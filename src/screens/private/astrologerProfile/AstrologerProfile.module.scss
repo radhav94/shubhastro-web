@@ -69,13 +69,16 @@
   }
   
   .sidebarTitle {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 600;
     color: #030303;
     margin: 0 0 0 0;
     letter-spacing: 0.5px;
     text-align: center;
     line-height: 1.4;
+    border-bottom: 2px solid #000;
+    width: fit-content;
+    margin: 0 auto;
   }
   
   .astrologersGrid {
@@ -308,7 +311,7 @@
 .chatBtn {
   width: 100%;
   height: 30px;
-  background: transparent;
+  background: #fff;
   color: #f75801;
   border: 1px solid #f75801;
   padding: 3px 12px;
@@ -583,12 +586,14 @@
   }
   
   .connectTitle {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 600;
     color: #030303;
-    margin: 0 0 10px 0;
+    margin: 0 auto 10px auto;
     letter-spacing: 0.3px;
     text-align: center;
+    width: fit-content;
+    border-bottom: 2px solid #000;
   }
   
   .connectOptions {
@@ -713,11 +718,15 @@
   }
   
   .consultationCard {
-    background: #FFF9F3;
+    background: rgba(255, 249, 243, 0.6);
     border-radius: 20px;
     padding: 16px;
     position: sticky;
     overflow: hidden;
+    border: 2px solid #FFFFFF;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
   }
   
   .hoursHeader {
@@ -1103,9 +1112,9 @@
    PROFILE CARD
 =========================== */
 .profileCard,.statsSection,.consultationHours,.minutesSection,.aboutSection,.giftSection {
-  background: #FFFFFF;
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 16px;
-  // border: 1px solid rgba(0, 0, 0, 0.03);
+  border: 2px solid #FFFFFF;
   padding: 16px;
   // margin: 16px 0px 16px;
   display: flex;
@@ -1113,6 +1122,9 @@
   gap: 12px;
   width: 100%;
   height: auto;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
   @media (width <= 767px) {
     border-radius: 12px;
   }
@@ -1217,7 +1229,7 @@
 
 .skills {
   font-size: 14px;
-  color: #A8A8A8;
+  color: #000;
   margin: 0 0 8px 0;
   line-height: 1.5;
   @media (width <= 767px) {
@@ -1227,7 +1239,7 @@
 
 .expertise {
   font-size: 14px;
-  color: #A8A8A8;
+  color: #000;
   margin: 0 0 8px 0;
   line-height: 1.5;
 }
@@ -1240,11 +1252,12 @@
 
 .languageTag {
   padding: 2px 8px;
-  background: #fff5ec;
+  background: #fff;
   border-radius: 16px;
   font-size: 13px;
-  color: #e56329;
+  color: #000;
   font-weight: 400;
+  border: 1px solid rgba(0, 0, 0, 0.25);
 }
 
 /* ===========================
@@ -1304,10 +1317,10 @@
 
 .statLabel {
   font-size: 1rem;
-  color: #101010;
+  color: #000;
   font-weight: 400;
   // margin-top: 4px;
-  opacity: 0.6;
+  opacity: 0.8;
   @media (width <= 460px) {
     font-size: 12px;
   }
@@ -1383,9 +1396,10 @@
 }
 
 .consultationHours {
-  background: #FFF5EC;
+  background: rgba(255, 245, 236, 0.6);
   flex-direction: column;
   display: flex;
+  border: 2px solid #FFFFFF;
   
   @media (min-width: 1024px) {
     display: none !important;
@@ -1581,11 +1595,11 @@
 
 .minuteLabel {
   font-size: 1rem;
-  color: #101010;
+  color: #000;
   text-align: center;
   font-weight: 400;
   // margin-top: 4px;
-  opacity: 0.6;
+  opacity: 0.8;
   @media (width <= 460px) {
     font-size: 12px;
   }
@@ -1840,14 +1854,18 @@
    REVIEWS SECTION
 =========================== */
 .reviewsSection {
-  background: transparent;
-  border-radius: 0;
-  // padding: 0 20px;
-  margin: 32px 0px 32px 0px;
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  border: 2px solid #FFFFFF;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  padding: 16px;
+  margin: 10px 0px 32px 0px;
   @media (width <= 767px) {
-    padding: 0px;
-    margin: 32px 0px 32px 0px;
+    padding: 16px;
+    margin: 10px 0px 32px 0px;
+    border-radius: 12px;
   }
 }
 
@@ -1896,7 +1914,7 @@
 
 .reviewsCount {
   font-size: 16px;
-  color: #999999;
+  color: #000;
   // margin: 0 0 32px 0;
   font-weight: 400;
   text-align: center;
@@ -1905,14 +1923,14 @@
 .reviewsLoading {
   text-align: center;
   padding: 40px 20px;
-  color: #999999;
+  color: #000;
   font-size: 15px;
 }
 
 .noReviews {
   text-align: center;
   padding: 40px 20px;
-  color: #999999;
+  color: #000;
   font-size: 15px;
   background: #F9F9F9;
   border-radius: 16px;
@@ -1950,11 +1968,11 @@
 }
 
 .reviewCard {
-  background: #FFFFFF;
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 20px;
   padding: 16px;
-  border: none;
-  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 2px solid #FFFFFF;
+  box-shadow: none !important;
 }
 
 .reviewHeader {
@@ -1984,10 +2002,11 @@
   gap: 6px;
   font-size: 15px;
   font-weight: 500;
-  color: #606060;
-  background: #FFF5EC;
+  color: #000;
+  background: #fff;
   padding: 6px 12px;
   border-radius: 40px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
 }
 
 .reviewStar {
@@ -2419,6 +2438,7 @@
   justify-content: center;
   margin-block: 10px;
   gap: 10px;
+  display: none;
 }
 
 .dividerLine {

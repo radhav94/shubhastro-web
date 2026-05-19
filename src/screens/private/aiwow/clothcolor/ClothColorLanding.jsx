@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ClothColorLanding.module.scss';
 import AuraSpectrumIcon from '../../../../assets/icons/auraspectrum.png';
@@ -5,12 +6,19 @@ import VibrancyIcon from '../../../../assets/icons/vibrancy.png';
 import PatternIcon from '../../../../assets/icons/pattern.png';
 import StyleCaratIcon from '../../../../assets/icons/stylecarat.png';
 import Footer from '../../../../layouts/Footer';
-import TTSButton from '../../../../component/UI/TTSButton';
 
 const ClothColorLanding = () => {
   const navigate = useNavigate();
 
-  const features = [
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/clothes-colour-analysis");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;  const features = [
     {
       icon: AuraSpectrumIcon,
       title: 'Aura Spectrum',
@@ -38,7 +46,7 @@ const ClothColorLanding = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate('/ai-wow')}>
+        <button className={styles.backButton} onClick={() => navigate(-1)}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -54,10 +62,7 @@ const ClothColorLanding = () => {
 
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
-            <div key={index} className={styles.featureCard} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
-                <TTSButton text={`${[feature?.title, feature.description].filter(Boolean).join('. ')}`} />
-              </span>
+            <div key={index} className={styles.featureCard}>
               <div className={styles.iconWrapper}>
                 <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
               </div>

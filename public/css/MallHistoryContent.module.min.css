@@ -1,0 +1,1 @@
+.wrapper{padding:0}.subTabs{display:flex;border-bottom:1px solid #eee;background:#fff}.subTab{flex:1;padding:12px 0;font-size:13px;font-weight:500;color:#888;background:none;border:none;border-bottom:2px solid rgba(0,0,0,0);cursor:pointer;transition:all .2s}.subTab.active{color:#1a1a1a;border-bottom-color:#f75801;font-weight:600}.content{padding:0}

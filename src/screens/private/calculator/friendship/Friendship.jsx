@@ -22,6 +22,7 @@ const Friendship = () => {
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
   const handleSubmit = (e) => {
@@ -29,7 +30,7 @@ const Friendship = () => {
 
     const newErrors = {};
     if (!formData.name1) newErrors.name1 = "Name is required";
-    if (!formData.name2) newErrors.name2 = "Partner name is required";
+    if (!formData.name2) newErrors.name2 = "Friend's name is required";
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length) return;
@@ -57,6 +58,8 @@ const Friendship = () => {
       <FlamesForm
         title="Calculate your Friendship Compatibility here"
         submitText="Calculate our Friendship"
+        name2Label="Your Friend's Name"
+        name2Placeholder="Enter your friend's name"
         formData={formData}
         errors={errors}
         onChange={handleChange}

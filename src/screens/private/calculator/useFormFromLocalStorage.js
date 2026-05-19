@@ -1,27 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 /**
- * Reusable hook to hydrate form state from localStorage
- * @param {string} storageKey
+ * Reusable hook for calculator form state.
+ * Always starts fresh — no persistence across refresh or navigation.
+ * @param {string} storageKey - kept for API compatibility (used on submit)
  * @param {object} initialState
  */
 const useFormFromLocalStorage = (storageKey, initialState) => {
   const [formData, setFormData] = useState(initialState);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(storageKey);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setFormData((prev) => ({
-          ...prev,
-          ...parsed,
-        }));
-      }
-    } catch (err) {
-      console.error(`Failed to read ${storageKey} from localStorage`, err);
-    }
-  }, [storageKey]);
 
   return [formData, setFormData];
 };

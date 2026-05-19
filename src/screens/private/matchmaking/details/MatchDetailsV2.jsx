@@ -3,15 +3,9 @@ import { ChevronLeft } from "lucide-react";
 import { useGetMatchMakingQuery } from "../../../../redux/api/kundli/dashaApi";
 import { PATH } from "../../../../utils/routes/Paths";
 import styles from "./MatchDetails.module.scss";
-// import RenderCard from "../../../../component/UI/table/matching/RenderCard";
-// import { PrimaryText } from "../../../../component";
-// import { AppImages } from "../../../../utils/appImages";
 import KundliSummary from "../../../../component/UI/circular/KundliSummaryV2";
 import DynamicTable from "../../../../component/UI/table/matching/DynamicTableV2";
-// import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
-// import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
-// import ServiceCards from "../../home/components/serviceCards/ServiceCards";
-// import ZodiacCarousel from "../../horoscope/zodiacCarousel/ZodiacCarousel";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 // const scores = [
 //   { type: "Vashya", score: "2/2" },
@@ -137,8 +131,19 @@ const MatchDetailsV2 = () => {
   //   { key: "full_score", label: "Out of" },
   //   { key: "description", label: "Description" },
   // ];
+  // Build TTS text from all match data
+  const ttsText = matchingDetails ? (() => {
+    const parts = [`Match Making Score: ${matchingDetails.score} out of 36.`];
+    Object.values(response).forEach((item) => {
+      if (item.name) {
+        parts.push(`${item.name}: ${item.varna} out of ${item.full_score}. Male: ${item.boy_varna}. Female: ${item.girl_varna}. ${item.description || ''}`);
+      }
+    });
+    return parts.join(' ');
+  })() : '';
+
   return (
-    <div className="bg-[#F7F7F7] min-h-screen flex flex-col items-center font-sans">
+    <div className="min-h-screen flex flex-col items-center font-sans">
       {/* Header with Back Button and Title */}
       <div className={styles.headerWrap}>
         <div className={styles.header}>
@@ -156,7 +161,7 @@ const MatchDetailsV2 = () => {
       </div>
 
       <div className={styles.containerCom}>{/* Total Score Card */}
-      <div className="bg-white mx-auto rounded-xl shadow-md p-6 mb-4 text-center">
+      <div className={styles.totalScoreCard}>
         {/* Score Box */}
         <KundliSummary score={matchingDetails?.score} total={36} />
         {/* Description */}

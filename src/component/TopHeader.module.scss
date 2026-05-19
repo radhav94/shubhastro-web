@@ -311,9 +311,9 @@
   border-top: 1px solid rgba(247, 88, 1, 0.3);
   background-color: rgba(255, 255, 255, 0.9);
   position: relative;
-  z-index: 99;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  z-index: -1;
+  // backdrop-filter: blur(8px);
+  // -webkit-backdrop-filter: blur(8px);
 }
 .headerNavigationSubmenu{
   display: flex;
@@ -463,7 +463,7 @@
 /* Dropdown hidden by default */
 .languageDropdown {
   position: absolute;
-  top: calc(100% + 40px);   /* below Lang */
+  top: calc(100% + 15px);   /* below Lang */
   right: -50px;
   // left: 0;
   min-width: 120px;

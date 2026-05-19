@@ -24,7 +24,7 @@ import astrologerImg from "../../../assets/images/home-hero-astrologer.png";
 import horoscopeImg from "../../../assets/images/home-hero-horoscope.png";
 
 // Hero BG
-import heroBg from "../../../assets/images/home-hero-bg.png";
+const heroBg = "https://shubhastroassets.s3.ap-south-1.amazonaws.com/images/1778659743-240854750.png";
 
 // WOW icons
 import vastuIcon from "../../../assets/aiwow/wow-vastu.svg";
@@ -267,7 +267,7 @@ const HomeNew = () => {
             {/* Hero part */}
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
-                <p className={styles.greeting}>Hello, {name}! 👋</p>
+                <p className={styles.greeting} key={`greeting-${name}`}>Hello, {name}! 👋</p>
                 <h1>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></h1>
                 <p className={styles.heroDesc}>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
                 {currentMahadasha && (
@@ -406,7 +406,7 @@ const HomeNew = () => {
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>{astrologerSection?.display_title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
           </div>
-          <button className={styles.viewAllBtn} onClick={() => navigate('/chat-to-astrologer')}>View all →</button>
+          <button className={styles.viewAllBtn} onClick={() => navigate('/chat-to-astrologer')}>View All →</button>
         </div>
         <AstrologersSection
           title=""
@@ -439,7 +439,13 @@ const HomeNew = () => {
           ]).map((a, i) => {
             const bgs = ["#fef3c7","#fef2f2","#f5f3ff","#fff7ed","#fff7ed","#ede9fe","#fefce8","#eef2ff"];
             return (
-              <div key={i} className={styles.gridItem} onClick={() => a.redirect_url && navigate(a.redirect_url)} style={{ cursor: a.redirect_url ? 'pointer' : 'default' }}>
+              <div key={i} className={styles.gridItem} onClick={() => {
+                if (a.redirect_url) return navigate(a.redirect_url);
+                const slug = (a.slug || a.title?.toLowerCase().replace(/\s+/g, '-') || '');
+                if (slug.includes('sade-sati') || slug.includes('sade sati')) return navigate('/shani-sade-sati-calculator');
+                if (slug.includes('numerology')) return navigate('/numerology-calculator');
+                if (slug.includes('remed')) return navigate('/remedies');
+              }} style={{ cursor: 'pointer' }}>
                 <div
                   className={styles.gridIconBox}
                   style={{
@@ -511,7 +517,7 @@ const HomeNew = () => {
                   </svg>
               </div>
             </div>
-            <button className={styles.viewAllBtn}>View More →</button>
+            <button className={styles.viewAllBtn}>View All →</button>
           </div>
           <div className={styles.calBody}>
             <div className={styles.calOccasions}>

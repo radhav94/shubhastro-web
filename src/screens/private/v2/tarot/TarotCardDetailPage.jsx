@@ -101,7 +101,7 @@ const TarotCardDetailPage = () => {
   console.log('Card names:', cardNames)
 
   if (isLoading) {
-    return <PrimaryLoader />
+    return <PrimaryLoader isLoading={true} />
   }
 
   if (error) {

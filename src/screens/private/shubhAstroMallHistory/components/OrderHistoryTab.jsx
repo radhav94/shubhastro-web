@@ -308,6 +308,7 @@ const OrderHistoryTab = () => {
                       {formattedDate && <p className={styles.orderDate}>Placed on {formattedDate}</p>}
                     </div>
                   </div>
+                  {orderStatus.toLowerCase() === "delivered" && (
                   <button
                     className={`${styles.downloadInvoiceBtn} ${invoiceLoadingId === orderId ? styles.downloadLoading : ""}`}
                     disabled={invoiceLoadingId === orderId}
@@ -332,6 +333,7 @@ const OrderHistoryTab = () => {
                     <FileText size={16} />
                     {invoiceLoadingId === orderId ? "Loading..." : "Download Invoice"}
                   </button>
+                  )}
                   <div className={styles.headerRight}>
                     <span className={`${styles.statusChip} ${styles[`status_${orderStatus}`]}`}>
                       {orderStatus.charAt(0).toUpperCase() + orderStatus.slice(1)} {(orderStatus === "confirmed" || orderStatus === "completed") && <CheckCircle size={11} />}

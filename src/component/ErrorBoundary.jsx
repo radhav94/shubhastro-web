@@ -17,6 +17,19 @@ class ErrorBoundary extends React.Component {
     if (!navigator.onLine) {
       return { hasError: false };
     }
+    // If Google Translate is active, redirect to home immediately to avoid
+    // showing error page caused by DOM conflicts
+    const hasGoogleTranslate = document.cookie.includes('googtrans=') ||
+      !!document.querySelector('.goog-te-combo');
+    if (hasGoogleTranslate) {
+      const hasRecovered = sessionStorage.getItem('gtranslate-error-recovery');
+      if (!hasRecovered) {
+        sessionStorage.setItem('gtranslate-error-recovery', 'true');
+        window.location.href = '/';
+        return { hasError: false };
+      }
+      sessionStorage.removeItem('gtranslate-error-recovery');
+    }
     return { hasError: true };
   }
 

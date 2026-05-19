@@ -32,7 +32,8 @@ import physiqueImg from "../../../assets/images/physique.png";
 const HoroscopeNew = () => {
   const navigate = useNavigate();
   const { sign } = useParams();
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   
   // Category image mapping
   const categoryImages = {
@@ -134,7 +135,7 @@ const HoroscopeNew = () => {
     : null;
 
   // Fetch astro details to get the actual sun sign
-  const { data: astroData } = useGetAstroDetailsQuery(vedicParams, {
+  const { data: astroData, isFetching: isAstroFetching } = useGetAstroDetailsQuery(vedicParams, {
     skip: !vedicParams,
   });
   const profileSunSign = astroData?.response?.sun_sign?.toLowerCase() || null;
@@ -153,7 +154,9 @@ const HoroscopeNew = () => {
   const hasAppliedKundliDefault = useRef(false);
 
   // Track the previous profile ID to detect actual profile switches from header
-  const prevProfileId = useRef(activeProfile?._id || null);
+  const prevProfileId = useRef(null);
+  // Track the previous sun sign to detect when API returns new data for a switched profile
+  const prevSunSign = useRef(null);
 
   // Refs for overview cards to scroll back on "Show Less"
   const overviewCardRefs = useRef([]);
@@ -173,43 +176,43 @@ const HoroscopeNew = () => {
   }, [sign]);
 
   // Set default zodiac based on profile's sun sign when page loads without a sign in URL
+  // AND react to profile switches from the header
   useEffect(() => {
-    if (!sign && !hasAppliedKundliDefault.current && profileSunSign && signToNumber[profileSunSign]) {
-      setSelectedZodiac(profileSunSign);
-      setTempSelectedZodiac(profileSunSign);
-      hasAppliedKundliDefault.current = true;
-      
-      // Update URL to reflect the selected zodiac
-      let newPath;
-      if (pathname.includes('tomorrow-horoscope')) {
-        newPath = `/horoscope/tomorrow-horoscope-new/${profileSunSign}`;
-      } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
-        newPath = `/daily-horoscope/${profileSunSign}`;
-      } else if (pathname.includes('weekly-horoscope')) {
-        newPath = `/weekly-horoscope/${profileSunSign}`;
-      } else if (pathname.includes('yearly-horoscope')) {
-        newPath = `/yearly-horoscope/${profileSunSign}`;
-      } else {
-        newPath = `/daily-horoscope/${profileSunSign}`;
-      }
-      
-      navigate(newPath, { replace: true });
-    }
-  }, [sign, profileSunSign, pathname, navigate]);
+    // Wait until astro data is done fetching for the current profile
+    if (isAstroFetching) return;
+    if (!profileSunSign || !signToNumber[profileSunSign]) return;
 
-  // React to profile sun sign changes ONLY when user switches profile from header
-  useEffect(() => {
     const currentProfileId = activeProfile?._id || null;
-    
-    // Skip if profile hasn't actually changed (initial load or same profile)
-    if (currentProfileId === prevProfileId.current) return;
+    const isProfileSwitch = prevProfileId.current !== null && currentProfileId !== prevProfileId.current;
+    const isInitialLoad = prevProfileId.current === null;
+
+    // Update refs
     prevProfileId.current = currentProfileId;
 
-    if (!profileSunSign || !signToNumber[profileSunSign] || profileSunSign === selectedZodiac) return;
+    // Determine if we should update the zodiac sign
+    let shouldUpdate = false;
+
+    if (isProfileSwitch) {
+      // User switched profile from header — always update
+      shouldUpdate = true;
+    } else if (isInitialLoad && !hasAppliedKundliDefault.current) {
+      // First load — apply profile's sign as default
+      shouldUpdate = true;
+      hasAppliedKundliDefault.current = true;
+    } else if (prevSunSign.current && prevSunSign.current !== profileSunSign) {
+      // Same profile but sun sign data changed (e.g., after refetch on refresh)
+      shouldUpdate = true;
+    }
+
+    prevSunSign.current = profileSunSign;
+
+    if (!shouldUpdate) return;
+    if (profileSunSign === selectedZodiac) return;
 
     setSelectedZodiac(profileSunSign);
     setTempSelectedZodiac(profileSunSign);
 
+    // Update URL to reflect the selected zodiac
     let newPath;
     if (pathname.includes('tomorrow-horoscope')) {
       newPath = `/horoscope/tomorrow-horoscope-new/${profileSunSign}`;
@@ -223,7 +226,7 @@ const HoroscopeNew = () => {
       newPath = `/daily-horoscope/${profileSunSign}`;
     }
     navigate(newPath, { replace: true });
-  }, [activeProfile?._id, profileSunSign]);
+  }, [activeProfile?._id, profileSunSign, isAstroFetching]);
 
   // Update active tab when pathname changes
   useEffect(() => {
@@ -497,7 +500,13 @@ const HoroscopeNew = () => {
       
       <div className="horoscope-header-Wrap">
         <div className="horoscope-header">
-          <button className="back-button" onClick={() => navigate('/')}>
+          <button className="back-button" onClick={() => {
+            if (location.key !== 'default') {
+              navigate(-1);
+            } else {
+              navigate('/');
+            }
+          }}>
             <ChevronLeft size={24} />
           </button>
           <button className="profile-selector" onClick={handleOpenModal}>

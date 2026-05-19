@@ -221,10 +221,12 @@ const DateTimePicker = ({
   };
 
   const [inputText, setInputText] = useState(selected ? formatDateDisplay(selected) : "");
+  const [dateError, setDateError] = useState("");
 
   // Sync inputText when selected prop changes (picker or parent update)
   useEffect(() => {
     setInputText(selected ? formatDateDisplay(selected) : "");
+    setDateError("");
   }, [selected]);
 
   // Parse DD/MM/YYYY string to Date
@@ -249,20 +251,37 @@ const DateTimePicker = ({
 
   const handleManualChange = (e) => {
     const val = e.target.value;
-    setInputText(val);
-    // Try to parse as user types — only call onChange when fully valid
-    const parsed = parseManualDate(val);
-    if (parsed) {
-      onChange(parsed);
+    // Auto-insert slashes for DD/MM/YYYY format
+    const digits = val.replace(/[^0-9]/g, "");
+    let formatted = "";
+    for (let i = 0; i < digits.length && i < 8; i++) {
+      if (i === 2 || i === 4) formatted += "/";
+      formatted += digits[i];
+    }
+    setInputText(formatted);
+    // Check validity once full date is entered (DD/MM/YYYY = 10 chars)
+    if (formatted.length === 10) {
+      const parsed = parseManualDate(formatted);
+      if (parsed) {
+        setDateError("");
+        onChange(parsed);
+      } else {
+        setDateError("Invalid date");
+      }
+    } else {
+      setDateError("");
     }
   };
 
   const handleManualBlur = () => {
-    // On blur, if text doesn't parse to a valid date, revert to selected
+    // On blur, if text doesn't parse to a valid date, show error or revert
+    if (inputText.length === 0) {
+      setDateError("");
+      return;
+    }
     const parsed = parseManualDate(inputText);
-    if (!parsed && inputText.length > 0) {
-      // Revert to last valid selection
-      setInputText(selected ? formatDateDisplay(selected) : "");
+    if (!parsed) {
+      setDateError("Invalid date");
     }
   };
 
@@ -291,7 +310,7 @@ const DateTimePicker = ({
           onBlur={handleManualBlur}
           placeholder={resolvedPlaceholder}
           disabled={disabled}
-          className={styles.input}
+          className={`${styles.input} ${dateError ? styles.inputError : ""}`}
           autoComplete="off"
         />
         {/* Invisible overlay covering right 1/3 of input to open calendar */}
@@ -314,6 +333,7 @@ const DateTimePicker = ({
           </svg>
         </button>
       </div>
+      {dateError && <p className={styles.dateError}>{dateError}</p>}
 
       {/* Hidden DatePicker for calendar popup */}
       <div className={styles.hiddenPicker}>

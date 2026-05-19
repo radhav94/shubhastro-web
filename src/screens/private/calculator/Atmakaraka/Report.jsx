@@ -40,7 +40,7 @@ const AtmakarakaReport = () => {
           </svg>
         </div>
       </div>
-      <p className={styles.subtitle}>Atmakaraka & Karaka Overview</p>
+      <p className={styles.subtitle}>Atmakaraka & DaraKaraka Overview</p>
 
       {/* TABLE */}
       <div className={styles.tableWrapper}>

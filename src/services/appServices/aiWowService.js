@@ -10,7 +10,8 @@ export const getProfileData = () => {
   
   try {
     const profile = JSON.parse(profileStr);
-    const kundliId = profile._id || profile.id || '';
+    const rawId = profile._id || profile.id || '';
+    const kundliId = rawId.startsWith('temp_') ? '' : rawId;
     return {
       kundliId,
       name: profile.name || '',

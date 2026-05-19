@@ -80,7 +80,7 @@ const AstrologerProfile = () => {
 
   const handleJoinLive = () => {
     if (liveRoomId) {
-      navigate(`/live/${liveRoomId}`);
+      navigate(`/live/${liveRoomId}`, { state: { from: `/astrologer/${id}` } });
     }
   };
 
@@ -366,6 +366,10 @@ const AstrologerProfile = () => {
 
 
   const handleOpenReviewModal = () => {
+    if (!getToken()) {
+      navigate("/login");
+      return;
+    }
     console.log(data,"123")
     setReviewData({
       astrologerID: data?.astrologer_ID,
@@ -1416,7 +1420,7 @@ const AstrologerProfile = () => {
                     onClick={handleLoadMoreReviews}
                     style={{ color: '#F75801', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
                   >
-                    View More →
+                    View All →
                   </span>
                 </div>
               )}

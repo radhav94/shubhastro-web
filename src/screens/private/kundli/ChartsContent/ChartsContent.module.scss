@@ -15,37 +15,53 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   font-family: $font-primary;
 }
 
-// --- Toggle Buttons ---
-.buttonGroup {
+// --- Tab Switcher (North/South) ---
+.tabGroup {
   display: flex;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
+  justify-content: space-between;
+  position: relative;
+  border-bottom: 1px solid $color-white;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
-.toggleButton {
-  padding: 10px 28px;
-  border: 1px solid $color-grey-light;
-  border-radius: 40px;
-  background-color: $color-white;
+.tabButton {
+  width: 50%;
+  background: none;
+  border: none;
   color: $color-black;
   font-weight: 500;
+  font-size: 15px;
+  padding: 10px 16px;
   cursor: pointer;
+  position: relative;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  white-space: nowrap;
 
-  &:hover {
-    background-color: $color-primary;
-    color: $color-black;
-    font-weight: bold;
+  @media (max-width: 1024px) {
+    font-size: 14px;
   }
 
-  &.active {
-    background-color: $color-primary;
-    border-color: $color-primary;
+  &:hover {
     color: $color-black;
-    font-weight: bold;
+  }
+}
+
+.activeTab {
+  font-weight: 600;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+    border-radius: 2px;
   }
 }
 
@@ -54,25 +70,6 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   grid-template-columns: 1fr; // Mobile-first: single column
   gap: 24px;
   margin-bottom: 24px;
-
-  // --- Responsive Design ---
-  @media (max-width: 768px) {
-    .toggleButton {
-      padding: 8px 18px;
-      font-size: 14px;
-    }
-    .buttonGroup {
-      gap: 12px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .toggleButton {
-      width: 100%;
-      max-width: 200px;
-      text-align: center;
-    }
-  }
 
   @media (min-width: 500px) {
     grid-template-columns: 1fr 1fr;

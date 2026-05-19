@@ -1,14 +1,10 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
 import styles from "./KundaliContent.module.scss";
 import { PrimaryText } from "../../../../component";
 import { appColors } from "../../../../utils/theme";
 import NorthIndian from "./NorthIndian";
 import SouthIndian from "./SouthIndian";
-import SwitchTabs from "../../../../component/UI/tabs/switchtabs/SwitchTabs";
 import { useSelector } from "react-redux";
-import { useGetPlanetsQuery } from "../../../../redux/api/kundli/kundliApi";
-import { skipToken } from "@reduxjs/toolkit/query";
 
 const monthToNumber = (month) => {
   if (!month) return "00";
@@ -33,11 +29,8 @@ const monthToNumber = (month) => {
 };
 
 const KundaliContent = () => {
+  const [activeTab, setActiveTab] = useState("north");
   const userDetails = useSelector((state) => state?.form?.userDetails);
-  // const tabs = [
-  //   { label: "North Indian", value: "north", component: () => <NorthIndian data={data} /> },
-  //   { label: "South Indian", value: "south", component: () => <SouthIndian data={data} /> },
-  // ];
 
   return (
     <div>
@@ -49,14 +42,29 @@ const KundaliContent = () => {
           <div className="mr-2 ml-2" />
           <PrimaryText isSemiBold size_20 color={appColors.tri}>
             ({String(userDetails?.day).padStart(2, "0")} - {monthToNumber(userDetails?.month)} - {userDetails?.year})
-            {/* ({userDetails?.day || "--"} - {userDetails?.month || "--"} -{" "}
-            {userDetails?.year || "--"}) */}
           </PrimaryText>
         </div>
       )}
       <div className={styles.mainContainer}>
-        {/* <SwitchTabs tabs={tabs} defaultTab="north" /> */}
-        <NorthIndian />
+        {/* North/South Tab Switcher */}
+        <div className={styles.tabGroup}>
+          <button
+            className={`${styles.tabButton} ${activeTab === "north" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("north")}
+          >
+            North Indian
+          </button>
+          <button
+            className={`${styles.tabButton} ${activeTab === "south" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("south")}
+          >
+            South Indian
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "north" && <NorthIndian style="north" />}
+        {activeTab === "south" && <SouthIndian style="south" />}
       </div>
     </div>
   );

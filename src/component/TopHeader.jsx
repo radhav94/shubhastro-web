@@ -15,13 +15,13 @@ import useRequireAuth from "../utils/hooks/useRequireAuth";
 import { ProfileManager } from "./UI/Profile";
 import { setSelectedKundli, clearSelectedKundli } from "../redux/kundli/kundliSlice";
 import { setSelectedKundliProfile } from "../redux/aiwow/aiwowSlice";
+import LanguageSelector from "./LanguageSelector";
 const TopHeader = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const requireAuth = useRequireAuth();
   const [user, setUser] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState('en');
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const token = getToken();
 
@@ -59,99 +59,11 @@ const TopHeader = () => {
   // Track if user is logged in to properly display wallet balance
   const isLoggedIn = !!user && !!token;
 
-  // Fixed list of supported languages with English labels
-  const [open, setOpen] = useState(false);
-  const [activeLang, setActiveLang] = useState("English"); // default language name
-  const langRef = useRef(null);
-
-  // Close language dropdown on outside click (desktop + mobile)
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (langRef.current && !langRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("touchstart", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-    };
-  }, [open]);
-
-  const supportedLanguages = [
-    { code: 'en', name: 'English' },
-    { code: 'hi', name: 'Hindi' },
-    { code: 'kn', name: 'Kannada' },
-    { code: 'bn', name: 'Bengali' },
-    { code: 'ta', name: 'Tamil' },
-    { code: 'te', name: 'Telugu' },
-    { code: 'ml', name: 'Malayalam' },
-    { code: 'ar', name: 'Arabic' },
-    { code: 'cs', name: 'Czech' },
-    { code: 'da', name: 'Danish' },
-    { code: 'fr', name: 'French' },
-    { code: 'de', name: 'German' },
-    { code: 'id', name: 'Indonesian' },
-    { code: 'it', name: 'Italian' },
-    { code: 'ms', name: 'Malay' },
-    { code: 'my', name: 'Myanmar (Burmese)' },
-    { code: 'pl', name: 'Polish' },
-    { code: 'es', name: 'Spanish' },
-    { code: 'sv', name: 'Swedish' },
-    { code: 'th', name: 'Thai' },
-    { code: 'tr', name: 'Turkish' },
-  ];
-
   /* lock body scroll when drawer open */
   useEffect(() => {
     document.body.style.overflow = isDrawerOpen ? "hidden" : "auto";
     return () => (document.body.style.overflow = "auto");
   }, [isDrawerOpen]);
-
-  /* Sync selected language with Google Translate cookie */
-  useEffect(() => {
-    const getCurrentLang = () => {
-      const cookie = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("googtrans="));
-      if (cookie) {
-        const value = decodeURIComponent(cookie.split("=")[1]);
-        const parts = value.split("/");
-        return parts[2] || "en";
-      }
-      return "en";
-    };
-
-    const currentLangCode = getCurrentLang();
-    setSelectedLang(currentLangCode);
-    
-    // Update the displayed language name based on the current language code
-    const currentLang = supportedLanguages.find(lang => lang.code === currentLangCode);
-    if (currentLang) {
-      setActiveLang(currentLang.name);
-    }
-
-    // Verify Google Translate widget is properly initialized
-    // This helps ensure consistent behavior across environments
-    const checkGoogleTranslateWidget = () => {
-      const widget = document.querySelector('.goog-te-combo');
-      if (widget && currentLangCode !== 'en') {
-        // Ensure widget matches cookie
-        if (widget.value !== currentLangCode) {
-          widget.value = currentLangCode;
-          widget.dispatchEvent(new Event('change'));
-        }
-      }
-    };
-
-    // Check after a short delay to allow Google Translate to initialize
-    const timer = setTimeout(checkGoogleTranslateWidget, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
 
   /* sync user */
   useEffect(() => {
@@ -274,147 +186,13 @@ const TopHeader = () => {
   })();
         
 
-  // Handle language change with Google Translate — no reload for non-English
-  const handleLanguageChange = (targetLang) => {
-    const getCurrentLang = () => {
-      const cookie = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("googtrans="));
-      if (cookie) {
-        const value = decodeURIComponent(cookie.split("=")[1]);
-        const parts = value.split("/");
-        return parts[2] || "en";
-      }
-      return "en";
-    };
-
-    const clearCookies = () => {
-      const hostname = window.location.hostname;
-      const cookiesToClear = ['googtrans', 'googtrans_backup'];
-      const domainParts = hostname.split('.');
-      const domains = [''];
-      domains.push(`domain=${hostname}`);
-      if (domainParts.length > 1) {
-        domains.push(`domain=.${hostname}`);
-        if (domainParts.length > 2) {
-          const parentDomain = domainParts.slice(-2).join('.');
-          domains.push(`domain=.${parentDomain}`);
-        }
-      }
-      cookiesToClear.forEach(cookieName => {
-        domains.forEach(domainStr => {
-          ['/', ''].forEach(path => {
-            const pathStr = path ? `path=${path};` : '';
-            const domainPart = domainStr ? `${domainStr};` : '';
-            document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0;`;
-          });
-        });
-      });
-    };
-
-    const setCookie = (lang) => {
-      const hostname = window.location.hostname;
-      const cookieValue = `/en/${lang}`;
-      const maxAge = 31536000;
-      document.cookie = `googtrans=${cookieValue}; path=/; max-age=${maxAge}; SameSite=Lax;`;
-      document.cookie = `googtrans=${cookieValue}; path=/; domain=${hostname}; max-age=${maxAge}; SameSite=Lax;`;
-      const domainParts = hostname.split('.');
-      if (domainParts.length > 1) {
-        document.cookie = `googtrans=${cookieValue}; path=/; domain=.${hostname}; max-age=${maxAge}; SameSite=Lax;`;
-        if (domainParts.length > 2) {
-          const parentDomain = domainParts.slice(-2).join('.');
-          document.cookie = `googtrans=${cookieValue}; path=/; domain=.${parentDomain}; max-age=${maxAge}; SameSite=Lax;`;
-        }
-      }
-    };
-
-    const currentLang = getCurrentLang();
-
-    if (currentLang === targetLang) {
-      setOpen(false);
-      return;
-    }
-
-    // Update UI state immediately
-    setSelectedLang(targetLang);
-    const selectedLanguage = supportedLanguages.find(lang => lang.code === targetLang);
-    if (selectedLanguage) {
-      setActiveLang(selectedLanguage.name);
-    }
-    setOpen(false);
-
-    // Notify listeners (e.g. TTS) that the translation language changed
-    window.dispatchEvent(new CustomEvent("translationchange", { detail: { lang: targetLang } }));
-
-    // Switching back to English requires a reload (Google Translate can't "untranslate" via widget)
-    if (targetLang === 'en') {
-      clearCookies();
-      setTimeout(() => { window.location.reload(); }, 200);
-      return;
-    }
-
-    // For non-English: try the widget first (no reload)
-    const widget = document.querySelector('.goog-te-combo');
-    if (widget) {
-      widget.value = targetLang;
-      widget.dispatchEvent(new Event('change'));
-      // Also set cookie so it persists on next page load
-      setCookie(targetLang);
-      return;
-    }
-
-    // Fallback: cookie + reload if widget not found
-    clearCookies();
-    setTimeout(() => {
-      setCookie(targetLang);
-      setTimeout(() => { window.location.reload(); }, 200);
-    }, 200);
-  };
-
   // If in iframe mode, show minimal header with only language and close button
   if (isIframeMode) {
     return (
       <header className={styles.iframeHeader}>
         <div className={styles.iframeHeaderContent}>
           {/* Language Dropdown */}
-          <div className={styles.languageWrap}>
-            <span
-              className={styles.onHoverChangeLang}
-              onClick={() => setOpen((prev) => !prev)}
-            >
-              <span className={styles.languageName}>{activeLang}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
-                <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_9128_57)"/>
-                <defs>
-                  <linearGradient id="paint0_linear_9128_57" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#F75801"/>
-                    <stop offset="1" stopColor="#D43400"/>
-                  </linearGradient>
-                </defs>
-              </svg>
-            </span>
-
-            <div
-              className={`${styles.languageDropdown} ${
-                open ? styles.open : styles.close
-              } notranslate`}
-              translate="no"
-            >
-              {supportedLanguages.map((lang) => (
-                <p
-                  key={lang.code}
-                  className={`notranslate ${lang.code === selectedLang ? styles.activeLang : ''}`}
-                  onClick={() => {
-                    handleLanguageChange(lang.code);
-                  }}
-                >
-                  {lang.name}
-                  {lang.code === selectedLang && <span>✓</span>}
-                </p>
-              ))}
-            </div>
-          </div>
-
+          <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
         </div>
       </header>
     );
@@ -542,44 +320,7 @@ const TopHeader = () => {
           <div className={styles.headerActions}>
 
             {/* language start */}
-            <div className={styles.languageWrap} ref={langRef}>
-              <span
-                className={styles.onHoverChangeLang}
-                onClick={() => setOpen((prev) => !prev)}
-              >
-                <span className={styles.languageName}>{activeLang}</span>
-
-                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
-                  <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_9128_57)"/>
-                  <defs>
-                    <linearGradient id="paint0_linear_9128_57" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#F75801"/>
-                      <stop offset="1" stopColor="#D43400"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </span>
-
-              <div
-                className={`${styles.languageDropdown} ${
-                  open ? styles.open : styles.close
-                } notranslate`}
-                translate="no"
-              >
-                {supportedLanguages.map((lang) => (
-                  <p
-                    key={lang.code}
-                    className={`notranslate ${lang.code === selectedLang ? styles.activeLang : ''}`}
-                    onClick={() => {
-                      handleLanguageChange(lang.code);
-                    }}
-                  >
-                    {lang.name}
-                    {lang.code === selectedLang && <span>✓</span>}
-                  </p>
-                ))}
-              </div>
-            </div>
+            <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
             {/* language end */}
 
             {/* <div className={styles.walletBadge}
@@ -609,6 +350,7 @@ const TopHeader = () => {
                   className={styles.profileWrapName}
                   onClick={() => setKundliModalOpen(true)}
                   style={{ cursor: "pointer" }}
+                  key={`profile-name-${selectedKundli?._id || 'default'}`}
                 >
                   <span className={styles.languageNamee}>
                     {selectedKundli?.name?.split(" ")[0] || displayName}

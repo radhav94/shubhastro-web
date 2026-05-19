@@ -249,7 +249,7 @@ const FollowedAstrologers = () => {
                     <p className={styles.name}>{name}</p>
                     {since && (
                       <p className={styles.since}>
-                        Following since {dayjs(since).format("MMM D, YYYY")}
+                        Following since {dayjs(since).format("DD MMM, YYYY")}
                       </p>
                     )}
                   </div>

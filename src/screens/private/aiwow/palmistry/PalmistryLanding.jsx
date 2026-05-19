@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './PalmistryLanding.module.scss';
 import PalmLineIcon from '../../../../assets/icons/palmline.png';
@@ -6,11 +6,20 @@ import PalmMountIcon from '../../../../assets/icons/palmmount.png';
 import CakeIcon from '../../../../assets/icons/Cake.png';
 import LoveIcon from '../../../../assets/icons/loveIcon.png';
 import Footer from '../../../../layouts/Footer';
-import TTSButton from '../../../../component/UI/TTSButton';
+
 
 const PalmistryLanding = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-palmistry-scanner");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
   const features = [
     {
       icon: PalmLineIcon,
@@ -55,10 +64,7 @@ const PalmistryLanding = () => {
 
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
-            <div key={index} className={styles.featureCard} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
-                <TTSButton text={`${[feature?.title, feature.description].filter(Boolean).join('. ')}`} />
-              </span>
+            <div key={index} className={styles.featureCard}>
               <div className={styles.iconWrapper}>
                 <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
               </div>

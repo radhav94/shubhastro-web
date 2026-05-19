@@ -120,6 +120,12 @@ const getCartVariantAttrs = (item, enrichedVariants = {}) => {
   return attrs;
 };
 
+// Format slug to readable label (e.g., "Without-Silver-Capping" → "Without Silver Capping")
+const formatAttrValue = (val) => {
+  if (!val) return "";
+  return val.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
 // Fetch fresh product detail from API
 const fetchProductDetail = async (productIdOrSlug) => {
   try {
@@ -541,7 +547,7 @@ const AstromallCart = () => {
                 {variantInfo.length > 0 && (
                   <div className={styles.variantAttrs}>
                     {variantInfo.map((a, i) => (
-                      <span key={i} className={styles.variantAttr}><strong>{a.name}:</strong> {a.value}{i < variantInfo.length - 1 ? "," : ""}</span>
+                      <span key={i} className={styles.variantAttr}><strong>{formatAttrValue(a.name)}:</strong> {formatAttrValue(a.value)}{i < variantInfo.length - 1 ? "," : ""}</span>
                     ))}
                   </div>
                 )}
@@ -552,12 +558,12 @@ const AstromallCart = () => {
                 </div>
               </div>
               <button className={styles.removeBtn} onClick={() => handleRemove(item)} aria-label="Remove"><FiTrash2 size={18} /></button>
-              <div className={styles.priceCol}><span className={styles.price}>₹{(price * qty).toLocaleString()}</span><span className={styles.taxLabel}>Incl. of all taxes</span></div>
+              <div className={styles.priceCol}><span className={styles.price}>₹{(price * qty).toLocaleString()}</span></div>
             </div>);
         })}
         {items.length > 0 && (
           <div className={styles.bottomBar}>
-            <div className={styles.totalCol}><span className={styles.totalPrice}>₹{total.toLocaleString()}</span><span className={styles.taxLabel}>Incl. of all taxes</span></div>
+            <div className={styles.totalCol}><span className={styles.totalPrice}>₹{total.toLocaleString()}</span></div>
             <button className={styles.checkoutBtn} disabled={isValidating} onClick={async () => {
               const valid = await validateCartProducts();
               if (!valid) return;

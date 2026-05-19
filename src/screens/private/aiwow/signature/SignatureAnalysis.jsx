@@ -138,7 +138,7 @@ const SignatureAnalysis = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.headerWrap}>
+      {/* <header className={styles.headerWrap}>
         <div className={styles.header}>
           <button className={styles.backButton} onClick={() => navigate('/ai-wow')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -147,7 +147,7 @@ const SignatureAnalysis = () => {
           </button>
           <h1 className={styles.headerTitle}>Signature Analysis</h1>
         </div>
-      </header>
+      </header> */}
       <div className={styles.content}>
         <div className={styles.leftSection}>
           <h2 className={styles.title}>

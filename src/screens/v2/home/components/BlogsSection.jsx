@@ -1,4 +1,3 @@
-import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PATH } from "../../../../utils/routes/Paths";
@@ -74,7 +73,7 @@ const BlogsSection = ({ blogData = [], title, showMore }) => {
             className={styles.viewAllBtn}
             onClick={() => navigate(PATH.privateRoutes.BLOG.path)}
           >
-            <ChevronRight size={24} />
+            View all ›
           </button>
         )}
       </div>
@@ -88,7 +87,7 @@ const BlogsSection = ({ blogData = [], title, showMore }) => {
               navigate(
                 PATH.privateRoutes.SINGLEBLOG.path.replace(
                   ":slug",
-                  blog.blogId,
+                  blog.blogId || blog._id || blog.slug,
                 ),
               )
             }
@@ -96,7 +95,7 @@ const BlogsSection = ({ blogData = [], title, showMore }) => {
           >
             <div className={styles.blogImageWrapper}>
               <img
-                src={blog.imageUrl || DefaultImages.BlogsDefault}
+                src={blog.imageUrl || blog.img || DefaultImages.BlogsDefault}
                 alt={blog.title}
                 className={styles.blogImage}
                 onError={(e) => {

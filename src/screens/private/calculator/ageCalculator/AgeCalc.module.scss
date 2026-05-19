@@ -8,12 +8,16 @@
   text-align: center;
   margin-bottom: 24px;
   h1 { font-size: 26px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px; }
-  p { font-size: 14px; color: #888; margin: 0; }
+  p { font-size: 14px; color: #030303; margin: 0; }
 }
 
 .infoCard {
-  background: #fffaf5;
-  border: 1px solid #ffe8d6;
+  // background: #fffaf5;
+  // border: 1px solid #ffe8d6;
+  background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 2px solid white;
   border-radius: 12px;
   padding: 16px 18px;
   margin-bottom: 24px;

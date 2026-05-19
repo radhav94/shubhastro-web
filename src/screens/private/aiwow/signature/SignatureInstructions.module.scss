@@ -3,7 +3,7 @@
 .container {
   position: relative;
   min-height: 100vh;
-  background: #f5f5f5;
+  // background: #f5f5f5;
   padding-top: 95px;
   @media screen and (width <= 1180px) {
     padding-top: 53px;
@@ -11,14 +11,15 @@
 }
 
 .headerWrap {
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   position: fixed;
-  top: 88px;
+  top: 95px;
   left: 0;
   right: 0;
-  z-index: 2002;
-  @media screen and (width <= 1180px) {
+  z-index: 100;
+  @media screen and (width <= 768px) {
     top: 53px;
   }
 }
@@ -46,10 +47,6 @@
   height: 40px;
   border: 1px solid #D43400;
   transition: all 0.2s ease;
-  position: relative;
-  z-index: 10;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
   @media (width <= 767px) {
     width: 36px;
     height: 36px;
@@ -69,7 +66,9 @@
 }
 
 .middleContent{
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   display: flex;
   flex-direction: row;
   padding: 24px;
@@ -241,15 +240,15 @@
   gap: 0.75rem;
   margin-top: auto;
   padding-bottom: 1rem;
-  @media (width <= 767px) {
-    position: fixed;
-    bottom: 88px;
-    background: #fff;
-    padding: 16px 16px 2.1rem 16px;
-    width: 100%;
-    left: 0;
-    z-index: 99;
-  }
+  // @media (width <= 767px) {
+  //   position: fixed;
+  //   bottom: 88px;
+  //   background: #fff;
+  //   padding: 16px 16px 2.1rem 16px;
+  //   width: 100%;
+  //   left: 0;
+  //   z-index: 99;
+  // }
   @media (width <= 360px) {
     padding: 16px 16px 2rem 16px;
   }

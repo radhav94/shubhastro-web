@@ -1,11 +1,13 @@
 .flamesForm {
   max-width: 100%;
   margin: auto;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  padding: 0;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   padding: 10px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
 }
 
 .formTitle {
@@ -47,6 +49,24 @@
 
 .required {
   color: #d32f2f;
+}
+
+.selectProfileBtn {
+  display: block;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 6px;
+  text-align: right;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .error {

@@ -4,8 +4,15 @@ export const giftApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
     getAllGifts: builder.query({
       query: () => ({
-        url: "gifts/all",
+        url: "gifts/all?limit=100",
       }),
+      transformResponse: (response) => {
+        // Filter out inactive gifts (status: false) at the API layer
+        if (response?.data && Array.isArray(response.data)) {
+          response.data = response.data.filter(gift => gift.status === true);
+        }
+        return response;
+      },
       providesTags: ['Gift'],
     }),
     sendGift: builder.mutation({

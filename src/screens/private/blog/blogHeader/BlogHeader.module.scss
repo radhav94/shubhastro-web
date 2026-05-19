@@ -21,7 +21,7 @@ $font-primary: "Poppins", sans-serif;
     GRID LAYOUT (Left: main / Right: scroll)
 -----------------------------------------*/
 .blogSection {
-  max-width: 1440px;
+  max-width: 1240px;
   padding: 0 16px;
   margin: 40px auto 40px;
   @media (width <= 768px) {
@@ -54,6 +54,9 @@ $font-primary: "Poppins", sans-serif;
   font-weight: 600;
   line-height: 20px;
   text-transform: uppercase;
+  padding-left: 5px;
+  border-left: 4px solid #f75801;
+  width: fit-content;
 
   @media (max-width: 768px) {
     font-size: 16px;
@@ -62,7 +65,7 @@ $font-primary: "Poppins", sans-serif;
 }
 
 .titleDivider {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: flex-start;
   gap: 12px;

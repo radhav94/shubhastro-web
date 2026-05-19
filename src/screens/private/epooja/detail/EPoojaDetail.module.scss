@@ -2,8 +2,11 @@
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 24px 60px;
-  background: #fafafa;
+  background: rgba(255, 255, 255, 0.4);
   min-height: 100vh;
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  margin-block: 16px;
 
   @media (max-width: 768px) {
     padding: 0 14px 40px;
@@ -309,8 +312,8 @@
 
 .attrGroup {
   padding: 18px 22px;
-  background: #f9f9f9;
-  &:nth-child(even) { background: #fff; }
+  background: rgba(255, 255, 255, 0.8);
+  &:nth-child(even) { background: rgba(255, 255, 255, 0.4); }
 }
 
 .attrLabel {
@@ -331,7 +334,7 @@
 
 .attrBtn {
   padding: 10px 20px;
-  border: 1.5px solid #e0e0e0;
+  border: 1px solid #e0e0e0;
   border-radius: 10px;
   background: #fff;
   font-size: 13px;
@@ -346,7 +349,7 @@
   &:hover:not(:disabled) {
     border-color: #f75801;
     color: #f75801;
-    box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
+    // box-shadow: 0 2px 8px rgba(247, 88, 1, 0.1);
   }
 }
 
@@ -355,7 +358,7 @@
   color: #f75801;
   background: #fff;
   font-weight: 600;
-  box-shadow: 0 0 0 1.5px #f75801, 0 2px 8px rgba(247, 88, 1, 0.12);
+  // box-shadow: 0 0 0 1.5px #f75801, 0 2px 8px rgba(247, 88, 1, 0.12);
 }
 
 .attrBtnDisabled {
@@ -446,8 +449,8 @@
 
 .cartBtn {
   padding: 13px 28px;
-  border: 2px solid #f75801;
-  border-radius: 8px;
+  border: 1px solid #f75801;
+  border-radius: 100px;
   background: #fff;
   color: #f75801;
   font-size: 15px;
@@ -468,15 +471,16 @@
 .bookBtn {
   padding: 13px 28px;
   border: none;
-  border-radius: 8px;
-  background: #f75801;
+  border-radius: 100px;
+  background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #d43400 100%));
   color: #fff;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
-  &:hover { background: #d43400; box-shadow: 0 4px 14px rgba(247, 88, 1, 0.3); }
+  &:hover { transform: translateY(-1px);
+    box-shadow: 0 4px 12px #f758014d; }
   &:disabled { opacity: 0.6; cursor: not-allowed; }
 
   @media (max-width: 480px) {
@@ -495,8 +499,9 @@
 }
 
 .faqCard {
-  background: #fff;
-  border: 1px solid #ebebeb;
+  background: rgba(255, 255, 255, 0);
+  backdrop-filter: blur(12px);
+  // border: 1px solid #fff;
   border-radius: 10px;
   overflow: hidden;
 }
@@ -507,8 +512,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 18px;
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid #fff;
   font-size: 14px;
   font-weight: 500;
   color: #333;
@@ -525,7 +531,7 @@
 }
 
 .faqAnswer {
-  padding: 0 18px 16px;
+  padding: 16px;
   font-size: 13px;
   line-height: 1.6;
   color: #666;
@@ -687,7 +693,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #fff;
 }
 
 .cartTitle {
@@ -1233,21 +1239,22 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 16px;
-  @media screen and (max-width: 480px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
+  // @media screen and (max-width: 480px) {
+  //   grid-template-columns: repeat(2, 1fr);
+  //   gap: 10px;
+  // }
 }
 
 .suggestionCard {
-  background: #fff;
-  border: 1px solid #e8e8e8;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
   border-radius: 12px;
   padding: 12px;
   display: flex;
   flex-direction: column;
   cursor: pointer;
   transition: box-shadow 0.2s;
+  backdrop-filter: blur(12px);
   &:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
 }
 
@@ -1372,17 +1379,18 @@
 .suggCartBtn {
   width: 100%;
   padding: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 24px;
+  border: 1px solid #f75801;
+  border-radius: 100px;
   background: #fff;
   font-size: 13px;
   font-weight: 500;
-  color: #333;
+  color: #f75801;
   cursor: pointer;
   transition: all 0.2s ease;
   margin-top: auto;
   &:hover {
-    border-color: #999;
-    background: #fafafa;
+    // border-color: #999;
+    background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #d43400 100%));
+    color: #fff;
   }
 }

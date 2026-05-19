@@ -21,10 +21,17 @@ const LoveCalc = () => {
   );
 
   const [errors, setErrors] = useState({});
-  const [infoOpen, setInfoOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(true);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
+    }
   };
 
   const handleReset = () => {
@@ -102,8 +109,7 @@ const LoveCalc = () => {
           <p>
             Have you ever thought if you and your crush are a perfect match? A love
             calculator is a fun and simple tool that tells you your love percentage
-            and how well you both connect. Just enter names, birth dates, or even
-            zodiac signs, and see the result! Finding love isn't always easy, but
+            and how well you both connect. Just enter names, birth dates and see the result! Finding love isn't always easy, but
             tools like the love calculator make it exciting. They help you understand
             your feelings and check your romantic compatibility. Many people use it
             for fun and to explore their bond before starting a relationship. Try it

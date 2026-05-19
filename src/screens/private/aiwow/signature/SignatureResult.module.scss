@@ -3,7 +3,7 @@
 .container {
   position: relative;
   min-height: 100vh;
-  background: #f5f5f5;
+  // background: #f5f5f5;
   padding-top: 95px;
   @media screen and (width <= 1180px) {
     padding-top: 53px;
@@ -11,8 +11,9 @@
 }
 
 .headerWrap{
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
 }
 .header {
   display: flex;
@@ -63,14 +64,22 @@
   // padding: 0;
   max-width: 1440px;
   margin: 20px auto;
+  padding: 16px;
   @media (width <= 767px) {
     margin: 0px auto;
   }
 }
 .tabsWrap{
   width: 100%;
-  border-bottom: 1px solid #e5e7eb;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.4);
+  border-bottom: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 95px;
+  z-index: 999;
+  @media (width <= 1180px) {
+    top: 53px;
+  }
 }
 .tabs {
   display: flex;
@@ -97,7 +106,7 @@
   border-bottom: 2px solid transparent;
   font-size: 14px;
   font-weight: 500;
-  color: #6b7280;
+  color: #030303;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
@@ -112,13 +121,13 @@
   }
 }
 
-.tabContent {
-  // padding: 16px;
+// .tabContent {
+//   // padding: 16px;
   
-  @media (max-width: 1024px) {
-    padding: 16px;
-  }
-}
+//   @media (max-width: 1024px) {
+//     padding: 16px;
+//   }
+// }
 
 // Two-column layout wrapper for desktop
 .overviewGrid {
@@ -140,11 +149,15 @@
 
 .signatureImageWrapper {
   position: relative;
-  width: 400px;
-  // max-width: 1000px;
+  width: 250px;
+  flex-shrink: 0;
   margin: 0 auto 16px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   margin: 0;
+  border-radius: 7px;
+  overflow: hidden;
   
   @media (max-width: 767px) {
     width: 70%;
@@ -210,7 +223,9 @@
 }
 .qualityCard,
 .styleCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 12px;
   padding:16px;
   margin-bottom: 16px;
@@ -222,11 +237,16 @@
 }
 .analysisCard,
 .traitsCard{
-  padding: 0;
+  // padding: 0;
   margin-bottom: 16px;
+  // background: rgba(255, 255, 255, 0.4);
+  // border: 1.5px solid #ffffff;
+  // backdrop-filter: blur(12px);
 }
 .insightsCard,.leadershipCard,.communicationCard,.emotionalCard,.socialCard{
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   padding: 16px;
   border-radius: 12px;
 }
@@ -245,7 +265,9 @@
 }
 
 .analysisItem {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 8px;
   padding: 16px;
 }
@@ -309,7 +331,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #f2f2f2;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 8px;
   padding: 12px;
   
@@ -321,7 +345,7 @@
 .scoreLabel {
   font-size: 11px;
   font-weight: 500;
-  color: #6b7280;
+  color: #030303;
   margin-bottom: 6px;
   text-align: center;
   
@@ -346,7 +370,9 @@
   gap : 10px;
   // justify-content: space-between;
   align-items: center;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 8px;
   padding: 10px 12px;
   
@@ -387,7 +413,7 @@
   // justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1.5px solid #ffffff;
   
   &:last-child {
     border-bottom: none;
@@ -397,7 +423,7 @@
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: #6b7280;
+  color: #030303;
   flex-shrink: 0;
   margin-right: 16px;
 }
@@ -412,7 +438,7 @@
 .description {
   font-size: 14px;
   line-height: 1.6;
-  color: #4b5563;
+  color: #030303;
   margin: 12px 0 0 0;
 }
 
@@ -427,13 +453,14 @@
 .tag,.value {
   display: inline-block;
   padding: 6px 12px;
-  background: #fff8ec;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   border-radius: 16px;
   font-size: 13px;
   font-weight: 500;
   color: #1f2937;
   text-transform: capitalize;
-  border: 1px solid #fed0bf;
 }
 
 .traitsGrid {
@@ -447,7 +474,9 @@
 }
 
 .traitItem {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   border-radius: 8px;
   padding: 16px;
 }
@@ -476,7 +505,7 @@
 .traitDescription {
   font-size: 14px;
   line-height: 1.6;
-  color: #4b5563;
+  color: #030303;
   margin: 0 0 8px 0;
 }
 
@@ -490,12 +519,12 @@
 .indicatorLabel {
   font-size: 12px;
   font-weight: 500;
-  color: #6b7280;
+  color: #030303;
 }
 
 .indicatorValue {
   font-size: 12px;
-  color: #4b5563;
+  color: #030303;
   font-style: italic;
 }
 
@@ -526,7 +555,7 @@
 .relationshipItem {
   font-size: 14px;
   line-height: 1.6;
-  color: #4b5563;
+  color: #030303;
   padding: 8px 0 8px 34px;
   position: relative;
   
@@ -592,7 +621,7 @@
   justify-content: center;
   min-height: 100vh;
   font-size: 16px;
-  color: #6b7280;
+  color: #030303;
 }
 
 // Tablet

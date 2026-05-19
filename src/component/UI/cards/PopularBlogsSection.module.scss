@@ -1,5 +1,5 @@
 .popularBlogsSection {
-  max-width: 1440px;
+  max-width: 1240px;
   padding: 0 16px;
   width: 100%;
   margin: 32px auto 40px;
@@ -26,6 +26,9 @@
   font-weight: 500;
   line-height: 20px;
   text-transform: uppercase;
+  padding-left: 5px;
+  border-left: 4px solid #f75801;
+  width: fit-content;
 
   @media (max-width: 768px) {
     font-size: 16px;
@@ -35,7 +38,7 @@
 }
 
 .titleDivider {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
@@ -97,12 +100,16 @@
 }
 
 .blogCard {
-  background: #fff;
+  // background: #fff;
   border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 2px solid white;
   
   &:hover {
     transform: translateY(-2px);

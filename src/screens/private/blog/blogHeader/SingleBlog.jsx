@@ -45,27 +45,31 @@ const SingleBlogDetails = () => {
             alt={singleBLogData.title}
             className={styles.bannerImage}
           />
+        </div>
+
+        {/* Blog Body - Title, Meta, and Content */}
+        <div className={styles.blogBody}>
+          {/* Trending Badge */}
+          <span className={styles.trendingBadge}>Trending</span>
 
           {/* Title */}
           <h1 className={styles.title}>{singleBLogData.title}
-           <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
-              <TTSButton text={`${[singleBLogData?.title,singleBLogData?.author,cleanText].filter(Boolean).join('. ')}`} />
+            <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+              <TTSButton text={`${[singleBLogData?.title, singleBLogData?.author, cleanText].filter(Boolean).join('. ')}`} />
             </span>
           </h1>
+
           {/* Publish Date and Author */}
           <div className={styles.metaInfo}>
-            <p className={styles.date}>Published on: {singleBLogData.publishDate}</p>
             {singleBLogData.author && (
-              <p className={styles.author}>By {singleBLogData.author}</p>
+              <p className={styles.date}>{singleBLogData.author}</p>
             )}
+            <p className={styles.author}>{singleBLogData.publishDate}</p>
           </div>
-        </div>
 
-        {/* Blog Body - Render HTML */}
-        <div
-          className={styles.blogBody}
-          dangerouslySetInnerHTML={{ __html: singleBLogData.body }}
-        ></div>
+          {/* Blog Content */}
+          <div dangerouslySetInnerHTML={{ __html: singleBLogData.body }}></div>
+        </div>
       </div>
 
       {/* Related Blogs Carousel */}
@@ -75,6 +79,7 @@ const SingleBlogDetails = () => {
           currentBlogId={slug}
           title={relatedTitle}
           subtitle={relatedSubtitle}
+          className={styles.relatedblogs}
         />
       )}
     </>

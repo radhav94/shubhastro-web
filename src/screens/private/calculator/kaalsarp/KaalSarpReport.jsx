@@ -64,6 +64,7 @@ const KaalSarpReport = () => {
       <div className={styles.actionsTop}>
         <button
           className={styles.shareBtn}
+          style={{ display: 'none' }}
           onClick={() => {
             if (navigator.share) {
               navigator.share({

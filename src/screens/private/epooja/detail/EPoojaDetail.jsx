@@ -140,6 +140,12 @@ const EPoojaDetail = () => {
   // Helper: get variant identifier — handles both old (_id/skuCode) and new (id/sku) formats
   const getVid = (v) => v?._id || v?.id || v?.skuCode || v?.sku || "";
 
+  // Helper: format slug to readable label (e.g., "Without-Silver-Capping" → "Without Silver Capping")
+  const formatAttrValue = (val) => {
+    if (!val) return "";
+    return val.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
   // Helper: safely get attributes as {name: value} entries from a variant
   // Old format: [{name, value}] array  |  New format: {type: "gemstone", size: "5-ratti"} object
   const getAttrsEntries = (v) => {
@@ -285,10 +291,10 @@ const EPoojaDetail = () => {
   // Add to cart
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
   const [updateCartItem] = useUpdateCartItemMutation();
-  const [qty, setQty] = useState(stateData?._cartQty || 1);
+  const [qty, setQty] = useState(1);
   const [stockLimited, setStockLimited] = useState(false);
 
-  // Sync qty with cart data
+  // Fetch cart data to check if variant is already in cart
   const { data: cartData } = useGetCartQuery();
   const cartItems = cartData?.data?.items || cartData?.data?.cart?.items || cartData?.data || [];
   const cartItemsList = Array.isArray(cartItems) ? cartItems : [];
@@ -307,39 +313,19 @@ const EPoojaDetail = () => {
   });
   const isInCart = !!cartMatch;
 
-  // Sync qty: cart quantity if variant is in cart, otherwise reset to 1
+  // Detail page qty is always independent — starts at 1 when variant changes
   useEffect(() => {
-    if (cartMatch?.quantity) {
-      setQty(cartMatch.quantity);
-    } else {
-      setQty(1);
-    }
-  }, [getVid(selectedVariant), cartMatch?.quantity]);
+    setQty(1);
+  }, [getVid(selectedVariant)]);
 
   // Reset stock limit only when variant changes
   useEffect(() => {
     setStockLimited(false);
   }, [getVid(selectedVariant)]);
 
-  const handleQtyChange = async (newQty) => {
+  const handleQtyChange = (newQty) => {
     if (newQty < 1) return;
-    if (isInCart) {
-      const productId = cartMatch?.productId?._id || cartMatch?.product?._id || cartMatch?._id || product?._id;
-      const variantId = cartMatch?.variantId?._id || cartMatch?.variantId?.id || (typeof cartMatch?.variantId === "string" && cartMatch.variantId ? cartMatch.variantId : "") || cartMatch?.variantSnapshot?._id || getVid(selectedVariant) || "";
-      if (productId) {
-        try {
-          await updateCartItem({ productId, variantId, quantity: newQty }).unwrap();
-          setQty(newQty);
-          if (newQty < qty) setStockLimited(false);
-        } catch (err) {
-          const msg = err?.data?.message || "";
-          if (msg === "Insufficient stock") setStockLimited(true);
-          Toast.error(msg || "Failed to update quantity");
-        }
-      }
-    } else {
-      setQty(newQty);
-    }
+    setQty(newQty);
   };
 
   const [showAddress, setShowAddress] = useState(false);
@@ -496,15 +482,26 @@ const EPoojaDetail = () => {
     if (!isVariantInStock(selectedVariant)) { Toast.error("This variant is out of stock"); return; }
     try {
       if (isInCart) {
+        // Add current detail page qty to existing cart qty (cumulative)
+        const existingCartQty = cartMatch?.quantity || 0;
+        const newTotalQty = existingCartQty + qty;
         const cartVid = cartMatch?.variantId?._id || cartMatch?.variantId?.id || (typeof cartMatch?.variantId === "string" && cartMatch.variantId ? cartMatch.variantId : "") || vid;
-        await updateCartItem({ productId: mongoId, variantId: cartVid, quantity: qty }).unwrap();
-        Toast.success(`${title} quantity updated`);
+        await updateCartItem({ productId: mongoId, variantId: cartVid, quantity: newTotalQty }).unwrap();
+        Toast.success(`${title} quantity updated (${newTotalQty} in cart)`);
+        setQty(1); // Reset detail page qty back to 1 after adding
         return;
       }
       await addToCart({ productId: mongoId, variantId: vid, skuCode: selectedVariant?.skuCode || selectedVariant?.sku || "", quantity: qty }).unwrap();
       Toast.success(`${title} added to cart`);
+      setQty(1); // Reset detail page qty back to 1 after adding
     } catch (err) {
-      Toast.error(err?.data?.message || "Failed to add to cart");
+      const msg = err?.data?.message || "";
+      if (msg === "Insufficient stock") {
+        setStockLimited(true);
+        Toast.error("Insufficient stock for the requested quantity");
+      } else {
+        Toast.error(msg || "Failed to add to cart");
+      }
     }
   };
 
@@ -639,7 +636,7 @@ const EPoojaDetail = () => {
     <div className={styles.page}>
       {/* Top Nav */}
       <div className={styles.topNav}>
-        <button className={styles.backBtn} onClick={() => navigate("/shubh-mall")}>
+        <button className={styles.backBtn} onClick={() => navigate(-1)}>
           <span className={styles.backCircle}><FiChevronLeft /></span>
           <span className={styles.backLabel}>ShubhMall</span>
         </button>
@@ -739,7 +736,7 @@ const EPoojaDetail = () => {
                 const available = new Set(getAvailableValues(dim.name));
                 return (
                   <div key={dim.name} className={styles.attrGroup}>
-                    <span className={styles.attrLabel}>{dim.name}</span>
+                    <span className={styles.attrLabel}>{formatAttrValue(dim.name)}</span>
                     <div className={styles.attrOptions}>
                       {dim.values.map((val) => {
                         const isSelected = selectedAttrs[dim.name] === val;
@@ -751,7 +748,7 @@ const EPoojaDetail = () => {
                             onClick={() => isAvailable && handleAttrSelect(dim.name, val)}
                             disabled={!isAvailable}
                           >
-                            {val}
+                            {formatAttrValue(val)}
                           </button>
                         );
                       })}

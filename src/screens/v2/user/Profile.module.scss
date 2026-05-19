@@ -100,7 +100,7 @@
 }
 .profileDetails {
   font-size: 0.8rem;
-  color: #999;
+  color: #030303;
   margin: 0;
   @media (width <= 767px) {
    font-size: 0.7rem;
@@ -148,15 +148,16 @@
   align-items: center;
   gap: 0.5rem;
   text-align: center;
-  &:nth-child(1){
-    border: 1px solid #e1baff;
-  }
-  &:nth-child(2){
-    border: 1px solid #addfff;
-  }
-  &:nth-child(3){
-    border: 1px solid #91ebb8;
-  }
+  border: 1.5px solid #fff;
+  // &:nth-child(1){
+  //   border: 1px solid #e1baff;
+  // }
+  // &:nth-child(2){
+  //   border: 1px solid #addfff;
+  // }
+  // &:nth-child(3){
+  //   border: 1px solid #91ebb8;
+  // }
 }
 
 .zodiacIcon {
@@ -285,8 +286,9 @@
 }
 
 .tabButton {
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 30px;
   padding: 0.6rem 1.2rem;
   font-size: 0.9375rem;
@@ -333,12 +335,13 @@
 }
 
 .profileCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   border-radius: 1rem;
   padding: 1rem;
   display: flex;
   gap: 1rem;
-  border: 2px solid transparent;
   transition: border-color 0.2s;
 }
 
@@ -349,7 +352,9 @@
 .avatarCircle {
   width: 70px;
   height: 70px;
-  background: #fdefd8;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -443,7 +448,7 @@
 
 .profileCardDate,.profileCardLocation {
   font-size: 0.9rem;
-  color: #999;
+  color: #030303;
   margin: 0;
   line-height: 1.4;
   @media (width <= 767px) {
@@ -456,7 +461,7 @@
 .emptyState {
   text-align: center;
   padding: 3rem 1rem;
-  color: #999;
+  color: #030303;
 }
 
 
@@ -567,7 +572,9 @@
 }
 
 .orderCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   border-radius: 16px;
   // padding: 0.75rem;
   // margin-bottom: 1rem;
@@ -580,7 +587,7 @@
   align-items: flex-start;
   // margin-bottom: 1rem;
   padding: 0.75rem;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #fff;
 }
 
 .orderLeft {
@@ -648,7 +655,7 @@
 
 .orderDuration {
   font-size: 0.875rem;
-  color: #999;
+  color: #030303;
   margin: 0;
 }
 
@@ -773,7 +780,7 @@
 .filterModalClose {
     padding: 0.25rem;
     border-radius: 0.375rem;
-    color: #6b7280;
+    color: #030303;
     transition: background-color 0.15s;
 
     &:hover {
@@ -793,7 +800,7 @@
 .filterTabs {
     width: 120px;
     flex-shrink: 0;
-    border-right: 1px solid #e5e7eb;
+    border-right: 1.5px solid #fff;
     background-color: #fafafa;
     overflow-y: auto;
 
@@ -809,7 +816,7 @@
     text-align: left;
     font-size: 13px;
     font-weight: 500;
-    color: #6b7280;
+    color: #030303;
     border: none;
     background: none;
     cursor: pointer;
@@ -864,7 +871,7 @@
     justify-content: space-between;
     margin-bottom: 0.75rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid #fff;
 
     span {
         font-size: 13px;
@@ -913,7 +920,7 @@
     gap: 0.75rem;
     padding: 0.75rem 0;
     cursor: pointer;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid #fff;
     user-select: none;
 
     &:last-child {
@@ -956,14 +963,14 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.25rem;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid #fff;
     gap: 1rem;
     flex-shrink: 0;
 }
 
 .filterResetBtn {
     padding: 0.625rem 1.5rem;
-    border: 2px solid #d1d5db;
+    border: 1.5px solid #fff;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
@@ -998,7 +1005,7 @@
 }
 
 .filterCheckInactive {
-    color: #d1d5db;
+    color: #030303;
 }
 
 .filterDateInputs {
@@ -1010,7 +1017,7 @@
 .filterDateInput {
     flex: 1;
     padding: 8px 12px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #fff;
     border-radius: 8px;
     font-size: 13px;
     color: #374151;
@@ -1022,7 +1029,7 @@
     }
 
     &::placeholder {
-        color: #9ca3af;
+        color: #030303;
     }
 }
 
@@ -1045,7 +1052,7 @@
 
 .txnPriceBound {
     font-size: 12px;
-    color: #9ca3af;
+    color: #030303;
 }
 
 .txnRangeSliderWrap {
@@ -1106,7 +1113,7 @@
 .buttonSeparator {
   width: 1px;
   height: -webkit-fill-available;
-  background: #E0E0E0;
+  background: #fff;
   flex-shrink: 0;
 }
 
@@ -1154,7 +1161,7 @@
 .rateButton {
   background: transparent;
   border: none;
-  color: #999;
+  color: #030303;
   font-weight: 500;
 
   &:hover {
@@ -1165,7 +1172,7 @@
 .consultAgainButton {
   background: transparent;
   border: none;
-  color: #999;
+  color: #030303;
   font-weight: 500;
 
   &:hover {
@@ -1217,7 +1224,7 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: #030303;
   pointer-events: none;
 }
 
@@ -1234,7 +1241,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
   &::placeholder {
-    color: #b0b0b0;
+    color: #030303;
     font-weight: 400;
   }
 }
@@ -1244,7 +1251,7 @@
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1.5px solid #fff;
   background: #fafafa;
   border-radius: 12px 12px 0 0;
 
@@ -1256,7 +1263,7 @@
 .txnHeaderCell {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #6b7280;
+  color: #030303;
   text-transform: capitalize;
 }
 
@@ -1266,9 +1273,12 @@
   grid-template-columns: 2fr 1fr 1fr;
   align-items: center;
   padding: 1rem;
-  background: #fff;
-  border-bottom: 1px solid #f3f4f6;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
+  border-bottom: 1.5px solid #fff;
   transition: background 0.15s;
+  border-radius: 8px;
 
   &:hover {
     background: #fafafa;
@@ -1276,6 +1286,12 @@
 
   &:last-child {
     border-bottom: none;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+  }
+  &:first-child {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
   }
 
   @media (max-width: 640px) {
@@ -1326,7 +1342,7 @@
 
 .txnMeta {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: #030303;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1415,7 +1431,7 @@
 .btnSpinner {
   width: 16px;
   height: 16px;
-  border: 2px solid #e0e0e0;
+  border: 1.5px solid #fff;
   border-top-color: #F75801;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
@@ -1447,7 +1463,7 @@
 .subTabButton {
   flex: 1;
   background: transparent;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 1.5px solid #fff;
   // border-radius: 30px;
   padding: 0.75rem 1rem;
   font-size: 0.9375rem;
@@ -1510,7 +1526,9 @@
 }
 
 .transactionItem {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 1rem;
   // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -1538,7 +1556,7 @@
 
 .transactionId {
   font-size: 0.875rem;
-  color: #999;
+  color: #030303;
   font-weight: 500;
 }
 
@@ -1593,7 +1611,7 @@
 .loadingMore {
   text-align: center;
   padding: 1rem;
-  color: #999;
+  color: #030303;
   font-size: 0.875rem;
 }
 
@@ -1651,7 +1669,9 @@
 }
 
 .supportGridCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   border-radius: 16px;
   padding: 1rem;
   display: flex;
@@ -1734,7 +1754,9 @@
 }
 
 .otherCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   border-radius: 20px;
   padding: 1.25rem 1.5rem;
   display: flex;
@@ -1782,7 +1804,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 1.5px solid #fff;
   margin-bottom: 1rem;
 }
 
@@ -1841,7 +1863,7 @@
 
 .transactionId {
   font-size: 0.8125rem;
-  color: #999;
+  color: #030303;
   margin: 0;
 }
 
@@ -1899,7 +1921,9 @@
 }
 
 .modalContent {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   border-radius: 20px;
   padding: 2rem;
   max-width: 400px;
@@ -1968,7 +1992,7 @@
 
   .orderCardTop {
     padding: 16px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #fff;
   }
 
   .orderLeft {
@@ -2189,7 +2213,7 @@
 }
 
 .profileLinkText {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #333;
   margin: 0;
@@ -2202,5 +2226,5 @@
 
 .profileLinkDivider {
   height: 1px;
-  background: #e0e0e0;
+  background: #fff;
 }

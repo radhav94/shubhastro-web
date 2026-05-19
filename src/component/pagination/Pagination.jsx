@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "./Pagination.module.scss";
 
 const Pagination = ({ pagination, onPageChange }) => {
@@ -8,7 +7,6 @@ const Pagination = ({ pagination, onPageChange }) => {
     const pages = [];
 
     if (totalPages <= 5) {
-      // Show all pages if small count
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
@@ -37,43 +35,56 @@ const Pagination = ({ pagination, onPageChange }) => {
     }
 
     // Always show last page
-    pages.push(totalPages);
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
 
     return pages;
   };
 
+  if (!totalPages || totalPages <= 1) return null;
+
   return (
     <div className={styles.paginationWrapper}>
+      {/* Previous Arrow */}
       <button
+        className={`${styles.arrowBtn} ${!hasPrevPage ? styles.disabled : ''}`}
         disabled={!hasPrevPage}
         onClick={() => hasPrevPage && onPageChange(page - 1)}
+        aria-label="Previous page"
       >
-        ← Previous
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
       </button>
 
-      <div className={styles.pages}>
-        {getPages().map((item, index) =>
-          item === "..." ? (
-            <span key={`dots-${index}`} className={styles.dots}>
-              ...
-            </span>
-          ) : (
-            <button
-              key={item}
-              className={page === item ? styles.active : ""}
-              onClick={() => item !== page && onPageChange(item)}
-            >
-              {item}
-            </button>
-          )
-        )}
-      </div>
+      {/* Page Numbers */}
+      {getPages().map((item, index) =>
+        item === "..." ? (
+          <span key={`dots-${index}`} className={styles.dots}>
+            •••
+          </span>
+        ) : (
+          <button
+            key={item}
+            className={`${styles.pageBtn} ${page === item ? styles.active : ''}`}
+            onClick={() => item !== page && onPageChange(item)}
+          >
+            {item}
+          </button>
+        )
+      )}
 
+      {/* Next Arrow */}
       <button
+        className={`${styles.arrowBtn} ${!hasNextPage ? styles.disabled : ''}`}
         disabled={!hasNextPage}
         onClick={() => hasNextPage && onPageChange(page + 1)}
+        aria-label="Next page"
       >
-        Next →
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
       </button>
     </div>
   );

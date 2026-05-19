@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './FaceReadingLanding.module.scss';
 import SmileIcon from '../../../../assets/icons/Smile.png';
@@ -6,9 +6,18 @@ import CakeIcon from '../../../../assets/icons/Cake.png';
 import FlowerIcon from '../../../../assets/icons/Flower.png';
 import ContactsIcon from '../../../../assets/icons/Contacts.png';
 import Footer from '../../../../layouts/Footer';
-import TTSButton from '../../../../component/UI/TTSButton';
 const FaceReadingLanding = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/astro-face-reading");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
 
   const features = [
     {
@@ -54,10 +63,7 @@ const FaceReadingLanding = () => {
 
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
-            <div key={index} className={styles.featureCard} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
-                <TTSButton text={`${[feature?.title, feature?.description].filter(Boolean).join('. ')}`} />
-              </span>
+            <div key={index} className={styles.featureCard}>
               <div className={styles.iconWrapper}>
                 <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
               </div>

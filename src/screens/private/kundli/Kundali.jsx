@@ -72,8 +72,16 @@ const Kundali = () => {
         'download': 8, // Support lowercase as well
       };
       setActiveTabIndex(tabMap[tab] || 0);
+      // Scroll to top so tab bar is visible
+      window.scrollTo(0, 0);
     }
   }, [searchParams]);
+
+  // Require auth for protected tabs/subtabs
+  const tab = searchParams.get('tab');
+  const subtab = searchParams.get('subtab');
+  const protectedTabs = ['basic', 'dasha'];
+  const requiresAuth = (subtab && subtab.startsWith('remed')) || protectedTabs.includes(tab);
 
   // Get initial tab index from query params
   const getInitialTabIndex = () => {
@@ -129,6 +137,20 @@ const Kundali = () => {
       : localStorage.getItem("shubhtalk_customer_token");
   
   const isLoggedIn = !!token;
+
+  // Require auth for remedies subtab
+  useEffect(() => {
+    if (requiresAuth && !token) {
+      const fullPath = `/kundli?${searchParams.toString()}`;
+      localStorage.setItem("shubhtalk_redirect_after_login", fullPath);
+      window.location.replace("/login?skip=welcome");
+    }
+  }, [requiresAuth, token, searchParams]);
+
+  // Block render while redirecting to login
+  if (requiresAuth && !token) {
+    return null;
+  }
 
   // Temporary profiles for non-logged-in users (persisted in sessionStorage)
   const [tempProfiles, setTempProfiles] = useState(() => {
@@ -471,9 +493,12 @@ const Kundali = () => {
   ];
 
   useEffect(() => {
-    if (planetLoading || isAstro) {
+    // Don't auto-scroll if page was loaded with a tab param (user navigated via URL)
+    const hasTabParam = searchParams.get('tab');
+    if ((planetLoading || isAstro) && !hasTabParam) {
       contentRef.current?.scrollIntoView({
         behavior: "smooth",
+        block: "start",
       });
     }
   }, [planetLoading, isAstro]);
@@ -744,7 +769,7 @@ const Kundali = () => {
   return (
     <div className={!isDirectKundliView ? styles.directKundli : ""}>
       {/* Free Kundli Online Title - Hidden in direct kundli view */}
-      {!isDirectKundliView && <KundliHeader />}
+      {/* {!isDirectKundliView && <KundliHeader />} */}
 
       {/* Profile Selector - Hidden in direct kundli view */}
       {!isDirectKundliView && (
@@ -763,6 +788,7 @@ const Kundali = () => {
       {/* Show tabs only when profile is selected and data is loaded */}
       {selectedProfile && (
         <div ref={contentRef} id="kundli-tabs">
+          {!isDirectKundliView && <KundliHeader />}
           {planetLoading || isAstro ? (
             <PrimaryTabs 
               key={selectedProfile._id} 

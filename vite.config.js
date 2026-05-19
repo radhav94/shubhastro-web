@@ -80,7 +80,14 @@ export default defineConfig({
     include: ['react', 'react-dom', 'react-router-dom'],
   },
   server: {
-    host: true
+    host: true,
+    proxy: {
+      "/api/sarvam": {
+        target: "https://api.sarvam.ai",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/sarvam/, ""),
+      },
+    },
   },
   esbuild: {
     // Remove console.log and console.warn in production, keep console.error

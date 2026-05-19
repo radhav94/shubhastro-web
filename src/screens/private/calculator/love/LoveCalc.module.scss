@@ -37,18 +37,22 @@
 
   p {
     font-size: 14px;
-    color: #888;
+    color: #030303;
     margin: 0;
   }
 }
 
 .infoCard {
-  background: #fffaf5;
-  border: 1px solid #ffe8d6;
+  // background: #fffaf5;
+  // border: 1px solid #ffe8d6;
   border-radius: 12px;
   padding: 0;
   margin-bottom: 24px;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 2px solid white;
 }
 
 .accordionHeader {
@@ -84,7 +88,7 @@
 
   p {
     font-size: 13px;
-    color: #777;
+    color: #030303;
     line-height: 1.6;
     margin: 0;
     padding: 0 18px 14px;

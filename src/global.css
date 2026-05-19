@@ -188,6 +188,17 @@ iframe:not([src]):not([id]) {
     pointer-events: none !important;
 }
 
+/* Hide Google Translate spinner/loading indicator */
+.goog-te-spinner-pos {
+    display: none !important;
+}
+.goog-te-spinner-animation {
+    display: none !important;
+}
+div[id^="goog-gt-"] {
+    display: none !important;
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
