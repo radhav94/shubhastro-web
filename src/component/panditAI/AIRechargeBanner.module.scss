@@ -1,0 +1,120 @@
+$accent: #f15a24;
+$warning-bg: #fff8f0;
+$ended-bg: #fff0f0;
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin: 0 14px 8px;
+  border: 1px solid rgba(241, 90, 36, 0.2);
+  border-radius: 14px;
+  background: $warning-bg;
+  animation: slideDown 0.25s ease;
+}
+
+.ended {
+  border-color: rgba(229, 57, 53, 0.2);
+  background: $ended-bg;
+
+  .iconWrap {
+    background: rgba(229, 57, 53, 0.1);
+    color: #e53935;
+  }
+
+  .title {
+    color: #e53935;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.iconWrap {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(241, 90, 36, 0.1);
+  color: $accent;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 750;
+  color: #3a2820;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin: 2px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8f8178;
+  line-height: 1.3;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.rechargeBtn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  background: $accent;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 750;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s ease, transform 0.15s ease;
+
+  &:hover {
+    background: darken($accent, 8%);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.dismissBtn {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #8f8178;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+}

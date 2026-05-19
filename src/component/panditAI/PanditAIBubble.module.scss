@@ -258,6 +258,58 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   gap: 8px;
 }
 
+.freeMinBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.countdownBadge {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.countdownTime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.countdownDivider {
+  width: 1px;
+  height: 12px;
+  margin: 0 8px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.countdownRate {
+  font-size: 10px;
+  font-weight: 650;
+  opacity: 0.85;
+}
+
 .closeBtn {
   display: grid;
   width: 42px;
@@ -554,6 +606,63 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   padding: 12px 14px 14px;
   border-top: 1px solid $line;
   background: linear-gradient(180deg, #fffdf9 0%, #fff8f1 100%);
+}
+
+.rechargeBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: calc(100% + 28px);
+  padding: 12px 14px;
+  margin: 10px -14px -14px;
+  background: #fff3dc;
+  border-top: 1px solid rgba(74, 45, 28, 0.12);
+
+  &:first-child {
+    margin-top: -12px;
+  }
+}
+
+.rechargeText {
+  font-size: 12px;
+  font-weight: 600;
+  color: #d53400;
+  line-height: 1.3;
+}
+
+.rechargeNowBtn {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 8px;
+  background: $accent;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background: $accent-deep;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .inputWrapper {
