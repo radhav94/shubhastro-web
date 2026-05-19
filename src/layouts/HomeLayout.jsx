@@ -19,6 +19,7 @@ import { useCall } from "../context/CallContext";
 import { voiceSocket } from "../services/voiceSocketServices";
 import WaitingModal from "../component/UI/modal/waitingModal/WaitingModal";
 import NoInternet, { useOnlineStatus } from "../component/NoInternet/NoInternet";
+import { useAiwowCleanup } from "../utils/hooks/useAiwowCleanup";
 
 const PENDING_LIVE_CALL_STORAGE_KEY = "shubhtalk_pending_live_call";
 
@@ -29,6 +30,9 @@ const HomeLayout = () => {
   const navigate = useNavigate();
   const { pendingLiveCall, setPendingLiveCall, waitingList } = useCall();
   const isOnline = useOnlineStatus();
+
+  // Clear aiwow session data when navigating away from aiwow pages
+  useAiwowCleanup();
 
   const handleCancelPending = () => {
     if (pendingLiveCall?.callRoomId) {
