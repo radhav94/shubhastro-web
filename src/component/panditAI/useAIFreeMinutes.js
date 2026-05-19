@@ -1,7 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { voiceSocket } from "../../services/voiceSocketServices";
-import { useLazyGetAIAstrologerUsageQuery } from "../../redux/api/aiAstrologerApi";
-import { PANDIT_AI_ID } from "./usePanditAI";
 
 /**
  * Hook that manages the AI free-minutes state machine.
@@ -21,6 +19,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
 
   // Recharge banner state
   const [showRechargeBanner, setShowRechargeBanner] = useState(false);
+  const [rechargeBannerMessage, setRechargeBannerMessage] = useState(null);
   const [minutesUntilPaid, setMinutesUntilPaid] = useState(null);
   const [minBalanceRequired, setMinBalanceRequired] = useState(null);
 
@@ -30,53 +29,45 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
   // Free window renewed toast
   const [freeWindowRenewed, setFreeWindowRenewed] = useState(false);
 
-  // Pre-chat usage check
-  const [canStartChat, setCanStartChat] = useState(null);
-  const [cantStartReason, setCantStartReason] = useState(null);
-
   const roomIdRef = useRef(roomId);
   roomIdRef.current = roomId;
 
-  const [fetchUsage] = useLazyGetAIAstrologerUsageQuery();
-
-  // Fetch usage on mount to determine if user can start chat
-  const checkUsage = useCallback(async () => {
-    try {
-      const result = await fetchUsage({ astrologerId: PANDIT_AI_ID }).unwrap();
-      const data = result?.data || result;
-      setCanStartChat(data.canStartChat);
-      setCantStartReason(data.reason);
-      setWalletBalance(data.walletBalance);
-      setRatePerMinute(data.ratePerMinute);
-      setFreeMinutesRemaining(data.freeMinutesRemainingToday);
-      setFreeMinutesUsed(data.freeMinutesUsedToday);
-      setDayKeyIST(data.dayKeyIST);
-      if (data.freeMinutesRemainingToday === 0) {
-        setIsFreePeriod(false);
-      }
-      if (data.needsRecharge) {
-        setShowRechargeBanner(true);
-        if (data.minBalanceRequired !== undefined) {
-          setMinBalanceRequired(data.minBalanceRequired);
-        }
-      }
-      return data;
-    } catch {
-      // If the endpoint fails, allow chat to proceed (graceful degradation)
-      setCanStartChat(true);
-      return null;
-    }
-  }, [fetchUsage]);
-
+  // Local countdown interval for paid period (ticks every second)
   useEffect(() => {
-    if (isOpen) {
-      checkUsage();
-    }
-  }, [isOpen, checkUsage]);
+    if (!isOpen || isFreePeriod || remainingPaidTime == null || remainingPaidTime <= 0) return;
+
+    const interval = setInterval(() => {
+      setRemainingPaidTime((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isOpen, isFreePeriod, remainingPaidTime > 0]);
 
   // Socket event handlers
   useEffect(() => {
     if (!isOpen) return;
+
+    const handleChatAccepted = (data) => {
+      if (data?.astrologerId !== "6928390dc00d56953b586c04") return;
+      // Clear previous session's recharge state
+      setShowRechargeBanner(false);
+      setSessionEndedLowBalance(false);
+      setRechargeBannerMessage(null);
+      if (data.isFreePeriod !== undefined) setIsFreePeriod(data.isFreePeriod);
+      if (data.freeMinutesRemainingToday !== undefined) setFreeMinutesRemaining(data.freeMinutesRemainingToday);
+      if (data.freeMinutesUsedToday !== undefined) setFreeMinutesUsed(data.freeMinutesUsedToday);
+      if (data.walletBalance !== undefined) setWalletBalance(data.walletBalance);
+      if (data.ratePerMinute !== undefined) setRatePerMinute(data.ratePerMinute);
+      if (!data.isFreePeriod && data.remainingTime !== undefined) {
+        setRemainingPaidTime(data.remainingTime * 60);
+      }
+    };
 
     const handleActivity = (data) => {
       // Only process if this is for our room or is an AI session event
@@ -105,7 +96,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
         setRatePerMinute(data.ratePerMinute);
       }
       if (!data.isFreePeriod && data.remainingTime !== undefined) {
-        setRemainingPaidTime(data.remainingTime);
+        setRemainingPaidTime(data.remainingTime * 60);
       }
 
       // Auto-dismiss recharge banner if wallet is now sufficient
@@ -138,7 +129,8 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
 
       if (data?.endReason === "low-balance") {
         setSessionEndedLowBalance(true);
-        setShowRechargeBanner(false);
+        setShowRechargeBanner(true);
+        setRechargeBannerMessage("Chat ended due to low balance. Recharge to continue.");
       }
     };
 
@@ -166,18 +158,40 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       if (data.ratePerMinute !== undefined) setRatePerMinute(data.ratePerMinute);
     };
 
+    const handleError = (data) => {
+      if (data?.message?.toLowerCase().includes("insufficient balance")) {
+        setShowRechargeBanner(true);
+        setSessionEndedLowBalance(true);
+        setRechargeBannerMessage(data.message);
+      }
+    };
+
+    const handleWarning = (data) => {
+      if (data?.message) {
+        setShowRechargeBanner(true);
+        setRechargeBannerMessage(data.message);
+        // Warning doesn't end session — input should stay visible
+      }
+    };
+
+    voiceSocket.on("chat:accepted", handleChatAccepted);
     voiceSocket.on("activity", handleActivity);
     voiceSocket.on("chat:insufficient-balance", handleInsufficientBalance);
     voiceSocket.on("chat:ended", handleChatEnded);
     voiceSocket.on("chat:free-window-renewed", handleFreeWindowRenewed);
     voiceSocket.on("chat:reconnected", handleReconnected);
+    voiceSocket.on("error", handleError);
+    voiceSocket.on("warning", handleWarning);
 
     return () => {
+      voiceSocket.off("chat:accepted", handleChatAccepted);
       voiceSocket.off("activity", handleActivity);
       voiceSocket.off("chat:insufficient-balance", handleInsufficientBalance);
       voiceSocket.off("chat:ended", handleChatEnded);
       voiceSocket.off("chat:free-window-renewed", handleFreeWindowRenewed);
       voiceSocket.off("chat:reconnected", handleReconnected);
+      voiceSocket.off("error", handleError);
+      voiceSocket.off("warning", handleWarning);
     };
   }, [isOpen, showRechargeBanner]);
 
@@ -211,6 +225,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
 
     // Recharge banner
     showRechargeBanner,
+    rechargeBannerMessage,
     minutesUntilPaid,
     minBalanceRequired,
     dismissRechargeBanner,
@@ -220,11 +235,6 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
 
     // Free window renewed
     freeWindowRenewed,
-
-    // Pre-chat check
-    canStartChat,
-    cantStartReason,
-    checkUsage,
 
     // Reset
     resetFreeMinutesState,
