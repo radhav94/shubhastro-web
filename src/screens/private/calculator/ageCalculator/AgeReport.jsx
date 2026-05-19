@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { useAgeCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
 import { useEffect } from "react";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
-import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
 import styles from "./AgeReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 
@@ -33,33 +32,25 @@ const AgeReport = () => {
   return (
     <div className={styles.wrapper}>
       <CalcBackButton />
-      {/* FORM (READ ONLY) */}
-      <DateWithSingleInputForm
-        title="Calculate your Age here"
-        inputLabel="Age As Of Date"
-        inputName="asOf"
-        inputType="date"
-        formData={{
-          dob: report.dob,
-          asOf: report.asOf,
-        }}
-        hideSubmit
-        readOnly
-      />
+
+      <h2 className={styles.pageTitle}>AGE CALCULATOR</h2>
 
       {/* RESULT */}
-      <div className={styles.resultBox}>
-        <div className={styles.resultItem}>
-          <strong>{report.years}</strong>
-          <span>Years</span>
-        </div>
-        <div className={styles.resultItem}>
-          <strong>{report.months}</strong>
-          <span>Months</span>
-        </div>
-        <div className={styles.resultItem}>
-          <strong>{report.days}</strong>
-          <span>Days</span>
+      <div className={styles.resultCard}>
+        <p className={styles.resultLabel}>Your Age Is</p>
+        <div className={styles.resultBox}>
+          <div className={styles.resultItem}>
+            <strong>{report.years}</strong>
+            <span>Years</span>
+          </div>
+          <div className={styles.resultItem}>
+            <strong>{report.months}</strong>
+            <span>Months</span>
+          </div>
+          <div className={styles.resultItem}>
+            <strong>{report.days}</strong>
+            <span>Days</span>
+          </div>
         </div>
       </div>
 

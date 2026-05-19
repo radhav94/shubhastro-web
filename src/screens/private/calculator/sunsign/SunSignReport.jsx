@@ -96,7 +96,7 @@ const SunSignReport = () => {
             className={styles.backBtn}
             onClick={() => navigate(-1)}
           >
-            Back to calculator
+            Calculate Again
           </button>
         </div>
       )}
