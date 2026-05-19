@@ -126,7 +126,10 @@ const OccultResult = () => {
         For serious consultations, please consult a certified Jyotish practitioner.
       </p>
 
-      <button className={styles.backBtn} onClick={() => navigate(PATH.privateRoutes.OCCULT.path)}>New Analysis</button>
+      <div className={styles.actionRow}>
+        <button className={styles.backBtn} onClick={() => navigate(PATH.privateRoutes.OCCULT.path)}>New Analysis</button>
+        <button className={styles.consultBtn} onClick={() => navigate("/talk-to-astrologer")}>Consult with Expert Astrologer</button>
+      </div>
     </div>
   );
 };

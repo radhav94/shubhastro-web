@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useGetRisingSignQuery } from "../../../../redux/api/calculator/calcApi";
 import styles from "./RisingSignReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import TTSButton from "../../../../component/UI/TTSButton";
 import { zodiacSignImages } from "../../horoscope/zodiac";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const RisingSignReport = () => {
   const navigate = useNavigate();
   const [aboutOpen, setAboutOpen] = useState(true);
 
-  const stored = JSON.parse(localStorage.getItem("rising_sign"));
+  const stored = useSelector(selectCalculatorData("rising_sign"));
   const { data, isLoading } = useGetRisingSignQuery(stored);
 
   if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
@@ -108,6 +111,8 @@ const RisingSignReport = () => {
           </div>
         </div>
       )}
+
+      <ConnectCard />
     </div>
   );
 };

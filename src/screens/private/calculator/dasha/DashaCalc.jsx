@@ -1,8 +1,10 @@
 import { useState } from "react";
 import AstroBirthForm from "../forms/AstroBirthForm";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./DashaCalc.module.scss";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "dasha_calc";
 const initialFormState = {
@@ -17,6 +19,7 @@ const initialFormState = {
 };
 const DashaCalc = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(
     STORAGE_KEY,
     initialFormState
@@ -66,7 +69,7 @@ const DashaCalc = () => {
       ...formData,
       tob: formData.isTimeUnknown ? "12:00" : formData.tob,
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: payload }));
     navigate("/dasha-calculator/report");
   };
 
@@ -99,7 +102,7 @@ const DashaCalc = () => {
         onReset={() => {
           setFormData(initialFormState);
           setErrors({});
-          localStorage.removeItem(STORAGE_KEY);
+          dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
         }}
       />
     </div>

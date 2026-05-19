@@ -8,6 +8,7 @@ import styles from "../flames/FlamesCalc.module.scss";
 import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "destiny_calc";
 const initialFormState = { name: "", dob: "" };
@@ -43,7 +44,7 @@ const DestinyCalc = () => {
   const onReset = () => {
     setFormData(initialFormState);
     setErrors({});
-    localStorage.removeItem(STORAGE_KEY);
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
   };
 
   const handleChange = (key, value) => {
@@ -57,7 +58,7 @@ const DestinyCalc = () => {
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: formData }));
     navigate("/destiny-number-calculator/report");
   };
 

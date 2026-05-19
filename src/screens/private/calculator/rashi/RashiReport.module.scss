@@ -2,6 +2,7 @@
   max-width: 800px;
   margin: 20px auto;
   padding: 0 16px;
+  text-align: center;
 }
 
 .title {
@@ -32,58 +33,71 @@
   color: #030303;
 }
 
-/* Rashi Card */
-.rashiCard {
+/* Rashi Card - matching sun sign style */
+.card {
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border: 2px solid white;
   border-radius: 12px;
-  padding: 20px 24px;
+  padding: 20px 24px 28px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  margin: 0 auto 24px;
+  max-width: 480px;
+  text-align: center;
+}
+
+.cardHeader {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.label {
-  font-size: 13px;
+.cardHeaderText {
+  font-size: 15px;
   font-weight: 500;
-  color: #555;
+  color: #1a1a1a;
 }
 
-.rashiName {
+.signImageWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, #FFE0B6 0%, #FFE2E2 100%);
+  padding: 30px;
+}
+
+.signImage {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  background: linear-gradient(90deg, #f75801, #d43400);
+  border-radius: 50px;
+}
+
+.signName {
   font-size: 22px;
   font-weight: 700;
-  color: #1a1a1a;
-  margin-top: 4px;
+  color: #d43400;
+  margin-bottom: 20px;
 }
 
-.rashiIcon {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  opacity: 0.7;
-}
-
-/* Calculate Again */
-.calcAgainWrap {
-  text-align: right;
-  margin-bottom: 24px;
-}
-
-.calcAgainBtn {
-  background: none;
-  border: none;
+.backBtn {
   color: #f75801;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   text-decoration: underline;
-  padding: 4px 0;
+  transition: opacity 0.2s;
 
   &:hover {
-    opacity: 0.8;
+    opacity: 0.7;
   }
 }
 
@@ -183,17 +197,21 @@
     font-size: 18px;
   }
 
-  .rashiCard {
-    padding: 16px;
+  .card {
+    padding: 16px 16px 24px;
   }
 
-  .rashiName {
+  .signImageWrap {
+    padding: 20px;
+  }
+
+  .signImage {
+    width: 64px;
+    height: 64px;
+  }
+
+  .signName {
     font-size: 20px;
-  }
-
-  .rashiIcon {
-    width: 40px;
-    height: 40px;
   }
 
   .detailsGrid {

@@ -7,6 +7,7 @@ import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePick
 import styles from "./SunSignCalc.module.scss";
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "sun_sign";
 
@@ -96,7 +97,7 @@ const SunSignCalc = () => {
       ...formData,
       tob: formData.isTimeUnknown ? "12:00" : formData.tob,
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: payload }));
     navigate("/sun-sign-calculator/report");
   };
 
@@ -296,7 +297,7 @@ const SunSignCalc = () => {
             onClick={() => {
               setFormData(initialFormState);
               setErrors({});
-              localStorage.removeItem(STORAGE_KEY);
+              dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
             }}
           >
             Reset

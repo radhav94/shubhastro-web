@@ -1,7 +1,8 @@
 .wrapper {
   max-width: 800px;
-  margin: 0 auto;
+  margin: 20px auto;
   padding: 0 16px 48px;
+  text-align: center;
 }
 
 /* ── Header ── */
@@ -47,8 +48,10 @@
 
 /* ── Bot Message ── */
 .botMessage {
-  background: #fffaf5;
-  border: 1px solid #ffe8d6;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
   border-left: 4px solid #f75801;
   padding: 16px 20px;
   border-radius: 0 12px 12px 0;
@@ -56,11 +59,20 @@
   font-size: 14px;
   line-height: 1.7;
   color: #444;
+  text-align: left;
 }
 
 /* ── Section ── */
 .section {
   margin-bottom: 28px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  text-align: left;
 
   h3 {
     font-size: 16px;
@@ -83,15 +95,16 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
 }
 
 .card {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.6);
   padding: 18px;
   border-radius: 12px;
-  border: 1px solid #f0ebe4;
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: border-color 0.2s;
 
   &:hover {
@@ -135,6 +148,7 @@
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 24px;
 }
 
 .shareBtn {
@@ -176,6 +190,10 @@
 
   .grid {
     grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 16px;
   }
 
   .actions {

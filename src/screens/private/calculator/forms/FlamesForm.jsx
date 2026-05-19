@@ -49,8 +49,7 @@ const FlamesForm = ({
     <>
       <form className={styles.flamesForm} onSubmit={onSubmit}>
         <h3 className={styles.formTitle}>
-          <span className={styles.dot}>●</span> {title}{" "}
-          <span className={styles.moon}>☾</span>
+           {title}
         </h3>
 
         {/* Your Name */}

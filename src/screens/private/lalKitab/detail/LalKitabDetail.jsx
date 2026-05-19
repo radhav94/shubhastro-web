@@ -112,6 +112,13 @@ const LalKitabDetail = () => {
           <ChartSection chart={chart} isLoading={chartLoading && !chart} />
         )}
       </div>
+
+      {/* Consult with Astrologer */}
+      <div className={styles.consultCta}>
+        <button className={styles.consultBtn} onClick={() => navigate("/talk-to-astrologer")}>
+          Consult with Expert Astrologer
+        </button>
+      </div>
     </div>
   );
 };
