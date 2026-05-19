@@ -70,6 +70,50 @@
   color: #f75801;
 }
 
+.selectProfileBtn {
+  display: block;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 14px;
+  text-align: right;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.selectProfileBtnMobile {
+  display: none;
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 8px;
+  text-align: right;
+  margin-left: auto;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+}
+
 .resetRow {
   display: flex;
   justify-content: flex-end;

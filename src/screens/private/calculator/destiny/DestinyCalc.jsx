@@ -1,29 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { TODAY } from "../../../../utils/dateFormat/date";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
 import styles from "../flames/FlamesCalc.module.scss";
 import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
+import { ProfileManager } from "../../../../component/UI/Profile";
+import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 
 const STORAGE_KEY = "destiny_calc";
 const initialFormState = { name: "", dob: "" };
 
 const DestinyCalc = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(STORAGE_KEY, initialFormState);
   const [errors, setErrors] = useState({});
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
+
+  useEffect(() => {
+    if (selectedKundli) {
+      const dob = `${selectedKundli.year}-${String(selectedKundli.month).padStart(2, "0")}-${String(selectedKundli.day).padStart(2, "0")}`;
+      setFormData({ name: selectedKundli.name || "", dob });
+    }
+  }, [selectedKundli]);
 
   const token = localStorage.getItem("shubhtalk_customer_token");
   const { data: kundliData } = useGetAllKundlisQuery(undefined, { skip: !token });
   const profiles = kundliData?.data || [];
 
-  const handleProfileSelect = (profileId) => {
-    const profile = profiles.find((p) => p._id === profileId);
+  const handleProfileSelect = (profile) => {
     if (!profile) return;
     const dob = `${profile.year}-${String(profile.month).padStart(2, "0")}-${String(profile.day).padStart(2, "0")}`;
     setFormData({ name: profile.name || "", dob });
     setErrors({});
+    dispatch(setSelectedKundli(profile));
+    setShowProfileModal(false);
   };
 
   const onReset = () => {
@@ -86,6 +100,9 @@ const DestinyCalc = () => {
           <label>Full Name <span>*</span></label>
           <input placeholder="Enter your full name" value={formData.name} onChange={(e) => handleChange("name", e.target.value)} />
           {errors.name && <p className={styles.err}>{errors.name}</p>}
+          <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
+            Select Profile +
+          </button>
         </div>
 
         <div className={styles.field}>
@@ -112,6 +129,14 @@ const DestinyCalc = () => {
 
         <button type="submit" className={styles.submitBtn}>Calculate Destiny Number</button>
       </form>
+
+      <ProfileManager
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        onProfileSelect={handleProfileSelect}
+        title="Select Profile"
+        enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+      />
     </div>
   );
 };

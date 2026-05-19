@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import { TODAY } from "../../../../utils/dateFormat/date";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
 import styles from "../mangaldosha/MangalDosha.module.scss";
 import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
+import { ProfileManager } from "../../../../component/UI/Profile";
+import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 
 const STORAGE_KEY = "shani_sade_sati";
 const initialFormState = {
@@ -21,28 +24,35 @@ const initialFormState = {
 
 const ShaniSadeSati = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(STORAGE_KEY, initialFormState);
   const [errors, setErrors] = useState({});
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
+
+  useEffect(() => {
+    if (selectedKundli) {
+      fillFromProfile(selectedKundli);
+    }
+  }, [selectedKundli]);
+
+  const fillFromProfile = (profile) => {
+    if (!profile) return;
+    const dob = `${profile.year}-${String(profile.month).padStart(2, "0")}-${String(profile.day).padStart(2, "0")}`;
+    const tob = `${String(profile.hour).padStart(2, "0")}:${String(profile.min).padStart(2, "0")}`;
+    setFormData({ name: profile.name || "", gender: (profile.gender || profile.identity || "").toLowerCase() || "", dob, tob, place: profile.place || "", lat: profile.lat || null, lng: profile.lon || null, isTimeUnknown: false });
+    setErrors({});
+  };
 
   const token = localStorage.getItem("shubhtalk_customer_token");
   const { data: kundliData } = useGetAllKundlisQuery(undefined, { skip: !token });
   const profiles = kundliData?.data || [];
 
-  const handleProfileSelect = (profileId) => {
-    const profile = profiles.find((p) => p._id === profileId);
+  const handleProfileSelect = (profile) => {
     if (!profile) return;
-    const dob = `${profile.year}-${String(profile.month).padStart(2, "0")}-${String(profile.day).padStart(2, "0")}`;
-    const tob = `${String(profile.hour).padStart(2, "0")}:${String(profile.min).padStart(2, "0")}`;
-    setFormData({
-      name: profile.name || "",
-      gender: profile.gender || "",
-      dob, tob,
-      place: profile.place || "",
-      lat: profile.lat || null,
-      lng: profile.lon || null,
-      isTimeUnknown: false,
-    });
-    setErrors({});
+    fillFromProfile(profile);
+    dispatch(setSelectedKundli(profile));
+    setShowProfileModal(false);
   };
 
   const handleChange = (key, value) => {
@@ -118,6 +128,9 @@ const ShaniSadeSati = () => {
             <label>Full Name <span>*</span></label>
             <input placeholder="Enter your name" value={formData.name} onChange={(e) => handleChange("name", e.target.value.replace(/[^a-zA-Z\s]/g, ""))} />
             {errors.name && <p className={styles.err}>{errors.name}</p>}
+            <button type="button" className={styles.selectProfileBtnMobile} onClick={() => setShowProfileModal(true)}>
+              Select Profile +
+            </button>
           </div>
           <div className={styles.field}>
             <label>Gender <span>*</span></label>
@@ -129,6 +142,9 @@ const ShaniSadeSati = () => {
             {errors.gender && <p className={styles.err}>{errors.gender}</p>}
           </div>
         </div>
+        <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
+          Select Profile +
+        </button>
 
         <div className={styles.row}>
           <div className={styles.field}>
@@ -194,6 +210,14 @@ const ShaniSadeSati = () => {
           Check Shani Sade Sati
         </button>
       </form>
+
+      <ProfileManager
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        onProfileSelect={handleProfileSelect}
+        title="Select Profile"
+        enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+      />
     </div>
   );
 };

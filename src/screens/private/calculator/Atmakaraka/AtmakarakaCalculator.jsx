@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 import styles from "./AtmakarakaCalculator.module.scss";
+import { ProfileManager } from "../../../../component/UI/Profile";
+import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 
 const STORAGE_KEY = "atmakaraka-and-darakaraka";
 
@@ -28,6 +31,9 @@ const AtmakarakaCalculator = () => {
 
   const [errors, setErrors] = useState({});
   const [infoOpen, setInfoOpen] = useState(true);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const dispatch = useDispatch();
+  const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
 
   const handleChange = (key, value) => {
     setFormData((prev) => ({
@@ -35,6 +41,36 @@ const AtmakarakaCalculator = () => {
       [key]: value,
     }));
     setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
+
+  const fillFromProfile = (profile) => {
+    if (!profile) return;
+    handleChange("name", profile.name || "");
+    const g = (profile.gender || profile.identity || "").toLowerCase();
+    if (g === "male" || g === "female") handleChange("gender", g);
+    if (profile.year && profile.month && profile.day) {
+      handleChange("dob", `${profile.year}-${String(profile.month).padStart(2, "0")}-${String(profile.day).padStart(2, "0")}`);
+    }
+    if (profile.hour != null && profile.min != null) {
+      handleChange("tob", `${String(profile.hour).padStart(2, "0")}:${String(profile.min).padStart(2, "0")}`);
+      handleChange("isTimeUnknown", false);
+    }
+    if (profile.place) handleChange("place", profile.place);
+    if (profile.lat) handleChange("lat", profile.lat);
+    if (profile.lon || profile.lng) handleChange("lng", profile.lon || profile.lng);
+  };
+
+  useEffect(() => {
+    if (selectedKundli) {
+      fillFromProfile(selectedKundli);
+    }
+  }, [selectedKundli]);
+
+  const handleProfileSelect = (profile) => {
+    if (!profile) return;
+    fillFromProfile(profile);
+    dispatch(setSelectedKundli(profile));
+    setShowProfileModal(false);
   };
 
   const handleSubmit = (e) => {
@@ -154,6 +190,9 @@ const AtmakarakaCalculator = () => {
               onChange={(e) => handleChange("name", e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
             />
             {errors?.name && <p className={styles.error}>{errors.name}</p>}
+            <button type="button" className={styles.selectProfileBtnMobile} onClick={() => setShowProfileModal(true)}>
+              Select Profile +
+            </button>
           </div>
 
           <div className={styles.formGroup}>
@@ -170,7 +209,12 @@ const AtmakarakaCalculator = () => {
             </select>
             {errors?.gender && <p className={styles.error}>{errors.gender}</p>}
           </div>
+        </div>
+        <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
+          Select Profile +
+        </button>
 
+        <div className={styles.formGrid}>
           {/* Row 2: Date of Birth + Place of birth */}
           <div className={styles.formGroup}>
             <label>
@@ -264,6 +308,14 @@ const AtmakarakaCalculator = () => {
           </button>
         </div>
       </form>
+
+      <ProfileManager
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        onProfileSelect={handleProfileSelect}
+        title="Select Profile"
+        enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+      />
     </div>
   );
 };
