@@ -127,7 +127,7 @@ const OccultResult = () => {
       </p>
 
       <div className={styles.actionRow}>
-        <button className={styles.backBtn} onClick={() => navigate(PATH.privateRoutes.OCCULT.path)}>New Analysis</button>
+        {/* <button className={styles.backBtn} onClick={() => navigate(PATH.privateRoutes.OCCULT.path)}>New Analysis</button> */}
         <button className={styles.consultBtn} onClick={() => navigate("/talk-to-astrologer")}>Consult with Expert Astrologer</button>
       </div>
     </div>
