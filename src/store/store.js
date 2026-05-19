@@ -1,6 +1,7 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
+import storageSession from "redux-persist/lib/storage/session";
 import authReducer from "../redux/auth/authSlice";
 import formReducer from "../redux/kundliform/formSlice";
 import kundliReducer from "../redux/kundli/kundliSlice";
@@ -28,11 +29,18 @@ const persistConfig = {
   whitelist: ["auth", "kundli", "calculator"], // persist auth, kundli, and calculator slices
 };
 
+// Persist aiwow results in sessionStorage (clears when tab closes)
+const aiwowPersistConfig = {
+  key: "aiwow",
+  storage: storageSession,
+  blacklist: [], // persist everything including results
+};
+
 const rootReducer = combineReducers({
   auth: authReducer,
   form: formReducer,
   kundli: kundliReducer,
-  aiwow: aiwowReducer,
+  aiwow: persistReducer(aiwowPersistConfig, aiwowReducer),
   remedy: remedyReducer,
   calculator: calculatorReducer,
   [baseApi.reducerPath]: baseApi.reducer,
