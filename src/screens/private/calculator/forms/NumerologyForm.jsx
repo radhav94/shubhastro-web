@@ -44,11 +44,6 @@ const NumerologyForm = ({
   return (
     <>
       <form className={styles.astroForm} onSubmit={onSubmit}>
-        <div className={styles.resetRow}>
-          <button type="button" className={styles.resetBtn} onClick={onReset}>
-            Reset
-          </button>
-        </div>
         <h3 className={styles.formTitle}>{title}</h3>
 
         {/* Name */}
@@ -122,9 +117,16 @@ const NumerologyForm = ({
           </div>
         )}
 
-        <button type="submit" className={styles.submitBtn}>
-          {submitText}
-        </button>
+        <div className={styles.btnRow}>
+          {onReset && (
+            <button type="button" className={styles.resetBtn} onClick={onReset}>
+              Reset
+            </button>
+          )}
+          <button type="submit" className={styles.submitBtn}>
+            {submitText}
+          </button>
+        </div>
       </form>
 
       <ProfileManager

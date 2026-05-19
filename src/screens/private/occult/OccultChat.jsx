@@ -100,7 +100,7 @@ const OccultChat = () => {
             <span className={styles.heroTitleItalic}>Reveal Hidden Energies in Your Life</span>
           </h1>
           <p className={styles.heroBadge}>
-            <span className={styles.heroBadgeIcon}>🔮</span>
+            {/* <span className={styles.heroBadgeIcon}>🔮</span> */}
             Trusted Spiritual Guidance at ShubhAstro.ai
           </p>
           <p className={styles.heroDesc}>

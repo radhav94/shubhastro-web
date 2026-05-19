@@ -11,7 +11,7 @@ const DateWithSingleInputForm = ({
   submitText,
   formData,
   errors,
-  onChange,
+  onChange = () => {},
   onSubmit,
   onReset,
   inputLabel,
@@ -27,6 +27,7 @@ const DateWithSingleInputForm = ({
   const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
 
   useEffect(() => {
+    if (readOnly) return;
     if (selectedKundli && selectedKundli.year && selectedKundli.month && selectedKundli.day) {
       onChange("dob", `${selectedKundli.year}-${String(selectedKundli.month).padStart(2, "0")}-${String(selectedKundli.day).padStart(2, "0")}`);
     }
@@ -44,13 +45,6 @@ const DateWithSingleInputForm = ({
   return (
     <>
       <form className={styles.form} onSubmit={onSubmit}>
-        {onReset && (
-          <div className={styles.resetRow}>
-            <button type="button" className={styles.resetBtn} onClick={onReset}>
-              Reset
-            </button>
-          </div>
-        )}
         <h3 className={styles.formTitle}>{title}</h3>
 
         {/* DOB */}
@@ -122,9 +116,16 @@ const DateWithSingleInputForm = ({
         </div>
 
         {!hideSubmit && (
-          <button type="submit" className={styles.submitBtn}>
-            {submitText}
-          </button>
+          <div className={styles.btnRow}>
+            {onReset && (
+              <button type="button" className={styles.resetBtn} onClick={onReset}>
+                Reset
+              </button>
+            )}
+            <button type="submit" className={styles.submitBtn}>
+              {submitText}
+            </button>
+          </div>
         )}
       </form>
 

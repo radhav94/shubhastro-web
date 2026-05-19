@@ -10,7 +10,7 @@ const CosmicInsightSection = ({ data }) => {
 
   const handleCardClick = () => {
     // Navigate to AIWow page with hash to scroll to Companion Suite section
-    navigate("/aiwow#companion-suite");
+    navigate("/ai-wow#companion-suite");
   };
 
   return (

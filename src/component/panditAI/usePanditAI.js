@@ -1,5 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { voiceSocket } from "../../services/voiceSocketServices";
+import {
+  voiceSocket,
+  registerChatSession,
+  clearChatSession,
+} from "../../services/voiceSocketServices";
 import {
   useCreateChatRoomMutation,
   useGetChatHistoryQuery,
@@ -46,15 +50,18 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   const [messages, setMessages] = useState([]);
   const [sending, setSending] = useState(false);
   const [connecting, setConnecting] = useState(false);
+  const [chatDisabled, setChatDisabled] = useState(false);
   const messagesEndRef = useRef(null);
   const roomIdRef = useRef(null);
   const initiatedRef = useRef(false);
   const historyLoadedRef = useRef(false);
   const pendingMessageRef = useRef(null);
   const sendTextRef = useRef(null);
+  const activityTimeoutRef = useRef(null);
 
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   const [createChatRoom] = useCreateChatRoomMutation();
+  const chatEndedRef = useRef(false);
 
   // Fetch previous chat history
   const { data: historyData, isLoading: historyLoading } = useGetChatHistoryQuery(
@@ -95,11 +102,11 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
 
   // Initiate chat session when bubble opens
   useEffect(() => {
-    if (!isOpen || !userIdLocal || initiatedRef.current) return;
+    if (!isOpen || !userIdLocal) return;
 
     const initChat = async () => {
       setConnecting(true);
-      initiatedRef.current = true;
+      chatEndedRef.current = false;
 
       try {
         await createChatRoom({
@@ -122,13 +129,60 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     };
 
     initChat();
+
+    // Handle socket reconnect while chat is open
+    const handleSocketReconnect = () => {
+      const currentRoomId = roomIdRef.current;
+      if (currentRoomId && !chatEndedRef.current) {
+        console.log("[PanditAI] Socket reconnected, emitting chat:reconnect");
+        voiceSocket.emit("chat:reconnect", {
+          roomId: currentRoomId,
+          userId: userIdLocal,
+          astrologerId: PANDIT_AI_ID,
+          callType: "chat",
+        });
+      } else if (!chatEndedRef.current) {
+        // No roomId yet, re-initiate
+        panditAIChatActive = true;
+        voiceSocket.emit("chat:initiate", {
+          userId: userIdLocal,
+          astrologerId: PANDIT_AI_ID,
+        });
+      }
+    };
+
+    voiceSocket.on("connect", handleSocketReconnect);
+
+    return () => {
+      voiceSocket.off("connect", handleSocketReconnect);
+    };
   }, [isOpen, userIdLocal, createChatRoom]);
 
-  // End session only on unmount, not on close
+  // End session when popup closes
+  useEffect(() => {
+    if (isOpen) return;
+
+    const currentRoomId = roomIdRef.current;
+    if (currentRoomId && voiceSocket.connected && !chatEndedRef.current) {
+      voiceSocket.emit("chat:end", {
+        roomId: currentRoomId,
+        userId: userIdLocal,
+        astrologerId: PANDIT_AI_ID,
+      });
+    }
+    roomIdRef.current = null;
+    panditAIRoomId = null;
+    initiatedRef.current = false;
+    pendingMessageRef.current = null;
+    panditAIChatActive = false;
+    clearChatSession();
+  }, [isOpen, userIdLocal]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       const currentRoomId = roomIdRef.current;
-      if (currentRoomId && voiceSocket.connected) {
+      if (currentRoomId && voiceSocket.connected && !chatEndedRef.current) {
         voiceSocket.emit("chat:end", {
           roomId: currentRoomId,
           userId: userIdLocal,
@@ -141,6 +195,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       historyLoadedRef.current = false;
       pendingMessageRef.current = null;
       panditAIChatActive = false;
+      clearChatSession();
     };
   }, [userIdLocal]);
 
@@ -152,6 +207,12 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       if (data?.roomId) {
         roomIdRef.current = data.roomId;
         panditAIRoomId = data.roomId;
+        registerChatSession({
+          roomId: data.roomId,
+          userId: userIdLocal,
+          astrologerId: PANDIT_AI_ID,
+          callType: "chat",
+        });
       }
     };
 
@@ -159,12 +220,29 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       if (data?.roomId) {
         roomIdRef.current = data.roomId;
         panditAIRoomId = data.roomId;
+        registerChatSession({
+          roomId: data.roomId,
+          userId: userIdLocal,
+          astrologerId: PANDIT_AI_ID,
+          callType: "chat",
+        });
         // Only flush pending message after chat is fully accepted
         const pending = pendingMessageRef.current;
         if (pending) {
           pendingMessageRef.current = null;
           sendTextRef.current?.(pending);
         }
+      }
+    };
+
+    const handleReconnected = (data) => {
+      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      console.log("[PanditAI] Chat reconnected:", data?.roomId);
+      if (data?.roomId) {
+        roomIdRef.current = data.roomId;
+        panditAIRoomId = data.roomId;
+        panditAIChatActive = true;
+        chatEndedRef.current = false;
       }
     };
 
@@ -211,20 +289,75 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       panditAIChatActive = false;
     };
 
+    const handleChatEnded = (data) => {
+      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      chatEndedRef.current = true;
+      roomIdRef.current = null;
+      panditAIRoomId = null;
+      panditAIChatActive = false;
+      clearChatSession();
+    };
+
     voiceSocket.on("chat:room", handleChatRoom);
     voiceSocket.on("chat:accepted", handleChatAccepted);
+    voiceSocket.on("chat:reconnected", handleReconnected);
     voiceSocket.on("message:recieved", handleMessage);
     voiceSocket.on("chat:rejected", handleRejected);
+    voiceSocket.on("chat:ended", handleChatEnded);
     voiceSocket.on("error", handleError);
 
     return () => {
       voiceSocket.off("chat:room", handleChatRoom);
       voiceSocket.off("chat:accepted", handleChatAccepted);
+      voiceSocket.off("chat:reconnected", handleReconnected);
       voiceSocket.off("message:recieved", handleMessage);
       voiceSocket.off("chat:rejected", handleRejected);
+      voiceSocket.off("chat:ended", handleChatEnded);
       voiceSocket.off("error", handleError);
     };
   }, [isOpen]);
+
+  // Activity timeout — if no activity received for 60s, disable input & re-initiate
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const resetActivityTimeout = () => {
+      setChatDisabled(false);
+      clearTimeout(activityTimeoutRef.current);
+      activityTimeoutRef.current = setTimeout(() => {
+        console.log("[PanditAI] No activity for 60s, re-initiating chat");
+        setChatDisabled(true);
+        // Re-initiate chat
+        if (voiceSocket.connected && userIdLocal) {
+          panditAIChatActive = true;
+          voiceSocket.emit("chat:initiate", {
+            userId: userIdLocal,
+            astrologerId: PANDIT_AI_ID,
+          });
+        }
+      }, 60000);
+    };
+
+    const handleActivityTick = (data) => {
+      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      resetActivityTimeout();
+    };
+
+    const handleAcceptedTick = (data) => {
+      if (data?.astrologerId === PANDIT_AI_ID) {
+        resetActivityTimeout();
+      }
+    };
+
+    voiceSocket.on("activity", handleActivityTick);
+    voiceSocket.on("chat:accepted", handleAcceptedTick);
+
+    return () => {
+      voiceSocket.off("activity", handleActivityTick);
+      voiceSocket.off("chat:accepted", handleAcceptedTick);
+      clearTimeout(activityTimeoutRef.current);
+    };
+  }, [isOpen, userIdLocal]);
 
   // Ref-based guard so sendText callback stays stable across send cycles
   const sendingRef = useRef(false);
@@ -283,7 +416,9 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     messages,
     isLoading: connecting || historyLoading,
     sending,
+    chatDisabled,
     sendText,
     messagesEndRef,
+    roomId: roomIdRef.current,
   };
 }

@@ -7,6 +7,7 @@ import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePick
 import styles from "./AtmakarakaCalculator.module.scss";
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "atmakaraka-and-darakaraka";
 
@@ -97,7 +98,7 @@ const AtmakarakaCalculator = () => {
       tob: formData.isTimeUnknown ? "12:00" : formData.tob,
     };
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: payload }));
     navigate("/atmakaraka-and-darakaraka-calculator/report");
   };
 
@@ -162,19 +163,6 @@ const AtmakarakaCalculator = () => {
 
       {/* Form Card */}
       <form className={styles.formCard} onSubmit={handleSubmit}>
-        <div className={styles.resetRow}>
-          <button
-            type="button"
-            className={styles.resetBtn}
-            onClick={() => {
-              setFormData(initialFormState);
-              setErrors({});
-              localStorage.removeItem(STORAGE_KEY);
-            }}
-          >
-            Reset
-          </button>
-        </div>
         <h3 className={styles.formTitle}>Fill the form to calculate</h3>
 
         <div className={styles.formGrid}>
@@ -303,8 +291,19 @@ const AtmakarakaCalculator = () => {
         </div>
 
         <div className={styles.btnRow}>
+          <button
+            type="button"
+            className={styles.resetBtn}
+            onClick={() => {
+              setFormData(initialFormState);
+              setErrors({});
+              dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
+            }}
+          >
+            Reset
+          </button>
           <button type="submit" className={styles.submitBtn}>
-            Calculate Atmakaraka & Darakaraka
+            Show Results
           </button>
         </div>
       </form>

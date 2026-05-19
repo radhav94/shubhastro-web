@@ -64,11 +64,20 @@
   font-size: 14px;
   line-height: 1.7;
   color: #444;
+  text-align: left;
 }
 
 /* ── Section ── */
 .section {
   margin-bottom: 28px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  text-align: left;
 
   h3 {
     font-size: 16px;
@@ -91,7 +100,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
 }
 
@@ -144,6 +153,7 @@
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 24px;
 }
 
 .shareBtn {
@@ -185,6 +195,10 @@
 
   .grid {
     grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 16px;
   }
 
   .actions {

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import AstroBirthForm from "../forms/AstroBirthForm";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./RisingSign.module.scss";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "rising_sign";
 const initialFormState = {
@@ -18,6 +20,7 @@ const initialFormState = {
 
 const RisingSign = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(
     STORAGE_KEY,
     initialFormState
@@ -68,7 +71,7 @@ const RisingSign = () => {
       tob: formData.isTimeUnknown ? "12:00" : formData.tob,
     };
     navigate("/rising-ascendant-sign-calculator/report");
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: payload }));
   };
 
   return (
@@ -90,7 +93,7 @@ const RisingSign = () => {
 
       <AstroBirthForm
         title="Calculate your Rising/Ascendant Sign here"
-        submitText="Calculate my Rising Sign"
+        submitText="Show Results"
         formData={formData}
         errors={errors}
         onChange={handleChange}
@@ -98,7 +101,7 @@ const RisingSign = () => {
         onReset={() => {
           setFormData(initialFormState);
           setErrors({});
-          localStorage.removeItem(STORAGE_KEY);
+          dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
         }}
       />
     </div>

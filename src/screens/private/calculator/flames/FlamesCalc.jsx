@@ -5,6 +5,7 @@ import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./FlamesCalc.module.scss";
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "flames_calculator";
 const initialFormState = { name1: "", name2: "" };
@@ -48,7 +49,7 @@ const FlamesCalc = () => {
   const onReset = () => {
     setFormData(initialFormState);
     setErrors({});
-    localStorage.removeItem(STORAGE_KEY);
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
   };
 
   const handleSubmit = (e) => {
@@ -58,7 +59,7 @@ const FlamesCalc = () => {
     if (!formData.name2) newErrors.name2 = "Partner's name is required";
     setErrors(newErrors);
     if (Object.keys(newErrors).length) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: formData }));
     navigate("/flames-calculator/report");
   };
 
@@ -79,9 +80,6 @@ const FlamesCalc = () => {
       </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.resetRow}>
-          <button type="button" className={styles.resetBtn} onClick={onReset}>Reset</button>
-        </div>
         <h3 className={styles.formTitle}>Enter Your Names</h3>
 
         <div className={styles.field}>
@@ -102,7 +100,10 @@ const FlamesCalc = () => {
           </button>
         </div>
 
-        <button type="submit" className={styles.submitBtn}>Check FLAMES</button>
+        <div className={styles.btnRow}>
+          <button type="button" className={styles.resetBtn} onClick={onReset}>Reset</button>
+          <button type="submit" className={styles.submitBtn}>Show Results</button>
+        </div>
       </form>
 
       <ProfileManager

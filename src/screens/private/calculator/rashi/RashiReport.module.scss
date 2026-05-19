@@ -9,8 +9,7 @@
 }
 
 .title {
-  text-align: center;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
   margin-bottom: 28px;
   background: linear-gradient(90deg, #f75801, #d43400);
@@ -48,13 +47,76 @@
   letter-spacing: 1px;
   color: #6b7280;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.rashiName {
+.headingUnderline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.dividerLine {
+  line-height: 0;
+}
+
+.dividerMoon {
+  flex-shrink: 0;
+  line-height: 0;
+  color: #030303;
+}
+
+/* Rashi Card - matching sun sign style */
+.card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
+  border-radius: 12px;
+  padding: 20px 24px 28px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  margin: 0 auto 24px;
+  max-width: 480px;
+  text-align: center;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.cardHeaderText {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.signImageWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, #FFE0B6 0%, #FFE2E2 100%);
+  padding: 30px;
+}
+
+.signImage {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  background: linear-gradient(90deg, #f75801, #d43400);
+  border-radius: 50px;
+}
+
+.signName {
   font-size: 22px;
   font-weight: 700;
   color: #d43400;
-  margin-top: 6px;
+  margin-bottom: 20px;
 }
 
 .detailsCard {
@@ -68,32 +130,67 @@
   position: relative;
 }
 
-.detailsCard::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  border-radius: 12px 12px 0 0;
-  background: linear-gradient(90deg, #f75801, #d43400);
+.accordionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+
+  span:first-child {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
 }
 
-.detailsCard h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
+.ttsWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+.chevron {
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.accordionBody {
+  display: none;
+  padding: 0 20px 16px;
+
+  p {
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.7;
+    margin: 0 0 8px;
+  }
+}
+
+.accordionBodyOpen {
+  display: block;
+}
+
+/* Personal Details Grid */
 .detailsGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin: 16px 0 0;
 
   span {
     font-size: 13px;
     color: #6b7280;
+    display: block;
+    margin-bottom: 2px;
   }
 
   p {
@@ -136,31 +233,15 @@
     line-height: 1.6;
     color: #374151;
     font-size: 14px;
-    margin-bottom: 10px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
   }
 }
 
 .botText {
   font-weight: 600;
-}
-
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-}
-
-
-
-.backBtn {
-  background: linear-gradient(135deg, #f75801, #d43400);
-  color: #fff;
-  padding: 14px 40px;
-  border-radius: 26px;
-  border: none;
-  font-size: 15px;
-  cursor: pointer;
+  color: #1a1a1a !important;
 }
 
 @media (max-width: 640px) {
@@ -170,24 +251,36 @@
   // }
 
   .title {
-    font-size: 22px;
+    font-size: 18px;
   }
 
-  .rashiCard {
-    padding: 20px 16px;
+  .card {
+    padding: 16px 16px 24px;
+  }
+
+  .signImageWrap {
+    padding: 20px;
+  }
+
+  .signImage {
+    width: 64px;
+    height: 64px;
+  }
+
+  .signName {
+    font-size: 20px;
   }
 
   .detailsGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .aboutBox {
-    padding: 18px;
+  .accordionHeader {
+    padding: 14px 16px;
   }
 
-  .shareBtn,
-  .backBtn {
-    width: 100%;
-    text-align: center;
+  .accordionBody {
+    padding: 0 16px 14px;
   }
 }

@@ -416,7 +416,7 @@ const HomeV2 = () => {
                     </svg>
                   </div>
                 </div>
-                <button className={styles.wowViewMore} onClick={() => navigate('/aiwow')}>View All &rsaquo;</button>
+                <button className={styles.wowViewMore} onClick={() => navigate('/ai-wow')}>View More &rsaquo;</button>
               </div>
 
               {/* All sections from API — continuous grid */}

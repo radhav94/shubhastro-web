@@ -1,13 +1,16 @@
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useGetMangalDoshaReportQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./MangalReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const MangalReport = () => {
   const navigate = useNavigate();
 
-  const stored = JSON.parse(localStorage.getItem("mangal_dosha"));
+  const stored = useSelector(selectCalculatorData("mangal_dosha"));
   const { data, isLoading } = useGetMangalDoshaReportQuery(stored);
 
   if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
@@ -135,6 +138,8 @@ const MangalReport = () => {
           Calculate Again
         </button>
       </div>
+
+      <ConnectCard />
     </div>
   );
 };

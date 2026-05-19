@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
 import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
 import styles from "./MobileCalc.module.scss";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "mobile_calculator";
 
@@ -13,6 +15,7 @@ const initialFormState = {
 
 const MobileCalc = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(
     STORAGE_KEY,
     initialFormState
@@ -53,7 +56,7 @@ const MobileCalc = () => {
 
     if (Object.keys(validationErrors).length) return;
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: payload }));
     navigate("/mobile-number-numerology-calculator/report");
   };
 
@@ -75,7 +78,7 @@ const MobileCalc = () => {
 
       <DateWithSingleInputForm
         title="Calculate your Lucky Mobile Number here"
-        submitText="Calculate my Lucky Mobile Number"
+        submitText="Show Results"
         inputLabel="Mobile Number"
         inputPlaceholder="ENTER FULL MOBILE NUMBER (10 DIGITS)"
         inputName="mobile"
@@ -87,7 +90,7 @@ const MobileCalc = () => {
         onReset={() => {
           setFormData(initialFormState);
           setErrors({});
-          localStorage.removeItem(STORAGE_KEY);
+          dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
         }}
       />
     </div>

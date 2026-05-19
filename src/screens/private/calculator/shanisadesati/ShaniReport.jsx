@@ -1,15 +1,20 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useGetSadeSatiReportQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./ShaniReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import { BsCheckCircleFill } from "react-icons/bs";
 import TTSButton from "../../../../component/UI/TTSButton";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const ShaniReport = () => {
   const navigate = useNavigate();
+  const [aboutOpen, setAboutOpen] = useState(true);
 
-  const stored = JSON.parse(localStorage.getItem("shani_sade_sati"));
+  const stored = useSelector(selectCalculatorData("shani_sade_sati"));
   const { data, isLoading } = useGetSadeSatiReportQuery(stored);
 
   if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
@@ -28,43 +33,83 @@ const ShaniReport = () => {
   return (
     <div className={styles.wrapper}>
       <CalcBackButton />
+
       {/* HEADER */}
       <div className={styles.header}>
-        <h2>{stored?.name}'s Shani Sade Sati Report</h2>
-        <p>Complete analysis of Saturn’s influence on your life journey</p>
+        <h2>
+          {stored?.name
+            ? `${stored.name.toUpperCase()}'S SHANI SADE SATI REPORT`
+            : "SHANI SADE SATI REPORT"}
+        </h2>
+        <div className={styles.headingUnderline}>
+          <div className={styles.dividerLine}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
+              <line y1="0.5" x2="93" y2="0.5" stroke="#030303" />
+            </svg>
+          </div>
+          <span className={styles.dividerMoon}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="4" height="5" viewBox="0 0 4 5" fill="none">
+              <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303" />
+            </svg>
+          </span>
+          <div className={styles.dividerLine}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
+              <line y1="0.5" x2="93" y2="0.5" stroke="#030303" />
+            </svg>
+          </div>
+        </div>
+        <p>Complete analysis of Saturn&apos;s influence on your life journey</p>
       </div>
 
       {/* STATUS CARD */}
-      <div className={styles.statusCard} style={{ position: 'relative' }}>
-        <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-          <TTSButton text={`Shani Sade Sati Status. ${shani_period_type ? 'Currently Active' : 'Currently Not Active'}. ${bot_response || ''}`} />
+      <div className={styles.statusCard} style={{ position: "relative" }}>
+        <span style={{ position: "absolute", top: "8px", right: "8px", display: "inline-flex", zIndex: 10, pointerEvents: "auto" }}>
+          <TTSButton text={`Shani Sade Sati Status. ${shani_period_type ? "Currently Active" : "Currently Not Active"}. ${bot_response || ""}`} />
         </span>
         <span
-          className={`${styles.badge} ${
-            shani_period_type ? styles.active : styles.inactive
-          }`}
+          className={`${styles.badge} ${shani_period_type ? styles.active : styles.inactive}`}
         >
           {shani_period_type ? "Currently Active" : "Currently Not Active"}
         </span>
-
         {bot_response && <p className={styles.statusText}>{bot_response}</p>}
       </div>
 
-      {/* ABOUT */}
+      {/* UNDERSTANDING SHANI SADE SATI - ACCORDION */}
       {description && (
-        <div className={styles.section} style={{ position: 'relative' }}>
-          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-            <TTSButton text={`Understanding Shani Sade Sati. ${description}`} />
-          </span>
-          <h3>Understanding Shani Sade Sati</h3>
-          <p className={styles.description}>{description}</p>
+        <div className={styles.accordionBox}>
+          <button
+            type="button"
+            className={styles.accordionHeader}
+            onClick={() => setAboutOpen((prev) => !prev)}
+            aria-expanded={aboutOpen}
+          >
+            <span>Understanding Shani Sade Sati</span>
+            <span className={styles.ttsWrap}>
+              <TTSButton text={`Understanding Shani Sade Sati. ${description}`} />
+              <svg
+                className={`${styles.chevron} ${aboutOpen ? styles.chevronOpen : ""}`}
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#e84d00"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </span>
+          </button>
+          <div className={`${styles.accordionBody} ${aboutOpen ? styles.accordionBodyOpen : ""}`}>
+            <p>{description}</p>
+          </div>
         </div>
       )}
 
-      {/* DETAILS */}
+      {/* KEY OBSERVATIONS */}
       <div className={styles.section}>
-        <h3>Key Observations</h3>
-
+        <h3>Key Observation</h3>
         <div className={styles.grid}>
           {date_considered && (
             <div className={styles.infoCard}>
@@ -72,12 +117,10 @@ const ShaniReport = () => {
               <strong>{date_considered}</strong>
             </div>
           )}
-
           <div className={styles.infoCard}>
             <span>Saturn Retrograde</span>
             <strong>{saturn_retrograde ? "Yes" : "No"}</strong>
           </div>
-
           {typeof age === "number" && (
             <div className={styles.infoCard}>
               <span>Age Considered</span>
@@ -87,18 +130,17 @@ const ShaniReport = () => {
         </div>
       </div>
 
-      {/* 🔥 REMEDIES – ENHANCED */}
+      {/* REMEDIES */}
       {Array.isArray(remedies) && remedies.length > 0 && (
-        <div className={styles.section} style={{ position: 'relative' }}>
-          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-            <TTSButton text={`Recommended Remedies. ${remedies.join('. ')}`} />
+        <div className={styles.section} style={{ position: "relative" }}>
+          <span style={{ position: "absolute", top: "0", right: "0", display: "inline-flex", zIndex: 10, pointerEvents: "auto" }}>
+            <TTSButton text={`Recommended Remedies. ${remedies.join(". ")}`} />
           </span>
           <h3>Recommended Remedies</h3>
           <p className={styles.remedyHint}>
-            Practicing these remedies regularly can help balance Saturn’s
+            Practicing these remedies regularly can help balance Saturn&apos;s
             influence and bring stability.
           </p>
-
           <div className={styles.remedyGrid}>
             {remedies.map((remedy, index) => (
               <div key={index} className={styles.remedyCard}>
@@ -116,6 +158,8 @@ const ShaniReport = () => {
           Calculate Again
         </button>
       </div>
+
+      <ConnectCard />
     </div>
   );
 };

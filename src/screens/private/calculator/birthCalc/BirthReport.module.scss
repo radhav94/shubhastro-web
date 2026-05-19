@@ -20,18 +20,28 @@
     font-size: 22px;
     font-weight: 700;
     color: #1a1a1a;
-    margin: 0;
-
-    &::after {
-      content: "";
-      display: block;
-      width: 50px;
-      height: 3px;
-      background: linear-gradient(135deg, #f75801, #d43400);
-      border-radius: 2px;
-      margin: 10px auto 0;
-    }
+    margin: 0 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
+}
+
+.headingUnderline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dividerLine {
+  line-height: 0;
+}
+
+.dividerMoon {
+  flex-shrink: 0;
+  line-height: 0;
+  color: #030303;
 }
 
 .mainContainer {
@@ -64,5 +74,23 @@
 @media (max-width: 900px) {
   .chartGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .pageWrapper {
+    padding: 0 12px 32px;
+  }
+
+  .nameCard h2 {
+    font-size: 18px;
+  }
+
+  .chartGrid {
+    gap: 14px;
+  }
+
+  .tableWrapper {
+    padding: 14px;
   }
 }

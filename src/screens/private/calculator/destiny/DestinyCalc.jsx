@@ -8,6 +8,7 @@ import styles from "../flames/FlamesCalc.module.scss";
 import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "destiny_calc";
 const initialFormState = { name: "", dob: "" };
@@ -43,7 +44,7 @@ const DestinyCalc = () => {
   const onReset = () => {
     setFormData(initialFormState);
     setErrors({});
-    localStorage.removeItem(STORAGE_KEY);
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
   };
 
   const handleChange = (key, value) => {
@@ -57,7 +58,7 @@ const DestinyCalc = () => {
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: formData }));
     navigate("/destiny-number-calculator/report");
   };
 
@@ -78,24 +79,6 @@ const DestinyCalc = () => {
       </div>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <div className={styles.resetRow}>
-          <button type="button" className={styles.resetBtn} onClick={onReset}>Reset</button>
-        </div>
-        {/* <h3 className={styles.formTitle}>Enter Your Details</h3>
-
-        {profiles.length > 0 && (
-          <div className={styles.profileSelector}>
-            <label>Quick Fill from Profile</label>
-            <div className={styles.profileChips}>
-              {profiles.map((p) => (
-                <button key={p._id} type="button" className={`${styles.profileChip} ${formData.name === p.name ? styles.activeChip : ""}`} onClick={() => handleProfileSelect(p._id)}>
-                  {p.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )} */}
-
         <div className={styles.field}>
           <label>Full Name <span>*</span></label>
           <input placeholder="Enter your full name" value={formData.name} onChange={(e) => handleChange("name", e.target.value)} />
@@ -127,7 +110,10 @@ const DestinyCalc = () => {
           {errors.dob && <p className={styles.err}>{errors.dob}</p>}
         </div>
 
-        <button type="submit" className={styles.submitBtn}>Calculate Destiny Number</button>
+        <div className={styles.btnRow}>
+          <button type="button" className={styles.resetBtn} onClick={onReset}>Reset</button>
+          <button type="submit" className={styles.submitBtn}>Show Results</button>
+        </div>
       </form>
 
       <ProfileManager

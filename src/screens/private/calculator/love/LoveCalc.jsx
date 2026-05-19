@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import LoveMatchForm from "../forms/LoveMatchForm";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./LoveCalc.module.scss";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "love_calculator";
 
@@ -15,6 +17,7 @@ const initialFormState = {
 
 const LoveCalc = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(
     STORAGE_KEY,
     initialFormState
@@ -37,7 +40,7 @@ const LoveCalc = () => {
   const handleReset = () => {
     setFormData(initialFormState);
     setErrors({});
-    localStorage.removeItem(STORAGE_KEY);
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
   };
 
   const handleSubmit = (e) => {
@@ -52,7 +55,7 @@ const LoveCalc = () => {
     setErrors(newErrors);
     if (Object.keys(newErrors).length) return;
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: formData }));
     navigate("/love-calculator/report");
   };
 
