@@ -55,6 +55,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
 
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   const [createChatRoom] = useCreateChatRoomMutation();
+  const chatEndedRef = useRef(false);
 
   // Fetch previous chat history
   const { data: historyData, isLoading: historyLoading } = useGetChatHistoryQuery(
@@ -95,11 +96,11 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
 
   // Initiate chat session when bubble opens
   useEffect(() => {
-    if (!isOpen || !userIdLocal || initiatedRef.current) return;
+    if (!isOpen || !userIdLocal) return;
 
     const initChat = async () => {
       setConnecting(true);
-      initiatedRef.current = true;
+      chatEndedRef.current = false;
 
       try {
         await createChatRoom({
@@ -124,11 +125,30 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     initChat();
   }, [isOpen, userIdLocal, createChatRoom]);
 
-  // End session only on unmount, not on close
+  // End session when popup closes
+  useEffect(() => {
+    if (isOpen) return;
+
+    const currentRoomId = roomIdRef.current;
+    if (currentRoomId && voiceSocket.connected && !chatEndedRef.current) {
+      voiceSocket.emit("chat:end", {
+        roomId: currentRoomId,
+        userId: userIdLocal,
+        astrologerId: PANDIT_AI_ID,
+      });
+    }
+    roomIdRef.current = null;
+    panditAIRoomId = null;
+    initiatedRef.current = false;
+    pendingMessageRef.current = null;
+    panditAIChatActive = false;
+  }, [isOpen, userIdLocal]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       const currentRoomId = roomIdRef.current;
-      if (currentRoomId && voiceSocket.connected) {
+      if (currentRoomId && voiceSocket.connected && !chatEndedRef.current) {
         voiceSocket.emit("chat:end", {
           roomId: currentRoomId,
           userId: userIdLocal,
@@ -211,10 +231,19 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       panditAIChatActive = false;
     };
 
+    const handleChatEnded = (data) => {
+      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      chatEndedRef.current = true;
+      roomIdRef.current = null;
+      panditAIRoomId = null;
+      panditAIChatActive = false;
+    };
+
     voiceSocket.on("chat:room", handleChatRoom);
     voiceSocket.on("chat:accepted", handleChatAccepted);
     voiceSocket.on("message:recieved", handleMessage);
     voiceSocket.on("chat:rejected", handleRejected);
+    voiceSocket.on("chat:ended", handleChatEnded);
     voiceSocket.on("error", handleError);
 
     return () => {
@@ -222,6 +251,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       voiceSocket.off("chat:accepted", handleChatAccepted);
       voiceSocket.off("message:recieved", handleMessage);
       voiceSocket.off("chat:rejected", handleRejected);
+      voiceSocket.off("chat:ended", handleChatEnded);
       voiceSocket.off("error", handleError);
     };
   }, [isOpen]);

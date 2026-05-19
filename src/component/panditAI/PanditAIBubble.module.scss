@@ -258,6 +258,24 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   gap: 8px;
 }
 
+.freeMinBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
 .closeBtn {
   display: grid;
   width: 42px;
@@ -554,6 +572,45 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   padding: 12px 14px 14px;
   border-top: 1px solid $line;
   background: linear-gradient(180deg, #fffdf9 0%, #fff8f1 100%);
+}
+
+.rechargeNowBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 9px 14px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(241, 90, 36, 0.25);
+  border-radius: 10px;
+  background: #fff5ef;
+  color: $accent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background: #ffede3;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .inputWrapper {

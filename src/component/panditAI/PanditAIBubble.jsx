@@ -6,12 +6,16 @@ import {
   IoChatbubbleEllipses,
   IoMic,
   IoStopCircle,
+  IoWallet,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import styles from "./PanditAIBubble.module.scss";
 import usePanditAI from "./usePanditAI";
+import useAIFreeMinutes from "./useAIFreeMinutes";
 import useSpeechToText from "./useSpeechToText";
 import { transliterateToLatin } from "./translateText";
+import AIRechargeBanner from "./AIRechargeBanner";
+import AISessionStatus from "./AISessionStatus";
 import panditAiIcon from "../../assets/images/AiPandit.png";
 
 // Memoized message bubble to avoid re-rendering the entire list on new messages
@@ -44,7 +48,23 @@ const PanditAIBubble = () => {
     sending,
     sendText,
     messagesEndRef,
+    roomId,
   } = usePanditAI({ isOpen, lang });
+
+  const {
+    isFreePeriod,
+    freeMinutesRemaining,
+    remainingPaidTime,
+    showRechargeBanner,
+    minutesUntilPaid,
+    minBalanceRequired,
+    walletBalance,
+    ratePerMinute,
+    sessionEndedLowBalance,
+    freeWindowRenewed,
+    dismissRechargeBanner,
+    resetFreeMinutesState,
+  } = useAIFreeMinutes({ isOpen, roomId });
 
   // Listen for external "open and send" events from PanditAISection card
   useEffect(() => {
@@ -185,6 +205,15 @@ const PanditAIBubble = () => {
               </div>
             </div>
             <div className={styles.headerActions}>
+              {isFreePeriod && freeMinutesRemaining != null && (
+                <div className={styles.freeMinBadge}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span>{freeMinutesRemaining} free min</span>
+                </div>
+              )}
               <button
                 className={styles.closeBtn}
                 onClick={handleClose}
@@ -219,6 +248,17 @@ const PanditAIBubble = () => {
           </div>
 
           <div className={styles.inputBar}>
+            {(showRechargeBanner || sessionEndedLowBalance) && (
+              <button
+                className={styles.rechargeNowBtn}
+                onClick={() => navigate("/recharge")}
+                type="button"
+              >
+                <IoWallet size={16} />
+                <span>Recharge Now</span>
+              </button>
+            )}
+            {!sessionEndedLowBalance && !(showRechargeBanner && freeMinutesRemaining === 0) && (
             <div className={styles.inputWrapper}>
               <input
                 ref={inputRef}
@@ -252,6 +292,7 @@ const PanditAIBubble = () => {
                 <IoSend size={18} />
               </button>
             </div>
+            )}
           </div>
         </div>
         </>
