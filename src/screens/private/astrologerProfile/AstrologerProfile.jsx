@@ -80,7 +80,7 @@ const AstrologerProfile = () => {
 
   const handleJoinLive = () => {
     if (liveRoomId) {
-      navigate(`/live/${liveRoomId}`);
+      navigate(`/live/${liveRoomId}`, { state: { from: `/astrologer/${id}` } });
     }
   };
 

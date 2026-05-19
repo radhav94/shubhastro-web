@@ -81,7 +81,7 @@ const AgeCalc = () => {
 
       <DateWithSingleInputForm
         title="Calculate your Age here"
-        submitText="Calculate my Age"
+        submitText="Show Results"
         inputLabel="Age As Of Date"
         inputPlaceholder=""
         inputName="asOf"

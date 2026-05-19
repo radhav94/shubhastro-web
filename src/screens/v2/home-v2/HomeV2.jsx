@@ -380,7 +380,7 @@ const HomeV2 = () => {
             {/* Hero part */}
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
-                <p className={styles.greeting}>Hello, {name}! 👋</p>
+                <p className={styles.greeting} key={`greeting-${name}`}>Hello, {name}! 👋</p>
                 <h1>
                   {aiPoweredSection?.title
                     ? <>{aiPoweredSection.title.replace(" AI", "")} <span className={styles.ai}>AI</span></>
@@ -414,7 +414,7 @@ const HomeV2 = () => {
                     </svg>
                   </div>
                 </div>
-                <button className={styles.wowViewMore} onClick={() => navigate('/aiwow')}>View All &rsaquo;</button>
+                <button className={styles.wowViewMore} onClick={() => navigate('/ai-wow')}>View More &rsaquo;</button>
               </div>
 
               {/* All sections from API — continuous grid */}

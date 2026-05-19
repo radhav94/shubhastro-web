@@ -50,6 +50,7 @@ const OrderHistoryTab = () => {
 
   const sortRef = useRef(null);
   const filterRef = useRef(null);
+  const wrapperRef = useRef(null);
 
   const [getMallOrderInvoice] = useGetMallOrderInvoiceMutation();
   const [invoiceLoadingId, setInvoiceLoadingId] = useState(null);
@@ -127,7 +128,7 @@ const OrderHistoryTab = () => {
   }
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} ref={wrapperRef}>
       <div className={styles.topBar}>
         <span className={styles.orderCount}>{totalOrders} Orders</span>
         <div className={styles.actions}>
@@ -301,37 +302,41 @@ const OrderHistoryTab = () => {
               >
                 {/* ── Card Header ── */}
                 <div className={styles.cardHeader}>
-                  <div className={styles.headerLeft}>
-                    <span className={styles.orderBagIcon}><ShoppingBag size={16} /></span>
-                    <div>
-                      <span className={styles.orderNumber}>ORD-{orderNumber}</span>
-                      {formattedDate && <p className={styles.orderDate}>Placed on {formattedDate}</p>}
+                  <div className={styles.headerTopRow}>
+                    <div className={styles.headerLeft}>
+                      <span className={styles.orderBagIcon}><ShoppingBag size={16} /></span>
+                      <div>
+                        <span className={styles.orderNumber}>ORD-{orderNumber}</span>
+                        {formattedDate && <p className={styles.orderDate}>Placed on {formattedDate}</p>}
+                      </div>
                     </div>
-                  </div>
-                  <button
-                    className={`${styles.downloadInvoiceBtn} ${invoiceLoadingId === orderId ? styles.downloadLoading : ""}`}
-                    disabled={invoiceLoadingId === orderId}
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      setInvoiceLoadingId(orderId);
-                      try {
-                        const data = await getMallOrderInvoice(orderId).unwrap();
-                        const pdfUrl = data?.data || data?.pdfUrl || data?.url;
-                        if (pdfUrl) {
-                          openInvoice(pdfUrl);
-                        } else {
-                          Toast.error("Invoice not available");
+                  {orderStatus.toLowerCase() === "delivered" && (
+                    <button
+                      className={`${styles.downloadInvoiceBtn} ${invoiceLoadingId === orderId ? styles.downloadLoading : ""}`}
+                      disabled={invoiceLoadingId === orderId}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        setInvoiceLoadingId(orderId);
+                        try {
+                          const data = await getMallOrderInvoice(orderId).unwrap();
+                          const pdfUrl = data?.data || data?.pdfUrl || data?.url;
+                          if (pdfUrl) {
+                            openInvoice(pdfUrl);
+                          } else {
+                            Toast.error("Invoice not available");
+                          }
+                        } catch (err) {
+                          Toast.error("Invoice not available for this order");
+                        } finally {
+                          setInvoiceLoadingId(null);
                         }
-                      } catch (err) {
-                        Toast.error("Invoice not available for this order");
-                      } finally {
-                        setInvoiceLoadingId(null);
-                      }
-                    }}
-                  >
-                    <FileText size={16} />
-                    {invoiceLoadingId === orderId ? "Loading..." : "Download Invoice"}
-                  </button>
+                      }}
+                    >
+                      <FileText size={14} />
+                      {invoiceLoadingId === orderId ? "Loading..." : "Download Invoice"}
+                    </button>
+                    )}
+                  </div>
                   <div className={styles.headerRight}>
                     <span className={`${styles.statusChip} ${styles[`status_${orderStatus}`]}`}>
                       {orderStatus.charAt(0).toUpperCase() + orderStatus.slice(1)} {(orderStatus === "confirmed" || orderStatus === "completed") && <CheckCircle size={11} />}
@@ -403,7 +408,7 @@ const OrderHistoryTab = () => {
         <div className={styles.pagination}>
           <button
             disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
+            onClick={() => { setPage((p) => p - 1); wrapperRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}
             className={styles.pageBtn}
           >
             Previous
@@ -413,7 +418,7 @@ const OrderHistoryTab = () => {
           </span>
           <button
             disabled={page >= pagination.pages}
-            onClick={() => setPage((p) => p + 1)}
+            onClick={() => { setPage((p) => p + 1); wrapperRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}
             className={styles.pageBtn}
           >
             Next

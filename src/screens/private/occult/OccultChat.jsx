@@ -100,7 +100,7 @@ const OccultChat = () => {
             <span className={styles.heroTitleItalic}>Reveal Hidden Energies in Your Life</span>
           </h1>
           <p className={styles.heroBadge}>
-            <span className={styles.heroBadgeIcon}>🔮</span>
+            {/* <span className={styles.heroBadgeIcon}>🔮</span> */}
             Trusted Spiritual Guidance at ShubhAstro.ai
           </p>
           <p className={styles.heroDesc}>
@@ -139,7 +139,7 @@ const OccultChat = () => {
             <span className={styles.changeBtn}>Change</span>
           </div>
         ) : (
-          <button className={styles.selectBtn} onClick={() => setShowProfileManager(true)}>
+          <button className={styles.selectBtn} onClick={() => { if (!token) { requireAuth(); return; } setShowProfileManager(true); }}>
             + Select Kundli Profile
           </button>
         )}

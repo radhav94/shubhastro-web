@@ -201,6 +201,7 @@ const MallOrderDetail = () => {
             <span>₹{total.toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</span>
           </div>
 
+          {status.toLowerCase() === "delivered" && (
           <button className={styles.downloadBtn} disabled={invoiceLoading} onClick={async () => {
             setInvoiceLoading(true);
             try {
@@ -217,6 +218,7 @@ const MallOrderDetail = () => {
           }}>
             <Download size={16} /> {invoiceLoading ? "Loading..." : "Download Invoice"}
           </button>
+          )}
         </section>
       </div>
 

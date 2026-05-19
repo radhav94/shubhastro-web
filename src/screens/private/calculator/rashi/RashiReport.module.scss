@@ -1,184 +1,211 @@
 .wrapper {
-  max-width: 1000px;
-  margin: 0 auto 40px;
-  padding: 20px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-  background: linear-gradient(135deg, #fff9f0 0%, #ffe4c4 100%);
-  border-radius: 10px;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 16px;
 }
 
 .title {
-  text-align: center;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 28px;
-  background: linear-gradient(90deg, #f75801, #d43400);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  text-align: center;
+  margin-bottom: 6px;
+  color: #1a1a1a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
+.headingUnderline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.dividerLine {
+  line-height: 0;
+}
+
+.dividerMoon {
+  flex-shrink: 0;
+  line-height: 0;
+  color: #030303;
+}
+
+/* Rashi Card */
 .rashiCard {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
   border-radius: 12px;
-  padding: 24px;
+  padding: 20px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-  position: relative;
-}
-
-.rashiCard::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  border-radius: 12px 12px 0 0;
-  background: linear-gradient(90deg, #f75801, #d43400);
+  margin-bottom: 12px;
 }
 
 .label {
-  font-size: 12px;
-  letter-spacing: 1px;
-  color: #6b7280;
-  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
 }
 
 .rashiName {
   font-size: 22px;
   font-weight: 700;
-  color: #d43400;
-  margin-top: 6px;
+  color: #1a1a1a;
+  margin-top: 4px;
 }
 
-.detailsCard {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+.rashiIcon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  opacity: 0.7;
+}
+
+/* Calculate Again */
+.calcAgainWrap {
+  text-align: right;
   margin-bottom: 24px;
-  position: relative;
 }
 
-.detailsCard::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  border-radius: 12px 12px 0 0;
-  background: linear-gradient(90deg, #f75801, #d43400);
-}
-
-.detailsCard h4 {
-  font-size: 16px;
+.calcAgainBtn {
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 14px;
   font-weight: 600;
-  color: #111827;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px 0;
+
+  &:hover {
+    opacity: 0.8;
+  }
 }
 
+/* Accordion Shared */
+.accordionBox {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.accordionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+
+  span:first-child {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+}
+
+.ttsWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chevron {
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.accordionBody {
+  display: none;
+  padding: 0 20px 16px;
+
+  p {
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.7;
+    margin: 0 0 8px;
+  }
+}
+
+.accordionBodyOpen {
+  display: block;
+}
+
+/* Personal Details Grid */
 .detailsGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
-  margin: 16px 0 0;
 
   span {
     font-size: 13px;
     color: #6b7280;
+    display: block;
+    margin-bottom: 2px;
   }
 
   p {
-    font-weight: 600;
-    color: #d43400;
-  }
-}
-
-.aboutBox {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-  margin-bottom: 32px;
-  position: relative;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 5px;
-    border-radius: 12px 12px 0 0;
-    background: linear-gradient(90deg, #f75801, #d43400);
-  }
-
-  h4 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: #111827;
-  }
-
-  p {
-    line-height: 1.6;
-    color: #374151;
     font-size: 14px;
-    margin-bottom: 10px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
   }
 }
 
 .botText {
   font-weight: 600;
-}
-
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-}
-
-
-
-.backBtn {
-  background: linear-gradient(135deg, #f75801, #d43400);
-  color: #fff;
-  padding: 14px 40px;
-  border-radius: 26px;
-  border: none;
-  font-size: 15px;
-  cursor: pointer;
+  color: #1a1a1a !important;
 }
 
 @media (max-width: 640px) {
   .wrapper {
-    padding: 14px;
-    margin: 0 auto 20px;
+    padding: 0 12px;
   }
 
   .title {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .rashiCard {
-    padding: 20px 16px;
+    padding: 16px;
+  }
+
+  .rashiName {
+    font-size: 20px;
+  }
+
+  .rashiIcon {
+    width: 40px;
+    height: 40px;
   }
 
   .detailsGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .aboutBox {
-    padding: 18px;
+  .accordionHeader {
+    padding: 14px 16px;
   }
 
-  .shareBtn,
-  .backBtn {
-    width: 100%;
-    text-align: center;
+  .accordionBody {
+    padding: 0 16px 14px;
   }
 }

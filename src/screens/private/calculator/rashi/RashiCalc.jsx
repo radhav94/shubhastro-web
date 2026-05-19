@@ -91,7 +91,7 @@ const RashiCalc = () => {
 
       <AstroBirthForm
         title="Rashi Calculator"
-        submitText="Calculate my Rashi"
+        submitText="Show Results"
         formData={formData}
         errors={errors}
         onChange={handleChange}

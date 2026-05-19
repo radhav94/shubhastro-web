@@ -6,7 +6,7 @@ import PalmMountIcon from '../../../../assets/icons/palmmount.png';
 import CakeIcon from '../../../../assets/icons/Cake.png';
 import LoveIcon from '../../../../assets/icons/loveIcon.png';
 import Footer from '../../../../layouts/Footer';
-import TTSButton from '../../../../component/UI/TTSButton';
+
 
 const PalmistryLanding = () => {
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ const PalmistryLanding = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
+          <button className={styles.backButton} onClick={() => navigate('/ai-wow')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -64,10 +64,7 @@ const PalmistryLanding = () => {
 
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
-            <div key={index} className={styles.featureCard} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
-                <TTSButton text={`${[feature?.title, feature.description].filter(Boolean).join('. ')}`} />
-              </span>
+            <div key={index} className={styles.featureCard}>
               <div className={styles.iconWrapper}>
                 <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
               </div>

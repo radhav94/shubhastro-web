@@ -91,7 +91,7 @@ const DashaCalc = () => {
 
       <AstroBirthForm
         title="Calculate Your Dasha here"
-        submitText="Calculate my Dasha"
+        submitText="Show Results"
         formData={formData}
         errors={errors}
         onChange={handleChange}

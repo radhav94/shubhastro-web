@@ -252,7 +252,7 @@ const TopHeader = () => {
               Astrologers
             </NavLink>
             <NavLink
-              to="/aiwow"
+              to="/ai-wow"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -350,6 +350,7 @@ const TopHeader = () => {
                   className={styles.profileWrapName}
                   onClick={() => setKundliModalOpen(true)}
                   style={{ cursor: "pointer" }}
+                  key={`profile-name-${selectedKundli?._id || 'default'}`}
                 >
                   <span className={styles.languageNamee}>
                     {selectedKundli?.name?.split(" ")[0] || displayName}
@@ -397,7 +398,7 @@ const TopHeader = () => {
               Astrologers
             </NavLink> */}
             {/* <NavLink
-              to="/aiwow"
+              to="/ai-wow"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -523,7 +524,7 @@ const TopHeader = () => {
               Astrologers
             </NavLink>
             <NavLink
-              to="/aiwow"
+              to="/ai-wow"
               onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`

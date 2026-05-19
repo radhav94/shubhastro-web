@@ -75,6 +75,50 @@
   color: #d32f2f;
 }
 
+.selectProfileBtn {
+  display: block;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 14px;
+  text-align: right;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.selectProfileBtnMobile {
+  display: none;
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 8px;
+  text-align: right;
+  margin-left: auto;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+}
+
 .error {
   margin-top: 4px;
   font-size: 12px;
@@ -88,35 +132,29 @@
   align-items: center;
   justify-content: center;
   padding-top: 10px;
-}
+  flex-direction: column;
+  gap: 6px;
 
-.resetRow {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 8px;
-}
-
-.resetTopBtn {
-  padding: 6px 18px;
-  border-radius: 20px;
-  border: 1.5px solid #f75801;
-  background: transparent;
-  color: #f75801;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-
-  &:hover {
-    background: linear-gradient(90deg, #f75801, #d43400);
-    color: #fff;
+  &::before,
+  &::after {
+    content: "";
+    display: block;
+    width: 2px;
+    height: 70px;
+    border-radius: 30px;
+    background: #bdbdbd;
   }
+}
+
+.mobileDivider {
+  display: none;
 }
 
 .btnRow {
   display: flex;
-  gap: 24px;
+  gap: 12px;
   justify-content: center;
+  align-items: center;
   margin-top: 24px;
 }
 
@@ -131,10 +169,27 @@
   cursor: pointer;
   transition: opacity 0.2s;
   white-space: nowrap;
-  min-width: 200px;
 
   &:hover {
     opacity: 0.92;
+  }
+}
+
+.resetBtn {
+  padding: 13px 40px;
+  border-radius: 28px;
+  border: 1.5px solid #f75801;
+  background: #fff;
+  color: #333;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    background: linear-gradient(90deg, #f75801, #d43400);
+    color: #fff;
   }
 }
 
@@ -152,6 +207,22 @@
   .heart {
     justify-content: center;
     padding: 4px 0 8px;
+    flex-direction: row;
+
+    &::before,
+    &::after {
+      display: block;
+      width: 40%;
+      height: 1px;
+    }
+  }
+
+  .mobileDivider {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #bdbdbd, transparent);
+    margin: 4px 0 12px;
   }
 
   .btnRow {
@@ -162,6 +233,12 @@
     padding: 11px 20px;
     font-size: 14px;
     min-width: unset;
+    flex: 1;
+  }
+
+  .resetBtn {
+    padding: 11px 20px;
+    font-size: 14px;
     flex: 1;
   }
 }

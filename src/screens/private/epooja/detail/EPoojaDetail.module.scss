@@ -984,6 +984,22 @@
   &:hover { color: #f75801; background: #fff5f0; }
 }
 
+.addrActionBtn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  color: #bbb;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  &:hover { color: #f75801; background: #fff5f0; }
+}
+
 .reviewFormStars {
   text-align: left;
   margin-bottom: 20px;

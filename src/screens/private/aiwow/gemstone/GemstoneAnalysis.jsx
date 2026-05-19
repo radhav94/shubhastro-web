@@ -16,7 +16,7 @@ const GemstoneAnalysis = () => {
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
     required: true,
     showToast: true,
-    redirectPath: PATH.privateRoutes.AI_WOW?.path || '/aiwow',
+    redirectPath: PATH.privateRoutes.AI_WOW?.path || '/ai-wow',
   });
 
   const [progress, setProgress] = useState(0);
