@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { FiX, FiEdit2, FiTrash2, FiUser } from "react-icons/fi";
-import { Plus } from "lucide-react";
 import {
   useGetAddressesQuery,
   useAddAddressMutation,
@@ -142,9 +141,8 @@ const AddressesTab = () => {
         })}
       </div>
 
-      <button className={styles.addBtn} onClick={() => { setEditingAddress(null); setNewAddr(EMPTY_ADDR); setAddrErrors({}); setShowNewAddress(true); }}>
-        <Plus size={16} className={styles.addBtnIcon} /> <span>Add New Address</span>
-      </button>
+
+
 
       {/* ── Add / Edit Address Modal (same as ShubhMall product page) ── */}
       {showNewAddress && (

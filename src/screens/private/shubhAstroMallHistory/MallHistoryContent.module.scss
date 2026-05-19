@@ -4,24 +4,24 @@
 
 .subTabs {
   display: flex;
-  border-bottom: 1px solid #eee;
-  background: #fff;
+  position: relative;
 }
 
 .subTab {
   flex: 1;
   padding: 12px 0;
-  font-size: 13px;
-  font-weight: 500;
-  color: #888;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
   background: none;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-bottom: 1.5px solid #ddd;
   cursor: pointer;
   transition: all 0.2s;
+  text-align: center;
 
   &.active {
-    color: #1a1a1a;
+    color: #F75801;
     border-bottom-color: #F75801;
     font-weight: 600;
   }
