@@ -171,7 +171,13 @@ const Footer = () => {
           <p className={styles.v2_contactText}>Have questions?</p>
           <a href="mailto:support@shubhtalk.ai" className={styles.v2_emailLink}>support@shubhtalk.ai</a>
           <p className={styles.v2_contactText}>Or call us at</p>
-          <a href="tel:+911234567890" className={styles.v2_phoneLink}>+91 12345 67890</a>
+          <a href="tel:+911234567890" className={styles.v2_contactText}>+91 12345 67890</a>
+          <h4 className={`${styles.v2_phoneLink}`}>Registered Company Address</h4>
+          <p className={styles.v2_contactText}>
+            9th Floor, Vaibhav Chambers, Opp Income Tax Office Bandra - Kurla Complex, Bandra (East), Mumbai, Maharashtra, India, 400051
+          </p>
+          <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
+          <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
           <h4 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h4>
           {storeButtons}
         </div>
@@ -201,7 +207,13 @@ const Footer = () => {
           <p className={styles.v2_contactText}>Have questions?</p>
           <a href="mailto:support@shubhtalk.ai" className={styles.v2_emailLink}>support@shubhtalk.ai</a>
           <p className={styles.v2_contactText}>Or call us at</p>
-          <a href="tel:+911234567890" className={styles.v2_phoneLink}>+91 12345 67890</a>
+          <a href="tel:+911234567890" className={styles.v2_contactText}>+91 12345 67890</a>
+          <h4 className={`${styles.v2_phoneLink} `}>Registered Company Address</h4>
+          <p className={styles.v2_contactText}>
+            9th Floor, Vaibhav Chambers, Opp Income Tax Office Bandra - Kurla Complex, Bandra (East), Mumbai, Maharashtra, India, 400051
+          </p>
+          <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
+          <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
           <h4 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h4>
           {storeButtons}
         </div>
