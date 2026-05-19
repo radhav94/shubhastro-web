@@ -597,7 +597,7 @@ export const PATH = {
 
     // AI WOW
     AI_WOW: {
-      path: "/aiwow",
+      path: "/ai-wow",
       element: AIWow,
       header: false,
       footer: false,
