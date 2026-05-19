@@ -344,7 +344,7 @@ export const PATH = {
         element: HoroscopeNew,
       },
       TOMORROW_NEW: {
-        path: ["/horoscope/tomorrow-horoscope-new/:sign", "/horoscope/tomorrow-horoscope-new"],
+        path: ["/tomorrow-horoscope/:sign", "/tomorrow-horoscope"],
         element: HoroscopeNew,
       },
       TODAY_NEW: {
@@ -364,7 +364,7 @@ export const PATH = {
         element: Yesterday,
       },
       TOMORROW: {
-        path: "/horoscope/tomorrow-horoscope/:sign",
+        path: "/tomorrow-horoscope/:sign",
         element: Tomorrow,
       },
     },
