@@ -1,19 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./FlamesCalc.module.scss";
+import { ProfileManager } from "../../../../component/UI/Profile";
+import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 
 const STORAGE_KEY = "flames_calculator";
 const initialFormState = { name1: "", name2: "" };
 
 const FlamesCalc = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(STORAGE_KEY, initialFormState);
   const [errors, setErrors] = useState({});
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileTarget, setProfileTarget] = useState(null);
+  const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
+
+  useEffect(() => {
+    if (selectedKundli) {
+      handleChange("name1", selectedKundli.name || "");
+    }
+  }, [selectedKundli]);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const handleSelectProfileClick = (target) => {
+    setProfileTarget(target);
+    setShowProfileModal(true);
+  };
+
+  const handleProfileSelect = (profile) => {
+    if (!profile) return;
+    if (profileTarget === "person1") {
+      handleChange("name1", profile.name || "");
+      dispatch(setSelectedKundli(profile));
+    } else if (profileTarget === "person2") {
+      handleChange("name2", profile.name || "");
+    }
+    setShowProfileModal(false);
   };
 
   const onReset = () => {
@@ -59,16 +88,30 @@ const FlamesCalc = () => {
           <label>Your Name <span>*</span></label>
           <input placeholder="Enter your name" value={formData.name1} onChange={(e) => handleChange("name1", e.target.value)} />
           {errors.name1 && <p className={styles.err}>{errors.name1}</p>}
+          <button type="button" className={styles.selectProfileBtn} onClick={() => handleSelectProfileClick("person1")}>
+            Select Profile +
+          </button>
         </div>
 
         <div className={styles.field}>
           <label>Partner's Name <span>*</span></label>
           <input placeholder="Enter partner's name" value={formData.name2} onChange={(e) => handleChange("name2", e.target.value)} />
           {errors.name2 && <p className={styles.err}>{errors.name2}</p>}
+          <button type="button" className={styles.selectProfileBtn} onClick={() => handleSelectProfileClick("person2")}>
+            Select Profile +
+          </button>
         </div>
 
         <button type="submit" className={styles.submitBtn}>Check FLAMES</button>
       </form>
+
+      <ProfileManager
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        onProfileSelect={handleProfileSelect}
+        title="Select Profile"
+        enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+      />
     </div>
   );
 };

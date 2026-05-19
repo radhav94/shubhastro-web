@@ -122,7 +122,7 @@ const ServiceCards = () => {
                 />
 
                 <PrimaryText className={styles.title}>
-                  {service.title}ssss
+                  {service.title}
                 </PrimaryText>
 
                 <PrimaryText className={styles.description}>

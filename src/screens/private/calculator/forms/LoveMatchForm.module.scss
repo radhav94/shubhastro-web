@@ -75,6 +75,50 @@
   color: #d32f2f;
 }
 
+.selectProfileBtn {
+  display: block;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 14px;
+  text-align: right;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.selectProfileBtnMobile {
+  display: none;
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 8px;
+  text-align: right;
+  margin-left: auto;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+}
+
 .error {
   margin-top: 4px;
   font-size: 12px;
@@ -88,6 +132,22 @@
   align-items: center;
   justify-content: center;
   padding-top: 10px;
+  flex-direction: column;
+  gap: 6px;
+
+  &::before,
+  &::after {
+    content: "";
+    display: block;
+    width: 2px;
+    height: 70px;
+    border-radius: 30px;
+    background: #bdbdbd;
+  }
+}
+
+.mobileDivider {
+  display: none;
 }
 
 .resetRow {
@@ -152,6 +212,22 @@
   .heart {
     justify-content: center;
     padding: 4px 0 8px;
+    flex-direction: row;
+
+    &::before,
+    &::after {
+      display: block;
+      width: 40%;
+      height: 1px;
+    }
+  }
+
+  .mobileDivider {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #bdbdbd, transparent);
+    margin: 4px 0 12px;
   }
 
   .btnRow {
