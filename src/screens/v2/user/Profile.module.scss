@@ -750,7 +750,7 @@
 }
 
 .filterModal {
-    background-color: #fff;
+    background: linear-gradient(90deg, rgba(254, 254, 254, 1) 0%, rgba(255, 248, 236, 1));
     border-radius: 12px;
     width: 100%;
     max-width: 560px;
@@ -871,7 +871,7 @@
     justify-content: space-between;
     margin-bottom: 0.75rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #fff;
+    border-bottom: 1px solid #e6e7eb;
 
     span {
         font-size: 13px;
@@ -920,7 +920,7 @@
     gap: 0.75rem;
     padding: 0.75rem 0;
     cursor: pointer;
-    border-bottom: 1px solid #fff;
+    border-bottom: 1px solid #e6e7eb;
     user-select: none;
 
     &:last-child {
@@ -970,7 +970,7 @@
 
 .filterResetBtn {
     padding: 0.625rem 1.5rem;
-    border: 1.5px solid #fff;
+    border: 1.5px solid #e6e7eb;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
@@ -1284,15 +1284,15 @@
     background: #fafafa;
   }
 
-  &:last-child {
-    border-bottom: none;
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
-  }
-  &:first-child {
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
-  }
+  // &:last-child {
+  //   border-bottom: none;
+  //   border-bottom-left-radius: 0px;
+  //   border-bottom-right-radius: 0px;
+  // }
+  // &:first-child {
+  //   border-top-left-radius: 0px;
+  //   border-top-right-radius: 0px;
+  // }
 
   @media (max-width: 640px) {
     grid-template-columns: 1fr auto;
@@ -1398,8 +1398,8 @@
   gap: 0.375rem;
   padding: 0.5rem 1rem;
   background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border: 1px solid #F75801;
+  border-radius: 50px;
   font-size: 0.8125rem;
   font-weight: 500;
   color: #374151;
@@ -1499,12 +1499,17 @@
 
 // Transaction List
 .transactionList {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
   flex-direction: column;
   gap: 1rem;
   max-height: 500px;
   overflow-y: auto;
-  padding-right: 0.5rem;
+  margin-top: 1rem;
+  // padding-right: 0.5rem;
+  // @media (width <= 767px) {
+  //   grid-template-columns: repeat(1, 1fr);
+  // }
 
   &::-webkit-scrollbar {
     width: 6px;

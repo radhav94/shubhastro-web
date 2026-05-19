@@ -7,7 +7,9 @@
     }
 
   .leftSide {
-    background: #fff;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid #fff;
     border-radius: 14px;
     display: flex;
     flex-direction: column;
@@ -40,11 +42,14 @@
     /* ⭐ Responsive Grid */
     .rechargeFlex {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 16px;
       justify-items: start;
       width: 100%;
       padding: 10px 0;
+      @media (width <= 767px) {
+        gap: 8px;
+      }
     }
 
     .linkWrapper {

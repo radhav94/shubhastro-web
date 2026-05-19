@@ -18,7 +18,7 @@
 
 .onboardingContainer {
   min-height: auto;
-  background: #f5f5f5;
+  // background: rgba(255, 255, 255, 0.4);
   position: relative;
   margin: 0 auto;
   max-width: 900px;
@@ -27,7 +27,7 @@
   // padding-top: 67px; // Space for fixed header
   @media (width <= 767px) {
      padding:0px;
-     background: #fff;
+    //  background: #fff;
      max-width: 100%;
      width: 100%;
   }
@@ -47,7 +47,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 9999;
+  z-index: 0303039;
 }
 
 .loadingContent {
@@ -142,7 +142,7 @@
 
 .loadingSubtitle {
   font-size: 16px;
-  color: #999;
+  color: #030303;
   line-height: 1.5;
 }
 
@@ -245,7 +245,7 @@
 
 .welcomeSubtitle {
   font-size: 16px;
-  color: #666;
+  color: #030303;
   margin-bottom: 32px;
   line-height: 1.5;
   max-width: 350px;
@@ -394,7 +394,7 @@
 
 .subtitle {
   font-size: 16px;
-  color: #999;
+  color: #030303;
   margin-bottom: 16px;
   line-height: 1.5;
 }
@@ -465,7 +465,7 @@
 .otpprimaryBtnPer{
   margin: 20px auto 20px auto;
   @media (width <= 767px) {
-    position: fixed;
+    // position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
@@ -544,7 +544,9 @@
   // min-height: calc(100vh - 32px);
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 12px;
 }
 
@@ -596,7 +598,7 @@
 .input {
   width: 100%;
   padding: 16px 48px 16px 16px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #ddd;
   border-radius: 12px;
   font-size: 16px;
   color: #2c2c2c;
@@ -613,7 +615,7 @@
 
   &:disabled {
     background: #f5f5f5;
-    color: #999;
+    color: #030303;
   }
 
   // Adjust date input calendar icon position
@@ -650,7 +652,7 @@
   right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #999;
+  color: #030303;
   pointer-events: none;
 }
 
@@ -663,7 +665,7 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: #666;
+  color: #030303;
   cursor: pointer;
   width: fit-content;
 
@@ -779,7 +781,7 @@
 
 .resendText {
   font-size: 14px;
-  color: #999;
+  color: #030303;
 }
 
 .resendBtn {
@@ -830,7 +832,7 @@
 
 .loginBackground .backgroundImage {
   width: 100%;
-  height: 100%;
+  height: 100vh;
   object-fit: cover;
   object-position: top;
 }
@@ -841,7 +843,9 @@
   display: flex;
   flex-direction: column;
   padding: 22px 16px 16px 16px;
-  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 32px 32px 0 0;
   min-height: auto;
   z-index: 1;
@@ -856,7 +860,7 @@
 
 .loginSubtitle {
   font-size: 14px;
-  color: #999;
+  color: #030303;
   margin-bottom: 32px;
   line-height: 1.5;
 }
@@ -872,7 +876,7 @@
   align-items: center;
   gap: 6px;
   padding: 10px 12px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #BBBBBB;
   border-radius: 12px;
   background: white;
   cursor: pointer;
@@ -893,7 +897,7 @@
 
   .dropdownIcon {
     font-size: 10px;
-    color: #999;
+    color: #030303;
     margin-left: auto;
   }
 }
@@ -902,7 +906,7 @@
   width: 100%;
   padding: 16px;
   font-size: 16px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #BBBBBB;
   border-radius: 12px;
   color: #2c2c2c;
   outline: none;
@@ -942,7 +946,7 @@
   span {
     background: white;
     padding: 0 16px;
-    color: #999;
+    color: #030303;
     font-size: 14px;
   }
 }
@@ -994,7 +998,7 @@
 .terms {
   text-align: center;
   font-size: 12px;
-  color: #999;
+  color: #565656;
   margin-top: auto;
   padding-top: 16px;
   line-height: 1.5;
@@ -1071,8 +1075,8 @@
         height: 100%;
         object-fit: cover;
         object-position: center;
-        filter: blur(8px) brightness(0.7);
-        transform: scale(1.1);
+        // filter: blur(8px) brightness(0.7);
+        // transform: scale(1.1);
       }
     }
 
@@ -1105,7 +1109,7 @@
       font-size: 17px;
       margin-bottom: 36px;
       max-width: 100%;
-      color: #666;
+      color: #030303;
       line-height: 1.6;
     }
 
@@ -1192,10 +1196,10 @@
       backdrop-filter: blur(20px);
       border-radius: 28px;
       padding: 32px 24px 24px 24px;
-      box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.6),
-        0 0 0 1px rgba(255, 255, 255, 0.1),
-        0 0 100px rgba(139, 105, 20, 0.2);
+      // box-shadow:
+      //   0 20px 60px rgba(0, 0, 0, 0.6),
+      //   0 0 0 1px rgba(255, 255, 255, 0.1),
+      //   0 0 100px rgba(139, 105, 20, 0.2);
     }
 
     .loginTitle {
