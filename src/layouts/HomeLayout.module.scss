@@ -29,10 +29,11 @@ $mobile-screen-width: 500px;
   }
 .topLinkWrap{
     background-color: #ffffff31;
+    padding: 16px;
     .topLink{
-      padding: 16px;
       max-width: 1440px;
       margin: 0 auto;
+      padding-block: 3px;
       span{
         text-transform: uppercase;
       }
