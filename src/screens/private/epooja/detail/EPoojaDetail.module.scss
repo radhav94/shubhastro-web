@@ -19,7 +19,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #fff;
   margin-bottom: 24px;
 }
 
@@ -579,8 +579,9 @@
 }
 
 .reviewCard {
-  background: #fff;
-  border: 1px solid #ebebeb;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 10px;
   padding: 16px 18px;
 }
@@ -847,7 +848,8 @@
 }
 
 .modal {
-  background: #fff;
+  // background: #fff;
+  background: linear-gradient(90deg, rgba(254, 254, 254, 1) 0%, rgba(255, 248, 236, 1));
   border-radius: 16px;
   padding: 28px 28px 24px;
   width: 100%;

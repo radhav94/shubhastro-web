@@ -1,17 +1,20 @@
 .wrapper {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 0 16px 48px;
+  max-width: 1440px;
+  margin: 70px auto 40px auto;
+  padding: 16px;
+  // border: 1.5px solid #fff;
+  border-radius: 12px;
+  // background: rgba(255, 255, 255, 0.4);
 }
 
 .card {
   background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 2px solid white;
-  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
+  border-radius: 16px;
   padding: 32px 24px;
   text-align: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 
 .title {
@@ -53,7 +56,9 @@
 }
 
 .resultBox {
-  background: linear-gradient(135deg, #fff5ee 0%, #ffe8d6 100%);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 14px;
   padding: 28px 24px;
   margin-bottom: 24px;

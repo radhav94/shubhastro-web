@@ -361,10 +361,12 @@ const HomeV2 = () => {
             className={`${styles.qCardLaal}`}
             onClick={() => navigate('/laal-kitab')}
           >
-            <span className={styles.featureTag}>New</span>
-            <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title || "Laal Kitaab"}</h3>
-            <p>{aiServicesItems[0]?.description || aiServicesItems[0]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
-            <button className={styles.featureCta}>Explore Laal Kitaab &gt;</button>
+            <div className={styles.laalKitaabLeftCh}>
+              <span className={styles.featureTag}>New</span>
+              <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title || "Laal Kitaab"}</h3>
+              <p>{aiServicesItems[0]?.description || aiServicesItems[0]?.short_description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
+              <button className={styles.featureCta}>Explore Laal Kitaab &gt;</button>
+            </div>
             <img
               src={aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon || laalKitaabImg}
               alt="Laal Kitaab"

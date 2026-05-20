@@ -19,7 +19,7 @@
 
 .header p {
   font-size: 14px;
-  color: #6b7280;
+  color: #030303;
 }
 
 .headingUnderline {
@@ -51,9 +51,8 @@
 /* CARD */
 .card {
   background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 2px solid white;
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 12px;
   padding: 18px 20px;
   display: flex;
@@ -93,7 +92,7 @@
 
 .text {
   font-size: 13px;
-  color: #6b7280;
+  color: #030303;
   line-height: 1.5;
   display: -webkit-box;
   // -webkit-line-clamp: 2;
@@ -168,7 +167,7 @@
 .accordionBody p {
   padding: 0 20px 16px;
   font-size: 13px;
-  color: #6b7280;
+  color: #030303;
   line-height: 1.6;
 }
 

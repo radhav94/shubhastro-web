@@ -1,20 +1,25 @@
 .container {
   max-width: 960px;
-  margin: 0 auto;
-  padding: 24px 20px 60px;
-  background: #f5f5f5;
+  margin: 0px auto 20px auto;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   min-height: 100vh;
   color: #1a1a1a;
+  border-radius: 12px;
 
   @media (max-width: 600px) {
-    padding: 16px 12px 40px;
+    // padding: 16px 12px 40px;
+    background: none;
+    border: none;
   }
 }
 
 .emptyState {
   text-align: center;
   padding: 60px 20px;
-  color: #718096;
+  color: #030303;
   p { margin-bottom: 16px; }
 }
 
@@ -22,10 +27,12 @@
 .header {
   text-align: center;
   margin-bottom: 28px;
-  padding: 32px 16px 24px;
-  background: #fff;
+  padding: 0px 16px 16px 16px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  // box-shadow: 0 2px 12px rgba(0,0,0,0.06);
 
   @media (max-width: 600px) {
     padding: 24px 12px 20px;
@@ -73,7 +80,7 @@
 
 .headerSubtitle {
   font-size: 14px;
-  color: #718096;
+  color: #030303;
   font-style: italic;
   margin: 0;
 
@@ -84,8 +91,9 @@
 
 /* User Details */
 .detailsTable {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 20px;
@@ -95,7 +103,7 @@
 .detailRow {
   display: grid;
   grid-template-columns: 140px 1fr 140px 1fr;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #fff;
 
   &:last-child { border-bottom: none; }
 
@@ -111,7 +119,7 @@
   letter-spacing: 0.5px;
   color: #F75801;
   background: #fff9f5;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid #fff;
   display: flex;
   align-items: center;
 
@@ -125,7 +133,7 @@
   padding: 14px 16px;
   font-size: 14px;
   color: #1a1a1a;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid #fff;
   display: flex;
   align-items: center;
 
@@ -160,8 +168,9 @@
 
 /* Priority Remedy */
 .priorityBox {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-left: 4px solid #F75801;
   border-radius: 12px;
   padding: 20px 24px;
@@ -203,11 +212,11 @@
 .doshaSectionTitle {
   font-size: 13px;
   letter-spacing: 1.5px;
-  color: #718096;
+  color: #030303;
   text-align: center;
   margin: 0 0 24px;
   padding-bottom: 14px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #fff;
 
   @media (max-width: 600px) {
     font-size: 11px;
@@ -221,8 +230,10 @@
   border-radius: 12px;
   margin-bottom: 18px;
   overflow: hidden;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
+  // box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 
   @media (max-width: 600px) {
     margin-bottom: 14px;
@@ -319,7 +330,7 @@
 
 .doshaDesc {
   font-size: 14px;
-  color: #4a5568;
+  color: #030303;
   line-height: 1.6;
   margin: 0 0 14px;
   font-style: italic;
@@ -330,8 +341,9 @@
 }
 
 .remedyBox {
-  background: #fff9f5;
-  border: 1px solid #fed7aa;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 8px;
   padding: 16px 18px;
 
@@ -368,20 +380,22 @@
 .summaryTitle {
   font-size: 13px;
   letter-spacing: 1.5px;
-  color: #718096;
+  color: #030303;
   text-align: center;
   margin: 0 0 16px;
   padding-bottom: 14px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #fff;
 }
 
 .summaryGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border: 1px solid #e2e8f0;
+  // border: 1px solid #fff;
   border-radius: 12px;
   overflow: hidden;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 
   @media (max-width: 400px) {
@@ -391,8 +405,8 @@
 
 .summaryCell {
   padding: 16px 18px;
-  border-bottom: 1px solid #e2e8f0;
-  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #fff;
+  border-right: 1px solid #fff;
 
   &:nth-child(2n) { border-right: none; }
   &:nth-last-child(-n+2) { border-bottom: none; }
@@ -428,13 +442,13 @@
 /* Disclaimer */
 .disclaimer {
   font-size: 12px;
-  color: #718096;
+  color: #030303;
   text-align: center;
   font-style: italic;
   line-height: 1.6;
   margin: 0 0 24px;
   padding-top: 24px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #fff;
 }
 
 /* Action Row */
