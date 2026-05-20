@@ -113,87 +113,87 @@ const HomeLayout = () => {
           <div className={styles.topLinkWrap}>
             <div className={styles.topLink}>
                 <span>Horoscope	: </span>
-                <a href="daily-horoscope" title="Daily Horoscope">Daily Horoscope</a> | 
-                <a href="weekly-horoscope" title="Weekly Horoscope">Weekly Horoscope</a> | 
-                <a href="monthly-horoscope" title="Monthly Horoscope">Monthly Horoscope</a> | 
-                <a href="yearly-horoscope" title="Yearly Horoscope">Yearly Horoscope</a> | 
-                <a href="chat-to-astrologer" title="Chat to Astrologer">Chat to Astrologer</a> | 
-                <a href="talk-to-astrologer" title="Talk to Astrologer">Talk to Astrologer</a> | 
+                <a href="daily-horoscope" title="Daily Horoscope"> Daily Horoscope</a> | 
+                <a href="weekly-horoscope" title="Weekly Horoscope"> Weekly Horoscope</a> | 
+                <a href="monthly-horoscope" title="Monthly Horoscope"> Monthly Horoscope</a> | 
+                <a href="yearly-horoscope" title="Yearly Horoscope"> Yearly Horoscope</a> | 
+                <a href="chat-to-astrologer" title="Chat to Astrologer"> Chat to Astrologer</a> | 
+                <a href="talk-to-astrologer" title="Talk to Astrologer"> Talk to Astrologer</a> | 
             </div>
             <div className={styles.topLink}>
                 <span>Shop our Products	: </span>
-                <a href="bracelets" title="Bracelets">Bracelets</a> | 
-                <a href="rudraksha" title="Rudraksha">Rudraksha</a> | 
-                <a href="murti" title="Murti">Murti</a> | 
-                <a href="gemstones" title="Gemstones">Gemstones</a> | 
-                <a href="yantra" title="Yantra">Yantra</a> | 
-                <a href="kavach" title="Kavach">Kavach</a> | 
+                <a href="bracelets" title="Bracelets"> Bracelets</a> | 
+                <a href="rudraksha" title="Rudraksha"> Rudraksha</a> | 
+                <a href="murti" title="Murti"> Murti</a> | 
+                <a href="gemstones" title="Gemstones"> Gemstones</a> | 
+                <a href="yantra" title="Yantra"> Yantra</a> | 
+                <a href="kavach" title="Kavach"> Kavach</a> | 
             </div>
             <div className={styles.topLink}>
                 <span>Company	: </span>
-                <a href="about-us" title="About Us">About Us</a> | 
-                <a href="contact-us" title="Contact Us">Contact Us</a> | 
-                <a href="faq" title="FAQ">FAQ</a> | 
-                <a href="refund-cancellation-policy" title="Refund and Cancellation Policy">Refund and Cancellation Policy</a> | 
-                <a href="terms-and-conditions" title="Terms and Conditions">Terms and Conditions</a> | 
-                <a href="privacy-policy" title="Privacy Policy">Privacy Policy</a> | 
-                <a href="disclaimer" title="Disclaimer">Disclaimer</a> | 
+                <a href="about-us" title="About Us"> About Us</a> | 
+                <a href="contact-us" title="Contact Us"> Contact Us</a> | 
+                <a href="faq" title="FAQ"> FAQ</a> | 
+                <a href="refund-cancellation-policy" title="Refund and Cancellation Policy"> Refund and Cancellation Policy</a> | 
+                <a href="terms-and-conditions" title="Terms and Conditions"> Terms and Conditions</a> | 
+                <a href="privacy-policy" title="Privacy Policy"> Privacy Policy</a> | 
+                <a href="disclaimer" title="Disclaimer"> Disclaimer</a> | 
             </div>
             <div className={styles.topLink}>
                 <span>Important Links	: </span>
-                <a href="shubh-muhurat-2026" title="Shubh Muhurat 2026">Shubh Muhurat 2026</a> | 
-                <a href="naam-karan-muhurat" title="NaamKaran Muhurat 2026">NaamKaran Muhurat 2026</a> | 
-                <a href="marriage-muhurat" title="Marriage Muhurat 2026">Marriage Muhurat 2026</a> | 
-                <a href="bhoomi-pujan-muhurat" title="Bhoomi Pujan Muhurat 2026">Bhoomi Pujan Muhurat 2026</a> | 
-                <a href="griha-pravesh-muhurat" title="Griha Pravesh Muhurat 2026">Griha Pravesh Muhurat 2026</a> | 
-                <a href="mundan-muhurat" title="Mundan Muhurat 2026">Mundan Muhurat 2026</a> | 
-                <a href="car-buying-muhurat" title="Car Buying Muhurat 2026">Car Buying Muhurat 2026</a> | 
-                <a href="bike-buying-muhurat" title="Bike Buying Muhurat 2026">Bike Buying Muhurat 2026</a> | 
-                <a href="gold-buying-muhurat" title="Gold Buying Muhurat 2026">Gold Buying Muhurat 2026</a> | 
+                <a href="shubh-muhurat-2026" title="Shubh Muhurat 2026"> Shubh Muhurat 2026</a> | 
+                <a href="naam-karan-muhurat" title="NaamKaran Muhurat 2026"> NaamKaran Muhurat 2026</a> | 
+                <a href="marriage-muhurat" title="Marriage Muhurat 2026"> Marriage Muhurat 2026</a> | 
+                <a href="bhoomi-pujan-muhurat" title="Bhoomi Pujan Muhurat 2026"> Bhoomi Pujan Muhurat 2026</a> | 
+                <a href="griha-pravesh-muhurat" title="Griha Pravesh Muhurat 2026"> Griha Pravesh Muhurat 2026</a> | 
+                <a href="mundan-muhurat" title="Mundan Muhurat 2026"> Mundan Muhurat 2026</a> | 
+                <a href="car-buying-muhurat" title="Car Buying Muhurat 2026"> Car Buying Muhurat 2026</a> | 
+                <a href="bike-buying-muhurat" title="Bike Buying Muhurat 2026"> Bike Buying Muhurat 2026</a> | 
+                <a href="gold-buying-muhurat" title="Gold Buying Muhurat 2026"> Gold Buying Muhurat 2026</a> | 
             </div>
             <div className={styles.topLink}>
                 <span>Important Links	: </span>
-                <a href="how-to-read-kundli" title="How to Read Kundli">How to Read Kundli</a> | 
-                <a href="astrology-mantras" title="Astrology Mantras">Astrology Mantras</a> | 
-                <a href="astrology-remedy-job-promotion" title="Astro Remedy for Job Promotion">Astro Remedy for Job Promotion</a> | 
-                <a href="astrology-remedy-conceive-child" title="Astro Remedy to Conceive a Child">Astro Remedy to Conceive a Child</a> | 
-                <a href="astrology-remedy-quick-marriage" title="Astro Remedy for Quick Marriage">Astro Remedy for Quick Marriage</a> | 
-                <a href="astro-remedy-to-get-new-job" title="Astro Remedy to Get New Job">Astro Remedy to Get New Job</a> | 
+                <a href="how-to-read-kundli" title="How to Read Kundli"> How to Read Kundli</a> | 
+                <a href="astrology-mantras" title="Astrology Mantras"> Astrology Mantras</a> | 
+                <a href="astrology-remedy-job-promotion" title="Astro Remedy for Job Promotion"> Astro Remedy for Job Promotion</a> | 
+                <a href="astrology-remedy-conceive-child" title="Astro Remedy to Conceive a Child"> Astro Remedy to Conceive a Child</a> | 
+                <a href="astrology-remedy-quick-marriage" title="Astro Remedy for Quick Marriage"> Astro Remedy for Quick Marriage</a> | 
+                <a href="astro-remedy-to-get-new-job" title="Astro Remedy to Get New Job"> Astro Remedy to Get New Job</a> | 
             </div>
             <div className={styles.topLink}>
                 <span>Important Links	: </span>
-                <a href="ar-vastu-scanner" title="AR Vastu Scanner">AR Vastu Scanner</a> | 
-                <a href="ai-palmistry-scanner" title="AI Palmistry Scanner">AI Palmistry Scanner</a> | 
-                <a href="astro-face-reading" title="Astro Face Reading">Astro Face Reading</a> | 
-                <a href="signature-analysis" title="Signature Analysis">Signature Analysis</a> | 
-                <a href="clothes-colour-analysis" title="Clothes Colour Analysis">Clothes Colour Analysis</a> | 
-                <a href="gemstone-authenticity" title="Gemstone Authenticity">Gemstone Authenticity</a> | 
-                <a href="aura-photography" title="Aura Photography">Aura Photography</a> | 
+                <a href="ar-vastu-scanner" title="AR Vastu Scanner"> AR Vastu Scanner</a> | 
+                <a href="ai-palmistry-scanner" title="AI Palmistry Scanner"> AI Palmistry Scanner</a> | 
+                <a href="astro-face-reading" title="Astro Face Reading"> Astro Face Reading</a> | 
+                <a href="signature-analysis" title="Signature Analysis"> Signature Analysis</a> | 
+                <a href="clothes-colour-analysis" title="Clothes Colour Analysis"> Clothes Colour Analysis</a> | 
+                <a href="gemstone-authenticity" title="Gemstone Authenticity"> Gemstone Authenticity</a> | 
+                <a href="aura-photography" title="Aura Photography"> Aura Photography</a> | 
             </div>
             <div className={styles.topLink}>
                 <span>Celebrity Horoscope	: </span>
-                <a href="https://www.shubhastro.ai/celebrity-horoscope/shahrukh-khan" title="Shah Rukh Khan Horoscope">Shah Rukh Khan Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-horoscope/amitabh-bachchan" title="Amitabh Bachchan Horoscope">Amitabh Bachchan Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-horoscope/aishwarya-rai" title="Aishwarya Rai Horoscope">Aishwarya Rai Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-horoscope/priyanka-chopra" title="Priyanka Chopra Horoscope">Priyanka Chopra Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-horoscope/salman-khan" title="Salman Khan Horoscope">Salman Khan Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-horoscope/aamir-khan" title="Aamir Khan Horoscope">Aamir Khan Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-horoscope/virat-kohli" title="Virat Kohli Horoscope">Virat Kohli Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-horoscope/ms-dhoni" title="MS Dhoni Horoscope">MS Dhoni Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-horoscope/narendra-modi" title="Narendra Modi Horoscope">Narendra Modi Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-horoscope/rahul-gandhi" title="Rahul Gandhi Horoscope">Rahul Gandhi Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-horoscope/shahrukh-khan" title="Shah Rukh Khan Horoscope"> Shah Rukh Khan Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-horoscope/amitabh-bachchan" title="Amitabh Bachchan Horoscope"> Amitabh Bachchan Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-horoscope/aishwarya-rai" title="Aishwarya Rai Horoscope"> Aishwarya Rai Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-horoscope/priyanka-chopra" title="Priyanka Chopra Horoscope"> Priyanka Chopra Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-horoscope/salman-khan" title="Salman Khan Horoscope"> Salman Khan Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-horoscope/aamir-khan" title="Aamir Khan Horoscope"> Aamir Khan Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-horoscope/virat-kohli" title="Virat Kohli Horoscope"> Virat Kohli Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-horoscope/ms-dhoni" title="MS Dhoni Horoscope"> MS Dhoni Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-horoscope/narendra-modi" title="Narendra Modi Horoscope"> Narendra Modi Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-horoscope/rahul-gandhi" title="Rahul Gandhi Horoscope"> Rahul Gandhi Horoscope</a> | 
             </div>
             <div className={styles.topLink}>
                 <span>Celebrity Couple Horoscope	: </span>
-                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/shahrukh-khan-and-Gauri-khan" title="Shah Rukh Khan & Gauri Khan Horoscope">Shah Rukh Khan & Gauri Khan Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/deepika-padukone-and-ranveer-singh" title="Deepika Padukone & Ranveer Singh Horoscope">Deepika Padukone & Ranveer Singh Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/ranvir-kapoor-and-alia-bhatt" title="Ranbir Kapoor & Alia Bhatt Horoscope">Ranbir Kapoor & Alia Bhatt Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/aishwarya-rai-and-abhishek-bachchan" title="Aishwarya Rai & Abhishek Bachan Horoscope">Aishwarya Rai & Abhishek Bachan Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/amitabh-bachchan-and-jaya-bachchan" title="Amitabh Bachchan & Jaya Bachchan Horoscope">Amitabh Bachchan & Jaya Bachchan Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/vicky-kaushal-and-katrina-kaif" title="Vicky Kaushal & Katrina Kaif Horoscope">Vicky Kaushal & Katrina Kaif Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/virat-kohli-and-anuska-sharma" title="Virat Kohli & Anushka Sharma Horoscope">Virat Kohli & Anushka Sharma Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/priyanka-chopra-and-nick-jonas" title="Priyanka Chopra & Nick Jonas Horoscope">Priyanka Chopra & Nick Jonas Horoscope</a> | 
-                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/saif-ali-khan-and-kareena-kapoor" title="Saif Ali Khan & Kareena Kapoor Khan Horoscope">Saif Ali Khan & Kareena Kapoor Khan Horoscope</a> |
+                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/shahrukh-khan-and-Gauri-khan" title="Shah Rukh Khan & Gauri Khan Horoscope"> Shah Rukh Khan & Gauri Khan Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/deepika-padukone-and-ranveer-singh" title="Deepika Padukone & Ranveer Singh Horoscope"> Deepika Padukone & Ranveer Singh Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/ranvir-kapoor-and-alia-bhatt" title="Ranbir Kapoor & Alia Bhatt Horoscope"> Ranbir Kapoor & Alia Bhatt Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/aishwarya-rai-and-abhishek-bachchan" title="Aishwarya Rai & Abhishek Bachan Horoscope"> Aishwarya Rai & Abhishek Bachan Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/amitabh-bachchan-and-jaya-bachchan" title="Amitabh Bachchan & Jaya Bachchan Horoscope"> Amitabh Bachchan & Jaya Bachchan Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/vicky-kaushal-and-katrina-kaif" title="Vicky Kaushal & Katrina Kaif Horoscope"> Vicky Kaushal & Katrina Kaif Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/virat-kohli-and-anuska-sharma" title="Virat Kohli & Anushka Sharma Horoscope"> Virat Kohli & Anushka Sharma Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/priyanka-chopra-and-nick-jonas" title="Priyanka Chopra & Nick Jonas Horoscope"> Priyanka Chopra & Nick Jonas Horoscope</a> | 
+                <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/saif-ali-khan-and-kareena-kapoor" title="Saif Ali Khan & Kareena Kapoor Khan Horoscope"> Saif Ali Khan & Kareena Kapoor Khan Horoscope</a> |
             </div>
             <div className={styles.topLink}>
                 <span>Important Links	: </span>
