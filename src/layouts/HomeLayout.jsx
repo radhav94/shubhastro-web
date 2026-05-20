@@ -113,7 +113,7 @@ const HomeLayout = () => {
           <div className={styles.topLinkWrap}>
             <div className={styles.topLink}>
                 <span>Important Links	: </span>
-                <a href="ai-love-astrologer" title="AI Love Astrologer">AI Love Astrologer</a> | 
+                <a href="ai-love-astrologer" title="AI Love Astrologer"> AI Love Astrologer</a> | 
                 <a href="ai-marriage-astrologer" title="AI Marriage Astrologer"> AI Marriage Astrologer</a> | 
                 <a href="ai-health-astrologer" title="AI Health Astrologer"> AI Health Astrologer</a> | 
                 <a href="ai-career-astrologer" title="AI Career Astrologer"> AI Career Astrologer</a> | 
