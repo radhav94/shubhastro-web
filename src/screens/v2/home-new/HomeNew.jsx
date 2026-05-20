@@ -379,7 +379,7 @@ const HomeNew = () => {
           </div>
 
           {/* AI Pandit Voice */}
-          <div className={`${styles.featureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))} style={{ cursor: 'pointer', ...(aiServicesItems[2]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[2].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}) }}>
+          <div className={`${styles.featureCard} ${styles.aiPanditVoice}`} onClick={() => navigate('/pandit-ai-voice')} style={{ cursor: 'pointer', ...(aiServicesItems[2]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[2].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}) }}>
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
               <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title || "AI Pandit (Voice)"}</h3>

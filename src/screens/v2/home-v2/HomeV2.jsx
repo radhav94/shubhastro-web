@@ -455,7 +455,7 @@ const HomeV2 = () => {
             </div>
 
             {/* AI Pandit Voice */}
-            <div className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))} style={{ cursor: 'pointer' }}>
+            <div className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`} onClick={() => navigate('/pandit-ai-voice')} style={{ cursor: 'pointer' }}>
               <div className={styles.panditEllipse} />
               <span className={styles.featureTag}>New</span>
               <div className={styles.fcTop}>
@@ -570,7 +570,7 @@ const HomeV2 = () => {
             )}
           </div>
           {/* AI Pandit */}
-          <div className={`${styles.mobileAiCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))}>
+          <div className={`${styles.mobileAiCard} ${styles.aiPanditVoice}`} onClick={() => navigate('/pandit-ai-voice')}>
             <span className={styles.featureTag}>New</span>
             <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title || "AI Pandit (Voice)"}</h3>
             <button className={styles.panditTalkBtn}>Talk Now &rsaquo;</button>

@@ -158,7 +158,7 @@ function App() {
                 path: child.path,
                 element: <PrivateRoute component={child.element} />,
                 errorElement: routeErrorElement,
-                handle: { header: child.header ?? true, footer: child.footer ?? true },
+                handle: { header: child.header ?? true, footer: child.footer ?? true, topHeader: child.topHeader ?? true },
               };
             }
             // All other routes are accessible to everyone
@@ -166,7 +166,7 @@ function App() {
               path: child.path,
               element: <child.element />,
               errorElement: routeErrorElement,
-              handle: { header: child.header ?? true, footer: child.footer ?? true },
+              handle: { header: child.header ?? true, footer: child.footer ?? true, topHeader: child.topHeader ?? true },
             };
           }),
           { path: "/", element: <Navigate to={PATH.privateRoutes.HOME.path} /> },
