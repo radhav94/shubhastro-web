@@ -314,7 +314,7 @@ const SignatureResult = () => {
               <div key={index} className={styles.traitItem}>
                 <div className={styles.traitHeader}>
                   <h4 className={styles.traitName}>{trait.trait}</h4>
-                  <span className={styles.traitScore}>{trait.score}%</span>
+                  {/* <span className={styles.traitScore}>{trait.score}%</span> */}
                 </div>
                 <p className={styles.traitDescription}>{trait.description}</p>
                 {trait.indicators && trait.indicators.length > 0 && (

@@ -511,7 +511,10 @@ const SmartMatchmaking = () => {
               <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
                 <TTSButton text={`Compatibility Breakdown. ${result?.categoryScores ? Object.entries(result.categoryScores).map(([k, v]) => k.replace(/([A-Z])/g, ' $1').trim() + ': ' + v + ' percent').join('. ') : ''}`} />
               </span>
-              <h3 className={styles.cardTitle}>Compatibility Breakdown</h3>
+              <div className={styles.compatibilityHeaderRow}>
+                <h3 className={styles.cardTitle}>Compatibility Breakdown</h3>
+                <div className={styles.overallScoreValue}>Overall Compatibility Score: {result.overallScore}%</div>
+              </div>
               <div className={styles.categoryList}>
                 {result?.categoryScores && Object.entries(result.categoryScores).map(([key, value]) => (
                   <div key={key} className={styles.categoryItem}>
