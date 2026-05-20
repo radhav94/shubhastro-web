@@ -15,6 +15,7 @@ import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionM
 import AstrologersSection from "../home/components/AstrologersSection";
 import BlogsSection from "../home/components/BlogsSection";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
+import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
 import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 
@@ -379,7 +380,7 @@ const HomeNew = () => {
           </div>
 
           {/* AI Pandit Voice */}
-          <div className={`${styles.featureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))} style={{ cursor: 'pointer', ...(aiServicesItems[2]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[2].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}) }}>
+          <div className={`${styles.featureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai-voice:open"))} style={{ cursor: 'pointer', ...(aiServicesItems[2]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[2].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}) }}>
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
               <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title || "AI Pandit (Voice)"}</h3>
@@ -631,6 +632,7 @@ const HomeNew = () => {
         onCallNow={(a) => handleConnectClick(a, "audio", true)}
       />
       <PanditAIBubble />
+      <PanditAIVoiceBubble />
       <MobileAppModal isOpen={showMobileAppModal} onClose={() => setShowMobileAppModal(false)} />
     </>
   );

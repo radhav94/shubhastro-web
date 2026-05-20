@@ -14,6 +14,7 @@ import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
+import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
 
 // Lazy-load below-the-fold components
 const ProfileModals = lazy(() => import("../../private/kundli/components/ProfileModals"));
@@ -457,7 +458,7 @@ const HomeV2 = () => {
             </div>
 
             {/* AI Pandit Voice */}
-            <div className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))} style={{ cursor: 'pointer' }}>
+            <div className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai-voice:open"))} style={{ cursor: 'pointer' }}>
               <div className={styles.panditEllipse} />
               <span className={styles.featureTag}>New</span>
               <div className={styles.fcTop}>
@@ -572,7 +573,7 @@ const HomeV2 = () => {
             )}
           </div>
           {/* AI Pandit */}
-          <div className={`${styles.mobileAiCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))}>
+          <div className={`${styles.mobileAiCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai-voice:open"))}>
             <span className={styles.featureTag}>New</span>
             <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title || "AI Pandit (Voice)"}</h3>
             <button className={styles.panditTalkBtn}>Talk Now &rsaquo;</button>
@@ -1018,6 +1019,7 @@ const HomeV2 = () => {
         <MobileAppModal isOpen={showMobileAppModal} onClose={() => setShowMobileAppModal(false)} />
       </Suspense>
       <PanditAIBubble />
+      <PanditAIVoiceBubble />
     </>
   );
 };

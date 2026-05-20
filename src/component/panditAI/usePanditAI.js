@@ -41,6 +41,10 @@ const getLanguageMeta = (language) =>
 let panditAIChatActive = false;
 let panditAIRoomId = null;
 export const isPanditAIChatActive = () => panditAIChatActive;
+export const setPanditAIChatActive = (active, roomId = null) => {
+  panditAIChatActive = active;
+  if (roomId !== null) panditAIRoomId = roomId;
+};
 export const isPanditAIEvent = (data = {}) =>
   data?.astrologerId === PANDIT_AI_ID ||
   data?.sender === PANDIT_AI_ID ||

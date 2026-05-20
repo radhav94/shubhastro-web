@@ -52,6 +52,7 @@ const HomeLayout = () => {
 
   const showHeader = currentRoute ? currentRoute.handle.header : false;
   const showFooter = currentRoute ? currentRoute.handle.footer : true;
+  const showRouteTopHeader = currentRoute ? currentRoute.handle.topHeader !== false : true;
 
   // Hide header/footer in webview mode (?type=webview)
   const isWebview = new URLSearchParams(location.search).get("type") === "webview";
@@ -59,7 +60,7 @@ const HomeLayout = () => {
   const isOnboardingPage = location.pathname === "/login";
   const isLivePage = location.pathname.startsWith("/live");
   
-  const showTopHeader = !isOnboardingPage && !isLivePage && !isWebview;
+  const showTopHeader = showRouteTopHeader && !isOnboardingPage && !isLivePage && !isWebview;
 
   return (
     <div className={styles.layout}>
