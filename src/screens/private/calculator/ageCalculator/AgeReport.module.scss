@@ -1,21 +1,44 @@
 .wrapper {
   max-width: 760px;
-  margin: 40px auto;
-  padding: 0 16px;
+  margin: 70px auto 40px;
+  padding: 20px 16px;
+  background: linear-gradient(135deg, #fff9f0 0%, #ffe4c4 100%);
+  border-radius: 10px;
+  border: 1.5px solid #fff;
 }
 
 .pageTitle {
   text-align: center;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  color: #333;
-  margin-bottom: 24px;
+  color: #1a1a1a;
+  margin-bottom: 8px;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.headingUnderline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.dividerLine {
+  line-height: 0;
+}
+
+.dividerMoon {
+  flex-shrink: 0;
+  line-height: 0;
+  color: #030303;
 }
 
 .resultCard {
-  background: #fff;
-  border: 1px solid #f75801;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 12px;
   padding: 24px 20px;
 }
@@ -23,7 +46,7 @@
 .resultLabel {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: #1a1a1a;
   margin-bottom: 16px;
 }
 
@@ -31,20 +54,16 @@
   display: flex;
   justify-content: center;
   gap: 20px;
-  border-radius: 10px;
-  // box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(12px);
-  border: 1.5px solid #fff;
 }
 
 .resultItem {
-  background: #fff8f5;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
   padding: 16px 12px;
   border-radius: 10px;
   text-align: center;
   flex: 1;
-  border: 1px solid #ffe8d6;
+  border: 1.5px solid #fff;
 
   strong {
     display: block;
@@ -86,13 +105,12 @@
 /* Mobile responsive */
 @media (max-width: 480px) {
   .wrapper {
-    margin: 20px auto;
-    padding: 0 12px;
+    margin: 70px auto 20px;
+    padding: 16px 12px;
   }
 
   .pageTitle {
-    font-size: 17px;
-    margin-bottom: 18px;
+    font-size: 18px;
   }
 
   .resultCard {

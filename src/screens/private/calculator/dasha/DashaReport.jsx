@@ -32,6 +32,7 @@ const DashaReport = () => {
   };
 
   return (
+    <>
     <div className={styles.wrapper}>
       <CalcBackButton />
       <h2 className={styles.title}>
@@ -134,9 +135,10 @@ const DashaReport = () => {
           Calculate Again
         </button>
       </div>
-
-      <ConnectCard />
     </div>
+
+    <ConnectCard />
+  </>
   );
 };
 

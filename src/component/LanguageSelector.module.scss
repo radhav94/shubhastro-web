@@ -1,9 +1,9 @@
 /* Language Selector Component */
 .langWrap {
-  position: absolute;
+  position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 10;
+  z-index: 100;
   display: inline-block;
   flex-shrink: 0;
 }
