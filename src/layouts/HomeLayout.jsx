@@ -110,6 +110,27 @@ const HomeLayout = () => {
 
       {showFooter && !isWebview && (
         <div className={styles.footerWrapper}>
+          <div className={styles.topLinkWrap}>
+            <div className={styles.topLink}>
+                <span>Important Links	: </span>
+                <a href="ai-love-astrologer" title="AI Love Astrologer">AI Love Astrologer</a> | 
+                <a href="ai-marriage-astrologer" title="AI Marriage Astrologer"> AI Marriage Astrologer</a> | 
+                <a href="ai-health-astrologer" title="AI Health Astrologer"> AI Health Astrologer</a> | 
+                <a href="ai-career-astrologer" title="AI Career Astrologer"> AI Career Astrologer</a> | 
+                <a href="ai-life-coach-astrologer" title="AI Life Coach Astrologer"> AI Life Coach Astrologer</a> | 
+                <a href="ai-wealth-astrologer" title="AI Wealth Astrologer"> AI Wealth Astrologer</a> | 
+                <a href="ai-general-prediction-astrologer" title="AI General Prediction Astrologer"> AI General Prediction Astrologer</a> | 
+                <a href="ai-gemstone-astrologer" title="AI Gemstone Astrologer"> AI Gemstone Astrologer</a> | 
+                <a href="ai-vedic-astrologer" title="AI Vedic Astrologer"> AI Vedic Astrologer</a> | 
+                <a href="ai-western-astrologer" title="AI Western Astrologer"> AI Western Astrologer</a> | 
+                <a href="ai-kp-astrologer" title="AI KP Astrologer"> AI KP Astrologer</a> | 
+                <a href="ai-laal-kitab-astrologer" title="AI Laal Kitab Astrologer"> AI Laal Kitab Astrologer</a> | 
+                <a href="ai-horoscope-matching-astrologer" title="AI Horoscope Matching Astrologer"> AI Horoscope Matching Astrologer</a> | 
+                <a href="ai-vaastu-astrologer" title="AI Vaastu Astrologer"> AI Vaastu Astrologer</a> | 
+                <a href="ai-spiritual-astrologer" title="AI Spiritual Astrologer"> AI Spiritual Astrologer</a> | 
+                <a href="ai-occult-astrologer" title="AI Occult Astrologer"> AI Occult Astrologer</a> | 
+            </div>
+          </div>
           <Footer />
         </div>
       )}
