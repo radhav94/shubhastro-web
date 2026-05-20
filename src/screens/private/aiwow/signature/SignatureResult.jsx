@@ -338,7 +338,7 @@ const SignatureResult = () => {
             <h3 className={styles.cardTitle}>Leadership Qualities</h3>
             <div className={styles.scoreHeader}>
               <span className={styles.scoreLabel}>Leadership Score</span>
-              <span className={styles.scoreValue}>{resultData.personality.leadershipQualities.score}%</span>
+              {/* <span className={styles.scoreValue}>{resultData.personality.leadershipQualities.score}%</span> */}
             </div>
             <p className={styles.description}>{resultData.personality.leadershipQualities.description}</p>
             
@@ -439,7 +439,7 @@ const SignatureResult = () => {
             <h3 className={styles.cardTitle}>Social Confidence</h3>
             <div className={styles.scoreHeader}>
               <span className={styles.scoreLabel}>Confidence Score</span>
-              <span className={styles.scoreValue}>{resultData.personality.socialConfidence.score}%</span>
+              {/* <span className={styles.scoreValue}>{resultData.personality.socialConfidence.score}%</span> */}
             </div>
             <div className={styles.infoRow}>
               <span className={styles.label}>Level:</span>

@@ -64,7 +64,13 @@ const LalKitabDetail = () => {
   // Merge: prefer API data (more complete), fall back to teva data
   const houses = chartData?.data?.houses || tevaData?.houses || [];
   const planetDetails = planetData?.data?.planetDetails || tevaData?.planetDetails || [];
-  const debts = debtsData?.data?.debts || tevaData?.debts || null;
+  // Debts: try dedicated API, then chart data, then navigation state
+  const rawDebts = debtsData?.data;
+  const apiDebts = rawDebts?.debts?.selfDebts ? rawDebts.debts : (rawDebts?.selfDebts ? rawDebts : null);
+  const chartDebts = chartData?.data?.debts?.selfDebts ? chartData.data.debts : null;
+  const tevaDebts = tevaData?.debts?.selfDebts ? tevaData.debts : null;
+  const debts = apiDebts || chartDebts || tevaDebts || null;
+  console.log("[LalKitab Debts Debug]", { rawDebts, chartDataDebts: chartData?.data?.debts, tevaDataDebts: tevaData?.debts, resolvedDebts: debts });
   const chart = chartData?.data || (tevaData?.svgChart ? { chartUrl: tevaData.svgChart } : null);
 
   const summary = tevaData?.birthDetails || tevaData || chartData?.data?.summary || {};
@@ -106,7 +112,7 @@ const LalKitabDetail = () => {
           <PlanetDetailsAccordion planets={planetDetails} isLoading={planetLoading} initialSelected={initialPlanet} onPlanetChange={handlePlanetChange} />
         )}
         {activeTab === "debts" && (
-          <DebtsSection debts={debts} isLoading={debtsLoading} />
+          <DebtsSection debts={debts} isLoading={debtsLoading && !debtsError && !debts} />
         )}
         {activeTab === "chart" && (
           <ChartSection chart={chart} isLoading={chartLoading && !chart} />
