@@ -49,15 +49,14 @@ const SingleBlogDetails = () => {
 
         {/* Blog Body - Title, Meta, and Content */}
         <div className={styles.blogBody}>
-          {/* Trending Badge */}
-          <span className={styles.trendingBadge}>Trending</span>
+          {/* Trending Badge + TTS Button Row */}
+          <div className={styles.badgeTtsRow}>
+            <span className={styles.trendingBadge}>Trending</span>
+            <TTSButton text={`${[singleBLogData?.title, singleBLogData?.author, cleanText].filter(Boolean).join('. ')}`} />
+          </div>
 
           {/* Title */}
-          <h1 className={styles.title}>{singleBLogData.title}
-            <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
-              <TTSButton text={`${[singleBLogData?.title, singleBLogData?.author, cleanText].filter(Boolean).join('. ')}`} />
-            </span>
-          </h1>
+          <h1 className={styles.title}>{singleBLogData.title}</h1>
 
           {/* Publish Date and Author */}
           <div className={styles.metaInfo}>

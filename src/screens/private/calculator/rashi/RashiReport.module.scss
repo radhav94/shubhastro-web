@@ -1,15 +1,51 @@
 .wrapper {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 0 16px;
+  max-width: 1000px;
+  margin: 70px auto 40px;
+  padding: 16px;
+  // box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(135deg, #fff9f0 0%, #ffe4c4 100%);
+  border-radius: 10px;
+  border: 1.5px solid #fff;
 }
 
 .title {
   font-size: 22px;
   font-weight: 700;
-  text-align: center;
-  margin-bottom: 6px;
-  color: #1a1a1a;
+  margin-bottom: 28px;
+  background: linear-gradient(90deg, #f75801, #d43400);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.rashiCard {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  // box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.rashiCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  border-radius: 12px 12px 0 0;
+  background: linear-gradient(90deg, #f75801, #d43400);
+}
+
+.label {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #6b7280;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -32,70 +68,66 @@
   color: #030303;
 }
 
-/* Rashi Card */
-.rashiCard {
+/* Rashi Card - matching sun sign style */
+.card {
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border: 2px solid white;
   border-radius: 12px;
-  padding: 20px 24px;
+  padding: 20px 24px 28px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  margin: 0 auto 24px;
+  max-width: 480px;
+  text-align: center;
+}
+
+.cardHeader {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.label {
-  font-size: 13px;
+.cardHeaderText {
+  font-size: 15px;
   font-weight: 500;
-  color: #555;
+  color: #1a1a1a;
 }
 
-.rashiName {
+.signImageWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, #FFE0B6 0%, #FFE2E2 100%);
+  padding: 30px;
+}
+
+.signImage {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  background: linear-gradient(90deg, #f75801, #d43400);
+  border-radius: 50px;
+}
+
+.signName {
   font-size: 22px;
   font-weight: 700;
-  color: #1a1a1a;
-  margin-top: 4px;
+  color: #d43400;
+  margin-bottom: 20px;
 }
 
-.rashiIcon {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  opacity: 0.7;
-}
-
-/* Calculate Again */
-.calcAgainWrap {
-  text-align: right;
-  margin-bottom: 24px;
-}
-
-.calcAgainBtn {
-  background: none;
-  border: none;
-  color: #f75801;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: underline;
-  padding: 4px 0;
-
-  &:hover {
-    opacity: 0.8;
-  }
-}
-
-/* Accordion Shared */
-.accordionBox {
+.detailsCard {
   background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 2px solid white;
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 12px;
-  margin-bottom: 16px;
-  overflow: hidden;
+  padding: 24px;
+  // box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  position: relative;
 }
 
 .accordionHeader {
@@ -162,6 +194,44 @@
   }
 
   p {
+    font-weight: 600;
+    color: #d43400;
+  }
+}
+
+.aboutBox {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
+  border-radius: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  padding: 24px;
+  // box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+  margin-bottom: 32px;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    border-radius: 12px 12px 0 0;
+    background: linear-gradient(90deg, #f75801, #d43400);
+  }
+
+  h4 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #111827;
+  }
+
+  p {
+    line-height: 1.6;
+    color: #374151;
     font-size: 14px;
     font-weight: 600;
     color: #1a1a1a;
@@ -175,25 +245,30 @@
 }
 
 @media (max-width: 640px) {
-  .wrapper {
-    padding: 0 12px;
-  }
+  // .wrapper {
+  //   padding: 14px;
+  //   // margin: 0 auto 20px;
+  // }
 
   .title {
     font-size: 18px;
   }
 
-  .rashiCard {
-    padding: 16px;
+  .card {
+    padding: 16px 16px 24px;
   }
 
-  .rashiName {
+  .signImageWrap {
+    padding: 20px;
+  }
+
+  .signImage {
+    width: 64px;
+    height: 64px;
+  }
+
+  .signName {
     font-size: 20px;
-  }
-
-  .rashiIcon {
-    width: 40px;
-    height: 40px;
   }
 
   .detailsGrid {

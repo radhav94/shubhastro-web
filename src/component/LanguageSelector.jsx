@@ -177,7 +177,8 @@ const LanguageSelector = ({ style, className }) => {
       ref={langRef}
     >
       <span
-        className={styles.langToggle}
+        className={`${styles.langToggle} notranslate`}
+        translate="no"
         onClick={() => setLangOpen((prev) => !prev)}
       >
         <span className={styles.langName}>{activeLang}</span>

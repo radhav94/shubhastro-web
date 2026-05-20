@@ -395,7 +395,7 @@
   font-size: 1.8rem;
   font-weight: 600;
   color: #1f2937;
-  margin: 0 0 8px;
+  margin: 0 0 28px;
   line-height: 1.5;
 }
 
@@ -423,11 +423,11 @@
 }
 
 .heroBgImg {
-  width: 350px;
+  width: 340px;
   height: auto;
   position: absolute;
-  right: 7px;
-  top: -7px;
+  right: -82px;
+  top: -82px;
   object-fit: contain;
   opacity: 1;
   z-index: 1;
@@ -752,7 +752,7 @@
     // background: transparent;
     background: rgba(255, 255, 255, 0.90);
     color: #F75801;
-    width: 100%;
+    width: fit-content;
     border: 1px solid #F75801;
     backdrop-filter: none;
   }
@@ -779,19 +779,25 @@
     gap: 10px;
   }
 }
+.laalKitaabLeftCh{
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+}
 .laalKitaabImgLeft {
-  position: absolute;
-  bottom: -42px;
+  // position: absolute;
+  // bottom: -42px;
+  margin-bottom: -92px;
   right: 0;
   width: 100%;
   object-fit: contain;
   z-index: 1;
   pointer-events: none;
-  @media (width <= 767px) {
-    bottom: -53px;
-    right: -40px;
-    width: 56%;
-  }
+  // @media (width <= 767px) {
+  //   bottom: -53px;
+  //   right: -40px;
+  //   width: 56%;
+  // }
 }
 
 /* ═══ Center col — bottom 2 feature cards row ═══ */
@@ -3580,9 +3586,9 @@
 
   // .heroDesc { font-size: 13px; }
   .heroBgImg {
-    width: 208px;
-    right: -30px;
-    top: 0;
+    width: 228px;
+    right: -64px;
+    top: -57px;
   }
 
   // .wowCard { flex: 0 0 44vw; }

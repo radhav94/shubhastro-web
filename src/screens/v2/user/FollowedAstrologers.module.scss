@@ -7,8 +7,9 @@
 }
 
 .headerWrap {
-  background: #fff;
-  border-bottom: 1px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border-bottom: 1.5px solid #fff;
 }
 
 .header {
@@ -16,13 +17,13 @@
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  background: #fff;
+  // background: #fff;
   max-width: 1440px;
   margin: 0 auto;
   width: 100%;
-  @media (min-width: 769px) {
-    padding: 10px 25px;
-  }
+  // @media (min-width: 769px) {
+  //   padding: 10px 25px;
+  // }
 }
 
 .backBtn {

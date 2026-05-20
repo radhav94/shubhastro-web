@@ -1,14 +1,17 @@
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useVehicleNumerologyCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
 import { useEffect } from "react";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./VehicleReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const VehicleReport = () => {
   const navigate = useNavigate();
 
-  const stored = JSON.parse(localStorage.getItem("vehicle_calculator"));
+  const stored = useSelector(selectCalculatorData("vehicle_calculator"));
 
   const [vehicleNumerologyCalculator, { data, isLoading, isError }] =
     useVehicleNumerologyCalculatorMutation();
@@ -52,6 +55,8 @@ const VehicleReport = () => {
       >
         Calculate Again
       </button>
+
+      <ConnectCard />
     </div>
   );
 };

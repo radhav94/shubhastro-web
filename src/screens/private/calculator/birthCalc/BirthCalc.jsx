@@ -9,6 +9,7 @@ import styles from "../mangaldosha/MangalDosha.module.scss";
 import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "birth_natal_calc";
 const initialFormState = {
@@ -66,7 +67,7 @@ const BirthCalc = () => {
   const onReset = () => {
     setFormData(initialFormState);
     setErrors({});
-    localStorage.removeItem(STORAGE_KEY);
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
   };
 
   const handleSubmit = (e) => {
@@ -79,7 +80,7 @@ const BirthCalc = () => {
     if (!formData.isTimeUnknown && !formData.tob) newErrors.tob = "Time of birth is required";
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     const payload = { ...formData, tob: formData.isTimeUnknown ? "12:00" : formData.tob };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: payload }));
     navigate("/birth-natal-chart-calculator/report");
   };
 

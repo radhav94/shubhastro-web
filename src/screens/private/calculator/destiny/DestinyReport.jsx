@@ -1,13 +1,16 @@
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useGetNumerologyReportQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./DestinyReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import TTSButton from "../../../../component/UI/TTSButton";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const DestinyReport = () => {
   const navigate = useNavigate();
-  const stored = JSON.parse(localStorage.getItem("destiny_calc"));
+  const stored = useSelector(selectCalculatorData("destiny_calc"));
   const { data, isLoading } = useGetNumerologyReportQuery(stored);
 
   if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
@@ -46,6 +49,8 @@ const DestinyReport = () => {
           Calculate Again
         </button>
       </div>
+
+      <ConnectCard />
     </div>
   );
 };

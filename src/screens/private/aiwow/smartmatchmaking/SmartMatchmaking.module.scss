@@ -565,6 +565,57 @@
   margin: 0;
 }
 
+// Compatibility Header (title + overall score side by side)
+.compatibilityHeaderRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #ffffff;
+  position: relative;
+
+  .cardTitle {
+    margin: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+    flex-shrink: 0;
+  }
+
+  .overallScoreValue {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 0;
+    width: auto;
+  }
+
+  @media (width <= 767px) {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+
+    .cardTitle {
+      width: 100%;
+      text-align: left;
+    }
+
+    .overallScoreValue {
+      position: static;
+      transform: none;
+    }
+  }
+}
+
+.overallScoreValue {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f97316;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  white-space: nowrap;
+  text-align: center;
+}
+
 // Category Scores
 .categoryCard {
   background: rgba(255, 255, 255, 0.4);

@@ -1,14 +1,17 @@
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useMobileNumerologyCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
 import { useEffect } from "react";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./MobileReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const MobileReport = () => {
   const navigate = useNavigate();
 
-  const stored = JSON.parse(localStorage.getItem("mobile_calculator"));
+  const stored = useSelector(selectCalculatorData("mobile_calculator"));
 
   const [mobileNumerologyCalculator, { data, isLoading, isError }] =
     useMobileNumerologyCalculatorMutation();
@@ -70,6 +73,8 @@ const MobileReport = () => {
       >
         Calculate Again
       </button>
+
+      <ConnectCard />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePick
 import styles from "./AtmakarakaCalculator.module.scss";
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "atmakaraka-and-darakaraka";
 
@@ -97,7 +98,7 @@ const AtmakarakaCalculator = () => {
       tob: formData.isTimeUnknown ? "12:00" : formData.tob,
     };
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: payload }));
     navigate("/atmakaraka-and-darakaraka-calculator/report");
   };
 
@@ -296,7 +297,7 @@ const AtmakarakaCalculator = () => {
             onClick={() => {
               setFormData(initialFormState);
               setErrors({});
-              localStorage.removeItem(STORAGE_KEY);
+              dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
             }}
           >
             Reset
