@@ -2,32 +2,57 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import {
   useCreateChatRoomMutation,
-  useGetChatHistoryQuery,
 } from "../../../redux/api/chatApi";
 import { textToSpeech, SARVAM_LANGUAGES, SARVAM_SPEAKERS } from "../../../services/sarvamTTSService";
-import useSpeechToText from "../../../component/panditAI/useSpeechToText";
-import { transliterateToLatin } from "../../../component/panditAI/translateText";
+import useSarvamSTT from "./useSarvamSTT";
+import { isPanditAIEvent, setPanditAIChatActive } from "../../../component/panditAI/usePanditAI";
 import toast from "../../../component/toast";
 
 export const PANDIT_AI_ID = "6928390dc00d56953b586c04";
 
-const LANGUAGE_OPTIONS = [
-  { code: "en", locale: "en-IN", name: "English", label: "EN", sarvamCode: SARVAM_LANGUAGES.ENGLISH },
-  { code: "hi", locale: "hi-IN", name: "Hindi", label: "HI", sarvamCode: SARVAM_LANGUAGES.HINDI },
-  { code: "bn", locale: "bn-IN", name: "Bengali", label: "BN", sarvamCode: SARVAM_LANGUAGES.BENGALI },
-  { code: "ta", locale: "ta-IN", name: "Tamil", label: "TA", sarvamCode: SARVAM_LANGUAGES.TAMIL },
-  { code: "te", locale: "te-IN", name: "Telugu", label: "TE", sarvamCode: SARVAM_LANGUAGES.TELUGU },
-  { code: "mr", locale: "mr-IN", name: "Marathi", label: "MR", sarvamCode: SARVAM_LANGUAGES.MARATHI },
-  { code: "gu", locale: "gu-IN", name: "Gujarati", label: "GU", sarvamCode: SARVAM_LANGUAGES.GUJARATI },
-  { code: "kn", locale: "kn-IN", name: "Kannada", label: "KN", sarvamCode: SARVAM_LANGUAGES.KANNADA },
-  { code: "ml", locale: "ml-IN", name: "Malayalam", label: "ML", sarvamCode: SARVAM_LANGUAGES.MALAYALAM },
-  { code: "pa", locale: "pa-IN", name: "Punjabi", label: "PA", sarvamCode: SARVAM_LANGUAGES.PUNJABI },
-];
+// Map language codes from backend response to Sarvam TTS language codes
+const LANG_CODE_TO_SARVAM = {
+  en: SARVAM_LANGUAGES.ENGLISH,
+  hi: SARVAM_LANGUAGES.HINDI,
+  bn: SARVAM_LANGUAGES.BENGALI,
+  ta: SARVAM_LANGUAGES.TAMIL,
+  te: SARVAM_LANGUAGES.TELUGU,
+  mr: SARVAM_LANGUAGES.MARATHI,
+  gu: SARVAM_LANGUAGES.GUJARATI,
+  kn: SARVAM_LANGUAGES.KANNADA,
+  ml: SARVAM_LANGUAGES.MALAYALAM,
+  pa: SARVAM_LANGUAGES.PUNJABI,
+};
 
-export { LANGUAGE_OPTIONS };
+// Detect language from text using Unicode script ranges
+function detectLanguageFromText(text) {
+  if (!text) return "hi";
 
-export default function usePanditAIVoice() {
-  const [selectedLang, setSelectedLang] = useState(LANGUAGE_OPTIONS[0]);
+  // Check for script-specific characters
+  const tamil = /[\u0B80-\u0BFF]/;
+  const telugu = /[\u0C00-\u0C7F]/;
+  const kannada = /[\u0C80-\u0CFF]/;
+  const malayalam = /[\u0D00-\u0D7F]/;
+  const bengali = /[\u0980-\u09FF]/;
+  const gujarati = /[\u0A80-\u0AFF]/;
+  const punjabi = /[\u0A00-\u0A7F]/;
+  const devanagari = /[\u0900-\u097F]/;
+  const latin = /[a-zA-Z]/;
+
+  if (tamil.test(text)) return "ta";
+  if (telugu.test(text)) return "te";
+  if (kannada.test(text)) return "kn";
+  if (malayalam.test(text)) return "ml";
+  if (bengali.test(text)) return "bn";
+  if (gujarati.test(text)) return "gu";
+  if (punjabi.test(text)) return "pa";
+  if (devanagari.test(text)) return "hi"; // Could be Hindi or Marathi — fallback to hi
+  if (latin.test(text)) return "en";
+
+  return "hi";
+}
+
+export default function usePanditAIVoice({ enabled = true } = {}) {
   const [status, setStatus] = useState("idle"); // idle | listening | processing | speaking
   const [transcript, setTranscript] = useState("");
   const [aiResponse, setAiResponse] = useState("");
@@ -46,7 +71,7 @@ export default function usePanditAIVoice() {
 
   // Initiate chat session on mount
   useEffect(() => {
-    if (!userIdLocal || initiatedRef.current) return;
+    if (!enabled || !userIdLocal || initiatedRef.current) return;
 
     const initChat = async () => {
       setConnecting(true);
@@ -73,6 +98,7 @@ export default function usePanditAIVoice() {
       // Wait for socket to connect before emitting
       const emitInitiate = () => {
         console.log("[PanditAIVoice] Emitting chat:initiate");
+        setPanditAIChatActive(true);
         voiceSocket.emit("chat:initiate", {
           userId: userIdLocal,
           astrologerId: PANDIT_AI_ID,
@@ -88,7 +114,7 @@ export default function usePanditAIVoice() {
     };
 
     initChat();
-  }, [userIdLocal, createChatRoom]);
+  }, [enabled, userIdLocal, createChatRoom]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -118,6 +144,7 @@ export default function usePanditAIVoice() {
       if (data?.roomId) {
         roomIdRef.current = data.roomId;
         setRoomId(data.roomId);
+        setPanditAIChatActive(true, data.roomId);
       }
     };
 
@@ -126,6 +153,7 @@ export default function usePanditAIVoice() {
       if (data?.roomId) {
         roomIdRef.current = data.roomId;
         setRoomId(data.roomId);
+        setPanditAIChatActive(true, data.roomId);
         const pending = pendingMessageRef.current;
         if (pending) {
           pendingMessageRef.current = null;
@@ -136,17 +164,34 @@ export default function usePanditAIVoice() {
 
     const handleMessage = async (data) => {
       console.log("[PanditAIVoice] message:recieved", data);
+      console.log("[PanditAIVoice] language fields:", {
+        languageCode: data.languageCode,
+        language: data.language,
+        targetLanguage: data.targetLanguage,
+        targetLanguageName: data.targetLanguageName,
+      });
       if (data?.astrologerId !== PANDIT_AI_ID && data?.sender !== PANDIT_AI_ID) return;
       if (data.sender === "user") return;
 
       const responseText = data.message || data.response;
       setAiResponse(responseText);
 
+      // Use the user's STT-detected language as primary for TTS
+      // Fallback to backend response fields, then text detection
+      const detectedLangCode =
+        detectedLangRef.current ||
+        data.languageCode ||
+        data.targetLanguage ||
+        data.language?.split("-")?.[0] ||
+        detectLanguageFromText(responseText);
+      const ttsLanguage = LANG_CODE_TO_SARVAM[detectedLangCode] || SARVAM_LANGUAGES.HINDI;
+      console.log("[PanditAIVoice] TTS language resolved:", detectedLangCode, "→", ttsLanguage);
+
       // Convert response to speech via Sarvam TTS
       try {
         abortRef.current = new AbortController();
         const audioBase64 = await textToSpeech(responseText, {
-          language: selectedLang.sarvamCode,
+          language: ttsLanguage,
           speaker: SARVAM_SPEAKERS.ISHITA,
           pace: 1.0,
           signal: abortRef.current.signal,
@@ -199,11 +244,11 @@ export default function usePanditAIVoice() {
       voiceSocket.off("message:recieved", handleMessage);
       voiceSocket.off("error", handleError);
     };
-  }, [selectedLang]);
+  }, []);
 
   // Send text message via socket
   const sendText = useCallback(
-    (text) => {
+    (text, sttLangCode) => {
       const trimmed = text.trim();
       if (!trimmed) return;
 
@@ -216,8 +261,13 @@ export default function usePanditAIVoice() {
       setStatus("processing");
       setTranscript(trimmed);
 
+      // Use Sarvam STT detected language, or fallback to script detection
+      const detectedCode = sttLangCode || detectLanguageFromText(trimmed);
+      const LANG_NAMES = { en: "English", hi: "Hindi", bn: "Bengali", ta: "Tamil", te: "Telugu", mr: "Marathi", gu: "Gujarati", kn: "Kannada", ml: "Malayalam", pa: "Punjabi" };
+      const LANG_LOCALES = { en: "en-IN", hi: "hi-IN", bn: "bn-IN", ta: "ta-IN", te: "te-IN", mr: "mr-IN", gu: "gu-IN", kn: "kn-IN", ml: "ml-IN", pa: "pa-IN" };
+
       if (voiceSocket.connected) {
-        console.log("[PanditAIVoice] Sending chat:message", { roomId: currentRoomId, message: trimmed });
+        console.log("[PanditAIVoice] Sending chat:message", { roomId: currentRoomId, message: trimmed, detectedLang: detectedCode });
         voiceSocket.emit("chat:message", {
           sender: "user",
           roomId: currentRoomId,
@@ -225,52 +275,47 @@ export default function usePanditAIVoice() {
           astrologerId: PANDIT_AI_ID,
           message: trimmed,
           type: "message",
-          language: selectedLang.locale,
-          languageCode: selectedLang.code,
-          targetLanguage: selectedLang.code,
-          targetLanguageName: selectedLang.name,
+          language: LANG_LOCALES[detectedCode] || "hi-IN",
+          languageCode: detectedCode,
+          targetLanguage: detectedCode,
+          targetLanguageName: LANG_NAMES[detectedCode] || "Hindi",
         });
       } else {
         toast.error("Connection lost. Please try again.");
         setStatus("idle");
       }
     },
-    [selectedLang, userIdLocal]
+    [userIdLocal]
   );
 
   sendTextRef.current = sendText;
 
-  // Speech-to-text handlers
-  const handleSpeechResult = useCallback(async (speechText) => {
-    // For non-English languages, send the original script directly
-    // Transliteration converts Hindi to Latin which confuses the backend
-    if (selectedLang.code === "en") {
-      const romanized = await transliterateToLatin(speechText);
-      setTranscript((prev) => (prev ? `${prev} ${romanized}` : romanized));
-    } else {
-      setTranscript((prev) => (prev ? `${prev} ${speechText}` : speechText));
-    }
-  }, [selectedLang]);
+  // Sarvam STT result handler — receives transcript and detected language
+  const detectedLangRef = useRef("hi");
 
-  const handleInterim = useCallback(() => {}, []);
-
-  const handleSpeechEnd = useCallback(() => {
-    // Auto-send when speech recognition ends naturally
-    setTimeout(() => {
-      setTranscript((current) => {
-        if (current.trim()) {
-          sendTextRef.current?.(current.trim());
-          return "";
-        }
-        return current;
-      });
-    }, 300);
+  const handleSTTResult = useCallback((transcript, languageCode) => {
+    if (!transcript?.trim()) return;
+    setTranscript(transcript.trim());
+    // Store detected language for sendText to use
+    detectedLangRef.current = languageCode || detectLanguageFromText(transcript);
   }, []);
 
-  const { isListening, isSupported, startListening, stopListening } = useSpeechToText({
-    onResult: handleSpeechResult,
-    onInterim: handleInterim,
-    onEnd: handleSpeechEnd,
+  const handleSTTEnd = useCallback((result) => {
+    const text = result?.transcript?.trim();
+    console.log("[PanditAIVoice] handleSTTEnd called:", { text, language_code: result?.language_code, roomId: roomIdRef.current });
+    if (text) {
+      const langCode = result.language_code || detectLanguageFromText(text);
+      detectedLangRef.current = langCode;
+      sendTextRef.current?.(text, langCode);
+    } else {
+      // No speech detected, go back to idle
+      setStatus("idle");
+    }
+  }, []);
+
+  const { isListening, isSupported, startListening, stopListening } = useSarvamSTT({
+    onResult: handleSTTResult,
+    onEnd: handleSTTEnd,
   });
 
   // Toggle mic
@@ -287,8 +332,9 @@ export default function usePanditAIVoice() {
     }
 
     if (isListening) {
+      // Stop recording — let onstop handler process the audio and call sendText
       stopListening();
-      setStatus("idle");
+      setStatus("processing");
     } else {
       setTranscript("");
       setAiResponse("");
@@ -301,20 +347,43 @@ export default function usePanditAIVoice() {
   useEffect(() => {
     if (isListening) {
       setStatus("listening");
+    } else if (status === "listening") {
+      // Auto-stopped (silence detection) — move to processing
+      setStatus("processing");
     }
   }, [isListening]);
+
+  // End session explicitly (called on popup close)
+  const endSession = useCallback(() => {
+    const currentRoomId = roomIdRef.current;
+    if (currentRoomId && voiceSocket.connected) {
+      voiceSocket.emit("chat:end", {
+        roomId: currentRoomId,
+        userId: userIdLocal,
+        astrologerId: PANDIT_AI_ID,
+      });
+    }
+    roomIdRef.current = null;
+    initiatedRef.current = false;
+    setPanditAIChatActive(false, null);
+    if (abortRef.current) abortRef.current.abort();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setStatus("idle");
+    setRoomId(null);
+  }, [userIdLocal]);
 
   return {
     status,
     transcript,
     aiResponse,
-    selectedLang,
-    setSelectedLang,
     toggleListening,
     isSupported,
     connecting,
     roomId,
-    languageOptions: LANGUAGE_OPTIONS,
+    endSession,
   };
 }
 

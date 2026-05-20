@@ -1,27 +1,21 @@
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Globe2,
   Loader2,
   MousePointerClick,
   Radio,
   Volume2,
 } from "lucide-react";
 import styles from "./PanditAIVoice.module.scss";
-import usePanditAIVoice, { LANGUAGE_OPTIONS } from "./usePanditAIVoice";
+import usePanditAIVoice from "./usePanditAIVoice";
 import useAIFreeMinutes from "../../../component/panditAI/useAIFreeMinutes";
 import AIRechargeBanner from "../../../component/panditAI/AIRechargeBanner";
 
 const PanditAIVoice = () => {
   const navigate = useNavigate();
-  const [showLangPicker, setShowLangPicker] = useState(false);
 
   const {
     status,
-    transcript,
-    aiResponse,
-    selectedLang,
-    setSelectedLang,
     toggleListening,
     isSupported,
     connecting,
@@ -39,14 +33,6 @@ const PanditAIVoice = () => {
   } = useAIFreeMinutes({ isOpen: true, roomId });
 
   const handleBack = useCallback(() => navigate(-1), [navigate]);
-
-  const handleLangSelect = useCallback(
-    (lang) => {
-      setSelectedLang(lang);
-      setShowLangPicker(false);
-    },
-    [setSelectedLang]
-  );
 
   const getStatusText = () => {
     if (connecting) return "Connecting...";
@@ -88,20 +74,6 @@ const PanditAIVoice = () => {
 
   return (
     <div className={styles.container}>
-      {showLangPicker && (
-        <div className={styles.langPicker}>
-          {LANGUAGE_OPTIONS.map((lang) => (
-            <button
-              key={lang.code}
-              className={`${styles.langOption} ${selectedLang.code === lang.code ? styles.langActive : ""}`}
-              onClick={() => handleLangSelect(lang)}
-            >
-              {lang.name}
-            </button>
-          ))}
-        </div>
-      )}
-
       <header className={styles.topBar}>
         <div className={styles.topBarInner}>
           <button className={styles.backBtn} onClick={handleBack} aria-label="Go back">
@@ -118,15 +90,7 @@ const PanditAIVoice = () => {
             <p>AI Voice Assistant</p>
           </div>
 
-          <button
-            className={styles.langBtn}
-            onClick={() => setShowLangPicker(!showLangPicker)}
-            aria-label="Select language"
-            aria-expanded={showLangPicker}
-          >
-            <Globe2 size={25} />
-            <span>{selectedLang.label}</span>
-          </button>
+          <div style={{ width: 40 }} />
         </div>
       </header>
 
