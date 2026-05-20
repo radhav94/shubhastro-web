@@ -486,6 +486,8 @@ const TopHeader = () => {
               Occult
             </NavLink>
             <CalculatorsDropdown />
+            <BestAstrologersDropdown />
+            <BestAstrologersGlobalDropdown />
           </nav>
         </div>
 
@@ -623,6 +625,8 @@ const TopHeader = () => {
               Occult
             </NavLink>
             <MobileCalculatorsAccordion onClose={() => setIsDrawerOpen(false)} />
+            <MobileBestAstrologersAccordion onClose={() => setIsDrawerOpen(false)} />
+            <MobileBestAstrologersGlobalAccordion onClose={() => setIsDrawerOpen(false)} />
             <NavLink
               to="/live"
               onClick={() => setIsDrawerOpen(false)}
@@ -748,6 +752,215 @@ const MobileCalculatorsAccordion = ({ onClose }) => {
       {expanded && (
         <div className={styles.mobileCalcLinks}>
           {CALCULATOR_LINKS.map((item) => (
+            <div
+              key={item.path}
+              className={styles.mobileCalcLink}
+              onClick={() => { navigate(item.path); onClose(); }}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const BEST_ASTROLOGERS_LINKS = [
+  { title: "Astrologers in Mumbai", path: "/astrologers/mumbai" },
+  { title: "Astrologers in Delhi", path: "/astrologers/delhi" },
+  { title: "Astrologers in Chennai", path: "/astrologers/chennai" },
+  { title: "Astrologers in Kolkata", path: "/astrologers/kolkata" },
+  { title: "Astrologers in Hyderabad", path: "/astrologers/hyderabad" },
+  { title: "Astrologers in Bangalore", path: "/astrologers/bangalore" },
+  { title: "Astrologers in Lucknow", path: "/astrologers/lucknow" },
+  { title: "Astrologers in Bhopal", path: "/astrologers/bhopal" },
+  { title: "Astrologers in Cochin", path: "/astrologers/cochin" },
+  { title: "Astrologers in Pune", path: "/astrologers/pune" },
+  { title: "Astrologers in Gurgaon", path: "/astrologers/gurgaon" },
+  { title: "Astrologers in Noida", path: "/astrologers/noida" },
+  { title: "Astrologers in Chandigarh", path: "/astrologers/chandigarh" },
+  { title: "Astrologers in Jaipur", path: "/astrologers/jaipur" },
+  { title: "Astrologers in Nagpur", path: "/astrologers/nagpur" },
+  { title: "Astrologers in Patna", path: "/astrologers/patna" },
+  { title: "Astrologers in Indore", path: "/astrologers/indore" },
+  { title: "Astrologers in Varanasi", path: "/astrologers/varanasi" },
+  { title: "Astrologers in Coimbatore", path: "/astrologers/coimbatore" },
+  { title: "Astrologers in Vijayawada", path: "/astrologers/vijaywada" },
+];
+
+const BestAstrologersDropdown = () => {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div
+      className={styles.calcDropdownWrap}
+      ref={ref}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <span
+        className={styles.headerNavLink}
+        onClick={() => setOpen((p) => !p)}
+        style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
+      >
+        Best Astrologers India
+        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
+          <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
+        </svg>
+      </span>
+      {open && (
+        <div className={styles.calcDropdownMenu}>
+          {BEST_ASTROLOGERS_LINKS.map((item) => (
+            <div
+              key={item.path}
+              className={styles.calcDropdownItem}
+              onClick={() => { navigate(item.path); setOpen(false); }}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const MobileBestAstrologersAccordion = ({ onClose }) => {
+  const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className={styles.mobileCalcAccordion}>
+      <div
+        className={styles.headerNavLink}
+        onClick={() => setExpanded((p) => !p)}
+        style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
+        Best Astrologers India
+        <svg
+          xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none"
+          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+        >
+          <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
+        </svg>
+      </div>
+      {expanded && (
+        <div className={styles.mobileCalcLinks}>
+          {BEST_ASTROLOGERS_LINKS.map((item) => (
+            <div
+              key={item.path}
+              className={styles.mobileCalcLink}
+              onClick={() => { navigate(item.path); onClose(); }}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const BEST_ASTROLOGERS_GLOBAL_LINKS = [
+  { title: "Astrologers in USA", path: "/astrologers/usa" },
+  { title: "Astrologers in Canada", path: "/astrologers/canada" },
+  { title: "Astrologers in UK", path: "/astrologers/uk" },
+  { title: "Astrologers in Dubai", path: "/astrologers/dubai" },
+  { title: "Astrologers in Singapore", path: "/astrologers/singapore" },
+  { title: "Astrologers in Sharjah", path: "/astrologers/sharjah" },
+  { title: "Astrologers in California", path: "/astrologers/california" },
+  { title: "Astrologers in Chicago", path: "/astrologers/chicago" },
+  { title: "Astrologers in Dallas", path: "/astrologers/dallas" },
+  { title: "Astrologers in New Jersey", path: "/astrologers/new-jursey" },
+  { title: "Astrologers in Toronto", path: "/astrologers/toronto" },
+  { title: "Astrologers in Abu Dhabi", path: "/astrologers/abu-dhabi" },
+  { title: "Astrologers in Doha", path: "/astrologers/doha" },
+  { title: "Astrologers in Riyadh", path: "/astrologers/riyadh" },
+  { title: "Astrologers in London", path: "/astrologers/london" },
+  { title: "Astrologers in Sydney", path: "/astrologers/sydney" },
+  { title: "Astrologers in Kuala Lumpur", path: "/astrologers/kuala-lampur" },
+];
+
+const BestAstrologersGlobalDropdown = () => {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div
+      className={styles.calcDropdownWrap}
+      ref={ref}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <span
+        className={styles.headerNavLink}
+        onClick={() => setOpen((p) => !p)}
+        style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
+      >
+        Best Astrologers Global
+        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
+          <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
+        </svg>
+      </span>
+      {open && (
+        <div className={styles.calcDropdownMenu}>
+          {BEST_ASTROLOGERS_GLOBAL_LINKS.map((item) => (
+            <div
+              key={item.path}
+              className={styles.calcDropdownItem}
+              onClick={() => { navigate(item.path); setOpen(false); }}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const MobileBestAstrologersGlobalAccordion = ({ onClose }) => {
+  const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className={styles.mobileCalcAccordion}>
+      <div
+        className={styles.headerNavLink}
+        onClick={() => setExpanded((p) => !p)}
+        style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
+        Best Astrologers Global
+        <svg
+          xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none"
+          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+        >
+          <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
+        </svg>
+      </div>
+      {expanded && (
+        <div className={styles.mobileCalcLinks}>
+          {BEST_ASTROLOGERS_GLOBAL_LINKS.map((item) => (
             <div
               key={item.path}
               className={styles.mobileCalcLink}

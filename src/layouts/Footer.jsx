@@ -16,8 +16,8 @@ import { clearSelectedKundli } from "../redux/kundli/kundliSlice";
 // Footer link data
 const horoscopeLinks = [
   { href: "/daily-horoscope", text: "Daily Horoscope" },
+  { href: "/tomorrow-horoscope", text: "Tommorow Horoscope"},
   { href: "/weekly-horoscope", text: "Weekly Horoscope" },
-  { href: "/monthly-horoscope", text: "Monthly Horoscope" },
   { href: "/yearly-horoscope", text: "Yearly Horoscope" },
 ];
 
@@ -43,11 +43,12 @@ const shopLinks = [
 ];
 
 const companyLinks = [
+  { href: "/about-us", text: "About Us" },
+  { href: "/faq", text: "FAQ" },
   { href: "/refund-cancellation-policy", text: "Refund & Cancellation Policy" },
   { href: "/terms-and-conditions", text: "Terms & Conditions" },
   { href: "/privacy-policy", text: "Privacy Policy" },
   { href: "/disclaimer", text: "Disclaimer" },
-  { href: "/about-us", text: "About Us" },
   { href: "/pricing-policy", text: "Pricing Policy" },
   { href: "/ai-use-policy", text: "AI Use Policy" },
   { href: "/astrologer-onboarding-agreement", text: "Onboarding Agreement" },
