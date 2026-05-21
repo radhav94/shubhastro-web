@@ -32,6 +32,7 @@ const RashiReport = () => {
   };
 
   return (
+    <>
     <div className={styles.wrapper}>
       <CalcBackButton />
 
@@ -61,25 +62,22 @@ const RashiReport = () => {
 
       {/* RASHI CARD */}
       {moon_sign && (
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <span className={styles.cardHeaderText}>
-              Your Rashi is {moon_sign}
-            </span>
-          </div>
-
-          {signImage && (
-            <div className={styles.signImageWrap}>
-              <img src={signImage} alt={moon_sign} className={styles.signImage} />
+        <>
+          <div className={styles.card}>
+            <div className={styles.cardLeft}>
+              <p className={styles.cardLabel}>Your Rashi</p>
+              <h3 className={styles.signName}>{moon_sign}</h3>
             </div>
-          )}
-
-          <h3 className={styles.signName}>{moon_sign}</h3>
-
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
+            {signImage && (
+              <div className={styles.signImageWrap}>
+                <img src={signImage} alt={moon_sign} className={styles.signImage} />
+              </div>
+            )}
+          </div>
+          <button className={styles.calcAgainBtn} onClick={() => navigate(-1)}>
             Calculate Again
           </button>
-        </div>
+        </>
       )}
 
       {/* PERSONAL DETAILS ACCORDION */}
@@ -168,9 +166,10 @@ const RashiReport = () => {
           </div>
         </div>
       )}
-
-      <ConnectCard />
     </div>
+
+    <ConnectCard />
+  </>
   );
 };
 

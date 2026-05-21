@@ -1,7 +1,10 @@
 .wrapper {
-  min-height: 100vh;
-  // background: #f6f6f6;
-  padding: 70px 16px 20px 16px;
+  max-width: 900px;
+  margin: 70px auto 40px;
+  padding: 20px 16px;
+  background: linear-gradient(135deg, #fff9f0 0%, #ffe4c4 100%);
+  border-radius: 10px;
+  border: 1.5px solid #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,8 +17,8 @@
   border-radius: 18px;
   max-width: 500px;
   width: 100%;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
   overflow: hidden;
+  text-align: center;
 }
 
 .title {

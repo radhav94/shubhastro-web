@@ -1,27 +1,64 @@
-.container { display: flex; flex-direction: column; }
-.content { position: relative; background: rgba(255, 255, 255, 0.4); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1.5px solid #fff;backdrop-filter: blur(12px);}
-.section { margin-bottom: 20px; &:last-child { margin-bottom: 0; } }
-.sectionTitle { font-size: 16px; font-weight: 600; color: #1a1a1a; margin: 0 0 10px; }
-.list { margin: 0; padding: 0 0 0 20px; display: flex; flex-direction: column; gap: 8px; li { font-size: 14px; color: #4a5568; line-height: 1.6; } }
-.skeletonList { display: flex; flex-direction: column; gap: 14px; }
-.skeleton { height: 80px; border-radius: 12px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-.empty, .emptyCategory { text-align: center; padding: 40px 20px; color: #718096; span { font-size: 48px; display: block; margin-bottom: 12px; } p { margin: 0; font-size: 15px; } }
+.container { display: flex; flex-direction: column; gap: 12px; }
 
-.ttsBtn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+.debtCard {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.cardHeader {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 6px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #fff;
-  color: #F75801;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  user-select: none;
+  text-align: left;
+}
 
+.cardHeaderLeft { display: flex; align-items: center; gap: 10px; }
+.cardIcon { font-size: 20px; }
+.cardLabel { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+
+.severity { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px; text-transform: capitalize; }
+.low { background: #dcfce7; color: #166534; }
+.medium { background: #fef9c3; color: #854d0e; }
+.high { background: #fee2e2; color: #991b1b; }
+
+.cardHeaderRight { display: flex; align-items: center; gap: 8px; }
+
+.ttsBtn {
+  display: flex; align-items: center; justify-content: center;
+  padding: 6px; border: 1px solid #e2e8f0; border-radius: 8px;
+  background: #fff; color: #F75801; cursor: pointer; transition: all 0.2s;
   &:hover { background: #fff5f0; border-color: #F75801; }
+}
+
+.chevron { color: #F75801; transition: transform 0.25s ease; flex-shrink: 0; }
+.chevronOpen { transform: rotate(180deg); }
+
+.cardBody { display: none; padding: 0 16px 16px; }
+.cardBodyOpen { display: block; }
+
+.section { margin-bottom: 16px; &:last-child { margin-bottom: 0; } }
+.sectionTitle { font-size: 14px; font-weight: 600; color: #1a1a1a; margin: 0 0 8px; }
+.list { margin: 0; padding: 0 0 0 18px; display: flex; flex-direction: column; gap: 6px; li { font-size: 13px; color: #4a5568; line-height: 1.6; } }
+
+.skeletonList { display: flex; flex-direction: column; gap: 14px; }
+.skeleton { height: 60px; border-radius: 12px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+.empty { text-align: center; padding: 40px 20px; color: #718096; span { font-size: 48px; display: block; margin-bottom: 12px; } p { margin: 0; font-size: 15px; } }
+
+@media (max-width: 640px) {
+  .cardHeader { padding: 14px 12px; }
+  .cardLabel { font-size: 14px; }
+  .cardBody { padding: 0 12px 14px; }
+  .list { padding: 0 0 0 14px; li { font-size: 12px; } }
 }
