@@ -137,8 +137,10 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
     };
   }, [userIdLocal]);
 
-  // Socket event listeners
+  // Socket event listeners — only active when voice session is enabled
   useEffect(() => {
+    if (!enabled) return;
+
     const handleChatRoom = (data) => {
       console.log("[PanditAIVoice] chat:room received", data);
       if (data?.roomId) {
@@ -244,7 +246,7 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
       voiceSocket.off("message:recieved", handleMessage);
       voiceSocket.off("error", handleError);
     };
-  }, []);
+  }, [enabled]);
 
   // Send text message via socket
   const sendText = useCallback(
