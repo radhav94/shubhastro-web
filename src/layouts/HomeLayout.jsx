@@ -111,50 +111,51 @@ const HomeLayout = () => {
 
       {showFooter && !isWebview && (
         <div className={styles.footerWrapper}>
+          {location.pathname === "/" && (
           <div className={styles.topLinkWrap}>
             <div className={styles.topLink}>
                 <span>Important Links	: </span>
-                <a href="shubh-muhurat-2026" title="Shubh Muhurat 2026"> Shubh Muhurat 2026</a> | 
-                <a href="naam-karan-muhurat" title="NaamKaran Muhurat 2026"> NaamKaran Muhurat 2026</a> | 
-                <a href="marriage-muhurat" title="Marriage Muhurat 2026"> Marriage Muhurat 2026</a> | 
-                <a href="bhoomi-pujan-muhurat" title="Bhoomi Pujan Muhurat 2026"> Bhoomi Pujan Muhurat 2026</a> | 
-                <a href="griha-pravesh-muhurat" title="Griha Pravesh Muhurat 2026"> Griha Pravesh Muhurat 2026</a> | 
-                <a href="mundan-muhurat" title="Mundan Muhurat 2026"> Mundan Muhurat 2026</a> | 
-                <a href="car-buying-muhurat" title="Car Buying Muhurat 2026"> Car Buying Muhurat 2026</a> | 
-                <a href="bike-buying-muhurat" title="Bike Buying Muhurat 2026"> Bike Buying Muhurat 2026</a> | 
-                <a href="gold-buying-muhurat" title="Gold Buying Muhurat 2026"> Gold Buying Muhurat 2026</a> |
-                <a href="how-to-read-kundli" title="How to Read Kundli"> How to Read Kundli</a> | 
-                <a href="astrology-mantras" title="Astrology Mantras"> Astrology Mantras</a> | 
-                <a href="astrology-remedy-job-promotion" title="Astro Remedy for Job Promotion"> Astro Remedy for Job Promotion</a> | 
-                <a href="astrology-remedy-conceive-child" title="Astro Remedy to Conceive a Child"> Astro Remedy to Conceive a Child</a> | 
-                <a href="astrology-remedy-quick-marriage" title="Astro Remedy for Quick Marriage"> Astro Remedy for Quick Marriage</a> | 
-                <a href="astro-remedy-to-get-new-job" title="Astro Remedy to Get New Job"> Astro Remedy to Get New Job</a> |
-                <a href="ar-vastu-scanner" title="AR Vastu Scanner"> AR Vastu Scanner</a> | 
-                <a href="ai-palmistry-scanner" title="AI Palmistry Scanner"> AI Palmistry Scanner</a> | 
-                <a href="astro-face-reading" title="Astro Face Reading"> Astro Face Reading</a> | 
-                <a href="signature-analysis" title="Signature Analysis"> Signature Analysis</a> | 
-                <a href="clothes-colour-analysis" title="Clothes Colour Analysis"> Clothes Colour Analysis</a> | 
-                <a href="gemstone-authenticity" title="Gemstone Authenticity"> Gemstone Authenticity</a> | 
-                <a href="aura-photography" title="Aura Photography"> Aura Photography</a>  
+                <a href="https://www.shubhastro.ai/shubh-muhurat-2026" title="Shubh Muhurat 2026"> Shubh Muhurat 2026</a> | 
+                <a href="https://www.shubhastro.ai/naam-karan-muhurat" title="NaamKaran Muhurat 2026"> NaamKaran Muhurat 2026</a> | 
+                <a href="https://www.shubhastro.ai/marriage-muhurat" title="Marriage Muhurat 2026"> Marriage Muhurat 2026</a> | 
+                <a href="bhttps://www.shubhastro.ai/hoomi-pujan-muhurat" title="Bhoomi Pujan Muhurat 2026"> Bhoomi Pujan Muhurat 2026</a> | 
+                <a href="https://www.shubhastro.ai/griha-pravesh-muhurat" title="Griha Pravesh Muhurat 2026"> Griha Pravesh Muhurat 2026</a> | 
+                <a href="https://www.shubhastro.ai/mundan-muhurat" title="Mundan Muhurat 2026"> Mundan Muhurat 2026</a> | 
+                <a href="https://www.shubhastro.ai/car-buying-muhurat" title="Car Buying Muhurat 2026"> Car Buying Muhurat 2026</a> | 
+                <a href="https://www.shubhastro.ai/bike-buying-muhurat" title="Bike Buying Muhurat 2026"> Bike Buying Muhurat 2026</a> | 
+                <a href="https://www.shubhastro.ai/gold-buying-muhurat" title="Gold Buying Muhurat 2026"> Gold Buying Muhurat 2026</a> |
+                <a href="https://www.shubhastro.ai/how-to-read-kundli" title="How to Read Kundli"> How to Read Kundli</a> | 
+                <a href="https://www.shubhastro.ai/astrology-mantras" title="Astrology Mantras"> Astrology Mantras</a> | 
+                <a href="https://www.shubhastro.ai/astrology-remedy-job-promotion" title="Astro Remedy for Job Promotion"> Astro Remedy for Job Promotion</a> | 
+                <a href="https://www.shubhastro.ai/astrology-remedy-conceive-child" title="Astro Remedy to Conceive a Child"> Astro Remedy to Conceive a Child</a> | 
+                <a href="https://www.shubhastro.ai/astrology-remedy-quick-marriage" title="Astro Remedy for Quick Marriage"> Astro Remedy for Quick Marriage</a> | 
+                <a href="https://www.shubhastro.ai/astro-remedy-to-get-new-job" title="Astro Remedy to Get New Job"> Astro Remedy to Get New Job</a> |
+                <a href="https://www.shubhastro.ai/ar-vastu-scanner" title="AR Vastu Scanner"> AR Vastu Scanner</a> | 
+                <a href="https://www.shubhastro.ai/ai-palmistry-scanner" title="AI Palmistry Scanner"> AI Palmistry Scanner</a> | 
+                <a href="https://www.shubhastro.ai/astro-face-reading" title="Astro Face Reading"> Astro Face Reading</a> | 
+                <a href="https://www.shubhastro.ai/signature-analysis" title="Signature Analysis"> Signature Analysis</a> | 
+                <a href="https://www.shubhastro.ai/clothes-colour-analysis" title="Clothes Colour Analysis"> Clothes Colour Analysis</a> | 
+                <a href="https://www.shubhastro.ai/gemstone-authenticity" title="Gemstone Authenticity"> Gemstone Authenticity</a> | 
+                <a href="https://www.shubhastro.ai/aura-photography" title="Aura Photography"> Aura Photography</a>  
             </div>
             <div className={styles.topLink}>
                 <span>Important AI Links	: </span>
-                <a href="ai-love-astrologer" title="AI Love Astrologer"> AI Love Astrologer</a> | 
-                <a href="ai-marriage-astrologer" title="AI Marriage Astrologer"> AI Marriage Astrologer</a> | 
-                <a href="ai-health-astrologer" title="AI Health Astrologer"> AI Health Astrologer</a> | 
-                <a href="ai-career-astrologer" title="AI Career Astrologer"> AI Career Astrologer</a> | 
-                <a href="ai-life-coach-astrologer" title="AI Life Coach Astrologer"> AI Life Coach Astrologer</a> | 
-                <a href="ai-wealth-astrologer" title="AI Wealth Astrologer"> AI Wealth Astrologer</a> | 
-                <a href="ai-general-prediction-astrologer" title="AI General Prediction Astrologer"> AI General Prediction Astrologer</a> | 
-                <a href="ai-gemstone-astrologer" title="AI Gemstone Astrologer"> AI Gemstone Astrologer</a> | 
-                <a href="ai-vedic-astrologer" title="AI Vedic Astrologer"> AI Vedic Astrologer</a> | 
-                <a href="ai-western-astrologer" title="AI Western Astrologer"> AI Western Astrologer</a> | 
-                <a href="ai-kp-astrologer" title="AI KP Astrologer"> AI KP Astrologer</a> | 
-                <a href="ai-laal-kitab-astrologer" title="AI Laal Kitab Astrologer"> AI Laal Kitab Astrologer</a> | 
-                <a href="ai-horoscope-matching-astrologer" title="AI Horoscope Matching Astrologer"> AI Horoscope Matching Astrologer</a> | 
-                <a href="ai-vaastu-astrologer" title="AI Vaastu Astrologer"> AI Vaastu Astrologer</a> | 
-                <a href="ai-spiritual-astrologer" title="AI Spiritual Astrologer"> AI Spiritual Astrologer</a> | 
-                <a href="ai-occult-astrologer" title="AI Occult Astrologer"> AI Occult Astrologer</a> 
+                <a href="https://www.shubhastro.ai/ai-love-astrologer" title="AI Love Astrologer"> AI Love Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-marriage-astrologer" title="AI Marriage Astrologer"> AI Marriage Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-health-astrologer" title="AI Health Astrologer"> AI Health Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-career-astrologer" title="AI Career Astrologer"> AI Career Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-life-coach-astrologer" title="AI Life Coach Astrologer"> AI Life Coach Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-wealth-astrologer" title="AI Wealth Astrologer"> AI Wealth Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-general-prediction-astrologer" title="AI General Prediction Astrologer"> AI General Prediction Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-gemstone-astrologer" title="AI Gemstone Astrologer"> AI Gemstone Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-vedic-astrologer" title="AI Vedic Astrologer"> AI Vedic Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-western-astrologer" title="AI Western Astrologer"> AI Western Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-kp-astrologer" title="AI KP Astrologer"> AI KP Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-laal-kitab-astrologer" title="AI Laal Kitab Astrologer"> AI Laal Kitab Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-horoscope-matching-astrologer" title="AI Horoscope Matching Astrologer"> AI Horoscope Matching Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-vaastu-astrologer" title="AI Vaastu Astrologer"> AI Vaastu Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-spiritual-astrologer" title="AI Spiritual Astrologer"> AI Spiritual Astrologer</a> | 
+                <a href="https://www.shubhastro.ai/ai-occult-astrologer" title="AI Occult Astrologer"> AI Occult Astrologer</a> 
             </div>
             <div className={styles.topLink}>
                 <span>Celebrity Horoscope	: </span>
@@ -182,6 +183,7 @@ const HomeLayout = () => {
                 <a href="https://www.shubhastro.ai/celebrity-couple-horoscope/saif-ali-khan-and-kareena-kapoor" title="Saif Ali Khan & Kareena Kapoor Khan Horoscope"> Saif Ali Khan & Kareena Kapoor Khan Horoscope</a> 
             </div>
           </div>
+          )}
           <Footer />
         </div>
       )}
