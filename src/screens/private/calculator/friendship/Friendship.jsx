@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
 import FlamesForm from "../forms/FlamesForm";
 import styles from "./Friendship.module.scss";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "friendship_calculator";
 
@@ -13,6 +15,7 @@ const initialFormState = {
 
 const Friendship = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(
     STORAGE_KEY,
     initialFormState
@@ -35,7 +38,7 @@ const Friendship = () => {
     setErrors(newErrors);
     if (Object.keys(newErrors).length) return;
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: formData }));
     navigate("/friendship-calculator/report");
   };
 
@@ -57,7 +60,7 @@ const Friendship = () => {
 
       <FlamesForm
         title="Calculate your Friendship Compatibility here"
-        submitText="Calculate our Friendship"
+        submitText="Show Results"
         name2Label="Your Friend's Name"
         name2Placeholder="Enter your friend's name"
         formData={formData}
@@ -67,7 +70,7 @@ const Friendship = () => {
         onReset={() => {
           setFormData(initialFormState);
           setErrors({});
-          localStorage.removeItem(STORAGE_KEY);
+          dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
         }}
       />
     </div>

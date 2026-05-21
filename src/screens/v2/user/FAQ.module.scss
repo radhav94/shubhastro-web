@@ -2,11 +2,12 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f8f8f8;
+  // background: #f8f8f8;
 }
 .headerWrap{
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   margin-top: 93px;
   @media (width <= 1180px) {
     margin-top: 50px;
@@ -17,7 +18,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px;
-  background: white;
+  // background: white;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -102,7 +103,8 @@
 }
 
 .categoryPill {
-  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
   border: 1px solid #F44336;
   padding: 10px 18px;
   border-radius: 20px;
@@ -132,7 +134,9 @@
 }
 
 .faqItem {
-  background: white;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -144,7 +148,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  background: white;
+  // background: white;
   border: none;
   cursor: pointer;
   text-align: left;
@@ -152,7 +156,7 @@
   gap: 12px;
 
   &:hover {
-    background: #fafafa;
+    background: #fafafaa0;
   }
 }
 
@@ -176,8 +180,10 @@
 }
 
 .faqAnswer {
-  padding: 0 16px 16px 16px;
-  background: #fafafa;
+  padding: 16px;
+  // background: rgba(255, 255, 255, 0.4);
+  // border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
   animation: slideDown 0.3s ease-out;
 
   p {

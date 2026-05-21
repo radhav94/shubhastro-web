@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useGetRashiCalQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./RashiReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import TTSButton from "../../../../component/UI/TTSButton";
 import { zodiacSignImages } from "../../horoscope/zodiac";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const RashiReport = () => {
   const navigate = useNavigate();
   const [detailsOpen, setDetailsOpen] = useState(true);
   const [aboutOpen, setAboutOpen] = useState(true);
 
-  const stored = JSON.parse(localStorage.getItem("rashi_moon_sign"));
+  const stored = useSelector(selectCalculatorData("rashi_moon_sign"));
   const { data, isLoading } = useGetRashiCalQuery(stored);
 
   if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
@@ -29,6 +32,7 @@ const RashiReport = () => {
   };
 
   return (
+    <>
     <div className={styles.wrapper}>
       <CalcBackButton />
 
@@ -58,23 +62,23 @@ const RashiReport = () => {
 
       {/* RASHI CARD */}
       {moon_sign && (
-        <div className={styles.rashiCard}>
-          <div>
-            <span className={styles.label}>Your Rashi</span>
-            <h3 className={styles.rashiName}>{moon_sign}</h3>
+        <>
+          <div className={styles.card}>
+            <div className={styles.cardLeft}>
+              <p className={styles.cardLabel}>Your Rashi</p>
+              <h3 className={styles.signName}>{moon_sign}</h3>
+            </div>
+            {signImage && (
+              <div className={styles.signImageWrap}>
+                <img src={signImage} alt={moon_sign} className={styles.signImage} />
+              </div>
+            )}
           </div>
-          {signImage && (
-            <img src={signImage} alt={moon_sign} className={styles.rashiIcon} />
-          )}
-        </div>
+          <button className={styles.calcAgainBtn} onClick={() => navigate(-1)}>
+            Calculate Again
+          </button>
+        </>
       )}
-
-      {/* CALCULATE AGAIN */}
-      <div className={styles.calcAgainWrap}>
-        <button className={styles.calcAgainBtn} onClick={() => navigate(-1)}>
-          Calculate Again
-        </button>
-      </div>
 
       {/* PERSONAL DETAILS ACCORDION */}
       <div className={styles.accordionBox}>
@@ -163,6 +167,9 @@ const RashiReport = () => {
         </div>
       )}
     </div>
+
+    <ConnectCard />
+  </>
   );
 };
 

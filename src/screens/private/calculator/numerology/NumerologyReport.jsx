@@ -1,13 +1,15 @@
+import { useSelector } from "react-redux";
 import { useGetNumerologyReportQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./NumerologyReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 import TTSButton from "../../../../component/UI/TTSButton";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const NumerologyReport = () => {
 
-  const stored = JSON.parse(localStorage.getItem("numerology_report"));
+  const stored = useSelector(selectCalculatorData("numerology_report"));
   const { data, isLoading } = useGetNumerologyReportQuery(stored, {
     skip: !stored,
   });

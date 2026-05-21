@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useGetSunSignQuery } from "../../../../redux/api/calculator/calcApi";
 import styles from "./SunSignReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { Share2 } from "lucide-react";
 import { zodiacSignImages } from "../../horoscope/zodiac";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const SunSignReport = () => {
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const stored = JSON.parse(localStorage.getItem("sun_sign"));
+  const stored = useSelector(selectCalculatorData("sun_sign"));
   const { data, isLoading } = useGetSunSignQuery(stored);
 
   if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
@@ -130,6 +133,8 @@ const SunSignReport = () => {
           </div>
         </div>
       )}
+
+      <ConnectCard />
     </div>
   );
 };

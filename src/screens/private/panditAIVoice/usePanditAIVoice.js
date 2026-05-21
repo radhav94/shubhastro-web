@@ -1,0 +1,404 @@
+import { useState, useRef, useCallback, useEffect } from "react";
+import { voiceSocket } from "../../../services/voiceSocketServices";
+import {
+  useCreateChatRoomMutation,
+} from "../../../redux/api/chatApi";
+import { textToSpeech, SARVAM_LANGUAGES, SARVAM_SPEAKERS } from "../../../services/sarvamTTSService";
+import useSarvamSTT from "./useSarvamSTT";
+import { isPanditAIEvent, setPanditAIChatActive } from "../../../component/panditAI/usePanditAI";
+import toast from "../../../component/toast";
+
+export const PANDIT_AI_ID = "6928390dc00d56953b586c04";
+
+// Map language codes from backend response to Sarvam TTS language codes
+const LANG_CODE_TO_SARVAM = {
+  en: SARVAM_LANGUAGES.ENGLISH,
+  hi: SARVAM_LANGUAGES.HINDI,
+  bn: SARVAM_LANGUAGES.BENGALI,
+  ta: SARVAM_LANGUAGES.TAMIL,
+  te: SARVAM_LANGUAGES.TELUGU,
+  mr: SARVAM_LANGUAGES.MARATHI,
+  gu: SARVAM_LANGUAGES.GUJARATI,
+  kn: SARVAM_LANGUAGES.KANNADA,
+  ml: SARVAM_LANGUAGES.MALAYALAM,
+  pa: SARVAM_LANGUAGES.PUNJABI,
+};
+
+// Detect language from text using Unicode script ranges
+function detectLanguageFromText(text) {
+  if (!text) return "hi";
+
+  // Check for script-specific characters
+  const tamil = /[\u0B80-\u0BFF]/;
+  const telugu = /[\u0C00-\u0C7F]/;
+  const kannada = /[\u0C80-\u0CFF]/;
+  const malayalam = /[\u0D00-\u0D7F]/;
+  const bengali = /[\u0980-\u09FF]/;
+  const gujarati = /[\u0A80-\u0AFF]/;
+  const punjabi = /[\u0A00-\u0A7F]/;
+  const devanagari = /[\u0900-\u097F]/;
+  const latin = /[a-zA-Z]/;
+
+  if (tamil.test(text)) return "ta";
+  if (telugu.test(text)) return "te";
+  if (kannada.test(text)) return "kn";
+  if (malayalam.test(text)) return "ml";
+  if (bengali.test(text)) return "bn";
+  if (gujarati.test(text)) return "gu";
+  if (punjabi.test(text)) return "pa";
+  if (devanagari.test(text)) return "hi"; // Could be Hindi or Marathi — fallback to hi
+  if (latin.test(text)) return "en";
+
+  return "hi";
+}
+
+export default function usePanditAIVoice({ enabled = true } = {}) {
+  const [status, setStatus] = useState("idle"); // idle | listening | processing | speaking
+  const [transcript, setTranscript] = useState("");
+  const [aiResponse, setAiResponse] = useState("");
+  const [connecting, setConnecting] = useState(false);
+
+  const roomIdRef = useRef(null);
+  const initiatedRef = useRef(false);
+  const audioRef = useRef(null);
+  const abortRef = useRef(null);
+  const pendingMessageRef = useRef(null);
+  const sendTextRef = useRef(null);
+  const [roomId, setRoomId] = useState(null);
+
+  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+  const [createChatRoom] = useCreateChatRoomMutation();
+
+  // Initiate chat session on mount
+  useEffect(() => {
+    if (!enabled || !userIdLocal || initiatedRef.current) return;
+
+    const initChat = async () => {
+      setConnecting(true);
+      initiatedRef.current = true;
+
+      // Ensure socket is connected
+      if (!voiceSocket.connected) {
+        voiceSocket.io.opts.query = {
+          userId: userIdLocal,
+          role: "CUSTOMER",
+        };
+        voiceSocket.connect();
+      }
+
+      try {
+        await createChatRoom({
+          userId: userIdLocal,
+          astrologerId: PANDIT_AI_ID,
+        }).unwrap();
+      } catch (err) {
+        console.log("[PanditAIVoice] Room creation:", err?.data?.message || "exists");
+      }
+
+      // Wait for socket to connect before emitting
+      const emitInitiate = () => {
+        console.log("[PanditAIVoice] Emitting chat:initiate");
+        setPanditAIChatActive(true);
+        voiceSocket.emit("chat:initiate", {
+          userId: userIdLocal,
+          astrologerId: PANDIT_AI_ID,
+        });
+        setConnecting(false);
+      };
+
+      if (voiceSocket.connected) {
+        emitInitiate();
+      } else {
+        voiceSocket.once("connect", emitInitiate);
+      }
+    };
+
+    initChat();
+  }, [enabled, userIdLocal, createChatRoom]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      const currentRoomId = roomIdRef.current;
+      if (currentRoomId && voiceSocket.connected) {
+        voiceSocket.emit("chat:end", {
+          roomId: currentRoomId,
+          userId: userIdLocal,
+          astrologerId: PANDIT_AI_ID,
+        });
+      }
+      roomIdRef.current = null;
+      initiatedRef.current = false;
+      if (abortRef.current) abortRef.current.abort();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [userIdLocal]);
+
+  // Socket event listeners — only active when voice session is enabled
+  useEffect(() => {
+    if (!enabled) return;
+
+    const handleChatRoom = (data) => {
+      console.log("[PanditAIVoice] chat:room received", data);
+      if (data?.roomId) {
+        roomIdRef.current = data.roomId;
+        setRoomId(data.roomId);
+        setPanditAIChatActive(true, data.roomId);
+      }
+    };
+
+    const handleChatAccepted = (data) => {
+      console.log("[PanditAIVoice] chat:accepted received", data);
+      if (data?.roomId) {
+        roomIdRef.current = data.roomId;
+        setRoomId(data.roomId);
+        setPanditAIChatActive(true, data.roomId);
+        const pending = pendingMessageRef.current;
+        if (pending) {
+          pendingMessageRef.current = null;
+          sendTextRef.current?.(pending);
+        }
+      }
+    };
+
+    const handleMessage = async (data) => {
+      console.log("[PanditAIVoice] message:recieved", data);
+      console.log("[PanditAIVoice] language fields:", {
+        languageCode: data.languageCode,
+        language: data.language,
+        targetLanguage: data.targetLanguage,
+        targetLanguageName: data.targetLanguageName,
+      });
+      if (data?.astrologerId !== PANDIT_AI_ID && data?.sender !== PANDIT_AI_ID) return;
+      if (data.sender === "user") return;
+
+      const responseText = data.message || data.response;
+      setAiResponse(responseText);
+
+      // Use the user's STT-detected language as primary for TTS
+      // Fallback to backend response fields, then text detection
+      const detectedLangCode =
+        detectedLangRef.current ||
+        data.languageCode ||
+        data.targetLanguage ||
+        data.language?.split("-")?.[0] ||
+        detectLanguageFromText(responseText);
+      const ttsLanguage = LANG_CODE_TO_SARVAM[detectedLangCode] || SARVAM_LANGUAGES.HINDI;
+      console.log("[PanditAIVoice] TTS language resolved:", detectedLangCode, "→", ttsLanguage);
+
+      // Convert response to speech via Sarvam TTS
+      try {
+        abortRef.current = new AbortController();
+        const audioBase64 = await textToSpeech(responseText, {
+          language: ttsLanguage,
+          speaker: SARVAM_SPEAKERS.ISHITA,
+          pace: 1.0,
+          signal: abortRef.current.signal,
+        });
+
+        const audioBlob = base64ToBlob(audioBase64, "audio/wav");
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+
+        audio.onended = () => {
+          setStatus("idle");
+          URL.revokeObjectURL(audioUrl);
+          audioRef.current = null;
+        };
+
+        audio.onerror = () => {
+          setStatus("idle");
+          URL.revokeObjectURL(audioUrl);
+          audioRef.current = null;
+        };
+
+        setStatus("speaking");
+        await audio.play();
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("[PanditAIVoice] TTS error:", err);
+          toast.error("Failed to play audio response");
+        }
+        setStatus("idle");
+      }
+    };
+
+    const handleError = (err) => {
+      console.error("[PanditAIVoice] Socket error:", err);
+      if (err?.code === "CONTENT_BLOCKED") {
+        toast.error("Message was blocked. Please try a different question.");
+      }
+      setStatus("idle");
+    };
+
+    voiceSocket.on("chat:room", handleChatRoom);
+    voiceSocket.on("chat:accepted", handleChatAccepted);
+    voiceSocket.on("message:recieved", handleMessage);
+    voiceSocket.on("error", handleError);
+
+    return () => {
+      voiceSocket.off("chat:room", handleChatRoom);
+      voiceSocket.off("chat:accepted", handleChatAccepted);
+      voiceSocket.off("message:recieved", handleMessage);
+      voiceSocket.off("error", handleError);
+    };
+  }, [enabled]);
+
+  // Send text message via socket
+  const sendText = useCallback(
+    (text, sttLangCode) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+
+      const currentRoomId = roomIdRef.current;
+      if (!currentRoomId) {
+        pendingMessageRef.current = trimmed;
+        return;
+      }
+
+      setStatus("processing");
+      setTranscript(trimmed);
+
+      // Use Sarvam STT detected language, or fallback to script detection
+      const detectedCode = sttLangCode || detectLanguageFromText(trimmed);
+      const LANG_NAMES = { en: "English", hi: "Hindi", bn: "Bengali", ta: "Tamil", te: "Telugu", mr: "Marathi", gu: "Gujarati", kn: "Kannada", ml: "Malayalam", pa: "Punjabi" };
+      const LANG_LOCALES = { en: "en-IN", hi: "hi-IN", bn: "bn-IN", ta: "ta-IN", te: "te-IN", mr: "mr-IN", gu: "gu-IN", kn: "kn-IN", ml: "ml-IN", pa: "pa-IN" };
+
+      if (voiceSocket.connected) {
+        console.log("[PanditAIVoice] Sending chat:message", { roomId: currentRoomId, message: trimmed, detectedLang: detectedCode });
+        voiceSocket.emit("chat:message", {
+          sender: "user",
+          roomId: currentRoomId,
+          userId: userIdLocal,
+          astrologerId: PANDIT_AI_ID,
+          message: trimmed,
+          type: "message",
+          language: LANG_LOCALES[detectedCode] || "hi-IN",
+          languageCode: detectedCode,
+          targetLanguage: detectedCode,
+          targetLanguageName: LANG_NAMES[detectedCode] || "Hindi",
+        });
+      } else {
+        toast.error("Connection lost. Please try again.");
+        setStatus("idle");
+      }
+    },
+    [userIdLocal]
+  );
+
+  sendTextRef.current = sendText;
+
+  // Sarvam STT result handler — receives transcript and detected language
+  const detectedLangRef = useRef("hi");
+
+  const handleSTTResult = useCallback((transcript, languageCode) => {
+    if (!transcript?.trim()) return;
+    setTranscript(transcript.trim());
+    // Store detected language for sendText to use
+    detectedLangRef.current = languageCode || detectLanguageFromText(transcript);
+  }, []);
+
+  const handleSTTEnd = useCallback((result) => {
+    const text = result?.transcript?.trim();
+    console.log("[PanditAIVoice] handleSTTEnd called:", { text, language_code: result?.language_code, roomId: roomIdRef.current });
+    if (text) {
+      const langCode = result.language_code || detectLanguageFromText(text);
+      detectedLangRef.current = langCode;
+      sendTextRef.current?.(text, langCode);
+    } else {
+      // No speech detected, go back to idle
+      setStatus("idle");
+    }
+  }, []);
+
+  const { isListening, isSupported, startListening, stopListening } = useSarvamSTT({
+    onResult: handleSTTResult,
+    onEnd: handleSTTEnd,
+  });
+
+  // Toggle mic
+  const toggleListening = useCallback(() => {
+    if (status === "speaking") {
+      // Stop current audio playback
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (abortRef.current) abortRef.current.abort();
+      setStatus("idle");
+      return;
+    }
+
+    if (isListening) {
+      // Stop recording — let onstop handler process the audio and call sendText
+      stopListening();
+      setStatus("processing");
+    } else {
+      setTranscript("");
+      setAiResponse("");
+      startListening();
+      setStatus("listening");
+    }
+  }, [isListening, status, startListening, stopListening]);
+
+  // Update status when listening state changes
+  useEffect(() => {
+    if (isListening) {
+      setStatus("listening");
+    } else if (status === "listening") {
+      // Auto-stopped (silence detection) — move to processing
+      setStatus("processing");
+    }
+  }, [isListening]);
+
+  // End session explicitly (called on popup close)
+  const endSession = useCallback(() => {
+    const currentRoomId = roomIdRef.current;
+    if (currentRoomId && voiceSocket.connected) {
+      voiceSocket.emit("chat:end", {
+        roomId: currentRoomId,
+        userId: userIdLocal,
+        astrologerId: PANDIT_AI_ID,
+      });
+    }
+    roomIdRef.current = null;
+    initiatedRef.current = false;
+    setPanditAIChatActive(false, null);
+    if (abortRef.current) abortRef.current.abort();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setStatus("idle");
+    setRoomId(null);
+  }, [userIdLocal]);
+
+  return {
+    status,
+    transcript,
+    aiResponse,
+    toggleListening,
+    isSupported,
+    connecting,
+    roomId,
+    endSession,
+  };
+}
+
+function base64ToBlob(base64, mimeType) {
+  const byteChars = atob(base64);
+  const byteArrays = [];
+  for (let offset = 0; offset < byteChars.length; offset += 512) {
+    const slice = byteChars.slice(offset, offset + 512);
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+    byteArrays.push(new Uint8Array(byteNumbers));
+  }
+  return new Blob(byteArrays, { type: mimeType });
+}

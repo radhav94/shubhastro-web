@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useLoveCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
 import { useEffect, useState } from "react";
 import styles from "./LoveReport.module.scss";
@@ -9,10 +10,11 @@ import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import CalcBackButton from "../CalcBackButton";
 import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 import { Share2, ChevronDown } from "lucide-react";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const LoveReport = () => {
   const navigate = useNavigate();
-  const stored = JSON.parse(localStorage.getItem("love_calculator"));
+  const stored = useSelector(selectCalculatorData("love_calculator"));
 
   const [loveCalculator, { data, isLoading, isError, error }] =
     useLoveCalculatorMutation();
@@ -68,12 +70,26 @@ const LoveReport = () => {
       <CalcBackButton />
 
       {/* Page Title */}
-      {/* <PrimaryText isCenter isSemiBold size_24>
-        Love Calculator: Find Your Perfect Match and Discover True Love
-      </PrimaryText>
-      <div className={styles.dividerWrap}>
-        <DividerWithImage imageSrc={ShubhTalkLogo} />
-      </div> */}
+      <div className={styles.header}>
+        <h2>Love Calculator Results</h2>
+        <div className={styles.headingUnderline}>
+          <div className={styles.dividerLine}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
+              <line y1="0.5" x2="93" y2="0.5" stroke="#030303" />
+            </svg>
+          </div>
+          <span className={styles.dividerMoon}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="4" height="5" viewBox="0 0 4 5" fill="none">
+              <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303" />
+            </svg>
+          </span>
+          <div className={styles.dividerLine}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
+              <line y1="0.5" x2="93" y2="0.5" stroke="#030303" />
+            </svg>
+          </div>
+        </div>
+      </div>
 
       {/* Intro Text */}
       {/* <PrimaryText className={styles.introText} size_16>
@@ -91,19 +107,6 @@ const LoveReport = () => {
 
       {/* RESULTS Section */}
       <div className={styles.resultsSection}>
-        <h2 className={styles.resultsHeading}>RESULTS</h2>
-        <div className={styles.resultsUnderline}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
-            <line y1="0.5" x2="93" y2="0.5" stroke="#030303" />
-          </svg>
-          <svg xmlns="http://www.w3.org/2000/svg" width="4" height="5" viewBox="0 0 4 5" fill="none">
-            <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
-          </svg>
-          <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
-            <line y1="0.5" x2="93" y2="0.5" stroke="#030303" />
-          </svg>
-        </div>
-
         {/* Result Card */}
         <div className={styles.resultCard}>
           {/* Share Button */}

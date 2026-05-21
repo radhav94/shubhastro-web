@@ -1,14 +1,16 @@
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useGetAtmakarakaQuery } from "../../../../redux/api/calculator/calcApi";
 import styles from "./AtmakarakaReport.module.scss";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import CalcBackButton from "../CalcBackButton";
 import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const AtmakarakaReport = () => {
   const navigate = useNavigate();
 
-  const stored = JSON.parse(localStorage.getItem("atmakaraka-and-darakaraka"));
+  const stored = useSelector(selectCalculatorData("atmakaraka-and-darakaraka"));
 
   const { data, isLoading } = useGetAtmakarakaQuery(stored);
 

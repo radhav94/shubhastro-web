@@ -1,16 +1,23 @@
 .wrapper {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 0 16px 48px;
+  max-width: 900px;
+  margin: 70px auto 40px;
+  padding: 20px 16px;
+  background: linear-gradient(135deg, #fff9f0 0%, #ffe4c4 100%);
+  border-radius: 10px;
+  border: 1.5px solid #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .card {
   background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 2px solid white;
-  border-radius: 14px;
-  padding: 32px 24px;
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
+  border-radius: 18px;
+  max-width: 500px;
+  width: 100%;
+  overflow: hidden;
   text-align: center;
 }
 
@@ -52,7 +59,8 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 28px;
+  margin: 16px 0;
+  padding-inline: 16px;
 }
 
 .nameBox {

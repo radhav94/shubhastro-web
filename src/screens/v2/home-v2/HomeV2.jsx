@@ -11,6 +11,7 @@ import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
+import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
@@ -103,7 +104,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
                     </svg>
                   </div>
                 </div>
-                <button className={styles.wowViewMore} onClick={() => navigate('/ai-wow')}>View More &rsaquo;</button>
+                {/* <button className={styles.wowViewMore} onClick={() => navigate('/ai-wow')}>View More &rsaquo;</button> */}
               </div>
               <div className={styles.wowGrid}>
                 {wowSections.flatMap((sec, si) =>
@@ -444,6 +445,7 @@ const HomeV2 = () => {
         <MobileAppModal isOpen={showMobileAppModal} onClose={() => setShowMobileAppModal(false)} />
       </Suspense>
       <PanditAIBubble />
+      <PanditAIVoiceBubble />
     </>
   );
 };

@@ -163,6 +163,13 @@
   }
 }
 
+.badgeTtsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
 .trendingBadge {
   display: inline-flex;
   padding: 4px 14px;
@@ -171,5 +178,4 @@
   color: #E56329;
   font-size: 13px;
   font-weight: 500;
-  margin-bottom: 16px;
 }

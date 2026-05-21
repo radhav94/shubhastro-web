@@ -27,7 +27,23 @@ $mobile-screen-width: 500px;
     //   margin-top: -1px;
     // }
   }
-
+.topLinkWrap{
+    background-color: #ffffff31;
+    padding: 16px;
+    .topLink{
+      max-width: 1440px;
+      margin: 0 auto;
+      padding-block: 3px;
+      span{
+        text-transform: uppercase;
+      }
+      a{
+        font-size: 0.8rem;
+        color: #030303;
+        letter-spacing: 0.4px;
+      }
+    }
+}
   .topBarContainer {
     width: 100%;
     padding: 8px 0;

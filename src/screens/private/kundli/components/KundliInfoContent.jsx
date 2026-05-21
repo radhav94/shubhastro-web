@@ -3,6 +3,7 @@ import styles from "./KundliInfoContent.module.scss";
 const KundliInfoContent = () => {
     return (
         <div className={styles.infoSection}>
+            <div className={styles.infoInner}>
             <p className={styles.infoParagraph}>
                 Now, making your janam kundali online is super easy. You just need to enter your birth details, no need to meet any astrologer or pay anything first. Websites like Shubh Talk free kundli bring this ancient knowledge right to your screen.
             </p>
@@ -25,6 +26,7 @@ const KundliInfoContent = () => {
             <p className={styles.infoParagraph}>
                 With a janam kundali, you can plan better for important life events. Whether it's about your job, relationships, or health, your kundli gives you helpful hints. Many people use their kundli predictions to make smarter choices and feel more confident about their future.
             </p>
+            </div>
         </div>
     );
 };
