@@ -204,20 +204,23 @@ const SideBar = ({ open, onClose }) => {
     {
       title: (
         <span className="notranslate">
-          {currentLang === "en" ? "English" : "हिंदी"}
+          {currentLang === "en" ? "English" : currentLang === "mr" ? "मराठी" : "हिंदी"}
         </span>
       ),
       children: [
-        currentLang === "en"
-          ? {
-              title: "हिंदी",
-              onClick: () => handleLanguageChange("hi"),
-            }
-          : {
-              title: "English",
-              onClick: () => handleLanguageChange("en"),
-            },
-      ],
+        currentLang !== "en" && {
+          title: "English",
+          onClick: () => handleLanguageChange("en"),
+        },
+        currentLang !== "hi" && {
+          title: "हिंदी",
+          onClick: () => handleLanguageChange("hi"),
+        },
+        currentLang !== "mr" && {
+          title: "मराठी",
+          onClick: () => handleLanguageChange("mr"),
+        },
+      ].filter(Boolean),
     },
     {
       title: "Calculators",

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./AstrologerProfile.module.scss";
 import { FaPlay, FaStar, FaChevronRight } from "react-icons/fa";
 import { Radio } from "lucide-react";
@@ -692,6 +692,23 @@ const AstrologerProfile = () => {
     }
   };
 
+  // Infinite scroll for reviews
+  const reviewsListRef = useRef(null);
+  const handleReviewsScroll = useCallback(() => {
+    const el = reviewsListRef.current;
+    if (!el || loadingMore || reviewPage >= reviewTotalPages) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
+      handleLoadMoreReviews();
+    }
+  }, [loadingMore, reviewPage, reviewTotalPages]);
+
+  useEffect(() => {
+    const el = reviewsListRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", handleReviewsScroll);
+    return () => el.removeEventListener("scroll", handleReviewsScroll);
+  }, [handleReviewsScroll]);
+
   // Use the overall rating from API data (not calculated from limited reviews)
   const averageRating = data?.rating || 0;
 
@@ -1378,8 +1395,8 @@ const AstrologerProfile = () => {
               {reviewsLoading ? (
                 <div className={styles.reviewsLoading}>Loading reviews...</div>
               ) : allReviews.length > 0 ? (
-                <div className={`${styles.reviewsList} ${allReviews.length > 4 ? styles.scrollable : ''}`}>
-                  {(allReviews.length <= 4 ? allReviews : allReviews).map((review) => (
+                <div ref={reviewsListRef} className={`${styles.reviewsList} ${styles.scrollable}`}>
+                  {allReviews.map((review) => (
                     <div key={review._id} className={styles.reviewCard}>
                       <div className={styles.reviewHeader}>
                         <span className={styles.reviewDate}>
@@ -1412,16 +1429,6 @@ const AstrologerProfile = () => {
               ) : (
                 <div className={styles.noReviews}>
                   No reviews yet. Be the first to review!
-                </div>
-              )}
-              {allReviews.length >= 4 && reviewPage < reviewTotalPages && !loadingMore && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
-                  <span
-                    onClick={handleLoadMoreReviews}
-                    style={{ color: '#F75801', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
-                  >
-                    View All →
-                  </span>
                 </div>
               )}
 

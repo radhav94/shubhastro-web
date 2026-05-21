@@ -624,9 +624,11 @@ const HoroscopeNew = () => {
                   <strong>Lucky Color:</strong>{' '}
                   <span
                     style={{
-                      color: currentContent.luckyColor?.toLowerCase() === 'white'
-                        ? '#000'
-                        : currentContent.luckyColorCode,
+                      color: '#fff',
+                      backgroundColor: currentContent.luckyColorCode || currentContent.luckyColor,
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      border: currentContent.luckyColor?.toLowerCase() === 'white' ? '1px solid #ccc' : 'none',
                     }}
                   >
                     {currentContent.luckyColor}
@@ -651,9 +653,11 @@ const HoroscopeNew = () => {
                       <strong>Lucky Color:</strong>{' '}
                       <span
                         style={{
-                          color: currentContent.luckyColor?.toLowerCase() === 'white'
-                            ? '#000'
-                            : currentContent.luckyColorCode,
+                          color: '#fff',
+                          backgroundColor: currentContent.luckyColorCode || currentContent.luckyColor,
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          border: currentContent.luckyColor?.toLowerCase() === 'white' ? '1px solid #ccc' : 'none',
                         }}
                       >
                         {currentContent.luckyColor}
