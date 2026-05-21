@@ -611,15 +611,15 @@
 /* ── Change Address Button ── */
 .changeAddrBtn {
   position: absolute;
-  top: 16px;
-  right: 18px;
+  top: 8px;
+  right: 15px;
   background: none;
   border: 1px solid #f75801;
   border-radius: 6px;
   color: #f75801;
   font-size: 12px;
   font-weight: 600;
-  padding: 4px 12px;
+  padding: 3px 10px;
   cursor: pointer;
   transition: all 0.2s;
   &:hover { background: #fff5f0; }

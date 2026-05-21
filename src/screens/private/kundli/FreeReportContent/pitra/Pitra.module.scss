@@ -27,19 +27,29 @@ $font-primary: "Poppins", sans-serif;
 // --- Header Card ---
 .headerCard {
   position: relative;
-  background: #fff;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
   overflow: hidden;
-  margin-bottom: 24px;
-  min-height: 200px;
+  // box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
+  border: 1.5px solid var(--border-50, rgba(255, 255, 255, 1));
+  backdrop-filter: blur(12px);
+
+  @media (max-width: 768px) {
+    padding: 20px;
+    border-radius: 12px;
+  }
 }
 
 .headerOverlay {
   position: absolute;
-  inset: 0;
-  border-radius: 15px;
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
-  background: var(--surface, #FEFEFE);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.1), transparent);
+  pointer-events: none;
 }
 
 .headerContent {
@@ -95,10 +105,11 @@ $font-primary: "Poppins", sans-serif;
 // --- Compact Stat Card ---
 .statCard {
   border-radius: 15px;
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
-  background: var(--surface, #FEFEFE);
+  border: 1.5px solid var(--border-50, rgb(255, 255, 255));
+  backdrop-filter: blur(12px);
+  background: var(--surface, rgba(255, 255, 255, 0.4));
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -133,11 +144,11 @@ $font-primary: "Poppins", sans-serif;
 
 // --- Summary Card ---
 .summaryCard {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 16px;
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.5));
+  border: 1px solid var(--border-50, rgba(255, 255, 255, 1));
   height: 100%;
 
   @media (min-width: 768px) {

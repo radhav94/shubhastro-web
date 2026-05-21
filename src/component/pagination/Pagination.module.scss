@@ -1,76 +1,97 @@
 .paginationWrapper {
-  margin-top: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-
-  button {
-    padding: 8px 14px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-    background: white;
-    cursor: pointer;
-    transition: 0.2s;
-
-    &:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    &:hover:not(:disabled) {
-      background: #F75801;
-      color: white;
-    }
-  }
+  padding: 20px 0;
 }
 
-.pages {
+// Arrow buttons (prev/next)
+.arrowBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #F75801 0%, #D43400 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.3);
 
-  .active {
-    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-    color: white;
-    border-color: #F75801;
+  &:hover:not(.disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.4);
+  }
+
+  &.disabled {
+    background: transparent;
+    border: 2px solid #D43400;
+    color: #D43400;
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  @media (max-width: 576px) {
+    width: 40px;
+    height: 40px;
   }
 }
-/* -------------------------
-   Mobile Pagination
---------------------------*/
-@media (max-width: 576px) {
-  .paginationWrapper {
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 10px;
-    margin-top: 20px;
+
+// Page number buttons
+.pageBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: #f5ede8;
+  color: #1a1a1a;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover:not(.active) {
+    background: #ffe0cc;
+    transform: scale(1.05);
   }
 
-  /* Prev / Next buttons */
-  .paginationWrapper > button {
-    flex: 1 1 45%;
-    padding: 10px 0;
-    font-size: 13px;
-    border-radius: 8px;
+  &.active {
+    background: linear-gradient(135deg, #F75801 0%, #D43400 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(247, 88, 1, 0.3);
   }
 
-  .pages {
-    width: 100%;
-    justify-content: center;
-    gap: 6px;
-    order: 3;
+  @media (max-width: 576px) {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
   }
+}
 
-  .pages button {
-    min-width: 32px;
-    height: 32px;
-    padding: 0;
-    font-size: 12px;
-    border-radius: 50%;
-  }
+// Dots (ellipsis)
+.dots {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f5ede8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #666;
+  letter-spacing: 1px;
 
-  .dots {
-    font-size: 12px;
-    padding: 0 4px;
+  @media (max-width: 576px) {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
   }
 }

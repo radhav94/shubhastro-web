@@ -76,10 +76,11 @@ const Weekly = () => {
                 <strong>Lucky Color:</strong>{" "}
                 <span
                     style={{
-                      color:
-                        data?.response?.lucky_color?.toLowerCase() === "white"
-                          ? "#000"
-                          : data?.response?.lucky_color_code,
+                      color: "#fff",
+                      backgroundColor: data?.response?.lucky_color_code || data?.response?.lucky_color,
+                      padding: "2px 8px",
+                      borderRadius: "4px",
+                      border: data?.response?.lucky_color?.toLowerCase() === "white" ? "1px solid #ccc" : "none",
                     }}
                   >
                   {data.response.lucky_color}

@@ -83,6 +83,18 @@ const Profile = () => {
   );
   const [orderHistoryTab, setOrderHistoryTab] = useState("call"); // Sub-tab for order history
 
+  // Scroll to tabs section when navigated with activeTab state
+  useEffect(() => {
+    if (navigationState.activeTab && orderListRef.current) {
+      setTimeout(() => {
+        const el = orderListRef.current;
+        const headerOffset = 100;
+        const elementPosition = el.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top: elementPosition - headerOffset, behavior: "smooth" });
+      }, 300);
+    }
+  }, []);
+
   // Filter modal state
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [filterActiveTab, setFilterActiveTab] = useState("Sort");
@@ -1239,7 +1251,7 @@ const Profile = () => {
     <div className={styles.profilePage}>
       {/* Header */}
       <div className={styles.profileHeader}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
+        <button className={styles.backButton} onClick={() => navigate('/')}>
           <ChevronLeft size={24} />
         </button>
 
@@ -1397,7 +1409,7 @@ const Profile = () => {
       </div>
 
       {/* Tabs */}
-      <div className={styles.tabsContainer}>
+      <div className={styles.tabsContainer} ref={orderListRef}>
         {tabs.map((tab) => (
           <button
             key={tab}
@@ -1631,7 +1643,7 @@ const Profile = () => {
                                       <span className={styles.orderDate}>
                                         📅{" "}
                                         {dayjs(order.date).format(
-                                          "MMM DD, YYYY",
+                                          "DD MMM, YYYY",
                                         )}
                                       </span>
                                       <span className={styles.orderTime}>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AuraLanding.module.scss';
 import SmileIcon from '../../../../assets/icons/Smile.png';
@@ -6,11 +6,19 @@ import EnergyLevelsIcon from '../../../../assets/icons/energylevels.png';
 import ChakraIcon from '../../../../assets/icons/chakra.png';
 import AuraSizeIcon from '../../../../assets/icons/aurasize.png';
 import Footer from '../../../../layouts/Footer';
-import TTSButton from '../../../../component/UI/TTSButton';
 
 const AuraLanding = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/aura-photography");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
   const features = [
     {
       icon: SmileIcon,
@@ -39,7 +47,7 @@ const AuraLanding = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate('/aiwow')}>
+        <button className={styles.backButton} onClick={() => navigate(-1)}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -55,10 +63,7 @@ const AuraLanding = () => {
 
         <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
-            <div key={index} className={styles.featureCard} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
-                <TTSButton text={`${[feature?.title, feature.description].filter(Boolean).join('. ')}`} />
-              </span>
+            <div key={index} className={styles.featureCard}>
               <div className={styles.iconWrapper}>
                 <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
               </div>

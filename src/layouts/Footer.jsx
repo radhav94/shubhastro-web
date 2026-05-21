@@ -16,8 +16,8 @@ import { clearSelectedKundli } from "../redux/kundli/kundliSlice";
 // Footer link data
 const horoscopeLinks = [
   { href: "/daily-horoscope", text: "Daily Horoscope" },
+  { href: "/tomorrow-horoscope", text: "Tommorow Horoscope"},
   { href: "/weekly-horoscope", text: "Weekly Horoscope" },
-  { href: "/monthly-horoscope", text: "Monthly Horoscope" },
   { href: "/yearly-horoscope", text: "Yearly Horoscope" },
 ];
 
@@ -43,11 +43,12 @@ const shopLinks = [
 ];
 
 const companyLinks = [
+  { href: "/about-us", text: "About Us" },
+  { href: "/faq", text: "FAQ" },
   { href: "/refund-cancellation-policy", text: "Refund & Cancellation Policy" },
   { href: "/terms-and-conditions", text: "Terms & Conditions" },
   { href: "/privacy-policy", text: "Privacy Policy" },
   { href: "/disclaimer", text: "Disclaimer" },
-  { href: "/about-us", text: "About Us" },
   { href: "/pricing-policy", text: "Pricing Policy" },
   { href: "/ai-use-policy", text: "AI Use Policy" },
   { href: "/astrologer-onboarding-agreement", text: "Onboarding Agreement" },
@@ -171,7 +172,13 @@ const Footer = () => {
           <p className={styles.v2_contactText}>Have questions?</p>
           <a href="mailto:support@shubhtalk.ai" className={styles.v2_emailLink}>support@shubhtalk.ai</a>
           <p className={styles.v2_contactText}>Or call us at</p>
-          <a href="tel:+911234567890" className={styles.v2_phoneLink}>+91 12345 67890</a>
+          <a href="tel:+911234567890" className={styles.v2_contactText}>+91 12345 67890</a>
+          <h4 className={`${styles.v2_phoneLink}`}>Registered Company Address</h4>
+          <p className={styles.v2_contactText}>
+            9th Floor, Vaibhav Chambers, Opp Income Tax Office Bandra - Kurla Complex, Bandra (East), Mumbai, Maharashtra, India, 400051
+          </p>
+          <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
+          <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
           <h4 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h4>
           {storeButtons}
         </div>
@@ -201,7 +208,13 @@ const Footer = () => {
           <p className={styles.v2_contactText}>Have questions?</p>
           <a href="mailto:support@shubhtalk.ai" className={styles.v2_emailLink}>support@shubhtalk.ai</a>
           <p className={styles.v2_contactText}>Or call us at</p>
-          <a href="tel:+911234567890" className={styles.v2_phoneLink}>+91 12345 67890</a>
+          <a href="tel:+911234567890" className={styles.v2_contactText}>+91 12345 67890</a>
+          <h4 className={`${styles.v2_phoneLink} `}>Registered Company Address</h4>
+          <p className={styles.v2_contactText}>
+            9th Floor, Vaibhav Chambers, Opp Income Tax Office Bandra - Kurla Complex, Bandra (East), Mumbai, Maharashtra, India, 400051
+          </p>
+          <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
+          <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
           <h4 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h4>
           {storeButtons}
         </div>

@@ -1419,7 +1419,7 @@ const VideoCalling = ({ callData }) => {
                 {/* <div className={styles.controlItem}>
                   <button
                     className={styles.controlBtn}
-                    onClick={() => handleRedirection("/aiwow")}
+                    onClick={() => handleRedirection("/ai-wow")}
                   >
                     <IoSparkles size={24} />
                   </button>

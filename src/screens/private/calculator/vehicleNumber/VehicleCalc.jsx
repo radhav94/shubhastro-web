@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
 import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
 import styles from "./VehicleCalc.module.scss";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "vehicle_calculator";
 
@@ -13,6 +15,7 @@ const initialFormState = {
 
 const VehicleCalc = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(
     STORAGE_KEY,
     initialFormState
@@ -36,10 +39,16 @@ const VehicleCalc = () => {
 
     if (!vehicle) {
       errors.vehicle = "Vehicle number is required";
-    } else if (
-      !/^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{1,4}$/.test(vehicle.toUpperCase())
-    ) {
-      errors.vehicle = "Please enter a valid vehicle number (e.g. MH12AB1234)";
+    } else {
+      const upperVehicle = vehicle.toUpperCase();
+      // Standard format: MH12AB1234
+      const standardPattern = /^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{1,4}$/;
+      // Bharat series format: 22BH1234AA
+      const bharatPattern = /^[0-9]{2}BH[0-9]{4}[A-Z]{1,2}$/;
+
+      if (!standardPattern.test(upperVehicle) && !bharatPattern.test(upperVehicle)) {
+        errors.vehicle = "Please enter a valid vehicle number (e.g. MH12AB1234 or 22BH1234AA)";
+      }
     }
 
     return errors;
@@ -58,7 +67,7 @@ const VehicleCalc = () => {
 
     if (Object.keys(validationErrors).length) return;
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: payload }));
     navigate("/lucky-vehicle-number-calculator/report");
   };
 
@@ -82,7 +91,7 @@ const VehicleCalc = () => {
 
       <DateWithSingleInputForm
         title="Calculate your Lucky Vehicle Number here"
-        submitText="Calculate my Lucky Vehicle Number"
+        submitText="Show Results"
         inputLabel="Vehicle Number"
         inputPlaceholder="ENTER FULL VEHICLE NUMBER E.G. MH12AB1234"
         inputName="vehicle"
@@ -94,7 +103,7 @@ const VehicleCalc = () => {
         onReset={() => {
           setFormData(initialFormState);
           setErrors({});
-          localStorage.removeItem(STORAGE_KEY);
+          dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
         }}
       />
     </div>

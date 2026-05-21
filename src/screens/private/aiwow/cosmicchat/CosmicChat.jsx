@@ -10,6 +10,16 @@ import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 const CosmicChat = () => {
   const navigate = useNavigate();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/aiwow/cosmic-chat");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
   
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -83,13 +93,13 @@ const CosmicChat = () => {
       } else {
         // Error already handled by service and interceptor
         setTimeout(() => {
-          navigate('/aiwow', { replace: true });
+          navigate('/ai-wow', { replace: true });
         }, 1500);
       }
     } catch (error) {
       console.error('Failed to start session:', error);
       setTimeout(() => {
-        navigate('/aiwow', { replace: true });
+        navigate('/ai-wow', { replace: true });
       }, 1500);
     } finally {
       setIsLoading(false);

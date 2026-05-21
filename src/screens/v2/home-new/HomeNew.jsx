@@ -15,6 +15,7 @@ import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionM
 import AstrologersSection from "../home/components/AstrologersSection";
 import BlogsSection from "../home/components/BlogsSection";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
+import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
 import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 
@@ -24,7 +25,7 @@ import astrologerImg from "../../../assets/images/home-hero-astrologer.png";
 import horoscopeImg from "../../../assets/images/home-hero-horoscope.png";
 
 // Hero BG
-import heroBg from "../../../assets/images/home-hero-bg.png";
+const heroBg = "https://shubhastroassets.s3.ap-south-1.amazonaws.com/images/1778659743-240854750.png";
 
 // WOW icons
 import vastuIcon from "../../../assets/aiwow/wow-vastu.svg";
@@ -267,7 +268,7 @@ const HomeNew = () => {
             {/* Hero part */}
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
-                <p className={styles.greeting}>Hello, {name}! 👋</p>
+                <p className={styles.greeting} key={`greeting-${name}`}>Hello, {name}! 👋</p>
                 <h1>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></h1>
                 <p className={styles.heroDesc}>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
                 {currentMahadasha && (
@@ -379,7 +380,7 @@ const HomeNew = () => {
           </div>
 
           {/* AI Pandit Voice */}
-          <div className={`${styles.featureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))} style={{ cursor: 'pointer', ...(aiServicesItems[2]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[2].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}) }}>
+          <div className={`${styles.featureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai-voice:open"))} style={{ cursor: 'pointer', ...(aiServicesItems[2]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[2].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}) }}>
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
               <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title || "AI Pandit (Voice)"}</h3>
@@ -406,7 +407,7 @@ const HomeNew = () => {
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>{astrologerSection?.display_title || "TOP RATED ASTROLOGERS FOR YOU"}</h2>
           </div>
-          <button className={styles.viewAllBtn} onClick={() => navigate('/chat-to-astrologer')}>View all →</button>
+          <button className={styles.viewAllBtn} onClick={() => navigate('/chat-to-astrologer')}>View All →</button>
         </div>
         <AstrologersSection
           title=""
@@ -439,7 +440,13 @@ const HomeNew = () => {
           ]).map((a, i) => {
             const bgs = ["#fef3c7","#fef2f2","#f5f3ff","#fff7ed","#fff7ed","#ede9fe","#fefce8","#eef2ff"];
             return (
-              <div key={i} className={styles.gridItem} onClick={() => a.redirect_url && navigate(a.redirect_url)} style={{ cursor: a.redirect_url ? 'pointer' : 'default' }}>
+              <div key={i} className={styles.gridItem} onClick={() => {
+                if (a.redirect_url) return navigate(a.redirect_url);
+                const slug = (a.slug || a.title?.toLowerCase().replace(/\s+/g, '-') || '');
+                if (slug.includes('sade-sati') || slug.includes('sade sati')) return navigate('/shani-sade-sati-calculator');
+                if (slug.includes('numerology')) return navigate('/numerology-calculator');
+                if (slug.includes('remed')) return navigate('/remedies');
+              }} style={{ cursor: 'pointer' }}>
                 <div
                   className={styles.gridIconBox}
                   style={{
@@ -504,14 +511,14 @@ const HomeNew = () => {
         <div className={styles.calendarBox}>
           <div className={styles.calHead}>
             <div className={`${styles.titleWithBottomDevider} ${styles.tWBmarginBottomZero}`}>
-              <h4 className={styles.wowTitle}>AGENTIC CALENDAR</h4>
+              <h4 className={styles.wowTitle}>MUHARAT CALENDAR</h4>
               <div className={styles.BottomDevider}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
                     <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
                   </svg>
               </div>
             </div>
-            <button className={styles.viewAllBtn}>View More →</button>
+            <button className={styles.viewAllBtn}>View All →</button>
           </div>
           <div className={styles.calBody}>
             <div className={styles.calOccasions}>
@@ -625,6 +632,7 @@ const HomeNew = () => {
         onCallNow={(a) => handleConnectClick(a, "audio", true)}
       />
       <PanditAIBubble />
+      <PanditAIVoiceBubble />
       <MobileAppModal isOpen={showMobileAppModal} onClose={() => setShowMobileAppModal(false)} />
     </>
   );

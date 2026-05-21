@@ -332,7 +332,7 @@ $font-primary:     "Poppins", sans-serif;
   display: inline-block;
   margin-bottom: 4px;
   transition: color 0.2s;
-  &:hover { color: darken(#F75801, 10%); }
+  &:hover { color: #d94a01; }
 }
 
 .v2_phoneLink {
@@ -340,7 +340,7 @@ $font-primary:     "Poppins", sans-serif;
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
-  display: inline-block;
+  display: block;
   margin-bottom: 4px;
   transition: color 0.2s;
   &:hover { color: $color-accent; }
@@ -351,7 +351,7 @@ $font-primary:     "Poppins", sans-serif;
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
-  &:hover { color: darken(#F75801, 10%); }
+  &:hover { color: #d94a01; }
 }
 
 // ============================================================
@@ -383,9 +383,9 @@ $font-primary:     "Poppins", sans-serif;
   padding: 10px 14px;
   // border: 1.5px solid rgba(0, 0, 0, 0.12);
   border-radius: 10px;
-  color: $color-dark;
+  color: $color-white;
   text-decoration: none;
-  background: $color-white;
+  background: #000;
   transition: border-color 0.2s, box-shadow 0.2s;
   width: fit-content;
 
@@ -408,7 +408,7 @@ $font-primary:     "Poppins", sans-serif;
 
 .v2_storeLabel {
   font-size: 10px;
-  color: $color-grey;
+  color: $color-white;
   line-height: 1.2;
   letter-spacing: 0.3px;
 }
@@ -416,7 +416,7 @@ $font-primary:     "Poppins", sans-serif;
 .v2_storeName {
   font-size: 13px;
   font-weight: 700;
-  color: $color-dark;
+  color: $color-white;
   line-height: 1.3;
 }
 

@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./EPoojaCheckout.module.scss";
-import detailStyles from "../detail/EPoojaDetail.module.scss";
-import { FiChevronLeft, FiChevronRight, FiX, FiHome, FiBriefcase, FiEdit2, FiTrash2 } from "react-icons/fi";
-import { useGetCartQuery, useRemoveCartItemMutation, useCreateMallOrderMutation, useUpdateMallOrderMutation, useGetAddressesQuery, useAddAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation, useValidateCouponMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
+import { FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
+import { useGetCartQuery, useRemoveCartItemMutation, useCreateMallOrderMutation, useUpdateMallOrderMutation, useValidateCouponMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
+import AddressPopup from "../components/AddressPopup";
 
 import phonepeLogo from "../../../../assets/icons/upi/phonepe.svg";
 import credLogo from "../../../../assets/icons/upi/cred.svg";
@@ -136,88 +136,6 @@ const EPoojaCheckout = () => {
 
   // Address modal state
   const [showAddress, setShowAddress] = useState(false);
-  const [showNewAddress, setShowNewAddress] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  const [editingAddress, setEditingAddress] = useState(null);
-  const [newAddr, setNewAddr] = useState({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" });
-  const [addrErrors, setAddrErrors] = useState({});
-
-  // Address API
-  const { data: addressData, isLoading: addressLoading } = useGetAddressesQuery();
-  const [addAddressApi, { isLoading: isAddingAddress }] = useAddAddressMutation();
-  const [updateAddressApi, { isLoading: isUpdatingAddress }] = useUpdateAddressMutation();
-  const [deleteAddressApi] = useDeleteAddressMutation();
-  const addresses = addressData?.data || addressData?.data?.addresses || [];
-  const addressList = Array.isArray(addresses) ? addresses : [];
-
-  useEffect(() => {
-    if (addressList.length > 0 && !selectedAddress) {
-      // Pre-select the current chosen address, or default
-      const currentId = chosenAddress?._id || chosenAddress?.id;
-      if (currentId && addressList.find((a) => (a._id || a.id) === currentId)) {
-        setSelectedAddress(currentId);
-      } else {
-        const def = addressList.find((a) => a.isDefault) || addressList[0];
-        setSelectedAddress(def?._id || def?.id);
-      }
-    }
-  }, [addressList, selectedAddress, chosenAddress]);
-
-  const validateAddress = () => {
-    const errs = {};
-    if (!newAddr.name.trim()) errs.name = "Name is required";
-    else if (!/^[a-zA-Z\s]+$/.test(newAddr.name.trim())) errs.name = "Name must contain only letters";
-    if (!newAddr.phone.trim()) errs.phone = "Phone is required";
-    else if (!/^\d{10}$/.test(newAddr.phone.trim())) errs.phone = "Enter a valid 10-digit phone number";
-    if (!newAddr.addressLine1.trim()) errs.addressLine1 = "Address line 1 is required";
-    if (!newAddr.pincode.trim()) errs.pincode = "Pincode is required";
-    else if (!/^\d{6}$/.test(newAddr.pincode.trim())) errs.pincode = "Enter a valid 6-digit pincode";
-    if (!newAddr.city.trim()) errs.city = "City is required";
-    else if (!/^[a-zA-Z\s]+$/.test(newAddr.city.trim())) errs.city = "City must contain only letters";
-    if (!newAddr.state.trim()) errs.state = "State is required";
-    else if (!/^[a-zA-Z\s]+$/.test(newAddr.state.trim())) errs.state = "State must contain only letters";
-    setAddrErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleAddAddress = async () => {
-    if (!validateAddress()) return;
-    try {
-      if (editingAddress) {
-        await updateAddressApi({ addressId: editingAddress._id || editingAddress.id, ...newAddr }).unwrap();
-        Toast.success("Address updated");
-      } else {
-        await addAddressApi(newAddr).unwrap();
-        Toast.success("Address added");
-      }
-      setShowNewAddress(false);
-      setEditingAddress(null);
-      setAddrErrors({});
-      setNewAddr({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" });
-      setShowAddress(true);
-    } catch (err) {
-      Toast.error(err?.data?.message || "Failed to save address");
-    }
-  };
-
-  const openEditAddress = (addr) => {
-    setEditingAddress(addr);
-    setNewAddr({ name: addr.name || "", phone: addr.phone || "", addressLine1: addr.addressLine1 || "", addressLine2: addr.addressLine2 || "", city: addr.city || "", state: addr.state || "", pincode: addr.pincode || "", landmark: addr.landmark || "", type: addr.type || "home", country: addr.country || "IN" });
-    setShowAddress(false);
-    setShowNewAddress(true);
-  };
-
-  const handleDeleteAddress = async (addrId) => {
-    if (!addrId || !window.confirm("Are you sure you want to delete this address?")) return;
-    try {
-      await deleteAddressApi({ addressId: addrId }).unwrap();
-      Toast.success("Address deleted");
-      if (selectedAddress === addrId) setSelectedAddress(null);
-      if ((chosenAddress?._id || chosenAddress?.id) === addrId) setChosenAddress(null);
-    } catch (err) {
-      Toast.error(err?.data?.message || "Failed to delete address");
-    }
-  };
 
   const { data: cartData, isLoading } = useGetCartQuery();
   const [removeCartItem] = useRemoveCartItemMutation();
@@ -799,66 +717,16 @@ const EPoojaCheckout = () => {
       </div>
 
       {/* ── Address Selection Modal ── */}
-      {showAddress && (
-        <div className={detailStyles.overlay} onClick={() => setShowAddress(false)}>
-          <div className={detailStyles.modal} onClick={(e) => e.stopPropagation()}>
-            <button className={detailStyles.modalClose} onClick={() => setShowAddress(false)} aria-label="Close"><FiX /></button>
-            <h2 className={detailStyles.modalTitle}>SELECT ADDRESS</h2>
-            <div className={detailStyles.addressList}>
-              {addressLoading && <p style={{ textAlign: "center", color: "#999", padding: "16px 0" }}>Loading addresses...</p>}
-              {!addressLoading && addressList.length === 0 && <p style={{ textAlign: "center", color: "#aaa", padding: "16px 0" }}>No saved addresses</p>}
-              {!addressLoading && addressList.map((a) => {
-                const addrId = a._id || a.id;
-                const addrType = a.type || "home";
-                return (
-                  <div key={addrId} className={`${detailStyles.addressCard} ${selectedAddress === addrId ? detailStyles.addressActive : ""}`} onClick={() => setSelectedAddress(addrId)} style={{ cursor: "pointer" }}>
-                    <span className={detailStyles.addressIcon}>{addrType === "home" ? <FiHome /> : <FiBriefcase />}</span>
-                    <div className={detailStyles.addressInfo}>
-                      <span className={detailStyles.addressType}>{a.name || addrType}{a.phone ? ` · ${a.phone}` : ""}</span>
-                      <p className={detailStyles.addressText}>{[a.addressLine1, a.addressLine2, a.landmark].filter(Boolean).join(", ")}<br />{[a.city, a.state, a.pincode].filter(Boolean).join(", ")}</p>
-                    </div>
-                    <button className={detailStyles.reviewActionBtn} onClick={(e) => { e.stopPropagation(); openEditAddress(a); }} aria-label="Edit address"><FiEdit2 size={14} /></button>
-                    <button className={detailStyles.reviewActionBtn} onClick={(e) => { e.stopPropagation(); handleDeleteAddress(addrId); }} aria-label="Delete address"><FiTrash2 size={14} /></button>
-                    <input type="radio" name="address" checked={selectedAddress === addrId} readOnly className={detailStyles.addressRadio} />
-                  </div>
-                );
-              })}
-            </div>
-            <div className={detailStyles.modalActions}>
-              <button className={detailStyles.addAddressBtn} onClick={() => { setShowAddress(false); setEditingAddress(null); setNewAddr({ name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" }); setShowNewAddress(true); }}>Add New Address +</button>
-              <button className={detailStyles.orderBtn} disabled={!selectedAddress} onClick={() => {
-                const chosen = addressList.find((a) => (a._id || a.id) === selectedAddress);
-                setChosenAddress(chosen);
-                setShowAddress(false);
-              }}>Order Here</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Add/Edit Address Modal ── */}
-      {showNewAddress && (
-        <div className={detailStyles.overlay} onClick={() => setShowNewAddress(false)}>
-          <div className={`${detailStyles.modal} ${detailStyles.modalLarge}`} onClick={(e) => e.stopPropagation()}>
-            <button className={detailStyles.modalClose} onClick={() => setShowNewAddress(false)} aria-label="Close"><FiX /></button>
-            <h2 className={detailStyles.modalTitle}>{editingAddress ? "EDIT ADDRESS" : "ADD NEW ADDRESS"}</h2>
-            <div className={detailStyles.formRow}>
-              <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>Name <span style={{color:'#dc2626'}}>*</span></label><input type="text" placeholder="Full name" className={`${detailStyles.formInput} ${addrErrors.name ? detailStyles.formInputError : ""}`} value={newAddr.name} onChange={(e) => { setNewAddr({ ...newAddr, name: e.target.value }); setAddrErrors({ ...addrErrors, name: "" }); }} />{addrErrors.name && <p className={detailStyles.formError}>{addrErrors.name}</p>}</div>
-              <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>Phone <span style={{color:'#dc2626'}}>*</span></label><input type="tel" placeholder="Phone number" maxLength={10} className={`${detailStyles.formInput} ${addrErrors.phone ? detailStyles.formInputError : ""}`} value={newAddr.phone} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); setNewAddr({ ...newAddr, phone: v }); setAddrErrors({ ...addrErrors, phone: "" }); }} />{addrErrors.phone && <p className={detailStyles.formError}>{addrErrors.phone}</p>}</div>
-            </div>
-            <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>Address line 1 <span style={{color:'#dc2626'}}>*</span></label><input type="text" placeholder="Enter here" className={`${detailStyles.formInput} ${addrErrors.addressLine1 ? detailStyles.formInputError : ""}`} value={newAddr.addressLine1} onChange={(e) => { setNewAddr({ ...newAddr, addressLine1: e.target.value }); setAddrErrors({ ...addrErrors, addressLine1: "" }); }} />{addrErrors.addressLine1 && <p className={detailStyles.formError}>{addrErrors.addressLine1}</p>}</div>
-            <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>Address line 2</label><input type="text" placeholder="Enter here" className={detailStyles.formInput} value={newAddr.addressLine2} onChange={(e) => setNewAddr({ ...newAddr, addressLine2: e.target.value })} /></div>
-            <div className={detailStyles.formRow}>
-              <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>Pincode <span style={{color:'#dc2626'}}>*</span></label><input type="text" placeholder="Enter here" maxLength={6} className={`${detailStyles.formInput} ${addrErrors.pincode ? detailStyles.formInputError : ""}`} value={newAddr.pincode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); setNewAddr({ ...newAddr, pincode: v }); setAddrErrors({ ...addrErrors, pincode: "" }); }} />{addrErrors.pincode && <p className={detailStyles.formError}>{addrErrors.pincode}</p>}</div>
-              <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>City <span style={{color:'#dc2626'}}>*</span></label><input type="text" placeholder="Enter here" className={`${detailStyles.formInput} ${addrErrors.city ? detailStyles.formInputError : ""}`} value={newAddr.city} onChange={(e) => { setNewAddr({ ...newAddr, city: e.target.value }); setAddrErrors({ ...addrErrors, city: "" }); }} />{addrErrors.city && <p className={detailStyles.formError}>{addrErrors.city}</p>}</div>
-              <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>State <span style={{color:'#dc2626'}}>*</span></label><input type="text" placeholder="Type here" className={`${detailStyles.formInput} ${addrErrors.state ? detailStyles.formInputError : ""}`} value={newAddr.state} onChange={(e) => { setNewAddr({ ...newAddr, state: e.target.value }); setAddrErrors({ ...addrErrors, state: "" }); }} />{addrErrors.state && <p className={detailStyles.formError}>{addrErrors.state}</p>}</div>
-            </div>
-            <div className={detailStyles.formGroup}><label className={detailStyles.formLabel}>Landmark</label><input type="text" placeholder="Near..." className={detailStyles.formInput} value={newAddr.landmark} onChange={(e) => setNewAddr({ ...newAddr, landmark: e.target.value })} /></div>
-            <div className={detailStyles.saveAsGroup}><span className={detailStyles.saveAsLabel}>Save Address as</span><div className={detailStyles.saveAsTags}><button className={`${detailStyles.saveAsTag} ${newAddr.type === "home" ? detailStyles.saveAsActive : ""}`} onClick={() => setNewAddr({ ...newAddr, type: "home" })}>Home</button><button className={`${detailStyles.saveAsTag} ${newAddr.type === "work" ? detailStyles.saveAsActive : ""}`} onClick={() => setNewAddr({ ...newAddr, type: "work" })}>Work</button><button className={`${detailStyles.saveAsTag} ${newAddr.type === "other" ? detailStyles.saveAsActive : ""}`} onClick={() => setNewAddr({ ...newAddr, type: "other" })}>Other</button></div></div>
-            <button className={detailStyles.saveAddressBtn} onClick={handleAddAddress} disabled={isAddingAddress || isUpdatingAddress}>{(isAddingAddress || isUpdatingAddress) ? "Saving..." : (editingAddress ? "Update Address ›" : "Save Address ›")}</button>
-          </div>
-        </div>
-      )}
+      <AddressPopup
+        open={showAddress}
+        onClose={() => setShowAddress(false)}
+        onSelect={(chosen) => {
+          setChosenAddress(chosen);
+          setShowAddress(false);
+        }}
+        confirmLabel="Select Address"
+        defaultSelectedId={chosenAddress?._id || chosenAddress?.id}
+      />
     </div>
   );
 };

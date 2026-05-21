@@ -4,7 +4,9 @@
   left: 50%;
   transform: translateX(-50%);
   width: min(720px, calc(100% - 24px));
-  background: #fff;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(24px);
+  border: 2px solid #fff;
   border-radius: 18px;
   padding: 30px 20px 20px 100px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
@@ -32,8 +34,8 @@
 .closeBtn {
   position: absolute;
   top: 10px;
-  left: 10px;
-  background: #f2f2f2;
+  right: 10px;
+  background: #ffffff;
   border: none;
   border-radius: 50%;
   width: 28px;
@@ -41,9 +43,16 @@
   cursor: pointer;
   display: grid;
   place-items: center;
+  z-index: 99;
+  border: 1px solid #ddd;
+
+  @media (width <= 767px) {
+    top: 2px;
+    right: 2px;
+  }
 
   &:hover {
-    background: #e5e5e5;
+    background: #ffffff;
   }
 }
 
@@ -114,5 +123,6 @@
   .wrapper {
     flex-direction: column;
     align-items: flex-start;
+    padding: 30px 16px 18px 90px;
   }
 }

@@ -10,6 +10,13 @@ import { openInvoice } from "../../../utils/helper/openInvoice";
 
 const GST_RATE = 0.18;
 
+// Format slug-style variant values (e.g., "without-silver-capping" → "without silver capping")
+const formatAttrValue = (val) => {
+  if (!val || typeof val !== "string") return val;
+  return val.replace(/-/g, " ");
+};
+
+
 const formatDate = (dateStr) => {
   if (!dateStr) return "—";
   const d = new Date(dateStr);
@@ -117,8 +124,8 @@ const MallOrderDetail = () => {
                   const price = variant.price || 0;
                   const lineTotal = variant.total_price || price * qty;
                   const attrText = variant.attributes?.length
-                    ? variant.attributes.map((a) => a.value).join(" / ")
-                    : variant.title || "";
+                    ? variant.attributes.map((a) => formatAttrValue(a.value)).join(" / ")
+                    : formatAttrValue(variant.title) || "";
                   return (
                     <div key={`${item.product_id || idx}-${variant._id || vIdx}`} className={styles.productCard}>
                       <div className={styles.productImg}>
@@ -135,7 +142,7 @@ const MallOrderDetail = () => {
                         </div>
                         <p className={styles.price}>
                           ₹{lineTotal.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}{" "}
-                          <span className={styles.taxNote}>Incl. of all taxes</span>
+                          {/* <span className={styles.taxNote}>Incl. of all taxes</span> */}
                         </p>
                       </div>
                     </div>
@@ -163,7 +170,7 @@ const MallOrderDetail = () => {
                     </div>
                     <p className={styles.price}>
                       ₹{lineTotal.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}{" "}
-                      <span className={styles.taxNote}>Incl. of all taxes</span>
+                      {/* <span className={styles.taxNote}>Incl. of all taxes</span> */}
                     </p>
                   </div>
                 </div>
@@ -201,6 +208,7 @@ const MallOrderDetail = () => {
             <span>₹{total.toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</span>
           </div>
 
+          {status.toLowerCase() != "cancelled" && (
           <button className={styles.downloadBtn} disabled={invoiceLoading} onClick={async () => {
             setInvoiceLoading(true);
             try {
@@ -217,6 +225,7 @@ const MallOrderDetail = () => {
           }}>
             <Download size={16} /> {invoiceLoading ? "Loading..." : "Download Invoice"}
           </button>
+          )}
         </section>
       </div>
 

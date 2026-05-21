@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DreamInterpreter.module.scss';
 import { Toast } from '../../../../component';
@@ -12,7 +12,16 @@ import TTSButton from '../../../../component/UI/TTSButton';
 const DreamInterpreter = () => {
   const navigate = useNavigate();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
-  
+
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/aiwow/dream-interpreter");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;  
   const [dreamDescription, setDreamDescription] = useState('');
   const [tags, setTags] = useState('');
   const [lifePhase, setLifePhase] = useState('');
@@ -20,6 +29,13 @@ const DreamInterpreter = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [interpretation, setInterpretation] = useState(null);
   const [error, setError] = useState(null);
+  const [showMorePsych, setShowMorePsych] = useState(false);
+  const [showMoreAstro, setShowMoreAstro] = useState(false);
+  const [showMoreEmotional, setShowMoreEmotional] = useState(false);
+  const [showMoreOpportunities, setShowMoreOpportunities] = useState(false);
+  const [showMorePersonalized, setShowMorePersonalized] = useState(false);
+  const [showMoreSymbols, setShowMoreSymbols] = useState(false);
+  const [showMoreSpiritual, setShowMoreSpiritual] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -112,14 +128,6 @@ const DreamInterpreter = () => {
   const handleTryAgain = () => {
     setError(null);
     setInterpretation(null);
-  };
-
-  const handleNewDream = () => {
-    setInterpretation(null);
-    setDreamDescription('');
-    setTags('');
-    setLifePhase('');
-    setChallenges('');
   };
 
   if (profileLoading) {
@@ -268,156 +276,282 @@ const DreamInterpreter = () => {
               <h2 className={styles.resultTitle}>Dream Interpretation</h2>
             </div>
 
+            <div className={styles.resultGrid}>
             {/* Dream Summary */}
             {interpretation.summary && (
-              <div className={styles.resultCard} style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <div className={`${styles.resultCard} ${styles.fullWidth}`}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>
+                    {interpretation.summary.title || 'Dream Summary'}
+                  </h3>
                   <TTSButton text={`${interpretation.summary.title || 'Dream Summary'}. ${interpretation.summary.mainTheme || ''}${interpretation.summary.emotionalTone ? '. Emotional Tone: ' + interpretation.summary.emotionalTone : ''}${interpretation.summary.intensity ? '. Intensity: ' + interpretation.summary.intensity + ' percent' : ''}`} />
-                </span>
-                <h3 className={styles.cardTitle}>
-                  {interpretation.summary.title || 'Dream Summary'}
-                </h3>
-                {interpretation.summary.mainTheme && (
-                  <p className={styles.cardText}>{interpretation.summary.mainTheme}</p>
-                )}
-                {interpretation.summary.emotionalTone && (
-                  <div className={styles.summaryMeta}>
-                    <span className={styles.metaItem}>
-                      Emotional Tone: <strong>{interpretation.summary.emotionalTone}</strong>
-                    </span>
-                    {interpretation.summary.intensity && (
+                </div>
+                <div className={styles.contentWrapper}>
+                  {interpretation.summary.mainTheme && (
+                    <div className={styles.insightSection}>
+                      <p className={styles.cardText}>{interpretation.summary.mainTheme}</p>
+                    </div>
+                  )}
+                  {interpretation.summary.emotionalTone && (
+                    <div className={styles.summaryMeta}>
                       <span className={styles.metaItem}>
-                        Intensity: <strong>{interpretation.summary.intensity}%</strong>
+                        Emotional Tone: <strong>{interpretation.summary.emotionalTone}</strong>
                       </span>
-                    )}
-                  </div>
-                )}
+                      {interpretation.summary.intensity && (
+                        <span className={styles.metaItem}>
+                          Intensity: <strong>{interpretation.summary.intensity}%</strong>
+                        </span>
+                      )}
+                      {interpretation.summary.lucidity && (
+                        <span className={styles.metaItem}>
+                          Lucidity: <strong>{interpretation.summary.lucidity}</strong>
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
             {/* Main Interpretation */}
             {interpretation.interpretation && (
-              <div className={styles.resultCard} style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <div className={`${styles.resultCard} ${styles.fullWidth}`}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>💫 Interpretation</h3>
                   <TTSButton text={`Interpretation. ${interpretation.interpretation}`} />
-                </span>
-                <h3 className={styles.cardTitle}>💫 Interpretation</h3>
-                <p className={styles.cardText}>{interpretation.interpretation}</p>
+                </div>
+                <div className={styles.contentWrapper}>
+                  <div className={styles.insightSection}>
+                    <p className={styles.cardText}>{interpretation.interpretation}</p>
+                  </div>
+                </div>
               </div>
             )}
 
             {/* Key Takeaways */}
             {interpretation.keyTakeaways && interpretation.keyTakeaways.length > 0 && (
-              <div className={styles.resultCard} style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+              <div className={styles.resultCard}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>🎯 Key Takeaways</h3>
                   <TTSButton text={`Key Takeaways. ${interpretation.keyTakeaways.join('. ')}`} />
-                </span>
-                <h3 className={styles.cardTitle}>🎯 Key Takeaways</h3>
-                <ul className={styles.takeawaysList}>
-                  {interpretation.keyTakeaways.map((takeaway, index) => (
-                    <li key={index} className={styles.takeawayItem}>{takeaway}</li>
-                  ))}
-                </ul>
+                </div>
+                <div className={styles.contentWrapper}>
+                  <ul className={styles.takeawaysList}>
+                    {interpretation.keyTakeaways.map((takeaway, index) => (
+                      <li key={index} className={styles.takeawayItem}>{takeaway}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             )}
 
             {/* Psychological Insights */}
             {interpretation.psychologicalInsights && (
-              <div className={styles.resultCard} style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                  <TTSButton text={`Psychological Insights. ${interpretation.psychologicalInsights.consciousLevel ? 'Conscious Level: ' + interpretation.psychologicalInsights.consciousLevel + '. ' : ''}${interpretation.psychologicalInsights.subconsciousLevel ? 'Subconscious Level: ' + interpretation.psychologicalInsights.subconsciousLevel + '. ' : ''}${interpretation.psychologicalInsights.shadowAspects ? 'Shadow Aspects: ' + interpretation.psychologicalInsights.shadowAspects : ''}`} />
-                </span>
-                <h3 className={styles.cardTitle}>🧠 Psychological Insights</h3>
-                {interpretation.psychologicalInsights.consciousLevel && (
-                  <div className={styles.insightSection}>
-                    <h4 className={styles.insightSubtitle}>Conscious Level</h4>
-                    <p className={styles.cardText}>{interpretation.psychologicalInsights.consciousLevel}</p>
-                  </div>
-                )}
-                {interpretation.psychologicalInsights.subconsciousLevel && (
-                  <div className={styles.insightSection}>
-                    <h4 className={styles.insightSubtitle}>Subconscious Level</h4>
-                    <p className={styles.cardText}>{interpretation.psychologicalInsights.subconsciousLevel}</p>
-                  </div>
-                )}
-                {interpretation.psychologicalInsights.shadowAspects && (
-                  <div className={styles.insightSection}>
-                    <h4 className={styles.insightSubtitle}>Shadow Aspects</h4>
-                    <p className={styles.cardText}>{interpretation.psychologicalInsights.shadowAspects}</p>
-                  </div>
-                )}
+              <div className={styles.resultCard}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>🧠 Psychological Insights</h3>
+                  <TTSButton text={`Psychological Insights. ${interpretation.psychologicalInsights.consciousLevel ? 'Conscious Level: ' + interpretation.psychologicalInsights.consciousLevel : ''}`} />
+                </div>
+                <div className={`${styles.contentWrapper} ${!showMorePsych ? styles.collapsedContent : ''}`}>
+                  {interpretation.psychologicalInsights.consciousLevel && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Conscious Level</h4>
+                      <p className={styles.cardText}>{interpretation.psychologicalInsights.consciousLevel}</p>
+                    </div>
+                  )}
+                  {interpretation.psychologicalInsights.subconsciousLevel && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Subconscious Level</h4>
+                      <p className={styles.cardText}>{interpretation.psychologicalInsights.subconsciousLevel}</p>
+                    </div>
+                  )}
+                  {interpretation.psychologicalInsights.shadowAspects && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Shadow Aspects</h4>
+                      <p className={styles.cardText}>{interpretation.psychologicalInsights.shadowAspects}</p>
+                    </div>
+                  )}
+                  {interpretation.psychologicalInsights.desires?.length > 0 && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Desires</h4>
+                      <div className={styles.tagList}>
+                        {interpretation.psychologicalInsights.desires.map((d, i) => (
+                          <span key={i} className={styles.tag}>{d}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {interpretation.psychologicalInsights.fears?.length > 0 && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Fears</h4>
+                      <div className={styles.tagList}>
+                        {interpretation.psychologicalInsights.fears.map((f, i) => (
+                          <span key={i} className={styles.tag}>{f}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {interpretation.psychologicalInsights.unresolved?.length > 0 && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Unresolved</h4>
+                      <ul className={styles.guidanceList}>
+                        {interpretation.psychologicalInsights.unresolved.map((u, i) => (
+                          <li key={i}>{u}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {interpretation.psychologicalInsights.growthOpportunities?.length > 0 && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Growth Opportunities</h4>
+                      <div className={styles.tagList}>
+                        {interpretation.psychologicalInsights.growthOpportunities.map((g, i) => (
+                          <span key={i} className={styles.tag}>{g}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className={styles.showMoreContainer}>
+                  <button className={styles.showMoreBtn} onClick={() => setShowMorePsych(!showMorePsych)}>
+                    {showMorePsych ? 'Show Less' : 'Show More'}
+                  </button>
+                </div>
               </div>
             )}
 
             {/* Astrological Connection */}
             {interpretation.astrologicalConnection && (
-              <div className={styles.resultCard} style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                  <TTSButton text={`Astrological Connection. ${interpretation.astrologicalConnection.cosmicTiming || ''}${interpretation.astrologicalConnection.planetaryInfluences?.length > 0 ? '. ' + interpretation.astrologicalConnection.planetaryInfluences.map(p => p.planet + ': ' + p.influence).join('. ') : ''}`} />
-                </span>
-                <h3 className={styles.cardTitle}>⭐ Astrological Connection</h3>
-                {interpretation.astrologicalConnection.cosmicTiming && (
-                  <p className={styles.cardText}>{interpretation.astrologicalConnection.cosmicTiming}</p>
-                )}
-                {interpretation.astrologicalConnection.planetaryInfluences && 
-                 interpretation.astrologicalConnection.planetaryInfluences.length > 0 && (
-                  <div className={styles.planetaryList}>
-                    {interpretation.astrologicalConnection.planetaryInfluences.slice(0, 3).map((planet, index) => (
-                      <div key={index} className={styles.planetaryItem}>
-                        <span className={styles.planetName}>{planet.planet}</span>
-                        <span className={styles.planetInfluence}>{planet.influence}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Symbols */}
-            {interpretation.symbols && interpretation.symbols.length > 0 && (
-              <div className={styles.resultCard} style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                  <TTSButton text={`Dream Symbols. ${interpretation.symbols.map(s => s.symbol + ': ' + s.meaning + (s.personalSignificance ? '. Personal: ' + s.personalSignificance : '')).join('. ')}`} />
-                </span>
-                <h3 className={styles.cardTitle}>🔮 Dream Symbols</h3>
-                <div className={styles.symbolsList}>
-                  {interpretation.symbols.map((symbol, index) => (
-                    <div key={index} className={styles.symbolItem}>
-                      <div className={styles.symbolHeader}>
-                        <span className={styles.symbolName}>{symbol.symbol}</span>
-                        {symbol.category && (
-                          <span className={styles.symbolCategory}>{symbol.category}</span>
-                        )}
-                      </div>
-                      <p className={styles.symbolMeaning}>{symbol.meaning}</p>
-                      {symbol.personalSignificance && (
-                        <p className={styles.symbolPersonal}>
-                          <strong>Personal:</strong> {symbol.personalSignificance}
-                        </p>
-                      )}
+              <div className={styles.resultCard}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>⭐ Astrological Connection</h3>
+                  <TTSButton text={`Astrological Connection. ${interpretation.astrologicalConnection.cosmicTiming || ''}`} />
+                </div>
+                <div className={`${styles.contentWrapper} ${!showMoreAstro ? styles.collapsedContent : ''}`}>
+                  {interpretation.astrologicalConnection.cosmicTiming && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Cosmic Timing</h4>
+                      <p className={styles.cardText}>{interpretation.astrologicalConnection.cosmicTiming}</p>
                     </div>
-                  ))}
+                  )}
+                  {interpretation.astrologicalConnection.moonPhaseImpact && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Moon Phase</h4>
+                      <p className={styles.cardText}>{interpretation.astrologicalConnection.moonPhaseImpact}</p>
+                    </div>
+                  )}
+                  {interpretation.astrologicalConnection.planetaryInfluences?.length > 0 && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Planetary Influences</h4>
+                      <div className={styles.planetaryList}>
+                        {interpretation.astrologicalConnection.planetaryInfluences.map((planet, index) => (
+                          <div key={index} className={styles.planetaryItem}>
+                            <span className={styles.planetName}>{planet.planet}</span>
+                            <span className={styles.planetInfluence}>{planet.influence}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {interpretation.astrologicalConnection.relevantHouses?.length > 0 && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Relevant Houses</h4>
+                      <div className={styles.planetaryList}>
+                        {interpretation.astrologicalConnection.relevantHouses.map((h, i) => (
+                          <div key={i} className={styles.houseItem}>
+                            <span className={styles.houseName}>{h.house} - {h.name}</span>
+                            <span className={styles.houseConnection}>{h.connection}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className={styles.showMoreContainer}>
+                  <button className={styles.showMoreBtn} onClick={() => setShowMoreAstro(!showMoreAstro)}>
+                    {showMoreAstro ? 'Show Less' : 'Show More'}
+                  </button>
                 </div>
               </div>
             )}
 
-            {/* Spiritual Meaning */}
-            {interpretation.spiritualMeaning && (
-              <div className={styles.resultCard} style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                  <TTSButton text={`Spiritual Meaning. ${interpretation.spiritualMeaning.soulMessage ? 'Soul Message: ' + interpretation.spiritualMeaning.soulMessage + '. ' : ''}${interpretation.spiritualMeaning.spiritualGuidance ? 'Spiritual Guidance: ' + interpretation.spiritualMeaning.spiritualGuidance : ''}`} />
-                </span>
-                <h3 className={styles.cardTitle}>🕉️ Spiritual Meaning</h3>
-                {interpretation.spiritualMeaning.soulMessage && (
-                  <div className={styles.insightSection}>
-                    <h4 className={styles.insightSubtitle}>Soul Message</h4>
-                    <p className={styles.cardText}>{interpretation.spiritualMeaning.soulMessage}</p>
+            {/* Symbols & Spiritual Meaning - Row Layout */}
+            {(interpretation.symbols?.length > 0 || interpretation.spiritualMeaning) && (
+              <div className={`${styles.rowCards} ${styles.fullWidth}`}>
+                {/* Symbols */}
+                {interpretation.symbols && interpretation.symbols.length > 0 && (
+                  <div className={styles.resultCard} style={{ flex: 1 }}>
+                    <div className={styles.cardHeader}>
+                      <h3 className={styles.cardTitle}>🔮 Dream Symbols</h3>
+                      <TTSButton text={`Dream Symbols. ${interpretation.symbols.map(s => s.symbol + ': ' + s.meaning + (s.personalSignificance ? '. Personal: ' + s.personalSignificance : '')).join('. ')}`} />
+                    </div>
+                    <div className={`${styles.contentWrapper} ${!showMoreSymbols ? styles.collapsedContent : ''}`}>
+                      {interpretation.symbols.map((symbol, index) => (
+                        <div key={index} className={styles.insightSection}>
+                          <h4 className={styles.insightSubtitle}>{symbol.symbol} {symbol.category && <span className={styles.symbolCategory}>{symbol.category}</span>}</h4>
+                          <p className={styles.cardText}>{symbol.meaning}</p>
+                          {symbol.personalSignificance && (
+                            <p className={styles.cardText} style={{ marginTop: '0.5rem', borderLeftColor: '#8b5cf6' }}>
+                              <strong>Personal:</strong> {symbol.personalSignificance}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    {interpretation.symbols.length > 2 && (
+                      <div className={styles.showMoreContainer}>
+                        <button className={styles.showMoreBtn} onClick={() => setShowMoreSymbols(!showMoreSymbols)}>
+                          {showMoreSymbols ? 'Show Less' : 'Show More'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
-                {interpretation.spiritualMeaning.spiritualGuidance && (
-                  <div className={styles.insightSection}>
-                    <h4 className={styles.insightSubtitle}>Spiritual Guidance</h4>
-                    <p className={styles.cardText}>{interpretation.spiritualMeaning.spiritualGuidance}</p>
+
+                {/* Spiritual Meaning */}
+                {interpretation.spiritualMeaning && (
+                  <div className={styles.resultCard} style={{ flex: 1 }}>
+                    <div className={styles.cardHeader}>
+                      <h3 className={styles.cardTitle}>🕉️ Spiritual Meaning</h3>
+                      <TTSButton text={`Spiritual Meaning. ${interpretation.spiritualMeaning.soulMessage || ''}`} />
+                    </div>
+                    <div className={`${styles.contentWrapper} ${!showMoreSpiritual ? styles.collapsedContent : ''}`}>
+                      {interpretation.spiritualMeaning.soulMessage && (
+                        <div className={styles.insightSection}>
+                          <h4 className={styles.insightSubtitle}>Soul Message</h4>
+                          <p className={styles.cardText}>{interpretation.spiritualMeaning.soulMessage}</p>
+                        </div>
+                      )}
+                      {interpretation.spiritualMeaning.spiritualGuidance && (
+                        <div className={styles.insightSection}>
+                          <h4 className={styles.insightSubtitle}>Spiritual Guidance</h4>
+                          <p className={styles.cardText}>{interpretation.spiritualMeaning.spiritualGuidance}</p>
+                        </div>
+                      )}
+                      {interpretation.spiritualMeaning.karmaConnection && (
+                        <div className={styles.insightSection}>
+                          <h4 className={styles.insightSubtitle}>Karma Connection</h4>
+                          <p className={styles.cardText}>{interpretation.spiritualMeaning.karmaConnection}</p>
+                        </div>
+                      )}
+                      {interpretation.spiritualMeaning.pastLifeEchoes && (
+                        <div className={styles.insightSection}>
+                          <h4 className={styles.insightSubtitle}>Past Life Echoes</h4>
+                          <p className={styles.cardText}>{interpretation.spiritualMeaning.pastLifeEchoes}</p>
+                        </div>
+                      )}
+                      {interpretation.spiritualMeaning.divineGuidance && (
+                        <div className={styles.insightSection}>
+                          <h4 className={styles.insightSubtitle}>Divine Guidance</h4>
+                          <p className={styles.cardText}>{interpretation.spiritualMeaning.divineGuidance}</p>
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.showMoreContainer}>
+                      <button className={styles.showMoreBtn} onClick={() => setShowMoreSpiritual(!showMoreSpiritual)}>
+                        {showMoreSpiritual ? 'Show Less' : 'Show More'}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -425,16 +559,15 @@ const DreamInterpreter = () => {
 
             {/* Guidance */}
             {interpretation.guidance && (
-              <div className={styles.guidanceCard} style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                  <TTSButton text={`Actionable Guidance. ${interpretation.guidance.immediateActions?.length > 0 ? 'Immediate Actions: ' + interpretation.guidance.immediateActions.join('. ') + '. ' : ''}${interpretation.guidance.reflectionQuestions?.length > 0 ? 'Reflection Questions: ' + interpretation.guidance.reflectionQuestions.join('. ') : ''}`} />
-                </span>
-                <div className={styles.guidanceIcon}>💡</div>
-                <div className={styles.guidanceContent}>
-                  <h3 className={styles.guidanceTitle}>Actionable Guidance</h3>
-                  {interpretation.guidance.immediateActions && interpretation.guidance.immediateActions.length > 0 && (
-                    <div className={styles.guidanceSection}>
-                      <h4 className={styles.guidanceSubtitle}>Immediate Actions</h4>
+              <div className={`${styles.resultCard} ${styles.fullWidth}`}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>💡 Actionable Guidance</h3>
+                  <TTSButton text={`Actionable Guidance. ${interpretation.guidance.immediateActions?.length > 0 ? 'Immediate Actions: ' + interpretation.guidance.immediateActions.join('. ') : ''}`} />
+                </div>
+                <div className={styles.contentWrapper}>
+                  {interpretation.guidance.immediateActions?.length > 0 && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Immediate Actions</h4>
                       <ul className={styles.guidanceList}>
                         {interpretation.guidance.immediateActions.map((action, index) => (
                           <li key={index}>{action}</li>
@@ -442,12 +575,32 @@ const DreamInterpreter = () => {
                       </ul>
                     </div>
                   )}
-                  {interpretation.guidance.reflectionQuestions && interpretation.guidance.reflectionQuestions.length > 0 && (
-                    <div className={styles.guidanceSection}>
-                      <h4 className={styles.guidanceSubtitle}>Reflection Questions</h4>
+                  {interpretation.guidance.reflectionQuestions?.length > 0 && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Reflection Questions</h4>
                       <ul className={styles.guidanceList}>
                         {interpretation.guidance.reflectionQuestions.map((question, index) => (
                           <li key={index}>{question}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {interpretation.guidance.journalingPrompts?.length > 0 && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Journaling Prompts</h4>
+                      <ul className={styles.guidanceList}>
+                        {interpretation.guidance.journalingPrompts.map((prompt, index) => (
+                          <li key={index}>{prompt}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {interpretation.guidance.rituals?.length > 0 && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Rituals</h4>
+                      <ul className={styles.guidanceList}>
+                        {interpretation.guidance.rituals.map((ritual, index) => (
+                          <li key={index}>{ritual}</li>
                         ))}
                       </ul>
                     </div>
@@ -456,21 +609,176 @@ const DreamInterpreter = () => {
               </div>
             )}
 
-            {/* Opportunities */}
-            {interpretation.opportunities && interpretation.opportunities.growthAreas && 
-             interpretation.opportunities.growthAreas.length > 0 && (
-              <div className={styles.resultCard} style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                  <TTSButton text={`Growth Opportunities. ${interpretation.opportunities.growthAreas.join('. ')}`} />
-                </span>
-                <h3 className={styles.cardTitle}>🌱 Growth Opportunities</h3>
-                <ul className={styles.takeawaysList}>
-                  {interpretation.opportunities.growthAreas.map((area, index) => (
-                    <li key={index} className={styles.takeawayItem}>{area}</li>
-                  ))}
-                </ul>
+            {/* Emotional Analysis */}
+            {interpretation.emotionalAnalysis && (
+              <div className={styles.resultCard}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>💜 Emotional Analysis</h3>
+                  <TTSButton text={`Emotional Analysis. ${interpretation.emotionalAnalysis.emotionalBalance || ''}`} />
+                </div>
+                <div className={`${styles.contentWrapper} ${!showMoreEmotional ? styles.collapsedContent : ''}`}>
+                  {interpretation.emotionalAnalysis.primaryEmotions?.length > 0 && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Primary Emotions</h4>
+                      <div className={styles.emotionList}>
+                        {interpretation.emotionalAnalysis.primaryEmotions.map((e, i) => (
+                          <div key={i} className={styles.emotionItem}>
+                            <span className={styles.emotionName}>{e.emotion}</span>
+                            <span className={styles.emotionIntensity}>{e.intensity}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {interpretation.emotionalAnalysis.emotionalBalance && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Emotional Balance</h4>
+                      <p className={styles.cardText}>{interpretation.emotionalAnalysis.emotionalBalance}</p>
+                    </div>
+                  )}
+                  {interpretation.emotionalAnalysis.healingNeeded && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Healing Needed</h4>
+                      <p className={styles.cardText}>{interpretation.emotionalAnalysis.healingNeeded}</p>
+                    </div>
+                  )}
+                </div>
+                <div className={styles.showMoreContainer}>
+                  <button className={styles.showMoreBtn} onClick={() => setShowMoreEmotional(!showMoreEmotional)}>
+                    {showMoreEmotional ? 'Show Less' : 'Show More'}
+                  </button>
+                </div>
               </div>
             )}
+
+            {/* Opportunities */}
+            {interpretation.opportunities && (
+              <div className={styles.resultCard}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>🌱 Growth Opportunities</h3>
+                  <TTSButton text={`Growth Opportunities. ${interpretation.opportunities.growthAreas?.join('. ') || ''}`} />
+                </div>
+                <div className={`${styles.contentWrapper} ${!showMoreOpportunities ? styles.collapsedContent : ''}`}>
+                  {interpretation.opportunities.growthAreas?.length > 0 && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Growth Areas</h4>
+                      <ul className={styles.takeawaysList}>
+                        {interpretation.opportunities.growthAreas.map((area, index) => (
+                          <li key={index} className={styles.takeawayItem}>{area}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {interpretation.opportunities.manifestationPotential && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Manifestation Potential</h4>
+                      <p className={styles.cardText}>{interpretation.opportunities.manifestationPotential}</p>
+                    </div>
+                  )}
+                  {interpretation.opportunities.timingAdvice && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Timing Advice</h4>
+                      <p className={styles.cardText}>{interpretation.opportunities.timingAdvice}</p>
+                    </div>
+                  )}
+                </div>
+                <div className={styles.showMoreContainer}>
+                  <button className={styles.showMoreBtn} onClick={() => setShowMoreOpportunities(!showMoreOpportunities)}>
+                    {showMoreOpportunities ? 'Show Less' : 'Show More'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Personalized Insights */}
+            {interpretation.personalizedInsights && (
+              <div className={styles.resultCard}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>🪐 Personalized Insights</h3>
+                  <TTSButton text={`Personalized Insights. ${interpretation.personalizedInsights.birthChartConnection || ''}`} />
+                </div>
+                <div className={`${styles.contentWrapper} ${!showMorePersonalized ? styles.collapsedContent : ''}`}>
+                  {interpretation.personalizedInsights.birthChartConnection && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Birth Chart Connection</h4>
+                      <p className={styles.cardText}>{interpretation.personalizedInsights.birthChartConnection}</p>
+                    </div>
+                  )}
+                  {interpretation.personalizedInsights.zodiacInfluence && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Zodiac Influence</h4>
+                      <p className={styles.cardText}>{interpretation.personalizedInsights.zodiacInfluence}</p>
+                    </div>
+                  )}
+                  {interpretation.personalizedInsights.lifePathAlignment && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Life Path Alignment</h4>
+                      <p className={styles.cardText}>{interpretation.personalizedInsights.lifePathAlignment}</p>
+                    </div>
+                  )}
+                  {interpretation.personalizedInsights.karmaReflection && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Karma Reflection</h4>
+                      <p className={styles.cardText}>{interpretation.personalizedInsights.karmaReflection}</p>
+                    </div>
+                  )}
+                  {interpretation.personalizedInsights.planetaryMessage && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Planetary Message</h4>
+                      <p className={styles.cardText}>{interpretation.personalizedInsights.planetaryMessage}</p>
+                    </div>
+                  )}
+                </div>
+                <div className={styles.showMoreContainer}>
+                  <button className={styles.showMoreBtn} onClick={() => setShowMorePersonalized(!showMorePersonalized)}>
+                    {showMorePersonalized ? 'Show Less' : 'Show More'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Remedies */}
+            {interpretation.personalizedInsights?.remedies?.length > 0 && (
+              <div className={styles.resultCard}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>💎 Remedies</h3>
+                  <TTSButton text={`Remedies. ${interpretation.personalizedInsights.remedies.join('. ')}`} />
+                </div>
+                <div className={styles.contentWrapper}>
+                  {interpretation.personalizedInsights.remedies.map((remedy, index) => (
+                    <div key={index} className={styles.insightSection}>
+                      <p className={styles.cardText}>{remedy}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Warnings */}
+            {interpretation.warnings?.hasWarnings && interpretation.warnings.cautionAreas?.length > 0 && (
+              <div className={styles.resultCard}>
+                <div className={styles.cardHeader}>
+                  <h3 className={styles.cardTitle}>⚠️ Caution Areas</h3>
+                  <TTSButton text={`Warnings. ${interpretation.warnings.cautionAreas.join('. ')}`} />
+                </div>
+                <div className={styles.contentWrapper}>
+                  <div className={styles.insightSection}>
+                    <ul className={styles.takeawaysList}>
+                      {interpretation.warnings.cautionAreas.map((area, index) => (
+                        <li key={index} className={styles.takeawayItem}>{area}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  {interpretation.warnings.preventiveAdvice && (
+                    <div className={styles.insightSection}>
+                      <h4 className={styles.insightSubtitle}>Preventive Advice</h4>
+                      <p className={styles.cardText}>{interpretation.warnings.preventiveAdvice}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            </div>
 
             {/* Action Button */}
             <button className={styles.newDreamButton} onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}>

@@ -59,7 +59,7 @@ function OptionalProfileExample() {
       ) : (
         <div>
           <p>No profile selected</p>
-          <button onClick={() => window.location.href = '/aiwow'}>
+          <button onClick={() => window.location.href = '/ai-wow'}>
             Select Profile
           </button>
         </div>
@@ -244,7 +244,7 @@ function CompleteAIWowModuleExample() {
     return (
       <div className={styles.error}>
         <p>{error}</p>
-        <button onClick={() => window.location.href = '/aiwow'}>
+        <button onClick={() => window.location.href = '/ai-wow'}>
           Go to AIWow
         </button>
       </div>
@@ -291,7 +291,7 @@ OPTIONS:
     - If true, shows toast notification on error
     - If false, silently handles errors
 
-  redirectPath: string       // Default: '/aiwow'
+  redirectPath: string       // Default: '/ai-wow'
     - Custom path to redirect when profile is missing
     - Only used when required=true
 

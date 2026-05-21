@@ -1,7 +1,11 @@
 .wrapper {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 0 16px 48px;
+  margin: 70px auto 40px auto;
+  padding: 16px;
+  // border: 1.5px solid #fff;
+  border-radius: 12px;
+  // background: rgba(255, 255, 255, 0.4);
 }
 
 .headerCard {
@@ -28,7 +32,7 @@
 
 .subTitle {
   font-size: 14px;
-  color: #888;
+  color: #030303;
   margin: 8px 0 16px;
 }
 
@@ -47,9 +51,9 @@
 .resultText {
   font-size: 14px;
   line-height: 1.7;
-  color: #555;
-  background: #fffaf5;
-  border: 1px solid #ffe8d6;
+  color: #030303;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
   border-left: 4px solid #f75801;
   border-radius: 0 12px 12px 0;
   padding: 14px 18px;
@@ -81,7 +85,7 @@
 
 .remedyHint {
   font-size: 13px;
-  color: #888;
+  color: #030303;
   margin-bottom: 14px;
 }
 
@@ -103,10 +107,11 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #ffffff;
   padding: 14px 16px;
   border-radius: 12px;
-  border: 1px solid #f0ebe4;
   transition: border-color 0.2s;
 
   &:hover { border-color: #f75801; }

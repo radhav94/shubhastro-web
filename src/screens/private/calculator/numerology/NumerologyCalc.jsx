@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import NumerologyForm from "../forms/NumerologyForm";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./NumerologyCalc.module.scss";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "numerology_report";
 
@@ -14,6 +16,7 @@ const initialFormState = {
 
 const NumerologyCalc = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(
     STORAGE_KEY,
     initialFormState
@@ -39,7 +42,6 @@ const NumerologyCalc = () => {
     const newErrors = {};
 
     if (!formData.name) newErrors.name = "Name is required";
-    if (!formData.type) newErrors.type = "Type is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
 
     if (Object.keys(newErrors).length > 0) {
@@ -50,7 +52,7 @@ const NumerologyCalc = () => {
     const payload = {
       ...formData,
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: payload }));
     navigate("/numerology-calculator/report");
   };
 
@@ -73,7 +75,7 @@ const NumerologyCalc = () => {
       </div>
 
       <NumerologyForm
-        submitText="Submit"
+        submitText="Show Results"
         formData={formData}
         errors={errors}
         onChange={handleChange}
@@ -81,7 +83,7 @@ const NumerologyCalc = () => {
         onReset={() => {
           setFormData(initialFormState);
           setErrors({});
-          localStorage.removeItem(STORAGE_KEY);
+          dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
         }}
       />
     </div>

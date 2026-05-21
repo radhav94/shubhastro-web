@@ -1,5 +1,7 @@
 .cardContainer {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   padding: 16px;
   border-radius: 16px;
   margin: 16px 0;
@@ -7,7 +9,7 @@
 
 .title {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 600;
   text-align: start;
   margin-bottom: 18px;
   color: #222;
@@ -154,11 +156,15 @@
 }
 
 .muhuratContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   margin-top: 20px;
   text-align: start;
+  gap: 16px;
   
   @media (max-width: 768px) {
     margin-top: 18px;
+    grid-template-columns: repeat(2, 1fr);
   }
   
   @media (max-width: 480px) {
@@ -167,19 +173,20 @@
 }
 
 .muhuratBox {
-  background: #fff5f0;
-  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+  padding: 16px;
   border-radius: 12px;
   margin-bottom: 12px;
   text-align: start;
   
   @media (max-width: 768px) {
-    padding: 13px 16px;
+    // padding: 13px 16px;
     margin-bottom: 10px;
   }
   
   @media (max-width: 480px) {
-    padding: 12px 14px;
+    // padding: 12px 14px;
     border-radius: 10px;
     margin-bottom: 8px;
   }
@@ -187,7 +194,7 @@
 
 .muhuratBox h3 {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 6px;
   color: #222;
   

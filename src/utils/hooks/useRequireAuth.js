@@ -9,10 +9,12 @@ const useRequireAuth = () => {
   
 
   const checkAuth = () => {
-    console.log("Redirect Locatrion::",location.pathname || "/")
+    const fullPath = location.pathname + location.search;
+    console.log("Redirect Location::", fullPath)
     if (!isLoggedIn) {
+      localStorage.setItem("shubhtalk_redirect_after_login", fullPath);
       navigate("/login?skip=welcome", {
-        state: { from: location.pathname },
+        state: { from: fullPath },
       });
       return false;
     }

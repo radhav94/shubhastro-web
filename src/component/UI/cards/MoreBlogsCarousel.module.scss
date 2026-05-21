@@ -1,12 +1,18 @@
 .moreBlogsSection {
-  max-width: 1440px;
+  max-width: 100%;
   padding: 0 16px;
   margin: 40px auto 48px;
+  background: rgba(255, 255, 255,0.4);
 
   @media (max-width: 768px) {
     margin: 40px auto 0px;
     padding: 0 16px;
   }
+}
+.moreBlogsMainSection{
+  margin: auto;
+  padding: 40px 0px;
+  max-width: 1220px;
 }
 
 .header {
@@ -25,19 +31,28 @@
   font-weight: 500;
   line-height: 20px;
   text-transform: uppercase;
+  padding-left: 5px;
+  border-left: 4px solid #f75801;
+  width: fit-content;
 
   @media (max-width: 768px) {
     font-size: 16px;
     margin-bottom: 12px;
+    // text-align: center;
   }
 }
 
 .titleDivider {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
   margin-top: 12px;
+
+  @media (max-width: 768px) {
+    gap: 8px;
+    // justify-content: center;
+  }
 }
 
 .dividerLine {
@@ -99,7 +114,7 @@
   pointer-events: auto;
 }
 .relatedBlogCard {
-  background: #fff;
+  // background: #fff;
   border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
@@ -108,6 +123,10 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 2px solid white;
 
   // Match All Blogs card size
   width: calc((100vw - 80px) / 3);
@@ -141,7 +160,7 @@
 
   .content {
     padding: 16px;
-    background: #fff;
+    // background: #fff;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -347,7 +366,7 @@
 
 .content {
   padding: 20px;
-  background: #fff;
+  // background: #fff;
 
   @media (max-width: 768px) {
     padding: 16px;

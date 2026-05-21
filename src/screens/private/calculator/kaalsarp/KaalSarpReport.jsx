@@ -1,15 +1,18 @@
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useGetKaalSarpReportQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./KaalSarpReport.module.scss";
 import { BsCheckCircleFill } from "react-icons/bs";
 import CalcBackButton from "../CalcBackButton";
 import TTSButton from "../../../../component/UI/TTSButton";
+import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 
 const KaalSarpReport = () => {
   const navigate = useNavigate();
 
-  const stored = JSON.parse(localStorage.getItem("kaal_sarp"));
+  const stored = useSelector(selectCalculatorData("kaal_sarp"));
   const { data, isLoading } = useGetKaalSarpReportQuery(stored);
 
   if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
@@ -64,6 +67,7 @@ const KaalSarpReport = () => {
       <div className={styles.actionsTop}>
         <button
           className={styles.shareBtn}
+          style={{ display: 'none' }}
           onClick={() => {
             if (navigator.share) {
               navigator.share({
@@ -80,6 +84,8 @@ const KaalSarpReport = () => {
           Calculate Again
         </button>
       </div>
+
+      <ConnectCard />
     </div>
   );
 };

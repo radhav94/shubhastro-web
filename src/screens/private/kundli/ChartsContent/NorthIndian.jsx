@@ -7,9 +7,9 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
 
-const NorthIndian = () => {
+const NorthIndian = ({ style = "north" }) => {
   const payload = useSelector((state) => state?.form?.kundliPayload);
-  const params = payload ? buildVedicParam(payload) : null;
+  const params = payload ? buildVedicParam(payload, { style }) : null;
 
   /** ↓↓↓ CALL EACH CHART INDIVIDUALLY (NO LOOP) ↓↓↓ */
 

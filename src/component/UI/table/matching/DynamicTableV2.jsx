@@ -1,4 +1,6 @@
 import React from "react";
+import TTSButton from "../../../UI/TTSButton";
+import styles from "./RenderCard.module.scss";
 
 const DynamicTable = ({data}) => {
   // Convert nested objects (like varna, vasya, etc.) into an array
@@ -7,21 +9,25 @@ const DynamicTable = ({data}) => {
     .map((key) => data[key]);
   return (
     <>
-      {/* {title && (
-        <h2 className="text-xl font-semibold text-start  p-3 ">{title}</h2>
-      )} */}
-        {rows.map((item, index) => (
+        {rows.map((item, index) => {
+          const cardText = `${item.name}. Score: ${item?.varna ?? 0} out of ${item?.full_score ?? 0}. Male: ${item?.boy_varna || ''}. Female: ${item?.girl_varna || ''}. ${item?.description || ''}`;
+          return (
           <div
           key={index}
-          className="bg-white rounded-xl shadow p-4 md:p-8 text-center "
+          className={styles.dyCard}
         >
+          {/* TTS Button */}
+          <div className="absolute top-3 right-3">
+            <TTSButton text={cardText} />
+          </div>
+
           {/* HEADER SECTION */}
-          <div className="border-b border-gray-300 pb-2 mb-2">
+          <div className={styles.dyCardInner}>
             <div className="text-m md:text-xl text-black-900 mb-1">
               {item.name}
             </div>
         
-            <div className="text-xl md:text-4xl font-bold text-[#FF6A3D]">
+            <div className="text-xl md:text-4xl font-bold text-[#FF6A3D] notranslate" translate="no">
               {(item?.varna ?? "-")}/{(item?.full_score ?? "-")}
             </div>
           </div>
@@ -39,7 +45,8 @@ const DynamicTable = ({data}) => {
             </div>
           </div>
         </div>
-        ))}
+          );
+        })}
     </>
   );
 };

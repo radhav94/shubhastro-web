@@ -9,6 +9,16 @@ import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 const TalkToKundliChat = () => {
   const navigate = useNavigate();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/aiwow/talk-to-your-kundli");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
   
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -73,18 +83,21 @@ const TalkToKundliChat = () => {
 
         // Update suggested questions if provided by API
         if (sessionData.popularQuestions && Array.isArray(sessionData.popularQuestions)) {
+          // Keep original format (string or object) - handled in render
           setSuggestedQuestions(sessionData.popularQuestions);
+        } else if (sessionData.suggestedQuestions && Array.isArray(sessionData.suggestedQuestions)) {
+          setSuggestedQuestions(sessionData.suggestedQuestions);
         }
       } else {
         // Error already handled by service and interceptor
         setTimeout(() => {
-          navigate('/aiwow', { replace: true });
+          navigate('/ai-wow', { replace: true });
         }, 1500);
       }
     } catch (error) {
       console.error('Failed to start session:', error);
       setTimeout(() => {
-        navigate('/aiwow', { replace: true });
+        navigate('/ai-wow', { replace: true });
       }, 1500);
     } finally {
       setIsLoading(false);
@@ -162,8 +175,10 @@ const TalkToKundliChat = () => {
     }
   };
 
-  const handleSuggestedQuestion = (question) => {
-    setInputMessage(question);
+  const handleSuggestedQuestion = (question, e) => {
+    // Use the actual displayed text from the button (respects Google Translate)
+    const displayedText = e?.currentTarget?.innerText || question;
+    setInputMessage(displayedText);
     inputRef.current?.focus();
   };
 
@@ -243,15 +258,23 @@ const TalkToKundliChat = () => {
           <div className={styles.suggestedQuestions}>
             <p className={styles.suggestedTitle}>Try asking:</p>
             <div className={styles.suggestedList}>
-              {suggestedQuestions.map((question, index) => (
-                <button
-                  key={index}
-                  className={styles.suggestedButton}
-                  onClick={() => handleSuggestedQuestion(question)}
-                >
-                  {question}
-                </button>
-              ))}
+              {suggestedQuestions.map((question, index) => {
+                // Handle both string and object formats from API
+                // Always use the displayed text for input (same language user sees)
+                const displayText = typeof question === 'object' 
+                  ? (question.translatedText || question.text || question.label || question.question || question.value) 
+                  : question;
+                
+                return (
+                  <button
+                    key={index}
+                    className={styles.suggestedButton}
+                    onClick={(e) => handleSuggestedQuestion(displayText, e)}
+                  >
+                    {displayText}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}  

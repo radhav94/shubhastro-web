@@ -11,6 +11,16 @@ import TTSButton from '../../../../component/UI/TTSButton';
 const DailyCosmicBriefing = () => {
   const navigate = useNavigate();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+
+  useEffect(() => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/aiwow/daily-cosmic-briefing");
+      window.location.href = "/login?skip=welcome";
+    }
+  }, []);
+
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
   
   const [briefing, setBriefing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,13 +59,13 @@ const DailyCosmicBriefing = () => {
         setBriefing(result.data);
       } else {
         setTimeout(() => {
-          navigate('/aiwow', { replace: true });
+          navigate('/ai-wow', { replace: true });
         }, 1500);
       }
     } catch (error) {
       console.error('Failed to fetch briefing:', error);
       setTimeout(() => {
-        navigate('/aiwow', { replace: true });
+        navigate('/ai-wow', { replace: true });
       }, 1500);
     } finally {
       setIsLoading(false);

@@ -1,7 +1,8 @@
 .wrapper {
   padding: 20px 16px;
-  max-width: 720px;
   margin: 0 auto;
+  background: linear-gradient(180deg, #f8c89a 0%, #fdd8b5 30%, #fce4c8 60%, #fdd8b5 100%);
+  border-radius: 16px;
 }
 
 .headingRow {
@@ -42,18 +43,31 @@
 }
 
 /* ── Address List ── */
-.addressList { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+.addressList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 992px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 576px) {
+    grid-template-columns: 1fr;
+  }
+}
 
 .addressCard {
   padding: 18px 20px 14px;
-  border: 1.5px solid #f0e0d6;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
   border-radius: 14px;
   cursor: pointer;
-  background: #fffaf7;
+  background: rgba(255, 240, 228, 0.55);
   transition: border-color 0.2s, background 0.2s;
   &:hover { border-color: #f75801; }
 }
-.addressActive { border-color: #f75801; background: #fff8f4; }
+.addressActive { border-color: #f75801; background: rgba(255, 240, 228, 0.75); }
 
 .cardTop {
   display: flex;
@@ -66,7 +80,7 @@
   display: inline-block;
   padding: 3px 12px;
   border-radius: 4px;
-  background: #ffe8db;
+  background: #fff5ee;
   color: #f75801;
   font-size: 11px;
   font-weight: 700;
@@ -113,7 +127,7 @@
   align-items: center;
   gap: 16px;
   padding-top: 10px;
-  border-top: 1px solid #f0e0d6;
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .actionBtn {
@@ -170,12 +184,12 @@
 /* ── Modal ── */
 .overlay {
   position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45);
-  z-index: 1000; display: flex; align-items: center; justify-content: center;
+  z-index: 99999; display: flex; align-items: center; justify-content: center;
   padding: 20px; overflow-y: auto;
 }
 
 .modal {
-  background: #fff; border-radius: 16px; padding: 28px 28px 24px;
+  background: linear-gradient(90deg, rgba(254, 254, 254, 1) 0%, rgba(255, 248, 236, 1));; border-radius: 16px; padding: 24px;
   width: 100%; max-width: 520px; max-height: 85vh; overflow-y: auto;
   position: relative; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15); margin: auto;
   @media (max-width: 480px) { padding: 20px 18px 18px; border-radius: 12px; max-height: 90vh; }
@@ -247,7 +261,7 @@
 
 /* ── Responsive ── */
 @media (max-width: 480px) {
-  .wrapper { padding: 14px 12px; }
+  .wrapper { padding: 14px 12px; border-radius: 12px; }
   .heading { font-size: 15px; }
   .addBtnTop { padding: 6px 12px; font-size: 12px; }
   .addressList { gap: 12px; margin-bottom: 16px; }

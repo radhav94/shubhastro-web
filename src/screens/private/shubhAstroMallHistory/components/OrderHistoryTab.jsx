@@ -50,6 +50,7 @@ const OrderHistoryTab = () => {
 
   const sortRef = useRef(null);
   const filterRef = useRef(null);
+  const wrapperRef = useRef(null);
 
   const [getMallOrderInvoice] = useGetMallOrderInvoiceMutation();
   const [invoiceLoadingId, setInvoiceLoadingId] = useState(null);
@@ -127,7 +128,7 @@ const OrderHistoryTab = () => {
   }
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} ref={wrapperRef}>
       <div className={styles.topBar}>
         <span className={styles.orderCount}>{totalOrders} Orders</span>
         <div className={styles.actions}>
@@ -255,7 +256,6 @@ const OrderHistoryTab = () => {
             const items = order.items || [];
             const firstItem = items[0] || {};
             const productName = firstItem.product_name || "Product";
-            const qty = firstItem.quantity || 1;
             const price = order.final_amount || order.total_amount || 0;
             const itemCount = items.length;
 
@@ -264,25 +264,46 @@ const OrderHistoryTab = () => {
               ? new Date(orderDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })
               : "";
 
-            // First item image
-            const getFirstImage = () => {
-              const variants = firstItem.variants || [];
-              if (variants.length > 0) {
-                const img = variants[0]?.images?.[0] || "";
-                if (typeof img === "string") return img;
-                if (img && typeof img === "object") return img.original || img.small || img.url || img.src || "";
-              }
-              const raw = firstItem.product_image || (firstItem.images?.length ? firstItem.images[0] : null) || firstItem.image || "";
-              if (typeof raw === "string") return raw;
-              if (raw && typeof raw === "object") return raw.original || raw.small || raw.url || raw.src || "";
-              return "";
+            // Collect one image per variant/item to match the displayed item count
+            const getItemImages = () => {
+              const images = [];
+              items.forEach((item) => {
+                const variants = item.variants || [];
+                if (variants.length > 0) {
+                  variants.forEach((variant) => {
+                    const img = variant.images?.[0] || "";
+                    if (typeof img === "string" && img) {
+                      images.push(img);
+                    } else if (img && typeof img === "object") {
+                      images.push(img.original || img.small || img.url || img.src || "");
+                    } else {
+                      images.push(""); // no image, will show default
+                    }
+                  });
+                } else {
+                  const raw = item.product_image || (item.images?.length ? item.images[0] : null) || item.image || "";
+                  if (typeof raw === "string" && raw) {
+                    images.push(raw);
+                  } else if (raw && typeof raw === "object") {
+                    images.push(raw.original || raw.small || raw.url || raw.src || "");
+                  } else {
+                    images.push(""); // no image, will show default
+                  }
+                }
+              });
+              return images;
             };
 
-            const firstImage = getFirstImage();
-            const sku = firstItem.sku || firstItem.product_sku || "";
-            const mrp = firstItem.mrp || firstItem.original_price || 0;
-            const itemPrice = firstItem.price || firstItem.selling_price || price;
-            const discount = mrp > itemPrice ? Math.round(((mrp - itemPrice) / mrp) * 100) : 0;
+            const itemImages = getItemImages();
+            const visibleImages = itemImages.slice(0, 4);
+            const remainingCount = itemImages.length > 4 ? itemImages.length - 4 : 0;
+
+            // Total quantity across all items/variants
+            const totalQty = items.reduce((sum, item) => {
+              const variants = item.variants || [];
+              const variantQty = variants.reduce((vSum, v) => vSum + (v.quantity || 0), 0);
+              return sum + (variantQty || item.quantity || 1);
+            }, 0);
 
             const orderStatus = order.order_status || "pending";
             const paymentStatus = order.payment_status || "pending";
@@ -301,37 +322,41 @@ const OrderHistoryTab = () => {
               >
                 {/* ── Card Header ── */}
                 <div className={styles.cardHeader}>
-                  <div className={styles.headerLeft}>
-                    <span className={styles.orderBagIcon}><ShoppingBag size={16} /></span>
-                    <div>
-                      <span className={styles.orderNumber}>ORD-{orderNumber}</span>
-                      {formattedDate && <p className={styles.orderDate}>Placed on {formattedDate}</p>}
+                  <div className={styles.headerTopRow}>
+                    <div className={styles.headerLeft}>
+                      <span className={styles.orderBagIcon}><ShoppingBag size={16} /></span>
+                      <div>
+                        <span className={styles.orderNumber}>ORD-{orderNumber}</span>
+                        {formattedDate && <p className={styles.orderDate}>Order on {formattedDate}</p>}
+                      </div>
                     </div>
-                  </div>
-                  <button
-                    className={`${styles.downloadInvoiceBtn} ${invoiceLoadingId === orderId ? styles.downloadLoading : ""}`}
-                    disabled={invoiceLoadingId === orderId}
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      setInvoiceLoadingId(orderId);
-                      try {
-                        const data = await getMallOrderInvoice(orderId).unwrap();
-                        const pdfUrl = data?.data || data?.pdfUrl || data?.url;
-                        if (pdfUrl) {
-                          openInvoice(pdfUrl);
-                        } else {
-                          Toast.error("Invoice not available");
+                  {orderStatus.toLowerCase() != "cancelled" && (
+                    <button
+                      className={`${styles.downloadInvoiceBtn} ${invoiceLoadingId === orderId ? styles.downloadLoading : ""}`}
+                      disabled={invoiceLoadingId === orderId}
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        setInvoiceLoadingId(orderId);
+                        try {
+                          const data = await getMallOrderInvoice(orderId).unwrap();
+                          const pdfUrl = data?.data || data?.pdfUrl || data?.url;
+                          if (pdfUrl) {
+                            openInvoice(pdfUrl);
+                          } else {
+                            Toast.error("Invoice not available");
+                          }
+                        } catch (err) {
+                          Toast.error("Invoice not available for this order");
+                        } finally {
+                          setInvoiceLoadingId(null);
                         }
-                      } catch (err) {
-                        Toast.error("Invoice not available for this order");
-                      } finally {
-                        setInvoiceLoadingId(null);
-                      }
-                    }}
-                  >
-                    <FileText size={16} />
-                    {invoiceLoadingId === orderId ? "Loading..." : "Download Invoice"}
-                  </button>
+                      }}
+                    >
+                      <FileText size={14} />
+                      {invoiceLoadingId === orderId ? "Loading..." : "Download Invoice"}
+                    </button>
+                    )}
+                  </div>
                   <div className={styles.headerRight}>
                     <span className={`${styles.statusChip} ${styles[`status_${orderStatus}`]}`}>
                       {orderStatus.charAt(0).toUpperCase() + orderStatus.slice(1)} {(orderStatus === "confirmed" || orderStatus === "completed") && <CheckCircle size={11} />}
@@ -346,18 +371,20 @@ const OrderHistoryTab = () => {
 
                 {/* ── Card Body ── */}
                 <div className={styles.cardBody}>
-                  <div className={styles.productImg}>
-                    <ProductImage src={firstImage} alt={productName} />
-                  </div>
-                  <div className={styles.productInfo}>
-                    <h4 className={styles.productName}>{productName}{itemCount > 1 ? ` +${itemCount - 1} more` : ""}</h4>
-                    {sku && <p className={styles.skuText}>SKU: {sku}</p>}
-                    <p className={styles.qtyText}>Qty: {qty}</p>
-                    <div className={styles.priceRow}>
-                      <span className={styles.sellingPrice}>₹{itemPrice}</span>
-                      {mrp > itemPrice && <span className={styles.mrpPrice}>₹{mrp}</span>}
-                      {discount > 0 && <span className={styles.discountBadge}>{discount}% OFF</span>}
+                  <div className={styles.imagesSection}>
+                    <div className={styles.imagesRow}>
+                      {visibleImages.map((img, idx) => (
+                        <div key={idx} className={styles.productImg}>
+                          <ProductImage src={img} alt={`Product ${idx + 1}`} />
+                        </div>
+                      ))}
+                      {remainingCount > 0 && (
+                        <div className={styles.moreImagesOverlay}>
+                          <span>+{remainingCount}</span>
+                        </div>
+                      )}
                     </div>
+                    <p className={styles.sellingPrice}>{totalQty} {totalQty === 1 ? "Item" : "Items"}</p>
                   </div>
                   <div className={styles.detailsCol}>
                     {paymentMethod && (
@@ -403,7 +430,7 @@ const OrderHistoryTab = () => {
         <div className={styles.pagination}>
           <button
             disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
+            onClick={() => { setPage((p) => p - 1); wrapperRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}
             className={styles.pageBtn}
           >
             Previous
@@ -413,7 +440,7 @@ const OrderHistoryTab = () => {
           </span>
           <button
             disabled={page >= pagination.pages}
-            onClick={() => setPage((p) => p + 1)}
+            onClick={() => { setPage((p) => p + 1); wrapperRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}
             className={styles.pageBtn}
           >
             Next

@@ -1,0 +1,88 @@
+/* Language Selector Component */
+.langWrap {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.langToggle {
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #fff;
+  border-radius: 40px;
+  padding: 6px 12px;
+  border: 1px solid rgba(189, 189, 189, 0.5);
+  height: 34px;
+  max-width: 140px;
+}
+
+.langName {
+  color: #424242;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+  display: inline-block;
+}
+
+.langDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 140px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  padding: 8px 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.95);
+  transition: all 0.25s ease;
+  z-index: 1000;
+  max-height: 250px;
+  overflow: auto;
+
+  p {
+    margin: 0;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+    font-size: 13px;
+    width: 100%;
+
+    &:hover {
+      background: #f2f2f2;
+    }
+  }
+}
+
+.langOpen {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.langClose {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.95);
+}
+
+.langActive {
+  background: #fff3ed;
+  color: #f75801;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}

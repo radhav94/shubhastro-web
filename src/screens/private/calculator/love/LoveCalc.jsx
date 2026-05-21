@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import LoveMatchForm from "../forms/LoveMatchForm";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./LoveCalc.module.scss";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "love_calculator";
 
@@ -15,22 +17,30 @@ const initialFormState = {
 
 const LoveCalc = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(
     STORAGE_KEY,
     initialFormState
   );
 
   const [errors, setErrors] = useState({});
-  const [infoOpen, setInfoOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(true);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
+    }
   };
 
   const handleReset = () => {
     setFormData(initialFormState);
     setErrors({});
-    localStorage.removeItem(STORAGE_KEY);
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
   };
 
   const handleSubmit = (e) => {
@@ -45,7 +55,7 @@ const LoveCalc = () => {
     setErrors(newErrors);
     if (Object.keys(newErrors).length) return;
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: formData }));
     navigate("/love-calculator/report");
   };
 
@@ -102,8 +112,7 @@ const LoveCalc = () => {
           <p>
             Have you ever thought if you and your crush are a perfect match? A love
             calculator is a fun and simple tool that tells you your love percentage
-            and how well you both connect. Just enter names, birth dates, or even
-            zodiac signs, and see the result! Finding love isn't always easy, but
+            and how well you both connect. Just enter names, birth dates and see the result! Finding love isn't always easy, but
             tools like the love calculator make it exciting. They help you understand
             your feelings and check your romantic compatibility. Many people use it
             for fun and to explore their bond before starting a relationship. Try it

@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
 import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
 import styles from "./AgeCalc.module.scss";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "age_calculator";
 
@@ -13,6 +15,7 @@ const initialFormState = {
 
 const AgeCalc = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(
     STORAGE_KEY,
     initialFormState
@@ -58,7 +61,7 @@ const AgeCalc = () => {
 
     if (Object.keys(validationErrors).length) return;
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: formData }));
     navigate("/age-calculator/report");
   };
 
@@ -75,13 +78,13 @@ const AgeCalc = () => {
           Have you ever paused for a moment and thought exactly how many days you
           have lived? Or maybe you're trying to figure out the exact age gap
           between you and your partner? From your exact age in years, months, and
-          days to even hours, this simple tool can reveal more than you think.
+          days, this simple tool can reveal more than you think.
         </p>
       </div>
 
       <DateWithSingleInputForm
         title="Calculate your Age here"
-        submitText="Calculate my Age"
+        submitText="Show Results"
         inputLabel="Age As Of Date"
         inputPlaceholder=""
         inputName="asOf"
@@ -93,7 +96,7 @@ const AgeCalc = () => {
         onReset={() => {
           setFormData(initialFormState);
           setErrors({});
-          localStorage.removeItem(STORAGE_KEY);
+          dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
         }}
       />
     </div>

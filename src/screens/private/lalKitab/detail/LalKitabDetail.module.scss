@@ -33,7 +33,29 @@
   color: #1a1a1a;
   margin: 0;
 }
-.tabWrapper { display: flex; border-bottom: 2px solid #e5e7eb; margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
-.tab { flex-shrink: 0; padding: 12px 20px; font-size: 14px; font-weight: 500; color: #6b7280; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; transition: all 0.2s; white-space: nowrap; &:hover { color: #374151; } }
+.tabWrapper { display: flex; border-bottom: 1.5px solid #ffffff; margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
+.tab { flex-shrink: 0; padding: 12px 20px; font-size: 14px; font-weight: 500; color: #030303; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s; white-space: nowrap; &:hover { color: #374151; } }
 .active { color: #F75801; font-weight: 600; border-bottom-color: #F75801; }
 .content { min-height: 300px; }
+
+.consultCta {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.consultBtn {
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: #F75801;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #e04e00;
+  }
+}

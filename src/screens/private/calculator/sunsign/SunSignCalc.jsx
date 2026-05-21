@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
 import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 import styles from "./SunSignCalc.module.scss";
+import { ProfileManager } from "../../../../component/UI/Profile";
+import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const STORAGE_KEY = "sun_sign";
 
@@ -26,7 +30,10 @@ const SunSignCalc = () => {
   );
 
   const [errors, setErrors] = useState({});
-  const [infoOpen, setInfoOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(true);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const dispatch = useDispatch();
+  const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
 
   const handleChange = (key, value) => {
     setFormData((prev) => {
@@ -36,6 +43,36 @@ const SunSignCalc = () => {
       return { ...prev, [key]: value };
     });
     setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
+
+  const fillFromProfile = (profile) => {
+    if (!profile) return;
+    handleChange("name", profile.name || "");
+    const g = (profile.gender || profile.identity || "").toLowerCase();
+    if (g === "male" || g === "female") handleChange("gender", g);
+    if (profile.year && profile.month && profile.day) {
+      handleChange("dob", `${profile.year}-${String(profile.month).padStart(2, "0")}-${String(profile.day).padStart(2, "0")}`);
+    }
+    if (profile.hour != null && profile.min != null) {
+      handleChange("tob", `${String(profile.hour).padStart(2, "0")}:${String(profile.min).padStart(2, "0")}`);
+      handleChange("isTimeUnknown", false);
+    }
+    if (profile.place) handleChange("place", profile.place);
+    if (profile.lat) handleChange("lat", profile.lat);
+    if (profile.lon || profile.lng) handleChange("lng", profile.lon || profile.lng);
+  };
+
+  useEffect(() => {
+    if (selectedKundli) {
+      fillFromProfile(selectedKundli);
+    }
+  }, [selectedKundli]);
+
+  const handleProfileSelect = (profile) => {
+    if (!profile) return;
+    fillFromProfile(profile);
+    dispatch(setSelectedKundli(profile));
+    setShowProfileModal(false);
   };
 
   const handleSubmit = (e) => {
@@ -60,7 +97,7 @@ const SunSignCalc = () => {
       ...formData,
       tob: formData.isTimeUnknown ? "12:00" : formData.tob,
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: payload }));
     navigate("/sun-sign-calculator/report");
   };
 
@@ -138,9 +175,12 @@ const SunSignCalc = () => {
               name="name"
               value={formData.name}
               placeholder="E.g. John Doe"
-              onChange={(e) => handleChange("name", e.target.value)}
+              onChange={(e) => handleChange("name", e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
             />
             {errors?.name && <p className={styles.error}>{errors.name}</p>}
+            <button type="button" className={styles.selectProfileBtnMobile} onClick={() => setShowProfileModal(true)}>
+              Select Profile +
+            </button>
           </div>
 
           <div className={styles.formGroup}>
@@ -157,7 +197,12 @@ const SunSignCalc = () => {
             </select>
             {errors?.gender && <p className={styles.error}>{errors.gender}</p>}
           </div>
+        </div>
+        <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
+          Select Profile +
+        </button>
 
+        <div className={styles.formGrid}>
           {/* Row 2: Date of Birth + Place of birth */}
           <div className={styles.formGroup}>
             <label>
@@ -246,11 +291,30 @@ const SunSignCalc = () => {
         </div>
 
         <div className={styles.btnRow}>
+          <button
+            type="button"
+            className={styles.resetBtn}
+            onClick={() => {
+              setFormData(initialFormState);
+              setErrors({});
+              dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
+            }}
+          >
+            Reset
+          </button>
           <button type="submit" className={styles.submitBtn}>
             Show Results
           </button>
         </div>
       </form>
+
+      <ProfileManager
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        onProfileSelect={handleProfileSelect}
+        title="Select Profile"
+        enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+      />
     </div>
   );
 };

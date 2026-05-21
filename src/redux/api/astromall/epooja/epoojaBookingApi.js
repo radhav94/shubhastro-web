@@ -5,7 +5,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     // GET Astromall Page Data (tray listing)
     getAstromallPageData: builder.query({
       query: ({ page = 1, limit = 20 } = {}) => ({
-        url: `mall/homepage/?slug=astromallpage&page=${page}&limit=${limit}`,
+        url: `mall/homepage?slug=astromallpage&page=${page}&limit=${limit}`,
         method: "GET",
         headers: { accept: "application/json" },
       }),
@@ -73,10 +73,15 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
             ? localStorage.getItem("shubhtalk_astro_token")
             : localStorage.getItem("shubhtalk_customer_token");
 
+          // If user is not logged in, return empty cart instead of making an unauthorized request
+          if (!token) {
+            return { data: { success: true, data: { items: [], totalItems: 0, totalPrice: 0 } } };
+          }
+
           const res = await fetch(`${BASE_URL}/api/mall/cart`, {
             headers: {
               accept: "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              Authorization: `Bearer ${token}`,
             },
           });
           const json = await res.json();
@@ -98,6 +103,11 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
             ? localStorage.getItem("shubhtalk_astro_token")
             : localStorage.getItem("shubhtalk_customer_token");
 
+          // Require authentication for cart mutations
+          if (!token) {
+            return { error: { status: 401, data: { message: "Please login to add items to cart" } } };
+          }
+
           const body = { productId, quantity, variantId };
           if (skuCode) body.skuCode = skuCode;
 
@@ -106,7 +116,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
             headers: {
               "Content-Type": "application/json",
               accept: "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify(body),
           });
@@ -132,12 +142,16 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
             ? localStorage.getItem("shubhtalk_astro_token")
             : localStorage.getItem("shubhtalk_customer_token");
 
+          if (!token) {
+            return { error: { status: 401, data: { message: "Please login to update cart" } } };
+          }
+
           const res = await fetch(`${BASE_URL}/api/mall/cart/${productId}/${variantId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
               accept: "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ quantity }),
           });
@@ -163,11 +177,15 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
             ? localStorage.getItem("shubhtalk_astro_token")
             : localStorage.getItem("shubhtalk_customer_token");
 
+          if (!token) {
+            return { error: { status: 401, data: { message: "Please login to modify cart" } } };
+          }
+
           const res = await fetch(`${BASE_URL}/api/mall/cart/${productId}/${variantId}`, {
             method: "DELETE",
             headers: {
               accept: "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              Authorization: `Bearer ${token}`,
             },
           });
           const json = await res.json();

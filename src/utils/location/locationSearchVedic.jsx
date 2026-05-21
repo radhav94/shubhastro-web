@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLazyGeoSearchQuery } from "../../redux/api/geoApi";
 import styles from "./locationSearch.module.scss";
 
-const LocationSearch = ({ value, onChange, onPlaceSelect }) => {
+const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder }) => {
   const [triggerGeoSearch, { data, isFetching }] = useLazyGeoSearchQuery();
   const [open, setOpen] = useState(false);
   const selectionMade = useRef(false); // Track if a place is selected
@@ -26,13 +26,46 @@ const LocationSearch = ({ value, onChange, onPlaceSelect }) => {
 
   const handleSelect = (item) => {
     try {
-      onPlaceSelect({
-        address: item.full_name,
-        lat: Number(item.coordinates[0]),
-        lng: Number(item.coordinates[1]),
-        timezone: item.tz != null ? Number(item.tz) : 5.5,
-      });
-      selectionMade.current = true; // prevent further API calls until user types again
+      const lat = Number(item.coordinates[0]);
+      const lng = Number(item.coordinates[1]);
+      
+      // Get language from googtrans cookie for localized name
+      const cookie = document.cookie.split("; ").find((row) => row.startsWith("googtrans="));
+      let lang = "en";
+      if (cookie) {
+        const value = decodeURIComponent(cookie.split("=")[1]);
+        const parts = value.split("/").filter(Boolean);
+        if (parts.length > 1) lang = parts[1];
+      }
+
+      // If non-English, fetch localized name
+      if (lang !== "en") {
+        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=10&accept-language=${lang}`)
+          .then((res) => res.json())
+          .then((data) => {
+            const city = data?.address?.city || data?.address?.town || data?.address?.state_district || "";
+            const country = data?.address?.country || "";
+            const localizedName = [city, country].filter(Boolean).join(", ") || item.full_name;
+            onPlaceSelect({
+              address: localizedName,
+              lat,
+              lng,
+              timezone: item.tz != null ? Number(item.tz) : 5.5,
+            });
+          })
+          .catch(() => {
+            onPlaceSelect({ address: item.full_name, lat, lng, timezone: item.tz != null ? Number(item.tz) : 5.5 });
+          });
+      } else {
+        onPlaceSelect({
+          address: item.full_name,
+          lat,
+          lng,
+          timezone: item.tz != null ? Number(item.tz) : 5.5,
+        });
+      }
+
+      selectionMade.current = true;
       setOpen(false);
     } catch (err) {
       console.error("Error selecting place:", err);
@@ -45,7 +78,7 @@ const LocationSearch = ({ value, onChange, onPlaceSelect }) => {
         type="text"
         value={value}
         onChange={handleInputChange} // API triggers only here
-        placeholder="Search for a city..."
+        placeholder={placeholder || "Search for a city..."}
         className={styles.input}
         autoComplete="off"
       />

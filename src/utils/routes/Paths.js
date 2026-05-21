@@ -209,6 +209,7 @@ import LalKitabZodiac from "../../screens/private/lalKitab/zodiac/LalKitabZodiac
 import LalKitabProblems from "../../screens/private/lalKitab/problems/LalKitabProblems";
 import OccultChat from "../../screens/private/occult/OccultChat";
 import OccultResult from "../../screens/private/occult/OccultResult";
+import PanditAIVoice from "../../screens/private/panditAIVoice/PanditAIVoice";
 
 export const PATH = {
   // DEFAULT: {
@@ -344,7 +345,7 @@ export const PATH = {
         element: HoroscopeNew,
       },
       TOMORROW_NEW: {
-        path: ["/horoscope/tomorrow-horoscope-new/:sign", "/horoscope/tomorrow-horoscope-new"],
+        path: ["/tomorrow-horoscope/:sign", "/tomorrow-horoscope"],
         element: HoroscopeNew,
       },
       TODAY_NEW: {
@@ -364,7 +365,7 @@ export const PATH = {
         element: Yesterday,
       },
       TOMORROW: {
-        path: "/horoscope/tomorrow-horoscope/:sign",
+        path: "/tomorrow-horoscope/:sign",
         element: Tomorrow,
       },
     },
@@ -407,6 +408,14 @@ export const PATH = {
     LAL_KITAB_PROBLEMS: {
       path: "/laal-kitab/problems",
       element: LalKitabProblems,
+    },
+
+    // AI Pandit Voice
+    PANDIT_AI_VOICE: {
+      path: "/pandit-ai-voice",
+      element: PanditAIVoice,
+      header: false,
+      footer: false,
     },
 
     // Occult
@@ -597,7 +606,7 @@ export const PATH = {
 
     // AI WOW
     AI_WOW: {
-      path: "/aiwow",
+      path: "/ai-wow",
       element: AIWow,
       header: false,
       footer: false,

@@ -8,7 +8,7 @@
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-block: 4px;
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 }
@@ -20,8 +20,8 @@
   gap: 4px;
   padding: 12px 14px;
   min-width: 72px;
-  background: #fff;
-  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
@@ -52,7 +52,8 @@
 }
 
 .detailCard {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -85,18 +86,18 @@
 
 .detailHouse {
   font-size: 13px;
-  color: #718096;
+  color: #030303;
 }
 
 .interpretation {
   font-size: 14px;
-  color: #4a5568;
+  color: #030303;
   line-height: 1.7;
   margin: 0 0 16px;
 }
 
 .remedies {
-  background: #f0fff4;
+  background: #f0fff488;
   border-radius: 10px;
   padding: 14px;
 }

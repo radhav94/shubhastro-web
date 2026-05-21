@@ -15,13 +15,13 @@ import useRequireAuth from "../utils/hooks/useRequireAuth";
 import { ProfileManager } from "./UI/Profile";
 import { setSelectedKundli, clearSelectedKundli } from "../redux/kundli/kundliSlice";
 import { setSelectedKundliProfile } from "../redux/aiwow/aiwowSlice";
+import LanguageSelector from "./LanguageSelector";
 const TopHeader = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const requireAuth = useRequireAuth();
   const [user, setUser] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState('en');
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const token = getToken();
 
@@ -59,99 +59,11 @@ const TopHeader = () => {
   // Track if user is logged in to properly display wallet balance
   const isLoggedIn = !!user && !!token;
 
-  // Fixed list of supported languages with English labels
-  const [open, setOpen] = useState(false);
-  const [activeLang, setActiveLang] = useState("English"); // default language name
-  const langRef = useRef(null);
-
-  // Close language dropdown on outside click (desktop + mobile)
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (langRef.current && !langRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("touchstart", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-    };
-  }, [open]);
-
-  const supportedLanguages = [
-    { code: 'en', name: 'English' },
-    { code: 'hi', name: 'Hindi' },
-    { code: 'kn', name: 'Kannada' },
-    { code: 'bn', name: 'Bengali' },
-    { code: 'ta', name: 'Tamil' },
-    { code: 'te', name: 'Telugu' },
-    { code: 'ml', name: 'Malayalam' },
-    { code: 'ar', name: 'Arabic' },
-    { code: 'cs', name: 'Czech' },
-    { code: 'da', name: 'Danish' },
-    { code: 'fr', name: 'French' },
-    { code: 'de', name: 'German' },
-    { code: 'id', name: 'Indonesian' },
-    { code: 'it', name: 'Italian' },
-    { code: 'ms', name: 'Malay' },
-    { code: 'my', name: 'Myanmar (Burmese)' },
-    { code: 'pl', name: 'Polish' },
-    { code: 'es', name: 'Spanish' },
-    { code: 'sv', name: 'Swedish' },
-    { code: 'th', name: 'Thai' },
-    { code: 'tr', name: 'Turkish' },
-  ];
-
   /* lock body scroll when drawer open */
   useEffect(() => {
     document.body.style.overflow = isDrawerOpen ? "hidden" : "auto";
     return () => (document.body.style.overflow = "auto");
   }, [isDrawerOpen]);
-
-  /* Sync selected language with Google Translate cookie */
-  useEffect(() => {
-    const getCurrentLang = () => {
-      const cookie = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("googtrans="));
-      if (cookie) {
-        const value = decodeURIComponent(cookie.split("=")[1]);
-        const parts = value.split("/");
-        return parts[2] || "en";
-      }
-      return "en";
-    };
-
-    const currentLangCode = getCurrentLang();
-    setSelectedLang(currentLangCode);
-    
-    // Update the displayed language name based on the current language code
-    const currentLang = supportedLanguages.find(lang => lang.code === currentLangCode);
-    if (currentLang) {
-      setActiveLang(currentLang.name);
-    }
-
-    // Verify Google Translate widget is properly initialized
-    // This helps ensure consistent behavior across environments
-    const checkGoogleTranslateWidget = () => {
-      const widget = document.querySelector('.goog-te-combo');
-      if (widget && currentLangCode !== 'en') {
-        // Ensure widget matches cookie
-        if (widget.value !== currentLangCode) {
-          widget.value = currentLangCode;
-          widget.dispatchEvent(new Event('change'));
-        }
-      }
-    };
-
-    // Check after a short delay to allow Google Translate to initialize
-    const timer = setTimeout(checkGoogleTranslateWidget, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
 
   /* sync user */
   useEffect(() => {
@@ -274,147 +186,13 @@ const TopHeader = () => {
   })();
         
 
-  // Handle language change with Google Translate — no reload for non-English
-  const handleLanguageChange = (targetLang) => {
-    const getCurrentLang = () => {
-      const cookie = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("googtrans="));
-      if (cookie) {
-        const value = decodeURIComponent(cookie.split("=")[1]);
-        const parts = value.split("/");
-        return parts[2] || "en";
-      }
-      return "en";
-    };
-
-    const clearCookies = () => {
-      const hostname = window.location.hostname;
-      const cookiesToClear = ['googtrans', 'googtrans_backup'];
-      const domainParts = hostname.split('.');
-      const domains = [''];
-      domains.push(`domain=${hostname}`);
-      if (domainParts.length > 1) {
-        domains.push(`domain=.${hostname}`);
-        if (domainParts.length > 2) {
-          const parentDomain = domainParts.slice(-2).join('.');
-          domains.push(`domain=.${parentDomain}`);
-        }
-      }
-      cookiesToClear.forEach(cookieName => {
-        domains.forEach(domainStr => {
-          ['/', ''].forEach(path => {
-            const pathStr = path ? `path=${path};` : '';
-            const domainPart = domainStr ? `${domainStr};` : '';
-            document.cookie = `${cookieName}=; ${pathStr} ${domainPart} expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0;`;
-          });
-        });
-      });
-    };
-
-    const setCookie = (lang) => {
-      const hostname = window.location.hostname;
-      const cookieValue = `/en/${lang}`;
-      const maxAge = 31536000;
-      document.cookie = `googtrans=${cookieValue}; path=/; max-age=${maxAge}; SameSite=Lax;`;
-      document.cookie = `googtrans=${cookieValue}; path=/; domain=${hostname}; max-age=${maxAge}; SameSite=Lax;`;
-      const domainParts = hostname.split('.');
-      if (domainParts.length > 1) {
-        document.cookie = `googtrans=${cookieValue}; path=/; domain=.${hostname}; max-age=${maxAge}; SameSite=Lax;`;
-        if (domainParts.length > 2) {
-          const parentDomain = domainParts.slice(-2).join('.');
-          document.cookie = `googtrans=${cookieValue}; path=/; domain=.${parentDomain}; max-age=${maxAge}; SameSite=Lax;`;
-        }
-      }
-    };
-
-    const currentLang = getCurrentLang();
-
-    if (currentLang === targetLang) {
-      setOpen(false);
-      return;
-    }
-
-    // Update UI state immediately
-    setSelectedLang(targetLang);
-    const selectedLanguage = supportedLanguages.find(lang => lang.code === targetLang);
-    if (selectedLanguage) {
-      setActiveLang(selectedLanguage.name);
-    }
-    setOpen(false);
-
-    // Notify listeners (e.g. TTS) that the translation language changed
-    window.dispatchEvent(new CustomEvent("translationchange", { detail: { lang: targetLang } }));
-
-    // Switching back to English requires a reload (Google Translate can't "untranslate" via widget)
-    if (targetLang === 'en') {
-      clearCookies();
-      setTimeout(() => { window.location.reload(); }, 200);
-      return;
-    }
-
-    // For non-English: try the widget first (no reload)
-    const widget = document.querySelector('.goog-te-combo');
-    if (widget) {
-      widget.value = targetLang;
-      widget.dispatchEvent(new Event('change'));
-      // Also set cookie so it persists on next page load
-      setCookie(targetLang);
-      return;
-    }
-
-    // Fallback: cookie + reload if widget not found
-    clearCookies();
-    setTimeout(() => {
-      setCookie(targetLang);
-      setTimeout(() => { window.location.reload(); }, 200);
-    }, 200);
-  };
-
   // If in iframe mode, show minimal header with only language and close button
   if (isIframeMode) {
     return (
       <header className={styles.iframeHeader}>
         <div className={styles.iframeHeaderContent}>
           {/* Language Dropdown */}
-          <div className={styles.languageWrap}>
-            <span
-              className={styles.onHoverChangeLang}
-              onClick={() => setOpen((prev) => !prev)}
-            >
-              <span className={styles.languageName}>{activeLang}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
-                <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_9128_57)"/>
-                <defs>
-                  <linearGradient id="paint0_linear_9128_57" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#F75801"/>
-                    <stop offset="1" stopColor="#D43400"/>
-                  </linearGradient>
-                </defs>
-              </svg>
-            </span>
-
-            <div
-              className={`${styles.languageDropdown} ${
-                open ? styles.open : styles.close
-              } notranslate`}
-              translate="no"
-            >
-              {supportedLanguages.map((lang) => (
-                <p
-                  key={lang.code}
-                  className={`notranslate ${lang.code === selectedLang ? styles.activeLang : ''}`}
-                  onClick={() => {
-                    handleLanguageChange(lang.code);
-                  }}
-                >
-                  {lang.name}
-                  {lang.code === selectedLang && <span>✓</span>}
-                </p>
-              ))}
-            </div>
-          </div>
-
+          <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
         </div>
       </header>
     );
@@ -474,7 +252,7 @@ const TopHeader = () => {
               Astrologers
             </NavLink>
             <NavLink
-              to="/aiwow"
+              to="/ai-wow"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -542,44 +320,7 @@ const TopHeader = () => {
           <div className={styles.headerActions}>
 
             {/* language start */}
-            <div className={styles.languageWrap} ref={langRef}>
-              <span
-                className={styles.onHoverChangeLang}
-                onClick={() => setOpen((prev) => !prev)}
-              >
-                <span className={styles.languageName}>{activeLang}</span>
-
-                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
-                  <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_9128_57)"/>
-                  <defs>
-                    <linearGradient id="paint0_linear_9128_57" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#F75801"/>
-                      <stop offset="1" stopColor="#D43400"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </span>
-
-              <div
-                className={`${styles.languageDropdown} ${
-                  open ? styles.open : styles.close
-                } notranslate`}
-                translate="no"
-              >
-                {supportedLanguages.map((lang) => (
-                  <p
-                    key={lang.code}
-                    className={`notranslate ${lang.code === selectedLang ? styles.activeLang : ''}`}
-                    onClick={() => {
-                      handleLanguageChange(lang.code);
-                    }}
-                  >
-                    {lang.name}
-                    {lang.code === selectedLang && <span>✓</span>}
-                  </p>
-                ))}
-              </div>
-            </div>
+            <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
             {/* language end */}
 
             {/* <div className={styles.walletBadge}
@@ -609,6 +350,7 @@ const TopHeader = () => {
                   className={styles.profileWrapName}
                   onClick={() => setKundliModalOpen(true)}
                   style={{ cursor: "pointer" }}
+                  key={`profile-name-${selectedKundli?._id || 'default'}`}
                 >
                   <span className={styles.languageNamee}>
                     {selectedKundli?.name?.split(" ")[0] || displayName}
@@ -656,7 +398,7 @@ const TopHeader = () => {
               Astrologers
             </NavLink> */}
             {/* <NavLink
-              to="/aiwow"
+              to="/ai-wow"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -744,6 +486,8 @@ const TopHeader = () => {
               Occult
             </NavLink>
             <CalculatorsDropdown />
+            <BestAstrologersDropdown />
+            <BestAstrologersGlobalDropdown />
           </nav>
         </div>
 
@@ -782,7 +526,7 @@ const TopHeader = () => {
               Astrologers
             </NavLink>
             <NavLink
-              to="/aiwow"
+              to="/ai-wow"
               onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
@@ -881,6 +625,8 @@ const TopHeader = () => {
               Occult
             </NavLink>
             <MobileCalculatorsAccordion onClose={() => setIsDrawerOpen(false)} />
+            <MobileBestAstrologersAccordion onClose={() => setIsDrawerOpen(false)} />
+            <MobileBestAstrologersGlobalAccordion onClose={() => setIsDrawerOpen(false)} />
             <NavLink
               to="/live"
               onClick={() => setIsDrawerOpen(false)}
@@ -1006,6 +752,215 @@ const MobileCalculatorsAccordion = ({ onClose }) => {
       {expanded && (
         <div className={styles.mobileCalcLinks}>
           {CALCULATOR_LINKS.map((item) => (
+            <div
+              key={item.path}
+              className={styles.mobileCalcLink}
+              onClick={() => { navigate(item.path); onClose(); }}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const BEST_ASTROLOGERS_LINKS = [
+  { title: "Astrologers in Mumbai", path: "/astrologers/mumbai" },
+  { title: "Astrologers in Delhi", path: "/astrologers/delhi" },
+  { title: "Astrologers in Chennai", path: "/astrologers/chennai" },
+  { title: "Astrologers in Kolkata", path: "/astrologers/kolkata" },
+  { title: "Astrologers in Hyderabad", path: "/astrologers/hyderabad" },
+  { title: "Astrologers in Bangalore", path: "/astrologers/bangalore" },
+  { title: "Astrologers in Lucknow", path: "/astrologers/lucknow" },
+  { title: "Astrologers in Bhopal", path: "/astrologers/bhopal" },
+  { title: "Astrologers in Cochin", path: "/astrologers/cochin" },
+  { title: "Astrologers in Pune", path: "/astrologers/pune" },
+  { title: "Astrologers in Gurgaon", path: "/astrologers/gurgaon" },
+  { title: "Astrologers in Noida", path: "/astrologers/noida" },
+  { title: "Astrologers in Chandigarh", path: "/astrologers/chandigarh" },
+  { title: "Astrologers in Jaipur", path: "/astrologers/jaipur" },
+  { title: "Astrologers in Nagpur", path: "/astrologers/nagpur" },
+  { title: "Astrologers in Patna", path: "/astrologers/patna" },
+  { title: "Astrologers in Indore", path: "/astrologers/indore" },
+  { title: "Astrologers in Varanasi", path: "/astrologers/varanasi" },
+  { title: "Astrologers in Coimbatore", path: "/astrologers/coimbatore" },
+  { title: "Astrologers in Vijayawada", path: "/astrologers/vijaywada" },
+];
+
+const BestAstrologersDropdown = () => {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div
+      className={styles.calcDropdownWrap}
+      ref={ref}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <span
+        className={styles.headerNavLink}
+        onClick={() => setOpen((p) => !p)}
+        style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
+      >
+        Best Astrologers India
+        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
+          <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
+        </svg>
+      </span>
+      {open && (
+        <div className={styles.calcDropdownMenu}>
+          {BEST_ASTROLOGERS_LINKS.map((item) => (
+            <div
+              key={item.path}
+              className={styles.calcDropdownItem}
+              onClick={() => { navigate(item.path); setOpen(false); }}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const MobileBestAstrologersAccordion = ({ onClose }) => {
+  const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className={styles.mobileCalcAccordion}>
+      <div
+        className={styles.headerNavLink}
+        onClick={() => setExpanded((p) => !p)}
+        style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
+        Best Astrologers India
+        <svg
+          xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none"
+          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+        >
+          <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
+        </svg>
+      </div>
+      {expanded && (
+        <div className={styles.mobileCalcLinks}>
+          {BEST_ASTROLOGERS_LINKS.map((item) => (
+            <div
+              key={item.path}
+              className={styles.mobileCalcLink}
+              onClick={() => { navigate(item.path); onClose(); }}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const BEST_ASTROLOGERS_GLOBAL_LINKS = [
+  { title: "Astrologers in USA", path: "/astrologers/usa" },
+  { title: "Astrologers in Canada", path: "/astrologers/canada" },
+  { title: "Astrologers in UK", path: "/astrologers/uk" },
+  { title: "Astrologers in Dubai", path: "/astrologers/dubai" },
+  { title: "Astrologers in Singapore", path: "/astrologers/singapore" },
+  { title: "Astrologers in Sharjah", path: "/astrologers/sharjah" },
+  { title: "Astrologers in California", path: "/astrologers/california" },
+  { title: "Astrologers in Chicago", path: "/astrologers/chicago" },
+  { title: "Astrologers in Dallas", path: "/astrologers/dallas" },
+  { title: "Astrologers in New Jersey", path: "/astrologers/new-jursey" },
+  { title: "Astrologers in Toronto", path: "/astrologers/toronto" },
+  { title: "Astrologers in Abu Dhabi", path: "/astrologers/abu-dhabi" },
+  { title: "Astrologers in Doha", path: "/astrologers/doha" },
+  { title: "Astrologers in Riyadh", path: "/astrologers/riyadh" },
+  { title: "Astrologers in London", path: "/astrologers/london" },
+  { title: "Astrologers in Sydney", path: "/astrologers/sydney" },
+  { title: "Astrologers in Kuala Lumpur", path: "/astrologers/kuala-lampur" },
+];
+
+const BestAstrologersGlobalDropdown = () => {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  return (
+    <div
+      className={styles.calcDropdownWrap}
+      ref={ref}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <span
+        className={styles.headerNavLink}
+        onClick={() => setOpen((p) => !p)}
+        style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
+      >
+        Best Astrologers Global
+        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
+          <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
+        </svg>
+      </span>
+      {open && (
+        <div className={styles.calcDropdownMenu}>
+          {BEST_ASTROLOGERS_GLOBAL_LINKS.map((item) => (
+            <div
+              key={item.path}
+              className={styles.calcDropdownItem}
+              onClick={() => { navigate(item.path); setOpen(false); }}
+            >
+              {item.title}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const MobileBestAstrologersGlobalAccordion = ({ onClose }) => {
+  const navigate = useNavigate();
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className={styles.mobileCalcAccordion}>
+      <div
+        className={styles.headerNavLink}
+        onClick={() => setExpanded((p) => !p)}
+        style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
+        Best Astrologers Global
+        <svg
+          xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none"
+          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+        >
+          <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
+        </svg>
+      </div>
+      {expanded && (
+        <div className={styles.mobileCalcLinks}>
+          {BEST_ASTROLOGERS_GLOBAL_LINKS.map((item) => (
             <div
               key={item.path}
               className={styles.mobileCalcLink}

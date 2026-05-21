@@ -1,15 +1,16 @@
 .container {
   position: relative;
   min-height: 100vh;
-  background: #f5f5f5;
+  // background: #f5f5f5;
   padding-top: 95px;
   @media screen and (width <= 1180px) {
     padding-top: 53px;
   }
 }
 .headerWrap{
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
 }
 .header {
   display: flex;
@@ -61,8 +62,9 @@
 // ─── Gemstone Selection Tabs ───
 .gemstoneTabs {
   display: flex;
-  border-bottom: 2px solid #e5e7eb;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border-bottom: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   position: sticky;
   top: 57px;
   z-index: 10;
@@ -79,7 +81,7 @@
   border-bottom: 3px solid transparent;
   font-size: 15px;
   font-weight: 600;
-  color: #6b7280;
+  color: #030303;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s;
@@ -94,15 +96,20 @@
 }
 .tabs {
   display: flex;
-  border-bottom: 1px solid #e5e7eb;
-  background: #fff;
+  // border-bottom: 1px solid #e5e7eb;
+  // background: rgba(255, 255, 255, 0.4);
+  border-bottom: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   position: sticky;
-  top: 57px;
+  top: 95px;
   z-index: 9;
   overflow-x: auto;
   margin: 0 auto;
   max-width: 1440px;
   padding: 0 16px;
+  @media (width <= 1180px) {
+    top: 53px;
+  }
   &::-webkit-scrollbar { display: none; }
 }
 
@@ -134,8 +141,11 @@
   display: flex;
   gap: 12px;
   align-items: center;
-  background-color: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 16px;
+  padding: 16px;
 
   @media (max-width: 767px) {
     flex-direction: column;
@@ -166,7 +176,9 @@
 .summaryCard {
   flex: 1;
   min-width: 0;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 10px;
   padding: 12px;
 
@@ -181,7 +193,7 @@
 //   }
 // }
 
-.cardTitle {
+.cardTitle,.sectionTitle {
   font-size: 14px;
   font-weight: 600;
   color: #1f2937;
@@ -208,7 +220,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 4px 0;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #ffffff;
   gap: 8px;
   &:last-child { border-bottom: none; }
 }
@@ -216,7 +228,7 @@
 .label {
   font-size: 12px;
   font-weight: 500;
-  color: #6b7280;
+  color: #030303;
   flex-shrink: 0;
 }
 
@@ -228,6 +240,29 @@
 }
 
 // ─── DETAILS TAB - Vertical Grid ───
+.personalizedSection{
+      background: rgba(255, 255, 255, 0.2);
+      border: 1.5px solid #ffffff;
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 16px;
+  .personalizedGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    @media (width <= 767px) {
+        grid-template-columns: repeat(1, 1fr);
+    }
+    .personalizedCard{
+      background: rgba(255, 255, 255, 0.4);
+      border: 1.5px solid #ffffff;
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 16px;
+    }
+  }
+}
 .detailsGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -254,7 +289,7 @@
     color: #1f2937;
     margin: 0 0 16px 0;
     padding-bottom: 12px;
-    border-bottom: 2px solid #e5e7eb;
+    border-bottom: 1.5px solid #fff;
     
     @media (min-width: 768px) {
       font-size: 20px;
@@ -269,7 +304,9 @@
 }
 
 .detailBox {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 10px;
   padding: 12px;
 }
@@ -318,7 +355,9 @@
 .astroBox {
   flex: 1;
   min-width: 140px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 10px;
   padding: 12px;
 
@@ -329,7 +368,9 @@
 
 // ─── DROPDOWN SECTIONS (Suitability & Healing) ───
 .dropdown {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 10px;
   margin-bottom: 10px;
   overflow: hidden;
@@ -404,10 +445,11 @@
 .suitBox {
   flex: 1;
   min-width: 160px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 8px;
   padding: 10px 12px;
-  border: 1px solid #ddd;
 
   @media (max-width: 600px) {
     min-width: 100%;
@@ -441,7 +483,9 @@
   font-family: 'Georgia', serif;
   font-style: italic;
   color: #1f2937;
-  background: #f9fafb;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
   border-radius: 6px;
   padding: 8px;
   margin: 4px 0 0 0;
@@ -468,14 +512,14 @@
   justify-content: center;
   min-height: 100vh;
   font-size: 16px;
-  color: #6b7280;
+  color: #030303;
 }
 
 // ─── Tablet ───
 @media (min-width: 768px) {
   // .tabContent { padding: 24px; }
   .tab { font-size: 14px; padding: 16px 14px; }
-  .cardTitle { font-size: 16px; }
+  .cardTitle,.sectionTitle { font-size: 16px; }
   .boxTitle { font-size: 13px; }
   .label, .value { font-size: 13px; }
   .infoRow { padding: 6px 0; }
@@ -485,50 +529,11 @@
 // ─── Desktop ───
 @media (min-width: 1024px) {
   // .tabContent { padding: 32px; }
-  .cardTitle { font-size: 18px; }
+  .cardTitle,.sectionTitle { font-size: 18px; }
   .identificationCard, .summaryCard { padding: 16px; }
   .detailBox, .astroBox, .suitBox { padding: 14px; }
 }
 
-
-// ─── PERSONALIZED INSIGHTS ───
-.personalizedSection {
-  margin-top: 16px;
-}
-
-.sectionTitle {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 12px 0;
-
-  @media (min-width: 768px) {
-    font-size: 18px;
-  }
-}
-
-.personalizedGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-
-  @media (min-width: 768px) {
-    grid-template-columns: 1fr 1fr;
-  }
-  @media (min-width: 1024px) {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-
-.personalizedCard {
-  background: #fff;
-  border-radius: 10px;
-  padding: 12px;
-
-  @media (min-width: 1024px) {
-    padding: 14px;
-  }
-}
 
 // Consult Button
 .consultButton {

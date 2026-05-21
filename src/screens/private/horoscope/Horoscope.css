@@ -7,7 +7,8 @@
 
 /* Horoscope Page - Exact Figma Match */
 .horoscope-header-Wrap{
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid #e8e8e8;
   position: fixed;
   top: 93px;
@@ -51,7 +52,7 @@
   display: flex;
   align-items: center;
   padding: 16px;
-  background: #ffffff;
+  /* background: #ffffff; */
   gap: 12px;
   /* margin-bottom: 10px; */
   max-width: 1440px;
@@ -114,7 +115,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  background: #ffffff;
+  /* background: #ffffff; */
   border: none;
   border-radius: 0;
   padding: 0;
@@ -139,7 +140,7 @@
 .selector-label {
   font-size: 11px;
   font-weight: 400;
-  color: #888888;
+  color: #030303;
   line-height: 1.2;
 }
 
@@ -244,7 +245,7 @@
 
 .time-tabs {
   display: flex;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid #ffffff;
   gap: 0;
   overflow: auto;
   margin-top: 5px;
@@ -252,7 +253,7 @@
 
 .time-tab {
   flex: 1;
-  padding: 12px 8px;
+  padding: 12px 0px;
   background: transparent;
   /* border: none; */
   border: 2px solid transparent;
@@ -288,8 +289,9 @@
 
 .category-card {
   border-radius: var(--Radius-4, 12px);
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
-  background: var(--primary-50, #FFF4E3);
+  border: 1.2px solid var(--border-50, rgba(255, 255, 255, 0.5));
+  background: #FFF4E3;
+  backdrop-filter: blur(12px);
   padding: 0;
   width: 100%;
   height: 100%;
@@ -365,6 +367,7 @@
 
 .content-text p {
   margin: 16px 0;
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .content-text p:last-child {
@@ -373,8 +376,9 @@
 
 /* Lucky Details Section */
 .lucky-details {
-  background: #fefefe;
-  border: 1px solid #e8e8e8;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #ffffff;
   border-radius: 8px;
   padding: 16px;
   display: flex;
@@ -420,11 +424,11 @@
 }
 
 .overview-card {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #ffffff;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  border: 1px solid #d0d0d0;
   height: auto;
   display: flex;
   flex-direction: column;
@@ -519,7 +523,7 @@
 
 .overview-card-text {
   padding: 14px 18px 18px 18px;
-  border-top: 1px solid #d0d0d0;
+  border-top: 1px solid #ffffff;
   font-size: 14px;
   line-height: 1.6;
   color: #666666;
@@ -530,6 +534,7 @@
 
 .overview-card-text p {
   margin: 8px 0 0 0;
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .overview-card-text p:first-child {
@@ -542,6 +547,9 @@
 
 /* Tablet - 2 columns */
 @media (max-width: 1024px) {
+  .horoscope-content {
+    padding: 0px;
+  }
   .overview-cards-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
@@ -646,7 +654,7 @@
 }
 
 .zodiac-modal-content {
-  background: #f5f5f5;
+  background: linear-gradient(90deg, rgba(254, 254, 254, 1) 0%, rgba(255, 248, 236, 1));
   border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 600px;
@@ -706,7 +714,7 @@
   font-size: 16px;
   font-weight: 500;
   color: #666666;
-  border-bottom: 1px solid #f5f5f5;
+  border: 1px solid rgba(247, 88, 1, 0.2);
   position: relative;
 }
 .zodiac-item:first-child {
@@ -778,6 +786,7 @@
 
 .zodiac-item-name {
   flex: 1;
+  color: #030303;
 }
 
 .zodiac-item-date {
@@ -831,7 +840,7 @@
   /* .time-tabs-wrapper{
     padding: 16px 0px 0px;
   } */
-  .time-tabs{
+  /* .time-tabs{
     border: none;
     gap: 8px;
   }
@@ -846,7 +855,7 @@
     color: #fff;
     border: none;
     background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-  }
+  } */
   .content-title {
     font-size: 18px;
     margin-bottom: 18px;
@@ -1087,7 +1096,7 @@
 
   .time-tabs {
     gap: 8px;
-    border-bottom: 2px solid #e8e8e8;
+    /* border-bottom: 2px solid #ffffff; */
   }
 
   /* Desktop Category Cards */

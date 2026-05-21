@@ -2,15 +2,29 @@
   max-width: 100%;
   margin: 1rem auto;
   padding: 24px;
-  background: #fff;
   border-radius: 14px;
-  border: 1px solid #eaeaea;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
 }
 
 .formTitle {
   text-align: center;
   margin-bottom: 20px;
   font-weight: 600;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
 }
 
 .formGroup {
@@ -21,6 +35,7 @@
   label {
     font-size: 14px;
     margin-bottom: 6px;
+    color: #333;
   }
 
   input,
@@ -30,6 +45,21 @@
     border-radius: 8px;
     border: 1px solid #ddd;
     font-size: 14px;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #f75801;
+      box-shadow: 0 0 0 2px rgba(247, 88, 1, 0.12);
+    }
+  }
+}
+
+.halfWidth {
+  width: calc(50% - 8px);
+
+  @media (max-width: 768px) {
+    width: 100%;
   }
 }
 
@@ -43,47 +73,95 @@
   }
 }
 
+.btnRow {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
 .submitBtn {
-  margin: 20px auto 0;
   display: block;
   background: linear-gradient(135deg, #f75801, #d43400);
   color: #fff;
-  padding: 14px 36px;
-  border-radius: 14px;
+  padding: 13px 48px;
+  border-radius: 28px;
   border: none;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s;
+  white-space: nowrap;
 
   &:hover {
-    opacity: 0.9;
+    opacity: 0.92;
   }
-}
-.required {
-  color: #f75801;
-}
-
-.resetRow {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 8px;
 }
 
 .resetBtn {
-  padding: 6px 18px;
-  border-radius: 20px;
+  padding: 13px 36px;
+  border-radius: 28px;
   border: 1.5px solid #f75801;
-  background: transparent;
-  color: #f75801;
-  font-size: 13px;
+  background: #fff;
+  color: #333;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
 
   &:hover {
     background: linear-gradient(90deg, #f75801, #d43400);
     color: #fff;
+  }
+}
+
+.required {
+  color: #f75801;
+}
+
+.selectProfileBtn {
+  display: block;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 14px;
+  text-align: right;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.selectProfileBtnMobile {
+  display: none;
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 8px;
+  text-align: right;
+  margin-left: auto;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    display: block;
   }
 }
 
