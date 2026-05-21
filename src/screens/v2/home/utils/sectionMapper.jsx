@@ -172,6 +172,14 @@ export const renderSection = (displayType, sectionData, handlers = {}, keyPrefix
     case "ai-powered-astrology":
       return <AIWowSection key={key} />;
 
+    case "quick-link-section":
+    case "ai-services":
+    case "connect-astrologer":
+    case "live-tracking":
+      // These display_types are handled by HomeV2's dedicated section components
+      // Returning null here for forward compatibility in the older Home.jsx
+      return null;
+
     default:
       console.warn(`Unknown display_type: ${displayType}`);
       return null;
