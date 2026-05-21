@@ -35,17 +35,15 @@ import Yesterday from "../../screens/private/horoscope/yesterdayhoroscope/Yester
 import Tomorrow from "../../screens/private/horoscope/tomorrowhoroscope/Tomorrow";
 import MatchMaking from "../../screens/private/matchmaking/MatchMakingV2";
 import MatchDetails from "../../screens/private/matchmaking/details/MatchDetailsV2";
-import About from "../../screens/public/static-pages/About";
-import Disclaimer from "../../screens/public/static-pages/Disclaimer";
 import PricingPolicy from "../../screens/public/static-pages/PricingPolicy";
-import PrivacyPolicy from "../../screens/public/static-pages/PrivacyPolicy";
 import RefundPolicy from "../../screens/public/static-pages/RefundPolicy";
 import AiUsePolicy from "../../screens/public/static-pages/AiUsePolicy";
 import AstrologerOnboardingAgreement from "../../screens/public/static-pages/AstrologerOnboardingAgreement";
 import LiveChatPolicy from "../../screens/public/static-pages/LiveChatPolicy";
 import UserAgreement from "../../screens/public/static-pages/UserAgreement";
-import TermsConditions from "../../screens/public/static-pages/TermsConditions";
 import OnboardingGuide from "../../screens/public/static-pages/OnboardingGuide";
+import StaticPage from "../../screens/public/static-pages/StaticPage";
+import { STATIC_PAGES_CONFIG } from "../../screens/public/static-pages/staticPagesConfig";
 import Notification from "../../screens/private/notification/Notification";
 import WalletTranscations from "../../screens/private/wallet/WalletTranscations";
 import AstrologerProfile from "../../screens/private/astrologerProfile/AstrologerProfile";
@@ -194,7 +192,6 @@ import Explore from "../../screens/private/explore/Explore";
 import AddProfile from "../../screens/v2/user/AddProfile";
 import EditProfile from "../../screens/v2/user/EditProfile";
 import LiveLanding from "../../screens/private/live/LiveLanding";
-import FAQ from "../../screens/v2/user/FAQ";
 import CustomerSupport from "../../screens/v2/user/CustomerSupport";
 import RecentTickets from "../../screens/v2/user/RecentTickets";
 import TicketDetails from "../../screens/v2/user/TicketDetails";
@@ -1099,24 +1096,9 @@ export const PATH = {
       header: true,
       footer: true,
     },
-    ABOUT: {
-      path: "/about-us",
-      element: About,
-      header: true,
-    },
-    DISCLAIMER: {
-      path: "/disclaimer",
-      element: Disclaimer,
-      header: true,
-    },
     PRICING_POLICY: {
       path: "/pricing-policy",
       element: PricingPolicy,
-      header: true,
-    },
-    PRIVACY_POLICY: {
-      path: "/privacy-policy",
-      element: PrivacyPolicy,
       header: true,
     },
     REFUND_POLICY: {
@@ -1144,16 +1126,19 @@ export const PATH = {
       element: UserAgreement,
       header: true,
     },
-    TERMSCONDITIONS: {
-      path: "/terms-and-conditions",
-      element: TermsConditions,
-      header: true,
-    },
     ONBOARDING_GUIDE: {
       path: "/onboarding-guide",
       element: OnboardingGuide,
       header: true,
     },
+
+    // CMS-managed static pages (auto-generated from config)
+    ...Object.fromEntries(
+      STATIC_PAGES_CONFIG.map(({ key, slug }) => [
+        key,
+        { path: `/${slug}`, element: StaticPage, header: true },
+      ])
+    ),
 
     // Header
     NOTIFICATION: {
@@ -1200,12 +1185,6 @@ export const PATH = {
     EDITPROFILE: {
       path: "/profile/edit/:id",
       element: EditProfile,
-    },
-    FAQ: {
-      path: "/faq",
-      element: FAQ,
-      header: false,
-      footer: false,
     },
     CUSTOMER_SUPPORT: {
       path: "/customer-support",

@@ -19,6 +19,7 @@ import RouteErrorBoundary from "./component/RouteErrorBoundary";
 import PrimaryLoader from "./component/UI/PrimaryLoader";
 import NoInternet, { useOnlineStatus } from "./component/NoInternet/NoInternet";
 import { initializeFCM } from "./services/fcmService.jsx";
+import { HelmetProvider } from "react-helmet-async";
 
 // Flatten routes helper - moved outside component for better performance
 const flattenRoutes = (routes) => {
@@ -251,17 +252,19 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary>
-      <CallProvider>
-        <ChatProvider>
-          <div className={classes.app}>
-            <Suspense fallback={<PrimaryLoader isLoading={true} />}>
-              <RouterProvider router={roleWiseRouting} />
-            </Suspense>
-          </div>
-        </ChatProvider>
-      </CallProvider>
-    </ErrorBoundary>
+    <HelmetProvider>
+      <ErrorBoundary>
+        <CallProvider>
+          <ChatProvider>
+            <div className={classes.app}>
+              <Suspense fallback={<PrimaryLoader isLoading={true} />}>
+                <RouterProvider router={roleWiseRouting} />
+              </Suspense>
+            </div>
+          </ChatProvider>
+        </CallProvider>
+      </ErrorBoundary>
+    </HelmetProvider>
   );
 }
 
