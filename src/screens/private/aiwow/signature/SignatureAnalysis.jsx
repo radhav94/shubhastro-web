@@ -6,7 +6,6 @@ import { analyzeSignature } from '../../../../services/appServices/aiWowService'
 import { setSignatureResult, clearSignatureData } from '../../../../redux/aiwow/aiwowSlice';
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
-import TTSButton from '../../../../component/UI/TTSButton';
 
 const SignatureAnalysis = () => {
   const navigate = useNavigate();
@@ -189,10 +188,7 @@ const SignatureAnalysis = () => {
               </div> */}
             </div>
 
-            <div className={styles.messageSection} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                <TTSButton text="Hold tight as we are analysing your signature" />
-              </span>
+            <div className={styles.messageSection}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
                 <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
               </svg>
@@ -209,10 +205,7 @@ const SignatureAnalysis = () => {
             </button>
           </>
         ) : (
-          <div className={styles.errorSection} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Analysis Failed. ${error.message || ''}${error.details?.detectedIssue ? '. Issue Detected: ' + error.details.detectedIssue : ''}${error.details?.expected ? '. Expected: ' + error.details.expected : ''}`} />
-            </span>
+          <div className={styles.errorSection}>
             <div className={styles.errorIcon}>
               <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
                 <circle cx="32" cy="32" r="30" stroke="#ef4444" strokeWidth="2" fill="none"/>

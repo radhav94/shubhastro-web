@@ -4,6 +4,7 @@ import styles from "./LanguageSelector.module.scss";
 const supportedLanguages = [
   { code: "en", name: "English" },
   { code: "hi", name: "Hindi" },
+  { code: "mr", name: "Marathi" },
   { code: "kn", name: "Kannada" },
   { code: "bn", name: "Bengali" },
   { code: "ta", name: "Tamil" },
