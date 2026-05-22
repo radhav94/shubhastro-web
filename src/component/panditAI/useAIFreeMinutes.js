@@ -8,7 +8,7 @@ import { voiceSocket } from "../../services/voiceSocketServices";
  */
 export default function useAIFreeMinutes({ isOpen, roomId }) {
   // Session billing state
-  const [isFreePeriod, setIsFreePeriod] = useState(true);
+  const [isFreePeriod, setIsFreePeriod] = useState(false);
   const [freeMinutesRemaining, setFreeMinutesRemaining] = useState(null);
   const [freeMinutesUsed, setFreeMinutesUsed] = useState(0);
   const [freeMinutesAllocated, setFreeMinutesAllocated] = useState(10);
@@ -32,9 +32,9 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
   const roomIdRef = useRef(roomId);
   roomIdRef.current = roomId;
 
-  // Local countdown interval for paid period (ticks every second)
+  // Local countdown interval (ticks every second)
   useEffect(() => {
-    if (!isOpen || isFreePeriod || remainingPaidTime == null || remainingPaidTime <= 0) return;
+    if (!isOpen || remainingPaidTime == null || remainingPaidTime <= 0) return;
 
     const interval = setInterval(() => {
       setRemainingPaidTime((prev) => {
@@ -47,7 +47,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isOpen, isFreePeriod, remainingPaidTime > 0]);
+  }, [isOpen, remainingPaidTime > 0]);
 
   // Socket event handlers
   useEffect(() => {
@@ -64,7 +64,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       if (data.freeMinutesUsedToday !== undefined) setFreeMinutesUsed(data.freeMinutesUsedToday);
       if (data.walletBalance !== undefined) setWalletBalance(data.walletBalance);
       if (data.ratePerMinute !== undefined) setRatePerMinute(data.ratePerMinute);
-      if (!data.isFreePeriod && data.remainingTime !== undefined) {
+      if (data.remainingTime !== undefined) {
         setRemainingPaidTime(data.remainingTime * 60);
       }
     };
@@ -95,7 +95,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       if (data.ratePerMinute !== undefined) {
         setRatePerMinute(data.ratePerMinute);
       }
-      if (!data.isFreePeriod && data.remainingTime !== undefined) {
+      if (data.remainingTime !== undefined) {
         setRemainingPaidTime(data.remainingTime * 60);
       }
 
@@ -127,6 +127,9 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
     const handleChatEnded = (data) => {
       if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
 
+      setRemainingPaidTime(null);
+      setFreeMinutesRemaining(null);
+
       if (data?.endReason === "low-balance") {
         setSessionEndedLowBalance(true);
         setShowRechargeBanner(true);
@@ -156,6 +159,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       if (data.dayKeyIST) setDayKeyIST(data.dayKeyIST);
       if (data.walletBalance !== undefined) setWalletBalance(data.walletBalance);
       if (data.ratePerMinute !== undefined) setRatePerMinute(data.ratePerMinute);
+      if (data.remainingTime !== undefined) setRemainingPaidTime(data.remainingTime * 60);
     };
 
     const handleError = (data) => {
