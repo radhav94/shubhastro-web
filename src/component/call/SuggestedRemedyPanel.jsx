@@ -1,6 +1,7 @@
 import { IoClose } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import styles from "./SuggestedRemedyPanel.module.scss";
+import { isShubhMallEnabled } from "../../utils/featureConfig";
 
 const SuggestedRemedyPanel = ({ isOpen, onClose, remedyData, onProductClick }) => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const SuggestedRemedyPanel = ({ isOpen, onClose, remedyData, onProductClick }) =
       : [];
 
   const handleProductClick = (product) => {
-    if (!product.slug) return;
+    if (!product.slug || !isShubhMallEnabled()) return;
     onProductClick?.();
     navigate(`/product-details/${product.slug}`, {
       state: {

@@ -11,6 +11,7 @@ import SharePopup from "./SharePopup";
 import LiveListModal from "./LiveListModal";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { useReelScroll } from "./useReelScroll";
+import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -740,6 +741,7 @@ const LiveView = (props) => {
   // Listen for suggested remedy messages from astrologer during call
   useEffect(() => {
     if (!isCallForCurrentAstrologer) return;
+    if (!isShubhMallEnabled()) return;
     const handleProductMessage = (data) => {
       if (data?.type === "products" && data?.suggestedProducts?.length > 0) {
         dispatch(addRemedy({
@@ -1358,17 +1360,19 @@ const LiveView = (props) => {
                       <text x="3" y="19" fontSize="18" fill="white" fontFamily="serif">卐</text>
                     </svg>
                   </button>
-                  <button
-                    className="call-action-pill"
-                    style={{ position: "relative" }}
-                    onClick={() => { setIsRemedyPanelOpen(true); dispatch(clearNewRemedy()); }}
-                    aria-label="Suggested Remedy"
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" stroke="none">
-                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                    </svg>
-                    {hasNewRemedy && <span className="call-action-dot" />}
-                  </button>
+                  {isShubhMallEnabled() && (
+                    <button
+                      className="call-action-pill"
+                      style={{ position: "relative" }}
+                      onClick={() => { setIsRemedyPanelOpen(true); dispatch(clearNewRemedy()); }}
+                      aria-label="Suggested Remedy"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" stroke="none">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                      </svg>
+                      {hasNewRemedy && <span className="call-action-dot" />}
+                    </button>
+                  )}
                 </>
               )}
             </div>

@@ -13,6 +13,7 @@ import { GrReactjs } from "react-icons/gr";
 import styles from "./VirtualAssistant.module.scss";
 import useVirtualAssistant from "./useVirtualAssistant";
 import dayjs from "dayjs";
+import { isShubhMallEnabled } from "../../utils/featureConfig";
 import IframeModal from "../../screens/private/home/components/chats/IframeModal";
 import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 import { useFileSelector } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
@@ -210,7 +211,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen }) =
                             className={styles.msgVideo}
                           />
                         </div>
-                      ) : msg.type === "products" ? (
+                      ) : msg.type === "products" && isShubhMallEnabled() ? (
                         <div className={styles.productsMessage}>
                           {msg.message && (
                             <p className={styles.productsNote}>{msg.message}</p>
@@ -221,6 +222,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen }) =
                               className={styles.productItem}
                               onClick={() =>
                                 p.slug &&
+                                isShubhMallEnabled() &&
                                 navigate(`/product-details/${p.slug}`, {
                                   state: {
                                     _selectedVariant: p.variantId ? {

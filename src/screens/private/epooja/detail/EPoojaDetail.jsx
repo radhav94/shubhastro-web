@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams, useLocation, useSearchParams } from "react-router-dom";
 import styles from "./EPoojaDetail.module.scss";
-import { FiChevronLeft, FiChevronRight, FiPlus, FiMinus, FiCalendar, FiX } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiPlus, FiMinus, FiCalendar, FiX, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { useGetEPoojaDetailQuery, useGetProductReviewsQuery, useAddToCartMutation, useGetCartQuery, useUpdateCartItemMutation, useCreateProductReviewMutation, useUpdateProductReviewMutation, useDeleteProductReviewMutation, useGetProductSuggestionsQuery } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";

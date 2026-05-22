@@ -31,6 +31,7 @@ import { getAstrologerDefaultImage } from "../../utils/appImages";
 import { capitalizeWords } from "../../utils/capitalize";
 import walletIcon from "../../assets/images/wallet-icon.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
+import { isShubhMallEnabled } from "../../utils/featureConfig";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
@@ -114,6 +115,8 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   const showChatNotification = useCallback((data) => {
     if (data.sender === "user") return;
+    // Hide product notifications when mall is disabled
+    if (data.type === "products" && !isShubhMallEnabled()) return;
     
     const messageText = data.type === "gift" ? "🎁 Sent a gift" : data.type === "products" ? "💊 Suggested a remedy" : (data.message || data.response || "New message");
     const astroImage = astrologerImage || lastRequestedAstro?.imageUrl || lastRequestedAstro?.aadharCardImgUrl || lastRequestedAstro?.panCardImgUrl || null;
@@ -138,6 +141,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     voiceSocket.on("message:recieved", showChatNotification);
     
     const handleProductMessage = (data) => {
+      if (!isShubhMallEnabled()) return;
       if (data?.type === "products" && data?.suggestedProducts?.length > 0) {
         setSuggestedRemedyData((prev) => ({
           suggestedProducts: [...prev.suggestedProducts, ...data.suggestedProducts],
@@ -969,17 +973,19 @@ const AgoraVoiceCalling = ({ callData }) => {
             <button className={styles.actionBtn} onClick={toggleChat}>
               <span>Virtual Assistant</span>
             </button>
-            <button
-              className={styles.actionBtn}
-              onClick={() => {
-                setIsRemedyPanelOpen(true);
-                setHasNewRemedy(false);
-              }}
-              style={{ position: 'relative' }}
-            >
-              <span>Suggested Remedy</span>
-              {hasNewRemedy && <span className={styles.notificationDot} />}
-            </button>
+            {isShubhMallEnabled() && (
+              <button
+                className={styles.actionBtn}
+                onClick={() => {
+                  setIsRemedyPanelOpen(true);
+                  setHasNewRemedy(false);
+                }}
+                style={{ position: 'relative' }}
+              >
+                <span>Suggested Remedy</span>
+                {hasNewRemedy && <span className={styles.notificationDot} />}
+              </button>
+            )}
             <button
               className={styles.actionBtn}
               onClick={() => {
