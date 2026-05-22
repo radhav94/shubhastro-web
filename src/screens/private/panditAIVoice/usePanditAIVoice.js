@@ -177,11 +177,14 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
           astrologerId: PANDIT_AI_ID,
         });
       }
+      chatEndedRef.current = true;
       setRoomIdPersist(null);
       initiatedRef.current = false;
       if (abortRef.current) abortRef.current.abort();
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.onended = null;
+        audioRef.current.onerror = null;
         audioRef.current = null;
       }
     };
@@ -223,8 +226,20 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
       if (data?.astrologerId !== PANDIT_AI_ID && data?.sender !== PANDIT_AI_ID) return;
       if (data.sender === "user") return;
 
+      // If session was ended, ignore incoming messages
+      if (chatEndedRef.current) return;
+
       const responseText = data.message || data.response;
       setAiResponse(responseText);
+
+      // Stop any currently playing audio before starting new one
+      if (abortRef.current) abortRef.current.abort();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.onended = null;
+        audioRef.current.onerror = null;
+        audioRef.current = null;
+      }
 
       // Use the user's STT-detected language as primary for TTS
       // Fallback to backend response fields, then text detection
@@ -240,12 +255,16 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
       // Convert response to speech via Sarvam TTS
       try {
         abortRef.current = new AbortController();
+        const signal = abortRef.current.signal;
         const audioBase64 = await textToSpeech(responseText, {
           language: ttsLanguage,
           speaker: SARVAM_SPEAKERS.ISHITA,
           pace: 1.0,
-          signal: abortRef.current.signal,
+          signal,
         });
+
+        // Check if session was ended while TTS was loading
+        if (chatEndedRef.current || signal.aborted) return;
 
         const audioBlob = base64ToBlob(audioBase64, "audio/wav");
         const audioUrl = URL.createObjectURL(audioBlob);
@@ -428,6 +447,9 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
 
   // End session explicitly (called on popup close)
   const endSession = useCallback(() => {
+    // Stop any active recording first
+    stopListening();
+
     const currentRoomId = roomIdRef.current;
     if (currentRoomId && voiceSocket.connected) {
       voiceSocket.emit("chat:end", {
@@ -443,10 +465,12 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
     if (abortRef.current) abortRef.current.abort();
     if (audioRef.current) {
       audioRef.current.pause();
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
       audioRef.current = null;
     }
     setStatus("idle");
-  }, [userIdLocal, setRoomIdPersist]);
+  }, [userIdLocal, setRoomIdPersist, stopListening]);
 
   return {
     status,

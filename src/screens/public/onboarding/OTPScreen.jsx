@@ -11,6 +11,7 @@ import {
 import { loginSuccess } from "../../../redux/auth/authSlice";
 import { requestFCMToken } from "../../../services/firebase";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
+import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import onboardingBg from "../../../assets/images/onboarding.png";
 import LanguageSelector from "../../../component/LanguageSelector";
 
@@ -112,6 +113,10 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
           // Clear RTK Query cache on login to prevent showing previous user's data
           dispatch(privateRequestNew.util.resetApiState());
+          
+          // Clear any stale guest/previous user profile selection
+          dispatch(clearSelectedKundli());
+          localStorage.removeItem("selectedKundliProfile");
 
           // Dispatch login action to Redux
           dispatch(

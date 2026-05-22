@@ -84,7 +84,7 @@ const Blogs = ({ titleShow = true, data }) => {
             key={blog._id}
             to={PATH.privateRoutes.SINGLEBLOG.path.replace(
               ":slug",
-              blog.blogId
+              blog.slug || blog._id
             )}
             className={Styles.blogLink}
           >
@@ -95,6 +95,7 @@ const Blogs = ({ titleShow = true, data }) => {
               date={blog.publishDate}
               authorIcon={blog.authorIcon}
               blogId={blog.blogId || blog._id}
+              slug={blog.slug}
             />
           </Link>
         ))}
