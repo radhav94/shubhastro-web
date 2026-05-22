@@ -21,6 +21,9 @@ import RouteErrorBoundary from "./component/RouteErrorBoundary";
 import PrimaryLoader from "./component/UI/PrimaryLoader";
 import NoInternet, { useOnlineStatus } from "./component/NoInternet/NoInternet";
 import { initializeFCM } from "./services/fcmService.jsx";
+import { HelmetProvider } from "react-helmet-async";
+import CmsPageWrapper from "./component/CmsPageWrapper";
+import CmsNotFoundPage from "./component/CmsNotFoundPage";
 
 // Flatten routes helper - moved outside component for better performance
 const flattenRoutes = (routes) => {
@@ -166,7 +169,11 @@ function App() {
             ) {
               return {
                 path: child.path,
-                element: <PrivateRoute component={child.element} />,
+                element: (
+                  <CmsPageWrapper>
+                    <PrivateRoute component={child.element} />
+                  </CmsPageWrapper>
+                ),
                 errorElement: routeErrorElement,
                 handle: { header: child.header ?? true, footer: child.footer ?? true, topHeader: child.topHeader ?? true },
               };
@@ -174,7 +181,11 @@ function App() {
             // All other routes are accessible to everyone
             return {
               path: child.path,
-              element: <child.element />,
+              element: (
+                <CmsPageWrapper>
+                  <child.element />
+                </CmsPageWrapper>
+              ),
               errorElement: routeErrorElement,
               handle: { header: child.header ?? true, footer: child.footer ?? true, topHeader: child.topHeader ?? true },
             };
@@ -182,7 +193,7 @@ function App() {
           { path: "/", element: <Navigate to={PATH.privateRoutes.HOME.path} /> },
           {
             path: "*",
-            element: <PATH.publicRoutes.NOT_FOUND.element />,
+            element: <CmsNotFoundPage />,
             handle: { header: true, footer: true },
           },
         ],
@@ -261,19 +272,21 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary>
-      <CallProvider>
-        <ChatProvider>
-          <WaitingQueueProvider>
-          <div className={classes.app}>
-            <Suspense fallback={<PrimaryLoader isLoading={true} />}>
-              <RouterProvider router={roleWiseRouting} />
-            </Suspense>
-          </div>
-          </WaitingQueueProvider>
-        </ChatProvider>
-      </CallProvider>
-    </ErrorBoundary>
+    <HelmetProvider>
+      <ErrorBoundary>
+        <CallProvider>
+          <ChatProvider>
+            <WaitingQueueProvider>
+              <div className={classes.app}>
+                <Suspense fallback={<PrimaryLoader isLoading={true} />}>
+                  <RouterProvider router={roleWiseRouting} />
+                </Suspense>
+              </div>
+            </WaitingQueueProvider>
+          </ChatProvider>
+        </CallProvider>
+      </ErrorBoundary>
+    </HelmetProvider>
   );
 }
 

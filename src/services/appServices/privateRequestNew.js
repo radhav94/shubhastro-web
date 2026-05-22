@@ -9,8 +9,14 @@ const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
 // Endpoints that should be accessible without authentication (no login redirect on 401)
 const PUBLIC_ENDPOINTS = ["getAstrologerById", "getAstrologers", "getRecommendedAstrologers"];
 
+// Endpoints that should not show toast errors (silent failures)
+const SILENT_ENDPOINTS = ["getStaticPageBySlug"];
+
 // ERROR HANDLER
 const handleApiError = (error, endpoint) => {
+  // Skip toast for silent endpoints
+  if (SILENT_ENDPOINTS.includes(endpoint)) return;
+
   const status = error?.status;
   const data = error?.data;
   const message = data?.message || data?.error || "Some Error Occurred";
