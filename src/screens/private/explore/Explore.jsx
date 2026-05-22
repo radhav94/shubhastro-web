@@ -260,10 +260,10 @@ const Explore = () => {
                 key={idx}
                 className={styles.blogCard}
                 onClick={() => {
-                  // Use blogId or ID field for navigation
-                  const blogId = blog.blogId || blog.ID || blog.id || blog._id;
-                  if (blogId) {
-                    navigate(`/blog/${blogId}`);
+                  // Use slug or _id for navigation
+                  const slug = blog.slug || blog._id;
+                  if (slug) {
+                    navigate(`/blog/${slug}`);
                   }
                 }}
               >

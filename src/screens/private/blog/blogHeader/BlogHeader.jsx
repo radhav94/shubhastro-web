@@ -42,7 +42,7 @@ const BlogHeader = () => {
             {blogs.map((blog) => (
               <Link
                 key={blog._id}
-                to={PATH.privateRoutes.SINGLEBLOG.path.replace(":slug", blog._id)}
+                to={PATH.privateRoutes.SINGLEBLOG.path.replace(":slug", blog.slug || blog._id)}
                 className={styles.blogLink}
               >
                 <BlogCard
