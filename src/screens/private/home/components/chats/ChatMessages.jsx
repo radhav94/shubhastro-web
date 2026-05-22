@@ -8,6 +8,7 @@ import { IoCheckmarkDone, IoDocument, IoDownload } from "react-icons/io5";
 import { FiFile } from "react-icons/fi";
 import IframeModal from "./IframeModal";
 import dayjs from "dayjs";
+import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
 import LinkPreview from "./LinkPreview";
 import { detectURL } from "../../../../../utils/helper/linkPreview";
 
@@ -171,13 +172,14 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
 
     // Product/Remedy suggestion messages
     if (msg?.type === "products") {
+      if (!isShubhMallEnabled()) return null;
       const products = msg.suggestedProducts || [];
       return (
         <div className={styles.productsMessage}>
           {msg.text && <p className={styles.productsNote}>{msg.text}</p>}
           {products.map((p, idx) => (
             <div key={p.variantId || p.productId || idx} className={styles.productItem} onClick={() => {
-              if (!p?.slug) return;
+              if (!p?.slug || !isShubhMallEnabled()) return;
               navigate(`/product-details/${p.slug}`, {
                 state: {
                   _selectedVariant: p.variantId ? {

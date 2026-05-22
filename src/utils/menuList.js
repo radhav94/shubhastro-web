@@ -1,4 +1,5 @@
 import { Home, Compass, Radio, UserRound, Store } from "lucide-react";
+import { isShubhMallEnabled } from "./featureConfig";
 
 export const MENU_LIST = [
   { title: "Home", path: "/" },
@@ -47,7 +48,7 @@ export const MENU_LIST = [
   },
   { title: "Chat with Astrologer", path: "/talk-to-astrologer" },
   { title: "Talk to Astrologer", path: "/talk-to-astrologer" },
-  { title: "Shubhmall", path: "/shubh-mall" },
+  ...(isShubhMallEnabled() ? [{ title: "Shubhmall", path: "/shubh-mall" }] : []),
   { title: "Live", path: "/livestream" },
   // { title: "Shubhtalk Store", path: "/store" },
   { title: "Blogs", path: "/blog" },
@@ -71,11 +72,15 @@ export const MENU_LIST = [
       path: "/live",
       isSpecial: true,
     },
-    {
-      label: "ShubhMall",
-      icon: Store,
-      path: "/shubh-mall",
-    },
+    ...(isShubhMallEnabled()
+      ? [
+          {
+            label: "ShubhMall",
+            icon: Store,
+            path: "/shubh-mall",
+          },
+        ]
+      : []),
     {
       label: "Profile",
       icon: UserRound,

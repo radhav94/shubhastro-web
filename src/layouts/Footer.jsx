@@ -12,6 +12,7 @@ import { useEffect, useState, useCallback } from "react";
 import { logout } from "../redux/auth/authSlice";
 import BottomNavigation from "../screens/v2/home/components/BottomNavigation";
 import { clearSelectedKundli } from "../redux/kundli/kundliSlice";
+import { isShubhMallEnabled } from "../utils/featureConfig";
 
 // Footer link data
 const horoscopeLinks = [
@@ -22,7 +23,7 @@ const horoscopeLinks = [
 ];
 
 const serviceLinks = [
-  { href: "/shubh-mall", text: "ShubhMall" },
+  ...(isShubhMallEnabled() ? [{ href: "/shubh-mall", text: "ShubhMall" }] : []),
   { href: "/talk-to-astrologer", text: "Live Astrologers" },
   { href: "/kundli", text: "Free Kundli" },
   { href: "/match-making", text: "Kundli Matching" },
@@ -33,14 +34,16 @@ const serviceLinks = [
   { href: "/blog", text: "Blogs" },
 ];
 
-const shopLinks = [
-  { href: "/shubh-mall?tab=bracelets", text: "Bracelets" },
-  { href: "/shubh-mall?tab=rudraksha", text: "Rudraksha" },
-  { href: "/shubh-mall?tab=murti", text: "Murti" },
-  { href: "/shubh-mall?tab=gemstones", text: "Gemstones" },
-  { href: "/shubh-mall?tab=yantra", text: "Yantra" },
-  { href: "/shubh-mall?tab=kavach", text: "Kavach" },
-];
+const shopLinks = isShubhMallEnabled()
+  ? [
+      { href: "/shubh-mall?tab=bracelets", text: "Bracelets" },
+      { href: "/shubh-mall?tab=rudraksha", text: "Rudraksha" },
+      { href: "/shubh-mall?tab=murti", text: "Murti" },
+      { href: "/shubh-mall?tab=gemstones", text: "Gemstones" },
+      { href: "/shubh-mall?tab=yantra", text: "Yantra" },
+      { href: "/shubh-mall?tab=kavach", text: "Kavach" },
+    ]
+  : [];
 
 const companyLinks = [
   { href: "/about-us", text: "About Us" },
@@ -157,10 +160,12 @@ const Footer = () => {
           {renderLinks(serviceLinks)}
         </div>
 
-        <div className={styles.v2_column}>
-          <h4 className={styles.v2_heading}>Shop Our Products</h4>
-          {renderLinks(shopLinks)}
-        </div>
+        {isShubhMallEnabled() && (
+          <div className={styles.v2_column}>
+            <h4 className={styles.v2_heading}>Shop Our Products</h4>
+            {renderLinks(shopLinks)}
+          </div>
+        )}
 
         <div className={styles.v2_column}>
           <h4 className={styles.v2_heading}>Company Policies</h4>
@@ -201,7 +206,7 @@ const Footer = () => {
         </div>
         {renderAccordionColumn("horoscope", "Horoscope", horoscopeLinks)}
         {renderAccordionColumn("services", "Explore Services", serviceLinks)}
-        {renderAccordionColumn("shop", "Shop Our Products", shopLinks)}
+        {isShubhMallEnabled() && renderAccordionColumn("shop", "Shop Our Products", shopLinks)}
         {renderAccordionColumn("company", "Company Policies", companyLinks)}
         <div className={`${styles.v2_column} ${styles.v2_marT}`}>
           <h4 className={styles.v2_heading}>Contact Us</h4>
