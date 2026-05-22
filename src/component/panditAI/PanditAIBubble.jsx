@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, memo } from "react";
+import { useState, useCallback, useEffect, useRef, memo, useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
   IoClose,
@@ -9,6 +9,7 @@ import {
   IoWallet,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 import styles from "./PanditAIBubble.module.scss";
 import usePanditAI from "./usePanditAI";
 import useAIFreeMinutes from "./useAIFreeMinutes";
@@ -72,6 +73,29 @@ const PanditAIBubble = () => {
     dismissRechargeBanner,
     resetFreeMinutesState,
   } = useAIFreeMinutes({ isOpen, roomId });
+
+  // Group messages by date for date separators
+  const messageGroups = useMemo(() => {
+    const groups = {};
+    messages.forEach((msg) => {
+      const dateKey = msg.createdAt
+        ? dayjs(msg.createdAt).format("MMM DD, YYYY")
+        : dayjs().format("MMM DD, YYYY");
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(msg);
+    });
+    return groups;
+  }, [messages]);
+
+  const getDateLabel = (dateStr) => {
+    const today = dayjs().format("MMM DD, YYYY");
+    const yesterday = dayjs().subtract(1, "day").format("MMM DD, YYYY");
+    if (dateStr === today) return "Today";
+    if (dateStr === yesterday) return "Yesterday";
+    return dateStr;
+  };
 
   // Listen for external "open and send" events from PanditAISection card
   useEffect(() => {
@@ -275,7 +299,16 @@ const PanditAIBubble = () => {
                 <p>Ask Pandit AI anything about your life</p>
               </div>
             ) : (
-              messages.map((msg) => <MessageBubble key={msg._id} msg={msg} />)
+              Object.entries(messageGroups).map(([date, msgs], groupIndex) => (
+                <div key={`${date}-${groupIndex}`} className={styles.messageGroup}>
+                  <div className={styles.dateHeader}>
+                    <span className={styles.dateText}>{getDateLabel(date)}</span>
+                  </div>
+                  {msgs.map((msg) => (
+                    <MessageBubble key={msg._id} msg={msg} />
+                  ))}
+                </div>
+              ))
             )}
             <div ref={messagesEndRef} />
           </div>

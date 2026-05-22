@@ -434,6 +434,29 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   }
 }
 
+.messageGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dateHeader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 4px 0 2px;
+  width: 100%;
+}
+
+.dateText {
+  font-size: 12px;
+  color: $muted;
+  background: transparent;
+  padding: 0;
+  font-weight: 600;
+  text-align: center;
+}
+
 .msgRow {
   display: flex;
   animation: fadeIn 0.22s ease;
