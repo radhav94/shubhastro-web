@@ -62,6 +62,7 @@ const TalkToAstrologer = () => {
   const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
+  const [recommendDismissed, setRecommendDismissed] = useState(false);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [showFilterAstrologer, setShowFilterAstrologer] = useState(false);
@@ -1453,7 +1454,7 @@ const TalkToAstrologer = () => {
         connectionType="chat"
       />
 
-      {showCTA && showRecommend && !WaitingList && (
+      {showCTA && showRecommend && !recommendDismissed && !WaitingList && (
         <RecommendCTA
           mode={isChatMode ? "chat" : "call"}
           onClick={() => {
@@ -1462,8 +1463,8 @@ const TalkToAstrologer = () => {
             setShowRecommend(false);
           }}
           onClose={() => {
-            setShowRecommend(false); // close now
-            setResetTrigger((prev) => prev + 1); // allow next scroll
+            setShowRecommend(false);
+            setRecommendDismissed(true); // permanently dismiss for this session
           }}
         />
       )}
