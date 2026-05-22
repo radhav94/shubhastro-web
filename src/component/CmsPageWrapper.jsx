@@ -2,6 +2,7 @@ import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useGetStaticPageBySlugQuery } from "../redux/api/staticPages/staticPagesApi";
 import styles from "../screens/public/static-pages/StaticPages.module.scss";
+import Divider from "./Divider";
 
 // Routes excluded from CMS static page lookup
 const EXCLUDED_PATHS = [
@@ -72,6 +73,12 @@ const CmsPageWrapper = ({ children }) => {
         <>
           {children}
           <div className={styles.container}>
+            {pageData.title && (
+              <>
+                <h1 className={styles.title}>{pageData.title}</h1>
+                <Divider />
+              </>
+            )}
             <div
               className={styles.htmlContent}
               dangerouslySetInnerHTML={{ __html: pageData.body }}

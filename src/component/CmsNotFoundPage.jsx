@@ -4,6 +4,7 @@ import { useGetStaticPageBySlugQuery } from "../redux/api/staticPages/staticPage
 import styles from "../screens/public/static-pages/StaticPages.module.scss";
 import PrimaryLoader from "./UI/PrimaryLoader";
 import NotFound from "../screens/private/NotFound/NotFound";
+import Divider from "./Divider";
 
 /**
  * CmsNotFoundPage
@@ -57,7 +58,12 @@ const CmsNotFoundPage = () => {
           />
         )}
       </Helmet>
-      {/* <h1 className={styles.title}>{pageData.title}</h1> */}
+      {pageData.title && (
+        <>
+          <h1 className={styles.title}>{pageData.title}</h1>
+          <Divider />
+        </>
+      )}
       <div
         className={styles.htmlContent}
         dangerouslySetInnerHTML={{ __html: pageData.body }}
