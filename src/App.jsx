@@ -11,6 +11,7 @@ import {
 import PublicRoute from "./utils/routes/PublicRoute";
 import PrivateRoute from "./utils/routes/PrivateRoute";
 import MixedRoute from "./utils/routes/MixedRoute";
+import { isShubhMallEnabled, isShubhMallRoute } from "./utils/featureConfig";
 import { useEffect, Suspense, useMemo } from "react";
 import { CallProvider } from "./context/CallContext";
 import { ChatProvider } from "./context/ChatContext";
@@ -145,7 +146,15 @@ function App() {
         ),
         errorElement: routeErrorElement,
         children: [
-          ...flattenRoutes(PATH.privateRoutes).map((child) => {
+          ...flattenRoutes(PATH.privateRoutes)
+            .filter((child) => {
+              // Filter out ShubhMall routes when feature is disabled
+              if (!isShubhMallEnabled() && isShubhMallRoute(child.path)) {
+                return false;
+              }
+              return true;
+            })
+            .map((child) => {
             // ProductDetail route requires authentication
             // Numerology route — commented out to allow public access
             // child.path === "/numerology" ||

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../../utils/routes/Paths";
+import { isShubhMallEnabled } from "../../../../utils/featureConfig";
 import quickActionOne from "../../../../assets/images/quick-action-1.svg";
 import quickActionTwo from "../../../../assets/images/quick-action-2.svg";
 import quickActionThree from "../../../../assets/images/quick-action-3.svg";
@@ -51,18 +52,22 @@ const QuickActions = ({ data = [], title }) => {
             image: quickActionOne,
             path: PATH.privateRoutes.Chat_With_ASTROLOGER.path,
         },
-        {
-            id: 3,
-            title: "ShubhMall Shop",
-            image: quickActionTwo,
-            path: PATH.privateRoutes.SHOP.path,
-        },
-        {
-            id: 4,
-            title: "Book A Pooja",
-            image: quickActionThree,
-            path: "shop/vip-e-pooja",
-        },
+        ...(isShubhMallEnabled()
+            ? [
+                  {
+                      id: 3,
+                      title: "ShubhMall Shop",
+                      image: quickActionTwo,
+                      path: PATH.privateRoutes.SHOP.path,
+                  },
+                  {
+                      id: 4,
+                      title: "Book A Pooja",
+                      image: quickActionThree,
+                      path: "shop/vip-e-pooja",
+                  },
+              ]
+            : []),
     ];
 
     return (

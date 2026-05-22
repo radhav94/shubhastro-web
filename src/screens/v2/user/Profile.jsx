@@ -54,6 +54,7 @@ import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import { Toast } from "../../../component/index";
 import StickyReview from "../../private/home/components/call/StickyReview";
 import MallHistoryContent from "../../private/shubhAstroMallHistory/MallHistoryContent";
+import { isShubhMallEnabled } from "../../../utils/featureConfig";
 import {
   useCreateKundliMutation,
   useDeleteKundliMutation,
@@ -78,9 +79,14 @@ const Profile = () => {
   // Get isRegister from Redux auth state
   const isRegister = useSelector((state) => state.auth.isRegister);
 
-  const [activeTab, setActiveTab] = useState(
-    navigationState.activeTab || "Profile"
-  );
+  const [activeTab, setActiveTab] = useState(() => {
+    const navTab = navigationState.activeTab;
+    // If navigated to a mall tab but mall is disabled, fallback to Profile
+    if (navTab === "ShubhMall History" && !isShubhMallEnabled()) {
+      return "Profile";
+    }
+    return navTab || "Profile";
+  });
   const [orderHistoryTab, setOrderHistoryTab] = useState("call"); // Sub-tab for order history
 
   // Scroll to tabs section when navigated with activeTab state
@@ -1211,7 +1217,7 @@ const Profile = () => {
     }
   };
 
-  const tabs = ["Profile", "Order History", "ShubhMall History", "Transactions", "Support"];
+  const tabs = ["Profile", "Order History", ...(isShubhMallEnabled() ? ["ShubhMall History"] : []), "Transactions", "Support"];
 
   // Get initials for avatar
   const getInitials = (name) => {
@@ -1758,7 +1764,7 @@ const Profile = () => {
           </div>
         )}
 
-        {activeTab === "ShubhMall History" && <MallHistoryContent />}
+        {activeTab === "ShubhMall History" && isShubhMallEnabled() && <MallHistoryContent />}
 
         {activeTab === "Transactions" && (
           <div className={styles.transactionsContent}>

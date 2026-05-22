@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import styles from "./RemediesTab.module.scss";
 import { useGetSuggestedRemediesQuery } from "../../../../../redux/api/chatApi";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
+import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
 
 const getBrand = (brand) =>
   typeof brand === "object" ? brand?.name : brand;
@@ -19,7 +20,7 @@ const RemediesTab = ({ astrologerId }) => {
   );
 
   const handleProductClick = (product) => {
-    if (!product.slug) return;
+    if (!product.slug || !isShubhMallEnabled()) return;
     navigate(`/product-details/${product.slug}`, {
       state: {
         _selectedVariant: product.variantId ? {

@@ -10,7 +10,12 @@ import panditAiIcon from "../../assets/images/AiPandit.png";
 
 const PanditAIVoiceBubble = () => {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(() => sessionStorage.getItem("panditai_voice_open") === "true");
+
+  // Persist open state for reconnect on refresh
+  useEffect(() => {
+    sessionStorage.setItem("panditai_voice_open", isOpen ? "true" : "false");
+  }, [isOpen]);
 
   const {
     status,
@@ -22,8 +27,12 @@ const PanditAIVoiceBubble = () => {
   } = usePanditAIVoice({ enabled: isOpen });
 
   const {
+    isFreePeriod,
+    freeMinutesRemaining,
+    remainingPaidTime,
     showRechargeBanner,
     rechargeBannerMessage,
+    ratePerMinute,
     sessionEndedLowBalance,
   } = useAIFreeMinutes({ isOpen, roomId });
 
@@ -40,6 +49,18 @@ const PanditAIVoiceBubble = () => {
     window.addEventListener("panditai-voice:open", handleOpen);
     return () => window.removeEventListener("panditai-voice:open", handleOpen);
   }, [navigate]);
+
+  // Close voice popup when chat popup opens (mutual exclusion)
+  useEffect(() => {
+    const handleChatOpen = () => {
+      if (isOpen) {
+        endSession?.();
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("panditai:ask", handleChatOpen);
+    return () => window.removeEventListener("panditai:ask", handleChatOpen);
+  }, [isOpen, endSession]);
 
   const handleClose = useCallback(() => {
     endSession?.();
@@ -101,6 +122,32 @@ const PanditAIVoiceBubble = () => {
             </div>
           </div>
           <div className={styles.headerActions}>
+            {isFreePeriod && freeMinutesRemaining != null && remainingPaidTime == null && (
+              <div className={styles.freeMinBadge}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>{freeMinutesRemaining} min free</span>
+              </div>
+            )}
+            {remainingPaidTime != null && !sessionEndedLowBalance && (
+              <div className={styles.countdownBadge}>
+                <div className={styles.countdownTime}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span>{Math.floor(remainingPaidTime / 3600) > 0 ? `${String(Math.floor(remainingPaidTime / 3600)).padStart(2, "0")}:` : ""}{String(Math.floor((remainingPaidTime % 3600) / 60)).padStart(2, "0")}:{String(remainingPaidTime % 60).padStart(2, "0")}</span>
+                </div>
+                {ratePerMinute && (
+                  <>
+                    <span className={styles.countdownDivider} />
+                    <span className={styles.countdownRate}>₹{ratePerMinute}/min</span>
+                  </>
+                )}
+              </div>
+            )}
             <button className={styles.closeBtn} onClick={handleClose} aria-label="Close">
               <IoClose size={20} />
             </button>

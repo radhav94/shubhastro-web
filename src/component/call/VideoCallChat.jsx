@@ -8,6 +8,7 @@ import { useFileSelector } from "../../screens/private/home/components/chats/fil
 import { Toast } from "../index";
 import dayjs from "dayjs";
 import { useVideoCallChat } from "./useVideoCallChat";
+import { isShubhMallEnabled } from "../../utils/featureConfig";
 import { GrReactjs } from "react-icons/gr";
 import IframeModal from "../../screens/private/home/components/chats/IframeModal";
 import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
@@ -383,6 +384,9 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
           </div>
         );
       } else if (msg.type === "products") {
+        if (!isShubhMallEnabled()) {
+          return null;
+        }
         isSpecialMessage = true;
         const products = msg.suggestedProducts || [];
         content = (
@@ -392,7 +396,7 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
               <div
                 key={p.productId || idx}
                 className={styles.productItem}
-                onClick={() => p.slug && navigate(`/product-details/${p.slug}`)}
+                onClick={() => p.slug && isShubhMallEnabled() && navigate(`/product-details/${p.slug}`)}
               >
                 {(p.variantImage || p.image || p.images?.[0]) && (
                   <img

@@ -6,6 +6,7 @@ import styles from "./TopBar.module.scss";
 import { AppIcons, appSvgs } from "../../utils/appImages";
 import SideBar from "../sidebar/SideBar";
 import { PATH } from "../../utils/routes/Paths";
+import { isShubhMallEnabled } from "../../utils/featureConfig";
 // Components and Hooks
 
 // Icons
@@ -362,7 +363,7 @@ const TopBar = () => {
     { title: "Talk to Astrologer", path: "/talk-to-astrologer" },
     { title: "Join Live", path: "/live" },
 
-    { title: "ShubhMall", path: "/shop" },
+    ...(isShubhMallEnabled() ? [{ title: "ShubhMall", path: "/shop" }] : []),
     // { title: "Shubhtalk Store", path: "/store" },
     { title: "Blogs", path: "/blog" },
     { title: "Recharge", path: "/recharge" },

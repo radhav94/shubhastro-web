@@ -36,11 +36,16 @@ MessageBubble.displayName = "MessageBubble";
 
 const PanditAIBubble = () => {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(() => sessionStorage.getItem("panditai_open") === "true");
   const [text, setText] = useState("");
   const [interimText, setInterimText] = useState("");
   const inputRef = useRef(null);
   const lang = "en-IN";
+
+  // Persist open state for reconnect on refresh
+  useEffect(() => {
+    sessionStorage.setItem("panditai_open", isOpen ? "true" : "false");
+  }, [isOpen]);
 
   const {
     messages,
@@ -80,6 +85,15 @@ const PanditAIBubble = () => {
     window.addEventListener("panditai:ask", handleOpenAndSend);
     return () => window.removeEventListener("panditai:ask", handleOpenAndSend);
   }, [sendText]);
+
+  // Close chat popup when voice popup opens (mutual exclusion)
+  useEffect(() => {
+    const handleVoiceOpen = () => {
+      setIsOpen(false);
+    };
+    window.addEventListener("panditai-voice:open", handleVoiceOpen);
+    return () => window.removeEventListener("panditai-voice:open", handleVoiceOpen);
+  }, []);
 
   // Auto-focus input when chat opens
   useEffect(() => {
@@ -192,7 +206,7 @@ const PanditAIBubble = () => {
       {isOpen && (
         <>
           <div className={styles.overlay} />
-          <div className={styles.chatWindow} role="dialog" aria-label="Pandit AI Chat">
+          <div className={`${styles.chatWindow} notranslate`} role="dialog" aria-label="Pandit AI Chat" translate="no">
           <div className={styles.header}>
             <div className={styles.headerInfo}>
               <div className={styles.headerAvatar}>
@@ -207,7 +221,7 @@ const PanditAIBubble = () => {
               </div>
             </div>
             <div className={styles.headerActions}>
-              {isFreePeriod && freeMinutesRemaining != null && (
+              {isFreePeriod && freeMinutesRemaining != null && remainingPaidTime == null && (
                 <div className={styles.freeMinBadge}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10"/>
@@ -216,14 +230,14 @@ const PanditAIBubble = () => {
                   <span>{freeMinutesRemaining} min free</span>
                 </div>
               )}
-              {!isFreePeriod && remainingPaidTime != null && !sessionEndedLowBalance && (
+              {remainingPaidTime != null && !sessionEndedLowBalance && (
                 <div className={styles.countdownBadge}>
                   <div className={styles.countdownTime}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10"/>
                       <polyline points="12 6 12 12 16 14"/>
                     </svg>
-                    <span>{Math.floor(remainingPaidTime / 60)}:{String(remainingPaidTime % 60).padStart(2, "0")}</span>
+                    <span>{Math.floor(remainingPaidTime / 3600) > 0 ? `${String(Math.floor(remainingPaidTime / 3600)).padStart(2, "0")}:` : ""}{String(Math.floor((remainingPaidTime % 3600) / 60)).padStart(2, "0")}:{String(remainingPaidTime % 60).padStart(2, "0")}</span>
                   </div>
                   {ratePerMinute && (
                     <>
