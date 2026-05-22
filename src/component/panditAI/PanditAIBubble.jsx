@@ -197,7 +197,7 @@ const PanditAIBubble = () => {
       {isOpen && (
         <>
           <div className={styles.overlay} />
-          <div className={styles.chatWindow} role="dialog" aria-label="Pandit AI Chat">
+          <div className={`${styles.chatWindow} notranslate`} role="dialog" aria-label="Pandit AI Chat" translate="no">
           <div className={styles.header}>
             <div className={styles.headerInfo}>
               <div className={styles.headerAvatar}>
