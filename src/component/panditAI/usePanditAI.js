@@ -56,7 +56,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   const [connecting, setConnecting] = useState(false);
   const [chatDisabled, setChatDisabled] = useState(false);
   const messagesEndRef = useRef(null);
-  const roomIdRef = useRef(null);
+  const roomIdRef = useRef(sessionStorage.getItem("panditai_roomId") || null);
   const initiatedRef = useRef(false);
   const historyLoadedRef = useRef(false);
   const pendingMessageRef = useRef(null);
@@ -66,6 +66,16 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   const [createChatRoom] = useCreateChatRoomMutation();
   const chatEndedRef = useRef(false);
+
+  // Persist roomId to sessionStorage for reconnect on refresh
+  const setRoomId = useCallback((id) => {
+    roomIdRef.current = id;
+    if (id) {
+      sessionStorage.setItem("panditai_roomId", id);
+    } else {
+      sessionStorage.removeItem("panditai_roomId");
+    }
+  }, []);
 
   // Fetch previous chat history
   const { data: historyData, isLoading: historyLoading } = useGetChatHistoryQuery(
@@ -111,6 +121,28 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     const initChat = async () => {
       setConnecting(true);
       chatEndedRef.current = false;
+
+      const savedRoomId = roomIdRef.current;
+
+      // If we have a saved roomId (page refresh), reconnect instead of initiating
+      if (savedRoomId && voiceSocket.connected) {
+        panditAIChatActive = true;
+        panditAIRoomId = savedRoomId;
+        registerChatSession({
+          roomId: savedRoomId,
+          userId: userIdLocal,
+          astrologerId: PANDIT_AI_ID,
+          callType: "chat",
+        });
+        voiceSocket.emit("chat:reconnect", {
+          roomId: savedRoomId,
+          userId: userIdLocal,
+          astrologerId: PANDIT_AI_ID,
+          callType: "chat",
+        });
+        setConnecting(false);
+        return;
+      }
 
       try {
         await createChatRoom({
@@ -174,13 +206,13 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         astrologerId: PANDIT_AI_ID,
       });
     }
-    roomIdRef.current = null;
+    setRoomId(null);
     panditAIRoomId = null;
     initiatedRef.current = false;
     pendingMessageRef.current = null;
     panditAIChatActive = false;
     clearChatSession();
-  }, [isOpen, userIdLocal]);
+  }, [isOpen, userIdLocal, setRoomId]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -193,7 +225,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           astrologerId: PANDIT_AI_ID,
         });
       }
-      roomIdRef.current = null;
+      setRoomId(null);
       panditAIRoomId = null;
       initiatedRef.current = false;
       historyLoadedRef.current = false;
@@ -201,7 +233,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       panditAIChatActive = false;
       clearChatSession();
     };
-  }, [userIdLocal]);
+  }, [userIdLocal, setRoomId]);
 
   // Listen for socket events
   useEffect(() => {
@@ -209,7 +241,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
 
     const handleChatRoom = (data) => {
       if (data?.roomId) {
-        roomIdRef.current = data.roomId;
+        setRoomId(data.roomId);
         panditAIRoomId = data.roomId;
         registerChatSession({
           roomId: data.roomId,
@@ -222,7 +254,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
 
     const handleChatAccepted = (data) => {
       if (data?.roomId) {
-        roomIdRef.current = data.roomId;
+        setRoomId(data.roomId);
         panditAIRoomId = data.roomId;
         registerChatSession({
           roomId: data.roomId,
@@ -243,7 +275,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
       console.log("[PanditAI] Chat reconnected:", data?.roomId);
       if (data?.roomId) {
-        roomIdRef.current = data.roomId;
+        setRoomId(data.roomId);
         panditAIRoomId = data.roomId;
         panditAIChatActive = true;
         chatEndedRef.current = false;
@@ -296,10 +328,12 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     const handleChatEnded = (data) => {
       if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
       chatEndedRef.current = true;
-      roomIdRef.current = null;
+      setRoomId(null);
       panditAIRoomId = null;
       panditAIChatActive = false;
       clearChatSession();
+      setMessages([]);
+      setSending(false);
     };
 
     voiceSocket.on("chat:room", handleChatRoom);
