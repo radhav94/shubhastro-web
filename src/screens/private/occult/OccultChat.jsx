@@ -32,15 +32,15 @@ const OccultChat = () => {
   };
 
   useEffect(() => {
-    if (selectedKundli && selectedKundli._id !== selectedProfile?._id) {
+    if (selectedKundli && !selectedKundli._id?.startsWith("temp_") && selectedKundli._id !== selectedProfile?._id) {
       setSelectedProfileLocal(selectedKundli);
     }
   }, [selectedKundli]);
 
   useEffect(() => {
     if (profiles.length > 0 && !selectedProfile) {
-      const match = selectedKundli && profiles.some((p) => p._id === selectedKundli._id);
-      setSelectedProfile(match ? selectedKundli : profiles[0]);
+      const isValidSelection = selectedKundli && !selectedKundli._id?.startsWith("temp_") && profiles.some((p) => p._id === selectedKundli._id);
+      setSelectedProfile(isValidSelection ? selectedKundli : profiles[0]);
     }
   }, [profiles.length]);
 

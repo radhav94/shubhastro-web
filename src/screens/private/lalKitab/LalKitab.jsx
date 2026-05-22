@@ -37,7 +37,7 @@ const LalKitab = () => {
   };
 
   useEffect(() => {
-    if (selectedKundli && selectedKundli._id !== selectedProfile?._id) {
+    if (selectedKundli && !selectedKundli._id?.startsWith("temp_") && selectedKundli._id !== selectedProfile?._id) {
       setSelectedProfileLocal(selectedKundli);
     }
   }, [selectedKundli]);
@@ -52,7 +52,8 @@ const LalKitab = () => {
 
   useEffect(() => {
     if (profiles.length > 0 && !selectedProfile) {
-      if (selectedKundli && profiles.some((p) => p._id === selectedKundli._id)) {
+      const isValidSelection = selectedKundli && !selectedKundli._id?.startsWith("temp_") && profiles.some((p) => p._id === selectedKundli._id);
+      if (isValidSelection) {
         setSelectedProfileLocal(selectedKundli);
       } else {
         setSelectedProfile(profiles[0]);
