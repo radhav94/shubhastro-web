@@ -15,6 +15,7 @@ import { isShubhMallEnabled, isShubhMallRoute } from "./utils/featureConfig";
 import { useEffect, Suspense, useMemo } from "react";
 import { CallProvider } from "./context/CallContext";
 import { ChatProvider } from "./context/ChatContext";
+import { WaitingQueueProvider } from "./context/WaitingQueueContext";
 import ErrorBoundary from "./component/ErrorBoundary";
 import RouteErrorBoundary from "./component/RouteErrorBoundary";
 import PrimaryLoader from "./component/UI/PrimaryLoader";
@@ -263,11 +264,13 @@ function App() {
     <ErrorBoundary>
       <CallProvider>
         <ChatProvider>
+          <WaitingQueueProvider>
           <div className={classes.app}>
             <Suspense fallback={<PrimaryLoader isLoading={true} />}>
               <RouterProvider router={roleWiseRouting} />
             </Suspense>
           </div>
+          </WaitingQueueProvider>
         </ChatProvider>
       </CallProvider>
     </ErrorBoundary>

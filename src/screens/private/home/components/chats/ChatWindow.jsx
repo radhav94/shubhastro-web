@@ -28,6 +28,7 @@ const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 const MIN_CHAT_SECONDS = 60;
 
 import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi";
+import SwitchWaitingPopup from "../../../../../component/UI/switchWaiting/SwitchWaitingPopup";
 import { useWalletBalance } from "../../../wallet/useWalletBalance";
 import { PATH } from "../../../../../utils/routes/Paths";
 import ProfileListingModal from "../../../../../component/UI/Profile/ProfileListingModal";
@@ -115,6 +116,7 @@ const ChatWindow = () => {
 
   const {
     waitingPopup: localWaitingPopup,
+    switchType,
     handleAudioCall,
     handleVideoCall,
     handleCancelCall
@@ -461,6 +463,11 @@ const ChatWindow = () => {
 
   return (
     <>
+      <SwitchWaitingPopup
+        isVisible={localWaitingPopup}
+        switchType={switchType || "audio"}
+        onCancel={handleCancelCall}
+      />
       <div className={styles.chatPage}>
         <div className={styles.chatWindow}>
           <ChatHeader
