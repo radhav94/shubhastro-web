@@ -86,6 +86,15 @@ const PanditAIBubble = () => {
     return () => window.removeEventListener("panditai:ask", handleOpenAndSend);
   }, [sendText]);
 
+  // Close chat popup when voice popup opens (mutual exclusion)
+  useEffect(() => {
+    const handleVoiceOpen = () => {
+      setIsOpen(false);
+    };
+    window.addEventListener("panditai-voice:open", handleVoiceOpen);
+    return () => window.removeEventListener("panditai-voice:open", handleVoiceOpen);
+  }, []);
+
   // Auto-focus input when chat opens
   useEffect(() => {
     if (isOpen && inputRef.current) {

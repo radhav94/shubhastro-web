@@ -207,7 +207,16 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
     setMinutesUntilPaid(null);
     setMinBalanceRequired(null);
     setRemainingPaidTime(null);
+    setFreeMinutesRemaining(null);
+    setIsFreePeriod(false);
   }, []);
+
+  // Auto-reset when popup closes
+  useEffect(() => {
+    if (!isOpen) {
+      resetFreeMinutesState();
+    }
+  }, [isOpen, resetFreeMinutesState]);
 
   // Dismiss the recharge banner (user manually closes it)
   const dismissRechargeBanner = useCallback(() => {

@@ -22,7 +22,7 @@ const AiServicesSection = memo(({ sectionData, styles, onlineCount }) => {
   const items = sortContentByOrder(sectionData?.content || []);
 
   const handlePanditClick = useCallback(() => {
-    window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }));
+    window.dispatchEvent(new CustomEvent("panditai-voice:open"));
   }, []);
 
   if (!items.length) return null;

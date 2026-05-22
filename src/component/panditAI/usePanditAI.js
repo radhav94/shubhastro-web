@@ -122,10 +122,22 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       setConnecting(true);
       chatEndedRef.current = false;
 
+      // Ensure socket is connected (handles page refresh scenario)
+      if (!voiceSocket.connected) {
+        voiceSocket.io.opts.query = {
+          userId: userIdLocal,
+          role: "CUSTOMER",
+        };
+        voiceSocket.connect();
+        // The handleSocketReconnect listener below will handle the rest once connected
+        setConnecting(false);
+        return;
+      }
+
       const savedRoomId = roomIdRef.current;
 
       // If we have a saved roomId (page refresh), reconnect instead of initiating
-      if (savedRoomId && voiceSocket.connected) {
+      if (savedRoomId) {
         panditAIChatActive = true;
         panditAIRoomId = savedRoomId;
         registerChatSession({
@@ -153,13 +165,11 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         console.log("[PanditAI] Room creation:", err?.data?.message || "exists");
       }
 
-      if (voiceSocket.connected) {
-        panditAIChatActive = true;
-        voiceSocket.emit("chat:initiate", {
-          userId: userIdLocal,
-          astrologerId: PANDIT_AI_ID,
-        });
-      }
+      panditAIChatActive = true;
+      voiceSocket.emit("chat:initiate", {
+        userId: userIdLocal,
+        astrologerId: PANDIT_AI_ID,
+      });
 
       setConnecting(false);
     };
@@ -171,6 +181,14 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       const currentRoomId = roomIdRef.current;
       if (currentRoomId && !chatEndedRef.current) {
         console.log("[PanditAI] Socket reconnected, emitting chat:reconnect");
+        panditAIChatActive = true;
+        panditAIRoomId = currentRoomId;
+        registerChatSession({
+          roomId: currentRoomId,
+          userId: userIdLocal,
+          astrologerId: PANDIT_AI_ID,
+          callType: "chat",
+        });
         voiceSocket.emit("chat:reconnect", {
           roomId: currentRoomId,
           userId: userIdLocal,
