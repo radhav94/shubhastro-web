@@ -165,7 +165,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
                 </div>
               )}
               {aiServicesItems[2] && (
-                <div className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }))} style={{ cursor: 'pointer' }}>
+                <div className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai-voice:open"))} style={{ cursor: 'pointer' }}>
                   <div className={styles.panditEllipse} />
                   <span className={styles.featureTag}>New</span>
                   <div className={styles.fcTop}>

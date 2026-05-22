@@ -126,6 +126,58 @@ $surface: #fffaf5;
   gap: 8px;
 }
 
+.freeMinBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.countdownBadge {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.countdownTime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.countdownDivider {
+  width: 1px;
+  height: 12px;
+  margin: 0 8px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.countdownRate {
+  font-size: 10px;
+  font-weight: 650;
+  opacity: 0.85;
+}
+
 .closeBtn {
   display: grid;
   width: 42px;
