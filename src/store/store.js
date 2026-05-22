@@ -22,6 +22,7 @@ import { calculatorApi } from "../redux/api/baseApi/calculatorApi";
 import "../redux/api/plansApi/plansApi"; // inject endpoints into privateRequestNew
 import "../redux/api/supportApi/supportApi"; // inject support endpoints
 import "../redux/api/lalKitab/lalKitabApi"; // inject lal kitab endpoints
+import "../redux/api/staticPages/staticPagesApi"; // inject static pages endpoints
 
 const persistConfig = {
   key: "root",

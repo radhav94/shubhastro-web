@@ -1,24 +1,41 @@
 import { useEffect } from "react";
 import { useChat } from "../../../../../context/ChatContext";
+import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
 
 export const FooterWaiting = () => {
   const { waitingList, resetChatFlow, activeChatRoomId, setChatApproval, setWaitingList, lastRequestedAstro } = useChat();
+  const { removePendingConnection, cancelAll } = useWaitingQueue();
 
   useEffect(() => {
     const handleAstrologerIncoming = (data) => {
       if(data.type != "chat") return;
       setChatApproval(true);
       setWaitingList(null);
+      // Remove the accepted connection from the waiting queue
+      // since it's now in the approval phase
+      if (data?.roomId) {
+        removePendingConnection(data.roomId);
+      }
     }
     voiceSocket.on("incoming", handleAstrologerIncoming);
     return () => {
     voiceSocket.off("incoming", handleAstrologerIncoming);
     }
-  }, [])
+  }, [setChatApproval, setWaitingList, removePendingConnection])
 
   const astrologerName = lastRequestedAstro?.firstName
+
+  const handleCancel = () => {
+    voiceSocket.emit("chat:cancel", {roomId : activeChatRoomId, canceledBy : "CUSTOMER"});
+    // Remove from queue and clear waiting state
+    if (activeChatRoomId) {
+      removePendingConnection(activeChatRoomId);
+    }
+    resetChatFlow();
+    localStorage.removeItem("waitingState");
+  };
 
   return (
     <>
@@ -38,11 +55,7 @@ export const FooterWaiting = () => {
       </div>
 
       <button
-        onClick={() => {
-          voiceSocket.emit("chat:cancel", {roomId : activeChatRoomId, canceledBy : "CUSTOMER"});
-          resetChatFlow();
-          localStorage.removeItem("waitingState");
-        }}
+        onClick={handleCancel}
         className="rounded-xl border border-red-500/40 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm text-red-400 hover:bg-red-500/10 transition flex-shrink-0"
       >
         Cancel

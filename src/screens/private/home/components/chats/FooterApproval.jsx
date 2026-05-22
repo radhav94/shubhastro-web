@@ -1,14 +1,26 @@
 import { useChat } from "../../../../../context/ChatContext";
+import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
 
 export const FooterApproval = () => {
   const { resetChatFlow, activeChatRoomId } = useChat();
+  const { cancelAllExcept, removePendingConnection } = useWaitingQueue();
 
   const handleUserChatAcccept = () => {
     voiceSocket.emit("chat:accept", {roomId : activeChatRoomId, acceptedBy : "CUSTOMER"});
+    // User accepted — cancel all other pending connections
+    cancelAllExcept(activeChatRoomId);
     resetChatFlow();
   }
+
+  const handleDecline = () => {
+    voiceSocket.emit("chat:cancel", {roomId : activeChatRoomId, canceledBy : "CUSTOMER"});
+    if (activeChatRoomId) {
+      removePendingConnection(activeChatRoomId);
+    }
+    resetChatFlow();
+  };
 
   return (
     <>
@@ -28,10 +40,7 @@ export const FooterApproval = () => {
           Yes
         </button>
         <button
-          onClick={() => {
-            voiceSocket.emit("chat:cancel", {roomId : activeChatRoomId, canceledBy : "CUSTOMER"});
-            resetChatFlow();
-          }}
+          onClick={handleDecline}
           className="rounded-xl bg-zinc-800 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-700 transition"
         >
           No

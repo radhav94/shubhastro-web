@@ -31,6 +31,7 @@ import { getAstrologerDefaultImage } from "../../utils/appImages";
 import { capitalizeWords } from "../../utils/capitalize";
 import walletIcon from "../../assets/images/wallet-icon.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
+import SwitchWaitingPopup from "../UI/switchWaiting/SwitchWaitingPopup";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
@@ -49,12 +50,19 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   const { 
     roomId, 
+    sessionRoomId,
+    channelName,
     agoraToken, 
     callerName, 
     isUserSide, 
     experience, 
     astrologerImage
   } = callData;
+
+  // For Agora: use channelName if provided by server, otherwise roomId
+  const agoraChannelName = channelName || roomId;
+  // For socket events: use roomId (always the session identifier)
+  const socketRoomId = roomId;
 
   /* ================= REFS ================= */
   const clientRef = useRef(null);
@@ -92,11 +100,12 @@ const AgoraVoiceCalling = ({ callData }) => {
     }
   }, [activeCall?.origin, isOnLivePage, isMinimized, setIsMinimized]);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showRechargeButton, setShowRechargeButton] = useState(false);
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
-  const [suggestedRemedyData, setSuggestedRemedyData] = useState({ suggestedProducts: [], messages: [] });
+  const [suggestedRemedyData, setSuggestedRemedyData] = useState({ entries: [], suggestedProducts: [], messages: [] });
   const [hasNewRemedy, setHasNewRemedy] = useState(false);
   const [showEndCallConfirm, setShowEndCallConfirm] = useState(false);
 
@@ -144,6 +153,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       if (!isShubhMallEnabled()) return;
       if (data?.type === "products" && data?.suggestedProducts?.length > 0) {
         setSuggestedRemedyData((prev) => ({
+          entries: [...prev.entries, { message: data.message || null, products: data.suggestedProducts }],
           suggestedProducts: [...prev.suggestedProducts, ...data.suggestedProducts],
           messages: data.message ? [...prev.messages, data.message] : prev.messages,
         }));
@@ -235,7 +245,12 @@ const AgoraVoiceCalling = ({ callData }) => {
     console.log("[VoiceCall] 📦 localStorage activeCall:", savedCall ? "exists" : "null", "| sessionStorage seconds:", savedSecs);
 
     const startCall = async () => {
-      console.log("[VoiceCall] ⏳ Creating Agora client & joining channel:", roomId);
+      console.log("[VoiceCall] ⏳ Creating Agora client & joining channel");
+      console.log("[VoiceCall]   → roomId:", roomId);
+      console.log("[VoiceCall]   → channelName:", channelName);
+      console.log("[VoiceCall]   → agoraChannelName (used for join):", agoraChannelName);
+      console.log("[VoiceCall]   → agoraToken:", agoraToken ? agoraToken.substring(0, 20) + "..." : "MISSING");
+      console.log("[VoiceCall]   → callData keys:", Object.keys(callData));
       const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
       clientRef.current = client;
 
@@ -286,8 +301,38 @@ const AgoraVoiceCalling = ({ callData }) => {
         }
       });
 
-      await client.join(APP_ID, roomId, agoraToken, "");
-      console.log("[VoiceCall] ✅ Agora joined — channel:", roomId, "remoteUsers:", client.remoteUsers.length);
+      // Retry join with exponential backoff — Agora channel may not be ready immediately
+      // after two-way accept (astrologer may still be joining the channel)
+      const MAX_JOIN_RETRIES = 5;
+      const RETRY_DELAY_BASE = 2000; // ms
+      let joinSuccess = false;
+
+      for (let attempt = 0; attempt < MAX_JOIN_RETRIES; attempt++) {
+        if (cleanupRef.current) return; // Component unmounted during retry
+        try {
+          console.log("[VoiceCall] 🔌 Agora join attempt", attempt + 1, "of", MAX_JOIN_RETRIES);
+          await client.join(APP_ID, agoraChannelName, agoraToken, "");
+          console.log("[VoiceCall] ✅ Agora joined — channel:", agoraChannelName, "remoteUsers:", client.remoteUsers.length);
+          joinSuccess = true;
+          break;
+        } catch (joinErr) {
+          const isGatewayError = joinErr?.code === "CAN_NOT_GET_GATEWAY_SERVER" ||
+            joinErr?.message?.includes("CAN_NOT_GET_GATEWAY_SERVER") ||
+            joinErr?.message?.includes("no active status");
+
+          if (isGatewayError && attempt < MAX_JOIN_RETRIES - 1) {
+            const delay = RETRY_DELAY_BASE * Math.pow(2, attempt);
+            console.warn(`[VoiceCall] ⚠️ Agora gateway not ready (attempt ${attempt + 1}), retrying in ${delay}ms...`);
+            await new Promise((r) => setTimeout(r, delay));
+            // Leave in case partial join happened
+            try { await client.leave(); } catch { /* ignore */ }
+          } else {
+            throw joinErr;
+          }
+        }
+      }
+
+      if (!joinSuccess) return;
 
       // Clear the resume flag now that we've successfully rejoined
       if (isResumeFromRefresh.current) {
@@ -429,7 +474,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       });
 
       voiceSocket.emit("call:end", {
-        roomId,
+        roomId: socketRoomId,
         endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
       });
       
@@ -555,6 +600,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     if (activeCall && activeCall.callType === "video" && activeCall.roomId === roomId) {
       console.log("🔄 Detected activeCall changed to video, setting upgrade flag...");
       isUpgradingToVideo.current = true;
+      setIsSwitching(false);
       setWaitingList(null);
     }
   }, [activeCall, roomId]);
@@ -629,6 +675,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         
         // Reset the upgrade flag since we're staying in audio mode
         isUpgradingToVideo.current = false;
+        setIsSwitching(false);
         setWaitingList(null);
         
         // Show toast notification
@@ -640,6 +687,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       
       // If it's a regular call rejection (not a switch), end the call
       console.log("📞 Regular call rejection - ending call");
+      setIsSwitching(false);
       endCall();
     };
 
@@ -743,14 +791,14 @@ const AgoraVoiceCalling = ({ callData }) => {
 
       // Balance is sufficient, proceed with video call
       Toast.success("Switching to video call...");
-      setWaitingList(5);
+      setIsSwitching(true);
 
       voiceSocket.emit("call:initiate", {
         userId: activeCall.userId,
         astrologerId: activeCall.astrologerId,
         type: "video",
         isSwitch: true,
-        roomId: roomId,
+        roomId: socketRoomId,
         ...(activeCall?.isEmergency && { isEmergency: true }),
       });
 
@@ -796,8 +844,22 @@ const AgoraVoiceCalling = ({ callData }) => {
   };
 
   /* ================= UI ================= */
+  const handleCancelSwitch = () => {
+    setIsSwitching(false);
+    isUpgradingToVideo.current = false;
+    voiceSocket.emit("call:cancel", { roomId: socketRoomId, canceledBy: "CUSTOMER", isSwitch: true });
+    setWaitingList(null);
+  };
+
   return (
     <>
+      {/* Switch Waiting Popup */}
+      <SwitchWaitingPopup
+        isVisible={isSwitching}
+        switchType="video"
+        onCancel={handleCancelSwitch}
+      />
+
       {/* MINI VIEW */}
       {isMinimized && !isOnLivePage && (
         <div

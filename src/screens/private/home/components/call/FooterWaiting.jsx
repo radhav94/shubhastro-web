@@ -1,28 +1,48 @@
 import { useEffect } from "react";
 import { useCall } from "../../../../../context/CallContext";
+import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
+function formatWait(conn) {
+  if (!conn || conn.confidence === undefined) return null;
+  const { waitingTime, minWait, maxWait, confidence } = conn;
+  const safeWait = Math.max(1, waitingTime || 1);
+  const safeMin = Math.max(1, minWait || safeWait);
+  const safeMax = Math.max(safeMin, maxWait || safeWait);
+  if (confidence === "high") return `~${safeWait} min`;
+  return `~${safeMin}-${safeMax} min`;
+}
 
 export const FooterWaiting = () => {
   const { waitingList, resetCallFlow, activeCall, activeCallRoomId, setCallApproval, setWaitingList, lastRequestedAstro, pendingLiveCall, setPendingLiveCall } = useCall();
+  const { removePendingConnection, getConnectionByRoomId } = useWaitingQueue();
 
   useEffect(() => {
     const handleAstrologerIncoming = (data) => {
       if(data.type == "chat") return;
       setCallApproval(true);
       setWaitingList(null);
+      // Remove the accepted connection from the waiting queue
+      // since it's now in the approval phase
+      if (data?.roomId) {
+        removePendingConnection(data.roomId);
+      }
     }
     voiceSocket.on("incoming", handleAstrologerIncoming);
     return () => {
     voiceSocket.off("incoming", handleAstrologerIncoming);
     }
-  }, [])
+  }, [setCallApproval, setWaitingList, removePendingConnection])
 
   const astrologerName = lastRequestedAstro?.firstName;
 
   const handleCancel = () => {
     voiceSocket.emit("call:cancel", {roomId: activeCallRoomId, canceledBy: "CUSTOMER"});
     localStorage.removeItem("waitingState");
+    // Remove from queue
+    if (activeCallRoomId) {
+      removePendingConnection(activeCallRoomId);
+    }
     // Clear pending live call so HomeLayout WaitingModal doesn't appear after this one dismisses
     if (pendingLiveCall) {
       setPendingLiveCall(null);

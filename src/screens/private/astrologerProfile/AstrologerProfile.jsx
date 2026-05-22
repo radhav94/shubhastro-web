@@ -37,6 +37,7 @@ import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useChat } from "../../../context/ChatContext";
+import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { ProfileManager } from "../../../component/UI/Profile";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { Link } from "react-router-dom";
@@ -168,6 +169,8 @@ const AstrologerProfile = () => {
     setActiveChat,
     setChatSeconds,
   } = useChat();
+
+  const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, cancelAll, assignRoomId } = useWaitingQueue();
   
   const {
     waitingList: callWaitingList,
@@ -456,6 +459,7 @@ const AstrologerProfile = () => {
       setActiveChatRoomId(data?.roomId);
       setWaitingList(data?.waitingTime || 2);
       setConnectionType("chat");
+      assignRoomId(data?.roomId, "chat", data?.waitingTime || 2);
 
       localStorage.setItem(
         "waitingState",
@@ -472,6 +476,7 @@ const AstrologerProfile = () => {
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
       setConnectionType(data?.type || "audio");
+      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
 
       localStorage.setItem(
         "waitingState",
@@ -491,6 +496,7 @@ const AstrologerProfile = () => {
     }) => {
       setWaitingList(false);
       localStorage.removeItem("waitingState");
+      removePendingConnection(roomId);
 
       const astro = activeCallAstroRef.current;
       const kundliId = lastSelectedKundli?._id;
@@ -534,6 +540,7 @@ const AstrologerProfile = () => {
     const handleCallAccepted = async ({
       roomId,
       token,
+      channelName,
       type,
       remainingTime,
       isSwitch,
@@ -558,6 +565,7 @@ const AstrologerProfile = () => {
       // Regular call acceptance
       resetCallFlow();
       localStorage.removeItem("waitingState");
+      removePendingConnection(roomId);
 
       const astro = activeCallAstroRef.current;
 
@@ -578,6 +586,7 @@ const AstrologerProfile = () => {
 
         setActiveCall({
           roomId,
+          channelName,
           chatRoomId,
           agoraToken: token,
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
@@ -600,11 +609,18 @@ const AstrologerProfile = () => {
       // Check if this is a switch rejection during an active call
       if (data?.switchRejected && (data?.type === "audio" || data?.type === "video")) {
         console.log("🔄 Call switch rejected - current call continues");
-        // Don't reset anything - the current call should continue
         return;
       }
       
-      // Regular call rejection - end everything
+      // Extract roomId and astrologerId — can be at top level or inside sessionData
+      const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
+      const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
+      if (rejectedRoomId) {
+        removePendingConnection(rejectedRoomId);
+      } else if (rejectedAstrologerId) {
+        removePendingByAstrologer(rejectedAstrologerId);
+      }
+
       const errorMsg =
         data?.sessionData?.sessionEndReason === "rejected" &&
         data?.type === "chat"
@@ -624,6 +640,7 @@ const AstrologerProfile = () => {
       localStorage.removeItem("waitingState");
       resetChatFlow();
       resetCallFlow();
+      cancelAll();
       setConnectionType(null);
     };
 
