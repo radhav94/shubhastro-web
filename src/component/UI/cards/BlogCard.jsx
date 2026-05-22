@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import Styles from "./BlogCard.module.scss";
 import { DefaultImages } from "../../../utils/appImages";
 
-const BlogCard = ({ image, title, author, date, authorIcon, blogId }) => {
+const BlogCard = ({ image, title, author, date, authorIcon, blogId, slug }) => {
   const [copiedId, setCopiedId] = useState(null);
 
-  const getBlogUrl = () => `${window.location.origin}/blog/${blogId}`;
+  const getBlogUrl = () => `${window.location.origin}/blog/${slug || blogId}`;
 
   const handleShare = (e, platform) => {
     e.preventDefault();

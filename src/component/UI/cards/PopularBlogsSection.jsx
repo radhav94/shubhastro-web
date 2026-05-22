@@ -10,8 +10,7 @@ const PopularBlogsSection = ({ blogs = [], title, subtitle }) => {
   const [copiedId, setCopiedId] = useState(null);
 
   const getBlogUrl = (blog) => {
-    const blogId = blog.blogId || blog._id;
-    return `${window.location.origin}/blog/${blogId}`;
+    return `${window.location.origin}/blog/${blog.slug || blog._id}`;
   };
 
   const handleShare = (e, platform, blog) => {
@@ -35,12 +34,12 @@ const PopularBlogsSection = ({ blogs = [], title, subtitle }) => {
   };
 
   const handleBlogClick = (blog) => {
-    const blogId = blog.blogId || blog._id;
-    if (!blogId) {
-      console.error('Blog ID is missing:', blog);
+    const slug = blog.slug || blog._id;
+    if (!slug) {
+      console.error('Blog slug is missing:', blog);
       return;
     }
-    navigate(PATH.privateRoutes.SINGLEBLOG.path.replace(":slug", blogId));
+    navigate(PATH.privateRoutes.SINGLEBLOG.path.replace(":slug", slug));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 

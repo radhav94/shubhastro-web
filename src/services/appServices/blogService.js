@@ -25,8 +25,8 @@ export const blogApi = privateRequestNew.injectEndpoints({
 
     // Get Single Blog
     getSingleBlog: builder.query({
-      query: (sun_sign) => ({
-        url: `blogs/single?blogId=${encodeURIComponent(sun_sign)}`,
+      query: (slug) => ({
+        url: `blogs/single?slug=${encodeURIComponent(slug)}`,
         method: "GET",
       }),
       providesTags: ["Blogs"],
