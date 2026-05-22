@@ -1,0 +1,15 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /account/
+Disallow: /login/
+Disallow: /register/
+Disallow: /search/
+Disallow: /internal-search/
+
+# Allow all public pages
+Allow: /
+
+# Sitemap declaration
+Sitemap: https://www.shubhastro.ai/sitemap.xml
