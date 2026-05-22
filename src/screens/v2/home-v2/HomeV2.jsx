@@ -185,7 +185,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
           {renderSectionContent(rightSection)}
           {/* Live Community from ai-services — always in right column */}
           {aiServicesItems[3] && (
-            <div className={`${styles.liveCommunityCard} ${styles.desktopOnly}`} onClick={() => navigate('/live')}>
+            <div className={`${styles.liveCommunityCard} ${styles.desktopOnly}`} onClick={() => navigate('/community')}>
               <span className={styles.featureTag}>New</span>
               <h4 className={styles.liveCommunityTitle}>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title || "ShubhAstro Live Community"}</h4>
               <p className={styles.liveCommunityDesc}>{aiServicesItems[3]?.description || "Lorem Ipsum is simply dummy text of"}</p>
