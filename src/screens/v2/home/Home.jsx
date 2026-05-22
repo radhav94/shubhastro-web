@@ -129,13 +129,6 @@ const Home = () => {
   // Handle connect button click - now receives connectionType (chat or audio)
   const handleConnectClick = async (astrologer, connectionType, isEmergency = false) => {
     if (!requireAuth()) return;
-    
-    if (WaitingList || callWaitingList) {
-      Toast.error(
-        "You are already waiting for an astrologer. Please cancel the current request first.",
-      );
-      return;
-    }
 
     setSelectedAstrologer(astrologer);
     setAstrologerRef(astrologer);

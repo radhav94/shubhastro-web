@@ -1,13 +1,25 @@
 import { useCall } from "../../../../../context/CallContext";
+import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 
 export const FooterApproval = () => {
   const { resetCallFlow, activeCallRoomId } = useCall();
+  const { cancelAllExcept, removePendingConnection } = useWaitingQueue();
 
   const handleUserCallAccept = async() => {
     voiceSocket.emit("call:accept", {roomId : activeCallRoomId, acceptedBy : "CUSTOMER"});
+    // User accepted — cancel all other pending connections
+    cancelAllExcept(activeCallRoomId);
     resetCallFlow();
   }
+
+  const handleDecline = () => {
+    voiceSocket.emit("call:cancel", {roomId : activeCallRoomId, canceledBy : "CUSTOMER"});
+    if (activeCallRoomId) {
+      removePendingConnection(activeCallRoomId);
+    }
+    resetCallFlow();
+  };
 
   return (
     <>
@@ -27,10 +39,7 @@ export const FooterApproval = () => {
           Yes
         </button>
         <button
-          onClick={() => {
-            voiceSocket.emit("call:cancel", {roomId : activeCallRoomId, canceledBy : "CUSTOMER"});
-            resetCallFlow();
-          }}
+          onClick={handleDecline}
           className="rounded-xl bg-zinc-800 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-700 transition"
         >
           No

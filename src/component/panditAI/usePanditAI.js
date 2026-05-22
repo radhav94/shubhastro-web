@@ -91,6 +91,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         _id: msg._id,
         text: msg.message,
         sender: msg.sender === "user" ? "user" : "ai",
+        createdAt: msg.createdAt,
         time: new Date(msg.createdAt).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -285,6 +286,9 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         if (pending) {
           pendingMessageRef.current = null;
           sendTextRef.current?.(pending);
+        } else {
+          // Send default automated "Hi" message when chat is accepted with no pending input
+          sendTextRef.current?.("Hi");
         }
       }
     };
@@ -316,6 +320,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         _id: `msg-${Date.now()}-${Math.random()}`,
         text: data.message || data.response,
         sender: "ai",
+        createdAt: new Date().toISOString(),
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -437,6 +442,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         _id: `user-${Date.now()}`,
         text: trimmedText,
         sender: "user",
+        createdAt: new Date().toISOString(),
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",

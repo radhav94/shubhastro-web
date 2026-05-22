@@ -20,6 +20,8 @@ export const CallProvider = ({ children }) => {
   const [activeCallRoomId, setActiveCallRoomId] = useState(null);
   const [callApproval, setCallApproval] = useState(false);
   const [missedApproval, setMissedApproval] = useState(false);
+  // Two-way accept: data from call:astrologer_accepted for user ring UI
+  const [callApprovalData, setCallApprovalData] = useState(null);
   const [openReview, setOpenReview] = useState(false);
   const [reviewData, setReviewData] = useState(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
@@ -479,7 +481,7 @@ export const CallProvider = ({ children }) => {
   useEffect(() => {
     if (!userIdLocal) return;
 
-    const handlePendingAccepted = async ({ roomId, token: agoraToken, type, remainingTime }) => {
+    const handlePendingAccepted = async ({ roomId, token: agoraToken, channelName, type, remainingTime }) => {
       const pending = pendingLiveCallRef.current;
       if (!pending || activeCallRef.current) return; // Only handle if no active call yet
 
@@ -492,6 +494,7 @@ export const CallProvider = ({ children }) => {
 
       setActiveCall({
         roomId,
+        channelName,
         agoraToken,
         callerName: astro.astrologerName || astro.firstName || "Astrologer",
         isUserSide: true,
@@ -581,6 +584,8 @@ export const CallProvider = ({ children }) => {
     setCallApproval,
     missedApproval,
     setMissedApproval,
+    callApprovalData,
+    setCallApprovalData,
     openReview,
     setOpenReview,
     reviewData,

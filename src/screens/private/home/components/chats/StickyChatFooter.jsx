@@ -1,11 +1,12 @@
 import { useMatch, useNavigate } from "react-router-dom";
 import { useChat } from "../../../../../context/ChatContext";
+import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { FooterApproval } from "./FooterApproval";
-import { FooterWaiting } from "./FooterWaiting";
 import { FooterMissedApproval } from "./FooterMissedApproval";
 import { useEffect } from "react";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import { PANDIT_AI_ID } from "../../../../../component/panditAI/usePanditAI";
+import styles from "./StickyChatFooter.module.scss";
 
 const StickyChatFooter = () => {
   const {
@@ -19,6 +20,7 @@ const StickyChatFooter = () => {
     activeChatRoomId,
     chatSeconds,
   } = useChat();
+  const { hasAnyPending } = useWaitingQueue();
   const navigate = useNavigate();
 
   const onTalkDetailPage = useMatch("/chat-to-astrologer/:id");
@@ -45,50 +47,58 @@ const StickyChatFooter = () => {
 
   if (activeChat?.astrologerId === PANDIT_AI_ID) return null;
 
-  if (!waitingList && !chatApproval && !activeChat && !missedApproval)
-    return null;
+  // When the queue is active, hide ONLY the waiting state from this footer.
+  if (hasAnyPending && waitingList && !chatApproval && !activeChat && !missedApproval) return null;
+
+  if (!chatApproval && !activeChat && !missedApproval) return null;
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = String(seconds % 60).padStart(2, "0");
+    return `${mins}:${secs}`;
+  };
 
   return (
-    <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-slideUp waiting-queue">
-      <div className="flex items-center gap-4 rounded-2xl bg-zinc-900/95 px-5 py-4 shadow-2xl backdrop-blur-md border border-zinc-800">
-        {waitingList && <FooterWaiting />}
+    <div className={styles.container}>
+      {chatApproval && <FooterApproval />}
+      {missedApproval && <FooterMissedApproval />}
 
-        {chatApproval && <FooterApproval />}
-        {missedApproval && <FooterMissedApproval />}
-
-        {activeChat && (
-          <div className="flex items-center gap-3 text-white">
-            <span className="text-xl">💬</span>
-            <div>
-              <p className="text-sm font-medium">Chat ongoing</p>
-              <p className="text-xs text-zinc-400">
-                With {activeChat.callerName || "Astrologer"} {Math.floor(chatSeconds / 60)}:
-                {String(chatSeconds % 60).padStart(2, "0")}
-              </p>
-            </div>
-            <button
-              onClick={() =>
-                navigate(`/chat-to-astrologer/${activeChat.astrologerId}`, {
-                  state: {
-                    userId: activeChat.userId,
-                    astrologerId: activeChat.astrologerId,
-                    fullName: activeChat.callerName,
-                    roomId: activeChat.roomId,
-                    isUserSide: true,
-                    kundliId: activeChat.kundliId,
-                    astrologerName: activeChat?.astrologerName,
-                    refreshKey: Math.floor(Math.random() * 100) + 1,
-                    profileImgUrl: activeChat?.profileImgUrl,
-                  },
-                })
-              }
-              className="ml-3 rounded-xl bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700 transition"
-            >
-              Open Chat
-            </button>
+      {activeChat && (
+        <div className={styles.chatCard}>
+          <div className={styles.iconWrapper}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
           </div>
-        )}
-      </div>
+          <div className={styles.info}>
+            <p className={styles.name}>{activeChat.callerName || activeChat.astrologerName || "Astrologer"}</p>
+            <p className={styles.meta}>
+              <span className={styles.liveDot} />
+              Chat ongoing • {formatTime(chatSeconds)}
+            </p>
+          </div>
+          <button
+            className={styles.openBtn}
+            onClick={() =>
+              navigate(`/chat-to-astrologer/${activeChat.astrologerId}`, {
+                state: {
+                  userId: activeChat.userId,
+                  astrologerId: activeChat.astrologerId,
+                  fullName: activeChat.callerName,
+                  roomId: activeChat.roomId,
+                  isUserSide: true,
+                  kundliId: activeChat.kundliId,
+                  astrologerName: activeChat?.astrologerName,
+                  refreshKey: Math.floor(Math.random() * 100) + 1,
+                  profileImgUrl: activeChat?.profileImgUrl,
+                },
+              })
+            }
+          >
+            Open
+          </button>
+        </div>
+      )}
     </div>
   );
 };

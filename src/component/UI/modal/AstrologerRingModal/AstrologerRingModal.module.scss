@@ -1,0 +1,252 @@
+/* ===== Full-screen modal variant ===== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 340px;
+  padding: 2rem 1.5rem 1.5rem;
+  position: relative;
+  text-align: center;
+  animation: slideUp 0.3s ease;
+}
+
+/* ===== Toast / banner variant ===== */
+.toastContainer {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10002;
+  animation: slideIn 0.3s ease;
+}
+
+.toastCard {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 320px;
+  max-width: 420px;
+
+  .profileSection {
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 0;
+    flex: 1;
+  }
+
+  .avatarRing {
+    width: 52px;
+    height: 52px;
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .countdownRing {
+    width: 52px;
+    height: 52px;
+  }
+
+  .name {
+    font-size: 14px;
+  }
+
+  .typeLabel {
+    font-size: 12px;
+  }
+
+  .countdown {
+    display: none;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 0;
+  }
+
+  .acceptBtn,
+  .rejectBtn {
+    padding: 8px 12px;
+    font-size: 12px;
+    min-width: 80px;
+
+    span {
+      display: none;
+    }
+  }
+}
+
+/* ===== Shared elements ===== */
+.closeBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+
+  &:hover {
+    background: #f0f0f0;
+  }
+}
+
+.profileSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.avatarRing {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.countdownRing {
+  position: absolute;
+  inset: 0;
+  width: 96px;
+  height: 96px;
+}
+
+.progressCircle {
+  transition: stroke-dashoffset 1s linear;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.typeLabel {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.emergencyTag {
+  background: #F75801;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.countdown {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 4px 0 0;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.rejectBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 14px;
+  background: #f5f5f5;
+  color: #e53935;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #ffebee;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.acceptBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #43a047, #2e7d32);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 14px rgba(46, 125, 50, 0.35);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(100px); }
+  to { opacity: 1; transform: translateX(0); }
+}
