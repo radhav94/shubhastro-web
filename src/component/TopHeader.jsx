@@ -16,6 +16,7 @@ import { ProfileManager } from "./UI/Profile";
 import { setSelectedKundli, clearSelectedKundli } from "../redux/kundli/kundliSlice";
 import { setSelectedKundliProfile } from "../redux/aiwow/aiwowSlice";
 import LanguageSelector from "./LanguageSelector";
+import { isShubhMallEnabled } from "../utils/featureConfig";
 const TopHeader = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -267,14 +268,16 @@ const TopHeader = () => {
             >
               Blogs
             </NavLink> */}
-            <NavLink
-              to="/shubh-mall"
-              className={({ isActive }) =>
-                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-              }
-            >
-              ShubhMall
-            </NavLink>
+            {isShubhMallEnabled() && (
+              <NavLink
+                to="/shubh-mall"
+                className={({ isActive }) =>
+                  `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+                }
+              >
+                ShubhMall
+              </NavLink>
+            )}
             <NavLink
               to={PATH.privateRoutes.KUNDLI.path}
               className={({ isActive }) =>
@@ -534,6 +537,17 @@ const TopHeader = () => {
             >
               AI WOW
             </NavLink>
+            {isShubhMallEnabled() && (
+              <NavLink
+                to="/shubh-mall"
+                onClick={() => setIsDrawerOpen(false)}
+                className={({ isActive }) =>
+                  `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+                }
+              >
+                ShubhMall
+              </NavLink>
+            )}
             <NavLink
               to="/blog"
               onClick={() => setIsDrawerOpen(false)}

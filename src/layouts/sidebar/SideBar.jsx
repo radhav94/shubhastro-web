@@ -8,6 +8,7 @@ import { PATH } from "../../utils/routes/Paths";
 import { getUserFromStorage } from "../../utils/authStorage";
 import { logout } from "../../redux/auth/authSlice";
 import { clearSelectedKundli } from "../../redux/kundli/kundliSlice";
+import { isShubhMallEnabled } from "../../utils/featureConfig";
 
 const SideBar = ({ open, onClose }) => {
   const navigate = useNavigate();
@@ -204,20 +205,23 @@ const SideBar = ({ open, onClose }) => {
     {
       title: (
         <span className="notranslate">
-          {currentLang === "en" ? "English" : "हिंदी"}
+          {currentLang === "en" ? "English" : currentLang === "mr" ? "मराठी" : "हिंदी"}
         </span>
       ),
       children: [
-        currentLang === "en"
-          ? {
-              title: "हिंदी",
-              onClick: () => handleLanguageChange("hi"),
-            }
-          : {
-              title: "English",
-              onClick: () => handleLanguageChange("en"),
-            },
-      ],
+        currentLang !== "en" && {
+          title: "English",
+          onClick: () => handleLanguageChange("en"),
+        },
+        currentLang !== "hi" && {
+          title: "हिंदी",
+          onClick: () => handleLanguageChange("hi"),
+        },
+        currentLang !== "mr" && {
+          title: "मराठी",
+          onClick: () => handleLanguageChange("mr"),
+        },
+      ].filter(Boolean),
     },
     {
       title: "Calculators",
@@ -298,7 +302,7 @@ const SideBar = ({ open, onClose }) => {
     { title: "Chat with Astrologer", path: "/talk-to-astrologer" },
     { title: "Talk to Astrologer", path: "/talk-to-astrologer" },
     { title: "Join Live", path: "/live" },
-    { title: "ShubhMall", path: "/shop" },
+    ...(isShubhMallEnabled() ? [{ title: "ShubhMall", path: "/shop" }] : []),
     { title: "Blogs", path: "/blog" },
     { title: "Recharge", path: "/recharge" },
   ];

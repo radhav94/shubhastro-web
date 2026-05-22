@@ -13,7 +13,7 @@
 .modal {
   background: #fff;
   border-radius: 14px 14px 0 0;
-  padding: 8px 10px;
+  padding: 10px 12px;
   width: 100%;
   max-width: 600px;
   animation: slideUp 0.25s ease;
@@ -23,7 +23,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .title {
@@ -31,6 +31,22 @@
   font-weight: 700;
   color: #000;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge {
+  background: #f75801;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .closeBtn {
@@ -48,83 +64,246 @@
   line-height: 1.3;
 }
 
-.userRow {
+/* List */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.listItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  transition: border-color 0.2s;
 }
 
-.userInfo {
+.listItemAccepted {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.listItemHold {
+  background: #fefce8;
+  border-color: #fde047;
+}
+
+.listItemRinging {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  animation: pulseRinging 1.5s ease-in-out infinite;
+}
+
+.listItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.listAvatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f75801, #ffa940);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.listAvatarRinging {
+  background: linear-gradient(135deg, #2563eb, #60a5fa);
+  animation: pulseAvatar 1.2s ease-in-out infinite;
+}
+
+.listMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.listName {
+  font-size: 12px;
+  font-weight: 600;
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.listType {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.acceptedTag {
+  color: #059669;
+  font-weight: 600;
+}
+
+.holdTag {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.waitTag {
+  color: #f75801;
+  font-weight: 600;
+}
+
+.ringingTag {
+  color: #059669;
+  font-weight: 600;
+}
+
+.listItemRight {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.listTimer {
+  font-size: 11px;
+  font-weight: 600;
+  color: #333;
+}
+
+.cancelIconBtn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: #fee2e2;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #fecaca;
+  }
+}
+
+.actionBtns {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.userAvatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f75801, #ffa940);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.userName {
-  font-size: 13px;
-  font-weight: 600;
-  color: #000;
-}
-
-.timer {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #333;
-}
-
-.offlineToggle {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin: 0 auto 6px;
-  padding: 4px 12px;
-  background: #f0f0f0;
+.acceptBtn {
+  padding: 5px 12px;
   border: none;
   border-radius: 20px;
+  background: #16a34a;
+  color: #fff;
   font-size: 11px;
-  color: #555;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.joinCallBtn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 20px;
+  background: #f75801;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.cancelBtn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 20px;
+  background: #f75801;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.rejoinBtn {
+  padding: 6px 14px;
+  border: 1.5px solid #f75801;
+  border-radius: 20px;
+  background: #fff;
+  color: #f75801;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #fff7ed;
+  }
+}
+
+.rejectBtn {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 20px;
+  background: #991b1b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.unholdBtn {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 20px;
+  background: #1e3a5f;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.85;
+  }
 }
 
 .divider {
   height: 1px;
   background: #e0e0e0;
-  margin-bottom: 0;
-}
-
-.waitTimeRow {
-  text-align: center;
-  margin-bottom: 4px;
-}
-
-.waitLabel {
-  font-size: 13px;
-  font-weight: 700;
-  color: #000;
-}
-
-.waitValue {
-  font-size: 13px;
-  font-weight: 700;
-  color: #ef4444;
+  margin: 8px 0;
 }
 
 .joinBtn {

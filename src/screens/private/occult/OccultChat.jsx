@@ -109,9 +109,9 @@ const OccultChat = () => {
         </div>
         <div className={styles.heroRight}>
           <div className={styles.aiCard}>
-            <div className={styles.aiIconWrap}>
+            {/* <div className={styles.aiIconWrap}>
               <img src={aiImage} alt="AI" className={styles.aiIconImg} />
-            </div>
+            </div> */}
             <div className={styles.aiContent}>
               <h3 className={styles.aiCardTitle}>AI-powered occult analysis</h3>
               <p className={styles.aiCardText}>

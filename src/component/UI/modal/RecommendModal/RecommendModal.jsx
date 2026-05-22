@@ -15,6 +15,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PrimaryLoader from "../../PrimaryLoader";
 import { useGetBalanceMutation } from "../../../../redux/api/wallet/walletApi";
 import { useChat } from "../../../../context/ChatContext";
+import { useWaitingQueue } from "../../../../context/WaitingQueueContext";
 import { useAstrologerConnect } from "../../../../utils/hooks/useAstrologerConnect";
 import ConnectAstrologerPopup from "../../../../screens/private/v2/components/ui/ConnectAstrologerPopup";
 import ProfileModals from "../../../../screens/private/kundli/components/ProfileModals";
@@ -91,6 +92,8 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
     setLastRequestedAstro,
     setChatSeconds,
   } = useChat();
+
+  const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, cancelAll, assignRoomId } = useWaitingQueue();
 
   // ✅ Ref for current calling astrologer (no re-render)
   const activeCallAstroRef = useRef(null);
@@ -191,17 +194,20 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
       setChatRoomId(data?.roomId);
       setActiveChatRoomId(data?.roomId);
       setWaitingList(data?.waitingTime || 2);
+      assignRoomId(data?.roomId, "chat", data?.waitingTime || 2);
     };
 
     const handleCallRoom = (data) => {
       setCallRoomId(data?.roomId);
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
+      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
     };
 
     const handleCallAccepted = async ({
       roomId,
       token,
+      channelName,
       type,
       remainingTime,
       isSwitch,
@@ -223,12 +229,14 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
       
       // Regular call acceptance
       resetCallFlow();
+      removePendingConnection(roomId);
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 
       try {
         setActiveCall({
           roomId,
+          channelName,
           chatRoomId,
           agoraToken: token,
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
@@ -253,6 +261,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
       ...data
     }) => {
       setWaitingList(false);
+      removePendingConnection(roomId);
       const astro = activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 
@@ -297,18 +306,24 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
       // Check if this is a switch rejection during an active call
       if (data?.switchRejected && (data?.type === "audio" || data?.type === "video")) {
         console.log("🔄 Call switch rejected - current call continues");
-        // Don't reset anything - the current call should continue
         return;
       }
       
-      // Regular call rejection - end everything
+      // Extract roomId and astrologerId — can be at top level or inside sessionData
+      const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
+      const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
+      if (rejectedRoomId) {
+        removePendingConnection(rejectedRoomId);
+      } else if (rejectedAstrologerId) {
+        removePendingByAstrologer(rejectedAstrologerId);
+      }
+
       const errorMsg =
         data?.sessionData?.sessionEndReason === "rejected" &&
           data?.type === "chat"
           ? "Astrologer has rejected the chat request"
           : "Astrologer has rejected the call request";
       Toast.error(errorMsg);
-      resetCallState();
       resetChatFlow();
       resetCallFlow();
     };
@@ -316,13 +331,13 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
     /* ERROR */
     const handleSocketError = (err) => {
       if (err?.message === "Call has already ended") {
-        // soft reset only
         resetCallState();
         return;
       }
 
       Toast.error(err?.message || "Connection error");
       resetCallState();
+      cancelAll();
     };
 
     /* CALL ENDED */

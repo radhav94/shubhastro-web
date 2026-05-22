@@ -4,6 +4,7 @@ import { voiceSocket, registerChatSession, clearChatSession } from "../services/
 import { toast as rht } from "react-hot-toast";
 import ChatNotificationBanner from "../component/UI/ChatNotificationBanner/ChatNotificationBanner";
 import { PANDIT_AI_ID, isPanditAIEvent } from "../component/panditAI/usePanditAI";
+import { isShubhMallEnabled } from "../utils/featureConfig";
 
 const ChatContext = createContext();
 
@@ -23,6 +24,8 @@ export const ChatProvider = ({ children }) => {
   const [waitingList, setWaitingList] = useState(false);
   const [chatApproval, setChatApproval] = useState(false);
   const [missedApproval, setMissedApproval] = useState(false);
+  // Two-way accept: data from chat:astrologer_accepted for user ring UI
+  const [chatApprovalData, setChatApprovalData] = useState(null);
   const [isReconnecting, setIsReconnecting] = useState(false);
 
   const [chatSeconds, setChatSeconds] = useState(0);
@@ -439,6 +442,9 @@ export const ChatProvider = ({ children }) => {
       // Skip Pandit AI messages — handled inline by PanditAIBubble
       if (isPanditAIEvent(data)) return;
 
+      // Hide product/remedy notifications when mall is disabled
+      if (data.type === "products" && !isShubhMallEnabled()) return;
+
       const isOnChatPage = window.location.pathname.includes("/chat-to-astrologer");
       const isOnLivePage = window.location.pathname.startsWith("/live");
 
@@ -527,6 +533,8 @@ export const ChatProvider = ({ children }) => {
         setChatApproval,
         missedApproval,
         setMissedApproval,
+        chatApprovalData,
+        setChatApprovalData,
         resetChatFlow,
         activeChatRoomId,
         setActiveChatRoomId,

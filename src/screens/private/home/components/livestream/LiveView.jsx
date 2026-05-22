@@ -11,12 +11,14 @@ import SharePopup from "./SharePopup";
 import LiveListModal from "./LiveListModal";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { useReelScroll } from "./useReelScroll";
+import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useGetAllGiftsQuery } from "../../../../../redux/api/gift/giftApi";
 import { useLiveList } from "../../../../../context/LiveListContext";
 import { useCall } from "../../../../../context/CallContext";
+import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import WaitingModal from "../../../../../component/UI/modal/waitingModal/WaitingModal";
 import WaitlistModal from "../../../../../component/UI/modal/waitlistModal/WaitlistModal";
@@ -187,6 +189,8 @@ const LiveView = (props) => {
     setWaitingList,
   } = useCall();
 
+  const { pendingConnections, addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, isInQueue, getConnectionByRoomId } = useWaitingQueue();
+
   // Auto-minimize call if user is on live stream (handles page refresh)
   useEffect(() => {
     if (activeCall) {
@@ -295,14 +299,6 @@ const LiveView = (props) => {
     console.log("LiveView restore effect — pending:", pending);
     restorePendingCallState(pending);
   }, [resolvePendingLiveCall, restorePendingCallState]);
-
-  useEffect(() => {
-    if (!showWaitingModal || !callingChannelRef.current || !liveListCtx?.lives?.length) {
-      return;
-    }
-
-    liveListCtx.switchToChannel(callingChannelRef.current);
-  }, [showWaitingModal, liveListCtx?.lives?.length, liveListCtx]);
 
   // Auto-dismiss the old waiting toast after 3 seconds
   useEffect(() => {
@@ -423,7 +419,7 @@ const LiveView = (props) => {
   const location = useLocation();
 
   useReelScroll({
-    enabled: !!liveListCtx && ROLE !== "host" && !activeCall && !showWaitingModal,
+    enabled: !!liveListCtx && ROLE !== "host" && !activeCall,
     containerRef: reelRef,
     onNext: liveListCtx?.goNextLive,
     onPrev: liveListCtx?.goPrevLive,
@@ -560,6 +556,12 @@ const LiveView = (props) => {
       return;
     }
 
+    // Check if already in queue for this astrologer
+    if (isInQueue(astrologerId, "audio")) {
+      Toast.error("Already waiting for this astrologer");
+      return;
+    }
+
     try {
       // 5. Check wallet balance only — astrologer is already live, no need to check availability
       const result = await getBalance({ astrologerId, type: "call" });
@@ -597,6 +599,18 @@ const LiveView = (props) => {
       type: "audio",
     });
 
+    // Add to waiting queue
+    addPendingConnection({
+      id: `${astrologerId}-audio-${Date.now()}`,
+      astrologer: { ...astrologer, _id: astrologerId, firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "" },
+      type: "audio",
+      roomId: null,
+      waitingTime: 5,
+      isEmergency: false,
+      fromLive: true,
+      liveChannelId: props.channel,
+    });
+
     setShowWaitingModal(true);
     setShowWaitingToast(true);
     setWaitingList(5);
@@ -628,6 +642,12 @@ const LiveView = (props) => {
       return;
     }
 
+    // Check if already in queue for this astrologer+type
+    if (isInQueue(astrologerId, type)) {
+      Toast.error("Already waiting for this astrologer");
+      return;
+    }
+
     // Store astrologer info in context and ref
     setLastRequestedAstro({ ...astrologer, profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl });
     setPendingCallType(type);
@@ -646,6 +666,18 @@ const LiveView = (props) => {
       type, // "audio" | "video"
     });
 
+    // Add to waiting queue
+    addPendingConnection({
+      id: `${astrologerId}-${type}-${Date.now()}`,
+      astrologer: { ...astrologer, _id: astrologerId, firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "" },
+      type,
+      roomId: null,
+      waitingTime: 5,
+      isEmergency: false,
+      fromLive: true,
+      liveChannelId: props.channel,
+    });
+
     setShowCallPopup(false);
     Toast.success(`${type === "audio" ? "Voice" : "Video"} call request sent`);
   };
@@ -660,6 +692,7 @@ const LiveView = (props) => {
     // Emit call:cancel to server
     if (callRoomId) {
       voiceSocket.emit("call:cancel", { roomId: callRoomId, canceledBy: "CUSTOMER" });
+      removePendingConnection(callRoomId);
     }
     
     setShowWaitingModal(false);
@@ -740,6 +773,7 @@ const LiveView = (props) => {
   // Listen for suggested remedy messages from astrologer during call
   useEffect(() => {
     if (!isCallForCurrentAstrologer) return;
+    if (!isShubhMallEnabled()) return;
     const handleProductMessage = (data) => {
       if (data?.type === "products" && data?.suggestedProducts?.length > 0) {
         dispatch(addRemedy({
@@ -781,9 +815,10 @@ const LiveView = (props) => {
       setCallWaitingList(data?.waitingTime || 5);
       setShowWaitingModal(true);
       setShowWaitingToast(true);
+      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
     };
 
-    const handleCallAccepted = async ({ roomId, token: agoraToken, type, remainingTime, isSwitch }) => {
+    const handleCallAccepted = async ({ roomId, token: agoraToken, channelName, type, remainingTime, isSwitch }) => {
       // If there's an active audio call and this is a video acceptance, it's an upgrade — let CallContext handle it
       if (type === "video" && activeCall && activeCall.callType === "audio") {
         console.log("🔄 Video upgrade accepted - CallContext will handle the switch (isSwitch:", isSwitch, ")");
@@ -806,21 +841,19 @@ const LiveView = (props) => {
       setShowWaitingToast(false);
       resetCallFlow();
 
-      // Switch back to the astrologer's stream if user scrolled away
-      if (callingChannelRef.current && liveListCtx) {
-        liveListCtx.switchToChannel(callingChannelRef.current);
-      }
+      // Get connection data before removing (has correct astrologer info)
+      const connData = getConnectionByRoomId(roomId);
+      removePendingConnection(roomId);
 
       const pending = resolvePendingLiveCall();
       const astro =
+        connData?.astrologer ||
         astrologerRef.current ||
         pending?.astrologer ||
         lastRequestedAstro ||
         astrologer;
       const astroId = astro?._id || astro?.astrologerId;
       const liveChannel =
-        callingChannelRef.current ||
-        pending?.liveChannel ||
         props.channel;
       
       if (!astro || !astroId) {
@@ -842,6 +875,7 @@ const LiveView = (props) => {
         // Auto-minimize since user is on live stream
         setActiveCall({
           roomId,
+          channelName,
           chatRoomId,
           agoraToken,
           callerName: astro.astrologerName || astro.firstName || "Astrologer",
@@ -869,18 +903,28 @@ const LiveView = (props) => {
       // Check if this is a switch rejection during an active call
       if (data?.switchRejected && (data?.type === "audio" || data?.type === "video")) {
         console.log("🔄 Call switch rejected - current call continues");
-        // Don't reset anything - the current call should continue
         return;
       }
       
-      // Regular call rejection - end everything
+      // Extract roomId and astrologerId — can be at top level or inside sessionData
+      const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
+      const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
+      if (rejectedRoomId) {
+        removePendingConnection(rejectedRoomId);
+      } else if (rejectedAstrologerId) {
+        removePendingByAstrologer(rejectedAstrologerId);
+      }
+
       const errorMsg =
         data?.sessionData?.sessionEndReason === "rejected"
           ? "Astrologer has rejected the call request"
           : "Call rejected";
       Toast.error(errorMsg);
       clearPendingLiveCallState();
-      resetCallState();
+      setShowWaitingModal(false);
+      setShowWaitingPopup(false);
+      setShowWaitingToast(false);
+      setCallRoomId(null);
     };
 
     const handleCallEnded = () => {
@@ -929,6 +973,13 @@ const LiveView = (props) => {
       }
     };
 
+    // When astrologer accepts, show waitlist popup (no scroll)
+    const handleAstrologerAcceptedScroll = (data) => {
+      const acceptedAstroId = data?.astrologerId;
+      if (!acceptedAstroId) return;
+      setShowWaitingPopup(true);
+    };
+
     // Register socket listeners
     voiceSocket.on("call:room", handleCallRoom);
     voiceSocket.on("call:accepted", handleCallAccepted);
@@ -937,6 +988,12 @@ const LiveView = (props) => {
     voiceSocket.on("call:canceled", handleCallCanceled);
     voiceSocket.on("warning", handleWarning);
     voiceSocket.on("live:astrologer_status", handleAstrologerPrivateCall);
+    voiceSocket.on("call:astrologer_accepted", handleAstrologerAcceptedScroll);
+    voiceSocket.on("chat:astrologer_accepted", handleAstrologerAcceptedScroll);
+
+    // When user accepts from StickyWaitingQueue — no scroll needed, stay on current stream
+    const handleWaitlistAccepted = () => {};
+    window.addEventListener("waitlist:accepted", handleWaitlistAccepted);
 
     return () => {
       voiceSocket.off("call:room", handleCallRoom);
@@ -946,7 +1003,10 @@ const LiveView = (props) => {
       voiceSocket.off("call:canceled", handleCallCanceled);
       voiceSocket.off("warning", handleWarning);
       voiceSocket.off("live:astrologer_status", handleAstrologerPrivateCall);
+      voiceSocket.off("call:astrologer_accepted", handleAstrologerAcceptedScroll);
+      voiceSocket.off("chat:astrologer_accepted", handleAstrologerAcceptedScroll);
       voiceSocket.off("warning", handleWarning);
+      window.removeEventListener("waitlist:accepted", handleWaitlistAccepted);
     };
   }, [
     userIdLocal,
@@ -980,7 +1040,7 @@ const LiveView = (props) => {
     isOnPrivateCall,
   });
 
-  const shouldShowWaitingIndicator = !isHost && (showWaitingModal || !!resolvePendingLiveCall());
+  const shouldShowWaitingIndicator = !isHost && pendingConnections.some((c) => c.astrologer?._id === astrologerId);
 
   if (isClosing) return null;
 
@@ -1332,7 +1392,7 @@ const LiveView = (props) => {
                 </button>
               </div>
               
-              {!isHost && !isCallForCurrentAstrologer && !showWaitingModal && (
+              {!isHost && !isCallForCurrentAstrologer && !pendingConnections.some((c) => c.astrologer?._id === astrologerId) && (
                 <button 
                   className="call-price-btn"
                   onClick={handleDirectVoiceCall}
@@ -1343,8 +1403,14 @@ const LiveView = (props) => {
                   <span>₹{fullAstro?.price?.audioRate?.amount || astrologer?.audioCallRate || 0}/ min</span>
                 </button>
               )}
-              {!isHost && !isCallForCurrentAstrologer && showWaitingModal && (
-                <button className="call-cancel-circle" onClick={resetCallState} aria-label="Cancel call">
+              {!isHost && !isCallForCurrentAstrologer && pendingConnections.some((c) => c.astrologer?._id === astrologerId) && (
+                <button className="call-cancel-circle" onClick={() => {
+                  const conn = pendingConnections.find((c) => c.astrologer?._id === astrologerId);
+                  if (conn?.roomId) {
+                    voiceSocket.emit("call:cancel", { roomId: conn.roomId, canceledBy: "CUSTOMER" });
+                    removePendingConnection(conn.roomId);
+                  }
+                }} aria-label="Cancel call">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round">
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
@@ -1358,17 +1424,19 @@ const LiveView = (props) => {
                       <text x="3" y="19" fontSize="18" fill="white" fontFamily="serif">卐</text>
                     </svg>
                   </button>
-                  <button
-                    className="call-action-pill"
-                    style={{ position: "relative" }}
-                    onClick={() => { setIsRemedyPanelOpen(true); dispatch(clearNewRemedy()); }}
-                    aria-label="Suggested Remedy"
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" stroke="none">
-                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                    </svg>
-                    {hasNewRemedy && <span className="call-action-dot" />}
-                  </button>
+                  {isShubhMallEnabled() && (
+                    <button
+                      className="call-action-pill"
+                      style={{ position: "relative" }}
+                      onClick={() => { setIsRemedyPanelOpen(true); dispatch(clearNewRemedy()); }}
+                      aria-label="Suggested Remedy"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" stroke="none">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                      </svg>
+                      {hasNewRemedy && <span className="call-action-dot" />}
+                    </button>
+                  )}
                 </>
               )}
             </div>
@@ -1442,18 +1510,77 @@ const LiveView = (props) => {
                     <span style={{ fontSize: 18 }}>⏳</span>
                     <div>
                       <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>Waiting in queue</div>
-                      <div style={{ color: '#9ca3af', fontSize: 11 }}>Approx 5 mins</div>
+                      <div style={{ color: '#9ca3af', fontSize: 11 }}>
+                        {(() => {
+                          const conn = pendingConnections.find((c) => c.astrologer?._id === astrologerId && c.confidence);
+                          if (!conn) return "Approx 5 mins";
+                          const { waitingTime, minWait, maxWait, confidence } = conn;
+                          const safeWait = Math.max(1, waitingTime || 1);
+                          const safeMin = Math.max(1, minWait || safeWait);
+                          const safeMax = Math.max(safeMin, maxWait || safeWait);
+                          if (confidence === "high") return `~${safeWait} min`;
+                          return `~${safeMin}-${safeMax} min`;
+                        })()}
+                      </div>
                     </div>
                   </div>
                 )}
                 {/* New waitlist modal — opens on hourglass click */}
                 <WaitlistModal
                   show={showWaitingPopup}
-                  callRoomId={callRoomId}
+                  pendingRequests={pendingConnections.filter((c) => c.astrologer?._id === astrologerId)}
                   onClose={() => setShowWaitingPopup(false)}
-                  resetCallState={() => { setShowWaitingPopup(false); resetCallState(); }}
-                  connectionType={pendingCallType}
-                  waitTime={callWaitingList}
+                  onShow={() => setShowWaitingPopup(true)}
+                  onAccept={(roomId, type) => {
+                    const event = type === "chat" ? "chat:user_accept" : "call:user_accept";
+                    voiceSocket.emit(event, { roomId });
+                  }}
+                  onReject={(roomId, type) => {
+                    const event = type === "chat" ? "chat:user_reject" : "call:user_reject";
+                    voiceSocket.emit(event, { roomId });
+                    removePendingConnection(roomId);
+                  }}
+                  onUnhold={(roomId, type) => {
+                    const userId = localStorage.getItem("shubhtalk_customer_id");
+                    if (!roomId || !userId) return;
+                    // Emit unhold
+                    const unholdEvent = type === "chat" ? "chat:unhold" : "call:unhold";
+                    voiceSocket.emit(unholdEvent, { roomId });
+                    // Get connection data before removing
+                    const conn = pendingConnections.find((c) => c.roomId === roomId);
+                    removePendingConnection(roomId);
+                    // Re-initiate call/chat
+                    const initiateEvent = type === "chat" ? "chat:initiate" : "call:initiate";
+                    voiceSocket.emit(initiateEvent, {
+                      userId,
+                      astrologerId: conn?.astrologer?._id || astrologerId,
+                      type,
+                      fromLive: true,
+                    });
+                    // Add fresh pending entry
+                    addPendingConnection({
+                      id: `${conn?.astrologer?._id || astrologerId}-${type}-${Date.now()}`,
+                      astrologer: conn?.astrologer || { _id: astrologerId },
+                      type,
+                      roomId: null,
+                      waitingTime: type === "chat" ? 2 : 5,
+                      isEmergency: false,
+                      fromLive: true,
+                      liveChannelId: props.channel,
+                    });
+                  }}
+                  onCancel={(roomId, type) => {
+                    if (!roomId) return;
+                    const event = type === "chat" ? "chat:cancel" : "call:cancel";
+                    voiceSocket.emit(event, { roomId, canceledBy: "CUSTOMER" });
+                    removePendingConnection(roomId);
+                  }}
+                  onCancelAll={() => { resetCallState(); }}
+                  onScrollToAstrologer={(astrologerId) => {
+                    if (!liveListCtx) return;
+                    const live = liveListCtx.lives?.find((l) => l.astrologerId === astrologerId || l.hostId === astrologerId);
+                    if (live?.channel) liveListCtx.switchToChannel(live.channel);
+                  }}
                 />
               </div>
             )}

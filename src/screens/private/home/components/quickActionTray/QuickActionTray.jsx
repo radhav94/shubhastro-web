@@ -8,9 +8,10 @@ import {
   IoFlower,
 } from "react-icons/io5";
 import { PATH } from "../../../../../utils/routes/Paths";
+import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
 
 const QuickActionTray = () => {
-  const ACTIONS = [
+  const ALL_ACTIONS = [
     {
       id: "chat",
       label: "Chat with Astrologer",
@@ -31,6 +32,7 @@ const QuickActionTray = () => {
       icon: <IoCart />,
       path: PATH.privateRoutes.SHOP?.path,
       bg: "#5da9ff",
+      isMall: true,
     },
     {
       id: "pooja",
@@ -38,8 +40,14 @@ const QuickActionTray = () => {
       icon: <IoFlower />,
       path: "shop/vip-e-pooja",
       bg: "#ff9f6e",
+      isMall: true,
     },
   ];
+
+  const ACTIONS = ALL_ACTIONS.filter(
+    (item) => !item.isMall || isShubhMallEnabled()
+  );
+
   const navigate = useNavigate();
 
   return (

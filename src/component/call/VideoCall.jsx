@@ -37,6 +37,8 @@ import { capitalizeWords } from "../../utils/capitalize";
 import VideocamIcon from "../../assets/chat/Videocam.svg";
 import CallIcon from "../../assets/chat/Call.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
+import SwitchWaitingPopup from "../UI/switchWaiting/SwitchWaitingPopup";
+import { isShubhMallEnabled } from "../../utils/featureConfig";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
@@ -50,7 +52,12 @@ const VideoCalling = ({ callData }) => {
 
   if (!activeCall || activeCall.callType !== "video") return null;
 
-  const { roomId, agoraToken, isUserSide, callerName } = callData;
+  const { roomId, sessionRoomId, channelName, agoraToken, isUserSide, callerName } = callData;
+
+  // For Agora: use channelName if provided by server, otherwise roomId
+  const agoraChannelName = channelName || roomId;
+  // For socket events: use roomId
+  const socketRoomId = roomId;
 
   const clientRef = useRef(null);
   const micTrackRef = useRef(null);
@@ -90,6 +97,7 @@ const VideoCalling = ({ callData }) => {
   const [remoteVideoEnabled, setRemoteVideoEnabled] = useState(true);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
 
   // Auto-minimize when call originated from live and user is not on live page
   useEffect(() => {
@@ -97,7 +105,7 @@ const VideoCalling = ({ callData }) => {
       setIsMinimized(true);
     }
   }, [activeCall?.origin, isOnLivePage, isMinimized, setIsMinimized]);
-  const [suggestedRemedyData, setSuggestedRemedyData] = useState({ suggestedProducts: [], messages: [] });
+  const [suggestedRemedyData, setSuggestedRemedyData] = useState({ entries: [], suggestedProducts: [], messages: [] });
   const [hasNewRemedy, setHasNewRemedy] = useState(false);
   const [showEndCallConfirm, setShowEndCallConfirm] = useState(false);
 
@@ -131,6 +139,8 @@ const VideoCalling = ({ callData }) => {
 
   const showChatNotification = useCallback((data) => {
     if (data.sender === "user") return;
+    // Hide product notifications when mall is disabled
+    if (data.type === "products" && !isShubhMallEnabled()) return;
     
     const messageText = data.type === "gift" ? "🎁 Sent a gift" : data.type === "products" ? "💊 Suggested a remedy" : (data.message || data.response || "New message");
     const astroImage = lastRequestedAstro?.imageUrl || lastRequestedAstro?.aadharCardImgUrl || lastRequestedAstro?.panCardImgUrl || null;
@@ -156,8 +166,10 @@ const VideoCalling = ({ callData }) => {
     voiceSocket.on("message:recieved", showChatNotification);
 
     const handleProductMessage = (data) => {
+      if (!isShubhMallEnabled()) return;
       if (data?.type === "products" && data?.suggestedProducts?.length > 0) {
         setSuggestedRemedyData((prev) => ({
+          entries: [...prev.entries, { message: data.message || null, products: data.suggestedProducts }],
           suggestedProducts: [...prev.suggestedProducts, ...data.suggestedProducts],
           messages: data.message ? [...prev.messages, data.message] : prev.messages,
         }));
@@ -402,8 +414,33 @@ const VideoCalling = ({ callData }) => {
         micTrackRef.current = micTrack;
         camTrackRef.current = camTrack;
 
-        await client.join(APP_ID, roomId, agoraToken, null);
-        console.log("[VideoCall] ✅ Agora joined — channel:", roomId);
+        // Retry join with exponential backoff — Agora channel may not be ready immediately
+        // after two-way accept (server creates channel after both sides accept)
+        const MAX_JOIN_RETRIES = 3;
+        const RETRY_DELAY_BASE = 1500;
+
+        for (let attempt = 0; attempt < MAX_JOIN_RETRIES; attempt++) {
+          if (didCancelStart || cleanupRef.current || endCallRef.current) return;
+          try {
+            console.log("[VideoCall] 🔌 Agora join attempt", attempt + 1, "of", MAX_JOIN_RETRIES);
+            await client.join(APP_ID, agoraChannelName, agoraToken, null);
+            console.log("[VideoCall] ✅ Agora joined — channel:", agoraChannelName);
+            break;
+          } catch (joinErr) {
+            const isGatewayError = joinErr?.code === "CAN_NOT_GET_GATEWAY_SERVER" ||
+              joinErr?.message?.includes("CAN_NOT_GET_GATEWAY_SERVER") ||
+              joinErr?.message?.includes("no active status");
+
+            if (isGatewayError && attempt < MAX_JOIN_RETRIES - 1) {
+              const delay = RETRY_DELAY_BASE * Math.pow(2, attempt);
+              console.warn(`[VideoCall] ⚠️ Agora gateway not ready (attempt ${attempt + 1}), retrying in ${delay}ms...`);
+              await new Promise((r) => setTimeout(r, delay));
+              try { await client.leave(); } catch { /* ignore */ }
+            } else {
+              throw joinErr;
+            }
+          }
+        }
 
         if (didCancelStart || cleanupRef.current || endCallRef.current) {
           await client.leave();
@@ -622,14 +659,14 @@ const VideoCalling = ({ callData }) => {
       // and sent when reconnected, or we rely on server timeout
       if (voiceSocket.connected) {
         voiceSocket.emit("call:end", {
-          roomId,
+          roomId: socketRoomId,
           endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
         });
       } else {
         console.log("[VideoCall] ⚠️ Socket disconnected, attempting to send call:end anyway");
         // Emit anyway - socket.io will queue it if reconnection happens
         voiceSocket.emit("call:end", {
-          roomId,
+          roomId: socketRoomId,
           endedBy: isUserSide ? "CUSTOMER" : "ASTROLOGER",
         });
         
@@ -789,6 +826,7 @@ const VideoCalling = ({ callData }) => {
         
         // Reset the downgrade flag since we're staying in video mode
         isDowngradingToAudio.current = false;
+        setIsSwitching(false);
         setWaitingList(null);
         
         Toast.info(data?.message || "Audio call request rejected. Continuing with video call.");
@@ -797,6 +835,7 @@ const VideoCalling = ({ callData }) => {
       
       // Regular call rejection
       console.log("📞 Regular call rejection - ending call");
+      setIsSwitching(false);
       safeEndCall();
     };
 
@@ -845,6 +884,7 @@ const VideoCalling = ({ callData }) => {
     if (activeCall && activeCall.callType === "audio" && activeCall.roomId === roomId) {
       console.log("🔄 Detected activeCall changed to audio, setting downgrade flag...");
       isDowngradingToAudio.current = true;
+      setIsSwitching(false);
       setWaitingList(null);
     }
   }, [activeCall, roomId]);
@@ -852,7 +892,7 @@ const VideoCalling = ({ callData }) => {
   /* ================= SWITCH TO AUDIO ================= */
   const switchToAudio = () => {
     Toast.success("Switching to audio call...");
-    setWaitingList(5);
+    setIsSwitching(true);
 
     voiceSocket.emit("call:initiate", {
       userId: activeCall.userId,
@@ -1078,8 +1118,22 @@ const VideoCalling = ({ callData }) => {
   // Ref to store sendMessage function from VideoCallChat
   const sendChatMessageRef = useRef(null);
 
+  const handleCancelSwitch = () => {
+    setIsSwitching(false);
+    isDowngradingToAudio.current = false;
+    voiceSocket.emit("call:cancel", { roomId: roomId, canceledBy: "CUSTOMER", isSwitch: true });
+    setWaitingList(null);
+  };
+
   return (
     <>
+      {/* Switch Waiting Popup */}
+      <SwitchWaitingPopup
+        isVisible={isSwitching}
+        switchType="audio"
+        onCancel={handleCancelSwitch}
+      />
+
       {/* MINI VIEW */}
       <div
         className={styles.floatingMini}
@@ -1282,18 +1336,20 @@ const VideoCalling = ({ callData }) => {
                 {/* <IoAttach size={16} /> */}
                 <span>Virtual Assistant</span>
               </button>
-              <button
-                className={styles.actionBtn}
-                onClick={() => {
-                  setIsRemedyPanelOpen(true);
-                  setHasNewRemedy(false);
-                }}
-                style={{ position: 'relative' }}
-              >
-                {/* <IoSparkles size={16} /> */}
-                <span>Suggested Remedy</span>
-                {hasNewRemedy && <span className={styles.notificationDot} />}
-              </button>
+              {isShubhMallEnabled() && (
+                <button
+                  className={styles.actionBtn}
+                  onClick={() => {
+                    setIsRemedyPanelOpen(true);
+                    setHasNewRemedy(false);
+                  }}
+                  style={{ position: 'relative' }}
+                >
+                  {/* <IoSparkles size={16} /> */}
+                  <span>Suggested Remedy</span>
+                  {hasNewRemedy && <span className={styles.notificationDot} />}
+                </button>
+              )}
               <button
                 className={styles.actionBtn}
                 onClick={() => {

@@ -31,6 +31,7 @@ import { useWalletBalance } from "../../private/wallet/useWalletBalance";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { useChat } from "../../../context/ChatContext";
 import { useCall } from "../../../context/CallContext";
+import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
@@ -53,6 +54,7 @@ import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import { Toast } from "../../../component/index";
 import StickyReview from "../../private/home/components/call/StickyReview";
 import MallHistoryContent from "../../private/shubhAstroMallHistory/MallHistoryContent";
+import { isShubhMallEnabled } from "../../../utils/featureConfig";
 import {
   useCreateKundliMutation,
   useDeleteKundliMutation,
@@ -77,9 +79,14 @@ const Profile = () => {
   // Get isRegister from Redux auth state
   const isRegister = useSelector((state) => state.auth.isRegister);
 
-  const [activeTab, setActiveTab] = useState(
-    navigationState.activeTab || "Profile"
-  );
+  const [activeTab, setActiveTab] = useState(() => {
+    const navTab = navigationState.activeTab;
+    // If navigated to a mall tab but mall is disabled, fallback to Profile
+    if (navTab === "ShubhMall History" && !isShubhMallEnabled()) {
+      return "Profile";
+    }
+    return navTab || "Profile";
+  });
   const [orderHistoryTab, setOrderHistoryTab] = useState("call"); // Sub-tab for order history
 
   // Scroll to tabs section when navigated with activeTab state
@@ -148,6 +155,9 @@ const Profile = () => {
     setActiveChat,
     setChatSeconds,
   } = useChat();
+
+  const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, cancelAll, assignRoomId } = useWaitingQueue();
+
   const {
     waitingList: callWaitingList,
     setWaitingList: setCallWaitingList,
@@ -582,6 +592,7 @@ const Profile = () => {
       setActiveChatRoomId(data?.roomId);
       setWaitingList(data?.waitingTime || 2);
       setConnectionType("chat");
+      assignRoomId(data?.roomId, "chat", data?.waitingTime || 2);
 
       // Save to localStorage
       localStorage.setItem(
@@ -599,6 +610,7 @@ const Profile = () => {
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
       setConnectionType(data?.type || "audio");
+      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
 
       // Save to localStorage
       localStorage.setItem(
@@ -621,6 +633,7 @@ const Profile = () => {
 
       // Clear localStorage
       localStorage.removeItem("waitingState");
+      removePendingConnection(roomId);
 
       const astro = activeAstroRef.current;
       const kundliId = selectedProfile?._id;
@@ -665,6 +678,7 @@ const Profile = () => {
     const handleCallAccepted = async ({
       roomId,
       token,
+      channelName,
       type,
       remainingTime,
       isSwitch,
@@ -691,6 +705,7 @@ const Profile = () => {
 
       // Clear localStorage
       localStorage.removeItem("waitingState");
+      removePendingConnection(roomId);
 
       const astro = activeAstroRef.current;
       const kundliId = selectedProfile?._id;
@@ -712,6 +727,7 @@ const Profile = () => {
 
         setActiveCall({
           roomId,
+          channelName,
           chatRoomId,
           agoraToken: token,
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
@@ -734,11 +750,18 @@ const Profile = () => {
       // Check if this is a switch rejection during an active call
       if (data?.switchRejected && (data?.type === "audio" || data?.type === "video")) {
         console.log("🔄 Call switch rejected - current call continues");
-        // Don't reset anything - the current call should continue
         return;
       }
       
-      // Regular call rejection - end everything
+      // Extract roomId and astrologerId — can be at top level or inside sessionData
+      const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
+      const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
+      if (rejectedRoomId) {
+        removePendingConnection(rejectedRoomId);
+      } else if (rejectedAstrologerId) {
+        removePendingByAstrologer(rejectedAstrologerId);
+      }
+
       const errorMsg =
         data?.sessionData?.sessionEndReason === "rejected" &&
         data?.type === "chat"
@@ -762,6 +785,7 @@ const Profile = () => {
 
       resetChatFlow();
       resetCallFlow();
+      cancelAll();
       setConnectionType(null);
     };
 
@@ -1193,7 +1217,7 @@ const Profile = () => {
     }
   };
 
-  const tabs = ["Profile", "Order History", "ShubhMall History", "Transactions", "Support"];
+  const tabs = ["Profile", "Order History", ...(isShubhMallEnabled() ? ["ShubhMall History"] : []), "Transactions", "Support"];
 
   // Get initials for avatar
   const getInitials = (name) => {
@@ -1740,7 +1764,7 @@ const Profile = () => {
           </div>
         )}
 
-        {activeTab === "ShubhMall History" && <MallHistoryContent />}
+        {activeTab === "ShubhMall History" && isShubhMallEnabled() && <MallHistoryContent />}
 
         {activeTab === "Transactions" && (
           <div className={styles.transactionsContent}>

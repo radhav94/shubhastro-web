@@ -1,8 +1,9 @@
 import React, { useRef, useEffect } from "react";
 import styles from "./OrderTabs.module.scss";
+import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
 
 const OrderTabs = ({ activeTab, onTabChange }) => {
-  const tabs = ["Call", "Chat", "Video", "Remedies"];
+  const tabs = ["Call", "Chat", "Video", ...(isShubhMallEnabled() ? ["Remedies"] : [])];
   const tabsRef = useRef(null);
   const activeTabRef = useRef(null);
 

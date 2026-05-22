@@ -1,59 +1,81 @@
-import { useState, useEffect, useRef } from "react";
-import { voiceSocket } from "../../../../services/voiceSocketServices";
-import { getUserFromStorage } from "../../../../utils/authStorage";
+import { useEffect } from "react";
 import styles from "./WaitlistModal.module.scss";
 
-const WaitlistModal = ({ show, callRoomId, resetCallState, onClose, connectionType, waitTime, offlineUsers }) => {
-  const [elapsed, setElapsed] = useState(0);
-  const [showOffline, setShowOffline] = useState(false);
-  const startTimeRef = useRef(null);
-  const intervalRef = useRef(null);
-  const user = getUserFromStorage();
-  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "You";
-  const initials = fullName.split(" ").map(w => w.charAt(0).toUpperCase()).join("").slice(0, 2);
+/**
+ * Format dynamic wait time based on confidence level.
+ * - high: "~11 min"
+ * - medium: "~8-14 min"
+ * - low: "Estimated: 5-15 min"
+ */
+function formatWaitTime(data) {
+  if (!data || data.waitingTime === undefined) return null;
 
-  // Start timer once when callRoomId is set, never reset on show/hide
+  const { waitingTime, minWait, maxWait, confidence } = data;
+
+  const safeWait = Math.max(1, waitingTime);
+  const safeMin = Math.max(1, minWait || safeWait);
+  const safeMax = Math.max(safeMin, maxWait || safeWait);
+
+  if (confidence === "high") {
+    return `~${safeWait} min`;
+  } else {
+    return `~${safeMin}-${safeMax} min`;
+  }
+}
+
+/**
+ * Multi-request WaitlistModal with dynamic wait time estimation.
+ * Props:
+ *  - show: boolean
+ *  - pendingRequests: array of { roomId, astrologer, type, status, waitingTime, minWait, maxWait, confidence, position, timestamp }
+ *  - onClose: () => void
+ *  - onShow: () => void
+ *  - onAccept: (roomId, type) => void
+ *  - onReject: (roomId, type) => void
+ *  - onUnhold: (roomId, type) => void
+ *  - onCancel: (roomId, type) => void
+ *  - onCancelAll: () => void
+ *  - onScrollToAstrologer: (astrologerId) => void
+ */
+const WaitlistModal = ({
+  show,
+  pendingRequests = [],
+  onClose,
+  onShow,
+  onAccept,
+  onReject,
+  onUnhold,
+  onCancel,
+  onCancelAll,
+  onScrollToAstrologer,
+}) => {
+  // Auto-show when any request gets accepted
   useEffect(() => {
-    if (callRoomId && !startTimeRef.current) {
-      startTimeRef.current = Date.now();
-      intervalRef.current = setInterval(() => {
-        setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
-      }, 1000);
-    }
-    if (!callRoomId) {
-      startTimeRef.current = null;
-      setElapsed(0);
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    }
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [callRoomId]);
+    const hasAccepted = pendingRequests.some(
+      (r) => r.status === "astrologer_accepted"
+    );
+    if (hasAccepted && onShow) onShow();
+  }, [pendingRequests, onShow]);
 
-  if (!show) return null;
+  if (!show || pendingRequests.length === 0) return null;
 
-  const mins = String(Math.floor(elapsed / 60)).padStart(2, "0");
-  const secs = String(elapsed % 60).padStart(2, "0");
-
-  const handleCancel = () => {
-    if (callRoomId) {
-      if (connectionType === "chat") {
-        voiceSocket.emit("chat:cancel", { roomId: callRoomId, canceledBy: "CUSTOMER" });
-      } else {
-        voiceSocket.emit("call:cancel", { roomId: callRoomId, canceledBy: "CUSTOMER" });
-      }
-    }
-    resetCallState();
+  const handleAccept = (req) => {
+    if (onScrollToAstrologer) onScrollToAstrologer(req.astrologer?._id || req.astrologer?.astrologerId);
+    if (onAccept) onAccept(req.roomId, req.type);
   };
 
-  const estimatedWait = waitTime || (connectionType === "chat" ? 2 : 5);
-  const offlineCount = offlineUsers || 0;
+  const count = pendingRequests.length;
+  const acceptedCount = pendingRequests.filter((r) => r.status === "astrologer_accepted").length;
+  const ringingCount = pendingRequests.filter((r) => r.status === "ringing").length;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
         <div className={styles.header}>
-          <h2 className={styles.title}>Waitlist</h2>
+          <h2 className={styles.title}>
+            Waitlist
+          </h2>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
@@ -63,43 +85,70 @@ const WaitlistModal = ({ show, callRoomId, resetCallState, onClose, connectionTy
           </button>
         </div>
 
-        <p className={styles.description}>
-          You are in the waitlist. Please wait while the astrologer connects with you.
-        </p>
+        {/* Request list */}
+        <div className={styles.list}>
+          {pendingRequests.map((req) => {
+            const name = req.astrologer?.firstName || req.astrologer?.astrologerName || req.astrologer?.hostName || "Astrologer";
+            const initial = name.charAt(0).toUpperCase();
+            const isAccepted = req.status === "astrologer_accepted";
+            const isOnHold = req.status === "on_hold";
+            const isRinging = req.status === "ringing";
+            const isWaiting = !isAccepted && !isOnHold && !isRinging;
+            const waitData = req.waitingTime !== undefined ? req : null;
 
-        <div className={styles.userRow}>
-          <div className={styles.userInfo}>
-            <div className={styles.userAvatar}>{initials}</div>
-            <span className={styles.userName}>{fullName}</span>
-          </div>
-          <div className={styles.timer}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-            </svg>
-            <span>{mins}m {secs}s</span>
-          </div>
+            return (
+              <div
+                key={req.roomId || req.astrologer?._id || req.id}
+                className={`${styles.listItem} ${isAccepted ? styles.listItemAccepted : ""} ${isOnHold ? styles.listItemHold : ""} ${isRinging ? styles.listItemRinging : ""}`}
+              >
+                <div className={styles.listItemLeft}>
+                  <div className={`${styles.listAvatar} ${isRinging ? styles.listAvatarRinging : ""}`}>
+                    {initial}
+                  </div>
+                  <div className={styles.listMeta}>
+                    <span className={styles.listName}>{name}</span>
+                    <span className={styles.listType}>
+                      {isAccepted && <span className={styles.acceptedTag}>Accepted</span>}
+                      {isOnHold && <span className={styles.holdTag}>Missed Call</span>}
+                      {isRinging && <span className={styles.ringingTag}>Ringing...</span>}
+                      {isWaiting && waitData && waitData.position && (
+                        <span>{`#${waitData.position} in queue${waitData.confidence ? ` • ${formatWaitTime(waitData)}` : ""}`}</span>
+                      )}
+                      {isWaiting && (!waitData || !waitData.position) && <span className={styles.ringingTag}>Ringing...</span>}
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles.listItemRight}>
+                  {/* Ringing / Waiting state — Cancel button */}
+                  {(isRinging || isWaiting) && (
+                    <button className={styles.cancelBtn} onClick={() => onCancel && onCancel(req.roomId, req.type)}>
+                      Cancel
+                    </button>
+                  )}
+
+                  {/* Accepted — Accept + Cancel */}
+                  {isAccepted && (
+                    <div className={styles.actionBtns}>
+                      <button className={styles.acceptBtn} onClick={() => handleAccept(req)}>Accept</button>
+                      <button className={styles.cancelBtn} onClick={() => onCancel && onCancel(req.roomId, req.type)}>Cancel</button>
+                    </div>
+                  )}
+
+                  {/* On hold / Missed — Rejoin + Cancel */}
+                  {isOnHold && (
+                    <div className={styles.actionBtns}>
+                      <button className={styles.rejoinBtn} onClick={() => onUnhold && onUnhold(req.roomId, req.type)}>Rejoin</button>
+                      <button className={styles.cancelBtn} onClick={() => onCancel && onCancel(req.roomId, req.type)}>Cancel</button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        {offlineCount > 0 && (
-          <button className={styles.offlineToggle} onClick={() => setShowOffline(!showOffline)}>
-            +{offlineCount} Offline users
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showOffline ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-        )}
-
-        <div className={styles.divider} />
-
-        <div className={styles.waitTimeRow}>
-          <span className={styles.waitLabel}>Wait Time :</span>
-          <span className={styles.waitValue}>~{estimatedWait} min</span>
-        </div>
-
-        <button className={styles.joinBtn} onClick={handleCancel}>
-          Cancel Waitlist
-        </button>
+        {/* Footer removed — individual cancel buttons handle each item */}
       </div>
     </div>
   );

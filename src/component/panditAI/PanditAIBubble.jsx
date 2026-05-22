@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, memo } from "react";
+import { useState, useCallback, useEffect, useRef, memo, useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
   IoClose,
@@ -9,6 +9,7 @@ import {
   IoWallet,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 import styles from "./PanditAIBubble.module.scss";
 import usePanditAI from "./usePanditAI";
 import useAIFreeMinutes from "./useAIFreeMinutes";
@@ -36,11 +37,16 @@ MessageBubble.displayName = "MessageBubble";
 
 const PanditAIBubble = () => {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(() => sessionStorage.getItem("panditai_open") === "true");
   const [text, setText] = useState("");
   const [interimText, setInterimText] = useState("");
   const inputRef = useRef(null);
   const lang = "en-IN";
+
+  // Persist open state for reconnect on refresh
+  useEffect(() => {
+    sessionStorage.setItem("panditai_open", isOpen ? "true" : "false");
+  }, [isOpen]);
 
   const {
     messages,
@@ -68,6 +74,29 @@ const PanditAIBubble = () => {
     resetFreeMinutesState,
   } = useAIFreeMinutes({ isOpen, roomId });
 
+  // Group messages by date for date separators
+  const messageGroups = useMemo(() => {
+    const groups = {};
+    messages.forEach((msg) => {
+      const dateKey = msg.createdAt
+        ? dayjs(msg.createdAt).format("MMM DD, YYYY")
+        : dayjs().format("MMM DD, YYYY");
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(msg);
+    });
+    return groups;
+  }, [messages]);
+
+  const getDateLabel = (dateStr) => {
+    const today = dayjs().format("MMM DD, YYYY");
+    const yesterday = dayjs().subtract(1, "day").format("MMM DD, YYYY");
+    if (dateStr === today) return "Today";
+    if (dateStr === yesterday) return "Yesterday";
+    return dateStr;
+  };
+
   // Listen for external "open and send" events from PanditAISection card
   useEffect(() => {
     const handleOpenAndSend = (e) => {
@@ -80,6 +109,15 @@ const PanditAIBubble = () => {
     window.addEventListener("panditai:ask", handleOpenAndSend);
     return () => window.removeEventListener("panditai:ask", handleOpenAndSend);
   }, [sendText]);
+
+  // Close chat popup when voice popup opens (mutual exclusion)
+  useEffect(() => {
+    const handleVoiceOpen = () => {
+      setIsOpen(false);
+    };
+    window.addEventListener("panditai-voice:open", handleVoiceOpen);
+    return () => window.removeEventListener("panditai-voice:open", handleVoiceOpen);
+  }, []);
 
   // Auto-focus input when chat opens
   useEffect(() => {
@@ -192,7 +230,7 @@ const PanditAIBubble = () => {
       {isOpen && (
         <>
           <div className={styles.overlay} />
-          <div className={styles.chatWindow} role="dialog" aria-label="Pandit AI Chat">
+          <div className={`${styles.chatWindow} notranslate`} role="dialog" aria-label="Pandit AI Chat" translate="no">
           <div className={styles.header}>
             <div className={styles.headerInfo}>
               <div className={styles.headerAvatar}>
@@ -207,7 +245,7 @@ const PanditAIBubble = () => {
               </div>
             </div>
             <div className={styles.headerActions}>
-              {isFreePeriod && freeMinutesRemaining != null && (
+              {isFreePeriod && freeMinutesRemaining != null && remainingPaidTime == null && (
                 <div className={styles.freeMinBadge}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10"/>
@@ -216,14 +254,14 @@ const PanditAIBubble = () => {
                   <span>{freeMinutesRemaining} min free</span>
                 </div>
               )}
-              {!isFreePeriod && remainingPaidTime != null && !sessionEndedLowBalance && (
+              {remainingPaidTime != null && !sessionEndedLowBalance && (
                 <div className={styles.countdownBadge}>
                   <div className={styles.countdownTime}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10"/>
                       <polyline points="12 6 12 12 16 14"/>
                     </svg>
-                    <span>{Math.floor(remainingPaidTime / 60)}:{String(remainingPaidTime % 60).padStart(2, "0")}</span>
+                    <span>{Math.floor(remainingPaidTime / 3600) > 0 ? `${String(Math.floor(remainingPaidTime / 3600)).padStart(2, "0")}:` : ""}{String(Math.floor((remainingPaidTime % 3600) / 60)).padStart(2, "0")}:{String(remainingPaidTime % 60).padStart(2, "0")}</span>
                   </div>
                   {ratePerMinute && (
                     <>
@@ -261,7 +299,16 @@ const PanditAIBubble = () => {
                 <p>Ask Pandit AI anything about your life</p>
               </div>
             ) : (
-              messages.map((msg) => <MessageBubble key={msg._id} msg={msg} />)
+              Object.entries(messageGroups).map(([date, msgs], groupIndex) => (
+                <div key={`${date}-${groupIndex}`} className={styles.messageGroup}>
+                  <div className={styles.dateHeader}>
+                    <span className={styles.dateText}>{getDateLabel(date)}</span>
+                  </div>
+                  {msgs.map((msg) => (
+                    <MessageBubble key={msg._id} msg={msg} />
+                  ))}
+                </div>
+              ))
             )}
             <div ref={messagesEndRef} />
           </div>
