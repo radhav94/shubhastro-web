@@ -1,0 +1,1353 @@
+// ─── Variables ────────────────────────────────────────────────────────────────
+$primary: #e65100;
+$primary-light: #fff8f3;
+$text-dark: #1a1a1a;
+$text-secondary: #333;
+$text-muted: #666;
+$text-light: #999;
+$border-color: #eee;
+$card-bg: #FFFFFF66;
+$radius: 12px;
+$radius-sm: 8px;
+
+// ─── Page Container ───────────────────────────────────────────────────────────
+.communityPage {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0px 20px 60px;
+  min-height: 70vh;
+  background: transparent;
+
+  @media (max-width: 1180px) {
+    padding: 12px 16px 40px;
+  }
+}
+
+.pageHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -5px -20px 12px;
+  padding: 10px 20px;
+  background: linear-gradient(90deg, rgba(254, 254, 254, 0.97) 0%, rgba(255, 248, 236, 0.97) 100%);
+  border-bottom: 1px solid $border-color;
+
+  @media (max-width: 1180px) {
+    margin: 0 -16px 12px;
+    padding: 10px 16px;
+  }
+}
+
+.backBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: $text-dark;
+
+  &:hover {
+    background: $primary-light;
+    color: $primary;
+  }
+}
+
+.pageTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: $text-dark;
+}
+
+// ─── Page Body ────────────────────────────────────────────────────────────────
+.pageBody {
+  display: grid;
+  grid-template-columns: 2fr 7fr 3fr;
+  gap: 20px;
+  align-items: flex-start;
+
+  @media (max-width: 900px) {
+    display: block;
+  }
+}
+
+// ─── Left Sidebar ─────────────────────────────────────────────────────────────
+.sidebar {
+  width: 236px;
+  position: sticky;
+  top: 90px;
+  padding: 20px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #FFFFFF66;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  @media (max-width: 900px) {
+    display: none;
+  }
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  color: $text-muted;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 8px;
+  font-weight: 400;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    color: $primary;
+  }
+
+  &.active {
+    color: $primary;
+    font-weight: 600;
+    background: linear-gradient(0deg, rgba(229, 99, 41, 0.05), rgba(229, 99, 41, 0.05)), #FFFFFF;
+
+    &::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, #F75801, #D43400);
+      border-radius: 0 8px 8px 0;
+    }
+  }
+}
+
+// Other Communities
+.otherCommunities {
+  padding-top: 0;
+  border-top: 1px solid #e0e0e0;
+}
+
+.sidebarSectionTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: $text-dark;
+  margin-bottom: 16px;
+}
+
+.communityList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.communityListItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+
+  &:hover .communityName {
+    color: $primary;
+  }
+}
+
+.communityAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  flex-shrink: 0;
+}
+
+.communityInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.communityName {
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-dark;
+}
+
+.communityMembers {
+  font-size: 11px;
+  color: $text-light;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.joinBtnSmall {
+  margin-left: auto;
+  font-size: 12px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1.5px solid $primary;
+  background: transparent;
+  color: $primary;
+  cursor: pointer;
+  font-weight: 500;
+
+  &:hover {
+    background: $primary;
+    color: #fff;
+  }
+}
+
+.viewAllBtn {
+  border: none;
+  background: none;
+  color: $primary;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 14px;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ─── Main Content ─────────────────────────────────────────────────────────────
+.mainContent {
+  min-width: 0;
+  grid-column: 2 / 4;
+}
+
+// ─── Feed Layout ──────────────────────────────────────────────────────────────
+.feedLayout {
+  display: grid;
+  grid-template-columns: 7fr 3fr;
+  gap: 20px;
+
+  @media (max-width: 900px) {
+    display: block;
+  }
+}
+
+.feedMain {
+  min-width: 0;
+}
+
+// ─── Breadcrumb ───────────────────────────────────────────────────────────────
+.breadcrumb {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 12px;
+
+  span:last-child {
+    color: $text-dark;
+    font-weight: 600;
+  }
+}
+
+
+// ─── Section Heading ──────────────────────────────────────────────────────────
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: $text-dark;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.headingBar {
+  width: 4px;
+  height: 20px;
+  background: $primary;
+  border-radius: 2px;
+}
+
+// ─── Filter Tabs ──────────────────────────────────────────────────────────────
+.filterTabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.filterTab {
+  padding: 6px 16px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  color: $text-dark;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $primary;
+    color: $primary;
+  }
+
+  &.activeFilter {
+    background: $primary;
+    color: #fff;
+    border-color: $primary;
+  }
+}
+
+// ─── Post Input ───────────────────────────────────────────────────────────────
+.postInputCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: $card-bg;
+  border: 1px solid $border-color;
+  border-radius: 16px;
+  margin-bottom: 20px;
+}
+
+.postInputAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.postInput {
+  flex: 1;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: $text-dark;
+  outline: none;
+  background: #f5f5f5;
+
+  &::placeholder {
+    color: #999;
+  }
+
+  &:focus {
+    background: #f0f0f0;
+  }
+}
+
+.postBtn {
+  padding: 10px 24px;
+  background: $primary;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: darken($primary, 8%);
+  }
+}
+
+// ─── Post Cards ───────────────────────────────────────────────────────────────
+.postsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.postCard {
+  background: #FFFFFF66;
+  border: 1px solid #FFFFFF;
+  border-radius: 16px;
+  padding: 20px 24px;
+}
+
+.postHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.postAuthorAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.postAuthorInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.postAuthorName {
+  font-size: 14px;
+  font-weight: 600;
+  color: $text-dark;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.verifiedBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #fff;
+  font-size: 9px;
+}
+
+.postSubtitle {
+  font-size: 12px;
+  color: $text-light;
+  margin-top: 1px;
+}
+
+.bookSessionBtn {
+  padding: 6px 16px;
+  background: $primary;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover {
+    background: darken($primary, 8%);
+  }
+}
+
+.postContent {
+  font-size: 14px;
+  line-height: 1.6;
+  color: $text-secondary;
+  margin-bottom: 12px;
+}
+
+.postImageWrapper {
+  border-radius: $radius-sm;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.postImage {
+  width: 100%;
+  height: auto;
+  max-height: 340px;
+  object-fit: cover;
+  display: block;
+}
+
+.postActions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-top: 8px;
+}
+
+.actionItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  color: #444;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+
+  svg {
+    color: $primary;
+  }
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+
+// ─── Trending Astrologers (Right Sidebar) ─────────────────────────────────────
+.trendingSidebar {
+  background: $card-bg;
+  border: 1px solid #FFFFFF;
+  border-radius: 16px;
+  padding: 16px;
+  position: sticky;
+  top: 90px;
+  height: fit-content;
+
+  @media (max-width: 1024px) {
+    position: static;
+  }
+}
+
+.detailSidebarWrapper {
+  padding-top: 28px;
+
+  @media (max-width: 1024px) {
+    padding-top: 0;
+  }
+}
+
+.trendingTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: $text-dark;
+  margin-bottom: 16px;
+}
+
+.trendingList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.trendingItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trendingAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.trendingInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.trendingName {
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-dark;
+}
+
+.trendingExp {
+  font-size: 11px;
+  color: $text-light;
+}
+
+.connectBtn {
+  padding: 5px 14px;
+  background: $primary;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover {
+    background: darken($primary, 8%);
+  }
+}
+
+// ─── Communities Page ─────────────────────────────────────────────────────────
+.communitiesPage {
+  width: 100%;
+}
+
+.communitiesGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  margin-bottom: 36px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+.communityCard {
+  background: #FFFFFF66;
+  border: 1px solid #FFFFFF;
+  border-radius: 16px;
+  padding: 20px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.communityCardAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  margin-bottom: 10px;
+}
+
+.communityCardName {
+  font-size: 14px;
+  font-weight: 600;
+  color: $text-dark;
+  margin-bottom: 4px;
+}
+
+.communityCardMembers {
+  font-size: 12px;
+  color: $text-light;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.joinBtn {
+  padding: 6px 20px;
+  background: $primary;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  &:hover {
+    background: darken($primary, 8%);
+  }
+
+  &.joined {
+    background: #fff;
+    color: #16a34a;
+    border: 1.5px solid #16a34a;
+  }
+}
+
+// ─── Top Rated Astrologers ────────────────────────────────────────────────────
+.topAstrologersSection {
+  margin-top: 20px;
+  background: #FFFFFF4D;
+  border: 1px solid #FFFFFF;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.topAstrologersHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+
+  .sectionHeading {
+    margin-bottom: 0;
+  }
+}
+
+.astrologerSlider {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  // Show 4 full + 1 half card
+  > * {
+    min-width: calc((100% - 48px) / 4.5);
+    max-width: calc((100% - 48px) / 4.5);
+    flex-shrink: 0;
+
+    @media (max-width: 1024px) {
+      min-width: 180px;
+      max-width: 180px;
+    }
+  }
+}
+
+// ─── Community Detail ─────────────────────────────────────────────────────────
+.communityDetailHeader {
+  display: flex;
+  gap: 20px;
+  background: #FFFFFF66;
+  border: 1px solid #FFFFFF;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.communityDetailAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  flex-shrink: 0;
+}
+
+.communityDetailInfo {
+  flex: 1;
+}
+
+.communityDetailName {
+  font-size: 20px;
+  font-weight: 700;
+  color: $text-dark;
+  margin-bottom: 6px;
+}
+
+.communityDetailMembers {
+  font-size: 13px;
+  color: $text-muted;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  background: linear-gradient(114.19deg, #FFFFFF 0%, #FFF4E3 100%);
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  margin-bottom: 14px;
+}
+
+.communityDetailAbout {
+  h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: $text-dark;
+  }
+  p {
+    font-size: 13px;
+    color: $text-muted;
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
+.createdBy {
+  margin-top: 10px !important;
+  font-weight: 400 !important;
+  color: $text-dark !important;
+}
+
+.recentPostsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+
+  .sectionHeading {
+    margin-bottom: 0;
+  }
+}
+
+.filterBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: 1px solid $primary;
+  background: #fff;
+  color: $primary;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    background: $primary-light;
+  }
+}
+
+// ─── Create Post ──────────────────────────────────────────────────────────────
+.createPostLayout {
+  display: flex;
+  gap: 24px;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+  }
+}
+
+.createPostMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.createPostForm {
+  background: #FFFFFF66;
+  border: 1px solid #FFFFFF;
+  border-radius: 16px;
+  padding: 24px;
+
+  @media (max-width: 600px) {
+    padding: 16px;
+  }
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: $text-dark;
+  margin-bottom: 8px;
+}
+
+.required {
+  color: #dc2626;
+}
+
+.formInput {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #f0e6dc;
+  border-radius: 8px;
+  font-size: 14px;
+  color: $text-dark;
+  outline: none;
+  background: #fff;
+
+  &:focus {
+    border-color: $primary;
+  }
+
+  &::placeholder {
+    color: #bbb;
+  }
+}
+
+.formTextarea {
+  width: 100%;
+  padding: 14px 16px;
+  padding-bottom: 40px;
+  border: 1px solid #f0e6dc;
+  border-radius: 8px;
+  font-size: 14px;
+  color: $text-dark;
+  outline: none;
+  resize: vertical;
+  min-height: 160px;
+  background: #fff;
+  font-family: inherit;
+  position: relative;
+
+  &:focus {
+    border-color: $primary;
+  }
+
+  &::placeholder {
+    color: #bbb;
+  }
+}
+
+.textareaFooter {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-top: -32px;
+  margin-left: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.imageUploadBtn {
+  border: none;
+  background: none;
+  color: $primary;
+  cursor: pointer;
+  padding: 4px;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.imagePreview {
+  position: relative;
+  margin-top: 10px;
+  display: inline-block;
+
+  img {
+    max-width: 180px;
+    max-height: 130px;
+    border-radius: 6px;
+    object-fit: cover;
+  }
+}
+
+.removeImage {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.moderationNotice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, rgba(246, 205, 67, 0.15) 0%, rgba(203, 167, 47, 0.1) 100%);
+  border: 1px solid rgba(246, 205, 67, 0.3);
+  border-radius: 20px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: $text-dark;
+}
+
+.infoIcon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.formActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.cancelBtn {
+  padding: 10px 32px;
+  border: 1px solid $primary;
+  background: #fff;
+  color: $primary;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    background: $primary-light;
+  }
+}
+
+.submitBtn {
+  padding: 10px 32px;
+  background: linear-gradient(135deg, #F75801, #D43400);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+// ─── Guidelines Sidebar ───────────────────────────────────────────────────────
+.guidelinesSidebar {
+  width: 260px;
+  flex-shrink: 0;
+  margin-top: 40px;
+  position: sticky;
+  top: 90px;
+  align-self: flex-start;
+
+  @media (max-width: 1024px) {
+    width: 100%;
+    margin-top: 0;
+    position: static;
+  }
+}
+
+.guidelinesCard {
+  background: linear-gradient(180deg, rgba(246, 205, 67, 0.2) 0%, rgba(203, 167, 47, 0.2) 100%);
+  border: 1px solid #FFFFFF;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.guidelinesIcon {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.guidelinesTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: $text-dark;
+  margin-bottom: 14px;
+}
+
+.guidelinesList {
+  list-style: disc;
+  padding-left: 16px;
+  margin: 0;
+
+  li {
+    font-size: 13px;
+    color: $text-muted;
+    line-height: 1.5;
+    margin-bottom: 10px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// ─── Success Modal ────────────────────────────────────────────────────────────
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modalContent {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 36px 32px;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.successIcon {
+  margin-bottom: 20px;
+  position: relative;
+  display: inline-block;
+}
+
+.confetti {
+  position: absolute;
+  inset: -14px;
+  background: radial-gradient(circle, #fbbf24 2px, transparent 2px),
+    radial-gradient(circle, #22c55e 2px, transparent 2px),
+    radial-gradient(circle, #ef4444 2px, transparent 2px),
+    radial-gradient(circle, #3b82f6 2px, transparent 2px);
+  background-size: 20px 20px, 16px 16px, 18px 18px, 14px 14px;
+  background-position: 0 0, 10px 10px, 5px 15px, 15px 5px;
+  opacity: 0.6;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.successTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: $text-dark;
+  margin-bottom: 8px;
+}
+
+.successDesc {
+  font-size: 14px;
+  color: $text-muted;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.ctaBtn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, $primary, #ff7043);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+// ─── Empty State ──────────────────────────────────────────────────────────────
+.emptyState {
+  text-align: center;
+  padding: 48px 20px;
+  color: $text-muted;
+  font-size: 14px;
+
+  p {
+    margin: 4px 0;
+  }
+}
+
+// ─── Your Community Section (Mobile) ──────────────────────────────────────────
+.yourCommunitySection {
+  display: none;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+
+  @media (max-width: 900px) {
+    display: block;
+  }
+}
+
+.yourCommunityDesc {
+  font-size: 13px;
+  color: $text-muted;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.yourCommunityScroller {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 4px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.yourCommunityCard {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 12px 16px;
+  min-width: 160px;
+}
+
+.yourCommunityAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  flex-shrink: 0;
+}
+
+.yourCommunityInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.yourCommunityName {
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-dark;
+  white-space: nowrap;
+}
+
+.yourCommunityMembers {
+  font-size: 11px;
+  color: $text-light;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+// ─── Mobile Tab Bar ───────────────────────────────────────────────────────────
+.mobileTabBar {
+  display: none;
+  background: transparent;
+  padding: 12px 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 14px;
+  gap: 10px;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    display: flex;
+  }
+}
+
+.mobileTab {
+  flex-shrink: 0;
+  padding: 10px 20px;
+  border: none;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  color: $text-dark;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 24px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  touch-action: pan-x;
+
+  &.active {
+    background: linear-gradient(135deg, #F75801, #D43400);
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 900px) {
+  .pageBody {
+    display: block;
+  }
+
+  .mainContent {
+    grid-column: unset;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .feedLayout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .trendingSidebar {
+    margin-top: 20px;
+    position: static;
+    width: 100%;
+  }
+
+  .detailSidebarWrapper {
+    padding-top: 0;
+    margin-top: 20px;
+  }
+
+  .communityDetailHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .communityPage {
+    padding: 0 12px 40px;
+    overflow-x: hidden;
+  }
+
+  .pageHeader {
+    margin: 0 -12px 12px;
+    padding: 8px 12px;
+  }
+
+  .communitiesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .createPostLayout {
+    flex-direction: column;
+  }
+
+  .guidelinesSidebar {
+    width: 100%;
+    margin-top: 16px;
+  }
+
+  .postCard {
+    padding: 16px;
+  }
+
+  .postInputCard {
+    padding: 12px;
+  }
+
+  .createPostForm {
+    padding: 16px;
+  }
+
+  .astrologerSlider > * {
+    min-width: 160px;
+    max-width: 160px;
+  }
+}

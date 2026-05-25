@@ -80,7 +80,7 @@ const AiServicesSection = memo(({ sectionData, styles, onlineCount }) => {
         )}
 
         {liveCommunity && (
-          <div className={styles.mobileAiCard} onClick={() => navigate("/live")}>
+          <div className={styles.mobileAiCard} onClick={() => navigate("/community")}>
             <span className={styles.featureTag}>New</span>
             <h3>{liveCommunity.display_title || liveCommunity.title || "ShubhAstro Live Community"}</h3>
             <button className={styles.liveCommunityBtn}>{liveCommunity.action_btn || "Join Live Now ›"}</button>
