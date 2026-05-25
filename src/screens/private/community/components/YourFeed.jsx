@@ -1,10 +1,18 @@
 import { useState } from "react";
-import { FiHeart, FiMessageCircle } from "react-icons/fi";
+import { FiHeart, FiMessageCircle, FiUsers } from "react-icons/fi";
 import { LuShare2 } from "react-icons/lu";
 import { PiShareNetwork } from "react-icons/pi";
 import styles from "../Community.module.scss";
 import TrendingAstrologers from "./TrendingAstrologers";
 import astrologerImg from "../../../../assets/default-img/astrologer male_v.1.png";
+
+const YOUR_COMMUNITIES = [
+  { id: 1, name: "Leo Tribe", members: "45.2k", avatar: null },
+  { id: 2, name: "Star Tribe", members: "45.2k", avatar: null },
+  { id: 3, name: "Gemini Tribe", members: "45.2k", avatar: null },
+  { id: 4, name: "Aries Tribe", members: "32.1k", avatar: null },
+  { id: 5, name: "Tarot Circle", members: "28.5k", avatar: null },
+];
 
 const MOCK_POSTS = [
   {
@@ -72,6 +80,31 @@ const YourFeed = () => {
             className={styles.postInput}
           />
           <button className={styles.postBtn}>Post</button>
+        </div>
+
+        {/* Your Community - Mobile Only */}
+        <div className={styles.yourCommunitySection}>
+          <h2 className={styles.sectionHeading}>
+            <span className={styles.headingBar} />
+            YOUR COMMUNITY
+          </h2>
+          <p className={styles.yourCommunityDesc}>
+            Communities are created Lorem Ipsum is simply dummy text for the printing industry
+          </p>
+          <div className={styles.yourCommunityScroller}>
+            {YOUR_COMMUNITIES.map((community) => (
+              <div key={community.id} className={styles.yourCommunityCard}>
+                <div className={styles.yourCommunityAvatar} />
+                <div className={styles.yourCommunityInfo}>
+                  <span className={styles.yourCommunityName}>{community.name}</span>
+                  <span className={styles.yourCommunityMembers}>
+                    <FiUsers size={12} /> {community.members}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <button className={styles.viewAllBtn}>View all &gt;</button>
         </div>
 
         {/* Trending Posts */}

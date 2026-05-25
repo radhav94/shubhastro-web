@@ -1152,6 +1152,81 @@ $radius-sm: 8px;
   }
 }
 
+// ─── Your Community Section (Mobile) ──────────────────────────────────────────
+.yourCommunitySection {
+  display: none;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+
+  @media (max-width: 900px) {
+    display: block;
+  }
+}
+
+.yourCommunityDesc {
+  font-size: 13px;
+  color: $text-muted;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.yourCommunityScroller {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 4px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.yourCommunityCard {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 12px 16px;
+  min-width: 160px;
+}
+
+.yourCommunityAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  flex-shrink: 0;
+}
+
+.yourCommunityInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.yourCommunityName {
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-dark;
+  white-space: nowrap;
+}
+
+.yourCommunityMembers {
+  font-size: 11px;
+  color: $text-light;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
 // ─── Mobile Tab Bar ───────────────────────────────────────────────────────────
 .mobileTabBar {
   display: none;
