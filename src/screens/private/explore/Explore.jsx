@@ -78,8 +78,13 @@ const Explore = () => {
   // Get profiles from API
   const profiles = data?.data || [];
   
-  // Get explore page sections
-  const exploreSections = exploreData?.data?.list || [];
+  // Get explore page sections sorted by list_order
+  const exploreSections = [...(exploreData?.data?.list || [])].sort(
+    (a, b) => (a.list_order || 0) - (b.list_order || 0)
+  );
+
+  // Debug: log section order (remove after testing)
+  console.log("Explore sections order:", exploreSections.map(s => ({ title: s.display_title, list_order: s.list_order })));
 
   // Auto-select first profile on load
   useEffect(() => {
@@ -126,7 +131,9 @@ const Explore = () => {
 
   // Render section based on display_type and slug
   const renderSection = (section, index) => {
-    const sectionContent = Array.isArray(section.content) ? section.content : [];
+    const sectionContent = Array.isArray(section.content) 
+      ? [...section.content].sort((a, b) => (a.list_order || 0) - (b.list_order || 0)) 
+      : [];
     const displayType = section.display_type;
     const slug = section.slug;
 
@@ -144,7 +151,7 @@ const Explore = () => {
             {section.description || "An ever growing library on the story of you"}
           </p>
 
-          <h1 className={styles.titleSub}>Quick Access</h1>
+          <h1 className={styles.titleSub}>{section?.display_title}</h1>
 
           <div className={`${styles.topCardsGrid} ${sectionContent.length > 3 ? styles.scrollable : ''}`}>
             {sectionContent.map((card, idx) => (
@@ -167,7 +174,7 @@ const Explore = () => {
     }
 
     // Discover More - Grid layout (for Kundli section)
-    if (displayType === "discover-more" && slug === "discover-your-kundli") {
+    if (displayType === "discover-more-explore") {
       return (
         <section key={index} className={styles.section}>
           {/* <h1 className={styles.titleSub}>Discover Your Kundli</h1> */}
