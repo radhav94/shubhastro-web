@@ -597,6 +597,13 @@ const LiveView = (props) => {
       userId: userIdLocal,
       astrologerId,
       type: "audio",
+      isLive: true,
+      liveRoomDetails: {
+        roomId: props.channel,
+        hostId: astrologerId,
+        hostName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "",
+        channel: props.channel,
+      },
     });
 
     // Add to waiting queue
@@ -664,6 +671,13 @@ const LiveView = (props) => {
       userId: userIdLocal,
       astrologerId,
       type, // "audio" | "video"
+      isLive: true,
+      liveRoomDetails: {
+        roomId: props.channel,
+        hostId: astrologerId,
+        hostName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "",
+        channel: props.channel,
+      },
     });
 
     // Add to waiting queue
@@ -1555,7 +1569,13 @@ const LiveView = (props) => {
                       userId,
                       astrologerId: conn?.astrologer?._id || astrologerId,
                       type,
-                      fromLive: true,
+                      isLive: true,
+                      liveRoomDetails: {
+                        roomId: props.channel,
+                        hostId: conn?.astrologer?._id || astrologerId,
+                        hostName: conn?.astrologer?.firstName || conn?.astrologer?.astrologerName || "",
+                        channel: props.channel,
+                      },
                     });
                     // Add fresh pending entry
                     addPendingConnection({

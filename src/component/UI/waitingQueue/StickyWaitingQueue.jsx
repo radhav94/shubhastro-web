@@ -5,7 +5,6 @@ import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { useCall } from "../../../context/CallContext";
 import { useChat } from "../../../context/ChatContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
-import { getAstrologerDefaultImage } from "../../../utils/appImages";
 import styles from "./StickyWaitingQueue.module.scss";
 
 /**
@@ -88,7 +87,21 @@ const StickyWaitingQueue = () => {
     voiceSocket.emit(unholdEvent, { roomId: conn.roomId });
     removePendingConnection(conn.roomId);
     const initiateEvent = conn.type === "chat" ? "chat:initiate" : "call:initiate";
-    voiceSocket.emit(initiateEvent, { userId, astrologerId: conn.astrologer?._id, type: conn.type, fromLive: false });
+    const initiatePayload = {
+      userId,
+      astrologerId: conn.astrologer?._id,
+      type: conn.type,
+      isLive: !!conn.fromLive,
+      ...(conn.fromLive && conn.liveChannelId && {
+        liveRoomDetails: {
+          roomId: conn.liveChannelId,
+          hostId: conn.astrologer?._id,
+          hostName: conn.astrologer?.firstName || conn.astrologer?.astrologerName || "",
+          channel: conn.liveChannelId,
+        },
+      }),
+    };
+    voiceSocket.emit(initiateEvent, initiatePayload);
     addPendingConnection({
       id: `${conn.astrologer?._id}-${conn.type}-${Date.now()}`,
       astrologer: conn.astrologer,
@@ -96,6 +109,8 @@ const StickyWaitingQueue = () => {
       roomId: null,
       waitingTime: conn.type === "chat" ? 2 : 5,
       isEmergency: conn.isEmergency || false,
+      fromLive: conn.fromLive || false,
+      liveChannelId: conn.liveChannelId || null,
     });
   };
 
