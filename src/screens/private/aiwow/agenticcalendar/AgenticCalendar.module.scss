@@ -91,7 +91,7 @@
 .banner {
   background: linear-gradient(135deg, #f75801 0%, #d43400 100%);
   border-radius: 16px;
-  padding: 24px 20px;
+  padding: 16px 20px;
   color: #fff;
   margin-bottom: 0;
   border-bottom-left-radius: 0;
@@ -112,7 +112,7 @@
 .bannerSubtitle {
   font-family: 'Poppins', sans-serif;
   font-size: 0.875rem;
-  margin: 0 0 12px 0;
+  // margin: 0 0 12px 0;
   opacity: 0.9;
   line-height: 1.5;
 }
@@ -229,7 +229,7 @@
 /* Period Chips */
 .periodDivider {
   height: 1px;
-  background: #f0f0f0;
+  background: #fff;
   margin: 16px 0;
 }
 
