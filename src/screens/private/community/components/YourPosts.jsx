@@ -1,11 +1,8 @@
-import { useState } from "react";
 import { FiHeart, FiMessageCircle } from "react-icons/fi";
 import { PiShareNetwork } from "react-icons/pi";
 import styles from "../Community.module.scss";
 import TrendingAstrologers from "./TrendingAstrologers";
 import astrologerImg from "../../../../assets/default-img/astrologer male_v.1.png";
-
-const FILTER_TABS = ["All", "Liked Post", "Commented", "Value 3"];
 
 const MY_POSTS = [
   {
@@ -43,8 +40,6 @@ const MY_POSTS = [
 ];
 
 const YourPosts = () => {
-  const [activeFilter, setActiveFilter] = useState("All");
-
   return (
     <div className={styles.feedLayout}>
       <div className={styles.feedMain}>
@@ -52,19 +47,6 @@ const YourPosts = () => {
           <span className={styles.headingBar} />
           YOUR LIBRARY
         </h2>
-
-        {/* Filter Tabs */}
-        <div className={styles.filterTabs}>
-          {FILTER_TABS.map((tab) => (
-            <button
-              key={tab}
-              className={`${styles.filterTab} ${activeFilter === tab ? styles.activeFilter : ""}`}
-              onClick={() => setActiveFilter(tab)}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
 
         {MY_POSTS.length === 0 ? (
           <div className={styles.emptyState}>

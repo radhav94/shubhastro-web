@@ -104,28 +104,30 @@ const Community = () => {
             ))}
           </nav>
 
-          {/* Other Communities */}
-          <div className={styles.otherCommunities}>
-            <h3 className={styles.sidebarSectionTitle}>Other Communities</h3>
-            <ul className={styles.communityList}>
-              {COMMUNITIES_DATA.slice(0, 3).map((community) => (
-                <li
-                  key={community.id}
-                  className={styles.communityListItem}
-                  onClick={() => handleCommunityClick(community.id)}
-                >
-                  <div className={styles.communityAvatar} />
-                  <div className={styles.communityInfo}>
-                    <span className={styles.communityName}>{community.name}</span>
-                    <span className={styles.communityMembers}>
-                      <FiUsers size={12} /> {community.members}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <button className={styles.viewAllBtn}>View all &gt;</button>
-          </div>
+          {/* Other Communities - hidden when on communities tab */}
+          {activeTab !== "communities" && (
+            <div className={styles.otherCommunities}>
+              <h3 className={styles.sidebarSectionTitle}>Other Communities</h3>
+              <ul className={styles.communityList}>
+                {COMMUNITIES_DATA.slice(0, 3).map((community) => (
+                  <li
+                    key={community.id}
+                    className={styles.communityListItem}
+                    onClick={() => handleCommunityClick(community.id)}
+                  >
+                    <div className={styles.communityAvatar} />
+                    <div className={styles.communityInfo}>
+                      <span className={styles.communityName}>{community.name}</span>
+                      <span className={styles.communityMembers}>
+                        <FiUsers size={12} /> {community.members}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <button className={styles.viewAllBtn}>View all &gt;</button>
+            </div>
+          )}
         </aside>
 
         {/* Main Content */}

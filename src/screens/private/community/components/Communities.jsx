@@ -12,6 +12,17 @@ const COMMUNITIES_GRID = [
   { id: 5, name: "Tarot Circle", members: "45.2k", avatar: null, joined: false },
   { id: 6, name: "Tarot Circle", members: "45.2k", avatar: null, joined: false },
   { id: 7, name: "Leo Tribe", members: "45.2k", avatar: null, joined: false },
+  { id: 8, name: "Gemini Tribe", members: "45.2k", avatar: null, joined: false },
+  { id: 9, name: "Aries Tribe", members: "45.2k", avatar: null, joined: true },
+  { id: 10, name: "Libra Tribe", members: "45.2k", avatar: null, joined: false },
+  { id: 11, name: "Scorpio Tribe", members: "45.2k", avatar: null, joined: false },
+  { id: 12, name: "Pisces Tribe", members: "45.2k", avatar: null, joined: true },
+  { id: 13, name: "Virgo Tribe", members: "45.2k", avatar: null, joined: false },
+  { id: 14, name: "Capricorn Tribe", members: "45.2k", avatar: null, joined: true },
+  { id: 15, name: "Aquarius Tribe", members: "45.2k", avatar: null, joined: false },
+  { id: 16, name: "Sagittarius Tribe", members: "45.2k", avatar: null, joined: false },
+  { id: 17, name: "Cancer Tribe", members: "45.2k", avatar: null, joined: true },
+  { id: 18, name: "Taurus Tribe", members: "45.2k", avatar: null, joined: false },
 ];
 
 const TOP_ASTROLOGERS = [
