@@ -1,13 +1,8 @@
 .wrapper {
-  max-width: 900px;
-  margin: 70px auto 40px;
-  padding: 20px 16px;
-  background: linear-gradient(135deg, #fff9f0 0%, #ffe4c4 100%);
-  border-radius: 10px;
-  border: 1.5px solid #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 16px;
+  text-align: center;
 }
 
 .card {
@@ -15,10 +10,10 @@
   backdrop-filter: blur(12px);
   border: 1.5px solid #fff;
   border-radius: 18px;
-  max-width: 500px;
   width: 100%;
   overflow: hidden;
   text-align: center;
+  padding: 24px;
 }
 
 .title {
@@ -58,26 +53,40 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin: 16px 0;
+  gap: 16px;
+  margin: 16px 0 24px;
   padding-inline: 16px;
 }
 
 .nameBox {
-  padding: 10px 20px;
+  padding: 12px 28px;
   border: 1.5px solid #f75801;
   border-radius: 8px;
-  font-weight: 500;
-  font-size: 14px;
-  min-width: 90px;
+  font-weight: 600;
+  font-size: 15px;
+  min-width: 100px;
   text-align: center;
   color: #1a1a1a;
+  background: #fff;
 }
 
 .connector {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid rgba(247, 88, 1, 0.15);
   display: flex;
   align-items: center;
-  font-size: 20px;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.connectorImg {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 .scoreWrapper {
@@ -162,7 +171,7 @@
 
 @media (max-width: 560px) {
   .card {
-    padding: 24px 16px;
+    padding: 18px 12px;
   }
 
   .title {
@@ -172,7 +181,13 @@
   .nameBox {
     min-width: 70px;
     font-size: 13px;
-    padding: 8px 14px;
+    padding: 10px 16px;
+  }
+
+  .connector {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
   }
 
   .circle {

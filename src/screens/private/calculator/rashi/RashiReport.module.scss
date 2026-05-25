@@ -1,11 +1,8 @@
 .wrapper {
-  max-width: 1000px;
-  margin: 70px auto 40px;
-  padding: 16px;
-  // box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-  background: linear-gradient(135deg, #fff9f0 0%, #ffe4c4 100%);
-  border-radius: 10px;
-  border: 1.5px solid #fff;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 16px;
+  text-align: center;
 }
 
 .title {
@@ -71,15 +68,12 @@
 
 /* Rashi Card - matching figma style */
 .card {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 2px solid white;
+  background: linear-gradient(90deg, #fff8f3 0%, #ffd6d6 100%);
+  border: 1.5px solid #fff;
   border-radius: 12px;
   padding: 20px 24px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
   margin: 0 auto 8px;
-  max-width: 480px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -93,7 +87,6 @@
     right: 0;
     height: 5px;
     border-radius: 12px 12px 0 0;
-    background: linear-gradient(90deg, #f75801, #d43400);
   }
 }
 
@@ -120,21 +113,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #FFE0B6 0%, #FFE2E2 100%);
+  background: #fff;
   border-radius: 50%;
-  padding: 12px;
+  padding: 0;
 }
 
 .signImage {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  background: linear-gradient(90deg, #f75801, #d43400);
+  border-radius: 50%;
 }
 
 .calcAgainBtn {
   display: block;
   text-align: center;
-  max-width: 480px;
   margin: 0 auto 24px;
   background: none;
   border: none;
@@ -143,9 +137,11 @@
   font-weight: 600;
   cursor: pointer;
   padding: 10px 0;
+  text-decoration: underline;
+  transition: opacity 0.2s;
 
   &:hover {
-    text-decoration: underline;
+    opacity: 0.8;
   }
 }
 
@@ -162,11 +158,13 @@
 
 .accordionBox {
   background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(12px);
-  border: 1.5px solid #fff;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid white;
   border-radius: 12px;
   margin-bottom: 16px;
   overflow: hidden;
+  text-align: left;
 }
 
 .accordionHeader {
@@ -294,16 +292,18 @@
   }
 
   .card {
-    padding: 16px 16px 24px;
+    padding: 16px;
   }
 
   .signImageWrap {
-    padding: 20px;
+    width: 48px;
+    height: 48px;
+    padding: 0;
   }
 
   .signImage {
-    width: 64px;
-    height: 64px;
+    width: 100%;
+    height: 100%;
   }
 
   .signName {

@@ -15,6 +15,7 @@ import {
   UserPlus,
   Download,
   Search,
+  Mail,
 } from "lucide-react";
 import { TiUserDelete } from "react-icons/ti";
 import { LuPencilLine } from "react-icons/lu";
@@ -47,10 +48,11 @@ import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal"
 import { useGetAstroDetailsQuery } from "../../../redux/api/kundli/kundliApi";
 import { buildVedicParam } from "../../../utils/VedicParams.js/vedicParams";
 import { PATH } from "../../../utils/routes/Paths";
-import { logout, updateRegistrationStatus } from "../../../redux/auth/authSlice";
+import { logout, updateRegistrationStatus, setEmail } from "../../../redux/auth/authSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import styles from "./Profile.module.scss";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
+import emailIconSet from "../../../assets/images/icon_set (1).png";
 import { Toast } from "../../../component/index";
 import StickyReview from "../../private/home/components/call/StickyReview";
 import MallHistoryContent from "../../private/shubhAstroMallHistory/MallHistoryContent";
@@ -78,6 +80,7 @@ const Profile = () => {
 
   // Get isRegister from Redux auth state
   const isRegister = useSelector((state) => state.auth.isRegister);
+  const userEmail = useSelector((state) => state.auth.email);
 
   const [activeTab, setActiveTab] = useState(() => {
     const navTab = navigationState.activeTab;
@@ -179,6 +182,8 @@ const Profile = () => {
   const [showAddProfileModal, setShowAddProfileModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEmailEditModal, setShowEmailEditModal] = useState(false);
+  const [editEmailValue, setEditEmailValue] = useState("");
   const [profileToEdit, setProfileToEdit] = useState(null);
   const [profileToDelete, setProfileToDelete] = useState(null);
 
@@ -870,11 +875,10 @@ const Profile = () => {
 
   // Handle rate consultation button click
   const handleRateConsultation = (astrologer, roomId) => {
-    console.log("astrologerssss",astrologer)
     setReviewData({
       astrologerID: astrologer.astrologer_ID || astrologer._id,
-      fullName: `${astrologer.firstName} ${astrologer.lastName || ""}`.trim(),
-      profileImage:  astrologer.profileImgUrl || astrologer.imageUrl,
+      fullName: astrologer.name || `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
+      profileImage: astrologer.image || astrologer.profileImgUrl || astrologer.imageUrl,
       roomId,
     });
     setOpenReview(true);
@@ -1282,7 +1286,7 @@ const Profile = () => {
           </div>
         </div>
 
-        <button className={styles.logoutButton} onClick={handleLogout}>
+        <button className={styles.logoutButton} onClick={handleLogout} title="Logout">
           <LogOut size={20} />
         </button>
       </div>
@@ -1394,24 +1398,53 @@ const Profile = () => {
         </button>
       </div>
 
-      {/* Astrologer You Follow Link */}
-      <div
-        className={styles.profileLink}
-        onClick={() => navigate("/followed-astrologers")}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => e.key === "Enter" && navigate("/followed-astrologers")}
-      >
-        <div className={styles.profileLinkRow}>
-          <div className={styles.profileLinkLeft}>
-            <div className={styles.profileLinkIcon}>
-              <FaUser size={18} />
+      {/* Email & Following Row */}
+      <div className={styles.emailFollowingRow}>
+        {/* Email Row */}
+        <div
+          className={styles.profileLink}
+          onClick={() => {
+            setEditEmailValue(userEmail || "");
+            setShowEmailEditModal(true);
+          }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              setEditEmailValue(userEmail || "");
+              setShowEmailEditModal(true);
+            }
+          }}
+        >
+          <div className={styles.profileLinkRow}>
+            <div className={styles.profileLinkLeft}>
+              <div className={styles.profileLinkIcon} style={{ background: "transparent" }}>
+                <img src={emailIconSet} alt="email" style={{ width: 28, height: 28 }} />
+              </div>
+              <p className={styles.profileLinkText}>{userEmail || "Add email"}</p>
             </div>
-            <p className={styles.profileLinkText}>{followedCount} (Following)</p>
+            <ChevronLeft size={18} className={styles.profileLinkArrow} style={{ transform: "rotate(180deg)", color: "#f75801" }} />
           </div>
-          <ChevronLeft size={18} className={styles.profileLinkArrow} style={{ transform: "rotate(180deg)", color: "#f75801" }} />
         </div>
-        <div className={styles.profileLinkDivider} />
+
+        {/* Astrologer You Follow Link */}
+        <div
+          className={styles.profileLink}
+          onClick={() => navigate("/followed-astrologers")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && navigate("/followed-astrologers")}
+        >
+          <div className={styles.profileLinkRow}>
+            <div className={styles.profileLinkLeft}>
+              <div className={styles.profileLinkIcon}>
+                <FaUser size={18} />
+              </div>
+              <p className={styles.profileLinkText}>{followedCount} (Following)</p>
+            </div>
+            <ChevronLeft size={18} className={styles.profileLinkArrow} style={{ transform: "rotate(180deg)", color: "#f75801" }} />
+          </div>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -2145,6 +2178,44 @@ const Profile = () => {
         onCancel={handleCancelDelete}
         onConfirm={confirmDeleteProfile}
       />
+
+      {/* Email Edit Modal */}
+      {showEmailEditModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowEmailEditModal(false)}>
+          <div className={styles.emailModalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.emailModalHeader}>
+              <h3 className={styles.emailModalTitle}>Update Email</h3>
+              <button className={styles.emailModalClose} onClick={() => setShowEmailEditModal(false)}>✕</button>
+            </div>
+            <label className={styles.emailModalLabel}>Email ID</label>
+            <input
+              type="email"
+              value={editEmailValue}
+              onChange={(e) => setEditEmailValue(e.target.value)}
+              placeholder="Enter your email address"
+              className={styles.emailModalInput}
+            />
+            <p className={styles.emailModalDesc}>
+              Update email ID to receive important notifications and account updates.
+            </p>
+            <button
+              className={styles.emailModalBtn}
+              onClick={() => {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (editEmailValue && !emailRegex.test(editEmailValue)) {
+                  Toast.error("Please enter a valid email address");
+                  return;
+                }
+                dispatch(setEmail(editEmailValue || null));
+                setShowEmailEditModal(false);
+                Toast.success("Email updated successfully");
+              }}
+            >
+              Update Email
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Sticky Review Modal */}
       <StickyReview />

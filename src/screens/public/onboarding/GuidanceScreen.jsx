@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
@@ -8,6 +9,7 @@ import { Heart, Rocket, DollarSign, Plus, User, HelpCircle, Eye } from "lucide-r
 import { registerUser } from "../../../services/appServices/authService";
 import { useCreateKundliMutation } from "../../../services/appServices/kundliServicesNew";
 import { useGetExpertiseFiltersQuery } from "../../../redux/api/astrologer/astrologerApi";
+import { setEmail } from "../../../redux/auth/authSlice";
 
 // Static mapping for icon and color by slug (API doesn't provide these)
 const slugStyleMap = {
@@ -39,6 +41,7 @@ const validationSchema = Yup.object({
 });
 
 const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep = 2, totalSteps = 3, onStepChange }) => {
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [createKundli] = useCreateKundliMutation();
   const { data: filtersData } = useGetExpertiseFiltersQuery();
@@ -95,7 +98,7 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
         place: formData.birthPlace || "",
         phoneNumber: phoneNumber,
         password: "TempPass@123", // Temporary password - backend requires non-empty
-        email: `${phoneNumber}@shubhtalk.com`, // Generate email from phone number
+        email: formData.email || `${phoneNumber}@shubhtalk.com`, // Use user-provided email or generate from phone
         gender: formData.identity 
           ? formData.identity.toLowerCase() === "others" 
             ? "other" 
@@ -143,6 +146,11 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
           place: formData.birthPlace,
         };
         localStorage.setItem("shubhtalk_user", JSON.stringify(updatedUser));
+        
+        // Store email in Redux if user provided one
+        if (formData.email) {
+          dispatch(setEmail(formData.email));
+        }
         
         // Dispatch event to notify TopBar to re-render
         window.dispatchEvent(new Event("auth-change"));

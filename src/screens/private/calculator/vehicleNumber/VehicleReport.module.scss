@@ -61,14 +61,15 @@
   margin: 18px auto 0;
   display: block;
   padding: 10px 24px;
-  border-radius: 12px;
-  border: 1.5px solid #f75801;
-  background: #fff;
+  border: none;
+  background: transparent;
   color: #f75801;
   font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
-  transition: background 0.2s;
-  &:hover { background: #fff8f5; }
+  text-decoration: underline;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.8; }
 }
 
 .center {

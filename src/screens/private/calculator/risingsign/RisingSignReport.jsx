@@ -25,7 +25,6 @@ const RisingSignReport = () => {
   const signImage = zodiacSignImages[signKey];
 
   return (
-    <>
     <div className={styles.wrapper}>
       <CalcBackButton />
 
@@ -112,10 +111,9 @@ const RisingSignReport = () => {
           </div>
         </div>
       )}
-    </div>
 
-    <ConnectCard />
-  </>
+      <ConnectCard />
+    </div>
   );
 };
 
