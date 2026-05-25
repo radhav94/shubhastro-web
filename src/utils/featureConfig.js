@@ -10,12 +10,13 @@
 /**
  * Check if ShubhMall (e-commerce) feature is enabled.
  * Controlled by VITE_SHUBH_MALL_ENABLED env variable.
- * Defaults to true if not set.
+ * Defaults to false if not set, null, or blank.
  */
 export const isShubhMallEnabled = () => {
   const value = import.meta.env.VITE_SHUBH_MALL_ENABLED;
-  // Default to true if not explicitly set to "false"
-  return value !== "false";
+  // Default to false if not set, null, undefined, or blank
+  if (!value || value.trim() === "") return false;
+  return value === "true";
 };
 
 /**
