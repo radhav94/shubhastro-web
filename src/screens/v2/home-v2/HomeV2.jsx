@@ -3,7 +3,6 @@ import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from "react
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getUserFromStorage } from "../../../utils/authStorage";
-import { Toast } from "../../../component";
 import { useGetAiSuitesQuery, useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -376,7 +375,7 @@ const HomeV2 = () => {
   // ─── Connection Hooks ─────────────────────────────────────────────────────
   const { profiles, isCreating, showAddProfile, showEditProfile, formData, editFormData, setShowAddProfile, setShowEditProfile, setFormData, setEditFormData, handleAddProfile, handleSubmitProfile, handleSubmitEditProfile, formatProfileDisplay } = useProfileManager();
   const { handleChatStart, handleCallStart, openModal: hookOpenModal, setOpenModal: hookSetOpenModal, selectedAstrologer: hookSelectedAstrologer, activeCallAstroRef, hasKundli, kundliRef } = useAstrologerConnect();
-  const { WaitingList, callWaitingList, connectionType, localSelectedProfile, setLocalSelectedProfile, setSelectedAstrologer: setAstrologerRef } = useAstrologerConnection(activeCallAstroRef, kundliRef.current);
+  const { connectionType, localSelectedProfile, setLocalSelectedProfile, setSelectedAstrologer: setAstrologerRef } = useAstrologerConnection(activeCallAstroRef, kundliRef.current);
 
   const handleProfileManagerStartCall = useCallback(() => {
     if (selectedAstrologer && pendingConnectionType) {
@@ -388,7 +387,6 @@ const HomeV2 = () => {
 
   const handleConnectClick = useCallback(async (astrologer, connType, isEmergency = false) => {
     if (!requireAuth()) return;
-    if (WaitingList || callWaitingList) { Toast.error("You are already waiting for an astrologer. Please cancel the current request first."); return; }
     setSelectedAstrologer(astrologer);
     setAstrologerRef(astrologer);
     if (hasKundli) {
@@ -397,7 +395,7 @@ const HomeV2 = () => {
       else result = await handleCallStart(astrologer, "audio", isEmergency);
       if (result?.emergencyAvailable) { setShowEmergencyModal(true); return; }
     } else { setPendingConnectionType(connType); hookSetOpenModal(prev => ({ ...prev, kundli: true })); }
-  }, [requireAuth, WaitingList, callWaitingList, hasKundli, handleChatStart, handleCallStart, setAstrologerRef, hookSetOpenModal]);
+  }, [requireAuth, hasKundli, handleChatStart, handleCallStart, setAstrologerRef, hookSetOpenModal]);
 
   // ─── Shared props for group renderers ─────────────────────────────────────
   const heroProps = { styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, onlineCount };
