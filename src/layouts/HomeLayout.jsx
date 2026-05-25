@@ -47,6 +47,12 @@ const footerLinkSections = [
       { path: "/clothes-colour-analysis", title: "Clothes Colour Analysis" },
       { path: "/gemstone-authenticity", title: "Gemstone Authenticity" },
       { path: "/aura-photography", title: "Aura Photography" },
+      { path: "/talk-to-your-kundli", title: "Talk to your kundli" },
+      { path: "/cosmic-chat", title: "Cosmic Chat" },
+      { path: "/daily-cosmic-briefing", title: "Daily Cosmic Briefing" },
+      { path: "/dream-interpreter", title: "Dream Interpreter" },
+      { path: "/smart-matchmaking", title: "Smart MatchMaking" },
+      { path: "/agentic-calendar", title: "Agentic Calendar" },
     ],
   },
   {
@@ -83,6 +89,7 @@ const footerLinkSections = [
       { path: "/celebrity-horoscope/ms-dhoni", title: "MS Dhoni Horoscope" },
       { path: "/celebrity-horoscope/narendra-modi", title: "Narendra Modi Horoscope" },
       { path: "/celebrity-horoscope/rahul-gandhi", title: "Rahul Gandhi Horoscope" },
+      { path: "/celebrity-horoscope/vaibhav-sooryavanshi", title: "Vaibhav Sooryavanshi Horoscope" },
     ],
   },
   {
