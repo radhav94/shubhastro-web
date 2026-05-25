@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
   voiceSocket,
   registerChatSession,
@@ -64,6 +65,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   const activityTimeoutRef = useRef(null);
 
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+  const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
   const [createChatRoom] = useCreateChatRoomMutation();
   const chatEndedRef = useRef(false);
 
@@ -288,7 +290,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           sendTextRef.current?.(pending);
         } else {
           // Send default automated "Hi" message when chat is accepted with no pending input
-          sendTextRef.current?.("Hi");
+          sendTextRef.current?.("Hi", { kundliId: selectedKundli?._id || null });
         }
       }
     };
@@ -425,7 +427,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   sendingRef.current = sending;
 
   const sendText = useCallback(
-    (text) => {
+    (text, options = {}) => {
       const trimmedText = text.trim();
       if (!trimmedText || sendingRef.current) return;
 
@@ -451,6 +453,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       setMessages((prev) => [...prev, userMsg]);
 
       if (voiceSocket.connected) {
+        const kundliId = options.kundliId !== undefined ? options.kundliId : (selectedKundli?._id || null);
         voiceSocket.emit("chat:message", {
           sender: "user",
           roomId: currentRoomId,
@@ -462,13 +465,14 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           languageCode: selectedLanguage.code,
           targetLanguage: selectedLanguage.code,
           targetLanguageName: selectedLanguage.name,
+          kundliId,
         });
       } else {
         toast.error("Connection lost. Please try again.");
         setSending(false);
       }
     },
-    [lang, userIdLocal]
+    [lang, userIdLocal, selectedKundli]
   );
 
   // Keep ref in sync so socket handlers can call latest sendText

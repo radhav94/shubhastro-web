@@ -13,13 +13,12 @@ import StickyChatFooter from "../screens/private/home/components/chats/StickyCha
 import StickyCallFooter from "../screens/private/home/components/call/StickyCallFooter";
 import StickyReview from "../screens/private/home/components/call/StickyReview";
 import StickyWaitingQueue from "../component/UI/waitingQueue/StickyWaitingQueue";
-import { useCall } from "../context/CallContext";
-import { voiceSocket } from "../services/voiceSocketServices";
-import WaitingModal from "../component/UI/modal/waitingModal/WaitingModal";
+
+
 import NoInternet, { useOnlineStatus } from "../component/NoInternet/NoInternet";
 import { useAiwowCleanup } from "../utils/hooks/useAiwowCleanup";
 
-const PENDING_LIVE_CALL_STORAGE_KEY = "shubhtalk_pending_live_call";
+
 
 const footerLinkSections = [
   {
@@ -47,6 +46,12 @@ const footerLinkSections = [
       { path: "/clothes-colour-analysis", title: "Clothes Colour Analysis" },
       { path: "/gemstone-authenticity", title: "Gemstone Authenticity" },
       { path: "/aura-photography", title: "Aura Photography" },
+      { path: "/talk-to-your-kundli", title: "Talk to your kundli" },
+      { path: "/cosmic-chat", title: "Cosmic Chat" },
+      { path: "/daily-cosmic-briefing", title: "Daily Cosmic Briefing" },
+      { path: "/dream-interpreter", title: "Dream Interpreter" },
+      { path: "/smart-matchmaking", title: "Smart MatchMaking" },
+      { path: "/agentic-calendar", title: "Agentic Calendar" },
     ],
   },
   {
@@ -83,6 +88,7 @@ const footerLinkSections = [
       { path: "/celebrity-horoscope/ms-dhoni", title: "MS Dhoni Horoscope" },
       { path: "/celebrity-horoscope/narendra-modi", title: "Narendra Modi Horoscope" },
       { path: "/celebrity-horoscope/rahul-gandhi", title: "Rahul Gandhi Horoscope" },
+      { path: "/celebrity-horoscope/vaibhav-sooryavanshi", title: "Vaibhav Sooryavanshi Horoscope" },
     ],
   },
   {
@@ -104,23 +110,13 @@ const footerLinkSections = [
 const HomeLayout = () => {
   const matches = useMatches();
   const location = useLocation();
-  const { pendingLiveCall, setPendingLiveCall, waitingList } = useCall();
+
   const isOnline = useOnlineStatus();
 
   // Clear aiwow session data when navigating away from aiwow pages
   useAiwowCleanup();
 
-  const handleCancelPending = () => {
-    if (pendingLiveCall?.callRoomId) {
-      voiceSocket.emit("call:cancel", { roomId: pendingLiveCall.callRoomId, canceledBy: "CUSTOMER" });
-    }
-    setPendingLiveCall(null);
-    try {
-      sessionStorage.removeItem(PENDING_LIVE_CALL_STORAGE_KEY);
-    } catch {
-      // Ignore storage failures; context state is the primary source.
-    }
-  };
+
 
   const currentRoute = matches
     .reverse()
@@ -209,15 +205,7 @@ const HomeLayout = () => {
       {/* ✅ FLOATING CALL UI (IMPORTANT LINE) */}
       <VideoCallContainer />
 
-      {/* Pending live call waiting banner — shown outside /live only when FooterWaiting isn't already visible */}
-      {pendingLiveCall && !isLivePage && !waitingList && (
-        <WaitingModal
-          callRoomId={pendingLiveCall.callRoomId}
-          resetCallState={handleCancelPending}
-          connectionType={pendingLiveCall.pendingCallType}
-          astrologerName={pendingLiveCall.astrologer?.astrologerName || pendingLiveCall.astrologer?.firstName}
-        />
-      )}
+
 
       <StickyChatFooter />
       <StickyCallFooter />

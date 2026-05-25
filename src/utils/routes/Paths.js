@@ -210,6 +210,7 @@ import LalKitabProblems from "../../screens/private/lalKitab/problems/LalKitabPr
 import OccultChat from "../../screens/private/occult/OccultChat";
 import OccultResult from "../../screens/private/occult/OccultResult";
 import PanditAIVoice from "../../screens/private/panditAIVoice/PanditAIVoice";
+import Community from "../../screens/private/community/Community";
 
 export const PATH = {
   // DEFAULT: {
@@ -1242,6 +1243,12 @@ export const PATH = {
       element: AppLicense,
       header: false,
       footer: false,
+    },
+    COMMUNITY: {
+      path: "/community",
+      element: Community,
+      header: true,
+      footer: true,
     },
     FOLLOWED_ASTROLOGERS: {
       path: "/followed-astrologers",
