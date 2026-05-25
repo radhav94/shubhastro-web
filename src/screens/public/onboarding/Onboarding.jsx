@@ -23,6 +23,7 @@ const Onboarding = () => {
   const [formData, setFormData] = useState({
     guidance: [],
     name: "",
+    email: "",
     identity: "Female",
     birthDate: "",
     birthTime: "",

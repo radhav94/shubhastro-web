@@ -32,7 +32,6 @@ const RashiReport = () => {
   };
 
   return (
-    <>
     <div className={styles.wrapper}>
       <CalcBackButton />
 
@@ -166,10 +165,9 @@ const RashiReport = () => {
           </div>
         </div>
       )}
-    </div>
 
-    <ConnectCard />
-  </>
+      <ConnectCard />
+    </div>
   );
 };
 

@@ -7,6 +7,7 @@ import styles from "./FriendshipReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
+import profileImg from "../../../../assets/images/Profile image.png";
 
 const FriendshipReport = () => {
   const navigate = useNavigate();
@@ -34,7 +35,6 @@ const FriendshipReport = () => {
   if (!report) return null;
 
   return (
-    <>
     <div className={styles.wrapper}>
       <CalcBackButton />
       {/* HEADER */}
@@ -63,7 +63,9 @@ const FriendshipReport = () => {
         {/* NAMES */}
         <div className={styles.namesRow}>
           <div className={styles.nameBox}>{report.name1}</div>
-          <div className={styles.connector}>🤝</div>
+          <div className={styles.connector}>
+            <img src={profileImg} alt="handshake" className={styles.connectorImg} />
+          </div>
           <div className={styles.nameBox}>{report.name2}</div>
         </div>
 
@@ -93,10 +95,9 @@ const FriendshipReport = () => {
           Calculate Again
         </button>
       </div>
-    </div>
 
-    <ConnectCard />
-    </>
+      <ConnectCard />
+    </div>
   );
 };
 

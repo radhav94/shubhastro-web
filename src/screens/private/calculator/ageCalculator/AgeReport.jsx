@@ -33,7 +33,6 @@ const AgeReport = () => {
   if (!report) return null;
 
   return (
-    <>
     <div className={styles.wrapper}>
       <CalcBackButton />
 
@@ -82,10 +81,9 @@ const AgeReport = () => {
       >
         Calculate Again
       </button>
-    </div>
 
-    <ConnectCard />
-    </>
+      <ConnectCard />
+    </div>
   );
 };
 

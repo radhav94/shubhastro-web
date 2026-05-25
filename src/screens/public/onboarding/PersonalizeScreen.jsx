@@ -10,6 +10,8 @@ const validationSchema = Yup.object({
     .max(50, "Name must not exceed 50 characters")
     .matches(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
     .required("Name is required"),
+  email: Yup.string()
+    .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address"),
   identity: Yup.string()
     .oneOf(["Male", "Female", "Others"], "Please select a valid identity")
     .required("Identity is required"),
@@ -18,6 +20,7 @@ const validationSchema = Yup.object({
 const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData, currentStep = 0, totalSteps = 3, onStepChange }) => {
   const initialValues = {
     name: formData.name || "",
+    email: formData.email || "",
     identity: formData.identity || "Female",
   };
 
@@ -66,6 +69,19 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData, c
                 placeholder="Enter your name (min 3 characters)"
               />
               <ErrorMessage name="name">
+                {(msg) => <span className={styles.validationError}>{msg}</span>}
+              </ErrorMessage>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Email ID <span style={{ color: '#999', fontWeight: 'normal', fontSize: '12px' }}>(optional)</span></label>
+              <Field
+                type="email"
+                name="email"
+                className={styles.input}
+                placeholder="Enter your email address"
+              />
+              <ErrorMessage name="email">
                 {(msg) => <span className={styles.validationError}>{msg}</span>}
               </ErrorMessage>
             </div>

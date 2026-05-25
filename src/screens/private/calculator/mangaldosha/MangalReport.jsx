@@ -28,7 +28,6 @@ const MangalReport = () => {
   } = data.response;
 
   return (
-    <>
     <div className={styles.wrapper}>
       <CalcBackButton />
       {/* HEADER */}
@@ -139,10 +138,9 @@ const MangalReport = () => {
           Calculate Again
         </button>
       </div>
-    </div>
 
-    <ConnectCard />
-  </>
+      <ConnectCard />
+    </div>
   );
 };
 

@@ -76,11 +76,9 @@ const AtmakarakaReport = () => {
       </div>
 
       {/* ACTIONS */}
-      {/* <div className={styles.actions}>
-        <button className={styles.calculateBtn} onClick={() => navigate(-1)}>
-          Calculate Again
-        </button>
-      </div> */}
+      <button className={styles.calculateBtn} onClick={() => navigate(-1)}>
+        Calculate Again
+      </button>
 
         {/* Connect Card between accordion items */}
                 <div className={styles.connectCardWrap}>

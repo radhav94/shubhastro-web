@@ -108,6 +108,7 @@
 }
 
 .logoutButton {
+  position: relative;
   width: 40px;
   height: 40px;
   background: #ffe5e5;
@@ -128,7 +129,28 @@
   &:hover{
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    .logoutTooltip {
+      opacity: 1;
+      visibility: visible;
+    }
   }
+}
+
+.logoutTooltip {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
 }
 
 // Zodiac Section
@@ -2196,7 +2218,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 0;
 }
 
 .profileLinkLeft {
@@ -2232,4 +2253,123 @@
 .profileLinkDivider {
   height: 1px;
   background: #fff;
+}
+
+// Email icon responsive
+.emailIconDesktop {
+  display: block;
+}
+.emailIconMobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .emailIconDesktop {
+    display: none;
+  }
+  .emailIconMobile {
+    display: block;
+  }
+}
+
+// Email & Following side by side on desktop
+.emailFollowingRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+
+  .profileLink {
+    flex: 1;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0;
+
+    .profileLink {
+      width: 100%;
+    }
+  }
+}
+
+// Email Edit Modal (Figma design)
+.emailModalContent {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.emailModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.emailModalTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+.emailModalClose {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #f75801;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.emailModalLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.emailModalInput {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 0.95rem;
+  outline: none;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #f75801;
+  }
+}
+
+.emailModalDesc {
+  font-size: 0.8rem;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 1.25rem 0;
+}
+
+.emailModalBtn {
+  width: 100%;
+  padding: 14px;
+  background: #f75801;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #e04e00;
+  }
 }

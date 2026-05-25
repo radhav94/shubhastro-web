@@ -260,13 +260,17 @@
 }
 
 .calculateBtn {
-  background: linear-gradient(135deg, #f75801, #d43400);
-  color: #fff;
-  padding: 14px 40px;
-  border-radius: 26px;
+  background: transparent;
+  color: #f75801;
+  padding: 10px 28px;
+  border-radius: 0;
   border: none;
-  font-size: 15px;
+  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
+  text-decoration: underline;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.8; }
 }
 
 
@@ -363,7 +367,7 @@
   }
 
   .calculateBtn {
-    width: 100%;
+    width: auto;
     text-align: center;
   }
 }

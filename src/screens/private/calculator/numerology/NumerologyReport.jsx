@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { useGetNumerologyReportQuery } from "../../../../redux/api/calculator/calcApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import styles from "./NumerologyReport.module.scss";
@@ -8,6 +9,7 @@ import TTSButton from "../../../../component/UI/TTSButton";
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 
 const NumerologyReport = () => {
+  const navigate = useNavigate();
 
   const stored = useSelector(selectCalculatorData("numerology_report"));
   const { data, isLoading } = useGetNumerologyReportQuery(stored, {
@@ -76,6 +78,11 @@ const NumerologyReport = () => {
           </div>
         ))}
       </div>
+
+      {/* Calculate Again */}
+      <button className={styles.calculateBtn} onClick={() => navigate("/numerology-calculator")}>
+        Calculate Again
+      </button>
 
       {/* Connect Card */}
       <div className={styles.connectCardWrap}>
