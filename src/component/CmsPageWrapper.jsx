@@ -42,7 +42,10 @@ const CmsPageWrapper = ({ children }) => {
     skip: shouldSkip,
   });
 
-  const pageData = !isError ? data?.data : null;
+  // Only use data if not excluded and data matches current slug
+  const pageData = !shouldSkip && !isError && data?.data?.slug === slug
+    ? data.data
+    : null;
   const hasBody = pageData?.body && pageData.body.trim().length > 0;
 
   return (
