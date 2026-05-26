@@ -68,7 +68,7 @@ export const chatApi = privateRequestNew.injectEndpoints({
         url: "chat/messages/create",
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: { astrologerId, type, sender, message, kundliId, kundliName },
+        body: { astrologerId, type, sender, message, kundliId, kundliName, isAssistant: true },
       }),
     }),
 

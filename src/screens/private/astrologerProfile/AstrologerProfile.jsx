@@ -1827,6 +1827,7 @@ const AstrologerProfile = () => {
         astrologerName={`${data?.firstName || ""} ${data?.lastName || ""}`.trim()}
         isOpen={isVAOpen}
         setIsOpen={setIsVAOpen}
+        onConnect={() => handleChatStart(data)}
       />
 
       {/* Image Preview Lightbox */}
