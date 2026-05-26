@@ -11,7 +11,8 @@ const EXCLUDED_PATHS = [
   "/home-v2",
   "/ai-wow",
   "/shubh-mall",
-  "/explore"
+  "/explore",
+  "/community"
 ];
 
 /**

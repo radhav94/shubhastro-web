@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiUsers, FiFileText, FiPlus, FiChevronLeft } from "react-icons/fi";
 import { LuNewspaper } from "react-icons/lu";
@@ -7,7 +7,13 @@ import YourFeed from "./components/YourFeed";
 import Communities from "./components/Communities";
 import YourPosts from "./components/YourPosts";
 import CreatePost from "./components/CreatePost";
+import EditPost from "./components/EditPost";
 import CommunityDetail from "./components/CommunityDetail";
+import {
+  useGetCommunityPageDataQuery,
+  useGetCommunitySpacesQuery,
+  useGetMyJoinedSpacesQuery,
+} from "../../../redux/api/community/communityApi";
 
 const TABS = [
   { id: "feed", label: "Your Feed", icon: LuNewspaper },
@@ -16,26 +22,65 @@ const TABS = [
   { id: "create", label: "Create Post", icon: FiPlus },
 ];
 
-const COMMUNITIES_DATA = [
-  { id: 1, name: "Gemini Tribe", members: "45.2k", avatar: null, joined: false },
-  { id: 2, name: "Leo Tribe", members: "45.2k", avatar: null, joined: true },
-  { id: 3, name: "Libra Tribe", members: "45.2k", avatar: null, joined: false },
-  { id: 4, name: "Tarot Circle", members: "45.2k", avatar: null, joined: false },
-  { id: 5, name: "Aries Tribe", members: "45.2k", avatar: null, joined: true },
-];
+const formatMemberCount = (count) => {
+  if (!count) return "0";
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
+  return count.toString();
+};
 
 const Community = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "feed";
   const communityId = searchParams.get("community");
+  const editPostId = searchParams.get("postId");
+
+  const { data: pageResponse } = useGetCommunityPageDataQuery();
+  const { data: spacesData } = useGetCommunitySpacesQuery({ page: 1, limit: 20 });
+  const { data: joinedSpacesData } = useGetMyJoinedSpacesQuery({ page: 1, limit: 50 });
+
+  const spaces = spacesData?.spaces || [];
+  const joinedSpaces = joinedSpacesData?.spaces || [];
+
+  // Build sections map from API response (same pattern as Explore page)
+  const pageData = useMemo(() => {
+    const list = pageResponse?.data?.list || [];
+    const sections = {};
+    list.forEach((section) => {
+      sections[section.display_type] = section;
+    });
+    return sections;
+  }, [pageResponse]);
+
+  // Extract sections by display_type
+  const feedSection = pageData["your-feed"];
+  const communitiesSection = pageData["communities"];
+  const yourPostsSection = pageData["your-posts"];
+
+  // Extract trending astrologers for feed tab
+  const feedTrendingAstrologers = useMemo(() => {
+    const block = feedSection?.content?.find((item) => item.display_type === "trending-astrologers");
+    return block?.content || [];
+  }, [feedSection]);
+
+  // Extract trending astrologers for your-posts tab
+  const postsTrendingAstrologers = useMemo(() => {
+    const block = yourPostsSection?.content?.find((item) => item.display_type === "trending-astrologers");
+    return block?.content || [];
+  }, [yourPostsSection]);
+
+  // Extract top rated astrologers for communities tab
+  const communitiesAstrologers = useMemo(() => {
+    const block = communitiesSection?.content?.find((item) => item.display_type === "top-rated-astrologer");
+    return block?.content || [];
+  }, [communitiesSection]);
 
   const setActiveTab = useCallback((tab) => {
     setSearchParams({ tab });
   }, [setSearchParams]);
 
-  const handleCommunityClick = useCallback((id) => {
-    setSearchParams({ tab: "communities", community: id });
+  const handleCommunityClick = useCallback((slug) => {
+    setSearchParams({ tab: "communities", community: slug });
   }, [setSearchParams]);
 
   const handleBack = useCallback(() => {
@@ -48,19 +93,28 @@ const Community = () => {
 
   const renderContent = () => {
     if (communityId) {
-      return <CommunityDetail communityId={communityId} />;
+      return <CommunityDetail communityId={communityId} astrologers={communitiesAstrologers} />;
     }
     switch (activeTab) {
       case "feed":
-        return <YourFeed />;
+        return <YourFeed trendingAstrologers={feedTrendingAstrologers} sectionContent={feedSection?.content} spaces={spaces} joinedSpaces={joinedSpaces} onViewAllCommunities={() => setActiveTab("communities")} onCommunityClick={handleCommunityClick} />;
       case "communities":
-        return <Communities onCommunityClick={handleCommunityClick} />;
+        return (
+          <Communities
+            onCommunityClick={handleCommunityClick}
+            topAstrologers={communitiesAstrologers}
+            sectionContent={communitiesSection?.content}
+            spaces={spaces}
+          />
+        );
       case "posts":
-        return <YourPosts />;
+        return <YourPosts trendingAstrologers={postsTrendingAstrologers} sectionContent={yourPostsSection?.content} />;
       case "create":
         return <CreatePost onSuccess={() => setActiveTab("feed")} />;
+      case "edit":
+        return <EditPost postId={editPostId} onSuccess={() => setActiveTab("feed")} />;
       default:
-        return <YourFeed />;
+        return <YourFeed trendingAstrologers={feedTrendingAstrologers} sectionContent={feedSection?.content} spaces={spaces} joinedSpaces={joinedSpaces} onViewAllCommunities={() => setActiveTab("communities")} onCommunityClick={handleCommunityClick} />;
     }
   };
 
@@ -105,27 +159,28 @@ const Community = () => {
           </nav>
 
           {/* Other Communities - hidden when on communities tab */}
-          {activeTab !== "communities" && (
+          {activeTab !== "communities" && joinedSpaces.length > 0 && (
             <div className={styles.otherCommunities}>
-              <h3 className={styles.sidebarSectionTitle}>Other Communities</h3>
+              <h3 className={styles.sidebarSectionTitle}>Your Communities</h3>
               <ul className={styles.communityList}>
-                {COMMUNITIES_DATA.slice(0, 3).map((community) => (
+                {joinedSpaces.map((space) => (
                   <li
-                    key={community.id}
+                    key={space._id}
                     className={styles.communityListItem}
-                    onClick={() => handleCommunityClick(community.id)}
+                    onClick={() => handleCommunityClick(space.slug)}
                   >
-                    <div className={styles.communityAvatar} />
+                    <div className={styles.communityAvatar}>
+                      {space.icon && <span style={{ fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>{space.icon}</span>}
+                    </div>
                     <div className={styles.communityInfo}>
-                      <span className={styles.communityName}>{community.name}</span>
+                      <span className={styles.communityName}>{space.name}</span>
                       <span className={styles.communityMembers}>
-                        <FiUsers size={12} /> {community.members}
+                        <FiUsers size={12} /> {formatMemberCount(space.memberCount)}
                       </span>
                     </div>
                   </li>
                 ))}
               </ul>
-              <button className={styles.viewAllBtn}>View all &gt;</button>
             </div>
           )}
         </aside>
