@@ -31,6 +31,7 @@ const ShaniReport = () => {
   } = data.response;
 
   return (
+    <>
     <div className={styles.wrapper}>
       <CalcBackButton />
 
@@ -159,8 +160,10 @@ const ShaniReport = () => {
         </button>
       </div>
 
-      <ConnectCard />
     </div>
+
+      <ConnectCard />
+    </>
   );
 };
 
