@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Loader2, Pause, Volume2 } from "lucide-react";
 import useTTS from "../../utils/hooks/useTTS";
 
@@ -19,22 +20,38 @@ const btnStyle = {
 
 const TTSButton = ({ text, size = 16 }) => {
   const { speak, stop, isSpeaking, isLoading } = useTTS();
+  const prevTextRef = useRef(text);
+
+  // Stop TTS when text changes (e.g. tab switch)
+  useEffect(() => {
+    if (prevTextRef.current !== text) {
+      stop();
+      prevTextRef.current = text;
+    }
+  }, [text, stop]);
 
   if (!text) return null;
 
   const getIcon = () => {
-    if (isLoading) return <Loader2 size={size} className="animate-spin" />;
+    if (isLoading) return <Loader2 size={size} style={{ animation: "spin 1s linear infinite" }} />;
     if (isSpeaking) return <Pause size={size} />;
     return <Volume2 size={size} />;
+  };
+
+  const handleClick = () => {
+    if (isLoading || isSpeaking) {
+      stop();
+    } else {
+      speak(text);
+    }
   };
 
   return (
     <button
       style={btnStyle}
-      onClick={() => (isSpeaking || isLoading ? stop() : speak(text))}
+      onClick={handleClick}
       aria-label={isLoading ? "Loading speech" : isSpeaking ? "Stop reading" : "Read aloud"}
       type="button"
-      disabled={isLoading}
     >
       {getIcon()}
     </button>
