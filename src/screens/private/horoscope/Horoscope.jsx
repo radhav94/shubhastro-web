@@ -144,7 +144,7 @@ const HoroscopeNew = () => {
   const [selectedZodiac, setSelectedZodiac] = useState(sign?.toLowerCase() || 'aries');
   const [tempSelectedZodiac, setTempSelectedZodiac] = useState(sign?.toLowerCase() || 'aries');
   const [activeTab, setActiveTab] = useState(getInitialTab());
-  const [activeCategory, setActiveCategory] = useState('');
+  const [activeCategory, setActiveCategory] = useState(location.state?.category || '');
   const [cameFromOverview, setCameFromOverview] = useState(false);
   const [overviewCardIndex, setOverviewCardIndex] = useState(null);
   const [showZodiacModal, setShowZodiacModal] = useState(false);
@@ -307,8 +307,17 @@ const HoroscopeNew = () => {
     setCategories(newCategories);
     
     // Set default active category to overview if not set or invalid
-    if (!activeCategory || !newCategories.find(c => c.id === activeCategory)) {
-      setActiveCategory('overview');
+    // If navigated with a specific category, apply it once categories are available
+    const navCategory = location.state?.category;
+    if (navCategory && newCategories.find(c => c.id === navCategory)) {
+      if (activeCategory !== navCategory) {
+        setActiveCategory(navCategory);
+      }
+    } else if (!activeCategory || !newCategories.find(c => c.id === activeCategory)) {
+      // Only default to overview if no pending nav category waiting for API data
+      if (!navCategory || newCategories.length > 1) {
+        setActiveCategory('overview');
+      }
     }
   }, [activeTab, dailyData, tomorrowData, weeklyData, yearlyData, activeCategory]);
 

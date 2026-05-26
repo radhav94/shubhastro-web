@@ -149,7 +149,7 @@ const LoveReport = () => {
           </button>
           <button
             className={styles.horoscopeBtn}
-            onClick={() => navigate("/horoscope/todays-horoscope")}
+            onClick={() => navigate("/daily-horoscope", { state: { category: "relationship" } })}
           >
             ❤ Get today&apos;s love Horoscope
           </button>
