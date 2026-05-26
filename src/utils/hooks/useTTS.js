@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { textToSpeech, SARVAM_LANGUAGES } from "../../services/sarvamTTSService";
+import { textToSpeech, chunkText, SARVAM_LANGUAGES } from "../../services/sarvamTTSService";
 import { translateText } from "../../component/panditAI/translateText";
 
 const LANG_TO_SARVAM = {
@@ -31,27 +31,29 @@ const getGoogleTranslateLang = () => {
 // Global reference to the currently active TTS instance's stop function.
 let activeStopFn = null;
 
-// Cache for TTS audio to avoid redundant API calls
+// Cache for TTS audio per chunk to avoid redundant API calls
 const audioCache = new Map();
-const MAX_CACHE_SIZE = 20;
+const MAX_CACHE_SIZE = 50;
 
+function cacheSet(key, value) {
+  if (audioCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = audioCache.keys().next().value;
+    audioCache.delete(firstKey);
+  }
+  audioCache.set(key, value);
+}
+
+// status: "idle" | "loading" | "speaking"
 const useTTS = () => {
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState("idle");
   const audioRef = useRef(null);
-  const speakingRef = useRef(false);
-  const abortRef = useRef(false);
   const abortControllerRef = useRef(null);
-
-  const setSpeaking = useCallback((val) => {
-    speakingRef.current = val;
-    setIsSpeaking(val);
-  }, []);
+  const requestIdRef = useRef(0);
 
   const stopRef = useRef(null);
 
   const stop = useCallback(() => {
-    abortRef.current = true;
+    requestIdRef.current += 1;
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
@@ -61,101 +63,151 @@ const useTTS = () => {
       audioRef.current.currentTime = 0;
       audioRef.current = null;
     }
-    setSpeaking(false);
-    setIsLoading(false);
+    setStatus("idle");
     if (activeStopFn === stopRef.current) {
       activeStopFn = null;
     }
-  }, [setSpeaking]);
+  }, []);
 
   stopRef.current = stop;
 
-  const speak = useCallback(
-    async (text) => {
-      if (!text) return;
+  const speak = useCallback(async (text) => {
+    if (!text) return;
 
-      if (speakingRef.current) {
-        stop();
-        return;
+    // Clean up any previous playback/request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+
+    // Stop any other active TTS instance
+    if (activeStopFn && activeStopFn !== stopRef.current) {
+      activeStopFn();
+    }
+    activeStopFn = stopRef.current;
+
+    // Capture request ID for staleness checks
+    requestIdRef.current += 1;
+    const myRequestId = requestIdRef.current;
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const currentLang = getGoogleTranslateLang();
+    const sarvamLang = LANG_TO_SARVAM[currentLang] || SARVAM_LANGUAGES.HINDI;
+
+    setStatus("loading");
+
+    try {
+      // Translate if needed
+      let speakText = text;
+      if (currentLang !== "en") {
+        try {
+          const translated = await translateText({ text, targetLanguage: currentLang });
+          if (translated) speakText = translated;
+        } catch {
+          // Fall back to original text
+        }
       }
 
-      // Stop any other active TTS instance
-      if (activeStopFn && activeStopFn !== stopRef.current) {
-        activeStopFn();
+      if (requestIdRef.current !== myRequestId) return;
+
+      // Split into small chunks for streaming playback
+      const chunks = chunkText(speakText);
+
+      // Prefetch first chunk
+      const firstCacheKey = `${sarvamLang}:${chunks[0]}`;
+      let firstAudio = audioCache.get(firstCacheKey);
+      if (!firstAudio) {
+        firstAudio = await textToSpeech(chunks[0], {
+          language: sarvamLang,
+          speaker: "priya",
+          pace: 1.0,
+          signal: controller.signal,
+        });
+        cacheSet(firstCacheKey, firstAudio);
       }
-      activeStopFn = stopRef.current;
 
-      const currentLang = getGoogleTranslateLang();
-      const sarvamLang = LANG_TO_SARVAM[currentLang] || SARVAM_LANGUAGES.HINDI;
+      if (requestIdRef.current !== myRequestId) return;
 
-      setSpeaking(true);
-      setIsLoading(true);
-      abortRef.current = false;
+      // Start playing first chunk, prefetch next in background
+      setStatus("speaking");
 
-      try {
-        const cacheKey = `${sarvamLang}:${text}`;
+      // Play chunks sequentially: play current, prefetch next
+      for (let i = 0; i < chunks.length; i++) {
+        if (requestIdRef.current !== myRequestId) return;
+
+        const cacheKey = `${sarvamLang}:${chunks[i]}`;
         let audioBase64 = audioCache.get(cacheKey);
 
+        // First chunk is already fetched above
         if (!audioBase64) {
-          const controller = new AbortController();
-          abortControllerRef.current = controller;
-
-          // Translate text if language is not English
-          let speakText = text;
-          if (currentLang !== "en") {
-            try {
-              const translated = await translateText({ text, targetLanguage: currentLang });
-              if (translated) speakText = translated;
-            } catch {
-              // Fall back to original text if translation fails
-            }
-          }
-
-          if (abortRef.current) return;
-
-          audioBase64 = await textToSpeech(speakText, {
+          audioBase64 = await textToSpeech(chunks[i], {
             language: sarvamLang,
-            speaker: "ishita",
+            speaker: "priya",
             pace: 1.0,
             signal: controller.signal,
           });
-
-          abortControllerRef.current = null;
-
-          // Store in cache, evict oldest if full
-          if (audioCache.size >= MAX_CACHE_SIZE) {
-            const firstKey = audioCache.keys().next().value;
-            audioCache.delete(firstKey);
-          }
-          audioCache.set(cacheKey, audioBase64);
+          cacheSet(cacheKey, audioBase64);
         }
 
-        if (abortRef.current) return;
+        if (requestIdRef.current !== myRequestId) return;
 
-        setIsLoading(false);
-        const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
-        audioRef.current = audio;
+        // Start prefetching next chunk while current plays
+        let nextChunkPromise = null;
+        if (i + 1 < chunks.length) {
+          const nextCacheKey = `${sarvamLang}:${chunks[i + 1]}`;
+          if (!audioCache.has(nextCacheKey)) {
+            nextChunkPromise = textToSpeech(chunks[i + 1], {
+              language: sarvamLang,
+              speaker: "priya",
+              pace: 1.0,
+              signal: controller.signal,
+            }).then((audio) => {
+              cacheSet(nextCacheKey, audio);
+            }).catch(() => {});
+          }
+        }
 
-        audio.onended = () => {
-          audioRef.current = null;
-          setSpeaking(false);
-        };
+        // Play current chunk and wait for it to finish
+        await new Promise((resolve, reject) => {
+          const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
+          audioRef.current = audio;
 
-        audio.onerror = () => {
-          audioRef.current = null;
-          setSpeaking(false);
-        };
+          audio.onended = () => {
+            audioRef.current = null;
+            resolve();
+          };
+          audio.onerror = (e) => {
+            audioRef.current = null;
+            reject(e);
+          };
 
-        audio.play();
-      } catch (error) {
-        if (error.name === "AbortError") return;
-        console.error("Sarvam TTS failed:", error);
-        setSpeaking(false);
-        setIsLoading(false);
+          audio.play().catch(reject);
+        });
+
+        // Wait for prefetch to complete before moving to next chunk
+        if (nextChunkPromise) {
+          await nextChunkPromise;
+        }
       }
-    },
-    [stop, setSpeaking]
-  );
+
+      // All chunks played
+      if (requestIdRef.current === myRequestId) {
+        setStatus("idle");
+      }
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+      if (requestIdRef.current !== myRequestId) return;
+      console.error("Sarvam TTS failed:", error);
+      setStatus("idle");
+    }
+  }, []);
 
   useEffect(() => {
     const handleLangChange = () => stop();
@@ -165,11 +217,22 @@ const useTTS = () => {
 
   useEffect(() => {
     return () => {
+      // Abort any in-flight requests and stop audio on unmount
+      requestIdRef.current += 1;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current = null;
       }
     };
   }, []);
+
+  // Derive booleans from status for backward compatibility
+  const isLoading = status === "loading";
+  const isSpeaking = status === "speaking";
 
   return { speak, stop, isSpeaking, isLoading };
 };
