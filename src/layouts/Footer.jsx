@@ -184,7 +184,10 @@ const Footer = () => {
           </p>
           <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
           <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
-          <h4 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h4>
+        </div>
+
+        <div className={`${styles.v2_column} ${styles.v2_columnWide}`}>
+          <h4 className={`${styles.v2_heading}`}>Download App</h4>
           {storeButtons}
         </div>
 
