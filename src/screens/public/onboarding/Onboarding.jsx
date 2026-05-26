@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
@@ -15,55 +14,49 @@ import LoginScreen from "./LoginScreen";
 const Onboarding = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const location = useLocation();
-  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
 
-  // Start directly at LoginScreen (skip WelcomeScreen)
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
-    guidance: [],
-    name: "",
-    email: "",
-    identity: "Female",
-    birthDate: "",
-    birthTime: "",
-    birthPlace: "",
-    unknownBirthTime: false,
-    latitude: null,
-    longitude: null,
-    phoneNumber: "",
-    otp: "",
+  const isPersonalizeFlow = searchParams.get("step") === "personalize";
+
+  const [currentStep, setCurrentStep] = useState(isPersonalizeFlow ? 3 : 1);
+
+  const [formData, setFormData] = useState(() => {
+    let phoneNumber = "";
+    if (isPersonalizeFlow) {
+      try {
+        const userData = localStorage.getItem("userData");
+        const user = userData ? JSON.parse(userData) : null;
+        phoneNumber = user?.phoneNumber || localStorage.getItem("shubhtalk_customer_phone") || "";
+      } catch { /* ignore */ }
+    }
+
+    return {
+      guidance: [],
+      name: "",
+      email: "",
+      identity: "Female",
+      birthDate: "",
+      birthTime: "",
+      birthPlace: "",
+      unknownBirthTime: false,
+      latitude: null,
+      longitude: null,
+      phoneNumber,
+      otp: "",
+    };
   });
 
-  // Redirect to home if user is already logged in (only on initial mount)
-  // DISABLED: This was interfering with the redirect-after-login flow
-  // The redirect logic is now handled in OTPScreen and LoadingScreen
+  // Redirect already-logged-in users to home (unless coming from kundli self-check)
   useEffect(() => {
+    if (isPersonalizeFlow) return;
+
     const token = localStorage.getItem("shubhtalk_customer_token");
     const userData = localStorage.getItem("userData");
     const redirectPath = localStorage.getItem("shubhtalk_redirect_after_login");
 
-    console.log(
-      "🔍 Onboarding mount check - token:",
-      !!token,
-      "userData:",
-      !!userData,
-      "redirectPath:",
-      redirectPath,
-      "Location Data::",
-      location?.state?.from
-    );
-
-    // Only redirect if user was already logged in before coming to this page
-    // AND there's no redirect path (meaning they came here directly, not from a 401 error)
     if (token && userData && !redirectPath) {
       try {
         const parsedUserData = JSON.parse(userData);
-        // Only redirect if user is already registered
         if (parsedUserData.isRegister) {
-          console.log(
-            "✅ User already logged in (no redirect path), redirecting to home",
-          );
           navigate(PATH.privateRoutes.HOME.path || "/");
         }
       } catch (error) {
@@ -73,31 +66,19 @@ const Onboarding = () => {
     // If there IS a redirect path, let the OTPScreen handle it after login
   }, []); // Run only once on mount
 
-  const isLoadingScreen = currentStep === 6;
-
   const handleStepChange = (step) => {
-    // Validate previous steps before allowing navigation
     if (step > 0 && (!formData.name || formData.name.trim().length < 3)) {
       toast.error("Please complete your name in the first step");
       return;
     }
-
     if (step > 1 && !formData.birthDate) {
       toast.error("Please complete your birth date in the second step");
       return;
     }
-
-    // Map the step index to the actual screen index
-    // PersonalizeScreen = step 0 -> screen 3
-    // BirthDetailsScreen = step 1 -> screen 4
-    // GuidanceScreen = step 2 -> screen 5
-    const screenIndex = step + 3;
-    setCurrentStep(screenIndex);
+    setCurrentStep(step + 3);
   };
 
-  const handleNext = () => {
-    setCurrentStep((prev) => prev + 1);
-  };
+  const handleNext = () => setCurrentStep((prev) => prev + 1);
 
   const handleBack = () => {
     // Prevent going back to WelcomeScreen (step 0) from LoginScreen (step 1)
@@ -109,11 +90,7 @@ const Onboarding = () => {
     setCurrentStep((prev) => prev - 1);
   };
 
-  // console.log("currentstep",currentStep)
-  const handleSkip = () => {
-    // Skip to home
-    navigate(PATH.privateRoutes.HOME.path || "/");
-  };
+  const handleSkip = () => navigate(PATH.privateRoutes.HOME.path || "/");
 
   const updateFormData = (data) => {
     setFormData((prev) => ({ ...prev, ...data }));
