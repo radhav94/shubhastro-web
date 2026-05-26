@@ -199,6 +199,15 @@ div[id^="goog-gt-"] {
     display: none !important;
 }
 
+/* Remove moon dividers globally */
+[class*="titleDivider"],
+[class*="cosmicDivider"],
+[class*="agenticTitleDivider"],
+[class*="headingUnderline"],
+[class*="dividerContainer"] {
+  display: none !important;
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -212,4 +221,9 @@ div[id^="goog-gt-"] {
 
 .animate-slideUp {
   animation: slideUp 0.25s ease-out;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

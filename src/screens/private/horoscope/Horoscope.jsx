@@ -29,6 +29,19 @@ import relationImg from "../../../assets/images/relation.png";
 import statusImg from "../../../assets/images/status.png";
 import physiqueImg from "../../../assets/images/physique.png";
 
+// Helper to determine if text on a colored background should be dark
+const isLightColor = (color) => {
+  if (!color) return false;
+  let hex = color.replace('#', '');
+  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+  if (hex.length !== 6) return true; // fallback: treat named colors as light to be safe
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6;
+};
+
 const HoroscopeNew = () => {
   const navigate = useNavigate();
   const { sign } = useParams();
@@ -144,7 +157,7 @@ const HoroscopeNew = () => {
   const [selectedZodiac, setSelectedZodiac] = useState(sign?.toLowerCase() || 'aries');
   const [tempSelectedZodiac, setTempSelectedZodiac] = useState(sign?.toLowerCase() || 'aries');
   const [activeTab, setActiveTab] = useState(getInitialTab());
-  const [activeCategory, setActiveCategory] = useState('');
+  const [activeCategory, setActiveCategory] = useState(location.state?.category || '');
   const [cameFromOverview, setCameFromOverview] = useState(false);
   const [overviewCardIndex, setOverviewCardIndex] = useState(null);
   const [showZodiacModal, setShowZodiacModal] = useState(false);
@@ -307,8 +320,17 @@ const HoroscopeNew = () => {
     setCategories(newCategories);
     
     // Set default active category to overview if not set or invalid
-    if (!activeCategory || !newCategories.find(c => c.id === activeCategory)) {
-      setActiveCategory('overview');
+    // If navigated with a specific category, apply it once categories are available
+    const navCategory = location.state?.category;
+    if (navCategory && newCategories.find(c => c.id === navCategory)) {
+      if (activeCategory !== navCategory) {
+        setActiveCategory(navCategory);
+      }
+    } else if (!activeCategory || !newCategories.find(c => c.id === activeCategory)) {
+      // Only default to overview if no pending nav category waiting for API data
+      if (!navCategory || newCategories.length > 1) {
+        setActiveCategory('overview');
+      }
     }
   }, [activeTab, dailyData, tomorrowData, weeklyData, yearlyData, activeCategory]);
 
@@ -594,11 +616,11 @@ const HoroscopeNew = () => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <h2 className="content-title">
                 {currentContent.title}
-                {currentContent.score && !currentContent.isOverview && (
+                {/* {currentContent.score && !currentContent.isOverview && (
                   <span style={{ fontSize: '14px', color: 'orange', marginLeft: '8px' }}>
                     ({currentContent.score}/100)
                   </span>
-                )}
+                )} */}
               </h2>
               <TTSButton text={(() => {
                 const parts = [];
@@ -624,7 +646,7 @@ const HoroscopeNew = () => {
                   <strong>Lucky Color:</strong>{' '}
                   <span
                     style={{
-                      color: '#fff',
+                      color: isLightColor(currentContent.luckyColorCode || currentContent.luckyColor) ? '#333' : '#fff',
                       backgroundColor: currentContent.luckyColorCode || currentContent.luckyColor,
                       padding: '2px 8px',
                       borderRadius: '4px',
@@ -653,7 +675,7 @@ const HoroscopeNew = () => {
                       <strong>Lucky Color:</strong>{' '}
                       <span
                         style={{
-                          color: '#fff',
+                          color: isLightColor(currentContent.luckyColorCode || currentContent.luckyColor) ? '#333' : '#fff',
                           backgroundColor: currentContent.luckyColorCode || currentContent.luckyColor,
                           padding: '2px 8px',
                           borderRadius: '4px',
@@ -684,11 +706,11 @@ const HoroscopeNew = () => {
                             <h3 className="overview-card-title">
                               {section.title}
                             </h3>
-                            {section.score && (
+                            {/* {section.score && (
                               <span className="overview-card-score">
                                 ({section.score}/100)
                               </span>
-                            )}
+                            )} */}
                           </div>
                         </div>
                         <div className="overview-card-body overview-card-body-expanded">

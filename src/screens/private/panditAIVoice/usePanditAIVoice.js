@@ -258,7 +258,7 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
         const signal = abortRef.current.signal;
         const audioBase64 = await textToSpeech(responseText, {
           language: ttsLanguage,
-          speaker: SARVAM_SPEAKERS.ISHITA,
+          speaker: SARVAM_SPEAKERS.PRIYA,
           pace: 1.0,
           signal,
         });

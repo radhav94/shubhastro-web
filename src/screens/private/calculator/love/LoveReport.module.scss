@@ -180,9 +180,11 @@
   cursor: pointer;
   padding: 6px 0;
   text-align: center;
+  text-decoration: underline;
+  transition: opacity 0.2s;
 
   &:hover {
-    text-decoration: underline;
+    opacity: 0.8;
   }
 }
 

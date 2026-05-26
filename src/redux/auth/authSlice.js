@@ -12,6 +12,7 @@ const getInitialAuthState = () => {
     token: token || null,
     isRegister: false,
     isVerified: false,
+    email: null,
   };
 };
 
@@ -34,12 +35,16 @@ const authSlice = createSlice({
       state.token = null;
       state.isRegister = false;
       state.isVerified = false;
+      state.email = null;
     },
     updateRegistrationStatus: (state, action) => {
       state.isRegister = action.payload.isRegister;
     },
+    setEmail: (state, action) => {
+      state.email = action.payload;
+    },
   },
 });
 
-export const { loginSuccess, logout, updateRegistrationStatus } = authSlice.actions;
+export const { loginSuccess, logout, updateRegistrationStatus, setEmail } = authSlice.actions;
 export default authSlice.reducer;

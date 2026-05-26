@@ -133,9 +133,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #f4e4b2;
+  color: #000;
   font-size: 16px;
-  background: #000;
+  font-weight: 600;
+  background: #fdf0e4;
   overflow: hidden;
 }
 
@@ -145,12 +146,18 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.5;
 }
 
 .waiting-text-label {
   position: relative;
   z-index: 2;
+  color: #000;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
 }
 
 /* Camera off overlay — astrologer image + name centered */
@@ -159,6 +166,7 @@
   inset: 0;
   z-index: 5;
   overflow: hidden;
+  background: #fdf0e4;
 }
 
 .camera-off-bg {
@@ -167,7 +175,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.5;
 }
 
 .camera-off-center {
@@ -226,7 +233,7 @@
   align-items: center;
   z-index: 50;
   padding: 14px;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.78) 0%, transparent 100%);
+  background: transparent;
 
   > .live-back-button {
     position: static;
@@ -849,7 +856,7 @@
   gap: 12px;
   z-index: 6;
   padding: 40px 14px calc(18px + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(to top, rgba(0, 0, 0, .78) 0%, transparent 100%);
+  background: transparent;
 }
 
 /* INLINE MESSAGES OVERLAY */
@@ -899,13 +906,13 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #f5e6d0;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 700;
-  color: #8b6914;
+  color: #fff;
 }
 
 .inline-host-message .inline-initial {
@@ -1758,6 +1765,7 @@
   width: 15px;
   height: 15px;
   stroke: #fff;
+  color: #fff;
   stroke-width: 2.5;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
@@ -1861,4 +1869,202 @@
   left: auto !important;
   transform: none !important;
   animation: none !important;
+}
+
+/* ===== CAMERA-OFF LIGHT THEME OVERRIDES ===== */
+.video-box.camera-off {
+  background: #fdf0e4;
+
+  .top-bar {
+    > .live-back-button {
+      background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+      border-color: transparent;
+
+      svg {
+        stroke: #fff;
+      }
+    }
+  }
+
+  .top-bar-left > .live-back-button {
+    background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+    border-color: transparent;
+
+    svg {
+      stroke: #fff;
+    }
+  }
+
+  .host-name {
+    color: #1a1a1a;
+    text-shadow: none;
+  }
+
+  .host-subtitle {
+    color: #555;
+    text-shadow: none;
+  }
+
+  .host-duration {
+    color: #666;
+    text-shadow: none;
+  }
+
+  .inline-message-body {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .inline-sender {
+    color: #555;
+  }
+
+  .inline-text {
+    color: #1a1a1a;
+  }
+
+  .inline-system-text {
+    color: #888;
+  }
+
+  .inline-initial {
+    background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+    color: #fff;
+  }
+
+  .gift-card-bubble {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .gift-card-sender {
+    color: #1a1a1a;
+  }
+
+  .gift-card-label {
+    color: #666;
+  }
+
+  .gift-card-price {
+    color: #1a1a1a;
+    background: rgba(0, 0, 0, 0.08);
+  }
+
+  .input-wrapper input {
+    border-color: rgba(0, 0, 0, 0.12);
+    background: rgba(0, 0, 0, 0.04);
+    color: #1a1a1a;
+    backdrop-filter: none;
+
+    &:focus {
+      border-color: rgba(0, 0, 0, 0.2);
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    &::placeholder {
+      color: #999;
+    }
+  }
+
+  .viewer-pill {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #1a1a1a;
+    backdrop-filter: none;
+  }
+
+  .viewer-count {
+    color: #1a1a1a;
+  }
+
+  .mute-indicator {
+    background: rgba(255, 255, 255, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    color: #1a1a1a;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+
+    svg {
+      stroke: #1a1a1a;
+      color: #1a1a1a;
+    }
+  }
+
+  .top-bar-right {
+    button, a {
+      color: #1a1a1a;
+
+      svg {
+        stroke: #1a1a1a;
+        color: #1a1a1a;
+      }
+    }
+  }
+
+  .live-call-pill {
+    background: rgba(0, 0, 0, 0.06);
+    backdrop-filter: none;
+  }
+
+  .follow-btn {
+    color: #fff !important;
+
+    svg {
+      stroke: #fff !important;
+      color: #fff !important;
+    }
+  }
+
+  .mute-indicator {
+    border-color: #1a1a1a;
+  }
+
+  .live-grid-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .right-action-bar .icon-btn {
+    color: #1a1a1a;
+  }
+
+  .icon-circle {
+    background: rgba(255, 255, 255, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+
+    svg {
+      stroke: #1a1a1a;
+      color: #1a1a1a !important;
+      filter: none;
+    }
+
+    img {
+      filter: brightness(0);
+    }
+  }
+
+  .icon-label {
+    color: #1a1a1a;
+    text-shadow: none;
+  }
+
+  // WaitingModal light theme override
+  .live-waiting-override > div {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.1) !important;
+
+    div {
+      color: #1a1a1a !important;
+    }
+  }
 }

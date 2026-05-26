@@ -11,6 +11,7 @@ import { useProfileManager } from "../../private/kundli/hooks/useProfileManager"
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
+import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
@@ -442,6 +443,12 @@ const HomeV2 = () => {
         <EmergencySessionModal isOpen={showEmergencyModal} onClose={() => setShowEmergencyModal(false)} astrologer={selectedAstrologer} onChatNow={(a) => handleConnectClick(a, "chat", true)} onCallNow={(a) => handleConnectClick(a, "audio", true)} />
         <MobileAppModal isOpen={showMobileAppModal} onClose={() => setShowMobileAppModal(false)} />
       </Suspense>
+      <RechargeModal
+        isOpen={hookOpenModal.recharge}
+        onClose={() => hookSetOpenModal((prev) => ({ ...prev, recharge: false }))}
+        astrologer={hookSelectedAstrologer}
+        connectionType={pendingConnectionType || "chat"}
+      />
       <PanditAIBubble />
       <PanditAIVoiceBubble />
     </>

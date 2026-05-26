@@ -43,7 +43,10 @@ const CmsPageWrapper = ({ children }) => {
     skip: shouldSkip,
   });
 
-  const pageData = !isError ? data?.data : null;
+  // Only use data if not excluded and data matches current slug
+  const pageData = !shouldSkip && !isError && data?.data?.slug === slug
+    ? data.data
+    : null;
   const hasBody = pageData?.body && pageData.body.trim().length > 0;
 
   return (
@@ -74,12 +77,12 @@ const CmsPageWrapper = ({ children }) => {
         <>
           {children}
           <div className={styles.container}>
-            {pageData.title && (
+            {/* {pageData.title && (
               <>
                 <h1 className={styles.title}>{pageData.title}</h1>
                 <Divider />
               </>
-            )}
+            )} */}
             <div
               className={styles.htmlContent}
               dangerouslySetInnerHTML={{ __html: pageData.body }}

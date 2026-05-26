@@ -139,10 +139,11 @@ const MangalReport = () => {
           Calculate Again
         </button>
       </div>
+
     </div>
 
-    <ConnectCard />
-  </>
+      <ConnectCard />
+    </>
   );
 };
 

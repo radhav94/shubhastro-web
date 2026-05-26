@@ -1,34 +1,34 @@
 .wrapper {
   max-width: 800px;
-  margin: 70px auto 40px auto;
-  padding: 16px;
-  border: 1.5px solid #fff;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.4);
+  margin: 20px auto;
+  padding: 0 16px;
+  text-align: center;
 }
 
 /* ── Header ── */
 .header {
   text-align: center;
-  padding: 0px 16px 16px 16px;
+  padding: 0px 16px 24px 16px;
 
   h2 {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
     color: #1a1a1a;
-    margin: 0 0 4px;
+    margin: 0 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   p {
     font-size: 14px;
-    color: #030303;
+    color: #555;
     margin: 0;
   }
 }
 
 /* ── Status Badge ── */
 .statusBadge {
-  margin: 0 auto 20px;
+  margin: 0 auto 24px;
   padding: 10px 28px;
   border-radius: 24px;
   width: fit-content;
@@ -60,7 +60,7 @@
   border-left: 4px solid #f75801;
   padding: 16px 20px;
   border-radius: 0 12px 12px 0;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   font-size: 14px;
   line-height: 1.7;
   color: #444;
@@ -69,7 +69,7 @@
 
 /* ── Section ── */
 .section {
-  margin-bottom: 28px;
+  margin-bottom: 16px;
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -173,18 +173,19 @@
 }
 
 .calculateBtn {
-  background: #fff;
+  background: transparent;
   color: #f75801;
-  padding: 13px 32px;
-  border-radius: 12px;
-  border: 1.5px solid #f75801;
+  padding: 10px 28px;
+  border-radius: 0;
+  border: none;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: background 0.2s;
+  text-decoration: underline;
+  transition: opacity 0.2s;
 
   &:hover {
-    background: #fff8f5;
+    opacity: 0.8;
   }
 }
 

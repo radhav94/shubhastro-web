@@ -218,8 +218,8 @@ export const WaitingQueueProvider = ({ children }) => {
 
   /* ================= GLOBAL TWO-WAY ACCEPT LISTENERS ================= */
   // These run at app level so events are handled regardless of which page the user is on
-  const { setCallApprovalData, callApprovalData } = useCall();
-  const { setChatApprovalData, chatApprovalData } = useChat();
+  const { setCallApprovalData, callApprovalData, activeCall } = useCall();
+  const { setChatApprovalData, chatApprovalData, activeChat } = useChat();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
   useEffect(() => {
@@ -318,45 +318,47 @@ export const WaitingQueueProvider = ({ children }) => {
     };
 
     // session:active_list — server sends all active sessions on connect/reconnect
+    // This is the primary APP KILL & RESTORE mechanism per the integration guide.
+    // On socket connect, server sends all active sessions for this user.
+    // The server list is the source of truth — REPLACE local pending connections entirely.
+    // Frontend restores UI based on each session's status:
+    //   - ringing → show "Calling astrologer..." UI (via pendingConnections)
+    //   - waiting → show "In queue, position X" UI (via pendingConnections)
+    //   - astrologer_accepted → show "Accept/Reject" UI (via approval data)
+    //   - on_hold → show "Unhold / Cancel" banner (via pendingConnections)
+    //   - on-going → rejoin call/chat (via call:reconnect / chat:reconnect)
     const handleActiveList = (data) => {
       console.log("[GlobalTwoWay] 📋 session:active_list", JSON.stringify(data));
       const sessions = data?.sessions || [];
-      if (!sessions.length) return;
 
-      // Sync pending connections with server state
-      setPendingConnections((prev) => {
-        const now = Date.now();
-        const merged = [...prev];
+      // Replace pending connections with server state (non on-going sessions)
+      const now = Date.now();
+      const newConnections = [];
 
-        sessions.forEach((session) => {
-          const { roomId, status, type, astrologerId } = session;
-          // Skip on-going sessions — those are handled by CallContext/ChatContext reconnect
-          if (status === "on-going") return;
+      sessions.forEach((session) => {
+        const { roomId, status, type, astrologerId } = session;
+        // on-going sessions are handled separately below via reconnect
+        if (status === "on-going") return;
 
-          const existingIdx = merged.findIndex((c) => c.roomId === roomId);
-          if (existingIdx !== -1) {
-            // Update status of existing entry
-            merged[existingIdx] = { ...merged[existingIdx], status };
-          } else {
-            // Add new entry from server
-            const astro = typeof astrologerId === "object" ? astrologerId : { _id: astrologerId };
-            merged.push({
-              id: roomId,
-              astrologer: astro,
-              type: type || "chat",
-              roomId,
-              waitingTime: 5,
-              timestamp: now,
-              isEmergency: session.isEmergency || false,
-              status: status || "ringing",
-              sessionId: session.sessionId || session._id,
-            });
-          }
+        const astro = typeof astrologerId === "object" ? astrologerId : { _id: astrologerId };
+        newConnections.push({
+          id: roomId,
+          astrologer: astro,
+          type: type || "chat",
+          roomId,
+          waitingTime: 5,
+          timestamp: now,
+          isEmergency: session.isEmergency || false,
+          status: status || "ringing",
+          sessionId: session.sessionId || session._id,
+          // Preserve live stream origin info for UI (clickable name → navigate to live)
+          fromLive: session.isLive || false,
+          liveChannelId: session.liveRoomDetails?.channel || session.liveRoomDetails?.roomId || null,
         });
-
-        persist(merged);
-        return merged;
       });
+
+      setPendingConnections(newConnections);
+      persist(newConnections);
 
       // If any session is astrologer_accepted, set approval data
       sessions.forEach((session) => {
@@ -377,6 +379,55 @@ export const WaitingQueueProvider = ({ children }) => {
           }
         }
       });
+
+      // Handle on-going sessions — trigger reconnect if no active call/chat in context.
+      // This covers the true "app kill" scenario where localStorage may have expired
+      // but the server still has an active session within the 60s grace period.
+      sessions.forEach((session) => {
+        if (session.status !== "on-going") return;
+
+        const { roomId, type, astrologerId } = session;
+        const astro = typeof astrologerId === "object" ? astrologerId : { _id: astrologerId };
+        const astroId = astro?._id || astrologerId;
+
+        if (type === "chat") {
+          // Only reconnect if ChatContext doesn't already have an active chat
+          if (!activeChat?.roomId) {
+            console.log("[GlobalTwoWay] 🔄 Restoring on-going chat session:", roomId);
+            voiceSocket.emit("chat:reconnect", {
+              roomId,
+              userId: userIdLocal,
+              astrologerId: astroId,
+              callType: "chat",
+            });
+          }
+        } else {
+          // audio or video — only reconnect if CallContext doesn't already have an active call
+          if (!activeCall?.roomId) {
+            console.log("[GlobalTwoWay] 🔄 Restoring on-going call session:", roomId);
+            voiceSocket.emit("call:reconnect", {
+              roomId,
+              userId: userIdLocal,
+              astrologerId: astroId,
+              callType: type || "audio",
+            });
+          }
+        }
+      });
+    };
+
+    // session:canceled — server auto-cancels sessions (e.g., live stream ended)
+    const handleSessionCanceled = (data) => {
+      console.log("[GlobalTwoWay] 🚫 session:canceled", JSON.stringify(data));
+      const { roomId } = data || {};
+      if (!roomId) return;
+
+      // Remove from pending connections
+      removePendingConnection(roomId);
+
+      // Clear approval data if it matches
+      if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
+      if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
     };
 
     voiceSocket.on("call:astrologer_accepted", handleCallAstrologerAccepted);
@@ -393,6 +444,7 @@ export const WaitingQueueProvider = ({ children }) => {
     voiceSocket.on("chat:rejected", handleRejected);
     voiceSocket.on("activity", handleActivity);
     voiceSocket.on("session:active_list", handleActiveList);
+    voiceSocket.on("session:canceled", handleSessionCanceled);
 
     return () => {
       voiceSocket.off("call:astrologer_accepted", handleCallAstrologerAccepted);
@@ -409,6 +461,7 @@ export const WaitingQueueProvider = ({ children }) => {
       voiceSocket.off("chat:rejected", handleRejected);
       voiceSocket.off("activity", handleActivity);
       voiceSocket.off("session:active_list", handleActiveList);
+      voiceSocket.off("session:canceled", handleSessionCanceled);
     };
   }, [userIdLocal]);
 
