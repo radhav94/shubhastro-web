@@ -37,6 +37,7 @@ import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
+import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
@@ -2146,6 +2147,13 @@ const Profile = () => {
           activeAstroRef.current = astro;
           handleCallStart(astro, "audio", true);
         }}
+      />
+
+      {/* Recharge Modal for insufficient balance */}
+      <RechargeModal
+        isOpen={hookOpenModal.recharge}
+        onClose={() => hookSetOpenModal((prev) => ({ ...prev, recharge: false }))}
+        astrologer={selectedAstrologer}
       />
 
       {/* Add Profile Modal */}

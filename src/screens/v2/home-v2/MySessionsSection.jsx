@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
-import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
+import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 
 // Inject getAllUserSessions endpoint
 const sessionsApi = privateRequestNew.injectEndpoints({
@@ -42,11 +42,13 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
   const {
     handleChatStart,
     handleCallStart,
+    openModal,
+    setOpenModal,
+    selectedAstrologer,
     activeCallAstroRef,
     kundliRef,
   } = useAstrologerConnect();
 
-  const { setSelectedAstrologer } = useAstrologerConnection(activeCallAstroRef, kundliRef.current);
   const sessions = useMemo(() => {
     return Array.isArray(data?.data?.recentSessions)
       ? data.data.recentSessions.slice(0, 6)
@@ -54,6 +56,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
   }, [data]);
 
   if (isLoading || !sessions.length) return null;
+
   const handleAgain = async (session) => {
     if (!session._id) {
       console.error("Astrologer _id not found in session");
@@ -70,14 +73,14 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
       price: session.price,
     };
 
+    activeCallAstroRef.current = astrologer;
+
     if (session.sessiontype === 'chat') {
       await handleChatStart(astrologer);
-    } else if (session.sessiontype === 'audio') {
-      await handleCallStart(astrologer, 'audio');
     } else if (session.sessiontype === 'video') {
       await handleCallStart(astrologer, 'video');
     } else {
-      navigate('/chat-to-astrologer');
+      await handleCallStart(astrologer, 'audio');
     }
   };
 
@@ -193,6 +196,13 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
           </div>
         ))}
       </div>
+
+      {/* Recharge Modal for insufficient balance */}
+      <RechargeModal
+        isOpen={openModal.recharge}
+        onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
+        astrologer={selectedAstrologer}
+      />
     </section>
   );
 };
