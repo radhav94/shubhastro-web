@@ -274,7 +274,7 @@ $font-primary:     "Poppins", sans-serif;
     margin: 0;
 
     li {
-      padding: 10px 0;
+      padding: 6px 0;
 
       a {
         color: $color-link;
@@ -319,7 +319,7 @@ $font-primary:     "Poppins", sans-serif;
 // ============================================================
 .v2_contactText {
   color: $color-grey;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
   margin: 6px 0 4px;
 }
@@ -341,6 +341,7 @@ $font-primary:     "Poppins", sans-serif;
   font-weight: 600;
   text-decoration: none;
   display: block;
+  margin-top: 10px;
   margin-bottom: 4px;
   transition: color 0.2s;
   &:hover { color: $color-accent; }
