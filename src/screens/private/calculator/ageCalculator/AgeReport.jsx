@@ -38,7 +38,7 @@ const AgeReport = () => {
         <CalcBackButton />
 
         <h2 className={styles.pageTitle}>AGE CALCULATOR</h2>
-        <div className={styles.headingUnderline}>
+        {/* <div className={styles.headingUnderline}>
           <div className={styles.dividerLine}>
             <svg xmlns="http://www.w3.org/2000/svg" width="93" height="1" viewBox="0 0 93 1" fill="none">
               <line y1="0.5" x2="93" y2="0.5" stroke="#030303" />
@@ -54,7 +54,7 @@ const AgeReport = () => {
               <line y1="0.5" x2="93" y2="0.5" stroke="#030303" />
             </svg>
           </div>
-        </div>
+        </div> */}
 
         {/* RESULT */}
         <div className={styles.resultCard}>

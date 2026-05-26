@@ -3967,7 +3967,7 @@
 
 .blogCard {
   // flex: 0 0 220px;
-  width: 220px;
+  width: 190px;
   background: #ffffff;
   border-radius: 12px;
   overflow: hidden;
@@ -3979,7 +3979,7 @@
     flex-shrink: 0;
   @media screen and (width <= 767px) {
     // flex: 0 0 150px;
-    width: 180px;
+    width: 145px;
   }
 }
 
