@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 import { useGetSingleBlogQuery, useGetBlogPageDataQuery } from "../../../../services/appServices/blogService";
 import styles from "./SingleBlogDetails.module.scss";
 import MoreBlogsCarousel from "../../../../component/UI/cards/MoreBlogsCarousel";
@@ -63,7 +64,7 @@ const SingleBlogDetails = () => {
             {singleBLogData.author && (
               <p className={styles.date}>{singleBLogData.author}</p>
             )}
-            <p className={styles.author}>{singleBLogData.publishDate}</p>
+            <p className={styles.author}>{dayjs(singleBLogData.publishDate).format("DD MMM YYYY")}</p>
           </div>
 
           {/* Blog Content */}

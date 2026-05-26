@@ -73,12 +73,12 @@ const CmsPageWrapper = ({ children }) => {
         <>
           {children}
           <div className={styles.container}>
-            {pageData.title && (
+            {/* {pageData.title && (
               <>
                 <h1 className={styles.title}>{pageData.title}</h1>
                 <Divider />
               </>
-            )}
+            )} */}
             <div
               className={styles.htmlContent}
               dangerouslySetInnerHTML={{ __html: pageData.body }}
