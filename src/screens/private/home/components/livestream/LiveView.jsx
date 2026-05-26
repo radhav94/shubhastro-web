@@ -33,7 +33,7 @@ import { createPortal } from "react-dom";
 import { ChevronLeft } from "lucide-react";
 import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
 import { AppImages, getAstrologerDefaultImage } from "../../../../../utils/appImages";
-import astrologerOfflineBg from "../../../../../assets/images/astrologer-offline-bg.png";
+import astrologerOfflineBg from "../../../../../assets/images/live-streaming-no-astro-background.webp";
 import {
   useCheckFollowingStatusQuery,
   useFollowAstrologerByIdMutation,
@@ -1060,7 +1060,7 @@ const LiveView = (props) => {
 
   return (
     <FixedLayer>
-      <div className="video-box">
+      <div className={`video-box${(!isHost && shouldRenderStream && safeRemoteUsers.length > 0 && !safeRemoteUsers.some((u) => u.hasVideo)) || (!isHost && !shouldRenderStream) ? ' camera-off' : ''}`}>
         <div className="reel-scroll-root" ref={reelRef}>
 
           {/* Back button when astrologer is not live */}
@@ -1512,7 +1512,7 @@ const LiveView = (props) => {
                   style={{ cursor: "pointer", background: "transparent" }}
                   onClick={(e) => { e.stopPropagation(); setShowWaitingPopup((v) => !v); }}
                 >
-                  <IoHourglass size={20} color="#fff" />
+                  <IoHourglass size={20} color="currentColor" />
                   <span className="hourglass-dot" />
                 </div>
                 {/* Waiting toast — beside hourglass, then shrinks into it */}
@@ -1608,9 +1608,9 @@ const LiveView = (props) => {
             {/* Viewers */}
             <div className="icon-btn viewer-icon-btn" style={{ cursor: "default" }}>
               <div className="icon-circle">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
+                  <circle cx="12" cy="12" r="3" fill="currentColor"/>
                 </svg>
               </div>
               <span className="icon-label">{viewerCount > 1000 ? `${(viewerCount/1000).toFixed(1)}k` : viewerCount}</span>

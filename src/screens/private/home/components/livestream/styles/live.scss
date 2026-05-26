@@ -13,23 +13,8 @@
   justify-content: center;
   align-items: center;
 
-  /* Premium luxury gradient background (desktop) */
-  background: radial-gradient(
-      circle at 20% 20%,
-      rgba(139, 92, 246, 0.22),
-      transparent 55%
-    ),
-    radial-gradient(
-      circle at 80% 80%,
-      rgba(212, 175, 55, 0.18),
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 50% 100%,
-      rgba(255, 107, 107, 0.15),
-      transparent 60%
-    ),
-    #000;
+  /* Background image */
+  background: url("../../../../../assets/images/live-streaming-no-astro-background.webp") center/cover no-repeat;
 }
 
 /* ===============================
@@ -176,7 +161,7 @@
   transition: all 0.2s ease;
 }
 .nav-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.8);
   transform: scale(1.05);
 }
 
@@ -201,16 +186,6 @@
 .slide-placeholder {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-      circle at 20% 20%,
-      rgba(139, 92, 246, 0.22),
-      transparent 55%
-    ),
-    radial-gradient(
-      circle at 80% 80%,
-      rgba(212, 175, 55, 0.18),
-      transparent 60%
-    ),
-    #000;
+  background: url("../../../../../assets/images/live-streaming-no-astro-background.webp") center/cover no-repeat;
 }
 
