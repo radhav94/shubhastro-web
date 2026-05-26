@@ -684,11 +684,11 @@ const HoroscopeNew = () => {
                             <h3 className="overview-card-title">
                               {section.title}
                             </h3>
-                            {section.score && (
+                            {/* {section.score && (
                               <span className="overview-card-score">
                                 ({section.score}/100)
                               </span>
-                            )}
+                            )} */}
                           </div>
                         </div>
                         <div className="overview-card-body overview-card-body-expanded">

@@ -160,12 +160,12 @@ const Footer = () => {
           {renderLinks(serviceLinks)}
         </div>
 
-        {isShubhMallEnabled() && (
+        {/* {isShubhMallEnabled() && (
           <div className={styles.v2_column}>
             <h4 className={styles.v2_heading}>Shop Our Products</h4>
             {renderLinks(shopLinks)}
           </div>
-        )}
+        )} */}
 
         <div className={styles.v2_column}>
           <h4 className={styles.v2_heading}>Company Policies</h4>
@@ -185,7 +185,7 @@ const Footer = () => {
           <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
           <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
         </div>
-
+        
         <div className={`${styles.v2_column} ${styles.v2_columnWide}`}>
           <h4 className={`${styles.v2_heading}`}>Download App</h4>
           {storeButtons}
@@ -209,7 +209,7 @@ const Footer = () => {
         </div>
         {renderAccordionColumn("horoscope", "Horoscope", horoscopeLinks)}
         {renderAccordionColumn("services", "Explore Services", serviceLinks)}
-        {isShubhMallEnabled() && renderAccordionColumn("shop", "Shop Our Products", shopLinks)}
+        {/* {isShubhMallEnabled() && renderAccordionColumn("shop", "Shop Our Products", shopLinks)} */}
         {renderAccordionColumn("company", "Company Policies", companyLinks)}
         <div className={`${styles.v2_column} ${styles.v2_marT}`}>
           <h4 className={styles.v2_heading}>Contact Us</h4>

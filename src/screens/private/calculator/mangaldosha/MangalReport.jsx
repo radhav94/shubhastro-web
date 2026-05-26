@@ -28,6 +28,7 @@ const MangalReport = () => {
   } = data.response;
 
   return (
+    <>
     <div className={styles.wrapper}>
       <CalcBackButton />
       {/* HEADER */}
@@ -139,8 +140,10 @@ const MangalReport = () => {
         </button>
       </div>
 
-      <ConnectCard />
     </div>
+
+      <ConnectCard />
+    </>
   );
 };
 

@@ -199,6 +199,15 @@ div[id^="goog-gt-"] {
     display: none !important;
 }
 
+/* Remove moon dividers globally */
+[class*="titleDivider"],
+[class*="cosmicDivider"],
+[class*="agenticTitleDivider"],
+[class*="headingUnderline"],
+[class*="dividerContainer"] {
+  display: none !important;
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
