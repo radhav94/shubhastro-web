@@ -140,6 +140,16 @@
 .timePickerWrapper {
   position: relative;
   width: 100%;
+
+  .dateInputRow {
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    .input {
+      padding-right: 40px;
+    }
+  }
 }
 
 .timeDropdown {
