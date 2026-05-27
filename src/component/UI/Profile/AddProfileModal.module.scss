@@ -124,7 +124,7 @@
     padding: 14px 16px;
     border: 1px solid #ddd;
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 16px;
     outline: none;
     transition: 0.2s ease;
 
@@ -322,7 +322,7 @@
     input,
     select {
       padding: 14px 18px;
-      font-size: 15px;
+      font-size: 16px;
       border: 1px solid #e0e0e0;
       border-radius: 8px;
       background: #fafafa;
@@ -330,11 +330,11 @@
 
       &:hover {
         border-color: #ccc;
-        background: #fff;
+        // background: #fff;
       }
 
       &:focus {
-        background: #fff;
+        // background: #fff;
         border-color: #999;
         outline: none;
       }

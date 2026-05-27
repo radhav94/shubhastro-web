@@ -1256,7 +1256,7 @@
   padding: 10px 16px;
   border: none;
   border-radius: 50px;
-  font-size: 15px;
+  font-size: 16px;
   color: #374151;
   outline: none;
   background: #fff;
@@ -2217,7 +2217,7 @@
 .profileLinkRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  // justify-content: space-between;
 }
 
 .profileLinkLeft {
@@ -2340,7 +2340,7 @@
   padding: 14px 16px;
   border-radius: 8px;
   border: 1px solid #ddd;
-  font-size: 0.95rem;
+  font-size: 16px;
   outline: none;
   margin-bottom: 0.75rem;
   transition: border-color 0.2s;
