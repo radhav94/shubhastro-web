@@ -13,6 +13,7 @@ import { getRouteFromSlug, requiresProfileData } from "../../../utils/constanats
 import { ProfileManager } from "../../../component/UI/Profile";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import toast from "react-hot-toast";
+import BackButton from "../../../component/UI/BackButton/BackButton";
 
 // Import default images as fallback
 import horoscopeImg from "../../../assets/explore/horoscope.png";
@@ -617,6 +618,7 @@ const Explore = () => {
 
   return (
     <div className={styles.explorePage}>
+      <BackButton />
       {/* Header */}
       <div className={styles.headerWrap}>
       <div className={styles.header}>

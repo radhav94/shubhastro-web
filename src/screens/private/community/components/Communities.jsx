@@ -94,9 +94,12 @@ const Communities = ({ onCommunityClick, topAstrologers = [], sectionContent = [
                 className={styles.communityCard}
                 onClick={() => onCommunityClick(space.slug)}
               >
+                {isJoined(space) && (
+                  <span className={styles.joinedBadge}>Joined</span>
+                )}
                 <div className={styles.communityCardAvatar}>
                   {space.icon && (
-                    <span style={{ fontSize: 28, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
+                    <span style={{ fontSize: 28 }}>
                       {space.icon}
                     </span>
                   )}
@@ -106,17 +109,11 @@ const Communities = ({ onCommunityClick, topAstrologers = [], sectionContent = [
                   <FiUsers size={13} /> {formatMemberCount(space.memberCount)} members
                 </span>
                 <button
-                  className={`${styles.joinBtn} ${isJoined(space) ? styles.joined : ""}`}
+                  className={`${styles.joinBtn} ${isJoined(space) ? styles.leaveBtn : ""}`}
                   disabled={loadingMap[space.slug]}
                   onClick={(e) => handleJoinLeave(space, e)}
                 >
-                  {isJoined(space) ? (
-                    <>✓ Joined</>
-                  ) : (
-                    <>
-                      <FiUsers size={13} /> Join
-                    </>
-                  )}
+                  <FiUsers size={13} /> {isJoined(space) ? "Leave" : "Join"}
                 </button>
               </div>
             ))}

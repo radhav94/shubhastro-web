@@ -77,7 +77,7 @@ const CommentSection = ({ postId }) => {
     postId,
     page,
     limit: 20,
-    sort: "newest",
+    sort: "oldest",
   });
   const [addComment, { isLoading: isSending }] = useAddPostCommentMutation();
 

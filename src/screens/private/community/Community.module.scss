@@ -634,6 +634,7 @@ $radius-sm: 8px;
   grid-template-columns: repeat(6, 1fr);
   gap: 16px;
   margin-bottom: 36px;
+  padding-top: 12px;
 
   @media (max-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
@@ -645,67 +646,92 @@ $radius-sm: 8px;
 }
 
 .communityCard {
-  background: #FFFFFF66;
-  border: 1px solid #FFFFFF;
-  border-radius: 16px;
-  padding: 20px 14px 16px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  padding: 24px 16px 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   cursor: pointer;
   transition: box-shadow 0.2s;
+  position: relative;
 
   &:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   }
 }
 
+.joinedBadge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  color: #16a34a;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 12px;
+  border: 1px solid #bbf7d0;
+  white-space: nowrap;
+  z-index: 1;
+}
+
 .communityCardAvatar {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background: #d9d9d9;
-  margin-bottom: 10px;
+  background: #fff;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .communityCardName {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   color: $text-dark;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .communityCardMembers {
-  font-size: 12px;
+  font-size: 13px;
   color: $text-light;
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .joinBtn {
-  padding: 6px 20px;
+  padding: 8px 28px;
   background: $primary;
   color: #fff;
   border: none;
-  border-radius: 20px;
-  font-size: 12px;
+  border-radius: 24px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 
   &:hover {
     background: darken($primary, 8%);
   }
 
-  &.joined {
+  &.leaveBtn {
     background: #fff;
-    color: #16a34a;
-    border: 1.5px solid #16a34a;
+    color: #dc2626;
+    border: 1.5px solid #dc2626;
+
+    &:hover {
+      background: #fef2f2;
+    }
   }
 }
 
@@ -1494,16 +1520,35 @@ $radius-sm: 8px;
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
+  max-height: 450px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+
+  @media (max-width: 768px) {
+    max-height: 350px;
+  }
 }
 
 .commentsList {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: 400px;
-  overflow-y: auto;
   padding-right: 4px;
-  margin-bottom: 14px;
+  flex: 1;
+}
+
+.commentInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  z-index: 1;
+  margin-top: 14px;
 }
 
 .commentItem {
@@ -1599,14 +1644,6 @@ $radius-sm: 8px;
     opacity: 0.5;
     cursor: not-allowed;
   }
-}
-
-.commentInputWrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .commentInputAvatar {

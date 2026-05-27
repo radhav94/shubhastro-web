@@ -5,6 +5,7 @@ import PopularBlogsSection from "../../../component/UI/cards/PopularBlogsSection
 import RelationalBlogsSection from "../../../component/UI/cards/RelationalBlogsSection";
 import TrendingBlogsCarousel from "../../../component/UI/cards/TrendingBlogsCarousel";
 import { useGetBlogPageDataQuery } from "../../../services/appServices/blogService";
+import BackButton from "../../../component/UI/BackButton/BackButton";
 
 const Blog = () => {
   const { data: blogPageData, isLoading } = useGetBlogPageDataQuery({ page: 1, limit: 10 });
@@ -37,6 +38,7 @@ const Blog = () => {
 
   return (
     <>
+      <BackButton />
       {/* Trending Blogs Carousel - at the very top */}
       {trendingBlogs.length > 0 && (
         <TrendingBlogsCarousel 
