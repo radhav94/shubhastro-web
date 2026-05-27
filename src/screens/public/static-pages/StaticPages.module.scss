@@ -13,6 +13,9 @@
   color: #030303;
   margin-block: 20px;
   text-align: center;
+  @media (width <= 768px) {
+    font-size: 20px;
+  }
 }
 
 .subtitle {

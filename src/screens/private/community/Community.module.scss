@@ -5,14 +5,14 @@ $text-dark: #1a1a1a;
 $text-secondary: #333;
 $text-muted: #666;
 $text-light: #999;
-$border-color: #eee;
+$border-color: #fff;
 $card-bg: #FFFFFF66;
 $radius: 12px;
 $radius-sm: 8px;
 
 // ─── Page Container ───────────────────────────────────────────────────────────
 .communityPage {
-  max-width: 1440px;
+  max-width: 100%;
   width: 100%;
   margin: 0 auto;
   padding: 0px 20px 60px;
@@ -62,9 +62,35 @@ $radius-sm: 8px;
   font-weight: 600;
   color: $text-dark;
 }
-
+.profileHeaderWrap{
+  background: rgba(255, 255, 255,0.4);
+  border-bottom: 1px solid #fff;
+  position: fixed;
+  top: 94px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  @media screen and (width <= 1180px) {
+    top: 53px;
+  }
+}
+.profileHeader {
+  display: flex; /* Hidden by default on mobile */
+  gap: 10px;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  // @media (width <= 767px) {
+  //   padding: 0px 16px;
+  // }
+}
 // ─── Page Body ────────────────────────────────────────────────────────────────
 .pageBody {
+  max-width: 1440px;
+  margin: 70px auto 0 auto;
+  // padding: 0px 16px;
   display: grid;
   grid-template-columns: 2fr 7fr 3fr;
   gap: 20px;
@@ -72,6 +98,9 @@ $radius-sm: 8px;
 
   @media (max-width: 900px) {
     display: block;
+  }
+  @media (max-width: 767px) {
+    margin: 50px auto 0 auto;
   }
 }
 
@@ -83,10 +112,12 @@ $radius-sm: 8px;
   padding: 20px 15px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  background: #FFFFFF66;
+  gap: 10px;
+  background: rgba($color: #ffffff, $alpha: 0.4);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  border: 1px solid #fff;
+  border-radius: 16px;
 
   @media (max-width: 900px) {
     display: none;
@@ -140,8 +171,8 @@ $radius-sm: 8px;
 
 // Other Communities
 .otherCommunities {
-  padding-top: 0;
-  border-top: 1px solid #e0e0e0;
+  padding-top: 16px;
+  border-top: 1px solid #fff;
 }
 
 .sidebarSectionTitle {
@@ -264,6 +295,9 @@ $radius-sm: 8px;
   grid-template-columns: 7fr 3fr;
   gap: 20px;
 
+  @media (max-width: 1024px) {
+    grid-template-columns: 5fr 3fr;
+  }
   @media (max-width: 900px) {
     display: block;
   }
@@ -361,7 +395,7 @@ $radius-sm: 8px;
   border: none;
   border-radius: 12px;
   padding: 12px 16px;
-  font-size: 14px;
+  font-size: 16px;
   color: $text-dark;
   outline: none;
   background: #f5f5f5;
@@ -498,7 +532,7 @@ $radius-sm: 8px;
 .postImage {
   width: 100%;
   height: auto;
-  max-height: 340px;
+  // max-height: 340px;
   object-fit: cover;
   display: block;
   border-radius: $radius-sm;
@@ -540,6 +574,7 @@ $radius-sm: 8px;
 .trendingSidebar {
   background: $card-bg;
   border: 1px solid #FFFFFF;
+  backdrop-filter: blur(12px);
   border-radius: 16px;
   padding: 16px;
   position: sticky;
@@ -605,7 +640,7 @@ $radius-sm: 8px;
 
 .trendingExp {
   font-size: 11px;
-  color: $text-light;
+  color: $text-dark;
 }
 
 .connectBtn {
@@ -634,11 +669,14 @@ $radius-sm: 8px;
   grid-template-columns: repeat(6, 1fr);
   gap: 16px;
   margin-bottom: 36px;
-  padding-top: 12px;
+  // padding-top: 12px;
 
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
+  @media (max-width: 1180px) {
+    grid-template-columns: repeat(4, 1fr);
   }
+  // @media (max-width: 1024px) {
+  //   grid-template-columns: repeat(3, 1fr);
+  // }
   @media (max-width: 600px) {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
@@ -665,16 +703,16 @@ $radius-sm: 8px;
 
 .joinedBadge {
   position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 14px;
+  left: 4px;
+  // transform: translateX(-50%);
   background: #fff;
   color: #16a34a;
   font-size: 11px;
   font-weight: 600;
-  padding: 3px 12px;
+  padding: 3px 6px;
   border-radius: 12px;
-  border: 1px solid #bbf7d0;
+  // border: 1px solid #bbf7d0;
   white-space: nowrap;
   z-index: 1;
 }
@@ -692,10 +730,15 @@ $radius-sm: 8px;
 }
 
 .communityCardName {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   color: $text-dark;
   margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  width: 100%;    
 }
 
 .communityCardMembers {
@@ -719,6 +762,7 @@ $radius-sm: 8px;
   display: flex;
   align-items: center;
   gap: 6px;
+  border: 1.5px solid #dc2626;
 
   &:hover {
     background: darken($primary, 8%);
@@ -966,7 +1010,7 @@ $radius-sm: 8px;
   padding: 14px 16px;
   border: 1px solid #f0e6dc;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
   color: $text-dark;
   outline: none;
   background: #fff;
@@ -986,7 +1030,7 @@ $radius-sm: 8px;
   padding-bottom: 40px;
   border: 1px solid #f0e6dc;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
   color: $text-dark;
   outline: none;
   resize: vertical;
@@ -1381,7 +1425,7 @@ $radius-sm: 8px;
 .mobileTabBar {
   display: none;
   background: transparent;
-  padding: 12px 16px;
+  padding: 12px 16px 12px 0px;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
@@ -1425,9 +1469,9 @@ $radius-sm: 8px;
 
 // ─── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 900px) {
-  .pageBody {
-    display: block;
-  }
+  // .pageBody {
+  //   display: block;
+  // }
 
   .mainContent {
     grid-column: unset;
@@ -1470,10 +1514,10 @@ $radius-sm: 8px;
     padding: 8px 12px;
   }
 
-  .communitiesGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
+  // .communitiesGrid {
+  //   grid-template-columns: repeat(2, 1fr);
+  //   gap: 12px;
+  // }
 
   .createPostLayout {
     flex-direction: column;
@@ -1670,7 +1714,7 @@ $radius-sm: 8px;
   align-items: center;
   gap: 8px;
   background: #f5f5f5;
-  border: 1px solid #eee;
+  border: 1px solid #ffffff;
   border-radius: 24px;
   padding: 8px 12px;
 }

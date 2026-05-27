@@ -1,12 +1,16 @@
 .tabsContainer {
-  background-color: #f3f4f6;
+  background-color: rgba($color: #ffffff, $alpha: 0.4);
+  backdrop-filter: blur(12px);
   padding: 20px 14px;
   position: sticky;
-  top: 163px;
+  top: 174px;
   z-index: 9;
 
-  @media (min-width: 1024px) {
-    top: 208px;
+  @media (max-width: 1180px) {
+    top: 174px;
+  }
+  @media (max-width: 820px) {
+    top: 130px;
   }
 }
 
