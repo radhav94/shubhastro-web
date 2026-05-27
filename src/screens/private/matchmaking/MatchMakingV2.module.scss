@@ -15,12 +15,10 @@
   border-radius: 12px;
 }
 .matchMaking{
-  margin-top: 90px;
   width: 100%;
   display: flex;
   justify-content: center;
   @media (width <= 767px) {
-    margin-top: 53px;
     flex-direction: column;
   }
 }
