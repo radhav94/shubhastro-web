@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { FiImage, FiX } from "react-icons/fi";
 import styles from "../Community.module.scss";
 import SuccessModal from "./SuccessModal";
+import MwebCommunities from "./MwebCommunities";
 import {
   useCreateCommunityPostMutation,
   useGetCommunitySpacesQuery,
@@ -18,11 +19,10 @@ const POSTING_GUIDELINES = [
   "Posts are reviewed by AI moderation before publishing.",
 ];
 
-const CreatePost = ({ onSuccess }) => {
+const CreatePost = ({ onSuccess, joinedSpaces: mwebJoinedSpaces = [], onCommunityClick }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [selectedSpaceId, setSelectedSpaceId] = useState("");
-  const [isAnonymous, setIsAnonymous] = useState(false);
   const [images, setImages] = useState([]); // [{ file, preview }]
   const [showSuccess, setShowSuccess] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -95,6 +95,10 @@ const CreatePost = ({ onSuccess }) => {
   };
 
   const handleSubmit = async () => {
+    if (!selectedSpaceId) {
+      Toast.error("Please select a community");
+      return;
+    }
     if (!title.trim()) {
       Toast.error("Title is required");
       return;
@@ -116,14 +120,10 @@ const CreatePost = ({ onSuccess }) => {
       const postData = {
         title: title.trim(),
         body: content.trim(),
-        isAnonymous,
+        spaceId: selectedSpaceId,
         images: imageUrls,
         linkedProducts: [],
       };
-
-      if (selectedSpaceId) {
-        postData.spaceId = selectedSpaceId;
-      }
 
       await createPost(postData).unwrap();
       setShowSuccess(true);
@@ -139,7 +139,6 @@ const CreatePost = ({ onSuccess }) => {
     setTitle("");
     setContent("");
     setSelectedSpaceId("");
-    setIsAnonymous(false);
     images.forEach((img) => URL.revokeObjectURL(img.preview));
     setImages([]);
   };
@@ -155,6 +154,9 @@ const CreatePost = ({ onSuccess }) => {
   return (
     <div className={styles.createPostLayout}>
       <div className={styles.createPostMain}>
+        {/* Your Community - Mobile Only */}
+        <MwebCommunities joinedSpaces={mwebJoinedSpaces} onCommunityClick={onCommunityClick} />
+
         <h2 className={styles.sectionHeading}>
           <span className={styles.headingBar} />
           CREATE POST
@@ -163,13 +165,15 @@ const CreatePost = ({ onSuccess }) => {
         <div className={styles.createPostForm}>
           {/* Community Selector */}
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Community</label>
+            <label className={styles.formLabel}>
+              Community <span className={styles.required}>*</span>
+            </label>
             <select
               value={selectedSpaceId}
               onChange={(e) => setSelectedSpaceId(e.target.value)}
               className={styles.formInput}
             >
-              <option value="">Select a community (optional)</option>
+              <option value="">Select a community</option>
               {joinedSpaces.map((space) => (
                 <option key={space._id} value={space._id}>
                   {space.icon} {space.name}
@@ -246,19 +250,6 @@ const CreatePost = ({ onSuccess }) => {
             )}
           </div>
 
-          {/* Anonymous Toggle */}
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={isAnonymous}
-                onChange={(e) => setIsAnonymous(e.target.checked)}
-                style={{ width: 16, height: 16 }}
-              />
-              Post anonymously
-            </label>
-          </div>
-
           {/* Moderation Notice */}
           <div className={styles.moderationNotice}>
             <span className={styles.infoIcon}>ℹ️</span>
@@ -273,7 +264,7 @@ const CreatePost = ({ onSuccess }) => {
             <button
               className={styles.submitBtn}
               onClick={handleSubmit}
-              disabled={!title.trim() || content.trim().length < 20 || isBusy}
+              disabled={!selectedSpaceId || !title.trim() || content.trim().length < 20 || isBusy}
               type="button"
             >
               {isBusy ? "Posting..." : "Post"}

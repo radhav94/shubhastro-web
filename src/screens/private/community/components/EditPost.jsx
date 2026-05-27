@@ -14,7 +14,6 @@ const MAX_IMAGES = 5;
 const EditPost = ({ postId, onSuccess }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [isAnonymous, setIsAnonymous] = useState(false);
   const [images, setImages] = useState([]);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -29,7 +28,6 @@ const EditPost = ({ postId, onSuccess }) => {
     if (post) {
       setTitle(post.title || "");
       setContent(post.body || "");
-      setIsAnonymous(post.isAnonymous || false);
       if (post.images && post.images.length > 0) {
         setImages(post.images.map((url) => ({ url, isExisting: true })));
       }
@@ -171,7 +169,9 @@ const EditPost = ({ postId, onSuccess }) => {
           {/* Community (read-only) */}
           {post?.spaceInfo && (
             <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Community</label>
+              <label className={styles.formLabel}>
+                Community <span className={styles.required}>*</span>
+              </label>
               <input
                 type="text"
                 value={`${post.spaceInfo.icon || ""} ${post.spaceInfo.name || ""}`}
@@ -247,19 +247,6 @@ const EditPost = ({ postId, onSuccess }) => {
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Anonymous (read-only) */}
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <input
-                type="checkbox"
-                checked={isAnonymous}
-                disabled
-                style={{ width: 16, height: 16 }}
-              />
-              Post anonymously
-            </label>
           </div>
 
           {/* Moderation Notice */}

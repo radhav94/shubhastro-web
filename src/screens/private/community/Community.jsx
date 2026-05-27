@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FiUsers, FiFileText, FiPlus, FiChevronLeft } from "react-icons/fi";
 import { LuNewspaper } from "react-icons/lu";
@@ -34,6 +34,17 @@ const Community = () => {
   const activeTab = searchParams.get("tab") || "feed";
   const communityId = searchParams.get("community");
   const editPostId = searchParams.get("postId");
+  const mobileTabBarRef = useRef(null);
+
+  // Auto-scroll mobile tab bar to show active tab
+  useEffect(() => {
+    if (mobileTabBarRef.current) {
+      const activeBtn = mobileTabBarRef.current.querySelector(`[data-tab="${activeTab}"]`);
+      if (activeBtn) {
+        activeBtn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      }
+    }
+  }, [activeTab]);
 
   const { data: pageResponse } = useGetCommunityPageDataQuery();
   const { data: spacesData } = useGetCommunitySpacesQuery({ page: 1, limit: 20 });
@@ -97,7 +108,7 @@ const Community = () => {
     }
     switch (activeTab) {
       case "feed":
-        return <YourFeed trendingAstrologers={feedTrendingAstrologers} sectionContent={feedSection?.content} spaces={spaces} joinedSpaces={joinedSpaces} onViewAllCommunities={() => setActiveTab("communities")} onCommunityClick={handleCommunityClick} />;
+        return <YourFeed trendingAstrologers={feedTrendingAstrologers} sectionContent={feedSection?.content} joinedSpaces={joinedSpaces} onCommunityClick={handleCommunityClick} />;
       case "communities":
         return (
           <Communities
@@ -108,13 +119,13 @@ const Community = () => {
           />
         );
       case "posts":
-        return <YourPosts trendingAstrologers={postsTrendingAstrologers} sectionContent={yourPostsSection?.content} />;
+        return <YourPosts trendingAstrologers={postsTrendingAstrologers} sectionContent={yourPostsSection?.content} joinedSpaces={joinedSpaces} onCommunityClick={handleCommunityClick} />;
       case "create":
-        return <CreatePost onSuccess={() => setActiveTab("posts")} />;
+        return <CreatePost onSuccess={() => setActiveTab("posts")} joinedSpaces={joinedSpaces} onCommunityClick={handleCommunityClick} />;
       case "edit":
         return <EditPost postId={editPostId} onSuccess={() => setActiveTab("posts")} />;
       default:
-        return <YourFeed trendingAstrologers={feedTrendingAstrologers} sectionContent={feedSection?.content} spaces={spaces} joinedSpaces={joinedSpaces} onViewAllCommunities={() => setActiveTab("communities")} onCommunityClick={handleCommunityClick} />;
+        return <YourFeed trendingAstrologers={feedTrendingAstrologers} sectionContent={feedSection?.content} joinedSpaces={joinedSpaces} onCommunityClick={handleCommunityClick} />;
     }
   };
 
@@ -130,12 +141,13 @@ const Community = () => {
 
       <div className={styles.pageBody}>
         {/* Mobile Tab Bar */}
-        <div className={styles.mobileTabBar}>
+        <div className={styles.mobileTabBar} ref={mobileTabBarRef}>
           {TABS.map((tab) => (
             <button
               key={tab.id}
               className={`${styles.mobileTab} ${activeTab === tab.id ? styles.active : ""}`}
               onClick={() => setActiveTab(tab.id)}
+              data-tab={tab.id}
             >
               <tab.icon size={16} />
               {tab.label}
