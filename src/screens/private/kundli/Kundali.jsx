@@ -55,6 +55,11 @@ const Kundali = () => {
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
   const { data: chargesData } = useGetChargesQuery();
   
+  // Scroll to top on initial mount (page load / navigation)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Sync activeTabIndex with query params on mount and when params change
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -492,10 +497,13 @@ const Kundali = () => {
     },
   ];
 
+  // Track whether user has interacted (profile change) to allow auto-scroll
+  const hasUserInteracted = useRef(false);
+
   useEffect(() => {
-    // Don't auto-scroll if page was loaded with a tab param (user navigated via URL)
+    // Only auto-scroll to content when user explicitly changed profile (not on initial load)
     const hasTabParam = searchParams.get('tab');
-    if ((planetLoading || isAstro) && !hasTabParam) {
+    if (hasUserInteracted.current && (planetLoading || isAstro) && !hasTabParam) {
       contentRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
@@ -582,6 +590,9 @@ const Kundali = () => {
   };
 
   const handleSelectProfile = (profile) => {
+    // Mark that user has interacted so auto-scroll to content is allowed
+    hasUserInteracted.current = true;
+
     // If it's a temporary profile (from non-logged-in user), add it to tempProfiles
     if (!isLoggedIn && profile._id?.startsWith('temp_')) {
       // Check if this temp profile already exists

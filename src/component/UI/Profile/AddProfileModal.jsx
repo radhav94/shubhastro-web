@@ -311,7 +311,7 @@ const AddProfileModal = ({
                         setFieldValue("birthTime", "");
                       }
                     }}
-                    placeholder="Select time"
+                    placeholder="HH:MM AM/PM"
                     disabled={values.unknownBirthTime}
                   />
                   <ErrorMessage name="birthTime" component="div" className={styles.errorText} />
