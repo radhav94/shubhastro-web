@@ -5,6 +5,7 @@ import PopularBlogsSection from "../../../component/UI/cards/PopularBlogsSection
 import RelationalBlogsSection from "../../../component/UI/cards/RelationalBlogsSection";
 import TrendingBlogsCarousel from "../../../component/UI/cards/TrendingBlogsCarousel";
 import { useGetBlogPageDataQuery } from "../../../services/appServices/blogService";
+import CalcBackButton from "../calculator/CalcBackButton";
 
 const Blog = () => {
   const { data: blogPageData, isLoading } = useGetBlogPageDataQuery({ page: 1, limit: 10 });
@@ -37,6 +38,7 @@ const Blog = () => {
 
   return (
     <>
+      <CalcBackButton />
       {/* Trending Blogs Carousel - at the very top */}
       {trendingBlogs.length > 0 && (
         <TrendingBlogsCarousel 

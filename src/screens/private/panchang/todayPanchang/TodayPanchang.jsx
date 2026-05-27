@@ -14,6 +14,7 @@ import { PanchangInputCard } from "../../../../component";
 import PanchangCards from "../../../../component/UI/cards/PanchangCards";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import BasicContent from "../../kundli/BasicContent/BasicContent";
+import CalcBackButton from "../../calculator/CalcBackButton";
 // import AccordionSection from "../../../../component/UI/AccordionSection/AccordionSection";
 
 // Icons
@@ -484,6 +485,7 @@ const TodayPanchang = () => {
 
   return (
     <>
+      <CalcBackButton />
       <PrimaryLoader isLoading={isLoading} />
 
       {isSuccess && (

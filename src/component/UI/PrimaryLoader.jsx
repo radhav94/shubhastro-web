@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./PrimaryLoader.module.scss";
-import defaultLoadingGif from "../../assets/gif/loading.gif";
+import defaultLoadingGif from "../../assets/gif/LOADING-ANIMATION.gif";
 
 const PrimaryLoader = ({
   isLoading,

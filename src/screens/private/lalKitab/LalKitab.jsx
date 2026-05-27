@@ -10,6 +10,7 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import TTSButton from "../../../component/UI/TTSButton";
+import CalcBackButton from "../calculator/CalcBackButton";
 import laalKitaabImg from "../../../assets/images/laal-kitaab.png";
 
 const features = [
@@ -81,6 +82,7 @@ const LalKitab = () => {
 
   return (
     <div className={styles.page}>
+      <CalcBackButton />
       {(isGenerating || isLoadingProfiles) && <PrimaryLoader />}
 
       {/* ── Hero Banner ── */}
