@@ -123,6 +123,10 @@
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 16px;
+   @media (width <= 767px) {
+    margin: 0px;
+    padding: 0px 16px
+  }
 }
 
 // Hero Section
@@ -747,7 +751,7 @@
     position: absolute;
     right: 0px;
     top: 0px;
-    height: 130px;
+    // height: 130px;
   }
 }
 
