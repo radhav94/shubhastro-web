@@ -190,7 +190,9 @@ const useChatSocket = ({
       if (data?.switchRejected && (data?.type === "audio" || data?.type === "video")) {
         console.log("🔄 Call switch rejected - current call continues");
         Toast.info(data?.message || "Call switch request rejected. Continuing current call.");
-        // Don't reset anything - the current call should continue
+        setWaitingPopup(false);
+        setGlobalWaitingList(null);
+        setCallRoomId(null);
         return;
       }
       
@@ -203,6 +205,22 @@ const useChatSocket = ({
       setGlobalWaitingList(null);
       setCallRoomId(null);
       resetCallFlow();
+    };
+
+    const handleSwitchRejected = (data) => {
+      console.log("🔄 call:switch_rejected event received", data);
+      Toast.info(data?.message || "Switch request rejected, continuing current session.");
+      setWaitingPopup(false);
+      setGlobalWaitingList(null);
+      setCallRoomId(null);
+    };
+
+    const handleSwitchCanceled = (data) => {
+      console.log("🔄 call:switch_canceled event received", data);
+      Toast.info(data?.message || "Switch request canceled, continuing current session.");
+      setWaitingPopup(false);
+      setGlobalWaitingList(null);
+      setCallRoomId(null);
     };
 
     const handleCallEnded = () => {
@@ -244,6 +262,8 @@ const useChatSocket = ({
     voiceSocket.on("call:accepted", handleCallAccepted);
     voiceSocket.on("call:rejected", handleCallRejected);
     voiceSocket.on("call:ended", handleCallEnded);
+    voiceSocket.on("call:switch_rejected", handleSwitchRejected);
+    voiceSocket.on("call:switch_canceled", handleSwitchCanceled);
     voiceSocket.on("error", handleSocketError);
 
     return () => {
@@ -251,6 +271,8 @@ const useChatSocket = ({
       voiceSocket.off("call:accepted", handleCallAccepted);
       voiceSocket.off("call:rejected", handleCallRejected);
       voiceSocket.off("call:ended", handleCallEnded);
+      voiceSocket.off("call:switch_rejected", handleSwitchRejected);
+      voiceSocket.off("call:switch_canceled", handleSwitchCanceled);
       voiceSocket.off("error", handleSocketError);
     };
   }, [

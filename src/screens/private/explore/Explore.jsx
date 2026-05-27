@@ -147,10 +147,10 @@ const Explore = () => {
     if (displayType === "all-about-you") {
       return (
         <section key={index} className={styles.section}>
-          <h1 className={styles.mainTitle}>{section.display_title || section.title || "All About You"}</h1>
+          {/* <h1 className={styles.mainTitle}>{section.display_title || section.title || "All About You"}</h1>
           <p className={styles.subtitle}>
             {section.description || "An ever growing library on the story of you"}
-          </p>
+          </p> */}
 
           <h1 className={styles.titleSub}>{section?.display_title}</h1>
 
@@ -202,9 +202,9 @@ const Explore = () => {
                   </div>
                   <div className={styles.kundliCardContent}>
                     <h3 className={styles.kundliCardTitle}>{card.title}</h3>
-                    {card.description && (
+                    {/* {card.description && (
                       <p className={styles.kundliCardDescription}>{card.description}</p>
-                    )}
+                    )} */}
                   </div>
                 </div>
               ))}
@@ -235,7 +235,7 @@ const Explore = () => {
               >
                 <div className={styles.destinyCardContent}>
                   <h3 className={styles.destinyCardTitle}>{card.title}</h3>
-                  <p className={styles.destinyCardSubtitle}>{card.description}</p>
+                  {/* <p className={styles.destinyCardSubtitle}>{card.description}</p> */}
                 </div>
                 {card.image_url && (
                   <img
@@ -432,6 +432,8 @@ const Explore = () => {
         // Discover Your Kundli section
         "Vedic Kundli": "/kundli?tab=kundli",
         "Vedic Kundali": "/kundli?tab=kundli",
+        "Match-making": "/match-making",
+        "Matchmaking": "/match-making",
         "KP Chart": "/kundli?tab=kp",
         "KP": "/kundli?tab=kp",
         "Dasha": "/kundli?tab=dasha",
