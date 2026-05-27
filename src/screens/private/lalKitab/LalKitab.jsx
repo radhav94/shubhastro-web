@@ -10,7 +10,7 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import TTSButton from "../../../component/UI/TTSButton";
-import CalcBackButton from "../calculator/CalcBackButton";
+import BackButton from "../../../component/UI/BackButton/BackButton";
 import laalKitaabImg from "../../../assets/images/laal-kitaab.png";
 
 const features = [
@@ -81,8 +81,9 @@ const LalKitab = () => {
   const infoText = "Lal Kitab is a unique system of astrology that provides simple yet powerful remedies for planetary afflictions. Unlike traditional Vedic astrology, Lal Kitab focuses on practical remedies that can be performed in daily life to mitigate negative planetary effects.";
 
   return (
+    <>
+      <BackButton />
     <div className={styles.page}>
-      <CalcBackButton />
       {(isGenerating || isLoadingProfiles) && <PrimaryLoader />}
 
       {/* ── Hero Banner ── */}
@@ -181,6 +182,7 @@ const LalKitab = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    </>
   );
 };
 

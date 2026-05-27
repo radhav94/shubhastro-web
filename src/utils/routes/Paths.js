@@ -432,7 +432,6 @@ export const PATH = {
     MATCHMAKING: {
       path: "/match-making",
       element: MatchMaking,
-      header: false,
     },
     MATCHMAKING_DETAILS: {
       path: "/match-making/match-making-details",

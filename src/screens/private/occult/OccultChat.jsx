@@ -10,7 +10,7 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { PATH } from "../../../utils/routes/Paths";
-import CalcBackButton from "../calculator/CalcBackButton";
+import BackButton from "../../../component/UI/BackButton/BackButton";
 import aiImage from "../../../assets/images/Ai Image.png";
 
 const OccultChat = () => {
@@ -90,8 +90,9 @@ const OccultChat = () => {
   ];
 
   return (
+    <>
+      <BackButton />
     <div className={styles.container}>
-      <CalcBackButton />
       {(isLoadingProfiles || isGenerating) && <PrimaryLoader />}
 
       {/* Hero Section - Two columns */}
@@ -198,6 +199,7 @@ const OccultChat = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    </>
   );
 };
 

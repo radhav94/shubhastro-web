@@ -1,7 +1,7 @@
 import styles from "./MatchMakingV2.module.scss";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { ChevronLeft, ChevronDown, Heart } from "lucide-react";
+import { ChevronDown, Heart } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   useGetAllKundlisQuery,
@@ -19,7 +19,7 @@ import bondIcon from "../../../assets/icons/destiny-icon.svg";
 import matchMakingImg from "../../../assets/images/match-making-top-img.svg";
 import matchMakingImgBottom from "../../../assets/images/match-making-bottom-img.svg";
 import { ProfileManager } from "../../../component/UI/Profile";
-import CalcBackButton from "../calculator/CalcBackButton";
+import BackButton from "../../../component/UI/BackButton/BackButton";
 // import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 
 const MatchMaking = () => {
@@ -594,7 +594,7 @@ const MatchMaking = () => {
   /* -------------------- UI -------------------- */
   return (
     <div className={styles.matchMakingMain}>
-      <CalcBackButton />
+      <BackButton />
       <div className={styles.matchMaking}>
           <img className={styles.topImg} src={matchMakingImg} alt="img" />
           
