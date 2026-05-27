@@ -119,7 +119,7 @@
 .mobileDrawer {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 0;
   width: 65%;
   max-width: 320px;
   height: 100%;
@@ -156,7 +156,7 @@
 
 @keyframes slideIn {
   from {
-    transform: translateX(100%);
+    transform: translateX(-100%);
   }
   to {
     transform: translateX(0);
@@ -312,8 +312,8 @@
   background-color: rgba(255, 255, 255, 0.9);
   position: relative;
   z-index: -1;
-  // backdrop-filter: blur(8px);
-  // -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .headerNavigationSubmenu{
   display: flex;
