@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import styles from "./HomeLayout.module.scss";
 import TopHeader from "../component/TopHeader";
 import { Outlet, useMatches, useLocation, Link } from "react-router-dom";
@@ -107,6 +107,46 @@ const footerLinkSections = [
   },
 ];
 
+const FooterLinkAccordion = ({ sections }) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className={styles.topLinkMobile}>
+      <div className={styles.accordionItem}>
+        <button
+          className={styles.accordionHeader}
+          onClick={() => setOpen((prev) => !prev)}
+          aria-expanded={open}
+        >
+          <span>Important Links</span>
+          <span className={styles.accordionIcon}>
+            {open ? "−" : "+"}
+          </span>
+        </button>
+        {open && (
+          <div className={styles.accordionContent}>
+            {sections.map((section, index) => (
+              <div key={section.label} className={styles.accordionSection}>
+                {index > 0 && <p className={styles.accordionSubtitle}>{section.label}</p>}
+                <div className={styles.accordionLinks}>
+                  {section.links.map((link, i) => (
+                    <span key={link.path}>
+                      {i > 0 && <span className={styles.accordionSeparator}> | </span>}
+                      <Link to={link.path} title={link.title}>
+                        {link.title}
+                      </Link>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const HomeLayout = () => {
   const matches = useMatches();
   const location = useLocation();
@@ -185,17 +225,22 @@ const HomeLayout = () => {
         <div className={styles.footerWrapper}>
           {location.pathname === "/" && (
           <div className={styles.topLinkWrap}>
-            {footerLinkSections.map((section) => (
-              <div className={styles.topLink} key={section.label}>
-                <span>{section.label} : </span>
-                {section.links.map((link, i) => (
-                  <span key={link.path}>
-                    {i > 0 && " | "}
-                    <Link to={link.path} title={link.title}> {link.title}</Link>
-                  </span>
-                ))}
-              </div>
-            ))}
+            {/* Desktop view - inline links */}
+            <div className={styles.topLinkDesktop}>
+              {footerLinkSections.map((section) => (
+                <div className={styles.topLink} key={section.label}>
+                  <span>{section.label} : </span>
+                  {section.links.map((link, i) => (
+                    <span key={link.path}>
+                      {i > 0 && " | "}
+                      <Link to={link.path} title={link.title}> {link.title}</Link>
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+            {/* Mobile view - accordion */}
+            <FooterLinkAccordion sections={footerLinkSections} />
           </div>
           )}
           <Footer />
