@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiHeart, FiMessageCircle, FiUsers, FiTrash2, FiFilter, FiEdit2 } from "react-icons/fi";
+import { FiHeart, FiMessageCircle, FiUsers, FiTrash2, FiEdit2 } from "react-icons/fi";
 import { PiShareNetwork } from "react-icons/pi";
 import styles from "../Community.module.scss";
 import TrendingAstrologers from "./TrendingAstrologers";
@@ -12,8 +12,6 @@ import Toast from "../../../../component/toast";
 const YourFeed = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces = [], onCommunityClick }) => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const [sortOrder, setSortOrder] = useState("newest");
-  const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [likeState, setLikeState] = useState({});
   const [shareState, setShareState] = useState({});
   const [openComments, setOpenComments] = useState({});
@@ -41,7 +39,7 @@ const YourFeed = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces 
   const showYourCommunity = !!sections["your-community"];
 
   const { data, isLoading, isFetching, isError } = useGetCommunityFeedQuery(
-    { page, limit: 10, sort: sortOrder },
+    { page, limit: 10, sort: "newest" },
     { skip: !showTrendingPosts }
   );
 
@@ -119,7 +117,10 @@ const YourFeed = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces 
   };
 
   const toggleComments = (postId) => {
-    setOpenComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
+    setOpenComments((prev) => {
+      if (prev[postId]) return {};
+      return { [postId]: true };
+    });
   };
 
   const handleDeletePost = async (postId) => {
@@ -215,37 +216,10 @@ const YourFeed = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces 
         {/* Trending Posts */}
         {showTrendingPosts && (
           <>
-            <div className={styles.recentPostsHeader}>
-              <h2 className={styles.sectionHeading}>
-                <span className={styles.headingBar} />
-                {sections["trending-posts"]?.display_title?.toUpperCase() || "TRENDING POSTS"}
-              </h2>
-              <div className={styles.filterWrapper}>
-                <button
-                  className={styles.filterBtn}
-                  onClick={() => setShowSortDropdown((prev) => !prev)}
-                >
-                  <FiFilter size={14} /> Filter
-                </button>
-                {showSortDropdown && (
-                  <div className={styles.filterDropdown}>
-                    {["newest", "oldest", "trending"].map((option) => (
-                      <button
-                        key={option}
-                        className={`${styles.filterOption} ${sortOrder === option ? styles.active : ""}`}
-                        onClick={() => {
-                          setSortOrder(option);
-                          setPage(1);
-                          setShowSortDropdown(false);
-                        }}
-                      >
-                        {option.charAt(0).toUpperCase() + option.slice(1)}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            <h2 className={styles.sectionHeading}>
+              <span className={styles.headingBar} />
+              {sections["trending-posts"]?.display_title?.toUpperCase() || "TRENDING POSTS"}
+            </h2>
 
             <div className={styles.postsContainer}>
               {isLoading && (

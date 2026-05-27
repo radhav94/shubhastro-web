@@ -5,6 +5,7 @@ import { PiShareNetwork } from "react-icons/pi";
 import styles from "../Community.module.scss";
 import TrendingAstrologers from "./TrendingAstrologers";
 import CommentSection from "./CommentSection";
+import MwebCommunities from "./MwebCommunities";
 import {
   useGetCommunityLibraryQuery,
   useDeleteCommunityPostMutation,
@@ -14,7 +15,7 @@ import {
 import Toast from "../../../../component/toast";
 import { getUserFromStorage } from "../../../../utils/authStorage";
 
-const YourPosts = ({ trendingAstrologers = [], sectionContent = [] }) => {
+const YourPosts = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces = [], onCommunityClick }) => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [deletedIds, setDeletedIds] = useState([]);
@@ -28,7 +29,10 @@ const YourPosts = ({ trendingAstrologers = [], sectionContent = [] }) => {
   const currentUser = getUserFromStorage();
 
   const toggleComments = (postId) => {
-    setOpenComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
+    setOpenComments((prev) => {
+      if (prev[postId]) return {};
+      return { [postId]: true };
+    });
   };
 
   const handleLike = async (postId) => {
@@ -156,6 +160,9 @@ const YourPosts = ({ trendingAstrologers = [], sectionContent = [] }) => {
   return (
     <div className={styles.feedLayout}>
       <div className={styles.feedMain}>
+        {/* Your Community - Mobile Only */}
+        <MwebCommunities joinedSpaces={joinedSpaces} onCommunityClick={onCommunityClick} />
+
         {showLibraryPosts && (
           <>
             <h2 className={styles.sectionHeading}>
