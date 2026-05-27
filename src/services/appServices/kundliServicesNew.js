@@ -6,7 +6,7 @@ import { privateRequestNew } from "./privateRequestNew";
  */
 const checkSelfKundliAndRedirect = (data) => {
   const profiles = data?.data || [];
-  const hasSelf = profiles.some((p) => p.relation?.toLowerCase() === "self");
+  const hasSelf = profiles.length > 0;
 
   if (!hasSelf) {
     const path = window.location.pathname;
