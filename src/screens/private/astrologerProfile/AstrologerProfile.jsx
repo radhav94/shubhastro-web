@@ -1062,12 +1062,14 @@ const AstrologerProfile = () => {
                           <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
                         </button>
                         <p className={styles.priceText}>
-                          <span className={styles.priceAmount}>
-                            ₹{astrologer?.price?.chatRate?.amount || 0}
-                          </span>
-                          /min
-                          {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice && (
-                            <span className={styles.originalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}/min</span>
+                          {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
+                            <>
+                              <span className={styles.originalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{astrologer?.price?.chatRate?.amount || 0}</span> min
+                            </>
+                          ) : (
+                            <>
+                              <span className={styles.priceAmount}>₹{astrologer?.price?.chatRate?.amount || 0}</span> min
+                            </>
                           )}
                         </p>
                       </div>
@@ -1083,12 +1085,14 @@ const AstrologerProfile = () => {
                           <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
                         </button>
                         <p className={styles.priceText}>
-                          <span className={styles.priceAmount}>
-                            ₹{astrologer?.price?.audioRate?.amount || 0}
-                          </span>
-                          /min
-                          {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice && (
-                            <span className={styles.originalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}/min</span>
+                          {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
+                            <>
+                              <span className={styles.originalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{astrologer?.price?.audioRate?.amount || 0}</span> min
+                            </>
+                          ) : (
+                            <>
+                              <span className={styles.priceAmount}>₹{astrologer?.price?.audioRate?.amount || 0}</span> min
+                            </>
                           )}
                         </p>
                       </div>
@@ -1279,9 +1283,11 @@ const AstrologerProfile = () => {
             </div>
 
             {/* About Section */}
+            {(displayData.description || displayData.gallery?.length > 0) && (
             <div className={styles.aboutSection}>
               <h3 className={styles.aboutTitle}>About</h3>
 
+              {displayData.description && (
               <p
                 className={`${styles.aboutText} ${
                   showFullAbout ? styles.expanded : ""
@@ -1293,6 +1299,7 @@ const AstrologerProfile = () => {
                     ? displayData.description.slice(0, 100) + "..."
                     : displayData.description}
               </p>
+              )}
 
               {displayData.description?.length > 100 && (
                 <button
@@ -1332,6 +1339,7 @@ const AstrologerProfile = () => {
                 </div>
               )}
             </div>
+            )}
 
             {/* Send a Gift Section */}
             <div className={styles.giftSection}>

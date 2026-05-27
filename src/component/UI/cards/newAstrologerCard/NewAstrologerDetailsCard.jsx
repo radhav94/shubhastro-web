@@ -109,9 +109,14 @@ const NewAstrologerDetailsCard = ({
                   <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
                 </button>
                 <p className={styles.detailsPriceText}>
-                  <span className={styles.detailsPriceAmount}>₹{chatPrice}</span>/min
-                  {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice && (
-                    <span className={styles.detailsOriginalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}/min</span>
+                  {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
+                    <>
+                      <span className={styles.detailsOriginalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.detailsPriceAmount}>{chatPrice}</span> min
+                    </>
+                  ) : (
+                    <>
+                      <span className={styles.detailsPriceAmount}>₹{chatPrice}</span> min
+                    </>
                   )}
                 </p>
               </div>
@@ -124,9 +129,14 @@ const NewAstrologerDetailsCard = ({
                   <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
                 </button>
                 <p className={styles.detailsPriceText}>
-                  <span className={styles.detailsPriceAmount}>₹{callPrice}</span>/min
-                  {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice && (
-                    <span className={styles.detailsOriginalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}/min</span>
+                  {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
+                    <>
+                      <span className={styles.detailsOriginalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.detailsPriceAmount}>{callPrice}</span> min
+                    </>
+                  ) : (
+                    <>
+                      <span className={styles.detailsPriceAmount}>₹{callPrice}</span> min
+                    </>
                   )}
                 </p>
               </div>
