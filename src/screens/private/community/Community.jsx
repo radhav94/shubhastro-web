@@ -132,11 +132,13 @@ const Community = () => {
   return (
     <div className={styles.communityPage}>
       {/* Back + Title */}
-      <div className={styles.pageHeader}>
-        <button className={styles.backBtn} onClick={handleBack}>
-          <FiChevronLeft size={20} />
-        </button>
-        <h1 className={styles.pageTitle}>Community</h1>
+      <div className={styles.profileHeaderWrap}>
+        <div className={styles.profileHeader}>
+          <button className={styles.backBtn} onClick={handleBack}>
+            <FiChevronLeft size={20} />
+          </button>
+          <h1 className={styles.pageTitle}>Community</h1>
+        </div>
       </div>
 
       <div className={styles.pageBody}>
