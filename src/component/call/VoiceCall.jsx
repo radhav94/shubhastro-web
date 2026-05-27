@@ -22,6 +22,7 @@ import { useGetAllKundlisQuery } from "../../services/appServices/kundliServices
 import VideoCallChat from "./VideoCallChat";
 import { Toast } from "../index";
 import { useGetBalanceMutation } from "../../redux/api/wallet/walletApi";
+import { useMediaPermission } from "../../utils/hooks/useMediaPermission";
 
 // Import SVG icons from chat assets
 import VideocamIcon from "../../assets/chat/Videocam.svg";
@@ -172,6 +173,7 @@ const AgoraVoiceCalling = ({ callData }) => {
   /* ================= WALLET BALANCE ================= */
   const { refreshWallet } = useWalletBalance();
   const [getBalance, { isLoading: isCheckingBalance }] = useGetBalanceMutation();
+  const { checkPermission } = useMediaPermission();
 
   /* ================= MINI CALL OVERLAY BRIDGE ================= */
   // No longer needed — mic/speaker state is shared via CallContext
@@ -766,6 +768,10 @@ const AgoraVoiceCalling = ({ callData }) => {
   }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.roomId, effectiveKundliId, activeCall?.isUserSide, astrologerName]);
 
   const toggleCamera = async () => {
+
+    // Check camera + mic permission before switching to video
+    const hasPermission = await checkPermission("both");
+    if (!hasPermission) return;
 
     try {
       // Check balance before switching to video
