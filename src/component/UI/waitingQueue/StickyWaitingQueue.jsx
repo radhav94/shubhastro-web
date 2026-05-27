@@ -206,10 +206,10 @@ const StickyWaitingQueue = () => {
                       </>
                     )}
 
-                    {/* Accepted — Join Call */}
+                    {/* Accepted — Join Call/Chat */}
                     {isAccepted && (
                       <button className={styles.joinCallBtn} onClick={() => handleAccept(conn)}>
-                        Join Call
+                        {conn.type === "chat" ? "Join Chat" : "Join Call"}
                       </button>
                     )}
                   </div>
