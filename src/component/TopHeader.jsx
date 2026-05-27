@@ -8,6 +8,7 @@ import { getUserFromStorage } from "../utils/authStorage";
 import ShubhTalkLogo from "../assets/images/ShubhAstrologo.svg";
 import ShubhTalkLogoMobile from "../assets/images/mobile-shubh-astro-logo.svg";
 import headerCoin from "../assets/images/headerCoin.svg";
+import profileIcon from "../assets/images/profile-icon.png";
 import { useWalletBalance } from "../screens/private/wallet/useWalletBalance";
 import { getToken } from "../utils/token";
 import { useGetAllKundlisQuery } from "../services/appServices/kundliServicesNew";
@@ -340,7 +341,10 @@ const TopHeader = () => {
             <div className={styles.profileDetailMain}>
               {userAvatarDisplay ? (
                 <div className={styles.avatarText} onClick={handleProfileClick}>
-                  <span>{userAvatarDisplay}</span>
+                  {/* <span>{userAvatarDisplay}</span> */}
+                  <span>
+                    <img src={profileIcon} alt="icon" />
+                  </span>
                 </div>
               ) : (
                 <div className={styles.profileIcon} onClick={handleProfileClick}>
