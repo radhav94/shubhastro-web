@@ -532,7 +532,7 @@ $radius-sm: 8px;
 .postImage {
   width: 100%;
   height: auto;
-  max-height: 340px;
+  // max-height: 340px;
   object-fit: cover;
   display: block;
   border-radius: $radius-sm;

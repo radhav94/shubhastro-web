@@ -806,11 +806,6 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
     height: 34px;
     width: 52px;
   }
-
-  .textInput {
-    height: 34px;
-    font-size: 13px;
-  }
 }
 
 .sendBtn {
@@ -830,6 +825,10 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
 }
 
 @media (max-width: 767px) {
+  .textInput {
+    height: 34px;
+    font-size: 16px;
+  }
   .bubble {
     right: 16px;
     bottom: 88px;
