@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useGetStaticPageBySlugQuery } from "../redux/api/staticPages/staticPagesApi";
 import styles from "../screens/public/static-pages/StaticPages.module.scss";
 import Divider from "./Divider";
+import logoUrl from "../assets/images/mobile-shubh-astro-logo.svg";
 
 // Routes excluded from CMS static page lookup
 const EXCLUDED_PATHS = [
@@ -24,13 +25,15 @@ const isExcluded = (pathname) =>
       pathname === excluded || pathname.startsWith(`${excluded}/`)
   );
 
+const LOGO_URL = logoUrl;
+
 /**
  * CmsPageWrapper
  *
  * Wraps every route's component. For non-excluded routes:
  * 1. Calls GET /api/static-pages?slug=<path> using the current URL as slug
- * 2. Sets meta tags (title, description, keywords) from API response
- * 3. If body is non-empty → renders CMS HTML body instead of the child component
+ * 2. Sets meta tags (title, description, keywords, OG, Twitter, canonical) from API response
+ * 3. If body is non-empty → appends CMS HTML body below the child component
  * 4. If body is empty → renders the original child component (with meta still applied)
  */
 const CmsPageWrapper = ({ children }) => {
@@ -48,28 +51,36 @@ const CmsPageWrapper = ({ children }) => {
     : null;
   const hasBody = pageData?.body && pageData.body.trim().length > 0;
 
+  const title = pageData?.meta_title || pageData?.title || "ShubhTalk";
+  const description = pageData?.meta_description || pageData?.title || "";
+  const keywords = pageData?.meta_tags
+    ? Array.isArray(pageData.meta_tags)
+      ? pageData.meta_tags.join(", ")
+      : pageData.meta_tags
+    : "";
+  const pageUrl = window.location.href;
+
   return (
     <>
       <Helmet>
-        <title>
-          {pageData?.meta_title || pageData?.title || "ShubhTalk"}
-        </title>
-        <meta
-          name="description"
-          content={pageData?.meta_description || pageData?.title || ""}
-        />
-        {pageData?.meta_tags ? (
-          <meta
-            name="keywords"
-            content={
-              Array.isArray(pageData.meta_tags)
-                ? pageData.meta_tags.join(", ")
-                : pageData.meta_tags
-            }
-          />
-        ) : (
-          <meta name="keywords" content="" />
-        )}
+        <title>{title}</title>
+        <link rel="canonical" href={pageUrl} />
+        <meta name="description" content={description} />
+        <meta name="keywords" content={keywords} />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={LOGO_URL} />
+        <meta property="og:image:secure_url" content={LOGO_URL} />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={LOGO_URL} />
       </Helmet>
 
       {hasBody ? (

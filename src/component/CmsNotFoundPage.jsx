@@ -5,6 +5,9 @@ import styles from "../screens/public/static-pages/StaticPages.module.scss";
 import PrimaryLoader from "./UI/PrimaryLoader";
 import NotFound from "../screens/private/NotFound/NotFound";
 import Divider from "./Divider";
+import logoUrl from "../assets/images/mobile-shubh-astro-logo.svg";
+
+const LOGO_URL = logoUrl;
 
 /**
  * CmsNotFoundPage
@@ -41,12 +44,8 @@ const CmsNotFoundPage = () => {
     <div className={styles.container}>
       <Helmet>
         <title>{pageData.meta_title || pageData.title || "ShubhTalk"}</title>
-        {(pageData.meta_description || pageData.title) && (
-          <meta
-            name="description"
-            content={pageData.meta_description || pageData.title}
-          />
-        )}
+        <link rel="canonical" href={window.location.href} />
+        <meta name="description" content={pageData.meta_description || pageData.title || ""} />
         {pageData.meta_tags && (
           <meta
             name="keywords"
@@ -57,6 +56,20 @@ const CmsNotFoundPage = () => {
             }
           />
         )}
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:title" content={pageData.meta_title || pageData.title || "ShubhTalk"} />
+        <meta property="og:description" content={pageData.meta_description || pageData.title || ""} />
+        <meta property="og:image" content={LOGO_URL} />
+        <meta property="og:image:secure_url" content={LOGO_URL} />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageData.meta_title || pageData.title || "ShubhTalk"} />
+        <meta name="twitter:description" content={pageData.meta_description || pageData.title || ""} />
+        <meta name="twitter:image" content={LOGO_URL} />
       </Helmet>
       {pageData.title && (
         <>
