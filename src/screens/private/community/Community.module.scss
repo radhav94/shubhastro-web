@@ -384,6 +384,8 @@ $radius-sm: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
 
   &:hover {
     background: darken($primary, 8%);
@@ -1462,6 +1464,19 @@ $radius-sm: 8px;
 
   .postInputCard {
     padding: 12px;
+    gap: 8px;
+  }
+
+  .postInput {
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .postBtn {
+    padding: 8px 16px;
+    font-size: 13px;
+    flex-shrink: 0;
   }
 
   .createPostForm {
