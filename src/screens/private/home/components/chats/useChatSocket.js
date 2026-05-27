@@ -4,6 +4,7 @@ import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import { useCall } from "../../../../../context/CallContext";
 import { useChat } from "../../../../../context/ChatContext";
 import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
+import { useMediaPermission } from "../../../../../utils/hooks/useMediaPermission";
 
 const useChatSocket = ({
   userId,
@@ -33,6 +34,7 @@ const useChatSocket = ({
   const [switchType, setSwitchType] = useState(null);
   const [callRoomId, setCallRoomId] = useState(null);
   const [getBalance] = useGetBalanceMutation();
+  const { checkPermission } = useMediaPermission();
 
   const connectSocket = () => {
     if (voiceSocket.connected) {
@@ -50,6 +52,10 @@ const useChatSocket = ({
 
   const handleAudioCall = async () => {
     console.log("🎵 Audio Call Clicked", { userId, astrologerId, kundliId, activeCall, chatRoomId });
+
+    // Check mic permission before proceeding
+    const hasMic = await checkPermission("microphone");
+    if (!hasMic) return;
 
     try {
       const result = await getBalance({ astrologerId, type: "audio", ...(activeChat?.isEmergency && { isEmergency: true }) });
@@ -91,6 +97,10 @@ const useChatSocket = ({
 
   const handleVideoCall = async () => {
     console.log("📹 Video Call Clicked", { userId, astrologerId, kundliId, activeCall, chatRoomId });
+
+    // Check mic + camera permission before proceeding
+    const hasPermission = await checkPermission("both");
+    if (!hasPermission) return;
 
     try {
       const result = await getBalance({ astrologerId, type: "video", ...(activeChat?.isEmergency && { isEmergency: true }) });
