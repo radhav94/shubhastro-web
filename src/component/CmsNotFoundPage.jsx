@@ -45,6 +45,7 @@ const CmsNotFoundPage = () => {
       <Helmet>
         <title>{pageData.meta_title || pageData.title || "ShubhTalk"}</title>
         <link rel="canonical" href={window.location.href} />
+        <link rel="shortcut icon" href={LOGO_URL} />
         <meta name="description" content={pageData.meta_description || pageData.title || ""} />
         {pageData.meta_tags && (
           <meta
