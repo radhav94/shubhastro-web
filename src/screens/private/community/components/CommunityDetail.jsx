@@ -5,7 +5,6 @@ import { PiShareNetwork } from "react-icons/pi";
 import styles from "../Community.module.scss";
 import TrendingAstrologers from "./TrendingAstrologers";
 import CommentSection from "./CommentSection";
-import astrologerImg from "../../../../assets/default-img/astrologer male_v.1.png";
 import {
   useGetCommunitySpaceDetailQuery,
   useGetCommunityFeedQuery,
@@ -231,11 +230,17 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
                     ref={isLast ? lastPostRef : null}
                   >
                     <div className={styles.postHeader}>
-                      <img
-                        src={post.authorImage || astrologerImg}
-                        alt={authorName}
-                        className={styles.postAuthorAvatar}
-                      />
+                      {post.authorImage ? (
+                        <img
+                          src={post.authorImage}
+                          alt={authorName}
+                          className={styles.postAuthorAvatar}
+                        />
+                      ) : (
+                        <div className={styles.postAuthorAvatar} style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #f97316, #ea580c)", color: "#fff", fontWeight: 600, fontSize: 14 }}>
+                          {authorName.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
                       <div className={styles.postAuthorInfo}>
                         <span className={styles.postAuthorName}>
                           {authorName}

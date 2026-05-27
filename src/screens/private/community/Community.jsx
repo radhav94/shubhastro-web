@@ -44,6 +44,8 @@ const Community = () => {
         activeBtn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
       }
     }
+    // Scroll page to top on tab change
+    window.scrollTo(0, 0);
   }, [activeTab]);
 
   const { data: pageResponse } = useGetCommunityPageDataQuery();
