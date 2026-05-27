@@ -696,11 +696,32 @@ const AgoraVoiceCalling = ({ callData }) => {
     voiceSocket.on("call:rejected", handleCallRejected);
     voiceSocket.on("call:reconnected", handleCallReconnected);
 
+    const handleSwitchRejected = (data) => {
+      console.log("🔄 call:switch_rejected in VoiceCall", data);
+      isUpgradingToVideo.current = false;
+      setIsSwitching(false);
+      setWaitingList(null);
+      Toast.info(data?.message || "Switch request rejected, continuing current call.");
+    };
+
+    const handleSwitchCanceled = (data) => {
+      console.log("🔄 call:switch_canceled in VoiceCall", data);
+      isUpgradingToVideo.current = false;
+      setIsSwitching(false);
+      setWaitingList(null);
+      Toast.info(data?.message || "Switch request canceled, continuing current call.");
+    };
+
+    voiceSocket.on("call:switch_rejected", handleSwitchRejected);
+    voiceSocket.on("call:switch_canceled", handleSwitchCanceled);
+
     return () => {
       voiceSocket.off("call:ended", handleCallEnded);
       // voiceSocket.off("call:canceled", handleCallCanceled);
       voiceSocket.off("call:rejected", handleCallRejected);
       voiceSocket.off("call:reconnected", handleCallReconnected);
+      voiceSocket.off("call:switch_rejected", handleSwitchRejected);
+      voiceSocket.off("call:switch_canceled", handleSwitchCanceled);
     };
     // eslint-disable-next-line
   }, []);
