@@ -165,7 +165,8 @@ function App() {
             if (
               child.path === "/shop/:slug/:productSlug" ||
               child.path === PATH.privateRoutes.PRODUCT_DETAIL?.path ||
-              child.path === "/profile"
+              child.path === "/profile" ||
+              child.path === "/community"
             ) {
               return {
                 path: child.path,

@@ -1,6 +1,15 @@
+import { useEffect } from "react";
 import styles from "../Community.module.scss";
 
-const SuccessModal = ({ onClose }) => {
+const SuccessModal = ({ onClose, message }) => {
+  // Auto-close after 3 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -12,13 +21,13 @@ const SuccessModal = ({ onClose }) => {
           {/* Confetti dots */}
           <span className={styles.confetti} />
         </div>
-        <h2 className={styles.successTitle}>Posted Successfully Lorem Ipsum!</h2>
-        <p className={styles.successDesc}>
+        <h2 className={styles.successTitle}>{message || "Posted Added Successfully"}</h2>
+        {/* <p className={styles.successDesc}>
           Our internal team will review,<br />
           Lorem Ipsum is simply dummy text of the
-        </p>
+        </p> */}
         <button className={styles.ctaBtn} onClick={onClose}>
-          CTA Name
+          OK
         </button>
       </div>
     </div>
