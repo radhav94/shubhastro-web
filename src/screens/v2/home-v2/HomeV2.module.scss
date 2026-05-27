@@ -1460,7 +1460,7 @@
   transition: box-shadow 0.2s;
   backdrop-filter: blur(12px);
 
-  &:hover { text-decoration: underline; }
+  // &:hover { text-decoration: underline; }
 }
 
 /* Live Community card */
@@ -3829,8 +3829,8 @@
 /* ═══ HomeV2 — iOS Liquid Glass left cards ═══ */
 .qCard {
   background: rgba(255, 255, 255, 0.5)!important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   // border: none !important;
   border-radius: 16px !important;
   // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
@@ -3893,8 +3893,8 @@
 
 .rightPanel {
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   border: 2px solid white;
   box-shadow: none !important;
   outline: none !important;
@@ -4120,7 +4120,7 @@
   // background-color: #ebecf2 !important;
   position: relative !important;
   background-repeat: repeat-y;
-  background-size: 100% 100%;
+  background-size: cover;
   @media (width <= 767px) {
     background-image: url("../../../assets/images/main-body-bg-new-mobile.png");
   }
