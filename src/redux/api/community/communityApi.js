@@ -66,6 +66,7 @@ export const communityApi = privateRequestNew.injectEndpoints({
         posts: response?.data || [],
         pagination: response?.pagination || { page: 1, limit: 10, total: 0, pages: 0 },
       }),
+      providesTags: ["CommunityLibrary"],
       serializeQueryArgs: ({ queryArgs }) => {
         const { page, ...rest } = queryArgs || {};
         return rest;
@@ -159,6 +160,7 @@ export const communityApi = privateRequestNew.injectEndpoints({
           "Content-Type": "application/json",
         },
       }),
+      invalidatesTags: ["CommunityLibrary"],
     }),
 
     deleteCommunityPost: builder.mutation({
@@ -244,6 +246,7 @@ export const communityApi = privateRequestNew.injectEndpoints({
           "Content-Type": "application/json",
         },
       }),
+      invalidatesTags: ["CommunityLibrary"],
     }),
   }),
 });

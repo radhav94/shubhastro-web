@@ -300,7 +300,7 @@ const EditPost = ({ postId, onSuccess }) => {
       </aside>
 
       {/* Success Modal */}
-      {showSuccess && <SuccessModal onClose={handleSuccessClose} />}
+      {showSuccess && <SuccessModal onClose={handleSuccessClose} message="Post Updated Successfully" />}
     </div>
   );
 };

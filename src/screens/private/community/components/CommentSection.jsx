@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { FiSend, FiChevronDown, FiCornerDownRight, FiHeart } from "react-icons/fi";
+import { FiSend, FiChevronDown } from "react-icons/fi";
 import styles from "../Community.module.scss";
 import {
   useGetPostCommentsQuery,
   useAddPostCommentMutation,
-  useLikeCommunityPostMutation,
 } from "../../../../redux/api/community/communityApi";
 import Toast from "../../../../component/toast";
 import { getUserFromStorage } from "../../../../utils/authStorage";
@@ -32,14 +31,10 @@ const getInitials = (name) => {
 };
 
 // Single comment item (used for both top-level and replies)
-const CommentItem = ({ comment, postId, onReply, likeComment, likeState }) => {
+const CommentItem = ({ comment }) => {
   const authorName = comment.isAnonymous
     ? "Anonymous"
     : comment.authorName || "User";
-
-  const currentLike = likeState[comment._id];
-  const isLiked = currentLike !== undefined ? currentLike.liked : comment.isLiked || false;
-  const likesCount = currentLike !== undefined ? currentLike.count : comment.likesCount || 0;
 
   return (
     <div className={styles.commentItem}>
@@ -63,38 +58,6 @@ const CommentItem = ({ comment, postId, onReply, likeComment, likeState }) => {
           <span className={styles.commentTime}>{getTimeAgo(comment.createdAt)}</span>
         </div>
         <p className={styles.commentText}>{comment.body}</p>
-        <div className={styles.commentActions}>
-          <button
-            className={styles.commentActionBtn}
-            onClick={() => likeComment(comment._id, comment)}
-          >
-            <FiHeart size={14} style={isLiked ? { fill: "#e65100", color: "#e65100" } : {}} />
-            {likesCount > 0 && <span>{likesCount}</span>}
-          </button>
-          <button
-            className={styles.commentActionBtn}
-            onClick={() => onReply(comment._id, authorName)}
-          >
-            <FiCornerDownRight size={14} />
-            <span>Reply</span>
-          </button>
-        </div>
-
-        {/* Nested Replies */}
-        {comment.replies && comment.replies.length > 0 && (
-          <div className={styles.repliesList}>
-            {comment.replies.map((reply) => (
-              <CommentItem
-                key={reply._id}
-                comment={reply}
-                postId={postId}
-                onReply={onReply}
-                likeComment={likeComment}
-                likeState={likeState}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -102,9 +65,7 @@ const CommentItem = ({ comment, postId, onReply, likeComment, likeState }) => {
 
 const CommentSection = ({ postId }) => {
   const [commentText, setCommentText] = useState("");
-  const [replyTo, setReplyTo] = useState(null); // { id, name }
   const [page, setPage] = useState(1);
-  const [likeState, setLikeState] = useState({});
 
   const user = getUserFromStorage();
   const currentUserName = user
@@ -119,41 +80,10 @@ const CommentSection = ({ postId }) => {
     sort: "newest",
   });
   const [addComment, { isLoading: isSending }] = useAddPostCommentMutation();
-  const [likePost] = useLikeCommunityPostMutation();
 
   const comments = data?.comments || [];
   const pagination = data?.pagination || {};
   const hasMore = page < (pagination.pages || 1);
-
-  const handleLikeComment = async (commentId, comment) => {
-    setLikeState((prev) => {
-      const current = prev[commentId];
-      if (current !== undefined) {
-        return { ...prev, [commentId]: { liked: !current.liked, count: current.liked ? current.count - 1 : current.count + 1 } };
-      }
-      const wasLiked = comment.isLiked || false;
-      const currentCount = comment.likesCount || 0;
-      return { ...prev, [commentId]: { liked: !wasLiked, count: wasLiked ? currentCount - 1 : currentCount + 1 } };
-    });
-
-    try {
-      await likePost({ targetId: commentId, targetType: "comment" }).unwrap();
-    } catch {
-      setLikeState((prev) => {
-        const current = prev[commentId];
-        return { ...prev, [commentId]: { liked: !current.liked, count: current.liked ? current.count - 1 : current.count + 1 } };
-      });
-    }
-  };
-
-  const handleReply = (commentId, authorName) => {
-    setReplyTo({ id: commentId, name: authorName });
-  };
-
-  const cancelReply = () => {
-    setReplyTo(null);
-    setCommentText("");
-  };
 
   const handleSubmit = async () => {
     if (!commentText.trim()) return;
@@ -162,11 +92,9 @@ const CommentSection = ({ postId }) => {
       await addComment({
         postId,
         body: commentText.trim(),
-        parentId: replyTo?.id || undefined,
         isAnonymous: false,
       }).unwrap();
       setCommentText("");
-      setReplyTo(null);
       refetch();
     } catch (error) {
       Toast.error(error?.data?.message || "Failed to post comment");
@@ -196,10 +124,6 @@ const CommentSection = ({ postId }) => {
           <CommentItem
             key={comment._id}
             comment={comment}
-            postId={postId}
-            onReply={handleReply}
-            likeComment={handleLikeComment}
-            likeState={likeState}
           />
         ))}
 
@@ -214,14 +138,6 @@ const CommentSection = ({ postId }) => {
         )}
       </div>
 
-      {/* Reply indicator */}
-      {replyTo && (
-        <div className={styles.replyIndicator}>
-          <span>Replying to <strong>{replyTo.name}</strong></span>
-          <button onClick={cancelReply} className={styles.cancelReplyBtn}>✕</button>
-        </div>
-      )}
-
       {/* Comment Input */}
       <div className={styles.commentInputWrapper}>
         <div className={styles.commentInputAvatar}>
@@ -234,7 +150,7 @@ const CommentSection = ({ postId }) => {
         <div className={styles.commentInputBox}>
           <input
             type="text"
-            placeholder={replyTo ? `Reply to ${replyTo.name}...` : "Write a comment..."}
+            placeholder="Write a comment..."
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             onKeyDown={handleKeyDown}

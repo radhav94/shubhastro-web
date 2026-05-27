@@ -110,9 +110,9 @@ const Community = () => {
       case "posts":
         return <YourPosts trendingAstrologers={postsTrendingAstrologers} sectionContent={yourPostsSection?.content} />;
       case "create":
-        return <CreatePost onSuccess={() => setActiveTab("feed")} />;
+        return <CreatePost onSuccess={() => setActiveTab("posts")} />;
       case "edit":
-        return <EditPost postId={editPostId} onSuccess={() => setActiveTab("feed")} />;
+        return <EditPost postId={editPostId} onSuccess={() => setActiveTab("posts")} />;
       default:
         return <YourFeed trendingAstrologers={feedTrendingAstrologers} sectionContent={feedSection?.content} spaces={spaces} joinedSpaces={joinedSpaces} onViewAllCommunities={() => setActiveTab("communities")} onCommunityClick={handleCommunityClick} />;
     }
