@@ -165,6 +165,7 @@ const Profile = () => {
   const {
     waitingList: callWaitingList,
     setWaitingList: setCallWaitingList,
+    activeCall,
     resetCallFlow,
     setActiveCallRoomId,
     setActiveCall,
@@ -856,12 +857,12 @@ const Profile = () => {
   // Handle connect button click
   const handleConnectClick = (astrologer) => {
     console.log("astrologer", astrologer);
-    if (WaitingList || callWaitingList) {
-      Toast.error(
-        "You are already waiting for an astrologer. Please cancel the current request first.",
-      );
-      return;
-    }
+    // if (WaitingList || callWaitingList) {
+    //   Toast.error(
+    //     "You are already waiting for an astrologer. Please cancel the current request first.",
+    //   );
+    //   return;
+    // }
 
     setSelectedAstrologerId(astrologer._id);
     setSelectedAstrologer(astrologer);

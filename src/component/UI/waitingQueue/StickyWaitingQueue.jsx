@@ -56,6 +56,9 @@ const StickyWaitingQueue = () => {
   if (callApproval || chatApproval || callMissed || chatMissed) return null;
   if (activeCall || activeChat) return null;
 
+  // Hide waiting queue when rendered inside an iframe (e.g. kundli view from chat)
+  if (window.self !== window.top) return null;
+
   const count = pendingConnections.length;
 
   const handleCancelAll = () => {
