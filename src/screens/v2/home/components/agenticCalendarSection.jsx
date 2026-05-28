@@ -95,7 +95,7 @@ const PlanEventsBanner = () => {
       {/* Section Header */}
       <div className={styles.sessionsHeader}>
         <div className={styles.sessionsHeaderLeft}>
-          <h2 className={styles.sessionsTitle}>MUHARAT CALENDAR</h2>
+          <h2 className={styles.sessionsTitle}>MUHURAT CALENDAR</h2>
           <div className={styles.agenticTitleDivider}>
             <div className={styles.agenticDividerLine} />
             <span className={styles.dividerMoon}>
