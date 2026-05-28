@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useCallback, useRef, useEffect } f
 import { voiceSocket } from "../services/voiceSocketServices";
 import { useCall } from "./CallContext";
 import { useChat } from "./ChatContext";
+import { PANDIT_AI_ID } from "../component/panditAI/usePanditAI";
+import { Toast } from "../component";
 
 const WaitingQueueContext = createContext();
 
@@ -218,8 +220,8 @@ export const WaitingQueueProvider = ({ children }) => {
 
   /* ================= GLOBAL TWO-WAY ACCEPT LISTENERS ================= */
   // These run at app level so events are handled regardless of which page the user is on
-  const { setCallApprovalData, callApprovalData, activeCall } = useCall();
-  const { setChatApprovalData, chatApprovalData, activeChat } = useChat();
+  const { setCallApprovalData, callApprovalData, activeCall, setActiveCall, resetCallFlow, setCallSeconds } = useCall();
+  const { setChatApprovalData, chatApprovalData, activeChat, setActiveChat, setChatSeconds, setWaitingList: setChatWaitingList } = useChat();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
   useEffect(() => {
@@ -285,6 +287,10 @@ export const WaitingQueueProvider = ({ children }) => {
       } else if (rejectedAstrologerId) {
         removePendingByAstrologer(rejectedAstrologerId);
       }
+
+      // Show toast so user knows the request was rejected
+      const label = data?.type === "chat" ? "chat" : "call";
+      Toast.error(`Astrologer rejected the ${label} request`);
     };
 
     const handleActivity = (data) => {
@@ -430,6 +436,96 @@ export const WaitingQueueProvider = ({ children }) => {
       if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
     };
 
+    /* ================= GLOBAL CHAT/CALL ACCEPTED HANDLERS ================= */
+    // These ensure the user is notified and navigated regardless of which page they're on.
+    // Page-level handlers (TalkToAstrologer, useAstrologerConnection) may also fire,
+    // but they use navigate() which is a no-op if we've already navigated via window.location.
+    // We use a small delay to let page-level handlers run first if they exist.
+
+    const handleGlobalChatAccepted = ({ roomId, astrologerId, userId, ...data }) => {
+      // Skip Pandit AI events
+      if (astrologerId === PANDIT_AI_ID) return;
+
+      console.log("[GlobalAccepted] ✅ chat:accepted — roomId:", roomId, "astrologerId:", astrologerId);
+
+      // Clear approval data and remove from pending queue
+      setChatApprovalData(null);
+      removePendingConnection(roomId);
+      localStorage.removeItem("waitingState");
+
+      // Build astrologer info from event payload
+      const astro = data?.astrologer || {};
+      const astroName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
+
+      // Set active chat in context so ChatWindow can pick it up
+      setActiveChat({
+        roomId,
+        chatRoomId: roomId,
+        callerName: astroName || "Astrologer",
+        isUserSide: true,
+        userId: userIdLocal,
+        astrologerId,
+        astrologerName: astro?.firstName || "",
+        remainingTime: data?.remainingTime,
+        isEmergency: data?.isEmergency || false,
+      });
+      setChatSeconds(Number(data?.remainingTime || 0) * 60);
+      setChatWaitingList(false);
+
+      // Navigate to chat page — use setTimeout to let any page-level handler run first
+      setTimeout(() => {
+        const isAlreadyOnChat = window.location.pathname.includes("/chat-to-astrologer");
+        if (!isAlreadyOnChat && astrologerId) {
+          console.log("[GlobalAccepted] 🚀 Navigating to chat page for astrologer:", astrologerId);
+          window.location.href = `/chat-to-astrologer/${astrologerId}`;
+        }
+      }, 100);
+    };
+
+    const handleGlobalCallAccepted = ({ roomId, token, channelName, type, remainingTime, astrologerId, isSwitch, ...rest }) => {
+      console.log("[GlobalAccepted] ✅ call:accepted — roomId:", roomId, "type:", type);
+
+      // Skip if this is a call upgrade/downgrade — CallContext handles those
+      // (activeCall exists and type is switching between audio/video)
+      // We read from the ref-synced state via the closure
+      if (type === "video" && activeCall?.callType === "audio") {
+        console.log("[GlobalAccepted] ⏭️ Video upgrade — CallContext handles this");
+        return;
+      }
+      if (type === "audio" && activeCall?.callType === "video") {
+        console.log("[GlobalAccepted] ⏭️ Audio downgrade — CallContext handles this");
+        return;
+      }
+
+      // Clear approval data and remove from pending queue
+      setCallApprovalData(null);
+      removePendingConnection(roomId);
+      localStorage.removeItem("waitingState");
+      resetCallFlow();
+
+      // Build astrologer info from event payload
+      const astro = rest?.astrologer || {};
+      const astroName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
+      const agoraChannel = channelName || roomId;
+
+      // Set active call in context — VoiceCall/VideoCall component renders globally
+      setActiveCall({
+        roomId,
+        channelName: agoraChannel,
+        agoraToken: token,
+        callerName: astroName || "Astrologer",
+        isUserSide: true,
+        callType: type,
+        userId: userIdLocal,
+        astrologerId: astrologerId || astro?._id,
+        astrologerID: astro?.astrologer_ID,
+        remainingTime,
+        experience: astro?.experience,
+        isEmergency: rest?.isEmergency || false,
+      });
+      setCallSeconds(Number(remainingTime || 0) * 60);
+    };
+
     voiceSocket.on("call:astrologer_accepted", handleCallAstrologerAccepted);
     voiceSocket.on("chat:astrologer_accepted", handleChatAstrologerAccepted);
     voiceSocket.on("call:on_hold", handleCallOnHold);
@@ -445,6 +541,8 @@ export const WaitingQueueProvider = ({ children }) => {
     voiceSocket.on("activity", handleActivity);
     voiceSocket.on("session:active_list", handleActiveList);
     voiceSocket.on("session:canceled", handleSessionCanceled);
+    voiceSocket.on("chat:accepted", handleGlobalChatAccepted);
+    voiceSocket.on("call:accepted", handleGlobalCallAccepted);
 
     return () => {
       voiceSocket.off("call:astrologer_accepted", handleCallAstrologerAccepted);
@@ -462,6 +560,8 @@ export const WaitingQueueProvider = ({ children }) => {
       voiceSocket.off("activity", handleActivity);
       voiceSocket.off("session:active_list", handleActiveList);
       voiceSocket.off("session:canceled", handleSessionCanceled);
+      voiceSocket.off("chat:accepted", handleGlobalChatAccepted);
+      voiceSocket.off("call:accepted", handleGlobalCallAccepted);
     };
   }, [userIdLocal]);
 
