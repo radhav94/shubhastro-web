@@ -1205,7 +1205,7 @@ export const PATH = {
       path: "/faq",
       element: FAQ,
       header: false,
-      footer: false,
+      footer: true,
     },
     CUSTOMER_SUPPORT: {
       path: "/customer-support",

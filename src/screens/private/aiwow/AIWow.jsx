@@ -362,7 +362,7 @@ const AIWow = () => {
               className={`${styles.tab} ${activeTab === "aiwow" ? styles.tabActive : ""}`}
               onClick={() => setActiveTab("aiwow")}
             >
-              AI WOW
+              Shubh AI
             </button>
             <button
               type="button"
@@ -375,7 +375,7 @@ const AIWow = () => {
         </header>
 
         <div className={styles.content}>
-          {/* AI WOW Tab */}
+          {/* Shubh AI Tab */}
           {activeTab === "aiwow" && (
             <>
               <div className={styles.heroSection}>

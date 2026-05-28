@@ -1287,9 +1287,9 @@ const Profile = () => {
           </div>
         </div>
 
-        <button className={styles.logoutButton} onClick={handleLogout} title="Logout">
+        {/* <button className={styles.logoutButton} onClick={handleLogout} title="Logout">
           <LogOut size={20} />
-        </button>
+        </button> */}
       </div>
 
       {/* Zodiac Cards */}
