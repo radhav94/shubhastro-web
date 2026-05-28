@@ -68,7 +68,7 @@ const PlanEventsBanner = () => {
     }
 
     // If logged in, navigate to agentic calendar with state
-    navigate("/aiwow/agentic-calendar", {
+    navigate("/aiwow/muhurat-calendar", {
       state: {
         occasions: selectedOccasions,
         period: selectedPeriod,
@@ -87,7 +87,7 @@ const PlanEventsBanner = () => {
     }
 
     // If logged in, navigate to agentic calendar
-    navigate("/aiwow/agentic-calendar");
+    navigate("/aiwow/muhurat-calendar");
   };
 
   return (
@@ -95,7 +95,7 @@ const PlanEventsBanner = () => {
       {/* Section Header */}
       <div className={styles.sessionsHeader}>
         <div className={styles.sessionsHeaderLeft}>
-          <h2 className={styles.sessionsTitle}>AGENTIC CALENDAR</h2>
+          <h2 className={styles.sessionsTitle}>MUHARAT CALENDAR</h2>
           <div className={styles.agenticTitleDivider}>
             <div className={styles.agenticDividerLine} />
             <span className={styles.dividerMoon}>

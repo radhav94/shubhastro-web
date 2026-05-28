@@ -189,7 +189,7 @@ const AIWow = () => {
 
   const handleClick = (slug) => {
     // Free features that don't require login
-    const freeAccessSlugs = ["agentic-calendar"];
+    const freeAccessSlugs = ["muhurat-calendar"];
     if (!freeAccessSlugs.includes(slug)) {
       if (!requireAuth()) return;
       if (!selectedProfile) {

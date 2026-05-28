@@ -51,7 +51,7 @@ const AgenticCalendarV2 = ({ styles }) => {
 
   const handleGetMuhurat = () => {
     if (!isLoggedIn) { navigate("/login"); return; }
-    navigate("/aiwow/agentic-calendar", {
+    navigate("/aiwow/muhurat-calendar", {
       state: {
         occasions: selectedOccasions,
         period: selectedPeriod,
@@ -73,7 +73,7 @@ const AgenticCalendarV2 = ({ styles }) => {
             </svg>
           </div>
         </div>
-        <button className={styles.viewAllBtn} style={{ color: '#f75801' }} onClick={() => navigate('/aiwow/agentic-calendar')}>
+        <button className={styles.viewAllBtn} style={{ color: '#f75801' }} onClick={() => navigate('/aiwow/muhurat-calendar')}>
           View All <FiChevronRight size={14} />
         </button>
       </div>
