@@ -1851,3 +1851,89 @@ $radius-sm: 8px;
     color: #333;
   }
 }
+
+// ─── Share Button (Blog-style) ────────────────────────────────────────────────
+.shareBtnMain {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+
+  &:hover .shareIconSocial {
+    display: flex;
+  }
+}
+
+.shareBtn {
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shareCount {
+  font-size: 14px;
+  color: #444;
+}
+
+.shareIconSocial {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  padding-bottom: 8px;
+  gap: 6px;
+  z-index: 10;
+
+  span.socialIconWrapper {
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    &:hover {
+      background: #f0f0f0;
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+      color: #333;
+    }
+  }
+}
+
+.copiedText {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeInOut 2s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+}
