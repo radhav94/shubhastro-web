@@ -113,7 +113,7 @@ const Communities = ({ onCommunityClick, topAstrologers = [], sectionContent = [
                   disabled={loadingMap[space.slug]}
                   onClick={(e) => handleJoinLeave(space, e)}
                 >
-                  <FiUsers size={13} /> {isJoined(space) ? "Leave" : "Join"}
+                  {isJoined(space) ? "Leave" : "Join"}
                 </button>
               </div>
             ))}

@@ -302,7 +302,20 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
                         <span>{formatCount(post.commentsCount)}</span>
                       </button>
                       <button className={styles.actionItem} onClick={() => handleShare(post._id)}>
-                        <PiShareNetwork size={18} />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="18" viewBox="0 0 16 22" fill="none">
+                          <path d="M14 6.79H12C11.45 6.79 11 7.24 11 7.79C11 8.34 11.45 8.79 12 8.79H14V19.79H2V8.79H4C4.55 8.79 5 8.34 5 7.79C5 7.24 4.55 6.79 4 6.79H2C0.9 6.79 0 7.69 0 8.79V19.79C0 20.89 0.9 21.79 2 21.79H14C15.1 21.79 16 20.89 16 19.79V8.79C16 7.69 15.1 6.79 14 6.79Z" fill="url(#paint0_linear_15525_28218)"/>
+                          <path d="M8 14.79C8.55 14.79 9 14.34 9 13.79V3.79H10.79C11.24 3.79 11.46 3.25 11.14 2.94L8.35 0.15C8.15 -0.05 7.84 -0.05 7.64 0.15L4.85 2.94C4.54 3.25 4.76 3.79 5.21 3.79H7V13.79C7 14.34 7.45 14.79 8 14.79Z" fill="url(#paint1_linear_15525_28218)"/>
+                          <defs>
+                            <linearGradient id="paint0_linear_15525_28218" x1="0" y1="10.895" x2="16" y2="10.895" gradientUnits="userSpaceOnUse">
+                              <stop stop-color="#F75801"/>
+                              <stop offset="1" stop-color="#D43400"/>
+                            </linearGradient>
+                            <linearGradient id="paint1_linear_15525_28218" x1="0" y1="10.895" x2="16" y2="10.895" gradientUnits="userSpaceOnUse">
+                              <stop stop-color="#F75801"/>
+                              <stop offset="1" stop-color="#D43400"/>
+                            </linearGradient>
+                          </defs>
+                        </svg>
                         <span>{formatCount(post.sharesCount)}</span>
                       </button>
                       {currentUser?.id && post.authorId === currentUser.id && (
