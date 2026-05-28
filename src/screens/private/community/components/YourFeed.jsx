@@ -7,6 +7,7 @@ import CommentSection from "./CommentSection";
 import { useGetCommunityFeedQuery, useLikeCommunityPostMutation, useDeleteCommunityPostMutation, useShareCommunityPostMutation } from "../../../../redux/api/community/communityApi";
 import { getUserFromStorage } from "../../../../utils/authStorage";
 import Toast from "../../../../component/toast";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const YourFeed = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces = [], onCommunityClick }) => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const YourFeed = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces 
   // Check which sections are enabled from API
   const sections = useMemo(() => {
     const map = {};
-    sectionContent.forEach((item) => {
+    (sectionContent || []).forEach((item) => {
       if (item.status && item.publishStatus !== false) {
         map[item.display_type] = item;
       }
@@ -236,9 +237,7 @@ const YourFeed = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces 
 
             <div className={styles.postsContainer}>
               {isLoading && (
-                <div className={styles.emptyState}>
-                  <p>Loading feed...</p>
-                </div>
+                <PrimaryLoader isLoading={true} fullscreen={false} message="Loading feed..." />
               )}
 
               {isError && (

@@ -13,6 +13,7 @@ import {
 } from "../../../../redux/api/community/communityApi";
 import Toast from "../../../../component/toast";
 import { getUserFromStorage } from "../../../../utils/authStorage";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const YourPosts = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces = [], onCommunityClick }) => {
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ const YourPosts = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces
   // Check which sections are enabled from API
   const sections = useMemo(() => {
     const map = {};
-    sectionContent.forEach((item) => {
+    (sectionContent || []).forEach((item) => {
       if (item.status && item.publishStatus !== false) {
         map[item.display_type] = item;
       }
@@ -185,9 +186,7 @@ const YourPosts = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces
 
             <div className={styles.postsContainer}>
               {isLoading && (
-                <div className={styles.emptyState}>
-                  <p>Loading your posts...</p>
-                </div>
+                <PrimaryLoader isLoading={true} fullscreen={false} message="Loading your posts..." />
               )}
 
               {isError && (
