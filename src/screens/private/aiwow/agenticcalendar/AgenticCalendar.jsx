@@ -274,7 +274,7 @@ const AgenticCalendar = () => {
             </svg>
           </button>
           <div className={styles.headerInfo}>
-            <h1 className={styles.title}>Muhurat Calender</h1>
+            <h1 className={styles.title}>Muhurat Calendar</h1>
             {profile && <p className={styles.subtitle}>{profile.name}</p>}
           </div>
         </div>
