@@ -165,7 +165,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
         <p className={styles.terms}>
           By submitting, you agree to our{" "}
-          <Link to={PATH.privateRoutes.TERMSCONDITIONS.path} className={styles.termsLink}>
+          <Link to={PATH.privateRoutes.TERMS_CONDITIONS_VIEW.path} className={styles.termsLink}>
             Terms & Conditions
           </Link>
         </p>
