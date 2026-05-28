@@ -900,7 +900,7 @@ const BEST_ASTROLOGERS_GLOBAL_LINKS = [
   { title: "Astrologers in California", path: "/astrologers/california" },
   { title: "Astrologers in Chicago", path: "/astrologers/chicago" },
   { title: "Astrologers in Dallas", path: "/astrologers/dallas" },
-  { title: "Astrologers in New Jersey", path: "/astrologers/new-jursey" },
+  { title: "Astrologers in New Jersey", path: "/astrologers/new-jersey" },
   { title: "Astrologers in Toronto", path: "/astrologers/toronto" },
   { title: "Astrologers in Abu Dhabi", path: "/astrologers/abu-dhabi" },
   { title: "Astrologers in Doha", path: "/astrologers/doha" },

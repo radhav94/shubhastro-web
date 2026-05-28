@@ -51,7 +51,7 @@ const footerLinkSections = [
       { path: "/daily-cosmic-briefing", title: "Daily Cosmic Briefing" },
       { path: "/dream-interpreter", title: "Dream Interpreter" },
       { path: "/smart-matchmaking", title: "Smart MatchMaking" },
-      { path: "/agentic-calendar", title: "Agentic Calendar" },
+      { path: "/aiwow/muhurat-calendar", title: "Muhurat Calendar" },
     ],
   },
   {

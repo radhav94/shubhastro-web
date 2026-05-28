@@ -798,7 +798,7 @@ export const PATH = {
       footer: false,
     },
     AGENTIC_CALENDAR: {
-      path: "/aiwow/agentic-calendar",
+      path: "/aiwow/muhurat-calendar",
       element: AgenticCalendar,
       header: false,
       footer: false,
