@@ -191,7 +191,7 @@ const YourPosts = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces
 
               {posts.map((post, index) => {
                 const isLast = index === posts.length - 1;
-                const authorName = post.authorName || "Unknown";
+                const authorName = post.isAnonymous ? "Anonymous" : (post.authorName || "Unknown");
                 const subtitle = post.spaceInfo
                   ? `${post.spaceInfo.icon || ""} ${post.spaceInfo.name || ""} • ${getTimeAgo(post.createdAt)}`
                   : getTimeAgo(post.createdAt);
@@ -211,7 +211,7 @@ const YourPosts = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces
                         />
                       ) : (
                         <div className={styles.postAuthorAvatar} style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #f97316, #ea580c)", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-                          {authorName.slice(0, 2).toUpperCase()}
+                          {authorName.slice(0, 1).toUpperCase()}
                         </div>
                       )}
                       <div className={styles.postAuthorInfo}>

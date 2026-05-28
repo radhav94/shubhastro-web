@@ -14,10 +14,8 @@ const TrendingAstrologers = ({
     navigate(`/astrologer/${astrologer._id}`);
   };
 
-  const getInitials = (firstName, lastName) => {
-    const first = (firstName || "")[0] || "";
-    const second = (lastName || "")[0] || (firstName || "")[1] || "";
-    return (first + second).toUpperCase() || "?";
+  const getInitials = (firstName) => {
+    return (firstName || "?")[0]?.toUpperCase() || "?";
   };
 
   return (
@@ -36,7 +34,7 @@ const TrendingAstrologers = ({
                 />
               ) : (
                 <div className={styles.trendingAvatar} style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #f97316, #ea580c)", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-                  {getInitials(astrologer.firstName, astrologer.lastName)}
+                  {getInitials(astrologer.firstName)}
                 </div>
               )}
               <div className={styles.trendingInfo}>
