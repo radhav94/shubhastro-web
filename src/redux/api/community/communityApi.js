@@ -105,16 +105,21 @@ export const communityApi = privateRequestNew.injectEndpoints({
       },
       transformResponse: (response, meta, arg) => ({
         posts: response?.data || [],
-        pagination: { ...(response?.pagination || { page: 1, limit: 10, total: 0, pages: 0 }), page: arg.page },
+        pagination: { ...(response?.pagination || { page: 1, limit: 10, total: 0, pages: 0 }), page: arg.page, sort: arg.sort },
       }),
-      // Infinite scroll: treat all page/sort requests for the same slug/filters as one cache entry
+      // Cache key includes slug + sort (not page) so pagination merges within same sort
       serializeQueryArgs: ({ queryArgs }) => {
-        const { page, sort, ...rest } = queryArgs || {};
+        const { page, ...rest } = queryArgs || {};
         return rest;
       },
-      // Merge new page results into existing cached posts
+      // Merge pages for infinite scroll; reset when sort changes or page is 1
       merge: (currentCache, newData, { arg }) => {
+        // If no existing cache, or page 1 (fresh load / sort change), replace entirely
         if (!currentCache || arg.page === 1) {
+          return newData;
+        }
+        // Only append if same sort order
+        if (currentCache.pagination?.sort !== arg.sort) {
           return newData;
         }
         return {
@@ -122,11 +127,8 @@ export const communityApi = privateRequestNew.injectEndpoints({
           pagination: newData.pagination,
         };
       },
-      // Re-fetch when page or sort changes
-      forceRefetch: ({ currentArg, previousArg }) => {
-        return currentArg?.page !== previousArg?.page ||
-          currentArg?.sort !== previousArg?.sort;
-      },
+      // Always refetch when args change (page or sort)
+      forceRefetch: () => true,
     }),
     joinCommunitySpace: builder.mutation({
       query: (slugOrId) => ({
@@ -225,6 +227,16 @@ export const communityApi = privateRequestNew.injectEndpoints({
       }),
     }),
 
+    deleteCommunityComment: builder.mutation({
+      query: (commentId) => ({
+        url: `community/comments/${commentId}`,
+        method: "DELETE",
+        headers: {
+          accept: "application/json",
+        },
+      }),
+    }),
+
     getCommunityPost: builder.query({
       query: (postId) => ({
         url: `community/posts/${postId}`,
@@ -267,6 +279,7 @@ export const {
   useGetPostCommentsQuery,
   useLazyGetPostCommentsQuery,
   useAddPostCommentMutation,
+  useDeleteCommunityCommentMutation,
   useGetCommunityPostQuery,
   useUpdateCommunityPostMutation,
 } = communityApi;

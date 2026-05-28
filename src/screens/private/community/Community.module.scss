@@ -40,20 +40,20 @@ $radius-sm: 8px;
 }
 
 .backBtn {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 1px solid #e0e0e0;
-  background: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid $primary;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: $text-dark;
+  color: $primary;
+  transition: background 0.2s ease;
 
   &:hover {
     background: $primary-light;
-    color: $primary;
   }
 }
 
@@ -1651,6 +1651,24 @@ $radius-sm: 8px;
   color: #999;
 }
 
+.commentDeleteBtn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  transition: color 0.2s ease, background 0.2s ease;
+
+  &:hover {
+    color: #e53935;
+    background: rgba(229, 57, 53, 0.08);
+  }
+}
+
 .commentText {
   font-size: 13px;
   line-height: 1.5;
@@ -1749,6 +1767,21 @@ $radius-sm: 8px;
   &:disabled {
     color: #ccc;
     cursor: not-allowed;
+  }
+}
+
+.commentSendSpinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e0e0e0;
+  border-top-color: #e65100;
+  border-radius: 50%;
+  animation: commentSpin 0.6s linear infinite;
+}
+
+@keyframes commentSpin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

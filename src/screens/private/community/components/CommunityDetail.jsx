@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiHeart, FiMessageCircle, FiUsers, FiFilter, FiTrash2 } from "react-icons/fi";
 import { PiShareNetwork } from "react-icons/pi";
@@ -14,6 +14,7 @@ import {
 } from "../../../../redux/api/community/communityApi";
 import { getUserFromStorage } from "../../../../utils/authStorage";
 import Toast from "../../../../component/toast";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const CommunityDetail = ({ communityId, astrologers = [] }) => {
   const navigate = useNavigate();
@@ -28,6 +29,19 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
   const [deletePost] = useDeleteCommunityPostMutation();
   const [sharePost] = useShareCommunityPostMutation();
   const currentUser = getUserFromStorage();
+  const filterRef = useRef(null);
+
+  // Close sort dropdown on outside click
+  useEffect(() => {
+    if (!showSortDropdown) return;
+    const handleClickOutside = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setShowSortDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showSortDropdown]);
 
   const { data: spaceData, isLoading: isSpaceLoading } = useGetCommunitySpaceDetailQuery(communityId, {
     skip: !communityId,
@@ -141,6 +155,10 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
     }
   };
 
+  if (isSpaceLoading && isFeedLoading) {
+    return <PrimaryLoader isLoading={true} fullscreen={false} message="Loading community..." />;
+  }
+
   return (
     <div className={styles.feedLayout}>
       <div className={styles.feedMain}>
@@ -152,7 +170,7 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
         {/* Community Header Card */}
         <div className={styles.communityDetailHeader}>
           {spaceData?.coverImage ? (
-            <img src={spaceData.coverImage} alt={spaceData.name} className={styles.communityDetailAvatar} />
+            <img src={spaceData.coverImage} alt={spaceData.name} className={styles.communityDetailAvatar} onError={(e) => { e.target.style.display = "none"; }} />
           ) : (
             <div className={styles.communityDetailAvatar}>
               {spaceData?.icon && (
@@ -175,7 +193,7 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
               {spaceData?.metadata?.dateRange && (
                 <p>{spaceData.metadata.dateRange} • {spaceData.metadata.element} • {spaceData.metadata.rulingPlanet}</p>
               )}
-              <p className={styles.createdBy}>Created By: {spaceData?.createdBy || "ShubhAstro"}</p>
+              <p className={styles.createdBy}>Created By : <strong>{spaceData?.createdBy || "ShubhAstro"}</strong></p>
             </div>
           </div>
         </div>
@@ -188,7 +206,7 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
                 <span className={styles.headingBar} />
                 RECENT POSTS
               </h2>
-              <div className={styles.filterWrapper}>
+              <div className={styles.filterWrapper} ref={filterRef}>
                 <button
                   className={styles.filterBtn}
                   onClick={() => setShowSortDropdown((prev) => !prev)}
@@ -285,6 +303,7 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
                           alt="Post"
                           className={styles.postImage}
                           loading="lazy"
+                          onError={(e) => { e.target.parentElement.style.display = "none"; }}
                         />
                       </div>
                     )}
