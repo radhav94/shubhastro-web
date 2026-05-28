@@ -1104,56 +1104,56 @@ export const PATH = {
       element: About,
       header: true,
     },
-    DISCLAIMER: {
-      path: "/disclaimer",
-      element: Disclaimer,
-      header: true,
-    },
-    PRICING_POLICY: {
-      path: "/pricing-policy",
-      element: PricingPolicy,
-      header: true,
-    },
-    PRIVACY_POLICY: {
-      path: "/privacy-policy",
-      element: PrivacyPolicy,
-      header: true,
-    },
-    REFUND_POLICY: {
-      path: "/refund-cancellation-policy",
-      element: RefundPolicy,
-      header: true,
-    },
-    AI_USE_POLICY: {
-      path: "/ai-use-policy",
-      element: AiUsePolicy,
-      header: true,
-    },
-    ASTROLOGER_ONBOARDING_AGREEMENT: {
-      path: "/astrologer-onboarding-agreement",
-      element: AstrologerOnboardingAgreement,
-      header: true,
-    },
-    LIVE_CHAT_POLICY: {
-      path: "/live-chat-policy",
-      element: LiveChatPolicy,
-      header: true,
-    },
-    USER_AGREEMENT: {
-      path: "/user-agreement",
-      element: UserAgreement,
-      header: true,
-    },
-    TERMSCONDITIONS: {
-      path: "/terms-and-conditions",
-      element: TermsConditions,
-      header: true,
-    },
-    ONBOARDING_GUIDE: {
-      path: "/onboarding-guide",
-      element: OnboardingGuide,
-      header: true,
-    },
+    // DISCLAIMER: {
+    //   path: "/disclaimer",
+    //   element: Disclaimer,
+    //   header: true,
+    // },
+    // PRICING_POLICY: {
+    //   path: "/pricing-policy",
+    //   element: PricingPolicy,
+    //   header: true,
+    // },
+    // PRIVACY_POLICY: {
+    //   path: "/privacy-policy",
+    //   element: PrivacyPolicy,
+    //   header: true,
+    // },
+    // REFUND_POLICY: {
+    //   path: "/refund-cancellation-policy",
+    //   element: RefundPolicy,
+    //   header: true,
+    // },
+    // AI_USE_POLICY: {
+    //   path: "/ai-use-policy",
+    //   element: AiUsePolicy,
+    //   header: true,
+    // },
+      // ASTROLOGER_ONBOARDING_AGREEMENT: {
+      //   path: "/astrologer-onboarding-agreement",
+      //   element: AstrologerOnboardingAgreement,
+      //   header: true,
+      // },
+    // LIVE_CHAT_POLICY: {
+    //   path: "/live-chat-policy",
+    //   element: LiveChatPolicy,
+    //   header: true,
+    // },
+    // USER_AGREEMENT: {
+    //   path: "/user-agreement",
+    //   element: UserAgreement,
+    //   header: true,
+    // },
+    // TERMSCONDITIONS: {
+    //   path: "/terms-and-conditions",
+    //   element: TermsConditions,
+    //   header: true,
+    // },
+    // ONBOARDING_GUIDE: {
+    //   path: "/onboarding-guide",
+    //   element: OnboardingGuide,
+    //   header: true,
+    // },
 
     // Header
     NOTIFICATION: {
