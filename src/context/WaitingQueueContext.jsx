@@ -289,8 +289,11 @@ export const WaitingQueueProvider = ({ children }) => {
       }
 
       // Show toast so user knows the request was rejected
-      const label = data?.type === "chat" ? "chat" : "call";
-      Toast.error(`Astrologer rejected the ${label} request`);
+      // Use setTimeout to avoid conflicting with page-level toast handlers
+      setTimeout(() => {
+        const label = data?.type === "chat" ? "chat" : "call";
+        Toast.error(`Astrologer rejected the ${label} request`);
+      }, 50);
     };
 
     const handleActivity = (data) => {
