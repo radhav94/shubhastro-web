@@ -91,6 +91,13 @@ const AIWow = () => {
     }
   }, [historyData]);
 
+  // Set active tab from navigation state (e.g., from result page Download button)
+  useEffect(() => {
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state]);
+
   // Reset page when profile changes
   useEffect(() => {
     setHistoryPage(1);

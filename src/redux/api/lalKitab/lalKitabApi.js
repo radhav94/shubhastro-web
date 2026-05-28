@@ -19,6 +19,10 @@ export const lalKitabApi = privateRequestNew.injectEndpoints({
     getLalKitabDebts: builder.query({
       query: (lalKitabId) => `lal-kitab/debts/${lalKitabId}`,
     }),
+    getLalKitabPdf: builder.query({
+      query: ({ historyId, featureType = "lal-kitab" }) =>
+        `ai-history/pdf?historyId=${historyId}&featureType=${featureType}`,
+    }),
   }),
 });
 
@@ -27,4 +31,5 @@ export const {
   useGetLalKitabChartQuery,
   useGetLalKitabPlanetDetailsQuery,
   useGetLalKitabDebtsQuery,
+  useLazyGetLalKitabPdfQuery,
 } = lalKitabApi;

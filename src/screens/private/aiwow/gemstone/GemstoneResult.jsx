@@ -631,6 +631,14 @@ const GemstoneResult = () => {
             </svg>
           </button>
           <h1 className={styles.title}>Gemstone Analysis</h1>
+          <button className={styles.downloadButton} onClick={() => navigate('/ai-wow', { state: { tab: 'results' } })}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Download
+          </button>
         </div>
       </header>
 
