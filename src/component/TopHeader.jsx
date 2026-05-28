@@ -94,10 +94,10 @@ const TopHeader = () => {
   }, [refreshWallet]);
 
   const handleProfileClick = () => {
-    if (token) {
-      setProfileDropdownOpen((prev) => !prev);
+    if (!token) {
+      navigate("/login?skip=welcome");
     } else {
-      requireAuth();
+      setProfileDropdownOpen((prev) => !prev);
     }
   };
 
