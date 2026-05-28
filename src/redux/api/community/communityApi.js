@@ -52,6 +52,7 @@ export const communityApi = privateRequestNew.injectEndpoints({
         },
       }),
       transformResponse: (response) => response?.data || null,
+      providesTags: (result, error, slugOrId) => [{ type: "CommunitySpaceDetail", id: slugOrId }],
     }),
 
     getCommunityLibrary: builder.query({
@@ -138,7 +139,11 @@ export const communityApi = privateRequestNew.injectEndpoints({
           accept: "application/json",
         },
       }),
-      invalidatesTags: ["JoinedSpaces", "CommunitySpaces"],
+      invalidatesTags: (result, error, slugOrId) => [
+        "JoinedSpaces",
+        "CommunitySpaces",
+        { type: "CommunitySpaceDetail", id: slugOrId },
+      ],
     }),
 
     leaveCommunitySpace: builder.mutation({
@@ -149,7 +154,11 @@ export const communityApi = privateRequestNew.injectEndpoints({
           accept: "application/json",
         },
       }),
-      invalidatesTags: ["JoinedSpaces", "CommunitySpaces"],
+      invalidatesTags: (result, error, slugOrId) => [
+        "JoinedSpaces",
+        "CommunitySpaces",
+        { type: "CommunitySpaceDetail", id: slugOrId },
+      ],
     }),
 
     createCommunityPost: builder.mutation({

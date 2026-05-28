@@ -47,7 +47,7 @@ const Community = () => {
     }
     // Scroll page to top on tab change
     window.scrollTo(0, 0);
-  }, [activeTab]);
+  }, [activeTab, communityId]);
 
   const { data: pageResponse, isLoading: isPageLoading } = useGetCommunityPageDataQuery();
   const { data: spacesData, isLoading: isSpacesLoading } = useGetCommunitySpacesQuery({ page: 1, limit: 20 });

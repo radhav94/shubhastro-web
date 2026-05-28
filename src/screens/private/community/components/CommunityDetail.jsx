@@ -10,6 +10,8 @@ import {
   useLikeCommunityPostMutation,
   useDeleteCommunityPostMutation,
   useShareCommunityPostMutation,
+  useJoinCommunitySpaceMutation,
+  useLeaveCommunitySpaceMutation,
 } from "../../../../redux/api/community/communityApi";
 import { getUserFromStorage } from "../../../../utils/authStorage";
 import Toast from "../../../../component/toast";
@@ -29,8 +31,20 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
   const [likePost] = useLikeCommunityPostMutation();
   const [deletePost] = useDeleteCommunityPostMutation();
   const [sharePost] = useShareCommunityPostMutation();
+  const [joinSpace, { isLoading: isJoining }] = useJoinCommunitySpaceMutation();
+  const [leaveSpace, { isLoading: isLeaving }] = useLeaveCommunitySpaceMutation();
+  const [hasJoined, setHasJoined] = useState(null);
   const currentUser = getUserFromStorage();
   const filterRef = useRef(null);
+
+  const { data: spaceData, isLoading: isSpaceLoading } = useGetCommunitySpaceDetailQuery(communityId, {
+    skip: !communityId,
+  });
+
+  const { data: feedData, isLoading: isFeedLoading, isFetching, isError: isFeedError } = useGetCommunityFeedQuery(
+    { page, limit: 10, slug: communityId, sort: sortOrder },
+    { skip: !communityId || !hasJoined }
+  );
 
   // Close sort dropdown on outside click
   useEffect(() => {
@@ -44,14 +58,29 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showSortDropdown]);
 
-  const { data: spaceData, isLoading: isSpaceLoading } = useGetCommunitySpaceDetailQuery(communityId, {
-    skip: !communityId,
-  });
+  // Sync joined state from API
+  useEffect(() => {
+    if (spaceData) {
+      setHasJoined(spaceData.isJoined || false);
+    }
+  }, [spaceData]);
 
-  const { data: feedData, isLoading: isFeedLoading, isFetching, isError: isFeedError } = useGetCommunityFeedQuery(
-    { page, limit: 10, slug: communityId, sort: sortOrder },
-    { skip: !communityId }
-  );
+  const handleJoinLeave = async () => {
+    try {
+      if (hasJoined) {
+        await leaveSpace(communityId).unwrap();
+        setHasJoined(false);
+        Toast.success("Left community");
+      } else {
+        await joinSpace(communityId).unwrap();
+        setHasJoined(true);
+        setPage(1);
+        Toast.success("Joined community");
+      }
+    } catch (error) {
+      Toast.error(error?.data?.message || "Something went wrong");
+    }
+  };
 
   const allPosts = feedData?.posts || [];
   const posts = allPosts.filter((p) => !deletedIds.includes(p._id));
@@ -174,7 +203,7 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
     }
   };
 
-  if (isSpaceLoading && isFeedLoading) {
+  if (isSpaceLoading) {
     return <PrimaryLoader isLoading={true} fullscreen={false} message="Loading community..." />;
   }
 
@@ -215,7 +244,31 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
               <p className={styles.createdBy}>Created By : <strong>{spaceData?.createdBy || "ShubhAstro"}</strong></p>
             </div>
           </div>
+          {hasJoined === false && (
+            <button
+              className={styles.joinCommunityBtn}
+              onClick={handleJoinLeave}
+              disabled={isJoining || isLeaving}
+            >
+              <FiUsers size={18} />
+              {isJoining ? "Joining..." : "Join"}
+            </button>
+          )}
         </div>
+
+        {/* Join message when not a member */}
+        {hasJoined === false && (
+          <div className={styles.joinMessage}>
+            <p>Join the tribe to unlock posts, discussions, and community updates.</p>
+          </div>
+        )}
+
+        {/* Empty state when joined but no posts */}
+        {hasJoined && !isFeedLoading && !isFetching && !isFeedError && posts.length === 0 && (
+          <div className={styles.joinMessage}>
+            <p>No posts yet. Be the first to share and start the conversation with the community.</p>
+          </div>
+        )}
 
         {/* Recent Posts - only show when there are posts */}
         {!isFeedLoading && !isFeedError && posts.length > 0 && (
@@ -255,7 +308,7 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
             <div className={styles.postsContainer}>
               {posts.map((post, index) => {
                 const isLast = index === posts.length - 1;
-                const authorName = post.authorName || "Unknown";
+                const authorName = post.isAnonymous ? "Anonymous" : (post.authorName || "Unknown");
                 const subtitle = post.spaceInfo
                   ? `${post.spaceInfo.icon || ""} ${post.spaceInfo.name || ""} • ${getTimeAgo(post.createdAt)}`
                   : getTimeAgo(post.createdAt);
@@ -275,7 +328,7 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
                         />
                       ) : (
                         <div className={styles.postAuthorAvatar} style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #f97316, #ea580c)", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-                          {authorName.slice(0, 2).toUpperCase()}
+                          {authorName.slice(0, 1).toUpperCase()}
                         </div>
                       )}
                       <div className={styles.postAuthorInfo}>

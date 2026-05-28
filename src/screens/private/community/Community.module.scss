@@ -833,6 +833,7 @@ $radius-sm: 8px;
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 20px;
+  position: relative;
 
   @media (max-width: 600px) {
     flex-direction: column;
@@ -892,6 +893,58 @@ $radius-sm: 8px;
   margin-top: 10px !important;
   font-weight: 400 !important;
   color: $text-dark !important;
+}
+
+.joinCommunityBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 32px;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(180deg, #f97316 0%, #d43400 100%);
+  box-shadow: 0 4px 12px rgba(212, 52, 0, 0.3);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(212, 52, 0, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  @media (max-width: 600px) {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: auto;
+    padding: 8px 16px;
+    font-size: 13px;
+    gap: 5px;
+  }
+}
+
+.joinMessage {
+  text-align: center;
+  padding: 24px 16px;
+  color: $text-muted;
+  font-size: 14px;
+
+  p {
+    margin: 0;
+  }
 }
 
 .recentPostsHeader {

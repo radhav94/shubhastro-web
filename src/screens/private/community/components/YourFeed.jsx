@@ -181,7 +181,7 @@ const YourFeed = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces 
             ) : (
               <div className={styles.postInputAvatar} style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #f97316, #ea580c)", color: "#fff", fontWeight: 600, fontSize: 14 }}>
                 {currentUser?.firstName
-                  ? (currentUser.firstName[0] + (currentUser.lastName?.[0] || currentUser.firstName[1] || "")).toUpperCase()
+                  ? currentUser.firstName[0].toUpperCase()
                   : "U"}
               </div>
             )}
@@ -255,7 +255,7 @@ const YourFeed = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces 
 
               {posts.map((post, index) => {
                 const isLast = index === posts.length - 1;
-                const authorName = post.authorName || "Unknown";
+                const authorName = post.isAnonymous ? "Anonymous" : (post.authorName || "Unknown");
                 const subtitle = post.spaceInfo
                   ? `${post.spaceInfo.icon || ""} ${post.spaceInfo.name || ""} • ${getTimeAgo(post.createdAt)}`
                   : getTimeAgo(post.createdAt);
@@ -275,7 +275,7 @@ const YourFeed = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces 
                         />
                       ) : (
                         <div className={styles.postAuthorAvatar} style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #f97316, #ea580c)", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-                          {authorName.slice(0, 2).toUpperCase()}
+                          {authorName.slice(0, 1).toUpperCase()}
                         </div>
                       )}
                       <div className={styles.postAuthorInfo}>
