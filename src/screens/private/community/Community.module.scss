@@ -1618,9 +1618,9 @@ $radius-sm: 8px;
   padding-top: 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   max-height: 450px;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 
   @media (max-width: 768px) {
     max-height: 350px;
@@ -1633,6 +1633,8 @@ $radius-sm: 8px;
   gap: 12px;
   padding-right: 4px;
   flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .commentInputWrapper {
@@ -1641,10 +1643,6 @@ $radius-sm: 8px;
   gap: 10px;
   padding: 12px 0 0;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  position: sticky;
-  bottom: 0;
-  background: transparent;
-  z-index: 1;
   margin-top: 14px;
 }
 

@@ -214,10 +214,27 @@ export const communityApi = privateRequestNew.injectEndpoints({
           accept: "application/json",
         },
       }),
-      transformResponse: (response) => ({
+      transformResponse: (response, meta, arg) => ({
         comments: response?.data || [],
-        pagination: response?.pagination || { page: 1, limit: 20, total: 0, pages: 0 },
+        pagination: { ...(response?.pagination || { page: 1, limit: 20, total: 0, pages: 0 }), page: arg.page },
       }),
+      serializeQueryArgs: ({ queryArgs }) => {
+        const { page, refetchKey, ...rest } = queryArgs || {};
+        return rest;
+      },
+      merge: (currentCache, newData, { arg }) => {
+        if (!currentCache || arg.page === 1) {
+          return newData;
+        }
+        // Deduplicate by comment _id
+        const existingIds = new Set(currentCache.comments.map((c) => c._id));
+        const newComments = newData.comments.filter((c) => !existingIds.has(c._id));
+        return {
+          comments: [...currentCache.comments, ...newComments],
+          pagination: newData.pagination,
+        };
+      },
+      forceRefetch: () => true,
     }),
 
     addPostComment: builder.mutation({

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { FiSend, FiChevronDown, FiTrash2 } from "react-icons/fi";
+import { useState, useRef, forwardRef } from "react";
+import { FiSend, FiTrash2 } from "react-icons/fi";
 import styles from "../Community.module.scss";
 import {
   useGetPostCommentsQuery,
@@ -30,7 +30,7 @@ const getInitials = (name) => {
 };
 
 // Single comment item (used for both top-level and replies)
-const CommentItem = ({ comment, currentUserId, onDelete }) => {
+const CommentItem = forwardRef(({ comment, currentUserId, onDelete }, ref) => {
   const authorName = comment.isAnonymous
     ? "Anonymous"
     : comment.authorName || "User";
@@ -38,7 +38,7 @@ const CommentItem = ({ comment, currentUserId, onDelete }) => {
   const isOwnComment = currentUserId && comment.authorId === currentUserId;
 
   return (
-    <div className={styles.commentItem}>
+    <div className={styles.commentItem} ref={ref}>
       <div className={styles.commentAvatar}>
         {!comment.isAnonymous && comment.authorImage ? (
           <img src={comment.authorImage} alt={authorName} />
@@ -71,12 +71,15 @@ const CommentItem = ({ comment, currentUserId, onDelete }) => {
       </div>
     </div>
   );
-};
+});
+
+CommentItem.displayName = "CommentItem";
 
 const CommentSection = ({ postId }) => {
   const [commentText, setCommentText] = useState("");
-  const [page, setPage] = useState(1);
   const [deletedIds, setDeletedIds] = useState([]);
+  const [refetchKey, setRefetchKey] = useState(0);
+  const commentsListRef = useRef(null);
 
   const user = getUserFromStorage();
   const currentUserId = user?.id || null;
@@ -85,18 +88,17 @@ const CommentSection = ({ postId }) => {
     : "You";
   const currentUserImage = user?.profileImgUrl || null;
 
-  const { data, isLoading, isFetching, refetch } = useGetPostCommentsQuery({
+  const { data, isLoading } = useGetPostCommentsQuery({
     postId,
-    page,
-    limit: 20,
-    sort: "oldest",
+    page: 1,
+    limit: 50,
+    sort: "newest",
+    refetchKey,
   });
   const [addComment, { isLoading: isSending }] = useAddPostCommentMutation();
   const [deleteComment] = useDeleteCommunityCommentMutation();
 
-  const comments = (data?.comments || []).filter((c) => !deletedIds.includes(c._id));
-  const pagination = data?.pagination || {};
-  const hasMore = page < (pagination.pages || 1);
+  const comments = (data?.comments || []).filter((c) => !deletedIds.includes(c._id)).slice().reverse();
 
   const handleDeleteComment = async (commentId) => {
     if (!window.confirm("Delete this comment?")) return;
@@ -119,7 +121,12 @@ const CommentSection = ({ postId }) => {
         isAnonymous: false,
       }).unwrap();
       setCommentText("");
-      refetch();
+      setRefetchKey((k) => k + 1);
+      setTimeout(() => {
+        if (commentsListRef.current) {
+          commentsListRef.current.scrollTop = commentsListRef.current.scrollHeight;
+        }
+      }, 800);
     } catch (error) {
       Toast.error(error?.data?.message || "Failed to post comment");
     }
@@ -135,7 +142,7 @@ const CommentSection = ({ postId }) => {
   return (
     <div className={styles.commentSection}>
       {/* Comments List */}
-      <div className={styles.commentsList}>
+      <div className={styles.commentsList} ref={commentsListRef}>
         {isLoading && (
           <div className={styles.commentLoading}>Loading comments...</div>
         )}
@@ -152,16 +159,6 @@ const CommentSection = ({ postId }) => {
             onDelete={handleDeleteComment}
           />
         ))}
-
-        {hasMore && (
-          <button
-            className={styles.loadMoreBtn}
-            onClick={() => setPage((prev) => prev + 1)}
-            disabled={isFetching}
-          >
-            {isFetching ? "Loading..." : "Load More"} <FiChevronDown size={14} />
-          </button>
-        )}
       </div>
 
       {/* Comment Input */}
