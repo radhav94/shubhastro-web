@@ -1290,7 +1290,7 @@ const TalkToAstrologer = () => {
         {isFetching && <PrimaryLoader />}
       </div>
 
-      {!hasMore && allAstrologers.length > 0 && (
+      {!hasMore && allAstrologers.length > 0 && recommendedAstrologers.length > 0 && (
         <div className={styles.matchSection}>
           <h2 className={styles.matchTitle}>
             NOT SURE?

@@ -268,6 +268,8 @@
   background-color: #fff;
   flex-shrink: 0;
   max-width: 200px;
+  cursor: pointer;
+  position: relative;
 }
 .namaste {
   font-size: 0.7rem;
@@ -824,5 +826,88 @@
   &:hover {
     background: #fff3ed;
     color: #F75801;
+  }
+}
+
+/* Profile Dropdown */
+
+.profileDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  padding: 8px 0;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease;
+}
+
+.profileDropdownHeader {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profileDropdownName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profileDropdownNameRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profileNameArrow {
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 2px;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #fff3ed;
+  }
+}
+
+.profileDropdownPhone {
+  font-size: 12px;
+  color: #757575;
+}
+
+.profileDropdownDivider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 4px 0;
+}
+
+.profileDropdownItem {
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #2c1b0e;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #fff3ed;
+    color: #F75801;
+  }
+}
+
+.profileDropdownLogout {
+  color: #d32f2f;
+
+  &:hover {
+    background: #fef2f2;
+    color: #b71c1c;
   }
 }

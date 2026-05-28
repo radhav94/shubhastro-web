@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import toast from "react-hot-toast";
 import styles from "./OccultResult.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import astralCompass from "../../../assets/icons/astral-compass.svg";
 import { format12HourTime } from "../../../utils/dateFormat/dateTime";
+import { useGetOccultPdfMutation } from "../../../redux/api/occult/occultApi";
+import { FiDownload } from "react-icons/fi";
 
 const SEVERITY_COLOR = {
   SEVERE: "#ef4444",
@@ -54,6 +58,39 @@ const OccultResult = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const result = state?.result;
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [getOccultPdf] = useGetOccultPdfMutation();
+
+  const handleDownloadPdf = async () => {
+    const historyId = state?.historyId || result?._id;
+    const kundliId = state?.profile?._id;
+    if (!historyId) {
+      toast.error("PDF not available for this report");
+      return;
+    }
+    setIsDownloading(true);
+    try {
+      toast.loading("Downloading PDF...", { id: "occult-pdf" });
+      const response = await getOccultPdf({ historyId, featureType: "ocult-dasha", kundliId }).unwrap();
+      const pdfUrl = response?.data?.pdfUrl;
+      if (!pdfUrl) throw new Error("PDF URL not found");
+      const res = await fetch(pdfUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `occult-dosha-darshan.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+      toast.success("PDF downloaded!", { id: "occult-pdf" });
+    } catch {
+      toast.error("Failed to download PDF", { id: "occult-pdf" });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   if (!result) {
     return (
@@ -71,6 +108,22 @@ const OccultResult = () => {
 
   return (
     <div className={styles.container}>
+      <button className={styles.backButton} onClick={() => navigate(PATH.privateRoutes.OCCULT.path)}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
+      <button
+        className={styles.downloadBtn}
+        onClick={handleDownloadPdf}
+        disabled={isDownloading}
+        title="Download PDF"
+      >
+        <FiDownload size={18} />
+        <span>{isDownloading ? "Downloading..." : "Download PDF"}</span>
+      </button>
+
       <div className={styles.header}>
         <img src={astralCompass} alt="Astral Compass" className={styles.headerIcon} />
         <span className={styles.headerKicker}>SHUBHASTRO · OCCULT ANALYSIS</span>

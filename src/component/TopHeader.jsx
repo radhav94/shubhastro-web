@@ -18,6 +18,8 @@ import { setSelectedKundli, clearSelectedKundli } from "../redux/kundli/kundliSl
 import { setSelectedKundliProfile } from "../redux/aiwow/aiwowSlice";
 import LanguageSelector from "./LanguageSelector";
 import { isShubhMallEnabled } from "../utils/featureConfig";
+import { logout } from "../redux/auth/authSlice";
+import { useLogoutUserMutation } from "../redux/api/userSession/userSessionApi";
 const TopHeader = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -25,6 +27,9 @@ const TopHeader = () => {
   const [user, setUser] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef(null);
+  const [logoutUser] = useLogoutUserMutation();
   const token = getToken();
 
   const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
@@ -89,7 +94,41 @@ const TopHeader = () => {
   }, [refreshWallet]);
 
   const handleProfileClick = () => {
-    requireAuth() && navigate("/profile");
+    if (token) {
+      setProfileDropdownOpen((prev) => !prev);
+    } else {
+      requireAuth();
+    }
+  };
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    if (profileDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileDropdownOpen]);
+
+  const handleLogout = async () => {
+    setProfileDropdownOpen(false);
+    try {
+      await logoutUser({ deviceType: "web" }).unwrap();
+    } catch (err) {
+      console.error("Logout API error:", err);
+    }
+    dispatch(logout());
+    dispatch(clearSelectedKundli());
+    localStorage.removeItem("shubhtalk_customer_token");
+    localStorage.removeItem("shubhtalk_customer_id");
+    localStorage.removeItem("selectedKundliProfile");
+    localStorage.removeItem("astro_wallet_balance");
+    window.dispatchEvent(new Event("auth-change"));
+    navigate("/");
   };
 
   const handleKundliSelect = (profile) => {
@@ -259,7 +298,7 @@ const TopHeader = () => {
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
-              AI WOW
+              Shubh AI
             </NavLink>
             {/* <NavLink
               to="/blog"
@@ -338,46 +377,66 @@ const TopHeader = () => {
                 )}
               </span>
             </div> */}
-            <div className={styles.profileDetailMain}>
+            <div className={styles.profileDetailMain} ref={profileDropdownRef} onClick={handleProfileClick}>
               {userAvatarDisplay ? (
-                <div className={styles.avatarText} onClick={handleProfileClick}>
-                  {/* <span>{userAvatarDisplay}</span> */}
+                <div className={styles.avatarText}>
                   <span>
                     <img src={profileIcon} alt="icon" />
                   </span>
                 </div>
               ) : (
-                <div className={styles.profileIcon} onClick={handleProfileClick}>
+                <div className={styles.profileIcon}>
                   <User size={20} strokeWidth={0} fill="#d53400"/>
                 </div>
               )}
-              {/* Kundli selector replaces greeting */}
-              {!!token && (
-                <span
-                  className={styles.profileWrapName}
-                  onClick={() => setKundliModalOpen(true)}
-                  style={{ cursor: "pointer" }}
-                  key={`profile-name-${selectedKundli?._id || 'default'}`}
-                >
-                  <span className={styles.languageNamee}>
-                    {selectedKundli?.name?.split(" ")[0] || displayName}
-                  </span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
-                    <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_kundli_greeting)"/>
-                    <defs>
-                      <linearGradient id="paint0_linear_kundli_greeting" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
-                        <stop stopColor="#F75801"/>
-                        <stop offset="1" stopColor="#D43400"/>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none" style={{ marginRight: '4px', flexShrink: 0 }}>
+                <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_profile_dd)"/>
+                <defs>
+                  <linearGradient id="paint0_linear_profile_dd" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#F75801"/>
+                    <stop offset="1" stopColor="#D43400"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+
+              {/* Profile Dropdown */}
+              {profileDropdownOpen && !!token && (
+                <div className={styles.profileDropdown}>
+                  <div className={styles.profileDropdownHeader}>
+                    <div className={styles.profileDropdownNameRow}>
+                      <span className={styles.profileDropdownName}>{displayName}</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 14 8" fill="none"
+                        className={styles.profileNameArrow}
+                        onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen(false); setKundliModalOpen(true); }}
+                      >
+                        <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#F75801"/>
+                      </svg>
+                    </div>
+                    <span className={styles.profileDropdownPhone}>{user?.phoneNumber || ""}</span>
+                  </div>
+                  <div className={styles.profileDropdownDivider} />
+                  <div
+                    className={styles.profileDropdownItem}
+                    onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen(false); navigate("/profile"); }}
+                  >
+                    My Account
+                  </div>
+                  {/* <div
+                    className={styles.profileDropdownItem}
+                    onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen(false); navigate("/profile"); }}
+                  >
+                    Order History
+                  </div> */}
+                  <div className={styles.profileDropdownDivider} />
+                  <div
+                    className={`${styles.profileDropdownItem} ${styles.profileDropdownLogout}`}
+                    onClick={(e) => { e.stopPropagation(); handleLogout(); }}
+                  >
+                    Logout
+                  </div>
+                </div>
               )}
-              {/* Original greeting block (commented out) */}
-              {/* <div className={styles.greetingText}>
-                <span className={styles.namaste}>नमस्ते</span>
-                <span className={styles.userName}>{displayName}</span>
-              </div> */}
             </div>
           </div>
         {/* </div> */}
@@ -410,7 +469,7 @@ const TopHeader = () => {
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
-              AI WOW
+              Shubh AI
             </NavLink> */}
             <NavLink
               to="/blog"
@@ -539,7 +598,7 @@ const TopHeader = () => {
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
-              AI WOW
+              Shubh AI
             </NavLink>
             {isShubhMallEnabled() && (
               <NavLink
@@ -662,10 +721,7 @@ const TopHeader = () => {
       <ProfileManager
         isOpen={kundliModalOpen}
         onClose={() => setKundliModalOpen(false)}
-        title="Select Kundli"
-        // startCallMode={true}
-        // callModeBtnTitle="Select Kundli"
-        // onStartCall={handleKundliSelect}
+        title="Select Profile"
         onProfileSelect={handleKundliSelect}
         selectedProfileId={selectedKundli?._id}
         enabledOperations={{
