@@ -33,7 +33,7 @@ const Onboarding = () => {
       guidance: [],
       name: "",
       email: "",
-      identity: "Female",
+      identity: "Male",
       birthDate: "",
       birthTime: "",
       birthPlace: "",

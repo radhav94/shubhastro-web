@@ -1488,7 +1488,7 @@ const Profile = () => {
 
                     <div className={styles.profileCardContent}>
                       <div className={styles.profileCardHeader}>
-                        <div className={styles.badge}>{kundli?.relation}</div>
+                        {kundli?.relation && <div className={styles.badge}>{kundli?.relation}</div>}
                         <div className={styles.profileActions}>
                           <button
                             className={styles.iconButton}
