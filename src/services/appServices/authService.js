@@ -37,6 +37,10 @@ export const refreshAgoraToken = async (channel, uid) => {
   return await privateRequest.post("users/live/refresh-token", { channel, uid });
 }
 
+export const updateUserProfile = async (data) => {
+  return await privateRequest.put("users/profile", data);
+};
+
 export const deleteAccount = async () => {
   return await privateRequest.delete("users/delete-account");
 };
