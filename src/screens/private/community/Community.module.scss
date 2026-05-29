@@ -40,20 +40,20 @@ $radius-sm: 8px;
 }
 
 .backBtn {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 1px solid #e0e0e0;
-  background: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid $primary;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: $text-dark;
+  color: $primary;
+  transition: background 0.2s ease;
 
   &:hover {
     background: $primary-light;
-    color: $primary;
   }
 }
 
@@ -843,6 +843,7 @@ $radius-sm: 8px;
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 20px;
+  position: relative;
 
   @media (max-width: 600px) {
     flex-direction: column;
@@ -902,6 +903,58 @@ $radius-sm: 8px;
   margin-top: 10px !important;
   font-weight: 400 !important;
   color: $text-dark !important;
+}
+
+.joinCommunityBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 32px;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(180deg, #f97316 0%, #d43400 100%);
+  box-shadow: 0 4px 12px rgba(212, 52, 0, 0.3);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(212, 52, 0, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  @media (max-width: 600px) {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: auto;
+    padding: 8px 16px;
+    font-size: 13px;
+    gap: 5px;
+  }
+}
+
+.joinMessage {
+  text-align: center;
+  padding: 24px 16px;
+  color: $text-muted;
+  font-size: 14px;
+
+  p {
+    margin: 0;
+  }
 }
 
 .recentPostsHeader {
@@ -1575,9 +1628,9 @@ $radius-sm: 8px;
   padding-top: 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   max-height: 450px;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 
   @media (max-width: 768px) {
     max-height: 350px;
@@ -1590,6 +1643,8 @@ $radius-sm: 8px;
   gap: 12px;
   padding-right: 4px;
   flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .commentInputWrapper {
@@ -1598,10 +1653,6 @@ $radius-sm: 8px;
   gap: 10px;
   padding: 12px 0 0;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  position: sticky;
-  bottom: 0;
-  background: transparent;
-  z-index: 1;
   margin-top: 14px;
 }
 
@@ -1659,6 +1710,24 @@ $radius-sm: 8px;
 .commentTime {
   font-size: 11px;
   color: #999;
+}
+
+.commentDeleteBtn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  transition: color 0.2s ease, background 0.2s ease;
+
+  &:hover {
+    color: #e53935;
+    background: rgba(229, 57, 53, 0.08);
+  }
 }
 
 .commentText {
@@ -1762,6 +1831,21 @@ $radius-sm: 8px;
   }
 }
 
+.commentSendSpinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e0e0e0;
+  border-top-color: #e65100;
+  border-radius: 50%;
+  animation: commentSpin 0.6s linear infinite;
+}
+
+@keyframes commentSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 // ─── Comment Actions & Replies ────────────────────────────────────────────────
 .commentActions {
   display: flex;
@@ -1860,4 +1944,90 @@ $radius-sm: 8px;
     background: #f0f0f0;
     color: #333;
   }
+}
+
+// ─── Share Button (Blog-style) ────────────────────────────────────────────────
+.shareBtnMain {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+
+  &:hover .shareIconSocial {
+    display: flex;
+  }
+}
+
+.shareBtn {
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shareCount {
+  font-size: 14px;
+  color: #444;
+}
+
+.shareIconSocial {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  padding-bottom: 8px;
+  gap: 6px;
+  z-index: 10;
+
+  span.socialIconWrapper {
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    &:hover {
+      background: #f0f0f0;
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+      color: #333;
+    }
+  }
+}
+
+.copiedText {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeInOut 2s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-4px); }
 }

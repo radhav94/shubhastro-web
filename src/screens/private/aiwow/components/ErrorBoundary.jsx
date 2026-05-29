@@ -80,7 +80,7 @@ class AIWowErrorBoundary extends React.Component {
                 className={styles.homeButton}
                 onClick={() => window.location.href = '/ai-wow'}
               >
-                Go to AI Wow Home
+                Go to Shubh AI Home
               </button>
             </div>
           </div>

@@ -8,11 +8,72 @@
   min-height: 100vh;
   color: #1a1a1a;
   border-radius: 12px;
+  position: relative;
 
   @media (max-width: 600px) {
-    // padding: 16px 12px 40px;
     background: none;
     border: none;
+  }
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  cursor: pointer;
+  color: #1a1a1a;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  margin-bottom: 16px;
+
+  &:hover {
+    border-color: #F75801;
+    color: #F75801;
+  }
+}
+
+.downloadBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border: 1.5px solid #F75801;
+  border-radius: 8px;
+  background: #fff;
+  color: #F75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  z-index: 2;
+
+  &:hover:not(:disabled) {
+    background: #F75801;
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 600px) {
+    top: 12px;
+    right: 12px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  @media print {
+    display: none;
   }
 }
 

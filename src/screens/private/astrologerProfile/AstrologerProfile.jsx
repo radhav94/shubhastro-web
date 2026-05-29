@@ -956,6 +956,7 @@ const AstrologerProfile = () => {
       <div className={styles.threeColumnLayout}>
         {/* Left Sidebar - Top Astrologers (Desktop Only) */}
         <aside className={styles.leftSidebar}>
+          {topAstrologers.length > 0 && (
           <section className={styles.astrologersSection}>
             <div className={styles.sectionHeader}>
               <h3 className={styles.sidebarTitle}>TOP ASTROLOGERS</h3>
@@ -1102,6 +1103,7 @@ const AstrologerProfile = () => {
               ))}
             </div>
           </section>
+          )}
         </aside>
 
         {/* Center Column - Existing Profile Content */}

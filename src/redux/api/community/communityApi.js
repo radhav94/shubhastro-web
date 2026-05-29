@@ -52,6 +52,7 @@ export const communityApi = privateRequestNew.injectEndpoints({
         },
       }),
       transformResponse: (response) => response?.data || null,
+      providesTags: (result, error, slugOrId) => [{ type: "CommunitySpaceDetail", id: slugOrId }],
     }),
 
     getCommunityLibrary: builder.query({
@@ -105,16 +106,21 @@ export const communityApi = privateRequestNew.injectEndpoints({
       },
       transformResponse: (response, meta, arg) => ({
         posts: response?.data || [],
-        pagination: { ...(response?.pagination || { page: 1, limit: 10, total: 0, pages: 0 }), page: arg.page },
+        pagination: { ...(response?.pagination || { page: 1, limit: 10, total: 0, pages: 0 }), page: arg.page, sort: arg.sort },
       }),
-      // Infinite scroll: treat all page/sort requests for the same slug/filters as one cache entry
+      // Cache key includes slug + sort (not page) so pagination merges within same sort
       serializeQueryArgs: ({ queryArgs }) => {
-        const { page, sort, ...rest } = queryArgs || {};
+        const { page, ...rest } = queryArgs || {};
         return rest;
       },
-      // Merge new page results into existing cached posts
+      // Merge pages for infinite scroll; reset when sort changes or page is 1
       merge: (currentCache, newData, { arg }) => {
+        // If no existing cache, or page 1 (fresh load / sort change), replace entirely
         if (!currentCache || arg.page === 1) {
+          return newData;
+        }
+        // Only append if same sort order
+        if (currentCache.pagination?.sort !== arg.sort) {
           return newData;
         }
         return {
@@ -122,11 +128,8 @@ export const communityApi = privateRequestNew.injectEndpoints({
           pagination: newData.pagination,
         };
       },
-      // Re-fetch when page or sort changes
-      forceRefetch: ({ currentArg, previousArg }) => {
-        return currentArg?.page !== previousArg?.page ||
-          currentArg?.sort !== previousArg?.sort;
-      },
+      // Always refetch when args change (page or sort)
+      forceRefetch: () => true,
     }),
     joinCommunitySpace: builder.mutation({
       query: (slugOrId) => ({
@@ -136,7 +139,11 @@ export const communityApi = privateRequestNew.injectEndpoints({
           accept: "application/json",
         },
       }),
-      invalidatesTags: ["JoinedSpaces", "CommunitySpaces"],
+      invalidatesTags: (result, error, slugOrId) => [
+        "JoinedSpaces",
+        "CommunitySpaces",
+        { type: "CommunitySpaceDetail", id: slugOrId },
+      ],
     }),
 
     leaveCommunitySpace: builder.mutation({
@@ -147,7 +154,11 @@ export const communityApi = privateRequestNew.injectEndpoints({
           accept: "application/json",
         },
       }),
-      invalidatesTags: ["JoinedSpaces", "CommunitySpaces"],
+      invalidatesTags: (result, error, slugOrId) => [
+        "JoinedSpaces",
+        "CommunitySpaces",
+        { type: "CommunitySpaceDetail", id: slugOrId },
+      ],
     }),
 
     createCommunityPost: builder.mutation({
@@ -203,10 +214,27 @@ export const communityApi = privateRequestNew.injectEndpoints({
           accept: "application/json",
         },
       }),
-      transformResponse: (response) => ({
+      transformResponse: (response, meta, arg) => ({
         comments: response?.data || [],
-        pagination: response?.pagination || { page: 1, limit: 20, total: 0, pages: 0 },
+        pagination: { ...(response?.pagination || { page: 1, limit: 20, total: 0, pages: 0 }), page: arg.page },
       }),
+      serializeQueryArgs: ({ queryArgs }) => {
+        const { page, refetchKey, ...rest } = queryArgs || {};
+        return rest;
+      },
+      merge: (currentCache, newData, { arg }) => {
+        if (!currentCache || arg.page === 1) {
+          return newData;
+        }
+        // Deduplicate by comment _id
+        const existingIds = new Set(currentCache.comments.map((c) => c._id));
+        const newComments = newData.comments.filter((c) => !existingIds.has(c._id));
+        return {
+          comments: [...currentCache.comments, ...newComments],
+          pagination: newData.pagination,
+        };
+      },
+      forceRefetch: () => true,
     }),
 
     addPostComment: builder.mutation({
@@ -221,6 +249,16 @@ export const communityApi = privateRequestNew.injectEndpoints({
         headers: {
           accept: "application/json",
           "Content-Type": "application/json",
+        },
+      }),
+    }),
+
+    deleteCommunityComment: builder.mutation({
+      query: (commentId) => ({
+        url: `community/comments/${commentId}`,
+        method: "DELETE",
+        headers: {
+          accept: "application/json",
         },
       }),
     }),
@@ -267,6 +305,7 @@ export const {
   useGetPostCommentsQuery,
   useLazyGetPostCommentsQuery,
   useAddPostCommentMutation,
+  useDeleteCommunityCommentMutation,
   useGetCommunityPostQuery,
   useUpdateCommunityPostMutation,
 } = communityApi;

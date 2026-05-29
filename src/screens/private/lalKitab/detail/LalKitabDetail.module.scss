@@ -32,6 +32,41 @@
   font-weight: 700;
   color: #1a1a1a;
   margin: 0;
+  flex: 1;
+}
+
+.downloadButton {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(90deg, #E54D00 0%, #D43400 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(212, 52, 0, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  @media (width <= 767px) {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
 }
 .tabWrapper { display: flex; border-bottom: 1.5px solid #ffffff; margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
 .tab { flex-shrink: 0; padding: 12px 20px; font-size: 14px; font-weight: 500; color: #030303; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s; white-space: nowrap; &:hover { color: #374151; } }

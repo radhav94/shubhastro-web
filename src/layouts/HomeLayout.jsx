@@ -51,7 +51,7 @@ const footerLinkSections = [
       { path: "/daily-cosmic-briefing", title: "Daily Cosmic Briefing" },
       { path: "/dream-interpreter", title: "Dream Interpreter" },
       { path: "/smart-matchmaking", title: "Smart MatchMaking" },
-      { path: "/agentic-calendar", title: "Agentic Calendar" },
+      { path: "/aiwow/muhurat-calendar", title: "Muhurat Calendar" },
     ],
   },
   {
@@ -170,7 +170,7 @@ const HomeLayout = () => {
   const isWebview = new URLSearchParams(location.search).get("type") === "webview";
 
   const isOnboardingPage = location.pathname === "/login";
-  const isLivePage = location.pathname.startsWith("/live");
+  const isLivePage = location.pathname.startsWith("/live") && !location.pathname.startsWith("/live-chat-policy");
   
   const showTopHeader = showRouteTopHeader && !isOnboardingPage && !isLivePage && !isWebview;
 

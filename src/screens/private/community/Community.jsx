@@ -14,6 +14,7 @@ import {
   useGetCommunitySpacesQuery,
   useGetMyJoinedSpacesQuery,
 } from "../../../redux/api/community/communityApi";
+import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 
 const TABS = [
   { id: "feed", label: "Your Feed", icon: LuNewspaper },
@@ -46,11 +47,13 @@ const Community = () => {
     }
     // Scroll page to top on tab change
     window.scrollTo(0, 0);
-  }, [activeTab]);
+  }, [activeTab, communityId]);
 
-  const { data: pageResponse } = useGetCommunityPageDataQuery();
-  const { data: spacesData } = useGetCommunitySpacesQuery({ page: 1, limit: 20 });
+  const { data: pageResponse, isLoading: isPageLoading } = useGetCommunityPageDataQuery();
+  const { data: spacesData, isLoading: isSpacesLoading } = useGetCommunitySpacesQuery({ page: 1, limit: 20 });
   const { data: joinedSpacesData } = useGetMyJoinedSpacesQuery({ page: 1, limit: 50 });
+
+  const isInitialLoading = isPageLoading || isSpacesLoading;
 
   const spaces = spacesData?.spaces || [];
   const joinedSpaces = joinedSpacesData?.spaces || [];
@@ -131,13 +134,21 @@ const Community = () => {
     }
   };
 
+  if (isInitialLoading) {
+    return (
+      <div className={styles.communityPage}>
+        <PrimaryLoader isLoading={true} />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.communityPage}>
       {/* Back + Title */}
       <div className={styles.profileHeaderWrap}>
         <div className={styles.profileHeader}>
           <button className={styles.backBtn} onClick={handleBack}>
-            <FiChevronLeft size={20} />
+            <FiChevronLeft size={18} />
           </button>
           <h1 className={styles.pageTitle}>Community</h1>
         </div>

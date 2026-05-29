@@ -172,9 +172,9 @@ const LoveTriangleResultPage = () => {
           <p className={styles.readingDescription}>{currentCard.description}</p>
         </div>
 
-        <button className={styles.goBackButton} onClick={() => navigate(-1)}>
+        {/* <button className={styles.goBackButton} onClick={() => navigate(-1)}>
           Go Back
-        </button>
+        </button> */}
       </div>
     </div>
     </div>

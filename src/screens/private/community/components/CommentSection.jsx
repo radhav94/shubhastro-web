@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { FiSend, FiChevronDown } from "react-icons/fi";
+import { useState, useRef, forwardRef } from "react";
+import { FiSend, FiTrash2 } from "react-icons/fi";
 import styles from "../Community.module.scss";
 import {
   useGetPostCommentsQuery,
   useAddPostCommentMutation,
+  useDeleteCommunityCommentMutation,
 } from "../../../../redux/api/community/communityApi";
 import Toast from "../../../../component/toast";
 import { getUserFromStorage } from "../../../../utils/authStorage";
@@ -25,19 +26,19 @@ const getTimeAgo = (dateStr) => {
 
 const getInitials = (name) => {
   if (!name) return "?";
-  const parts = name.trim().split(" ");
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return parts[0].slice(0, 2).toUpperCase();
+  return name.trim()[0]?.toUpperCase() || "?";
 };
 
 // Single comment item (used for both top-level and replies)
-const CommentItem = ({ comment }) => {
+const CommentItem = forwardRef(({ comment, currentUserId, onDelete }, ref) => {
   const authorName = comment.isAnonymous
     ? "Anonymous"
     : comment.authorName || "User";
 
+  const isOwnComment = currentUserId && comment.authorId === currentUserId;
+
   return (
-    <div className={styles.commentItem}>
+    <div className={styles.commentItem} ref={ref}>
       <div className={styles.commentAvatar}>
         {!comment.isAnonymous && comment.authorImage ? (
           <img src={comment.authorImage} alt={authorName} />
@@ -56,34 +57,59 @@ const CommentItem = ({ comment }) => {
             )}
           </span>
           <span className={styles.commentTime}>{getTimeAgo(comment.createdAt)}</span>
+          {isOwnComment && (
+            <button
+              className={styles.commentDeleteBtn}
+              onClick={() => onDelete(comment._id)}
+              title="Delete comment"
+            >
+              <FiTrash2 size={14} />
+            </button>
+          )}
         </div>
         <p className={styles.commentText}>{comment.body}</p>
       </div>
     </div>
   );
-};
+});
+
+CommentItem.displayName = "CommentItem";
 
 const CommentSection = ({ postId }) => {
   const [commentText, setCommentText] = useState("");
-  const [page, setPage] = useState(1);
+  const [deletedIds, setDeletedIds] = useState([]);
+  const [refetchKey, setRefetchKey] = useState(0);
+  const commentsListRef = useRef(null);
 
   const user = getUserFromStorage();
+  const currentUserId = user?.id || null;
   const currentUserName = user
     ? [user.firstName, user.lastName].filter(Boolean).join(" ") || "You"
     : "You";
   const currentUserImage = user?.profileImgUrl || null;
 
-  const { data, isLoading, isFetching, refetch } = useGetPostCommentsQuery({
+  const { data, isLoading } = useGetPostCommentsQuery({
     postId,
-    page,
-    limit: 20,
-    sort: "oldest",
+    page: 1,
+    limit: 50,
+    sort: "newest",
+    refetchKey,
   });
   const [addComment, { isLoading: isSending }] = useAddPostCommentMutation();
+  const [deleteComment] = useDeleteCommunityCommentMutation();
 
-  const comments = data?.comments || [];
-  const pagination = data?.pagination || {};
-  const hasMore = page < (pagination.pages || 1);
+  const comments = (data?.comments || []).filter((c) => !deletedIds.includes(c._id)).slice().reverse();
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Delete this comment?")) return;
+    try {
+      await deleteComment(commentId).unwrap();
+      setDeletedIds((prev) => [...prev, commentId]);
+      Toast.success("Comment deleted");
+    } catch (error) {
+      Toast.error(error?.data?.message || "Failed to delete comment");
+    }
+  };
 
   const handleSubmit = async () => {
     if (!commentText.trim()) return;
@@ -95,7 +121,12 @@ const CommentSection = ({ postId }) => {
         isAnonymous: false,
       }).unwrap();
       setCommentText("");
-      refetch();
+      setRefetchKey((k) => k + 1);
+      setTimeout(() => {
+        if (commentsListRef.current) {
+          commentsListRef.current.scrollTop = commentsListRef.current.scrollHeight;
+        }
+      }, 800);
     } catch (error) {
       Toast.error(error?.data?.message || "Failed to post comment");
     }
@@ -111,7 +142,7 @@ const CommentSection = ({ postId }) => {
   return (
     <div className={styles.commentSection}>
       {/* Comments List */}
-      <div className={styles.commentsList}>
+      <div className={styles.commentsList} ref={commentsListRef}>
         {isLoading && (
           <div className={styles.commentLoading}>Loading comments...</div>
         )}
@@ -124,18 +155,10 @@ const CommentSection = ({ postId }) => {
           <CommentItem
             key={comment._id}
             comment={comment}
+            currentUserId={currentUserId}
+            onDelete={handleDeleteComment}
           />
         ))}
-
-        {hasMore && (
-          <button
-            className={styles.loadMoreBtn}
-            onClick={() => setPage((prev) => prev + 1)}
-            disabled={isFetching}
-          >
-            {isFetching ? "Loading..." : "Load More"} <FiChevronDown size={14} />
-          </button>
-        )}
       </div>
 
       {/* Comment Input */}
@@ -162,7 +185,11 @@ const CommentSection = ({ postId }) => {
             onClick={handleSubmit}
             disabled={!commentText.trim() || isSending}
           >
-            <FiSend size={18} />
+            {isSending ? (
+              <span className={styles.commentSendSpinner} />
+            ) : (
+              <FiSend size={18} />
+            )}
           </button>
         </div>
       </div>
