@@ -910,12 +910,17 @@
 
   .fcCardImg {
     position: absolute;
-    bottom: -48px;
-    right: -48px;
-    width: 55%;
+    bottom: -20px;
+    right: 9px;
+    width: 46%;
     object-fit: contain;
     z-index: 1;
     pointer-events: none;
+    @media (width <= 1180px) {
+      bottom: 0px;
+      right: 9px;
+      width: 40%;
+    }
   }
   &.aiPanditVoice{
     .fcCardImg{
@@ -1123,6 +1128,9 @@
   color: #424242;
   margin: 0;
   padding-left: 2px;
+  @media (width <= 390px) {
+    font-size: 12px;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -4140,7 +4148,8 @@
     margin: 0 auto;
   }
   @media (width <= 767px) {
-    width: 93%;
+    width: 130px;
+    bottom: -6px;
   }
 }
 

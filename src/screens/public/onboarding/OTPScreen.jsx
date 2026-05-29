@@ -13,6 +13,7 @@ import { requestFCMToken } from "../../../services/firebase";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import onboardingBg from "../../../assets/images/onboarding.png";
+import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
 import LanguageSelector from "../../../component/LanguageSelector";
 
 const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
@@ -224,6 +225,11 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           src={onboardingBg}
           alt="Astrology"
           className={styles.backgroundImage}
+        />
+        <img
+          src={onboardingBgMobile}
+          alt="Astrology"
+          className={styles.backgroundImageMobile}
         />
       </div>
       <button className={styles.backBtn} onClick={onBack}>
