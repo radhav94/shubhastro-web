@@ -62,7 +62,7 @@ const OccultResult = () => {
   const [getOccultPdf] = useGetOccultPdfMutation();
 
   const handleDownloadPdf = async () => {
-    const historyId = state?.historyId || result?._id;
+    const historyId = state?.historyId || result?.historyId || result?._id || result?.data?.historyId;
     const kundliId = state?.profile?._id;
     if (!historyId) {
       toast.error("PDF not available for this report");
@@ -71,7 +71,7 @@ const OccultResult = () => {
     setIsDownloading(true);
     try {
       toast.loading("Downloading PDF...", { id: "occult-pdf" });
-      const response = await getOccultPdf({ historyId, featureType: "ocult-dasha", kundliId }).unwrap();
+      const response = await getOccultPdf({ historyId, featureType: "occult-dosha", kundliId }).unwrap();
       const pdfUrl = response?.data?.pdfUrl;
       if (!pdfUrl) throw new Error("PDF URL not found");
       const res = await fetch(pdfUrl);
@@ -107,22 +107,32 @@ const OccultResult = () => {
   const doshas = doshaAnalysis ? Object.values(doshaAnalysis) : [];
 
   return (
-    <div className={styles.container}>
-      <button className={styles.backButton} onClick={() => navigate(PATH.privateRoutes.OCCULT.path)}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
+    <div className={styles.outerWrap}>
+      <div className={styles.topBar}>
+        <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
 
-      <button
-        className={styles.downloadBtn}
-        onClick={handleDownloadPdf}
-        disabled={isDownloading}
-        title="Download PDF"
-      >
-        <FiDownload size={18} />
-        <span>{isDownloading ? "Downloading..." : "Download PDF"}</span>
-      </button>
+        <button
+          className={styles.downloadBtn}
+          onClick={handleDownloadPdf}
+          disabled={isDownloading}
+          title="Download PDF"
+        >
+          <span className={styles.downloadPrice}>₹50</span>
+          <div className={styles.downloadContent}>
+            <FiDownload size={22} />
+            <div className={styles.downloadText}>
+              <span className={styles.downloadTitle}>{isDownloading ? "Downloading..." : "Download Now"}</span>
+              {/* <span className={styles.downloadSubtitle}>Premium PDF Report</span>  */}
+            </div>
+          </div>
+        </button>
+      </div>
+
+    <div className={styles.container}>
 
       <div className={styles.header}>
         <img src={astralCompass} alt="Astral Compass" className={styles.headerIcon} />
@@ -183,6 +193,7 @@ const OccultResult = () => {
         {/* <button className={styles.backBtn} onClick={() => navigate(PATH.privateRoutes.OCCULT.path)}>New Analysis</button> */}
         <button className={styles.consultBtn} onClick={() => navigate("/talk-to-astrologer", { state: { selectedType: "occult" } })}>Consult with Expert Astrologer</button>
       </div>
+    </div>
     </div>
   );
 };

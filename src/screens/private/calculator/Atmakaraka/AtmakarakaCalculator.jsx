@@ -164,6 +164,9 @@ const AtmakarakaCalculator = () => {
             <button type="button" className={styles.selectProfileBtnMobile} onClick={() => setShowProfileModal(true)}>
               Select Profile +
             </button>
+            <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
+              Select Profile +
+            </button>
           </div>
 
           <div className={styles.formGroup}>
@@ -181,9 +184,6 @@ const AtmakarakaCalculator = () => {
             {errors?.gender && <p className={styles.error}>{errors.gender}</p>}
           </div>
         </div>
-        <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
-          Select Profile +
-        </button>
 
         <div className={styles.formGrid}>
           {/* Row 2: Date of Birth + Place of birth */}
