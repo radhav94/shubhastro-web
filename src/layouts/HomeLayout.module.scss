@@ -29,7 +29,7 @@ $mobile-screen-width: 500px;
   }
 .topLinkWrap{
     background-color: #ffffff31;
-    padding: 16px;
+    padding-block: 16px;
     .topLinkDesktop{
       display: block;
       @media screen and (max-width: 768px) {
@@ -42,12 +42,14 @@ $mobile-screen-width: 500px;
         display: flex;
         flex-direction: column;
         gap: 10px;
+        padding-inline: 16px;
       }
     }
     .topLink{
       max-width: 1440px;
       margin: 0 auto;
       padding-block: 3px;
+      padding-inline: 16px;
       span{
         text-transform: capitalize;
       }
@@ -68,7 +70,7 @@ $mobile-screen-width: 500px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 4px;
+      // padding: 14px 4px;
       background: none;
       border: none;
       cursor: pointer;

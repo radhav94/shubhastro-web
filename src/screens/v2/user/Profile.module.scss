@@ -1251,7 +1251,7 @@
 }
 
 .txnSearchInput {
-  width: 25%;
+  width: fit-content;
   float: right;
   padding: 10px 16px;
   border: none;
@@ -2210,7 +2210,7 @@
   flex-direction: column;
   background: transparent;
   padding: 0;
-  margin: 0 1rem 1rem;
+  margin-bottom: 1rem;
   cursor: pointer;
 }
 
@@ -2223,7 +2223,7 @@
 .profileLinkLeft {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  // gap: 0.75rem;
 }
 
 .profileLinkIcon {
@@ -2277,15 +2277,17 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 24px;
+  padding-left: 16px;
+  // gap: 24px;
 
   .profileLink {
     flex: 1;
   }
 
   @media (max-width: 768px) {
-    flex-direction: column;
+    // flex-direction: column;
     gap: 0;
+    // padding-left: 16px;
 
     .profileLink {
       width: 100%;
