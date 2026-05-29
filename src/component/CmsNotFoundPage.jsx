@@ -6,7 +6,7 @@ import PrimaryLoader from "./UI/PrimaryLoader";
 import NotFound from "../screens/private/NotFound/NotFound";
 import Divider from "./Divider";
 import logoUrl from "../assets/images/mobile-shubh-astro-logo.svg";
-
+import BackButton from "./UI/BackButton/BackButton";
 const LOGO_URL = logoUrl;
 
 /**
@@ -74,7 +74,10 @@ const CmsNotFoundPage = () => {
       </Helmet>
       {pageData.title && (
         <>
-          <h1 className={styles.title}>{pageData.title}</h1>
+          <div className={styles.titleName}>
+            <BackButton style={{margin:0}}/>
+            <h1 className={styles.title} style={{ margin: 0 }}>{pageData.title}</h1>
+          </div>
           <Divider />
         </>
       )}

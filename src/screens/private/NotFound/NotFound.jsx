@@ -1,11 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import styles from "./NotFound.module.scss";
 import zodiacWheel from "../../../assets/images/404-zodiac-wheel.png";
+import BackButton from "../../../component/UI/BackButton/BackButton";
 
 const NotFound = () => {
   const navigate = useNavigate();
 
   return (
+    <>
+      <BackButton />
     <div className={styles.container}>
       <div className={styles.card}>
 
@@ -28,6 +31,7 @@ const NotFound = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
