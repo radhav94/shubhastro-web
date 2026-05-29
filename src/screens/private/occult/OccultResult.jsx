@@ -107,13 +107,14 @@ const OccultResult = () => {
   const doshas = doshaAnalysis ? Object.values(doshaAnalysis) : [];
 
   return (
-    <div className={styles.container}>
-      <button className={styles.backButton} onClick={() => navigate(PATH.privateRoutes.OCCULT.path)}>
+    <div className={styles.outerWrap}>
+      <button className={styles.backButton} onClick={() => navigate(-1)}>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
 
+    <div className={styles.container}>
       <button
         className={styles.downloadBtn}
         onClick={handleDownloadPdf}
@@ -183,6 +184,7 @@ const OccultResult = () => {
         {/* <button className={styles.backBtn} onClick={() => navigate(PATH.privateRoutes.OCCULT.path)}>New Analysis</button> */}
         <button className={styles.consultBtn} onClick={() => navigate("/talk-to-astrologer", { state: { selectedType: "occult" } })}>Consult with Expert Astrologer</button>
       </div>
+    </div>
     </div>
   );
 };

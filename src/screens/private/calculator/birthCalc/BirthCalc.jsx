@@ -109,6 +109,9 @@ const BirthCalc = () => {
             <button type="button" className={styles.selectProfileBtnMobile} onClick={() => setShowProfileModal(true)}>
               Select Profile +
             </button>
+            <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
+              Select Profile +
+            </button>
           </div>
           <div className={styles.field}>
             <label>Gender <span>*</span></label>
@@ -120,9 +123,6 @@ const BirthCalc = () => {
             {errors.gender && <p className={styles.err}>{errors.gender}</p>}
           </div>
         </div>
-        <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
-          Select Profile +
-        </button>
 
         <div className={styles.row}>
           <div className={styles.field}>

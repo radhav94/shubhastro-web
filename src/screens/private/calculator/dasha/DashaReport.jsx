@@ -135,9 +135,11 @@ const DashaReport = () => {
           Calculate Again
         </button>
       </div>
-    </div>
 
-    <ConnectCard />
+      <div className={styles.connectCardWrap}>
+        <ConnectCard />
+      </div>
+    </div>
     </>
   );
 };
