@@ -126,10 +126,10 @@
        4. centerFeatureRow → Occult + AI Pandit (2-col)
        (Live Community stays in rightCol, already shown at top)
     */
-    & > .rightCol          { order: 1; }
-    & > .centerCard        { order: 2; }
-    & > .leftCards         { order: 3; }
-    & > .centerFeatureRow  { order: 4; }
+    // & > .rightCol          { order: 3; }
+    // & > .centerCard        { order: 2; }
+    // & > .leftCards         { order: 1; }
+    // & > .centerFeatureRow  { order: 4; }
   }
 }
 
@@ -148,7 +148,7 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    order: 3;
+    // order: 3;
   }
 }
 
@@ -296,10 +296,10 @@
   overflow: hidden;
 
   @media (max-width: 820px) {
-    order: 2;
+    // order: 2;
   }
   @media (max-width: 767px) {
-    order: 2;
+    // order: 2;
     padding-bottom: 0;
   }
 }
@@ -1045,11 +1045,11 @@
   }
 
   @media (max-width: 900px) {
-    order: 1;
+    // order: 1;
   }
 
   @media (max-width: 767px) {
-    order: 1;
+    // order: 1;
   }
 }
 
