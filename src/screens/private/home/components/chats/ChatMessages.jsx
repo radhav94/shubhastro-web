@@ -4,36 +4,35 @@ import styles from "./ChatWindow.module.scss";
 import { PrimaryText } from "../../../../../component";
 import AudioMessageWrapper from "./AudioMessageWrapper";
 import { GrReactjs } from "react-icons/gr";
-import { IoCheckmarkDone, IoDocument, IoDownload } from "react-icons/io5";
-import { FiFile } from "react-icons/fi";
+import { IoCheckmarkDone } from "react-icons/io5";
+import { FaFileAlt } from "react-icons/fa";
+import PdfIcon from "../../../../../assets/chat/PDF.svg";
+import DocIcon from "../../../../../assets/chat/DOC.svg";
+import XlsIcon from "../../../../../assets/chat/XLS.svg";
 import IframeModal from "./IframeModal";
 import dayjs from "dayjs";
 import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
 import LinkPreview from "./LinkPreview";
 import { detectURL } from "../../../../../utils/helper/linkPreview";
+import { getAttachmentDisplayName } from "../../../../../utils/helper/getAttachmentDisplayName";
 
 const ChatMessages = ({ messages, isTyping, messagesRef }) => {
   const [iframeSrc, setIframeSrc] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const navigate = useNavigate();
 
-  const getFileExtension = (filename) => {
-    return filename?.split('.').pop()?.toLowerCase() || '';
-  };
-
-  const getFileName = (url) => {
-    try {
-      return url?.split('/').pop() || 'attachment';
-    } catch {
-      return 'attachment';
+  const getFileIcon = (filename) => {
+    const ext = filename?.split('.').pop()?.toLowerCase() || '';
+    switch (ext) {
+      case 'pdf':
+        return <img src={PdfIcon} alt="PDF" className="w-5 h-5 flex-shrink-0" />;
+      case 'doc': case 'docx':
+        return <img src={DocIcon} alt="DOC" className="w-5 h-5 flex-shrink-0" />;
+      case 'xls': case 'xlsx': case 'csv':
+        return <img src={XlsIcon} alt="XLS" className="w-5 h-5 flex-shrink-0" />;
+      default:
+        return <FaFileAlt className="text-lg flex-shrink-0" style={{ color: '#757575' }} />;
     }
-  };
-
-  const formatFileSize = (bytes) => {
-    if (!bytes) return '';
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
   // Memoize message groups for performance
@@ -95,16 +94,39 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
 
     // Attachment/Document messages
     if (msg?.type === "attachment") {
+      const displayName = getAttachmentDisplayName(msg.text);
+      let fileUrl = msg.text;
+      try {
+        const parsed = typeof msg.text === "string" ? JSON.parse(msg.text) : msg.text;
+        if (parsed?.url) fileUrl = parsed.url;
+      } catch { /* use msg.text as URL */ }
+
+      const handleDownload = async (e) => {
+        e.preventDefault();
+        try {
+          const res = await fetch(fileUrl);
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = blobUrl;
+          a.download = displayName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        } catch {
+          window.open(fileUrl, "_blank");
+        }
+      };
+
       return (
-        <a
-          href={msg.text}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm underline font-semibold"
+        <button
+          onClick={handleDownload}
+          className="flex items-center gap-2 text-sm font-semibold text-inherit cursor-pointer bg-transparent border-none p-0"
         >
-          <span className="text-lg">📎</span>
-          <span className="truncate max-w-[180px]">Download Attachment</span>
-        </a>
+          {getFileIcon(displayName)}
+          <span className="truncate max-w-[180px]">{displayName}</span>
+        </button>
       );
     }
 

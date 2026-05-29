@@ -34,6 +34,7 @@ import walletIcon from "../../assets/images/wallet-icon.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
 import SwitchWaitingPopup from "../UI/switchWaiting/SwitchWaitingPopup";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
+import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
@@ -128,7 +129,22 @@ const AgoraVoiceCalling = ({ callData }) => {
     // Hide product notifications when mall is disabled
     if (data.type === "products" && !isShubhMallEnabled()) return;
     
-    const messageText = data.type === "gift" ? "🎁 Sent a gift" : data.type === "products" ? "💊 Suggested a remedy" : (data.message || data.response || "New message");
+    let messageText;
+    if (data.type === "gift") {
+      messageText = "🎁 Sent a gift";
+    } else if (data.type === "products") {
+      messageText = "💊 Suggested a remedy";
+    } else if (data.type === "attachment") {
+      messageText = "📎 " + getAttachmentDisplayName(data.message || data.response || "");
+    } else if (data.type === "image") {
+      messageText = "📷 Image";
+    } else if (data.type === "audio") {
+      messageText = "🎵 Audio";
+    } else if (data.type === "video") {
+      messageText = "🎬 Video";
+    } else {
+      messageText = data.message || data.response || "New message";
+    }
     const astroImage = astrologerImage || lastRequestedAstro?.imageUrl || lastRequestedAstro?.aadharCardImgUrl || lastRequestedAstro?.panCardImgUrl || null;
     const astroGender = lastRequestedAstro?.gender || null;
     setChatNotification({
