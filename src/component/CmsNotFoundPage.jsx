@@ -43,7 +43,7 @@ const CmsNotFoundPage = () => {
   return (
     <div className={styles.container}>
       <Helmet>
-        <title>{pageData.meta_title || pageData.title || "ShubhTalk"}</title>
+        <title>{pageData.meta_title || pageData.title || "ShubhAstro"}</title>
         <link rel="canonical" href={window.location.href} />
         <link rel="shortcut icon" href={LOGO_URL} />
         <meta name="description" content={pageData.meta_description || pageData.title || ""} />

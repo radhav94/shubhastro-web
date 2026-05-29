@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ChevronLeft, Edit, ChevronRight } from "lucide-react";
 import styles from "./Explore.module.scss";
+import SeoHelmet from "../../../component/SeoHelmet";
 import { 
   useGetAllKundlisQuery,
 } from "../../../services/appServices/kundliServicesNew";
@@ -640,6 +641,7 @@ const Explore = () => {
 
   return (
     <div className={styles.explorePage}>
+      <SeoHelmet data={exploreData?.data} />
       <BackButton />
       {/* Header */}
       <div className={styles.headerWrap}>

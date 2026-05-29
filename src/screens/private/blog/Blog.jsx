@@ -1,3 +1,4 @@
+import SeoHelmet from "../../../component/SeoHelmet";
 import BlogHeader from "./blogHeader/BlogHeader";
 import Blogs from "../home/components/blogs/Blogs";
 import MoreBlogsCarousel from "../../../component/UI/cards/MoreBlogsCarousel";
@@ -38,6 +39,7 @@ const Blog = () => {
 
   return (
     <>
+      <SeoHelmet data={blogPageData?.data} />
       <BackButton />
       {/* Trending Blogs Carousel - at the very top */}
       {trendingBlogs.length > 0 && (
