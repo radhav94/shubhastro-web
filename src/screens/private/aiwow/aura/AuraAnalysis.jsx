@@ -7,6 +7,7 @@ import { setAuraResult, clearAuraData } from '../../../../redux/aiwow/aiwowSlice
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import BackButton from '../../../../component/UI/BackButton/BackButton';
 
 const AuraAnalysis = () => {
   const navigate = useNavigate();
@@ -206,6 +207,7 @@ const AuraAnalysis = () => {
 
   return (
     <div className={styles.container}>
+      <BackButton />
       <div className={styles.content}>
         <div className={styles.leftSection}>
           <h2 className={styles.title}>

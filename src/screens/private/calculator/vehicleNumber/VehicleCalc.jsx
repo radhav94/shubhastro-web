@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
 import styles from "./VehicleCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "vehicle_calculator";
 
@@ -72,7 +73,9 @@ const VehicleCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Lucky Vehicle Number Calculator</h1>
         <p>Your Guide to Choosing the Perfect Number</p>
@@ -107,6 +110,7 @@ const VehicleCalc = () => {
         }}
       />
     </div>
+    </>
   );
 };
 

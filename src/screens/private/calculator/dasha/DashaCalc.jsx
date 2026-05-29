@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./DashaCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "dasha_calc";
 const initialFormState = {
@@ -74,7 +75,9 @@ const DashaCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Dasha Calculator</h1>
         <p>Making Sense of Your Life's Path</p>
@@ -106,6 +109,7 @@ const DashaCalc = () => {
         }}
       />
     </div>
+    </>
   );
 };
 

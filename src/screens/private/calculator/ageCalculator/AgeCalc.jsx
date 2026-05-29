@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
 import styles from "./AgeCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "age_calculator";
 
@@ -66,7 +67,9 @@ const AgeCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Age Calculator</h1>
         <p>Decode Your Life's Journey with Cosmic Insight</p>
@@ -100,6 +103,7 @@ const AgeCalc = () => {
         }}
       />
     </div>
+    </>
   );
 };
 

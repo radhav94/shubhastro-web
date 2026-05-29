@@ -157,7 +157,6 @@ export const WaitingQueueProvider = ({ children }) => {
     });
     setPendingConnections([]);
     persist([]);
-    localStorage.removeItem("waitingState");
   }, [persist]);
 
   // Cancel all pending connections
@@ -179,7 +178,6 @@ export const WaitingQueueProvider = ({ children }) => {
     });
     setPendingConnections([]);
     persist([]);
-    localStorage.removeItem("waitingState");
   }, [persist]);
 
   // Check if a specific astrologer+type is already in the queue
@@ -395,14 +393,32 @@ export const WaitingQueueProvider = ({ children }) => {
       sessions.forEach((session) => {
         if (session.status !== "on-going") return;
 
-        const { roomId, type, astrologerId } = session;
+        const { roomId, type, astrologerId, agoraToken, channelName, billedMinutes, user } = session;
         const astro = typeof astrologerId === "object" ? astrologerId : { _id: astrologerId };
         const astroId = astro?._id || astrologerId;
+        const astroName = user?.astro
+          ? `${user.astro.firstName || ""} ${user.astro.lastName || ""}`.trim()
+          : `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
 
         if (type === "chat") {
           // Only reconnect if ChatContext doesn't already have an active chat
           if (!activeChat?.roomId) {
             console.log("[GlobalTwoWay] 🔄 Restoring on-going chat session:", roomId);
+
+            // Set active chat so ChatContext can handle the reconnected response
+            setActiveChat({
+              roomId,
+              chatRoomId: roomId,
+              callerName: astroName || "Astrologer",
+              isUserSide: true,
+              userId: userIdLocal,
+              astrologerId: astroId,
+              astrologerName: astro?.firstName || "",
+              astrologerImage: astro?.profileImgUrl || user?.astro?.profileImgUrl || null,
+              remainingTime: billedMinutes || 0,
+              callType: "chat",
+            });
+
             voiceSocket.emit("chat:reconnect", {
               roomId,
               userId: userIdLocal,
@@ -414,6 +430,21 @@ export const WaitingQueueProvider = ({ children }) => {
           // audio or video — only reconnect if CallContext doesn't already have an active call
           if (!activeCall?.roomId) {
             console.log("[GlobalTwoWay] 🔄 Restoring on-going call session:", roomId);
+
+            // Set active call so VoiceCall/VideoCall component renders
+            setActiveCall({
+              roomId,
+              channelName: channelName || roomId,
+              agoraToken: agoraToken || null,
+              callerName: astroName || "Astrologer",
+              isUserSide: true,
+              callType: type || "audio",
+              userId: userIdLocal,
+              astrologerId: astroId,
+              remainingTime: billedMinutes || 0,
+              isEmergency: session.isEmergency || false,
+            });
+
             voiceSocket.emit("call:reconnect", {
               roomId,
               userId: userIdLocal,
@@ -454,7 +485,6 @@ export const WaitingQueueProvider = ({ children }) => {
       // Clear approval data and remove from pending queue
       setChatApprovalData(null);
       removePendingConnection(roomId);
-      localStorage.removeItem("waitingState");
 
       // Build astrologer info from event payload
       const astro = data?.astrologer || {};
@@ -503,7 +533,6 @@ export const WaitingQueueProvider = ({ children }) => {
       // Clear approval data and remove from pending queue
       setCallApprovalData(null);
       removePendingConnection(roomId);
-      localStorage.removeItem("waitingState");
       resetCallFlow();
 
       // Build astrologer info from event payload

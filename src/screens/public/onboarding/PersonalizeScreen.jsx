@@ -21,7 +21,7 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData, c
   const initialValues = {
     name: formData.name || "",
     email: formData.email || "",
-    identity: formData.identity || "Female",
+    identity: formData.identity || "Male",
   };
 
   const handleSubmit = (values) => {
