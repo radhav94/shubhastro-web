@@ -108,22 +108,31 @@ const OccultResult = () => {
 
   return (
     <div className={styles.outerWrap}>
-      <button className={styles.backButton} onClick={() => navigate(-1)}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
+      <div className={styles.topBar}>
+        <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+
+        <button
+          className={styles.downloadBtn}
+          onClick={handleDownloadPdf}
+          disabled={isDownloading}
+          title="Download PDF"
+        >
+          <span className={styles.downloadPrice}>₹50</span>
+          <div className={styles.downloadContent}>
+            <FiDownload size={22} />
+            <div className={styles.downloadText}>
+              <span className={styles.downloadTitle}>{isDownloading ? "Downloading..." : "Download Now"}</span>
+              {/* <span className={styles.downloadSubtitle}>Premium PDF Report</span>  */}
+            </div>
+          </div>
+        </button>
+      </div>
 
     <div className={styles.container}>
-      <button
-        className={styles.downloadBtn}
-        onClick={handleDownloadPdf}
-        disabled={isDownloading}
-        title="Download PDF"
-      >
-        <FiDownload size={18} />
-        <span>{isDownloading ? "Downloading..." : "Download PDF"}</span>
-      </button>
 
       <div className={styles.header}>
         <img src={astralCompass} alt="Astral Compass" className={styles.headerIcon} />

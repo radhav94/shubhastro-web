@@ -70,8 +70,8 @@ const OccultChat = () => {
         : { kundliId: selectedProfile._id };
 
       const result = await getOccultDasha(body).unwrap();
-      const historyId = result?._id || result?.data?._id || result?.message?._id || result?.message?.message?._id;
-      const data = result?.message?.message || result?.message || result?.data || result;
+      const historyId = result?.message?._id || result?._id;
+      const data = result?.message?.message || result?.message || result;
       if (data) {
         navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile: selectedProfile, historyId } });
       } else {
