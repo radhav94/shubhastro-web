@@ -29,6 +29,7 @@ const TopHeader = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [activeAccordion, setActiveAccordion] = useState(null);
   const profileDropdownRef = useRef(null);
   const [logoutUser] = useLogoutUserMutation();
   const token = getToken();
@@ -250,7 +251,7 @@ const TopHeader = () => {
           <div className={styles.mainLeftMain}>
             <div
               className={styles.hamburger}
-              onClick={() => setIsDrawerOpen(true)}
+              onClick={() => { setIsDrawerOpen(true); setActiveAccordion(null); }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="16" viewBox="0 0 24 16" fill="none">
                 <path d="M1.33333 16H22.6667C23.4 16 24 15.4 24 14.6667C24 13.9333 23.4 13.3333 22.6667 13.3333H1.33333C0.6 13.3333 0 13.9333 0 14.6667C0 15.4 0.6 16 1.33333 16ZM1.33333 9.33333H22.6667C23.4 9.33333 24 8.73333 24 8C24 7.26667 23.4 6.66667 22.6667 6.66667H1.33333C0.6 6.66667 0 7.26667 0 8C0 8.73333 0.6 9.33333 1.33333 9.33333ZM0 1.33333C0 2.06667 0.6 2.66667 1.33333 2.66667H22.6667C23.4 2.66667 24 2.06667 24 1.33333C24 0.6 23.4 0 22.6667 0H1.33333C0.6 0 0 0.6 0 1.33333Z" fill="#030303"/>
@@ -392,31 +393,27 @@ const TopHeader = () => {
                   <User size={20} strokeWidth={0} fill="#d53400"/>
                 </div>
               )}
-              <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none" style={{ marginRight: '4px', flexShrink: 0 }}>
-                <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_profile_dd)"/>
-                <defs>
-                  <linearGradient id="paint0_linear_profile_dd" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#F75801"/>
-                    <stop offset="1" stopColor="#D43400"/>
-                  </linearGradient>
-                </defs>
-              </svg>
+              {token && <span className={styles.profileName}>{displayName}</span>}
+              {token && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none" style={{ marginRight: '4px', flexShrink: 0 }}>
+                  <path d="M2.08049 0.355353L6.79423 5.0691L11.508 0.355353C11.9818 -0.118451 12.7472 -0.118451 13.221 0.355353C13.6948 0.829157 13.6948 1.59453 13.221 2.06834L7.64465 7.64465C7.17084 8.11845 6.40547 8.11845 5.93166 7.64465L0.355353 2.06834C-0.118451 1.59453 -0.118451 0.829157 0.355353 0.355353C0.829157 -0.106302 1.60668 -0.118451 2.08049 0.355353Z" fill="url(#paint0_linear_profile_dd)"/>
+                  <defs>
+                    <linearGradient id="paint0_linear_profile_dd" x1="0" y1="4" x2="13.5763" y2="4" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#F75801"/>
+                      <stop offset="1" stopColor="#D43400"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              )}
 
               {/* Profile Dropdown */}
               {profileDropdownOpen && !!token && (
                 <div className={styles.profileDropdown}>
-                  <div className={styles.profileDropdownHeader}>
-                    <div className={styles.profileDropdownNameRow}>
-                      <span className={styles.profileDropdownName}>{displayName}</span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 14 8" fill="none"
-                        className={styles.profileNameArrow}
-                        onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen(false); setKundliModalOpen(true); }}
-                      >
-                        <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#F75801"/>
-                      </svg>
-                    </div>
-                    <span className={styles.profileDropdownPhone}>{user?.phoneNumber || ""}</span>
+                  <div
+                    className={styles.profileDropdownItem}
+                    onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen(false); setKundliModalOpen(true); }}
+                  >
+                    Manage Profile
                   </div>
                   <div className={styles.profileDropdownDivider} />
                   <div
@@ -425,12 +422,6 @@ const TopHeader = () => {
                   >
                     My Account
                   </div>
-                  {/* <div
-                    className={styles.profileDropdownItem}
-                    onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen(false); navigate("/profile"); }}
-                  >
-                    Order History
-                  </div> */}
                   <div className={styles.profileDropdownDivider} />
                   <div
                     className={`${styles.profileDropdownItem} ${styles.profileDropdownLogout}`}
@@ -576,20 +567,31 @@ const TopHeader = () => {
               ✕
             </button> */}
 
-            <div className={styles.menuProfileTop}>
+            <div
+              className={styles.menuProfileTop}
+              onClick={() => {
+                setIsDrawerOpen(false);
+                if (token) {
+                  navigate("/profile");
+                } else {
+                  navigate("/login?skip=welcome");
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
               <div className={styles.menuProfilePik}>
-                  S
+                  {userAvatarDisplay || <User size={18} strokeWidth={0} fill="#d53400"/>}
               </div>
               <div className={styles.menuProfileNameMobile}>
-                <p>Summet Yadav</p>
-                <span>8987654320</span>
+                <p>{displayName}</p>
+                {token && user?.phoneNumber && <span>+{user.phoneNumber}</span>}
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" width="8" height="15" viewBox="0 0 8 15" fill="none">
-                <path d="M0.75 13.95L6.18333 8.51667C6.825 7.875 6.825 6.825 6.18333 6.18333L0.75 0.75" stroke="url(#paint0_linear_15704_10971)" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M0.75 13.95L6.18333 8.51667C6.825 7.875 6.825 6.825 6.18333 6.18333L0.75 0.75" stroke="url(#paint0_linear_15704_10971)" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
                 <defs>
                   <linearGradient id="paint0_linear_15704_10971" x1="0.75" y1="7.35" x2="6.66458" y2="7.35" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#F75801"/>
-                    <stop offset="1" stop-color="#D43400"/>
+                    <stop stopColor="#F75801"/>
+                    <stop offset="1" stopColor="#D43400"/>
                   </linearGradient>
                 </defs>
               </svg>
@@ -723,9 +725,9 @@ const TopHeader = () => {
             >
               Occult
             </NavLink>
-            <MobileCalculatorsAccordion onClose={() => setIsDrawerOpen(false)} />
-            <MobileBestAstrologersAccordion onClose={() => setIsDrawerOpen(false)} />
-            <MobileBestAstrologersGlobalAccordion onClose={() => setIsDrawerOpen(false)} />
+            <MobileCalculatorsAccordion onClose={() => setIsDrawerOpen(false)} isExpanded={activeAccordion === 'calculators'} onToggle={() => setActiveAccordion(prev => prev === 'calculators' ? null : 'calculators')} />
+            <MobileBestAstrologersAccordion onClose={() => setIsDrawerOpen(false)} isExpanded={activeAccordion === 'bestIndia'} onToggle={() => setActiveAccordion(prev => prev === 'bestIndia' ? null : 'bestIndia')} />
+            <MobileBestAstrologersGlobalAccordion onClose={() => setIsDrawerOpen(false)} isExpanded={activeAccordion === 'bestGlobal'} onToggle={() => setActiveAccordion(prev => prev === 'bestGlobal' ? null : 'bestGlobal')} />
             <NavLink
               to="/live"
               onClick={() => setIsDrawerOpen(false)}
@@ -826,26 +828,25 @@ const CalculatorsDropdown = () => {
   );
 };
 
-const MobileCalculatorsAccordion = ({ onClose }) => {
+const MobileCalculatorsAccordion = ({ onClose, isExpanded, onToggle }) => {
   const navigate = useNavigate();
-  const [expanded, setExpanded] = useState(false);
 
   return (
     <div className={styles.mobileCalcAccordion}>
       <div
         className={styles.headerNavLink}
-        onClick={() => setExpanded((p) => !p)}
+        onClick={onToggle}
         style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
       >
         Calculators
         <svg
           xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none"
-          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+          style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
         >
           <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
         </svg>
       </div>
-      {expanded && (
+      {isExpanded && (
         <div className={styles.mobileCalcLinks}>
           {CALCULATOR_LINKS.map((item) => (
             <div
@@ -932,26 +933,25 @@ const BestAstrologersDropdown = () => {
   );
 };
 
-const MobileBestAstrologersAccordion = ({ onClose }) => {
+const MobileBestAstrologersAccordion = ({ onClose, isExpanded, onToggle }) => {
   const navigate = useNavigate();
-  const [expanded, setExpanded] = useState(false);
 
   return (
     <div className={styles.mobileCalcAccordion}>
       <div
         className={styles.headerNavLink}
-        onClick={() => setExpanded((p) => !p)}
+        onClick={onToggle}
         style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
       >
         Best Astrologers India
         <svg
           xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none"
-          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+          style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
         >
           <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
         </svg>
       </div>
-      {expanded && (
+      {isExpanded && (
         <div className={styles.mobileCalcLinks}>
           {BEST_ASTROLOGERS_LINKS.map((item) => (
             <div
@@ -1035,26 +1035,25 @@ const BestAstrologersGlobalDropdown = () => {
   );
 };
 
-const MobileBestAstrologersGlobalAccordion = ({ onClose }) => {
+const MobileBestAstrologersGlobalAccordion = ({ onClose, isExpanded, onToggle }) => {
   const navigate = useNavigate();
-  const [expanded, setExpanded] = useState(false);
 
   return (
     <div className={styles.mobileCalcAccordion}>
       <div
         className={styles.headerNavLink}
-        onClick={() => setExpanded((p) => !p)}
+        onClick={onToggle}
         style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
       >
         Best Astrologers Global
         <svg
           xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none"
-          style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+          style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
         >
           <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
         </svg>
       </div>
-      {expanded && (
+      {isExpanded && (
         <div className={styles.mobileCalcLinks}>
           {BEST_ASTROLOGERS_GLOBAL_LINKS.map((item) => (
             <div
