@@ -92,7 +92,13 @@ const Communities = ({ onCommunityClick, topAstrologers = [], sectionContent = [
               <div
                 key={space._id}
                 className={styles.communityCard}
-                onClick={() => onCommunityClick(space.slug)}
+                onClick={() => {
+                  if (isJoined(space)) {
+                    onCommunityClick(space.slug);
+                  } else {
+                    Toast.error("Join the community first");
+                  }
+                }}
               >
                 {isJoined(space) && (
                   <span className={styles.joinedBadge}>Joined</span>

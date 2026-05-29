@@ -8,6 +8,7 @@ import {
 } from "../../../../redux/api/community/communityApi";
 import Toast from "../../../../component/toast";
 import { getUserFromStorage } from "../../../../utils/authStorage";
+import { DeleteConfirmationModal } from "../../../../component";
 
 const getTimeAgo = (dateStr) => {
   if (!dateStr) return "";
@@ -79,6 +80,9 @@ const CommentSection = ({ postId }) => {
   const [commentText, setCommentText] = useState("");
   const [deletedIds, setDeletedIds] = useState([]);
   const [refetchKey, setRefetchKey] = useState(0);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteCommentId, setDeleteCommentId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const commentsListRef = useRef(null);
 
   const user = getUserFromStorage();
@@ -100,14 +104,24 @@ const CommentSection = ({ postId }) => {
 
   const comments = (data?.comments || []).filter((c) => !deletedIds.includes(c._id)).slice().reverse();
 
-  const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Delete this comment?")) return;
+  const handleDeleteComment = (commentId) => {
+    setDeleteCommentId(commentId);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDeleteComment = async () => {
+    if (!deleteCommentId) return;
+    setIsDeleting(true);
     try {
-      await deleteComment(commentId).unwrap();
-      setDeletedIds((prev) => [...prev, commentId]);
+      await deleteComment(deleteCommentId).unwrap();
+      setDeletedIds((prev) => [...prev, deleteCommentId]);
       Toast.success("Comment deleted");
     } catch (error) {
       Toast.error(error?.data?.message || "Failed to delete comment");
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalOpen(false);
+      setDeleteCommentId(null);
     }
   };
 
@@ -193,6 +207,15 @@ const CommentSection = ({ postId }) => {
           </button>
         </div>
       </div>
+
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        title="Delete Comment"
+        message="Are you sure you want to delete this comment? This action cannot be undone."
+        onConfirm={confirmDeleteComment}
+        onClose={() => { setDeleteModalOpen(false); setDeleteCommentId(null); }}
+        isLoading={isDeleting}
+      />
     </div>
   );
 };
