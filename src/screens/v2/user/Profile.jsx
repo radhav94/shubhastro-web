@@ -81,7 +81,7 @@ const Profile = () => {
 
   // Get isRegister from Redux auth state
   const isRegister = useSelector((state) => state.auth.isRegister);
-  const userEmail = useSelector((state) => state.auth.email);
+  const userEmail = useSelector((state) => state.auth.email) || getUserFromStorage()?.email || "";
 
   const [activeTab, setActiveTab] = useState(() => {
     const navTab = navigationState.activeTab;
@@ -2227,6 +2227,10 @@ const Profile = () => {
                 try {
                   await updateUserProfile({ email: editEmailValue });
                   dispatch(setEmail(editEmailValue));
+                  // Update localStorage so email persists across sessions
+                  const stored = JSON.parse(localStorage.getItem("shubhtalk_user") || "{}");
+                  stored.email = editEmailValue;
+                  localStorage.setItem("shubhtalk_user", JSON.stringify(stored));
                   setShowEmailEditModal(false);
                   setEmailError("");
                   Toast.success("Email updated successfully");

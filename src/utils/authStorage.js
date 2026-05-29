@@ -6,6 +6,7 @@ export const saveUserToStorage = (user) => {
     firstName: user.firstName,
     lastName: user.lastName,
     phoneNumber: user.phoneNumber,
+    email: user.email || null,
     place: user.place,
     role: user.role,
     languagePreferences: user.languagePreferences || [],

@@ -20,6 +20,7 @@ import LanguageSelector from "./LanguageSelector";
 import { isShubhMallEnabled } from "../utils/featureConfig";
 import { logout } from "../redux/auth/authSlice";
 import { useLogoutUserMutation } from "../redux/api/userSession/userSessionApi";
+import { privateRequestNew } from "../services/appServices/privateRequestNew";
 const TopHeader = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -123,8 +124,10 @@ const TopHeader = () => {
     }
     dispatch(logout());
     dispatch(clearSelectedKundli());
+    dispatch(privateRequestNew.util.resetApiState());
     localStorage.removeItem("shubhtalk_customer_token");
     localStorage.removeItem("shubhtalk_customer_id");
+    localStorage.removeItem("shubhtalk_user");
     localStorage.removeItem("selectedKundliProfile");
     localStorage.removeItem("astro_wallet_balance");
     window.dispatchEvent(new Event("auth-change"));

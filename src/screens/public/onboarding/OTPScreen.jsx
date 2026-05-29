@@ -8,7 +8,7 @@ import {
   verifyOtp,
   loginWithPhone,
 } from "../../../services/appServices/authService";
-import { loginSuccess } from "../../../redux/auth/authSlice";
+import { loginSuccess, setEmail } from "../../../redux/auth/authSlice";
 import { requestFCMToken } from "../../../services/firebase";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
@@ -105,6 +105,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
             languagePreferences: userData.languagePreferences || [],
             accessToken: accessToken,
             refreshToken: refreshToken,
+            email: userData.email || "",
           };
           localStorage.setItem(
             "shubhtalk_user",
@@ -126,6 +127,11 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
               token: accessToken,
             }),
           );
+
+          // Store email from backend if available
+          if (userData?.email) {
+            dispatch(setEmail(userData.email));
+          }
 
           updateFormData({
             otp: otpValue,
