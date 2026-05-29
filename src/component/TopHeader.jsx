@@ -566,12 +566,31 @@ const TopHeader = () => {
           />
 
           <div className={styles.mobileDrawer}>
-            <button
+            {/* <button
               className={styles.drawerClose}
               onClick={() => setIsDrawerOpen(false)}
             >
               ✕
-            </button>
+            </button> */}
+
+            <div className={styles.menuProfileTop}>
+              <div className={styles.menuProfilePik}>
+                  S
+              </div>
+              <div className={styles.menuProfileNameMobile}>
+                <p>Summet Yadav</p>
+                <span>8987654320</span>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="8" height="15" viewBox="0 0 8 15" fill="none">
+                <path d="M0.75 13.95L6.18333 8.51667C6.825 7.875 6.825 6.825 6.18333 6.18333L0.75 0.75" stroke="url(#paint0_linear_15704_10971)" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs>
+                  <linearGradient id="paint0_linear_15704_10971" x1="0.75" y1="7.35" x2="6.66458" y2="7.35" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#F75801"/>
+                    <stop offset="1" stop-color="#D43400"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
 
             <NavLink
               to="/"
