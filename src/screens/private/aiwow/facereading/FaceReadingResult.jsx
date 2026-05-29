@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styles from './FaceReadingResult.module.scss';
 import { Toast, PieChart } from '../../../../component';
-import Footer from '../../../../layouts/Footer';
 import TTSButton from '../../../../component/UI/TTSButton';
 
 const FaceReadingResult = () => {
@@ -680,7 +679,6 @@ const FaceReadingResult = () => {
         </div>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import styles from './SignatureResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
-import Footer from '../../../../layouts/Footer';
 import TTSButton from '../../../../component/UI/TTSButton';
 
 const SignatureResult = () => {
@@ -624,7 +623,6 @@ const SignatureResult = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

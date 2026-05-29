@@ -6,7 +6,6 @@ import { getPalmistryResult } from '../../../../services/appServices/aiWowServic
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
-import Footer from '../../../../layouts/Footer';
 import TTSButton from '../../../../component/UI/TTSButton';
 
 const LineDropdown = ({ title, subtitle, children, isOpen, onToggle, ttsText }) => (
@@ -977,7 +976,6 @@ const PalmistryResult = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };
