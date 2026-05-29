@@ -5,6 +5,7 @@ import LoveMatchForm from "../forms/LoveMatchForm";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./LoveCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "love_calculator";
 
@@ -60,7 +61,9 @@ const LoveCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Love Calculator</h1>
         <p>Find Your Perfect Match and Discover True Love</p>
@@ -113,6 +116,7 @@ const LoveCalc = () => {
         onReset={handleReset}
       />
     </div>
+    </>
   );
 };
 

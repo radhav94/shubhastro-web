@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useGetAllPlansQuery } from "../../../redux/api/plansApi/plansApi";
 import { getToken } from "../../../utils/token";
 import { useWalletBalance } from "../wallet/useWalletBalance";
+import BackButton from "../../../component/UI/BackButton/BackButton";
 
 const RechargePack = ({ name, actualPrice, discountedPrice, offerPrice, Active }) => (
   <div className={styles.rechargeAmountWrapper}>
@@ -44,9 +45,11 @@ const Payment = () => {
   }, [refreshWallet]);
 
   return (
-    <div className={styles.rechargeTop}>
-      <div className={styles.leftSide}>
-        <div className={styles.walletBalance}>
+    <div className={styles.rechargeWrapper}>
+      <BackButton />
+      <div className={styles.rechargeTop}>
+        <div className={styles.leftSide}>
+          <div className={styles.walletBalance}>
           <img
             src="https://images.astroyogi.com/astroyogi/wallet_blc.png"
             alt="Wallet"
@@ -74,6 +77,7 @@ const Payment = () => {
           ))}
         </div>
       </div>
+    </div>
     </div>
   );
 };

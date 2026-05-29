@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
 import styles from "./MobileCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "mobile_calculator";
 
@@ -61,7 +62,9 @@ const MobileCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Lucky Mobile Number Calculator</h1>
         <p>Discover How Your Number Aligns with Your Energy</p>
@@ -94,6 +97,7 @@ const MobileCalc = () => {
         }}
       />
     </div>
+    </>
   );
 };
 

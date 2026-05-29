@@ -6,6 +6,7 @@ import { useGetPlanByIdQuery } from "../../../redux/api/plansApi/plansApi";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { useRazorpayPayment } from "../../../utils/hooks/useRazorpay";
 import Toast from "../../../component/toast";
+import BackButton from "../../../component/UI/BackButton/BackButton";
 
 const FinalPay = () => {
   const location = useLocation();
@@ -122,8 +123,10 @@ const FinalPay = () => {
   }
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.header}>Payment Details</h2>
+    <div className={styles.wrapper}>
+      <BackButton />
+      <div className={styles.container}>
+        <h2 className={styles.header}>Payment Details</h2>
 
       <div className={styles.card}>
         <table className={styles.table}>
@@ -189,6 +192,7 @@ const FinalPay = () => {
           </button>
         </div>
       )}
+    </div>
     </div>
   );
 };

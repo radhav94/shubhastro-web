@@ -28,6 +28,7 @@ import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { useCall } from "../../../context/CallContext";
 import useRecommendTrigger from "../../../utils/hooks/useRecommendTrigger";
+import BackButton from "../../../component/UI/BackButton/BackButton";
 import RecommendCTA from "../../../layouts/recommend/RecommendCTA";
 import RecommendModal from "../../../component/UI/modal/RecommendModal/RecommendModal";
 import { useChat } from "../../../context/ChatContext";
@@ -1074,6 +1075,7 @@ const TalkToAstrologer = () => {
   //JSX
   return (
     <div className={styles.mainContainer}>
+      <BackButton />
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>
           Chat With Best <span className={styles.highlight}>Astrologers</span>{" "}
