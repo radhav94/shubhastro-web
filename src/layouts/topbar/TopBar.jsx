@@ -16,6 +16,8 @@ import { getUserFromStorage } from "../../utils/authStorage";
 import { useDispatch } from "react-redux";
 import { clearFormAndCache } from "../../redux/actions/clearFormAndCache";
 import { clearSelectedKundli } from "../../redux/kundli/kundliSlice";
+import { logout } from "../../redux/auth/authSlice";
+import { privateRequestNew } from "../../services/appServices/privateRequestNew";
 
 const TopBar = () => {
   const navigate = useNavigate();
@@ -45,7 +47,11 @@ const TopBar = () => {
 
   const handleLogout = () => {
     dispatch(clearFormAndCache());
-     dispatch(clearSelectedKundli())
+    dispatch(clearSelectedKundli());
+    dispatch(logout());
+    dispatch(privateRequestNew.util.resetApiState());
+    localStorage.clear();
+    window.dispatchEvent(new Event("auth-change"));
     navigate("/");
   };
 
