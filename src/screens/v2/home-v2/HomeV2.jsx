@@ -2,6 +2,7 @@ import styles from "./HomeV2.module.scss";
 import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import SeoHelmet from "../../../component/SeoHelmet";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { useGetAiSuitesQuery, useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
@@ -412,6 +413,7 @@ const HomeV2 = () => {
 
   return (
     <>
+      <SeoHelmet data={newHomeData?.data} />
       <div className={styles.page}>
         {renderPlan.map((block, idx) => {
           switch (block.type) {

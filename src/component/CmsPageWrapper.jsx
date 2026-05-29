@@ -12,7 +12,8 @@ const EXCLUDED_PATHS = [
   "/home-v2",
   "/ai-wow",
   "/shubh-mall",
-  "/explore"
+  "/explore",
+  "/blog"
 ];
 
 /**
@@ -51,7 +52,7 @@ const CmsPageWrapper = ({ children }) => {
     : null;
   const hasBody = pageData?.body && pageData.body.trim().length > 0;
 
-  const title = pageData?.meta_title || pageData?.title || "ShubhTalk";
+  const title = pageData?.meta_title || pageData?.title || "ShubhAstro";
   const description = pageData?.meta_description || pageData?.title || "";
   const keywords = pageData?.meta_tags
     ? Array.isArray(pageData.meta_tags)

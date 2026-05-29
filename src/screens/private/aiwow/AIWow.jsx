@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import styles from "./AIWow.module.scss";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import SeoHelmet from "../../../component/SeoHelmet";
 import toast from "react-hot-toast";
 import axios from "axios";
 import FeatureCard from "./components/FeatureCard";
@@ -309,6 +310,7 @@ const AIWow = () => {
 
   return (
     <>
+      <SeoHelmet data={aiwowData?.data} />
       <div className={styles.container}>
         {isLoading && <PrimaryLoader />}
 
