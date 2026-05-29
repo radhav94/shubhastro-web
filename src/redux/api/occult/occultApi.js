@@ -11,7 +11,7 @@ export const occultApi = privateRequestNew.injectEndpoints({
       }),
     }),
     getOccultPdf: builder.mutation({
-      query: ({ historyId, featureType = "ocult-dasha", kundliId }) => {
+      query: ({ historyId, featureType = "occult-dosha", kundliId }) => {
         const params = new URLSearchParams({ historyId, featureType });
         if (kundliId) params.append("kundliId", kundliId);
         return {

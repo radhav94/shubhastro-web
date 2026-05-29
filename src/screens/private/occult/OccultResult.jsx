@@ -62,7 +62,7 @@ const OccultResult = () => {
   const [getOccultPdf] = useGetOccultPdfMutation();
 
   const handleDownloadPdf = async () => {
-    const historyId = state?.historyId || result?._id;
+    const historyId = state?.historyId || result?.historyId || result?._id || result?.data?.historyId;
     const kundliId = state?.profile?._id;
     if (!historyId) {
       toast.error("PDF not available for this report");
@@ -71,7 +71,7 @@ const OccultResult = () => {
     setIsDownloading(true);
     try {
       toast.loading("Downloading PDF...", { id: "occult-pdf" });
-      const response = await getOccultPdf({ historyId, featureType: "ocult-dasha", kundliId }).unwrap();
+      const response = await getOccultPdf({ historyId, featureType: "occult-dosha", kundliId }).unwrap();
       const pdfUrl = response?.data?.pdfUrl;
       if (!pdfUrl) throw new Error("PDF URL not found");
       const res = await fetch(pdfUrl);

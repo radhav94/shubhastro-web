@@ -70,9 +70,10 @@ const OccultChat = () => {
         : { kundliId: selectedProfile._id };
 
       const result = await getOccultDasha(body).unwrap();
-      const data = result?.message?.message || result?.message || result;
+      const historyId = result?._id || result?.data?._id || result?.message?._id || result?.message?.message?._id;
+      const data = result?.message?.message || result?.message || result?.data || result;
       if (data) {
-        navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile: selectedProfile } });
+        navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile: selectedProfile, historyId } });
       } else {
         Toast.error("Failed to generate reading");
       }
