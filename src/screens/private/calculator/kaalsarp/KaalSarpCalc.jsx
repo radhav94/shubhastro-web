@@ -10,6 +10,7 @@ import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePick
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "kaal_sarp";
 const initialFormState = {
@@ -78,7 +79,9 @@ const KaalSarpCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Kaal Sarp Dosh Calculator</h1>
         <p>Check if Rahu-Ketu axis is affecting your life</p>
@@ -183,6 +186,7 @@ const KaalSarpCalc = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    </>
   );
 };
 

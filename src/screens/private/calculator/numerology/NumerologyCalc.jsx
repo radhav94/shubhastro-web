@@ -5,6 +5,7 @@ import NumerologyForm from "../forms/NumerologyForm";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./NumerologyCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "numerology_report";
 
@@ -57,7 +58,9 @@ const NumerologyCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Name Numerology Calculator</h1>
         <p>Accurate Name Number Calculator Online</p>
@@ -87,6 +90,7 @@ const NumerologyCalc = () => {
         }}
       />
     </div>
+    </>
   );
 };
 

@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./RashiCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "rashi_moon_sign";
 
@@ -76,7 +77,9 @@ const RashiCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Rashi/Moon Sign Calculator</h1>
         <p>Find Your Moon Sign & Unlock Life's Mysteries</p>
@@ -106,6 +109,7 @@ const RashiCalc = () => {
         }}
       />
     </div>
+    </>
   );
 };
 

@@ -10,6 +10,7 @@ import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePick
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "birth_natal_calc";
 const initialFormState = {
@@ -85,7 +86,9 @@ const BirthCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Birth / Natal Chart Calculator</h1>
         <p>Discover your life's path through the stars</p>
@@ -190,6 +193,7 @@ const BirthCalc = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    </>
   );
 };
 

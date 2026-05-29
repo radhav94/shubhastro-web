@@ -1061,7 +1061,7 @@ export const PATH = {
       footer: true,
     },
     ABOUT: {
-      path: "/about-us",
+      // path: "/about-us",
       element: About,
       header: true,
     },

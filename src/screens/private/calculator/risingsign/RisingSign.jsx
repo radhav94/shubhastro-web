@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./RisingSign.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "rising_sign";
 const initialFormState = {
@@ -75,7 +76,9 @@ const RisingSign = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>The Complete Rising Sign Calculator</h1>
         <p>Discover Your True Self</p>
@@ -105,6 +108,7 @@ const RisingSign = () => {
         }}
       />
     </div>
+    </>
   );
 };
 

@@ -8,6 +8,7 @@ import styles from "./AtmakarakaCalculator.module.scss";
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "atmakaraka-and-darakaraka";
 
@@ -103,7 +104,9 @@ const AtmakarakaCalculator = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       {/* Hero Section */}
       <div className={styles.hero}>
         <h1>ATMAKARAKA AND DARAKARAKA CALCULATOR</h1>
@@ -299,6 +302,7 @@ const AtmakarakaCalculator = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    </>
   );
 };
 

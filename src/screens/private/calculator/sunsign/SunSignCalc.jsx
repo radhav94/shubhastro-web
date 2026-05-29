@@ -8,6 +8,7 @@ import styles from "./SunSignCalc.module.scss";
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "sun_sign";
 
@@ -102,7 +103,9 @@ const SunSignCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       {/* Hero Section */}
       <div className={styles.hero}>
         <h1>SUN SIGN CALCULATOR</h1>
@@ -299,6 +302,7 @@ const SunSignCalc = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    </>
   );
 };
 
