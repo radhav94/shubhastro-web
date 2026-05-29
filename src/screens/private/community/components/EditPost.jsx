@@ -275,7 +275,11 @@ const EditPost = ({ postId, onSuccess }) => {
       {/* Guidelines Sidebar */}
       <aside className={styles.guidelinesSidebar}>
         <div className={styles.guidelinesCard}>
-          <div className={styles.guidelinesIcon}>💡</div>
+          <div className={styles.guidelinesIcon}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#D43400" stroke="none">
+              <path d="M9 21c0 .5.4 1 1 1h4c.6 0 1-.5 1-1v-1H9v1zm3-19C8.1 2 5 5.1 5 9c0 2.4 1.2 4.5 3 5.7V17c0 .5.4 1 1 1h6c.6 0 1-.5 1-1v-2.3c1.8-1.3 3-3.4 3-5.7 0-3.9-3.1-7-7-7z"/>
+            </svg>
+          </div>
           <h3 className={styles.guidelinesTitle}>Things to consider before posting</h3>
           <ul className={styles.guidelinesList}>
             <li>Body must be between 20-5000 characters.</li>
@@ -287,7 +291,7 @@ const EditPost = ({ postId, onSuccess }) => {
       </aside>
 
       {/* Success Modal */}
-      {showSuccess && <SuccessModal onClose={handleSuccessClose} message="Post Updated Successfully" />}
+      {showSuccess && <SuccessModal onClose={handleSuccessClose} message="Post updated successfully" />}
     </div>
   );
 };

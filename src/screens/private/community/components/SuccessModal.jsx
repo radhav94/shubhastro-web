@@ -21,7 +21,7 @@ const SuccessModal = ({ onClose, message }) => {
           {/* Confetti dots */}
           <span className={styles.confetti} />
         </div>
-        <h2 className={styles.successTitle}>{message || "Posted Added Successfully"}</h2>
+        <h2 className={styles.successTitle}>{message || "Post added successfully"}</h2>
         {/* <p className={styles.successDesc}>
           Our internal team will review,<br />
           Lorem Ipsum is simply dummy text of the

@@ -15,6 +15,17 @@ import {
   useGetMyJoinedSpacesQuery,
 } from "../../../redux/api/community/communityApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
+import Toast from "../../../component/toast";
+
+// Redirect component for non-joined community access
+const CommunityNotJoined = ({ setSearchParams }) => {
+  useEffect(() => {
+    Toast.error("Join the community first");
+    setSearchParams({ tab: "communities" });
+  }, [setSearchParams]);
+
+  return null;
+};
 
 const TABS = [
   { id: "feed", label: "Your Feed", icon: LuNewspaper },
@@ -109,6 +120,12 @@ const Community = () => {
 
   const renderContent = () => {
     if (communityId) {
+      // Check if user has joined this community
+      const isMember = spaces.some((s) => s.slug === communityId && s.isJoined) ||
+        joinedSpaces.some((s) => s.slug === communityId);
+      if (!isMember) {
+        return <CommunityNotJoined setSearchParams={setSearchParams} />;
+      }
       return <CommunityDetail communityId={communityId} astrologers={communitiesAstrologers} />;
     }
     switch (activeTab) {
