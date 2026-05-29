@@ -82,9 +82,11 @@ const AgeReport = () => {
         >
           Calculate Again
         </button>
-      </div>
 
-      <ConnectCard />
+        <div className={styles.connectCardWrap}>
+          <ConnectCard />
+        </div>
+      </div>
     </>
   );
 };

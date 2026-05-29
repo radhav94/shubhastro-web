@@ -432,7 +432,9 @@ const Explore = () => {
         // Discover Your Kundli section
         "Vedic Kundli": "/kundli?tab=kundli",
         "Vedic Kundali": "/kundli?tab=kundli",
+        "Match Making": "/match-making",
         "Match-making": "/match-making",
+        "Match-Making": "/match-making",
         "Matchmaking": "/match-making",
         "KP Chart": "/kundli?tab=kp",
         "KP": "/kundli?tab=kp",
@@ -448,6 +450,24 @@ const Explore = () => {
       };
       
       redirectUrl = titleToRouteMap[card.title] || card.redirect_url || card.redirectUrl || card.url || card.link;
+    }
+
+    // Slug-based fallback: if no route found yet, try mapping slug to route
+    if (!redirectUrl && card.slug) {
+      const slugToRouteMap = {
+        "match-making": "/match-making",
+        "vedic-kundli": "/kundli?tab=kundli",
+        "dasha": "/kundli?tab=dasha",
+        "kp-chart": "/kundli?tab=kp",
+        "kp": "/kundli?tab=kp",
+        "ashtakvarga": "/kundli?tab=ashtakvarga",
+        "ashtakvarga-chart": "/kundli?tab=ashtakvarga",
+        "tarot": "/tarot",
+        "numerology": "/numerology",
+        "gemstones": "/gemstone-authenticity",
+        "gemstone": "/gemstone-authenticity",
+      };
+      redirectUrl = slugToRouteMap[card.slug.toLowerCase().trim()] || null;
     }
     
     // 🔹 SECTION: "ALL ABOUT YOU"

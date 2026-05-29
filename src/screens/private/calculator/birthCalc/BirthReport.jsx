@@ -168,10 +168,12 @@ const BirthReport = () => {
               </div>
             )}
           </div>
+
+          <div className={styles.connectCardWrap}>
+            <ConnectCard />
+          </div>
         </div>
       )}
-
-      <ConnectCard />
     </div>
   );
 };
