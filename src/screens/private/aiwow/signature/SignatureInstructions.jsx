@@ -4,7 +4,6 @@ import { useDispatch } from 'react-redux';
 import styles from './SignatureInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
-import Footer from '../../../../layouts/Footer';
 import TTSButton from '../../../../component/UI/TTSButton';
 
 const SignatureInstructions = () => {
@@ -138,7 +137,6 @@ const SignatureInstructions = () => {
         </div>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

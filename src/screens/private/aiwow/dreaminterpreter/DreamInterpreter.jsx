@@ -5,7 +5,6 @@ import { Toast } from '../../../../component';
 import { interpretDream } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
-import Footer from '../../../../layouts/Footer';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 
@@ -788,7 +787,6 @@ const DreamInterpreter = () => {
         )}
       </div>
     </div>
-    <Footer />
     </>
   );
 };

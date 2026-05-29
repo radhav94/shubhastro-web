@@ -4,7 +4,6 @@ import styles from './DailyCosmicBriefing.module.scss';
 import { getDailyCosmicBriefing } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
-import Footer from '../../../../layouts/Footer';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 
@@ -239,7 +238,6 @@ const DailyCosmicBriefing = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

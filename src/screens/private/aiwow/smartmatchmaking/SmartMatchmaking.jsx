@@ -17,7 +17,6 @@ import EditProfileModal from '../../../../component/UI/Profile/EditProfileModal'
 import DeleteConfirmationModal from '../../../../component/UI/modal/deleteModal/DeleteConfirmationModal';
 import matchMakingImg from '../../../../assets/images/match-making-top-img.svg';
 import matchMakingImgBottom from '../../../../assets/images/match-making-bottom-img.svg';
-import Footer from '../../../../layouts/Footer';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 // import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
@@ -881,7 +880,6 @@ const SmartMatchmaking = () => {
         />
       )}
     </div>
-    <Footer />
     </>
   );
 };

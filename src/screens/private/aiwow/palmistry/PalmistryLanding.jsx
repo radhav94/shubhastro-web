@@ -5,7 +5,6 @@ import PalmLineIcon from '../../../../assets/icons/palmline.png';
 import PalmMountIcon from '../../../../assets/icons/palmmount.png';
 import CakeIcon from '../../../../assets/icons/Cake.png';
 import LoveIcon from '../../../../assets/icons/loveIcon.png';
-import Footer from '../../../../layouts/Footer';
 
 
 const PalmistryLanding = () => {
@@ -82,7 +81,6 @@ const PalmistryLanding = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

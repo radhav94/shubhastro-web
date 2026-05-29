@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import styles from './FaceReadingInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
-import Footer from '../../../../layouts/Footer';
 import TTSButton from '../../../../component/UI/TTSButton';
 
 const FaceReadingInstructions = () => {
@@ -141,7 +140,6 @@ const FaceReadingInstructions = () => {
         </div>
       </div>
     </div>
-    <Footer />
     </>
   );
 };
