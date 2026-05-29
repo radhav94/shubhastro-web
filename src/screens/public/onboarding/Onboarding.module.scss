@@ -25,7 +25,7 @@
   padding:16px;
   // border-radius: 12px;
   // padding-top: 67px; // Space for fixed header
-  @media (width <= 767px) {
+  @media (width <= 768px) {
      padding:0px;
     //  background: #fff;
      max-width: 100%;
@@ -216,6 +216,20 @@
   object-position: top;
   position: relative;
   z-index: 0;
+  @media (width <= 769px) {
+    display: none;
+  }
+}
+.backgroundImageMobile {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  position: relative;
+  z-index: 0;
+  @media (width <= 768px) {
+    display: block;
+  }
 }
 
 .welcomeContent {
@@ -267,23 +281,24 @@
   position: absolute;
   top: 20px;
   left: 20px;
-  width: 48px;
-  height: 48px;
-  background: #2a1c06;
-  border: none;
+  width: 40px;
+  height: 40px;
+  background: #2a1c0600;
+  border: 1.5px solid #f75801;
   border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: #fff;
-  box-shadow:
-    0 4px 10px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  // box-shadow:
+  //   0 4px 10px rgba(0, 0, 0, 0.25),
+  //   inset 0 1px 0 rgba(255, 255, 255, 0.15);
   z-index: 10;
 
   svg {
-    color: #fff;
+    color: #f75801;
   }
 
   &:active {
@@ -292,7 +307,7 @@
 }
 
 /* ❌ Hide on desktop */
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .backBtn {
     display: none;
   }
@@ -300,22 +315,26 @@
 
 .otpbackBtn {
   position: absolute;
-  top: 90px;
+  top: 20px;
   left: 20px;
-  width: 48px;
-  height: 48px;
-  background: white;
-  border: 1px solid #2a1c06;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  background: #2a1c0600;
+  border: 1.5px solid #f75801;
+  border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #fff;
+  backdrop-filter: blur(12px);
+  // box-shadow:
+  //   0 4px 10px rgba(0, 0, 0, 0.25),
+  //   inset 0 1px 0 rgba(255, 255, 255, 0.15);
   z-index: 10;
 
   svg {
-    color: #333;
+    color: #f75801;
   }
 
   &:active {
@@ -1174,8 +1193,8 @@
         height: 100%;
         object-fit: cover;
         object-position: center;
-        filter: blur(8px) brightness(0.7);
-        transform: scale(1.1);
+        // filter: blur(8px) brightness(0.7);
+        // transform: scale(1.1);
       }
     }
 

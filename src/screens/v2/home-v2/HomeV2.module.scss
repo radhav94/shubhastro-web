@@ -910,12 +910,17 @@
 
   .fcCardImg {
     position: absolute;
-    bottom: -48px;
-    right: -48px;
-    width: 55%;
+    bottom: -20px;
+    right: 9px;
+    width: 46%;
     object-fit: contain;
     z-index: 1;
     pointer-events: none;
+    @media (width <= 1180px) {
+      bottom: 0px;
+      right: 9px;
+      width: 40%;
+    }
   }
   &.aiPanditVoice{
     .fcCardImg{
@@ -923,6 +928,7 @@
       right: 0px;
       width: auto;
       height: 100%;
+      filter: drop-shadow(0 0 2.75rem rgba(247, 88, 1));
     }
   }
 }
@@ -1123,6 +1129,9 @@
   color: #424242;
   margin: 0;
   padding-left: 2px;
+  @media (width <= 390px) {
+    font-size: 12px;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1410,8 +1419,8 @@
 
 /* AI Pandit Voice card */
 .aiPanditVoice {
-  background: linear-gradient(135deg, #f0ecff 0%, #e8e0ff 100%) !important;
-  border: 1.5px solid rgba(255,255,255,0.8) !important;
+  // background: linear-gradient(135deg, #f0ecff 0%, #e8e0ff 100%) !important;
+  border: 1.5px solid rgba(255,255,255,1) !important;
   overflow: hidden;
   position: relative;
   min-height: 180px;
@@ -1474,7 +1483,7 @@
   border: none!important;
   border-radius: 50px;
   padding: 8px 16px!important;
-  color: #7c3aed;
+  color: #f75801;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -4048,12 +4057,13 @@
       line-height: 30px;
     }
     &.aiPanditVoice::after{
-        color: #6834C3;
+        color: #f75801;
       // }
     }
   }
   & > div{
     display: flex;
+    margin-top: 16px;
     img{
       width: 45px;
       height: 45px;
@@ -4112,10 +4122,11 @@
   }
   &.aiPanditVoice{
     .mobileAiCardImg{
-      bottom: 25px;
+      bottom: 0px;
       right: 0;
       left: 0;
       width: 100%;
+      filter: drop-shadow(0 0 2.75rem rgba(247, 88, 1));
     }
   }
   @media (width <= 767px) {
@@ -4140,7 +4151,8 @@
     margin: 0 auto;
   }
   @media (width <= 767px) {
-    width: 93%;
+    width: 130px;
+    bottom: -6px;
   }
 }
 
