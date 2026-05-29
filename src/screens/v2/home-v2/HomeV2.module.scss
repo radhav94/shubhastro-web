@@ -386,7 +386,7 @@
     max-width: 60%;
   }
   @media (max-width: 767px) {
-    max-width: 82%;
+    max-width: 76%;
   }
 }
 
@@ -445,7 +445,7 @@
 //   }
 // }
 .heroBgImg {
-  width: 214px;
+  width: 230px;
   height: auto;
   position: absolute;
   right: -29px;
@@ -674,6 +674,7 @@
   @media (max-width: 767px) {
     padding: 10px 6px;
     justify-content: flex-start;
+    gap: 6px;
     span {
       font-size: 13px;
     }
@@ -931,7 +932,8 @@
   margin-top: 0;
   border-radius: 16px;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
   border: 1.5px solid #FFFFFF;
   cursor: pointer;
   display: flex;
@@ -3376,7 +3378,7 @@
   // .catItem { width: 110px; }
   // .catIconBox { width: 70px; height: 70px; }
   .heroBgImg {
-    width: 154px;
+    width: 178px;
     right: -24px;
     top: -23px;
     opacity: 1;
@@ -3421,6 +3423,7 @@
   // .heroBanner { padding: 20px 16px 12px;}
   .heroBanner h1 {
     font-size: 22px;
+    margin-bottom: 0;
   }
 
   // .heroDesc { font-size: 12px; }
@@ -3502,8 +3505,8 @@
   }
 
   .heroBanner h1 {
-    font-size: 15px;
-    width: 77%;
+    font-size: 18px!important;
+    margin-bottom: 0;
   }
   .heroBanner{
     margin-bottom: 0;
@@ -3575,9 +3578,6 @@
 }
 
 @media (max-width: 480px) {
-  .heroBanner h1 {
-    font-size: 15px;
-  }
 
   // .wowCard { min-height: 140px; }
   .featureCard {
@@ -3627,9 +3627,9 @@
 }
 
 @media (max-width: 480px) {
-  .heroBanner h1 {
-    font-size: 15px;
-  }
+  // .heroBanner h1 {
+  //   font-size: 15px;
+  // }
 
   // .heroDesc { font-size: 13px; }
   .heroBgImg {

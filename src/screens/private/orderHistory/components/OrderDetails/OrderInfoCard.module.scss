@@ -3,10 +3,12 @@
 }
 
 .cardWrapper {
-  background-color: #ffffff;
+  background-color: rgb(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #fff;
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  // box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   margin-bottom: 12px;
 }
 
@@ -16,7 +18,7 @@
   align-items: center;
   margin-bottom: 14px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #ffffff;
 }
 
 .orderId {
@@ -160,7 +162,7 @@
   cursor: pointer;
   white-space: nowrap;
   padding-left: 12px;
-  border-left: 1px solid #d1d5db;
+  border-left: 1px solid #ffffff;
 
   &:hover {
     color: #ea580c;
@@ -170,7 +172,7 @@
 .rateButton {
   background: transparent;
   border: none;
-  color: #999;
+  color: #000;
   font-size: 14px;
   font-weight: 500;
   padding: 0;
