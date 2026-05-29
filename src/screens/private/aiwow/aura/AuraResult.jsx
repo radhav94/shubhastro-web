@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import styles from './AuraResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
-import Footer from '../../../../layouts/Footer';
 import TTSButton from '../../../../component/UI/TTSButton';
 
 const AuraResult = () => {
@@ -555,7 +554,6 @@ const AuraResult = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

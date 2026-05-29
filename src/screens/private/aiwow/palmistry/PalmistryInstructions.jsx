@@ -4,7 +4,6 @@ import { useDispatch } from 'react-redux';
 import styles from './PalmistryInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
-import Footer from '../../../../layouts/Footer';
 import TTSButton from '../../../../component/UI/TTSButton';
 const PalmistryInstructions = () => {
   const navigate = useNavigate();
@@ -135,7 +134,6 @@ const PalmistryInstructions = () => {
         </div>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

@@ -16,7 +16,6 @@ import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWalletBalance } from "../wallet/useWalletBalance";
-import Footer from "../../../layouts/Footer";
 import { PATH } from "../../../utils/routes/Paths";
 
 // Reusable Section Title with Divider (same as Explore page, auto-width)
@@ -493,7 +492,6 @@ const AIWow = () => {
           showLanguageSelection={false}
         />
       </div>
-      <Footer />
     </>
   );
 };

@@ -5,7 +5,6 @@ import StrokeIcon from '../../../../assets/icons/Stroke.png';
 import PressureIcon from '../../../../assets/icons/pressure.png';
 import LetterIcon from '../../../../assets/icons/letter.png';
 import SignatureSizeIcon from '../../../../assets/icons/signauresize.png';
-import Footer from '../../../../layouts/Footer';
 
 const SignatureLanding = () => {
   const navigate = useNavigate();
@@ -81,7 +80,6 @@ const SignatureLanding = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };
