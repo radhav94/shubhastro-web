@@ -35,7 +35,7 @@ const OrderDetails = () => {
   const [chatRoomIdLocal, setChatRoomIdLocal] = useState(null);
   const [callRoomIdLocal, setCallRoomIdLocal] = useState(null);
 
-  const { handleChatStart, handleCallStart, openModal: hookOpenModal, setOpenModal: hookSetOpenModal, selectedAstrologer: hookSelectedAstrologer, hasKundli } = useAstrologerConnect();
+  const { handleChatStart, handleCallStart, openModal: hookOpenModal, setOpenModal: hookSetOpenModal, selectedAstrologer: hookSelectedAstrologer, lastConnectionType: hookLastConnectionType, lastIsEmergency: hookLastIsEmergency, hasKundli } = useAstrologerConnect();
   const { setWaitingList, resetChatFlow, setActiveChatRoomId, setActiveChat, setChatSeconds, waitingList: chatWaiting } = useChat();
   const { setWaitingList: setCallWaitingList, resetCallFlow, setActiveCallRoomId, setActiveCall, setOpenReview, setReviewData, waitingList: callWaiting } = useCall();
   const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, cancelAll, assignRoomId } = useWaitingQueue();

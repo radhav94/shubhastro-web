@@ -1,6 +1,10 @@
 import { useRef, useLayoutEffect, useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoAttach, IoClose } from "react-icons/io5";
+import { FaFileAlt } from "react-icons/fa";
+import PdfIcon from "../../assets/chat/PDF.svg";
+import DocIcon from "../../assets/chat/DOC.svg";
+import XlsIcon from "../../assets/chat/XLS.svg";
 import styles from "./VideoCallChat.module.scss";
 import { useGetChatHistoryQuery } from "../../redux/api/chatApi";
 import { useGetS3SignedUrlMutation } from "../../redux/api/s3SignedApi";
@@ -13,6 +17,7 @@ import { GrReactjs } from "react-icons/gr";
 import IframeModal from "../../screens/private/home/components/chats/IframeModal";
 import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 import AudioMessageWrapper from "../../screens/private/home/components/chats/AudioMessageWrapper";
+import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
 
 const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 
@@ -321,6 +326,20 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
     setCameraOpen(true);
   };
 
+  const getFileIcon = (filename) => {
+    const ext = filename?.split('.').pop()?.toLowerCase() || '';
+    switch (ext) {
+      case 'pdf':
+        return <img src={PdfIcon} alt="PDF" className="w-5 h-5 flex-shrink-0" />;
+      case 'doc': case 'docx':
+        return <img src={DocIcon} alt="DOC" className="w-5 h-5 flex-shrink-0" />;
+      case 'xls': case 'xlsx': case 'csv':
+        return <img src={XlsIcon} alt="XLS" className="w-5 h-5 flex-shrink-0" />;
+      default:
+        return <FaFileAlt className="text-lg flex-shrink-0" style={{ color: '#757575' }} />;
+    }
+  };
+
   const renderMessage = (msg, index) => {
     let isSpecialMessage = false;
     let content = msg.text;
@@ -465,30 +484,69 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
         );
       } else if (msg.type === "attachment") {
         isSpecialMessage = true;
+        const displayName = getAttachmentDisplayName(msg.text);
+        let fileUrl = msg.text;
+        try {
+          const parsed = typeof msg.text === "string" ? JSON.parse(msg.text) : msg.text;
+          if (parsed?.url) fileUrl = parsed.url;
+        } catch { /* use msg.text as URL */ }
+        const handleDownload = async (e) => {
+          e.preventDefault();
+          try {
+            const res = await fetch(fileUrl);
+            const blob = await res.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = blobUrl;
+            a.download = displayName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+          } catch {
+            window.open(fileUrl, "_blank");
+          }
+        };
         content = (
-          <a
-            href={msg.text}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm underline font-semibold"
+          <button
+            onClick={handleDownload}
+            className="flex items-center gap-2 text-sm font-semibold text-inherit cursor-pointer bg-transparent border-none p-0"
           >
-            <span className="text-lg">📎</span>
-            <span className="truncate max-w-[180px]">Download Attachment</span>
-          </a>
+            {getFileIcon(displayName)}
+            <span className="truncate max-w-[180px]">{displayName}</span>
+          </button>
         );
       } else {
         if (msg.type !== "message" && msg.type !== "gift")
           isSpecialMessage = true;
+        const fallbackName = getAttachmentDisplayName(msg.text);
+        const fallbackUrl = msg.text;
+        const handleFallbackDownload = async (e) => {
+          e.preventDefault();
+          try {
+            const res = await fetch(fallbackUrl);
+            const blob = await res.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = blobUrl;
+            a.download = fallbackName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+          } catch {
+            window.open(fallbackUrl, "_blank");
+          }
+        };
         content = (
           <div className={styles.fileMessage}>
-            <a
-              href={msg.text}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.fileLink}
+            <button
+              onClick={handleFallbackDownload}
+              className="flex items-center gap-2 text-sm font-semibold text-inherit cursor-pointer bg-transparent border-none p-0"
             >
-              📎 Download Attachment
-            </a>
+              {getFileIcon(fallbackName)}
+              <span className="truncate max-w-[180px]">{fallbackName}</span>
+            </button>
           </div>
         );
       }
