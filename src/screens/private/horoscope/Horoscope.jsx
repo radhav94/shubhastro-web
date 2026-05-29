@@ -317,6 +317,12 @@ const HoroscopeNew = () => {
       console.log('Daily/Weekly Category IDs:', dailyWeeklyCategories.map(c => c.id));
     }
     
+    // Remove "Total Score" category from all tabs
+    newCategories = newCategories.filter(c => {
+      const id = c.id.toLowerCase().replace(/[_\s]/g, '');
+      return id !== 'totalscore';
+    });
+    
     setCategories(newCategories);
     
     // Set default active category to overview if not set or invalid
