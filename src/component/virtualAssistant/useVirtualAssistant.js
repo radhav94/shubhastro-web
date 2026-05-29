@@ -25,6 +25,7 @@ export default function useVirtualAssistant({ astrologerId, isOpen }) {
   const [getS3SignedUrl] = useGetS3SignedUrlMutation();
 
   const history = historyData?.data || [];
+  const assistantUsage = historyData?.assistantUsage || null;
 
   // Merge history + optimistic messages
   const messages = [...history, ...optimisticMsgs].sort(
@@ -203,5 +204,6 @@ export default function useVirtualAssistant({ astrologerId, isOpen }) {
     sendKundli,
     retryMessage,
     messagesEndRef,
+    assistantUsage,
   };
 }

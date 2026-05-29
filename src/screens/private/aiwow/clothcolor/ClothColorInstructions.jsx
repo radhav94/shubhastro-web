@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import styles from './ClothColorInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
-import Footer from '../../../../layouts/Footer';
 import TTSButton from '../../../../component/UI/TTSButton';
 
 const ClothColorInstructions = () => {
@@ -139,7 +138,6 @@ const ClothColorInstructions = () => {
     </div>
     </div>
     </div>
-    <Footer />
     </div>
   );
 };

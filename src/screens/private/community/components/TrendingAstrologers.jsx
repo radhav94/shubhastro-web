@@ -1,29 +1,57 @@
+import { useNavigate } from "react-router-dom";
 import styles from "../Community.module.scss";
-import astrologerImg from "../../../../assets/default-img/astrologer male_v.1.png";
 
-const TRENDING_ASTROLOGERS = [
-  { id: 1, name: "Pandit Ravi Ji", experience: "Exp. 20+ Years", avatar: astrologerImg },
-  { id: 2, name: "Pandit Ravi Ji", experience: "Exp. 20+ Years", avatar: astrologerImg },
-  { id: 3, name: "Pandit Ravi Ji", experience: "Exp. 20+ Years", avatar: astrologerImg },
-  { id: 4, name: "Pandit Ravi Ji", experience: "Exp. 20+ Years", avatar: astrologerImg },
-  { id: 5, name: "Pandit Ravi Ji", experience: "Exp. 20+ Years", avatar: astrologerImg },
-];
+const TrendingAstrologers = ({
+  title = "Trending Astrologers",
+  btnLabel = "Connect",
+  astrologers = [],
+}) => {
+  const navigate = useNavigate();
 
-const TrendingAstrologers = ({ title = "Trending Astrologers", btnLabel = "Connect" }) => {
+  if (!astrologers.length) return null;
+
+  const handleConnect = (astrologer) => {
+    navigate(`/astrologer/${astrologer._id}`);
+  };
+
+  const getInitials = (firstName) => {
+    return (firstName || "?")[0]?.toUpperCase() || "?";
+  };
+
   return (
     <aside className={styles.trendingSidebar}>
       <h3 className={styles.trendingTitle}>{title}</h3>
       <ul className={styles.trendingList}>
-        {TRENDING_ASTROLOGERS.map((astrologer) => (
-          <li key={astrologer.id} className={styles.trendingItem}>
-            <img src={astrologer.avatar} alt={astrologer.name} className={styles.trendingAvatar} />
-            <div className={styles.trendingInfo}>
-              <span className={styles.trendingName}>{astrologer.name}</span>
-              <span className={styles.trendingExp}>{astrologer.experience}</span>
-            </div>
-            <button className={styles.connectBtn}>{btnLabel}</button>
-          </li>
-        ))}
+        {astrologers.map((astrologer) => {
+          const name = `${astrologer.firstName} ${astrologer.lastName || ""}`;
+          return (
+            <li key={astrologer._id || astrologer.astrologerID} className={styles.trendingItem}>
+              {astrologer.profileImgUrl ? (
+                <img
+                  src={astrologer.profileImgUrl}
+                  alt={name}
+                  className={styles.trendingAvatar}
+                />
+              ) : (
+                <div className={styles.trendingAvatar} style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #f97316, #ea580c)", color: "#fff", fontWeight: 600, fontSize: 14 }}>
+                  {getInitials(astrologer.firstName)}
+                </div>
+              )}
+              <div className={styles.trendingInfo}>
+                <span className={styles.trendingName}>{name}</span>
+                <span className={styles.trendingExp}>
+                  Exp. {astrologer.experience}+ Years
+                </span>
+              </div>
+              <button
+                className={styles.connectBtn}
+                onClick={() => handleConnect(astrologer)}
+              >
+                {btnLabel}
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </aside>
   );

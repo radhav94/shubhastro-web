@@ -1,94 +1,78 @@
-// import { privateRequest } from "./privateRequest";
-
-// import { privateRequest } from "../privateRequest";
 import { privateRequestNew } from "./privateRequestNew";
+
+/**
+ * Checks if kundli list contains a "self" profile.
+ * If not, redirects to personalize screen so user can register one.
+ */
+const checkSelfKundliAndRedirect = (data) => {
+  const profiles = data?.data || [];
+  const hasSelf = profiles.length > 0;
+
+  if (!hasSelf) {
+    const path = window.location.pathname;
+    if (path === "/login" || path === "/register" || path === "/profile/add") return;
+    setTimeout(() => window.location.replace("/login?step=personalize"), 0);
+  }
+};
 
 export const kundliApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
-    // GET ALL KUNDLIS
     getAllKundlis: builder.query({
-      query: (userId) => ({
-        url: "kundlis/all",
-        method: "GET",
-      }),
+      query: () => ({ url: "kundlis/all", method: "GET" }),
       providesTags: (result, error, userId) => [
         { type: "Kundlis", id: userId || "LIST" },
       ],
-      // Force refetch on mount or when userId changes
-      keepUnusedDataFor: 0, // Don't cache data after component unmounts
+      keepUnusedDataFor: 0,
+      async onQueryStarted(arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          checkSelfKundliAndRedirect(data);
+        } catch {
+          // API error — don't redirect
+        }
+      },
     }),
 
-    // CREATE KUNDLI
     createKundli: builder.mutation({
       query: (body) => ({
         url: "kundlis/create",
         method: "POST",
         body,
-        headers: {
-          "Content-Type": "application/json",
-          accept: "application/json",
-        },
+        headers: { "Content-Type": "application/json", accept: "application/json" },
       }),
-      invalidatesTags: (result, error, arg) => [
-        { type: "Kundlis", id: "LIST" },
-        // Invalidate for all possible user IDs to be safe
-        "Kundlis",
-      ],
+      invalidatesTags: () => [{ type: "Kundlis", id: "LIST" }, "Kundlis"],
     }),
 
-    
-
-    // DELETE KUNDLI
     deleteKundli: builder.mutation({
       query: (id) => ({
         url: "kundlis/delete",
         method: "DELETE",
         body: { kundliId: id },
-        headers: {
-          "Content-Type": "application/json",
-          accept: "application/json",
-        },
+        headers: { "Content-Type": "application/json", accept: "application/json" },
       }),
-      invalidatesTags: (result, error, arg) => [
-        { type: "Kundlis", id: "LIST" },
-        // Invalidate for all possible user IDs to be safe
-        "Kundlis",
-      ],
+      invalidatesTags: () => [{ type: "Kundlis", id: "LIST" }, "Kundlis"],
     }),
 
-    // EDIT KUNDLI
     editKundli: builder.mutation({
       query: ({ id, ...body }) => ({
         url: `kundlis/editkundli/${id}`,
         method: "PUT",
         body,
-        headers: {
-          "Content-Type": "application/json",
-          accept: "application/json",
-        },
+        headers: { "Content-Type": "application/json", accept: "application/json" },
       }),
-      invalidatesTags: (result, error, arg) => [
-        { type: "Kundlis", id: "LIST" },
-        // Invalidate for all possible user IDs to be safe
-        "Kundlis",
-      ],
+      invalidatesTags: () => [{ type: "Kundlis", id: "LIST" }, "Kundlis"],
     }),
 
-    // GET KUNDLI PDF
     getKundliPdf: builder.query({
       query: ({ kundliId, language }) => ({
         url: `kundlis/kundli-pdf`,
         method: "GET",
-        params: { 
-          id: kundliId,
-          language: language || 'en'
-        },
+        params: { id: kundliId, language: language || "en" },
       }),
     }),
   }),
 });
 
-// HOOKS
 export const {
   useGetAllKundlisQuery,
   useCreateKundliMutation,
@@ -98,5 +82,4 @@ export const {
   useLazyGetKundliPdfQuery,
 } = kundliApi;
 
-// Export addKundli as an alias for createKundli for backward compatibility
 export const useAddKundliMutation = useCreateKundliMutation;

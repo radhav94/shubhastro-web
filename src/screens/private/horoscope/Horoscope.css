@@ -246,7 +246,7 @@
 .time-tabs {
   display: flex;
   border-bottom: 1px solid #ffffff;
-  gap: 0;
+  gap: 16px;
   overflow: auto;
   margin-top: 5px;
 }

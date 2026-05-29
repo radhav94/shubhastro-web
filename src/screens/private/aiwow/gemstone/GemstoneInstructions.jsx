@@ -4,7 +4,6 @@ import { useDispatch } from 'react-redux';
 import styles from './GemstoneInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setGemstoneImage } from '../../../../redux/aiwow/aiwowSlice';
-import Footer from '../../../../layouts/Footer';
 import TTSButton from '../../../../component/UI/TTSButton';
 
 const GemstoneInstructions = () => {
@@ -137,7 +136,6 @@ const GemstoneInstructions = () => {
         </div>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

@@ -22,6 +22,7 @@ import { useGetAllKundlisQuery } from "../../services/appServices/kundliServices
 import VideoCallChat from "./VideoCallChat";
 import { Toast } from "../index";
 import { useGetBalanceMutation } from "../../redux/api/wallet/walletApi";
+import { useMediaPermission } from "../../utils/hooks/useMediaPermission";
 
 // Import SVG icons from chat assets
 import VideocamIcon from "../../assets/chat/Videocam.svg";
@@ -33,6 +34,7 @@ import walletIcon from "../../assets/images/wallet-icon.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
 import SwitchWaitingPopup from "../UI/switchWaiting/SwitchWaitingPopup";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
+import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
@@ -127,7 +129,22 @@ const AgoraVoiceCalling = ({ callData }) => {
     // Hide product notifications when mall is disabled
     if (data.type === "products" && !isShubhMallEnabled()) return;
     
-    const messageText = data.type === "gift" ? "🎁 Sent a gift" : data.type === "products" ? "💊 Suggested a remedy" : (data.message || data.response || "New message");
+    let messageText;
+    if (data.type === "gift") {
+      messageText = "🎁 Sent a gift";
+    } else if (data.type === "products") {
+      messageText = "💊 Suggested a remedy";
+    } else if (data.type === "attachment") {
+      messageText = "📎 " + getAttachmentDisplayName(data.message || data.response || "");
+    } else if (data.type === "image") {
+      messageText = "📷 Image";
+    } else if (data.type === "audio") {
+      messageText = "🎵 Audio";
+    } else if (data.type === "video") {
+      messageText = "🎬 Video";
+    } else {
+      messageText = data.message || data.response || "New message";
+    }
     const astroImage = astrologerImage || lastRequestedAstro?.imageUrl || lastRequestedAstro?.aadharCardImgUrl || lastRequestedAstro?.panCardImgUrl || null;
     const astroGender = lastRequestedAstro?.gender || null;
     setChatNotification({
@@ -172,6 +189,7 @@ const AgoraVoiceCalling = ({ callData }) => {
   /* ================= WALLET BALANCE ================= */
   const { refreshWallet } = useWalletBalance();
   const [getBalance, { isLoading: isCheckingBalance }] = useGetBalanceMutation();
+  const { checkPermission } = useMediaPermission();
 
   /* ================= MINI CALL OVERLAY BRIDGE ================= */
   // No longer needed — mic/speaker state is shared via CallContext
@@ -696,11 +714,32 @@ const AgoraVoiceCalling = ({ callData }) => {
     voiceSocket.on("call:rejected", handleCallRejected);
     voiceSocket.on("call:reconnected", handleCallReconnected);
 
+    const handleSwitchRejected = (data) => {
+      console.log("🔄 call:switch_rejected in VoiceCall", data);
+      isUpgradingToVideo.current = false;
+      setIsSwitching(false);
+      setWaitingList(null);
+      Toast.info(data?.message || "Switch request rejected, continuing current call.");
+    };
+
+    const handleSwitchCanceled = (data) => {
+      console.log("🔄 call:switch_canceled in VoiceCall", data);
+      isUpgradingToVideo.current = false;
+      setIsSwitching(false);
+      setWaitingList(null);
+      Toast.info(data?.message || "Switch request canceled, continuing current call.");
+    };
+
+    voiceSocket.on("call:switch_rejected", handleSwitchRejected);
+    voiceSocket.on("call:switch_canceled", handleSwitchCanceled);
+
     return () => {
       voiceSocket.off("call:ended", handleCallEnded);
       // voiceSocket.off("call:canceled", handleCallCanceled);
       voiceSocket.off("call:rejected", handleCallRejected);
       voiceSocket.off("call:reconnected", handleCallReconnected);
+      voiceSocket.off("call:switch_rejected", handleSwitchRejected);
+      voiceSocket.off("call:switch_canceled", handleSwitchCanceled);
     };
     // eslint-disable-next-line
   }, []);
@@ -766,6 +805,10 @@ const AgoraVoiceCalling = ({ callData }) => {
   }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.roomId, effectiveKundliId, activeCall?.isUserSide, astrologerName]);
 
   const toggleCamera = async () => {
+
+    // Check camera + mic permission before switching to video
+    const hasPermission = await checkPermission("both");
+    if (!hasPermission) return;
 
     try {
       // Check balance before switching to video

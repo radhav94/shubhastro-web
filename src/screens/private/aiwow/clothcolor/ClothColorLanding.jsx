@@ -5,7 +5,6 @@ import AuraSpectrumIcon from '../../../../assets/icons/auraspectrum.png';
 import VibrancyIcon from '../../../../assets/icons/vibrancy.png';
 import PatternIcon from '../../../../assets/icons/pattern.png';
 import StyleCaratIcon from '../../../../assets/icons/stylecarat.png';
-import Footer from '../../../../layouts/Footer';
 
 const ClothColorLanding = () => {
   const navigate = useNavigate();
@@ -46,7 +45,7 @@ const ClothColorLanding = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
+        <button className={styles.backButton} onClick={() => navigate('/ai-wow')}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -80,7 +79,6 @@ const ClothColorLanding = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

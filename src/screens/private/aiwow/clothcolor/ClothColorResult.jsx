@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import styles from './ClothColorResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
-import Footer from '../../../../layouts/Footer';
 import TTSButton from '../../../../component/UI/TTSButton';
 
 const ClothColorResult = () => {
@@ -400,7 +399,6 @@ const ClothColorResult = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

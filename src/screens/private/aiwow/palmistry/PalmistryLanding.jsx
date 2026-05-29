@@ -5,7 +5,6 @@ import PalmLineIcon from '../../../../assets/icons/palmline.png';
 import PalmMountIcon from '../../../../assets/icons/palmmount.png';
 import CakeIcon from '../../../../assets/icons/Cake.png';
 import LoveIcon from '../../../../assets/icons/loveIcon.png';
-import Footer from '../../../../layouts/Footer';
 
 
 const PalmistryLanding = () => {
@@ -48,7 +47,7 @@ const PalmistryLanding = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate('/ai-wow')}>
+          <button className={styles.backButton} onClick={() => navigate('/')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -82,7 +81,6 @@ const PalmistryLanding = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

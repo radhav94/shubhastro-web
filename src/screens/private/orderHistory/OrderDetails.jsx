@@ -15,6 +15,7 @@ import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
+import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 import { useChat } from "../../../context/ChatContext";
 import { useCall } from "../../../context/CallContext";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
@@ -34,7 +35,7 @@ const OrderDetails = () => {
   const [chatRoomIdLocal, setChatRoomIdLocal] = useState(null);
   const [callRoomIdLocal, setCallRoomIdLocal] = useState(null);
 
-  const { handleChatStart, handleCallStart } = useAstrologerConnect();
+  const { handleChatStart, handleCallStart, openModal: hookOpenModal, setOpenModal: hookSetOpenModal, selectedAstrologer: hookSelectedAstrologer, lastConnectionType: hookLastConnectionType, lastIsEmergency: hookLastIsEmergency, hasKundli } = useAstrologerConnect();
   const { setWaitingList, resetChatFlow, setActiveChatRoomId, setActiveChat, setChatSeconds, waitingList: chatWaiting } = useChat();
   const { setWaitingList: setCallWaitingList, resetCallFlow, setActiveCallRoomId, setActiveCall, setOpenReview, setReviewData, waitingList: callWaiting } = useCall();
   const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, cancelAll, assignRoomId } = useWaitingQueue();
@@ -494,6 +495,13 @@ const OrderDetails = () => {
           activeAstroRef.current = astro;
           handleCallStart(astro, "audio", true);
         }}
+      />
+
+      {/* Recharge Modal for insufficient balance */}
+      <RechargeModal
+        isOpen={hookOpenModal.recharge}
+        onClose={() => hookSetOpenModal((prev) => ({ ...prev, recharge: false }))}
+        astrologer={hookSelectedAstrologer}
       />
     </div>
   );

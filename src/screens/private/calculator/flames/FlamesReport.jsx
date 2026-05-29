@@ -41,7 +41,6 @@ const FlamesReport = () => {
       <CalcBackButton />
       <div className={styles.card}>
         <h3 className={styles.title}>FLAMES RESULT</h3>
-
         <p className={styles.names}>
           {report.name1} <span className={styles.fire}>🔥</span> {report.name2}
         </p>

@@ -14,6 +14,7 @@ import { getRouteFromSlug, requiresProfileData } from "../../../utils/constanats
 import { ProfileManager } from "../../../component/UI/Profile";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import toast from "react-hot-toast";
+import BackButton from "../../../component/UI/BackButton/BackButton";
 
 // Import default images as fallback
 import horoscopeImg from "../../../assets/explore/horoscope.png";
@@ -147,10 +148,10 @@ const Explore = () => {
     if (displayType === "all-about-you") {
       return (
         <section key={index} className={styles.section}>
-          <h1 className={styles.mainTitle}>{section.display_title || section.title || "All About You"}</h1>
+          {/* <h1 className={styles.mainTitle}>{section.display_title || section.title || "All About You"}</h1>
           <p className={styles.subtitle}>
             {section.description || "An ever growing library on the story of you"}
-          </p>
+          </p> */}
 
           <h1 className={styles.titleSub}>{section?.display_title}</h1>
 
@@ -202,9 +203,9 @@ const Explore = () => {
                   </div>
                   <div className={styles.kundliCardContent}>
                     <h3 className={styles.kundliCardTitle}>{card.title}</h3>
-                    {card.description && (
+                    {/* {card.description && (
                       <p className={styles.kundliCardDescription}>{card.description}</p>
-                    )}
+                    )} */}
                   </div>
                 </div>
               ))}
@@ -235,7 +236,7 @@ const Explore = () => {
               >
                 <div className={styles.destinyCardContent}>
                   <h3 className={styles.destinyCardTitle}>{card.title}</h3>
-                  <p className={styles.destinyCardSubtitle}>{card.description}</p>
+                  {/* <p className={styles.destinyCardSubtitle}>{card.description}</p> */}
                 </div>
                 {card.image_url && (
                   <img
@@ -432,6 +433,10 @@ const Explore = () => {
         // Discover Your Kundli section
         "Vedic Kundli": "/kundli?tab=kundli",
         "Vedic Kundali": "/kundli?tab=kundli",
+        "Match Making": "/match-making",
+        "Match-making": "/match-making",
+        "Match-Making": "/match-making",
+        "Matchmaking": "/match-making",
         "KP Chart": "/kundli?tab=kp",
         "KP": "/kundli?tab=kp",
         "Dasha": "/kundli?tab=dasha",
@@ -446,6 +451,24 @@ const Explore = () => {
       };
       
       redirectUrl = titleToRouteMap[card.title] || card.redirect_url || card.redirectUrl || card.url || card.link;
+    }
+
+    // Slug-based fallback: if no route found yet, try mapping slug to route
+    if (!redirectUrl && card.slug) {
+      const slugToRouteMap = {
+        "match-making": "/match-making",
+        "vedic-kundli": "/kundli?tab=kundli",
+        "dasha": "/kundli?tab=dasha",
+        "kp-chart": "/kundli?tab=kp",
+        "kp": "/kundli?tab=kp",
+        "ashtakvarga": "/kundli?tab=ashtakvarga",
+        "ashtakvarga-chart": "/kundli?tab=ashtakvarga",
+        "tarot": "/tarot",
+        "numerology": "/numerology",
+        "gemstones": "/gemstone-authenticity",
+        "gemstone": "/gemstone-authenticity",
+      };
+      redirectUrl = slugToRouteMap[card.slug.toLowerCase().trim()] || null;
     }
     
     // 🔹 SECTION: "ALL ABOUT YOU"
@@ -619,6 +642,7 @@ const Explore = () => {
   return (
     <div className={styles.explorePage}>
       <SeoHelmet data={exploreData?.data} />
+      <BackButton />
       {/* Header */}
       <div className={styles.headerWrap}>
       <div className={styles.header}>

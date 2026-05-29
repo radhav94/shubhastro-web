@@ -10,7 +10,8 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import TTSButton from "../../../component/UI/TTSButton";
-import laalKitaabImg from "../../../assets/images/laal-kitaab.png";
+import BackButton from "../../../component/UI/BackButton/BackButton";
+// import laalKitaabImg from "../../../assets/images/laal-kitaab.png";
 
 const features = [
   { icon: "🏠", title: "Houses Analysis",   desc: "Detailed analysis of all 12 houses with planetary positions" },
@@ -80,6 +81,8 @@ const LalKitab = () => {
   const infoText = "Lal Kitab is a unique system of astrology that provides simple yet powerful remedies for planetary afflictions. Unlike traditional Vedic astrology, Lal Kitab focuses on practical remedies that can be performed in daily life to mitigate negative planetary effects.";
 
   return (
+    <>
+      <BackButton />
     <div className={styles.page}>
       {(isGenerating || isLoadingProfiles) && <PrimaryLoader />}
 
@@ -140,7 +143,7 @@ const LalKitab = () => {
 
         {/* Hero image */}
         <div className={styles.heroImgWrap}>
-          <img src={laalKitaabImg} alt="Lal Kitab" className={styles.heroImg} />
+          <img src={"https://assets.shubhastro.ai/images/1779687633-744685033.webp"} alt="Lal Kitab" className={styles.heroImg} />
           <div className={styles.heroGlow} />
         </div>
       </div>
@@ -179,6 +182,7 @@ const LalKitab = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    </>
   );
 };
 

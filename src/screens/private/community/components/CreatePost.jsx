@@ -1,57 +1,187 @@
 import { useState, useRef } from "react";
-import { FiImage } from "react-icons/fi";
+import { FiImage, FiX } from "react-icons/fi";
 import styles from "../Community.module.scss";
 import SuccessModal from "./SuccessModal";
+import MwebCommunities from "./MwebCommunities";
+import {
+  useCreateCommunityPostMutation,
+  useGetCommunitySpacesQuery,
+} from "../../../../redux/api/community/communityApi";
+import { useGetS3SignedUrlMutation } from "../../../../redux/api/s3SignedApi";
+import Toast from "../../../../component/toast";
+
+const MAX_IMAGES = 5;
 
 const POSTING_GUIDELINES = [
-  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum",
-  "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-  "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
-  "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+  "Body must be between 20-5000 characters.",
+  "Title can be up to 200 characters.",
+  "Maximum 5 images allowed per post.",
+  "Posts are reviewed by AI moderation before publishing.",
 ];
 
-const CreatePost = ({ onSuccess }) => {
+const CreatePost = ({ onSuccess, joinedSpaces: mwebJoinedSpaces = [], onCommunityClick }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);
+  const [selectedSpaceId, setSelectedSpaceId] = useState("");
+  const [images, setImages] = useState([]); // [{ file, preview }]
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
+  const [createPost, { isLoading: isSubmitting }] = useCreateCommunityPostMutation();
+  const [getS3SignedUrl] = useGetS3SignedUrlMutation();
+  const { data: spacesData } = useGetCommunitySpacesQuery({ page: 1, limit: 50 });
+  const spaces = spacesData?.spaces || [];
+  const joinedSpaces = spaces.filter((s) => s.isJoined);
+
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(URL.createObjectURL(file));
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    const remaining = MAX_IMAGES - images.length;
+    if (remaining <= 0) {
+      Toast.error(`Maximum ${MAX_IMAGES} images allowed`);
+      return;
     }
+
+    const newFiles = files.slice(0, remaining);
+    const newImages = newFiles.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setImages((prev) => [...prev, ...newImages]);
+
+    // Reset input so same file can be selected again
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleSubmit = () => {
-    if (!title.trim() || !content.trim()) return;
-    setShowSuccess(true);
+  const removeImage = (index) => {
+    setImages((prev) => {
+      const updated = [...prev];
+      URL.revokeObjectURL(updated[index].preview);
+      updated.splice(index, 1);
+      return updated;
+    });
+  };
+
+  const uploadImagesToS3 = async () => {
+    const uploadedUrls = [];
+
+    for (const img of images) {
+      const ext = img.file.name?.split(".").pop();
+      const fileType = ext ? `application/${ext}` : img.file.type;
+
+      const signedUrl = await getS3SignedUrl({ fileType }).unwrap();
+      const uploadUrl = signedUrl.uploadUrl;
+      const fileUrl = uploadUrl.split("?")[0];
+
+      try {
+        const res = await fetch(uploadUrl, {
+          method: "PUT",
+          body: img.file,
+        });
+
+        if (res.ok) {
+          uploadedUrls.push(fileUrl);
+        }
+      } catch {
+        // S3 CORS may block from localhost — skip failed uploads
+        console.warn("Image upload failed (CORS), skipping:", fileUrl);
+      }
+    }
+
+    return uploadedUrls;
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedSpaceId) {
+      Toast.error("Please select a community");
+      return;
+    }
+    if (!title.trim()) {
+      Toast.error("Title is required");
+      return;
+    }
+    if (!content.trim() || content.trim().length < 20) {
+      Toast.error("Post body must be at least 20 characters");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+
+      // Upload images to S3 first
+      let imageUrls = [];
+      if (images.length > 0) {
+        imageUrls = await uploadImagesToS3();
+      }
+
+      const postData = {
+        title: title.trim(),
+        body: content.trim(),
+        spaceId: selectedSpaceId,
+        images: imageUrls,
+        linkedProducts: [],
+      };
+
+      await createPost(postData).unwrap();
+      setShowSuccess(true);
+    } catch (error) {
+      const message = error?.data?.message || "Failed to create post";
+      Toast.error(message);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleCancel = () => {
     setTitle("");
     setContent("");
-    setImage(null);
+    setSelectedSpaceId("");
+    images.forEach((img) => URL.revokeObjectURL(img.preview));
+    setImages([]);
   };
 
   const handleSuccessClose = () => {
     setShowSuccess(false);
-    setTitle("");
-    setContent("");
-    setImage(null);
+    handleCancel();
     if (onSuccess) onSuccess();
   };
+
+  const isBusy = isSubmitting || isUploading;
 
   return (
     <div className={styles.createPostLayout}>
       <div className={styles.createPostMain}>
+        {/* Your Community - Mobile Only */}
+        <MwebCommunities joinedSpaces={mwebJoinedSpaces} onCommunityClick={onCommunityClick} />
+
         <h2 className={styles.sectionHeading}>
           <span className={styles.headingBar} />
           CREATE POST
         </h2>
 
         <div className={styles.createPostForm}>
+          {/* Community Selector */}
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
+              Community <span className={styles.required}>*</span>
+            </label>
+            <select
+              value={selectedSpaceId}
+              onChange={(e) => setSelectedSpaceId(e.target.value)}
+              className={styles.formInput}
+            >
+              <option value="">Select a community</option>
+              {joinedSpaces.map((space) => (
+                <option key={space._id} value={space._id}>
+                  {space.icon} {space.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Title */}
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
@@ -59,10 +189,11 @@ const CreatePost = ({ onSuccess }) => {
             </label>
             <input
               type="text"
-              placeholder="Give your post a title"
+              placeholder="Give your post a title (max 200 chars)"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => setTitle(e.target.value.slice(0, 200))}
               className={styles.formInput}
+              maxLength={200}
             />
           </div>
 
@@ -72,32 +203,49 @@ const CreatePost = ({ onSuccess }) => {
               Share your thoughts <span className={styles.required}>*</span>
             </label>
             <textarea
-              placeholder="What's on your mind? Share your spiritual journey, insights, questions..."
+              placeholder="What's on your mind? Share your spiritual journey, insights, questions... (min 20 chars)"
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => setContent(e.target.value.slice(0, 5000))}
               className={styles.formTextarea}
               rows={5}
+              maxLength={5000}
             />
-            <div className={styles.textareaFooter}>
-              <button
-                className={styles.imageUploadBtn}
-                onClick={() => fileInputRef.current?.click()}
-                type="button"
-              >
-                <FiImage size={20} />
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                hidden
-              />
-            </div>
-            {image && (
-              <div className={styles.imagePreview}>
-                <img src={image} alt="Preview" />
-                <button onClick={() => setImage(null)} className={styles.removeImage} type="button">×</button>
+          </div>
+
+          {/* Upload Images */}
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>Upload Images</label>
+            <button
+              className={styles.imageUploadLabel}
+              onClick={() => fileInputRef.current?.click()}
+              type="button"
+              disabled={images.length >= MAX_IMAGES}
+            >
+              <FiImage size={18} />
+              <span>{images.length >= MAX_IMAGES ? "Maximum 5 images reached" : "Choose images (max 5)"}</span>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageUpload}
+              hidden
+            />
+            {images.length > 0 && (
+              <div className={styles.imagePreviewGrid}>
+                {images.map((img, index) => (
+                  <div key={index} className={styles.imagePreviewItem}>
+                    <img src={img.preview} alt={`Preview ${index + 1}`} />
+                    <button
+                      onClick={() => removeImage(index)}
+                      className={styles.removeImage}
+                      type="button"
+                    >
+                      <FiX size={14} />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -105,7 +253,7 @@ const CreatePost = ({ onSuccess }) => {
           {/* Moderation Notice */}
           <div className={styles.moderationNotice}>
             <span className={styles.infoIcon}>ℹ️</span>
-            <span>Your post will be reviewed by our moderation team lorem ipsum is simply dummy text.</span>
+            <span>Your post will be reviewed by AI moderation before publishing.</span>
           </div>
 
           {/* Actions */}
@@ -116,10 +264,10 @@ const CreatePost = ({ onSuccess }) => {
             <button
               className={styles.submitBtn}
               onClick={handleSubmit}
-              disabled={!title.trim() || !content.trim()}
+              disabled={!selectedSpaceId || !title.trim() || content.trim().length < 20 || isBusy}
               type="button"
             >
-              Post
+              {isBusy ? "Posting..." : "Post"}
             </button>
           </div>
         </div>
@@ -128,7 +276,11 @@ const CreatePost = ({ onSuccess }) => {
       {/* Guidelines Sidebar */}
       <aside className={styles.guidelinesSidebar}>
         <div className={styles.guidelinesCard}>
-          <div className={styles.guidelinesIcon}>💡</div>
+          <div className={styles.guidelinesIcon}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#D43400" stroke="none">
+              <path d="M9 21c0 .5.4 1 1 1h4c.6 0 1-.5 1-1v-1H9v1zm3-19C8.1 2 5 5.1 5 9c0 2.4 1.2 4.5 3 5.7V17c0 .5.4 1 1 1h6c.6 0 1-.5 1-1v-2.3c1.8-1.3 3-3.4 3-5.7 0-3.9-3.1-7-7-7z"/>
+            </svg>
+          </div>
           <h3 className={styles.guidelinesTitle}>Things to consider before posting</h3>
           <ul className={styles.guidelinesList}>
             {POSTING_GUIDELINES.map((item, idx) => (

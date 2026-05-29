@@ -71,10 +71,17 @@ const AstroBirthForm = ({
             />
             {errors?.name && <p className={styles.error}>{errors.name}</p>}
 
-            {/* Mobile only: Select Profile below name */}
+            {/* Select Profile below name */}
             <button
               type="button"
               className={styles.selectProfileBtnMobile}
+              onClick={() => setShowProfileModal(true)}
+            >
+              Select Profile +
+            </button>
+            <button
+              type="button"
+              className={styles.selectProfileBtn}
               onClick={() => setShowProfileModal(true)}
             >
               Select Profile +
@@ -97,15 +104,6 @@ const AstroBirthForm = ({
             {errors?.gender && <p className={styles.error}>{errors.gender}</p>}
           </div>
         </div>
-
-        {/* Desktop only: Select Profile in original position */}
-        <button
-          type="button"
-          className={styles.selectProfileBtn}
-          onClick={() => setShowProfileModal(true)}
-        >
-          Select Profile +
-        </button>
 
         <div className={styles.formGrid}>
           {/* DOB */}

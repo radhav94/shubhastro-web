@@ -29,11 +29,27 @@ $mobile-screen-width: 500px;
   }
 .topLinkWrap{
     background-color: #ffffff31;
-    padding: 16px;
+    padding-block: 16px;
+    .topLinkDesktop{
+      display: block;
+      @media screen and (max-width: 768px) {
+        display: none;
+      }
+    }
+    .topLinkMobile{
+      display: none;
+      @media screen and (max-width: 768px) {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-inline: 16px;
+      }
+    }
     .topLink{
       max-width: 1440px;
       margin: 0 auto;
       padding-block: 3px;
+      padding-inline: 16px;
       span{
         text-transform: capitalize;
       }
@@ -42,6 +58,69 @@ $mobile-screen-width: 500px;
         color: #030303;
         letter-spacing: 0.4px;
       }
+    }
+    .accordionItem{
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      &:last-child{
+        border-bottom: none;
+      }
+    }
+    .accordionHeader{
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      // padding: 14px 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      text-transform: capitalize;
+      border-left: 3px solid #F75801;
+      padding-left: 12px;
+    }
+    .accordionIcon{
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    .accordionContent{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+      padding: 0 4px 14px 16px;
+      flex-direction: column;
+      a{
+        font-size: 0.8rem;
+        color: #030303;
+        letter-spacing: 0.4px;
+        text-decoration: none;
+        &:hover{
+          color: #F75801;
+        }
+      }
+    }
+    .accordionSection{
+      margin-bottom: 10px;
+    }
+    .accordionSubtitle{
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #F75801;
+      margin: 0 0 6px;
+      text-transform: capitalize;
+    }
+    .accordionLinks{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 0;
+      align-items: center;
+    }
+    .accordionSeparator{
+      color: #000;
+      font-size: 0.8rem;
     }
 }
   .topBarContainer {

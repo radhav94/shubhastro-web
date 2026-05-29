@@ -9,11 +9,15 @@ import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliSe
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { setForm } from "../../../../redux/kundliform/formSlice";
+import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 
 import { PanchangInputCard } from "../../../../component";
 import PanchangCards from "../../../../component/UI/cards/PanchangCards";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import BasicContent from "../../kundli/BasicContent/BasicContent";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
+import ProfileSelector from "../../kundli/components/ProfileSelector";
+import { ProfileManager } from "../../../../component/UI/Profile";
 // import AccordionSection from "../../../../component/UI/AccordionSection/AccordionSection";
 
 // Icons
@@ -41,6 +45,10 @@ const TodayPanchang = () => {
   const dispatch = useDispatch();
   const pad = (num) => String(num).padStart(2, "0");
   const userLocation = useUserLocation();
+
+  // Profile selector state
+  const [showSelectProfile, setShowSelectProfile] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState(null);
 
   
   // Get initial date and location from navigation state OR URL query params
@@ -84,9 +92,28 @@ const TodayPanchang = () => {
   });
   const profiles = kundliProfilesData?.data || [];
   const selfProfile = profiles.find((p) => p.relation?.toLowerCase() === "self") || profiles[0];
-  const activeProfile = selectedKundli?._id
-    ? profiles.find((p) => p._id === selectedKundli._id) || selfProfile
-    : selfProfile;
+  const activeProfile = selectedProfile
+    ? profiles.find((p) => p._id === selectedProfile._id) || selectedProfile
+    : selectedKundli?._id
+      ? profiles.find((p) => p._id === selectedKundli._id) || selfProfile
+      : selfProfile;
+
+  // Auto-select first profile
+  useEffect(() => {
+    if (profiles.length && !selectedProfile) {
+      const initial = selectedKundli?._id
+        ? profiles.find((p) => p._id === selectedKundli._id) || selfProfile
+        : selfProfile;
+      if (initial) setSelectedProfile(initial);
+    }
+  }, [profiles.length]);
+
+  // Handle profile selection from modal
+  const handleSelectProfile = (profile) => {
+    setSelectedProfile(profile);
+    setShowSelectProfile(false);
+    dispatch(setSelectedKundli(profile));
+  };
 
   // Sync active profile to Redux form state so BasicContent can read it
   useEffect(() => {
@@ -484,6 +511,32 @@ const TodayPanchang = () => {
 
   return (
     <>
+      <BackButton />
+
+      {/* Profile Selector - shown for logged-in users */}
+      {isLoggedIn && (
+        <ProfileSelector
+          selectedProfile={activeProfile}
+          onSelectClick={() => setShowSelectProfile(true)}
+          onEditClick={() => {}}
+        />
+      )}
+
+      {/* Profile Manager Modal */}
+      <ProfileManager
+        isOpen={showSelectProfile}
+        onClose={() => setShowSelectProfile(false)}
+        onProfileSelect={handleSelectProfile}
+        selectedProfileId={activeProfile?._id}
+        title="Select Profile"
+        enabledOperations={{
+          list: true,
+          add: true,
+          edit: true,
+          delete: true,
+        }}
+      />
+
       <PrimaryLoader isLoading={isLoading} />
 
       {isSuccess && (

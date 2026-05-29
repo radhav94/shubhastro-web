@@ -119,7 +119,7 @@ const ChatWindow = () => {
     switchType,
     handleAudioCall,
     handleVideoCall,
-    handleCancelCall
+    handleCancelCall,
   } = useChatSocket({
     userId,
     astrologerId,

@@ -5,7 +5,6 @@ import SmileIcon from '../../../../assets/icons/Smile.png';
 import EnergyLevelsIcon from '../../../../assets/icons/energylevels.png';
 import ChakraIcon from '../../../../assets/icons/chakra.png';
 import AuraSizeIcon from '../../../../assets/icons/aurasize.png';
-import Footer from '../../../../layouts/Footer';
 
 const AuraLanding = () => {
   const navigate = useNavigate();
@@ -47,7 +46,7 @@ const AuraLanding = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
+        <button className={styles.backButton} onClick={() => navigate('/ai-wow')}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -81,7 +80,6 @@ const AuraLanding = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

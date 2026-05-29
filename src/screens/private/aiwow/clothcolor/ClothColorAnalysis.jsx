@@ -6,6 +6,7 @@ import { analyzeClothColor } from '../../../../services/appServices/aiWowService
 import { setClothColorResult, clearClothColorData } from '../../../../redux/aiwow/aiwowSlice';
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import BackButton from '../../../../component/UI/BackButton/BackButton';
 
 const ClothColorAnalysis = () => {
   const navigate = useNavigate();
@@ -139,6 +140,7 @@ const ClothColorAnalysis = () => {
 
   return (
     <div className={styles.container}>
+      <BackButton />
       <div className={styles.content}>
         <div className={styles.leftSection}>
           <h2 className={styles.title}>

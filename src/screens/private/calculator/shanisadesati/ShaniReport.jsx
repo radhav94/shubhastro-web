@@ -143,9 +143,10 @@ const ShaniReport = () => {
         </button>
       </div>
 
+      <div className={styles.connectCardWrap}>
+        <ConnectCard />
+      </div>
     </div>
-
-      <ConnectCard />
     </>
   );
 };

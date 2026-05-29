@@ -12,6 +12,7 @@ import { useProfileManager } from "../../private/kundli/hooks/useProfileManager"
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
+import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
@@ -97,7 +98,8 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
               <div className={styles.wowGlow} />
               <div className={styles.wowHeader}>
                 <div className={styles.titleWithBottomDevider}>
-                  <h4 className={styles.wowTitle}>{wowSuiteItems.title}</h4>
+                  {/* <h4 className={styles.wowTitle}>{wowSuiteItems.title}</h4> */}
+                  <h4 className={styles.wowTitle}>Your AI Suite</h4>
                   <div className={styles.BottomDevider}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
                       <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
@@ -357,7 +359,7 @@ const HomeV2 = () => {
     if (!item.slug) return;
     if (item.slug === "ar-vastu-scanner") { setShowMobileAppModal(true); return; }
     const path = ["ai-palmistry-scanner","astro-face-reading","signature-analysis","clothes-colour-analysis","gemstone-authenticity","aura-photography"].includes(item.slug) ? `/${item.slug}` : `/aiwow/${item.slug}`;
-    if (!["agentic-calendar"].includes(item.slug)) {
+    if (!["muhurat-calendar"].includes(item.slug)) {
       const token = localStorage.getItem("shubhtalk_customer_token");
       if (!token) { localStorage.setItem("shubhtalk_redirect_after_login", path); window.location.href = "/login?skip=welcome"; return; }
     }
@@ -444,6 +446,12 @@ const HomeV2 = () => {
         <EmergencySessionModal isOpen={showEmergencyModal} onClose={() => setShowEmergencyModal(false)} astrologer={selectedAstrologer} onChatNow={(a) => handleConnectClick(a, "chat", true)} onCallNow={(a) => handleConnectClick(a, "audio", true)} />
         <MobileAppModal isOpen={showMobileAppModal} onClose={() => setShowMobileAppModal(false)} />
       </Suspense>
+      <RechargeModal
+        isOpen={hookOpenModal.recharge}
+        onClose={() => hookSetOpenModal((prev) => ({ ...prev, recharge: false }))}
+        astrologer={hookSelectedAstrologer}
+        connectionType={pendingConnectionType || "chat"}
+      />
       <PanditAIBubble />
       <PanditAIVoiceBubble />
     </>

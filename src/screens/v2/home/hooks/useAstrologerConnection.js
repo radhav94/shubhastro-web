@@ -14,6 +14,8 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
   const [connectionType, setConnectionType] = useState(null);
   const [localSelectedProfile, setLocalSelectedProfile] = useState(selectedKundli);
 
+  // Note: activeAstroRef kept for backward compat with callers using setSelectedAstrologer,
+  // but accepted handlers now use astrologer data from the socket event payload directly.
   const activeAstroRef = useRef(null);
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
@@ -167,24 +169,26 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       // Cancel all other pending connections — this one was accepted
       removePendingConnection(roomId);
 
-      // Use external ref if provided, otherwise use local ref
-      const astro = externalAstroRef?.current || activeAstroRef.current;
+      // Use astrologer data from event payload directly
+      const astro = data?.astrologer || {};
       const kundliId = localSelectedProfile;
-      console.log("[NormalFlow]   → astro from ref:", astro?._id, astro?.firstName);
+      console.log("[NormalFlow]   → astro from payload:", astro?._id, astro?.firstName);
       console.log("[NormalFlow]   → kundliId:", kundliId);
 
       try {
         if (!roomId) throw new Error("Room ID missing");
 
+        const astroName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
+
         setActiveChat({
           roomId,
           chatRoomId: roomId,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: astroName || "Astrologer",
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
           kundliId,
-          astrologerName: data?.astrologer?.firstName || "",
+          astrologerName: astro?.firstName || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
         });
@@ -195,12 +199,12 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           state: {
             userId: userIdLocal,
             astrologerId,
-            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+            fullName: astroName,
             roomId,
             isUserSide: true,
             kundliId,
-            astrologerName: data?.astrologer?.firstName || "",
-            astroID: data?.astrologer?.astrologer_ID,
+            astrologerName: astro?.firstName || "",
+            astroID: astro?.astrologer_ID,
           },
         });
       } catch (e) {
@@ -254,21 +258,15 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       // Cancel all other pending connections — this one was accepted
       removePendingConnection(roomId);
 
-      // Use external ref if provided, otherwise use local ref
-      const astro = externalAstroRef?.current || activeAstroRef.current;
+      // Use astrologer data from event payload directly
+      const astro = rest?.astrologer || {};
       const kundliId = localSelectedProfile;
-      console.log("[NormalFlow]   → astro from ref:", astro, astro?._id, astro?.firstName);
+      console.log("[NormalFlow]   → astro from payload:", astro?._id, astro?.firstName);
       console.log("[NormalFlow]   → kundliId:", kundliId);
 
       try {
-        if (!astro) {
-          console.error("[NormalFlow] ❌ Astrologer data missing in ref");
-          Toast.error("Astrologer data missing");
-          return;
-        }
-
         // Use astrologerId from socket response as primary, fallback to astro._id
-        const astroId = astrologerId || astro._id;
+        const astroId = astrologerId || astro?._id;
         
         if (!astroId) {
           console.error("[NormalFlow] ❌ Astrologer ID missing");
@@ -276,18 +274,21 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           return;
         }
 
+        const astroName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
+
         const callPayload = {
           roomId,
           channelName,
           agoraToken: token,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: astroName || "Astrologer",
           isUserSide: true,
           callType: type,
           userId: userIdLocal,
           astrologerId: astroId,
           kundliId,
-          astrologerID: astro?.astrologerID,
+          astrologerID: astro?.astrologer_ID,
           remainingTime,
+          experience: astro?.experience,
           isEmergency: rest?.isEmergency || false,
         };
         console.log("[NormalFlow] 📦 Setting activeCall:", JSON.stringify({ ...callPayload, agoraToken: "[redacted]" }));

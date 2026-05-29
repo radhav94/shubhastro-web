@@ -9,6 +9,7 @@ import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePick
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "destiny_calc";
 const initialFormState = { name: "", dob: "" };
@@ -63,7 +64,9 @@ const DestinyCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Destiny Number Calculator</h1>
         <p>Discover your life's purpose through numerology</p>
@@ -124,6 +127,7 @@ const DestinyCalc = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    </>
   );
 };
 

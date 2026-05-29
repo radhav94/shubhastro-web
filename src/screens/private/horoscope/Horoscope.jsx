@@ -29,6 +29,19 @@ import relationImg from "../../../assets/images/relation.png";
 import statusImg from "../../../assets/images/status.png";
 import physiqueImg from "../../../assets/images/physique.png";
 
+// Helper to determine if text on a colored background should be dark
+const isLightColor = (color) => {
+  if (!color) return false;
+  let hex = color.replace('#', '');
+  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+  if (hex.length !== 6) return true; // fallback: treat named colors as light to be safe
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6;
+};
+
 const HoroscopeNew = () => {
   const navigate = useNavigate();
   const { sign } = useParams();
@@ -303,6 +316,12 @@ const HoroscopeNew = () => {
       newCategories = [...newCategories, ...dailyWeeklyCategories];
       console.log('Daily/Weekly Category IDs:', dailyWeeklyCategories.map(c => c.id));
     }
+    
+    // Remove "Total Score" category from all tabs
+    newCategories = newCategories.filter(c => {
+      const id = c.id.toLowerCase().replace(/[_\s]/g, '');
+      return id !== 'totalscore';
+    });
     
     setCategories(newCategories);
     
@@ -603,11 +622,11 @@ const HoroscopeNew = () => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <h2 className="content-title">
                 {currentContent.title}
-                {currentContent.score && !currentContent.isOverview && (
+                {/* {currentContent.score && !currentContent.isOverview && (
                   <span style={{ fontSize: '14px', color: 'orange', marginLeft: '8px' }}>
                     ({currentContent.score}/100)
                   </span>
-                )}
+                )} */}
               </h2>
               <TTSButton text={(() => {
                 const parts = [];
@@ -633,7 +652,7 @@ const HoroscopeNew = () => {
                   <strong>Lucky Color:</strong>{' '}
                   <span
                     style={{
-                      color: '#fff',
+                      color: isLightColor(currentContent.luckyColorCode || currentContent.luckyColor) ? '#333' : '#fff',
                       backgroundColor: currentContent.luckyColorCode || currentContent.luckyColor,
                       padding: '2px 8px',
                       borderRadius: '4px',
@@ -662,7 +681,7 @@ const HoroscopeNew = () => {
                       <strong>Lucky Color:</strong>{' '}
                       <span
                         style={{
-                          color: '#fff',
+                          color: isLightColor(currentContent.luckyColorCode || currentContent.luckyColor) ? '#333' : '#fff',
                           backgroundColor: currentContent.luckyColorCode || currentContent.luckyColor,
                           padding: '2px 8px',
                           borderRadius: '4px',

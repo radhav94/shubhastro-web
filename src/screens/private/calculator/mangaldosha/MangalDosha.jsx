@@ -10,6 +10,7 @@ import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePick
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "mangal_dosha";
 const initialFormState = {
@@ -95,7 +96,9 @@ const MangalDosha = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Mangal Dosha Calculator</h1>
         <p>Check if Mars is influencing your relationships</p>
@@ -140,6 +143,9 @@ const MangalDosha = () => {
             <button type="button" className={styles.selectProfileBtnMobile} onClick={() => setShowProfileModal(true)}>
               Select Profile +
             </button>
+            <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
+              Select Profile +
+            </button>
           </div>
           <div className={styles.field}>
             <label>Gender <span>*</span></label>
@@ -151,9 +157,6 @@ const MangalDosha = () => {
             {errors.gender && <p className={styles.err}>{errors.gender}</p>}
           </div>
         </div>
-        <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
-          Select Profile +
-        </button>
 
         <div className={styles.row}>
           <div className={styles.field}>
@@ -230,6 +233,7 @@ const MangalDosha = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    </>
   );
 };
 

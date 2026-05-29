@@ -37,6 +37,7 @@ import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
+import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
@@ -64,7 +65,7 @@ import {
 } from "../../../services/appServices/kundliServicesNew";
 import Pagination from "../../../component/pagination/Pagination";
 import { ProfileManager } from "../../../component/UI/Profile";
-import { registerUser } from "../../../services/appServices/authService";
+import { registerUser, updateUserProfile } from "../../../services/appServices/authService";
 import { useLogoutUserMutation } from "../../../redux/api/userSession/userSessionApi";
 import { useSelector } from "react-redux";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
@@ -80,7 +81,7 @@ const Profile = () => {
 
   // Get isRegister from Redux auth state
   const isRegister = useSelector((state) => state.auth.isRegister);
-  const userEmail = useSelector((state) => state.auth.email);
+  const userEmail = useSelector((state) => state.auth.email) || getUserFromStorage()?.email || "";
 
   const [activeTab, setActiveTab] = useState(() => {
     const navTab = navigationState.activeTab;
@@ -164,6 +165,7 @@ const Profile = () => {
   const {
     waitingList: callWaitingList,
     setWaitingList: setCallWaitingList,
+    activeCall,
     resetCallFlow,
     setActiveCallRoomId,
     setActiveCall,
@@ -184,6 +186,7 @@ const Profile = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEmailEditModal, setShowEmailEditModal] = useState(false);
   const [editEmailValue, setEditEmailValue] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [profileToEdit, setProfileToEdit] = useState(null);
   const [profileToDelete, setProfileToDelete] = useState(null);
 
@@ -855,12 +858,12 @@ const Profile = () => {
   // Handle connect button click
   const handleConnectClick = (astrologer) => {
     console.log("astrologer", astrologer);
-    if (WaitingList || callWaitingList) {
-      Toast.error(
-        "You are already waiting for an astrologer. Please cancel the current request first.",
-      );
-      return;
-    }
+    // if (WaitingList || callWaitingList) {
+    //   Toast.error(
+    //     "You are already waiting for an astrologer. Please cancel the current request first.",
+    //   );
+    //   return;
+    // }
 
     setSelectedAstrologerId(astrologer._id);
     setSelectedAstrologer(astrologer);
@@ -1286,9 +1289,9 @@ const Profile = () => {
           </div>
         </div>
 
-        <button className={styles.logoutButton} onClick={handleLogout} title="Logout">
+        {/* <button className={styles.logoutButton} onClick={handleLogout} title="Logout">
           <LogOut size={20} />
-        </button>
+        </button> */}
       </div>
 
       {/* Zodiac Cards */}
@@ -1405,6 +1408,7 @@ const Profile = () => {
           className={styles.profileLink}
           onClick={() => {
             setEditEmailValue(userEmail || "");
+            setEmailError("");
             setShowEmailEditModal(true);
           }}
           role="button"
@@ -1412,6 +1416,7 @@ const Profile = () => {
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               setEditEmailValue(userEmail || "");
+              setEmailError("");
               setShowEmailEditModal(true);
             }
           }}
@@ -1483,7 +1488,7 @@ const Profile = () => {
 
                     <div className={styles.profileCardContent}>
                       <div className={styles.profileCardHeader}>
-                        <div className={styles.badge}>{kundli?.relation}</div>
+                        {kundli?.relation && <div className={styles.badge}>{kundli?.relation}</div>}
                         <div className={styles.profileActions}>
                           <button
                             className={styles.iconButton}
@@ -2148,6 +2153,13 @@ const Profile = () => {
         }}
       />
 
+      {/* Recharge Modal for insufficient balance */}
+      <RechargeModal
+        isOpen={hookOpenModal.recharge}
+        onClose={() => hookSetOpenModal((prev) => ({ ...prev, recharge: false }))}
+        astrologer={selectedAstrologer}
+      />
+
       {/* Add Profile Modal */}
       <AddProfileModal
         isOpen={showAddProfileModal}
@@ -2187,28 +2199,44 @@ const Profile = () => {
               <h3 className={styles.emailModalTitle}>Update Email</h3>
               <button className={styles.emailModalClose} onClick={() => setShowEmailEditModal(false)}>✕</button>
             </div>
-            <label className={styles.emailModalLabel}>Email ID</label>
+            <label className={styles.emailModalLabel}>Email ID <span style={{ color: "red" }}>*</span></label>
             <input
               type="email"
               value={editEmailValue}
-              onChange={(e) => setEditEmailValue(e.target.value)}
+              onChange={(e) => { setEditEmailValue(e.target.value); setEmailError(""); }}
               placeholder="Enter your email address"
               className={styles.emailModalInput}
+              style={emailError ? { borderColor: "red", marginBottom: "0.25rem" } : {}}
             />
+            {emailError && <p style={{ color: "red", fontSize: "0.75rem", margin: "0 0 0.5rem 0" }}>{emailError}</p>}
             <p className={styles.emailModalDesc}>
               Update email ID to receive important notifications and account updates.
             </p>
             <button
               className={styles.emailModalBtn}
-              onClick={() => {
+              onClick={async () => {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (editEmailValue && !emailRegex.test(editEmailValue)) {
-                  Toast.error("Please enter a valid email address");
+                if (!editEmailValue.trim()) {
+                  setEmailError("Please enter an email address");
                   return;
                 }
-                dispatch(setEmail(editEmailValue || null));
-                setShowEmailEditModal(false);
-                Toast.success("Email updated successfully");
+                if (!emailRegex.test(editEmailValue)) {
+                  setEmailError("Please enter a valid email address");
+                  return;
+                }
+                try {
+                  await updateUserProfile({ email: editEmailValue });
+                  dispatch(setEmail(editEmailValue));
+                  // Update localStorage so email persists across sessions
+                  const stored = JSON.parse(localStorage.getItem("shubhtalk_user") || "{}");
+                  stored.email = editEmailValue;
+                  localStorage.setItem("shubhtalk_user", JSON.stringify(stored));
+                  setShowEmailEditModal(false);
+                  setEmailError("");
+                  Toast.success("Email updated successfully");
+                } catch (err) {
+                  setEmailError(err?.response?.data?.message || "Failed to update email");
+                }
               }}
             >
               Update Email

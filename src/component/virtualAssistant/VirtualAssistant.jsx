@@ -18,7 +18,7 @@ import IframeModal from "../../screens/private/home/components/chats/IframeModal
 import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 import { useFileSelector } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
 
-const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen }) => {
+const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onConnect }) => {
   const [text, setText] = useState("");
   const [preview, setPreview] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
@@ -46,7 +46,10 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen }) =
     sendKundli,
     retryMessage,
     messagesEndRef,
+    assistantUsage,
   } = useVirtualAssistant({ astrologerId, isOpen });
+
+  const isLimitReached = assistantUsage && assistantUsage.remaining <= 0;
 
   const handleSend = useCallback(() => {
     if (previewFile) {
@@ -352,7 +355,21 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen }) =
             </div>
           )}
 
-          {/* Input */}
+          {/* Assistant Usage Info */}
+          {assistantUsage && (
+            <div className={styles.usageInfo}>
+              <span>{assistantUsage.remaining} out of {assistantUsage.total} messages remaining</span>
+            </div>
+          )}
+
+          {/* Input or Connect Button */}
+          {isLimitReached ? (
+            <div className={styles.connectBar}>
+              <button className={styles.connectBtn} onClick={() => { setIsOpen(false); onConnect(); }}>
+                Connect Now
+              </button>
+            </div>
+          ) : (
           <div className={styles.inputBar}>
             <button
               className={styles.attachBtn}
@@ -380,6 +397,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen }) =
               <IoSend size={18} />
             </button>
           </div>
+          )}
 
           {/* Attach File Modal */}
           {attachMenuOpen && (

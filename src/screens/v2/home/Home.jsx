@@ -9,7 +9,7 @@ import { useAstrologerConnection } from "./hooks/useAstrologerConnection";
 import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import ProfileModals from "../../private/kundli/components/ProfileModals";
-import BottomNavigation from "./components/BottomNavigation";
+
 import { renderSection, sortSectionsByOrder } from "./utils/sectionMapper";
 import styles from "./Home.module.scss";
 import {ProfileManager} from "../../../component/UI/Profile";
@@ -243,7 +243,7 @@ const Home = () => {
         </div>
       </main>
 
-      <BottomNavigation />
+
 
       <PanditAIBubble />
 

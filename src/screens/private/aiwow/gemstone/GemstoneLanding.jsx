@@ -5,7 +5,6 @@ import ClarityIcon from '../../../../assets/icons/clarity.png';
 import ColorGradingIcon from '../../../../assets/icons/colorgrading.png';
 import CutPrecisionIcon from '../../../../assets/icons/curprecision.png';
 import CaratIcon from '../../../../assets/icons/carat.png';
-import Footer from '../../../../layouts/Footer';
 
 const GemstoneLanding = () => {
   const navigate = useNavigate();
@@ -47,7 +46,7 @@ const GemstoneLanding = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
+        <button className={styles.backButton} onClick={() => navigate('/ai-wow')}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -81,7 +80,6 @@ const GemstoneLanding = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

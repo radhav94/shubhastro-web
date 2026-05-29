@@ -5,7 +5,6 @@ import StrokeIcon from '../../../../assets/icons/Stroke.png';
 import PressureIcon from '../../../../assets/icons/pressure.png';
 import LetterIcon from '../../../../assets/icons/letter.png';
 import SignatureSizeIcon from '../../../../assets/icons/signauresize.png';
-import Footer from '../../../../layouts/Footer';
 
 const SignatureLanding = () => {
   const navigate = useNavigate();
@@ -47,7 +46,7 @@ const SignatureLanding = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <button className={styles.backButton} onClick={() => navigate('/ai-wow')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -81,7 +80,6 @@ const SignatureLanding = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styles from "./DebtsSection.module.scss";
-import useTTS from "./useTTS";
-import { Volume2, VolumeX, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import TTSButton from "../../../../component/UI/TTSButton";
 
 const DEBT_CATEGORIES = [
   { key: "selfDebts", label: "Self Debts", icon: "🪞" },
@@ -13,20 +13,17 @@ const DEBT_CATEGORIES = [
 
 const DebtCard = ({ category, data }) => {
   const [open, setOpen] = useState(false);
-  const { speak, stop, isSpeaking } = useTTS();
 
   if (!data || (!data.indications?.length && !data.events?.length && !data.remedies?.length)) {
     return null;
   }
 
-  const handleSpeak = (e) => {
-    e.stopPropagation();
-    if (isSpeaking) { stop(); return; }
+  const getTTSText = () => {
     let text = `${category.label}. `;
     if (data.indications?.length) text += "Indications: " + data.indications.join(". ") + ". ";
     if (data.events?.length) text += "Events: " + data.events.join(". ") + ". ";
     if (data.remedies?.length) text += "Remedies: " + data.remedies.join(". ");
-    speak(text);
+    return text;
   };
 
   return (
@@ -46,13 +43,8 @@ const DebtCard = ({ category, data }) => {
           )}
         </div>
         <div className={styles.cardHeaderRight}>
-          <span
-            className={styles.ttsBtn}
-            onClick={handleSpeak}
-            role="button"
-            aria-label={isSpeaking ? "Stop reading" : "Read aloud"}
-          >
-            {isSpeaking ? <VolumeX size={16} /> : <Volume2 size={16} />}
+          <span onClick={(e) => e.stopPropagation()}>
+            <TTSButton text={getTTSText()} size={16} />
           </span>
           <ChevronDown
             size={20}

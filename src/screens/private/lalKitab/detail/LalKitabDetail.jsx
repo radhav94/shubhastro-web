@@ -1,10 +1,12 @@
 import { useState, useCallback } from "react";
 import { useParams, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import toast from "react-hot-toast";
 import styles from "./LalKitabDetail.module.scss";
 import {
   useGetLalKitabChartQuery,
   useGetLalKitabPlanetDetailsQuery,
   useGetLalKitabDebtsQuery,
+  useLazyGetLalKitabPdfQuery,
 } from "../../../../redux/api/lalKitab/lalKitabApi";
 import ChartSection from "../components/ChartSection";
 import HousesGrid from "../components/HousesGrid";
@@ -76,18 +78,53 @@ const LalKitabDetail = () => {
   const summary = tevaData?.birthDetails || tevaData || chartData?.data?.summary || {};
 
   const isAnyLoading = planetLoading || debtsLoading || chartLoading;
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [triggerGetPdf] = useLazyGetLalKitabPdfQuery();
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      toast.loading("Downloading PDF...", { id: "lalkitab-pdf" });
+      const result = await triggerGetPdf({ historyId: lalKitabId }).unwrap();
+      const pdfUrl = result?.data?.pdfUrl;
+      if (!pdfUrl) throw new Error("PDF URL not found");
+      const res = await fetch(pdfUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = "lal-kitab-report.pdf";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+      toast.success("PDF downloaded!", { id: "lalkitab-pdf" });
+    } catch {
+      toast.error("Failed to download PDF", { id: "lalkitab-pdf" });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className={styles.container}>
       {isAnyLoading && <PrimaryLoader />}
 
       <div className={styles.headerRow}>
-        <button className={styles.backButton} onClick={() => navigate("/laal-kitab")}>
+        <button className={styles.backButton} onClick={() => navigate(-1)}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
         <h1 className={styles.pageTitle}>Lal Kitab Teva</h1>
+        <button className={styles.downloadButton} onClick={handleDownload} disabled={isDownloading}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Download
+        </button>
       </div>
 
       <SummaryHeader summary={summary} />

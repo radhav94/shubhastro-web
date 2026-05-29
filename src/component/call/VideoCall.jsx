@@ -39,6 +39,7 @@ import CallIcon from "../../assets/chat/Call.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
 import SwitchWaitingPopup from "../UI/switchWaiting/SwitchWaitingPopup";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
+import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
@@ -142,7 +143,22 @@ const VideoCalling = ({ callData }) => {
     // Hide product notifications when mall is disabled
     if (data.type === "products" && !isShubhMallEnabled()) return;
     
-    const messageText = data.type === "gift" ? "🎁 Sent a gift" : data.type === "products" ? "💊 Suggested a remedy" : (data.message || data.response || "New message");
+    let messageText;
+    if (data.type === "gift") {
+      messageText = "🎁 Sent a gift";
+    } else if (data.type === "products") {
+      messageText = "💊 Suggested a remedy";
+    } else if (data.type === "attachment") {
+      messageText = "📎 " + getAttachmentDisplayName(data.message || data.response || "");
+    } else if (data.type === "image") {
+      messageText = "📷 Image";
+    } else if (data.type === "audio") {
+      messageText = "🎵 Audio";
+    } else if (data.type === "video") {
+      messageText = "🎬 Video";
+    } else {
+      messageText = data.message || data.response || "New message";
+    }
     const astroImage = lastRequestedAstro?.imageUrl || lastRequestedAstro?.aadharCardImgUrl || lastRequestedAstro?.panCardImgUrl || null;
     const astroGender = lastRequestedAstro?.gender || null;
     setChatNotification({
@@ -846,6 +862,25 @@ const VideoCalling = ({ callData }) => {
     voiceSocket.on("call:rejected", handleCallRejected);
     voiceSocket.on("call:reconnected", handleCallReconnected);
 
+    const handleSwitchRejected = (data) => {
+      console.log("🔄 call:switch_rejected in VideoCall", data);
+      isDowngradingToAudio.current = false;
+      setIsSwitching(false);
+      setWaitingList(null);
+      Toast.info(data?.message || "Switch request rejected, continuing current call.");
+    };
+
+    const handleSwitchCanceled = (data) => {
+      console.log("🔄 call:switch_canceled in VideoCall", data);
+      isDowngradingToAudio.current = false;
+      setIsSwitching(false);
+      setWaitingList(null);
+      Toast.info(data?.message || "Switch request canceled, continuing current call.");
+    };
+
+    voiceSocket.on("call:switch_rejected", handleSwitchRejected);
+    voiceSocket.on("call:switch_canceled", handleSwitchCanceled);
+
     return () => {
       voiceSocket.off("call:ended", handleCallEnded);
       voiceSocket.off("disconnect", handleDisconnect);
@@ -853,6 +888,8 @@ const VideoCalling = ({ callData }) => {
       voiceSocket.off("warning", handleWarning);
       voiceSocket.off("call:rejected", handleCallRejected);
       voiceSocket.off("call:reconnected", handleCallReconnected);
+      voiceSocket.off("call:switch_rejected", handleSwitchRejected);
+      voiceSocket.off("call:switch_canceled", handleSwitchCanceled);
       
       // Clear reconnect timer on unmount
       if (reconnectTimeoutRef.current) {

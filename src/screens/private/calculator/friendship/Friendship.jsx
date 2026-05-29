@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import FlamesForm from "../forms/FlamesForm";
 import styles from "./Friendship.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "friendship_calculator";
 
@@ -43,7 +44,9 @@ const Friendship = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Friendship Compatibility Calculator</h1>
         <p>Understanding True Bonds</p>
@@ -74,6 +77,7 @@ const Friendship = () => {
         }}
       />
     </div>
+    </>
   );
 };
 

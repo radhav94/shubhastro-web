@@ -11,6 +11,7 @@ import { useGetBalanceMutation } from "../../redux/api/wallet/walletApi";
 import { useCreateChatRoomMutation } from "../../redux/api/chatApi";
 import { useGetAllKundlisQuery } from "../../services/appServices/kundliServicesNew";
 import Toast from "../../component/toast";
+import { useMediaPermission } from "./useMediaPermission";
 
 export const useAstrologerConnect = () => {
   const navigate = useNavigate();
@@ -68,6 +69,7 @@ export const useAstrologerConnect = () => {
 
   const [getBalance] = useGetBalanceMutation();
   const [createChatRoom] = useCreateChatRoomMutation();
+  const { checkPermission } = useMediaPermission();
 
   /**
    * Selects the appropriate kundli from the user's profiles
@@ -209,6 +211,11 @@ export const useAstrologerConnect = () => {
     console.log("[NormalFlow]   → astrologer:", astro?._id, astro?.firstName, astro?.lastName);
     console.log("[NormalFlow]   → callType:", type);
     console.log("[NormalFlow]   → isEmergency:", isEmergency);
+
+    // Check media permissions before proceeding
+    const permType = type === "video" ? "both" : "microphone";
+    const hasPermission = await checkPermission(permType);
+    if (!hasPermission) return false;
     
     // Validate profile and kundli before proceeding
     if (!validateBeforeConnection()) {

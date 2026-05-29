@@ -1,7 +1,9 @@
 .chatWindow {
-  background-color: #f3f4f6;
+  // background-color: #f3f4f6;
   padding: 0px 20px 40px;
   min-height: 400px;
+  background-color: rgba($color: #ffffff, $alpha: 0.4);
+  backdrop-filter: blur(12px);
 
   @media (max-width: 639px) {
     padding: 20px 16px 40px;
@@ -18,8 +20,8 @@
 }
 
 .chatSession {
-  background-color: #fff;
-  padding: 1rem;
+  // background-color: #fff;
+  padding: 1rem 0rem;
   margin-bottom: 1rem;
   border-radius: 1rem;
 }
@@ -38,7 +40,7 @@
 }
 
 .divider {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1.5px solid #ffffff;
   margin-top: 8px;
 }
 
@@ -71,6 +73,7 @@
   border-bottom-right-radius: 4px;
   max-width: 72%;
   box-shadow: none;
+  border: 1px solid #fff;
 
   @media (max-width: 639px) {
     max-width: 80%;
@@ -107,8 +110,8 @@
 }
 
 .receivedBubble {
-  background-color: #ffffff;
-  border: 1px solid #d1d5db;
+  background-color: rgba($color: #ffffff, $alpha: 0.4);
+  border: 1px solid #ffffff;
   padding: 10px 14px;
   border-radius: 10px;
   border-bottom-left-radius: 4px;

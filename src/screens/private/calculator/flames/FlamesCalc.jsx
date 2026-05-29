@@ -6,6 +6,7 @@ import styles from "./FlamesCalc.module.scss";
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "flames_calculator";
 const initialFormState = { name1: "", name2: "" };
@@ -64,7 +65,9 @@ const FlamesCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>FLAMES Calculator</h1>
         <p>Discover the bond between you and your partner</p>
@@ -114,6 +117,7 @@ const FlamesCalc = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    </>
   );
 };
 

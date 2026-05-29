@@ -1,4 +1,4 @@
-import { forwardRef, useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "./DateTimePicker.module.scss";
@@ -26,6 +26,8 @@ const PERIODS = ["AM", "PM"];
 const TimePicker12 = ({ selected, onChange, disabled, placeholder }) => {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
+  const [manualInput, setManualInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
 
   // Derive display values from selected Date
   const hour = selected ? to12(selected.getHours()).hour : null;
@@ -64,6 +66,13 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder }) => {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
+  // Sync manualInput with displayValue when not typing
+  useEffect(() => {
+    if (!isTyping) {
+      setManualInput(displayValue);
+    }
+  }, [displayValue, isTyping]);
+
   const buildDate = useCallback(
     (h12, m, p) => {
       const d = selected ? new Date(selected) : new Date();
@@ -85,22 +94,155 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder }) => {
     else if (type === "minute") newM = value;
     else newP = value;
 
+    setIsTyping(false);
     onChange(buildDate(newH, newM, newP));
+  };
+
+  // Parse manual time input like "02:30 AM" or "2:30 pm"
+  const parseManualTime = (text) => {
+    const cleaned = text.trim().toUpperCase();
+    // Try HH:MM AM/PM format
+    const match12 = cleaned.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+    if (match12) {
+      const h = parseInt(match12[1], 10);
+      const m = parseInt(match12[2], 10);
+      const p = match12[3];
+      if (h >= 1 && h <= 12 && m >= 0 && m <= 59) {
+        return { hour: h, minute: m, period: p };
+      }
+    }
+    return null;
+  };
+
+  // Auto-format time input: only digits allowed, auto-inserts ":" and " AM/PM"
+  const handleManualChange = (e) => {
+    setIsTyping(true);
+    const raw = e.target.value;
+    
+    // Extract only digits from input
+    const digits = raw.replace(/[^0-9]/g, "");
+    const prevDigits = manualInput.replace(/[^0-9]/g, "");
+    
+    // Detect if user is deleting
+    const isDeleting = raw.length < manualInput.length;
+    
+    let limitedDigits;
+    if (isDeleting) {
+      // When deleting from a complete value (4 digits + AM/PM), remove last digit
+      if (prevDigits.length === 4 && digits.length === 4) {
+        limitedDigits = digits.slice(0, 3);
+      } else {
+        limitedDigits = digits.slice(0, 4);
+      }
+    } else {
+      limitedDigits = digits.slice(0, 4);
+    }
+    
+    // If clearing everything
+    if (limitedDigits.length === 0) {
+      setManualInput("");
+      return;
+    }
+    
+    // Validate hour and minute as user types (only when adding, not deleting)
+    if (!isDeleting) {
+      if (limitedDigits.length >= 1) {
+        const firstDigit = parseInt(limitedDigits[0], 10);
+        if (firstDigit > 1) return;
+      }
+      if (limitedDigits.length >= 2) {
+        const h = parseInt(limitedDigits.slice(0, 2), 10);
+        if (h < 1 || h > 12) return;
+      }
+      if (limitedDigits.length >= 3) {
+        const thirdDigit = parseInt(limitedDigits[2], 10);
+        if (thirdDigit > 5) return;
+      }
+      if (limitedDigits.length >= 4) {
+        const m = parseInt(limitedDigits.slice(2, 4), 10);
+        if (m > 59) return;
+      }
+    }
+    
+    // Build formatted string: HH:MM
+    let formatted = "";
+    for (let i = 0; i < limitedDigits.length; i++) {
+      if (i === 2) formatted += ":";
+      formatted += limitedDigits[i];
+    }
+    
+    // Once 4 digits are entered (HH:MM), auto-append AM/PM
+    if (limitedDigits.length === 4) {
+      const currentPeriod = period || "AM";
+      formatted += ` ${currentPeriod}`;
+    }
+    
+    setManualInput(formatted);
+  };
+
+  const handleManualBlur = () => {
+    setIsTyping(false);
+    if (!manualInput.trim()) {
+      setManualInput(displayValue);
+      return;
+    }
+    const parsed = parseManualTime(manualInput);
+    if (parsed) {
+      onChange(buildDate(parsed.hour, parsed.minute, parsed.period));
+    } else {
+      // Revert to current value if invalid
+      setManualInput(displayValue);
+    }
+  };
+
+  const handleManualKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.target.blur();
+    }
+    // Allow toggling AM/PM with 'a' or 'p' key when time is fully entered
+    if (manualInput.length >= 8) {
+      const key = e.key.toLowerCase();
+      if (key === "a" || key === "p") {
+        e.preventDefault();
+        const newPeriod = key === "a" ? "AM" : "PM";
+        const newInput = manualInput.replace(/AM|PM/, newPeriod);
+        setManualInput(newInput);
+        const parsed = parseManualTime(newInput);
+        if (parsed) {
+          onChange(buildDate(parsed.hour, parsed.minute, parsed.period));
+        }
+      }
+    }
   };
 
   return (
     <div className={styles.timePickerWrapper} ref={wrapperRef}>
-      <input
-        type="text"
-        readOnly
-        value={displayValue}
-        placeholder={placeholder || "Select time"}
-        disabled={disabled}
-        className={styles.input}
-        onClick={() => !disabled && setOpen((o) => !o)}
-        autoComplete="off"
-      />
-
+      <div className={styles.dateInputRow}>
+        <input
+          type="text"
+          value={isTyping ? manualInput : displayValue}
+          onChange={handleManualChange}
+          onBlur={handleManualBlur}
+          onKeyDown={handleManualKeyDown}
+          onFocus={() => setIsTyping(true)}
+          placeholder={placeholder || "HH:MM AM/PM"}
+          disabled={disabled}
+          className={styles.input}
+          autoComplete="off"
+        />
+        <button
+          type="button"
+          className={styles.calendarBtn}
+          disabled={disabled}
+          onClick={() => !disabled && setOpen((o) => !o)}
+          tabIndex={-1}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </button>
+      </div>
       {open && (
         <div className={styles.timeDropdown}>
           {/* Hours */}

@@ -6,6 +6,7 @@ import { analyzeSignature } from '../../../../services/appServices/aiWowService'
 import { setSignatureResult, clearSignatureData } from '../../../../redux/aiwow/aiwowSlice';
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import BackButton from '../../../../component/UI/BackButton/BackButton';
 
 const SignatureAnalysis = () => {
   const navigate = useNavigate();
@@ -137,6 +138,7 @@ const SignatureAnalysis = () => {
 
   return (
     <div className={styles.container}>
+      <BackButton />
       {/* <header className={styles.headerWrap}>
         <div className={styles.header}>
           <button className={styles.backButton} onClick={() => navigate('/ai-wow')}>

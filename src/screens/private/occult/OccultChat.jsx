@@ -10,6 +10,7 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { PATH } from "../../../utils/routes/Paths";
+import BackButton from "../../../component/UI/BackButton/BackButton";
 import aiImage from "../../../assets/images/Ai Image.png";
 
 const OccultChat = () => {
@@ -69,9 +70,10 @@ const OccultChat = () => {
         : { kundliId: selectedProfile._id };
 
       const result = await getOccultDasha(body).unwrap();
+      const historyId = result?.message?._id || result?._id;
       const data = result?.message?.message || result?.message || result;
       if (data) {
-        navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile: selectedProfile } });
+        navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile: selectedProfile, historyId } });
       } else {
         Toast.error("Failed to generate reading");
       }
@@ -89,6 +91,8 @@ const OccultChat = () => {
   ];
 
   return (
+    <>
+      <BackButton />
     <div className={styles.container}>
       {(isLoadingProfiles || isGenerating) && <PrimaryLoader />}
 
@@ -196,6 +200,7 @@ const OccultChat = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    </>
   );
 };
 

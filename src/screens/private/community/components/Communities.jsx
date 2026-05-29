@@ -1,108 +1,159 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FiUsers } from "react-icons/fi";
 import styles from "../Community.module.scss";
 import NewAstrologerCard from "../../../../component/UI/cards/newAstrologerCard/NewAstrologerCard";
-import defaultAvatar from "../../../../assets/images/community-avatar-1.png";
+import { useAstrologerConnect } from "../../../../utils/hooks/useAstrologerConnect";
+import {
+  useJoinCommunitySpaceMutation,
+  useLeaveCommunitySpaceMutation,
+} from "../../../../redux/api/community/communityApi";
+import Toast from "../../../../component/toast";
 
-const COMMUNITIES_GRID = [
-  { id: 1, name: "Tarot Circle", members: "45.2k", avatar: null, joined: false },
-  { id: 2, name: "Leo Tribe", members: "45.2k", avatar: null, joined: false },
-  { id: 3, name: "Leo Tribe", members: "45.2k", avatar: null, joined: true },
-  { id: 4, name: "Leo Tribe", members: "45.2k", avatar: null, joined: true },
-  { id: 5, name: "Tarot Circle", members: "45.2k", avatar: null, joined: false },
-  { id: 6, name: "Tarot Circle", members: "45.2k", avatar: null, joined: false },
-  { id: 7, name: "Leo Tribe", members: "45.2k", avatar: null, joined: false },
-  { id: 8, name: "Gemini Tribe", members: "45.2k", avatar: null, joined: false },
-  { id: 9, name: "Aries Tribe", members: "45.2k", avatar: null, joined: true },
-  { id: 10, name: "Libra Tribe", members: "45.2k", avatar: null, joined: false },
-  { id: 11, name: "Scorpio Tribe", members: "45.2k", avatar: null, joined: false },
-  { id: 12, name: "Pisces Tribe", members: "45.2k", avatar: null, joined: true },
-  { id: 13, name: "Virgo Tribe", members: "45.2k", avatar: null, joined: false },
-  { id: 14, name: "Capricorn Tribe", members: "45.2k", avatar: null, joined: true },
-  { id: 15, name: "Aquarius Tribe", members: "45.2k", avatar: null, joined: false },
-  { id: 16, name: "Sagittarius Tribe", members: "45.2k", avatar: null, joined: false },
-  { id: 17, name: "Cancer Tribe", members: "45.2k", avatar: null, joined: true },
-  { id: 18, name: "Taurus Tribe", members: "45.2k", avatar: null, joined: false },
-];
+const formatMemberCount = (count) => {
+  if (!count) return "0";
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
+  return count.toString();
+};
 
-const TOP_ASTROLOGERS = [
-  { _id: "1", firstName: "Pt. Ved", lastName: "Sharma", experience: 5, rating: 4.5, isActive: true, chatRate: 17, callRate: 35, profileImgUrl: defaultAvatar, gender: "male" },
-  { _id: "2", firstName: "Pt. Ved", lastName: "Sharma", experience: 5, rating: 4.5, isActive: true, chatRate: 17, callRate: 35, profileImgUrl: defaultAvatar, gender: "male" },
-  { _id: "3", firstName: "Acharya", lastName: "Lakshmi Kant", experience: 5, rating: 4.5, isActive: false, chatRate: 17, callRate: 35, profileImgUrl: defaultAvatar, gender: "male" },
-  { _id: "4", firstName: "Pt. Ved", lastName: "Sharma", experience: 5, rating: 4.5, isActive: false, chatRate: 17, callRate: 35, profileImgUrl: defaultAvatar, gender: "male" },
-  { _id: "5", firstName: "Pt. Ved", lastName: "Sharma", experience: 5, rating: 4.5, isActive: false, chatRate: 17, callRate: 35, profileImgUrl: defaultAvatar, gender: "male" },
-];
+const Communities = ({ onCommunityClick, topAstrologers = [], sectionContent = [], spaces = [] }) => {
+  const navigate = useNavigate();
+  const { handleChatStart, handleCallStart } = useAstrologerConnect();
+  const [joinSpace] = useJoinCommunitySpaceMutation();
+  const [leaveSpace] = useLeaveCommunitySpaceMutation();
 
-const Communities = ({ onCommunityClick }) => {
-  const [communities, setCommunities] = useState(COMMUNITIES_GRID);
+  // Local state to track join status optimistically
+  const [joinedMap, setJoinedMap] = useState({});
+  const [loadingMap, setLoadingMap] = useState({});
 
-  const handleJoin = (id, e) => {
-    e.stopPropagation();
-    setCommunities((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, joined: !c.joined } : c))
-    );
+  // Check which sections are enabled from API
+  const sections = useMemo(() => {
+    const map = {};
+    sectionContent.forEach((item) => {
+      if (item.status && item.publishStatus !== false) {
+        map[item.display_type] = item;
+      }
+    });
+    return map;
+  }, [sectionContent]);
+
+  const showCommunityList = !!sections["communities-list"];
+  const showTopAstrologers = !!sections["top-rated-astrologer"];
+
+  const isJoined = (space) => {
+    if (joinedMap[space.slug] !== undefined) return joinedMap[space.slug];
+    return space.isJoined;
   };
 
-  const handleConnect = () => {
-    // placeholder for connect action
+  const handleJoinLeave = async (space, e) => {
+    e.stopPropagation();
+    if (loadingMap[space.slug]) return;
+
+    setLoadingMap((prev) => ({ ...prev, [space.slug]: true }));
+
+    try {
+      if (isJoined(space)) {
+        await leaveSpace(space.slug).unwrap();
+        setJoinedMap((prev) => ({ ...prev, [space.slug]: false }));
+        Toast.success(`Left ${space.name}`);
+      } else {
+        await joinSpace(space.slug).unwrap();
+        setJoinedMap((prev) => ({ ...prev, [space.slug]: true }));
+        Toast.success(`Joined ${space.name}`);
+      }
+    } catch (error) {
+      const message = error?.data?.message || "Something went wrong";
+      Toast.error(message);
+    } finally {
+      setLoadingMap((prev) => ({ ...prev, [space.slug]: false }));
+    }
+  };
+
+  const handleConnect = async (astrologer, type, isEmergency = false) => {
+    if (type === "chat") {
+      await handleChatStart(astrologer, true, isEmergency);
+    } else {
+      await handleCallStart(astrologer, type || "audio", isEmergency);
+    }
   };
 
   return (
     <div className={styles.communitiesPage}>
       {/* Communities Grid */}
-      <h2 className={styles.sectionHeading}>
-        <span className={styles.headingBar} />
-        COMMUNITIES
-      </h2>
-
-      <div className={styles.communitiesGrid}>
-        {communities.map((community) => (
-          <div
-            key={community.id}
-            className={styles.communityCard}
-            onClick={() => onCommunityClick(community.id)}
-          >
-            <div className={styles.communityCardAvatar} />
-            <h4 className={styles.communityCardName}>{community.name}</h4>
-            <span className={styles.communityCardMembers}>
-              <FiUsers size={13} /> {community.members} members
-            </span>
-            <button
-              className={`${styles.joinBtn} ${community.joined ? styles.joined : ""}`}
-              onClick={(e) => handleJoin(community.id, e)}
-            >
-              {community.joined ? (
-                <>✓ Joined</>
-              ) : (
-                <>
-                  <FiUsers size={13} /> Join
-                </>
-              )}
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {/* Top Rated Astrologers */}
-      <div className={styles.topAstrologersSection}>
-        <div className={styles.topAstrologersHeader}>
+      {showCommunityList && (
+        <>
           <h2 className={styles.sectionHeading}>
             <span className={styles.headingBar} />
-            TOP RATED ASTROLOGER FOR YOU
+            {sections["communities-list"]?.display_title?.toUpperCase() || "COMMUNITIES"}
           </h2>
-          <button className={styles.viewAllBtn}>View all &gt;</button>
-        </div>
 
-        <div className={styles.astrologerSlider}>
-          {TOP_ASTROLOGERS.map((astrologer) => (
-            <NewAstrologerCard
-              key={astrologer._id}
-              astrologer={astrologer}
-              onConnect={handleConnect}
-            />
-          ))}
+          <div className={styles.communitiesGrid}>
+            {spaces.map((space) => (
+              <div
+                key={space._id}
+                className={styles.communityCard}
+                onClick={() => {
+                  if (isJoined(space)) {
+                    onCommunityClick(space.slug);
+                  } else {
+                    Toast.error("Join the community first");
+                  }
+                }}
+              >
+                {isJoined(space) && (
+                  <span className={styles.joinedBadge}>Joined</span>
+                )}
+                <div className={styles.communityCardAvatar}>
+                  {space.icon && (
+                    <span style={{ fontSize: 28 }}>
+                      {space.icon}
+                    </span>
+                  )}
+                </div>
+                <h4 className={styles.communityCardName}>{space.name}</h4>
+                <span className={styles.communityCardMembers}>
+                  <FiUsers size={13} /> {formatMemberCount(space.memberCount)} members
+                </span>
+                <button
+                  className={`${styles.joinBtn} ${isJoined(space) ? styles.leaveBtn : ""}`}
+                  disabled={loadingMap[space.slug]}
+                  onClick={(e) => handleJoinLeave(space, e)}
+                >
+                  {isJoined(space) ? "Leave" : "Join"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Top Rated Astrologers */}
+      {showTopAstrologers && topAstrologers.length > 0 && (
+        <div className={styles.topAstrologersSection}>
+          <div className={styles.topAstrologersHeader}>
+            <h2 className={styles.sectionHeading}>
+              <span className={styles.headingBar} />
+              {sections["top-rated-astrologer"]?.display_title?.toUpperCase() || "TOP RATED ASTROLOGER FOR YOU"}
+            </h2>
+            <button
+              className={styles.viewAllBtn}
+              onClick={() => navigate("/chat-to-astrologer")}
+            >
+              View all &gt;
+            </button>
+          </div>
+
+          <div className={styles.astrologerSlider}>
+            {topAstrologers.map((astrologer) => (
+              <NewAstrologerCard
+                key={astrologer._id}
+                astrologer={astrologer}
+                onConnect={handleConnect}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

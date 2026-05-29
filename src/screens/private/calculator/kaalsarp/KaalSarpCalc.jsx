@@ -10,6 +10,7 @@ import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePick
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "kaal_sarp";
 const initialFormState = {
@@ -78,7 +79,9 @@ const KaalSarpCalc = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <>
+      <BackButton />
+      <div className={styles.page}>
       <div className={styles.hero}>
         <h1>Kaal Sarp Dosh Calculator</h1>
         <p>Check if Rahu-Ketu axis is affecting your life</p>
@@ -102,6 +105,9 @@ const KaalSarpCalc = () => {
             <button type="button" className={styles.selectProfileBtnMobile} onClick={() => setShowProfileModal(true)}>
               Select Profile +
             </button>
+            <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
+              Select Profile +
+            </button>
           </div>
           <div className={styles.field}>
             <label>Gender <span>*</span></label>
@@ -113,9 +119,6 @@ const KaalSarpCalc = () => {
             {errors.gender && <p className={styles.err}>{errors.gender}</p>}
           </div>
         </div>
-        <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
-          Select Profile +
-        </button>
 
         <div className={styles.row}>
           <div className={styles.field}>
@@ -183,6 +186,7 @@ const KaalSarpCalc = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    </>
   );
 };
 

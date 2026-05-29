@@ -25,6 +25,7 @@ import WaitlistModal from "../../../../../component/UI/modal/waitlistModal/Waitl
 import Toast from "../../../../../component/toast";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
 import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
+import { useMediaPermission } from "../../../../../utils/hooks/useMediaPermission";
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
 import { PATH } from "../../../../../utils/routes/Paths";
@@ -267,6 +268,7 @@ const LiveView = (props) => {
   
   const [createChatRoom] = useCreateChatRoomMutation();
   const [getBalance] = useGetBalanceMutation();
+  const { checkPermission } = useMediaPermission();
   const { refreshWallet } = useWalletBalance();
 
   // Follow/unfollow astrologer
@@ -528,6 +530,10 @@ const LiveView = (props) => {
 
   // Handle call initiation - uses real call flow (same as homepage astrologer listing)
   const handleDirectVoiceCall = async () => {
+    // Check mic permission first
+    const hasMic = await checkPermission("microphone");
+    if (!hasMic) return;
+
     // 1. Check login
     if (!token || !userIdLocal) {
       Toast.error("Please login to continue");
@@ -625,7 +631,12 @@ const LiveView = (props) => {
   };
 
   // Handle call initiation from popup (with choice)
-  const handleCallRequest = (type) => {
+  const handleCallRequest = async (type) => {
+    // Check permissions based on call type
+    const permType = type === "video" ? "both" : "microphone";
+    const hasPermission = await checkPermission(permType);
+    if (!hasPermission) return;
+
     if (!token) {
       Toast.error("Please login to make a call");
       navigate("/login");

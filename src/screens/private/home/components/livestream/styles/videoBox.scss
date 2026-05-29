@@ -37,7 +37,7 @@
   justify-content: flex-start;
   padding: 20px;
   padding-left: 60px;
-  background: rgba(0, 0, 0, 0.8);
+  // background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 100;
@@ -45,25 +45,27 @@
 
 .live-back-button {
   position: absolute;
-  left: 6px;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 10px;
+  top: 10px;
+  // transform: translateY(-50%);
   background: transparent;
   border: none;
   width: 32px;
   height: 32px;
+  border-radius: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: #ef5350;
   cursor: pointer;
+  border: 1px solid #ef5350;
 
   svg {
     width: 32px;
     height: 32px;
-    stroke: #fff;
-    stroke-width: 3;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    stroke: #ef5350;
+    stroke-width: 2;
+    // filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   }
 }
 
@@ -242,15 +244,16 @@
     height: 36px;
     min-width: 36px;
     border-radius: 50%;
-    background: rgba(20, 20, 20, 0.85);
-    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    background: rgba(20, 20, 20, 0);
+    border: 1px solid #ef5350;
     flex-shrink: 0;
     margin-right: 8px;
 
     svg {
       width: 20px;
       height: 20px;
-      stroke-width: 2.5;
+      stroke: #ef5350;
+      stroke-width: 2;
     }
   }
 }
@@ -270,15 +273,17 @@
     height: 36px;
     min-width: 36px;
     border-radius: 50%;
-    background: rgba(20, 20, 20, 0.85);
-    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid #ef5350;
+    // background: rgba(20, 20, 20, 0.85);
+    // border: 1.5px solid rgba(255, 255, 255, 0.25);
     flex-shrink: 0;
     margin-right: 8px;
 
     svg {
       width: 20px;
       height: 20px;
-      stroke-width: 2.5;
+      stroke: #ef5350;
+      stroke-width: 2;
     }
   }
 }
@@ -1875,25 +1880,25 @@
 .video-box.camera-off {
   background: #fdf0e4;
 
-  .top-bar {
-    > .live-back-button {
-      background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
-      border-color: transparent;
+  // .top-bar {
+  //   > .live-back-button {
+  //     background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  //     border-color: transparent;
 
-      svg {
-        stroke: #fff;
-      }
-    }
-  }
+  //     svg {
+  //       stroke: #fff;
+  //     }
+  //   }
+  // }
 
-  .top-bar-left > .live-back-button {
-    background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
-    border-color: transparent;
+  // .top-bar-left > .live-back-button {
+  //   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  //   border-color: transparent;
 
-    svg {
-      stroke: #fff;
-    }
-  }
+  //   svg {
+  //     stroke: #fff;
+  //   }
+  // }
 
   .host-name {
     color: #1a1a1a;

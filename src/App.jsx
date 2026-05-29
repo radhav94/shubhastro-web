@@ -16,6 +16,7 @@ import { useEffect, Suspense, useMemo } from "react";
 import { CallProvider } from "./context/CallContext";
 import { ChatProvider } from "./context/ChatContext";
 import { WaitingQueueProvider } from "./context/WaitingQueueContext";
+import PermissionModalProvider from "./component/UI/modal/PermissionModal/PermissionModalProvider";
 import ErrorBoundary from "./component/ErrorBoundary";
 import RouteErrorBoundary from "./component/RouteErrorBoundary";
 import PrimaryLoader from "./component/UI/PrimaryLoader";
@@ -165,7 +166,8 @@ function App() {
             if (
               child.path === "/shop/:slug/:productSlug" ||
               child.path === PATH.privateRoutes.PRODUCT_DETAIL?.path ||
-              child.path === "/profile"
+              child.path === "/profile" ||
+              child.path === "/community"
             ) {
               return {
                 path: child.path,
@@ -282,6 +284,7 @@ function App() {
                   <RouterProvider router={roleWiseRouting} />
                 </Suspense>
               </div>
+              <PermissionModalProvider />
             </WaitingQueueProvider>
           </ChatProvider>
         </CallProvider>

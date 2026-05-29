@@ -25,14 +25,16 @@ const TarotCardSelectionPage = () => {
   if (isLoveTriangle) maxCards = 3
   else if (isRomanticBreakup || isBusinessBreakup) maxCards = 2
 
-  const [selectedCards, setSelectedCards] = useState([])
+  // Each entry: { position, card, slot } where slot is the fixed assignment (1-based)
+  const [selections, setSelections] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [isShuffling, setIsShuffling] = useState(false)
   const [animationReady, setAnimationReady] = useState(false)
   const containerRef = useRef(null)
 
-  // Track which positions have been tapped (for visual highlight)
-  const [selectedPositions, setSelectedPositions] = useState([])
+  // Derived state for backward compatibility
+  const selectedCards = selections.map((s) => s.card)
+  const selectedPositions = selections.map((s) => s.position)
 
   const { data: shuffleData } = useGetTarotShuffleDataQuery(
     { shuffle_type: 'major', lang: 'en' },
@@ -92,20 +94,25 @@ const TarotCardSelectionPage = () => {
 
     if (isMultiCardReading) {
       // Check if this position is already selected
-      if (selectedPositions.includes(positionIndex)) {
-        // Deselect: remove this position and its corresponding card
-        const posIdx = selectedPositions.indexOf(positionIndex)
-        setSelectedPositions((prev) => prev.filter((p) => p !== positionIndex))
-        setSelectedCards((prev) => prev.filter((_, i) => i !== posIdx))
+      const existingSelection = selections.find((s) => s.position === positionIndex)
+      if (existingSelection) {
+        // Deselect: remove this position but keep slot assignments of others intact
+        setSelections((prev) => prev.filter((s) => s.position !== positionIndex))
         return
       }
 
-      if (selectedCards.length >= maxCards) return
+      if (selections.length >= maxCards) return
+
+      // Determine the next available slot (1-based)
+      const usedSlots = selections.map((s) => s.slot)
+      let nextSlot = 1
+      while (usedSlots.includes(nextSlot)) {
+        nextSlot++
+      }
 
       const picked = pickRandomCard(selectedCards)
       if (picked) {
-        setSelectedPositions((prev) => [...prev, positionIndex])
-        setSelectedCards((prev) => [...prev, picked])
+        setSelections((prev) => [...prev, { position: positionIndex, card: picked, slot: nextSlot }])
       }
     } else {
       // Single card reading — pick random and navigate
@@ -117,27 +124,31 @@ const TarotCardSelectionPage = () => {
   }
 
   const handleShowReading = async () => {
-    if (selectedCards.length !== maxCards) return
+    if (selections.length !== maxCards) return
     setIsLoading(true)
     try {
+      // Sort by slot to ensure correct order regardless of selection sequence
+      const sortedSelections = [...selections].sort((a, b) => a.slot - b.slot)
+      const sortedCards = sortedSelections.map((s) => s.card)
+
       if (isLoveTriangle) {
         navigate('/love-triangle-result', {
           state: {
             reading,
             selectedCards: {
-              you: selectedCards[0],
-              partner1: selectedCards[1],
-              partner2: selectedCards[2]
+              you: sortedCards[0],
+              partner1: sortedCards[1],
+              partner2: sortedCards[2]
             },
             type: 'love-triangle'
           }
         })
       } else if (isRomanticBreakup || isBusinessBreakup) {
-        const card1 = selectedCards[0]
-        const card2 = selectedCards[1]
+        const card1 = sortedCards[0]
+        const card2 = sortedCards[1]
         navigate('/tarot-card', {
           state: {
-            cards: selectedCards,
+            cards: sortedCards,
             reading,
             isMultiCard: true,
             cardNames: {
@@ -178,27 +189,46 @@ const TarotCardSelectionPage = () => {
 
         {isLoveTriangle && (
           <div className={styles.drawSequence}>
-            {['You', 'Partner 1', 'Partner 2'].map((label, i) => (
-              <span
-                key={label}
-                className={`${styles.sequenceItem} ${selectedCards.length === i ? styles.sequenceActive : ''} ${selectedCards.length > i ? styles.sequenceDone : ''}`}
-              >
-                {i + 1}. {label}
-              </span>
-            ))}
+            {['You', 'Partner 1', 'Partner 2'].map((label, i) => {
+              const slot = i + 1
+              const isDone = selections.some((s) => s.slot === slot)
+              // Active = next available slot
+              const usedSlots = selections.map((s) => s.slot)
+              let nextSlot = 1
+              while (usedSlots.includes(nextSlot)) nextSlot++
+              const isActive = slot === nextSlot && selections.length < maxCards
+
+              return (
+                <span
+                  key={label}
+                  className={`${styles.sequenceItem} ${isActive ? styles.sequenceActive : ''} ${isDone ? styles.sequenceDone : ''}`}
+                >
+                  {slot}. {label}
+                </span>
+              )
+            })}
           </div>
         )}
 
         {(isRomanticBreakup || isBusinessBreakup) && (
           <div className={styles.drawSequence}>
-            {['You', 'Partner'].map((label, i) => (
-              <span
-                key={label}
-                className={`${styles.sequenceItem} ${selectedCards.length === i ? styles.sequenceActive : ''} ${selectedCards.length > i ? styles.sequenceDone : ''}`}
-              >
-                {i + 1}. {label}
-              </span>
-            ))}
+            {['You', 'Partner'].map((label, i) => {
+              const slot = i + 1
+              const isDone = selections.some((s) => s.slot === slot)
+              const usedSlots = selections.map((s) => s.slot)
+              let nextSlot = 1
+              while (usedSlots.includes(nextSlot)) nextSlot++
+              const isActive = slot === nextSlot && selections.length < maxCards
+
+              return (
+                <span
+                  key={label}
+                  className={`${styles.sequenceItem} ${isActive ? styles.sequenceActive : ''} ${isDone ? styles.sequenceDone : ''}`}
+                >
+                  {slot}. {label}
+                </span>
+              )
+            })}
           </div>
         )}
 
@@ -251,7 +281,7 @@ const TarotCardSelectionPage = () => {
                   <img src="/images/black-back-card.jpg" alt="Tarot Card Back" />
                   {isSelected && (
                     <div className={styles.selectedBadge}>
-                      {selectedPositions.indexOf(posIndex) + 1}
+                      {selections.find((s) => s.position === posIndex)?.slot}
                     </div>
                   )}
                 </div>
@@ -262,8 +292,8 @@ const TarotCardSelectionPage = () => {
 
         {isMultiCardReading && (
           <button
-            className={`${styles.showReadingButton} ${selectedCards.length === maxCards ? '' : styles.disabled}`}
-            disabled={selectedCards.length !== maxCards || isLoading}
+            className={`${styles.showReadingButton} ${selections.length === maxCards ? '' : styles.disabled}`}
+            disabled={selections.length !== maxCards || isLoading}
             onClick={handleShowReading}
           >
             {isLoading ? 'Loading...' : 'Show Reading'}

@@ -51,6 +51,34 @@
   font-weight: 600;
   color: #1f2937;
   margin: 0 0 0 12px;
+  flex: 1;
+}
+
+.downloadButton {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(90deg, #E54D00 0%, #D43400 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(212, 52, 0, 0.3);
+  }
+
+  @media (width <= 767px) {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
 }
 
 .content {

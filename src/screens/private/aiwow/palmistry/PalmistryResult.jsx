@@ -6,7 +6,6 @@ import { getPalmistryResult } from '../../../../services/appServices/aiWowServic
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
-import Footer from '../../../../layouts/Footer';
 import TTSButton from '../../../../component/UI/TTSButton';
 
 const LineDropdown = ({ title, subtitle, children, isOpen, onToggle, ttsText }) => (
@@ -246,6 +245,14 @@ const PalmistryResult = () => {
           </svg>
         </button>
         <h1 className={styles.title}>Palmistry Analysis</h1>
+        <button className={styles.downloadButton} onClick={() => navigate('/ai-wow', { state: { tab: 'results' } })}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Download
+        </button>
         </div>
       </header>
 
@@ -969,7 +976,6 @@ const PalmistryResult = () => {
         </button>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

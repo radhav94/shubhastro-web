@@ -6,7 +6,6 @@ import { analyzeCalendarEvents } from '../../../../services/appServices/aiWowSer
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { FiMapPin, FiCalendar, FiChevronLeft, FiChevronRight, FiChevronUp, FiChevronDown } from 'react-icons/fi';
-import Footer from '../../../../layouts/Footer';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 
@@ -274,7 +273,7 @@ const AgenticCalendar = () => {
             </svg>
           </button>
           <div className={styles.headerInfo}>
-            <h1 className={styles.title}>Agentic Calendar</h1>
+            <h1 className={styles.title}>Muhurat Calendar</h1>
             {profile && <p className={styles.subtitle}>{profile.name}</p>}
           </div>
         </div>
@@ -637,7 +636,6 @@ const AgenticCalendar = () => {
         </div>
       )}
     </div>
-    <Footer />
     </>
   );
 };

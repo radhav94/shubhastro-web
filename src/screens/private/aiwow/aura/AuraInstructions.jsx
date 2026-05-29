@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import styles from './AuraInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setAuraImage } from '../../../../redux/aiwow/aiwowSlice';
-import Footer from '../../../../layouts/Footer';
 import TTSButton from '../../../../component/UI/TTSButton';
 
 const AuraInstructions = () => {
@@ -140,7 +139,6 @@ const AuraInstructions = () => {
       </div>
       </div>
     </div>
-    <Footer />
     </>
   );
 };

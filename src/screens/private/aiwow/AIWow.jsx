@@ -17,7 +17,6 @@ import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWalletBalance } from "../wallet/useWalletBalance";
-import Footer from "../../../layouts/Footer";
 import { PATH } from "../../../utils/routes/Paths";
 
 // Reusable Section Title with Divider (same as Explore page, auto-width)
@@ -91,6 +90,13 @@ const AIWow = () => {
       setHasMoreHistory(page < totalPages);
     }
   }, [historyData]);
+
+  // Set active tab from navigation state (e.g., from result page Download button)
+  useEffect(() => {
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state]);
 
   // Reset page when profile changes
   useEffect(() => {
@@ -190,7 +196,7 @@ const AIWow = () => {
 
   const handleClick = (slug) => {
     // Free features that don't require login
-    const freeAccessSlugs = ["agentic-calendar"];
+    const freeAccessSlugs = ["muhurat-calendar"];
     if (!freeAccessSlugs.includes(slug)) {
       if (!requireAuth()) return;
       if (!selectedProfile) {
@@ -364,7 +370,7 @@ const AIWow = () => {
               className={`${styles.tab} ${activeTab === "aiwow" ? styles.tabActive : ""}`}
               onClick={() => setActiveTab("aiwow")}
             >
-              AI WOW
+              Shubh AI
             </button>
             <button
               type="button"
@@ -377,7 +383,7 @@ const AIWow = () => {
         </header>
 
         <div className={styles.content}>
-          {/* AI WOW Tab */}
+          {/* Shubh AI Tab */}
           {activeTab === "aiwow" && (
             <>
               <div className={styles.heroSection}>
@@ -488,7 +494,6 @@ const AIWow = () => {
           showLanguageSelection={false}
         />
       </div>
-      <Footer />
     </>
   );
 };

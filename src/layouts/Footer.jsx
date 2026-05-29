@@ -10,7 +10,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useEffect, useState, useCallback } from "react";
 import { logout } from "../redux/auth/authSlice";
-import BottomNavigation from "../screens/v2/home/components/BottomNavigation";
+
 import { clearSelectedKundli } from "../redux/kundli/kundliSlice";
 import { isShubhMallEnabled } from "../utils/featureConfig";
 
@@ -231,7 +231,7 @@ const Footer = () => {
       {/* Bottom Bar */}
       <div className={styles.v2_bottomOuter}>
         <div className={styles.v2_bottomBar}>
-          <p> ©{currentYear} Shubh Talk Pvt. Ltd. All rights reserved</p>
+          <p> ©{currentYear} PITTIE GLOBAL Pvt. Ltd. All rights reserved</p>
           <ul>
             <li><Link to="/privacy-policy">Privacy Policy</Link></li>
             <li><Link to="/terms-and-conditions">T&C</Link></li>
@@ -239,8 +239,7 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      {location.pathname !== "/" && <BottomNavigation />}
+
     </footer>
   );
 };
