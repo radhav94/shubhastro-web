@@ -247,6 +247,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
           kundliId,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
+          experience: astro?.experience,
           isEmergency: rest?.isEmergency || false,
         });
       } catch {

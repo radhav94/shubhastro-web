@@ -341,17 +341,12 @@ const ChatWindow = () => {
 
     await uploadFileToS3(uploadUrl, blob);
 
-    //don't remove this below commented code//
-    // const jsonString = JSON.stringify({
-    //   type: "file",
-    //   fileUrl,
-    //   fileName: meta.name,
-    //   fileType: blob.type,
-    //   fileSize: meta.size,
-    // });
-
     const attachType = getAttachType(blob.type);
-    sendMessage(fileUrl, attachType);
+    // Send as JSON with fileName so display can show proper name and icon
+    const messagePayload = attachType === "image" || attachType === "video" || attachType === "audio"
+      ? fileUrl
+      : JSON.stringify({ url: fileUrl, fileName: meta?.name || `file.${ext}` });
+    sendMessage(messagePayload, attachType);
     setMessage("");
     console.log("FILE UPLOADED URL:", fileUrl);
   };

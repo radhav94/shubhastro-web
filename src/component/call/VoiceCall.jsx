@@ -41,7 +41,7 @@ const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
 const AgoraVoiceCalling = ({ callData }) => {
   const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow, isCallMinimized, setIsCallMinimized, reconnectToCall, isMicOn, setIsMicOn, isSpeakerOn, setIsSpeakerOn } = useCall();
-  const { activeChat } = useChatContext();
+  const { activeChat, lastRequestedAstro: chatLastRequestedAstro } = useChatContext();
   const navigate = useNavigate();
   const location = useLocation();
   const isOnLivePage = location.pathname.startsWith("/live");
@@ -881,6 +881,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         kundliId: activeCall.kundliId,
         astrologerName: callerName,
         astroID: activeCall.astrologerID,
+        experience: activeCall.experience || lastRequestedAstro?.experience,
         profileImgUrl: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
       }
     });
@@ -987,9 +988,9 @@ const AgoraVoiceCalling = ({ callData }) => {
             <div className={styles.astrologerInfo}>
               <h3 className={styles.astrologerName}>{capitalizeWords(callerName)}</h3>
               <p className={styles.astrologerExp}>
-                {lastRequestedAstro?.role 
-                  ? lastRequestedAstro.role.charAt(0).toUpperCase() + lastRequestedAstro.role.slice(1).toLowerCase()
-                  : "Astrologer"} • Exp. {experience || lastRequestedAstro?.experience || "0"} Years
+                {lastRequestedAstro?.role || chatLastRequestedAstro?.role
+                  ? (lastRequestedAstro?.role || chatLastRequestedAstro?.role).charAt(0).toUpperCase() + (lastRequestedAstro?.role || chatLastRequestedAstro?.role).slice(1).toLowerCase()
+                  : "Astrologer"} • Exp. {experience || lastRequestedAstro?.experience || chatLastRequestedAstro?.experience || "0"} Years
               </p>
             </div>
 

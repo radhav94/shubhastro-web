@@ -134,6 +134,7 @@ export const useAstrologerConnect = () => {
 
     setSelectedAstrologer(astro);
     setLastRequestedAstro(astro);
+    setLastRequestedCallAstro(astro);
     activeCallAstroRef.current = astro; // Store in ref immediately
     console.log("[NormalFlow] 📝 Stored astrologer in ref:", astro?._id);
 

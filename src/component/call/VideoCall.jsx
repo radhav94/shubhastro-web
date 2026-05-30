@@ -46,7 +46,7 @@ const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
 const VideoCalling = ({ callData }) => {
   const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, reconnectToCall, isCallMinimized, setIsCallMinimized, setWaitingList, isMicOn, setIsMicOn, isSpeakerOn, setIsSpeakerOn } = useCall();
-  const { activeChat } = useChatContext();
+  const { activeChat, lastRequestedAstro: chatLastRequestedAstro } = useChatContext();
   const navigate = useNavigate();
   const location = useLocation();
   const isOnLivePage = location.pathname.startsWith("/live");
@@ -1118,6 +1118,7 @@ const VideoCalling = ({ callData }) => {
         kundliId: activeCall.kundliId,
         astrologerName: callerName,
         astroID: activeCall.astrologerID,
+        experience: activeCall.experience || lastRequestedAstro?.experience,
         profileImgUrl: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
       }
     });
@@ -1286,9 +1287,9 @@ const VideoCalling = ({ callData }) => {
               <div className={styles.astrologerInfo}>
                 <h3 className={styles.astrologerName}>{capitalizeWords(callerName)}</h3>
                 <p className={styles.astrologerExp}>
-                  {lastRequestedAstro?.role 
-                    ? lastRequestedAstro.role.charAt(0).toUpperCase() + lastRequestedAstro.role.slice(1).toLowerCase()
-                    : "Astrologer"} • Exp. {lastRequestedAstro?.experience || callData?.experience || "0"} Years
+                  {lastRequestedAstro?.role || chatLastRequestedAstro?.role
+                    ? (lastRequestedAstro?.role || chatLastRequestedAstro?.role).charAt(0).toUpperCase() + (lastRequestedAstro?.role || chatLastRequestedAstro?.role).slice(1).toLowerCase()
+                    : "Astrologer"} • Exp. {lastRequestedAstro?.experience || chatLastRequestedAstro?.experience || callData?.experience || "0"} Years
                 </p>
               </div>
 

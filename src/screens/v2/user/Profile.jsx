@@ -146,6 +146,8 @@ const Profile = () => {
   useEffect(() => {
     if (latestAstrologerData?.data) {
       activeAstroRef.current = latestAstrologerData.data;
+      setChatLastRequestedAstro(latestAstrologerData.data);
+      setCallLastRequestedAstro(latestAstrologerData.data);
       console.log('✅ Updated activeAstroRef with latest pricing:', latestAstrologerData.data.price);
     }
   }, [latestAstrologerData]);
@@ -158,6 +160,7 @@ const Profile = () => {
     setActiveChatRoomId,
     setActiveChat,
     setChatSeconds,
+    setLastRequestedAstro: setChatLastRequestedAstro,
   } = useChat();
 
   const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, cancelAll, assignRoomId } = useWaitingQueue();
@@ -171,6 +174,7 @@ const Profile = () => {
     setActiveCall,
     setOpenReview,
     setReviewData,
+    setLastRequestedAstro: setCallLastRequestedAstro,
   } = useCall();
 
   const [createChatRoom] = useCreateChatRoomMutation();
@@ -674,6 +678,7 @@ const Profile = () => {
             kundliId,
             astrologerName: data?.astrologer?.firstName || "",
             astroID: data?.astrologer?.astrologer_ID,
+            experience: astro?.experience || data?.astrologer?.experience,
             profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
           },
         });
@@ -746,6 +751,7 @@ const Profile = () => {
           kundliId,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
+          experience: astro?.experience,
           isEmergency: rest?.isEmergency || false,
         });
       } catch (error) {

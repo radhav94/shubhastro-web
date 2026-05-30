@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
+import { useLazyGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 
 // Inject getAllUserSessions endpoint
 const sessionsApi = privateRequestNew.injectEndpoints({
@@ -49,6 +50,8 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
     kundliRef,
   } = useAstrologerConnect();
 
+  const [fetchAstrologer] = useLazyGetAstrologerByIdQuery();
+
   const sessions = useMemo(() => {
     return Array.isArray(data?.data?.recentSessions)
       ? data.data.recentSessions.slice(0, 6)
@@ -63,7 +66,8 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
       return;
     }
 
-    const astrologer = {
+    // Fetch full astrologer data to get experience and other fields
+    let astrologer = {
       _id: session._id,
       astrologerID: session.astrologerID,
       firstName: session.astrologerName?.split(' ')[0] || session.astrologerName,
@@ -71,7 +75,17 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
       profileImgUrl: session.profileImgUrl,
       isActiveType: session.isActiveType,
       price: session.price,
+      experience: session.experience,
     };
+
+    try {
+      const { data: astroData } = await fetchAstrologer({ id: session._id });
+      if (astroData?.data) {
+        astrologer = { ...astrologer, ...astroData.data };
+      }
+    } catch (e) {
+      console.warn("Failed to fetch astrologer details, using session data");
+    }
 
     activeCallAstroRef.current = astrologer;
 
