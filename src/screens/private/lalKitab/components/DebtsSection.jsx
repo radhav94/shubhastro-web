@@ -87,18 +87,37 @@ const DebtsSection = ({ debts, isLoading }) => {
   if (isLoading) return <div className={styles.skeletonList}>{Array.from({ length: 3 }).map((_, i) => <div key={i} className={styles.skeleton} />)}</div>;
   if (!debts) return <div className={styles.empty}><span>⚖️</span><p>Debts analysis not available.</p></div>;
 
-  const hasAnyData = DEBT_CATEGORIES.some((cat) => {
-    const d = debts[cat.key];
-    return d && (d.indications?.length || d.events?.length || d.remedies?.length);
-  });
-
-  if (!hasAnyData) return <div className={styles.empty}><span>⚖️</span><p>No debts data available.</p></div>;
+  const selfData = debts.selfDebts;
+  if (!selfData || (!selfData.indications?.length && !selfData.events?.length && !selfData.remedies?.length)) {
+    return <div className={styles.empty}><span>⚖️</span><p>No debts data available.</p></div>;
+  }
 
   return (
     <div className={styles.container}>
-      {DEBT_CATEGORIES.map((cat) => (
-        <DebtCard key={cat.key} category={cat} data={debts[cat.key]} />
-      ))}
+      {selfData.indications?.length > 0 && (
+        <div className={styles.section}>
+          <h4 className={styles.sectionTitle}>⚠️ Indications</h4>
+          <ul className={styles.list}>
+            {selfData.indications.map((item, i) => <li key={i}>{item}</li>)}
+          </ul>
+        </div>
+      )}
+      {selfData.events?.length > 0 && (
+        <div className={styles.section}>
+          <h4 className={styles.sectionTitle}>📅 Events</h4>
+          <ul className={styles.list}>
+            {selfData.events.map((item, i) => <li key={i}>{item}</li>)}
+          </ul>
+        </div>
+      )}
+      {selfData.remedies?.length > 0 && (
+        <div className={styles.section}>
+          <h4 className={styles.sectionTitle}>🙏 Remedies</h4>
+          <ul className={styles.list}>
+            {selfData.remedies.map((item, i) => <li key={i}>{item}</li>)}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
