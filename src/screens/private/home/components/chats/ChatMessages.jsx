@@ -82,7 +82,7 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
         <div className={styles.videoMessage}>
           <div className={styles.videoWrapper}>
             <video
-              src={msg.text}
+              src={`${msg.text}#t=0.001`}
               className={styles.messageVideo}
               controls
               preload="metadata"
