@@ -69,7 +69,7 @@ const CmsPageWrapper = ({ children }) => {
 
   return (
     <>
-      {pageData && (
+      {pageData ? (
         <Helmet>
           <title>{title}</title>
           {pageUrl && <link rel="canonical" href={pageUrl} />}
@@ -89,6 +89,20 @@ const CmsPageWrapper = ({ children }) => {
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={title} />
           <meta name="twitter:description" content={description} />
+          <meta name="twitter:image" content={LOGO_URL} />
+        </Helmet>
+      ) : !shouldSkip && (
+        <Helmet>
+          <title>{DEFAULT_TITLE}</title>
+          {pageUrl && <link rel="canonical" href={pageUrl} />}
+          <link rel="shortcut icon" href={LOGO_URL} />
+          <meta property="og:type" content="website" />
+          {pageUrl && <meta property="og:url" content={pageUrl} />}
+          <meta property="og:title" content={DEFAULT_TITLE} />
+          <meta property="og:image" content={LOGO_URL} />
+          <meta property="og:image:secure_url" content={LOGO_URL} />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={DEFAULT_TITLE} />
           <meta name="twitter:image" content={LOGO_URL} />
         </Helmet>
       )}
