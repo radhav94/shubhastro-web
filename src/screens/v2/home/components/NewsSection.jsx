@@ -58,7 +58,7 @@ const NewsSection = ({ newsData, title, showMore }) => {
                 className={styles.blogImage}
                 onError={(e) => {
                   e.target.src =
-                    "https://shubhastroassets.s3.ap-south-1.amazonaws.com/astrologer_male.png";
+                    "https://assets.shubhastro.ai/astrologer_male.png";
                 }}
               />
             </div>

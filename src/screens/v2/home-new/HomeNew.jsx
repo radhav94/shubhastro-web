@@ -25,7 +25,7 @@ import astrologerImg from "../../../assets/images/home-hero-astrologer.png";
 import horoscopeImg from "../../../assets/images/home-hero-horoscope.png";
 
 // Hero BG
-const heroBg = "https://shubhastroassets.s3.ap-south-1.amazonaws.com/images/1778659743-240854750.png";
+const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
 
 // WOW icons
 import vastuIcon from "../../../assets/aiwow/wow-vastu.svg";

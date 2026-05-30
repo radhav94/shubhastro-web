@@ -40,7 +40,7 @@ import avatar4 from "../../../assets/images/community-avatar-4.png";
 import avatar5 from "../../../assets/images/community-avatar-5.png";
 
 const COMMUNITY_AVATARS = [avatar1, avatar2, avatar3, avatar4, avatar5];
-const heroBg = "https://shubhastroassets.s3.ap-south-1.amazonaws.com/images/1778659743-240854750.png";
+const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
 
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
