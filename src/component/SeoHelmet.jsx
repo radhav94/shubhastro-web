@@ -1,7 +1,9 @@
 import { Helmet } from "react-helmet-async";
-import logoUrl from "../assets/images/mobile-shubh-astro-logo.svg";
 
-const LOGO_URL = logoUrl;
+const LOGO_PATH = "/src/assets/images/mobile-shubh-astro-logo.svg";
+const LOGO_URL = typeof window !== "undefined"
+  ? `${window.location.origin}${LOGO_PATH}`
+  : LOGO_PATH;
 const DEFAULT_TITLE = "ShubhAstro";
 
 /**
