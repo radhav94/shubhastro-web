@@ -1,5 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import styles from "./BirthReport.module.scss";
 import { appColors } from "../../../../utils/theme";
@@ -97,6 +98,7 @@ export const buildAstroPayload = (data) => {
 };
 
 const BirthReport = () => {
+  const navigate = useNavigate();
   const payload = useSelector(selectCalculatorData("birth_natal_calc"));
 
   const params = payload ? buildAstroPayload(payload) : null;
@@ -142,7 +144,6 @@ const BirthReport = () => {
           <div className={styles.nameCard}>
             <h2>{payload?.name ? `${payload.name.toUpperCase()}'S BIRTH / NATAL REPORT` : "BIRTH / NATAL REPORT"}</h2>
           </div>
-
           <div className={styles.mainContainer}>
             {/* CHART GRID */}
             <div className={styles.chartGrid}>
@@ -168,6 +169,10 @@ const BirthReport = () => {
               </div>
             )}
           </div>
+
+          <button className={styles.calcAgainBtn} onClick={() => navigate(-1)}>
+            Calculate Again
+          </button>
 
           <div className={styles.connectCardWrap}>
             <ConnectCard />

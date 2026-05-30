@@ -17,7 +17,7 @@ const PalmistryAnalysis = () => {
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
     required: true,
     showToast: true,
-    redirectPath: PATH.privateRoutes.AI_WOW?.path || '/ai-wow',
+    redirectPath: '/ai-palmistry-scanner',
   });
 
   const [progress, setProgress] = useState(0);
@@ -164,9 +164,14 @@ const PalmistryAnalysis = () => {
     navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path);
   };
 
+  const handleBack = () => {
+    dispatch(clearPalmistryData());
+    navigate('/ai-palmistry-scanner/hand-selection', { replace: true });
+  };
+
   return (
     <div className={styles.container}>
-      <BackButton />
+      <BackButton onClick={handleBack} />
       <div className={styles.content}>
         <div className={styles.leftSection}>
           <h2 className={styles.title}>
