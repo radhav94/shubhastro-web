@@ -31,7 +31,16 @@ export const blogApi = privateRequestNew.injectEndpoints({
       }),
       providesTags: ["Blogs"],
     }),
+
+    // Get Related Blogs by tag matching
+    getRelatedBlogs: builder.query({
+      query: ({ blogId, page = 1, limit = 5 }) => ({
+        url: `blogs/related?blogId=${blogId}&page=${page}&limit=${limit}`,
+        method: "GET",
+      }),
+      providesTags: ["Blogs"],
+    }),
   }),
 });
 
-export const { useGetBlogPageDataQuery, useGetBlogQuery, useGetSingleBlogQuery } = blogApi;
+export const { useGetBlogPageDataQuery, useGetBlogQuery, useGetSingleBlogQuery, useGetRelatedBlogsQuery } = blogApi;

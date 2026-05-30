@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
-import { useGetSingleBlogQuery, useGetBlogPageDataQuery } from "../../../../services/appServices/blogService";
+import { useGetSingleBlogQuery, useGetRelatedBlogsQuery } from "../../../../services/appServices/blogService";
 import styles from "./SingleBlogDetails.module.scss";
 import MoreBlogsCarousel from "../../../../component/UI/cards/MoreBlogsCarousel";
 import TTSButton from "../../../../component/UI/TTSButton";
@@ -8,16 +8,14 @@ const SingleBlogDetails = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { data, isLoading } = useGetSingleBlogQuery(slug);
-  const { data: blogPageData, isLoading: blogsLoading } = useGetBlogPageDataQuery({ page: 1, limit: 10 });
-  
   const singleBLogData = data?.data;
-  
-  // Extract related blogs from blog page API
-  const blogList = blogPageData?.data?.list || [];
-  const relatedSection = blogList.find(item => item.slug === "related_blogs");
-  const relatedBlogs = relatedSection?.content || [];
-  const relatedTitle = relatedSection?.title;
-  const relatedSubtitle = relatedSection?.sub_title || relatedSection?.subtitle;
+
+  // Fetch related blogs using dedicated API (matches by tags)
+  const { data: relatedData, isLoading: relatedLoading } = useGetRelatedBlogsQuery(
+    { blogId: singleBLogData?._id, page: 1, limit: 5 },
+    { skip: !singleBLogData?._id }
+  );
+  const relatedBlogs = relatedData?.data || [];
   const cleanText = singleBLogData?.body
   ?.replace(/<[^>]+>/g, ' ')   // remove HTML tags
   ?.replace(/\s+/g, ' ')       // normalize spaces
@@ -73,12 +71,11 @@ const SingleBlogDetails = () => {
       </div>
 
       {/* Related Blogs Carousel */}
-      {!blogsLoading && relatedBlogs.length > 0 && (
+      {!relatedLoading && relatedBlogs.length > 0 && (
         <MoreBlogsCarousel 
           blogs={relatedBlogs} 
           currentBlogId={slug}
-          title={relatedTitle}
-          subtitle={relatedSubtitle}
+          title="RELATED BLOGS"
           className={styles.relatedblogs}
         />
       )}
