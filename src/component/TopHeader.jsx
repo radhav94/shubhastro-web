@@ -259,14 +259,14 @@ const TopHeader = () => {
             </div>
 
             <div className={styles.logoHeader} onClick={() => navigate("/")}>
-              <img src={ShubhTalkLogo} alt="Shubh Talk Logo" />
+              <img src={ShubhTalkLogo} alt="Shubh Talk Logo" width="150" height="32" />
             </div>
 
             <div
               className={styles.logoHeaderMobile}
               onClick={() => navigate("/")}
             >
-              <img src={ShubhTalkLogoMobile} alt="Shubh Talk Logo" />
+              <img src={ShubhTalkLogoMobile} alt="Shubh Talk Logo" width="32" height="32" />
             </div>
           </div>
 
