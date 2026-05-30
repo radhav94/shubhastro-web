@@ -113,7 +113,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
                   (sec.content || []).map((item, i) => (
                     <div key={`${si}-${i}`} className={styles.wowCard} onClick={() => handleWowCardClick(item)} style={{ cursor: item.slug ? 'pointer' : 'default' }}>
                       <div className={styles.wowIconBox}>
-                        <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} loading="lazy" />
+                        <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} width="40" height="40" loading="lazy" />
                       </div>
                       <span>{item.title}</span>
                     </div>
@@ -143,7 +143,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
               <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title || "Laal Kitaab"}</h3>
               <p>{aiServicesItems[0]?.description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
               <button className={styles.featureCta}>{aiServicesItems[0]?.action_btn || "Explore Laal Kitaab >"}</button>
-              <img src={aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon} alt="Laal Kitaab" className={styles.laalKitaabImgLeft} loading="lazy" />
+              <img src={aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon} alt="Laal Kitaab" width="120" height="120" className={styles.laalKitaabImgLeft} loading="lazy" />
             </div>
           )}
         </div>
@@ -163,7 +163,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
                     <p>{aiServicesItems[1]?.description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
                   </div>
                   <button className={styles.fcCtaLight}>{aiServicesItems[1]?.action_btn || "Explore Occult >"}</button>
-                  <img src={aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon} alt="Occult World" className={styles.fcCardImg} loading="lazy" />
+                  <img src={aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon} alt="Occult World" width="100" height="100" className={styles.fcCardImg} loading="lazy" />
                 </div>
               )}
               {aiServicesItems[2] && (
@@ -175,7 +175,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
                     <p>{aiServicesItems[2]?.description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
                   </div>
                   <button className={styles.panditTalkBtn}>{aiServicesItems[2]?.action_btn || "Talk Now ›"}</button>
-                  <img src={aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon} alt="AI Pandit" className={styles.fcCardImg} loading="lazy" />
+                  <img src={aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon} alt="AI Pandit" width="100" height="100" className={styles.fcCardImg} loading="lazy" />
                 </div>
               )}
             </div>
@@ -195,7 +195,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
               <div className={styles.avatarCluster}>
                 <div className={styles.avatarClusterInner}>
                   {COMMUNITY_AVATARS.map((src, i) => (
-                    <img key={i} src={src} alt="" className={`${styles.clusterAvatar} ${styles[`ca${i + 1}`]}`} loading="lazy" />
+                    <img key={i} src={src} alt="" width="36" height="36" className={`${styles.clusterAvatar} ${styles[`ca${i + 1}`]}`} loading="lazy" />
                   ))}
                   <div className={`${styles.clusterAvatar} ${styles.ca6} ${styles.clusterCount}`}>
                     <span>+{onlineCount}</span>

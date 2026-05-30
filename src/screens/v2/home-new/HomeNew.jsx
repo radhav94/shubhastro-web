@@ -255,7 +255,7 @@ const HomeNew = () => {
                   <p>{card.description}</p>
                 </div>
                 <div className={styles.qImgWrap}>
-                  <img src={card.image_url || card.icon} alt={card.title} />
+                  <img src={card.image_url || card.icon} alt={card.title} width="80" height="80" loading="lazy" />
                 </div>
               </div>
             );
@@ -278,7 +278,7 @@ const HomeNew = () => {
                 )}
               </div>
               <div className={styles.heroBgImg}>
-                <img src={heroBg} alt="" />
+                <img src={heroBg} alt="" width="350" height="350" loading="eager" fetchPriority="high" decoding="async" />
               </div>
             </div>
 
@@ -306,7 +306,7 @@ const HomeNew = () => {
                   {wowAllItems.map((item, i) => (
                     <div key={i} className={styles.wowCard} onClick={() => handleWowCardClick(item)} style={{ cursor: item.slug ? 'pointer' : 'default' }}>
                       <div className={styles.wowIconBox}>
-                        <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} />
+                        <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} width="40" height="40" loading="lazy" />
                       </div>
                       <span>{item.title}</span>
                     </div>
