@@ -470,9 +470,10 @@
 }
 
 .controlItem.giftWrapMain{
-  position: absolute;
-  right: 4vw;
-  bottom: 150px;
+  position: fixed;
+  right: 16px;
+  bottom: 100px;
+  z-index: 51;
   @media (width <= 767px) {
     position: absolute;
     right: 0;

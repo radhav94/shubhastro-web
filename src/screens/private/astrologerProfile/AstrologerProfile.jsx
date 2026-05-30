@@ -232,6 +232,10 @@ const AstrologerProfile = () => {
 
   const handleFollow = async () => {
     try {
+      if (!token) {
+        navigate("/login", { state: { from: location.pathname } });
+        return;
+      }
       if (!data?._id) return;
 
       if (!isFollowing) {
