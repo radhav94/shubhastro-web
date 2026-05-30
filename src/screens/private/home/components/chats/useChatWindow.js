@@ -33,6 +33,8 @@ export default function useChat({
   // Fetch kundli profiles to get the "Self" profile
   const { data: profilesData } = useGetAllKundlisQuery();
   const profiles = profilesData?.data || [];
+  const profilesRef = useRef(profiles);
+  profilesRef.current = profiles;
 
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -121,12 +123,21 @@ export default function useChat({
             }
 
             // Find the kundli profile with relation "Self"
-            const selfProfile = profiles.find(
-              (profile) => profile.relation === "Self",
-            );
-            const profileIdToUse = selfProfile?._id || kundliId;
+            const sendKundliWhenReady = (retries = 10) => {
+              const currentProfiles = profilesRef.current;
+              const selfProfile = currentProfiles.find(
+                (profile) => profile.relation === "Self",
+              );
+              const profileIdToUse = selfProfile?._id || kundliId;
 
-            setTimeout(() => sendMessage(profileIdToUse, "kundli"), 300);
+              if (profileIdToUse) {
+                sendMessage(profileIdToUse, "kundli", profileIdToUse);
+              } else if (retries > 0) {
+                setTimeout(() => sendKundliWhenReady(retries - 1), 500);
+              }
+            };
+
+            setTimeout(() => sendKundliWhenReady(), 300);
           } else if (alreadySent) {
             console.log(
               "[ChatWindow] ⏭️ Initial messages already sent for room:",
