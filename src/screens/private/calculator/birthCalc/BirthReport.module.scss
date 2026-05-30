@@ -28,6 +28,25 @@
   }
 }
 
+.calcAgainBtn {
+  display: block;
+  text-align: center;
+  margin: 0 auto 24px;
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px 0;
+  text-decoration: underline;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
 .headingUnderline {
   display: flex;
   align-items: center;

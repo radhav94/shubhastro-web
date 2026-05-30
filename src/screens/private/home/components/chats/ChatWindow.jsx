@@ -517,6 +517,8 @@ const ChatWindow = () => {
               isTyping={isTyping}
               error={error}
               messagesRef={messagesRef}
+              astrologerName={astrologerName || fullName}
+              customerName={user?.firstName}
             />
 
             <FloatingActions
