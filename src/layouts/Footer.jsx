@@ -92,7 +92,7 @@ const Footer = () => {
         onKeyDown={(e) => e.key === "Enter" && toggleSection(id)}
         aria-expanded={openSection === id}
       >
-        <h4 className={styles.v2_heading}>{title}</h4>
+        <h3 className={styles.v2_heading}>{title}</h3>
         <span className={styles.v2_accordionIcon}>{openSection === id ? "−" : "+"}</span>
       </div>
       <div className={`${styles.v2_accordionBody} ${openSection === id ? styles.v2_accordionOpen : ""}`}>
@@ -151,29 +151,29 @@ const Footer = () => {
         </div>
 
         <div className={styles.v2_column}>
-          <h4 className={styles.v2_heading}>Horoscope</h4>
+          <h3 className={styles.v2_heading}>Horoscope</h3>
           {renderLinks(horoscopeLinks)}
         </div>
 
         <div className={styles.v2_column}>
-          <h4 className={styles.v2_heading}>Explore Services</h4>
+          <h3 className={styles.v2_heading}>Explore Services</h3>
           {renderLinks(serviceLinks)}
         </div>
 
         {/* {isShubhMallEnabled() && (
           <div className={styles.v2_column}>
-            <h4 className={styles.v2_heading}>Shop Our Products</h4>
+            <h3 className={styles.v2_heading}>Shop Our Products</h3>
             {renderLinks(shopLinks)}
           </div>
         )} */}
 
         <div className={styles.v2_column}>
-          <h4 className={styles.v2_heading}>Company Policies</h4>
+          <h3 className={styles.v2_heading}>Company Policies</h3>
           {renderLinks(companyLinks)}
         </div>
 
         <div className={`${styles.v2_column} ${styles.v2_columnWide}`}>
-          <h4 className={styles.v2_heading}>Contact Us</h4>
+          <h3 className={styles.v2_heading}>Contact Us</h3>
           <p className={styles.v2_contactText}>Have questions?</p>
           <a href="mailto:support@shubhtalk.ai" className={styles.v2_emailLink}>support@shubhtalk.ai</a>
           <p className={styles.v2_contactText}>Or call us at</p>
@@ -187,7 +187,7 @@ const Footer = () => {
         </div>
         
         <div className={`${styles.v2_column} ${styles.v2_columnWide}`}>
-          <h4 className={`${styles.v2_heading}`}>Download App</h4>
+          <h3 className={`${styles.v2_heading}`}>Download App</h3>
           {storeButtons}
         </div>
 
@@ -212,7 +212,7 @@ const Footer = () => {
         {/* {isShubhMallEnabled() && renderAccordionColumn("shop", "Shop Our Products", shopLinks)} */}
         {renderAccordionColumn("company", "Company Policies", companyLinks)}
         <div className={`${styles.v2_column} ${styles.v2_marT}`}>
-          <h4 className={styles.v2_heading}>Contact Us</h4>
+          <h3 className={styles.v2_heading}>Contact Us</h3>
           <p className={styles.v2_contactText}>Have questions?</p>
           <a href="mailto:support@shubhtalk.ai" className={styles.v2_emailLink}>support@shubhtalk.ai</a>
           <p className={styles.v2_contactText}>Or call us at</p>
@@ -223,7 +223,7 @@ const Footer = () => {
           </p>
           <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
           <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
-          <h4 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h4>
+          <h3 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h3>
           {storeButtons}
         </div>
       </div>
