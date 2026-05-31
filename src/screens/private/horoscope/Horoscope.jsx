@@ -17,17 +17,17 @@ import { useGetAllKundlisQuery } from '../../../services/appServices/kundliServi
 import { useSelector } from 'react-redux';
 import { useGetAstroDetailsQuery } from '../../../redux/api/kundli/kundliApi';
 import { buildVedicParam } from '../../../utils/VedicParams.js/vedicParams';
-import overViewImg from "../../../assets/images/overall-Image.png";
-import financeImg from "../../../assets/images/finance.png";
-import scoreImg from "../../../assets/images/score.png";
-import healthImg from "../../../assets/images/health.png";
-import friendsImg from "../../../assets/images/friends.png";
-import familyImg from "../../../assets/images/family.png";
-import travelImg from "../../../assets/images/travel.png";
-import careerImg from "../../../assets/images/career.png";
-import relationImg from "../../../assets/images/relation.png";
-import statusImg from "../../../assets/images/status.png";
-import physiqueImg from "../../../assets/images/physique.png";
+const overViewImg = "https://assets.shubhastro.ai/images/horoscope/overview.png";
+const financeImg = "https://assets.shubhastro.ai/images/horoscope/finances.png";
+const scoreImg = "https://assets.shubhastro.ai/images/horoscope/total-score.png";
+const healthImg = "https://assets.shubhastro.ai/images/horoscope/health.png";
+const friendsImg = "https://assets.shubhastro.ai/images/horoscope/friends.png";
+const familyImg = "https://assets.shubhastro.ai/images/horoscope/family.png";
+const travelImg = "https://assets.shubhastro.ai/images/horoscope/travel.png";
+const careerImg = "https://assets.shubhastro.ai/images/horoscope/career.png";
+const relationImg = "https://assets.shubhastro.ai/images/horoscope/relationship.png";
+const statusImg = "https://assets.shubhastro.ai/images/horoscope/status.png";
+const physiqueImg = "https://assets.shubhastro.ai/images/horoscope/physique.png";
 
 // Helper to determine if text on a colored background should be dark
 const isLightColor = (color) => {

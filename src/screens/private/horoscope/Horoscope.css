@@ -304,21 +304,6 @@
   padding: 5px;
   overflow: hidden;
 }
-.category-card::after{
-  content: "";
-  width: 80px;
-  height: 80px;
-  border-radius: 100%;
-  background: #00000021;
-  display: flex;
-  position: absolute;
-  bottom: 5px;
-  left: 0;
-  right: 0;
-  margin: 0 auto;
-  z-index: 1;
-}
-
 .category-card.active {
   border: 1px solid var(--border-50, rgba(247, 88, 1, 100%));
 }
@@ -829,11 +814,6 @@
     height: 80px;
     width: 80px;
   } */
-  .category-card::after{
-    height: 5px;
-    width: 40px;
-    bottom: 5px;
-  }
   .zodiac-name{
     font-size: 24px;
   }
@@ -906,12 +886,6 @@
   .category-label {
     font-size: 13.5px;
     height: fit-content;
-  }
-
-  .category-card::after {
-    width: 50px;
-    height: 5px;
-    bottom: 5px;
   }
 
   /* .content-text {
@@ -1106,12 +1080,6 @@
     height: fit-content;
   }
 
-  .category-card::after {
-    width: 50px;
-    height: 5px;
-    bottom: 5px;
-  }
-
   /* Desktop Content */
 
   /* .content-text {
@@ -1255,10 +1223,4 @@
   /* .lucky-details{
     max-width: 100%;
   } */
-
-  .category-card::after {
-    width: 50px;
-    height: 5px;
-    bottom: 5px;
-  }
 }
