@@ -385,7 +385,7 @@ const TopHeader = () => {
               {userAvatarDisplay ? (
                 <div className={styles.avatarText}>
                   <span>
-                    <img src={profileIcon} alt="icon" />
+                    <img src={profileIcon} alt="icon" width={30} height={30} />
                   </span>
                 </div>
               ) : (

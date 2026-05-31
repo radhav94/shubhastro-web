@@ -218,7 +218,7 @@ const PanditAIBubble = () => {
         >
           <span className={styles.bubbleGlow} />
           <span className={styles.bubbleIcon}>
-            <img src={panditAiIcon} alt="icon" width="40" height="40" />
+            <img src={panditAiIcon} alt="icon" width="40" height="40" fetchPriority="high" />
           </span>
           <span className={styles.bubbleText}>
             <span className={styles.bubbleKicker}>Ask</span>
