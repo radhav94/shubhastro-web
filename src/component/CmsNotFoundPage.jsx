@@ -57,6 +57,7 @@ const CmsNotFoundPage = () => {
       <Helmet>
         <title>{title}</title>
         <link rel="canonical" href={pageUrl} />
+        <link rel="icon" type="image/svg+xml" href={LOGO_URL} />
         <link rel="shortcut icon" href={LOGO_URL} />
         <meta name="description" content={description} />
         {keywords && <meta name="keywords" content={keywords} />}

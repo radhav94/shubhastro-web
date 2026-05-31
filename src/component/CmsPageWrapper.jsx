@@ -73,6 +73,7 @@ const CmsPageWrapper = ({ children }) => {
         <Helmet>
           <title>{title}</title>
           {pageUrl && <link rel="canonical" href={pageUrl} />}
+          <link rel="icon" type="image/svg+xml" href={LOGO_URL} />
           <link rel="shortcut icon" href={LOGO_URL} />
           <meta name="description" content={description} />
           {keywords && <meta name="keywords" content={keywords} />}
@@ -95,6 +96,7 @@ const CmsPageWrapper = ({ children }) => {
         <Helmet>
           <title>{DEFAULT_TITLE}</title>
           {pageUrl && <link rel="canonical" href={pageUrl} />}
+          <link rel="icon" type="image/svg+xml" href={LOGO_URL} />
           <link rel="shortcut icon" href={LOGO_URL} />
           <meta property="og:type" content="website" />
           {pageUrl && <meta property="og:url" content={pageUrl} />}
