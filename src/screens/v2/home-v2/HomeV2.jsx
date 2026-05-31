@@ -412,21 +412,10 @@ const HomeV2 = () => {
   if (isHomeLoading || !renderPlan.length) {
     return (
       <div className={styles.page} style={{ minHeight: "100vh" }}>
-        {/* Render hero with LCP image immediately to avoid render delay */}
-        <section className={styles.heroGroup}>
-          <div className={styles.centerCard}>
-            <div className={styles.heroBanner}>
-              <div className={styles.heroContent}>
-                <p className={styles.greeting}>Hello, {name}! 👋</p>
-                <h1>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></h1>
-              </div>
-              <div className={styles.heroBgImg}>
-                <div className={styles.heroBgGlow} />
-                <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Hidden LCP image for browser preload — visible only to paint engine */}
+        <div style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }} aria-hidden="true">
+          <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
+        </div>
       </div>
     );
   }
