@@ -1,5 +1,5 @@
 import styles from "./HomeV2.module.scss";
-import { useState, useMemo, useEffect, useCallback, lazy, Suspense } from "react";
+import { useState, useMemo, useEffect, useCallback, lazy, Suspense, Fragment } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
@@ -99,7 +99,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
               <div className={styles.wowHeader}>
                 <div className={styles.titleWithBottomDevider}>
                   {/* <h4 className={styles.wowTitle}>{wowSuiteItems.title}</h4> */}
-                  <h4 className={styles.wowTitle}>Your AI Suite</h4>
+                  <h2 className={styles.wowTitle}>Your AI Suite</h2>
                   <div className={styles.BottomDevider}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
                       <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
@@ -189,7 +189,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
           {aiServicesItems[3] && (
             <div className={`${styles.liveCommunityCard} ${styles.desktopOnly}`} onClick={() => navigate('/community')}>
               <span className={styles.featureTag}>New</span>
-              <h4 className={styles.liveCommunityTitle}>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title || "ShubhAstro Live Community"}</h4>
+              <h3 className={styles.liveCommunityTitle}>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title || "ShubhAstro Live Community"}</h3>
               <p className={styles.liveCommunityDesc}>{aiServicesItems[3]?.description || "Lorem Ipsum is simply dummy text of"}</p>
               <button className={styles.liveCommunityBtn}>{aiServicesItems[3]?.action_btn || "Join Live Chat ›"}</button>
               <div className={styles.avatarCluster}>
@@ -244,7 +244,11 @@ const ThreeColGroupLayout = ({ sections, styles }) => {
 
   return (
     <section className={styles.threeColSection}>
-      {sorted.map(section => renderThreeColContent(section))}
+      {sorted.map(section => (
+        <Fragment key={section._id || section.list_order}>
+          {renderThreeColContent(section)}
+        </Fragment>
+      ))}
     </section>
   );
 };
@@ -408,7 +412,21 @@ const HomeV2 = () => {
   if (isHomeLoading || !renderPlan.length) {
     return (
       <div className={styles.page} style={{ minHeight: "100vh" }}>
-        {/* Skeleton placeholder while API loads */}
+        {/* Render hero with LCP image immediately to avoid render delay */}
+        <section className={styles.heroGroup}>
+          <div className={styles.centerCard}>
+            <div className={styles.heroBanner}>
+              <div className={styles.heroContent}>
+                <p className={styles.greeting}>Hello, {name}! 👋</p>
+                <h1>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></h1>
+              </div>
+              <div className={styles.heroBgImg}>
+                <div className={styles.heroBgGlow} />
+                <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
