@@ -680,10 +680,6 @@ const TalkToAstrologer = () => {
       setActiveChatRoomId(data?.roomId);
       setWaitingList(data?.waitingTime || 2);
       assignRoomId(data?.roomId, "chat", data?.waitingTime || 2);
-      // Update queue status based on server response
-      if (data?.roomId) {
-        updateStatusByRoomId(data.roomId, data?.status || "ringing");
-      }
     };
 
     const handleCallRoom = (data) => {
@@ -691,9 +687,6 @@ const TalkToAstrologer = () => {
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
       assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
-      if (data?.roomId) {
-        updateStatusByRoomId(data.roomId, data?.status || "ringing");
-      }
     };
 
     /* ===== TWO-WAY ACCEPT: Astrologer accepted, user must now accept/reject ===== */
