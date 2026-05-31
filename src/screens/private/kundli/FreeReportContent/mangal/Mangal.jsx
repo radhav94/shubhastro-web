@@ -72,13 +72,15 @@ const Mangal = () => {
       {/* Factors Section */}
       {mangal.factors && (
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>
-            <span className={styles.sectionIcon}>🔍</span>
-            Mangal Analysis Factors
-            <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.sectionIcon}>🔍</span>
+              Mangal Analysis Factors
+            </h2>
+            <span style={{ marginLeft: 'auto', marginRight: '5px', display: 'inline-flex' }}>
               <TTSButton text={`Mangal Analysis Factors. ${[mangal.factors?.mars, mangal.factors?.moon].filter(Boolean).join('. ')}`} />
             </span>
-          </h2>
+          </div>
           <div className={styles.factorsList}>
             {mangal.factors.mars && (
               <div className={styles.factorCard}>

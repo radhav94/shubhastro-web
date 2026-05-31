@@ -92,10 +92,10 @@ const KaalSarp = () => {
             <h2 className={styles.sectionTitle}>
               <span className={styles.sectionIcon}><img src={namaste} width="20" alt="icon" /></span>
               Remedies
-              <span onClick={(e) => e.stopPropagation()} style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
-                <TTSButton text={`Remedies. ${kaalsarp.remedies.join('. ')}`} />
-              </span>
             </h2>
+            <span onClick={(e) => e.stopPropagation()} style={{ marginLeft: 'auto', marginRight: '5px', display: 'inline-flex' }}>
+              <TTSButton text={`Remedies. ${kaalsarp.remedies.join('. ')}`} />
+            </span>
             <span className={`${styles.dropdownArrow} ${isRemediesExpanded ? styles.expanded : ''}`}>
               ▼
             </span>

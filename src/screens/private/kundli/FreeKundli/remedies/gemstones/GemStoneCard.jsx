@@ -184,15 +184,6 @@ const GemStoneCard = ({ gem }) => {
         {/* TIME TO WEAR */}
         <SectionCard 
           title="Time to Wear"
-          titleExtra={
-            <TTSButton
-              text={[
-                "Time to Wear",
-                gem.time_to_wear || "",
-                gem.time_to_wear_short ? `In short: ${gem.time_to_wear_short}` : "",
-              ].filter(Boolean).join(". ")}
-            />
-          }
         >
           <PrimaryText marginBottom="5px" size="base">
             {displayTimeToWear}
@@ -213,14 +204,6 @@ const GemStoneCard = ({ gem }) => {
         {/* METHODS */}
         <SectionCard 
           title="How to Wear"
-          titleExtra={
-            <TTSButton
-              text={[
-                "How to Wear",
-                gem.methods || "",
-              ].filter(Boolean).join(". ")}
-            />
-          }
         >
           <PrimaryText size="base">{displayMethods}</PrimaryText>
           {shouldTruncateMethods && (

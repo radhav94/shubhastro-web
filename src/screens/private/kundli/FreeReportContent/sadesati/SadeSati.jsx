@@ -98,9 +98,9 @@ const SadeSati = () => {
             <h2 className={styles.sectionTitle}>
               <span className={styles.sectionIcon}><img src={namaste} width="20" alt="icon" /></span>
               Recommended Remedies
-              <span onClick={(e) => e.stopPropagation()} style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+              {/* <span onClick={(e) => e.stopPropagation()} style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
                 <TTSButton text={`Recommended Remedies. ${sadeSatiData.remedies.join('. ')}`} />
-              </span>
+              </span> */}
             </h2>
             <span className={`${styles.dropdownArrow} ${isRemediesExpanded ? styles.expanded : ''}`}>
               ▼
