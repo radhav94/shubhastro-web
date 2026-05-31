@@ -16,7 +16,7 @@ import LinkPreview from "./LinkPreview";
 import { detectURL } from "../../../../../utils/helper/linkPreview";
 import { getAttachmentDisplayName } from "../../../../../utils/helper/getAttachmentDisplayName";
 
-const ChatMessages = ({ messages, isTyping, messagesRef }) => {
+const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, customerName }) => {
   const [iframeSrc, setIframeSrc] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const navigate = useNavigate();
@@ -82,7 +82,7 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
         <div className={styles.videoMessage}>
           <div className={styles.videoWrapper}>
             <video
-              src={msg.text}
+              src={`${msg.text}#t=0.001`}
               className={styles.messageVideo}
               controls
               preload="metadata"
@@ -286,6 +286,11 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
                 key={`${date}-${i}-${msg.time}`}
                 className={styles.messageWrapper}
               >
+                {!msg.isSender && (
+                  <div className={styles.msgAvatar}>
+                    {astrologerName ? astrologerName.charAt(0).toUpperCase() : "A"}
+                  </div>
+                )}
                 <div
                   className={`${styles.msgBubble} ${
                     msg.isSender ? styles.senderBubble : styles.receiverBubble
@@ -301,6 +306,11 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
                     )}
                   </div>
                 </div>
+                {msg.isSender && (
+                  <div className={styles.msgAvatarSender}>
+                    {customerName ? customerName.charAt(0).toUpperCase() : "U"}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -329,7 +339,14 @@ const ChatMessages = ({ messages, isTyping, messagesRef }) => {
       {/* Image Preview Modal */}
       {imagePreview && (
         <div className={styles.imagePreviewModal} onClick={() => setImagePreview(null)}>
-          <div className={styles.imagePreviewContent}>
+          <button
+            className={styles.imagePreviewClose}
+            onClick={(e) => { e.stopPropagation(); setImagePreview(null); }}
+            aria-label="Close image preview"
+          >
+            ✕
+          </button>
+          <div className={styles.imagePreviewContent} onClick={(e) => e.stopPropagation()}>
             <img src={imagePreview} alt="Preview" className={styles.previewImage} />
           </div>
         </div>

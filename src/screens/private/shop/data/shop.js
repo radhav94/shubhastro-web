@@ -6,7 +6,7 @@ export const SHOP_CATEGORIES = [
     tag: "Watch Live | Daily Aarti",
     slug: "live-darshan",
     imgUrl:
-      "https://shubhastroassets.s3.ap-south-1.amazonaws.com/Live-Darshan.png",
+      "https://assets.shubhastro.ai/Live-Darshan.png",
     description:
       "Experience divine connection from anywhere with Live Darshan. Join real-time temple aartis, special poojas, and sacred rituals streamed live to bring peace, positivity, and blessings into your life.",
   },

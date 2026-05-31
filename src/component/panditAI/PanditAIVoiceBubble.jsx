@@ -111,7 +111,7 @@ const PanditAIVoiceBubble = () => {
         <div className={styles.header}>
           <div className={styles.headerInfo}>
             <div className={styles.headerAvatar}>
-              <img src={panditAiIcon} alt="icon" />
+              <img src={panditAiIcon} alt="icon" width="36" height="36" />
             </div>
             <div className={styles.headerCopy}>
               <h4 className={styles.headerName}>Pandit AI (Voice)</h4>

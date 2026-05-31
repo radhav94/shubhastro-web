@@ -135,17 +135,17 @@ const Footer = () => {
 
         {/* Logo + Tagline + Social */}
         <div className={`${styles.v2_column} ${styles.v2_logoCol}`}>
-          <img src={ShubhAstroLogo} alt="ShubhAstro Logo" className={styles.v2_logo} />
+          <img src={ShubhAstroLogo} alt="ShubhAstro Logo" width="150" height="32" className={styles.v2_logo} />
           <p className={styles.v2_tagline}>
             Your trusted guide to the cosmos. Connect with the best astrologers from India.
             Get predictions related to Marriage, Love life, Career or Health over call, chat, query or report.
           </p>
           <p className={styles.v2_followLabel}>Follow Us</p>
           <div className={styles.v2_socialIcons}>
-            <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
-            <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
-            <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><IoLogoInstagram /></a>
-            <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><FaLinkedinIn /></a>
+            <a href="https://www.facebook.com/profile.php?id=61589408862522" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
+            <a href="https://www.youtube.com/@ShubhAstroofficial" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
+            <a href="https://www.instagram.com/shubhastroofficial/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><IoLogoInstagram /></a>
+            <a href="https://www.linkedin.com/company/shubhastro-ai" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><FaLinkedinIn /></a>
             <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
           </div>
         </div>
@@ -196,14 +196,14 @@ const Footer = () => {
       {/* Mobile Accordion */}
       <div className={styles.v2_mobileFooter}>
         <div className={styles.v2_mobileLogo}>
-          <img src={ShubhAstroLogo} alt="ShubhAstro Logo" className={styles.v2_logo} />
+          <img src={ShubhAstroLogo} alt="ShubhAstro Logo" width="150" height="32" className={styles.v2_logo} />
           <p className={styles.v2_tagline}>Your trusted guide to the cosmos.</p>
           <p className={styles.v2_followLabel}>Follow Us</p>
           <div className={styles.v2_socialIcons}>
-            <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
-            <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
-            <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><IoLogoInstagram /></a>
-            <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><FaLinkedinIn /></a>
+            <a href="https://www.facebook.com/profile.php?id=61589408862522" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
+            <a href="https://www.youtube.com/@ShubhAstroofficial" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
+            <a href="https://www.instagram.com/shubhastroofficial/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><IoLogoInstagram /></a>
+            <a href="https://www.linkedin.com/company/shubhastro-ai" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><FaLinkedinIn /></a>
             <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
           </div>
         </div>

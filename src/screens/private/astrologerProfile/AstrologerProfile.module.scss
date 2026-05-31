@@ -1761,7 +1761,7 @@
 
 .giftContent {
   flex: 1;
-  z-index: 1;
+  z-index: 3;
   max-width: 50%;
   @media (width <= 768px) {
     text-align: left;

@@ -129,7 +129,7 @@ const MoreBlogsCarousel = ({ blogs = [], currentBlogId, title, subtitle }) => {
                 >
                   <div className={styles.imageWrapper}>
                     <img
-                      src={blog.imageUrl || DefaultImages.BlogsDefault}
+                      src={blog.imageUrl || blog.img || DefaultImages.BlogsDefault}
                       alt={blog.title}
                       className={styles.blogImage}
                       onError={(e) => {

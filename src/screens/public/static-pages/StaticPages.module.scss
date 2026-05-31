@@ -133,6 +133,24 @@
   margin: 0;
 }
 
+.titleName{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  > div:first-child {
+    position: absolute;
+    left: 0;
+
+    > div {
+      max-width: unset;
+      margin: 0;
+      padding: 0;
+    }
+  }
+}
+
 /* Common Container */
 .container {
   max-width: 1440px;
@@ -304,7 +322,7 @@
   line-height: 1.8;
   color: #444;
   text-align: justify;
-
+  padding-top: 15px;
   p {
     margin-bottom: 16px;
   }

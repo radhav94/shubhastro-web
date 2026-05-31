@@ -910,6 +910,7 @@ const LiveView = (props) => {
           astrologerId: astroId,
           astrologerID: fullAstro?.astrologer_ID || astro?.astrologer_ID || astroId,
           remainingTime,
+          experience: fullAstro?.experience || astro?.experience,
           origin: "live",
           liveChannel,
         });

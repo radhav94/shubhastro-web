@@ -191,6 +191,7 @@ export const {
   useGetAstrologersQuery,
   useGetAstrologerFilterCategoryTabQuery,
   useGetAstrologerByIdQuery,
+  useLazyGetAstrologerByIdQuery,
   useLazyFilterAstrologersQuery,
   useGetRecommendedAstrologersQuery,
   useGetExpertiseFiltersQuery,

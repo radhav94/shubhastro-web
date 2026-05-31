@@ -158,7 +158,8 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
               </div>
               <a
                 href={content}
-                download={fileName}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={styles.downloadButton}
                 onClick={(e) => e.stopPropagation()}
                 aria-label={`Download ${fileName}`}

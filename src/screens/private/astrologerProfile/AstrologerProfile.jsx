@@ -232,6 +232,10 @@ const AstrologerProfile = () => {
 
   const handleFollow = async () => {
     try {
+      if (!token) {
+        navigate("/login", { state: { from: location.pathname } });
+        return;
+      }
       if (!data?._id) return;
 
       if (!isFollowing) {
@@ -276,13 +280,6 @@ const AstrologerProfile = () => {
       return;
     }
     
-    // Check if already in waiting state
-    if (WaitingList || callWaitingList) {
-      toast.error(
-        "You are already waiting for an astrologer. Please cancel the current request first.",
-      );
-      return;
-    }
     
     activeCallAstroRef.current = data;
     setIsConnectPopupOpen(true);
@@ -291,13 +288,6 @@ const AstrologerProfile = () => {
   const handleChatStart = async (astro, isEmergency = false) => {
     if (!token) {
       navigate("/login", { state: { from: location.pathname } });
-      return;
-    }
-    
-    if (WaitingList || callWaitingList) {
-      toast.error(
-        "You are already waiting for an astrologer. Please cancel the current request first.",
-      );
       return;
     }
     
@@ -313,13 +303,6 @@ const AstrologerProfile = () => {
   const handleCallStart = async (astro, type, isEmergency = false) => {
     if (!token) {
       navigate("/login", { state: { from: location.pathname } });
-      return;
-    }
-    
-    if (WaitingList || callWaitingList) {
-      toast.error(
-        "You are already waiting for an astrologer. Please cancel the current request first.",
-      );
       return;
     }
     
@@ -528,6 +511,7 @@ const AstrologerProfile = () => {
             kundliId,
             astrologerName: data?.astrologer?.firstName || "",
             astroID: data?.astrologer?.astrologer_ID,
+            experience: astro?.experience || data?.astrologer?.experience,
             profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
           },
         });
@@ -597,6 +581,7 @@ const AstrologerProfile = () => {
           kundliId: lastSelectedKundli?._id,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
+          experience: astro?.experience,
           isEmergency: rest?.isEmergency || false,
         });
       } catch (error) {

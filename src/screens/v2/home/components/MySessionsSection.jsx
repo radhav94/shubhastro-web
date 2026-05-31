@@ -31,6 +31,7 @@ const MySessionsSection = ({ onConnectClick }) => {
           lastName: session.astrologerName?.split(" ").slice(1).join(" ") || "",
           imageUrl: session.astrologerImage,
           isActive: session.isActive,
+          experience: session.experience,
         };
         onConnectClick(astrologer, connectionType, isEmergency);
       }

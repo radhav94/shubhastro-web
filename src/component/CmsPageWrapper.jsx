@@ -2,8 +2,6 @@ import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useGetStaticPageBySlugQuery } from "../redux/api/staticPages/staticPagesApi";
 import styles from "../screens/public/static-pages/StaticPages.module.scss";
-import Divider from "./Divider";
-import logoUrl from "../assets/images/mobile-shubh-astro-logo.svg";
 
 // Routes excluded from CMS static page lookup
 const EXCLUDED_PATHS = [
@@ -13,6 +11,7 @@ const EXCLUDED_PATHS = [
   "/ai-wow",
   "/shubh-mall",
   "/explore",
+  "/blog",
   "/community"
 ];
 
@@ -26,7 +25,12 @@ const isExcluded = (pathname) =>
       pathname === excluded || pathname.startsWith(`${excluded}/`)
   );
 
-const LOGO_URL = logoUrl;
+const SITE_ORIGIN = typeof window !== "undefined" ? window.location.origin : "";
+const OG_IMAGE_PATH = "/images/ShubhAstrologo.svg";
+const OG_IMAGE_URL = `${SITE_ORIGIN}${OG_IMAGE_PATH}`;
+const FAVICON_PATH = "/images/mobile-shubh-astro-logo.svg";
+const FAVICON_URL = `${SITE_ORIGIN}${FAVICON_PATH}`;
+const DEFAULT_TITLE = "ShubhAstro";
 
 /**
  * CmsPageWrapper
@@ -36,6 +40,9 @@ const LOGO_URL = logoUrl;
  * 2. Sets meta tags (title, description, keywords, OG, Twitter, canonical) from API response
  * 3. If body is non-empty → appends CMS HTML body below the child component
  * 4. If body is empty → renders the original child component (with meta still applied)
+ *
+ * Always renders a default Helmet with fallback title so no page is ever without a <title>.
+ * Page-specific Helmets (SeoHelmet or CMS data) override this via react-helmet-async priority.
  */
 const CmsPageWrapper = ({ children }) => {
   const { pathname } = useLocation();
@@ -52,49 +59,61 @@ const CmsPageWrapper = ({ children }) => {
     : null;
   const hasBody = pageData?.body && pageData.body.trim().length > 0;
 
-  const title = pageData?.meta_title || pageData?.title || "ShubhTalk";
+  const title = pageData?.meta_title || pageData?.title || DEFAULT_TITLE;
   const description = pageData?.meta_description || pageData?.title || "";
   const keywords = pageData?.meta_tags
     ? Array.isArray(pageData.meta_tags)
       ? pageData.meta_tags.join(", ")
       : pageData.meta_tags
     : "";
-  const pageUrl = window.location.href;
+  const pageUrl = typeof window !== "undefined" ? window.location.href : "";
 
   return (
     <>
-      <Helmet>
-        <title>{title}</title>
-        <link rel="canonical" href={pageUrl} />
-        <link rel="shortcut icon" href={LOGO_URL} />
-        <meta name="description" content={description} />
-        <meta name="keywords" content={keywords} />
+      {pageData ? (
+        <Helmet>
+          <title>{title}</title>
+          {pageUrl && <link rel="canonical" href={pageUrl} />}
+          <link rel="icon" type="image/svg+xml" href={FAVICON_URL} />
+          <link rel="shortcut icon" href={FAVICON_URL} />
+          <meta name="description" content={description} />
+          {keywords && <meta name="keywords" content={keywords} />}
 
-        {/* Open Graph */}
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={pageUrl} />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-        <meta property="og:image" content={LOGO_URL} />
-        <meta property="og:image:secure_url" content={LOGO_URL} />
+          {/* Open Graph */}
+          <meta property="og:type" content="website" />
+          {pageUrl && <meta property="og:url" content={pageUrl} />}
+          <meta property="og:title" content={title} />
+          <meta property="og:description" content={description} />
+          <meta property="og:image" content={OG_IMAGE_URL} />
+          <meta property="og:image:secure_url" content={OG_IMAGE_URL} />
 
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={LOGO_URL} />
-      </Helmet>
+          {/* Twitter */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={title} />
+          <meta name="twitter:description" content={description} />
+          <meta name="twitter:image" content={OG_IMAGE_URL} />
+        </Helmet>
+      ) : !shouldSkip && (
+        <Helmet>
+          <title>{DEFAULT_TITLE}</title>
+          {pageUrl && <link rel="canonical" href={pageUrl} />}
+          <link rel="icon" type="image/svg+xml" href={FAVICON_URL} />
+          <link rel="shortcut icon" href={FAVICON_URL} />
+          <meta property="og:type" content="website" />
+          {pageUrl && <meta property="og:url" content={pageUrl} />}
+          <meta property="og:title" content={DEFAULT_TITLE} />
+          <meta property="og:image" content={OG_IMAGE_URL} />
+          <meta property="og:image:secure_url" content={OG_IMAGE_URL} />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={DEFAULT_TITLE} />
+          <meta name="twitter:image" content={OG_IMAGE_URL} />
+        </Helmet>
+      )}
 
       {hasBody ? (
         <>
           {children}
           <div className={styles.container}>
-            {/* {pageData.title && (
-              <>
-                <h1 className={styles.title}>{pageData.title}</h1>
-                <Divider />
-              </>
-            )} */}
             <div
               className={styles.htmlContent}
               dangerouslySetInnerHTML={{ __html: pageData.body }}

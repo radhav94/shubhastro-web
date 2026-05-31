@@ -205,6 +205,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
             kundliId,
             astrologerName: astro?.firstName || "",
             astroID: astro?.astrologer_ID,
+            experience: astro?.experience,
           },
         });
       } catch (e) {
