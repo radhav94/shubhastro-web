@@ -1,9 +1,10 @@
 import { Helmet } from "react-helmet-async";
 
-const LOGO_PATH = "/src/assets/images/mobile-shubh-astro-logo.svg";
-const LOGO_URL = typeof window !== "undefined"
-  ? `${window.location.origin}${LOGO_PATH}`
-  : LOGO_PATH;
+const SITE_ORIGIN = typeof window !== "undefined" ? window.location.origin : "";
+const OG_IMAGE_PATH = "/images/ShubhAstrologo.svg";
+const OG_IMAGE_URL = `${SITE_ORIGIN}${OG_IMAGE_PATH}`;
+const FAVICON_PATH = "/images/mobile-shubh-astro-logo.svg";
+const FAVICON_URL = `${SITE_ORIGIN}${FAVICON_PATH}`;
 const DEFAULT_TITLE = "ShubhAstro";
 
 /**
@@ -42,8 +43,8 @@ const SeoHelmet = ({ data }) => {
     <Helmet>
       <title>{title}</title>
       {pageUrl && <link rel="canonical" href={pageUrl} />}
-      <link rel="icon" type="image/svg+xml" href={LOGO_URL} />
-      <link rel="shortcut icon" href={LOGO_URL} />
+      <link rel="icon" type="image/svg+xml" href={FAVICON_URL} />
+      <link rel="shortcut icon" href={FAVICON_URL} />
       <meta name="description" content={description} />
       {keywords && <meta name="keywords" content={keywords} />}
 
@@ -52,14 +53,14 @@ const SeoHelmet = ({ data }) => {
       {pageUrl && <meta property="og:url" content={pageUrl} />}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={LOGO_URL} />
-      <meta property="og:image:secure_url" content={LOGO_URL} />
+      <meta property="og:image" content={OG_IMAGE_URL} />
+      <meta property="og:image:secure_url" content={OG_IMAGE_URL} />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={LOGO_URL} />
+      <meta name="twitter:image" content={OG_IMAGE_URL} />
     </Helmet>
   );
 };
