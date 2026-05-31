@@ -1,6 +1,7 @@
 .infoSection {
   max-width: 1440px;
   padding: 0px 16px 16px 16px;
+  margin: 0 auto;
 }
 .infoInner{
   background-color: rgba(255, 255, 255, 0.4);
@@ -19,10 +20,10 @@
 }
 
 .infoHeading {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 600;
   color: #000;
-  margin: 40px 0 20px 0;
+  margin: 20px 0 16px 0;
   @media (width <= 767px) {
     font-size: 18px;
   }
@@ -34,8 +35,8 @@
     line-height: 1.9;
   }
 
-  .infoHeading {
-    font-size: 28px;
-    margin: 50px 0 24px 0;
-  }
+  // .infoHeading {
+  //   font-size: 28px;
+  //   margin: 50px 0 24px 0;
+  // }
 }
