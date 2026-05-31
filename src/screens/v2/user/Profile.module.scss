@@ -1253,7 +1253,7 @@
 .txnSearchInput {
   width: fit-content;
   float: right;
-  padding: 10px 16px;
+  padding: 4px 16px;
   border: none;
   border-radius: 50px;
   font-size: 16px;
@@ -1262,6 +1262,9 @@
   background: rgb(255, 255, 255, 0.4);
   border: 1.5px solid #fff;
   // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  @media (width <= 767px) {
+    width: 100%;
+  }
 
   &::placeholder {
     color: #030303;
