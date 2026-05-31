@@ -6,7 +6,7 @@
   backdrop-filter: blur(12px);
 
   @media (max-width: 639px) {
-    padding: 20px 16px 40px;
+    padding: 0px 16px 40px;
   }
 }
 
@@ -20,9 +20,8 @@
 }
 
 .chatSession {
-  // background-color: #fff;
-  padding: 1rem 0rem;
-  margin-bottom: 1rem;
+  padding-top: 1rem;
+  // margin-bottom: 1rem;
   border-radius: 1rem;
 }
 
@@ -139,8 +138,8 @@
 
 .sessionDivider {
   height: 1px;
-  background-color: #e5e7eb;
-  margin: 40px 0;
+  background-color: #fff;
+  margin: 0px 0;
 }
 
 .loadingMore {

@@ -7,16 +7,18 @@ const AppLicense = () => {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <button
-          className={styles.backButton}
-          onClick={() => navigate(-1)}
-          aria-label="Go back"
-        >
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className={styles.title}>App License</h1>
-      </header>
+      <div className={styles.headerWrap}>
+        <header className={styles.header}>
+          <button
+            className={styles.backButton}
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className={styles.title}>App License</h1>
+        </header>
+      </div>
 
       <div className={styles.content}>
         <div className={styles.updateInfo}>
