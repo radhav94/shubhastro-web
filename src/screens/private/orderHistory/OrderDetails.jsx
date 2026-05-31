@@ -214,7 +214,7 @@ const OrderDetails = () => {
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
         navigate(`/chat-to-astrologer/${astroId}`, {
-          state: { userId: uid, astrologerId: astroId, fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(), roomId, isUserSide: true },
+          state: { userId: uid, astrologerId: astroId, fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(), roomId, isUserSide: true, experience: astro?.experience || data?.astrologer?.experience },
         });
       } catch (e) {
         Toast.error("Failed to start chat");
@@ -234,6 +234,7 @@ const OrderDetails = () => {
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true, callType: type, userId, astrologerId: astro._id,
           astrologerID: astro?.astrologer_ID, remainingTime,
+          experience: astro?.experience,
           isEmergency: rest?.isEmergency || false,
         });
       } catch (error) {

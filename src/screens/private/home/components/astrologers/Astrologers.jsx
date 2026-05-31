@@ -228,6 +228,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           kundliId,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
+          experience: astro?.experience,
           isEmergency: rest?.isEmergency || false,
         });
         setCallSeconds(Number(remainingTime) * 60);

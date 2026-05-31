@@ -511,6 +511,7 @@ const AstrologerProfile = () => {
             kundliId,
             astrologerName: data?.astrologer?.firstName || "",
             astroID: data?.astrologer?.astrologer_ID,
+            experience: astro?.experience || data?.astrologer?.experience,
             profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
           },
         });
@@ -580,6 +581,7 @@ const AstrologerProfile = () => {
           kundliId: lastSelectedKundli?._id,
           astrologerID: astro?.astrologer_ID,
           remainingTime,
+          experience: astro?.experience,
           isEmergency: rest?.isEmergency || false,
         });
       } catch (error) {

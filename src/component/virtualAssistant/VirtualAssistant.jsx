@@ -9,6 +9,7 @@ import {
   IoCheckmarkDone,
   IoDownload,
 } from "react-icons/io5";
+import { FaFileAlt } from "react-icons/fa";
 import { GrReactjs } from "react-icons/gr";
 import styles from "./VirtualAssistant.module.scss";
 import useVirtualAssistant from "./useVirtualAssistant";
@@ -17,6 +18,10 @@ import { isShubhMallEnabled } from "../../utils/featureConfig";
 import IframeModal from "../../screens/private/home/components/chats/IframeModal";
 import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 import { useFileSelector } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
+import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
+import PdfIcon from "../../assets/chat/PDF.svg";
+import DocIcon from "../../assets/chat/DOC.svg";
+import XlsIcon from "../../assets/chat/XLS.svg";
 
 const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onConnect }) => {
   const [text, setText] = useState("");
@@ -43,6 +48,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onC
     sending,
     sendText,
     sendImage,
+    sendFile,
     sendKundli,
     retryMessage,
     messagesEndRef,
@@ -94,8 +100,13 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onC
     if (type === "camera") { setCameraOpen(true); return; }
     try {
       const accept = type === "photo" ? "image/*" : ".pdf,.doc,.docx,.xls,.xlsx";
-      const { blob } = await openFileSelector(accept);
-      sendImage(blob);
+      const { blob, name } = await openFileSelector(accept);
+      if (type === "photo") {
+        sendImage(blob);
+      } else {
+        const file = new File([blob], name || `file_${Date.now()}`, { type: blob.type });
+        sendFile(file);
+      }
     } catch { /* cancelled */ }
   };
 
@@ -187,8 +198,8 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onC
                           className={styles.msgImage}
                           onClick={() => setImagePreview(msg.message)}
                           onError={(e) => {
-                            e.target.src =
-                              "https://via.placeholder.com/200x150?text=Image+Error";
+                            e.target.onerror = null;
+                            e.target.style.display = "none";
                           }}
                         />
                       ) : msg.type === "kundli" ? (
@@ -307,18 +318,53 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onC
                             )}
                           </div>
                         );
-                      })() : msg.type === "attachment" ? (
-                        <a
-                          href={msg.message}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.attachmentLink}
-                          download
-                        >
-                          <IoDownload size={16} />
-                          {msg.message?.split("/").pop() || "Download File"}
-                        </a>
-                      ) : (
+                      })() : msg.type === "attachment" ? (() => {
+                        const displayName = getAttachmentDisplayName(msg.message);
+                        let fileUrl = msg.message;
+                        try {
+                          const parsed = typeof msg.message === "string" ? JSON.parse(msg.message) : msg.message;
+                          if (parsed?.url) fileUrl = parsed.url;
+                        } catch { /* use msg.message as URL */ }
+
+                        const ext = displayName?.split(".").pop()?.toLowerCase();
+                        const getFileIcon = () => {
+                          switch (ext) {
+                            case "pdf": return <img src={PdfIcon} alt="PDF" style={{ width: 20, height: 20, flexShrink: 0 }} />;
+                            case "doc": case "docx": return <img src={DocIcon} alt="DOC" style={{ width: 20, height: 20, flexShrink: 0 }} />;
+                            case "xls": case "xlsx": case "csv": return <img src={XlsIcon} alt="XLS" style={{ width: 20, height: 20, flexShrink: 0 }} />;
+                            default: return <FaFileAlt style={{ fontSize: 16, flexShrink: 0, color: "#757575" }} />;
+                          }
+                        };
+
+                        const handleDownload = async (e) => {
+                          e.preventDefault();
+                          try {
+                            const res = await fetch(fileUrl);
+                            const blob = await res.blob();
+                            const blobUrl = URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = blobUrl;
+                            a.download = displayName;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(blobUrl);
+                          } catch {
+                            window.open(fileUrl, "_blank");
+                          }
+                        };
+
+                        return (
+                          <button
+                            onClick={handleDownload}
+                            className={styles.attachmentLink}
+                            style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", background: "transparent", border: "none", padding: 0, color: "inherit" }}
+                          >
+                            {getFileIcon()}
+                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 150 }}>{displayName}</span>
+                          </button>
+                        );
+                      })() : (
                         <p className={styles.msgText}>{msg.message}</p>
                       )}
                       <div className={styles.msgMeta}>

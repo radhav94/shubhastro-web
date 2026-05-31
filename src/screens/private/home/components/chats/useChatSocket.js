@@ -21,6 +21,7 @@ const useChatSocket = ({
     setActiveCall, 
     setWaitingList: setGlobalWaitingList,
     setActiveCallRoomId,
+    setLastRequestedAstro,
     resetCallFlow 
   } = useCall();
 
@@ -172,6 +173,7 @@ const useChatSocket = ({
       }
       
       // Regular call acceptance (including direct video calls from chat)
+      setLastRequestedAstro((prev) => prev || { experience, firstName: fullName?.split(" ")[0], lastName: fullName?.split(" ").slice(1).join(" ") });
       setActiveCall({
         roomId,
         channelName,

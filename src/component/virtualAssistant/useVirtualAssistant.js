@@ -138,6 +138,56 @@ export default function useVirtualAssistant({ astrologerId, isOpen }) {
     [astrologerId, sending, sendMsgApi, getS3SignedUrl, refetch, scrollToBottom]
   );
 
+  const sendFile = useCallback(
+    async (file) => {
+      if (!file || sending) return;
+      setSending(true);
+
+      const tempId = `temp-file-${Date.now()}`;
+      const fileName = file.name || "Attachment";
+      const optimistic = {
+        _id: tempId,
+        sender: "user",
+        type: "attachment",
+        message: fileName,
+        createdAt: new Date().toISOString(),
+        _optimistic: true,
+      };
+      setOptimisticMsgs((prev) => [...prev, optimistic]);
+      scrollToBottom();
+
+      try {
+        const signed = await getS3SignedUrl({ fileType: file.type }).unwrap();
+        const uploadUrl = signed.uploadUrl;
+        const fileUrl = uploadUrl.split("?")[0];
+
+        await fetch(uploadUrl, {
+          method: "PUT",
+          body: file,
+          headers: { "Content-Type": file.type },
+        });
+
+        await sendMsgApi({
+          astrologerId,
+          type: "attachment",
+          sender: "user",
+          message: JSON.stringify({ url: fileUrl, fileName }),
+        }).unwrap();
+
+        setOptimisticMsgs((prev) => prev.filter((m) => m._id !== tempId));
+        refetch();
+      } catch (err) {
+        setOptimisticMsgs((prev) =>
+          prev.map((m) => (m._id === tempId ? { ...m, _failed: true } : m))
+        );
+        toast.error("Failed to send file");
+      } finally {
+        setSending(false);
+      }
+    },
+    [astrologerId, sending, sendMsgApi, getS3SignedUrl, refetch, scrollToBottom]
+  );
+
   const sendKundli = useCallback(
     async (kundliId, kundliName) => {
       if (!kundliId || sending) return;
@@ -201,6 +251,7 @@ export default function useVirtualAssistant({ astrologerId, isOpen }) {
     sending,
     sendText,
     sendImage,
+    sendFile,
     sendKundli,
     retryMessage,
     messagesEndRef,
