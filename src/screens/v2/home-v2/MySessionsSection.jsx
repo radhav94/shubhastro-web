@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
-import RechargeModal from "../../../component/recharge-modal/RechargeModal";
+import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { useLazyGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 
 // Inject getAllUserSessions endpoint
@@ -51,6 +51,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
   } = useAstrologerConnect();
 
   const [fetchAstrologer] = useLazyGetAstrologerByIdQuery();
+  const [lastConnectionType, setLastConnectionType] = useState("chat");
 
   const sessions = useMemo(() => {
     return Array.isArray(data?.data?.recentSessions)
@@ -90,10 +91,13 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
     activeCallAstroRef.current = astrologer;
 
     if (session.sessiontype === 'chat') {
+      setLastConnectionType("chat");
       await handleChatStart(astrologer);
     } else if (session.sessiontype === 'video') {
+      setLastConnectionType("video");
       await handleCallStart(astrologer, 'video');
     } else {
+      setLastConnectionType("audio");
       await handleCallStart(astrologer, 'audio');
     }
   };
@@ -216,6 +220,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
         isOpen={openModal.recharge}
         onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
         astrologer={selectedAstrologer}
+        connectionType={lastConnectionType}
       />
     </section>
   );

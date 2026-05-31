@@ -18,10 +18,11 @@ const RechargeModal = ({
   const rate =
     connectionType === "chat"
       ? astrologer?.price?.chatRate?.amount
-      : astrologer?.price?.callRate?.amount || 1;
+      : connectionType === "video"
+        ? astrologer?.price?.videoCallRate?.amount
+        : astrologer?.price?.audioRate?.amount;
 
-
-  const minBalance = rate * 5;
+  const minBalance = (rate || 1) * 5;
   const astrologerName = astrologer?.firstName || "Astrologer";
 
   const handleRecharge = () => {

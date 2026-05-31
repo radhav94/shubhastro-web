@@ -37,7 +37,7 @@ import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import ConnectAstrologerPopup from "../../private/v2/components/ui/ConnectAstrologerPopup";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
-import RechargeModal from "../../../component/recharge-modal/RechargeModal";
+import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
@@ -125,6 +125,7 @@ const Profile = () => {
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
+  const [lastConnectionType, setLastConnectionType] = useState("chat");
   const [selectedAstrologerId, setSelectedAstrologerId] = useState(null);
   const [callRoomId, setCallRoomId] = useState(null);
   const [chatRoomId, setChatRoomId] = useState(null);
@@ -2135,8 +2136,8 @@ const Profile = () => {
         onClose={handleClosePopup}
         astrologer={latestAstrologerData?.data || selectedAstrologer}
         isLoadingAstrologer={isLoadingAstrologer || isFetchingAstrologer}
-        onChatStart={handleChatStart}
-        onCallStart={handleCallStart}
+        onChatStart={(...args) => { setLastConnectionType("chat"); return handleChatStart(...args); }}
+        onCallStart={(...args) => { setLastConnectionType(args[1] || "audio"); return handleCallStart(...args); }}
         onEmergencyAvailable={() => {
           setIsConnectPopupOpen(false);
           setShowEmergencyModal(true);
@@ -2163,7 +2164,8 @@ const Profile = () => {
       <RechargeModal
         isOpen={hookOpenModal.recharge}
         onClose={() => hookSetOpenModal((prev) => ({ ...prev, recharge: false }))}
-        astrologer={selectedAstrologer}
+        astrologer={latestAstrologerData?.data || selectedAstrologer}
+        connectionType={lastConnectionType}
       />
 
       {/* Add Profile Modal */}
