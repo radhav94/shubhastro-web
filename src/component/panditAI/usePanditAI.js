@@ -429,7 +429,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   const sendText = useCallback(
     (text, options = {}) => {
       const trimmedText = text.trim();
-      if (!trimmedText || sendingRef.current) return;
+      if (!trimmedText) return;
 
       const currentRoomId = roomIdRef.current;
       if (!currentRoomId) {

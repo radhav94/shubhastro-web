@@ -323,14 +323,14 @@ const PanditAIBubble = () => {
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 placeholder={chatDisabled ? "Reconnecting..." : placeholder}
-                disabled={sending || isLoading || chatDisabled}
+                disabled={isLoading || chatDisabled}
               />
 
               {isSupported && (
                 <button
                   className={`${styles.micBtn} ${isListening ? styles.micActive : ""}`}
                   onClick={handleMicClick}
-                  disabled={sending || isLoading || chatDisabled}
+                  disabled={isLoading || chatDisabled}
                   aria-label={isListening ? "Stop recording" : "Start voice input"}
                   type="button"
                 >
@@ -341,7 +341,7 @@ const PanditAIBubble = () => {
               <button
                 className={styles.sendBtn}
                 onClick={handleSend}
-                disabled={sending || !displayValue.trim()}
+                disabled={!displayValue.trim()}
                 aria-label="Send message"
                 type="button"
               >
