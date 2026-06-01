@@ -199,7 +199,15 @@ const TalkToAstrologer = () => {
     setChatApprovalData,
   } = useChat();
 
-  const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, cancelAll, assignRoomId, updateStatusByRoomId, getConnectionByRoomId } = useWaitingQueue();
+  const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, cancelAll, assignRoomId, updateStatusByRoomId, getConnectionByRoomId, pendingConnections } = useWaitingQueue();
+
+  // Permanently dismiss recommendation popup once any connection is initiated
+  useEffect(() => {
+    if (pendingConnections?.length && !recommendDismissed) {
+      setRecommendDismissed(true);
+      localStorage.setItem("recommend_cta_dismissed", "true");
+    }
+  }, [pendingConnections?.length]);
 
   // Two-way accept: ring data queue for stacked notifications
   const [ringQueue, setRingQueue] = useState([]);
@@ -1451,7 +1459,7 @@ const TalkToAstrologer = () => {
         connectionType="chat"
       />
 
-      {showCTA && showRecommend && !recommendDismissed && !WaitingList && (
+      {showCTA && showRecommend && !recommendDismissed && (
         <RecommendCTA
           mode={isChatMode ? "chat" : "call"}
           onClick={() => {
