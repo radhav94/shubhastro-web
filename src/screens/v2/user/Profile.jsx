@@ -325,8 +325,8 @@ const Profile = () => {
 
   const chatOrders = Array.isArray(chatHistoryData?.data?.chatHistory)
     ? chatHistoryData.data.chatHistory.map((room, index) => {
-        const lastChat = room?.[room.length - 1];
-        // const chatDuration = Math.round(room?.totalDuration)
+        const chatMessages = room?.chatHistory || [];
+        const firstChat = chatMessages[0];
         return {
           id: `chat-${chatHistoryPage}-${index}`,
           type: "chat",
@@ -342,15 +342,17 @@ const Profile = () => {
             lastName: room.astrologerLastName || "",
             isActive: true,
           },
-          date: lastChat?.createdAt || new Date(),
+          date: firstChat?.createdAt || room?.createdAt || new Date(),
           duration: `${formatDuration(Math.round(room?.totalDuration)) || 0}`,
           amount: room?.amount || 0,
           rate: room?.rate || 0,
           status: "completed",
           roomId: room.roomId,
-          year: lastChat?.createdAt
-            ? new Date(lastChat.createdAt).getFullYear()
-            : new Date().getFullYear(),
+          year: firstChat?.createdAt
+            ? new Date(firstChat.createdAt).getFullYear()
+            : room?.createdAt
+              ? new Date(room.createdAt).getFullYear()
+              : new Date().getFullYear(),
         };
       })
     : [];
