@@ -929,6 +929,9 @@
       width: auto;
       height: 100%;
       filter: drop-shadow(0 0 2.75rem rgba(247, 88, 1));
+      @media (width <= 1180px) {
+        width: 50%;
+      }
     }
   }
 }
@@ -4125,8 +4128,9 @@
       bottom: 0px;
       right: 0;
       left: 0;
-      width: 100%;
+      width: 130px;
       filter: drop-shadow(0 0 2.75rem rgba(247, 88, 1));
+      position: relative;
     }
   }
   @media (width <= 767px) {
@@ -4145,10 +4149,11 @@
   z-index: 1;
   pointer-events: none;
   @media (width <= 820px) {
-    width: 86%;
+    width: 70%;
     left: 0;
     right: 0;
     margin: 0 auto;
+    bottom: 0;
   }
   @media (width <= 767px) {
     width: 130px;
