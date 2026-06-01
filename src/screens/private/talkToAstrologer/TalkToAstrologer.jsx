@@ -63,7 +63,9 @@ const TalkToAstrologer = () => {
   const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
-  const [recommendDismissed, setRecommendDismissed] = useState(false);
+  const [recommendDismissed, setRecommendDismissed] = useState(() => {
+    return localStorage.getItem("recommend_cta_dismissed") === "true";
+  });
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [showFilterAstrologer, setShowFilterAstrologer] = useState(false);
@@ -1456,10 +1458,13 @@ const TalkToAstrologer = () => {
             setOpen(true);
             setIsRecommendModalOpen(true);
             setShowRecommend(false);
+            setRecommendDismissed(true);
+            localStorage.setItem("recommend_cta_dismissed", "true");
           }}
           onClose={() => {
             setShowRecommend(false);
-            setRecommendDismissed(true); // permanently dismiss for this session
+            setRecommendDismissed(true);
+            localStorage.setItem("recommend_cta_dismissed", "true");
           }}
         />
       )}
