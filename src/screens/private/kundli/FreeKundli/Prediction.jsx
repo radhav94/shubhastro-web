@@ -9,6 +9,20 @@ import styles from "./FreeReportContent.module.scss";
 const formatLabel = (key = "") =>
   key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
+const flattenToText = (value) => {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return value.map(flattenToText).filter(Boolean).join(". ");
+  if (typeof value === "object") {
+    return Object.entries(value)
+      .map(([k, v]) => `${formatLabel(k)}: ${flattenToText(v)}`)
+      .filter(Boolean)
+      .join(". ");
+  }
+  return "";
+};
+
 const formatValue = (value) => {
   if (value === null || value === undefined) return "-";
   if (typeof value === "boolean") return value ? "Yes" : "No";
@@ -191,7 +205,7 @@ const Prediction = ({ params, skipToken }) => {
                           </p>
 
                           <div className="flex items-center gap-2">
-                            <TTSButton text={`${formatLabel(key)}. ${value.bot_response}. Probability: ${formatValue(value.probability)}`} />
+                            <TTSButton text={`${formatLabel(key)}. ${value.bot_response}. Probability: ${formatValue(value.probability)}${value.contributors ? `. Contributors: ${flattenToText(value.contributors)}` : ""}`} />
                             {value.outcome && (
                             <span
                               className={`text-xs px-3 py-1 rounded-full capitalize ${
