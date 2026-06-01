@@ -1,11 +1,12 @@
 // Header with back button
 .headerWrap{
   position: fixed;
-  top: 88px; // Below TopHeader
+  top: 95px; // Below TopHeader
   left: 0;
   right: 0;
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #fff;
   z-index: 1000;
   
   @media (max-width: 1180px) {
@@ -82,7 +83,7 @@
 .title {
   text-align: left;
   font-size: 28px;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 16px;
   line-height: 1.35;
   color: #1a1a1a;
@@ -146,7 +147,7 @@
   }
 
   p {
-    margin-bottom: 18px;
+    margin-bottom: 0px;
   }
 
   strong {
