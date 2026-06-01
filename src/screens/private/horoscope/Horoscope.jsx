@@ -209,8 +209,10 @@ const HoroscopeNew = () => {
       // User switched profile from header — always update
       shouldUpdate = true;
     } else if (isInitialLoad && !hasAppliedKundliDefault.current) {
-      // First load — apply profile's sign as default
-      shouldUpdate = true;
+      // First load — apply profile's sign as default ONLY if no sign in URL
+      if (!sign) {
+        shouldUpdate = true;
+      }
       hasAppliedKundliDefault.current = true;
     } else if (prevSunSign.current && prevSunSign.current !== profileSunSign) {
       // Same profile but sun sign data changed (e.g., after refetch on refresh)
