@@ -1494,7 +1494,7 @@ const VideoCalling = ({ callData }) => {
 
                 <div className={styles.controlItem}>
                   <button
-                    className={`${styles.controlBtn} ${!micOn ? styles.muted : ''}`}
+                    className={`${styles.controlBtn} ${!micOn ? styles.muted : styles.active}`}
                     onClick={() => setMicOn((p) => !p)}
                   >
                     {micOn ? <IoMic size={24} /> : <IoMicOff size={24} />}
@@ -1540,13 +1540,13 @@ const VideoCalling = ({ callData }) => {
 
                 <div className={styles.controlItem}>
                   <button
-                    className={`${styles.controlBtn} ${!speakerOn ? styles.muted : ''}`}
+                    className={`${styles.controlBtn} ${!speakerOn ? styles.muted : styles.active}`}
                     onClick={() => setSpeakerOn((p) => !p)}
                   >
                     {speakerOn ? <IoVolumeHigh size={24} /> : <IoVolumeMute size={24} />}
                   </button>
                   <span className={styles.controlLabel}>
-                    {speakerOn ? "Mute Speaker" : "Unmute Speaker"}
+                    {speakerOn ? "Speaker On" : "Speaker Off"}
                   </span>
                 </div>
               </div>
