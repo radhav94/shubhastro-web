@@ -86,7 +86,8 @@ export const WaitingQueueProvider = ({ children }) => {
   }, [persist]);
 
   // Assign roomId to a pending connection that doesn't have one yet
-  const assignRoomId = useCallback((roomId, type, waitingTime) => {
+  // Sets status to "ringing" by default when room is assigned (server created the room)
+  const assignRoomId = useCallback((roomId, type, waitingTime, status = "ringing") => {
     setPendingConnections((prev) => {
       // Find the first pending connection of this type without a roomId
       const idx = prev.findIndex((c) => {
@@ -96,7 +97,7 @@ export const WaitingQueueProvider = ({ children }) => {
       });
       if (idx === -1) return prev;
       const next = [...prev];
-      next[idx] = { ...next[idx], roomId, id: roomId, waitingTime: waitingTime || next[idx].waitingTime };
+      next[idx] = { ...next[idx], roomId, id: roomId, waitingTime: waitingTime || next[idx].waitingTime, status };
       persist(next);
       return next;
     });
@@ -558,6 +559,19 @@ export const WaitingQueueProvider = ({ children }) => {
       setCallSeconds(Number(remainingTime || 0) * 60);
     };
 
+    // Global call:room / chat:room — assign roomId and set status to "ringing"
+    const handleGlobalCallRoom = (data) => {
+      if (data?.roomId) {
+        assignRoomId(data.roomId, data?.type || "audio", data?.waitingTime || 5, data?.status || "ringing");
+      }
+    };
+
+    const handleGlobalChatRoom = (data) => {
+      if (data?.roomId) {
+        assignRoomId(data.roomId, "chat", data?.waitingTime || 2, data?.status || "ringing");
+      }
+    };
+
     voiceSocket.on("call:astrologer_accepted", handleCallAstrologerAccepted);
     voiceSocket.on("chat:astrologer_accepted", handleChatAstrologerAccepted);
     voiceSocket.on("call:on_hold", handleCallOnHold);
@@ -571,6 +585,8 @@ export const WaitingQueueProvider = ({ children }) => {
     voiceSocket.on("call:rejected", handleRejected);
     voiceSocket.on("chat:rejected", handleRejected);
     voiceSocket.on("activity", handleActivity);
+    voiceSocket.on("call:room", handleGlobalCallRoom);
+    voiceSocket.on("chat:room", handleGlobalChatRoom);
     voiceSocket.on("session:active_list", handleActiveList);
     voiceSocket.on("session:canceled", handleSessionCanceled);
     voiceSocket.on("chat:accepted", handleGlobalChatAccepted);
@@ -590,6 +606,8 @@ export const WaitingQueueProvider = ({ children }) => {
       voiceSocket.off("call:rejected", handleRejected);
       voiceSocket.off("chat:rejected", handleRejected);
       voiceSocket.off("activity", handleActivity);
+      voiceSocket.off("call:room", handleGlobalCallRoom);
+      voiceSocket.off("chat:room", handleGlobalChatRoom);
       voiceSocket.off("session:active_list", handleActiveList);
       voiceSocket.off("session:canceled", handleSessionCanceled);
       voiceSocket.off("chat:accepted", handleGlobalChatAccepted);
