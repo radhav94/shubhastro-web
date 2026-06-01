@@ -1054,7 +1054,6 @@ const Profile = () => {
           place: formData.birthPlace,
           phoneNumber: formattedPhone,
           password: "TempPass@123",
-          email: `${formattedPhone}@shubhtalk.com`,
           gender: formData.identity.toLowerCase() === "others" ? "other" : formData.identity.toLowerCase(),
           languagePreferences: ["en"],
           role: "CUSTOMER",

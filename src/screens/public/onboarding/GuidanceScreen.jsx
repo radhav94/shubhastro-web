@@ -98,7 +98,6 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
         place: formData.birthPlace || "",
         phoneNumber: phoneNumber,
         password: "TempPass@123", // Temporary password - backend requires non-empty
-        email: formData.email || `${phoneNumber}@shubhtalk.com`, // Use user-provided email or generate from phone
         gender: formData.identity 
           ? formData.identity.toLowerCase() === "others" 
             ? "other" 
