@@ -211,7 +211,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
       // Regular call acceptance
       resetCallFlow();
       removePendingConnection(roomId);
-      const astro = activeCallAstroRef.current;
+      const astro = rest?.astrologer || activeCallAstroRef.current || {};
       const kundliId = kundliRef.current;
 
       try {
@@ -245,7 +245,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     }) => {
       setWaitingList(false);
       removePendingConnection(roomId);
-      const astro = activeCallAstroRef.current;
+      const astro = data?.astrologer || activeCallAstroRef.current || {};
       const kundliId = kundliRef.current;
 
       try {

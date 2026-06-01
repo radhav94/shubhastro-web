@@ -648,7 +648,7 @@ const Profile = () => {
       localStorage.removeItem("waitingState");
       removePendingConnection(roomId);
 
-      const astro = activeAstroRef.current;
+      const astro = data?.astrologer || activeAstroRef.current || {};
       const kundliId = selectedProfile?._id;
 
       try {
@@ -662,7 +662,7 @@ const Profile = () => {
           userId: userId,
           astrologerId: astrologerId,
           kundliId,
-          astrologerName: data?.astrologer?.firstName || "",
+          astrologerName: astro?.firstName || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
         });
@@ -677,10 +677,10 @@ const Profile = () => {
             roomId,
             isUserSide: true,
             kundliId,
-            astrologerName: data?.astrologer?.firstName || "",
-            astroID: data?.astrologer?.astrologer_ID,
-            experience: astro?.experience || data?.astrologer?.experience,
-            profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
+            astrologerName: astro?.firstName || "",
+            astroID: astro?.astrologer_ID,
+            experience: astro?.experience,
+            profileImgUrl: astro?.profileImgUrl,
           },
         });
       } catch (e) {
@@ -721,7 +721,7 @@ const Profile = () => {
       localStorage.removeItem("waitingState");
       removePendingConnection(roomId);
 
-      const astro = activeAstroRef.current;
+      const astro = rest?.astrologer || activeAstroRef.current;
       const kundliId = selectedProfile?._id;
 
       try {

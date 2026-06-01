@@ -201,20 +201,20 @@ const OrderDetails = () => {
     const handleChatAccepted = async ({ roomId, astrologerId: astroId, userId: uid, ...data }) => {
       setWaitingList(false);
       removePendingConnection(roomId);
-      const astro = activeAstroRef.current || astrologerData?.data;
+      const astro = data?.astrologer || activeAstroRef.current || astrologerData?.data || {};
       try {
         if (!roomId) throw new Error("Room ID missing");
         setActiveChat({
           roomId, chatRoomId: roomId,
           callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
           isUserSide: true, userId: uid, astrologerId: astroId,
-          astrologerName: data?.astrologer?.firstName || "",
+          astrologerName: astro?.firstName || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
         navigate(`/chat-to-astrologer/${astroId}`, {
-          state: { userId: uid, astrologerId: astroId, fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(), roomId, isUserSide: true, experience: astro?.experience || data?.astrologer?.experience },
+          state: { userId: uid, astrologerId: astroId, fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(), roomId, isUserSide: true, experience: astro?.experience },
         });
       } catch (e) {
         Toast.error("Failed to start chat");
@@ -224,9 +224,9 @@ const OrderDetails = () => {
     const handleCallAccepted = async ({ roomId, token, channelName, type, remainingTime, ...rest }) => {
       resetCallFlow();
       removePendingConnection(roomId);
-      const astro = activeAstroRef.current || astrologerData?.data;
+      const astro = rest?.astrologer || activeAstroRef.current || astrologerData?.data || {};
       try {
-        if (!astro) { Toast.error("Astrologer data missing"); return; }
+        if (!astro?._id) { Toast.error("Astrologer data missing"); return; }
         const res = await createChatRoom({ userId, astrologerId: astro._id });
         const chatRoomId = res?.data?.data;
         setActiveCall({

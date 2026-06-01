@@ -682,6 +682,10 @@ const TalkToAstrologer = () => {
       setActiveChatRoomId(data?.roomId);
       setWaitingList(data?.waitingTime || 2);
       assignRoomId(data?.roomId, "chat", data?.waitingTime || 2);
+      // Store astrologer details from socket data if available
+      if (data?.recieverDetail) {
+        activeCallAstroRef.current = data.recieverDetail;
+      }
     };
 
     const handleCallRoom = (data) => {
@@ -689,6 +693,10 @@ const TalkToAstrologer = () => {
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
       assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
+      // Store astrologer details from socket data if available
+      if (data?.recieverDetail) {
+        activeCallAstroRef.current = data.recieverDetail;
+      }
     };
 
     /* ===== TWO-WAY ACCEPT: Astrologer accepted, user must now accept/reject ===== */
@@ -816,7 +824,8 @@ const TalkToAstrologer = () => {
       // Only remove this specific connection from pending — keep others alive
       removePendingConnection(roomId);
 
-      const astro = activeCallAstroRef.current;
+      // Use astrologer from ref, fallback to socket payload
+      const astro = activeCallAstroRef.current || rest?.astrologer || rest?.recieverDetail;
       const kundliId = kundliRef.current;
 
       // Use channelName from server if provided, otherwise fall back to roomId
@@ -858,7 +867,7 @@ const TalkToAstrologer = () => {
       // Only remove this specific connection from pending — keep others alive
       removePendingConnection(roomId);
 
-      const astro = activeCallAstroRef.current;
+      const astro = data?.astrologer || activeCallAstroRef;
       const kundliId = kundliRef.current;
 
       try {

@@ -481,7 +481,7 @@ const AstrologerProfile = () => {
       localStorage.removeItem("waitingState");
       removePendingConnection(roomId);
 
-      const astro = activeCallAstroRef.current;
+      const astro = data?.astrologer || activeCallAstroRef.current || {};
       const kundliId = lastSelectedKundli?._id;
 
       try {
@@ -551,7 +551,7 @@ const AstrologerProfile = () => {
       localStorage.removeItem("waitingState");
       removePendingConnection(roomId);
 
-      const astro = activeCallAstroRef.current;
+      const astro = rest?.astrologer || activeCallAstroRef.current;
 
       try {
         if (!astro) {
