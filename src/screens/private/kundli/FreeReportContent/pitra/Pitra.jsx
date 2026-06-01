@@ -38,7 +38,11 @@ const Pitra = () => {
         <div className={styles.headerContent}>
           <h1 className={styles.headerTitle}>Pitra Dosh Analysis
             <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
-              <TTSButton text={`Pitra Dosh Analysis. ${[pitra?.bot_response].filter(Boolean).join('. ')}`} />
+             <TTSButton text={[
+              "Pitra Dosh Analysis",
+              `Dosh Present: ${pitra.is_dosha_present ? "Yes" : "No"}`,
+              pitra.bot_response || "",
+            ].filter(Boolean).join(". ")} />
             </span>
           </h1>
 

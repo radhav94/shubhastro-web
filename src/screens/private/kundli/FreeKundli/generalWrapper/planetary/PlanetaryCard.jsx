@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import PrimaryText from "../../../../../../component/PrimaryText";
 import TTSButton from "../../../../../../component/UI/TTSButton";
 import styles from "./Planetary.module.scss";
@@ -17,7 +17,7 @@ const PlanetaryCard = ({ planet }) => {
     );
   }
 
-  const safe = (value, fallback = "—") =>
+  const safe = (value, fallback = "") =>
     value !== undefined && value !== null && value !== "" ? value : fallback;
 
   const toggleShowMore = () => {
@@ -36,18 +36,47 @@ const PlanetaryCard = ({ planet }) => {
     return sentences.slice(0, 2).join(' ');
   };
 
-  const afflictionText = safe(planet.affliction);
+  const afflictionText = safe(planet.affliction, "—");
   const truncatedAffliction = getTruncatedText(afflictionText);
   const shouldShowAfflictionToggle = afflictionText !== "—" && afflictionText !== truncatedAffliction;
+
+  // Build TTS text from all card content (independent of showMore state)
+  const ttsText = useMemo(() => {
+    const parts = [];
+    
+    if (safe(planet.planet_considered)) {
+      parts.push(`${safe(planet.planet_considered)} Consideration.`);
+    }
+    if (safe(planet.planet_definitions)) {
+      parts.push(`Definition: ${safe(planet.planet_definitions)}`);
+    }
+    if (safe(planet.affliction)) {
+      parts.push(`Affliction: ${safe(planet.affliction)}`);
+    }
+    if (safe(planet.gayatri_mantra)) {
+      parts.push(`Gayatri Mantra: ${safe(planet.gayatri_mantra)}`);
+    }
+    if (safe(planet.general_prediction)) {
+      parts.push(`General Prediction: ${safe(planet.general_prediction)}`);
+    }
+    if (safe(planet.planet_zodiac_prediction)) {
+      parts.push(`Planet Zodiac Prediction: ${safe(planet.planet_zodiac_prediction)}`);
+    }
+    if (safe(planet.personalised_prediction)) {
+      parts.push(`Personalised Prediction: ${safe(planet.personalised_prediction)}`);
+    }
+
+    return parts.join(" ");
+  }, [planet]);
 
   return (
     <div className={styles.card}>
       {/* Title */}
       <div className={styles.cardHeader}>
         <h2 className={styles.cardTitle}>
-          {safe(planet.planet_considered)} Consideration
+          {safe(planet.planet_considered, "—")} Consideration
         </h2>
-        <TTSButton text={`${safe(planet.planet_considered)} Consideration. Definition: ${safe(planet.planet_definitions)}. Affliction: ${safe(planet.affliction)}. General Prediction: ${safe(planet.general_prediction)}`} />
+        <TTSButton text={ttsText} />
       </div>
 
       {/* Content - Always Visible */}
@@ -58,7 +87,7 @@ const PlanetaryCard = ({ planet }) => {
             Definition
           </h2>
           <p size_16 color="#555" className={styles.sectionContent}>
-            {safe(planet.planet_definitions)}
+            {safe(planet.planet_definitions, "—")}
           </p>
         </div>
         {/* Affliction */}
@@ -90,7 +119,7 @@ const PlanetaryCard = ({ planet }) => {
                 Gayatri Mantra
               </h2>
               <p color="#555" className={styles.sectionContent}>
-                {safe(planet.gayatri_mantra)}
+                {safe(planet.gayatri_mantra, "—")}
               </p>
             </div>
 
@@ -100,7 +129,7 @@ const PlanetaryCard = ({ planet }) => {
                 General Prediction
               </h2>
               <p color="#555" className={styles.sectionContent}>
-                {safe(planet.general_prediction)}
+                {safe(planet.general_prediction, "—")}
               </p>
             </div>
 
@@ -110,7 +139,7 @@ const PlanetaryCard = ({ planet }) => {
                 Planet Zodiac Prediction
               </h2>
               <p color="#555" className={styles.sectionContent}>
-                {safe(planet.planet_zodiac_prediction)}
+                {safe(planet.planet_zodiac_prediction, "—")}
               </p>
             </div>
 
@@ -120,7 +149,7 @@ const PlanetaryCard = ({ planet }) => {
                 Personalised Prediction
               </h2>
               <p color="#555" className={styles.sectionContent}>
-                {safe(planet.personalised_prediction)}
+                {safe(planet.personalised_prediction, "—")}
               </p>
             </div>
 
@@ -130,7 +159,7 @@ const PlanetaryCard = ({ planet }) => {
                 Long Qualities
               </h2>
               <p color="#555" className={styles.sectionContent}>
-                {safe(planet.qualities_long)}
+                {safe(planet.qualities_long, "—")}
               </p>
             </div>
             {/*Short  Qualities */}
@@ -139,7 +168,7 @@ const PlanetaryCard = ({ planet }) => {
                 short Qualities
               </h2>
               <p color="#555" className={styles.sectionContent}>
-                {safe(planet.qualities_short)}
+                {safe(planet.qualities_short, "—")}
               </p>
             </div>
 
@@ -149,7 +178,7 @@ const PlanetaryCard = ({ planet }) => {
                 Verbal Location
               </h2>
               <p color="#555" className={styles.sectionContent}>
-                {safe(planet.verbal_location)}
+                {safe(planet.verbal_location, "—")}
               </p>
             </div>
 
@@ -159,7 +188,7 @@ const PlanetaryCard = ({ planet }) => {
                 Zodiac Lord Location
               </h2>
               <p color="#555" className={styles.sectionContent}>
-                {safe(planet.zodiac_lord_location)}
+                {safe(planet.zodiac_lord_location, "—")}
               </p>
             </div>
 
@@ -169,7 +198,7 @@ const PlanetaryCard = ({ planet }) => {
                 Zodiac Lord Strength
               </h2>
               <p color="#555" className={styles.sectionContent}>
-                {safe(planet.zodiac_lord_strength)}
+                {safe(planet.zodiac_lord_strength, "—")}
               </p>
             </div>
 
