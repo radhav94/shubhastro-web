@@ -230,7 +230,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
       // Regular call acceptance
       resetCallFlow();
       removePendingConnection(roomId);
-      const astro = activeCallAstroRef.current;
+      const astro = rest?.astrologer || activeCallAstroRef.current || {};
       const kundliId = kundliRef.current;
 
       try {
@@ -263,7 +263,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
     }) => {
       setWaitingList(false);
       removePendingConnection(roomId);
-      const astro = activeCallAstroRef.current;
+      const astro = data?.astrologer || activeCallAstroRef.current || {};
       const kundliId = kundliRef.current;
 
       try {
