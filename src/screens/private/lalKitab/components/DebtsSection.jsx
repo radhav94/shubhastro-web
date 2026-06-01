@@ -94,30 +94,32 @@ const DebtsSection = ({ debts, isLoading }) => {
 
   return (
     <div className={styles.container}>
-      {selfData.indications?.length > 0 && (
-        <div className={styles.section}>
-          <h4 className={styles.sectionTitle}>⚠️ Indications</h4>
-          <ul className={styles.list}>
-            {selfData.indications.map((item, i) => <li key={i}>{item}</li>)}
-          </ul>
-        </div>
-      )}
-      {selfData.events?.length > 0 && (
-        <div className={styles.section}>
-          <h4 className={styles.sectionTitle}>📅 Events</h4>
-          <ul className={styles.list}>
-            {selfData.events.map((item, i) => <li key={i}>{item}</li>)}
-          </ul>
-        </div>
-      )}
-      {selfData.remedies?.length > 0 && (
-        <div className={styles.section}>
-          <h4 className={styles.sectionTitle}>🙏 Remedies</h4>
-          <ul className={styles.list}>
-            {selfData.remedies.map((item, i) => <li key={i}>{item}</li>)}
-          </ul>
-        </div>
-      )}
+      <div className={styles.detailCard}>
+        {selfData.indications?.length > 0 && (
+          <div className={styles.section}>
+            <h4 className={styles.sectionTitle}>⚠️ Indications</h4>
+            <ul className={styles.list}>
+              {selfData.indications.map((item, i) => <li key={i}>{item}</li>)}
+            </ul>
+          </div>
+        )}
+        {selfData.events?.length > 0 && (
+          <div className={styles.section}>
+            <h4 className={styles.sectionTitle}>📅 Events</h4>
+            <ul className={styles.list}>
+              {selfData.events.map((item, i) => <li key={i}>{item}</li>)}
+            </ul>
+          </div>
+        )}
+        {selfData.remedies?.length > 0 && (
+          <div className={styles.section}>
+            <h4 className={styles.sectionTitle}>🙏 Remedies</h4>
+            <ul className={styles.list}>
+              {selfData.remedies.map((item, i) => <li key={i}>{item}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
