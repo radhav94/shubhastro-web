@@ -177,10 +177,10 @@ const Footer = () => {
           <p className={styles.v2_contactText}>Have questions?</p>
           <a href="mailto:support@shubhtalk.ai" className={styles.v2_emailLink}>support@shubhtalk.ai</a>
           <p className={styles.v2_contactText}>Or call us at</p>
-          <a href="tel:+911234567890" className={styles.v2_contactText}>+91 12345 67890</a>
+          <a href="tel:+918655682877" className={styles.v2_contactText}>+91 86556 82877</a>
           <h4 className={`${styles.v2_phoneLink}`}>Registered Company Address</h4>
           <p className={styles.v2_contactText}>
-            9th Floor, Vaibhav Chambers, Opp Income Tax Office Bandra - Kurla Complex, Bandra (East), Mumbai, Maharashtra, India, 400051
+            Raheja District I, B3 & B4, RICC, Plot Gen-2/1/B, D Block, T.T.C. Industrial Area, Juinagar, Navi Mumbai, Maharashtra 400705
           </p>
           <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
           <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
@@ -216,10 +216,10 @@ const Footer = () => {
           <p className={styles.v2_contactText}>Have questions?</p>
           <a href="mailto:support@shubhtalk.ai" className={styles.v2_emailLink}>support@shubhtalk.ai</a>
           <p className={styles.v2_contactText}>Or call us at</p>
-          <a href="tel:+911234567890" className={styles.v2_contactText}>+91 12345 67890</a>
+          <a href="tel:+918655682877" className={styles.v2_contactText}>+91 86556 82877</a>
           <h4 className={`${styles.v2_phoneLink} `}>Registered Company Address</h4>
           <p className={styles.v2_contactText}>
-            9th Floor, Vaibhav Chambers, Opp Income Tax Office Bandra - Kurla Complex, Bandra (East), Mumbai, Maharashtra, India, 400051
+            Raheja District I, B3 & B4, RICC, Plot Gen-2/1/B, D Block, T.T.C. Industrial Area, Juinagar, Navi Mumbai, Maharashtra 400705
           </p>
           <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
           <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
