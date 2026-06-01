@@ -70,10 +70,10 @@ $floating-button-gap: 14px;
 }
 /* PAGE WRAPPER */
 .chatPage {
-  height: calc(100dvh - 90px);
+  height: calc(100dvh - 53px);
   max-width: 1440px;
   // padding: 0 16px;
-  background: #fff;
+  // background: #fff;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -81,9 +81,13 @@ $floating-button-gap: 14px;
   @media (width <= 1180px) {
     height: calc(100dvh - 53px);
   }
-  @media (width <= 767px) {
-    height: calc(100dvh - 53px);
-  }
+  // @media (width <= 767px) {
+  //   height: calc(100dvh - 20px);
+  //   // &:has(.header,.callButtonsContainer){
+  //   //   height: calc(100dvh - 52px);
+  //   // }
+  // }
+  
 }
 
 /* CHAT CONTAINER */
@@ -372,7 +376,7 @@ $floating-button-gap: 14px;
 .messages {
   height: 100%;
   overflow-y: auto;
-  padding: $spacing-xxxl;
+  padding: 16px 16px 50px 16px;
   display: flex;
   flex-direction: column;
   gap: $message-group-gap;
@@ -439,7 +443,7 @@ $floating-button-gap: 14px;
 
 .dateText {
   font-size: 13px;
-  color: $text-date-header;
+  color: $bg-footer;
   background: transparent;
   padding: 0;
   font-weight: 400;
@@ -1056,7 +1060,8 @@ $floating-button-gap: 14px;
   display: flex;
   align-items: center;
   gap: $spacing-xl;
-  background: $bg-input-bar;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
   border-top: none;
   flex-shrink: 0;
 }
@@ -1065,7 +1070,7 @@ $floating-button-gap: 14px;
   flex: 1;
   display: flex;
   align-items: center;
-  background: $bg-input-field;
+  // background: $bg-input-field;
   border-radius: 32px;
   // padding: 0 12px;
   box-shadow: none;
@@ -1078,18 +1083,18 @@ $floating-button-gap: 14px;
   height: 100%;
   padding: 0 25px;
   border: none;
-  font-size: 15px;
+  font-size: 16px;
   outline: none;
-  color: $text-black;
+  color: #000;
   border-radius: 16px;
   border: 1px solid #FFD6A8;
   background: rgba(255, 247, 237, 0.50);
 }
 
 .inputField::placeholder {
-  color: $placeholder-color;
-  font-size: 15px;
+  color: $bg-footer;
   font-weight: 300;
+  font-size: 16px;
 }
 
 .inputIcons {
@@ -1424,7 +1429,7 @@ $floating-button-gap: 14px;
   }
 
   .messages {
-    padding: $spacing-xl;
+    padding: 16px 16px 30px 16px;
     gap: $message-gap;
     height: 100%;
     overflow-y: auto;
@@ -1480,14 +1485,14 @@ $floating-button-gap: 14px;
 
   .inputField {
     height: 100%;
-    font-size: 14px;
+    font-size: 16px;
     flex: 1;
     min-width: 0;
   }
 
   .inputField::placeholder {
-    font-size: 14px;
-    color: #b8b8b8;
+    font-size: 16px;
+    color: $bg-footer;
   }
 
   .inputIcons {
