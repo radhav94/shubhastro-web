@@ -69,7 +69,9 @@ const ShaniReport = () => {
           >
             <span>Understanding Shani Sade Sati</span>
             <span className={styles.ttsWrap}>
-              <TTSButton text={`Understanding Shani Sade Sati. ${description}`} />
+              <span onClick={(e) => e.stopPropagation()}>
+                <TTSButton text={`Understanding Shani Sade Sati. ${description}`} />
+              </span>
               <svg
                 className={`${styles.chevron} ${aboutOpen ? styles.chevronOpen : ""}`}
                 width="22"

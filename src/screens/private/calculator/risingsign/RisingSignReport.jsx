@@ -72,7 +72,9 @@ const RisingSignReport = () => {
           >
             <span>About Your Ascendant</span>
             <span className={styles.ttsWrap}>
-              <TTSButton text={`About Your Ascendant. ${prediction || ''} ${bot_response || ''}`} />
+              <span onClick={(e) => e.stopPropagation()}>
+                <TTSButton text={`About Your Ascendant. ${prediction || ''} ${bot_response || ''}`} />
+              </span>
               <svg
                 className={`${styles.chevron} ${aboutOpen ? styles.chevronOpen : ""}`}
                 width="22"

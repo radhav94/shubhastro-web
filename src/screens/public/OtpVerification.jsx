@@ -21,8 +21,16 @@ const OtpVerification = () => {
   const [otp, setOtp] = useState("");
   const [counter, setCounter] = useState(120);
   const [isTimerActive, setIsTimerActive] = useState(true);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const isOtpComplete = otp.length === 6;
+
+  // Auto-submit when OTP is fully filled (e.g., SMS autofill on iOS)
+  useEffect(() => {
+    if (isOtpComplete && !isVerifying) {
+      handleVerifyOtp({ preventDefault: () => {} });
+    }
+  }, [otp]);
 
 // const handleVerifyOtp = async (event) => {
 //   event.preventDefault();
@@ -83,6 +91,8 @@ const OtpVerification = () => {
 
 const handleVerifyOtp = async (event) => {
   event.preventDefault();
+  if (isVerifying) return;
+  setIsVerifying(true);
 
   const fcmTokens = await requestFCMToken();
 
@@ -159,6 +169,8 @@ const handleVerifyOtp = async (event) => {
     Toast.error(error?.response?.data?.message || "OTP verification failed");
     // Clear OTP input on error
     setOtp("");
+  } finally {
+    setIsVerifying(false);
   }
 };
 

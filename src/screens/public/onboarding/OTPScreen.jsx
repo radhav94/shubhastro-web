@@ -23,6 +23,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [resendTimer, setResendTimer] = useState(20);
   const [loading, setLoading] = useState(false);
+  const handleContinueRef = useRef(null);
   const inputRefs = [
     useRef(),
     useRef(),
@@ -32,6 +33,27 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     useRef(),
   ];
 
+  // Web OTP API - auto-read OTP from SMS
+  useEffect(() => {
+    if ("OTPCredential" in window) {
+      const ac = new AbortController();
+      navigator.credentials
+        .get({ otp: { transport: ["sms"] }, signal: ac.signal })
+        .then((otpCredential) => {
+          if (otpCredential?.code) {
+            const digits = otpCredential.code.split("");
+            setOtp(digits);
+            // Auto-submit after filling
+            setTimeout(() => {
+              handleContinueRef.current?.();
+            }, 300);
+          }
+        })
+        .catch(() => {});
+      return () => ac.abort();
+    }
+  }, []);
+
   useEffect(() => {
     if (resendTimer > 0) {
       const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
@@ -40,7 +62,16 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   }, [resendTimer]);
 
   const handleChange = (index, value) => {
-    if (value.length > 1) value = value[0];
+    // Handle paste of full OTP
+    if (value.length > 1) {
+      const digits = value.replace(/\D/g, "").slice(0, 6).split("");
+      if (digits.length === 6) {
+        setOtp(digits);
+        inputRefs[5].current?.focus();
+        return;
+      }
+      value = value[0];
+    }
     if (!/^\d*$/.test(value)) return;
 
     const newOtp = [...otp];
@@ -49,6 +80,15 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
     if (value && index < 5) {
       inputRefs[index + 1].current.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pastedData.length === 6) {
+      setOtp(pastedData.split(""));
+      inputRefs[5].current?.focus();
     }
   };
 
@@ -196,6 +236,16 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     }
   };
 
+  // Keep ref updated for Web OTP auto-submit
+  handleContinueRef.current = handleContinue;
+
+  // Auto-submit when all 6 digits are filled
+  useEffect(() => {
+    if (otp.join("").length === 6 && !loading) {
+      handleContinue();
+    }
+  }, [otp]);
+
   const handleResend = async () => {
     if (resendTimer === 0) {
       try {
@@ -266,12 +316,14 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
               key={index}
               ref={inputRefs[index]}
               type="text"
+              autoComplete={index === 0 ? "one-time-code" : "off"}
               autoFocus={index === 0}
               inputMode="numeric"
               maxLength={1}
               value={digit}
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
+              onPaste={handlePaste}
               className={styles.otpInput}
             />
           ))}
