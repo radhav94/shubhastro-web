@@ -289,8 +289,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           pendingMessageRef.current = null;
           sendTextRef.current?.(pending);
         } else {
-          // Send default message with kundli id when chat is accepted with no pending input
-          sendTextRef.current?.("", { kundliId: selectedKundli?._id || null });
+          // Send default "Hi" message with kundli id when chat is accepted with no pending input
+          sendTextRef.current?.("Hi", { kundliId: selectedKundli?._id || null, silent: true });
         }
       }
     };
@@ -440,7 +440,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       setSending(true);
       const selectedLanguage = getLanguageMeta(lang);
 
-      if (trimmedText) {
+      if (trimmedText && !options.silent) {
         const userMsg = {
           _id: `user-${Date.now()}`,
           text: trimmedText,
