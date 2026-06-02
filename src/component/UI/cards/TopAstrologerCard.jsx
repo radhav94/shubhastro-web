@@ -6,7 +6,7 @@ import { getAstrologerDefaultImage } from "../../../utils/appImages";
 
 const TopAstrologerCard = ({ data, onConnect }) => {
   // Handle rating - use rating field or default to 4.5
-  const rating = data?.rating || 4.5;
+  const rating = data?.rating || 0;
 
   // Handle experience - convert to number if string
   const experience = parseInt(data?.experience) || 0;
