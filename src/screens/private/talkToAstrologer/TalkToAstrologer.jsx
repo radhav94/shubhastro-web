@@ -856,6 +856,7 @@ const TalkToAstrologer = () => {
           remainingTime,
           experience: astro?.experience,
           isEmergency: rest?.isEmergency || false,
+          profileImgUrl: astro?.profileImgUrl || rest?.astrologer?.profileImgUrl,
         });
       } catch {
         Toast.error("Failed to start call");
@@ -892,6 +893,7 @@ const TalkToAstrologer = () => {
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
+          profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 
