@@ -53,7 +53,7 @@ const ChatWindow = () => {
     refreshKey,
     astroID,
     experience,
-    profileImgUrl
+    profileImgUrl: stateProfileImgUrl
   } = state || {};
   // console.log('kundliId in chat', kundliId)
 
@@ -66,6 +66,14 @@ const ChatWindow = () => {
   const [isEnding, setIsEnding] = useState(false);
   const [showEndChatConfirm, setShowEndChatConfirm] = useState(false);
   const { activeChat, isReconnecting } = useChatContext();
+
+  // Resolve profileImgUrl: prefer route state, fallback to activeChat context or query param
+  const profileImgUrl = stateProfileImgUrl || activeChat?.profileImgUrl || (() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("profileImgUrl") || "";
+    } catch { return ""; }
+  })();
 
   // Check if there's an active call (audio or video)
   const isVideoCallActive = activeCall && activeCall.callType === "video" && !isCallMinimized;
@@ -129,6 +137,7 @@ const ChatWindow = () => {
     isUserSide,
     astroID,
     experience,
+    profileImgUrl,
   });
 
   // Use global waiting list from CallContext
