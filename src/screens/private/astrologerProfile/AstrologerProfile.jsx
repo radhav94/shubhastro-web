@@ -795,7 +795,7 @@ const AstrologerProfile = () => {
     },
     
     description:
-      data?.achievements?.[0]?.achievementName ||
+      data?.description ||
       "",
     // OLD: dummy/static gallery data
     // gallery:

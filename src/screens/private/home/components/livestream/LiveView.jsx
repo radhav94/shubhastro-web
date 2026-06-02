@@ -1169,26 +1169,28 @@ const LiveView = (props) => {
                     </svg>
                   </div>
                 )}
-                <button className="live-grid-btn" onClick={async () => {
-                  try {
-                    const res = await getAstrologerLiveList();
-                    const all = res.data?.data || [];
-                    const valid = all.filter((l) => l.astrologer && l.astrologer.firstName);
-                    setLiveListData(valid);
-                    setShowLiveList(true);
-                    scrollDisabledRef.current = true;
-                    if (props.giftPopupOpenRef) props.giftPopupOpenRef.current = true;
-                  } catch (err) {
-                    console.error("Failed to fetch live list:", err);
-                  }
-                }} aria-label="View all live astrologers">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="3" y="3" width="8" height="8" rx="2" />
-                    <rect x="13" y="3" width="8" height="8" rx="2" />
-                    <rect x="3" y="13" width="8" height="8" rx="2" />
-                    <rect x="13" y="13" width="8" height="8" rx="2" />
-                  </svg>
-                </button>
+                {!localPrivateCall && (
+                  <button className="live-grid-btn" onClick={async () => {
+                    try {
+                      const res = await getAstrologerLiveList();
+                      const all = res.data?.data || [];
+                      const valid = all.filter((l) => l.astrologer && l.astrologer.firstName);
+                      setLiveListData(valid);
+                      setShowLiveList(true);
+                      scrollDisabledRef.current = true;
+                      if (props.giftPopupOpenRef) props.giftPopupOpenRef.current = true;
+                    } catch (err) {
+                      console.error("Failed to fetch live list:", err);
+                    }
+                  }} aria-label="View all live astrologers">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="3" y="3" width="8" height="8" rx="2" />
+                      <rect x="13" y="3" width="8" height="8" rx="2" />
+                      <rect x="3" y="13" width="8" height="8" rx="2" />
+                      <rect x="13" y="13" width="8" height="8" rx="2" />
+                    </svg>
+                  </button>
+                )}
               </div>
             )}
           </div>
