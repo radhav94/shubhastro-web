@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { voiceSocket } from "../../services/voiceSocketServices";
+import { useLazyGetWalletBalanceQuery } from "../../redux/api/wallet/walletApi";
 
 /**
  * Hook that manages the AI free-minutes state machine.
@@ -31,6 +32,18 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
 
   const roomIdRef = useRef(roomId);
   roomIdRef.current = roomId;
+
+  // Fetch wallet balance on open
+  const [getWalletBalance] = useLazyGetWalletBalanceQuery();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    getWalletBalance().then((res) => {
+      if (res?.data?.data !== undefined && !isNaN(res.data.data)) {
+        setWalletBalance(Number(res.data.data));
+      }
+    });
+  }, [isOpen, getWalletBalance]);
 
   // Local countdown interval (ticks every second)
   useEffect(() => {
@@ -66,6 +79,10 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       if (data.ratePerMinute !== undefined) setRatePerMinute(data.ratePerMinute);
       if (data.remainingTime !== undefined) {
         setRemainingPaidTime(data.remainingTime * 60);
+      }
+      // Extract ratePerMinute from astrologer pricing if not directly provided
+      if (!data.ratePerMinute && data.astrologer?.price?.chatRate?.amount) {
+        setRatePerMinute(data.astrologer.price.chatRate.amount);
       }
     };
 
@@ -160,6 +177,10 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       if (data.walletBalance !== undefined) setWalletBalance(data.walletBalance);
       if (data.ratePerMinute !== undefined) setRatePerMinute(data.ratePerMinute);
       if (data.remainingTime !== undefined) setRemainingPaidTime(data.remainingTime * 60);
+      // Extract ratePerMinute from astrologer pricing if not directly provided
+      if (!data.ratePerMinute && data.astrologer?.price?.chatRate?.amount) {
+        setRatePerMinute(data.astrologer.price.chatRate.amount);
+      }
     };
 
     const handleError = (data) => {

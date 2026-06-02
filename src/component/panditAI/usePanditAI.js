@@ -289,8 +289,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           pendingMessageRef.current = null;
           sendTextRef.current?.(pending);
         } else {
-          // Send default automated "Hi" message when chat is accepted with no pending input
-          sendTextRef.current?.("Hi", { kundliId: selectedKundli?._id || null });
+          // Send default message with kundli id when chat is accepted with no pending input
+          sendTextRef.current?.("", { kundliId: selectedKundli?._id || null });
         }
       }
     };
@@ -429,28 +429,30 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   const sendText = useCallback(
     (text, options = {}) => {
       const trimmedText = text.trim();
-      if (!trimmedText) return;
+      if (!trimmedText && !options.kundliId) return;
 
       const currentRoomId = roomIdRef.current;
       if (!currentRoomId) {
-        pendingMessageRef.current = trimmedText;
+        if (trimmedText) pendingMessageRef.current = trimmedText;
         return;
       }
 
       setSending(true);
       const selectedLanguage = getLanguageMeta(lang);
 
-      const userMsg = {
-        _id: `user-${Date.now()}`,
-        text: trimmedText,
-        sender: "user",
-        createdAt: new Date().toISOString(),
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-      setMessages((prev) => [...prev, userMsg]);
+      if (trimmedText) {
+        const userMsg = {
+          _id: `user-${Date.now()}`,
+          text: trimmedText,
+          sender: "user",
+          createdAt: new Date().toISOString(),
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        };
+        setMessages((prev) => [...prev, userMsg]);
+      }
 
       if (voiceSocket.connected) {
         const kundliId = options.kundliId !== undefined ? options.kundliId : (selectedKundli?._id || null);
