@@ -24,7 +24,6 @@ const footerLinkSections = [
   {
     label: "Important Links",
     links: [
-      { path: "/shubh-muhurat-2026", title: "Shubh Muhurat 2026" },
       { path: "/naam-karan-muhurat", title: "NaamKaran Muhurat 2026" },
       { path: "/marriage-muhurat", title: "Marriage Muhurat 2026" },
       { path: "/bhoomi-pujan-muhurat", title: "Bhoomi Pujan Muhurat 2026" },

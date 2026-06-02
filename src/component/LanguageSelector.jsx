@@ -3,28 +3,41 @@ import styles from "./LanguageSelector.module.scss";
 
 const supportedLanguages = [
   { code: "en", name: "English" },
-  { code: "hi", name: "Hindi" },
-  { code: "mr", name: "Marathi" },
-  { code: "kn", name: "Kannada" },
-  { code: "bn", name: "Bengali" },
-  { code: "ta", name: "Tamil" },
-  { code: "te", name: "Telugu" },
-  { code: "ml", name: "Malayalam" },
-  { code: "ar", name: "Arabic" },
-  { code: "cs", name: "Czech" },
-  { code: "da", name: "Danish" },
-  { code: "fr", name: "French" },
-  { code: "de", name: "German" },
-  { code: "id", name: "Indonesian" },
-  { code: "it", name: "Italian" },
-  { code: "ms", name: "Malay" },
-  { code: "my", name: "Myanmar (Burmese)" },
-  { code: "pl", name: "Polish" },
-  { code: "es", name: "Spanish" },
-  { code: "sv", name: "Swedish" },
-  { code: "th", name: "Thai" },
-  { code: "tr", name: "Turkish" },
+  { code: "hi", name: "हिन्दी" },
+  { code: "mr", name: "मराठी" },
+  { code: "bn", name: "বাংলা" },
+  { code: "te", name: "తెలుగు" },
+  { code: "ta", name: "தமிழ்" },
+  { code: "kn", name: "ಕನ್ನಡ" },
+  { code: "gu", name: "ગુજરાતી" },
+  { code: "pa", name: "ਪੰਜਾਬੀ" },
+  { code: "ml", name: "മലയാളം" },
+  { code: "or", name: "ଓଡ଼ିଆ" },
 ];
+
+// Language names translated into each supported language
+const langNamesMap = {
+  en: { en: "English", hi: "हिन्दी", mr: "मराठी", bn: "বাংলা", te: "తెలుగు", ta: "தமிழ்", kn: "ಕನ್ನಡ", gu: "ગુજરાતી", pa: "ਪੰਜਾਬੀ", ml: "മലയാളം", or: "ଓଡ଼ିଆ" },
+  hi: { en: "English", hi: "हिन्दी", mr: "मराठी", bn: "বাংলা", te: "తెలుగు", ta: "தமிழ்", kn: "ಕನ್ನಡ", gu: "ગુજરાતી", pa: "ਪੰਜਾਬੀ", ml: "മലയാളം", or: "ଓଡ଼ିଆ" },
+  mr: { en: "English", hi: "हिन्दी", mr: "मराठी", bn: "বাংলা", te: "తెలుగు", ta: "தமிழ்", kn: "ಕನ್ನಡ", gu: "ગુજરાતી", pa: "ਪੰਜਾਬੀ", ml: "മലയാളം", or: "ଓଡ଼ିଆ" },
+  bn: { en: "English", hi: "हिन्दी", mr: "मराठी", bn: "বাংলা", te: "తెలుగు", ta: "தமிழ்", kn: "ಕನ್ನಡ", gu: "ગુજરાતી", pa: "ਪੰਜਾਬੀ", ml: "മലയാളം", or: "ଓଡ଼ିଆ" },
+  te: { en: "English", hi: "हिन्दी", mr: "मराठी", bn: "বাংলা", te: "తెలుగు", ta: "தமிழ்", kn: "ಕನ್ನಡ", gu: "ગુજરાતી", pa: "ਪੰਜਾਬੀ", ml: "മലയാളം", or: "ଓଡ଼ିଆ" },
+  ta: { en: "English", hi: "हिन्दी", mr: "मराठी", bn: "বাংলা", te: "తెలుగు", ta: "தமிழ்", kn: "ಕನ್ನಡ", gu: "ગુજરાતી", pa: "ਪੰਜਾਬੀ", ml: "മലയാളം", or: "ଓଡ଼ିଆ" },
+  kn: { en: "English", hi: "हिन्दी", mr: "मराठी", bn: "বাংলা", te: "తెలుగు", ta: "தமிழ்", kn: "ಕನ್ನಡ", gu: "ગુજરાતી", pa: "ਪੰਜਾਬੀ", ml: "മലയാളം", or: "ଓଡ଼ିଆ" },
+  gu: { en: "English", hi: "हिन्दी", mr: "मराठी", bn: "বাংলা", te: "తెలుగు", ta: "தமிழ்", kn: "ಕನ್ನಡ", gu: "ગુજરાતી", pa: "ਪੰਜਾਬੀ", ml: "മലയാളം", or: "ଓଡ଼ିଆ" },
+  pa: { en: "English", hi: "हिन्दी", mr: "मराठी", bn: "বাংলা", te: "తెలుగు", ta: "தமிழ்", kn: "ಕನ್ನಡ", gu: "ગુજરાતી", pa: "ਪੰਜਾਬੀ", ml: "മലയാളം", or: "ଓଡ଼ିଆ" },
+  ml: { en: "English", hi: "हिन्दी", mr: "मराठी", bn: "বাংলা", te: "తెలుగు", ta: "தமிழ்", kn: "ಕನ್ನಡ", gu: "ગુજરાતી", pa: "ਪੰਜਾਬੀ", ml: "മലയാളം", or: "ଓଡ଼ିଆ" },
+  or: { en: "English", hi: "हिन्दी", mr: "मराठी", bn: "বাংলা", te: "తెలుగు", ta: "தமிழ்", kn: "ಕನ್ನಡ", gu: "ગુજરાતી", pa: "ਪੰਜਾਬੀ", ml: "മലയാളം", or: "ଓଡ଼ିଆ" },
+};
+
+// Get the display name for a language based on the currently selected language
+const getLocalizedName = (langCode, selectedLangCode) => {
+  const map = langNamesMap[selectedLangCode];
+  if (map && map[langCode]) return map[langCode];
+  // Fallback to English names
+  const lang = supportedLanguages.find((l) => l.code === langCode);
+  return lang ? lang.name : langCode;
+};
 
 const LanguageSelector = ({ style, className }) => {
   const [langOpen, setLangOpen] = useState(false);
@@ -65,13 +78,7 @@ const LanguageSelector = ({ style, className }) => {
 
     const currentLangCode = getCurrentLang();
     setSelectedLang(currentLangCode);
-
-    const currentLang = supportedLanguages.find(
-      (lang) => lang.code === currentLangCode
-    );
-    if (currentLang) {
-      setActiveLang(currentLang.name);
-    }
+    setActiveLang(getLocalizedName(currentLangCode, currentLangCode));
   }, []);
 
   const handleLanguageChange = (targetLang) => {
@@ -134,12 +141,7 @@ const LanguageSelector = ({ style, className }) => {
     }
 
     setSelectedLang(targetLang);
-    const selectedLanguage = supportedLanguages.find(
-      (lang) => lang.code === targetLang
-    );
-    if (selectedLanguage) {
-      setActiveLang(selectedLanguage.name);
-    }
+    setActiveLang(getLocalizedName(targetLang, targetLang));
     setLangOpen(false);
 
     window.dispatchEvent(
@@ -224,7 +226,7 @@ const LanguageSelector = ({ style, className }) => {
             }`}
             onClick={() => handleLanguageChange(lang.code)}
           >
-            {lang.name}
+            {getLocalizedName(lang.code, selectedLang)}
             {lang.code === selectedLang && <span>✓</span>}
           </p>
         ))}
