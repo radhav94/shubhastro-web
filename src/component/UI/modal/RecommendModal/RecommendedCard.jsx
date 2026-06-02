@@ -4,7 +4,7 @@ import { PiBookOpenTextLight } from "react-icons/pi";
 import { getAstrologerDefaultImage } from "../../../../utils/appImages";
 
 const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall, mode }) => {
-  const rating = astro?.rating || 4.5;
+  const rating = astro?.rating || 0;
   const experience = parseInt(astro?.experience) || 0;
   const fullName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
 
