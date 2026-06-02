@@ -238,10 +238,7 @@ const PanditAIBubble = () => {
               </div>
               <div className={styles.headerCopy}>
                 <h4 className={styles.headerName}>Pandit AI</h4>
-                <span className={styles.headerStatus}>
-                  <span className={styles.statusDot} />
-                  {sending ? "Typing..." : "AI Assistant"}
-                </span>
+                {sending && <span className={styles.headerStatus}>Typing...</span>}
               </div>
             </div>
             <div className={styles.headerActions}>
@@ -256,19 +253,31 @@ const PanditAIBubble = () => {
               )}
               {remainingPaidTime != null && !sessionEndedLowBalance && (
                 <div className={styles.countdownBadge}>
-                  <div className={styles.countdownTime}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"/>
-                      <polyline points="12 6 12 12 16 14"/>
-                    </svg>
-                    <span>{Math.floor(remainingPaidTime / 3600) > 0 ? `${String(Math.floor(remainingPaidTime / 3600)).padStart(2, "0")}:` : ""}{String(Math.floor((remainingPaidTime % 3600) / 60)).padStart(2, "0")}:{String(remainingPaidTime % 60).padStart(2, "0")}</span>
-                  </div>
-                  {ratePerMinute && (
-                    <>
-                      <span className={styles.countdownDivider} />
-                      <span className={styles.countdownRate}>₹{ratePerMinute}/min</span>
-                    </>
+                  {walletBalance != null && (
+                    <span className={styles.countdownBalance}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2"/>
+                        <path d="M16 12h.01"/>
+                        <path d="M2 10h20"/>
+                      </svg>
+                      ₹{walletBalance}
+                    </span>
                   )}
+                  <div className={styles.countdownRow}>
+                    <div className={styles.countdownTime}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                      </svg>
+                      <span>{String(Math.floor(remainingPaidTime / 3600)).padStart(2, "0")}:{String(Math.floor((remainingPaidTime % 3600) / 60)).padStart(2, "0")}</span>
+                    </div>
+                    {ratePerMinute && (
+                      <>
+                        <span className={styles.countdownDivider} />
+                        <span className={styles.countdownRate}>₹{ratePerMinute}/min</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
               <button

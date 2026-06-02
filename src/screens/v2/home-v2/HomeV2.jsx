@@ -13,6 +13,7 @@ import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
+import WelcomeBonusModal from "../../../component/UI/modal/WelcomeBonusModal/WelcomeBonusModal";
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
@@ -423,6 +424,7 @@ const HomeV2 = () => {
   return (
     <>
       <SeoHelmet data={newHomeData?.data} />
+      <WelcomeBonusModal />
       <div className={styles.page}>
         {renderPlan.map((block, idx) => {
           switch (block.type) {

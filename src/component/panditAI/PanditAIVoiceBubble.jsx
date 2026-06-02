@@ -32,6 +32,7 @@ const PanditAIVoiceBubble = () => {
     remainingPaidTime,
     showRechargeBanner,
     rechargeBannerMessage,
+    walletBalance,
     ratePerMinute,
     sessionEndedLowBalance,
   } = useAIFreeMinutes({ isOpen, roomId });
@@ -117,7 +118,7 @@ const PanditAIVoiceBubble = () => {
               <h4 className={styles.headerName}>Pandit AI (Voice)</h4>
               <span className={styles.headerStatus}>
                 <span className={styles.statusDot} />
-                {connecting ? "Connecting..." : status === "processing" ? "Thinking..." : "AI Assistant"}
+                {connecting ? "Connecting..." : status === "processing" ? "Thinking..." : ""}
               </span>
             </div>
           </div>
@@ -131,6 +132,9 @@ const PanditAIVoiceBubble = () => {
                 <span>{freeMinutesRemaining} min free</span>
               </div>
             )}
+            {walletBalance != null && (
+              <span className={styles.walletBadge}>₹{walletBalance}</span>
+            )}
             {remainingPaidTime != null && !sessionEndedLowBalance && (
               <div className={styles.countdownBadge}>
                 <div className={styles.countdownTime}>
@@ -138,7 +142,7 @@ const PanditAIVoiceBubble = () => {
                     <circle cx="12" cy="12" r="10"/>
                     <polyline points="12 6 12 12 16 14"/>
                   </svg>
-                  <span>{Math.floor(remainingPaidTime / 3600) > 0 ? `${String(Math.floor(remainingPaidTime / 3600)).padStart(2, "0")}:` : ""}{String(Math.floor((remainingPaidTime % 3600) / 60)).padStart(2, "0")}:{String(remainingPaidTime % 60).padStart(2, "0")}</span>
+                  <span>{String(Math.floor(remainingPaidTime / 3600)).padStart(2, "0")}:{String(Math.floor((remainingPaidTime % 3600) / 60)).padStart(2, "0")}</span>
                 </div>
                 {ratePerMinute && (
                   <>

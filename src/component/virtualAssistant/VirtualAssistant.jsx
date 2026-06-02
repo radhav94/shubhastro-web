@@ -138,7 +138,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onC
   const handleCameraPreviewSend = async () => { if (!cameraPreview || isSending) return; setIsSending(true); try { sendImage(cameraPreview.blob); URL.revokeObjectURL(cameraPreview.url); setCameraPreview(null); } finally { setIsSending(false); } };
   const handleCameraRetake = () => { URL.revokeObjectURL(cameraPreview?.url); setCameraPreview(null); setCameraOpen(true); };
 
-  const formatTime = (dateStr) => dayjs(dateStr).format("hh:mm A");
+  const formatTime = (dateStr) => dayjs(dateStr).format("HH:mm");
 
   return (
     <>
