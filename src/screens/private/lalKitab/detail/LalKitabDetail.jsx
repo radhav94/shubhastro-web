@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import styles from "./LalKitabDetail.module.scss";
@@ -8,6 +8,10 @@ import {
   useGetLalKitabDebtsQuery,
   useLazyGetLalKitabPdfQuery,
 } from "../../../../redux/api/lalKitab/lalKitabApi";
+import { useLazyGetChargesQuery } from "../../../../redux/api/aiwow/aiwowApi";
+import { useWalletBalance } from "../../wallet/useWalletBalance";
+import { FiDownload } from "react-icons/fi";
+import DownloadReportModal from "../../aiwow/components/DownloadReportModal";
 import ChartSection from "../components/ChartSection";
 import HousesGrid from "../components/HousesGrid";
 import PlanetDetailsAccordion from "../components/PlanetDetailsAccordion";
@@ -79,9 +83,37 @@ const LalKitabDetail = () => {
 
   const isAnyLoading = planetLoading || debtsLoading || chartLoading;
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [triggerGetPdf] = useLazyGetLalKitabPdfQuery();
+  const [triggerGetCharges, { data: chargesData }] = useLazyGetChargesQuery();
+  const { balance: walletBalance, refreshWallet } = useWalletBalance();
 
-  const handleDownload = async () => {
+  // Fetch charges on mount to display dynamic price
+  useEffect(() => {
+    triggerGetCharges();
+  }, []);
+
+  // Get download price from charges API data
+  const getDownloadCost = () => {
+    const charges = chargesData?.data;
+    if (!charges) return null;
+    const slug = "lal-kitab-report";
+    for (const section of charges) {
+      if (!Array.isArray(section?.list)) continue;
+      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug);
+      if (match) return match.amount ?? 0;
+    }
+    return null;
+  };
+
+  const downloadPrice = getDownloadCost();
+
+  const handleDownloadClick = () => {
+    refreshWallet();
+    setShowDownloadModal(true);
+  };
+
+  const handleConfirmDownload = async () => {
     setIsDownloading(true);
     try {
       toast.loading("Downloading PDF...", { id: "lalkitab-pdf" });
@@ -99,6 +131,8 @@ const LalKitabDetail = () => {
       link.remove();
       URL.revokeObjectURL(blobUrl);
       toast.success("PDF downloaded!", { id: "lalkitab-pdf" });
+      setShowDownloadModal(false);
+      refreshWallet();
     } catch {
       toast.error("Failed to download PDF", { id: "lalkitab-pdf" });
     } finally {
@@ -117,13 +151,14 @@ const LalKitabDetail = () => {
           </svg>
         </button>
         <h1 className={styles.pageTitle}>Lal Kitab Teva</h1>
-        <button className={styles.downloadButton} onClick={handleDownload} disabled={isDownloading}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Download
+        <button className={styles.downloadBtn} onClick={handleDownloadClick} disabled={isDownloading}>
+          {downloadPrice !== null && <span className={styles.downloadPrice}>₹{downloadPrice}</span>}
+          <div className={styles.downloadContent}>
+            <FiDownload size={22} />
+            <div className={styles.downloadText}>
+              <span className={styles.downloadTitle}>{isDownloading ? "Downloading..." : "Download Now"}</span>
+            </div>
+          </div>
         </button>
       </div>
 
@@ -162,6 +197,17 @@ const LalKitabDetail = () => {
           Consult with Expert Astrologer
         </button>
       </div>
+
+      <DownloadReportModal
+        isOpen={showDownloadModal}
+        onClose={() => setShowDownloadModal(false)}
+        onDownload={handleConfirmDownload}
+        featureName="Lal Kitab Report"
+        downloadCost={downloadPrice ?? 0}
+        walletBalance={walletBalance ?? 0}
+        isDownloading={isDownloading}
+        showLanguageSelection={false}
+      />
     </div>
   );
 };

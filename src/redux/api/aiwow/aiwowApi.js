@@ -42,4 +42,4 @@ export const aiwowApi = privateRequestNew.injectEndpoints({
   }),
 });
 
-export const { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery } = aiwowApi;
+export const { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery, useLazyGetChargesQuery } = aiwowApi;

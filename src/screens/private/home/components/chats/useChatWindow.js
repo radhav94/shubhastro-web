@@ -6,6 +6,7 @@ import { useChat as useChatContext } from "../../../../../context/ChatContext"
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
 import { useCall } from "../../../../../context/CallContext";
 import { showErrorWithHighlight } from "../../../../../utils/showErrorWithHighlight";
+import useTypingIndicator from "./useTypingIndicator";
 
 export default function useChat({
   userId,
@@ -21,10 +22,12 @@ export default function useChat({
   const { activeCall, openReview } = useCall();
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
-  const [isTyping, setIsTyping] = useState(false);
   const [isMessageDisabled, setIsMessageDisabled] = useState(false);
   const systemReconnectInFlightRef = useRef(false);
   const [hightLightText, setHighLightText] = useState("");
+
+  // Typing indicator via new activity:update / activity contract
+  const { isTyping, handleTextChange, handleMessageSent } = useTypingIndicator({ roomId, sender: "user" });
 
   // When the kundali iframe closes, the server may briefly think the user disconnected
   // and fire session-end errors. We ignore those for a short grace period.
@@ -216,20 +219,13 @@ export default function useChat({
       toast.warning(msg.message);
     }
 
-    const handleTyping = (isTyping) => {
-      console.log('Typing event received:', isTyping);
-      setIsTyping(isTyping === true);
-    }
-
     voiceSocket.on("message:recieved", handleAddMessage);
     voiceSocket.on("warning", handleWarning);
-    voiceSocket.on("typing", handleTyping);
     voiceSocket.on("chat:ended", handleChatEndedFromServer);
 
     return () => {
       voiceSocket.off("message:recieved", handleAddMessage);
       voiceSocket.off("warning", handleWarning);
-      voiceSocket.off("typing", handleTyping);
       voiceSocket.off("chat:ended", handleChatEndedFromServer);
     };
   }, [roomId, activeChat, activeCall, reconnectToChat, hightLightText]);
@@ -238,6 +234,10 @@ export default function useChat({
   const sendMessage = (text, type = "message", kundliID = null) => {
     console.log("sendMessage",text)
     setHighLightText(text)
+
+    // Clear typing state immediately on send
+    handleMessageSent();
+
     const payload = {
       sender: "user",
       kundliId : kundliID ?? kundliId,
@@ -298,11 +298,7 @@ export default function useChat({
     });
   };
 
-  //  typing emit
-  const sendTyping = () => {
-    console.log("sendTyping")
-    socketService.sendTyping({ roomId, sender: userId });
-  };
+  //  typing is now handled by useTypingIndicator hook
 
   return {
     messages,
@@ -310,7 +306,7 @@ export default function useChat({
     isTyping,
     sendMessage,
     astroReply,
-    sendTyping,
+    handleTextChange,
     chatSeconds,
     isMessageDisabled,
     setIsMessageDisabled,

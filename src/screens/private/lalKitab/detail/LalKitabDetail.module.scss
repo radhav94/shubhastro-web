@@ -35,37 +35,65 @@
   flex: 1;
 }
 
-.downloadButton {
-  margin-left: auto;
+.downloadBtn {
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  background: linear-gradient(90deg, #E54D00 0%, #D43400 100%);
-  color: #fff;
+  gap: 0;
+  padding: 0;
   border: none;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  border-radius: 16px;
+  background: transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  margin-left: auto;
 
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(212, 52, 0, 0.3);
+  .downloadPrice {
+    background: #fef3c7;
+    color: #1f2937;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 16px;
+    border-radius: 20px;
+    margin-bottom: -10px;
+    z-index: 1;
+  }
+
+  .downloadContent {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    color: #fff;
+    padding: 8px 8px;
+    border-radius: 16px;
+  }
+
+  .downloadText {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .downloadTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
   }
 
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
   }
 
-  @media (width <= 767px) {
-    padding: 6px 10px;
-    font-size: 0.75rem;
+  @media (max-width: 600px) {
+    .downloadContent {
+      padding: 12px 18px;
+      gap: 10px;
+    }
+    .downloadTitle {
+      font-size: 14px;
+    }
   }
 }
 .tabWrapper { display: flex; border-bottom: 1.5px solid #ffffff; margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; &::-webkit-scrollbar { display: none; } }
