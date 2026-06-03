@@ -1224,3 +1224,53 @@
     max-width: 100%;
   } */
 }
+
+
+/* Nakshatra Cards - same style as category tabs */
+.nakshatra-select {
+  display: none;
+}
+
+/* Nakshatra scrollable row with square cards */
+.nakshatra-cards {
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 12px 0;
+}
+
+.nakshatra-cards::-webkit-scrollbar {
+  display: none;
+}
+
+.nakshatra-cards .category-item {
+  width: 90px;
+  height: 90px;
+  flex-shrink: 0;
+}
+
+.nakshatra-cards .category-card {
+  width: 90px;
+  height: 90px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.nakshatra-cards .category-label {
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+.nakshatra-cards .categoryImages {
+  height: auto;
+  margin: 0;
+}

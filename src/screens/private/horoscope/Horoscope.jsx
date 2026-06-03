@@ -5,7 +5,12 @@ import {
   useFetchDailyQuery, 
   useFetchTomorrowQuery,
   useFetchWeeklyQuery, 
-  useFetchYearlyQuery
+  useFetchYearlyQuery,
+  useFetchDailyMoonQuery,
+  useFetchDailySunQuery,
+  useFetchDailyNakshatraQuery,
+  useFetchWeeklyMoonQuery,
+  useFetchWeeklySunQuery,
 } from '../../../redux/api/horoscope/zodiacApi';
 import { signToNumber, zodiacDateRanges } from './utils';
 import PrimaryLoader from '../../../component/UI/PrimaryLoader';
@@ -108,13 +113,13 @@ const HoroscopeNew = () => {
     if (pathname.includes('tomorrow-horoscope')) {
       return 'Tomorrow';
     } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
-      return 'Today';
+      return 'Daily';
     } else if (pathname.includes('weekly-horoscope')) {
       return 'This Week';
     } else if (pathname.includes('yearly-horoscope')) {
       return 'This Year';
     }
-    return 'Today';
+    return 'Daily';
   };
   
   // Get header-selected Kundli from Redux (top priority)
@@ -175,7 +180,13 @@ const HoroscopeNew = () => {
   const overviewCardRefs = useRef([]);
   const overviewRef = useRef(null);
 
-  const tabs = ['Today', 'Tomorrow', /* 'Daily', */ 'This Week', 'This Year'];
+  const tabs = ['Daily', 'Tomorrow', 'This Week', 'This Year'];
+
+  // Sub-tabs for Daily and Weekly
+  const dailySubTabs = ['Sun', 'Moon', 'Nakshatra'];
+  const weeklySubTabs = ['Sun', 'Moon'];
+  const [dailySubTab, setDailySubTab] = useState('Sun');
+  const [weeklySubTab, setWeeklySubTab] = useState('Sun');
   
   // Categories will be dynamically generated from API response
   const [categories, setCategories] = useState([]);
@@ -251,9 +262,24 @@ const HoroscopeNew = () => {
   const signNumber = signToNumber[selectedZodiac.toLowerCase()];
   
   // Fetch data based on active tab
-  // Both "Today" and "Daily" use the same daily API
   const { data: dailyData, isLoading: dailyLoading } = useFetchDailyQuery(signNumber, {
-    skip: activeTab !== 'Today' && activeTab !== 'Daily'
+    skip: activeTab !== 'Daily' || dailySubTab !== 'Sun'
+  });
+
+  // Daily Moon
+  const { data: dailyMoonData, isLoading: dailyMoonLoading } = useFetchDailyMoonQuery(signNumber, {
+    skip: activeTab !== 'Daily' || dailySubTab !== 'Moon'
+  });
+
+  // Daily Sun (same as fetchDaily but using the new endpoint)
+  const { data: dailySunData, isLoading: dailySunLoading } = useFetchDailySunQuery(signNumber, {
+    skip: activeTab !== 'Daily' || dailySubTab !== 'Sun'
+  });
+
+  // Daily Nakshatra (uses nakshatra number, default to 1 if not known)
+  const [selectedNakshatra, setSelectedNakshatra] = useState(1);
+  const { data: dailyNakshatraData, isLoading: dailyNakshatraLoading } = useFetchDailyNakshatraQuery(selectedNakshatra, {
+    skip: activeTab !== 'Daily' || dailySubTab !== 'Nakshatra'
   });
 
   const { data: tomorrowData, isLoading: tomorrowLoading } = useFetchTomorrowQuery(signNumber, {
@@ -261,20 +287,37 @@ const HoroscopeNew = () => {
   });
   
   const { data: weeklyData, isLoading: weeklyLoading } = useFetchWeeklyQuery(signNumber, {
-    skip: activeTab !== 'This Week'
+    skip: activeTab !== 'This Week' || weeklySubTab !== 'Sun'
+  });
+
+  // Weekly Moon
+  const { data: weeklyMoonData, isLoading: weeklyMoonLoading } = useFetchWeeklyMoonQuery(signNumber, {
+    skip: activeTab !== 'This Week' || weeklySubTab !== 'Moon'
+  });
+
+  // Weekly Sun
+  const { data: weeklySunData, isLoading: weeklySunLoading } = useFetchWeeklySunQuery(signNumber, {
+    skip: activeTab !== 'This Week' || weeklySubTab !== 'Sun'
   });
   
   const { data: yearlyData, isLoading: yearlyLoading } = useFetchYearlyQuery(signNumber, {
     skip: activeTab !== 'This Year'
   });
 
-  const isLoading = dailyLoading || tomorrowLoading || weeklyLoading || yearlyLoading;
+  const isLoading = dailyLoading || dailyMoonLoading || dailySunLoading || dailyNakshatraLoading || tomorrowLoading || weeklyLoading || weeklyMoonLoading || weeklySunLoading || yearlyLoading;
 
-  // Get current data based on active tab
+  // Get current data based on active tab and sub-tab
   const getCurrentData = () => {
-    if (activeTab === 'Today' || activeTab === 'Daily') return dailyData;
+    if (activeTab === 'Daily') {
+      if (dailySubTab === 'Moon') return dailyMoonData;
+      if (dailySubTab === 'Nakshatra') return dailyNakshatraData;
+      return dailyData; // Sun uses the same western endpoint
+    }
     if (activeTab === 'Tomorrow') return tomorrowData;
-    if (activeTab === 'This Week') return weeklyData;
+    if (activeTab === 'This Week') {
+      if (weeklySubTab === 'Moon') return weeklyMoonData;
+      return weeklyData; // Sun
+    }
     if (activeTab === 'This Year') return yearlyData;
     return null;
   };
@@ -300,11 +343,11 @@ const HoroscopeNew = () => {
         newCategories = [...newCategories, ...yearlyCategories];
         console.log('Yearly Category IDs:', yearlyCategories.map(c => c.id));
       }
-    } else if (((activeTab === 'Today' || activeTab === 'Daily') && dailyData?.response?.bot_response) || 
+    } else if ((activeTab === 'Daily' && dailyData?.response?.bot_response) || 
                (activeTab === 'Tomorrow' && tomorrowData?.response?.bot_response) ||
                (activeTab === 'This Week' && weeklyData?.response?.bot_response)) {
       // For daily/tomorrow/weekly, get categories from bot_response
-      const bot = (activeTab === 'Today' || activeTab === 'Daily') 
+      const bot = activeTab === 'Daily' 
         ? dailyData.response.bot_response 
         : activeTab === 'Tomorrow'
           ? tomorrowData.response.bot_response
@@ -404,7 +447,7 @@ const HoroscopeNew = () => {
 
         return {
           title: `${selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)} ${activeTab} Overview`,
-          subtitle: (activeTab === 'Today' || activeTab === 'Daily') ? formatted : activeTab === 'Tomorrow' ? 'Tomorrow' : 'Sunday - Saturday',
+          subtitle: activeTab === 'Daily' ? formatted : activeTab === 'Tomorrow' ? 'Tomorrow' : 'Sunday - Saturday',
           content: '',
           luckyColor: response.lucky_color,
           luckyColorCode: response.lucky_color_code,
@@ -439,7 +482,7 @@ const HoroscopeNew = () => {
     
     return {
       title: categories.find(c => c.id === activeCategory)?.label || activeCategory,
-      subtitle: (activeTab === 'Today' || activeTab === 'Daily') ? formatted : activeTab === 'Tomorrow' ? 'Tomorrow' : 'Sunday - Saturday',
+      subtitle: activeTab === 'Daily' ? formatted : activeTab === 'Tomorrow' ? 'Tomorrow' : 'Sunday - Saturday',
       content: categoryData?.split_response || 'Content coming soon.',
       score: categoryData?.score,
       luckyColor: response.lucky_color,
@@ -457,8 +500,7 @@ const HoroscopeNew = () => {
     setSelectedPhase('phase_1');
     
     // Navigate to corresponding route
-    // Both "Today" and "Daily" go to daily-horoscope
-    if (tab === 'Today' || tab === 'Daily') {
+    if (tab === 'Daily') {
       navigate(`/daily-horoscope/${selectedZodiac}`);
     } else if (tab === 'Tomorrow') {
       navigate(`/tomorrow-horoscope/${selectedZodiac}`);
@@ -583,6 +625,67 @@ const HoroscopeNew = () => {
             </div>
           </div>
 
+          {/* Sub-tabs for Daily */}
+          {activeTab === 'Daily' && (
+            <div className="time-tabs-wrapper">
+              <div className="time-tabs">
+                {dailySubTabs.map((sub) => (
+                  <button
+                    key={sub}
+                    className={`time-tab ${dailySubTab === sub ? 'active' : ''}`}
+                    onClick={() => setDailySubTab(sub)}
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Nakshatra selector for Daily Nakshatra */}
+          {activeTab === 'Daily' && dailySubTab === 'Nakshatra' && (
+            <div className="category-cards nakshatra-cards">
+              {[
+                {name: 'Ashwini', icon: '🐴'}, {name: 'Bharani', icon: '🌺'}, {name: 'Krittika', icon: '🔥'},
+                {name: 'Rohini', icon: '🌙'}, {name: 'Mrigashira', icon: '🦌'}, {name: 'Ardra', icon: '💧'},
+                {name: 'Punarvasu', icon: '🏹'}, {name: 'Pushya', icon: '🌸'}, {name: 'Ashlesha', icon: '🐍'},
+                {name: 'Magha', icon: '👑'}, {name: 'Purvaphalguni', icon: '🛏️'}, {name: 'Uttaraphalguni', icon: '☀️'},
+                {name: 'Hasta', icon: '✋'}, {name: 'Chitra', icon: '💎'}, {name: 'Swati', icon: '🌬️'},
+                {name: 'Vishakha', icon: '🌳'}, {name: 'Anuradha', icon: '🪷'}, {name: 'Jyeshtha', icon: '⭐'},
+                {name: 'Mula', icon: '🌿'}, {name: 'Purvashadha', icon: '🌊'}, {name: 'Uttarashadha', icon: '🐘'},
+                {name: 'Sravana', icon: '👂'}, {name: 'Dhanista', icon: '🎵'}, {name: 'Shatabhisha', icon: '💊'},
+                {name: 'Purvabhadra', icon: '⚡'}, {name: 'Uttarabhadra', icon: '🐉'}, {name: 'Revati', icon: '🐟'}
+              ].map((item, idx) => (
+                <div key={idx + 1} className="category-item">
+                  <button
+                    className={`category-card ${selectedNakshatra === idx + 1 ? 'active' : ''}`}
+                    onClick={() => setSelectedNakshatra(idx + 1)}
+                  >
+                    <span className="category-label">{item.name}</span>
+                    <span className="categoryImages" style={{ fontSize: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{item.icon}</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Sub-tabs for Weekly */}
+          {activeTab === 'This Week' && (
+            <div className="time-tabs-wrapper">
+              <div className="time-tabs">
+                {weeklySubTabs.map((sub) => (
+                  <button
+                    key={sub}
+                    className={`time-tab ${weeklySubTab === sub ? 'active' : ''}`}
+                    onClick={() => setWeeklySubTab(sub)}
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {activeTab === 'This Year' && yearlyData?.response && (
             <div className="time-tabs-wrapper">
               <div className="time-tabs">
@@ -602,6 +705,8 @@ const HoroscopeNew = () => {
             </div>
           )}
 
+          {/* Category cards - hide when Nakshatra is active */}
+          {!(activeTab === 'Daily' && dailySubTab === 'Nakshatra') && (
           <div className="category-cards">
             {categories.map((category) => (
               <div key={category.id} className="category-item">
@@ -619,6 +724,7 @@ const HoroscopeNew = () => {
               </div>
             ))}
           </div>
+          )}
 
           <div className="horoscope-content" ref={overviewRef}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
@@ -647,7 +753,7 @@ const HoroscopeNew = () => {
             </div>
             
             {/* Lucky Details - Only for Daily and Weekly, not in Overview */}
-            {!currentContent.isOverview && (activeTab === 'Today' || activeTab === 'Tomorrow' || activeTab === 'This Week') && currentContent.luckyColor && (
+            {!currentContent.isOverview && (activeTab === 'Daily' || activeTab === 'Tomorrow' || activeTab === 'This Week') && currentContent.luckyColor && (
               <div className="lucky-details">
                 <h3 className="lucky-title">Lucky Details</h3>
                 <p className="lucky-item">
@@ -676,7 +782,7 @@ const HoroscopeNew = () => {
             {currentContent.isOverview && currentContent.overviewSections ? (
               <div className="overview-sections">
                 {/* Lucky Details for Overview in Daily/Weekly */}
-                {(activeTab === 'Today' || activeTab === 'Daily' || activeTab === 'Tomorrow' || activeTab === 'This Week') && currentContent.luckyColor && (
+                {(activeTab === 'Daily' || activeTab === 'Tomorrow' || activeTab === 'This Week') && currentContent.luckyColor && (
                   <div className="lucky-details">
                     <h3 className="lucky-title">Lucky Details</h3>
                     <p className="lucky-item">
