@@ -19,10 +19,9 @@ function decimalToDMS(decimal) {
 
   const degrees = Math.floor(decimal);
   const minutesFloat = (decimal - degrees) * 60;
-  const minutes = Math.floor(minutesFloat);
-  const seconds = Math.round((minutesFloat - minutes) * 60);
+  const minutes = Math.round(minutesFloat);
 
-  return `${degrees}° ${minutes}′ ${seconds}″`;
+  return `${degrees}° ${minutes}′`;
 }
 
 const rulingHeaders = [
