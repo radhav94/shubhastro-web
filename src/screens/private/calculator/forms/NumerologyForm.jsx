@@ -92,7 +92,6 @@ const NumerologyForm = ({
                 onChange("dob", "");
               }
             }}
-            maxDate={new Date()}
             placeholder="DD/MM/YYYY"
           />
           {errors?.dob && <p className={styles.error}>{errors.dob}</p>}

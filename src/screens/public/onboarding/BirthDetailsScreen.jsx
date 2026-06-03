@@ -121,7 +121,6 @@ const BirthDetailsScreen = ({
                     });
                   }
                 }}
-                maxDate={new Date()}
                 placeholder="DD/MM/YYYY"
               />
               <ErrorMessage name="birthDate">

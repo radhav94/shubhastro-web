@@ -107,7 +107,6 @@ const DestinyCalc = () => {
                 handleChange("dob", "");
               }
             }}
-            maxDate={new Date()}
             placeholder="DD/MM/YYYY"
           />
           {errors.dob && <p className={styles.err}>{errors.dob}</p>}
