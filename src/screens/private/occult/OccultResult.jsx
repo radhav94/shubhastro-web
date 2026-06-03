@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import toast from "react-hot-toast";
@@ -7,7 +7,10 @@ import { PATH } from "../../../utils/routes/Paths";
 import astralCompass from "../../../assets/icons/astral-compass.svg";
 import { format12HourTime } from "../../../utils/dateFormat/dateTime";
 import { useGetOccultPdfMutation } from "../../../redux/api/occult/occultApi";
+import { useLazyGetChargesQuery } from "../../../redux/api/aiwow/aiwowApi";
+import { useWalletBalance } from "../wallet/useWalletBalance";
 import { FiDownload } from "react-icons/fi";
+import DownloadReportModal from "../aiwow/components/DownloadReportModal";
 
 const SEVERITY_COLOR = {
   SEVERE: "#ef4444",
@@ -59,9 +62,37 @@ const OccultResult = () => {
   const navigate = useNavigate();
   const result = state?.result;
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [getOccultPdf] = useGetOccultPdfMutation();
+  const [triggerGetCharges, { data: chargesData }] = useLazyGetChargesQuery();
+  const { balance: walletBalance, refreshWallet } = useWalletBalance();
 
-  const handleDownloadPdf = async () => {
+  // Fetch charges on mount to display dynamic price
+  useEffect(() => {
+    triggerGetCharges();
+  }, []);
+
+  // Get download price from charges API data
+  const getDownloadCost = () => {
+    const charges = chargesData?.data;
+    if (!charges) return null;
+    const slug = "occult-dosha-report";
+    for (const section of charges) {
+      if (!Array.isArray(section?.list)) continue;
+      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug);
+      if (match) return match.amount ?? 0;
+    }
+    return null;
+  };
+
+  const downloadPrice = getDownloadCost();
+
+  const handleDownloadClick = () => {
+    refreshWallet();
+    setShowDownloadModal(true);
+  };
+
+  const handleConfirmDownload = async () => {
     const historyId = state?.historyId || result?.historyId || result?._id || result?.data?.historyId;
     const kundliId = state?.profile?._id;
     if (!historyId) {
@@ -85,6 +116,8 @@ const OccultResult = () => {
       link.remove();
       URL.revokeObjectURL(blobUrl);
       toast.success("PDF downloaded!", { id: "occult-pdf" });
+      setShowDownloadModal(false);
+      refreshWallet();
     } catch {
       toast.error("Failed to download PDF", { id: "occult-pdf" });
     } finally {
@@ -117,16 +150,15 @@ const OccultResult = () => {
 
         <button
           className={styles.downloadBtn}
-          onClick={handleDownloadPdf}
+          onClick={handleDownloadClick}
           disabled={isDownloading}
           title="Download PDF"
         >
-          <span className={styles.downloadPrice}>₹50</span>
+          {downloadPrice !== null && <span className={styles.downloadPrice}>₹{downloadPrice}</span>}
           <div className={styles.downloadContent}>
             <FiDownload size={22} />
             <div className={styles.downloadText}>
               <span className={styles.downloadTitle}>{isDownloading ? "Downloading..." : "Download Now"}</span>
-              {/* <span className={styles.downloadSubtitle}>Premium PDF Report</span>  */}
             </div>
           </div>
         </button>
@@ -194,6 +226,17 @@ const OccultResult = () => {
         <button className={styles.consultBtn} onClick={() => navigate("/talk-to-astrologer", { state: { selectedType: "occult" } })}>Consult with Expert Astrologer</button>
       </div>
     </div>
+
+      <DownloadReportModal
+        isOpen={showDownloadModal}
+        onClose={() => setShowDownloadModal(false)}
+        onDownload={handleConfirmDownload}
+        featureName="Occult Dosha Report"
+        downloadCost={downloadPrice ?? 0}
+        walletBalance={walletBalance ?? 0}
+        isDownloading={isDownloading}
+        showLanguageSelection={false}
+      />
     </div>
   );
 };
