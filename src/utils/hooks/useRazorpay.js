@@ -488,7 +488,7 @@ export const useRazorpayPayment = () => {
     }
 
     // Check if key is configured
-    if (!RAZORPAY_KEY_ID || RAZORPAY_KEY_ID === "rzp_test_xxxxxx") {
+    if (!RAZORPAY_KEY_ID || RAZORPAY_KEY_ID === "rzp_xxxx_xxxxxx") {
       console.error("[Razorpay] API key not configured");
       Toast.error("Payment gateway not configured. Please contact support.");
       return;
