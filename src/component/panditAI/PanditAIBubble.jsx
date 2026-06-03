@@ -54,6 +54,7 @@ const PanditAIBubble = () => {
     sending,
     chatDisabled,
     sendText,
+    followupQuestions,
     messagesEndRef,
     roomId,
   } = usePanditAI({ isOpen, lang });
@@ -321,6 +322,20 @@ const PanditAIBubble = () => {
             )}
             <div ref={messagesEndRef} />
           </div>
+
+          {followupQuestions.length > 0 && (
+            <div className={styles.followupSection}>
+              {followupQuestions.map((q, idx) => (
+                <button
+                  key={idx}
+                  className={styles.followupBtn}
+                  onClick={() => sendText(q)}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className={styles.inputBar}>
             {!sessionEndedLowBalance && (

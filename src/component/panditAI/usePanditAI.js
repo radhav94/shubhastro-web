@@ -56,6 +56,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   const [sending, setSending] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [chatDisabled, setChatDisabled] = useState(false);
+  const [followupQuestions, setFollowupQuestions] = useState([]);
   const messagesEndRef = useRef(null);
   const roomIdRef = useRef(sessionStorage.getItem("panditai_roomId") || null);
   const initiatedRef = useRef(false);
@@ -369,6 +370,14 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     voiceSocket.on("chat:ended", handleChatEnded);
     voiceSocket.on("error", handleError);
 
+    const handleFollowup = (data) => {
+      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      if (data?.followupQuestions?.length) {
+        setFollowupQuestions(data.followupQuestions);
+      }
+    };
+    voiceSocket.on("ai_followup_questions", handleFollowup);
+
     return () => {
       voiceSocket.off("chat:room", handleChatRoom);
       voiceSocket.off("chat:accepted", handleChatAccepted);
@@ -377,6 +386,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       voiceSocket.off("chat:rejected", handleRejected);
       voiceSocket.off("chat:ended", handleChatEnded);
       voiceSocket.off("error", handleError);
+      voiceSocket.off("ai_followup_questions", handleFollowup);
     };
   }, [isOpen]);
 
@@ -430,6 +440,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     (text, options = {}) => {
       const trimmedText = text.trim();
       if (!trimmedText && !options.kundliId) return;
+
+      setFollowupQuestions([]);
 
       const currentRoomId = roomIdRef.current;
       if (!currentRoomId) {
@@ -486,6 +498,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     sending,
     chatDisabled,
     sendText,
+    followupQuestions,
     messagesEndRef,
     roomId: roomIdRef.current,
   };

@@ -649,6 +649,36 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   }
 }
 
+/* ==================== FOLLOWUP QUESTIONS ==================== */
+.followupSection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 16px;
+  flex-shrink: 0;
+}
+
+.followupBtn {
+  padding: 8px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(247, 88, 1, 0.3);
+  background: #fff5ec;
+  color: #F75801;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  line-height: 1.3;
+
+  &:hover {
+    background: #ffe8d0;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
 /* ==================== INPUT BAR ==================== */
 .inputBar {
   position: relative;

@@ -9,6 +9,7 @@ import toast from "../toast";
 import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
 import { IoChevronForward } from "react-icons/io5";
 import RechargeModal from "../recharge-modal/RechargeModal";
+import PaymentSuccessModal from "../UI/modal/WelcomeBonusModal/PaymentSuccessModal";
 import WalletIcon from "../../assets/icons/wallet-2.svg";
 import AstrologerShopImage from "../../assets/images/astrologer-shop.png";
 import { getUserFromStorage } from "../../utils/authStorage";
@@ -66,6 +67,7 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
   const [sendGift, { isLoading: isSending }] = useSendGiftMutation();
   const [selected, setSelected] = useState(null);
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
+  const [paymentSuccessAmount, setPaymentSuccessAmount] = useState(null);
   const { balance, refreshWallet } = useWalletBalance();
   
   const user = getUserFromStorage();
@@ -180,10 +182,13 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
     setGiftHidden(false);
   };
 
-  const handleRechargeSuccess = () => {
+  const handleRechargeSuccess = (data) => {
     setIsRechargeModalOpen(false);
-    setGiftHidden(false);
+    setGiftHidden(true);
     refreshWallet();
+    
+    // Show payment success popup with the recharged amount
+    setPaymentSuccessAmount(data?.amount || "");
     
     // Dispatch custom event to notify other components
     window.dispatchEvent(new Event("walletBalanceUpdated"));
@@ -341,6 +346,17 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
         onClose={handleRechargeClose}
         onSuccess={handleRechargeSuccess}
         title="Recharge Wallet"
+      />
+
+      {/* Payment Success Popup */}
+      <PaymentSuccessModal
+        isOpen={paymentSuccessAmount !== null}
+        onClose={() => {
+          setPaymentSuccessAmount(null);
+          setGiftHidden(false);
+        }}
+        amount={paymentSuccessAmount}
+        redirectTo={null}
       />
     </>
   );
