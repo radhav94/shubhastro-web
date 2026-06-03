@@ -290,7 +290,6 @@ const AddProfileModal = ({
                         setFieldValue("birthDate", "");
                       }
                     }}
-                    maxDate={new Date()}
                     placeholder="DD/MM/YYYY"
                   />
                   <ErrorMessage name="birthDate" component="div" className={styles.errorText} />

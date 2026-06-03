@@ -178,7 +178,6 @@ const ProfileModals = ({
                                                 setFormData({ ...formData, birthDate: "" });
                                             }
                                         }}
-                                        maxDate={new Date()}
                                         placeholder="DD/MM/YYYY"
                                     />
                                 </div>
@@ -316,7 +315,6 @@ const ProfileModals = ({
                                                 setEditFormData({ ...editFormData, birthDate: "" });
                                             }
                                         }}
-                                        maxDate={new Date()}
                                         placeholder="DD/MM/YYYY"
                                     />
                                 </div>

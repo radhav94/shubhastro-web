@@ -458,7 +458,6 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                         setForm({ ...form, birthDate: "" });
                       }
                     }}
-                    maxDate={new Date()}
                     placeholder="DD/MM/YYYY"
                   />
                 </div>

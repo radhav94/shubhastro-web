@@ -65,7 +65,6 @@ const DateWithSingleInputForm = ({
                 onChange("dob", "");
               }
             }}
-            maxDate={new Date()}
             placeholder="DD/MM/YYYY"
             disabled={readOnly}
           />

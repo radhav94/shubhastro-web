@@ -108,7 +108,6 @@ const LifePathForm = () => {
                 setDob("");
               }
             }}
-            maxDate={new Date()}
             placeholder="DD/MM/YYYY"
           />
         </div>
