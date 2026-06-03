@@ -42,7 +42,6 @@ const CALL_EVENTS = [
   "live:user_blocked",
   "live:report_submitted",
   "session:active_list",
-  "session:canceled",
 ];
 
 /* ================= 🔄 RECONNECTION STATE ================= */
