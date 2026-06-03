@@ -126,7 +126,9 @@ const RashiReport = () => {
           >
             <span>About Your Rashi</span>
             <span className={styles.ttsWrap}>
-              <TTSButton text={`About Your Rashi. ${prediction || ''} ${bot_response || ''}`} />
+              <span onClick={(e) => e.stopPropagation()}>
+                <TTSButton text={`About Your Rashi. ${prediction || ''} ${bot_response || ''}`} />
+              </span>
               <svg
                 className={`${styles.chevron} ${aboutOpen ? styles.chevronOpen : ""}`}
                 width="22"

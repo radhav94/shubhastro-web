@@ -230,6 +230,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           remainingTime,
           experience: astro?.experience,
           isEmergency: rest?.isEmergency || false,
+          profileImgUrl: astro?.profileImgUrl || rest?.astrologer?.profileImgUrl,
         });
         setCallSeconds(Number(remainingTime) * 60);
       } catch {
@@ -262,6 +263,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
+          profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 

@@ -211,10 +211,11 @@ const OrderDetails = () => {
           astrologerName: astro?.firstName || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
+          profileImgUrl: astro?.profileImgUrl,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
         navigate(`/chat-to-astrologer/${astroId}`, {
-          state: { userId: uid, astrologerId: astroId, fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(), roomId, isUserSide: true, experience: astro?.experience },
+          state: { userId: uid, astrologerId: astroId, fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(), roomId, isUserSide: true, experience: astro?.experience, profileImgUrl: astro?.profileImgUrl },
         });
       } catch (e) {
         Toast.error("Failed to start chat");
@@ -236,6 +237,7 @@ const OrderDetails = () => {
           astrologerID: astro?.astrologer_ID, remainingTime,
           experience: astro?.experience,
           isEmergency: rest?.isEmergency || false,
+          profileImgUrl: astro?.profileImgUrl,
         });
       } catch (error) {
         Toast.error("Failed to start call");

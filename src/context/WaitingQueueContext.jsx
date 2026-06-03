@@ -471,6 +471,24 @@ export const WaitingQueueProvider = ({ children }) => {
       if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
     };
 
+    // session:dismissed — multi-device sync: another device already handled this session
+    const handleSessionDismissed = (data) => {
+      const { roomId, acceptedSocketId, reason, action } = data || {};
+      if (!roomId) return;
+
+      // If this socket triggered the action, ignore (already handled locally)
+      if (acceptedSocketId && acceptedSocketId === voiceSocket.id) return;
+
+      console.log("[GlobalTwoWay] 🔇 session:dismissed", reason, action, roomId);
+
+      // Remove from pending connections
+      removePendingConnection(roomId);
+
+      // Clear approval popups if they match this roomId
+      if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
+      if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
+    };
+
     /* ================= GLOBAL CHAT/CALL ACCEPTED HANDLERS ================= */
     // These ensure the user is notified and navigated regardless of which page they're on.
     // Page-level handlers (TalkToAstrologer, useAstrologerConnection) may also fire,
@@ -502,6 +520,7 @@ export const WaitingQueueProvider = ({ children }) => {
         astrologerName: astro?.firstName || "",
         remainingTime: data?.remainingTime,
         isEmergency: data?.isEmergency || false,
+        profileImgUrl: astro?.profileImgUrl,
       });
       setChatSeconds(Number(data?.remainingTime || 0) * 60);
       setChatWaitingList(false);
@@ -511,7 +530,9 @@ export const WaitingQueueProvider = ({ children }) => {
         const isAlreadyOnChat = window.location.pathname.includes("/chat-to-astrologer");
         if (!isAlreadyOnChat && astrologerId) {
           console.log("[GlobalAccepted] 🚀 Navigating to chat page for astrologer:", astrologerId);
-          window.location.href = `/chat-to-astrologer/${astrologerId}`;
+          // Pass profileImgUrl as query param so ChatWindow can pick it up
+          const imgParam = astro?.profileImgUrl ? `?profileImgUrl=${encodeURIComponent(astro.profileImgUrl)}` : "";
+          window.location.href = `/chat-to-astrologer/${astrologerId}${imgParam}`;
         }
       }, 100);
     };
@@ -555,6 +576,7 @@ export const WaitingQueueProvider = ({ children }) => {
         remainingTime,
         experience: astro?.experience,
         isEmergency: rest?.isEmergency || false,
+        profileImgUrl: astro?.profileImgUrl,
       });
       setCallSeconds(Number(remainingTime || 0) * 60);
     };
@@ -589,6 +611,7 @@ export const WaitingQueueProvider = ({ children }) => {
     voiceSocket.on("chat:room", handleGlobalChatRoom);
     voiceSocket.on("session:active_list", handleActiveList);
     voiceSocket.on("session:canceled", handleSessionCanceled);
+    voiceSocket.on("session:dismissed", handleSessionDismissed);
     voiceSocket.on("chat:accepted", handleGlobalChatAccepted);
     voiceSocket.on("call:accepted", handleGlobalCallAccepted);
 
@@ -610,6 +633,7 @@ export const WaitingQueueProvider = ({ children }) => {
       voiceSocket.off("chat:room", handleGlobalChatRoom);
       voiceSocket.off("session:active_list", handleActiveList);
       voiceSocket.off("session:canceled", handleSessionCanceled);
+      voiceSocket.off("session:dismissed", handleSessionDismissed);
       voiceSocket.off("chat:accepted", handleGlobalChatAccepted);
       voiceSocket.off("call:accepted", handleGlobalCallAccepted);
     };

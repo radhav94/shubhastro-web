@@ -15,6 +15,7 @@ const useChatSocket = ({
   isUserSide,
   astroID,
   experience,
+  profileImgUrl,
 }) => {
   const { 
     activeCall, 
@@ -188,6 +189,7 @@ const useChatSocket = ({
         kundliId,
         remainingTime,
         experience,
+        profileImgUrl: profileImgUrl,
       });
 
       setWaitingPopup(false);

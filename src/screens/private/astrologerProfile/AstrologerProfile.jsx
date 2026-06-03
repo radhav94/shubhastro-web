@@ -784,8 +784,8 @@ const AstrologerProfile = () => {
         : ["English", "Hindi"],
     experience: data?.experience ?? 20,
     totalConsultations: data?.consultations ?? 1200,
-    rating: data?.rating ?? 4.5,
-    totalRatings: data?.totalRatings ?? 1020,
+    rating: data?.rating ?? 0,
+    totalRatings: data?.totalRatings ?? 0,
     availability: formatAvailability(data?.availability),
     weeklySchedule: formatWeeklyAvailability(data?.availability),
     metrics: {
@@ -795,7 +795,7 @@ const AstrologerProfile = () => {
     },
     
     description:
-      data?.achievements?.[0]?.achievementName ||
+      data?.description ||
       "",
     // OLD: dummy/static gallery data
     // gallery:

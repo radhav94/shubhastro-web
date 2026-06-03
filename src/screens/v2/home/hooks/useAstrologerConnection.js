@@ -191,6 +191,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           astrologerName: astro?.firstName || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
+          profileImgUrl: astro?.profileImgUrl,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
         console.log("[NormalFlow] ✅ activeChat set, navigating to chat page");
@@ -206,6 +207,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
             astrologerName: astro?.firstName || "",
             astroID: astro?.astrologer_ID,
             experience: astro?.experience,
+            profileImgUrl: astro?.profileImgUrl,
           },
         });
       } catch (e) {
@@ -291,6 +293,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           remainingTime,
           experience: astro?.experience,
           isEmergency: rest?.isEmergency || false,
+          profileImgUrl: astro?.profileImgUrl,
         };
         console.log("[NormalFlow] 📦 Setting activeCall:", JSON.stringify({ ...callPayload, agoraToken: "[redacted]" }));
         setActiveCall(callPayload);

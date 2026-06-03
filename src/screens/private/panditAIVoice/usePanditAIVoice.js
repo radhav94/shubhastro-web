@@ -259,7 +259,7 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
         const audioBase64 = await textToSpeech(responseText, {
           language: ttsLanguage,
           speaker: SARVAM_SPEAKERS.PRIYA,
-          pace: 1.0,
+          pace: 1.05,
           signal,
         });
 
