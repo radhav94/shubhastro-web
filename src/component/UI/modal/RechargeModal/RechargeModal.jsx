@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { PrimaryText } from "../../../index";
 import NewRechargeModal from "../../../recharge-modal/RechargeModal";
+import PaymentSuccessModal from "../WelcomeBonusModal/PaymentSuccessModal";
 import styles from "./RechargeModal.module.scss";
 
 const RechargeModal = ({
@@ -10,10 +11,11 @@ const RechargeModal = ({
   connectionType = "chat",
 }) => {
   const [showPlansModal, setShowPlansModal] = useState(false);
+  const [successAmount, setSuccessAmount] = useState(null);
 
   
 
-  if (!isOpen) return null;
+  if (!isOpen && successAmount === null) return null;
 
   const rate =
     connectionType === "chat"
@@ -37,11 +39,12 @@ const RechargeModal = ({
   const handleRechargeSuccess = (paymentData) => {
     console.log('Recharge successful:', paymentData);
     setShowPlansModal(false);
-    onClose();
+    setSuccessAmount(paymentData?.amount || "");
   };
 
   return (
     <>
+      {isOpen && (
       <div className={styles.modalOverlay} onClick={onClose}>
         <div
           className={styles.modalContainer}
@@ -62,6 +65,7 @@ const RechargeModal = ({
           </div>
         </div>
       </div>
+      )}
 
       {/* New Recharge Modal with Plans */}
       <NewRechargeModal
@@ -69,6 +73,17 @@ const RechargeModal = ({
         onClose={handlePlansModalClose}
         onSuccess={handleRechargeSuccess}
         title="Recharge Wallet"
+      />
+
+      {/* Payment Success Popup */}
+      <PaymentSuccessModal
+        isOpen={successAmount !== null}
+        onClose={() => {
+          setSuccessAmount(null);
+          onClose();
+        }}
+        amount={successAmount}
+        redirectTo={null}
       />
     </>
   );

@@ -30,16 +30,16 @@ const WelcomeBonusModal = () => {
         <div className={styles.content}>
           <img src={welcomeIcon} alt="Bonus" className={styles.icon} />
           <p className={styles.welcome}>Welcome to ShubhAstro!</p>
-          <h2 className={styles.title}>You've Earned</h2>
+          <h2 className={styles.title}>A Little Gift From Us</h2>
           <p className={styles.amount}>₹1,000</p>
           <div className={styles.badge}>
-            <span>₹</span> Bonus added to your wallet
+            <span>₹</span> Welcome bonus added to your wallet
           </div>
           <p className={styles.desc}>
-            You can use this bonus to connect with expert astrologers and get guidance on your journey ahead.
+            Use it to talk to expert astrologers & begin your cosmic journey.
           </p>
           <button className={styles.doneBtn} onClick={() => setIsOpen(false)}>
-            Done
+            Start Exploring
           </button>
         </div>
       </div>

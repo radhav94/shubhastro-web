@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import PlanCard from './PlanCard';
 import PaymentDetailsModal from './PaymentDetailsModal';
+import PaymentSuccessModal from '../UI/modal/WelcomeBonusModal/PaymentSuccessModal';
 import { useRechargePlans } from './useRechargePlans';
 import { useWalletBalance } from '../../screens/private/wallet/useWalletBalance';
 import { AppIcons } from '../../utils/appImages';
@@ -24,6 +25,7 @@ const RechargeModal = ({
 }) => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
+  const [successAmount, setSuccessAmount] = useState(null);
   const isMountedRef = useRef(true);
 
   const { plans, isLoading, error, refetch } = useRechargePlans();
@@ -96,11 +98,23 @@ const RechargeModal = ({
   const handlePaymentSuccess = useCallback((data) => {
     setShowPaymentDetails(false);
     refreshWallet();
+    const amount = selectedPlan?.actualPrice || selectedPlan?.amount || selectedPlan?.price || data?.amount || "";
+    setSuccessAmount(amount);
     if (typeof onClose === 'function') onClose();
-    if (typeof onSuccess === 'function') onSuccess(data);
-  }, [onClose, onSuccess, refreshWallet]);
+    if (typeof onSuccess === 'function') onSuccess({ ...data, amount });
+  }, [onClose, onSuccess, refreshWallet, selectedPlan]);
 
-  if (!isOpen) return null;
+  if (!isOpen && successAmount === null) return null;
+
+  if (!isOpen) {
+    return (
+      <PaymentSuccessModal
+        isOpen={successAmount !== null}
+        onClose={() => setSuccessAmount(null)}
+        amount={successAmount}
+      />
+    );
+  }
 
   const displayBalance = balance !== null && balance !== undefined
     ? `₹${Number(balance).toLocaleString('en-IN')}`
@@ -231,6 +245,13 @@ const RechargeModal = ({
         selectedPlan={selectedPlan}
         onSuccess={handlePaymentSuccess}
         onBack={handlePaymentBack}
+      />
+
+      {/* ── Payment Success Popup ── */}
+      <PaymentSuccessModal
+        isOpen={successAmount !== null}
+        onClose={() => setSuccessAmount(null)}
+        amount={successAmount}
       />
     </>
   );
