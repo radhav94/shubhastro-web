@@ -104,16 +104,16 @@ class SocketService {
     }
   }
 
-  // ⭐ TYPING EVENT
-  sendTyping({ roomId, sender }) {
+  // ⭐ TYPING ACTIVITY EVENT
+  sendActivity({ roomId, activity, sender }) {
     if (this.socket?.connected) {
-      this.socket.emit("typing", { roomId, sender });
+      this.socket.emit("activity:update", { roomId, activity, sender });
     }
   }
 
-  // ⭐ LISTEN EVENTS (MESSAGE + TYPING)
+  // ⭐ LISTEN EVENTS (MESSAGE)
   listenEvents(callbacks) {
-    const { onMessage, onTyping } = callbacks;
+    const { onMessage } = callbacks;
 
     this.socket.on("message:recieved", (data) => {
       onMessage?.({
@@ -121,10 +121,6 @@ class SocketService {
         message: data.message || data.response,
         dateTime: data.createdAt || new Date().toISOString(),
       });
-    });
-
-    this.socket.on("typing", (data) => {
-      onTyping?.(data);
     });
   }
 }

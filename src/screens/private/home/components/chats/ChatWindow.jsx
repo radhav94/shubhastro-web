@@ -104,7 +104,7 @@ const ChatWindow = () => {
     isTyping,
     sendMessage,
     astroReply,
-    sendTyping,
+    handleTextChange,
     chatSeconds,
     isMessageDisabled,
     remainingTime,
@@ -537,7 +537,7 @@ const ChatWindow = () => {
               value={message}
               onChange={(e) => {
                 setMessage(e.target.value);
-                sendTyping();
+                handleTextChange();
               }}
               onSend={handleSend}
               isMessageDisabled={isMessageDisabled && !isCallActive}
