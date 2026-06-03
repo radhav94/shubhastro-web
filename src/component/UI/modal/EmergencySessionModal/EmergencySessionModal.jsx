@@ -40,7 +40,7 @@ const EmergencySessionModal = ({
         </div>
 
         <p className={styles.description}>
-          ShubhTalk will try calling {name}, if there is anything urgent. We can&apos;t promise if they would be able to take the call.
+          ShubhAstro will try calling {name}, if there is anything urgent. We can&apos;t promise if they would be able to take the call.
         </p>
 
         <div className={styles.actions}>
