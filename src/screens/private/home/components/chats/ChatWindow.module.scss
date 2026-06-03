@@ -70,7 +70,7 @@ $floating-button-gap: 14px;
 }
 /* PAGE WRAPPER */
 .chatPage {
-  height: calc(100dvh - 53px);
+  height: calc(100dvh - 95px);
   max-width: 1440px;
   // padding: 0 16px;
   // background: #fff;
@@ -483,6 +483,9 @@ $floating-button-gap: 14px;
   border-radius: 18px 18px 18px 4px;
   border: 1px solid #f0ebe4;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  .msgTimeWrapper{
+    left: 0;
+  }
 }
 
 .bubbleContent {
@@ -496,14 +499,14 @@ $floating-button-gap: 14px;
   align-items: center;
   gap: $spacing-xs;
   position: absolute;
-  bottom: -$timestamp-offset;
+  bottom: -21px;
   right: 0;
   white-space: nowrap;
 }
 
 .msgTime {
   font-size: 13px;
-  color: $text-timestamp;
+  color: $bg-footer;
   font-weight: 400;
 }
 
