@@ -1,5 +1,6 @@
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { calculatorApi } from "../baseApi/calculatorApi";
+import { getCurrentLang } from "../../../utils/VedicParams.js/vedicParams";
 
 const formatDate = (dateString) => {
   if (!dateString) return "";
@@ -14,7 +15,7 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "extended-horoscope/jaimini-karakas",
         params: {
-          lang: "en",
+          lang: getCurrentLang(),
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
           lat: payload?.lat,
@@ -28,7 +29,7 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "extended-horoscope/find-sun-sign",
         params: {
-          lang: "en",
+          lang: getCurrentLang(),
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
           lat: payload?.lat,
@@ -41,7 +42,7 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "extended-horoscope/find-ascendant",
         params: {
-          lang: "en",
+          lang: getCurrentLang(),
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
           lat: payload?.lat,
@@ -54,7 +55,7 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "extended-horoscope/find-moon-sign",
         params: {
-          lang: "en",
+          lang: getCurrentLang(),
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
           lat: payload?.lat,
@@ -67,7 +68,7 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "dashas/maha-dasha",
         params: {
-          lang: "en",
+          lang: getCurrentLang(),
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
           lat: payload?.lat,
@@ -80,7 +81,7 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "dashas/maha-dasha-predictions",
         params: {
-          lang: "en",
+          lang: getCurrentLang(),
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
           lat: payload?.lat,
@@ -93,7 +94,7 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "dosha/mangal-dosh",
         params: {
-          lang: "en",
+          lang: getCurrentLang(),
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
           lat: payload?.lat,
@@ -106,7 +107,7 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "extended-horoscope/current-sade-sati",
         params: {
-          lang: "en",
+          lang: getCurrentLang(),
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
           lat: payload?.lat,
@@ -119,7 +120,7 @@ export const calcApi = calculatorApi.injectEndpoints({
       query: (payload) => ({
         url: "dosha/kaalsarp-dosh",
         params: {
-          lang: "en",
+          lang: getCurrentLang(),
           dob: formatDate(payload?.dob),
           tob: payload?.tob,
           lat: payload?.lat,
@@ -133,7 +134,7 @@ export const calcApi = calculatorApi.injectEndpoints({
         url: "prediction/numerology",
         params: {
           name: payload?.name?.trim().replace(/\s+/g, ""),
-          lang: "en",
+          lang: getCurrentLang(),
           date: formatDate(payload?.dob),
         },
       }),

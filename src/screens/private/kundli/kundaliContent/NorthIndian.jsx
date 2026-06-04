@@ -14,6 +14,7 @@ import { useSelector } from "react-redux";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
+import useLang from "../../../../utils/hooks/useLang";
 
 export const planetaryHeaders = [
   { label: "House", key: "house" },
@@ -75,8 +76,9 @@ export const planetaryHeaders = [
 
 const NorthIndian = ({ style = "north" }) => {
   const payload = useSelector((state) => state?.form?.kundliPayload);
+  const lang = useLang();
 
-  const params = payload ? buildVedicParam(payload, { style }) : null;
+  const params = payload ? buildVedicParam(payload, { style, lang }) : null;
 
   /** 🌟 Load Planet Data */
   const {

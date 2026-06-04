@@ -1,4 +1,5 @@
 import { vedicApi } from "../baseApi/vedicApi";
+import { getCurrentLang } from "../../../utils/VedicParams.js/vedicParams";
 
 const formatDate = (dateString) => {
   if (!dateString) return "";
@@ -121,7 +122,7 @@ export const dashaApi = vedicApi.injectEndpoints({
           girl_lat: formData.girlData.place.lat,
           girl_lon: formData.girlData.place.lng,
           girl_tz: 5.5,
-          lang: "en",
+          lang: getCurrentLang(),
         },
       }),
     }),

@@ -12,10 +12,12 @@ import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
 import { planetaryHeaders, formatPlanetData } from "./NorthIndian";
+import useLang from "../../../../utils/hooks/useLang";
 
 const SouthIndian = ({ style = "south" }) => {
   const payload = useSelector((state) => state?.form?.kundliPayload);
-  const params = payload ? buildVedicParam(payload, { style }) : null;
+  const lang = useLang();
+  const params = payload ? buildVedicParam(payload, { style, lang }) : null;
 
   /** Load Planet Data */
   const {

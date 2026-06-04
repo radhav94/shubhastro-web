@@ -1,4 +1,5 @@
 import { vedicApi } from "../baseApi/vedicApi";
+import { getCurrentLang } from "../../../utils/VedicParams.js/vedicParams";
 
 export const zodiacApi = vedicApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -10,7 +11,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
           date: new Date().toLocaleDateString("en-GB"),
           split: true,
           type: "big",
-          lang: "en",
+          lang: getCurrentLang(),
         },
       }),
     }),
@@ -25,7 +26,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
             date: tomorrow.toLocaleDateString("en-GB"),
             split: true,
             type: "big",
-            lang: "en",
+            lang: getCurrentLang(),
           },
         };
       },
@@ -42,7 +43,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
             zodiac,
             date: tomorrow.toLocaleDateString("en-GB"),
             show_same: true,
-            lang: "en",
+            lang: getCurrentLang(),
           },
         };
       },
@@ -58,7 +59,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
           params: {
             nakshatra,
             date: tomorrow.toLocaleDateString("en-GB"),
-            lang: "en",
+            lang: getCurrentLang(),
           },
         };
       },
@@ -71,7 +72,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
           week: "thisweek",
           split: true,
           type: "big",
-          lang: "en",
+          lang: getCurrentLang(),
         },
       }),
     }),
@@ -82,7 +83,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
           zodiac,
           year: new Date().getFullYear(),
           show_same: true,
-          lang: "en",
+          lang: getCurrentLang(),
         },
       }),
     }),
@@ -117,7 +118,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
           zodiac,
           date: new Date().toLocaleDateString("en-GB"),
           show_same: true,
-          lang: "en",
+          lang: getCurrentLang(),
         },
       }),
     }),
@@ -129,7 +130,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
         params: {
           zodiac,
           date: new Date().toLocaleDateString("en-GB"),
-          lang: "en",
+          lang: getCurrentLang(),
           split: true,
           type: "big",
         },
@@ -143,7 +144,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
         params: {
           nakshatra,
           date: new Date().toLocaleDateString("en-GB"),
-          lang: "en",
+          lang: getCurrentLang(),
         },
       }),
     }),
@@ -156,7 +157,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
           zodiac,
           week: "thisweek",
           show_same: true,
-          lang: "en",
+          lang: getCurrentLang(),
         },
       }),
     }),
@@ -169,7 +170,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
           zodiac,
           week: "thisweek",
           show_same: true,
-          lang: "en",
+          lang: getCurrentLang(),
         },
       }),
     }),
