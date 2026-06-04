@@ -75,6 +75,71 @@ export const zodiacApi = vedicApi.injectEndpoints({
         body: payload,
       }),
     }),
+
+    // Daily Moon prediction
+    fetchDailyMoon: builder.query({
+      query: (zodiac) => ({
+        url: "prediction/daily-moon",
+        params: {
+          zodiac,
+          date: new Date().toLocaleDateString("en-GB"),
+          show_same: true,
+          lang: "en",
+        },
+      }),
+    }),
+
+    // Daily Sun prediction
+    fetchDailySun: builder.query({
+      query: (zodiac) => ({
+        url: "prediction/daily-sun",
+        params: {
+          zodiac,
+          date: new Date().toLocaleDateString("en-GB"),
+          lang: "en",
+          split: true,
+          type: "big",
+        },
+      }),
+    }),
+
+    // Daily Nakshatra prediction
+    fetchDailyNakshatra: builder.query({
+      query: (nakshatra) => ({
+        url: "prediction/daily-nakshatra",
+        params: {
+          nakshatra,
+          date: new Date().toLocaleDateString("en-GB"),
+          lang: "en",
+        },
+      }),
+    }),
+
+    // Weekly Moon prediction
+    fetchWeeklyMoon: builder.query({
+      query: (zodiac) => ({
+        url: "prediction/weekly-moon",
+        params: {
+          zodiac,
+          week: "thisweek",
+          show_same: true,
+          lang: "en",
+        },
+      }),
+    }),
+
+    // Weekly Sun prediction
+    fetchWeeklySun: builder.query({
+      query: (zodiac) => ({
+        url: "prediction/weekly-sun",
+        params: {
+          zodiac,
+          week: "thisweek",
+          show_same: true,
+          lang: "en",
+        },
+      }),
+    }),
   }),
 });
 
@@ -86,4 +151,9 @@ export const {
   useFetchMonthQuery,
   useFetchWeeklyQuery,
   useFetchYearlyQuery,
+  useFetchDailyMoonQuery,
+  useFetchDailySunQuery,
+  useFetchDailyNakshatraQuery,
+  useFetchWeeklyMoonQuery,
+  useFetchWeeklySunQuery,
 } = zodiacApi;
