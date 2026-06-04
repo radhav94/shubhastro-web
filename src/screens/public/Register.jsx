@@ -106,6 +106,7 @@ const Register = () => {
         languagePreferences: ["English", "Hindi"],
         dateOfBirth,
         role: "CUSTOMER",
+        ...(formData.email && { email: formData.email }),
       };
 
       let response;

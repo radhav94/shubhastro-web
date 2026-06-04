@@ -1905,43 +1905,45 @@ const Profile = () => {
                           </span>
                         </div>
 
-                        {/* Receipt Button */}
+                        {/* Receipt Button - only for successful purchases (credit) */}
                         <div className={styles.txnActionCell}>
-                          <button
-                            className={`${styles.receiptBtn} ${invoiceLoadingId === transaction._id ? styles.downloadLoading : ""}`}
-                            disabled={invoiceLoadingId === transaction._id}
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              setInvoiceLoadingId(transaction._id);
-                              try {
-                                const data = await getInvoice(transaction._id).unwrap();
-                                const pdfUrl =
-                                  data?.data?.pdfUrl ||
-                                  data?.data?.url ||
-                                  data?.data ||
-                                  data?.pdfUrl ||
-                                  data?.url;
-                                if (pdfUrl) {
-                                  window.open(pdfUrl, "_blank");
-                                } else {
-                                  Toast.error("Invoice not available");
+                          {transaction?.billing?.user?.action === "credit" && (
+                            <button
+                              className={`${styles.receiptBtn} ${invoiceLoadingId === transaction._id ? styles.downloadLoading : ""}`}
+                              disabled={invoiceLoadingId === transaction._id}
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                setInvoiceLoadingId(transaction._id);
+                                try {
+                                  const data = await getInvoice(transaction._id).unwrap();
+                                  const pdfUrl =
+                                    data?.data?.pdfUrl ||
+                                    data?.data?.url ||
+                                    data?.data ||
+                                    data?.pdfUrl ||
+                                    data?.url;
+                                  if (pdfUrl) {
+                                    window.open(pdfUrl, "_blank");
+                                  } else {
+                                    Toast.error("Invoice not available");
+                                  }
+                                } catch (err) {
+                                  console.error("[Invoice] Error:", err);
+                                  Toast.error("Invoice not available for this transaction");
+                                } finally {
+                                  setInvoiceLoadingId(null);
                                 }
-                              } catch (err) {
-                                console.error("[Invoice] Error:", err);
-                                Toast.error("Invoice not available for this transaction");
-                              } finally {
-                                setInvoiceLoadingId(null);
-                              }
-                            }}
-                            title="Download Invoice"
-                          >
-                            {invoiceLoadingId === transaction._id ? (
-                              <span className={styles.btnSpinner} />
-                            ) : (
-                              <Download size={16} />
-                            )}
-                            Receipt
-                          </button>
+                              }}
+                              title="Download Invoice"
+                            >
+                              {invoiceLoadingId === transaction._id ? (
+                                <span className={styles.btnSpinner} />
+                              ) : (
+                                <Download size={16} />
+                              )}
+                              Receipt
+                            </button>
+                          )}
                         </div>
                       </div>
                     );

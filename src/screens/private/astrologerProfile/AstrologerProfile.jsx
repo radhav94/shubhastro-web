@@ -1120,9 +1120,6 @@ const AstrologerProfile = () => {
                 <h1 className={styles.astrologerName}>
                   {displayData.firstName} {displayData.lastName}
                 </h1>
-                <p className={styles.skills}>
-                  {displayData.specialities.join(" • ")}
-                </p>
                 <p className={styles.expertise}>
                   {displayData.expertise.join(" • ")}
                 </p>
@@ -1786,15 +1783,13 @@ const AstrologerProfile = () => {
       />
 
       {/* Recharge Modal */}
-      {hookOpenModal.recharge && (
-        <RechargeModal
-          astrologer={data}
-          isOpen={hookOpenModal.recharge}
-          onClose={() =>
-            hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
-          }
-        />
-      )}
+      <RechargeModal
+        astrologer={data}
+        isOpen={hookOpenModal.recharge}
+        onClose={() =>
+          hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
+        }
+      />
 
       <StickyReview />
 

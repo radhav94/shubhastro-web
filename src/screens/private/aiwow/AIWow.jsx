@@ -73,7 +73,7 @@ const AIWow = () => {
   const { data: chargesData } = useGetChargesQuery();
 
   const kundliId = selectedProfile?._id || selectedProfile?.id || "";
-  const { data: historyData, isLoading: isHistoryLoading, isFetching: isHistoryFetching } = useGetAiHistoryQuery(
+  const { data: historyData, isLoading: isHistoryLoading, isFetching: isHistoryFetching, refetch: refetchHistory } = useGetAiHistoryQuery(
     { kundliId, page: historyPage, limit: 10 },
     { skip: !kundliId }
   );
@@ -240,9 +240,9 @@ const AIWow = () => {
   };
 
   const handleDownloadPdf = async (item) => {
-    // Check if PDF already exists: key is `{featureType}PdfPath`
+    // Check if PDF already exists: key is `{featureType}PdfPath` or just `pdfPath`
     const pdfKey = `${item.featureType}PdfPath`;
-    const existingPdfUrl = item[pdfKey];
+    const existingPdfUrl = item.pdfPath || item[pdfKey];
     
     if (existingPdfUrl || paidToFreeIds[item.featureId]) {
       // Free — directly download existing PDF
@@ -291,6 +291,8 @@ const AIWow = () => {
       setPaidToFreeIds(prev => ({ ...prev, [featureId]: true }));
       setDownloadModal({ open: false, featureId: null, featureName: "" });
       refreshWallet();
+      // Refetch history so API returns updated pdfPath (shows "Free" on reload)
+      refetchHistory();
     } catch {
       toast.error("Failed to download PDF", { id: "pdf-download" });
     } finally {
@@ -451,7 +453,7 @@ const AIWow = () => {
                             })
                           : "",
                         summary: item.summary || "",
-                        isPaid: !item[`${item.featureType}PdfPath`] && !paidToFreeIds[item.featureId],
+                        isPaid: !item.pdfPath && !item[`${item.featureType}PdfPath`] && !paidToFreeIds[item.featureId],
                         price: null,
                         charges,
                         onViewResult: () => handleViewResultPdf(item.featureId),

@@ -146,6 +146,17 @@
     padding: 20px 16px;
   }
 
+  a {
+    color: #F75801;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #D43400;
+    }
+  }
+
   p {
     margin-bottom: 0px;
   }

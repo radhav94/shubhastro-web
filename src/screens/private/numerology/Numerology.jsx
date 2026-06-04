@@ -493,8 +493,10 @@ const NumerologyWeb = () => {
                   </span>
                 </h3>
                 <p className={styles.cardDescription}>{item.meaning}</p>
+                <h4>{item?.number && `Your ${item?.title} Number is ${item?.number}` }</h4>
               </div>
-              <div className={styles.cardNumber}>{item.number}</div>
+              
+              {/* <div className={styles.caitem?.number rdNumber}>{item.number}</div> */}
             </div>
           ))}
         </section>
@@ -507,7 +509,7 @@ const NumerologyWeb = () => {
           state={{
             selectedType: "Numerology",
           }}
-        >
+        >item?.number 
           <button className={styles.fullWidthExpertBtn}>
             Talk to a Numerology Expert
           </button>

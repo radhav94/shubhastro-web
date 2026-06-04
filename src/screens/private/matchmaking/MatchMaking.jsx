@@ -288,7 +288,6 @@ const MatchMaking = () => {
                   handleChange(personKey, "dob", "");
                 }
               }}
-              maxDate={new Date()}
               placeholder="DD/MM/YYYY"
             />
             {err.dob && <p className={styles.error}>{err.dob}</p>}

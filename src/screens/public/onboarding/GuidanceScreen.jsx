@@ -107,6 +107,7 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
         role: "CUSTOMER",
         lat: formData.latitude || 0,
         lon: formData.longitude || 0,
+        ...(formData.email && { email: formData.email }),
       };
 
       console.log("📤 Registering user with payload:", payload);

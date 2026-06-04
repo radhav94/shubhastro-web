@@ -7,6 +7,7 @@ import { useWalletBalance } from "../wallet/useWalletBalance";
 import { useRazorpayPayment } from "../../../utils/hooks/useRazorpay";
 import Toast from "../../../component/toast";
 import BackButton from "../../../component/UI/BackButton/BackButton";
+import PaymentSuccessModal from "../../../component/UI/modal/WelcomeBonusModal/PaymentSuccessModal";
 
 const FinalPay = () => {
   const location = useLocation();
@@ -19,6 +20,7 @@ const FinalPay = () => {
   });
 
   const [paymentAttempted, setPaymentAttempted] = useState(false);
+  const [successAmount, setSuccessAmount] = useState(null);
 
   const amount = data?.data?.actualPrice || 0;
   const extra = data?.data?.discountedPrice || 0;
@@ -81,20 +83,8 @@ const FinalPay = () => {
         // Refresh wallet balance
         refreshWallet();
         
-        // Navigate back to return URL or home
-        if (returnUrl) {
-          Toast.success("Payment successful! Redirecting...");
-          setTimeout(() => {
-            // Add fromPayment parameter to trigger download retry
-            const separator = returnUrl.includes('?') ? '&' : '?';
-            navigate(`${returnUrl}${separator}fromPayment=true`);
-          }, 1500);
-        } else {
-          Toast.success("Redirecting to home...");
-          setTimeout(() => {
-            navigate("/");
-          }, 1500);
-        }
+        // Show payment success popup
+        setSuccessAmount(amount);
       },
       onFailure: (error) => {
         console.error("Payment failed:", error);
@@ -123,6 +113,7 @@ const FinalPay = () => {
   }
 
   return (
+    <>
     <div className={styles.wrapper}>
       <BackButton />
       <div className={styles.container}>
@@ -194,6 +185,21 @@ const FinalPay = () => {
       )}
     </div>
     </div>
+
+      <PaymentSuccessModal
+        isOpen={successAmount !== null}
+        onClose={() => {
+          setSuccessAmount(null);
+          if (returnUrl) {
+            const separator = returnUrl.includes('?') ? '&' : '?';
+            navigate(`${returnUrl}${separator}fromPayment=true`);
+          } else {
+            navigate("/");
+          }
+        }}
+        amount={successAmount}
+      />
+    </>
   );
 };
 

@@ -193,11 +193,21 @@
   &:hover { opacity: 0.8; }
 }
 
+.totalTextNumber{
+  font-size: 14px;
+  margin-top: 10px;
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .cardsGrid {
     grid-template-columns: 1fr;
   }
+
+.totalTextNumber{
+  font-size: 12px;
+  margin-top: 5px;
+}
 }
 
 @media (max-width: 640px) {
@@ -210,6 +220,10 @@
     font-size: 20px;
   }
 
+.totalTextNumber{
+  font-size: 12px;
+  margin-top: 5px;
+}
   .cardsGrid {
     gap: 12px;
     margin-bottom: 24px;
