@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   useFetchDailyQuery, 
   useFetchTomorrowQuery,
+  useFetchTomorrowMoonQuery,
+  useFetchTomorrowNakshatraQuery,
   useFetchWeeklyQuery, 
   useFetchYearlyQuery,
   useFetchDailyMoonQuery,
@@ -18,10 +20,12 @@ import TTSButton from '../../../component/UI/TTSButton';
 import { formatted } from '../../../utils/dateFormat/date';
 import { zodiac, zodiacSignImages } from './zodiac';
 import './Horoscope.css';
+import { ProfileManager } from '../../../component/UI/Profile';
 import { useGetAllKundlisQuery } from '../../../services/appServices/kundliServicesNew';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useGetAstroDetailsQuery } from '../../../redux/api/kundli/kundliApi';
 import { buildVedicParam } from '../../../utils/VedicParams.js/vedicParams';
+import { setSelectedKundli } from '../../../redux/kundli/kundliSlice';
 const overViewImg = "https://assets.shubhastro.ai/images/horoscope/overview.png";
 const financeImg = "https://assets.shubhastro.ai/images/horoscope/finances.png";
 const scoreImg = "https://assets.shubhastro.ai/images/horoscope/total-score.png";
@@ -49,6 +53,7 @@ const isLightColor = (color) => {
 
 const HoroscopeNew = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { sign } = useParams();
   const location = useLocation();
   const { pathname } = location;
@@ -68,7 +73,7 @@ const HoroscopeNew = () => {
     physique: physiqueImg,
 
     // Names are Not coming from the API So commented
-    // totalscore: scoreImg,
+    total_score: scoreImg,
     // relation: relationImg,
     // finance: financeImg,
     // score: scoreImg,
@@ -166,6 +171,7 @@ const HoroscopeNew = () => {
   const [cameFromOverview, setCameFromOverview] = useState(false);
   const [overviewCardIndex, setOverviewCardIndex] = useState(null);
   const [showZodiacModal, setShowZodiacModal] = useState(false);
+  const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState('phase_1');
 
   // Track if we've already applied the Kundli-based default
@@ -182,10 +188,11 @@ const HoroscopeNew = () => {
 
   const tabs = ['Daily', 'Tomorrow', 'This Week', 'This Year'];
 
-  // Sub-tabs for Daily and Weekly
+  // Sub-tabs for Daily, Tomorrow and Weekly
   const dailySubTabs = ['Sun', 'Moon', 'Nakshatra'];
   const weeklySubTabs = ['Sun', 'Moon'];
   const [dailySubTab, setDailySubTab] = useState('Sun');
+  const [tomorrowSubTab, setTomorrowSubTab] = useState('Sun');
   const [weeklySubTab, setWeeklySubTab] = useState('Sun');
   
   // Categories will be dynamically generated from API response
@@ -283,7 +290,19 @@ const HoroscopeNew = () => {
   });
 
   const { data: tomorrowData, isLoading: tomorrowLoading } = useFetchTomorrowQuery(signNumber, {
-    skip: activeTab !== 'Tomorrow'
+    skip: activeTab !== 'Tomorrow' || tomorrowSubTab !== 'Sun'
+  });
+
+  // Tomorrow Moon
+  const { data: tomorrowMoonData, isLoading: tomorrowMoonLoading } = useFetchTomorrowMoonQuery(signNumber, {
+    skip: activeTab !== 'Tomorrow' || tomorrowSubTab !== 'Moon'
+  });
+
+  // Tomorrow Nakshatra
+  const [selectedTomorrowNakshatra, setSelectedTomorrowNakshatra] = useState(1);
+  const { data: tomorrowNakshatraData, isLoading: tomorrowNakshatraLoading } = useFetchTomorrowNakshatraQuery(
+    selectedTomorrowNakshatra, {
+    skip: activeTab !== 'Tomorrow' || tomorrowSubTab !== 'Nakshatra'
   });
   
   const { data: weeklyData, isLoading: weeklyLoading } = useFetchWeeklyQuery(signNumber, {
@@ -304,18 +323,74 @@ const HoroscopeNew = () => {
     skip: activeTab !== 'This Year'
   });
 
-  const isLoading = dailyLoading || dailyMoonLoading || dailySunLoading || dailyNakshatraLoading || tomorrowLoading || weeklyLoading || weeklyMoonLoading || weeklySunLoading || yearlyLoading;
+  const isLoading = dailyLoading || dailyMoonLoading || dailySunLoading || dailyNakshatraLoading || tomorrowLoading || tomorrowMoonLoading || tomorrowNakshatraLoading || weeklyLoading || weeklyMoonLoading || weeklySunLoading || yearlyLoading;
 
   // Get current data based on active tab and sub-tab
+  // Moon APIs return a different structure - normalize it
+  const normalizeMoonResponse = (data) => {
+    if (!data?.response) return data;
+    const res = data.response;
+    // If bot_response is already an object (Sun format), return as-is
+    if (res.bot_response && typeof res.bot_response === 'object') return data;
+    // Moon format: scores at root, bot_response is a string
+    const categoryKeys = ['physique', 'status', 'finances', 'relationship', 'career', 'travel', 'family', 'friends', 'health'];
+    const bot_response = {};
+    categoryKeys.forEach(key => {
+      if (res[key] !== undefined) {
+        bot_response[key] = {
+          score: res[key],
+          split_response: '' // Will use the single bot_response string for overview
+        };
+      }
+    });
+    // Add total_score
+    if (res.total_score !== undefined) {
+      bot_response.total_score = {
+        score: res.total_score,
+        split_response: typeof res.bot_response === 'string' ? res.bot_response : ''
+      };
+    }
+    // Put the full bot_response text into overview-like content
+    const fullText = typeof res.bot_response === 'string' ? res.bot_response : '';
+    // Distribute text across categories if possible (split by sentences)
+    if (fullText) {
+      const sentences = fullText.split(/(?<=\.)\s+/).filter(Boolean);
+      const keys = Object.keys(bot_response).filter(k => k !== 'total_score');
+      keys.forEach((key, idx) => {
+        if (sentences[idx]) {
+          bot_response[key].split_response = sentences[idx];
+        }
+      });
+      // If fewer sentences than categories, put all text in total_score
+      if (sentences.length < keys.length && bot_response.total_score) {
+        bot_response.total_score.split_response = fullText;
+      }
+    }
+    return {
+      ...data,
+      response: {
+        ...res,
+        bot_response,
+        lucky_color: res.lucky_color,
+        lucky_color_code: res.lucky_color_code,
+        lucky_number: res.lucky_number,
+      }
+    };
+  };
+
   const getCurrentData = () => {
     if (activeTab === 'Daily') {
-      if (dailySubTab === 'Moon') return dailyMoonData;
-      if (dailySubTab === 'Nakshatra') return dailyNakshatraData;
-      return dailyData; // Sun uses the same western endpoint
+      if (dailySubTab === 'Moon') return normalizeMoonResponse(dailyMoonData);
+      if (dailySubTab === 'Nakshatra') return normalizeMoonResponse(dailyNakshatraData);
+      return dailyData; // Sun
     }
-    if (activeTab === 'Tomorrow') return tomorrowData;
+    if (activeTab === 'Tomorrow') {
+      if (tomorrowSubTab === 'Moon') return normalizeMoonResponse(tomorrowMoonData);
+      if (tomorrowSubTab === 'Nakshatra') return normalizeMoonResponse(tomorrowNakshatraData);
+      return tomorrowData; // Sun
+    }
     if (activeTab === 'This Week') {
-      if (weeklySubTab === 'Moon') return weeklyMoonData;
+      if (weeklySubTab === 'Moon') return normalizeMoonResponse(weeklyMoonData);
       return weeklyData; // Sun
     }
     if (activeTab === 'This Year') return yearlyData;
@@ -343,15 +418,18 @@ const HoroscopeNew = () => {
         newCategories = [...newCategories, ...yearlyCategories];
         console.log('Yearly Category IDs:', yearlyCategories.map(c => c.id));
       }
-    } else if ((activeTab === 'Daily' && dailyData?.response?.bot_response) || 
-               (activeTab === 'Tomorrow' && tomorrowData?.response?.bot_response) ||
-               (activeTab === 'This Week' && weeklyData?.response?.bot_response)) {
+    } else if ((activeTab === 'Daily' && (dailyData?.response?.bot_response || dailyMoonData?.response?.bot_response || dailyNakshatraData?.response?.bot_response)) || 
+               (activeTab === 'Tomorrow' && (tomorrowData?.response?.bot_response || tomorrowMoonData?.response || tomorrowNakshatraData?.response)) ||
+               (activeTab === 'This Week' && (weeklyData?.response?.bot_response || weeklyMoonData?.response?.bot_response))) {
       // For daily/tomorrow/weekly, get categories from bot_response
-      const bot = activeTab === 'Daily' 
-        ? dailyData.response.bot_response 
-        : activeTab === 'Tomorrow'
-          ? tomorrowData.response.bot_response
-          : weeklyData.response.bot_response;
+      let bot;
+      if (activeTab === 'Daily') {
+        bot = dailyData?.response?.bot_response || dailyMoonData?.response?.bot_response || dailyNakshatraData?.response?.bot_response;
+      } else if (activeTab === 'Tomorrow') {
+        bot = tomorrowData?.response?.bot_response || normalizeMoonResponse(tomorrowMoonData)?.response?.bot_response || normalizeMoonResponse(tomorrowNakshatraData)?.response?.bot_response;
+      } else {
+        bot = weeklyData?.response?.bot_response || weeklyMoonData?.response?.bot_response;
+      }
       const dailyWeeklyCategories = Object.keys(bot).map(key => ({
         id: key,
         label: key.replace(/_/g, ' ').split(' ').map(word => 
@@ -362,12 +440,7 @@ const HoroscopeNew = () => {
       console.log('Daily/Weekly Category IDs:', dailyWeeklyCategories.map(c => c.id));
     }
     
-    // Remove "Total Score" category from all tabs
-    newCategories = newCategories.filter(c => {
-      const id = c.id.toLowerCase().replace(/[_\s]/g, '');
-      return id !== 'totalscore';
-    });
-    
+    // Keep all categories including total_score
     setCategories(newCategories);
     
     // Set default active category to overview if not set or invalid
@@ -383,7 +456,7 @@ const HoroscopeNew = () => {
         setActiveCategory('overview');
       }
     }
-  }, [activeTab, dailyData, tomorrowData, weeklyData, yearlyData, activeCategory]);
+  }, [activeTab, dailyData, dailyMoonData, dailyNakshatraData, tomorrowData, tomorrowMoonData, tomorrowNakshatraData, weeklyData, weeklyMoonData, yearlyData, activeCategory, dailySubTab, tomorrowSubTab, weeklySubTab]);
 
   // Get content for active category
   const getContent = () => {
@@ -538,8 +611,7 @@ const HoroscopeNew = () => {
   };
 
   const handleOpenModal = () => {
-    setTempSelectedZodiac(selectedZodiac);
-    setShowZodiacModal(true);
+    setShowProfileSelector(true);
   };
 
   const selectedZodiacData = zodiacSigns.find(
@@ -583,9 +655,9 @@ const HoroscopeNew = () => {
           </button>
           <button className="profile-selector" onClick={handleOpenModal}>
             <div className="selector-content">
-              <span className="selector-label">Select Horoscope</span>
+              <span className="selector-label">Select Profile</span>
               <span className="selector-value">
-                {selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)}
+                {activeProfile?.name || selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)}
               </span>
             </div>
             <ChevronDown size={16} />
@@ -595,21 +667,6 @@ const HoroscopeNew = () => {
 
       <div className="horoscope-page-content">
         <div className="horoscope-container">
-          <div className="zodiac-display">
-            <div className="zodiac-info">
-              <h1 className="zodiac-name">
-                {selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)}
-              </h1>
-              <p className="zodiac-date-range">{selectedZodiacData?.dateRange}</p>
-            </div>
-            {zodiacImage && (
-              <img 
-                src={zodiacImage} 
-                alt={capitalizedSign}
-                className="zodiac-symbol-img"
-              />
-            )}
-          </div>
 
           <div className="time-tabs-wrapper">
             <div className="time-tabs">
@@ -669,6 +726,50 @@ const HoroscopeNew = () => {
             </div>
           )}
 
+          {/* Sub-tabs for Tomorrow */}
+          {activeTab === 'Tomorrow' && (
+            <div className="time-tabs-wrapper">
+              <div className="time-tabs">
+                {dailySubTabs.map((sub) => (
+                  <button
+                    key={sub}
+                    className={`time-tab ${tomorrowSubTab === sub ? 'active' : ''}`}
+                    onClick={() => setTomorrowSubTab(sub)}
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Nakshatra selector for Tomorrow Nakshatra */}
+          {activeTab === 'Tomorrow' && tomorrowSubTab === 'Nakshatra' && (
+            <div className="category-cards nakshatra-cards">
+              {[
+                {name: 'Ashwini', icon: '🐴'}, {name: 'Bharani', icon: '🌺'}, {name: 'Krittika', icon: '🔥'},
+                {name: 'Rohini', icon: '🌙'}, {name: 'Mrigashira', icon: '🦌'}, {name: 'Ardra', icon: '💧'},
+                {name: 'Punarvasu', icon: '🏹'}, {name: 'Pushya', icon: '🌸'}, {name: 'Ashlesha', icon: '🐍'},
+                {name: 'Magha', icon: '👑'}, {name: 'Purvaphalguni', icon: '🛏️'}, {name: 'Uttaraphalguni', icon: '☀️'},
+                {name: 'Hasta', icon: '✋'}, {name: 'Chitra', icon: '💎'}, {name: 'Swati', icon: '🌬️'},
+                {name: 'Vishakha', icon: '🌳'}, {name: 'Anuradha', icon: '🪷'}, {name: 'Jyeshtha', icon: '⭐'},
+                {name: 'Mula', icon: '🌿'}, {name: 'Purvashadha', icon: '🌊'}, {name: 'Uttarashadha', icon: '🐘'},
+                {name: 'Sravana', icon: '👂'}, {name: 'Dhanista', icon: '🎵'}, {name: 'Shatabhisha', icon: '💊'},
+                {name: 'Purvabhadra', icon: '⚡'}, {name: 'Uttarabhadra', icon: '🐉'}, {name: 'Revati', icon: '🐟'}
+              ].map((item, idx) => (
+                <div key={idx + 1} className="category-item">
+                  <button
+                    className={`category-card ${selectedTomorrowNakshatra === idx + 1 ? 'active' : ''}`}
+                    onClick={() => setSelectedTomorrowNakshatra(idx + 1)}
+                  >
+                    <span className="category-label">{item.name}</span>
+                    <span className="categoryImages" style={{ fontSize: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{item.icon}</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Sub-tabs for Weekly */}
           {activeTab === 'This Week' && (
             <div className="time-tabs-wrapper">
@@ -706,7 +807,7 @@ const HoroscopeNew = () => {
           )}
 
           {/* Category cards - hide when Nakshatra is active */}
-          {!(activeTab === 'Daily' && dailySubTab === 'Nakshatra') && (
+          {!(activeTab === 'Daily' && dailySubTab === 'Nakshatra') && !(activeTab === 'Tomorrow' && tomorrowSubTab === 'Nakshatra') && (
           <div className="category-cards">
             {categories.map((category) => (
               <div key={category.id} className="category-item">
@@ -730,11 +831,11 @@ const HoroscopeNew = () => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <h2 className="content-title">
                 {currentContent.title}
-                {/* {currentContent.score && !currentContent.isOverview && (
-                  <span style={{ fontSize: '14px', color: 'orange', marginLeft: '8px' }}>
-                    ({currentContent.score}/100)
+                {currentContent.score && !currentContent.isOverview && (
+                  <span style={{ fontSize: '14px', color: '#F75801', marginLeft: '8px', fontWeight: '600' }}>
+                    {currentContent.score}/100
                   </span>
-                )} */}
+                )}
               </h2>
               <TTSButton text={(() => {
                 const parts = [];
@@ -820,11 +921,11 @@ const HoroscopeNew = () => {
                             <h3 className="overview-card-title">
                               {section.title}
                             </h3>
-                            {/* {section.score && (
-                              <span className="overview-card-score">
-                                ({section.score}/100)
+                            {section.score && (
+                              <span className="overview-card-score" style={{ fontSize: '12px', color: '#F75801', fontWeight: '600' }}>
+                                {section.score}/100
                               </span>
-                            )} */}
+                            )}
                           </div>
                         </div>
                         <div className="overview-card-body overview-card-body-expanded">
@@ -904,6 +1005,25 @@ const HoroscopeNew = () => {
             </div>
           </div>
         )}
+
+        {/* Profile Manager */}
+        <ProfileManager
+          isOpen={showProfileSelector}
+          onClose={() => setShowProfileSelector(false)}
+          onProfileSelect={(profile) => {
+            setShowProfileSelector(false);
+            // Update Redux with selected profile so useEffect picks up the new sun sign
+            dispatch(setSelectedKundli(profile));
+          }}
+          selectedProfileId={activeProfile?._id}
+          title="Select Profile"
+          enabledOperations={{
+            list: true,
+            add: true,
+            edit: true,
+            delete: true,
+          }}
+        />
       </div>
     </div>
   );
