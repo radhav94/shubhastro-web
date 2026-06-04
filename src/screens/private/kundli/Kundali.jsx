@@ -356,34 +356,22 @@ const Kundali = () => {
         }).unwrap();
         
         if (result?.success && result?.data) {
-          Toast.success("Opening PDF in new tab...");
-          
-          // Fetch the PDF as a blob to create a dummy URL
           try {
             const response = await fetch(result.data);
             if (!response.ok) throw new Error("Fetch failed");
             const blob = await response.blob();
-            
-            // Create a blob URL (this will show as blob:http://... in the browser)
             const blobUrl = URL.createObjectURL(blob);
-            
-            // Open the blob URL in a new tab
-            const newWindow = window.open(blobUrl, '_blank', 'noopener,noreferrer');
-            
-            // Revoke blob URL when the new tab is closed
-            if (newWindow) {
-              const checkClosed = setInterval(() => {
-                if (newWindow.closed) {
-                  clearInterval(checkClosed);
-                  URL.revokeObjectURL(blobUrl);
-                }
-              }, 2000);
-            }
-            
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = `Kundli_Report_${selectedProfile?.name || "report"}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(blobUrl);
+            Toast.success("PDF downloaded!");
           } catch (fetchError) {
-            console.error("Failed to fetch PDF as blob, opening directly:", fetchError);
-            // Fallback to direct URL if blob creation fails (CORS etc.)
-            window.open(result.data, '_blank', 'noopener,noreferrer');
+            console.error("Failed to fetch PDF as blob:", fetchError);
+            Toast.error("Failed to download PDF");
           }
         } else {
           Toast.error("Failed to load PDF");
@@ -908,10 +896,23 @@ const Kundali = () => {
           const reports = freshProfile?.kundli_report || selectedProfile?.kundli_report || [];
           const existing = Array.isArray(reports) && reports.find(r => r?.language === language && r?.file_url);
           if (existing) {
-            // Free — open existing PDF directly and close modal
+            // Free — download existing PDF directly
             setShowDownloadModal(false);
-            Toast.success("Opening PDF in new tab...");
-            window.open(existing.file_url, '_blank', 'noopener,noreferrer');
+            try {
+              const res = await fetch(existing.file_url);
+              const blob = await res.blob();
+              const blobUrl = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = blobUrl;
+              link.download = `Kundli_Report_${selectedProfile?.name || "report"}_${language}.pdf`;
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              URL.revokeObjectURL(blobUrl);
+              Toast.success("PDF downloaded!");
+            } catch {
+              Toast.error("Failed to download PDF");
+            }
           } else {
             // Paid — keep modal open, show downloading state
             await handlePdfDownload(language);
