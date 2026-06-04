@@ -11,6 +11,7 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
+import useLang from "../../../../utils/hooks/useLang";
 
 function decimalToDMS(decimal) {
   if (decimal === null || decimal === undefined || isNaN(decimal)) {
@@ -112,7 +113,8 @@ const cuspHeaders = [
 const KpContent = () => {
   const [activeTab, setActiveTab] = useState("north");
   const payload = useSelector((state) => state?.form?.kundliPayload);
-  const params = payload ? buildVedicParam(payload, { style: activeTab }) : null;
+  const lang = useLang();
+  const params = payload ? buildVedicParam(payload, { style: activeTab, lang }) : null;
 
   const { data, isLoading: kpLoading } = useGetKpDetailsQuery(
     params ? params : skipToken

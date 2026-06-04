@@ -28,7 +28,7 @@ import "../redux/api/community/communityApi"; // inject community feed endpoints
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "kundli", "calculator"], // persist auth, kundli, and calculator slices
+  whitelist: ["auth", "kundli", "calculator", "form"], // persist auth, kundli, calculator, and form slices
 };
 
 // Persist aiwow results in sessionStorage (clears when tab closes)

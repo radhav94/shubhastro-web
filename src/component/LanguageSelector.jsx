@@ -144,6 +144,9 @@ const LanguageSelector = ({ style, className }) => {
     setActiveLang(getLocalizedName(targetLang, targetLang));
     setLangOpen(false);
 
+    // Persist language for API calls
+    localStorage.setItem("appLang", targetLang);
+
     window.dispatchEvent(
       new CustomEvent("translationchange", { detail: { lang: targetLang } })
     );
