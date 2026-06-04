@@ -272,6 +272,38 @@
   border-bottom-color: #F75801;
 }
 
+/* Main Tabs - Pill Style (Daily, Tomorrow, This Week, This Year) */
+.main-tabs {
+  border-bottom: none;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.main-tab {
+  flex: 1;
+  padding: 12px 24px;
+  border-radius: 50px;
+  border: 2px solid #e8e4e0;
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.main-tab:hover {
+  background: #fff5ec;
+  border-color: #F75801;
+}
+
+.main-tab.active {
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(247, 88, 1, 0.3);
+}
+
 /* Category Cards Section */
 .category-cards {
   display: flex;
