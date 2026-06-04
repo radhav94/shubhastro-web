@@ -21,6 +21,7 @@ import { formatted } from '../../../utils/dateFormat/date';
 import { zodiac, zodiacSignImages } from './zodiac';
 import './Horoscope.css';
 import { ProfileManager } from '../../../component/UI/Profile';
+import ProfileSelector from '../kundli/components/ProfileSelector';
 import { useGetAllKundlisQuery } from '../../../services/appServices/kundliServicesNew';
 import { useSelector, useDispatch } from 'react-redux';
 import { useGetAstroDetailsQuery } from '../../../redux/api/kundli/kundliApi';
@@ -642,28 +643,10 @@ const HoroscopeNew = () => {
     <div className="horoscope-page">
       <PrimaryLoader isLoading={isLoading} />
       
-      <div className="horoscope-header-Wrap">
-        <div className="horoscope-header">
-          <button className="back-button" onClick={() => {
-            if (location.key !== 'default') {
-              navigate(-1);
-            } else {
-              navigate('/');
-            }
-          }}>
-            <ChevronLeft size={24} />
-          </button>
-          <button className="profile-selector" onClick={handleOpenModal}>
-            <div className="selector-content">
-              <span className="selector-label">Select Profile</span>
-              <span className="selector-value">
-                {activeProfile?.name || selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)}
-              </span>
-            </div>
-            <ChevronDown size={16} />
-          </button>
-        </div>
-      </div>
+      <ProfileSelector
+        selectedProfile={activeProfile}
+        onSelectClick={handleOpenModal}
+      />
 
       <div className="horoscope-page-content">
         <div className="horoscope-container">
