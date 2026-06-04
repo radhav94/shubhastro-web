@@ -152,7 +152,6 @@ const LalKitabDetail = () => {
         </button>
         <h1 className={styles.pageTitle}>Lal Kitab Teva</h1>
         <button className={styles.downloadBtn} onClick={handleDownloadClick} disabled={isDownloading}>
-          {downloadPrice !== null && <span className={styles.downloadPrice}>₹{downloadPrice}</span>}
           <div className={styles.downloadContent}>
             <FiDownload size={22} />
             <div className={styles.downloadText}>

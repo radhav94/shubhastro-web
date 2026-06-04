@@ -154,7 +154,6 @@ const OccultResult = () => {
           disabled={isDownloading}
           title="Download PDF"
         >
-          {downloadPrice !== null && <span className={styles.downloadPrice}>₹{downloadPrice}</span>}
           <div className={styles.downloadContent}>
             <FiDownload size={22} />
             <div className={styles.downloadText}>

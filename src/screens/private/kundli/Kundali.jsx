@@ -13,6 +13,7 @@ import ChartsContent from "./ChartsContent/ChartsContent";
 import AshtakvargaContent from "./AshtakvargaContent/AshtakvargaContent";
 import DashaContent from "./DashaContent/DashaContent";
 import Report from "./FreeKundli/Report";
+import FreeReportContent from "./FreeReportContent/FreeReportContent";
 import { buildVedicParam } from "../../../utils/VedicParams.js/vedicParams";
 import Prediction from "./FreeKundli/Prediction";
 import {
@@ -441,6 +442,10 @@ const Kundali = () => {
     {
       label: "Free Report",
       content: <Report />,
+    },
+    {
+      label: "Dosha",
+      content: <FreeReportContent />,
     },
     {
       label: "12 Months Prediction",

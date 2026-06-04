@@ -6,8 +6,7 @@ import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import { logout } from "../../../redux/auth/authSlice";
 import { loginWithPhone } from "../../../services/appServices/authService";
-import onboardingBg from "../../../assets/images/onboarding.png";
-import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
+import { AppImages } from "../../../utils/appImages";
 import LanguageSelector from "../../../component/LanguageSelector";
 
 const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
@@ -62,12 +61,12 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
     <div className={styles.loginScreen}>
       <div className={styles.loginBackground}>
         <img
-          src={onboardingBg}
+          src={AppImages.OnboardingBg}
           alt="Astrology"
           className={styles.backgroundImage}
         />
         <img
-          src={onboardingBgMobile}
+          src={AppImages.OnboardingBgMobile}
           alt="Astrology"
           className={styles.backgroundImageMobile}
         />

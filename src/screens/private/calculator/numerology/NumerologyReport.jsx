@@ -56,9 +56,8 @@ const NumerologyReport = () => {
               {item.master && (
                 <span className={styles.master}>Master Number</span>
               )}
-            <p className={styles.totalTextNumber}>{item?.number && `Your ${item?.title} Number is ${item?.number}` }</p>
             </div>
-            {/* <div className={styles.circle}>{item.number}</div> */}
+            <div className={styles.circle}>{item.number}</div>
           </div>
         ))}
       </div>
