@@ -4,11 +4,10 @@ export const zodiacApi = vedicApi.injectEndpoints({
   endpoints: (builder) => ({
     fetchDaily: builder.query({
       query: (zodiac) => ({
-        url: "western/daily-horoscope",
+        url: "prediction/daily-sun",
         params: {
           zodiac,
           date: new Date().toLocaleDateString("en-GB"),
-          // date: "06/12/2025",
           split: true,
           type: "big",
           lang: "en",
@@ -20,12 +19,45 @@ export const zodiacApi = vedicApi.injectEndpoints({
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         return {
-          url: "western/daily-horoscope",
+          url: "prediction/daily-sun",
           params: {
             zodiac,
             date: tomorrow.toLocaleDateString("en-GB"),
             split: true,
             type: "big",
+            lang: "en",
+          },
+        };
+      },
+    }),
+
+    // Tomorrow Moon prediction
+    fetchTomorrowMoon: builder.query({
+      query: (zodiac) => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return {
+          url: "prediction/daily-moon",
+          params: {
+            zodiac,
+            date: tomorrow.toLocaleDateString("en-GB"),
+            show_same: true,
+            lang: "en",
+          },
+        };
+      },
+    }),
+
+    // Tomorrow Nakshatra prediction
+    fetchTomorrowNakshatra: builder.query({
+      query: (nakshatra) => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return {
+          url: "prediction/daily-nakshatra",
+          params: {
+            nakshatra,
+            date: tomorrow.toLocaleDateString("en-GB"),
             lang: "en",
           },
         };
@@ -45,10 +77,11 @@ export const zodiacApi = vedicApi.injectEndpoints({
     }),
     fetchYearly: builder.query({
       query: (zodiac) => ({
-        url: "western/yearly-horoscope",
+        url: "prediction/yearly",
         params: {
           zodiac,
           year: new Date().getFullYear(),
+          show_same: true,
           lang: "en",
         },
       }),
@@ -146,6 +179,8 @@ export const zodiacApi = vedicApi.injectEndpoints({
 export const {
   useFetchDailyQuery,
   useFetchTomorrowQuery,
+  useFetchTomorrowMoonQuery,
+  useFetchTomorrowNakshatraQuery,
   useFetchPreviosQuery,
   useFetchNextQuery,
   useFetchMonthQuery,
