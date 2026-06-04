@@ -23,10 +23,10 @@
 
 .closeBtn {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 6px;
+  right: 6px;
   z-index: 10;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   border: none;
   border-radius: 50%;
   width: 32px;
@@ -39,7 +39,7 @@
   transition: background 0.2s;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.9);
   }
 }
 
