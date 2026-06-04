@@ -1,18 +1,15 @@
 // socketService.js
 import { io } from "socket.io-client";
 
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL
 class SocketService {
   socket = null;
   _lastConnectErrorAt = 0;
 
   connect({ onConnected, onDisconnected, onError, onWarn }) {
-    this.socket = io(BASE_URL, {
+    this.socket = io("/", {
       transports: ["websocket"],
       autoConnect: true,
-      // reconnection: true,
-      // reconnectionAttempts: 5,
-      // reconnectionDelay: 2000,
+      path: "/main/socket.io",
     });
 
     this.socket.on("connect", () => {

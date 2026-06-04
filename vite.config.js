@@ -82,10 +82,30 @@ export default defineConfig({
   server: {
     host: true,
     proxy: {
-      "/api/sarvam": {
+      // Main backend API + WebSocket
+      "/main": {
+        target: process.env.VITE_APP_API_BASE_URL || "https://devapi-shubhtalk.epicon.in",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/main/, ""),
+        ws: true,
+      },
+      // Vedic astrology API
+      "/vedic": {
+        target: "https://json.astrologyapi.com",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/vedic/, ""),
+      },
+      // Chart generation service
+      "/chart": {
+        target: "https://pyapi-shubhtalk.epicon.in",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/chart/, ""),
+      },
+      // Voice TTS/STT service
+      "/voice": {
         target: "https://api.sarvam.ai",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/sarvam/, ""),
+        rewrite: (path) => path.replace(/^\/voice/, ""),
       },
     },
   },

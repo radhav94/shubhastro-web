@@ -4,7 +4,7 @@ import { getToken } from "../../utils/utlis";
 import { navigateToLogin } from "../../utils/navigationHelper";
 
 let unAuthorizedCount = 0;
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+const BASE_URL = "/main";
 
 // Endpoints that should be accessible without authentication (no login redirect on 401)
 const PUBLIC_ENDPOINTS = ["getAstrologerById", "getAstrologers", "getRecommendedAstrologers"];

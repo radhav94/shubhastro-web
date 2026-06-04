@@ -7,7 +7,7 @@ const apiKey = import.meta.env.VITE_VEDIC_API_KEY;
 const auth = `Basic ${btoa(userId + ":" + apiKey)}`;
 
 const astrologyApiInstance = axios.create({
-  baseURL: "https://json.astrologyapi.com/v1/",
+  baseURL: "/vedic/v1/",
   headers: {
     Authorization: auth,
     "Content-Type": "application/json",

@@ -227,7 +227,7 @@ const AIWow = () => {
   };
 
   const fetchPdfUrl = async (featureId, language) => {
-    const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+    const BASE_URL = "/main";
     const params = new URLSearchParams({ historyId: featureId });
     if (language) params.append("language", language);
     const response = await axios.get(
