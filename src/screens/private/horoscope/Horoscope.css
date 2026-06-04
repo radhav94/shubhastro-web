@@ -272,16 +272,52 @@
   border-bottom-color: #F75801;
 }
 
-/* Main Tabs - Pill Style (Daily, Tomorrow, This Week, This Year) */
+/* Main Tabs - Normal underline style (Daily, Tomorrow, This Week, This Year) */
 .main-tabs {
-  border-bottom: none;
-  gap: 12px;
-  padding: 12px 0;
+  border-bottom: 1px solid #e8e4e0;
+  gap: 0;
+  padding: 0;
 }
 
 .main-tab {
   flex: 1;
-  padding: 12px 24px;
+  padding: 12px 0px;
+  border-radius: 0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 500;
+  color: #2c1b0e;
+  transition: all 0.2s ease;
+}
+
+.main-tab:hover {
+  background: transparent;
+  border-color: transparent;
+  color: #F75801;
+}
+
+.main-tab.active {
+  background: transparent;
+  color: #F75801;
+  border-color: transparent;
+  border-bottom-color: #F75801;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+/* Sub-tabs - Pill Style (Sun, Moon, Nakshatra) */
+.pill-tabs {
+  border-bottom: none;
+  gap: 12px;
+  padding: 12px 0;
+  justify-content: center;
+}
+
+.pill-tab {
+  flex: unset;
+  padding: 10px 28px;
   border-radius: 50px;
   border: 2px solid #e8e4e0;
   background: rgba(255, 255, 255, 0.6);
@@ -291,17 +327,18 @@
   transition: all 0.2s ease;
 }
 
-.main-tab:hover {
+.pill-tab:hover {
   background: #fff5ec;
   border-color: #F75801;
 }
 
-.main-tab.active {
+.pill-tab.active {
   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   color: #fff;
   border-color: transparent;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(247, 88, 1, 0.3);
+  border-bottom-color: transparent;
 }
 
 /* Category Cards Section */
