@@ -11,7 +11,7 @@ const DailyTarotResult = ({ card, onReset  }) => {
       {/* LEFT: Tarot Card */}
       <div className={styles.tarotCard} style={{ marginBottom: "30px" }}>
         <div className={styles.tarotLeft}>
-          <img src={card_image?.classic} alt={name} className={styles.cardImage} />
+          <img src={card_image?.artwork || card_image?.classic} alt={name} className={styles.cardImage} />
         </div>
 
         {/* RIGHT: Daily Meanings */}

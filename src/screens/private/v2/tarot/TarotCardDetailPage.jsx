@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ChevronLeft from '../components/ui/ChevronLeft'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { 
@@ -14,13 +14,23 @@ import { DefaultImages } from '../../../../utils/appImages'
 const TarotCardDetailPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { card, cards, reading, isMultiCard, cardNames } = location.state || { 
-    reading: { title: 'Yes/ No Tarot', apiEndpoint: 'yes-no' },
-    card: { id: 1, name: 'the-fool' }
-  }
+
+  // Redirect to tarot page if opened directly without navigation state
+  useEffect(() => {
+    if (!location.state) {
+      navigate('/tarot', { replace: true })
+    }
+  }, [location.state, navigate])
+
+  const { card, cards, reading, isMultiCard, cardNames } = location.state || {}
 
   // State for tab selection (for multi-card readings)
   const [activeTab, setActiveTab] = useState(0)
+
+  // Show loader while redirecting
+  if (!location.state) {
+    return <PrimaryLoader isLoading={true} />
+  }
 
   // Determine if this is a breakup reading
   const isRomanticBreakup = reading?.title === 'Romantic Breakup'
@@ -192,7 +202,7 @@ const TarotCardDetailPage = () => {
           <div className={styles.cardDisplay}>
             {displayData.card_image ? (
               <img 
-                src={displayData.card_image?.classic || displayData.card_image?.artwork || displayData.card_image || DefaultImages.TarotCardDefault} 
+                src={displayData.card_image?.artwork || displayData.card_image?.classic || displayData.card_image || DefaultImages.TarotCardDefault} 
                 alt={displayData.card_name || displayData.name || 'Tarot Card'}
                 className={styles.tarotCard}
               />
