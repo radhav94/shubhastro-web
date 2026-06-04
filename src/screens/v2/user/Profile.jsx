@@ -1849,6 +1849,7 @@ const Profile = () => {
             {allLoadedTransactions.length > 0 && (
               <div className={styles.txnTableHeader}>
                 <span className={styles.txnHeaderCell}>Transaction</span>
+                <span className={styles.txnHeaderCell}>Duration</span>
                 <span className={styles.txnHeaderCell}>Amount</span>
                 <span className={styles.txnHeaderCell}>Action</span>
               </div>
@@ -1891,6 +1892,17 @@ const Profile = () => {
                               {dayjs(transaction.createdAt).format("hh:mm A")} • TXN #{transaction._id}
                             </span>
                           </div>
+                        </div>
+
+                        {/* Duration */}
+                        <div className={styles.txnDurationCell}>
+                          {transaction?.sessionDetails?.durationSeconds > 0 ? (
+                            <span className={styles.txnDurationText}>
+                              {Math.floor(transaction.sessionDetails.durationSeconds / 60)}:{(transaction.sessionDetails.durationSeconds % 60).toString().padStart(2, "0")} min
+                            </span>
+                          ) : (
+                            <span className={styles.txnDurationEmpty}>—</span>
+                          )}
                         </div>
 
                         {/* Amount */}
