@@ -651,12 +651,12 @@ const HoroscopeNew = () => {
       <div className="horoscope-page-content">
         <div className="horoscope-container">
 
-          <div className="time-tabs-wrapper">
-            <div className="time-tabs">
+          <div className="time-tabs-wrapper main-tabs-wrapper">
+            <div className="time-tabs main-tabs">
               {tabs.map((tab) => (
                 <button
                   key={tab}
-                  className={`time-tab ${activeTab === tab ? 'active' : ''}`}
+                  className={`time-tab main-tab ${activeTab === tab ? 'active' : ''}`}
                   onClick={() => handleTabChange(tab)}
                 >
                   {tab}
