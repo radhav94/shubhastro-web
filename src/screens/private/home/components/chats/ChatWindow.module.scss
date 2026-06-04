@@ -1948,7 +1948,7 @@ $floating-button-gap: 14px;
   background: rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 0 32px;
   gap: 16px;
 }
@@ -2045,11 +2045,35 @@ $floating-button-gap: 14px;
   display: block;
 }
 
+/* Camera close button */
+.cameraCloseBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  color: #fff;
+  transition: background 0.2s;
+
+  &:active {
+    background: rgba(0, 0, 0, 0.75);
+    transform: scale(0.92);
+  }
+}
+
 /* Camera switch button */
 .cameraSwitchBtn {
   position: absolute;
   top: 16px;
-  right: 16px;
+  right: 76px;
   width: 48px;
   height: 48px;
   border-radius: 50%;
