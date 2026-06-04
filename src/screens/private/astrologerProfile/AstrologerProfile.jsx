@@ -1120,9 +1120,6 @@ const AstrologerProfile = () => {
                 <h1 className={styles.astrologerName}>
                   {displayData.firstName} {displayData.lastName}
                 </h1>
-                <p className={styles.skills}>
-                  {displayData.specialities.join(" • ")}
-                </p>
                 <p className={styles.expertise}>
                   {displayData.expertise.join(" • ")}
                 </p>
