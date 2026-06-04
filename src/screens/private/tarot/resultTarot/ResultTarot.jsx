@@ -32,7 +32,7 @@ const ResultTarot = ({ card, userName = "", onReset }) => {
       <div className={styles.tarotCard}>
         <div className={styles.tarotLeft}>
           <img
-            src={card?.card_image?.classic}
+            src={card?.card_image?.artwork || card?.card_image?.classic}
             alt={card.name}
             className={styles.cardImage}
           />

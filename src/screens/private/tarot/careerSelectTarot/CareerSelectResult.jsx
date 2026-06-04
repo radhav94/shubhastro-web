@@ -22,7 +22,7 @@ const CareerSelectResult = ({ card, onReset }) => {
       {/* CARD DISPLAY */}
       <div className={styles.tarotCard} style={{ marginBottom: "30px" }}>
         <div className={styles.tarotLeft}>
-          <img src={card_image?.classic} alt={name} className={styles.cardImage} />
+          <img src={card_image?.artwork || card_image?.classic} alt={name} className={styles.cardImage} />
           <div className={styles.directionBadge}>
             {direction === "upright" ? "🔼 Upright" : "🔽 Reversed"}
           </div>
