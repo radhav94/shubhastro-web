@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+const BASE_URL = "/main";
 
 export const geoApi = createApi({
   reducerPath: "geoApi",

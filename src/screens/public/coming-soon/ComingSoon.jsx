@@ -23,7 +23,7 @@ import ShubhAstroLogo from "../../../assets/images/ShubhAstrologo.svg";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import styles from "./ComingSoon.module.scss";
 
-const API_URL = "https://devapi-shubhtalk.epicon.in/api/landing-leads/submit";
+const API_URL = "/main/api/landing-leads/submit";
 
 const initialValues = {
   fullName: "",
