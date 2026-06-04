@@ -280,14 +280,14 @@ const TopHeader = () => {
             >
               Tarot
             </NavLink>
-            <NavLink
+            {/* <NavLink
               to="/explore"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
               Explore
-            </NavLink>
+            </NavLink> */}
             <NavLink
               to="/chat-to-astrologer"
               className={({ isActive }) =>
@@ -644,7 +644,7 @@ const TopHeader = () => {
             >
               Blogs
             </NavLink>
-            <NavLink
+            {/* <NavLink
               to="/explore"
               onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
@@ -652,7 +652,7 @@ const TopHeader = () => {
               }
             >
               Explore
-            </NavLink>
+            </NavLink> */}
             <NavLink
               to={PATH.privateRoutes.KUNDLI.path}
               onClick={() => setIsDrawerOpen(false)}

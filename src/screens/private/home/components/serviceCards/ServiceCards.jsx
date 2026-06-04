@@ -95,7 +95,8 @@ const ServiceCards = () => {
     navigate(path);
   };
 
-  console.log(data,"456789")
+  if (!services.length) return null;
+
   return (
     <div className={styles.wrapper}>
       <Title title={bannerSection?.display_title} showDivider />
