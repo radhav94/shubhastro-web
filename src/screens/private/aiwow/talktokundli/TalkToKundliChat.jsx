@@ -191,7 +191,7 @@ const TalkToKundliChat = () => {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} notranslate`} translate="no">
       {/* Header */}
       <header className={styles.headerWrap}>
         <div className={styles.header}>
