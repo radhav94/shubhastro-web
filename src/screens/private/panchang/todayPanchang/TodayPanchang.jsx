@@ -581,6 +581,7 @@ const TodayPanchang = () => {
                 birthDetails={planetsData?.response}
                 birthPanchang={planetsData?.response?.panchang}
                 astroDetails={astroDetails}
+                ghatkaChakra={planetsData?.response?.ghatka_chakra}
               />
             </div>
           )}

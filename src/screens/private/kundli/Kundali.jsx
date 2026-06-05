@@ -416,6 +416,7 @@ const Kundali = () => {
           birthDetails={fullData?.response}
           birthPanchang={fullData?.response?.panchang}
           astroDetails={astroDetails}
+          ghatkaChakra={fullData?.response?.ghatka_chakra}
         />
       ),
     },
