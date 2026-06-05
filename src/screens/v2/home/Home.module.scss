@@ -4008,12 +4008,15 @@
 
 .blogTitle {
   font-family: "Poppins", sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
   color: #1a1a1a;
   margin: 0 0 10px 0;
   line-height: 1.3;
   @include line-clamp(2);
+  @media (width <= 767px) {
+    font-size: 12px;
+  }
 }
 
 .blogDate {
@@ -4038,10 +4041,6 @@
     height: 130px;
   }
 
-  .blogTitle {
-    font-size: 14px;
-  }
-
   .blogDate {
     font-size: 13px;
   }
@@ -4064,10 +4063,6 @@
   // .blogImageWrapper {
   //   height: 260px;
   // }
-
-  .blogTitle {
-    font-size: 16px;
-  }
 }
 
 /* Desktop responsive for Blogs */
