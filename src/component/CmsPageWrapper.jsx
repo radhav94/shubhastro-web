@@ -49,13 +49,30 @@ const CmsPageWrapper = ({ children }) => {
   const slug = pathname.replace(/^\//, "");
   const shouldSkip = isExcluded(pathname) || !slug;
 
+  // Primary query with full slug
   const { data, isError } = useGetStaticPageBySlugQuery(slug, {
     skip: shouldSkip,
   });
 
-  // Only use data if not excluded and data matches current slug
-  const pageData = !shouldSkip && !isError && data?.data?.slug === slug
-    ? data.data
+  // Fallback: if primary fails (404), try parent slug only for horoscope paths
+  const parentSlug = slug.includes("/") ? slug.substring(0, slug.lastIndexOf("/")) : "";
+  const isHoroscopePath = slug.match(/^(daily-horoscope|tomorrow-horoscope|weekly-horoscope|yearly-horoscope)\//);
+  const shouldFallback = !shouldSkip && (isError || (!data?.data)) && !!parentSlug && isHoroscopePath;
+
+  const { data: fallbackData, isError: fallbackError } = useGetStaticPageBySlugQuery(parentSlug, {
+    skip: !shouldFallback,
+  });
+
+  // Use primary data if available, otherwise fallback
+  const resolvedData = (!shouldSkip && !isError && data?.data) ? data.data
+    : (shouldFallback && !fallbackError && fallbackData?.data) ? fallbackData.data
+    : null;
+
+  // Only use data if slug matches (exact or prefix)
+  const pageData = resolvedData
+    ? (resolvedData.slug === slug || slug.startsWith(resolvedData.slug + "/") || resolvedData.slug === parentSlug)
+      ? resolvedData
+      : null
     : null;
   const hasBody = pageData?.body && pageData.body.trim().length > 0;
 
