@@ -672,6 +672,7 @@ const MatchMaking = () => {
           edit: true,
           delete: true,
         }}
+        matchmakingMode={true}
       />
 
       {/* SELECT PROFILE POPUP */}
