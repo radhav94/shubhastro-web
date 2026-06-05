@@ -2,17 +2,17 @@ import { useState, useEffect, useRef } from "react";
 import styles from "./LanguageSelector.module.scss";
 
 const supportedLanguages = [
-  { code: "en", name: "English" },
-  { code: "hi", name: "हिन्दी" },
-  { code: "mr", name: "मराठी" },
-  { code: "bn", name: "বাংলা" },
-  { code: "te", name: "తెలుగు" },
-  { code: "ta", name: "தமிழ்" },
-  { code: "kn", name: "ಕನ್ನಡ" },
-  { code: "gu", name: "ગુજરાતી" },
-  { code: "pa", name: "ਪੰਜਾਬੀ" },
-  { code: "ml", name: "മലയാളം" },
-  { code: "or", name: "ଓଡ଼ିଆ" },
+  { code: "en", name: "English", short: "EN" },
+  { code: "hi", name: "हिन्दी", short: "HI" },
+  { code: "mr", name: "मराठी", short: "MR" },
+  { code: "bn", name: "বাংলা", short: "BN" },
+  { code: "te", name: "తెలుగు", short: "TE" },
+  { code: "ta", name: "தமிழ்", short: "TA" },
+  { code: "kn", name: "ಕನ್ನಡ", short: "KN" },
+  { code: "gu", name: "ગુજરાતી", short: "GU" },
+  { code: "pa", name: "ਪੰਜਾਬੀ", short: "PA" },
+  { code: "ml", name: "മലയാളം", short: "ML" },
+  { code: "or", name: "ଓଡ଼ିଆ", short: "OR" },
 ];
 
 // Language names translated into each supported language
@@ -42,7 +42,7 @@ const getLocalizedName = (langCode, selectedLangCode) => {
 const LanguageSelector = ({ style, className }) => {
   const [langOpen, setLangOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState("en");
-  const [activeLang, setActiveLang] = useState("English");
+  const [activeLang, setActiveLang] = useState("EN");
   const langRef = useRef(null);
 
   // Close language dropdown on outside click
@@ -78,7 +78,8 @@ const LanguageSelector = ({ style, className }) => {
 
     const currentLangCode = getCurrentLang();
     setSelectedLang(currentLangCode);
-    setActiveLang(getLocalizedName(currentLangCode, currentLangCode));
+    const langObj = supportedLanguages.find((l) => l.code === currentLangCode);
+    setActiveLang(langObj?.short || currentLangCode.toUpperCase());
   }, []);
 
   const handleLanguageChange = (targetLang) => {
@@ -141,7 +142,8 @@ const LanguageSelector = ({ style, className }) => {
     }
 
     setSelectedLang(targetLang);
-    setActiveLang(getLocalizedName(targetLang, targetLang));
+    const langObj = supportedLanguages.find((l) => l.code === targetLang);
+    setActiveLang(langObj?.short || targetLang.toUpperCase());
     setLangOpen(false);
 
     window.dispatchEvent(

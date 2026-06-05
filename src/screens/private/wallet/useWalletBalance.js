@@ -35,7 +35,7 @@ export const useWalletBalance = () => {
     trigger(fetchCount.current, false);
   }, [trigger]);
 
-  // Listen for wallet updates from other components
+  // Listen for wallet balance updated via API refresh (e.g. recharge, call end)
   useEffect(() => {
     const handleWalletUpdate = () => {
       if (getToken()) {
@@ -46,6 +46,19 @@ export const useWalletBalance = () => {
     window.addEventListener("walletBalanceUpdated", handleWalletUpdate);
     return () => window.removeEventListener("walletBalanceUpdated", handleWalletUpdate);
   }, [trigger]);
+
+  // Listen for real-time balance from socket activity events (no API call needed)
+  useEffect(() => {
+    const handleSocketBalance = (e) => {
+      const newBalance = e.detail?.balance;
+      if (newBalance !== undefined && !isNaN(newBalance)) {
+        localStorage.setItem(LOCAL_KEY, String(newBalance));
+        setBalance(Number(newBalance));
+      }
+    };
+    window.addEventListener("walletBalanceFromSocket", handleSocketBalance);
+    return () => window.removeEventListener("walletBalanceFromSocket", handleSocketBalance);
+  }, []);
 
   return {
     balance,

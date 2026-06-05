@@ -117,20 +117,29 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(0, 0, 0, 0.8);
-  padding: 8px 14px;
-  border-radius: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  padding: 4px 8px 4px 4px;
+  border-radius: 50px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
 }
 
 .walletIcon {
   font-size: 16px;
 }
 
+.coinImg {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
 .walletAmount {
   font-size: 15px;
   font-weight: 600;
   color: #fff;
+  letter-spacing: 0.5px;
 }
 
 /* ===============================
@@ -169,30 +178,29 @@
   padding-left: 10px;
 }
 .rechargeButton {
-  // padding: $spacing-lg 24px;
-  // padding: 5px;
-  width: 30px;
-  border-radius: 24px;
   border: none;
   background: transparent;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 8px;
-  white-space: nowrap;
+  justify-content: center;
+  padding: 0;
   flex-shrink: 0;
+  transition: transform 0.2s ease;
   @media (width <= 767px) {
-    font-size: 12px;
-    border-radius: 20px;
-    gap: 4px;
-    span svg{
-      width: 30px;
+    svg {
+      width: 24px;
+      height: 24px;
     }
   }
+}
+
+.rechargeButton:hover {
+  transform: scale(1.05);
+}
+
+.rechargeButton:active {
+  transform: scale(0.95);
 }
 
 // .rechargeButton img {
@@ -723,7 +731,7 @@
   background: #E4342F !important;
   color: #fff !important;
   box-shadow: 0 2px 8px rgba(229, 57, 53, 0.3);
-  transform: rotate(135deg);
+  // transform: rotate(135deg);
 }
 
 .endCallBtn:hover {

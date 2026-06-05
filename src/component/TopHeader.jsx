@@ -370,17 +370,17 @@ const TopHeader = () => {
             <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
             {/* language end */}
 
-            {/* <div className={styles.walletBadge}
-              onClick={() => requireAuth() && navigate(PATH.privateRoutes.PROFILE.path)}
-              style={{ cursor: 'pointer' }}
->
-               <img src={headerCoin} className={styles.coinImg} alt="coin icon" />
-              <span className={styles.walletAmount}>
-                {formatAmount(
-                  isFetchingBalance ? "..." : isLoggedIn ? balance || 0 : 0,
-                )}
-              </span>
-            </div> */}
+            {isLoggedIn && (
+              <div className={styles.walletBadge}
+                onClick={() => requireAuth() && navigate(PATH.privateRoutes.PROFILE.path)}
+                style={{ cursor: 'pointer' }}
+              >
+                <img src={headerCoin} className={styles.coinImg} alt="coin icon" />
+                <span className={styles.walletAmount}>
+                  {formatAmount(isFetchingBalance ? "..." : balance || 0)}
+                </span>
+              </div>
+            )}
             <div className={styles.profileDetailMain} ref={profileDropdownRef} onClick={handleProfileClick}>
               {userAvatarDisplay ? (
                 <div className={styles.avatarText}>
