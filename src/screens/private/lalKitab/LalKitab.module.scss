@@ -3,7 +3,7 @@ $orange: #f75801;
 $dark-orange: #d43400;
 
 .page {
-  max-width: 1100px;
+  max-width: 1450px;
   margin: 0 auto;
   padding: 0px 16px 60px;
   font-family: $font;
@@ -14,20 +14,20 @@ $dark-orange: #d43400;
 
 /* ── Hero ── */
 .hero {
-  display: grid;
-  grid-template-columns: 1fr 340px;
+  display: flex;
+  // grid-template-columns: 1fr 340px;
   gap: 40px;
   align-items: center;
-  background: rgba(255,255,255,0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1.5px solid rgba(255,255,255,0.8);
+  // background: rgba(255,255,255,0.55);
+  // backdrop-filter: blur(12px);
+  // -webkit-backdrop-filter: blur(12px);
+  // border: 1.5px solid rgba(255,255,255,0.8);
   border-radius: 24px;
-  padding: 48px 48px 48px 52px;
+  padding: 0px 100px 0px 100px;
   margin-bottom: 40px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 40px rgba(247,88,1,0.08);
+  // box-shadow: 0 8px 40px rgba(247,88,1,0.08);
 
   &::before {
     content: '';
@@ -45,8 +45,10 @@ $dark-orange: #d43400;
     gap: 24px;
   }
   @media (max-width: 767px) {
-    padding: 16px;
+    padding: 0px;
     gap: 16px;
+    flex-direction: column-reverse;
+    margin-top: -56px;
   }
 }
 
@@ -61,15 +63,19 @@ $dark-orange: #d43400;
 .heroBadge {
   display: inline-flex;
   align-items: center;
-  background: rgba(247,88,1,0.1);
-  color: $orange;
-  font-size: 12px;
-  font-weight: 600;
+  // background: rgba(247,88,1,0.1);
+  color: #000;
+  font-size: 14px;
+  font-weight: 400;
   letter-spacing: 0.5px;
   padding: 5px 14px;
   border-radius: 999px;
   width: fit-content;
-  border: 1px solid rgba(247,88,1,0.2);
+  // border: 1px solid rgba(247,88,1,0.2);
+
+  border-radius: 100px;
+  border: 1px solid #FFD28E;
+  background: #FFF5EC;
 }
 
 .heroTitle {
@@ -85,7 +91,7 @@ $dark-orange: #d43400;
 
 .heroDesc {
   font-size: 15px;
-  color: #555;
+  color: #000;
   line-height: 1.7;
   margin: 0;
   max-width: 480px;
@@ -102,7 +108,7 @@ $dark-orange: #d43400;
 .profileLabel {
   font-size: 13px;
   font-weight: 500;
-  color: #6b7280;
+  color: #111;
   margin: 0;
 }
 
@@ -173,7 +179,8 @@ $dark-orange: #d43400;
   padding: 14px 20px;
   border: 2px dashed rgba(247,88,1,0.3);
   border-radius: 14px;
-  background: rgba(247,88,1,0.04);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
   font-size: 14px;
   font-weight: 500;
   color: $orange;
@@ -194,7 +201,7 @@ $dark-orange: #d43400;
   gap: 10px;
   padding: 16px 32px;
   border: none;
-  border-radius: 14px;
+  border-radius: 100px;
   background: linear-gradient(90deg, $orange, $dark-orange);
   color: #fff;
   font-size: 16px;
@@ -237,16 +244,15 @@ $dark-orange: #d43400;
   align-items: center;
   justify-content: center;
 
-  @media (max-width: 900px) {
-    order: -1;
-    max-width: 200px;
-    margin: 0 auto;
+  @media (max-width: 1180px) {
+    width: 70%;
+    // margin: 0 auto;
   }
 }
 
 .heroImg {
   width: 100%;
-  max-width: 300px;
+  // max-width: 300px;
   object-fit: contain;
   position: relative;
   z-index: 1;
@@ -265,12 +271,12 @@ $dark-orange: #d43400;
 
 /* ── Info Section ── */
 .infoSection {
-  background: rgba(255,255,255,0.55);
+  background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1.5px solid rgba(255,255,255,0.8);
+  border: 1.5px solid rgba(255,255,255,1);
   border-radius: 24px;
-  padding: 40px 48px;
+  padding: 40px 100px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.05);
 
   @media (max-width: 768px) { padding: 28px 20px; }
@@ -279,7 +285,7 @@ $dark-orange: #d43400;
 .infoHeader {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: center;
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -300,8 +306,10 @@ $dark-orange: #d43400;
   font-size: 15px;
   color: #555;
   line-height: 1.8;
-  margin: 0 0 32px;
+  // margin: 0 0 32px;
   max-width: 720px;
+  text-align: center;
+  margin: 0px auto 30px auto;
 }
 
 /* Feature grid */
@@ -316,10 +324,11 @@ $dark-orange: #d43400;
 
 .featureCard {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  flex-direction: column;
   gap: 14px;
-  background: rgba(255,255,255,0.7);
-  border: 1.5px solid rgba(255,255,255,0.9);
+  // background: rgba(255,255,255,0.7);
+  border: 1.5px solid rgba(255,255,255,0);
   border-radius: 16px;
   padding: 20px;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -327,6 +336,7 @@ $dark-orange: #d43400;
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border: 1.5px solid rgba(255,255,255,0.9);
   }
 }
 
@@ -337,17 +347,19 @@ $dark-orange: #d43400;
 }
 
 .featureTitle {
-  font-size: 14px;
-  font-weight: 700;
-  color: #111;
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
   margin: 0 0 4px;
   font-family: $font;
+  text-align: center;
 }
 
 .featureDesc {
-  font-size: 12px;
-  color: #6b7280;
+  font-size: 14px;
+  color: #111;
   margin: 0;
   line-height: 1.5;
   font-family: $font;
+  text-align: center;
 }
