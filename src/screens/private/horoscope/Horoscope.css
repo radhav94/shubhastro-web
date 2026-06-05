@@ -1343,3 +1343,99 @@
   height: auto;
   margin: 0;
 }
+
+
+/* Centered Profile Header */
+.horoscope-profile-header {
+  position: sticky;
+  top: 93px;
+  z-index: 100;
+  padding: 16px 20px 12px;
+  text-align: center;
+  background: rgba(255, 255, 255, 40%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e8e8e8;
+}
+
+@media screen and (max-width: 1180px) {
+  .horoscope-profile-header {
+    top: 53px;
+  }
+}
+
+.horoscope-profile-center {
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.horoscope-profile-label {
+  font-size: 11px;
+  color: #888;
+  letter-spacing: 0.05em;
+}
+
+.horoscope-profile-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.horoscope-profile-dob {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+/* Sun Sign / Moon Sign Tabs */
+.sign-tabs-wrapper {
+  border-bottom: 2px solid #e8e4e0;
+  margin-bottom: 4px;
+}
+
+.sign-tabs {
+  display: flex;
+  gap: 0;
+}
+
+.sign-tab {
+  flex: 1;
+  padding: 14px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 16px;
+  font-weight: 600;
+  color: #999;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: -2px;
+}
+
+.sign-tab:hover {
+  color: #333;
+}
+
+.sign-tab.active {
+  color: #1a1a1a;
+  border-bottom-color: #F75801;
+}
+
+@media (max-width: 767px) {
+  .horoscope-profile-name {
+    font-size: 16px;
+  }
+  .horoscope-profile-dob {
+    font-size: 11px;
+  }
+  .sign-tab {
+    font-size: 14px;
+    padding: 12px 0;
+  }
+}
