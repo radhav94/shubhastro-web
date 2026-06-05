@@ -16,7 +16,6 @@
   border-radius: 16px;
   padding: 2rem;
   margin-bottom: 2rem;
-  overflow: hidden;
   border: 1.5px solid var(--border-50, rgb(255, 255, 255));
   // box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
 
@@ -186,6 +185,9 @@
   font-weight: 700;
   color: #2d3748;
   margin: 0;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .sectionIcon {
