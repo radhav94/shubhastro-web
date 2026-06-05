@@ -167,7 +167,7 @@ const AuraAnalysis = () => {
       setProgress(0);
       
       // Determine error message
-      let errorMessage = 'An unexpected error occurred. Please try again.';
+      let errorMessage = 'Something went wrong. Please try again.';
       
       if (error.message === 'Network Error' || error.message === 'Failed to fetch') {
         errorMessage = 'Network error. Please check your connection and try again.';
@@ -178,9 +178,7 @@ const AuraAnalysis = () => {
       } else if (error.response?.status === 429) {
         errorMessage = 'Too many requests. Please wait a moment and try again.';
       } else if (error.response?.status >= 500) {
-        errorMessage = 'Server error. Please try again later.';
-      } else if (error.message) {
-        errorMessage = error.message;
+        errorMessage = 'Something went wrong. Please try again later.';
       }
       
       // Don't show Toast here - interceptor already showed it
