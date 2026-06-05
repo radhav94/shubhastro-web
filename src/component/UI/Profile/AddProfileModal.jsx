@@ -21,6 +21,8 @@ const AddProfileModal = ({
   onSelectProfile = null,
   onDeleteProfile = null,
   savedKundlis = [],
+  // Matchmaking mode - hides "Others" gender and Relation field
+  matchmakingMode = false,
 }) => {
   const [showListing, setShowListing] = useState(false);
   const [formData, setFormData] = useState({
@@ -46,19 +48,20 @@ const AddProfileModal = ({
     name: Yup.string()
       .required("Name is required")
       .matches(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces"),
-    relation: Yup.string()
-      .required("Relation is required")
-      .test(
-        "unique-self",
-        "A Self profile already exists. Please select a different relation.",
-        function(value) {
-          // Allow any relation except "Self" if a Self profile already exists
-          if (value?.toLowerCase() === "self" && hasSelfProfile) {
-            return false;
+    relation: matchmakingMode
+      ? Yup.string().notRequired()
+      : Yup.string()
+        .required("Relation is required")
+        .test(
+          "unique-self",
+          "A Self profile already exists. Please select a different relation.",
+          function(value) {
+            if (value?.toLowerCase() === "self" && hasSelfProfile) {
+              return false;
+            }
+            return true;
           }
-          return true;
-        }
-      ),
+        ),
     birthDate: Yup.string().required("Birth date is required"),
     birthTime: Yup.string().when("unknownBirthTime", {
       is: false,
@@ -234,6 +237,7 @@ const AddProfileModal = ({
                       </svg>
                       Female
                     </button>
+                    {!matchmakingMode && (
                     <button
                       type="button"
                       className={values.identity === "Others" ? styles.active : ""}
@@ -257,9 +261,11 @@ const AddProfileModal = ({
                       </svg>
                       Others
                     </button>
+                    )}
                   </div>
                 </div>
 
+                {!matchmakingMode && (
                 <div className={styles.formGroup}>
                   <label>Relation <span className={styles.required}>*</span></label>
                   <Field
@@ -273,6 +279,7 @@ const AddProfileModal = ({
                   </Field>
                   <ErrorMessage name="relation" component="div" className={styles.errorText} />
                 </div>
+                )}
 
                 <div className={styles.formGroup}>
                   <label>Birth Date <span className={styles.required}>*</span></label>

@@ -852,6 +852,7 @@ const SmartMatchmaking = () => {
           setProfileToDelete(profileId);
           setShowDeleteModal(true);
         }}
+        matchmakingMode={true}
       />
 
       {/* Edit Profile Modal */}
