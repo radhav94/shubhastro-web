@@ -1353,7 +1353,7 @@ const VideoCalling = ({ callData }) => {
                 <span class={styles.dividerLine}></span> */}
   
                 {/* Wallet Balance Badge */}
-                <div className={styles.walletBadge}>
+                <div className={styles.walletBadge} onClick={() => { setIsMinimized(true); navigate("/recharge"); }} style={{ cursor: 'pointer' }}>
                   <img src={headerCoin} className={styles.coinImg} alt="coin" />
                   <span className={styles.walletAmount}>
                     {formatAmount(isFetching ? "..." : balance || 0)}
