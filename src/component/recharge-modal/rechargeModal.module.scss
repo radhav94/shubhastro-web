@@ -22,7 +22,8 @@
 
 // Modal Container
 .modalContainer {
-  background: #ffffff;
+  background: linear-gradient(90deg, #fefefee6, #fff8ece6);
+  backdrop-filter: blur(8px);
   border-radius: 20px;
   width: 100%;
   max-width: 900px;

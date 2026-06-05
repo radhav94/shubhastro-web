@@ -22,7 +22,8 @@
 }
 
 .popup {
-  background: white;
+  background: linear-gradient(90deg, rgba(254, 254, 254, 1) 0%, rgba(255, 248, 236, 1));
+  backdrop-filter: blur(12px);
   border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 600px;
@@ -98,7 +99,8 @@
   gap: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 2px solid transparent;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0px 0px 6px rgb(247 88 1 / 19%);
 }
 
 .optionCard:hover {
