@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
 import Toast from "../../../../../component/toast";
 
-const SOCKET_URL = import.meta.env.VITE_APP_API_BASE_URL;
+const SOCKET_URL = undefined; // Uses relative path via socket.io path option
 
 export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onStreamEnded, onSessionStarted, onSessionEnded, onRoomNotFound, onBlocked, onUserBlocked, onReportSubmitted }) => {
   const socketRef = useRef(null);
@@ -48,10 +48,11 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
       return;
     }
 
-    console.log("LiveChat → Connecting to", SOCKET_URL);
+    console.log("LiveChat → Connecting via proxy");
 
-    const socket = io(SOCKET_URL, {
+    const socket = io("/", {
       transports: ["websocket"],
+      path: "/main/socket.io",
       query: { role: "CUSTOMER", userId },
       auth: { role: "CUSTOMER", userId },
     });

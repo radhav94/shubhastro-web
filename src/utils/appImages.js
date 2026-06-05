@@ -168,7 +168,9 @@ export const AppImages = {
   LiveClock,
   LiveIcon,
   LikesIconContainer,
-  FilterIcon
+  FilterIcon,
+  OnboardingBg: "https://shubhastroassets.s3.ap-south-1.amazonaws.com/onboarding.png",
+  OnboardingBgMobile: "https://shubhastroassets.s3.ap-south-1.amazonaws.com/onboarding.png",
 };
 
 //svgs

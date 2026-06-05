@@ -493,10 +493,8 @@ const NumerologyWeb = () => {
                   </span>
                 </h3>
                 <p className={styles.cardDescription}>{item.meaning}</p>
-                <h4>{item?.number && `Your ${item?.title} Number is ${item?.number}` }</h4>
               </div>
-              
-              {/* <div className={styles.caitem?.number rdNumber}>{item.number}</div> */}
+              {item?.number && <div className={styles.cardNumber}>{item.number}</div>}
             </div>
           ))}
         </section>

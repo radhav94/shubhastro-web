@@ -105,9 +105,9 @@ const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0, onTabChange }) => {
           <ServiceCards />
         </div>
       </main>
-      <div style={kundliId ? activeStyle : null}>
+      {/* <div style={kundliId ? activeStyle : null}>
         <ZodiacCarousel />
-      </div>
+      </div> */}
     </div>
   );
 };

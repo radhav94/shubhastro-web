@@ -28,6 +28,24 @@ export const formatTOB = (hour, min, meridiem) => {
   return `${String(hour24).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
 };
 
+// Get current language from localStorage (set by LanguageSelector) with cookie fallback
+export const getCurrentLang = () => {
+  // Primary: localStorage (persisted by LanguageSelector on change)
+  const stored = localStorage.getItem("appLang");
+  if (stored) return stored;
+
+  // Fallback: googtrans cookie
+  const cookie = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("googtrans="));
+  if (cookie) {
+    const value = decodeURIComponent(cookie.split("=")[1]);
+    const parts = value.split("/");
+    return parts[2] || "en";
+  }
+  return "en";
+};
+
 // Build common Kundli Payload for all APIs
 export const buildVedicParam = (formData, extraFields = {}) => {
   if (!formData) return null;
@@ -40,7 +58,7 @@ export const buildVedicParam = (formData, extraFields = {}) => {
     lat: formData.lat,
     lon: formData.lon,
     tz: formData.tzone,
-    lang: "en",
+    lang: getCurrentLang(),
     ...extraFields,
   };
 };

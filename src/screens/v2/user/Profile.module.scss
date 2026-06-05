@@ -1275,7 +1275,7 @@
 // Transaction Table Header
 .txnTableHeader {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 2fr 0.8fr 1fr 1fr;
   padding: 0.75rem 1rem;
   border-bottom: 1.5px solid #fff;
   background: #fafafa;
@@ -1296,7 +1296,7 @@
 // Transaction Row
 .txnRow {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 2fr 0.8fr 1fr 1fr;
   align-items: center;
   padding: 1rem;
   background: rgba(255, 255, 255, 0.4);
@@ -1381,6 +1381,26 @@
   @media (max-width: 640px) {
     // mobile styles
   }
+}
+
+.txnDurationCell {
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.txnDurationText {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.txnDurationEmpty {
+  font-size: 0.875rem;
+  color: #9ca3af;
 }
 
 .txnAmountCell {

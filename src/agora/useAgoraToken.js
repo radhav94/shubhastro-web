@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 
-const BACKEND = import.meta.env.VITE_APP_API_BASE_URL; // change to production URL
+const BACKEND = "/main";
 
 export const useAgoraToken = () => {
   const [loading, setLoading] = useState(false);

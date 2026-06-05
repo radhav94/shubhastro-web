@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const AshtakVargaApiInstance = axios.create({
-  baseURL: "https://pyapi-shubhtalk.epicon.in/api/astrology/",
+  baseURL: "/chart/api/astrology/",
   headers: {
     "Content-Type": "application/json",
   },

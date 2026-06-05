@@ -62,9 +62,7 @@ const MatchMaking = () => {
 
   /* -------------------- CURL GENERATOR -------------------- */
   const generateCurlCommand = (endpoint, _method, payload, token) => {
-    const baseUrl =
-      import.meta.env.VITE_APP_API_BASE_URL ||
-      "https://devapi-shubhtalk.epicon.in";
+    const baseUrl = "/main";
     const url = `${baseUrl}/api/${endpoint}`;
 
     let curl = `curl --location '${url}' \\\n`;

@@ -117,7 +117,7 @@ const ShaniReport = () => {
       </div>
 
       {/* REMEDIES */}
-      {Array.isArray(remedies) && remedies.length > 0 && (
+      {shani_period_type && Array.isArray(remedies) && remedies.length > 0 && (
         <div className={styles.section} style={{ position: "relative" }}>
           <span style={{ position: "absolute", top: "0", right: "0", display: "inline-flex", zIndex: 10, pointerEvents: "auto" }}>
             <TTSButton text={`Recommended Remedies. ${remedies.join(". ")}`} />

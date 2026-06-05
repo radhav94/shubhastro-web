@@ -1,4 +1,5 @@
 import { vedicApi } from "../baseApi/vedicApi";
+import { getCurrentLang } from "../../../utils/VedicParams.js/vedicParams";
 
 const formatDate = (dateString) => {
   if (!dateString) return "";
@@ -17,7 +18,7 @@ export const panchangApi = vedicApi.injectEndpoints({
           lat: formData.lat,
           lon: formData.lon,
           tz: 5.5, // Default timezone
-          lang: "en",
+          lang: getCurrentLang(),
         },
       }),
     }),

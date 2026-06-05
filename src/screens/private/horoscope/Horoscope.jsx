@@ -21,6 +21,7 @@ import { formatted } from '../../../utils/dateFormat/date';
 import { zodiac, zodiacSignImages } from './zodiac';
 import './Horoscope.css';
 import { ProfileManager } from '../../../component/UI/Profile';
+import ProfileSelector from '../kundli/components/ProfileSelector';
 import { useGetAllKundlisQuery } from '../../../services/appServices/kundliServicesNew';
 import { useSelector, useDispatch } from 'react-redux';
 import { useGetAstroDetailsQuery } from '../../../redux/api/kundli/kundliApi';
@@ -611,7 +612,13 @@ const HoroscopeNew = () => {
   };
 
   const handleOpenModal = () => {
-    setShowProfileSelector(true);
+    if (isLoggedIn) {
+      setShowProfileSelector(true);
+    } else {
+      // Guest user — show zodiac selector
+      setTempSelectedZodiac(selectedZodiac);
+      setShowZodiacModal(true);
+    }
   };
 
   const selectedZodiacData = zodiacSigns.find(
@@ -642,38 +649,44 @@ const HoroscopeNew = () => {
     <div className="horoscope-page">
       <PrimaryLoader isLoading={isLoading} />
       
-      <div className="horoscope-header-Wrap">
-        <div className="horoscope-header">
-          <button className="back-button" onClick={() => {
-            if (location.key !== 'default') {
-              navigate(-1);
-            } else {
-              navigate('/');
-            }
-          }}>
-            <ChevronLeft size={24} />
-          </button>
-          <button className="profile-selector" onClick={handleOpenModal}>
-            <div className="selector-content">
-              <span className="selector-label">Select Profile</span>
-              <span className="selector-value">
-                {activeProfile?.name || selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)}
-              </span>
-            </div>
-            <ChevronDown size={16} />
-          </button>
-        </div>
-      </div>
+      <ProfileSelector
+        selectedProfile={activeProfile || { name: selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1) }}
+        onSelectClick={handleOpenModal}
+      />
 
       <div className="horoscope-page-content">
         <div className="horoscope-container">
 
-          <div className="time-tabs-wrapper">
-            <div className="time-tabs">
+          {/* Zodiac Banner */}
+          <div className="zodiac-display">
+            <div className="zodiac-info">
+              <h1 className="zodiac-name">
+                {(() => {
+                  const nakshatraNames = ['Ashwini','Bharani','Krittika','Rohini','Mrigashira','Ardra','Punarvasu','Pushya','Ashlesha','Magha','Purvaphalguni','Uttaraphalguni','Hasta','Chitra','Swati','Vishakha','Anuradha','Jyeshtha','Mula','Purvashadha','Uttarashadha','Sravana','Dhanista','Shatabhisha','Purvabhadra','Uttarabhadra','Revati'];
+                  const currentSubTab = activeTab === 'Daily' ? dailySubTab : activeTab === 'Tomorrow' ? tomorrowSubTab : activeTab === 'This Week' ? weeklySubTab : 'Sun';
+                  if (currentSubTab === 'Nakshatra') {
+                    const nkIdx = activeTab === 'Tomorrow' ? selectedTomorrowNakshatra : selectedNakshatra;
+                    return nakshatraNames[nkIdx - 1] || 'Nakshatra';
+                  }
+                  return `${capitalizedSign} ${currentSubTab}`;
+                })()}
+              </h1>
+            </div>
+            {zodiacImage && (
+              <img 
+                src={zodiacImage} 
+                alt={capitalizedSign}
+                className="zodiac-symbol-img"
+              />
+            )}
+          </div>
+
+          <div className="time-tabs-wrapper main-tabs-wrapper">
+            <div className="time-tabs main-tabs">
               {tabs.map((tab) => (
                 <button
                   key={tab}
-                  className={`time-tab ${activeTab === tab ? 'active' : ''}`}
+                  className={`time-tab main-tab ${activeTab === tab ? 'active' : ''}`}
                   onClick={() => handleTabChange(tab)}
                 >
                   {tab}
@@ -684,12 +697,12 @@ const HoroscopeNew = () => {
 
           {/* Sub-tabs for Daily */}
           {activeTab === 'Daily' && (
-            <div className="time-tabs-wrapper">
-              <div className="time-tabs">
+            <div className="time-tabs-wrapper pill-tabs-wrapper">
+              <div className="time-tabs pill-tabs">
                 {dailySubTabs.map((sub) => (
                   <button
                     key={sub}
-                    className={`time-tab ${dailySubTab === sub ? 'active' : ''}`}
+                    className={`time-tab pill-tab ${dailySubTab === sub ? 'active' : ''}`}
                     onClick={() => setDailySubTab(sub)}
                   >
                     {sub}
@@ -728,12 +741,12 @@ const HoroscopeNew = () => {
 
           {/* Sub-tabs for Tomorrow */}
           {activeTab === 'Tomorrow' && (
-            <div className="time-tabs-wrapper">
-              <div className="time-tabs">
+            <div className="time-tabs-wrapper pill-tabs-wrapper">
+              <div className="time-tabs pill-tabs">
                 {dailySubTabs.map((sub) => (
                   <button
                     key={sub}
-                    className={`time-tab ${tomorrowSubTab === sub ? 'active' : ''}`}
+                    className={`time-tab pill-tab ${tomorrowSubTab === sub ? 'active' : ''}`}
                     onClick={() => setTomorrowSubTab(sub)}
                   >
                     {sub}
@@ -772,12 +785,12 @@ const HoroscopeNew = () => {
 
           {/* Sub-tabs for Weekly */}
           {activeTab === 'This Week' && (
-            <div className="time-tabs-wrapper">
-              <div className="time-tabs">
+            <div className="time-tabs-wrapper pill-tabs-wrapper">
+              <div className="time-tabs pill-tabs">
                 {weeklySubTabs.map((sub) => (
                   <button
                     key={sub}
-                    className={`time-tab ${weeklySubTab === sub ? 'active' : ''}`}
+                    className={`time-tab pill-tab ${weeklySubTab === sub ? 'active' : ''}`}
                     onClick={() => setWeeklySubTab(sub)}
                   >
                     {sub}
@@ -788,14 +801,14 @@ const HoroscopeNew = () => {
           )}
 
           {activeTab === 'This Year' && yearlyData?.response && (
-            <div className="time-tabs-wrapper">
-              <div className="time-tabs">
+            <div className="time-tabs-wrapper pill-tabs-wrapper">
+              <div className="time-tabs pill-tabs">
                 {['phase_1', 'phase_2', 'phase_3', 'phase_4'].map((phase, idx) => {
                   const period = yearlyData.response[phase]?.period;
                   return (
                     <button
                       key={phase}
-                      className={`time-tab ${selectedPhase === phase ? 'active' : ''}`}
+                      className={`time-tab pill-tab ${selectedPhase === phase ? 'active' : ''}`}
                       onClick={() => setSelectedPhase(phase)}
                     >
                       {period || `Q${idx + 1}`}

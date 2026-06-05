@@ -129,7 +129,7 @@ const formatAttrValue = (val) => {
 // Fetch fresh product detail from API
 const fetchProductDetail = async (productIdOrSlug) => {
   try {
-    const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
+    const BASE_URL = "/main";
     const role = localStorage.getItem("shubhtalk_role");
     const token = role === "ASTROLOGER" ? localStorage.getItem("shubhtalk_astro_token") : localStorage.getItem("shubhtalk_customer_token");
     const res = await fetch(`${BASE_URL}/api/mall/products/${productIdOrSlug}`, {

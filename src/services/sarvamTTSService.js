@@ -1,6 +1,6 @@
 const SARVAM_API_KEY = import.meta.env.VITE_SARVAM_API_KEY;
-const TTS_API_URL = "/api/sarvam/text-to-speech";
-const STT_API_URL = "/api/sarvam/speech-to-text";
+const TTS_API_URL = "/voice/text-to-speech";
+const STT_API_URL = "/voice/speech-to-text";
 
 export const SARVAM_SPEAKERS = {
   SHUBH: "shubh",

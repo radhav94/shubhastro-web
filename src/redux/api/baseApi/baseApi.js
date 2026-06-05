@@ -7,7 +7,7 @@ const auth = `Basic ${btoa(userId + ":" + apiKey)}`;
 export const baseApi = createApi({
   reducerPath: 'astrologyApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://json.astrologyapi.com/v1/",
+    baseUrl: "/vedic/v1/",
     prepareHeaders: (headers) => {
       headers.set("Authorization", auth);
       headers.set("Content-Type", "application/json");

@@ -6,7 +6,7 @@ import { PrimaryText, Title } from "../../../../../component";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PATH } from "../../../../../utils/routes/Paths";
 import { AppIcons ,DefaultImages} from "../../../../../utils/appImages";
-import { useGetHomeDetailsQuery } from "../../../../../services/appServices/homeServices";
+import { useGetNewHomeDetailsQuery } from "../../../../../services/appServices/homeServices";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
 
 const iconMap = {
@@ -20,7 +20,7 @@ const iconMap = {
 
 const ServiceCards = () => {
   //  HOOK MUST RUN ALWAYS (Fixes your error)
-  const { data, isLoading } = useGetHomeDetailsQuery();
+  const { data, isLoading } = useGetNewHomeDetailsQuery();
   const [disableLeft, setDisableLeft] = useState(true);
   const [disableRight, setDisableRight] = useState(false);
 
@@ -95,11 +95,13 @@ const ServiceCards = () => {
     navigate(path);
   };
 
+  if (!services.length) return null;
+
   return (
     <div className={styles.wrapper}>
-      <Title title="Complementary Astrology Services" showDivider />
+      <Title title={bannerSection?.display_title} showDivider />
 
-      <div className={styles.carouselWrapper}>
+      {/* <div className={styles.carouselWrapper}> */}
         {/* <button
           className={`${styles.arrowBtn} ${disableLeft ? styles.disabled : ""}`}
           disabled={disableLeft}
@@ -145,7 +147,7 @@ const ServiceCards = () => {
           <IoArrowForwardOutline size={22} />
         </button> */}
       </div>
-    </div>
+    // </div>
   );
 };
 
