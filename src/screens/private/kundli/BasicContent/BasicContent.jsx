@@ -84,7 +84,7 @@ const AccordionSection = ({ title, data = {}, defaultOpen = false }) => {
 const BasicContent = (props) => {
   const userDetails = useSelector((state) => state?.form?.userDetails);
 
-  const { birthDetails, birthPanchang, astroDetails } = props || {};
+  const { birthDetails, birthPanchang, astroDetails, ghatkaChakra } = props || {};
 
   if (!birthDetails || !birthPanchang || !astroDetails) return null;
 
@@ -194,6 +194,22 @@ const BasicContent = (props) => {
         data={avakhadaDetailsData}
         defaultOpen={false}
       />
+      {ghatkaChakra && (
+        <AccordionSection
+          title="Ghatka Chakra"
+          data={{
+            Rasi: capitalizeWords(ghatkaChakra.rasi) || "--",
+            Tithi: Array.isArray(ghatkaChakra.tithi) ? ghatkaChakra.tithi.join(", ") : (ghatkaChakra.tithi || "--"),
+            Day: capitalizeWords(ghatkaChakra.day) || "--",
+            Nakshatra: capitalizeWords(ghatkaChakra.nakshatra) || "--",
+            Tatva: capitalizeWords(ghatkaChakra.tatva) || "--",
+            Lord: capitalizeWords(ghatkaChakra.lord) || "--",
+            "Same Sex Lagna": capitalizeWords(ghatkaChakra.same_sex_lagna) || "--",
+            "Opposite Sex Lagna": capitalizeWords(ghatkaChakra.opposite_sex_lagna) || "--",
+          }}
+          defaultOpen={false}
+        />
+      )}
     </div>
   );
 };
