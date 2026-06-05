@@ -372,7 +372,7 @@ const TopHeader = () => {
 
             {isLoggedIn && (
               <div className={styles.walletBadge}
-                onClick={() => requireAuth() && navigate(PATH.privateRoutes.PROFILE.path)}
+                onClick={() => requireAuth() && navigate(PATH.privateRoutes.RECHARGE.path)}
                 style={{ cursor: 'pointer' }}
               >
                 <img src={headerCoin} className={styles.coinImg} alt="coin icon" />
