@@ -30,8 +30,6 @@ const DreamInterpreter = () => {
   const [error, setError] = useState(null);
   const [showMorePsych, setShowMorePsych] = useState(false);
   const [showMoreAstro, setShowMoreAstro] = useState(false);
-  const [showMoreEmotional, setShowMoreEmotional] = useState(false);
-  const [showMoreOpportunities, setShowMoreOpportunities] = useState(false);
   const [showMorePersonalized, setShowMorePersonalized] = useState(false);
   const [showMoreSymbols, setShowMoreSymbols] = useState(false);
   const [showMoreSpiritual, setShowMoreSpiritual] = useState(false);
@@ -349,7 +347,7 @@ const DreamInterpreter = () => {
               <div className={styles.resultCard}>
                 <div className={styles.cardHeader}>
                   <h3 className={styles.cardTitle}>🧠 Psychological Insights</h3>
-                  <TTSButton text={`Psychological Insights. ${interpretation.psychologicalInsights.consciousLevel ? 'Conscious Level: ' + interpretation.psychologicalInsights.consciousLevel : ''}`} />
+                  <TTSButton text={`Psychological Insights. ${interpretation.psychologicalInsights.consciousLevel ? 'Conscious Level: ' + interpretation.psychologicalInsights.consciousLevel + '. ' : ''}${interpretation.psychologicalInsights.subconsciousLevel ? 'Subconscious Level: ' + interpretation.psychologicalInsights.subconsciousLevel + '. ' : ''}${interpretation.psychologicalInsights.shadowAspects ? 'Shadow Aspects: ' + interpretation.psychologicalInsights.shadowAspects + '. ' : ''}${interpretation.psychologicalInsights.desires?.length > 0 ? 'Desires: ' + interpretation.psychologicalInsights.desires.join(', ') + '. ' : ''}${interpretation.psychologicalInsights.fears?.length > 0 ? 'Fears: ' + interpretation.psychologicalInsights.fears.join(', ') + '. ' : ''}${interpretation.psychologicalInsights.unresolved?.length > 0 ? 'Unresolved: ' + interpretation.psychologicalInsights.unresolved.join(', ') + '. ' : ''}${interpretation.psychologicalInsights.growthOpportunities?.length > 0 ? 'Growth Opportunities: ' + interpretation.psychologicalInsights.growthOpportunities.join(', ') : ''}`} />
                 </div>
                 <div className={`${styles.contentWrapper} ${!showMorePsych ? styles.collapsedContent : ''}`}>
                   {interpretation.psychologicalInsights.consciousLevel && (
@@ -424,7 +422,7 @@ const DreamInterpreter = () => {
               <div className={styles.resultCard}>
                 <div className={styles.cardHeader}>
                   <h3 className={styles.cardTitle}>⭐ Astrological Connection</h3>
-                  <TTSButton text={`Astrological Connection. ${interpretation.astrologicalConnection.cosmicTiming || ''}`} />
+                  <TTSButton text={`Astrological Connection. ${interpretation.astrologicalConnection.cosmicTiming ? 'Cosmic Timing: ' + interpretation.astrologicalConnection.cosmicTiming + '. ' : ''}${interpretation.astrologicalConnection.moonPhaseImpact ? 'Moon Phase: ' + interpretation.astrologicalConnection.moonPhaseImpact + '. ' : ''}${interpretation.astrologicalConnection.planetaryInfluences?.length > 0 ? 'Planetary Influences: ' + interpretation.astrologicalConnection.planetaryInfluences.map(p => p.planet + ' - ' + p.influence).join('. ') + '. ' : ''}${interpretation.astrologicalConnection.relevantHouses?.length > 0 ? 'Relevant Houses: ' + interpretation.astrologicalConnection.relevantHouses.map(h => h.house + ' ' + h.name + ' - ' + h.connection).join('. ') : ''}`} />
                 </div>
                 <div className={`${styles.contentWrapper} ${!showMoreAstro ? styles.collapsedContent : ''}`}>
                   {interpretation.astrologicalConnection.cosmicTiming && (
@@ -512,7 +510,7 @@ const DreamInterpreter = () => {
                   <div className={styles.resultCard} style={{ flex: 1 }}>
                     <div className={styles.cardHeader}>
                       <h3 className={styles.cardTitle}>🕉️ Spiritual Meaning</h3>
-                      <TTSButton text={`Spiritual Meaning. ${interpretation.spiritualMeaning.soulMessage || ''}`} />
+                      <TTSButton text={`Spiritual Meaning. ${interpretation.spiritualMeaning.soulMessage ? 'Soul Message: ' + interpretation.spiritualMeaning.soulMessage + '. ' : ''}${interpretation.spiritualMeaning.spiritualGuidance ? 'Spiritual Guidance: ' + interpretation.spiritualMeaning.spiritualGuidance + '. ' : ''}${interpretation.spiritualMeaning.karmaConnection ? 'Karma Connection: ' + interpretation.spiritualMeaning.karmaConnection + '. ' : ''}${interpretation.spiritualMeaning.pastLifeEchoes ? 'Past Life Echoes: ' + interpretation.spiritualMeaning.pastLifeEchoes + '. ' : ''}${interpretation.spiritualMeaning.divineGuidance ? 'Divine Guidance: ' + interpretation.spiritualMeaning.divineGuidance : ''}`} />
                     </div>
                     <div className={`${styles.contentWrapper} ${!showMoreSpiritual ? styles.collapsedContent : ''}`}>
                       {interpretation.spiritualMeaning.soulMessage && (
@@ -561,7 +559,7 @@ const DreamInterpreter = () => {
               <div className={`${styles.resultCard} ${styles.fullWidth}`}>
                 <div className={styles.cardHeader}>
                   <h3 className={styles.cardTitle}>💡 Actionable Guidance</h3>
-                  <TTSButton text={`Actionable Guidance. ${interpretation.guidance.immediateActions?.length > 0 ? 'Immediate Actions: ' + interpretation.guidance.immediateActions.join('. ') : ''}`} />
+                  <TTSButton text={`Actionable Guidance. ${interpretation.guidance.immediateActions?.length > 0 ? 'Immediate Actions: ' + interpretation.guidance.immediateActions.join('. ') + '. ' : ''}${interpretation.guidance.reflectionQuestions?.length > 0 ? 'Reflection Questions: ' + interpretation.guidance.reflectionQuestions.join('. ') + '. ' : ''}${interpretation.guidance.journalingPrompts?.length > 0 ? 'Journaling Prompts: ' + interpretation.guidance.journalingPrompts.join('. ') + '. ' : ''}${interpretation.guidance.rituals?.length > 0 ? 'Rituals: ' + interpretation.guidance.rituals.join('. ') : ''}`} />
                 </div>
                 <div className={styles.contentWrapper}>
                   {interpretation.guidance.immediateActions?.length > 0 && (
@@ -613,9 +611,9 @@ const DreamInterpreter = () => {
               <div className={styles.resultCard}>
                 <div className={styles.cardHeader}>
                   <h3 className={styles.cardTitle}>💜 Emotional Analysis</h3>
-                  <TTSButton text={`Emotional Analysis. ${interpretation.emotionalAnalysis.emotionalBalance || ''}`} />
+                  <TTSButton text={`Emotional Analysis. ${interpretation.emotionalAnalysis.primaryEmotions?.length > 0 ? 'Primary Emotions: ' + interpretation.emotionalAnalysis.primaryEmotions.map(e => e.emotion + ' ' + e.intensity + ' percent').join(', ') + '. ' : ''}${interpretation.emotionalAnalysis.emotionalBalance ? 'Emotional Balance: ' + interpretation.emotionalAnalysis.emotionalBalance + '. ' : ''}${interpretation.emotionalAnalysis.healingNeeded ? 'Healing Needed: ' + interpretation.emotionalAnalysis.healingNeeded : ''}`} />
                 </div>
-                <div className={`${styles.contentWrapper} ${!showMoreEmotional ? styles.collapsedContent : ''}`}>
+                <div className={styles.contentWrapper}>
                   {interpretation.emotionalAnalysis.primaryEmotions?.length > 0 && (
                     <div className={styles.insightSection}>
                       <h4 className={styles.insightSubtitle}>Primary Emotions</h4>
@@ -642,11 +640,6 @@ const DreamInterpreter = () => {
                     </div>
                   )}
                 </div>
-                <div className={styles.showMoreContainer}>
-                  <button className={styles.showMoreBtn} onClick={() => setShowMoreEmotional(!showMoreEmotional)}>
-                    {showMoreEmotional ? 'Show Less' : 'Show More'}
-                  </button>
-                </div>
               </div>
             )}
 
@@ -655,9 +648,9 @@ const DreamInterpreter = () => {
               <div className={styles.resultCard}>
                 <div className={styles.cardHeader}>
                   <h3 className={styles.cardTitle}>🌱 Growth Opportunities</h3>
-                  <TTSButton text={`Growth Opportunities. ${interpretation.opportunities.growthAreas?.join('. ') || ''}`} />
+                  <TTSButton text={`Growth Opportunities. ${interpretation.opportunities.growthAreas?.length > 0 ? 'Growth Areas: ' + interpretation.opportunities.growthAreas.join('. ') + '. ' : ''}${interpretation.opportunities.manifestationPotential ? 'Manifestation Potential: ' + interpretation.opportunities.manifestationPotential + '. ' : ''}${interpretation.opportunities.timingAdvice ? 'Timing Advice: ' + interpretation.opportunities.timingAdvice : ''}`} />
                 </div>
-                <div className={`${styles.contentWrapper} ${!showMoreOpportunities ? styles.collapsedContent : ''}`}>
+                <div className={styles.contentWrapper}>
                   {interpretation.opportunities.growthAreas?.length > 0 && (
                     <div className={styles.insightSection}>
                       <h4 className={styles.insightSubtitle}>Growth Areas</h4>
@@ -681,11 +674,6 @@ const DreamInterpreter = () => {
                     </div>
                   )}
                 </div>
-                <div className={styles.showMoreContainer}>
-                  <button className={styles.showMoreBtn} onClick={() => setShowMoreOpportunities(!showMoreOpportunities)}>
-                    {showMoreOpportunities ? 'Show Less' : 'Show More'}
-                  </button>
-                </div>
               </div>
             )}
 
@@ -694,7 +682,7 @@ const DreamInterpreter = () => {
               <div className={styles.resultCard}>
                 <div className={styles.cardHeader}>
                   <h3 className={styles.cardTitle}>🪐 Personalized Insights</h3>
-                  <TTSButton text={`Personalized Insights. ${interpretation.personalizedInsights.birthChartConnection || ''}`} />
+                  <TTSButton text={`Personalized Insights. ${interpretation.personalizedInsights.birthChartConnection ? 'Birth Chart Connection: ' + interpretation.personalizedInsights.birthChartConnection + '. ' : ''}${interpretation.personalizedInsights.zodiacInfluence ? 'Zodiac Influence: ' + interpretation.personalizedInsights.zodiacInfluence + '. ' : ''}${interpretation.personalizedInsights.lifePathAlignment ? 'Life Path Alignment: ' + interpretation.personalizedInsights.lifePathAlignment + '. ' : ''}${interpretation.personalizedInsights.karmaReflection ? 'Karma Reflection: ' + interpretation.personalizedInsights.karmaReflection + '. ' : ''}${interpretation.personalizedInsights.planetaryMessage ? 'Planetary Message: ' + interpretation.personalizedInsights.planetaryMessage : ''}`} />
                 </div>
                 <div className={`${styles.contentWrapper} ${!showMorePersonalized ? styles.collapsedContent : ''}`}>
                   {interpretation.personalizedInsights.birthChartConnection && (

@@ -31,7 +31,6 @@ $font-primary: "Poppins", sans-serif;
   border-radius: 20px;
   padding: 2rem;
   margin-bottom: 2rem;
-  overflow: hidden;
   // box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
   border: 1.5px solid var(--border-50, rgba(255, 255, 255, 1));
   backdrop-filter: blur(12px);
@@ -218,6 +217,9 @@ $font-primary: "Poppins", sans-serif;
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
 
   @media (min-width: 768px) {
     font-size: 22px;

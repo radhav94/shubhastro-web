@@ -49,6 +49,7 @@ const TTSButton = ({ text, size = 16 }) => {
   return (
     <button
       style={btnStyle}
+      className="notranslate"
       onClick={handleClick}
       aria-label={isLoading ? "Loading speech" : isSpeaking ? "Stop reading" : "Read aloud"}
       type="button"
