@@ -320,6 +320,15 @@ export const ChatProvider = ({ children }) => {
         setChatSeconds(data.remainingTime * 60);
         startTimer();
       }
+
+      // Update wallet balance from activity event (comes every minute during call/chat)
+      if (data?.walletBalance !== undefined || data?.remainingBalance !== undefined) {
+        const newBalance = data.walletBalance ?? data.remainingBalance;
+        if (newBalance !== undefined && !isNaN(newBalance)) {
+          localStorage.setItem("astro_wallet_balance", String(newBalance));
+          window.dispatchEvent(new CustomEvent("walletBalanceFromSocket", { detail: { balance: newBalance } }));
+        }
+      }
     };
 
     /* 🔍 [ChatReconnect] Chat lifecycle event loggers */
