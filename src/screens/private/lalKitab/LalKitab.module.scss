@@ -341,9 +341,17 @@ $dark-orange: #d43400;
 }
 
 .featureIcon {
-  font-size: 28px;
+  font-size: 30px;
   flex-shrink: 0;
   line-height: 1;
+  background: #fff;
+  /* padding: 5px; */
+  border-radius: 100px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .featureTitle {
