@@ -120,8 +120,15 @@ const PalmistryAnalysis = () => {
         
         setProgress(0);
         // Don't show Toast here - interceptor already showed it
-        // Just display the error details on screen
-        setError(result.error || { message: 'Analysis failed. Please try again.' });
+        // Show generic error to users
+        const errMsg = result.error;
+        const userMessage = (typeof errMsg === 'string' && (
+          errMsg.includes('GoogleGenerativeAI') || errMsg.includes('googleapis') ||
+          errMsg.includes('Too Many Requests') || errMsg.includes('prepayment') ||
+          errMsg.includes('Error fetching') || errMsg.includes('INTERNAL') ||
+          errMsg.length > 100
+        )) ? 'Something went wrong. Please try again.' : (errMsg || 'Analysis failed. Please try again.');
+        setError({ message: typeof userMessage === 'string' ? userMessage : 'Something went wrong. Please try again.' });
       }
     } catch (error) {
       // Ignore abort errors - user navigated away

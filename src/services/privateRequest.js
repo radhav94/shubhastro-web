@@ -57,17 +57,35 @@ const responseErrorHandler = (error) => {
     const getErrorMsg = (data, message) => {
       // Check for nested error object with message
       if (data?.error && typeof data.error === 'object' && data.error.message) {
-        return String(data.error.message);
+        const msg = String(data.error.message);
+        // Hide technical/internal error messages from users
+        if (msg.includes('GoogleGenerativeAI') || msg.includes('googleapis.com') || 
+            msg.includes('Too Many Requests') || msg.includes('prepayment credits') ||
+            msg.includes('Error fetching from') || msg.includes('INTERNAL') ||
+            msg.includes('ai.studio') || msg.includes('billing') ||
+            msg.length > 150) {
+          return "Something went wrong. Please try again.";
+        }
+        return msg;
       }
       
-      const msg = data?.message || data?.error || message || "Some Error Occurred";
+      const msg = data?.message || data?.error || message || "Something went wrong";
       // Ensure it's a string
-      if (typeof msg === 'string') return msg;
+      if (typeof msg === 'string') {
+        // Hide technical messages
+        if (msg.includes('GoogleGenerativeAI') || msg.includes('googleapis.com') || 
+            msg.includes('Too Many Requests') || msg.includes('prepayment credits') ||
+            msg.includes('Error fetching from') || msg.includes('INTERNAL') ||
+            msg.length > 150) {
+          return "Something went wrong. Please try again.";
+        }
+        return msg;
+      }
       if (typeof msg === 'object' && msg !== null) {
         if (msg.message) return String(msg.message);
         if (msg.error) return String(msg.error);
       }
-      return "Some Error Occurred";
+      return "Something went wrong";
     };
 
     switch (status) {

@@ -287,7 +287,14 @@ const ChatWindow = () => {
   const handleReviewSubmit = async ({ rating, review, isAnonymous }) => {
     try {
       // Use astroID from location state, fall back to activeCall or reviewData
-      const reviewAstrologerID = astroID || activeCall?.astrologerID || activeCall?.astrologerId || reviewData?.astrologerID;
+      const reviewAstrologerID = astroID || activeCall?.astrologerID || activeCall?.astrologerId || reviewData?.astrologerID || reviewData?.astrologer_ID;
+      
+      if (!reviewAstrologerID) {
+        Toast.error("Something went wrong. Please try again.");
+        setOpenFeedback(false);
+        return;
+      }
+
       const res = await addAstrologerReview({
         astrologerID: reviewAstrologerID,
         rating,
@@ -297,19 +304,19 @@ const ChatWindow = () => {
       }).unwrap();
 
       if (res.success) {
-        Toast.success(res.message);
-        // Only emit chat:end if the chat is still active to avoid
-        // "Chat has already ended" socket error
+        Toast.success(res.message || "Review submitted successfully");
         if (isChatActive && !isMessageDisabled) {
           handleDisconnect();
         }
       } else {
-        Toast.error(res.message);
+        Toast.error("Something went wrong. Please try again.");
       }
 
       setOpenFeedback(false);
     } catch (error) {
       console.error("Failed to submit review", error);
+      Toast.error("Something went wrong. Please try again.");
+      setOpenFeedback(false);
     }
   };
 
