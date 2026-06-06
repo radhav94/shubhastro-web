@@ -26,7 +26,7 @@ const isExcluded = (pathname) =>
   );
 
 const SITE_ORIGIN = typeof window !== "undefined" ? window.location.origin : "";
-const OG_IMAGE_PATH = "/images/ShubhAstrologo.svg";
+const OG_IMAGE_PATH = "/images/ShubhAstrologo.png";
 const OG_IMAGE_URL = `${SITE_ORIGIN}${OG_IMAGE_PATH}`;
 const FAVICON_PATH = "/images/mobile-shubh-astro-logo.svg";
 const FAVICON_URL = `${SITE_ORIGIN}${FAVICON_PATH}`;
