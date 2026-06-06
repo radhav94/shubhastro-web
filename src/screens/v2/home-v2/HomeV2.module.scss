@@ -3344,6 +3344,7 @@
     background: linear-gradient(180deg, #FFEFE3 0%, #F2F0F1 100%) !important;
     position: relative;
     overflow: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   footer * {
