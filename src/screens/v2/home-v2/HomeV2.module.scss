@@ -2381,7 +2381,7 @@
 .discoverBox {
   // background: #fff;
   // border: 1px solid #f0ebe4;
-  background: linear-gradient(114.19deg, rgba(246, 247, 248, 0.5) 0%, rgba(240, 237, 240, 0.5) 100%) !important;
+  // background: linear-gradient(114.19deg, rgba(246, 247, 248, 0.5) 0%, rgba(240, 237, 240, 0.5) 100%) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   // border-radius: 16px !important;
@@ -3344,6 +3344,7 @@
     background: linear-gradient(180deg, #FFEFE3 0%, #F2F0F1 100%) !important;
     position: relative;
     overflow: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   footer * {
