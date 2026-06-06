@@ -1,10 +1,17 @@
+import { useState } from "react";
 import styles from "./ChatWindow.module.scss";
 import { IoArrowBack } from "react-icons/io5";
 // import { FaWallet } from "react-icons/fa";
 import { PrimaryText } from "../../../../../component";
 import ChatFooter from "./ChatFooter";
 import { capitalizeWords } from "../../../../../utils/capitalize";
-import { getAstrologerDefaultImage } from "../../../../../utils/appImages";
+
+const getInitials = (name) => {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return parts[0][0]?.toUpperCase() || "?";
+};
 
 const ChatHeader = ({
   fullName,
@@ -20,19 +27,25 @@ const ChatHeader = ({
   isEnding = false,
   profileImgUrl,
 }) => {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <div className={styles.header}>
       <div className={styles.headerLeft}>
         <IoArrowBack className={styles.backIcon} onClick={onBack} />
 
-        <img
-          src={profileImgUrl || getAstrologerDefaultImage()}
-          className={styles.headerAvatar}
-          alt={fullName || "Astrologer"}
-          onError={(e) => {
-            e.target.src = getAstrologerDefaultImage();
-          }}
-        />
+        {!profileImgUrl || imgError ? (
+          <div className={styles.headerAvatarInitials}>
+            {getInitials(fullName)}
+          </div>
+        ) : (
+          <img
+            src={profileImgUrl}
+            className={styles.headerAvatar}
+            alt={fullName || "Astrologer"}
+            onError={() => setImgError(true)}
+          />
+        )}
 
         <div className={styles.userInfo}>
           <PrimaryText size_16 isSemiBold>

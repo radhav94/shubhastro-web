@@ -322,6 +322,21 @@ $floating-button-gap: 14px;
   flex-shrink: 0;
 }
 
+.headerAvatarInitials {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #F75801, #D43400);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
 .userInfo {
   display: flex;
   flex-direction: column;
