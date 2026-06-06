@@ -17,7 +17,7 @@ import { isShubhMallEnabled } from "../utils/featureConfig";
 // Footer link data
 const horoscopeLinks = [
   { href: "/daily-horoscope", text: "Daily Horoscope" },
-  { href: "/tomorrow-horoscope", text: "Tommorow Horoscope"},
+  { href: "/tomorrow-horoscope", text: "Tomorrow Horoscope"},
   { href: "/weekly-horoscope", text: "Weekly Horoscope" },
   { href: "/yearly-horoscope", text: "Yearly Horoscope" },
 ];
