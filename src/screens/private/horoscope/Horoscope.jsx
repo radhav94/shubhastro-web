@@ -650,6 +650,16 @@ const HoroscopeNew = () => {
     <div className="horoscope-page">
       <PrimaryLoader isLoading={isLoading} />
       
+      {/* Page Header with Back Button */}
+      <div className="horoscope-page-header">
+        <button className="horoscope-back-btn" onClick={() => navigate(-1)}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        <span className="horoscope-page-title">Kundli Horoscope</span>
+      </div>
+
       {/* Centered Profile Selector with DOB/Place */}
       <div className="horoscope-profile-header">
         <div className="horoscope-profile-center" onClick={handleOpenModal}>
@@ -689,6 +699,11 @@ const HoroscopeNew = () => {
                     }}
                   >
                     {signTab}
+                    {zodiacImage && (
+                      <span className="sign-tab-zodiac-wrap">
+                        ({capitalizedSign})
+                      </span>
+                    )}
                   </button>
                 );
               })}
