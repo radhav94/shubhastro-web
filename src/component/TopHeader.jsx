@@ -21,6 +21,7 @@ import { isShubhMallEnabled } from "../utils/featureConfig";
 import { logout } from "../redux/auth/authSlice";
 import { useLogoutUserMutation } from "../redux/api/userSession/userSessionApi";
 import { privateRequestNew } from "../services/appServices/privateRequestNew";
+import { Toast } from "./index";
 const TopHeader = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -132,6 +133,7 @@ const TopHeader = () => {
     localStorage.removeItem("selectedKundliProfile");
     localStorage.removeItem("astro_wallet_balance");
     window.dispatchEvent(new Event("auth-change"));
+    Toast.success("Logged out successfully");
     navigate("/");
   };
 
