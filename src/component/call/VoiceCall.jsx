@@ -811,7 +811,8 @@ const AgoraVoiceCalling = ({ callData }) => {
     chatRoomId: activeCall?.roomId,
     kundliId: effectiveKundliId,
     isUserSide: activeCall?.isUserSide,
-    astrologerName: astrologerName
+    astrologerName: astrologerName,
+    fullName: astrologerName,
   }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.roomId, effectiveKundliId, activeCall?.isUserSide, astrologerName]);
 
   const toggleCamera = async () => {
