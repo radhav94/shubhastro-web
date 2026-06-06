@@ -117,6 +117,7 @@ const ChatWindow = () => {
     kundliId,
     setOpenFeedback,
     astrologerName,
+    fullName,
     refreshKey,
   });
 

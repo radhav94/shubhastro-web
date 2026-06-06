@@ -16,6 +16,7 @@ export default function useChat({
   kundliId,
   setOpenFeedback,
   astrologerName,
+  fullName,
   refreshKey = 0
 }) {
   const { startTimer, stopTimer, chatSeconds, setActiveChat, activeChat, reconnectToChat } = useChatContext();
@@ -122,7 +123,7 @@ export default function useChat({
               localStorage.removeItem("aiInitialQuery");
             } else {
               // Regular greeting message
-              sendMessage(`Hi ${astrologerName || ""}`);
+              sendMessage(`Hi ${fullName || astrologerName || ""}`);
             }
 
             // Find the kundli profile with relation "Self"
