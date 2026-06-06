@@ -214,7 +214,7 @@ const Footer = () => {
         <div className={`${styles.v2_column} ${styles.v2_marT}`}>
           <h3 className={styles.v2_heading}>Contact Us</h3>
           <p className={styles.v2_contactText}>Have questions?</p>
-          <a href="mailto:support@shubhtalk.ai" className={styles.v2_emailLink}>support@shubhtalk.ai</a>
+          <a href="mailto:connect@pittiegroup.com" className={styles.v2_emailLink}>connect@pittiegroup.com</a>
           <p className={styles.v2_contactText}>Or call us at</p>
           <a href="tel:+918655682877" className={styles.v2_contactText}>+91 86556 82877</a>
           <h4 className={`${styles.v2_phoneLink} `}>Registered Company Address</h4>

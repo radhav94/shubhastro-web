@@ -46,7 +46,12 @@ const DEFAULT_TITLE = "ShubhAstro";
  */
 const CmsPageWrapper = ({ children }) => {
   const { pathname } = useLocation();
-  const slug = pathname.replace(/^\//, "");
+  
+  // Normalize slug — strip dynamic params like zodiac signs from horoscope routes
+  const rawSlug = pathname.replace(/^\//, "");
+  const horoscopePatterns = /^(daily-horoscope|tomorrow-horoscope|weekly-horoscope|yearly-horoscope|horoscope\/todays-horoscope)\/.+$/;
+  const slug = horoscopePatterns.test(rawSlug) ? rawSlug.replace(/\/[^/]+$/, '') : rawSlug;
+  
   const shouldSkip = isExcluded(pathname) || !slug;
 
   // Primary query with full slug

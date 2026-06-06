@@ -1223,12 +1223,19 @@ const Profile = () => {
       // Clear all authentication related data from localStorage
       localStorage.clear();
       window.dispatchEvent(new Event("auth-change"));
-
+      Toast.success("Logged out successfully");
       // Navigate to home page
       navigate("/");
     } catch (err) {
       // Continue with local logout even if API fails
       console.error("Logout API error:", err);
+      // Still perform local logout
+      dispatch(logout());
+      dispatch(clearSelectedKundli());
+      localStorage.clear();
+      window.dispatchEvent(new Event("auth-change"));
+      Toast.success("Logged out successfully");
+      navigate("/");
     }
   };
 
