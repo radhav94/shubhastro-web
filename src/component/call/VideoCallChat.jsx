@@ -42,7 +42,6 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
     kundliId,
     chatRoomId,
     astrologerName,
-    fullName,
   } = videoCallData || {};
 
   // Always call hooks - use the custom hook for chat functionality
@@ -53,7 +52,6 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
     kundliId,
     isActive: isOpen,
     astrologerName,
-    fullName,
   });
 
   // Expose sendMessage function via ref

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { Toast } from "../index";
 
-export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astrologerName, fullName }) => {
+export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astrologerName }) => {
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const hasInitializedRef = useRef(false);
@@ -62,7 +62,7 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
       
       // Send greeting message
       setTimeout(() => {
-        sendViaSocket(`Hi ${fullName || astrologerName || ""}`, "message");
+        sendViaSocket(`Hi ${astrologerName || ""}`, "message");
       }, 500);
 
       // Send Kundli link

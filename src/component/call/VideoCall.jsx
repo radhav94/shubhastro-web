@@ -1162,7 +1162,6 @@ const VideoCalling = ({ callData }) => {
     kundliId: effectiveKundliId,
     isUserSide: activeCall?.isUserSide,
     astrologerName: astrologerName,
-    fullName: astrologerName,
   }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.chatRoomId, effectiveKundliId, activeCall?.isUserSide, astrologerName]);
 
   // Ref to store sendMessage function from VideoCallChat
