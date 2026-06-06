@@ -405,7 +405,6 @@ const HoroscopeNew = () => {
             ).join(' ')
           }));
         newCategories = [...newCategories, ...yearlyCategories];
-        console.log('Yearly Category IDs:', yearlyCategories.map(c => c.id));
       }
     } else if ((activeTab === 'Today' && (dailyData?.response?.bot_response || dailyMoonData?.response?.bot_response || dailyNakshatraData?.response?.bot_response)) || 
                (activeTab === 'Tomorrow' && (tomorrowData?.response?.bot_response || tomorrowMoonData?.response || tomorrowNakshatraData?.response)) ||
@@ -426,7 +425,6 @@ const HoroscopeNew = () => {
         ).join(' ')
       }));
       newCategories = [...newCategories, ...dailyWeeklyCategories];
-      console.log('Daily/Weekly Category IDs:', dailyWeeklyCategories.map(c => c.id));
     }
     
     // Keep all categories including total_score
