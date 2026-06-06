@@ -32,7 +32,6 @@ import TarotResult from "../../screens/private/tarot/resultTarot/ResultTarot";
 import SignScreen from "../../screens/private/horoscope/SignScreen";
 import Monthly from "../../screens/private/horoscope/monthlyHoroscope/Monthly";
 import Yesterday from "../../screens/private/horoscope/yesterdayhoroscope/Yesterday";
-import Tomorrow from "../../screens/private/horoscope/tomorrowhoroscope/Tomorrow";
 import MatchMaking from "../../screens/private/matchmaking/MatchMakingV2";
 import MatchDetails from "../../screens/private/matchmaking/details/MatchDetailsV2";
 import About from "../../screens/public/static-pages/About";
@@ -364,10 +363,6 @@ export const PATH = {
       YESTERDAY: {
         path: "/horoscope/yesterday-horoscope/:sign",
         element: Yesterday,
-      },
-      TOMORROW: {
-        path: "/tomorrow-horoscope/:sign",
-        element: Tomorrow,
       },
     },
     HOROSCOPEDETAILS: {

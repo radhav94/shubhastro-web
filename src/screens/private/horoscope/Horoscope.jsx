@@ -72,19 +72,6 @@ const HoroscopeNew = () => {
     career: careerImg,
     status: statusImg,
     physique: physiqueImg,
-
-    // Names are Not coming from the API So commented
-    total_score: scoreImg,
-    // relation: relationImg,
-    // finance: financeImg,
-    // score: scoreImg,
-    // carrer: careerImg,
-    // Add alternative spellings/variations
-    // emotions: scoreImg,
-    // personal_life: relationImg,
-    // profession: careerImg,
-    // luck: scoreImg,
-    // travel_and_health: travelImg
   };
 
   // Function to get category image
