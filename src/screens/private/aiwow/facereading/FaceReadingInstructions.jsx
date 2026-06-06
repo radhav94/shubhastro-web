@@ -5,6 +5,7 @@ import styles from './FaceReadingInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
+import { compressImage } from '../../../../utils/helper/compressImage';
 
 const FaceReadingInstructions = () => {
   const navigate = useNavigate();
@@ -24,12 +25,10 @@ const FaceReadingInstructions = () => {
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        dispatch(setFaceReadingImage(reader.result));
+      compressImage(file).then((dataUrl) => {
+        dispatch(setFaceReadingImage(dataUrl));
         navigate('/astro-face-reading/capture');
-      };
-      reader.readAsDataURL(file);
+      });
     }
   };
 

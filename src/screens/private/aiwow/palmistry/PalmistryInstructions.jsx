@@ -5,6 +5,7 @@ import styles from './PalmistryInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
+import { compressImage } from '../../../../utils/helper/compressImage';
 const PalmistryInstructions = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -21,12 +22,10 @@ const PalmistryInstructions = () => {
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        dispatch(setPalmistryImage(reader.result));
+      compressImage(file).then((dataUrl) => {
+        dispatch(setPalmistryImage(dataUrl));
         navigate('/ai-palmistry-scanner/capture');
-      };
-      reader.readAsDataURL(file);
+      });
     }
   };
 
