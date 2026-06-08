@@ -54,10 +54,10 @@ export const useRechargePlans = () => {
           return;
         }
 
-        // Filter plans: only web device, skip ios
+        // Filter plans: ensure valid plan objects
         const rechargePlans = data.data.filter((plan) => {
           if (!plan || typeof plan !== 'object') return false;
-          return plan.device === 'web' || !plan.device;
+          return true;
         });
 
         // Sort by actualPrice (ascending) for better UX
