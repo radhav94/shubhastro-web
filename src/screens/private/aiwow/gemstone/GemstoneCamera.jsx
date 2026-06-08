@@ -183,7 +183,7 @@ const GemstoneCamera = () => {
     }
     
     // Navigate after stopping camera
-    navigate(-1);
+    navigate('/ai-wow');
   };
 
   if (error) {
