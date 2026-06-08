@@ -1517,7 +1517,7 @@ const VideoCalling = ({ callData }) => {
                     {micOn ? <IoMic size={24} /> : <IoMicOff size={24} />}
                   </button>
                   <span className={styles.controlLabel}>
-                    {micOn ? "Mute Audio" : "Unmute Audio"}
+                    {micOn ? "Mute" : "Unmute"}
                   </span>
                 </div>
 
@@ -1561,7 +1561,7 @@ const VideoCalling = ({ callData }) => {
                     {speakerOn ? <IoVolumeHigh size={24} /> : <IoVolumeMute size={24} />}
                   </button>
                   <span className={styles.controlLabel}>
-                    {speakerOn ? "Speaker On" : "Speaker Off"}
+                    {speakerOn ? "Speaker Off" : "Speaker On"}
                   </span>
                 </div>
               </div>
