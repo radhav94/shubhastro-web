@@ -57,7 +57,7 @@ const KarmicDebtTracker = () => {
     if (analysis) {
       setAnalysis(null);
     } else {
-      navigate(-1);
+      navigate('/aiwow');
     }
   };
 

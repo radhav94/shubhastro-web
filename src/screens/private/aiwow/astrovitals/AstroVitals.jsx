@@ -157,7 +157,7 @@ const AstroVitals = () => {
       setDiastolic('');
       setSleepQuality('');
     } else {
-      navigate(-1);
+      navigate('/aiwow');
     }
   };
 

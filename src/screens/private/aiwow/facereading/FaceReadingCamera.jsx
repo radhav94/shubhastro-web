@@ -287,7 +287,7 @@ const FaceReadingCamera = () => {
     setVideoActive(false);
     
     // 4️⃣ Navigate immediately
-    navigate(-1);
+    navigate('/aiwow');
   };
 
   if (error) {
