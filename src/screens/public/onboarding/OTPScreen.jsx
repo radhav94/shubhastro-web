@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
+import OtpInput from "react-otp-input";
 import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import {
@@ -20,18 +21,10 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [otp, setOtp] = useState("");
   const [resendTimer, setResendTimer] = useState(20);
   const [loading, setLoading] = useState(false);
   const handleContinueRef = useRef(null);
-  const inputRefs = [
-    useRef(),
-    useRef(),
-    useRef(),
-    useRef(),
-    useRef(),
-    useRef(),
-  ];
 
   // Web OTP API - auto-read OTP from SMS
   useEffect(() => {
@@ -41,8 +34,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         .get({ otp: { transport: ["sms"] }, signal: ac.signal })
         .then((otpCredential) => {
           if (otpCredential?.code) {
-            const digits = otpCredential.code.split("");
-            setOtp(digits);
+            setOtp(otpCredential.code);
             // Auto-submit after filling
             setTimeout(() => {
               handleContinueRef.current?.();
@@ -61,48 +53,8 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     }
   }, [resendTimer]);
 
-  const handleChange = (index, value) => {
-    // Handle paste of full OTP
-    if (value.length > 1) {
-      const digits = value.replace(/\D/g, "").slice(0, 6).split("");
-      if (digits.length === 6) {
-        setOtp(digits);
-        inputRefs[5].current?.focus();
-        return;
-      }
-      value = value[0];
-    }
-    if (!/^\d*$/.test(value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    if (value && index < 5) {
-      inputRefs[index + 1].current.focus();
-    }
-  };
-
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (pastedData.length === 6) {
-      setOtp(pastedData.split(""));
-      inputRefs[5].current?.focus();
-    }
-  };
-
-  const handleKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs[index - 1].current.focus();
-    }
-    if (e.key === "Enter" && otp.join("").length === 6 && !loading) {
-      handleContinue();
-    }
-  };
-
   const handleContinue = async () => {
-    const otpValue = otp.join("");
+    const otpValue = otp;
     if (otpValue.length === 6) {
       setLoading(true);
       try {
@@ -227,9 +179,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           "Failed to verify OTP. Please try again.",
         );
         // Clear OTP input on error
-        setOtp(["", "", "", "", "", ""]);
-        // Focus back to first input
-        inputRefs[0].current?.focus();
+        setOtp("");
       } finally {
         setLoading(false);
       }
@@ -241,7 +191,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
   // Auto-submit when all 6 digits are filled
   useEffect(() => {
-    if (otp.join("").length === 6 && !loading) {
+    if (otp.length === 6 && !loading) {
       handleContinue();
     }
   }, [otp]);
@@ -259,8 +209,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         if (response.data.success && response.data.statusCode === 200) {
           toast.success("OTP resent successfully");
           setResendTimer(20);
-          setOtp(["", "", "", "", "", ""]);
-          inputRefs[0].current.focus();
+          setOtp("");
         } else {
           toast.error(response.data.message || "Failed to resend OTP");
         }
@@ -311,22 +260,23 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         </p>
 
         <div className={styles.otpInputs}>
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              ref={inputRefs[index]}
-              type="text"
-              autoComplete={index === 0 ? "one-time-code" : "off"}
-              autoFocus={index === 0}
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleChange(index, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(index, e)}
-              onPaste={handlePaste}
-              className={styles.otpInput}
-            />
-          ))}
+          <OtpInput
+            value={otp}
+            onChange={setOtp}
+            numInputs={6}
+            shouldAutoFocus
+            containerStyle={{ display: 'flex', gap: '12px', justifyContent: 'center' }}
+            inputStyle={styles.otpInput}
+            renderInput={(props) => (
+              <input
+                {...props}
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                autoComplete="one-time-code"
+              />
+            )}
+          />
         </div>
 
         <div className={styles.resendContainer}>
@@ -342,7 +292,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         <button
           className={styles.otpprimaryBtn}
           onClick={handleContinue}
-          disabled={otp.join("").length !== 6 || loading}
+          disabled={otp.length !== 6 || loading}
         >
           {loading ? "Verifying..." : "Continue"}
         </button>

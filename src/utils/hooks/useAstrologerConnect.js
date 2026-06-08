@@ -21,7 +21,7 @@ export const useAstrologerConnect = () => {
   const token = getToken();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
-  const { addPendingConnection, isInQueue, isQueueFull } = useWaitingQueue();
+  const { addPendingConnection, isInQueue } = useWaitingQueue();
 
   const [openModal, setOpenModal] = useState({
     recharge: false,
@@ -354,12 +354,6 @@ export const useAstrologerConnect = () => {
           return
         }
 
-        // Check queue limit
-        if (isQueueFull()) {
-          console.log("[NormalFlow] ❌ Queue full — aborting");
-          return Toast.error("Maximum 5 simultaneous queues allowed. Please cancel an existing request first.");
-        }
-
         // Check if same astrologer already has any pending request (call or chat)
         if (isInQueue(astro._id, connectionType) || isInQueue(astro._id, "chat")) {
           console.log("[NormalFlow] ⏭️ Already in queue for this astrologer");
@@ -398,12 +392,6 @@ export const useAstrologerConnect = () => {
           return
         }
 
-        // Check queue limit
-        if (isQueueFull()) {
-          console.log("[NormalFlow] ❌ Queue full — aborting");
-          return Toast.error("Maximum 5 simultaneous queues allowed. Please cancel an existing request first.");
-        }
-
         // Check if same astrologer already has any pending request (call or chat)
         if (isInQueue(astro._id, "chat") || isInQueue(astro._id, "audio") || isInQueue(astro._id, "video")) {
           console.log("[NormalFlow] ⏭️ Already in queue for this astrologer");
@@ -437,7 +425,7 @@ export const useAstrologerConnect = () => {
     } catch (error) {
       console.error("[NormalFlow] ❌ Error in handleAfterKundliSelect:", error);
     }
-  }, [token, userIdLocal, navigate, location, setLastSelectedKundli, setLastCallType, setCallWaitingList, profiles, addPendingConnection, isInQueue, isQueueFull]);
+  }, [token, userIdLocal, navigate, location, setLastSelectedKundli, setLastCallType, setCallWaitingList, profiles, addPendingConnection, isInQueue]);
 
   const handleRechargeNow = useCallback(() => {
     setOpenModal((prev) => ({ ...prev, recharge: false }));
