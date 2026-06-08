@@ -165,7 +165,8 @@ function App() {
               child.path === "/shop/:slug/:productSlug" ||
               child.path === PATH.privateRoutes.PRODUCT_DETAIL?.path ||
               child.path === "/profile" ||
-              child.path === "/community"
+              child.path === "/community" ||
+              child.path === "/aiwow/muhurat-calendar"
             ) {
               return {
                 path: child.path,
