@@ -251,7 +251,7 @@ const TopBar = () => {
               </div>
               <div className={styles.userDetails}>
                 <PrimaryText size_14 isBold isCenter>
-                  {user?.firstName || user?.phoneNumber}
+                  <span className="notranslate">{user?.firstName || user?.phoneNumber}</span>
                 </PrimaryText>
                 <PrimaryText size_12 isBold color="#466590" isCenter={true}>
                   {user?.phoneNumber}
