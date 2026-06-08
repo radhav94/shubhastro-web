@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 
 const SITE_ORIGIN = typeof window !== "undefined" ? window.location.origin : "";
-const OG_IMAGE_PATH = "/images/ShubhAstrologo.svg";
+const OG_IMAGE_PATH = "/images/ShubhAstrologo.png";
 const OG_IMAGE_URL = `${SITE_ORIGIN}${OG_IMAGE_PATH}`;
 const FAVICON_PATH = "/images/mobile-shubh-astro-logo.svg";
 const FAVICON_URL = `${SITE_ORIGIN}${FAVICON_PATH}`;
@@ -37,12 +37,15 @@ const SeoHelmet = ({ data }) => {
   const title = data.meta_title || DEFAULT_TITLE;
   const description = data.meta_description || "";
   const keywords = parseKeywords(data.meta_keywords);
-  const pageUrl = typeof window !== "undefined" ? window.location.href : "";
+  // Strip query params and hash for canonical URL to avoid duplicate content
+  const canonicalUrl = typeof window !== "undefined"
+    ? `${window.location.origin}${window.location.pathname}`
+    : "";
 
   return (
     <Helmet>
       <title>{title}</title>
-      {pageUrl && <link rel="canonical" href={pageUrl} />}
+      {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
       <link rel="icon" type="image/svg+xml" href={FAVICON_URL} />
       <link rel="shortcut icon" href={FAVICON_URL} />
       <meta name="description" content={description} />
@@ -50,7 +53,7 @@ const SeoHelmet = ({ data }) => {
 
       {/* Open Graph */}
       <meta property="og:type" content="website" />
-      {pageUrl && <meta property="og:url" content={pageUrl} />}
+      {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={OG_IMAGE_URL} />

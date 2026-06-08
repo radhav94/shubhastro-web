@@ -1223,12 +1223,19 @@ const Profile = () => {
       // Clear all authentication related data from localStorage
       localStorage.clear();
       window.dispatchEvent(new Event("auth-change"));
-
+      Toast.success("Logged out successfully");
       // Navigate to home page
       navigate("/");
     } catch (err) {
       // Continue with local logout even if API fails
       console.error("Logout API error:", err);
+      // Still perform local logout
+      dispatch(logout());
+      dispatch(clearSelectedKundli());
+      localStorage.clear();
+      window.dispatchEvent(new Event("auth-change"));
+      Toast.success("Logged out successfully");
+      navigate("/");
     }
   };
 
@@ -1917,9 +1924,10 @@ const Profile = () => {
                           </span>
                         </div>
 
-                        {/* Receipt Button - only for successful purchases (credit) */}
+                        {/* Receipt Button - only for successful purchases (not admin credits) */}
                         <div className={styles.txnActionCell}>
-                          {transaction?.billing?.user?.action === "credit" && (
+                          {transaction?.billing?.user?.action === "credit" && 
+                           !(transaction.description || "").toLowerCase().includes("admin") && (
                             <button
                               className={`${styles.receiptBtn} ${invoiceLoadingId === transaction._id ? styles.downloadLoading : ""}`}
                               disabled={invoiceLoadingId === transaction._id}

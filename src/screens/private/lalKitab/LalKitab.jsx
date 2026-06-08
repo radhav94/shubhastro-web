@@ -11,7 +11,7 @@ import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import TTSButton from "../../../component/UI/TTSButton";
 import BackButton from "../../../component/UI/BackButton/BackButton";
-// import laalKitaabImg from "../../../assets/images/laal-kitaab.png";
+import laalKitaabImg from "../../../assets/images/laalkitabNewImg.png";
 
 const features = [
   { icon: "🏠", title: "Houses Analysis",   desc: "Detailed analysis of all 12 houses with planetary positions" },
@@ -143,7 +143,7 @@ const LalKitab = () => {
 
         {/* Hero image */}
         <div className={styles.heroImgWrap}>
-          <img src={"https://assets.shubhastro.ai/images/1779687633-744685033.webp"} alt="Lal Kitab" className={styles.heroImg} />
+          <img src={laalKitaabImg} alt="Lal Kitab" className={styles.heroImg} />
           <div className={styles.heroGlow} />
         </div>
       </div>

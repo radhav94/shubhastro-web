@@ -95,7 +95,7 @@ const FaceReadingAnalysis = () => {
         
         setProgress(0);
         // Don't show Toast here - interceptor already showed it
-        setError(result.error || { message: 'Analysis failed. Please try again.' });
+        setError({ message: 'Something went wrong. Please try again.' });
       }
     } catch (error) {
       // Ignore abort errors - user navigated away

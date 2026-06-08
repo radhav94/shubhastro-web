@@ -22,6 +22,7 @@ const ChatInput = ({
   const [cameraPreview, setCameraPreview] = useState(null); // { url, blob }
   const [isSending, setIsSending] = useState(false);
   const [facingMode, setFacingMode] = useState('environment'); // 'environment' = back, 'user' = front
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
 
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -67,6 +68,11 @@ const ChatInput = ({
           videoRef.current.srcObject = stream;
           videoRef.current.play();
         }
+
+        // Check if device has multiple cameras
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoInputs = devices.filter((d) => d.kind === "videoinput");
+        setHasMultipleCameras(videoInputs.length > 1);
       } catch (err) {
         console.error("Camera error:", err);
         if (active) {
@@ -314,15 +320,17 @@ const ChatInput = ({
                 <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
             </button>
-            {/* Switch camera button - top right */}
-            <button className={styles.cameraSwitchBtn} onClick={handleSwitchCamera}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M20 7L16 3L12 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M16 3V15C16 16.1046 15.1046 17 14 17H4" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M4 17L8 21L12 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M8 21V9C8 7.89543 8.89543 7 10 7H20" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </button>
+            {/* Switch camera button - only show if multiple cameras available */}
+            {hasMultipleCameras && (
+              <button className={styles.cameraSwitchBtn} onClick={handleSwitchCamera}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 7L16 3L12 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M16 3V15C16 16.1046 15.1046 17 14 17H4" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M4 17L8 21L12 17" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M8 21V9C8 7.89543 8.89543 7 10 7H20" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </button>
+            )}
             <div className={styles.cameraPreviewActions}>
               {/* Shutter button */}
               <button className={styles.cameraShutterBtn} onClick={handleCapture}>

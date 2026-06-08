@@ -30,7 +30,6 @@ $font-primary: "Poppins", sans-serif;
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(12px);
   border-radius: 16px;
-  overflow: hidden;
   margin-bottom: 24px;
   min-height: 300px;
   border: 1.5px solid #fff;
@@ -222,6 +221,9 @@ $font-primary: "Poppins", sans-serif;
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
 
   @media (min-width: 768px) {
     font-size: 22px;

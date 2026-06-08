@@ -56,6 +56,7 @@ const ProfileManager = ({
   excludedProfileIds = [],
   profilesList = null,
   onDeleteProfile: onDeleteProfileCallback = null,
+  matchmakingMode = false,
 }) => {
   // Local state for modal visibility
   const [showAddProfile, setShowAddProfile] = useState(false);
@@ -469,6 +470,7 @@ const ProfileManager = ({
         title="Add Profile"
         showProfileListing={false}
         savedKundlis={profiles}
+        matchmakingMode={matchmakingMode}
       />
 
       {/* Edit Profile Modal */}

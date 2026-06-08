@@ -24,6 +24,7 @@ import "../redux/api/supportApi/supportApi"; // inject support endpoints
 import "../redux/api/lalKitab/lalKitabApi"; // inject lal kitab endpoints
 import "../redux/api/staticPages/staticPagesApi"; // inject static pages endpoints
 import "../redux/api/community/communityApi"; // inject community feed endpoints
+import { paymentDirectApi } from "../redux/api/payment/paymentApi";
 
 const persistConfig = {
   key: "root",
@@ -54,6 +55,7 @@ const rootReducer = combineReducers({
   [astroTarotApi.reducerPath]: astroTarotApi.reducer,
   [geoApi.reducerPath]: geoApi.reducer,
   [calculatorApi.reducerPath]: calculatorApi.reducer,
+  [paymentDirectApi.reducerPath]: paymentDirectApi.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -78,7 +80,8 @@ export const store = configureStore({
       .concat(horoscopeApi.middleware)
       .concat(vedicApi.middleware)
       .concat(astroTarotApi.middleware)
-      .concat(calculatorApi.middleware),
+      .concat(calculatorApi.middleware)
+      .concat(paymentDirectApi.middleware),
 });
 
 export const persistor = persistStore(store);

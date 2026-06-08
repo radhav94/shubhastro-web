@@ -94,7 +94,7 @@ const SignatureAnalysis = () => {
         // dispatch(clearSignatureData());
         
         setProgress(0);
-        setError(result.error || { message: 'Analysis failed. Please try again.' });
+        setError({ message: 'Something went wrong. Please try again.' });
       }
     } catch (error) {
       // Ignore abort errors - user navigated away

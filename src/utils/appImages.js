@@ -170,7 +170,7 @@ export const AppImages = {
   LikesIconContainer,
   FilterIcon,
   OnboardingBg: "https://shubhastroassets.s3.ap-south-1.amazonaws.com/onboarding.png",
-  OnboardingBgMobile: "https://shubhastroassets.s3.ap-south-1.amazonaws.com/onboarding.png",
+  OnboardingBgMobile: "https://shubhastroassets.s3.ap-south-1.amazonaws.com/login-mobile-bg.png",
 };
 
 //svgs

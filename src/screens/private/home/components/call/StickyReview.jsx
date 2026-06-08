@@ -18,8 +18,16 @@ const StickyReview = () => {
 
   const handleReviewSubmit = async ({ rating, review, isAnonymous }) => {
     try {
+      const astrologerID = reviewData?.astrologerID || reviewData?.astrologer_ID || reviewData?.astrologerId;
+      
+      if (!astrologerID) {
+        Toast.error("Something went wrong. Please try again.");
+        setOpenReview(false);
+        return;
+      }
+
       const res = await addAstrologerReview({
-        astrologerID: reviewData?.astrologerID,
+        astrologerID,
         rating,
         review,
         isAnonymous,
@@ -27,15 +35,15 @@ const StickyReview = () => {
       }).unwrap();
 
       if (res.success) {
-        Toast.success(res.message);
+        Toast.success(res.message || "Review submitted successfully");
         setOpenReview(false);
-        // navigate(-1); // or home
       } else {
-        Toast.error(res.message);
+        Toast.error("Something went wrong. Please try again.");
         setOpenReview(false);
       }
     } catch (err) {
-      // Global error handler in privateRequestNew.js will show the toast
+      // Show generic error instead of raw API message
+      Toast.error("Something went wrong. Please try again.");
       setOpenReview(false);
     }
   };

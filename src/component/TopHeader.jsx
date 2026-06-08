@@ -21,6 +21,7 @@ import { isShubhMallEnabled } from "../utils/featureConfig";
 import { logout } from "../redux/auth/authSlice";
 import { useLogoutUserMutation } from "../redux/api/userSession/userSessionApi";
 import { privateRequestNew } from "../services/appServices/privateRequestNew";
+import { Toast } from "./index";
 const TopHeader = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -132,6 +133,7 @@ const TopHeader = () => {
     localStorage.removeItem("selectedKundliProfile");
     localStorage.removeItem("astro_wallet_balance");
     window.dispatchEvent(new Event("auth-change"));
+    Toast.success("Logged out successfully");
     navigate("/");
   };
 
@@ -370,17 +372,17 @@ const TopHeader = () => {
             <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
             {/* language end */}
 
-            {/* <div className={styles.walletBadge}
-              onClick={() => requireAuth() && navigate(PATH.privateRoutes.PROFILE.path)}
-              style={{ cursor: 'pointer' }}
->
-               <img src={headerCoin} className={styles.coinImg} alt="coin icon" />
-              <span className={styles.walletAmount}>
-                {formatAmount(
-                  isFetchingBalance ? "..." : isLoggedIn ? balance || 0 : 0,
-                )}
-              </span>
-            </div> */}
+            {isLoggedIn && (
+              <div className={styles.walletBadge}
+                onClick={() => requireAuth() && navigate(PATH.privateRoutes.RECHARGE.path)}
+                style={{ cursor: 'pointer' }}
+              >
+                <img src={headerCoin} className={styles.coinImg} alt="coin icon" />
+                <span className={styles.walletAmount}>
+                  {formatAmount(isFetchingBalance ? "..." : balance || 0)}
+                </span>
+              </div>
+            )}
             <div className={styles.profileDetailMain} ref={profileDropdownRef} onClick={handleProfileClick}>
               {userAvatarDisplay ? (
                 <div className={styles.avatarText}>
