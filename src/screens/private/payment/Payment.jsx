@@ -33,7 +33,7 @@ const Payment = () => {
   const { balance, isFetching, refreshWallet } = useWalletBalance();
 
   const { data } = useGetAllPlansQuery();
-  const allPlans = data?.data?.filter((plan) => plan?.device === 'web' || !plan?.device) ?? [];
+  const allPlans = data?.data ?? [];
 
   // Refresh wallet balance when component mounts
   useEffect(() => {
