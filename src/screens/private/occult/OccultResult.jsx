@@ -63,6 +63,7 @@ const OccultResult = () => {
   const result = state?.result;
   const [isDownloading, setIsDownloading] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [isFreeReport, setIsFreeReport] = useState(false);
   const [getOccultPdf] = useGetOccultPdfMutation();
   const [triggerGetCharges, { data: chargesData }] = useLazyGetChargesQuery();
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
@@ -87,8 +88,18 @@ const OccultResult = () => {
 
   const downloadPrice = getDownloadCost();
 
-  const handleDownloadClick = () => {
+  const handleDownloadClick = async () => {
     refreshWallet();
+    const historyId = state?.historyId || result?.historyId || result?._id || result?.data?.historyId;
+    const kundliId = state?.profile?._id;
+    if (historyId) {
+      try {
+        const response = await getOccultPdf({ historyId, featureType: "occult-dosha", kundliId }).unwrap();
+        if (response?.data?.isFree) {
+          setIsFreeReport(true);
+        }
+      } catch {}
+    }
     setShowDownloadModal(true);
   };
 
@@ -117,6 +128,7 @@ const OccultResult = () => {
       URL.revokeObjectURL(blobUrl);
       toast.success("PDF downloaded!", { id: "occult-pdf" });
       setShowDownloadModal(false);
+      setIsFreeReport(true);
       refreshWallet();
     } catch {
       toast.error("Failed to download PDF", { id: "occult-pdf" });
@@ -235,6 +247,7 @@ const OccultResult = () => {
         walletBalance={walletBalance ?? 0}
         isDownloading={isDownloading}
         showLanguageSelection={false}
+        generatedLanguages={isFreeReport ? { en: true } : undefined}
       />
     </div>
   );

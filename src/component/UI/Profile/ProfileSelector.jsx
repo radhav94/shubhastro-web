@@ -54,7 +54,7 @@ const ProfileSelector = ({
       .map((n) => n[0])
       .join("")
       .toUpperCase()
-      .slice(0, 2);
+      .slice(0, 1);
 
     const monthNames = [
       "Jan",

@@ -84,6 +84,7 @@ const LalKitabDetail = () => {
   const isAnyLoading = planetLoading || debtsLoading || chartLoading;
   const [isDownloading, setIsDownloading] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [isFreeReport, setIsFreeReport] = useState(false);
   const [triggerGetPdf] = useLazyGetLalKitabPdfQuery();
   const [triggerGetCharges, { data: chargesData }] = useLazyGetChargesQuery();
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
@@ -108,8 +109,14 @@ const LalKitabDetail = () => {
 
   const downloadPrice = getDownloadCost();
 
-  const handleDownloadClick = () => {
+  const handleDownloadClick = async () => {
     refreshWallet();
+    try {
+      const result = await triggerGetPdf({ historyId: lalKitabId }).unwrap();
+      if (result?.data?.isFree) {
+        setIsFreeReport(true);
+      }
+    } catch {}
     setShowDownloadModal(true);
   };
 
@@ -132,6 +139,7 @@ const LalKitabDetail = () => {
       URL.revokeObjectURL(blobUrl);
       toast.success("PDF downloaded!", { id: "lalkitab-pdf" });
       setShowDownloadModal(false);
+      setIsFreeReport(true);
       refreshWallet();
     } catch {
       toast.error("Failed to download PDF", { id: "lalkitab-pdf" });
@@ -206,6 +214,7 @@ const LalKitabDetail = () => {
         walletBalance={walletBalance ?? 0}
         isDownloading={isDownloading}
         showLanguageSelection={false}
+        generatedLanguages={isFreeReport ? { en: true } : undefined}
       />
     </div>
   );
