@@ -135,7 +135,7 @@ const ClothColorResult = () => {
       {resultData.recommendedColors && Array.isArray(resultData.recommendedColors) && resultData.recommendedColors.length > 0 && (
         <div className={styles.colorsCard} style={{ position: 'relative' }}>
           <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-            <TTSButton text={`Recommended Colors. ${resultData.recommendedColors.map(c => c.colorName + (c.description ? ': ' + c.description : '') + (c.whenToWear ? '. When to Wear: ' + c.whenToWear : '')).join('. ')}`} />
+            <TTSButton text={`Recommended Colors. ${resultData.recommendedColors.map(c => c.colorName + (c.description ? ': ' + c.description : '') + (c.benefits?.length > 0 ? '. Benefits: ' + c.benefits.join(', ') : '') + (c.whenToWear ? '. When to Wear: ' + c.whenToWear : '')).join('. ')}`} />
           </span>
           <h3 className={styles.cardTitle}>Recommended Colors</h3>
           <div className={styles.colorsGrid}>
@@ -227,7 +227,7 @@ const ClothColorResult = () => {
       {resultData.wardrobeAnalysis && (
         <div className={styles.wardrobeCard} style={{ position: 'relative' }}>
           <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-            <TTSButton text={`Wardrobe Analysis. ${resultData.wardrobeAnalysis.detectedColors?.length > 0 ? 'Detected Colors: ' + resultData.wardrobeAnalysis.detectedColors.map(c => c.colorName + ' ' + c.percentage + ' percent').join(', ') + '. ' : ''}${resultData.wardrobeAnalysis.astrologicalMatches?.length > 0 ? 'Astrological Matches: ' + resultData.wardrobeAnalysis.astrologicalMatches.map(m => m.detectedColor + ' to ' + m.recommendedColor + ' ' + m.matchPercentage + ' percent match').join(', ') : ''}`} />
+            <TTSButton text={`Wardrobe Analysis. ${resultData.wardrobeAnalysis.detectedColors?.length > 0 ? 'Detected Colors: ' + resultData.wardrobeAnalysis.detectedColors.map(c => c.colorName + ' ' + c.percentage + ' percent').join(', ') + '. ' : ''}${resultData.wardrobeAnalysis.astrologicalMatches?.length > 0 ? 'Astrological Matches: ' + resultData.wardrobeAnalysis.astrologicalMatches.map(m => m.detectedColor + ' to ' + m.recommendedColor + ' ' + m.matchPercentage + ' percent match' + (m.suggestion ? '. ' + m.suggestion : '')).join(', ') : ''}`} />
           </span>
           <h3 className={styles.cardTitle}>Wardrobe Analysis</h3>
           
