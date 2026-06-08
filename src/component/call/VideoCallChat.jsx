@@ -1,4 +1,5 @@
 import { useRef, useLayoutEffect, useMemo, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { IoAttach, IoClose } from "react-icons/io5";
 import { FaFileAlt } from "react-icons/fa";
@@ -24,6 +25,7 @@ const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
   const messagesRef = useRef(null);
   const [iframeSrc, setIframeSrc] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const navigate = useNavigate();
   const [kundliModalOpen, setKundliModalOpen] = useState(false);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
@@ -477,7 +479,8 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
                 src={msg.text}
                 alt={msg.text}
                 className={styles.imageAttachment}
-                onClick={() => window.open(msg.text, "_blank")}
+                draggable={false}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setImagePreview(msg.text); }}
               />
             </div>
           </div>
@@ -960,6 +963,26 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
         src={iframeSrc}
         onClose={() => setIframeSrc(null)}
       />
+
+      {/* Image Preview Modal */}
+      {imagePreview && createPortal(
+        <div
+          className={styles.imagePreviewOverlay}
+          onClick={() => setImagePreview(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            className={styles.imagePreviewClose}
+            onClick={(e) => { e.stopPropagation(); setImagePreview(null); }}
+            aria-label="Close image preview"
+          >
+            <IoClose size={24} />
+          </button>
+          <img src={imagePreview} alt="Preview" className={styles.imagePreviewImg} onClick={(e) => e.stopPropagation()} />
+        </div>,
+        document.body
+      )}
     </div>
   );
 };
