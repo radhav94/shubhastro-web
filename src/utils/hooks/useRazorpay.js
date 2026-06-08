@@ -394,6 +394,7 @@ export const useRazorpayPayment = () => {
       currency: orderData.currency,
       name: "ShubhAstro",
       description: `Wallet Recharge - ₹${planData.actualPrice || orderData.amount}`,
+      image: `${window.location.origin}/images/ShubhAstrologo.png`,
       order_id: orderData?.orderData?.gatewayOrderId,
       // NOTE: callback_url removed — using handler only for reliable cross-platform support.
       // callback_url causes Android UPI intent flows to not redirect back properly.
