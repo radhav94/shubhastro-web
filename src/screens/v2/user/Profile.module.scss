@@ -2317,6 +2317,9 @@
       width: 100%;
     }
   }
+  @media (width <= 767px) {
+    flex-direction: column;
+  }
 }
 
 // Email Edit Modal (Figma design)
