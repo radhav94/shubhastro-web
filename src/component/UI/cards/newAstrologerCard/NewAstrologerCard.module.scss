@@ -17,7 +17,7 @@
 }
 
 .astrologerCard {
-  min-width: 190px;
+  width: 190px;
   background: rgba(255, 255, 255, 0.4);
   border-radius: 12px;
   display: flex;
@@ -28,8 +28,9 @@
   position: relative;
   border: 1px solid #fff;
   backdrop-filter: blur(12px);
+  flex-shrink: 0;
   @media screen and (width <= 767px) {
-    min-width: 145px;
+    width: 145px;
   }
   &:hover{
     transform: translateY(-2px);
