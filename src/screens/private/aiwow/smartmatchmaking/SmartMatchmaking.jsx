@@ -338,7 +338,7 @@ const SmartMatchmaking = () => {
       setResult(null);
       setError(null);
     } else {
-      navigate('/aiwow');
+      navigate('/ai-wow');
     }
   };
 

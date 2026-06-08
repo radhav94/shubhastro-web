@@ -183,7 +183,7 @@ const CosmicChat = () => {
   };
 
   const handleBack = () => {
-    navigate('/aiwow');
+    navigate('/ai-wow');
   };
 
   if (profileLoading) {

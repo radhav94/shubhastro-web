@@ -118,7 +118,7 @@ const DreamInterpreter = () => {
       setLifePhase('');
       setChallenges('');
     } else {
-      navigate('/aiwow');
+      navigate('/ai-wow');
     }
   };
 

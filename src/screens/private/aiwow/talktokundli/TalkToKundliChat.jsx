@@ -183,7 +183,7 @@ const TalkToKundliChat = () => {
   };
 
   const handleBack = () => {
-    navigate('/aiwow');
+    navigate('/ai-wow');
   };
 
   if (profileLoading) {

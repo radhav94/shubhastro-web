@@ -258,7 +258,7 @@ const SignatureCamera = () => {
     }
     
     // Navigate after stopping camera
-    navigate('/aiwow');
+    navigate('/ai-wow');
   };
 
   if (error) {
