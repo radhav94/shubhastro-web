@@ -12,6 +12,7 @@ import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { PATH } from "../../../utils/routes/Paths";
 import BackButton from "../../../component/UI/BackButton/BackButton";
 import aiImage from "../../../assets/images/Ai Image.png";
+import occultImg from "../../../assets/images/occult-img.svg";
 
 const OccultChat = () => {
   const navigate = useNavigate();
@@ -128,30 +129,37 @@ const OccultChat = () => {
 
       {/* Profile Selection */}
       <div className={styles.profileSection}>
-        <h2 className={styles.sectionTitle}>Select Kundli Profile</h2>
-        {selectedProfile ? (
-          <div className={styles.selectedCard} onClick={() => setShowProfileManager(true)}>
-            <div className={styles.selectedAvatar}>
-              {(selectedProfile.name || "U").charAt(0).toUpperCase()}
+        <div className={styles.profileSectionLeft}>
+          <span className={styles.heroBadge}>AI-powered occult analysis</span>
+          <h1 class={styles.heroTitle}>Occult World</h1>
+          <p class={styles.heroDesc}>At ShubhAstro.ai, we offer AI-powered occult analysis based on ancient Vedic astrology principles. Our advanced Dosha Analysis helps identify spiritual afflictions like Kala Sarpa Dosha, Pitra Dosha, and Nazar Dosha that may create obstacles and negativity in life.</p>
+          {/* <h2 className={styles.sectionTitle}>Select Kundli Profile</h2> */}
+          {selectedProfile ? (
+            <div className={styles.selectedCard} onClick={() => setShowProfileManager(true)}>
+              <div className={styles.selectedAvatar}>
+                {(selectedProfile.name || "U").charAt(0).toUpperCase()}
+              </div>
+              <div className={styles.selectedInfo}>
+                <span className={styles.selectedName}>{selectedProfile.name}</span>
+                <span className={styles.selectedDetails}>
+                  {selectedProfile.day}/{selectedProfile.month}/{selectedProfile.year} • {selectedProfile.place}
+                </span>
+              </div>
+              <span className={styles.changeBtn}>Change</span>
             </div>
-            <div className={styles.selectedInfo}>
-              <span className={styles.selectedName}>{selectedProfile.name}</span>
-              <span className={styles.selectedDetails}>
-                {selectedProfile.day}/{selectedProfile.month}/{selectedProfile.year} • {selectedProfile.place}
-              </span>
-            </div>
-            <span className={styles.changeBtn}>Change</span>
-          </div>
-        ) : (
-          <button className={styles.selectBtn} onClick={() => { if (!token) { requireAuth(); return; } setShowProfileManager(true); }}>
-            + Select Kundli Profile
+          ) : (
+            <button className={styles.selectBtn} onClick={() => { if (!token) { requireAuth(); return; } setShowProfileManager(true); }}>
+              + Select Kundli Profile
+            </button>
+          )}
+          <button className={styles.generateBtn} onClick={handleGenerate} disabled={!selectedProfile || isGenerating}>
+            {isGenerating ? "Analyzing..." : "Get Occult Reading"}
           </button>
-        )}
+        </div>
+        <img src={occultImg} alt="occult" />
+
       </div>
 
-      <button className={styles.generateBtn} onClick={handleGenerate} disabled={!selectedProfile || isGenerating}>
-        {isGenerating ? "Analyzing..." : "Get Occult Reading"}
-      </button>
 
       {/* Bottom Two Column Section */}
       <div className={styles.bottomRow}>

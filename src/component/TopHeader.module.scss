@@ -463,6 +463,11 @@
   max-width: 80px;
   display: inline-block;
 }
+.profileName{
+  @media (width <= 767px) {
+    display: none;
+  }
+}
 
 /* Dropdown hidden by default */
 .languageDropdown {
