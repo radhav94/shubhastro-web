@@ -1,15 +1,55 @@
 .container {
-  max-width: 920px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0px 16px 40px;
   @media (width <= 767px) {
     padding: 0px 16px 40px;
+    margin-top: -44px;
   }
 }
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  // background: rgba(247,88,1,0.1);
+  color: #000;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  width: fit-content;
+  // border: 1px solid rgba(247,88,1,0.2);
 
+  border-radius: 100px;
+  border: 1px solid #FFD28E;
+  background: #FFF5EC;
+  margin-bottom: 16px;
+}
+
+.heroTitle {
+  font-size: 34px;
+  font-weight: 600;
+  color: #111;
+  margin-bottom: 8px;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+
+  @media (max-width: 600px) { font-size: 24px; }
+}
+
+.heroDesc {
+  font-size: 15px;
+  color: #000;
+  line-height: 1.7;
+  margin-bottom: 16px;
+  max-width: 480px;
+  @media (width <= 767px) {
+    text-align: center;
+  }
+}
 /* Hero Row */
 .heroRow {
-  display: grid;
+  // display: grid;
   grid-template-columns: 1.1fr 1fr;
   gap: 28px;
   align-items: start;
@@ -19,6 +59,7 @@
   backdrop-filter: blur(12px);
   padding: 16px;
   border-radius: 20px;
+  display: none;
 }
 
 .heroLeft {
@@ -27,13 +68,13 @@
   gap: 14px;
 }
 
-.heroTitle {
-  font-size: 28px;
-  font-weight: 800;
-  color: #1a1a1a;
-  margin: 0;
-  line-height: 1.25;
-}
+// .heroTitle {
+//   font-size: 28px;
+//   font-weight: 800;
+//   color: #1a1a1a;
+//   margin: 0;
+//   line-height: 1.25;
+// }
 
 .heroTitleItalic {
   font-size: 22px;
@@ -41,26 +82,16 @@
   color: #f75801;
 }
 
-.heroBadge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #f75801;
-  margin: 0;
-}
-
 .heroBadgeIcon {
   font-size: 16px;
 }
 
-.heroDesc {
-  font-size: 13px;
-  color: #4a5568;
-  line-height: 1.75;
-  margin: 0;
-}
+// .heroDesc {
+//   font-size: 13px;
+//   color: #4a5568;
+//   line-height: 1.75;
+//   margin: 0;
+// }
 
 /* AI Card (top right) */
 .heroRight {
@@ -121,6 +152,28 @@
 /* Profile Section */
 .profileSection {
   margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 50px;
+  margin-bottom: 50px;
+  @media (width <= 768px) {
+    img{
+      width: 300px;
+    }
+  }
+  @media (width <= 767px) {
+    flex-direction: column;
+    gap: 0;
+  }
+  .profileSectionLeft{
+    width: 100%;
+    @media (width <= 767px) {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+    } 
+  }
 }
 
 .sectionTitle {
@@ -190,15 +243,20 @@
 
 .selectBtn {
   width: 100%;
-  padding: 14px;
-  border: 2px dashed #e2e8f0;
-  border-radius: 12px;
-  background: none;
-  font-size: 14px;
-  font-weight: 500;
-  color: #718096;
-  cursor: pointer;
-  transition: all 0.2s;
+  display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px;
+    border: 2px dashed rgba(247, 88, 1, 0.3);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    font-size: 14px;
+    font-weight: 500;
+    color: #f75801;
+    cursor: pointer;
+    font-family: "Poppins", sans-serif;
+    transition: all 0.2s;
 
   &:hover {
     border-color: #F75801;
@@ -208,17 +266,18 @@
 
 /* Generate Button */
 .generateBtn {
-  width: 100%;
-  padding: 15px;
+  width: fit-content;
+  padding: 15px 30px;
   border: none;
-  border-radius: 10px;
+  border-radius: 100px;
   background: linear-gradient(90deg, #F75801, #D43400);
   color: #fff;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   margin-bottom: 24px;
+  margin-top: 16px;
   box-shadow: 0 4px 16px rgba(247, 88, 1, 0.2);
 
   &:hover {
@@ -393,9 +452,9 @@
     gap: 16px;
   }
 
-  .heroTitle {
-    font-size: 22px;
-  }
+  // .heroTitle {
+  //   font-size: 22px;
+  // }
 
   .bottomRow {
     grid-template-columns: 1fr;
