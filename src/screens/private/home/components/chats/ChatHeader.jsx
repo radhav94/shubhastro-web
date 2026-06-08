@@ -5,6 +5,7 @@ import { IoArrowBack } from "react-icons/io5";
 import { PrimaryText } from "../../../../../component";
 import ChatFooter from "./ChatFooter";
 import { capitalizeWords } from "../../../../../utils/capitalize";
+import { getAstrologerDefaultImage } from "../../../../../utils/appImages";
 
 const getInitials = (name) => {
   if (!name) return "?";
@@ -26,6 +27,7 @@ const ChatHeader = ({
   isChatActive,
   isEnding = false,
   profileImgUrl,
+  gender = "male",
 }) => {
   const [imgError, setImgError] = useState(false);
 
@@ -34,18 +36,12 @@ const ChatHeader = ({
       <div className={styles.headerLeft}>
         <IoArrowBack className={styles.backIcon} onClick={onBack} />
 
-        {!profileImgUrl || imgError ? (
-          <div className={styles.headerAvatarInitials}>
-            {getInitials(fullName)}
-          </div>
-        ) : (
-          <img
-            src={profileImgUrl}
-            className={styles.headerAvatar}
-            alt={fullName || "Astrologer"}
-            onError={() => setImgError(true)}
-          />
-        )}
+        <img
+          src={(!profileImgUrl || imgError) ? getAstrologerDefaultImage(gender) : profileImgUrl}
+          className={styles.headerAvatar}
+          alt={fullName || "Astrologer"}
+          onError={() => setImgError(true)}
+        />
 
         <div className={styles.userInfo}>
           <PrimaryText size_16 isSemiBold>
