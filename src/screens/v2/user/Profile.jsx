@@ -1503,7 +1503,7 @@ const Profile = () => {
 
                     <div className={styles.profileCardContent}>
                       <div className={styles.profileCardHeader}>
-                        {kundli?.relation && <div className={styles.badge}>{kundli?.relation}</div>}
+                        {kundli?.relation && <div className={styles.badge}>{capitalizeWords(kundli?.relation)}</div>}
                         <div className={styles.profileActions}>
                           <button
                             className={styles.iconButton}
