@@ -5,6 +5,7 @@ import styles from './AuraInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setAuraImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
+import { compressImage } from '../../../../utils/helper/compressImage';
 
 const AuraInstructions = () => {
   const navigate = useNavigate();
@@ -24,12 +25,10 @@ const AuraInstructions = () => {
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        dispatch(setAuraImage(reader.result));
+      compressImage(file).then((dataUrl) => {
+        dispatch(setAuraImage(dataUrl));
         navigate('/aura-photography/capture');
-      };
-      reader.readAsDataURL(file);
+      });
     }
   };
 

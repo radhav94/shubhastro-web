@@ -9,13 +9,9 @@ import BackButton from "../../../component/UI/BackButton/BackButton";
 const RechargePack = ({ name, actualPrice, discountedPrice, offerPrice, Active }) => (
   <div className={styles.rechargeAmountWrapper}>
     <div className={`${styles.rechargeAmount} ${Active ? styles.active : ""}`}>
-      {name && <div className={styles.planName}>{name}</div>}
-      {offerPrice > actualPrice && (
-        <span className={styles.strikePrice}>₹ {offerPrice}</span>
-      )}
       <div className={styles.price}>₹ {actualPrice}</div>
       {discountedPrice > 0 && (
-        <span className={styles.extra}>Save ₹ {discountedPrice}</span>
+        <span className={styles.extra}>Bonus ₹ {discountedPrice}</span>
       )}
     </div>
   </div>
