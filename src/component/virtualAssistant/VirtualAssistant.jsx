@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   IoClose,
@@ -192,16 +193,24 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onC
                       className={`${styles.bubble} ${isUser ? styles.userBubble : styles.assistantBubble} ${msg._failed ? styles.failedBubble : ""}`}
                     >
                       {msg.type === "image" ? (
-                        <img
-                          src={msg.message}
-                          alt="Shared"
-                          className={styles.msgImage}
-                          onClick={() => setImagePreview(msg.message)}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.style.display = "none";
-                          }}
-                        />
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          className={styles.msgImageWrap}
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setImagePreview(msg.message); }}
+                          onKeyDown={(e) => { if (e.key === "Enter") setImagePreview(msg.message); }}
+                        >
+                          <img
+                            src={msg.message}
+                            alt="Shared"
+                            className={styles.msgImage}
+                            draggable={false}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.style.display = "none";
+                            }}
+                          />
+                        </div>
                       ) : msg.type === "kundli" ? (
                         <div
                           className={styles.kundliLink}
@@ -364,9 +373,30 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onC
                             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 150 }}>{displayName}</span>
                           </button>
                         );
-                      })() : (
-                        <p className={styles.msgText}>{msg.message}</p>
-                      )}
+                      })() : (() => {
+                        // Detect image URLs that weren't typed as "image"
+                        const isImageUrl = typeof msg.message === "string" && /\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?.*)?$/i.test(msg.message);
+                        if (isImageUrl) {
+                          return (
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              className={styles.msgImageWrap}
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setImagePreview(msg.message); }}
+                              onKeyDown={(e) => { if (e.key === "Enter") setImagePreview(msg.message); }}
+                            >
+                              <img
+                                src={msg.message}
+                                alt="Shared"
+                                className={styles.msgImage}
+                                draggable={false}
+                                onError={(e) => { e.target.onerror = null; e.target.style.display = "none"; }}
+                              />
+                            </div>
+                          );
+                        }
+                        return <p className={styles.msgText}>{msg.message}</p>;
+                      })()}
                       <div className={styles.msgMeta}>
                         <span className={styles.msgTime}>
                           {formatTime(msg.createdAt)}
@@ -507,15 +537,23 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onC
       )}
 
       {/* Image Preview Modal */}
-      {imagePreview && (
+      {imagePreview && createPortal(
         <div
           className={styles.imageModal}
           onClick={() => setImagePreview(null)}
           role="dialog"
           aria-modal="true"
         >
-          <img src={imagePreview} alt="Preview" className={styles.modalImage} />
-        </div>
+          <button
+            className={styles.imageModalClose}
+            onClick={(e) => { e.stopPropagation(); setImagePreview(null); }}
+            aria-label="Close image preview"
+          >
+            <IoClose size={24} />
+          </button>
+          <img src={imagePreview} alt="Preview" className={styles.modalImage} onClick={(e) => e.stopPropagation()} />
+        </div>,
+        document.body
       )}
 
       {/* Kundli Iframe Modal */}
