@@ -72,19 +72,6 @@ const HoroscopeNew = () => {
     career: careerImg,
     status: statusImg,
     physique: physiqueImg,
-
-    // Names are Not coming from the API So commented
-    total_score: scoreImg,
-    // relation: relationImg,
-    // finance: financeImg,
-    // score: scoreImg,
-    // carrer: careerImg,
-    // Add alternative spellings/variations
-    // emotions: scoreImg,
-    // personal_life: relationImg,
-    // profession: careerImg,
-    // luck: scoreImg,
-    // travel_and_health: travelImg
   };
 
   // Function to get category image
@@ -423,7 +410,6 @@ const HoroscopeNew = () => {
             ).join(' ')
           }));
         newCategories = [...newCategories, ...yearlyCategories];
-        console.log('Yearly Category IDs:', yearlyCategories.map(c => c.id));
       }
     } else if ((activeTab === 'Today' && (dailyData?.response?.bot_response || dailyMoonData?.response?.bot_response || dailyNakshatraData?.response?.bot_response)) || 
                (activeTab === 'Tomorrow' && (tomorrowData?.response?.bot_response || tomorrowMoonData?.response || tomorrowNakshatraData?.response)) ||
@@ -444,7 +430,6 @@ const HoroscopeNew = () => {
         ).join(' ')
       }));
       newCategories = [...newCategories, ...dailyWeeklyCategories];
-      console.log('Daily/Weekly Category IDs:', dailyWeeklyCategories.map(c => c.id));
     }
     
     // Keep all categories including total_score

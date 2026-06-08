@@ -95,18 +95,16 @@ const isChunkLoadError = (error) => {
  * @param {string} context - Context where error occurred (for logging)
  */
 const handleChunkLoadError = (context) => {
-  console.log(`🔴 Chunk loading error detected in ${context}`);
+  if (import.meta.env.DEV) console.log(`🔴 Chunk loading error detected in ${context}`);
   
   const hasReloaded = sessionStorage.getItem(ERROR_STORAGE_KEYS.CHUNK_ERROR_RELOAD);
-  console.log('📊 Reload status:', { hasReloaded, context });
   
   if (!hasReloaded) {
     sessionStorage.setItem(ERROR_STORAGE_KEYS.CHUNK_ERROR_RELOAD, 'true');
-    console.log(`🔄 Reloading page due to chunk error in ${context}...`);
     window.location.reload();
   } else {
     sessionStorage.removeItem(ERROR_STORAGE_KEYS.CHUNK_ERROR_RELOAD);
-    console.error('❌ Chunk error persists after reload. Please clear cache.');
+    if (import.meta.env.DEV) console.error('❌ Chunk error persists after reload. Please clear cache.');
   }
 };
 

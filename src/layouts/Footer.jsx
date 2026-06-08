@@ -6,12 +6,8 @@ import {
   IoLogoInstagram,
 } from "react-icons/io5";
 import { FaYoutube, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { useEffect, useState, useCallback } from "react";
-import { logout } from "../redux/auth/authSlice";
-
-import { clearSelectedKundli } from "../redux/kundli/kundliSlice";
+import { Link } from "react-router-dom";
+import { useState, useCallback } from "react";
 import { isShubhMallEnabled } from "../utils/featureConfig";
 
 // Footer link data
@@ -61,9 +57,6 @@ const companyLinks = [
 ];
 
 const Footer = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const location = useLocation();
   const currentYear = new Date().getFullYear();
 
   const [openSection, setOpenSection] = useState(null);

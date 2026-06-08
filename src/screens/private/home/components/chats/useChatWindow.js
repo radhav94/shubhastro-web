@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import socketService from "../../../../../services/socketService";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import toast from "../../../../../component/toast";
@@ -21,6 +22,7 @@ export default function useChat({
 }) {
   const { startTimer, stopTimer, chatSeconds, setActiveChat, activeChat, reconnectToChat } = useChatContext();
   const { activeCall, openReview } = useCall();
+  const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [isMessageDisabled, setIsMessageDisabled] = useState(false);
@@ -39,6 +41,10 @@ export default function useChat({
   const profiles = profilesData?.data || [];
   const profilesRef = useRef(profiles);
   profilesRef.current = profiles;
+
+  // Ref for header-selected kundli profile (from Redux store)
+  const selectedKundliRef = useRef(selectedKundli);
+  selectedKundliRef.current = selectedKundli;
 
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -126,13 +132,14 @@ export default function useChat({
               sendMessage(`Hi ${fullName || astrologerName || ""}`);
             }
 
-            // Find the kundli profile with relation "Self"
+            // Find the kundli profile to send — use header-selected profile from Redux store
             const sendKundliWhenReady = (retries = 10) => {
               const currentProfiles = profilesRef.current;
+              const headerProfile = selectedKundliRef.current;
               const selfProfile = currentProfiles.find(
                 (profile) => profile.relation === "Self",
               );
-              const profileIdToUse = selfProfile?._id || kundliId;
+              const profileIdToUse = headerProfile?._id || selfProfile?._id || kundliId;
 
               if (profileIdToUse) {
                 sendMessage(profileIdToUse, "kundli", profileIdToUse);

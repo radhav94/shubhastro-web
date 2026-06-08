@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { useSelector } from "react-redux";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import {
   IoMic,
@@ -48,6 +49,7 @@ const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 const VideoCalling = ({ callData }) => {
   const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, reconnectToCall, isCallMinimized, setIsCallMinimized, setWaitingList, isMicOn, setIsMicOn, isSpeakerOn, setIsSpeakerOn } = useCall();
   const { activeChat, lastRequestedAstro: chatLastRequestedAstro } = useChatContext();
+  const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
   const navigate = useNavigate();
   const location = useLocation();
   const isOnLivePage = location.pathname.startsWith("/live");
@@ -1148,12 +1150,13 @@ const VideoCalling = ({ callData }) => {
 
   // Get kundliId with fallback logic
   const effectiveKundliId = useMemo(() => {
-    // Priority: activeCall.kundliId > lastSelectedKundli > first profile
+    // Priority: Redux selectedKundli > activeCall.kundliId > lastSelectedKundli > first profile
+    if (selectedKundli?._id) return selectedKundli._id;
     if (activeCall?.kundliId) return activeCall.kundliId;
     if (lastSelectedKundli?._id) return lastSelectedKundli._id;
     if (profiles && profiles.length > 0) return profiles[0]._id;
     return null;
-  }, [activeCall?.kundliId, lastSelectedKundli, profiles]);
+  }, [selectedKundli, activeCall?.kundliId, lastSelectedKundli, profiles]);
 
   const chatData = useMemo(() => ({
     userId: activeCall?.userId,
