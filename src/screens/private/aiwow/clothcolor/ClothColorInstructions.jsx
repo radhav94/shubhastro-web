@@ -5,6 +5,7 @@ import styles from './ClothColorInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
+import { compressImage } from '../../../../utils/helper/compressImage';
 
 const ClothColorInstructions = () => {
   const navigate = useNavigate();
@@ -24,12 +25,10 @@ const ClothColorInstructions = () => {
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        dispatch(setClothColorImage(reader.result));
+      compressImage(file).then((dataUrl) => {
+        dispatch(setClothColorImage(dataUrl));
         navigate('/clothes-colour-analysis/capture');
-      };
-      reader.readAsDataURL(file);
+      });
     }
   };
 

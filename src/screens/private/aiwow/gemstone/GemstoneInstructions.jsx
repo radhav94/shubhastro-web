@@ -5,6 +5,7 @@ import styles from './GemstoneInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setGemstoneImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
+import { compressImage } from '../../../../utils/helper/compressImage';
 
 const GemstoneInstructions = () => {
   const navigate = useNavigate();
@@ -22,12 +23,10 @@ const GemstoneInstructions = () => {
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        dispatch(setGemstoneImage(reader.result));
+      compressImage(file).then((dataUrl) => {
+        dispatch(setGemstoneImage(dataUrl));
         navigate('/gemstone-authenticity/capture');
-      };
-      reader.readAsDataURL(file);
+      });
     }
   };
 
