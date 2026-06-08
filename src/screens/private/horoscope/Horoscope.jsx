@@ -150,6 +150,7 @@ const HoroscopeNew = () => {
     skip: !vedicParams,
   });
   const profileSunSign = astroData?.response?.sun_sign?.toLowerCase() || null;
+  const profileMoonSign = astroData?.response?.rasi?.toLowerCase() || astroData?.response?.moon_sign?.toLowerCase() || null;
   
   // Default to first sign if no sign in URL
   const [selectedZodiac, setSelectedZodiac] = useState(sign?.toLowerCase() || 'aries');
@@ -257,18 +258,22 @@ const HoroscopeNew = () => {
 
   const signNumber = signToNumber[selectedZodiac.toLowerCase()];
   
+  // Use moon sign zodiac number when Moon Sign tab is active
+  const activeZodiac = activeSignTab === 'Moon' && profileMoonSign ? profileMoonSign : selectedZodiac.toLowerCase();
+  const activeSignNumber = signToNumber[activeZodiac] || signNumber;
+  
   // Fetch data based on active tab
-  const { data: dailyData, isLoading: dailyLoading } = useFetchDailyQuery(signNumber, {
+  const { data: dailyData, isLoading: dailyLoading } = useFetchDailyQuery(activeSignNumber, {
     skip: activeTab !== 'Today' || dailySubTab !== 'Sun'
   });
 
   // Daily Moon
-  const { data: dailyMoonData, isLoading: dailyMoonLoading } = useFetchDailyMoonQuery(signNumber, {
+  const { data: dailyMoonData, isLoading: dailyMoonLoading } = useFetchDailyMoonQuery(activeSignNumber, {
     skip: activeTab !== 'Today' || dailySubTab !== 'Moon'
   });
 
   // Daily Sun (same as fetchDaily but using the new endpoint)
-  const { data: dailySunData, isLoading: dailySunLoading } = useFetchDailySunQuery(signNumber, {
+  const { data: dailySunData, isLoading: dailySunLoading } = useFetchDailySunQuery(activeSignNumber, {
     skip: activeTab !== 'Today' || dailySubTab !== 'Sun'
   });
 
@@ -278,12 +283,12 @@ const HoroscopeNew = () => {
     skip: activeTab !== 'Today' || dailySubTab !== 'Nakshatra'
   });
 
-  const { data: tomorrowData, isLoading: tomorrowLoading } = useFetchTomorrowQuery(signNumber, {
+  const { data: tomorrowData, isLoading: tomorrowLoading } = useFetchTomorrowQuery(activeSignNumber, {
     skip: activeTab !== 'Tomorrow' || tomorrowSubTab !== 'Sun'
   });
 
   // Tomorrow Moon
-  const { data: tomorrowMoonData, isLoading: tomorrowMoonLoading } = useFetchTomorrowMoonQuery(signNumber, {
+  const { data: tomorrowMoonData, isLoading: tomorrowMoonLoading } = useFetchTomorrowMoonQuery(activeSignNumber, {
     skip: activeTab !== 'Tomorrow' || tomorrowSubTab !== 'Moon'
   });
 
@@ -294,21 +299,21 @@ const HoroscopeNew = () => {
     skip: activeTab !== 'Tomorrow' || tomorrowSubTab !== 'Nakshatra'
   });
   
-  const { data: weeklyData, isLoading: weeklyLoading } = useFetchWeeklyQuery(signNumber, {
+  const { data: weeklyData, isLoading: weeklyLoading } = useFetchWeeklyQuery(activeSignNumber, {
     skip: activeTab !== 'This Week' || weeklySubTab !== 'Sun'
   });
 
   // Weekly Moon
-  const { data: weeklyMoonData, isLoading: weeklyMoonLoading } = useFetchWeeklyMoonQuery(signNumber, {
+  const { data: weeklyMoonData, isLoading: weeklyMoonLoading } = useFetchWeeklyMoonQuery(activeSignNumber, {
     skip: activeTab !== 'This Week' || weeklySubTab !== 'Moon'
   });
 
   // Weekly Sun
-  const { data: weeklySunData, isLoading: weeklySunLoading } = useFetchWeeklySunQuery(signNumber, {
+  const { data: weeklySunData, isLoading: weeklySunLoading } = useFetchWeeklySunQuery(activeSignNumber, {
     skip: activeTab !== 'This Week' || weeklySubTab !== 'Sun'
   });
   
-  const { data: yearlyData, isLoading: yearlyLoading } = useFetchYearlyQuery(signNumber, {
+  const { data: yearlyData, isLoading: yearlyLoading } = useFetchYearlyQuery(activeSignNumber, {
     skip: activeTab !== 'This Year'
   });
 
@@ -611,9 +616,16 @@ const HoroscopeNew = () => {
     z => z.name.toLowerCase() === selectedZodiac.toLowerCase()
   );
 
-  // Get zodiac image dynamically based on selected sign
-  const capitalizedSign = selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1);
-  const zodiacImage = zodiacSignImages[selectedZodiac.toLowerCase()];
+  // Get zodiac image dynamically based on active sign tab
+  const displayZodiac = activeSignTab === 'Moon' && profileMoonSign ? profileMoonSign : selectedZodiac.toLowerCase();
+  const capitalizedSign = displayZodiac.charAt(0).toUpperCase() + displayZodiac.slice(1);
+  const zodiacImage = zodiacSignImages[displayZodiac];
+
+  // For showing both signs in tabs
+  const sunSignName = (profileSunSign || selectedZodiac.toLowerCase());
+  const moonSignName = (profileMoonSign || selectedZodiac.toLowerCase());
+  const capitalizedSunSign = sunSignName.charAt(0).toUpperCase() + sunSignName.slice(1);
+  const capitalizedMoonSign = moonSignName.charAt(0).toUpperCase() + moonSignName.slice(1);
 
   // Truncate text to 200 words
   const truncateToWords = (text, wordLimit) => {
@@ -671,6 +683,7 @@ const HoroscopeNew = () => {
             <div className="sign-tabs">
               {['Sun Sign', 'Moon Sign'].map((signTab) => {
                 const isActive = (signTab === 'Moon Sign') ? activeSignTab === 'Moon' : activeSignTab === 'Sun';
+                const tabZodiacName = signTab === 'Moon Sign' ? capitalizedMoonSign : capitalizedSunSign;
                 return (
                   <button
                     key={signTab}
@@ -684,11 +697,9 @@ const HoroscopeNew = () => {
                     }}
                   >
                     {signTab}
-                    {zodiacImage && (
-                      <span className="sign-tab-zodiac-wrap">
-                        ({capitalizedSign})
-                      </span>
-                    )}
+                    <span className="sign-tab-zodiac-wrap">
+                      ({tabZodiacName})
+                    </span>
                   </button>
                 );
               })}
