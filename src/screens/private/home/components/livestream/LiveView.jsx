@@ -1092,11 +1092,12 @@ const LiveView = (props) => {
                 <ChevronLeft size={24} />
               </button>
               <div className="host-info">
-              {fullAstro?.profileImgUrl ? (
-                <img className="host-avatar-img" src={fullAstro.profileImgUrl} alt={astrologer?.astrologerName || "Astrologer"} />
-              ) : (
-                <div className="host-avatar">🕉️</div>
-              )}
+              <img
+                className="host-avatar-img"
+                src={fullAstro?.profileImgUrl || getAstrologerDefaultImage(fullAstro?.gender)}
+                alt={astrologer?.astrologerName || "Astrologer"}
+                onError={(e) => { e.target.src = getAstrologerDefaultImage(fullAstro?.gender); }}
+              />
               <div className="host-text">
                 <div className="host-name host-name-truncate">
                   {astrologer?.astrologerName || "Astrologer"}
