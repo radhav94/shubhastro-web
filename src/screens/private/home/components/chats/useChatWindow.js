@@ -73,21 +73,9 @@ export default function useChat({
       return;
     }
 
-    setIsMessageDisabled(true);
-    stopTimer();
-    setActiveChat(null);
-    
-    // Clear chat start time
-    localStorage.removeItem("shubhtalk_chat_start_time");
-
-    toast.success("Chat ended.");
-
-    // Don't show chat feedback if call review is already open (chat→call switch scenario)
-    // or if there's an active call (chat ended because user switched to call)
-    if (openReview || activeCall) {
-      return;
-    }
-    setOpenFeedback(true);
+    // Non-SYSTEM ends are handled by the global handler (WaitingQueueContext).
+    // It clears activeChat, stops timer, shows toast, and dispatches "global:chat:ended".
+    // Page-level feedback/UI is handled via the "global:chat:ended" event listener below.
   };
 
   useEffect(() => {
@@ -237,6 +225,26 @@ export default function useChat({
       voiceSocket.off("chat:ended", handleChatEndedFromServer);
     };
   }, [roomId, activeChat, activeCall, reconnectToChat, hightLightText]);
+
+  // Listen for global chat:ended event (fired from WaitingQueueContext)
+  // Handles page-level actions: disabling input and showing feedback modal
+  useEffect(() => {
+    const handleGlobalChatEnded = (e) => {
+      const data = e.detail;
+      // Only react if this chat page matches the ended chat
+      if (data?.astrologerId && data.astrologerId !== astrologerId) return;
+
+      setIsMessageDisabled(true);
+
+      // Don't show feedback if call review is already open or there's an active call
+      if (!openReview && !activeCall) {
+        setOpenFeedback(true);
+      }
+    };
+
+    window.addEventListener("global:chat:ended", handleGlobalChatEnded);
+    return () => window.removeEventListener("global:chat:ended", handleGlobalChatEnded);
+  }, [astrologerId, activeCall, openReview, setOpenFeedback]);
 
   // USER SEND — prefer socketService, fallback to voiceSocket (which is already in the room after reconnect)
   const sendMessage = (text, type = "message", kundliID = null) => {

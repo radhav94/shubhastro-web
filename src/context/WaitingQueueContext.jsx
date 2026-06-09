@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
-import { voiceSocket } from "../services/voiceSocketServices";
+import { voiceSocket, clearChatSession } from "../services/voiceSocketServices";
 import { useCall } from "./CallContext";
 import { useChat } from "./ChatContext";
 import { PANDIT_AI_ID } from "../component/panditAI/usePanditAI";
@@ -49,12 +49,8 @@ export const WaitingQueueProvider = ({ children }) => {
     } catch { /* ignore */ }
   }, []);
 
-  const MAX_QUEUE_SIZE = 5;
-
   const addPendingConnection = useCallback((connection) => {
     setPendingConnections((prev) => {
-      // Don't exceed max queue size
-      if (prev.length >= MAX_QUEUE_SIZE) return prev;
       // Don't add duplicate by astrologer+type
       const exists = prev.some(
         (c) => c.astrologer?._id === connection.astrologer?._id && c.type === connection.type
@@ -66,10 +62,8 @@ export const WaitingQueueProvider = ({ children }) => {
     });
   }, [persist]);
 
-  // Check if queue is full
-  const isQueueFull = useCallback(() => {
-    return pendingConnectionsRef.current.length >= MAX_QUEUE_SIZE;
-  }, []);
+  // Queue is no longer limited
+  const isQueueFull = useCallback(() => false, []);
 
   // Update a pending connection (e.g., when roomId arrives from server)
   const updatePendingConnection = useCallback((astrologerId, type, updates) => {
@@ -220,7 +214,7 @@ export const WaitingQueueProvider = ({ children }) => {
   /* ================= GLOBAL TWO-WAY ACCEPT LISTENERS ================= */
   // These run at app level so events are handled regardless of which page the user is on
   const { setCallApprovalData, callApprovalData, activeCall, setActiveCall, resetCallFlow, setCallSeconds } = useCall();
-  const { setChatApprovalData, chatApprovalData, activeChat, setActiveChat, setChatSeconds, setWaitingList: setChatWaitingList } = useChat();
+  const { setChatApprovalData, chatApprovalData, activeChat, setActiveChat, setChatSeconds, setWaitingList: setChatWaitingList, stopTimer: stopChatTimer } = useChat();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
   useEffect(() => {
@@ -489,6 +483,42 @@ export const WaitingQueueProvider = ({ children }) => {
       if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
     };
 
+    /* ================= GLOBAL CHAT:ENDED HANDLER ================= */
+    // Ensures chat is cleaned up regardless of which page the user is on
+    const handleGlobalChatEnded = (data) => {
+      // Skip Pandit AI events
+      if (data?.astrologerId === PANDIT_AI_ID) return;
+
+      const endedRoomId = data?.roomId || data?.sessionData?.roomId;
+      console.log("[GlobalEnded] 🔚 chat:ended — roomId:", endedRoomId, "endedBy:", data?.endedBy);
+
+      // Skip SYSTEM ends — let page-level handler deal with reconnect logic
+      if (data?.endedBy === "SYSTEM") return;
+
+      // Remove from pending connections if still there
+      if (endedRoomId) removePendingConnection(endedRoomId);
+
+      // Clear approval data if it matches
+      if (chatApprovalData?.roomId === endedRoomId) setChatApprovalData(null);
+
+      // Always clear active chat, stop timer, and clean up session
+      // The server is authoritative — if it says chat ended, it ended
+      setActiveChat(null);
+      stopChatTimer();
+      setChatSeconds(0);
+      clearChatSession();
+      localStorage.removeItem("shubhtalk_chat_start_time");
+
+      // Show toast notification
+      Toast.success("Chat ended.");
+
+      // Refresh wallet balance after chat ends
+      window.dispatchEvent(new Event("walletBalanceUpdated"));
+
+      // Dispatch event so page-level components can show feedback modal, disable input, etc.
+      window.dispatchEvent(new CustomEvent("global:chat:ended", { detail: data }));
+    };
+
     /* ================= GLOBAL CHAT/CALL ACCEPTED HANDLERS ================= */
     // These ensure the user is notified and navigated regardless of which page they're on.
     // Page-level handlers (TalkToAstrologer, useAstrologerConnection) may also fire,
@@ -614,6 +644,7 @@ export const WaitingQueueProvider = ({ children }) => {
     voiceSocket.on("session:dismissed", handleSessionDismissed);
     voiceSocket.on("chat:accepted", handleGlobalChatAccepted);
     voiceSocket.on("call:accepted", handleGlobalCallAccepted);
+    voiceSocket.on("chat:ended", handleGlobalChatEnded);
 
     return () => {
       voiceSocket.off("call:astrologer_accepted", handleCallAstrologerAccepted);
@@ -636,6 +667,7 @@ export const WaitingQueueProvider = ({ children }) => {
       voiceSocket.off("session:dismissed", handleSessionDismissed);
       voiceSocket.off("chat:accepted", handleGlobalChatAccepted);
       voiceSocket.off("call:accepted", handleGlobalCallAccepted);
+      voiceSocket.off("chat:ended", handleGlobalChatEnded);
     };
   }, [userIdLocal]);
 

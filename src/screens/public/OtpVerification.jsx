@@ -245,6 +245,7 @@ const handleVerifyOtp = async (event) => {
                   type="tel"
                   inputMode="numeric"
                   pattern="[0-9]*"
+                  autoComplete="one-time-code"
                   maxLength={1}
                   onKeyDown={(e) => {
                     if (e.key === "Backspace") {

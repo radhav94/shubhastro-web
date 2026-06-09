@@ -412,7 +412,7 @@ const PalmistryResult = () => {
                 subtitle={lines.fate.interpretation.summary}
                 isOpen={openLines.fate}
                 onToggle={() => toggleLine('fate')}
-                ttsText={`Fate Line. ${[lines.fate.interpretation.summary, lines.fate.interpretation.careerPath ? 'Career Path: ' + lines.fate.interpretation.careerPath : '', lines.fate.interpretation.lifePurpose ? 'Life Purpose: ' + lines.fate.interpretation.lifePurpose : '', lines.fate.interpretation.successTiming ? 'Success Timing: ' + lines.fate.interpretation.successTiming : ''].filter(Boolean).join('. ')}`}
+                ttsText={`Fate Line. ${[lines.fate.interpretation.summary, lines.fate.interpretation.careerPath ? 'Career Path: ' + lines.fate.interpretation.careerPath : '', lines.fate.interpretation.lifePurpose ? 'Life Purpose: ' + lines.fate.interpretation.lifePurpose : '', lines.fate.interpretation.successTiming ? 'Success Timing: ' + lines.fate.interpretation.successTiming : '', lines.fate.interpretation.strengths?.length > 0 ? 'Strengths: ' + lines.fate.interpretation.strengths.join(', ') : '', lines.fate.interpretation.challenges?.length > 0 ? 'Challenges: ' + lines.fate.interpretation.challenges.join(', ') : ''].filter(Boolean).join('. ')}`}
               >
                 <div className={styles.lineDetailsGrid}>
                   <div className={styles.lineDetailCard}>
@@ -473,7 +473,7 @@ const PalmistryResult = () => {
                 subtitle={lines.heart.interpretation?.summary}
                 isOpen={openLines.heart}
                 onToggle={() => toggleLine('heart')}
-                ttsText={`Heart Line. ${[lines.heart.interpretation?.summary, lines.heart.interpretation?.emotionalNature ? 'Emotional Nature: ' + lines.heart.interpretation.emotionalNature : '', lines.heart.interpretation?.relationshipPattern ? 'Relationship Pattern: ' + lines.heart.interpretation.relationshipPattern : ''].filter(Boolean).join('. ')}`}
+                ttsText={`Heart Line. ${[lines.heart.interpretation?.summary, lines.heart.interpretation?.emotionalNature ? 'Emotional Nature: ' + lines.heart.interpretation.emotionalNature : '', lines.heart.interpretation?.relationshipPattern ? 'Relationship Pattern: ' + lines.heart.interpretation.relationshipPattern : '', lines.heart.interpretation?.strengths?.length > 0 ? 'Strengths: ' + lines.heart.interpretation.strengths.join(', ') : '', lines.heart.interpretation?.challenges?.length > 0 ? 'Challenges: ' + lines.heart.interpretation.challenges.join(', ') : '', lines.heart.interpretation?.remedies?.length > 0 ? 'Remedies: ' + lines.heart.interpretation.remedies.join(', ') : ''].filter(Boolean).join('. ')}`}
               >
                 <div className={styles.lineDetailsGrid}>
                   {lines.heart.interpretation?.emotionalNature && (
@@ -533,7 +533,7 @@ const PalmistryResult = () => {
                 subtitle={lines.head.interpretation?.summary}
                 isOpen={openLines.head}
                 onToggle={() => toggleLine('head')}
-                ttsText={`Head Line. ${[lines.head.interpretation?.summary, lines.head.interpretation?.thinkingStyle ? 'Thinking Style: ' + lines.head.interpretation.thinkingStyle : '', lines.head.interpretation?.intellectualDepth ? 'Intellectual Depth: ' + lines.head.interpretation.intellectualDepth : '', lines.head.interpretation?.careerAptitude ? 'Career Aptitude: ' + lines.head.interpretation.careerAptitude : ''].filter(Boolean).join('. ')}`}
+                ttsText={`Head Line. ${[lines.head.interpretation?.summary, lines.head.interpretation?.thinkingStyle ? 'Thinking Style: ' + lines.head.interpretation.thinkingStyle : '', lines.head.interpretation?.intellectualDepth ? 'Intellectual Depth: ' + lines.head.interpretation.intellectualDepth : '', lines.head.interpretation?.careerAptitude ? 'Career Aptitude: ' + lines.head.interpretation.careerAptitude : '', lines.head.interpretation?.strengths?.length > 0 ? 'Strengths: ' + lines.head.interpretation.strengths.join(', ') : '', lines.head.interpretation?.challenges?.length > 0 ? 'Challenges: ' + lines.head.interpretation.challenges.join(', ') : ''].filter(Boolean).join('. ')}`}
               >
                 <div className={styles.lineDetailsGrid}>
                   {lines.head.interpretation?.thinkingStyle && (
@@ -589,7 +589,7 @@ const PalmistryResult = () => {
                 subtitle={lines.life.interpretation?.summary}
                 isOpen={openLines.life}
                 onToggle={() => toggleLine('life')}
-                ttsText={`Life Line. ${[lines.life.interpretation?.summary, lines.life.interpretation?.vitalityLevel ? 'Vitality Level: ' + lines.life.interpretation.vitalityLevel : ''].filter(Boolean).join('. ')}`}
+                ttsText={`Life Line. ${[lines.life.interpretation?.summary, lines.life.interpretation?.vitalityLevel ? 'Vitality Level: ' + lines.life.interpretation.vitalityLevel : '', lines.life.interpretation?.healthIndicators?.length > 0 ? 'Health Indicators: ' + lines.life.interpretation.healthIndicators.join(', ') : '', lines.life.interpretation?.lifeEvents?.length > 0 ? 'Life Events: ' + lines.life.interpretation.lifeEvents.join(', ') : '', lines.life.interpretation?.strengths?.length > 0 ? 'Strengths: ' + lines.life.interpretation.strengths.join(', ') : '', lines.life.interpretation?.challenges?.length > 0 ? 'Challenges: ' + lines.life.interpretation.challenges.join(', ') : ''].filter(Boolean).join('. ')}`}
               >
                 <div className={styles.lineDetailsGrid}>
                   {lines.life.interpretation?.vitalityLevel && (
@@ -708,7 +708,7 @@ const PalmistryResult = () => {
             {lines?.heart?.detected && (
               <div className={styles.personalityCard} style={{ position: 'relative' }}>
                 <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
-                  <TTSButton text={`Emotional Nature. ${lines.heart.interpretation?.emotionalNature || 'No data available'}`} />
+                <TTSButton text={`Emotional Nature. ${lines.heart.interpretation?.emotionalNature || 'No data available'}${lines.heart.interpretation?.strengths?.length > 0 ? '. Strengths: ' + lines.heart.interpretation.strengths.join(', ') : ''}${lines.heart.interpretation?.challenges?.length > 0 ? '. Challenges: ' + lines.heart.interpretation.challenges.join(', ') : ''}`} />
                 </span>
                 <h3 className={styles.personalityCardTitle}>Emotional Nature</h3>
                 <p className={styles.personalityCardText}>{lines.heart.interpretation?.emotionalNature || 'No data available'}</p>
@@ -740,7 +740,7 @@ const PalmistryResult = () => {
             {lines?.head?.detected && (
               <div className={styles.personalityCard} style={{ position: 'relative' }}>
                 <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex' }}>
-                  <TTSButton text={`Thinking Style. ${lines.head.interpretation?.thinkingStyle || 'No data available'}`} />
+                  <TTSButton text={`Thinking Style. ${lines.head.interpretation?.thinkingStyle || 'No data available'}${lines.head.interpretation?.strengths?.length > 0 ? '. Strengths: ' + lines.head.interpretation.strengths.join(', ') : ''}`} />
                 </span>
                 <h3 className={styles.personalityCardTitle}>Thinking Style</h3>
                 <p className={styles.personalityCardText}>{lines.head.interpretation?.thinkingStyle || 'No data available'}</p>

@@ -13,13 +13,26 @@ const firebaseConfig = {
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
 const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+
+// Firebase Messaging requires a secure context (HTTPS or localhost)
+let messaging = null;
+try {
+    const isSecureContext = window.isSecureContext || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    if (isSecureContext && "Notification" in window && "serviceWorker" in navigator) {
+        messaging = getMessaging(app);
+    } else {
+        console.warn("[Firebase] Messaging not available: requires HTTPS or localhost");
+    }
+} catch (err) {
+    console.warn("[Firebase] Failed to initialize messaging:", err.message);
+}
 
 /**
  * Requests notification permission and returns the FCM token.
  * Returns null if permission denied or messaging unsupported.
  */
 export const requestFCMToken = async () => {
+    if (!messaging) return null;
     try {
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
@@ -43,9 +56,10 @@ export const requestFCMToken = async () => {
 
 /**
  * Listens for foreground messages and calls the provided callback.
- * Returns an unsubscribe function.
+ * Returns an unsubscribe function or no-op if messaging unavailable.
  */
 export const onForegroundMessage = (callback) => {
+    if (!messaging) return () => {};
     return onMessage(messaging, (payload) => {
         console.log("Foreground message received:", payload);
         callback(payload);

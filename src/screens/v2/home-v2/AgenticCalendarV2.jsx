@@ -73,7 +73,7 @@ const AgenticCalendarV2 = ({ styles }) => {
             </svg>
           </div>
         </div>
-        <button className={styles.viewAllBtn} style={{ color: '#f75801' }} onClick={() => navigate('/aiwow/muhurat-calendar')}>
+        <button className={styles.viewAllBtn} style={{ color: '#f75801' }} onClick={() => { if (!isLoggedIn) { navigate('/login'); return; } navigate('/aiwow/muhurat-calendar'); }}>
           View All <FiChevronRight size={14} />
         </button>
       </div>

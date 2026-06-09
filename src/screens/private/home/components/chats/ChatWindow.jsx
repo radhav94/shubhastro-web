@@ -53,7 +53,8 @@ const ChatWindow = () => {
     refreshKey,
     astroID,
     experience,
-    profileImgUrl: stateProfileImgUrl
+    profileImgUrl: stateProfileImgUrl,
+    gender: stateGender
   } = state || {};
   // console.log('kundliId in chat', kundliId)
 
@@ -498,6 +499,7 @@ const ChatWindow = () => {
             isChatActive={isChatActive}
             isEnding={isEnding}
             profileImgUrl={profileImgUrl}
+            gender={stateGender || activeChat?.gender}
           />
 
           {/* Call Buttons Below Header */}
