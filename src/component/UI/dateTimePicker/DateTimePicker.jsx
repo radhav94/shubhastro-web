@@ -119,6 +119,23 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder }) => {
     setIsTyping(true);
     const raw = e.target.value;
     
+    // Check if user is trying to type AM/PM part
+    const upperRaw = raw.toUpperCase();
+    if (upperRaw.match(/^\d{2}:\d{2}\s*[AP]$/)) {
+      // User typed 'A' or 'P' after time digits
+      setManualInput(raw.toUpperCase());
+      return;
+    }
+    if (upperRaw.match(/^\d{2}:\d{2}\s*(AM|PM)$/)) {
+      // User completed AM/PM
+      setManualInput(upperRaw);
+      const parsed = parseManualTime(upperRaw);
+      if (parsed) {
+        onChange(buildDate(parsed.hour, parsed.minute, parsed.period));
+      }
+      return;
+    }
+    
     // Extract only digits from input
     const digits = raw.replace(/[^0-9]/g, "");
     const prevDigits = manualInput.replace(/[^0-9]/g, "");
@@ -171,10 +188,9 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder }) => {
       formatted += limitedDigits[i];
     }
     
-    // Once 4 digits are entered (HH:MM), auto-append AM/PM
+    // Once 4 digits are entered (HH:MM), append a space to prompt AM/PM typing
     if (limitedDigits.length === 4) {
-      const currentPeriod = period || "AM";
-      formatted += ` ${currentPeriod}`;
+      formatted += " ";
     }
     
     setManualInput(formatted);
@@ -199,14 +215,17 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder }) => {
     if (e.key === "Enter") {
       e.target.blur();
     }
-    // Allow toggling AM/PM with 'a' or 'p' key when time is fully entered
-    if (manualInput.length >= 8) {
-      const key = e.key.toLowerCase();
-      if (key === "a" || key === "p") {
+    // Allow toggling AM/PM with 'a' or 'p' key when time digits are entered
+    const key = e.key.toLowerCase();
+    if (key === "a" || key === "p") {
+      const digits = manualInput.replace(/[^0-9]/g, "");
+      if (digits.length === 4) {
         e.preventDefault();
         const newPeriod = key === "a" ? "AM" : "PM";
-        const newInput = manualInput.replace(/AM|PM/, newPeriod);
+        const timeBase = manualInput.replace(/\s*(AM|PM|[AP])?$/, "");
+        const newInput = `${timeBase} ${newPeriod}`;
         setManualInput(newInput);
+        setIsTyping(false);
         const parsed = parseManualTime(newInput);
         if (parsed) {
           onChange(buildDate(parsed.hour, parsed.minute, parsed.period));

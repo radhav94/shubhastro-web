@@ -177,6 +177,7 @@ const ChatWindow = () => {
         time: new Date(item.createdAt).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
+          hour12: true,
         }),
         dateTime: item.createdAt,
         giftData: giftData,

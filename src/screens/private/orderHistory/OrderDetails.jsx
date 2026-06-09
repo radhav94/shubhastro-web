@@ -132,6 +132,7 @@ const OrderDetails = () => {
         time: new Date(msg.createdAt).toLocaleTimeString("en-IN", {
           hour: "numeric",
           minute: "2-digit",
+          hour12: true,
         }),
         status: "read",
         type: msg.type,
@@ -159,6 +160,7 @@ const OrderDetails = () => {
         time: sessionDate.toLocaleTimeString("en-IN", {
           hour: "2-digit",
           minute: "2-digit",
+          hour12: true,
         }),
         messages,
         amount: roomAmount,
