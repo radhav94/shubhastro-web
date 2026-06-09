@@ -949,18 +949,18 @@ export const analyzeKarmicDebt = async (data) => {
 
 /**
  * Smart Matchmaking API Service
- * Analyze compatibility between two users based on birth details
- * @param {Object} userA - First user's birth details
- * @param {Object} userB - Second user's birth details
+ * Analyze compatibility between two users based on kundli IDs
+ * @param {string} kundliIdA - First user's kundli ID
+ * @param {string} kundliIdB - Second user's kundli ID
  * @returns {Promise} API response with compatibility analysis
  */
-export const analyzeSmartMatchmaking = async (userA, userB) => {
+export const analyzeSmartMatchmaking = async (kundliIdA, kundliIdB) => {
   try {
     const response = await privatePost(
       'action-suite/smart-matchmaking/smart-matchmaking',
       {
-        userA,
-        userB
+        kundliIdA,
+        kundliIdB
       }
     );
 
