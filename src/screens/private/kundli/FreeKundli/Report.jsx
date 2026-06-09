@@ -2,7 +2,7 @@ import React from "react";
 import NestedTabs from "../../../../component/UI/tabs/nestedtabs/NestedTabs";
 import { useSelector } from "react-redux";
 import Planetary from "./generalWrapper/planetary/Planetary";
-import Vimshottari from "../DashaContent/Vimshottari";
+// import Vimshottari from "../DashaContent/Vimshottari";
 import Yoga from "./generalWrapper/yoga/Yoga";
 import Rudraksha from "./remedies/rudraksha/Rudraksha";
 import GemStones from "./remedies/gemstones/GemStones";
@@ -28,11 +28,11 @@ const Report = ({ data }) => {
           value: "planetary",
           component: () => <Planetary />,
         },
-        {
-          label: "Vimshottari",
-          value: "vimshottari",
-          component: () => <Vimshottari />,
-        },
+        // {
+        //   label: "Vimshottari",
+        //   value: "vimshottari",
+        //   component: () => <Vimshottari />,
+        // },
         {
           label: "Yoga",
           value: "yoga",
