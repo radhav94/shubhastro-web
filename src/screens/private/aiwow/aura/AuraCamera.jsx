@@ -211,7 +211,7 @@ const AuraCamera = () => {
 
   const handleBack = () => {
     stopCamera();
-    navigate(-1);
+    navigate('/ai-wow');
   };
 
   if (error) {
