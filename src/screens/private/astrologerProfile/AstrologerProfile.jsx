@@ -1815,6 +1815,7 @@ const AstrologerProfile = () => {
       <VirtualAssistant
         astrologerId={data?._id}
         astrologerName={`${data?.firstName || ""} ${data?.lastName || ""}`.trim()}
+        astrologerImage={data?.profileImgUrl || data?.imageUrl}
         isOpen={isVAOpen}
         setIsOpen={setIsVAOpen}
         onConnect={() => handleChatStart(data)}

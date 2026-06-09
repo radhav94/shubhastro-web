@@ -24,7 +24,7 @@ import PdfIcon from "../../assets/chat/PDF.svg";
 import DocIcon from "../../assets/chat/DOC.svg";
 import XlsIcon from "../../assets/chat/XLS.svg";
 
-const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onConnect }) => {
+const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpen, setIsOpen, onConnect }) => {
   const [text, setText] = useState("");
   const [preview, setPreview] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
@@ -139,7 +139,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onC
   const handleCameraPreviewSend = async () => { if (!cameraPreview || isSending) return; setIsSending(true); try { sendImage(cameraPreview.blob); URL.revokeObjectURL(cameraPreview.url); setCameraPreview(null); } finally { setIsSending(false); } };
   const handleCameraRetake = () => { URL.revokeObjectURL(cameraPreview?.url); setCameraPreview(null); setCameraOpen(true); };
 
-  const formatTime = (dateStr) => dayjs(dateStr).format("HH:mm");
+  const formatTime = (dateStr) => dayjs(dateStr).format("hh:mm A");
 
   return (
     <>
@@ -149,6 +149,14 @@ const VirtualAssistant = ({ astrologerId, astrologerName, isOpen, setIsOpen, onC
           {/* Header */}
           <div className={styles.header}>
             <div className={styles.headerInfo}>
+              {astrologerImage && (
+                <img
+                  src={astrologerImage}
+                  alt={astrologerName}
+                  className={styles.headerAvatar}
+                  onError={(e) => { e.target.style.display = "none"; }}
+                />
+              )}
               <div>
                 <h4 className={styles.headerName}>
                   {astrologerName || "Virtual Assistant"}

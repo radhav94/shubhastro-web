@@ -85,6 +85,7 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
       time: new Date(item.createdAt).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
+        hour12: true,
       }),
       dateTime: item.createdAt,
       type: item?.type,
