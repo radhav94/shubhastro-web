@@ -1449,7 +1449,8 @@ $floating-button-gap: 14px;
   .messagesContainer {
     flex: 1;
     min-height: 0;
-    max-height: calc(100dvh - var(--chat-header-height) - var(--chat-input-height) - var(--chat-footer-height));
+    // max-height: calc(100dvh - var(--chat-header-height) - var(--chat-input-height) - var(--chat-footer-height));
+    max-height: calc(100dvh - 231px);
     overflow: hidden;
     position: relative;
   }
