@@ -496,7 +496,7 @@ const ChatWindow = () => {
             isVideoCallActive={isVideoCallActive}
             onChatEnd={handleChatEnd}
             isChatActive={isChatActive}
-            isEnding={isEnding}
+            isEnding={isEnding || waitingPopup}
             profileImgUrl={profileImgUrl}
           />
 
