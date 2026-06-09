@@ -158,7 +158,7 @@ const LalKitabDetail = () => {
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <h1 className={styles.pageTitle}>Lal Kitab Teva</h1>
+        <h1 className={styles.pageTitle}>Laal Kitab Teva</h1>
         <button className={styles.downloadBtn} onClick={handleDownloadClick} disabled={isDownloading}>
           <div className={styles.downloadContent}>
             <FiDownload size={22} />
@@ -209,7 +209,7 @@ const LalKitabDetail = () => {
         isOpen={showDownloadModal}
         onClose={() => setShowDownloadModal(false)}
         onDownload={handleConfirmDownload}
-        featureName="Lal Kitab Report"
+        featureName="Laal Kitab Report"
         downloadCost={downloadPrice ?? 0}
         walletBalance={walletBalance ?? 0}
         isDownloading={isDownloading}
