@@ -1,5 +1,7 @@
 import { memo, useMemo } from "react";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
+import useUserLocation from "../../../../utils/hooks/useUserLocation";
+import { IoLocationOutline } from "react-icons/io5";
 
 import abhijitIcon from "../../../../assets/images/Abhijit-Muhurat 1.png";
 import rahuKaalIcon from "../../../../assets/images/Crucial Muhurats.png";
@@ -23,6 +25,8 @@ const formatTime = (t) => {
 };
 
 const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
+  const userLocation = useUserLocation();
+
   const panchangPayload = useMemo(() => {
     const now = new Date();
     const pad = (n) => String(n).padStart(2, "0");
@@ -32,11 +36,11 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
       year: now.getFullYear(),
       hour: pad(now.getHours()),
       min: pad(now.getMinutes()),
-      lat: 19.132,
-      lon: 72.342,
+      lat: userLocation.lat,
+      lon: userLocation.lon,
       tzone: 5.5,
     };
-  }, []);
+  }, [userLocation.lat, userLocation.lon]);
 
   const { data: panchangData } = useFetchAdvancePanchangQuery(panchangPayload);
 
@@ -70,7 +74,15 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
 
   return (
     <div className={styles.rightPanel}>
-      <h4>{sectionData?.display_title || sectionData?.title || "CRUCIAL MUHURATS"}</h4>
+      <div className={styles.muhuratHeader}>
+        <h4>{sectionData?.display_title || sectionData?.title || "TODAY'S MUHARAT"}</h4>
+        <span className={styles.muhuratLocation}>
+          <IoLocationOutline />
+          {userLocation.locationName
+            ? userLocation.locationName.split(",")[0]
+            : "Mumbai"}
+        </span>
+      </div>
       <div className={styles.muhuratGrid}>
         {muhurats.map((m, i) => (
           <div key={m.name} className={styles.muhuratItem}>
