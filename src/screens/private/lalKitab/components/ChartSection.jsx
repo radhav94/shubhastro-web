@@ -21,13 +21,13 @@ const ChartSection = ({ chart, isLoading }) => {
   return (
     <div className={styles.container}>
       <div className={styles.chartWrap}>
-        <img src={chart.chartUrl} alt="Lal Kitab Chart" className={styles.chartImg} onClick={() => setShowZoom(true)} />
+        <img src={chart.chartUrl} alt="Laal Kitab Chart" className={styles.chartImg} onClick={() => setShowZoom(true)} />
       </div>
       <button className={styles.downloadBtn} onClick={handleDownload}>⬇ Download Chart</button>
 
       {showZoom && (
         <div className={styles.zoomOverlay} onClick={() => setShowZoom(false)}>
-          <img src={chart.chartUrl} alt="Lal Kitab Chart" className={styles.zoomImg} />
+          <img src={chart.chartUrl} alt="Laal Kitab Chart" className={styles.zoomImg} />
         </div>
       )}
     </div>

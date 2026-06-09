@@ -29,7 +29,7 @@ const LalKitabZodiac = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.pageTitle}>Zodiac Remedies</h1>
-      <p className={styles.pageSubtitle}>Select your zodiac sign for Lal Kitab remedies</p>
+      <p className={styles.pageSubtitle}>Select your zodiac sign for Laal Kitab remedies</p>
       <div className={styles.grid}>
         {ZODIAC_SIGNS.map((s) => (
           <div key={s.key} className={`${styles.item} ${selected === s.key ? styles.active : ""}`} onClick={() => setSelected(s.key)}>

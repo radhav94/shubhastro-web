@@ -524,7 +524,7 @@ const TopHeader = () => {
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
-              Lal Kitab
+              Laal Kitab
             </NavLink>
             <NavLink
               to="/occult"
@@ -703,7 +703,7 @@ const TopHeader = () => {
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
             >
-              Lal Kitab
+              Laal Kitab
             </NavLink>
             <NavLink
               to="/occult"
