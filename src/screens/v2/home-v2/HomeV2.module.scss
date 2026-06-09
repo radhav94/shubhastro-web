@@ -3999,9 +3999,30 @@
     font-size: 14px;
     font-weight: 600;
     color: #1a1a1a;
-    margin: 0 0 12px;
+    margin: 0;
     letter-spacing: 0.5px;
     text-transform: uppercase;
+  }
+}
+
+.muhuratHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.muhuratLocation {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #d43400;
+  white-space: nowrap;
+
+  svg {
+    font-size: 15px;
   }
 }
 
