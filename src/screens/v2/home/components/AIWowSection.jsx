@@ -130,7 +130,7 @@ const AIWowSection = () => {
       </div>
       
       {/* <h1 className={styles.AIWowUserName}>Hello, John Doe!</h1> */}
-      <h1 className={styles.AIWowUserName} key={`greeting-${greetingName}`}>Hello, {greetingName}!</h1>
+      <h1 className={styles.AIWowUserName} key={`greeting-${greetingName}`}>Hello, <span className="notranslate">{greetingName}</span>!</h1>
       <h2 className={styles.heading}>
         Experience Astrology <span className={styles.headingHighlight}>Powered by AI</span>
       </h2>
