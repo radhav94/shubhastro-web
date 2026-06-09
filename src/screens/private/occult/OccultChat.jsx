@@ -132,7 +132,7 @@ const OccultChat = () => {
         <div className={styles.profileSectionLeft}>
           <span className={styles.heroBadge}>AI-powered occult analysis</span>
           <h1 class={styles.heroTitle}>Occult World</h1>
-          <p class={styles.heroDesc}>At ShubhAstro.ai, we offer AI-powered occult analysis based on ancient Vedic astrology principles. Our advanced Dosha Analysis helps identify spiritual afflictions like Kala Sarpa Dosha, Pitra Dosha, and Nazar Dosha that may create obstacles and negativity in life.</p>
+          <p class={styles.heroDesc}>AI-powered Occult Astrology on ShubhAstro.ai helps you understand hidden energies and life patterns through Vedic astrology, tarot reading, numerology, palmistry, face reading, psychic reading, vastu, Lal Kitab, kundli analysis, and spiritual guidance for love, career, health, and relationships.</p>
           {/* <h2 className={styles.sectionTitle}>Select Kundli Profile</h2> */}
           {selectedProfile ? (
             <div className={styles.selectedCard} onClick={() => setShowProfileManager(true)}>

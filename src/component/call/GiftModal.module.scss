@@ -9,7 +9,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  // padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
   z-index: 999999;
   animation: fadeIn 0.2s ease;
 }
@@ -29,7 +29,9 @@
 
 .modalContent {
   position: relative;
-  background: #fff;
+  background: linear-gradient(90deg, #fefefee6, #fff8ece6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 600px;
@@ -103,7 +105,7 @@
 
 .modalTitle {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 600;
   color: #1a1a1a;
   margin: 0;
 }
@@ -116,8 +118,8 @@
 }
 
 .balanceAmount {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 600;
   color: #1a1a1a;
   line-height: 1;
 }
@@ -170,7 +172,7 @@
 
 .sectionTitle {
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 600;
   color: #1a1a1a;
   margin: 0 0 16px 0;
 }
@@ -181,7 +183,7 @@
 
 .giftGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 12px;
 }
 
@@ -226,15 +228,15 @@
 
 .giftPrice {
   position: absolute;
-  bottom: 8px;
-  left: 8px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  margin: 0;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 5px 12px;
-  border-radius: 12px;
+    bottom: 8px;
+    left: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 3px 6px;
+    border-radius: 12px;
 }
 
 .giftName {
@@ -322,7 +324,7 @@
 
 .comboName {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: #2a2a2a;
   margin: 0 0 8px 0;
 }
@@ -344,7 +346,7 @@
 
 .currentPrice {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 600;
   color: #1a1a1a;
 }
 
@@ -387,9 +389,10 @@
 .modalFooter {
   display: flex;
   gap: 12px;
-  padding: 20px 24px;
+  padding: 10px 13px;
   border-top: none;
-  background: #fff;
+  background: rgba(255, 255, 255,0.4);
+  backdrop-filter: blur(8px);
   border-radius: 24px;
 }
 
@@ -468,7 +471,7 @@
   }
 
   .giftGrid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 10px;
   }
 
@@ -485,9 +488,9 @@
     font-size: 12px;
   }
 
-  .modalFooter {
-    padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px));
-  }
+  // .modalFooter {
+  //   padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px));
+  // }
 
   .addMoneyBtn,
   .sendBtn {
@@ -524,7 +527,7 @@
   }
 
   .modalFooter {
-    flex-direction: column;
+    // flex-direction: column;
     gap: 10px;
   }
 
@@ -550,10 +553,5 @@
 
   .modalHandle {
     display: none;
-  }
-
-  .giftGrid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
   }
 }

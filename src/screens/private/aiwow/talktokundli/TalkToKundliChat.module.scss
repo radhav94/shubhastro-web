@@ -331,6 +331,10 @@
   backdrop-filter: blur(12px);
   // border-top: 1.5px solid #e5e7eb;
   flex-shrink: 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 99;
 
   @media (min-width: 640px) {
     padding: 1rem 1rem 1.125rem 1rem;

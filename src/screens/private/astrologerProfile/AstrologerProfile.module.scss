@@ -176,6 +176,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
   border-radius: 50%;
   
   @media (min-width: 1024px) {
@@ -1199,6 +1200,7 @@
   height: 120px;
   border-radius: 12px;
   object-fit: cover;
+  object-position: top;
   border: none;
   display: block;
   @media (width <= 767px) {

@@ -703,7 +703,7 @@
   height: 30px;
   min-width: 30px;
   background: #FFF5EC;
-  // border: 1px solid #FFD28E;
+  border: 1px solid #f75801;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -711,9 +711,9 @@
   flex-shrink: 0;
   cursor: pointer;
   span{
-    font-size: 11px;
+    font-size: 16px;
     font-weight: 600;
-    color: #030303;
+    color: #f75801;
     line-height: 1;
   }
   @media (width <= 767px) {
@@ -908,11 +908,11 @@
 }
 
 .profileDropdownLogout {
-  color: #d32f2f;
+  color: #F75801;
 
   &:hover {
     background: #fef2f2;
-    color: #b71c1c;
+    color: #F75801;
   }
 }
 
