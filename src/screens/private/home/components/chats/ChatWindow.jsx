@@ -177,6 +177,7 @@ const ChatWindow = () => {
         time: new Date(item.createdAt).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
+          hour12: true,
         }),
         dateTime: item.createdAt,
         giftData: giftData,
@@ -207,7 +208,7 @@ const ChatWindow = () => {
     );
   }, [history, messages, isUserSide]);
 
-  const { isInactive, resetTimer } = useInactivityTimer(120000);
+  const { isInactive, resetTimer } = useInactivityTimer(120000, !!activeCall);
 
   const handleDisconnect = () => {
     if (isEnding) return;
