@@ -246,7 +246,16 @@ const handleVerifyOtp = async (event) => {
                   inputMode="numeric"
                   pattern="[0-9]*"
                   autoComplete="one-time-code"
-                  maxLength={1}
+                  onInput={(e) => {
+                    // Handle Chrome autofill pasting full OTP into one input
+                    const value = e.target.value;
+                    if (value.length > 1 && /^\d+$/.test(value)) {
+                      e.preventDefault();
+                      setOtp(value.slice(0, 6));
+                      return;
+                    }
+                    if (props.onInput) props.onInput(e);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Backspace") {
                       e.preventDefault();

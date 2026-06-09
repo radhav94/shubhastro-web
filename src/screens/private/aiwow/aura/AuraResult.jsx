@@ -22,6 +22,21 @@ const AuraResult = () => {
   const [expandedRecommendations, setExpandedRecommendations] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+
+  // Helper to convert hex color codes to readable names for TTS
+  const getColorName = (hex) => {
+    if (!hex || !hex.startsWith('#')) return hex;
+    const colorMap = {
+      '#FFD700': 'Gold', '#FFA500': 'Orange', '#FF0000': 'Red',
+      '#800080': 'Purple', '#0000FF': 'Blue', '#00FF00': 'Green',
+      '#FFFF00': 'Yellow', '#FFC0CB': 'Pink', '#FFFFFF': 'White',
+      '#000000': 'Black', '#808080': 'Gray', '#4B0082': 'Indigo',
+      '#EE82EE': 'Violet', '#00FFFF': 'Cyan', '#FF00FF': 'Magenta',
+      '#C0C0C0': 'Silver', '#A52A2A': 'Brown', '#FF4500': 'Orange Red',
+      '#7FFFD4': 'Aquamarine', '#DC143C': 'Crimson',
+    };
+    return colorMap[hex.toUpperCase()] || hex;
+  };
   
   const analysisData = useSelector((state) => state.aiwow.aura.result);
   const auraImage = useSelector((state) => state.aiwow.aura.image);
@@ -417,7 +432,7 @@ const AuraResult = () => {
                 {auraColors?.length > 0 && auraColors.map((color, index) => (
                   <div key={index} className={styles.auraCard} style={{ position: 'relative' }}>
                     <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                      <TTSButton text={`${color.type}. ${color.color}. ${color.percentage} percent. ${color.meaning || ''}`} />
+                      <TTSButton text={`${color.type}. ${getColorName(color.color)}. ${color.percentage} percent. ${color.meaning || ''}${color.traits?.filter(Boolean).length > 0 ? ', with traits ' + color.traits.filter(Boolean).join(' and ') : ''}`} />
                     </span>
                     <div className={styles.auraHeader}>
                       <div 
@@ -426,9 +441,7 @@ const AuraResult = () => {
                       ></div>
                       <div className={styles.auraInfo}>
                         <h3 className={styles.auraColor}>
-                          {color.color === '#FFD700' ? 'Gold' : 
-                           color.color === '#FFA500' ? 'Orange' : 
-                           color.color}
+                          {getColorName(color.color)}
                         </h3>
                         <p className={styles.auraType}>{color.type}</p>
                       </div>

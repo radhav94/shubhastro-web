@@ -262,18 +262,33 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         <div className={styles.otpInputs}>
           <OtpInput
             value={otp}
-            onChange={setOtp}
+            onChange={(val) => {
+              // Chrome autofill may paste full OTP into one input
+              // react-otp-input passes the full string through onChange
+              setOtp(val);
+            }}
             numInputs={6}
             shouldAutoFocus
             containerStyle={{ display: 'flex', gap: '12px', justifyContent: 'center' }}
             inputStyle={styles.otpInput}
-            renderInput={(props) => (
+            renderInput={(props, index) => (
               <input
                 {...props}
                 type="tel"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 autoComplete="one-time-code"
+                onInput={(e) => {
+                  // Handle Chrome autofill pasting full OTP into first input
+                  const value = e.target.value;
+                  if (value.length > 1 && /^\d+$/.test(value)) {
+                    e.preventDefault();
+                    setOtp(value.slice(0, 6));
+                    return;
+                  }
+                  // Call original onInput if exists
+                  if (props.onInput) props.onInput(e);
+                }}
               />
             )}
           />
