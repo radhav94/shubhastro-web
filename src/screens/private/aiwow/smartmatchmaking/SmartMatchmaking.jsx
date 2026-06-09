@@ -286,39 +286,7 @@ const SmartMatchmaking = () => {
       setIsLoading(true);
       setError(null);
 
-      // Prepare User A data from primary profile
-      const userA = {
-        name: primaryProfile.name || 'User A',
-        gender: primaryProfile.gender?.toLowerCase() || 'male',
-        day: parseInt(primaryProfile.day),
-        month: parseInt(primaryProfile.month),
-        year: parseInt(primaryProfile.year),
-        hour: parseInt(primaryProfile.hour || 0),
-        min: parseInt(primaryProfile.min || 0),
-        second: 0,
-        place: primaryProfile.place || '',
-        lat: String(primaryProfile.lat || '0'),
-        lon: String(primaryProfile.lon || '0'),
-        tzone: parseFloat(primaryProfile.tzone || 5.5)
-      };
-
-      // Prepare User B data from partner profile
-      const userB = {
-        name: partnerProfile.name || 'User B',
-        gender: partnerProfile.gender?.toLowerCase() || 'female',
-        day: parseInt(partnerProfile.day),
-        month: parseInt(partnerProfile.month),
-        year: parseInt(partnerProfile.year),
-        hour: parseInt(partnerProfile.hour || 0),
-        min: parseInt(partnerProfile.min || 0),
-        second: 0,
-        place: partnerProfile.place || '',
-        lat: String(partnerProfile.lat || '0'),
-        lon: String(partnerProfile.lon || '0'),
-        tzone: parseFloat(partnerProfile.tzone || 5.5)
-      };
-
-      const apiResult = await analyzeSmartMatchmaking(userA, userB);
+      const apiResult = await analyzeSmartMatchmaking(primaryProfile._id, partnerProfile._id);
 
       if (apiResult.success) {
         setResult(apiResult.data);

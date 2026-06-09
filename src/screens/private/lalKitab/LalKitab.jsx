@@ -17,7 +17,7 @@ const features = [
   { icon: "🏠", title: "Houses Analysis",   desc: "Detailed analysis of all 12 houses with planetary positions" },
   { icon: "🪐", title: "Planet Insights",   desc: "In-depth interpretation of each planet with personalized remedies" },
   { icon: "⚖️", title: "Debts Analysis",    desc: "Karmic debts from self, father, mother, relatives, and spouse" },
-  { icon: "📊", title: "Chart View",        desc: "Visual Lal Kitab chart with downloadable image" },
+  { icon: "📊", title: "Chart View",        desc: "Visual Laal Kitab chart with downloadable image" },
   { icon: "💊", title: "Remedies",          desc: "Simple daily-life remedies to mitigate negative planetary effects" },
   { icon: "🔮", title: "Predictions",       desc: "Life predictions based on your unique planetary configuration" },
 ];
@@ -71,14 +71,14 @@ const LalKitab = () => {
       if (lalKitabId) {
         navigate(`/laal-kitab/${lalKitabId}`, { state: { tevaData: result?.data || result } });
       } else {
-        Toast.error("Failed to generate Lal Kitab");
+        Toast.error("Failed to generate Laal Kitab");
       }
     } catch (err) {
-      Toast.error(err?.data?.message || "Failed to generate Lal Kitab Teva");
+      Toast.error(err?.data?.message || "Failed to generate Laal Kitab Teva");
     }
   };
 
-  const infoText = "Lal Kitab is a unique system of astrology that provides simple yet powerful remedies for planetary afflictions. Unlike traditional Vedic astrology, Lal Kitab focuses on practical remedies that can be performed in daily life to mitigate negative planetary effects.";
+  const infoText = "Laal Kitab is a unique system of astrology that provides simple yet powerful remedies for planetary afflictions. Unlike traditional Vedic astrology, Laal Kitab focuses on practical remedies that can be performed in daily life to mitigate negative planetary effects.";
 
   return (
     <>
@@ -90,9 +90,9 @@ const LalKitab = () => {
       <div className={styles.hero}>
         <div className={styles.heroContent}>
           <span className={styles.heroBadge}>Ancient Wisdom · Modern Insights</span>
-          <h1 className={styles.heroTitle}>Lal Kitab</h1>
+          <h1 className={styles.heroTitle}>Laal Kitab</h1>
           <p className={styles.heroDesc}>
-            Unlock the secrets of your destiny through the ancient wisdom of Lal Kitab.
+            Unlock the secrets of your destiny through the ancient wisdom of Laal Kitab.
             Get personalized planetary analysis, karmic debt insights, and powerful daily remedies.
           </p>
 
@@ -134,7 +134,7 @@ const LalKitab = () => {
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
                   </svg>
-                  Generate Lal Kitab Teva
+                  Generate Laal Kitab Teva
                 </>
               )}
             </button>
@@ -143,18 +143,18 @@ const LalKitab = () => {
 
         {/* Hero image */}
         <div className={styles.heroImgWrap}>
-          <img src={laalKitaabImg} alt="Lal Kitab" className={styles.heroImg} />
+          <img src={laalKitaabImg} alt="Laal Kitab" className={styles.heroImg} />
           <div className={styles.heroGlow} />
         </div>
       </div>
 
-      {/* ── What is Lal Kitab ── */}
+      {/* ── What is Laal Kitab ── */}
       <div className={styles.infoSection}>
         <div className={styles.infoHeader}>
           <h2 className={styles.infoTitle}>
-            What is <span className={styles.orange}>Lal Kitab?</span>
+            What is <span className={styles.orange}>Laal Kitab?</span>
           </h2>
-          <TTSButton text={`What is Lal Kitab? ${infoText}`} />
+          <TTSButton text={`What is Laal Kitab? ${infoText}`} />
         </div>
         <p className={styles.infoText}>{infoText}</p>
 

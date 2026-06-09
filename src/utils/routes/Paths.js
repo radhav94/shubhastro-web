@@ -388,7 +388,7 @@ export const PATH = {
       element: Tithi,
     },
 
-    // Lal Kitab
+    // Laal Kitab
     LAL_KITAB: {
       path: "/laal-kitab",
       element: LalKitab,

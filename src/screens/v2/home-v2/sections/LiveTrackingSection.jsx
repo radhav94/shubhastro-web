@@ -4,7 +4,7 @@ import { sortContentByOrder } from "../sectionRendererV2";
 const DEFAULT_STATS = [
   { count: 234, description: "users in active consultations" },
   { count: 47, description: "Kundlis generated today" },
-  { count: 8, description: "Lal Kitab remedies tried tonight" },
+  { count: 8, description: "Laal Kitab remedies tried tonight" },
   { count: 12, description: "new chats started in the last hour" },
 ];
 

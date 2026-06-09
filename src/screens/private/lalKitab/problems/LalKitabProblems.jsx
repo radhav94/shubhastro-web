@@ -23,7 +23,7 @@ const LalKitabProblems = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.pageTitle}>Problem-Based Remedies</h1>
-      <p className={styles.pageSubtitle}>Choose a life area for targeted Lal Kitab remedies</p>
+      <p className={styles.pageSubtitle}>Choose a life area for targeted Laal Kitab remedies</p>
       <div className={styles.categoryGrid}>
         {CATEGORIES.map((cat) => (
           <div key={cat.key} className={`${styles.catCard} ${selected === cat.key ? styles.activeCat : ""}`} onClick={() => setSelected(cat.key)}>
