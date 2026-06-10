@@ -249,11 +249,6 @@ const ChatWindow = () => {
     // Use wall-clock as primary (more reliable), fall back to timer-based
     const effectiveElapsed = wallClockElapsed > 0 ? wallClockElapsed : timerBasedElapsed;
 
-    if (effectiveElapsed < MIN_CHAT_SECONDS) {
-      Toast.error("Chat cannot be ended before 1 minute");
-      return false;
-    }
-
     // Show confirmation popup instead of ending directly
     setShowEndChatConfirm(true);
     return false;

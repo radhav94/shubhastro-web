@@ -11,7 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import styles from "./PanditAIBubble.module.scss";
-import usePanditAI from "./usePanditAI";
+import usePanditAI, { setPanditAIVoiceHandover } from "./usePanditAI";
 import useAIFreeMinutes from "./useAIFreeMinutes";
 import useSpeechToText from "./useSpeechToText";
 import { transliterateToLatin } from "./translateText";
@@ -112,12 +112,22 @@ const PanditAIBubble = () => {
   }, [sendText]);
 
   // Close chat popup when voice popup opens (mutual exclusion)
+  // Pass roomId so voice reuses the same session
   useEffect(() => {
     const handleVoiceOpen = () => {
       setIsOpen(false);
     };
     window.addEventListener("panditai-voice:open", handleVoiceOpen);
     return () => window.removeEventListener("panditai-voice:open", handleVoiceOpen);
+  }, []);
+
+  // Reopen text chat when voice popup is closed
+  useEffect(() => {
+    const handleReopen = () => {
+      setIsOpen(true);
+    };
+    window.addEventListener("panditai:reopen", handleReopen);
+    return () => window.removeEventListener("panditai:reopen", handleReopen);
   }, []);
 
   // Auto-focus input when chat opens
@@ -361,6 +371,25 @@ const PanditAIBubble = () => {
                   {isListening ? <IoStopCircle size={18} /> : <IoMic size={18} />}
                 </button>
               )}
+
+              <button
+                className={styles.voiceChatBtn}
+                onClick={() => {
+                  setPanditAIVoiceHandover(true);
+                  setIsOpen(false);
+                  window.dispatchEvent(new CustomEvent("panditai-voice:open", { detail: { roomId, walletBalance, remainingPaidTime, ratePerMinute, isFreePeriod, freeMinutesRemaining } }));
+                }}
+                aria-label="Switch to voice chat"
+                type="button"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="2" y="10" width="2.5" height="4" rx="1.25" />
+                  <rect x="6.5" y="7" width="2.5" height="10" rx="1.25" />
+                  <rect x="11" y="4" width="2.5" height="16" rx="1.25" />
+                  <rect x="15.5" y="7" width="2.5" height="10" rx="1.25" />
+                  <rect x="20" y="10" width="2.5" height="4" rx="1.25" />
+                </svg>
+              </button>
 
               <button
                 className={styles.sendBtn}
