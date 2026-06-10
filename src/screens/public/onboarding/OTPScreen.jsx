@@ -180,6 +180,11 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         );
         // Clear OTP input on error
         setOtp("");
+        // Focus first OTP input after clearing
+        setTimeout(() => {
+          const firstInput = document.querySelector(`.${styles.otpInputs} input`);
+          firstInput?.focus();
+        }, 50);
       } finally {
         setLoading(false);
       }

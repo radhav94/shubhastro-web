@@ -169,6 +169,11 @@ const handleVerifyOtp = async (event) => {
     Toast.error(error?.response?.data?.message || "OTP verification failed");
     // Clear OTP input on error
     setOtp("");
+    // Focus first OTP input after clearing
+    setTimeout(() => {
+      const firstInput = document.querySelector(`.${styles.otpInputContainer} input, .${styles.otpInput}`);
+      firstInput?.focus();
+    }, 50);
   } finally {
     setIsVerifying(false);
   }
