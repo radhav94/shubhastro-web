@@ -1332,9 +1332,15 @@ const AstrologerProfile = () => {
                 <p className={styles.giftSubtitle}>
                   Show your appreciation to your favorite astrologer.
                 </p>
-                <button
+               <button
                   className={styles.sendNowBtn}
-                  onClick={() => setIsGiftModalOpen(true)}
+                  onClick={() => {
+                    if (!token) {
+                      navigate("/login", { state: { from: location.pathname } });
+                      return;
+                    }
+                    setIsGiftModalOpen(true);
+                  }}
                 >
                   Send Now
                 </button>

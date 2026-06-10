@@ -140,7 +140,7 @@ const SunSignCalc = () => {
             Your date of birth isn&apos;t just a day for celebrations; it holds more
             meaning than you can even think of! Want to know which zodiac sign truly
             represents you? Our Sun Sign Calculator makes it easy—just enter your
-            birth date, and you&apos;ll instantly discover your sun sign. Whether you&apos;re
+            basic details, and you&apos;ll instantly discover your sun sign. Whether you&apos;re
             a fiery Aries or a grounded Taurus, this tool gives you accurate results
             based on your unique birthday.
           </p>

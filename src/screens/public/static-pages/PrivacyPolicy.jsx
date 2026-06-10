@@ -249,7 +249,7 @@ const PrivacyPolicy = () => {
       </p>
       
       <p className={styles.paragraph}>
-        <strong>Email: <a href="mailto:support@ShubhAstro.com" className={styles.link}>support@ShubhAstro.com</a></strong>
+        <strong>Email: <a href="mailto:connect@pittiegroup.com" className={styles.link}>connect@pittiegroup.com</a></strong>
       </p>
       
       <p className={styles.paragraph}>

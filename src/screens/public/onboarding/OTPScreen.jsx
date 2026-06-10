@@ -16,7 +16,7 @@ import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import onboardingBg from "../../../assets/images/onboarding.png";
 import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
 import LanguageSelector from "../../../component/LanguageSelector";
-
+import BackButton from "../../../component/UI/BackButton/BackButton";
 const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -242,17 +242,11 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           className={styles.backgroundImageMobile}
         />
       </div>
-      <button className={styles.backBtn} onClick={onBack}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M15 18L9 12L15 6"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+
+      {/* Back Button - top left corner */}
+      <div className={styles.otpBackButtonWrap}>
+        <BackButton/>
+      </div>
 
       {/* Language Translator - top right corner */}
       <LanguageSelector />
@@ -306,7 +300,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
             onClick={handleResend}
             disabled={resendTimer > 0}
           >
-            {resendTimer > 0 ? `Resend in ${resendTimer}seconds` : "Resend"}
+            {resendTimer > 0 ? `Resend in ${resendTimer} seconds` : "Resend"}
           </button>
         </div>
         <button
