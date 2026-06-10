@@ -11,6 +11,8 @@
   z-index: 567000;
   backdrop-filter: blur(2px);
   animation: fadeIn 0.25s ease-out forwards;
+  overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .modalContainer {
