@@ -6,6 +6,7 @@ import { FiChevronLeft, FiChevronRight, FiPlus, FiMinus, FiCalendar, FiX, FiEdit
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { useGetEPoojaDetailQuery, useGetProductReviewsQuery, useAddToCartMutation, useGetCartQuery, useUpdateCartItemMutation, useCreateProductReviewMutation, useUpdateProductReviewMutation, useDeleteProductReviewMutation, useGetProductSuggestionsQuery } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
+import { DeleteConfirmationModal } from "../../../../component";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 import AddressPopup from "../components/AddressPopup";
 import { DefaultImages } from "../../../../utils/appImages";
@@ -335,11 +336,40 @@ const EPoojaDetail = () => {
   // Review modal state
   const [createProductReview, { isLoading: isCreatingReview }] = useCreateProductReviewMutation();
   const [updateProductReview, { isLoading: isUpdatingReview }] = useUpdateProductReviewMutation();
-  const [deleteProductReview] = useDeleteProductReviewMutation();
+  const [deleteProductReview, { isLoading: isDeletingReview }] = useDeleteProductReviewMutation();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 0, title: "", comment: "" });
   const [reviewErrors, setReviewErrors] = useState({});
   const [editingReview, setEditingReview] = useState(null);
+  const [reviewToDelete, setReviewToDelete] = useState(null);
+
+  useEffect(() => {
+    if (reviewToDelete) {
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+    } else {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    };
+  }, [reviewToDelete]);
+
+  useEffect(() => {
+    if (showReviewModal) {
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+    } else {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    };
+  }, [showReviewModal]);
 
   const openReviewModal = (review = null) => {
     if (!isLoggedIn()) { redirectToLogin(); return; }
@@ -378,14 +408,21 @@ const EPoojaDetail = () => {
     }
   };
 
-  const handleDeleteReview = async (review) => {
-    const reviewId = review.ID || review.id || review._id;
+  const handleDeleteReview = (review) => {
+    setReviewToDelete(review);
+  };
+
+  const confirmDeleteReview = async () => {
+    if (!reviewToDelete) return;
+    const reviewId = reviewToDelete.ID || reviewToDelete.id || reviewToDelete._id;
     if (!reviewId) return;
     try {
       await deleteProductReview({ reviewId }).unwrap();
       Toast.success("Review deleted");
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to delete review");
+    } finally {
+      setReviewToDelete(null);
     }
   };
 
@@ -872,6 +909,19 @@ const EPoojaDetail = () => {
             </button>
           </div>
         </div>,
+        document.body
+      )}
+
+      {reviewToDelete && createPortal(
+        <DeleteConfirmationModal
+          isOpen={!!reviewToDelete}
+          title="Delete Review"
+          message="Are you sure you want to delete your review? This action cannot be undone."
+          onConfirm={confirmDeleteReview}
+          onClose={() => setReviewToDelete(null)}
+          onCancel={() => setReviewToDelete(null)}
+          isLoading={isDeletingReview}
+        />,
         document.body
       )}
     </div>
