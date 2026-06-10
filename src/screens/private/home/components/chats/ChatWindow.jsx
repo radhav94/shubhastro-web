@@ -25,7 +25,7 @@ import CallIcon from "../../../../../assets/chat/Call.svg";
 import VideocamIcon from "../../../../../assets/chat/Videocam.svg";
 
 const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
-const MIN_CHAT_SECONDS = 60;
+const MIN_CHAT_SECONDS = 0;
 
 import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi";
 import SwitchWaitingPopup from "../../../../../component/UI/switchWaiting/SwitchWaitingPopup";
