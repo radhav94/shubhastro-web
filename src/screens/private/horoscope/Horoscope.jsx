@@ -649,12 +649,14 @@ const HoroscopeNew = () => {
       
       {/* Page Header with Back Button */}
       <div className="horoscope-page-header">
-        <button className="horoscope-back-btn" onClick={() => navigate(-1)}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <span className="horoscope-page-title">Kundli Horoscope</span>
+        <div className='horoscope-page-header-inner'>
+          <button className="horoscope-back-btn" onClick={() => navigate(-1)}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <span className="horoscope-page-title">Kundli Horoscope</span>
+        </div>
       </div>
 
       {/* Centered Profile Selector with DOB/Place */}

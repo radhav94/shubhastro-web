@@ -1356,7 +1356,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 16px;
+  padding: 12px 0px;
   position: sticky;
   top: 93px;
   z-index: 101;
@@ -1368,13 +1368,23 @@
 @media screen and (max-width: 1180px) {
   .horoscope-page-header {
     top: 53px;
+    padding: 10px 0px;
   }
 }
 
+.horoscope-page-header-inner{
+  width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-inline: 16px;
+}
+
 .horoscope-back-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   border: 1px solid #D43400;
   background: #FFF4EC;
   color: #D43400;
@@ -1384,6 +1394,10 @@
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
+  @media (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 .horoscope-back-btn:hover {
@@ -1411,7 +1425,7 @@
 
 @media screen and (max-width: 1180px) {
   .horoscope-profile-header {
-    top: 113px;
+    top: 107px;
   }
 }
 
