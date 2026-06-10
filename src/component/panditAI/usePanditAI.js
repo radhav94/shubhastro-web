@@ -41,11 +41,15 @@ const getLanguageMeta = (language) =>
 // Global flag so other socket handlers can skip Pandit AI events
 let panditAIChatActive = false;
 let panditAIRoomId = null;
+// Flag to prevent session end when switching to voice mode
+let panditAIVoiceHandover = false;
 export const isPanditAIChatActive = () => panditAIChatActive;
 export const setPanditAIChatActive = (active, roomId = null) => {
   panditAIChatActive = active;
   if (roomId !== null) panditAIRoomId = roomId;
 };
+export const setPanditAIVoiceHandover = (value) => { panditAIVoiceHandover = value; };
+export const getPanditAIRoomId = () => panditAIRoomId;
 export const isPanditAIEvent = (data = {}) =>
   data?.astrologerId === PANDIT_AI_ID ||
   data?.sender === PANDIT_AI_ID ||
@@ -98,7 +102,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         time: new Date(msg.createdAt).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
-        }),
+          hour12: true,
+        }).toUpperCase(),
       }));
       setMessages(mapped);
     }
@@ -216,9 +221,20 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     };
   }, [isOpen, userIdLocal, createChatRoom]);
 
-  // End session when popup closes
+  // End session when popup closes (skip if handing over to voice mode)
   useEffect(() => {
     if (isOpen) return;
+
+    // Reset typing indicator when closed
+    setSending(false);
+
+    // If voice mode is taking over, don't end the session
+    if (panditAIVoiceHandover) {
+      panditAIVoiceHandover = false;
+      initiatedRef.current = false;
+      historyLoadedRef.current = false;
+      return;
+    }
 
     const currentRoomId = roomIdRef.current;
     if (currentRoomId && voiceSocket.connected && !chatEndedRef.current) {
@@ -327,7 +343,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
-        }),
+          hour12: true,
+        }).toUpperCase(),
       };
       setMessages((prev) => [...prev, msg]);
       setSending(false);
@@ -370,6 +387,11 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     voiceSocket.on("chat:ended", handleChatEnded);
     voiceSocket.on("error", handleError);
 
+    const handleTyping = (isTyping) => {
+      if (!isTyping) setSending(false);
+    };
+    voiceSocket.on("typing", handleTyping);
+
     const handleFollowup = (data) => {
       if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
       if (data?.followupQuestions?.length) {
@@ -386,6 +408,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       voiceSocket.off("chat:rejected", handleRejected);
       voiceSocket.off("chat:ended", handleChatEnded);
       voiceSocket.off("error", handleError);
+      voiceSocket.off("typing", handleTyping);
       voiceSocket.off("ai_followup_questions", handleFollowup);
     };
   }, [isOpen]);
@@ -461,7 +484,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           time: new Date().toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
-          }),
+            hour12: true,
+          }).toUpperCase(),
         };
         setMessages((prev) => [...prev, userMsg]);
       }

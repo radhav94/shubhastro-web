@@ -881,6 +881,26 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   }
 }
 
+.voiceChatBtn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: $send-gradient;
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+  box-shadow: 0 10px 20px rgba(241, 90, 36, 0.28);
+
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(241, 90, 36, 0.4);
+  }
+}
+
 @media (max-width: 767px) {
   .textInput {
     height: 34px;

@@ -101,7 +101,8 @@ const Streaming = () => {
     const time = now.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
-    });
+      hour12: true,
+    }).toUpperCase();
 
     setMessages([
       ...messages,

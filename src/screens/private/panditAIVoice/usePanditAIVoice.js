@@ -52,13 +52,13 @@ function detectLanguageFromText(text) {
   return "hi";
 }
 
-export default function usePanditAIVoice({ enabled = true } = {}) {
+export default function usePanditAIVoice({ enabled = true, sharedRoomId = null } = {}) {
   const [status, setStatus] = useState("idle"); // idle | listening | processing | speaking
   const [transcript, setTranscript] = useState("");
   const [aiResponse, setAiResponse] = useState("");
   const [connecting, setConnecting] = useState(false);
 
-  const roomIdRef = useRef(sessionStorage.getItem("panditai_voice_roomId") || null);
+  const roomIdRef = useRef(sharedRoomId || sessionStorage.getItem("panditai_voice_roomId") || null);
   const initiatedRef = useRef(false);
   const audioRef = useRef(null);
   const abortRef = useRef(null);
@@ -66,6 +66,20 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
   const sendTextRef = useRef(null);
   const [roomId, setRoomId] = useState(roomIdRef.current);
   const chatEndedRef = useRef(false);
+  // When true, unmount won't emit chat:end (session handed back to text chat)
+  const skipCleanupRef = useRef(false);
+  // Tracks if user has sent at least one voice message — ignore responses before that
+  const voiceActiveRef = useRef(!sharedRoomId);
+
+  // Keep voiceActiveRef in sync when sharedRoomId changes (e.g. passed late)
+  // Also track when voice mode started to ignore messages arriving immediately after switch
+  const voiceModeStartedAt = useRef(Date.now());
+  useEffect(() => {
+    if (sharedRoomId) {
+      voiceActiveRef.current = false;
+      voiceModeStartedAt.current = Date.now();
+    }
+  }, [sharedRoomId]);
 
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   const [createChatRoom] = useCreateChatRoomMutation();
@@ -102,10 +116,11 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
         return;
       }
 
-      const savedRoomId = roomIdRef.current;
+      const savedRoomId = sharedRoomId || roomIdRef.current;
 
-      // If we have a saved roomId (page refresh), reconnect instead of initiating
+      // If we have a roomId (shared from text chat or page refresh), reconnect
       if (savedRoomId) {
+        setRoomIdPersist(savedRoomId);
         setPanditAIChatActive(true, savedRoomId);
         voiceSocket.emit("chat:reconnect", {
           roomId: savedRoomId,
@@ -169,6 +184,19 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      // If handing back to text chat, don't end the session
+      if (skipCleanupRef.current) {
+        skipCleanupRef.current = false;
+        initiatedRef.current = false;
+        if (abortRef.current) abortRef.current.abort();
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.onended = null;
+          audioRef.current.onerror = null;
+          audioRef.current = null;
+        }
+        return;
+      }
       const currentRoomId = roomIdRef.current;
       if (currentRoomId && voiceSocket.connected) {
         voiceSocket.emit("chat:end", {
@@ -228,6 +256,18 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
 
       // If session was ended, ignore incoming messages
       if (chatEndedRef.current) return;
+
+      // If shared session and user hasn't spoken yet, ignore (pending text chat response)
+      if (!voiceActiveRef.current) {
+        console.log("[PanditAIVoice] Ignoring message — voice not yet active (voiceActiveRef:", voiceActiveRef.current, ")");
+        return;
+      }
+
+      // Extra guard: ignore messages arriving within 3s of voice mode start (stale text responses)
+      if (Date.now() - voiceModeStartedAt.current < 3000) {
+        console.log("[PanditAIVoice] Ignoring message — too soon after voice mode start");
+        return;
+      }
 
       const responseText = data.message || data.response;
       setAiResponse(responseText);
@@ -343,6 +383,11 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
     (text, sttLangCode) => {
       const trimmed = text.trim();
       if (!trimmed) return;
+
+      // Mark voice as active — now responses should be spoken
+      voiceActiveRef.current = true;
+      // Reset the start timestamp so the 3s guard doesn't block legitimate responses
+      voiceModeStartedAt.current = 0;
 
       const currentRoomId = roomIdRef.current;
       if (!currentRoomId) {
@@ -472,6 +517,23 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
     setStatus("idle");
   }, [userIdLocal, setRoomIdPersist, stopListening]);
 
+  // Mark cleanup as skippable (used when handing back to text chat)
+  const markSkipCleanup = useCallback(() => {
+    skipCleanupRef.current = true;
+  }, []);
+
+  // Stop audio playback without ending session
+  const stopAudio = useCallback(() => {
+    if (abortRef.current) abortRef.current.abort();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.onended = null;
+      audioRef.current.onerror = null;
+      audioRef.current = null;
+    }
+    setStatus("idle");
+  }, []);
+
   return {
     status,
     transcript,
@@ -481,6 +543,8 @@ export default function usePanditAIVoice({ enabled = true } = {}) {
     connecting,
     roomId,
     endSession,
+    markSkipCleanup,
+    stopAudio,
   };
 }
 

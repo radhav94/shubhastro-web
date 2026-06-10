@@ -47,7 +47,7 @@ export default function useChat({
   selectedKundliRef.current = selectedKundli;
 
   const formatTime = () =>
-    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }).toUpperCase();
 
   const addMessage = (msg) => {
     setMessages((prev) => [...prev, msg]);

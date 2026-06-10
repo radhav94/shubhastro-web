@@ -84,8 +84,8 @@ $surface: #fffaf5;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
 
   img {
-    width: 100%;
-    height: 100%;
+    width: 36px;
+    height: 36px;
     object-fit: contain;
     border-radius: 50%;
   }
@@ -157,14 +157,30 @@ $surface: #fffaf5;
 
 .countdownBadge {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0;
+  gap: 2px;
   padding: 5px 10px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.28);
   color: #fff;
   white-space: nowrap;
+}
+
+.countdownBalance {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.countdownRow {
+  display: flex;
+  align-items: center;
+  gap: 0;
 }
 
 .countdownTime {
