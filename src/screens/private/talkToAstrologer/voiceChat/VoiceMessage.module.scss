@@ -5,8 +5,8 @@
   align-items: center;
   gap: 10px;
   padding: 0;
-  max-width: 280px;
-  width: 280px;
+  max-width: 220px;
+  width: 220px;
   position: relative;
   background: transparent;
   border: none;
@@ -23,17 +23,17 @@
 }
 
 .receiver {
-  .playBtn { background: linear-gradient(135deg, #6b7280, #4b5563); }
-  .barActive { background: #6b7280; }
-  .scrubDot { background: #6b7280; }
-  .currentTime { color: #374151; }
-  .msgTime { color: #9ca3af; }
+  .playBtn { background: linear-gradient(135deg, rgb(247, 88, 1), rgb(212, 52, 0)); }
+  .barActive { background: #f75801; }
+  .scrubDot { background: #f75801; }
+  .currentTime { color: #f75801; }
+  .msgTime { color: #f75801; }
 }
 
 /* Play/Pause button */
 .playBtn {
-  width: 38px;
-  height: 38px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: none;
   color: #fff;
@@ -85,7 +85,7 @@
 }
 
 .bar {
-  flex: 1;
+  width: 1.5px;
   border-radius: 2px;
   background: #d1d5db;
   min-height: 3px;
