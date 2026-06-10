@@ -4007,7 +4007,6 @@
 }
 
 .blogTitle {
-  font-family: "Poppins", sans-serif;
   font-size: 16px;
   font-weight: 500;
   color: #1a1a1a;
@@ -4019,13 +4018,12 @@
   }
 }
 
-.blogDate {
-  font-family: "Poppins", sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #424242;
-  margin: 0;
-}
+// .blogDate {
+//   font-size: 14px;
+//   font-weight: 400;
+//   color: #333;
+//   margin: 0;
+// }
 
 /* Mobile responsive for Blogs */
 @media (max-width: 480px) {
@@ -4041,9 +4039,9 @@
     height: 130px;
   }
 
-  .blogDate {
-    font-size: 13px;
-  }
+  // .blogDate {
+  //   font-size: 13px;
+  // }
 }
 
 /* Tablet responsive for Blogs */
@@ -4116,7 +4114,7 @@
 .blogDate {
   font-family: "Poppins", sans-serif;
   font-size: 12px;
-  color: #888;
+  color: #666;
 }
 
 .blogLink {

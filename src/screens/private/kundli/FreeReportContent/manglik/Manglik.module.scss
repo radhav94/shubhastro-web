@@ -11,7 +11,7 @@ $font-primary: "Poppins", sans-serif;
 .manglikContainer {
   max-width: 100%;
   margin: 0 auto;
-  padding: 24px;
+  padding: 16px;
   font-family: $font-primary;
   max-width: 1440px;
 
@@ -70,12 +70,8 @@ $font-primary: "Poppins", sans-serif;
 .headerContent {
   position: relative;
   z-index: 1;
-  padding: 24px 20px;
+  padding: 16px;
   color: #ffffff;
-
-  @media (min-width: 768px) {
-    padding: 32px 28px;
-  }
 }
 
 .headerTitle {
@@ -113,10 +109,6 @@ $font-primary: "Poppins", sans-serif;
   flex-direction: column;
   gap: 8px;
   // border: 1px solid rgba(255, 255, 255, 0.2);
-
-  @media (min-width: 768px) {
-    padding: 20px;
-  }
 }
 
 .statLabel {
@@ -148,10 +140,6 @@ $font-primary: "Poppins", sans-serif;
   border-radius: 12px;
   padding: 16px;
   border: 1px solid var(--border-50, rgba(189, 189, 189, 0.5));
-
-  @media (min-width: 768px) {
-    padding: 20px;
-  }
 }
 
 .summaryTitle {
@@ -224,15 +212,11 @@ $font-primary: "Poppins", sans-serif;
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(12px);
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   border: 1.5px solid var(--border-50, rgb(255, 255, 255));
   height: 100%;
   display: flex;
   flex-direction: column;
-
-  @media (max-width: 768px) {
-    padding: 16px;
-  }
 }
 
 .sectionTitle {
@@ -281,10 +265,6 @@ $font-primary: "Poppins", sans-serif;
     transform: translateX(4px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
-
-  @media (min-width: 768px) {
-    padding: 18px 20px;
-  }
 }
 
 .factorIcon {
@@ -328,10 +308,6 @@ $font-primary: "Poppins", sans-serif;
   &:hover {
     transform: translateX(4px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-
-  @media (min-width: 768px) {
-    padding: 18px 20px;
   }
 }
 

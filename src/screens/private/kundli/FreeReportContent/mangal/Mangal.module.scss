@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 16px;
   @media (width <= 767px) {
        padding: 0rem; 
   }
@@ -13,17 +13,12 @@
   position: relative;
   background: rgba(255, 255, 255, 0.4);
   border-radius: 20px;
-  padding: 2rem;
+  padding: 16px;
   margin-bottom: 2rem;
   overflow: hidden;
   // box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
   border: 1.5px solid var(--border-50, rgba(255, 255, 255, 1));
   backdrop-filter: blur(12px);
-
-  @media (max-width: 768px) {
-    padding: 20px;
-    border-radius: 12px;
-  }
 }
 
 .headerOverlay {
