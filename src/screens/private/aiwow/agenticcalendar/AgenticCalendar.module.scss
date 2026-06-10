@@ -401,6 +401,16 @@
   flex-wrap: wrap;
 }
 
+.ttsWrap {
+  display: inline-flex;
+  margin-right: 8px;
+
+  @media (max-width: 767px) {
+    margin-left: auto;
+    margin-right: 0;
+  }
+}
+
 .cardDate {
   display: flex;
   align-items: center;

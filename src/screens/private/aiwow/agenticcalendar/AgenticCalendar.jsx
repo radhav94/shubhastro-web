@@ -426,7 +426,7 @@ const AgenticCalendar = () => {
                           <span>{name}</span>
                           {isCustom && <span className={styles.customTag}>Custom</span>}
                         </div>
-                        <span style={{ display: 'inline-flex', marginRight: '8px' }} onClick={(e) => e.stopPropagation()}>
+                        <span className={styles.ttsWrap} onClick={(e) => e.stopPropagation()}>
                           <TTSButton text={`${name}. ${timings.map(t => {
                             let text = '';
                             if (t.bestDate) text += new Date(t.bestDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) + '. ';
