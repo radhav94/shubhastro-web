@@ -11,7 +11,7 @@ $font-primary: "Poppins", sans-serif;
 .manglikContainer {
   max-width: 100%;
   margin: 0 auto;
-  padding: 24px;
+  padding: 16px;
   font-family: $font-primary;
   max-width: 1440px;
 
@@ -29,14 +29,14 @@ $font-primary: "Poppins", sans-serif;
   position: relative;
   background: rgba(255, 255, 255, 0.4);
   border-radius: 20px;
-  padding: 2rem;
+  padding: 16px;
   margin-bottom: 2rem;
   // box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
   border: 1.5px solid var(--border-50, rgba(255, 255, 255, 1));
   backdrop-filter: blur(12px);
 
   @media (max-width: 768px) {
-    padding: 20px;
+    // padding: 20px;
     border-radius: 12px;
   }
 }
@@ -54,12 +54,8 @@ $font-primary: "Poppins", sans-serif;
 .headerContent {
   position: relative;
   z-index: 1;
-  padding: 24px 20px;
+  // padding: 24px 20px;
   color: #ffffff;
-
-  @media (min-width: 768px) {
-    padding: 32px 28px;
-  }
 }
 
 .headerTitle {
@@ -113,10 +109,6 @@ $font-primary: "Poppins", sans-serif;
   flex-direction: column;
   gap: 8px;
   width: 100%;
-
-  @media (min-width: 768px) {
-    padding: 24px;
-  }
 }
 
 .statLabel {
@@ -149,10 +141,6 @@ $font-primary: "Poppins", sans-serif;
   padding: 16px;
   border: 1px solid var(--border-50, rgba(255, 255, 255, 1));
   height: 100%;
-
-  @media (min-width: 768px) {
-    padding: 20px;
-  }
 }
 
 .summaryTitle {
@@ -192,7 +180,7 @@ $font-primary: "Poppins", sans-serif;
   justify-content: space-between;
   cursor: pointer;
   user-select: none;
-  padding: 12px 16px;
+  padding: 16px;
   background: #fff;
   border-radius: 12px;
   border: 1px solid $color-border;
@@ -202,10 +190,6 @@ $font-primary: "Poppins", sans-serif;
   &:hover {
     background: #f9f9f9;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  }
-
-  @media (min-width: 768px) {
-    padding: 16px 20px;
   }
 }
 
@@ -277,10 +261,6 @@ $font-primary: "Poppins", sans-serif;
     transform: translateX(4px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
-
-  @media (min-width: 768px) {
-    padding: 18px 20px;
-  }
 }
 
 .effectIcon {
@@ -325,10 +305,6 @@ $font-primary: "Poppins", sans-serif;
   &:hover {
     transform: translateX(4px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-
-  @media (min-width: 768px) {
-    padding: 18px 20px;
   }
 }
 

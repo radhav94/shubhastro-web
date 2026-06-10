@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 16px;
   @media (width <= 767px) {
        padding: 0rem; 
   }
@@ -14,15 +14,10 @@
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(12px);
   border-radius: 16px;
-  padding: 2rem;
+  padding: 16px;
   margin-bottom: 2rem;
   border: 1.5px solid var(--border-50, rgb(255, 255, 255));
   // box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-    border-radius: 12px;
-  }
 }
 
 .headerOverlay {
@@ -164,16 +159,12 @@
   justify-content: space-between;
   cursor: pointer;
   user-select: none;
-  padding: 1.25rem 1.5rem;
+  padding: 16px;
   // background: rgba(255, 255, 255, 0.4);
   transition: all 0.3s ease;
 
   &:hover {
     background: #f9f9f9;
-  }
-
-  @media (width <= 768px) {
-    padding: 1rem;
   }
 }
 

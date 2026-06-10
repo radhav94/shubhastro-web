@@ -11,7 +11,7 @@ $font-primary: "Poppins", sans-serif;
 .manglikContainer {
   max-width: 100%;
   margin: 0 auto;
-  padding: 24px;
+  padding: 16px;
   font-family: $font-primary;
   max-width: 1440px;
 
@@ -46,12 +46,8 @@ $font-primary: "Poppins", sans-serif;
 .headerContent {
   position: relative;
   z-index: 1;
-  padding: 24px 20px;
+  padding: 16px;
   color: #ffffff;
-
-  @media (min-width: 768px) {
-    padding: 32px 28px;
-  }
 }
 
 .headerTitle {
@@ -117,10 +113,6 @@ $font-primary: "Poppins", sans-serif;
   display: flex;
   flex-direction: column;
   gap: 8px;
-
-  @media (min-width: 768px) {
-    padding: 20px;
-  }
 }
 
 .statLabel {
@@ -153,10 +145,6 @@ $font-primary: "Poppins", sans-serif;
   padding: 16px;
   border: 1px solid var(--border-50, rgba(189, 189, 189, 0.5));
   height: 100%;
-
-  @media (min-width: 768px) {
-    padding: 20px;
-  }
 }
 
 .summaryTitle {
@@ -196,7 +184,7 @@ $font-primary: "Poppins", sans-serif;
   justify-content: space-between;
   cursor: pointer;
   user-select: none;
-  padding: 12px 16px;
+  padding: 16px;
   background: rgba(255, 255, 255, 0.4);
   border-radius: 12px;
   border: 1.5px solid #fff;
@@ -206,10 +194,6 @@ $font-primary: "Poppins", sans-serif;
   &:hover {
     background: rgba(255, 255, 255, 0.6);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  }
-
-  @media (min-width: 768px) {
-    padding: 16px 20px;
   }
 }
 
@@ -268,12 +252,12 @@ $font-primary: "Poppins", sans-serif;
 
   @media (min-width: 640px) {
     grid-template-columns: repeat(2, 1fr);
-    gap: 18px;
+    // gap: 18px;
   }
 
   @media (min-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    // gap: 20px;
   }
 }
 
@@ -292,10 +276,6 @@ $font-primary: "Poppins", sans-serif;
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-
-  @media (min-width: 768px) {
-    padding: 18px 20px;
   }
 }
 
@@ -341,10 +321,6 @@ $font-primary: "Poppins", sans-serif;
     transform: translateX(4px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
-
-  @media (min-width: 768px) {
-    padding: 18px 20px;
-  }
 }
 
 .factorIcon {
@@ -388,10 +364,6 @@ $font-primary: "Poppins", sans-serif;
   &:hover {
     transform: translateX(4px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-
-  @media (min-width: 768px) {
-    padding: 18px 20px;
   }
 }
 
