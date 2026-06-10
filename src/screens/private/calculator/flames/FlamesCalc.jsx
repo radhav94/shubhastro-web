@@ -16,6 +16,7 @@ const FlamesCalc = () => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useFormFromLocalStorage(STORAGE_KEY, initialFormState);
   const [errors, setErrors] = useState({});
+  const [inputHints, setInputHints] = useState({});
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileTarget, setProfileTarget] = useState(null);
   const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
@@ -87,7 +88,7 @@ const FlamesCalc = () => {
 
         <div className={styles.field}>
           <label>Your Name <span>*</span></label>
-          <input placeholder="Enter your name" value={formData.name1} onChange={(e) => handleChange("name1", e.target.value)} />
+          <input placeholder="Enter your name" value={formData.name1} onChange={(e) => handleChange("name1", e.target.value.replace(/[^a-zA-Z\s]/g, ""))} />
           {errors.name1 && <p className={styles.err}>{errors.name1}</p>}
           <button type="button" className={styles.selectProfileBtn} onClick={() => handleSelectProfileClick("person1")}>
             Select Profile +
@@ -96,7 +97,7 @@ const FlamesCalc = () => {
 
         <div className={styles.field}>
           <label>Partner's Name <span>*</span></label>
-          <input placeholder="Enter partner's name" value={formData.name2} onChange={(e) => handleChange("name2", e.target.value)} />
+          <input placeholder="Enter partner's name" value={formData.name2} onChange={(e) => handleChange("name2", e.target.value.replace(/[^a-zA-Z\s]/g, ""))} />
           {errors.name2 && <p className={styles.err}>{errors.name2}</p>}
           <button type="button" className={styles.selectProfileBtn} onClick={() => handleSelectProfileClick("person2")}>
             Select Profile +
