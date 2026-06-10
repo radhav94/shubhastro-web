@@ -69,6 +69,16 @@ import { PersistGate } from "redux-persist/integration/react";
 
 import { AgoraProvider } from "./agora/agoraClient";  // <-- IMPORTANT
 
+// Dynamically adjust toast position based on visual viewport (keyboard open/close)
+if (window.visualViewport) {
+  const updateToastPosition = () => {
+    const offset = window.visualViewport.offsetTop;
+    document.documentElement.style.setProperty('--toast-top-offset', `${offset}px`);
+  };
+  window.visualViewport.addEventListener('resize', updateToastPosition);
+  window.visualViewport.addEventListener('scroll', updateToastPosition);
+}
+
 createRoot(document.getElementById("root")).render(
   // <StrictMode>
   // <AgoraProvider>
@@ -79,6 +89,7 @@ createRoot(document.getElementById("root")).render(
           reverseOrder={false}
           containerStyle={{
             zIndex: 10000000,
+            top: 'calc(8px + var(--toast-top-offset, 0px))',
           }}
           toastOptions={{
             style: {

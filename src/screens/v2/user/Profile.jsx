@@ -1896,7 +1896,7 @@ const Profile = () => {
                               {transaction?.displayProfile?.name}
                             </h4>
                             <span className={styles.txnMeta}>
-                              {dayjs(transaction.createdAt).format("hh:mm A")} • TXN #{transaction._id}
+                              {dayjs(transaction.createdAt).format("DD MMM, YYYY • hh:mm A")} • TXN #{transaction._id}
                             </span>
                           </div>
                         </div>
