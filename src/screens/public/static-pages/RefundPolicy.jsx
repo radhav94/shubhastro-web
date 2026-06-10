@@ -100,7 +100,7 @@ const RefundPolicy = () => {
       <p className={styles.paragraph}>To initiate a refund claim:</p>
       <ul className={styles.list}>
         <li className={styles.listItem}>Log in to your Shubhastro account and navigate to "Help" &gt; "Raise a Complaint"</li>
-        <li className={styles.listItem}>Alternatively, email <a href="mailto:support@shubhastro.com" className={styles.link}>support@shubhastro.com</a> with subject line "Refund Request - [Order/Transaction ID]"</li>
+        <li className={styles.listItem}>Alternatively, email <a href="mailto:connect@pittiegroup.com" className={styles.link}>connect@pittiegroup.com</a> with subject line "Refund Request - [Order/Transaction ID]"</li>
         <li className={styles.listItem}>Include your registered email/phone, transaction ID, date of transaction, and reason for refund</li>
       </ul>
       <p className={styles.paragraph}><strong>5.2 Processing Timeline</strong></p>
@@ -136,7 +136,7 @@ const RefundPolicy = () => {
       <h4 className={styles.subtitle}>9. CONTACT FOR REFUND QUERIES</h4>
       <p className={styles.paragraph}><strong>Shubhastro Customer Support</strong></p>
       <ul className={styles.list}>
-        <li className={styles.listItem}>Email: <a href="mailto:support@shubhastro.com" className={styles.link}>support@shubhastro.com</a></li>
+        <li className={styles.listItem}>Email: <a href="mailto:connect@pittiegroup.com" className={styles.link}>connect@pittiegroup.com</a></li>
         <li className={styles.listItem}>Grievance Officer Email: <a href="mailto:grievance@shubhastro.com" className={styles.link}>grievance@shubhastro.com</a></li>
         <li className={styles.listItem}>Address: [Registered Office Address, City, State, PIN, India]</li>
         <li className={styles.listItem}>Support Hours: Monday to Saturday, 9:00 AM to 6:00 PM IST</li>

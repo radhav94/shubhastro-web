@@ -132,8 +132,8 @@ const AppLicense = () => {
           <h2 className={styles.sectionTitle}>11. Contact Information</h2>
           <p className={styles.paragraph}>
             For questions about this App License, please contact us at{" "}
-            <a href="mailto:support@shubhastro.com" className={styles.link}>
-              support@shubhastro.com
+            <a href="mailto:connect@pittiegroup.com" className={styles.link}>
+              connect@pittiegroup.com
             </a>
           </p>
         </div>

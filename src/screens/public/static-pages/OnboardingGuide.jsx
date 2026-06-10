@@ -100,7 +100,7 @@ const OnboardingGuide = () => {
         <li className={styles.listItem}>Use a strong, unique password</li>
         <li className={styles.listItem}>Never share your OTP or login credentials with anyone</li>
         <li className={styles.listItem}>Log out from shared devices</li>
-        <li className={styles.listItem}>Report suspicious activity immediately to <a href="mailto:support@shubhastro.com" className={styles.link}>support@shubhastro.com</a></li>
+        <li className={styles.listItem}>Report suspicious activity immediately to <a href="mailto:connect@pittiegroup.com" className={styles.link}>connect@pittiegroup.com</a></li>
       </ul>
       <p className={styles.paragraph}>Shubhastro will NEVER ask for your password, full card number, or OTP via call or email.</p>
 
@@ -121,7 +121,7 @@ const OnboardingGuide = () => {
 
       <p className={styles.paragraph}><strong>8.2 Email Support</strong></p>
       <ul className={styles.list}>
-        <li className={styles.listItem}>Email: <a href="mailto:support@shubhastro.com" className={styles.link}>support@shubhastro.com</a> (for general queries)</li>
+        <li className={styles.listItem}>Email: <a href="mailto:connect@pittiegroup.com" className={styles.link}>connect@pittiegroup.com</a> (for general queries)</li>
         <li className={styles.listItem}>Email: <a href="mailto:grievance@shubhastro.com" className={styles.link}>grievance@shubhastro.com</a> (for formal grievances)</li>
       </ul>
 
@@ -155,7 +155,7 @@ const OnboardingGuide = () => {
 
       <h4 className={styles.subtitle}>10. QUICK REFERENCE CONTACT DIRECTORY</h4>
       <ul className={styles.list}>
-        <li className={styles.listItem}>General Support: <a href="mailto:support@shubhastro.com" className={styles.link}>support@shubhastro.com</a></li>
+        <li className={styles.listItem}>General Support: <a href="mailto:connect@pittiegroup.com" className={styles.link}>connect@pittiegroup.com</a></li>
         <li className={styles.listItem}>Grievance Officer: <a href="mailto:grievance@shubhastro.com" className={styles.link}>grievance@shubhastro.com</a></li>
         <li className={styles.listItem}>Legal Notices: <a href="mailto:legal@shubhastro.com" className={styles.link}>legal@shubhastro.com</a></li>
         <li className={styles.listItem}>Privacy / Data Concerns: <a href="mailto:privacy@shubhastro.com" className={styles.link}>privacy@shubhastro.com</a></li>
