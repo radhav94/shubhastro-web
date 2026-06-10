@@ -11,6 +11,8 @@ import panditAiIcon from "../../assets/images/AiPandit.png";
 const PanditAIVoiceBubble = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(() => sessionStorage.getItem("panditai_voice_open") === "true");
+  const [sharedRoomId, setSharedRoomId] = useState(null);
+  const [initialBilling, setInitialBilling] = useState(null);
 
   // Persist open state for reconnect on refresh
   useEffect(() => {
@@ -24,27 +26,42 @@ const PanditAIVoiceBubble = () => {
     connecting,
     roomId,
     endSession,
-  } = usePanditAIVoice({ enabled: isOpen });
+    markSkipCleanup,
+    stopAudio,
+  } = usePanditAIVoice({ enabled: isOpen, sharedRoomId });
 
   const {
-    isFreePeriod,
-    freeMinutesRemaining,
-    remainingPaidTime,
+    isFreePeriod: hookIsFreePeriod,
+    freeMinutesRemaining: hookFreeMinutesRemaining,
+    remainingPaidTime: hookRemainingPaidTime,
     showRechargeBanner,
     rechargeBannerMessage,
-    walletBalance,
-    ratePerMinute,
+    walletBalance: hookWalletBalance,
+    ratePerMinute: hookRatePerMinute,
     sessionEndedLowBalance,
   } = useAIFreeMinutes({ isOpen, roomId });
 
-  // Listen for external open event
+  // Use hook values, fall back to initial billing from text chat
+  const isFreePeriod = hookIsFreePeriod || initialBilling?.isFreePeriod || false;
+  const freeMinutesRemaining = hookFreeMinutesRemaining ?? initialBilling?.freeMinutesRemaining ?? null;
+  const remainingPaidTime = hookRemainingPaidTime ?? initialBilling?.remainingPaidTime ?? null;
+  const walletBalance = hookWalletBalance ?? initialBilling?.walletBalance ?? null;
+  const ratePerMinute = hookRatePerMinute ?? initialBilling?.ratePerMinute ?? null;
+
+  // Listen for external open event (may include shared roomId from text chat)
   useEffect(() => {
-    const handleOpen = () => {
+    const handleOpen = (e) => {
       const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
       if (!userIdLocal) {
         navigate("/login");
         return;
       }
+      const incomingRoomId = e.detail?.roomId || null;
+      if (incomingRoomId) {
+        setSharedRoomId(incomingRoomId);
+      }
+      // Seed initial billing data from text chat
+      if (e.detail?.walletBalance != null) setInitialBilling(e.detail);
       setIsOpen(true);
     };
     window.addEventListener("panditai-voice:open", handleOpen);
@@ -64,9 +81,25 @@ const PanditAIVoiceBubble = () => {
   }, [isOpen, endSession]);
 
   const handleClose = useCallback(() => {
-    endSession?.();
-    setIsOpen(false);
-  }, [endSession]);
+    // Stop any audio playback immediately
+    stopAudio();
+
+    // If this was a shared session from text chat, don't end it — just close voice UI
+    if (sharedRoomId) {
+      markSkipCleanup();
+      setIsOpen(false);
+      setSharedRoomId(null);
+      // Reopen Pandit AI text chat (it will reconnect to the same room)
+      window.dispatchEvent(new CustomEvent("panditai:reopen"));
+    } else {
+      // Standalone voice session — end it fully
+      endSession?.();
+      setIsOpen(false);
+      setSharedRoomId(null);
+      // Always reopen text chat when voice closes
+      window.dispatchEvent(new CustomEvent("panditai:reopen"));
+    }
+  }, [endSession, sharedRoomId, markSkipCleanup, stopAudio]);
 
   const getStatusText = () => {
     if (connecting) return "Connecting...";
@@ -115,11 +148,8 @@ const PanditAIVoiceBubble = () => {
               <img src={panditAiIcon} alt="icon" width="36" height="36" />
             </div>
             <div className={styles.headerCopy}>
-              <h4 className={styles.headerName}>Pandit AI (Voice)</h4>
-              <span className={styles.headerStatus}>
-                <span className={styles.statusDot} />
-                {connecting ? "Connecting..." : status === "processing" ? "Thinking..." : ""}
-              </span>
+              <h4 className={styles.headerName}>Pandit AI <span style={{ fontSize: '10px', fontWeight: 500, opacity: 0.8 }}>(Voice)</span></h4>
+              {(connecting || status === "processing") && <span className={styles.headerStatus}>{connecting ? "Connecting..." : "Thinking..."}</span>}
             </div>
           </div>
           <div className={styles.headerActions}>
@@ -132,24 +162,33 @@ const PanditAIVoiceBubble = () => {
                 <span>{freeMinutesRemaining} min free</span>
               </div>
             )}
-            {walletBalance != null && (
-              <span className={styles.walletBadge}>₹{walletBalance}</span>
-            )}
             {remainingPaidTime != null && !sessionEndedLowBalance && (
               <div className={styles.countdownBadge}>
-                <div className={styles.countdownTime}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 12 16 14"/>
-                  </svg>
-                  <span>{String(Math.floor(remainingPaidTime / 3600)).padStart(2, "0")}:{String(Math.floor((remainingPaidTime % 3600) / 60)).padStart(2, "0")}</span>
-                </div>
-                {ratePerMinute && (
-                  <>
-                    <span className={styles.countdownDivider} />
-                    <span className={styles.countdownRate}>₹{ratePerMinute}/min</span>
-                  </>
+                {walletBalance != null && (
+                  <span className={styles.countdownBalance}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="4" width="20" height="16" rx="2"/>
+                      <path d="M16 12h.01"/>
+                      <path d="M2 10h20"/>
+                    </svg>
+                    ₹{walletBalance}
+                  </span>
                 )}
+                <div className={styles.countdownRow}>
+                  <div className={styles.countdownTime}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span>{String(Math.floor(remainingPaidTime / 3600)).padStart(2, "0")}:{String(Math.floor((remainingPaidTime % 3600) / 60)).padStart(2, "0")}</span>
+                  </div>
+                  {ratePerMinute && (
+                    <>
+                      <span className={styles.countdownDivider} />
+                      <span className={styles.countdownRate}>₹{ratePerMinute}/min</span>
+                    </>
+                  )}
+                </div>
               </div>
             )}
             <button className={styles.closeBtn} onClick={handleClose} aria-label="Close">

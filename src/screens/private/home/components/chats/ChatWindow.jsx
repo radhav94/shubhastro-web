@@ -25,7 +25,7 @@ import CallIcon from "../../../../../assets/chat/Call.svg";
 import VideocamIcon from "../../../../../assets/chat/Videocam.svg";
 
 const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
-const MIN_CHAT_SECONDS = 60;
+const MIN_CHAT_SECONDS = 0;
 
 import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi";
 import SwitchWaitingPopup from "../../../../../component/UI/switchWaiting/SwitchWaitingPopup";
@@ -178,7 +178,7 @@ const ChatWindow = () => {
           hour: "2-digit",
           minute: "2-digit",
           hour12: true,
-        }),
+        }).toUpperCase(),
         dateTime: item.createdAt,
         giftData: giftData,
         kundliName: item?.kundliName,
@@ -248,11 +248,6 @@ const ChatWindow = () => {
     
     // Use wall-clock as primary (more reliable), fall back to timer-based
     const effectiveElapsed = wallClockElapsed > 0 ? wallClockElapsed : timerBasedElapsed;
-
-    if (effectiveElapsed < MIN_CHAT_SECONDS) {
-      Toast.error("Chat cannot be ended before 1 minute");
-      return false;
-    }
 
     // Show confirmation popup instead of ending directly
     setShowEndChatConfirm(true);

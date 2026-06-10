@@ -123,8 +123,8 @@ const TermsConditionsView = () => {
           <h2 className={styles.sectionTitle}>10. Contact Us</h2>
           <p className={styles.paragraph}>
             For questions about these Terms, please contact us at{" "}
-            <a href="mailto:support@shubhastro.com" className={styles.link}>
-              support@shubhastro.com
+            <a href="mailto:connect@pittiegroup.com" className={styles.link}>
+              connect@pittiegroup.com
             </a>
           </p>
         </div>

@@ -149,7 +149,10 @@ const useChatSocket = ({
       console.log("📞 call:room event received", data);
       setCallRoomId(data?.roomId);
       setActiveCallRoomId(data?.roomId);
-      setWaitingPopup(true);
+      // Only show popup if this switch was initiated from chat (not from VoiceCall's audio→video)
+      if (!activeCall) {
+        setWaitingPopup(true);
+      }
       setGlobalWaitingList(data?.waitingTime || 5);
     };
 

@@ -239,7 +239,7 @@ const Prediction = ({ params, skipToken }) => {
                             }
                             className="mt-3 text-xs text-blue-600 hover:underline"
                           >
-                            {isMetaOpen ? "Hide details" : "Show details"}
+                            {isMetaOpen ? "Show Less" : "Show More"}
                           </button>
                         )}
 

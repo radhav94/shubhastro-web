@@ -772,21 +772,11 @@ const VideoCalling = ({ callData }) => {
         refreshWallet();
         window.dispatchEvent(new Event("walletBalanceUpdated"));
 
-        // If astrologer ended the call and there's an active chat, end that too
-        if (data?.endedBy === "ASTROLOGER" && hasOngoingChat()) {
-          const chatRoomId = activeChat?.roomId || JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || "null")?.roomId;
-          if (chatRoomId) {
-            voiceSocket.emit("chat:end", { roomId: chatRoomId, endedBy: "ASTROLOGER" });
-          }
-          // Both sessions are ending — show review
-          setOpenReview(true);
-        }
-
         Toast.success("Video session ended.");
 
-        // Don't show review when this call was started from an ongoing chat
-        // (unless both are being terminated together — handled above).
-        if (!hasOngoingChat()) {
+        // Show review: if astrologer ended the call, always show (both sessions ending).
+        // If user ended, only show when no ongoing chat.
+        if (data?.endedBy === "ASTROLOGER" || !hasOngoingChat()) {
           setOpenReview(true);
         }
       }
