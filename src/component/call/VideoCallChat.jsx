@@ -86,7 +86,7 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
-      }),
+      }).toUpperCase(),
       dateTime: item.createdAt,
       type: item?.type,
       kundliName: item?.kundliName,

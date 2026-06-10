@@ -8,7 +8,7 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
   const hasInitializedRef = useRef(false);
 
   const formatTime = () =>
-    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }).toUpperCase();
 
   const addMessage = (msg) => {
     setMessages((prev) => [...prev, msg]);

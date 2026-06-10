@@ -178,7 +178,7 @@ const ChatWindow = () => {
           hour: "2-digit",
           minute: "2-digit",
           hour12: true,
-        }),
+        }).toUpperCase(),
         dateTime: item.createdAt,
         giftData: giftData,
         kundliName: item?.kundliName,

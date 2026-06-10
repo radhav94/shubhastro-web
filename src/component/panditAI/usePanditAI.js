@@ -102,7 +102,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         time: new Date(msg.createdAt).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
-        }),
+          hour12: true,
+        }).toUpperCase(),
       }));
       setMessages(mapped);
     }
@@ -342,7 +343,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
-        }),
+          hour12: true,
+        }).toUpperCase(),
       };
       setMessages((prev) => [...prev, msg]);
       setSending(false);
@@ -482,7 +484,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           time: new Date().toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
-          }),
+            hour12: true,
+          }).toUpperCase(),
         };
         setMessages((prev) => [...prev, userMsg]);
       }
