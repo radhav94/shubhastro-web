@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -40,11 +40,12 @@ const validationSchema = Yup.object({
   guidance: Yup.array().of(Yup.string()),
 });
 
-const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep = 2, totalSteps = 3, onStepChange }) => {
+const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep = 2, totalSteps = 3, onStepChange, autoSubmit = false }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [createKundli] = useCreateKundliMutation();
   const { data: filtersData } = useGetExpertiseFiltersQuery();
+  const autoSubmitTriggered = useRef(false);
 
   // Extract skill options from API response, fallback to static
   const skillList = filtersData?.data?.find(f => f.title === "Skill")?.list;
@@ -59,9 +60,18 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
     guidance: formData.guidance || [],
   };
 
-  const handleSubmit = async (values) => {
+  // Auto-submit when autoSubmit prop is true (skip guidance screen)
+  useEffect(() => {
+    if (autoSubmit && !autoSubmitTriggered.current) {
+      autoSubmitTriggered.current = true;
+      // Trigger registration with empty guidance
+      performRegistration([]);
+    }
+  }, [autoSubmit]);
+
+  const performRegistration = async (guidance) => {
     setLoading(true);
-    updateFormData({ guidance: values.guidance });
+    updateFormData({ guidance });
 
     try {
       // Check if token exists
@@ -218,6 +228,21 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
       setLoading(false);
     }
   };
+
+  const handleSubmit = async (values) => {
+    await performRegistration(values.guidance);
+  };
+
+  // When autoSubmit is true, show loading indicator instead of the form
+  if (autoSubmit) {
+    return (
+      <div className={styles.guidanceScreen}>
+        <div className={styles.content} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p>{loading ? "Saving..." : ""}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Formik

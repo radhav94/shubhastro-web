@@ -1,10 +1,16 @@
+import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
 import LanguageSelector from "../../../component/LanguageSelector";
+import { registerUser } from "../../../services/appServices/authService";
+import { useCreateKundliMutation } from "../../../services/appServices/kundliServicesNew";
+import { setEmail } from "../../../redux/auth/authSlice";
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -44,7 +50,12 @@ const BirthDetailsScreen = ({
   currentStep = 1,
   totalSteps = 3,
   onStepChange,
+  skipGuidance = false,
 }) => {
+  const dispatch = useDispatch();
+  const [registering, setRegistering] = useState(false);
+  const [createKundli] = useCreateKundliMutation();
+
   const initialValues = {
     birthDate: formData.birthDate || "",
     birthTime: formData.birthTime || "",
@@ -54,9 +65,135 @@ const BirthDetailsScreen = ({
     longitude: formData.longitude || null,
   };
 
+  const handleRegistration = async (mergedFormData) => {
+    setRegistering(true);
+
+    try {
+      const token = localStorage.getItem("shubhtalk_customer_token");
+      if (!token) {
+        toast.error("Please complete login and OTP verification first");
+        setRegistering(false);
+        return;
+      }
+
+      const fullName = mergedFormData.name || "";
+      const nameParts = fullName.trim().split(/\s+/);
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ");
+
+      let phoneNumber = mergedFormData.phoneNumber || "";
+      phoneNumber = phoneNumber.replace(/^\+?91/, "");
+      phoneNumber = `91${phoneNumber}`;
+
+      const payload = {
+        firstName,
+        lastName,
+        dateOfBirth: mergedFormData.birthDate || "",
+        place: mergedFormData.birthPlace || "",
+        phoneNumber,
+        password: "TempPass@123",
+        gender: mergedFormData.identity
+          ? mergedFormData.identity.toLowerCase() === "others"
+            ? "other"
+            : mergedFormData.identity.toLowerCase()
+          : "female",
+        languagePreferences: ["en"],
+        role: "CUSTOMER",
+        lat: mergedFormData.latitude || 0,
+        lon: mergedFormData.longitude || 0,
+        ...(mergedFormData.email && { email: mergedFormData.email }),
+      };
+
+      const response = await registerUser(payload);
+
+      if (response?.data?.statusCode === 201 || response?.data?.success) {
+        toast.success("Registration successful!");
+        localStorage.setItem("shubhtalk_show_welcome_bonus", "true");
+
+        const currentUserData = localStorage.getItem("userData");
+        const parsedUserData = currentUserData ? JSON.parse(currentUserData) : {};
+
+        const updatedUserData = {
+          ...parsedUserData,
+          isRegister: true,
+          firstName,
+          lastName,
+          place: mergedFormData.birthPlace,
+          dateOfBirth: mergedFormData.birthDate,
+          gender: mergedFormData.identity,
+        };
+        localStorage.setItem("userData", JSON.stringify(updatedUserData));
+
+        const currentUser = localStorage.getItem("shubhtalk_user");
+        const parsedUser = currentUser ? JSON.parse(currentUser) : {};
+
+        const updatedUser = {
+          ...parsedUser,
+          firstName,
+          lastName,
+          place: mergedFormData.birthPlace,
+        };
+        localStorage.setItem("shubhtalk_user", JSON.stringify(updatedUser));
+
+        if (mergedFormData.email) {
+          dispatch(setEmail(mergedFormData.email));
+        }
+
+        window.dispatchEvent(new Event("auth-change"));
+
+        // Create Kundali profile if birth details are provided
+        if (mergedFormData.birthDate && mergedFormData.birthPlace && mergedFormData.latitude && mergedFormData.longitude) {
+          try {
+            const dateObj = new Date(mergedFormData.birthDate);
+            const timeObj = mergedFormData.birthTime ? mergedFormData.birthTime.split(":") : ["0", "0"];
+
+            const kundliPayload = {
+              name: fullName || firstName,
+              gender: mergedFormData.identity ? mergedFormData.identity.toLowerCase() : "female",
+              relation: "Self",
+              day: dateObj.getDate(),
+              month: dateObj.getMonth() + 1,
+              year: dateObj.getFullYear(),
+              hour: mergedFormData.unknownBirthTime ? "00" : String(parseInt(timeObj[0])).padStart(2, "0"),
+              min: mergedFormData.unknownBirthTime ? "00" : String(parseInt(timeObj[1])).padStart(2, "0"),
+              second: "00",
+              place: mergedFormData.birthPlace,
+              lat: mergedFormData.latitude,
+              lon: mergedFormData.longitude,
+              tzone: mergedFormData.timezone ?? 5.5,
+            };
+
+            const kundliResponse = await createKundli(kundliPayload).unwrap();
+            toast.success("Birth chart created successfully!");
+          } catch (kundliError) {
+            toast.error("Birth chart creation failed, but you can add it later from your profile");
+          }
+        }
+
+        onNext();
+      } else {
+        toast.error(response?.data?.message || "Registration failed");
+      }
+    } catch (error) {
+      if (error.response?.status === 401 || error.response?.data?.message?.includes("Authorization")) {
+        toast.error("Session expired. Please login again.");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to register. Please try again.");
+      }
+    } finally {
+      setRegistering(false);
+    }
+  };
+
   const handleSubmit = (values) => {
     updateFormData(values);
-    onNext();
+
+    if (skipGuidance) {
+      const mergedFormData = { ...formData, ...values };
+      handleRegistration(mergedFormData);
+    } else {
+      onNext();
+    }
   };
 
   return (
@@ -95,15 +232,6 @@ const BirthDetailsScreen = ({
 
             <div className={styles.formGroup}>
               <label>Birth Date<span className={styles.required}>*</span></label>
-              {/* Old native date input */}
-              {/* <Field
-                type="date"
-                name="birthDate"
-                className={`${styles.input} ${styles.iosFix}`}
-                placeholder="DD/MM/YYYY"
-                onClick={(e) => e.target.showPicker?.()}
-                max={new Date().toISOString().split('T')[0]}
-              /> */}
               <DateTimePicker
                 mode="date"
                 selected={values.birthDate ? new Date(values.birthDate) : null}
@@ -130,17 +258,6 @@ const BirthDetailsScreen = ({
 
             <div className={styles.formGroup}>
               <label>Birth Time</label>
-              {/* Old native time input */}
-              {/* <div className={styles.inputWrapper}>
-                <Field
-                  type="time"
-                  name="birthTime"
-                  onClick={(e) => e.target.showPicker?.()}
-                  className={`${styles.input} ${styles.iosFix}`}
-                  placeholder="Select here"
-                  disabled={values.unknownBirthTime}
-                />
-              </div> */}
               <DateTimePicker
                 mode="time"
                 selected={values.birthTime ? (() => { const [h, m] = values.birthTime.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
@@ -184,7 +301,6 @@ const BirthDetailsScreen = ({
                   onChange={(e) => {
                     setFieldValue("birthPlace", e.target.value);
                     setFieldTouched("birthPlace", true);
-                    // Reset coordinates when user types manually
                     if (e.target.value !== values.birthPlace) {
                       setFieldValue("latitude", null);
                       setFieldValue("longitude", null);
@@ -195,7 +311,6 @@ const BirthDetailsScreen = ({
                     setFieldValue("latitude", place.lat);
                     setFieldValue("longitude", place.lng);
                     setFieldTouched("birthPlace", true);
-                    // Trigger validation after setting all values
                     setTimeout(() => validateForm(), 0);
                   }}
                   placeholder="Select here"
@@ -214,9 +329,9 @@ const BirthDetailsScreen = ({
           <button 
             type="submit" 
             className={styles.otpprimaryBtn}
-            disabled={!values.birthDate || !values.birthPlace || !values.latitude || Object.keys(errors).length > 0}
+            disabled={!values.birthDate || !values.birthPlace || !values.latitude || Object.keys(errors).length > 0 || registering}
           >
-            Next
+            {registering ? "Saving..." : "Next"}
           </button>
         </Form>
       )}
