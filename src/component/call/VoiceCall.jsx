@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import AgoraRTC from "agora-rtc-sdk-ng";
+import { AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
 import {
   IoMic,
   IoMicOff,
@@ -372,7 +373,13 @@ const AgoraVoiceCalling = ({ callData }) => {
       const TRACK_RETRY_DELAY = 800; // ms
       for (let attempt = 1; attempt <= MAX_TRACK_RETRIES; attempt++) {
         try {
-          micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
+          micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack({
+            encoderConfig: {
+              sampleRate: AUDIO_ENCODER_CONFIG.sampleRate,
+              stereo: AUDIO_ENCODER_CONFIG.stereo,
+              bitrate: AUDIO_ENCODER_CONFIG.bitrate,
+            },
+          });
           break; // success
         } catch (trackErr) {
           console.warn(`[VoiceCall] ⚠️ Mic track creation attempt ${attempt}/${MAX_TRACK_RETRIES} failed:`, trackErr.message);
