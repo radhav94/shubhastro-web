@@ -143,6 +143,17 @@
   margin: 0;
 }
 
+.itemType {
+  font-size: 13px;
+  font-weight: 400;
+  color: #888;
+  margin: 0;
+}
+
+.typeBadge {
+  display: none;
+}
+
 .itemNameClickable {
   color: #f75801;
   cursor: pointer;
