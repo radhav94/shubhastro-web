@@ -552,9 +552,19 @@
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
 }
 .callTimer {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
+  font-size: 18px;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 28px;
+  color: #fff;
+  text-align: center;
+  padding: 5px 16px;
+  margin: 0 auto 10px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  border-radius: 20px;
+  width: fit-content;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .timerRed {
@@ -1111,7 +1121,7 @@
 
   .callTimer {
     font-size: 11px;
-    width: 100%;
+    width: fit-content;
     text-align: center;
   }
 

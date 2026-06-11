@@ -1128,11 +1128,16 @@ const VideoCalling = ({ callData }) => {
     });
   };
 
-  const formatTime = (s) =>
-    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(
-      2,
-      "0"
-    )}`;
+  const formatTime = (sec) => {
+    const totalSec = Math.max(0, Math.floor(Number(sec) || 0));
+    const hours = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    if (hours > 0) {
+      return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  };
 
   const formatAmount = (amount) => {
     if (typeof amount !== "number") return `₹${amount}`;
@@ -1466,6 +1471,17 @@ const VideoCalling = ({ callData }) => {
 
             {/* Bottom Controls */}
             <div className={styles.bottomControls}>
+              {/* Call Duration Timer */}
+              <div className={styles.callTimer}>
+                {isReconnecting ? (
+                  <span className={styles.reconnecting}>Reconnecting...</span>
+                ) : joined ? (
+                  formatTime(callSeconds)
+                ) : (
+                  "Connecting…"
+                )}
+              </div>
+
               {/* Control Buttons Grid */}
               <div className={styles.controlGrid}>
                 {/* <div className={styles.controlItem}>
