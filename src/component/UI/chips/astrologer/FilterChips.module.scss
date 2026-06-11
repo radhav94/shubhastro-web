@@ -70,6 +70,9 @@
       max-width: 100%;
     }
   }
+  div {
+    position: relative;
+  }
   button.chip {
     background: var(
       --orange_gradient,
@@ -81,6 +84,30 @@
     @media (width <= 767px) {
       width: 100px;
     }
+  }
+}
+
+.clearSearchBtn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #999;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  
+  &:hover {
+    background: #666;
   }
 }
 .filterTabs {
