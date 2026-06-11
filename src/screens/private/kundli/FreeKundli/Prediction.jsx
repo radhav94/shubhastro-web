@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useGetAi12MonthsPredictionQuery } from "../../../../redux/api/kundli/kundliApi";
 import TTSButton from "../../../../component/UI/TTSButton";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import arrowUp from "../../../../assets/images/arrow-up.svg";
 import styles from "./FreeReportContent.module.scss";
 
@@ -94,9 +95,7 @@ const Prediction = ({ params, skipToken }) => {
 
   if (isLoading) {
     return (
-      <div className="py-6 text-center text-sm text-gray-500">
-        Loading predictions...
-      </div>
+      <PrimaryLoader isLoading={true} fullscreen={true} message="Loading Please Wait" />
     );
   }
 
@@ -168,16 +167,27 @@ const Prediction = ({ params, skipToken }) => {
               <div className="border-t border-white px-4 py-4 space-y-5">
                 {/* ================= SPECIFICATIONS ================= */}
                 <div className={styles.innerTabStyle}>
-                  {Object.entries(specifications).map(([key, value]) => (
-                    <div key={key}>
-                      <p className="text-sm text-gray-500">
-                        {formatLabel(key)}
-                      </p>
-                      <p className="text-sm font-medium text-gray-800">
-                        {formatValue(value)}
-                      </p>
-                    </div>
-                  ))}
+                  {Object.entries(specifications).map(([key, value]) => {
+                    // Hide Planet Transit Data if empty/null/empty object
+                    if (
+                      value === null ||
+                      value === undefined ||
+                      (typeof value === "object" && !Array.isArray(value) && Object.keys(value).length === 0)
+                    ) {
+                      return null;
+                    }
+
+                    return (
+                      <div key={key}>
+                        <p className="text-sm text-gray-500">
+                          {formatLabel(key)}
+                        </p>
+                        <p className="text-sm font-medium text-gray-800">
+                          {formatValue(value)}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* ================= PREDICTIONS ================= */}
