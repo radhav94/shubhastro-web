@@ -1324,7 +1324,7 @@ const AstrologerProfile = () => {
             )}
 
             {/* Send a Gift Section */}
-            <div className={styles.giftSection}>
+            {/* <div className={styles.giftSection}>
               <div className={styles.giftContent}>
                 <h3 className={styles.giftTitle}>Send a Gift</h3>
                 <p className={styles.giftSubtitle}>
@@ -1346,7 +1346,7 @@ const AstrologerProfile = () => {
               <div className={styles.giftImage}>
                 <img src={SendGiftImage} alt="Send Gift" />
               </div>
-            </div>
+            </div> */}
 
             {/* User Reviews */}
             <div className={styles.reviewsSection}>
