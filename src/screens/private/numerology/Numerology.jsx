@@ -556,7 +556,7 @@ const NumerologyWeb = () => {
               Talk to a <br /> Numerology Expert
             </h3>
             <Link
-              to={PATH.privateRoutes.Chat_With_ASTROLOGER.path}
+              to={PATH.privateRoutes.TALK_TO_ASTROLOGER.path}
               state={{
                 selectedType: "Numerology",
               }}
