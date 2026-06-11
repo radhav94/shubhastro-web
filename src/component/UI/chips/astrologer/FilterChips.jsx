@@ -565,6 +565,29 @@ const FilterChips = ({
                     value={searchText}
                     onInput={(e) => handleDebouncedSearch(e, setFieldValue)}
                   />
+                  {searchText && (
+                    <button
+                      type="button"
+                      className={styles.clearSearchBtn}
+                      onClick={() => {
+                        setFieldValue("searchText", "");
+                        setSearchText("");
+                        if (activeChips.length > 0) {
+                          isFilterActiveRef.current = true;
+                          applyFilters({
+                            pageNo: 1,
+                            skills: selectedSkills,
+                            ignoreSearch: true,
+                            append: false,
+                          });
+                        } else {
+                          handleClick("all");
+                        }
+                      }}
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               </Form>
             )}
