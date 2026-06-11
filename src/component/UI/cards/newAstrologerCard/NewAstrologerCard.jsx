@@ -41,17 +41,7 @@ const NewAstrologerCard = ({
         <span>{isOnline ? 'Online' : 'Offline'}</span>
       </div>
 
-      <Link to={`/astrologer/${astrologer?._id}`} className={styles.cardLink}>
-        <div className={styles.astrologerImageWrapper}>
-          <img
-            src={astrologer.profileImgUrl || getAstrologerDefaultImage(astrologer.gender)}
-            alt={astrologer.firstName}
-            className={styles.astrologerImg}
-            onError={(e) => {
-              e.target.src = getAstrologerDefaultImage(astrologer.gender);
-            }}
-          />
-          <div className={styles.ratingBadge}>
+      <div className={styles.ratingBadge}>
             <span className={styles.star}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -79,6 +69,17 @@ const NewAstrologerCard = ({
             </span>
             <span className={styles.ratingText}>{astrologer.rating ? Number(astrologer.rating).toFixed(1) : '0.0'}</span>
           </div>
+
+      <Link to={`/astrologer/${astrologer?._id}`} className={styles.cardLink}>
+        <div className={styles.astrologerImageWrapper}>
+          <img
+            src={astrologer.profileImgUrl || getAstrologerDefaultImage(astrologer.gender)}
+            alt={astrologer.firstName}
+            className={styles.astrologerImg}
+            onError={(e) => {
+              e.target.src = getAstrologerDefaultImage(astrologer.gender);
+            }}
+          />
         </div>
         <h3 className={styles.astrologerName}>
           {astrologer.firstName} {astrologer.lastName}
