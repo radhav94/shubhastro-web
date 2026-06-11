@@ -7,6 +7,7 @@ import {
   useRemoteUsers,
 } from "agora-rtc-react";
 
+import { LIVE_STREAM_ENCODER_CONFIG, AUDIO_ENCODER_CONFIG } from "../../../../../agora/agoraConfig";
 import {
   getViewerToken,
   getReconnectToken,
@@ -268,9 +269,23 @@ export const useLiveStreaming = (client, ROLE, channel, rejoinKey = 0, { onChann
     };
   }, [client, ROLE, channel]);
 
-  // Local tracks (host only)
-  const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn && ROLE === "host");
-  const { localCameraTrack } = useLocalCameraTrack(cameraOn && ROLE === "host");
+  // Local tracks (host only) — with low-bandwidth encoding config
+  const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn && ROLE === "host", {
+    encoderConfig: {
+      sampleRate: AUDIO_ENCODER_CONFIG.sampleRate,
+      stereo: AUDIO_ENCODER_CONFIG.stereo,
+      bitrate: AUDIO_ENCODER_CONFIG.bitrate,
+    },
+  });
+  const { localCameraTrack } = useLocalCameraTrack(cameraOn && ROLE === "host", {
+    encoderConfig: {
+      width: LIVE_STREAM_ENCODER_CONFIG.width,
+      height: LIVE_STREAM_ENCODER_CONFIG.height,
+      frameRate: LIVE_STREAM_ENCODER_CONFIG.frameRate,
+      bitrateMin: LIVE_STREAM_ENCODER_CONFIG.bitrateMin,
+      bitrateMax: LIVE_STREAM_ENCODER_CONFIG.bitrateMax,
+    },
+  });
 
   const remoteUsers = useRemoteUsers();
 

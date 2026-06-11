@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import AgoraRTC from "agora-rtc-sdk-ng";
+import { applyVideoEncoderConfig, VIDEO_CALL_ENCODER_CONFIG, AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
 import {
   IoMic,
   IoMicOff,
@@ -414,7 +415,16 @@ const VideoCalling = ({ callData }) => {
         for (let attempt = 1; attempt <= MAX_TRACK_RETRIES; attempt++) {
           if (didCancelStart || cleanupRef.current || endCallRef.current) return;
           try {
-            [micTrack, camTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+            [micTrack, camTrack] = await AgoraRTC.createMicrophoneAndCameraTracks(
+              {
+                encoderConfig: {
+                  sampleRate: AUDIO_ENCODER_CONFIG.sampleRate,
+                  stereo: AUDIO_ENCODER_CONFIG.stereo,
+                  bitrate: AUDIO_ENCODER_CONFIG.bitrate,
+                },
+              },
+              {}
+            );
             break; // success
           } catch (trackErr) {
             console.warn(`[VideoCall] ⚠️ Track creation attempt ${attempt}/${MAX_TRACK_RETRIES} failed:`, trackErr.message);
@@ -432,6 +442,9 @@ const VideoCalling = ({ callData }) => {
 
         micTrackRef.current = micTrack;
         camTrackRef.current = camTrack;
+
+        // Apply low-bandwidth encoding settings
+        await applyVideoEncoderConfig(camTrack, VIDEO_CALL_ENCODER_CONFIG);
 
         // Retry join with exponential backoff — Agora channel may not be ready immediately
         // after two-way accept (server creates channel after both sides accept)
