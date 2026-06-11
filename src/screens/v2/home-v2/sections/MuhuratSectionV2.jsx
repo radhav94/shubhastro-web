@@ -10,19 +10,18 @@ import yamakantaIcon from "../../../../assets/images/Crucial Muhurats (1).png";
 
 const MUHURAT_ICONS = [abhijitIcon, rahuKaalIcon, gulikaIcon, yamakantaIcon];
 
+/** Strips seconds from time string: "12:17:35" → "12:17" (works with any script) */
+const stripSeconds = (t) => {
+  if (!t) return "—";
+  return t.replace(/(\d{1,2}:\d{2}):\d{2}/g, "$1");
+};
+
 const DEFAULT_MUHURATS = [
   { name: "Abhijit Muhurat", start: "—", end: "—" },
   { name: "Rahu Kaal", start: "—", end: "—" },
   { name: "Gulika Kaal", start: "—", end: "—" },
   { name: "Yamakanta Kaal", start: "—", end: "—" },
 ];
-
-/** Strips seconds from time string: "12:14:20 PM" → "12:14 PM" */
-const formatTime = (t) => {
-  const val = t?.trim();
-  if (!val) return "—";
-  return val.replace(/(\d{1,2}:\d{2}):\d{2}/, "$1");
-};
 
 const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
   const userLocation = useUserLocation();
@@ -51,23 +50,23 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
     return [
       {
         name: "Abhijit Muhurat",
-        start: formatTime(response.advanced_details?.abhijit_muhurta?.start),
-        end: formatTime(response.advanced_details?.abhijit_muhurta?.end),
+        start: stripSeconds(response.advanced_details?.abhijit_muhurta?.start) || "—",
+        end: stripSeconds(response.advanced_details?.abhijit_muhurta?.end) || "—",
       },
       {
         name: "Rahu Kaal",
-        start: formatTime(response.rahukaal?.split("to")[0]),
-        end: formatTime(response.rahukaal?.split("to")[1]),
+        start: response.rahukaal || "—",
+        end: "",
       },
       {
         name: "Gulika Kaal",
-        start: formatTime(response.gulika?.split("to")[0]),
-        end: formatTime(response.gulika?.split("to")[1]),
+        start: response.gulika || "—",
+        end: "",
       },
       {
         name: "Yamakanta Kaal",
-        start: formatTime(response.yamakanta?.split("to")[0]),
-        end: formatTime(response.yamakanta?.split("to")[1]),
+        start: response.yamakanta || "—",
+        end: "",
       },
     ];
   }, [panchangData]);
@@ -93,7 +92,7 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
               <h5>{m.name}</h5>
             </div>
             <p className={styles.muhuratTime}>
-              {m.start} – {m.end}
+              {m.end ? `${m.start} to ${m.end}` : m.start}
             </p>
           </div>
         ))}
