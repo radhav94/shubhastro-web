@@ -39,7 +39,16 @@ export const aiwowApi = privateRequestNew.injectEndpoints({
       }),
       keepUnusedDataFor: 300, // cache 5 min — global data, rarely changes
     }),
+
+    getBusinessPathfinderOptions: builder.query({
+      query: () => ({
+        url: "wow-suite/business-pathfinder/options",
+        method: "GET",
+        headers: { accept: "application/json" },
+      }),
+      keepUnusedDataFor: 300,
+    }),
   }),
 });
 
-export const { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery, useLazyGetChargesQuery } = aiwowApi;
+export const { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery, useLazyGetChargesQuery, useGetBusinessPathfinderOptionsQuery } = aiwowApi;
