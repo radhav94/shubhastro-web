@@ -85,12 +85,12 @@ const NorthIndian = ({ style = "north" }) => {
 
   const charts = [
     { title: "Chalit", src: svgUrl(dChalit.data) },
-    { title: "Sun Chart", src: svgUrl(dSun.data) },
-    { title: "Moon Chart", src: svgUrl(dMoon.data) },
+    { title: "Sun", src: svgUrl(dSun.data) },
+    { title: "Moon", src: svgUrl(dMoon.data) },
     { title: "KP Chalit", src: svgUrl(kpChalit.data) },
-    { title: "Transit Chart", src: svgUrl(transit.data) },
-    { title: "Lagna / Ascendant / Basic Birth Chart", src: svgUrl(d1.data) },
-    { title: "Hora (Wealth / Income Chart)", src: svgUrl(d2.data) },
+    { title: "Transit", src: svgUrl(transit.data) },
+    { title: "Lagna / Ascendant / Basic Birth", src: svgUrl(d1.data) },
+    { title: "Hora (Wealth / Income)", src: svgUrl(d2.data) },
     { title: "Drekkana (Relationship with siblings)", src: svgUrl(d3.data) },
     { title: "Special Drekkana (Secret enemies)", src: svgUrl(d3s.data) },
     { title: "Chaturthamsa (Assets)", src: svgUrl(d4.data) },
