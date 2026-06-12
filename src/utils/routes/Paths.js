@@ -133,6 +133,8 @@ import CosmicChat from "../../screens/private/aiwow/cosmicchat/CosmicChat";
 import DailyCosmicBriefing from "../../screens/private/aiwow/dailycosmicbriefing/DailyCosmicBriefing";
 import DreamInterpreter from "../../screens/private/aiwow/dreaminterpreter/DreamInterpreter";
 import AgenticCalendar from "../../screens/private/aiwow/agenticcalendar/AgenticCalendar";
+import BusinessPathfinder from "../../screens/private/aiwow/businesspathfinder/BusinessPathfinder";
+import BusinessPathfinderResult from "../../screens/private/aiwow/businesspathfinder/BusinessPathfinderResult";
 import SmartMatchmaking from "../../screens/private/aiwow/smartmatchmaking/SmartMatchmaking";
 import AuraLanding from "../../screens/private/aiwow/aura/AuraLanding";
 import AuraInstructions from "../../screens/private/aiwow/aura/AuraInstructions";
@@ -769,6 +771,18 @@ export const PATH = {
       path: "/aiwow/smart-matchmaking",
       element: SmartMatchmaking,
       header: false,
+    },
+    BUSINESS_PATHFINDER: {
+      path: "/business-pathfinder",
+      element: BusinessPathfinder,
+      header: true,
+      footer: true,
+    },
+    BUSINESS_PATHFINDER_RESULT: {
+      path: "/business-pathfinder/report",
+      element: BusinessPathfinderResult,
+      header: true,
+      footer: true,
     },
     // KARMIC_DEBT_TRACKER: {
     //   path: "/aiwow/karmic-debt-tracker",

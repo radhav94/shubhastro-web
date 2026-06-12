@@ -123,16 +123,9 @@ const LanguageSelector = ({ style, className }) => {
       const hostname = window.location.hostname;
       const cookieValue = `/en/${lang}`;
       const maxAge = 31536000;
+      // Only set cookie for the current exact hostname, not parent domains
       document.cookie = `googtrans=${cookieValue}; path=/; max-age=${maxAge}; SameSite=Lax;`;
       document.cookie = `googtrans=${cookieValue}; path=/; domain=${hostname}; max-age=${maxAge}; SameSite=Lax;`;
-      const domainParts = hostname.split(".");
-      if (domainParts.length > 1) {
-        document.cookie = `googtrans=${cookieValue}; path=/; domain=.${hostname}; max-age=${maxAge}; SameSite=Lax;`;
-        if (domainParts.length > 2) {
-          const parentDomain = domainParts.slice(-2).join(".");
-          document.cookie = `googtrans=${cookieValue}; path=/; domain=.${parentDomain}; max-age=${maxAge}; SameSite=Lax;`;
-        }
-      }
     };
 
     const currentLang = getCurrentLang();
