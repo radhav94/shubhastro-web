@@ -45,22 +45,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
     });
   }, [isOpen, getWalletBalance]);
 
-  // Local countdown interval (ticks every second)
-  useEffect(() => {
-    if (!isOpen || remainingPaidTime == null || remainingPaidTime <= 0) return;
-
-    const interval = setInterval(() => {
-      setRemainingPaidTime((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isOpen, remainingPaidTime > 0]);
+  // No local countdown — just display what the backend sends via activity events
 
   // Socket event handlers
   useEffect(() => {
@@ -78,7 +63,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       if (data.walletBalance !== undefined) setWalletBalance(data.walletBalance);
       if (data.ratePerMinute !== undefined) setRatePerMinute(data.ratePerMinute);
       if (data.remainingTime !== undefined) {
-        setRemainingPaidTime(data.remainingTime * 60);
+        setRemainingPaidTime(data.remainingTime);
       }
       // Extract ratePerMinute from astrologer pricing if not directly provided
       if (!data.ratePerMinute && data.astrologer?.price?.chatRate?.amount) {
@@ -113,7 +98,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
         setRatePerMinute(data.ratePerMinute);
       }
       if (data.remainingTime !== undefined) {
-        setRemainingPaidTime(data.remainingTime * 60);
+        setRemainingPaidTime(data.remainingTime);
       }
 
       // Auto-dismiss recharge banner if wallet is now sufficient
@@ -176,7 +161,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       if (data.dayKeyIST) setDayKeyIST(data.dayKeyIST);
       if (data.walletBalance !== undefined) setWalletBalance(data.walletBalance);
       if (data.ratePerMinute !== undefined) setRatePerMinute(data.ratePerMinute);
-      if (data.remainingTime !== undefined) setRemainingPaidTime(data.remainingTime * 60);
+      if (data.remainingTime !== undefined) setRemainingPaidTime(data.remainingTime);
       // Extract ratePerMinute from astrologer pricing if not directly provided
       if (!data.ratePerMinute && data.astrologer?.price?.chatRate?.amount) {
         setRatePerMinute(data.astrologer.price.chatRate.amount);

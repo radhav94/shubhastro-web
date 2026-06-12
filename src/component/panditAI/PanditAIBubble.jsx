@@ -60,8 +60,6 @@ const PanditAIBubble = () => {
   } = usePanditAI({ isOpen, lang });
 
   const {
-    isFreePeriod,
-    freeMinutesRemaining,
     remainingPaidTime,
     showRechargeBanner,
     rechargeBannerMessage,
@@ -70,7 +68,6 @@ const PanditAIBubble = () => {
     walletBalance,
     ratePerMinute,
     sessionEndedLowBalance,
-    freeWindowRenewed,
     dismissRechargeBanner,
     resetFreeMinutesState,
   } = useAIFreeMinutes({ isOpen, roomId });
@@ -253,15 +250,6 @@ const PanditAIBubble = () => {
               </div>
             </div>
             <div className={styles.headerActions}>
-              {isFreePeriod && freeMinutesRemaining != null && remainingPaidTime == null && (
-                <div className={styles.freeMinBadge}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 12 16 14"/>
-                  </svg>
-                  <span>{freeMinutesRemaining} min free</span>
-                </div>
-              )}
               {remainingPaidTime != null && !sessionEndedLowBalance && (
                 <div className={styles.countdownBadge}>
                   {walletBalance != null && (
@@ -280,7 +268,7 @@ const PanditAIBubble = () => {
                         <circle cx="12" cy="12" r="10"/>
                         <polyline points="12 6 12 12 16 14"/>
                       </svg>
-                      <span>{String(Math.floor(remainingPaidTime / 3600)).padStart(2, "0")}:{String(Math.floor((remainingPaidTime % 3600) / 60)).padStart(2, "0")}</span>
+                      <span>{String(Math.floor(remainingPaidTime / 60)).padStart(2, "0")}:{String(remainingPaidTime % 60).padStart(2, "0")}</span>
                     </div>
                     {ratePerMinute && (
                       <>
@@ -377,7 +365,7 @@ const PanditAIBubble = () => {
                 onClick={() => {
                   setPanditAIVoiceHandover(true);
                   setIsOpen(false);
-                  window.dispatchEvent(new CustomEvent("panditai-voice:open", { detail: { roomId, walletBalance, remainingPaidTime, ratePerMinute, isFreePeriod, freeMinutesRemaining } }));
+                  window.dispatchEvent(new CustomEvent("panditai-voice:open", { detail: { roomId, walletBalance, remainingPaidTime, ratePerMinute } }));
                 }}
                 aria-label="Switch to voice chat"
                 type="button"
