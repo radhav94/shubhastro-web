@@ -4,7 +4,6 @@ import { IoWallet } from "react-icons/io5";
 const AIRechargeBanner = ({
   walletBalance,
   ratePerMinute,
-  minutesUntilPaid,
   minBalanceRequired,
   sessionEnded,
   onRecharge,
@@ -27,13 +26,9 @@ const AIRechargeBanner = ({
           </>
         ) : (
           <>
-            <p className={styles.title}>
-              {minutesUntilPaid != null
-                ? `Free minutes end in ${minutesUntilPaid} min`
-                : "Low balance"}
-            </p>
+            <p className={styles.title}>Low balance</p>
             <p className={styles.subtitle}>
-              Recharge ₹{required - (walletBalance || 0)} to continue after free minutes.
+              Recharge ₹{required - (walletBalance || 0)} to continue.
               {walletBalance != null && ` Balance: ₹${walletBalance}`}
             </p>
           </>
