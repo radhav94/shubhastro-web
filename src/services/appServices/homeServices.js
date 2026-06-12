@@ -20,10 +20,10 @@ export const homeApi = privateRequestNew.injectEndpoints({
       }),
     }),
     getNewHomeDetails: builder.query({
-      query: () => ({
+      query: (slug) => ({
         url: "homepage",
         method: "GET",
-        params: { slug: "newcustomerlandingpage" },
+        params: { slug: slug || "newcustomerlandingpage" },
       }),
     }),
   }),
