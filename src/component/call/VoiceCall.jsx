@@ -287,8 +287,13 @@ const AgoraVoiceCalling = ({ callData }) => {
 
         await client.subscribe(user, mediaType);
         if (mediaType === "audio") {
-          user.audioTrack?.setVolume(speakerOnRef.current ? 100 : 0);
-          user.audioTrack?.play();
+          if (speakerOnRef.current) {
+            user.audioTrack?.setVolume(100);
+            user.audioTrack?.play();
+          } else {
+            user.audioTrack?.setVolume(0);
+            // Don't play if speaker is off (iOS Safari won't respect setVolume(0))
+          }
         }
       });
 
@@ -443,10 +448,16 @@ const AgoraVoiceCalling = ({ callData }) => {
     const client = clientRef.current;
     if (!client) return;
 
-    // Update volume for all remote users
+    // On iOS Safari, setVolume(0) is unreliable. Use stop/play instead.
     client.remoteUsers.forEach((user) => {
       if (user.audioTrack) {
-        user.audioTrack.setVolume(speakerOn ? 100 : 0);
+        if (speakerOn) {
+          user.audioTrack.setVolume(100);
+          try { user.audioTrack.play(); } catch (e) { /* already playing */ }
+        } else {
+          user.audioTrack.setVolume(0);
+          try { user.audioTrack.stop(); } catch (e) { /* already stopped */ }
+        }
       }
     });
   }, [speakerOn]);

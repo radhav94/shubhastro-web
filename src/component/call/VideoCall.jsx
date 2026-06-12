@@ -312,8 +312,13 @@ const VideoCalling = ({ callData }) => {
     clientRef.current.remoteUsers.forEach((user) => {
       if (user.audioTrack) {
         try {
-          user.audioTrack.play();
-          user.audioTrack.setVolume(speakerOnRef.current ? 100 : 0);
+          if (speakerOnRef.current) {
+            user.audioTrack.setVolume(100);
+            user.audioTrack.play();
+          } else {
+            user.audioTrack.setVolume(0);
+            user.audioTrack.stop();
+          }
         } catch (err) {
           console.error("Error playing audio:", err);
         }
@@ -363,8 +368,13 @@ const VideoCalling = ({ callData }) => {
             }
 
             if (mediaType === "audio" && user.audioTrack) {
-              user.audioTrack.play();
-              user.audioTrack.setVolume(speakerOnRef.current ? 100 : 0);
+              if (speakerOnRef.current) {
+                user.audioTrack.setVolume(100);
+                user.audioTrack.play();
+              } else {
+                user.audioTrack.setVolume(0);
+                // Don't play if speaker is off (iOS Safari won't respect setVolume(0))
+              }
             }
           } catch (err) {
             console.error("Error handling published media:", err);
@@ -588,9 +598,16 @@ const VideoCalling = ({ callData }) => {
     if (!clientRef.current) return;
 
     try {
+      // On iOS Safari, setVolume(0) is unreliable. Use stop/play instead.
       clientRef.current.remoteUsers.forEach((user) => {
         if (user.audioTrack) {
-          user.audioTrack.setVolume(speakerOn ? 100 : 0);
+          if (speakerOn) {
+            user.audioTrack.setVolume(100);
+            try { user.audioTrack.play(); } catch (e) { /* already playing */ }
+          } else {
+            user.audioTrack.setVolume(0);
+            try { user.audioTrack.stop(); } catch (e) { /* already stopped */ }
+          }
         }
       });
     } catch (err) {
