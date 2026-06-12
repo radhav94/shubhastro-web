@@ -24,6 +24,7 @@ const ChatInput = ({
   const [facingMode, setFacingMode] = useState('environment'); // 'environment' = back, 'user' = front
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
 
+  const inputRef = useRef(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const canvasRef = useRef(null);
@@ -224,11 +225,18 @@ const ChatInput = ({
           ) : (
             <>
             <input
+              ref={inputRef}
               className={styles.inputField}
               value={value}
               onChange={onChange}
               disabled={isMessageDisabled}
-              onKeyDown={(e) => e.key === "Enter" && onSend()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  onSend();
+                  setTimeout(() => inputRef.current?.focus(), 0);
+                }
+              }}
               placeholder="Type your message here..."
               autoFocus
             />
@@ -259,7 +267,7 @@ const ChatInput = ({
               </svg>
             </button>
 
-            <button className={styles.sendButton} onClick={onSend}>
+            <button className={styles.sendButton} onClick={() => { onSend(); setTimeout(() => inputRef.current?.focus(), 0); }}>
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 20 17" fill="none">
                 <path d="M1.4 16.8849L18.85 9.40488C19.66 9.05488 19.66 7.91488 18.85 7.56488L1.4 0.0848801C0.74 -0.20512 0.00999999 0.28488 0.00999999 0.99488L0 5.60488C0 6.10488 0.37 6.53488 0.87 6.59488L15 8.48488L0.87 10.3649C0.37 10.4349 0 10.8649 0 11.3649L0.00999999 15.9749C0.00999999 16.6849 0.74 17.1749 1.4 16.8849Z" fill="#FEFEFE"/>
               </svg>

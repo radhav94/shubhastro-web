@@ -20,7 +20,7 @@ const iconMap = {
 
 const ServiceCards = () => {
   //  HOOK MUST RUN ALWAYS (Fixes your error)
-  const { data, isLoading } = useGetNewHomeDetailsQuery();
+  const { data, isLoading } = useGetNewHomeDetailsQuery('complimentary-service');
   const [disableLeft, setDisableLeft] = useState(true);
   const [disableRight, setDisableRight] = useState(false);
 
@@ -34,9 +34,7 @@ const ServiceCards = () => {
   const preferredOrder = ["free-kundli", "generate-my-kundli", "talk-to-astrologer", "explore-daily-horoscope", "daily-horoscope"];
   const rawServices = bannerSection?.content || [];
   const isKundliPage = location.pathname.startsWith("/kundli");
-  const filteredServices = isKundliPage
-    ? rawServices.filter((s) => s.slug !== "free-kundli" && s.slug !== "generate-my-kundli")
-    : rawServices;
+  const filteredServices = isKundliPage ? rawServices : [];
   const services = [...filteredServices].sort((a, b) => {
     const idxA = preferredOrder.indexOf(a.slug);
     const idxB = preferredOrder.indexOf(b.slug);
