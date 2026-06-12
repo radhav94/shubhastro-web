@@ -11,7 +11,7 @@ const ConnectCard = () => {
       <Link to="/chat-to-astrologer">
         <img src={askToAsrtroDesktop} className={styles.askToAsrtroDesktop} alt="ask to astrologer" />
         <img src={askToAsrtroMob} className={styles.askToAsrtroMob} alt="ask to astrologer" />
-        <button className={styles.askAnAstrobtn}>Ask An Astrologer</button>
+        <button className={styles.askAnAstrobtn}>Consult with an Astrologer</button>
       </Link>
       {/* <p className={styles.title}>
         When will I be financially stable? Talk to our expert astrologers for

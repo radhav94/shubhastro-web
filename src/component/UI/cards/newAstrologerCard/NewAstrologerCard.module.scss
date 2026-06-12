@@ -146,11 +146,11 @@
   font-weight: 600;
   color: #333;
   position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  // left: 50%;
+  // transform: translateX(-50%);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  bottom: -8px;
+  top: 5px;
+  left: 8px;
   // @media screen and (width <= 767px) {
   //   padding: 4px 10px;
   // }

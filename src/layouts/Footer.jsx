@@ -137,7 +137,7 @@ const Footer = () => {
             <a href="https://www.youtube.com/@ShubhAstroofficial" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
             <a href="https://www.instagram.com/shubhastroofficial/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><IoLogoInstagram /></a>
             <a href="https://www.linkedin.com/company/shubhastro-ai" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><FaLinkedinIn /></a>
-            <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
+            {/* <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a> */}
           </div>
         </div>
 
@@ -195,7 +195,7 @@ const Footer = () => {
             <a href="https://www.youtube.com/@ShubhAstroofficial" aria-label="YouTube" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
             <a href="https://www.instagram.com/shubhastroofficial/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><IoLogoInstagram /></a>
             <a href="https://www.linkedin.com/company/shubhastro-ai" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><FaLinkedinIn /></a>
-            <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
+            {/* <a href="https://twitter.com" aria-label="X" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a> */}
           </div>
         </div>
         {renderAccordionColumn("horoscope", "Horoscope", horoscopeLinks)}

@@ -1559,6 +1559,42 @@
   }
 }
 
+.reminderBtnFull {
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  color: #FFFFFF;
+  border: none;
+  border-radius: 28px;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 16px;
+
+  @media (width <= 767px) {
+    padding: 12px 14px;
+    font-size: 14px;
+    gap: 6px;
+  }
+
+  .notificationIcon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+}
+
 /* ===========================
    MINUTES SECTION
 =========================== */
@@ -1644,8 +1680,8 @@
   margin: 0 0 10px 0;
   text-align: left;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
 

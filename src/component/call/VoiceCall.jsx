@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import AgoraRTC from "agora-rtc-sdk-ng";
+import { AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
 import {
   IoMic,
   IoMicOff,
@@ -286,8 +287,13 @@ const AgoraVoiceCalling = ({ callData }) => {
 
         await client.subscribe(user, mediaType);
         if (mediaType === "audio") {
-          user.audioTrack?.setVolume(speakerOnRef.current ? 100 : 0);
-          user.audioTrack?.play();
+          if (speakerOnRef.current) {
+            user.audioTrack?.setVolume(100);
+            user.audioTrack?.play();
+          } else {
+            user.audioTrack?.setVolume(0);
+            // Don't play if speaker is off (iOS Safari won't respect setVolume(0))
+          }
         }
       });
 
@@ -372,7 +378,13 @@ const AgoraVoiceCalling = ({ callData }) => {
       const TRACK_RETRY_DELAY = 800; // ms
       for (let attempt = 1; attempt <= MAX_TRACK_RETRIES; attempt++) {
         try {
-          micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack();
+          micTrackRef.current = await AgoraRTC.createMicrophoneAudioTrack({
+            encoderConfig: {
+              sampleRate: AUDIO_ENCODER_CONFIG.sampleRate,
+              stereo: AUDIO_ENCODER_CONFIG.stereo,
+              bitrate: AUDIO_ENCODER_CONFIG.bitrate,
+            },
+          });
           break; // success
         } catch (trackErr) {
           console.warn(`[VoiceCall] ⚠️ Mic track creation attempt ${attempt}/${MAX_TRACK_RETRIES} failed:`, trackErr.message);
@@ -436,10 +448,16 @@ const AgoraVoiceCalling = ({ callData }) => {
     const client = clientRef.current;
     if (!client) return;
 
-    // Update volume for all remote users
+    // On iOS Safari, setVolume(0) is unreliable. Use stop/play instead.
     client.remoteUsers.forEach((user) => {
       if (user.audioTrack) {
-        user.audioTrack.setVolume(speakerOn ? 100 : 0);
+        if (speakerOn) {
+          user.audioTrack.setVolume(100);
+          try { user.audioTrack.play(); } catch (e) { /* already playing */ }
+        } else {
+          user.audioTrack.setVolume(0);
+          try { user.audioTrack.stop(); } catch (e) { /* already stopped */ }
+        }
       }
     });
   }, [speakerOn]);

@@ -16,6 +16,7 @@ const Onboarding = () => {
   const [searchParams] = useSearchParams();
 
   const isPersonalizeFlow = searchParams.get("step") === "personalize";
+  const skipGuidance = searchParams.get("skip") === "welcome" || isPersonalizeFlow;
 
   const [currentStep, setCurrentStep] = useState(isPersonalizeFlow ? 3 : 1);
 
@@ -67,6 +68,9 @@ const Onboarding = () => {
   }, []); // Run only once on mount
 
   const handleStepChange = (step) => {
+    // When guidance is skipped, don't allow navigating to step index 2 (GuidanceScreen)
+    if (skipGuidance && step >= 2) return;
+
     if (step > 0 && (!formData.name || formData.name.trim().length < 3)) {
       toast.error("Please complete your name in the first step");
       return;
@@ -78,7 +82,11 @@ const Onboarding = () => {
     setCurrentStep(step + 3);
   };
 
-  const handleNext = () => setCurrentStep((prev) => prev + 1);
+  const handleNext = () => setCurrentStep((prev) => {
+    // Skip GuidanceScreen (step 5) when skipGuidance is true
+    if (skipGuidance && prev === 4) return 6;
+    return prev + 1;
+  });
 
   const handleBack = () => {
     // Prevent going back to WelcomeScreen (step 0) from LoginScreen (step 1)
@@ -120,7 +128,7 @@ const Onboarding = () => {
       formData={formData}
       updateFormData={updateFormData}
       currentStep={0}
-      totalSteps={3}
+      totalSteps={skipGuidance ? 2 : 3}
       onStepChange={handleStepChange}
     />,
     <BirthDetailsScreen
@@ -131,8 +139,9 @@ const Onboarding = () => {
       formData={formData}
       updateFormData={updateFormData}
       currentStep={1}
-      totalSteps={3}
+      totalSteps={skipGuidance ? 2 : 3}
       onStepChange={handleStepChange}
+      skipGuidance={skipGuidance}
     />,
     <GuidanceScreen
       key="guidance"

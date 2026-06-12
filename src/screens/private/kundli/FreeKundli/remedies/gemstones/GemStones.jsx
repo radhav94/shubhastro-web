@@ -16,6 +16,18 @@ const GemStones = () => {
 
   return (
     <div>
+      <p style={{ 
+        fontSize: '16px', 
+        color: '#070707ff', 
+        background: 'rgba(255, 255, 255, 0.4)', 
+        padding: '10px 14px', 
+        borderRadius: '8px', 
+        marginBottom: '16px',
+        lineHeight: '1.5',
+      }}>
+        We recommend consulting a verified astrologer before purchasing any gemstone to ensure it aligns with your specific planetary positions.
+      </p>
+
       {isLoading && <PrimaryLoader isLoading={isLoading} />}
 
       {!isLoading && gem && <GemStoneCard gem={gem} />}

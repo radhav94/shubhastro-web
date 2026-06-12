@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import AgoraRTC from "agora-rtc-sdk-ng";
+import { applyVideoEncoderConfig, VIDEO_CALL_ENCODER_CONFIG, AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
 import {
   IoMic,
   IoMicOff,
@@ -311,8 +312,13 @@ const VideoCalling = ({ callData }) => {
     clientRef.current.remoteUsers.forEach((user) => {
       if (user.audioTrack) {
         try {
-          user.audioTrack.play();
-          user.audioTrack.setVolume(speakerOnRef.current ? 100 : 0);
+          if (speakerOnRef.current) {
+            user.audioTrack.setVolume(100);
+            user.audioTrack.play();
+          } else {
+            user.audioTrack.setVolume(0);
+            user.audioTrack.stop();
+          }
         } catch (err) {
           console.error("Error playing audio:", err);
         }
@@ -362,8 +368,13 @@ const VideoCalling = ({ callData }) => {
             }
 
             if (mediaType === "audio" && user.audioTrack) {
-              user.audioTrack.play();
-              user.audioTrack.setVolume(speakerOnRef.current ? 100 : 0);
+              if (speakerOnRef.current) {
+                user.audioTrack.setVolume(100);
+                user.audioTrack.play();
+              } else {
+                user.audioTrack.setVolume(0);
+                // Don't play if speaker is off (iOS Safari won't respect setVolume(0))
+              }
             }
           } catch (err) {
             console.error("Error handling published media:", err);
@@ -414,7 +425,16 @@ const VideoCalling = ({ callData }) => {
         for (let attempt = 1; attempt <= MAX_TRACK_RETRIES; attempt++) {
           if (didCancelStart || cleanupRef.current || endCallRef.current) return;
           try {
-            [micTrack, camTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
+            [micTrack, camTrack] = await AgoraRTC.createMicrophoneAndCameraTracks(
+              {
+                encoderConfig: {
+                  sampleRate: AUDIO_ENCODER_CONFIG.sampleRate,
+                  stereo: AUDIO_ENCODER_CONFIG.stereo,
+                  bitrate: AUDIO_ENCODER_CONFIG.bitrate,
+                },
+              },
+              {}
+            );
             break; // success
           } catch (trackErr) {
             console.warn(`[VideoCall] ⚠️ Track creation attempt ${attempt}/${MAX_TRACK_RETRIES} failed:`, trackErr.message);
@@ -432,6 +452,9 @@ const VideoCalling = ({ callData }) => {
 
         micTrackRef.current = micTrack;
         camTrackRef.current = camTrack;
+
+        // Apply low-bandwidth encoding settings
+        await applyVideoEncoderConfig(camTrack, VIDEO_CALL_ENCODER_CONFIG);
 
         // Retry join with exponential backoff — Agora channel may not be ready immediately
         // after two-way accept (server creates channel after both sides accept)
@@ -575,9 +598,16 @@ const VideoCalling = ({ callData }) => {
     if (!clientRef.current) return;
 
     try {
+      // On iOS Safari, setVolume(0) is unreliable. Use stop/play instead.
       clientRef.current.remoteUsers.forEach((user) => {
         if (user.audioTrack) {
-          user.audioTrack.setVolume(speakerOn ? 100 : 0);
+          if (speakerOn) {
+            user.audioTrack.setVolume(100);
+            try { user.audioTrack.play(); } catch (e) { /* already playing */ }
+          } else {
+            user.audioTrack.setVolume(0);
+            try { user.audioTrack.stop(); } catch (e) { /* already stopped */ }
+          }
         }
       });
     } catch (err) {
@@ -1128,11 +1158,16 @@ const VideoCalling = ({ callData }) => {
     });
   };
 
-  const formatTime = (s) =>
-    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(
-      2,
-      "0"
-    )}`;
+  const formatTime = (sec) => {
+    const totalSec = Math.max(0, Math.floor(Number(sec) || 0));
+    const hours = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    if (hours > 0) {
+      return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  };
 
   const formatAmount = (amount) => {
     if (typeof amount !== "number") return `₹${amount}`;
@@ -1466,6 +1501,17 @@ const VideoCalling = ({ callData }) => {
 
             {/* Bottom Controls */}
             <div className={styles.bottomControls}>
+              {/* Call Duration Timer */}
+              <div className={styles.callTimer}>
+                {isReconnecting ? (
+                  <span className={styles.reconnecting}>Reconnecting...</span>
+                ) : joined ? (
+                  formatTime(callSeconds)
+                ) : (
+                  "Connecting…"
+                )}
+              </div>
+
               {/* Control Buttons Grid */}
               <div className={styles.controlGrid}>
                 {/* <div className={styles.controlItem}>

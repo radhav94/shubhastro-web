@@ -1201,17 +1201,6 @@ const AstrologerProfile = () => {
               <div className={styles.hoursHeader}>
                 <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
                 <span className={styles.hoursTitle}>Consultation Hours</span>
-                <button
-                  className={styles.reminderBtn}
-                  onClick={handleSetReminder}
-                >
-                  <img
-                    src={NotificationIcon}
-                    alt="Notification"
-                    className={styles.notificationIcon}
-                  />
-                  Set Reminder
-                </button>
               </div>
               <div className={styles.weeklySchedule}>
                 {displayData.weeklySchedule.map((item, index) => (
@@ -1225,6 +1214,17 @@ const AstrologerProfile = () => {
                   </div>
                 ))}
               </div>
+              <button
+                className={styles.reminderBtnFull}
+                onClick={handleSetReminder}
+              >
+                <img
+                  src={NotificationIcon}
+                  alt="Notification"
+                  className={styles.notificationIcon}
+                />
+                Set Reminder
+              </button>
             </div>
 
             {/* Minutes Section */}
@@ -1279,13 +1279,11 @@ const AstrologerProfile = () => {
               >
                 {showFullAbout
                   ? displayData.description
-                  : displayData.description?.length > 100
-                    ? displayData.description.slice(0, 100) + "..."
-                    : displayData.description}
+                  : displayData.description}
               </p>
               )}
 
-              {displayData.description?.length > 100 && (
+              {displayData.description?.length > 200 && (
                 <button
                   className={styles.readMoreBtn}
                   onClick={() => setShowFullAbout((prev) => !prev)}
@@ -1326,7 +1324,7 @@ const AstrologerProfile = () => {
             )}
 
             {/* Send a Gift Section */}
-            <div className={styles.giftSection}>
+            {/* <div className={styles.giftSection}>
               <div className={styles.giftContent}>
                 <h3 className={styles.giftTitle}>Send a Gift</h3>
                 <p className={styles.giftSubtitle}>
@@ -1348,7 +1346,7 @@ const AstrologerProfile = () => {
               <div className={styles.giftImage}>
                 <img src={SendGiftImage} alt="Send Gift" />
               </div>
-            </div>
+            </div> */}
 
             {/* User Reviews */}
             <div className={styles.reviewsSection}>
@@ -1662,17 +1660,6 @@ const AstrologerProfile = () => {
             <div className={styles.hoursHeader}>
               <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
               <span className={styles.hoursTitle}>Consultation Hours</span>
-              <button
-                className={styles.reminderBtn}
-                onClick={handleSetReminder}
-              >
-                <img
-                  src={NotificationIcon}
-                  alt="Notification"
-                  className={styles.notificationIcon}
-                />
-                Set Reminder
-              </button>
             </div>
 
             <div className={styles.weeklySchedule}>
@@ -1687,6 +1674,17 @@ const AstrologerProfile = () => {
                 </div>
               ))}
             </div>
+            <button
+              className={styles.reminderBtnFull}
+              onClick={handleSetReminder}
+            >
+              <img
+                src={NotificationIcon}
+                alt="Notification"
+                className={styles.notificationIcon}
+              />
+              Set Reminder
+            </button>
           </div>
         </aside>
       </div>

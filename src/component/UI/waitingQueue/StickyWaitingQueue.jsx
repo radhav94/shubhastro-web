@@ -174,10 +174,13 @@ const StickyWaitingQueue = () => {
                     >
                       {name}
                     </p>
+                    <p className={styles.itemType}>
+                      {conn.type === "chat" ? "Chat" : conn.type === "video" ? "Video Call" : "Audio Call"}
+                    </p>
                     <p className={styles.itemMeta}>
                       {isAccepted && <span className={styles.metaGreen}>Accepted</span>}
                       {isOnHold && <span className={styles.metaRed}>Missed Call</span>}
-                      {status === "ringing" && <span className={styles.metaGreen}>Ringing...</span>}
+                      {status === "ringing" && <span className={styles.metaGreen}>{conn.type === "chat" ? "Connecting..." : "Ringing..."}</span>}
                       {!isAccepted && !isOnHold && status !== "ringing" && (formatWaitDisplay(conn) || "Waiting…")}
                     </p>
                   </div>
