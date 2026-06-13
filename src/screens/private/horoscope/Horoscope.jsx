@@ -671,7 +671,7 @@ const HoroscopeNew = () => {
           </span>
           {activeProfile && (
             <span className="horoscope-profile-dob">
-              Date of birth: {activeProfile.day} {['', 'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][activeProfile.month]}, {activeProfile.year} | Place: {activeProfile.place}
+              Date of birth: {activeProfile.day} {['', 'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][activeProfile.month]}, {activeProfile.year} | Time:  {String(activeProfile.hour || 0).padStart(2, '0')}:{String(activeProfile.min || 0).padStart(2, '0')} {activeProfile.hour >= 12 ? 'PM' : 'AM'} | Place: {activeProfile.place}
             </span>
           )}
         </div>
@@ -821,11 +821,6 @@ const HoroscopeNew = () => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <h2 className="content-title">
                 {currentContent.title}
-                {currentContent.score && !currentContent.isOverview && (
-                  <span style={{ fontSize: '14px', color: '#F75801', marginLeft: '8px', fontWeight: '600' }}>
-                    {currentContent.score}/100
-                  </span>
-                )}
               </h2>
               <TTSButton text={(() => {
                 const parts = [];
@@ -911,11 +906,6 @@ const HoroscopeNew = () => {
                             <h3 className="overview-card-title">
                               {section.title}
                             </h3>
-                            {section.score && (
-                              <span className="overview-card-score" style={{ fontSize: '12px', color: '#F75801', fontWeight: '600' }}>
-                                {section.score}/100
-                              </span>
-                            )}
                           </div>
                         </div>
                         <div className="overview-card-body overview-card-body-expanded">
