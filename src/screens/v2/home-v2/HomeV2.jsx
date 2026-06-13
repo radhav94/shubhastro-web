@@ -139,10 +139,10 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
           {renderSectionContent(leftSection)}
           {/* Laal Kitaab from ai-services — always in left column */}
           {aiServicesItems[0] && (
-            <div className={styles.qCardLaal} onClick={() => navigate('/laal-kitab')}>
+            <div className={styles.qCardLaal} onClick={() => navigate(aiServicesItems[0]?.redirect_url || aiServicesItems[0]?.link || '/laal-kitab')}>
               <span className={styles.featureTag}>New</span>
               <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title || "Laal Kitaab"}</h3>
-              <p>{aiServicesItems[0]?.description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
+              <p>{aiServicesItems[0]?.description || ""}</p>
               <button className={styles.featureCta}>{aiServicesItems[0]?.action_btn || "Explore Laal Kitaab >"}</button>
               <img src={aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon} alt="Laal Kitaab" width="120" height="120" className={styles.laalKitaabImgLeft} loading="lazy" />
             </div>
@@ -156,27 +156,27 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
           {aiServicesItems.length > 1 && (
             <div className={`${styles.centerFeatureRow} ${styles.desktopOnly}`}>
               {aiServicesItems[1] && (
-                <div className={`${styles.centerFeatureCard} ${styles.occultWorld}`} onClick={() => navigate('/occult')} style={{ cursor: 'pointer' }}>
+                <div className={`${styles.centerFeatureCard} ${styles.occultWorld}`} onClick={() => navigate(aiServicesItems[1]?.redirect_url || aiServicesItems[1]?.link || '/occult')} style={{ cursor: 'pointer' }}>
                   <div className={styles.occultEllipse} />
                   <span className={styles.featureTag}>New</span>
                   <div className={styles.fcTop}>
                     <h3>{aiServicesItems[1]?.display_title || aiServicesItems[1]?.title || "Occult World"}</h3>
-                    <p>{aiServicesItems[1]?.description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
+                    <p>{aiServicesItems[1]?.description || ""}</p>
                   </div>
                   <button className={styles.fcCtaLight}>{aiServicesItems[1]?.action_btn || "Explore Occult >"}</button>
-                  <img src={aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon} alt="Occult World" width="100" height="100" className={styles.fcCardImg} loading="lazy" />
+                  <img src={aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon} alt={aiServicesItems[1]?.title || "Occult World"} width="100" height="100" className={styles.fcCardImg} loading="lazy" />
                 </div>
               )}
               {aiServicesItems[2] && (
-                <div className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`} onClick={() => window.dispatchEvent(new CustomEvent("panditai-voice:open"))} style={{ cursor: 'pointer' }}>
+                <div className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`} onClick={() => { const url = aiServicesItems[2]?.redirect_url || aiServicesItems[2]?.link; if (url) navigate(url); else window.dispatchEvent(new CustomEvent("panditai-voice:open")); }} style={{ cursor: 'pointer' }}>
                   <div className={styles.panditEllipse} />
                   <span className={styles.featureTag}>New</span>
                   <div className={styles.fcTop}>
                     <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title || "AI Pandit (Voice)"}</h3>
-                    <p>{aiServicesItems[2]?.description || "Lorem Ipsum is simply dummy text of the printing and typesetting industry."}</p>
+                    <p>{aiServicesItems[2]?.description || ""}</p>
                   </div>
                   <button className={styles.panditTalkBtn}>{aiServicesItems[2]?.action_btn || "Talk Now ›"}</button>
-                  <img src={aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon} alt="AI Pandit" width="100" height="100" className={styles.fcCardImg} loading="lazy" />
+                  <img src={aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon} alt={aiServicesItems[2]?.title || "AI Pandit"} width="100" height="100" className={styles.fcCardImg} loading="lazy" />
                 </div>
               )}
             </div>
@@ -188,10 +188,10 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
           {renderSectionContent(rightSection)}
           {/* Live Community from ai-services — always in right column */}
           {aiServicesItems[3] && (
-            <div className={`${styles.liveCommunityCard} ${styles.desktopOnly}`} onClick={() => navigate('/community')}>
+            <div className={`${styles.liveCommunityCard} ${styles.desktopOnly}`} onClick={() => navigate(aiServicesItems[3]?.redirect_url || aiServicesItems[3]?.link || '/community')}>
               <span className={styles.featureTag}>New</span>
               <h3 className={styles.liveCommunityTitle}>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title || "ShubhAstro Live Community"}</h3>
-              <p className={styles.liveCommunityDesc}>{aiServicesItems[3]?.description || "Lorem Ipsum is simply dummy text of"}</p>
+              <p className={styles.liveCommunityDesc}>{aiServicesItems[3]?.description || ""}</p>
               <button className={styles.liveCommunityBtn}>{aiServicesItems[3]?.action_btn || "Join Live Chat ›"}</button>
               <div className={styles.avatarCluster}>
                 <div className={styles.avatarClusterInner}>
