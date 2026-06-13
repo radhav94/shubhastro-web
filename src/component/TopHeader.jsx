@@ -22,6 +22,9 @@ import { logout } from "../redux/auth/authSlice";
 import { useLogoutUserMutation } from "../redux/api/userSession/userSessionApi";
 import { privateRequestNew } from "../services/appServices/privateRequestNew";
 import { Toast } from "./index";
+import { useCall } from "../context/CallContext";
+import { useChat } from "../context/ChatContext";
+import { voiceSocket, clearCallSession, clearChatSession } from "../services/voiceSocketServices";
 const TopHeader = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -34,6 +37,9 @@ const TopHeader = () => {
   const profileDropdownRef = useRef(null);
   const [logoutUser] = useLogoutUserMutation();
   const token = getToken();
+
+  const { activeCall, setActiveCall, resetCallFlow, stopTimer: stopCallTimer } = useCall();
+  const { activeChat, setActiveChat, resetChatFlow, stopTimer: stopChatTimer } = useChat();
 
   const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
 
@@ -117,21 +123,51 @@ const TopHeader = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [profileDropdownOpen]);
 
+  const endActiveSessions = () => {
+    const userId = localStorage.getItem("shubhtalk_customer_id");
+
+    if (activeCall?.roomId) {
+      voiceSocket.emit("call:end", { roomId: activeCall.roomId, endedBy: "CUSTOMER", userId });
+      stopCallTimer();
+      resetCallFlow();
+      setActiveCall(null);
+      clearCallSession();
+    }
+
+    if (activeChat?.roomId) {
+      voiceSocket.emit("chat:end", { roomId: activeChat.roomId, endedBy: "CUSTOMER", userId });
+      stopChatTimer();
+      resetChatFlow();
+      setActiveChat(null);
+      clearChatSession();
+    }
+
+    // Clear all persisted session state
+    ["shubhtalk_active_call", "shubhtalk_call_timestamp", "shubhtalk_active_chat", "shubhtalk_chat_timestamp"]
+      .forEach((key) => localStorage.removeItem(key));
+    ["shubhtalk_call_seconds", "shubhtalk_chat_seconds"]
+      .forEach((key) => sessionStorage.removeItem(key));
+
+    if (voiceSocket.connected) voiceSocket.disconnect();
+  };
+
   const handleLogout = async () => {
     setProfileDropdownOpen(false);
+    endActiveSessions();
+
     try {
       await logoutUser({ deviceType: "web" }).unwrap();
     } catch (err) {
       console.error("Logout API error:", err);
     }
+
     dispatch(logout());
     dispatch(clearSelectedKundli());
     dispatch(privateRequestNew.util.resetApiState());
-    localStorage.removeItem("shubhtalk_customer_token");
-    localStorage.removeItem("shubhtalk_customer_id");
-    localStorage.removeItem("shubhtalk_user");
-    localStorage.removeItem("selectedKundliProfile");
-    localStorage.removeItem("astro_wallet_balance");
+
+    ["shubhtalk_customer_token", "shubhtalk_customer_id", "shubhtalk_user", "selectedKundliProfile", "astro_wallet_balance"]
+      .forEach((key) => localStorage.removeItem(key));
+
     window.dispatchEvent(new Event("auth-change"));
     Toast.success("Logged out successfully");
     navigate("/");
