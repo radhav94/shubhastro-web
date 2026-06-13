@@ -519,11 +519,11 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
           {/* Camera View */}
           {cameraOpen && (
             <div className={styles.cameraOverlay}>
+              <button className={styles.cameraCloseBtn} onClick={() => { stopStream(); setCameraOpen(false); }}>&times;</button>
               <video ref={videoRef} className={styles.cameraVideo} autoPlay playsInline muted />
               <div className={styles.cameraActions}>
-                <button onClick={() => { stopStream(); setCameraOpen(false); }}>Cancel</button>
                 <button onClick={handleCapture} className={styles.shutterBtn}><span /></button>
-                <button onClick={() => setFacingMode((p) => p === "environment" ? "user" : "environment")}>Flip</button>
+                <button className={styles.cameraFlipBtn} onClick={() => setFacingMode((p) => p === "environment" ? "user" : "environment")}>Flip</button>
               </div>
             </div>
           )}
