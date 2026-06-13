@@ -463,9 +463,14 @@ const ChatWindow = () => {
   }, [activeCall, isChatActive, openFeedback, navigate]);
 
   // Auto-end chat when timer reaches 0
+  // Use a ref to track if timer was ever started (to avoid ending on initial mount/refresh)
+  const timerStartedRef = useRef(false);
   useLayoutEffect(() => {
-    if (chatSeconds === 0 && remainingTime > 0) {
-      // Timer has reached 0, automatically end the chat
+    if (chatSeconds > 0) {
+      timerStartedRef.current = true;
+    }
+    if (chatSeconds === 0 && remainingTime > 0 && timerStartedRef.current) {
+      // Timer has counted down to 0, automatically end the chat
       handleDisconnect();
     }
   }, [chatSeconds, remainingTime]);
