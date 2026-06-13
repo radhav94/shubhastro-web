@@ -285,6 +285,22 @@ const SideBar = ({ open, onClose }) => {
           title: "Destiny Number Calculator",
           path: "/destiny-number-calculator",
         },
+        {
+          title: "Mulank Calculator",
+          path: "/mulank-calculator",
+        },
+        {
+          title: "Name Compatibility",
+          path: "/name-compatibility-calculator",
+        },
+        {
+          title: "Lo Shu Grid Calculator",
+          path: "/lo-shu-grid-calculator",
+        },
+        {
+          title: "Lucky Name Numerology",
+          path: "/lucky-name-numerology-calculator",
+        },
       ],
     },
   ];

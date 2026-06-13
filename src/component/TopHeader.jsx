@@ -768,6 +768,10 @@ const CALCULATOR_LINKS = [
   { title: "Age Calculator", path: "/age-calculator" },
   { title: "Mobile Numerology", path: "/mobile-number-numerology-calculator" },
   { title: "Destiny Number", path: "/destiny-number-calculator" },
+  { title: "Mulank Calculator", path: "/mulank-calculator" },
+  { title: "Name Compatibility", path: "/name-compatibility-calculator" },
+  { title: "Lo Shu Grid", path: "/lo-shu-grid-calculator" },
+  { title: "Lucky Name Numerology", path: "/lucky-name-numerology-calculator" },
 ];
 
 const CalculatorsDropdown = () => {
