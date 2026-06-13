@@ -48,7 +48,7 @@ const ShaniReport = () => {
       {/* STATUS CARD */}
       <div className={styles.statusCard} style={{ position: "relative" }}>
         <span style={{ position: "absolute", top: "8px", right: "8px", display: "inline-flex", zIndex: 10, pointerEvents: "auto" }}>
-          <TTSButton text={`Shani Sade Sati Status. ${shani_period_type ? "Currently Active" : "Currently Not Active"}. ${bot_response || ""}`} />
+          <TTSButton text={`${shani_period_type ? "Currently Active" : "Currently Not Active"}. ${bot_response || ""}`} />
         </span>
         <span
           className={`${styles.badge} ${shani_period_type ? styles.active : styles.inactive}`}
