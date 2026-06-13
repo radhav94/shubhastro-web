@@ -114,6 +114,24 @@
   margin: -4px 0 0;
 }
 
+.selectProfileBtn {
+  display: block;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #f75801;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 6px;
+  text-align: right;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .btnRow {
   display: flex;
   gap: 12px;

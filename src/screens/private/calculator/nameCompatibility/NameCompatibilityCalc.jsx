@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import styles from "./NameCompatibilityCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
+import { ProfileManager } from "../../../../component/UI/Profile";
 import BackButton from "../../../../component/UI/BackButton/BackButton";
 
 const STORAGE_KEY = "name_compatibility_calc";
@@ -19,6 +21,8 @@ const NameCompatibilityCalc = () => {
   const [formData, setFormData] = useFormFromLocalStorage(STORAGE_KEY, initialFormState);
   const [errors, setErrors] = useState({});
   const [infoOpen, setInfoOpen] = useState(true);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -35,6 +39,13 @@ const NameCompatibilityCalc = () => {
     setFormData(initialFormState);
     setErrors({});
     dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
+  };
+
+  const handleProfileSelect = (profile) => {
+    if (!profile) return;
+    handleChange("name1", profile.name || "");
+    dispatch(setSelectedKundli(profile));
+    setShowProfileModal(false);
   };
 
   const handleSubmit = (e) => {
@@ -94,6 +105,9 @@ const NameCompatibilityCalc = () => {
               onChange={(e) => handleChange("name1", e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
             />
             {errors.name1 && <p className={styles.err}>{errors.name1}</p>}
+            <button type="button" className={styles.selectProfileBtn} onClick={() => setShowProfileModal(true)}>
+              Select Profile +
+            </button>
           </div>
 
           <div className={styles.field}>
@@ -111,6 +125,14 @@ const NameCompatibilityCalc = () => {
             <button type="submit" className={styles.submitBtn}>Check Compatibility</button>
           </div>
         </form>
+
+        <ProfileManager
+          isOpen={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          onProfileSelect={handleProfileSelect}
+          title="Select Profile"
+          enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+        />
       </div>
     </>
   );
