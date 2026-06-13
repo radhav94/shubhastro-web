@@ -1,0 +1,119 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import styles from "./NameCompatibilityCalc.module.scss";
+import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import BackButton from "../../../../component/UI/BackButton/BackButton";
+
+const STORAGE_KEY = "name_compatibility_calc";
+
+const initialFormState = {
+  name1: "",
+  name2: "",
+};
+
+const NameCompatibilityCalc = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [formData, setFormData] = useFormFromLocalStorage(STORAGE_KEY, initialFormState);
+  const [errors, setErrors] = useState({});
+  const [infoOpen, setInfoOpen] = useState(true);
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
+    }
+  };
+
+  const handleReset = () => {
+    setFormData(initialFormState);
+    setErrors({});
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newErrors = {};
+    if (!formData.name1) newErrors.name1 = "Your name is required";
+    if (!formData.name2) newErrors.name2 = "Partner name is required";
+    if (Object.keys(newErrors).length) { setErrors(newErrors); return; }
+    dispatch(setCalculatorData({ key: STORAGE_KEY, data: formData }));
+    navigate("/name-compatibility-calculator/report");
+  };
+
+  return (
+    <>
+      <BackButton />
+      <div className={styles.page}>
+        <div className={styles.hero}>
+          <h1>Name Compatibility Calculator</h1>
+          <p>Discover how well your names align through Chaldean numerology</p>
+        </div>
+
+        <div className={styles.infoCard}>
+          <button
+            type="button"
+            className={styles.accordionHeader}
+            onClick={() => setInfoOpen((prev) => !prev)}
+            aria-expanded={infoOpen}
+          >
+            <span>What is Name Compatibility?</span>
+            <svg
+              className={`${styles.chevron} ${infoOpen ? styles.chevronOpen : ""}`}
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#e84d00"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div className={`${styles.accordionBody} ${infoOpen ? styles.accordionBodyOpen : ""}`}>
+            <p>
+              Ever wondered why some couples just click, while others, no matter how hard they try, keep missing the mark? That’s where a Name Compatibility Calculator comes in. It’s not just some digital gimmick; it taps into the ancient science of numerology to decode the energy behind your name and your partner’s. Think of it as a guide to understanding the deeper currents in your relationship, what clicks, what clashes, and where you both can grow together.
+            </p>
+          </div>
+        </div>
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.field}>
+            <label>Your Name <span>*</span></label>
+            <input
+              placeholder="Enter your name"
+              value={formData.name1}
+              onChange={(e) => handleChange("name1", e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
+            />
+            {errors.name1 && <p className={styles.err}>{errors.name1}</p>}
+          </div>
+
+          <div className={styles.field}>
+            <label>Partner&apos;s Name <span>*</span></label>
+            <input
+              placeholder="Enter partner's name"
+              value={formData.name2}
+              onChange={(e) => handleChange("name2", e.target.value.replace(/[^a-zA-Z\s]/g, ""))}
+            />
+            {errors.name2 && <p className={styles.err}>{errors.name2}</p>}
+          </div>
+
+          <div className={styles.btnRow}>
+            <button type="button" className={styles.resetBtn} onClick={handleReset}>Reset</button>
+            <button type="submit" className={styles.submitBtn}>Check Compatibility</button>
+          </div>
+        </form>
+      </div>
+    </>
+  );
+};
+
+export default NameCompatibilityCalc;
