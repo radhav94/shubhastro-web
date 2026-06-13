@@ -267,6 +267,9 @@ const VideoCalling = ({ callData }) => {
   //   }, 150);
   // };
 
+  // Use "contain" on desktop so full frame is visible, "cover" on mobile for full-screen feel
+  const videoFit = window.innerWidth >= 768 ? "contain" : "cover";
+
   const safePlayRemoteVideo = (track) => {
     if (!track) return;
 
@@ -291,11 +294,11 @@ const VideoCalling = ({ callData }) => {
 
     setTimeout(() => {
       try {
-        track.play(div);
+        track.play(div, { fit: videoFit });
       } catch (err) {
         setTimeout(() => {
           try {
-            track.play(div);
+            track.play(div, { fit: videoFit });
           } catch (retryErr) {
             console.error("Failed to play remote video after retry:", retryErr);
           }
