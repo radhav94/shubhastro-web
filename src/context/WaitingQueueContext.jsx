@@ -493,7 +493,8 @@ export const WaitingQueueProvider = ({ children }) => {
       console.log("[GlobalEnded] 🔚 chat:ended — roomId:", endedRoomId, "endedBy:", data?.endedBy);
 
       // Skip SYSTEM ends — let page-level handler deal with reconnect logic
-      if (data?.endedBy === "SYSTEM") return;
+      // Exception: if reason is "reported", treat as permanent end (astrologer reported user)
+      if (data?.endedBy === "SYSTEM" && data?.reason !== "reported") return;
 
       // Remove from pending connections if still there
       if (endedRoomId) removePendingConnection(endedRoomId);

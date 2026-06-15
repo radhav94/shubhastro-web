@@ -58,7 +58,8 @@ export default function useChat({
   const handleChatEndedFromServer = (data) => {
     // SYSTEM ends are treated as transient transport failures; attempt reconnect
     // instead of tearing down the active chat session.
-    if (data?.endedBy === 'SYSTEM') {
+    // Exception: if reason is "reported", treat as permanent end (astrologer reported user).
+    if (data?.endedBy === 'SYSTEM' && data?.reason !== 'reported') {
       ignoringSystemEndRef.current = true;
       setTimeout(() => { ignoringSystemEndRef.current = false; }, 10000);
 
@@ -71,6 +72,15 @@ export default function useChat({
       }
 
       return;
+    }
+
+    // If reason is "reported", show feedback immediately (before WaitingQueueContext
+    // clears activeChat which would trigger a redirect away from ChatWindow)
+    if (data?.reason === 'reported') {
+      setIsMessageDisabled(true);
+      if (!openReview && !activeCall) {
+        setOpenFeedback(true);
+      }
     }
 
     // Non-SYSTEM ends are handled by the global handler (WaitingQueueContext).
