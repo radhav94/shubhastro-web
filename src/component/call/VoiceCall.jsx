@@ -649,24 +649,6 @@ const AgoraVoiceCalling = ({ callData }) => {
 
     const handleCallEnded = (data) => {
       if (data?.endedBy === "SYSTEM") {
-        // If reason is "reported", treat as permanent end (astrologer reported user)
-        if (data?.reason === "reported") {
-          const currentCall = activeCallRef.current;
-          setReviewData({
-            astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
-            fullName: currentCall?.callerName || callerName,
-            profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
-            roomId,
-          });
-          refreshWallet();
-          window.dispatchEvent(new Event("walletBalanceUpdated"));
-          setWaitingList(null);
-          Toast.success("Call ended.");
-          setOpenReview(true);
-          cleanup(false);
-          return;
-        }
-
         if (isUpgradingToVideo.current || cleanupRef.current) {
           return;
         }
