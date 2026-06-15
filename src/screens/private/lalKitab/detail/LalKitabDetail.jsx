@@ -109,14 +109,20 @@ const LalKitabDetail = () => {
 
   const downloadPrice = getDownloadCost();
 
-  const handleDownloadClick = async () => {
+  // Check if report was already downloaded (from API data or navigation state)
+  useEffect(() => {
+    const pdfUrl =
+      chartData?.data?.pdfPath ||
+      chartData?.data?.["lal-kitabPdfPath"] ||
+      tevaData?.pdfPath ||
+      tevaData?.["lal-kitabPdfPath"];
+    if (pdfUrl) {
+      setIsFreeReport(true);
+    }
+  }, [chartData, tevaData]);
+
+  const handleDownloadClick = () => {
     refreshWallet();
-    try {
-      const result = await triggerGetPdf({ historyId: lalKitabId }).unwrap();
-      if (result?.data?.isFree) {
-        setIsFreeReport(true);
-      }
-    } catch {}
     setShowDownloadModal(true);
   };
 

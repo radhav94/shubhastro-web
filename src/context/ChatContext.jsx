@@ -394,6 +394,9 @@ export const ChatProvider = ({ children }) => {
       } else if (data && data.active === false) {
         console.log("[ChatContext] ❌ Auto-reconnect failed, chat ended:", data?.reason);
         // Chat ended during disconnect - clear state
+        // Dispatch global:chat:ended BEFORE clearing activeChat so ChatWindow
+        // can set openFeedback and prevent redirect
+        window.dispatchEvent(new CustomEvent("global:chat:ended", { detail: { ...data, astrologerId: activeChatRef.current?.astrologerId } }));
         setActiveChat(null);
         stopTimer();
       }
