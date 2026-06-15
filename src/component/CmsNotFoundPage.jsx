@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useGetStaticPageBySlugQuery } from "../redux/api/staticPages/staticPagesApi";
 import styles from "../screens/public/static-pages/StaticPages.module.scss";
@@ -78,11 +78,13 @@ const CmsNotFoundPage = () => {
       </Helmet>
       {pageData.title && (
         <>
-          <div className={styles.titleName}>
-            <BackButton style={{ margin: 0 }} />
-            <h1 className={styles.title} style={{ margin: 0 }}>{pageData.title}</h1>
-          </div>
-          <Divider />
+          {new URLSearchParams(window.location.search).get("type") !== "webview" && (
+            <div className={styles.titleName}>
+              <BackButton style={{ margin: 0 }} />
+              <h1 className={styles.title} style={{ margin: 0 }}>{pageData.title}</h1>
+            </div>
+          )}
+          {new URLSearchParams(window.location.search).get("type") !== "webview" && <Divider />}
         </>
       )}
       <div
