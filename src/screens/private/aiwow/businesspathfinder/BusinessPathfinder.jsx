@@ -5,11 +5,13 @@ import { Toast } from '../../../../component';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { useGetBusinessPathfinderOptionsQuery } from '../../../../redux/api/aiwow/aiwowApi';
+import { ProfileManager } from '../../../../component/UI/Profile';
 
 const BusinessPathfinder = () => {
   const navigate = useNavigate();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
   const { data: optionsData, isLoading: optionsLoading } = useGetBusinessPathfinderOptionsQuery();
+  const [showProfileSelector, setShowProfileSelector] = useState(false);
 
   const options = optionsData?.data?.options || {};
   const BUSINESS_CATEGORIES = options.businessCategory || [];
@@ -124,7 +126,12 @@ const BusinessPathfinder = () => {
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <span className={styles.pageTitle}>Business Pathfinder</span>
+
+        {/* Profile Selector - centered in header */}
+        <div className={styles.headerProfile} onClick={() => setShowProfileSelector(true)}>
+          <span className={styles.profileLabel}>Select Profile</span>
+          <span className={styles.profileName}>{profile?.name || 'Select Profile'} <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
+        </div>
       </div>
 
       <div className={styles.container}>
@@ -285,6 +292,16 @@ const BusinessPathfinder = () => {
         </div>
       </div>
     </div>
+
+    {/* Profile Manager Modal */}
+    <ProfileManager
+      isOpen={showProfileSelector}
+      onClose={() => setShowProfileSelector(false)}
+      onProfileSelect={() => setShowProfileSelector(false)}
+      selectedProfileId={profile?._id}
+      title="Select Profile"
+      enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+    />
     </>
   );
 };
