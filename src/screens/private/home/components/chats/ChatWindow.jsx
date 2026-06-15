@@ -142,9 +142,9 @@ const ChatWindow = () => {
     profileImgUrl,
   });
 
-  // Use global waiting list from CallContext
-  const { waitingList: globalWaitingList } = useCall();
-  const waitingPopup = localWaitingPopup || globalWaitingList;
+  // Only show waiting popup if it's a local switch request from this chat,
+  // not a global waiting list from other pending connections
+  const waitingPopup = localWaitingPopup;
 
   const { data } = useGetChatHistoryQuery(
     { userId: astrologerId },
@@ -433,6 +433,8 @@ const ChatWindow = () => {
   const prevActiveCallRef = useRef(activeCall);
   const prevChatActiveRef = useRef(isChatActive);
   const prevFeedbackRef = useRef(openFeedback);
+  const openFeedbackRef = useRef(openFeedback);
+  openFeedbackRef.current = openFeedback;
   useEffect(() => {
     const hadCall = prevActiveCallRef.current;
     const hadChat = prevChatActiveRef.current;
@@ -451,9 +453,14 @@ const ChatWindow = () => {
     }
 
     // Chat was active and just ended → redirect home
+    // Use a short delay to allow feedback modal state to settle (e.g. report-triggered end)
     if (hadChat && !isChatActive && !activeCall) {
-      navigate(PATH.privateRoutes.HOME.path, { replace: true });
-      return;
+      const timer = setTimeout(() => {
+        if (!openFeedbackRef.current) {
+          navigate(PATH.privateRoutes.HOME.path, { replace: true });
+        }
+      }, 150);
+      return () => clearTimeout(timer);
     }
 
     // Voice/video call was active and just ended, no active chat → redirect home

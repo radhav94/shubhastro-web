@@ -304,6 +304,16 @@ export const CallProvider = ({ children }) => {
       } else {
         console.log("[CallReconnect] 💀 Call is no longer active — clearing state");
         console.log("[CallReconnect]   → reason:", data?.reason);
+        // Show review when call ended during disconnect
+        if (reconnectCall) {
+          setReviewData({
+            astrologerID: reconnectCall?.astrologerID || reconnectCall?.astrologerId,
+            fullName: reconnectCall?.callerName,
+            profileImage: reconnectCall?.profileImgUrl,
+            roomId: reconnectCall?.roomId,
+          });
+          setOpenReview(true);
+        }
         clearPersistedCallState();
       }
     };
@@ -464,7 +474,16 @@ export const CallProvider = ({ children }) => {
         }
       } else {
         console.log("[CallContext] ❌ Auto-reconnect failed, call ended:", data?.reason);
-        // Call ended during disconnect - clear state
+        // Call ended during disconnect - show review before clearing state
+        if (activeCall) {
+          setReviewData({
+            astrologerID: activeCall?.astrologerID || activeCall?.astrologerId,
+            fullName: activeCall?.callerName,
+            profileImage: activeCall?.profileImgUrl,
+            roomId: activeCall?.roomId,
+          });
+          setOpenReview(true);
+        }
         setActiveCall(null);
         stopTimer();
       }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./AshtakvargaContent.module.scss";
 import DynamicChart from "../../../../component/UI/charts/kundli/DynamicChart";
 import { useSelector } from "react-redux";
@@ -19,10 +19,10 @@ const sectionVariants = {
 };
 
 const AshtakvargaContent = () => {
-  // const { Jupiter, Mars, Mercury, Moon, Sarva, Saturn, Sun, Venus } = data?.data
+  const [activeTab, setActiveTab] = useState("north");
 
   const payload = useSelector((state) => state?.form?.kundliPayload);
-  const params = payload ? buildVedicParam(payload) : null;
+  const params = payload ? buildVedicParam(payload, { style: activeTab }) : null;
 
   // const { data, isSuccess, isLoading } = useFetchAshtakvargaChartQuery(
   //   payload ? { payload } : skipToken
@@ -81,6 +81,22 @@ const AshtakvargaContent = () => {
       {/* <PrimaryLoader isLoading={isLoading} /> */}
       {true && (
         <div className={styles.mainContainer}>
+          {/* North/South Indian Tab Switcher */}
+          <div className={styles.tabGroup}>
+            <button
+              className={`${styles.tabButton} ${activeTab === "north" ? styles.activeTab : ""}`}
+              onClick={() => setActiveTab("north")}
+            >
+              North Indian
+            </button>
+            <button
+              className={`${styles.tabButton} ${activeTab === "south" ? styles.activeTab : ""}`}
+              onClick={() => setActiveTab("south")}
+            >
+              South Indian
+            </button>
+          </div>
+
           <div className={styles.textContainer}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <h1 className={styles.cardTitle}>Ashtakvarga Chart</h1>
