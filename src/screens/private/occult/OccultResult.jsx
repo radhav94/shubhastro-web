@@ -73,6 +73,17 @@ const OccultResult = () => {
     triggerGetCharges();
   }, []);
 
+  // Check if report was already downloaded (pdfPath exists in state data)
+  useEffect(() => {
+    const pdfUrl =
+      result?.pdfPath ||
+      result?.["occult-doshaPdfPath"] ||
+      state?.pdfPath;
+    if (pdfUrl) {
+      setIsFreeReport(true);
+    }
+  }, [result, state]);
+
   // Get download price from charges API data
   const getDownloadCost = () => {
     const charges = chargesData?.data;
@@ -88,18 +99,8 @@ const OccultResult = () => {
 
   const downloadPrice = getDownloadCost();
 
-  const handleDownloadClick = async () => {
+  const handleDownloadClick = () => {
     refreshWallet();
-    const historyId = state?.historyId || result?.historyId || result?._id || result?.data?.historyId;
-    const kundliId = state?.profile?._id;
-    if (historyId) {
-      try {
-        const response = await getOccultPdf({ historyId, featureType: "occult-dosha", kundliId }).unwrap();
-        if (response?.data?.isFree) {
-          setIsFreeReport(true);
-        }
-      } catch {}
-    }
     setShowDownloadModal(true);
   };
 
