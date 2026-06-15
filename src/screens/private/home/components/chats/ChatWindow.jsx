@@ -142,9 +142,9 @@ const ChatWindow = () => {
     profileImgUrl,
   });
 
-  // Use global waiting list from CallContext
-  const { waitingList: globalWaitingList } = useCall();
-  const waitingPopup = localWaitingPopup || globalWaitingList;
+  // Only show waiting popup if it's a local switch request from this chat,
+  // not a global waiting list from other pending connections
+  const waitingPopup = localWaitingPopup;
 
   const { data } = useGetChatHistoryQuery(
     { userId: astrologerId },
