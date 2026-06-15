@@ -7,20 +7,26 @@
 // Page Header - full width bar
 .pageHeader {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  position: sticky;
-  top: 93px;
-  z-index: 100;
-  min-height: 54px;
-  background: linear-gradient(90deg, rgba(254, 254, 254, 0.97) 0%, rgba(255, 248, 236, 0.97) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0px;
+    position: sticky;
+    top: 93px;
+    z-index: 101;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
 
   @media (max-width: 1180px) {
     top: 53px;
   }
+}
+.pageHeaderInner {
+    width: 1440px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-inline: 16px;
 }
 
 // Profile selector centered in header
@@ -331,7 +337,7 @@
 .submitWrap {
   display: flex;
   justify-content: center;
-  margin-top: 40px;
+  // margin-top: 40px;
 }
 
 .submitBtn {
@@ -361,10 +367,6 @@
 
 // Mobile Responsive
 @media (max-width: 767px) {
-  .container {
-    padding: 0 12px 40px;
-  }
-
   .banner {
     padding: 20px 16px;
     border-radius: 12px 12px 0 0;

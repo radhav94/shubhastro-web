@@ -121,6 +121,7 @@ const BusinessPathfinder = () => {
     <>
       {/* Header - outside container */}
       <div className={styles.pageHeader}>
+        <div className={styles.pageHeaderInner}>
         <button className={styles.backBtn} onClick={() => navigate('/ai-wow')}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -131,6 +132,7 @@ const BusinessPathfinder = () => {
         <div className={styles.headerProfile} onClick={() => setShowProfileSelector(true)}>
           <span className={styles.profileLabel}>Select Profile</span>
           <span className={styles.profileName}>{profile?.name || 'Select Profile'} <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
+        </div>
         </div>
       </div>
 
