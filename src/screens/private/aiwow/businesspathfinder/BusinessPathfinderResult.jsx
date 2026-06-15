@@ -191,7 +191,10 @@ const BusinessPathfinderResult = () => {
             </div>
             <span className={styles.alignmentBadge}>✨ {alignment}</span>
           </div>
-          <div className={styles.scoreRight}>
+          <div className={styles.scoreRight} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+              <TTSButton text={`Compatibility Score ${score} percent. ${alignment}. Cosmic Verdict. ${cosmicVerdict || ''}`} />
+            </span>
             <h4>Cosmic Verdict</h4>
             <p>{cosmicVerdict || 'Your business alignment shows promising cosmic energy.'}</p>
           </div>
@@ -205,7 +208,10 @@ const BusinessPathfinderResult = () => {
 
         {/* Star Industry Fit */}
         {starIndustryFit && (
-          <div className={styles.resultCard}>
+          <div className={styles.resultCard} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+              <TTSButton text={`Star Industry Fit. ${starIndustryFit}`} />
+            </span>
             <div className={styles.cardIcon}>💼</div>
             <div className={styles.cardContent}>
               <h3>Star Industry Fit</h3>
@@ -216,7 +222,10 @@ const BusinessPathfinderResult = () => {
 
         {/* Best Launch Window */}
         {bestLaunchWindow && (
-          <div className={styles.resultCard}>
+          <div className={styles.resultCard} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+              <TTSButton text={`Best Launch Window. ${typeof bestLaunchWindow === 'object' ? bestLaunchWindow.description : bestLaunchWindow}`} />
+            </span>
             <div className={styles.cardIcon}>🚀</div>
             <div className={styles.cardContent}>
               <h3>Best Launch Window</h3>
@@ -229,7 +238,10 @@ const BusinessPathfinderResult = () => {
         {((topStrengths && topStrengths.length > 0) || (topWatchouts && topWatchouts.length > 0)) && (
           <div className={styles.twoColCard}>
             {topStrengths && topStrengths.length > 0 && (
-              <div className={styles.colCard}>
+              <div className={styles.colCard} style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                  <TTSButton text={`Top 3 Strengths. ${topStrengths.map(i => typeof i === 'string' ? i : i.text || i.description).join('. ')}`} />
+                </span>
                 <span className={styles.cardIcon}>💪</span>
                 <h4>Top 3 Strength</h4>
                 <ul>
@@ -240,7 +252,10 @@ const BusinessPathfinderResult = () => {
               </div>
             )}
             {topWatchouts && topWatchouts.length > 0 && (
-              <div className={styles.colCard}>
+              <div className={styles.colCard} style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                  <TTSButton text={`Top 3 Watch Outs. ${topWatchouts.map(i => typeof i === 'string' ? i : i.text || i.description).join('. ')}`} />
+                </span>
                 <span className={styles.cardIcon}>👁️</span>
                 <h4>Top 3 Watch - Outs</h4>
                 <ul>
@@ -255,7 +270,10 @@ const BusinessPathfinderResult = () => {
 
         {/* Funding Outlook */}
         {fundingOutlook && (
-          <div className={styles.resultCard}>
+          <div className={styles.resultCard} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+              <TTSButton text={`Funding Outlook. ${fundingOutlook}`} />
+            </span>
             <div className={styles.cardIcon}>🔮</div>
             <div className={styles.cardContent}>
               <h3>Funding Outlook</h3>
@@ -266,7 +284,10 @@ const BusinessPathfinderResult = () => {
 
         {/* Suggested Remedy */}
         {suggestedRemedy && (
-          <div className={styles.resultCard + ' ' + styles.remedyCard}>
+          <div className={styles.resultCard + ' ' + styles.remedyCard} style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+              <TTSButton text={`Suggested Remedy. ${suggestedRemedy}`} />
+            </span>
             <img src={remedyMortarImg} alt="Remedy" className={styles.remedyImg} />
             <div className={styles.cardContent}>
               <h3>Suggested Remedy</h3>
