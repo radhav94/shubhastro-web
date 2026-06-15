@@ -765,6 +765,25 @@ const VideoCalling = ({ callData }) => {
   useEffect(() => {
     const handleCallEnded = (data) => {
       if (data?.endedBy === "SYSTEM") {
+        // If reason is "reported", treat as permanent end (astrologer reported user)
+        if (data?.reason === "reported") {
+          if (endCallRef.current) return;
+          endCallRef.current = true;
+          const currentCall = activeCallRef.current;
+          setReviewData({
+            astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
+            fullName: currentCall?.callerName || callerName,
+            profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
+            roomId,
+          });
+          refreshWallet();
+          window.dispatchEvent(new Event("walletBalanceUpdated"));
+          Toast.success("Video session ended.");
+          setOpenReview(true);
+          cleanup(false);
+          return;
+        }
+
         if (isDowngradingToAudio.current || cleanupRef.current || endCallRef.current) {
           return;
         }
