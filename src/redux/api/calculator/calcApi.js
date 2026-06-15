@@ -236,6 +236,58 @@ export const ShubhCalcApi = privateRequestNew.injectEndpoints({
         },
       }),
     }),
+
+    //Mulank Calculator
+    mulankCalculator: builder.mutation({
+      query: (payload) => ({
+        url: "calculators/mulank",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: {
+          name: payload.name,
+          dob: payload.dob,
+        },
+      }),
+    }),
+
+    //Name Compatibility Calculator
+    nameCompatibilityCalculator: builder.mutation({
+      query: (payload) => ({
+        url: "calculators/name-compatibility",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: {
+          name1: payload.name1,
+          name2: payload.name2,
+        },
+      }),
+    }),
+
+    //Lo Shu Grid Calculator
+    loShuGridCalculator: builder.mutation({
+      query: (payload) => ({
+        url: "calculators/lo-shu-grid",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: {
+          dob: payload.dob,
+        },
+      }),
+    }),
+
+    //Lucky Name Numerology Calculator
+    luckyNameNumerologyCalculator: builder.mutation({
+      query: (payload) => ({
+        url: "calculators/lucky-name-numerology",
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: {
+          name: payload.name,
+          dob: payload.dob,
+          system: payload.system,
+        },
+      }),
+    }),
   }),
 });
 
@@ -246,4 +298,8 @@ export const {
   useAgeCalculatorMutation,
   useMobileNumerologyCalculatorMutation,
   useVehicleNumerologyCalculatorMutation,
+  useMulankCalculatorMutation,
+  useNameCompatibilityCalculatorMutation,
+  useLoShuGridCalculatorMutation,
+  useLuckyNameNumerologyCalculatorMutation,
 } = ShubhCalcApi;

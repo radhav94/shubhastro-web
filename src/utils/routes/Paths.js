@@ -78,6 +78,14 @@ import RashiCalc from "../../screens/private/calculator/rashi/RashiCalc";
 import RashiReport from "../../screens/private/calculator/rashi/RashiReport";
 import RisingSign from "../../screens/private/calculator/risingsign/RisingSign";
 import RisingSignReport from "../../screens/private/calculator/risingsign/RisingSignReport";
+import MulankCalc from "../../screens/private/calculator/mulank/MulankCalc";
+import MulankReport from "../../screens/private/calculator/mulank/MulankReport";
+import NameCompatibilityCalc from "../../screens/private/calculator/nameCompatibility/NameCompatibilityCalc";
+import NameCompatibilityReport from "../../screens/private/calculator/nameCompatibility/NameCompatibilityReport";
+import LoShuCalc from "../../screens/private/calculator/loshu/LoShuCalc";
+import LoShuReport from "../../screens/private/calculator/loshu/LoShuReport";
+import LuckyNameCalc from "../../screens/private/calculator/luckyName/LuckyNameCalc";
+import LuckyNameReport from "../../screens/private/calculator/luckyName/LuckyNameReport";
 import ShaniReport from "../../screens/private/calculator/shanisadesati/ShaniReport";
 import ShaniSadeSati from "../../screens/private/calculator/shanisadesati/ShaniSadeSati";
 import SunSignCalc from "../../screens/private/calculator/sunsign/SunSignCalc";
@@ -583,6 +591,38 @@ export const PATH = {
     DESTINY_NUMBER_REPORT: {
       path: "/destiny-number-calculator/report",
       element: DestinyReport,
+    },
+    MULANK_CALC: {
+      path: "/mulank-calculator",
+      element: MulankCalc,
+    },
+    MULANK_REPORT: {
+      path: "/mulank-calculator/report",
+      element: MulankReport,
+    },
+    NAME_COMPATIBILITY_CALC: {
+      path: "/name-compatibility-calculator",
+      element: NameCompatibilityCalc,
+    },
+    NAME_COMPATIBILITY_REPORT: {
+      path: "/name-compatibility-calculator/report",
+      element: NameCompatibilityReport,
+    },
+    LOSHU_GRID_CALC: {
+      path: "/lo-shu-grid-calculator",
+      element: LoShuCalc,
+    },
+    LOSHU_GRID_REPORT: {
+      path: "/lo-shu-grid-calculator/report",
+      element: LoShuReport,
+    },
+    LUCKY_NAME_CALC: {
+      path: "/lucky-name-numerology-calculator",
+      element: LuckyNameCalc,
+    },
+    LUCKY_NAME_REPORT: {
+      path: "/lucky-name-numerology-calculator/report",
+      element: LuckyNameReport,
     },
     BIRTH_CHART_CALC: {
       path: "/birth-natal-chart-calculator",

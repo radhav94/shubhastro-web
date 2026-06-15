@@ -185,7 +185,7 @@ export function decimalToDMS(decimal) {
   }
 
   const degrees = Math.floor(decimal);
-  const minutesFloat = (decimal - degrees) * 60;
+  const minutesFloat = (decimal - degrees) * 100;
   const minutes = Math.round(minutesFloat);
 
   return `${degrees}° ${minutes}′`;

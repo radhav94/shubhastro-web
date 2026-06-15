@@ -490,7 +490,7 @@
   background: rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 0 32px;
   gap: 16px;
 }
@@ -603,6 +603,38 @@
   cursor: pointer;
   z-index: 10;
   transition: background 0.2s;
+
+  @media (min-width: 768px) {
+    display: none;
+  }
+
+  &:active {
+    background: rgba(0, 0, 0, 0.75);
+    transform: scale(0.92);
+  }
+}
+
+/* Camera close button - top right */
+.cameraCloseBtn {
+  position: absolute;
+  top: 16px;
+  right: 72px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s;
+
+  @media (min-width: 768px) {
+    right: 16px;
+  }
 
   &:active {
     background: rgba(0, 0, 0, 0.75);

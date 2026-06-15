@@ -18,6 +18,10 @@ const initialState = {
   destiny_calc: null,
   birth_natal_calc: null,
   "atmakaraka-and-darakaraka": null,
+  mulank_calc: null,
+  name_compatibility_calc: null,
+  loshu_grid_calc: null,
+  lucky_name_calc: null,
 };
 
 const calculatorSlice = createSlice({

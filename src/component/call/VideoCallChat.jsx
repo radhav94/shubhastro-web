@@ -803,6 +803,20 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
               playsInline
               muted
             />
+            {/* Close button - top right */}
+            <button
+              className={styles.cameraCloseBtn}
+              onClick={handleCameraClose}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M18 6L6 18M6 6l12 12"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
             <button
               className={styles.cameraSwitchBtn}
               onClick={handleSwitchCamera}
@@ -837,20 +851,6 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
               </svg>
             </button>
             <div className={styles.cameraPreviewActions}>
-              <button
-                className={styles.cameraRetakeBtn}
-                onClick={handleCameraClose}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M18 6L6 18M6 6l12 12"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                Cancel
-              </button>
               <button
                 className={styles.cameraShutterBtn}
                 onClick={handleCapture}
