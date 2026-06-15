@@ -164,6 +164,10 @@
   grid-template-columns: repeat(5, 1fr);
   gap: 10px;
 
+  @media (max-width: 991px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
   @media (max-width: 767px) {
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
@@ -191,14 +195,29 @@
   width: 100%;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 
-  svg {
-    color: #bbb;
+  .chipImg {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
     flex-shrink: 0;
+    opacity: 0.7;
   }
 
   &:hover {
     border-color: #F75801;
     background: #FFF8F3;
+  }
+
+  @media (max-width: 767px) {
+    padding: 10px 10px;
+    font-size: 12px;
+    gap: 6px;
+    white-space: normal;
+
+    .chipImg {
+      width: 16px;
+      height: 16px;
+    }
   }
 }
 
@@ -296,5 +315,68 @@
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+  }
+}
+
+
+// Mobile Responsive
+@media (max-width: 767px) {
+  .container {
+    padding: 0 12px 40px;
+  }
+
+  .banner {
+    padding: 20px 16px;
+    border-radius: 12px 12px 0 0;
+
+    h2 {
+      font-size: 16px;
+    }
+
+    p {
+      font-size: 12px;
+    }
+  }
+
+  .formSection {
+    padding-top: 16px;
+    gap: 24px;
+  }
+
+  .stepSection {
+    gap: 10px;
+  }
+
+  .stepNumber {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+
+  .stepTitle {
+    font-size: 14px;
+  }
+
+  .stepSubtitle {
+    font-size: 12px;
+  }
+
+  .mainTitle h1 {
+    font-size: 16px;
+  }
+
+  .submitBtn {
+    width: 100%;
+    padding: 14px 20px;
+  }
+
+  .customInputWrap input {
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+
+  .textarea {
+    font-size: 13px;
+    padding: 12px 14px;
   }
 }

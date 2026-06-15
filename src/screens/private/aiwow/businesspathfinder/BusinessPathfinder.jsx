@@ -159,9 +159,6 @@ const BusinessPathfinder = () => {
                     className={`${styles.chip} ${formData.category === catValue && !showCustomInput ? styles.chipActive : ''}`}
                     onClick={() => handleCategorySelect(catValue)}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <rect x="3" y="3" width="18" height="18" rx="3"/>
-                    </svg>
                     {catLabel}
                   </button>
                 );
@@ -170,10 +167,7 @@ const BusinessPathfinder = () => {
                 className={`${styles.chip} ${showCustomInput ? styles.chipActive : ''}`}
                 onClick={() => handleCategorySelect('Add Custom')}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <rect x="3" y="3" width="18" height="18" rx="3"/>
-                </svg>
-                Add Custom <span style={{ color: '#22c55e' }}>✅</span>
+                Add Custom 
               </button>
             </div>
 
@@ -207,9 +201,6 @@ const BusinessPathfinder = () => {
                     className={`${styles.chip} ${formData.scale === value ? styles.chipActive : ''}`}
                     onClick={() => setFormData(prev => ({ ...prev, scale: value }))}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <rect x="3" y="3" width="18" height="18" rx="3"/>
-                    </svg>
                     {label}
                   </button>
                 );
@@ -234,9 +225,6 @@ const BusinessPathfinder = () => {
                     className={`${styles.chip} ${formData.partnership === value ? styles.chipActive : ''}`}
                     onClick={() => setFormData(prev => ({ ...prev, partnership: value }))}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <rect x="3" y="3" width="18" height="18" rx="3"/>
-                    </svg>
                     {label}
                   </button>
                 );
@@ -261,9 +249,6 @@ const BusinessPathfinder = () => {
                     className={`${styles.chip} ${formData.timeline === value ? styles.chipActive : ''}`}
                     onClick={() => setFormData(prev => ({ ...prev, timeline: value }))}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <rect x="3" y="3" width="18" height="18" rx="3"/>
-                    </svg>
                     {label}
                   </button>
                 );
