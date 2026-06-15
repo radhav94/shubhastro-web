@@ -29,6 +29,23 @@
     padding-inline: 16px;
 }
 
+// Profile selector centered in header
+.headerProfile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
+  @media (max-width: 767px) {
+    max-width: 60%;
+  }
+}
+
 .backBtn {
   width: 36px;
   height: 36px;
@@ -53,6 +70,31 @@
   font-size: 16px;
   font-weight: 600;
   color: #1a1a1a;
+}
+
+// Profile selector text styles
+.profileLabel {
+  font-size: 12px;
+  color: #888;
+  letter-spacing: 0.02em;
+}
+
+.profileName {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (max-width: 767px) {
+    font-size: 15px;
+  }
 }
 
 // Main Title
@@ -295,7 +337,7 @@
 .submitWrap {
   display: flex;
   justify-content: center;
-  margin-top: 40px;
+  // margin-top: 40px;
 }
 
 .submitBtn {

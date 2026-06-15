@@ -833,7 +833,7 @@ const TalkToAstrologer = () => {
       removePendingConnection(roomId);
 
       // Use astrologer from ref, fallback to socket payload
-      const astro = activeCallAstroRef.current || rest?.astrologer || rest?.recieverDetail;
+      const astro = rest?.astrologer || rest?.recieverDetail;
       const kundliId = kundliRef.current;
 
       // Use channelName from server if provided, otherwise fall back to roomId

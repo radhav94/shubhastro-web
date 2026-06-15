@@ -91,6 +91,7 @@ const StickyChatFooter = () => {
                   astrologerName: activeChat?.astrologerName,
                   refreshKey: Math.floor(Math.random() * 100) + 1,
                   profileImgUrl: activeChat?.profileImgUrl,
+                  experience: activeChat?.experience,
                 },
               })
             }
