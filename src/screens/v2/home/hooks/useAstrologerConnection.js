@@ -189,6 +189,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           astrologerId: astrologerId,
           kundliId,
           astrologerName: astro?.firstName || "",
+          experience: astro?.experience || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
           profileImgUrl: astro?.profileImgUrl,
