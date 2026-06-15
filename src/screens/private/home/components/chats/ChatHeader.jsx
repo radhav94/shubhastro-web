@@ -18,7 +18,7 @@ const ChatHeader = ({
   fullName,
   isTyping,
   onBack,
-  experience = "20 Years",
+  experience,
   walletBalance = 0,
   remainingTime = 0,
   onRecharge,
@@ -47,9 +47,11 @@ const ChatHeader = ({
           <PrimaryText size_16 isSemiBold>
             {capitalizeWords(fullName) || "Chat User"}
           </PrimaryText>
-          <span className={styles.experienceText}>
-            Exp. {experience} {experience > 1 ? "years" : "year"}
-          </span>
+          {experience && (
+            <span className={styles.experienceText}>
+              Exp. {experience} {experience > 1 ? "years" : "year"}
+            </span>
+          )}
         </div>
       </div>
 

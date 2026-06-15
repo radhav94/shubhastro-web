@@ -551,6 +551,7 @@ export const WaitingQueueProvider = ({ children }) => {
         remainingTime: data?.remainingTime,
         isEmergency: data?.isEmergency || false,
         profileImgUrl: astro?.profileImgUrl,
+        experience: astro?.experience,
       });
       setChatSeconds(Number(data?.remainingTime || 0) * 60);
       setChatWaitingList(false);

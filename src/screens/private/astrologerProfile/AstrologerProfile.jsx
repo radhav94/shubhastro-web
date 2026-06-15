@@ -496,6 +496,7 @@ const AstrologerProfile = () => {
           astrologerId: astrologerId,
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
+          experience: data?.astrologer?.experience || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
         });
