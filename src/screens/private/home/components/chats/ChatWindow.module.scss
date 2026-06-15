@@ -1024,7 +1024,7 @@ $floating-button-gap: 14px;
 .floatingActions {
   position: absolute;
   right: $spacing-xxxl;
-  bottom: 40px;
+  bottom: 20px;
   display: flex;
   flex-direction: column;
   gap: $spacing-xxxl;
@@ -1488,8 +1488,19 @@ $floating-button-gap: 14px;
 
   .floatingActions {
     right: $spacing-xl;
-    bottom: 60px;
-    gap: $spacing-xxxl;
+    bottom: 12px;
+    gap: $spacing-xl;
+  }
+
+  .floatingButton {
+    width: 36px;
+    height: 36px;
+  }
+
+  .floatingButton svg,
+  .floatingButton img {
+    width: 18px;
+    height: 18px;
   }
 
   .inputBox {
@@ -1702,7 +1713,7 @@ $floating-button-gap: 14px;
 
   .floatingActions {
     right: $spacing-xxxl;
-    bottom: 40px;
+    bottom: 10px;
     gap: $spacing-xxxl;
   }
 
