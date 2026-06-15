@@ -433,6 +433,8 @@ const ChatWindow = () => {
   const prevActiveCallRef = useRef(activeCall);
   const prevChatActiveRef = useRef(isChatActive);
   const prevFeedbackRef = useRef(openFeedback);
+  const openFeedbackRef = useRef(openFeedback);
+  openFeedbackRef.current = openFeedback;
   useEffect(() => {
     const hadCall = prevActiveCallRef.current;
     const hadChat = prevChatActiveRef.current;
@@ -451,9 +453,14 @@ const ChatWindow = () => {
     }
 
     // Chat was active and just ended → redirect home
+    // Use a short delay to allow feedback modal state to settle (e.g. report-triggered end)
     if (hadChat && !isChatActive && !activeCall) {
-      navigate(PATH.privateRoutes.HOME.path, { replace: true });
-      return;
+      const timer = setTimeout(() => {
+        if (!openFeedbackRef.current) {
+          navigate(PATH.privateRoutes.HOME.path, { replace: true });
+        }
+      }, 150);
+      return () => clearTimeout(timer);
     }
 
     // Voice/video call was active and just ended, no active chat → redirect home
