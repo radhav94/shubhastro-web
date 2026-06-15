@@ -786,6 +786,8 @@
   padding: 8px 0;
   z-index: 1000;
   animation: fadeIn 0.15s ease;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .calcDropdownItem {

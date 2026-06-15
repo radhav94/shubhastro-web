@@ -119,12 +119,14 @@ const BusinessPathfinder = () => {
     <>
       {/* Header - outside container */}
       <div className={styles.pageHeader}>
-        <button className={styles.backBtn} onClick={() => navigate('/ai-wow')}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-        <span className={styles.pageTitle}>Business Pathfinder</span>
+        <div className={styles.pageHeaderInner}>
+          <button className={styles.backBtn} onClick={() => navigate('/ai-wow')}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <span className={styles.pageTitle}>Business Pathfinder</span>
+        </div>
       </div>
 
       <div className={styles.container}>

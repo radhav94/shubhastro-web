@@ -935,17 +935,19 @@
   &.aiPanditVoice{
     .fcCardImg{
       bottom: 0px;
-      right: 0px;
+      right: 10px;
       width: auto;
-      height: 82%;
+      height: 75%;
       filter: drop-shadow(0 0 2.75rem rgba(247, 88, 1));
+      top: 50%;
+      transform: translateY(-50%);
       @media (width <= 1180px) {
         width: 37%;
         bottom: 0px;
       }
       @media (width <= 1024px) {
-        width: 41%;
-        bottom: -7px;
+        width: 37%;
+        // bottom: -7px;
       }
     }
   }
@@ -1442,6 +1444,9 @@
   overflow: hidden;
   position: relative;
   min-height: 180px;
+  background-image: url("../../../assets/images/bussiness-finder-bg.png");
+  background-repeat: no-repeat;
+  background-size: cover;
 
   h3 { color: #1a1a1a !important; }
   p  { max-width: 60% !important; }
