@@ -1175,6 +1175,10 @@ const TalkToAstrologer = () => {
                 key={astro._id}
                 astrologer={astro}
                 onConnect={handleConnectClick}
+                onEmergencyClick={(astrologer) => {
+                  setSelectedAstrologer(astrologer);
+                  setShowEmergencyModal(true);
+                }}
                 // OLD INLINE LOGIC (commented out):
                 // onConnect={(astrologer, type) => {
                 //   setSelectedAstrologer(astrologer);
@@ -1378,6 +1382,10 @@ const TalkToAstrologer = () => {
                   <NewAstrologerCard
                     astrologer={astro}
                     onConnect={handleConnectClick}
+                    onEmergencyClick={(astrologer) => {
+                      setSelectedAstrologer(astrologer);
+                      setShowEmergencyModal(true);
+                    }}
                   />
                 </div>
               ))}

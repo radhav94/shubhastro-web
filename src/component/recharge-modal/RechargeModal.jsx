@@ -28,7 +28,7 @@ const RechargeModal = ({
   const [successAmount, setSuccessAmount] = useState(null);
   const isMountedRef = useRef(true);
 
-  const { plans, isLoading, error, refetch } = useRechargePlans();
+  const { plans, isLoading, error, refetch } = useRechargePlans(!isOpen);
   const { balance, isFetching: isBalanceFetching, refreshWallet } = useWalletBalance();
 
   useEffect(() => {

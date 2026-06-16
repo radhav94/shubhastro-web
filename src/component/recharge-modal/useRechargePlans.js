@@ -20,7 +20,7 @@ import { useGetAllPlansQuery } from '../../redux/api/plansApi/plansApi';
  * if (error) return <Error message={error} onRetry={refetch} />;
  * return <PlansList plans={plans} />;
  */
-export const useRechargePlans = () => {
+export const useRechargePlans = (skip = false) => {
   // State management
   const [plans, setPlans] = useState([]);
   const [error, setError] = useState(null);
@@ -34,6 +34,8 @@ export const useRechargePlans = () => {
     error: apiError,
     refetch: apiRefetch,
   } = useGetAllPlansQuery(undefined, {
+    // Skip fetching until modal is actually opened
+    skip,
     // Refetch on mount and focus for fresh data
     refetchOnMountOrArgChange: true,
     refetchOnFocus: false,

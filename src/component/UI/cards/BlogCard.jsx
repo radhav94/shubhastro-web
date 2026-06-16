@@ -62,18 +62,18 @@ const BlogCard = ({ image, title, author, date, authorIcon, blogId, slug }) => {
       </div>
 
       <div className={Styles.contentContainer}>
+        {author && (
+          <div className={Styles.authorTop}>
+            {authorIcon && (
+              <img src={authorIcon} alt={author} className={Styles.authorIcon} />
+            )}
+            <span className={Styles.authorName}>{author}</span>
+          </div>
+        )}
         <h3 className={Styles.blogTitle}>{title}</h3>
         <div className={Styles.blogInfo}>
           <div className={Styles.authorDate}>
-            {authorIcon && (
-              <img
-                src={authorIcon}
-                alt={author}
-                className={Styles.authorIcon}
-              />
-            )}
             <span className={Styles.authorText}>
-            {author ? `${author} ・ ` : ""}
             {formatDate(date)}
             </span>
           </div>

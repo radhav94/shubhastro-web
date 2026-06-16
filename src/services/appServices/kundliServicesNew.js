@@ -19,8 +19,8 @@ export const kundliApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
     getAllKundlis: builder.query({
       query: () => ({ url: "kundlis/all", method: "GET" }),
-      providesTags: (result, error, userId) => [
-        { type: "Kundlis", id: userId || "LIST" },
+      providesTags: () => [
+        { type: "Kundlis", id: "LIST" },
       ],
       keepUnusedDataFor: 0,
       async onQueryStarted(arg, { queryFulfilled }) {

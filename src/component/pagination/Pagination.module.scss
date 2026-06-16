@@ -4,12 +4,21 @@
   justify-content: center;
   gap: 12px;
   padding: 20px 0;
+  flex-wrap: wrap;
+
+  @media (max-width: 576px) {
+    gap: 8px;
+  }
+
+  @media (max-width: 380px) {
+    gap: 6px;
+  }
 }
 
 // Arrow buttons (prev/next)
 .arrowBtn {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: none;
   display: flex;
@@ -39,12 +48,17 @@
     width: 40px;
     height: 40px;
   }
+
+  @media (max-width: 380px) {
+    width: 34px;
+    height: 34px;
+  }
 }
 
 // Page number buttons
 .pageBtn {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: none;
   background: #f5ede8;
@@ -73,6 +87,12 @@
     height: 40px;
     font-size: 14px;
   }
+
+  @media (max-width: 380px) {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+  }
 }
 
 // Dots (ellipsis)
@@ -93,5 +113,11 @@
     width: 40px;
     height: 40px;
     font-size: 14px;
+  }
+
+  @media (max-width: 380px) {
+    width: 34px;
+    height: 34px;
+    font-size: 12px;
   }
 }

@@ -662,7 +662,7 @@ const HoroscopeNew = () => {
       {/* Centered Profile Selector with DOB/Place */}
       <div className="horoscope-profile-header">
         <div className="horoscope-profile-center" onClick={handleOpenModal}>
-          <span className="horoscope-profile-label">Select Profile</span>
+          <span className="horoscope-profile-label">{isLoggedIn ? "Select Profile" : "Select Zodiac"}</span>
           <span className="horoscope-profile-name">
             {activeProfile?.name || capitalizedSign}
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ marginLeft: '4px' }}>
@@ -671,7 +671,7 @@ const HoroscopeNew = () => {
           </span>
           {activeProfile && (
             <span className="horoscope-profile-dob">
-              Date of birth: {activeProfile.day} {['', 'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][activeProfile.month]}, {activeProfile.year} | Time:  {String(activeProfile.hour || 0).padStart(2, '0')}:{String(activeProfile.min || 0).padStart(2, '0')} {activeProfile.hour >= 12 ? 'PM' : 'AM'} | Place: {activeProfile.place}
+              Date of birth: {activeProfile.day} {['', 'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][activeProfile.month]}, {activeProfile.year} | Time:  {String(((activeProfile.hour || 0) % 12) || 12).padStart(2, '0')}:{String(activeProfile.min || 0).padStart(2, '0')} {activeProfile.hour >= 12 ? 'PM' : 'AM'} | Place: {activeProfile.place}
             </span>
           )}
         </div>
