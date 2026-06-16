@@ -297,7 +297,10 @@ const AgenticCalendar = () => {
 
         {/* Select Your Occasion */}
         <div className={styles.occasionCard}>
-          <h3 className={styles.occasionTitle}>SELECT YOUR OCCASION</h3>
+          <div className={styles.occasionHeader}>
+            <h3 className={styles.occasionTitle}>SELECT YOUR OCCASION</h3>
+            <p className={styles.hint}>Select one or more occasions to view Muhurat</p>
+          </div>
           <div className={styles.chipsWrap}>
             {[...allOccasions]
               .sort((a, b) => {
@@ -336,7 +339,6 @@ const AgenticCalendar = () => {
               + Add Custom
             </button>
           </div>
-          <p className={styles.hint}>Select one or more occasions to view Muhurat</p>
 
           {/* Period Chips */}
           <div className={styles.periodDivider} />
