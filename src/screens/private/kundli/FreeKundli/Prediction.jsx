@@ -95,7 +95,7 @@ const Prediction = ({ params, skipToken }) => {
 
   if (isLoading) {
     return (
-      <PrimaryLoader isLoading={true} fullscreen={true} message="Loading Please Wait" />
+      <PrimaryLoader isLoading={true} fullscreen={true} />
     );
   }
 

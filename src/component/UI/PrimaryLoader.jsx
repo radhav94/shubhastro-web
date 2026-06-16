@@ -5,7 +5,7 @@ import defaultLoadingGif from "../../assets/gif/LOADING-ANIMATION.gif";
 const PrimaryLoader = ({
   isLoading,
   fullscreen = true,
-  message = "Loading Please Wait",
+  message = "",
   spinnerSrc,
 }) => {
   if (!isLoading) {
