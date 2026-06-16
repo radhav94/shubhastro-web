@@ -71,7 +71,6 @@ $floating-button-gap: 14px;
 /* PAGE WRAPPER */
 .chatPage {
   height: calc(100dvh - 95px);
-  max-width: 1440px;
   // padding: 0 16px;
   // background: #fff;
   overflow: hidden;
@@ -183,7 +182,7 @@ $floating-button-gap: 14px;
 .header {
   height: var(--chat-header-height);
   min-height: var(--chat-header-height);
-  padding: $spacing-xl $spacing-xxxl;
+  padding: $spacing-xl max(calc(50% - 720px + 20px), 16px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -191,6 +190,7 @@ $floating-button-gap: 14px;
   border-bottom: none;
   flex-shrink: 0;
   gap: $spacing-lg;
+  position: relative;
 }
 
 /* ==================== CALL BUTTONS BELOW HEADER ==================== */
@@ -204,7 +204,7 @@ $floating-button-gap: 14px;
   align-items: center;
   padding-block: 2px;
   position: absolute;
-  right: 350px;
+  right: max(calc(50% - 720px + 350px), 350px);
   top: 14px;
   @media (width <= 767px) {
     top: 0px;
@@ -388,6 +388,9 @@ $floating-button-gap: 14px;
   overflow: hidden;
   background: $bg-main;
   min-height: 0;
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 /* ==================== MESSAGES ==================== */
@@ -1082,7 +1085,7 @@ $floating-button-gap: 14px;
 /* ==================== INPUT BAR ==================== */
 .inputBox {
   min-height: var(--chat-input-height);
-  padding: $spacing-xl $spacing-xxxl;
+  padding: $spacing-xl max(calc(50% - 720px + 20px), 16px);
   display: flex;
   align-items: center;
   gap: $spacing-xl;
