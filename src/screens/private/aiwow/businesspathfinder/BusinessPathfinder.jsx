@@ -274,7 +274,7 @@ const BusinessPathfinder = () => {
             <p className={styles.stepSubtitle}>Tell us more about your business (Optional)</p>
             <textarea
               className={styles.textarea}
-              placeholder="E.g. Placeholder text lorem ipsum"
+              placeholder="E.g. I want to start a bakery in Mumbai"
               value={formData.businessInfo}
               onChange={(e) => setFormData(prev => ({ ...prev, businessInfo: e.target.value }))}
               rows={3}
