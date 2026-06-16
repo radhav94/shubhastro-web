@@ -5,6 +5,7 @@ import { toast as rht } from "react-hot-toast";
 import ChatNotificationBanner from "../component/UI/ChatNotificationBanner/ChatNotificationBanner";
 import { PANDIT_AI_ID, isPanditAIEvent } from "../component/panditAI/usePanditAI";
 import { isShubhMallEnabled } from "../utils/featureConfig";
+import { getNavigate } from "../utils/navigationHelper";
 
 const ChatContext = createContext();
 
@@ -482,7 +483,23 @@ export const ChatProvider = ({ children }) => {
             }
             const astroId = data.astrologerId || activeChatRef.current?.astrologerId;
             if (astroId) {
-              window.location.href = `/chat-to-astrologer/${astroId}`;
+              const nav = getNavigate();
+              if (nav) {
+                nav(`/chat-to-astrologer/${astroId}`, {
+                  state: {
+                    userId: activeChatRef.current?.userId,
+                    astrologerId: astroId,
+                    fullName: activeChatRef.current?.callerName || activeChatRef.current?.astrologerName,
+                    roomId: activeChatRef.current?.roomId,
+                    isUserSide: true,
+                    astrologerName: activeChatRef.current?.astrologerName,
+                    profileImgUrl: activeChatRef.current?.profileImgUrl,
+                    experience: activeChatRef.current?.experience,
+                  },
+                });
+              } else {
+                window.location.href = `/chat-to-astrologer/${astroId}`;
+              }
             }
           }}
         />
