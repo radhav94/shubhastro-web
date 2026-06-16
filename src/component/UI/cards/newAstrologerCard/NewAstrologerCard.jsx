@@ -1,18 +1,17 @@
-import { useState } from "react";
+import { memo } from "react";
 import { BookOpen } from "lucide-react";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link } from "react-router-dom";
 import { AppIcons, getAstrologerDefaultImage } from "../../../../utils/appImages";
-import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySessionModal";
 
-const NewAstrologerCard = ({ 
+const NewAstrologerCard = memo(({ 
   astrologer, 
   onConnect, 
+  onEmergencyClick,
   className = "", 
   style = {} 
 }) => {
   const isOnline = astrologer?.isActive === true;
-  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const activeTypes = astrologer?.isActiveType || [];
   const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;
   const callPrice = Number(astrologer?.price?.audioRate?.amount) || 0;
@@ -107,7 +106,7 @@ const NewAstrologerCard = ({
           <div className={styles.emergencyButtonWrapper}>
             <button
               className={styles.emergencySingleBtn}
-              onClick={() => setShowEmergencyModal(true)}
+              onClick={() => onEmergencyClick?.(astrologer)}
             >
               Emergency Session{emergencyMinRate > 0 ? ` - ₹${emergencyMinRate}/min` : ''}
             </button>
@@ -157,16 +156,10 @@ const NewAstrologerCard = ({
           </>
         )}
       </div>
-
-      <EmergencySessionModal
-        isOpen={showEmergencyModal}
-        onClose={() => setShowEmergencyModal(false)}
-        astrologer={astrologer}
-        onChatNow={(astro) => onConnect(astro, "chat", true)}
-        onCallNow={(astro) => onConnect(astro, "audio", true)}
-      />
     </div>
   );
-};
+});
+
+NewAstrologerCard.displayName = "NewAstrologerCard";
 
 export default NewAstrologerCard;

@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback, lazy, Suspense } from "react";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { useLazyGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
+
+const EmergencySessionModal = lazy(() => import("../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal"));
 
 // Inject getAllUserSessions endpoint
 const sessionsApi = privateRequestNew.injectEndpoints({
@@ -52,6 +54,8 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
 
   const [fetchAstrologer] = useLazyGetAstrologerByIdQuery();
   const [lastConnectionType, setLastConnectionType] = useState("chat");
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [emergencyAstrologer, setEmergencyAstrologer] = useState(null);
 
   const sessions = useMemo(() => {
     return Array.isArray(data?.data?.recentSessions)
@@ -90,15 +94,22 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
 
     activeCallAstroRef.current = astrologer;
 
+    let result;
     if (session.sessiontype === 'chat') {
       setLastConnectionType("chat");
-      await handleChatStart(astrologer);
+      result = await handleChatStart(astrologer);
     } else if (session.sessiontype === 'video') {
       setLastConnectionType("video");
-      await handleCallStart(astrologer, 'video');
+      result = await handleCallStart(astrologer, 'video');
     } else {
       setLastConnectionType("audio");
-      await handleCallStart(astrologer, 'audio');
+      result = await handleCallStart(astrologer, 'audio');
+    }
+
+    // If astrologer is offline but emergency is available, show emergency modal
+    if (result?.emergencyAvailable) {
+      setEmergencyAstrologer(astrologer);
+      setShowEmergencyModal(true);
     }
   };
 
@@ -222,6 +233,19 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
         astrologer={selectedAstrologer}
         connectionType={lastConnectionType}
       />
+
+      {/* Emergency Session Modal */}
+      {showEmergencyModal && (
+        <Suspense fallback={null}>
+          <EmergencySessionModal
+            isOpen={true}
+            onClose={() => { setShowEmergencyModal(false); setEmergencyAstrologer(null); }}
+            astrologer={emergencyAstrologer}
+            onChatNow={(astro) => handleChatStart(astro, true, true)}
+            onCallNow={(astro) => handleCallStart(astro, lastConnectionType === "video" ? "video" : "audio", true)}
+          />
+        </Suspense>
+      )}
     </section>
   );
 };

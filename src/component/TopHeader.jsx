@@ -49,7 +49,7 @@ const TopHeader = () => {
   const userId = localStorage.getItem("shubhtalk_customer_id");   
 
   // Fetch kundli profiles for name fallback
-  const { data: kundliData } = useGetAllKundlisQuery(userId, {
+  const { data: kundliData } = useGetAllKundlisQuery(undefined, {
     skip: !userId || !token,
   });
   const savedKundlis = kundliData?.data || [];      
