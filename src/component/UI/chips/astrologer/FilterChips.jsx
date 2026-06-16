@@ -650,7 +650,7 @@ const FilterChips = ({
             <div className={styles.modalBody}>
               <div className={styles.leftSidebar}>
                 {/* ✅ DYNAMIC RENDERING - Render sidebar items based on API response */}
-                {filterTabData?.map((filterSection) => (
+                {filterTabData?.filter((filterSection) => filterSection.title !== "Sorting").map((filterSection) => (
                   <div
                     key={filterSection.title}
                     className={`${styles.sidebarItem} ${activeModalTab === filterSection.title ? styles.activeSidebarItem : ""}`}
@@ -777,39 +777,7 @@ const FilterChips = ({
                   </div>
                 )}
 
-                {activeModalTab === "Sorting" && (
-                  <div className={styles.optionsList}>
-                    {sorting.map((s) => {
-                      const isSelected = selectedSort === s.slug;
-                      const displayTitle = s.title
-                        ?.replace(/ascending/gi, "Low to High")
-                        ?.replace(/descending/gi, "High to Low");
-                      return (
-                        <div
-                          key={s.slug}
-                          className={styles.option}
-                          onClick={() =>
-                            toggleValue(s.slug, setSelectedSort, selectedSort)
-                          }
-                        >
-                          <FaCheck
-                            className={
-                              isSelected
-                                ? styles.checkIcon
-                                : styles.checkIconInactive
-                            }
-                            size={14}
-                          />
-                          <span
-                            className={isSelected ? styles.selectedText : ""}
-                          >
-                            {displayTitle}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                {/* Sorting tab hidden */}
 
                 {activeModalTab === "Price" && (
                   <div className={styles.priceRangeContainer}>
