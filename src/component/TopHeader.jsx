@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "./TopHeader.module.scss";
 import { PATH } from "../utils/routes/Paths";
@@ -811,7 +811,6 @@ const CALCULATOR_LINKS = [
 ];
 
 const CalculatorsDropdown = () => {
-  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -843,13 +842,14 @@ const CalculatorsDropdown = () => {
       {open && (
         <div className={styles.calcDropdownMenu}>
           {CALCULATOR_LINKS.map((item) => (
-            <div
+            <Link
               key={item.path}
+              to={item.path}
               className={styles.calcDropdownItem}
-              onClick={() => { navigate(item.path); setOpen(false); }}
+              onClick={() => setOpen(false)}
             >
               {item.title}
-            </div>
+            </Link>
           ))}
         </div>
       )}
@@ -916,7 +916,6 @@ const BEST_ASTROLOGERS_LINKS = [
 ];
 
 const BestAstrologersDropdown = () => {
-  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -948,13 +947,14 @@ const BestAstrologersDropdown = () => {
       {open && (
         <div className={styles.calcDropdownMenu}>
           {BEST_ASTROLOGERS_LINKS.map((item) => (
-            <div
+            <Link
               key={item.path}
+              to={item.path}
               className={styles.calcDropdownItem}
-              onClick={() => { navigate(item.path); setOpen(false); }}
+              onClick={() => setOpen(false)}
             >
               {item.title}
-            </div>
+            </Link>
           ))}
         </div>
       )}
@@ -1018,7 +1018,6 @@ const BEST_ASTROLOGERS_GLOBAL_LINKS = [
 ];
 
 const BestAstrologersGlobalDropdown = () => {
-  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -1050,13 +1049,14 @@ const BestAstrologersGlobalDropdown = () => {
       {open && (
         <div className={styles.calcDropdownMenu}>
           {BEST_ASTROLOGERS_GLOBAL_LINKS.map((item) => (
-            <div
+            <Link
               key={item.path}
+              to={item.path}
               className={styles.calcDropdownItem}
-              onClick={() => { navigate(item.path); setOpen(false); }}
+              onClick={() => setOpen(false)}
             >
               {item.title}
-            </div>
+            </Link>
           ))}
         </div>
       )}
