@@ -137,7 +137,7 @@ const RefundPolicy = () => {
       <p className={styles.paragraph}><strong>Shubhastro Customer Support</strong></p>
       <ul className={styles.list}>
         <li className={styles.listItem}>Email: <a href="mailto:connect@pittiegroup.com" className={styles.link}>connect@pittiegroup.com</a></li>
-        <li className={styles.listItem}>Grievance Officer Email: <a href="mailto:grievance@shubhastro.com" className={styles.link}>grievance@shubhastro.com</a></li>
+        <li className={styles.listItem}>Grievance Officer Email: <a href="mailto:nodal@pittiegroup.com" className={styles.link}>nodal@pittiegroup.com</a></li>
         <li className={styles.listItem}>Address: [Registered Office Address, City, State, PIN, India]</li>
         <li className={styles.listItem}>Support Hours: Monday to Saturday, 9:00 AM to 6:00 PM IST</li>
         <li className={styles.listItem}>Response Time: We aim to acknowledge all refund queries within 48 hours</li>
