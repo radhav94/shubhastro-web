@@ -4,42 +4,40 @@ const Pagination = ({ pagination, onPageChange }) => {
   const { page, totalPages, hasNextPage, hasPrevPage } = pagination;
 
   const getPages = () => {
-    const pages = [];
+    // Few enough pages: show them all
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
 
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
+    const pages = new Set();
+
+    // Always include first and last
+    pages.add(1);
+    pages.add(totalPages);
+
+    // Window around the current page
+    for (let i = page - 1; i <= page + 1; i++) {
+      if (i > 1 && i < totalPages) pages.add(i);
+    }
+
+    const sorted = [...pages].sort((a, b) => a - b);
+
+    // Build the final list, inserting "..." only when the gap is > 1.
+    // If the gap is exactly 1, show the missing page number instead of dots.
+    const result = [];
+    for (let i = 0; i < sorted.length; i++) {
+      result.push(sorted[i]);
+      const next = sorted[i + 1];
+      if (next) {
+        if (next - sorted[i] === 2) {
+          result.push(sorted[i] + 1);
+        } else if (next - sorted[i] > 2) {
+          result.push("...");
+        }
       }
-      return pages;
     }
 
-    // Always show first page
-    pages.push(1);
-
-    // Left dots
-    if (page > 3) {
-      pages.push("...");
-    }
-
-    // Middle pages
-    const start = Math.max(2, page - 1);
-    const end = Math.min(totalPages - 1, page + 1);
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    // Right dots
-    if (page < totalPages - 2) {
-      pages.push("...");
-    }
-
-    // Always show last page
-    if (totalPages > 1) {
-      pages.push(totalPages);
-    }
-
-    return pages;
+    return result;
   };
 
   if (!totalPages || totalPages <= 1) return null;

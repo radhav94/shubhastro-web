@@ -671,7 +671,7 @@ const HoroscopeNew = () => {
           </span>
           {activeProfile && (
             <span className="horoscope-profile-dob">
-              Date of birth: {activeProfile.day} {['', 'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][activeProfile.month]}, {activeProfile.year} | Time:  {String(activeProfile.hour || 0).padStart(2, '0')}:{String(activeProfile.min || 0).padStart(2, '0')} {activeProfile.hour >= 12 ? 'PM' : 'AM'} | Place: {activeProfile.place}
+              Date of birth: {activeProfile.day} {['', 'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][activeProfile.month]}, {activeProfile.year} | Time:  {String(((activeProfile.hour || 0) % 12) || 12).padStart(2, '0')}:{String(activeProfile.min || 0).padStart(2, '0')} {activeProfile.hour >= 12 ? 'PM' : 'AM'} | Place: {activeProfile.place}
             </span>
           )}
         </div>

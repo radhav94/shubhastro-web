@@ -14,19 +14,32 @@ export const blogApi = privateRequestNew.injectEndpoints({
       providesTags: ["Blogs"],
     }),
 
-    // Get Paginated Blogs
+    // Get Paginated Blogs (optionally filtered by category slug)
     getBlog: builder.query({
-      query: ({ page = 1, limit = 10 } = {}) => ({
-        url: `blogs/all?page=${page}&limit=${limit}`,
+      query: ({ page = 1, limit = 10, category = "" } = {}) => {
+        const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+        if (category) params.set("category", category);
+        return {
+          url: `blogs/all?${params.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["Blogs"],
+    }),
+
+    // Get Blog Categories
+    getBlogCategories: builder.query({
+      query: () => ({
+        url: `blogs/categories`,
         method: "GET",
       }),
-      providesTags: ["Blogs"],
+      providesTags: ["BlogCategories"],
     }),
 
     // Get Single Blog
     getSingleBlog: builder.query({
       query: (slug) => ({
-        url: `blogs/single?slug=${encodeURIComponent(slug)}`,
+        url: `blogs/${encodeURIComponent(slug)}`,
         method: "GET",
       }),
       providesTags: ["Blogs"],
@@ -43,4 +56,4 @@ export const blogApi = privateRequestNew.injectEndpoints({
   }),
 });
 
-export const { useGetBlogPageDataQuery, useGetBlogQuery, useGetSingleBlogQuery, useGetRelatedBlogsQuery } = blogApi;
+export const { useGetBlogPageDataQuery, useGetBlogQuery, useGetBlogCategoriesQuery, useGetSingleBlogQuery, useGetRelatedBlogsQuery } = blogApi;
