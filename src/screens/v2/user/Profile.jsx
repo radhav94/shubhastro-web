@@ -377,9 +377,9 @@ const Profile = () => {
     data: kundliData,
     isLoading: isLoadingKundlis,
     refetch: refetchKundlis,
-  } = useGetAllKundlisQuery(userId, {
+  } = useGetAllKundlisQuery(undefined, {
     skip: !userId,
-    refetchOnMountOrArgChange: true, // Always refetch when component mounts or userId changes
+    refetchOnMountOrArgChange: true,
   });
   const savedKundlis = kundliData?.data || [];
 
