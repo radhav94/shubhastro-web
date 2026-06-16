@@ -122,14 +122,14 @@ const OnboardingGuide = () => {
       <p className={styles.paragraph}><strong>8.2 Email Support</strong></p>
       <ul className={styles.list}>
         <li className={styles.listItem}>Email: <a href="mailto:connect@pittiegroup.com" className={styles.link}>connect@pittiegroup.com</a> (for general queries)</li>
-        <li className={styles.listItem}>Email: <a href="mailto:grievance@shubhastro.com" className={styles.link}>grievance@shubhastro.com</a> (for formal grievances)</li>
+        <li className={styles.listItem}>Email: <a href="mailto:nodal@pittiegroup.com" className={styles.link}>nodal@pittiegroup.com</a> (for formal grievances)</li>
       </ul>
 
       <p className={styles.paragraph}><strong>8.3 Grievance Officer</strong></p>
       <p className={styles.paragraph}>As required under the Consumer Protection (E-Commerce) Rules, 2020 and IT Act, 2000, our Grievance Officer is:</p>
       <ul className={styles.list}>
         <li className={styles.list}>Name: [Grievance Officer Name]</li>
-        <li className={styles.listItem}>Email: <a href="mailto:grievance@shubhastro.com" className={styles.link}>grievance@shubhastro.com</a></li>
+        <li className={styles.listItem}>Email: <a href="mailto:nodal@pittiegroup.com" className={styles.link}>nodal@pittiegroup.com</a></li>
         <li className={styles.listItem}>Address: [Registered Office Address, City, State, PIN, India]</li>
         <li className={styles.listItem}>Response Time: Within 48 hours of acknowledgement; resolution within 30 days</li>
       </ul>
@@ -156,7 +156,7 @@ const OnboardingGuide = () => {
       <h4 className={styles.subtitle}>10. QUICK REFERENCE CONTACT DIRECTORY</h4>
       <ul className={styles.list}>
         <li className={styles.listItem}>General Support: <a href="mailto:connect@pittiegroup.com" className={styles.link}>connect@pittiegroup.com</a></li>
-        <li className={styles.listItem}>Grievance Officer: <a href="mailto:grievance@shubhastro.com" className={styles.link}>grievance@shubhastro.com</a></li>
+        <li className={styles.listItem}>Grievance Officer: <a href="mailto:nodal@pittiegroup.com" className={styles.link}>nodal@pittiegroup.com</a></li>
         <li className={styles.listItem}>Legal Notices: <a href="mailto:legal@shubhastro.com" className={styles.link}>legal@shubhastro.com</a></li>
         <li className={styles.listItem}>Privacy / Data Concerns: <a href="mailto:privacy@shubhastro.com" className={styles.link}>privacy@shubhastro.com</a></li>
         <li className={styles.listItem}>Astrologer Partnerships: <a href="mailto:astro-partners@shubhastro.com" className={styles.link}>astro-partners@shubhastro.com</a></li>
