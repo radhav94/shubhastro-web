@@ -64,7 +64,9 @@ const SadeSati = () => {
               <div className={styles.statCard}>
                 <span className={styles.statLabel}>Period Type</span>
                 <span className={styles.statValue}>
-                  {sadeSatiData.shani_period_type || "N/A"}
+                  {sadeSatiData.shani_period_type !== undefined && sadeSatiData.shani_period_type !== null
+                    ? String(sadeSatiData.shani_period_type)
+                    : "N/A"}
                 </span>
               </div>
             </div>
