@@ -1,17 +1,30 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './BusinessPathfinder.module.scss';
 import { Toast } from '../../../../component';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { useGetBusinessPathfinderOptionsQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import { ProfileManager } from '../../../../component/UI/Profile';
+import { setSelectedKundliProfile } from '../../../../redux/aiwow/aiwowSlice';
+import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 
 const BusinessPathfinder = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
   const { data: optionsData, isLoading: optionsLoading } = useGetBusinessPathfinderOptionsQuery();
   const [showProfileSelector, setShowProfileSelector] = useState(false);
+
+  const handleProfileSelect = (selected) => {
+    if (selected) {
+      dispatch(setSelectedKundliProfile(selected));
+      dispatch(setSelectedKundli(selected));
+      localStorage.setItem('selectedKundliProfile', JSON.stringify(selected));
+    }
+    setShowProfileSelector(false);
+  };
 
   const options = optionsData?.data?.options || {};
   const BUSINESS_CATEGORIES = options.businessCategory || [];
@@ -67,6 +80,7 @@ const BusinessPathfinder = () => {
     setIsSubmitting(true);
     try {
       const payload = {
+        kundliId: profile._id,
         businessCategory: category,
         businessInfo: formData.businessInfo || '',
         scale: formData.scale,
@@ -274,7 +288,7 @@ const BusinessPathfinder = () => {
             <p className={styles.stepSubtitle}>Tell us more about your business (Optional)</p>
             <textarea
               className={styles.textarea}
-              placeholder="E.g. Placeholder text lorem ipsum"
+              placeholder="Enter Your Business Information"
               value={formData.businessInfo}
               onChange={(e) => setFormData(prev => ({ ...prev, businessInfo: e.target.value }))}
               rows={3}
@@ -299,7 +313,7 @@ const BusinessPathfinder = () => {
     <ProfileManager
       isOpen={showProfileSelector}
       onClose={() => setShowProfileSelector(false)}
-      onProfileSelect={() => setShowProfileSelector(false)}
+      onProfileSelect={handleProfileSelect}
       selectedProfileId={profile?._id}
       title="Select Profile"
       enabledOperations={{ list: true, add: true, edit: true, delete: true }}
