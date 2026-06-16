@@ -293,9 +293,10 @@ const Profile = () => {
 
 
   const formatDuration = (seconds = 0) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins} Min ${secs} Secs`;
+    const totalSecs = Math.round(seconds);
+    const mins = Math.floor(totalSecs / 60);
+    const secs = totalSecs % 60;
+    return `${mins} Min ${secs} Sec`;
   };
   // Process order history data - current page call orders
   const callOrders = Array.isArray(callHistoryData?.data?.callHistory)
@@ -1932,7 +1933,7 @@ const Profile = () => {
                         <div className={styles.txnDurationCell}>
                           {transaction?.sessionDetails?.durationSeconds > 0 ? (
                             <span className={styles.txnDurationText}>
-                              {Math.floor(transaction.sessionDetails.durationSeconds / 60)}:{(transaction.sessionDetails.durationSeconds % 60).toString().padStart(2, "0")} min
+                              {Math.floor(Math.round(transaction.sessionDetails.durationSeconds) / 60)} Min {Math.round(transaction.sessionDetails.durationSeconds) % 60} Sec
                             </span>
                           ) : (
                             <span className={styles.txnDurationEmpty}>—</span>
