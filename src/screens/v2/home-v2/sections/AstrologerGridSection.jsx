@@ -1,4 +1,4 @@
-import { memo, Suspense, lazy } from "react";
+import { memo, useMemo, Suspense, lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { sortContentByOrder } from "../sectionRendererV2";
 
@@ -6,7 +6,7 @@ const AstrologersSection = lazy(() => import("../../home/components/AstrologersS
 
 const AstrologerGridSection = memo(({ sectionData, styles, onConnect }) => {
   const navigate = useNavigate();
-  const astrologers = sortContentByOrder(sectionData?.content || []);
+  const astrologers = useMemo(() => sortContentByOrder(sectionData?.content || []), [sectionData?.content]);
 
   if (!astrologers.length) return null;
 
