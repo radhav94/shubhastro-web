@@ -797,6 +797,8 @@
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s ease;
+  text-decoration: none;
+  display: block;
 
   &:hover {
     background: #fff3ed;

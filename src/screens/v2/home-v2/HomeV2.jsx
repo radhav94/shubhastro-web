@@ -34,13 +34,15 @@ import palmIcon from "../../../assets/aiwow/wow-palmistry.svg";
 import faceIcon from "../../../assets/aiwow/wow-face.svg";
 import signatureIcon from "../../../assets/aiwow/wow-signature.svg";
 import astrologerMaleImg from "../../../assets/default-img/astrologer male_v.1.png";
-import avatar1 from "../../../assets/images/community-avatar-1.png";
-import avatar2 from "../../../assets/images/community-avatar-2.png";
-import avatar3 from "../../../assets/images/community-avatar-3.png";
-import avatar4 from "../../../assets/images/community-avatar-4.png";
-import avatar5 from "../../../assets/images/community-avatar-5.png";
 
-const COMMUNITY_AVATARS = [avatar1, avatar2, avatar3, avatar4, avatar5];
+// Community avatars — loaded lazily via URL (below-the-fold, decorative)
+const COMMUNITY_AVATARS = [
+  new URL("../../../assets/images/community-avatar-1.png", import.meta.url).href,
+  new URL("../../../assets/images/community-avatar-2.png", import.meta.url).href,
+  new URL("../../../assets/images/community-avatar-3.png", import.meta.url).href,
+  new URL("../../../assets/images/community-avatar-4.png", import.meta.url).href,
+  new URL("../../../assets/images/community-avatar-5.png", import.meta.url).href,
+];
 const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
 
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
@@ -403,6 +405,13 @@ const HomeV2 = () => {
     } else { setPendingConnectionType(connType); hookSetOpenModal(prev => ({ ...prev, kundli: true })); }
   }, [requireAuth, hasKundli, handleChatStart, handleCallStart, setAstrologerRef, hookSetOpenModal]);
 
+  // ─── Memoized modal handlers ──────────────────────────────────────────────
+  const handleEmergencyClose = useCallback(() => setShowEmergencyModal(false), []);
+  const handleEmergencyChatNow = useCallback((a) => handleConnectClick(a, "chat", true), [handleConnectClick]);
+  const handleEmergencyCallNow = useCallback((a) => handleConnectClick(a, "audio", true), [handleConnectClick]);
+  const handleMobileAppClose = useCallback(() => setShowMobileAppModal(false), []);
+  const handleRechargeClose = useCallback(() => hookSetOpenModal((prev) => ({ ...prev, recharge: false })), [hookSetOpenModal]);
+
   // ─── Shared props for group renderers ─────────────────────────────────────
   const heroProps = { styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, onlineCount };
   const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id, astrologerMaleImg };
@@ -450,12 +459,12 @@ const HomeV2 = () => {
       {/* Modals */}
       <Suspense fallback={null}>
         <ProfileModals profiles={profiles} isCreating={isCreating} showAddProfile={showAddProfile} showEditProfile={showEditProfile} formData={formData} editFormData={editFormData} setShowAddProfile={setShowAddProfile} setShowEditProfile={setShowEditProfile} setFormData={setFormData} setEditFormData={setEditFormData} handleAddProfile={handleAddProfile} handleSubmitProfile={handleSubmitProfile} handleSubmitEditProfile={handleSubmitEditProfile} formatProfileDisplay={formatProfileDisplay} openModal={hookOpenModal} setOpenModal={hookSetOpenModal} selectedAstrologer={hookSelectedAstrologer} localSelectedProfile={localSelectedProfile} setLocalSelectedProfile={setLocalSelectedProfile} onContinue={handleProfileManagerStartCall} connectionType={connectionType} />
-        <EmergencySessionModal isOpen={showEmergencyModal} onClose={() => setShowEmergencyModal(false)} astrologer={selectedAstrologer} onChatNow={(a) => handleConnectClick(a, "chat", true)} onCallNow={(a) => handleConnectClick(a, "audio", true)} />
-        <MobileAppModal isOpen={showMobileAppModal} onClose={() => setShowMobileAppModal(false)} />
+        <EmergencySessionModal isOpen={showEmergencyModal} onClose={handleEmergencyClose} astrologer={selectedAstrologer} onChatNow={handleEmergencyChatNow} onCallNow={handleEmergencyCallNow} />
+        <MobileAppModal isOpen={showMobileAppModal} onClose={handleMobileAppClose} />
       </Suspense>
       <RechargeModal
         isOpen={hookOpenModal.recharge}
-        onClose={() => hookSetOpenModal((prev) => ({ ...prev, recharge: false }))}
+        onClose={handleRechargeClose}
         astrologer={hookSelectedAstrologer}
         connectionType={pendingConnectionType || "chat"}
       />
