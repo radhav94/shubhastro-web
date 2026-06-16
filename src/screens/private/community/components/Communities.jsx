@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiUsers } from "react-icons/fi";
 import styles from "../Community.module.scss";
@@ -9,6 +9,8 @@ import {
   useLeaveCommunitySpaceMutation,
 } from "../../../../redux/api/community/communityApi";
 import Toast from "../../../../component/toast";
+
+const EmergencySessionModal = lazy(() => import("../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal"));
 
 const formatMemberCount = (count) => {
   if (!count) return "0";
@@ -21,6 +23,17 @@ const Communities = ({ onCommunityClick, topAstrologers = [], sectionContent = [
   const { handleChatStart, handleCallStart } = useAstrologerConnect();
   const [joinSpace] = useJoinCommunitySpaceMutation();
   const [leaveSpace] = useLeaveCommunitySpaceMutation();
+
+  // Emergency modal state (shared across all cards)
+  const [emergencyAstrologer, setEmergencyAstrologer] = useState(null);
+
+  const handleEmergencyClick = useCallback((astrologer) => {
+    setEmergencyAstrologer(astrologer);
+  }, []);
+
+  const handleEmergencyClose = useCallback(() => {
+    setEmergencyAstrologer(null);
+  }, []);
 
   // Local state to track join status optimistically
   const [joinedMap, setJoinedMap] = useState({});
@@ -149,10 +162,23 @@ const Communities = ({ onCommunityClick, topAstrologers = [], sectionContent = [
                 key={astrologer._id}
                 astrologer={astrologer}
                 onConnect={handleConnect}
+                onEmergencyClick={handleEmergencyClick}
               />
             ))}
           </div>
         </div>
+      )}
+
+      {emergencyAstrologer && (
+        <Suspense fallback={null}>
+          <EmergencySessionModal
+            isOpen={true}
+            onClose={handleEmergencyClose}
+            astrologer={emergencyAstrologer}
+            onChatNow={(astro) => handleConnect(astro, "chat", true)}
+            onCallNow={(astro) => handleConnect(astro, "audio", true)}
+          />
+        </Suspense>
       )}
     </div>
   );

@@ -9,7 +9,7 @@ import WalletComboImage from "../../assets/images/wallet-popular-combo.png";
 
 const WalletModal = ({ isOpen, onClose }) => {
   const { balance, refreshWallet } = useWalletBalance();
-  const { plans, isLoading: plansLoading } = useRechargePlans();
+  const { plans, isLoading: plansLoading } = useRechargePlans(!isOpen);
   const [customAmount, setCustomAmount] = useState("");
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);

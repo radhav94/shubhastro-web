@@ -47,9 +47,9 @@
 }
 
 .backBtn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   border: 1px solid #D43400;
   background: #FFF4EC;
   color: #D43400;
@@ -61,8 +61,13 @@
   flex-shrink: 0;
 
   &:hover {
-    background: #D43400;
-    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  @media (max-width: 767px) {
+    width: 36px;
+    height: 36px;
   }
 }
 

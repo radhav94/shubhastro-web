@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./Navbar.module.scss";
 import PrimaryText from "../component/PrimaryText";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { PATH } from "../utils/routes/Paths";
 
 const Navbar = () => {
@@ -67,7 +67,6 @@ const Navbar = () => {
 export default Navbar;
 
 const NavbarItem = ({ title, path, children }) => {
-  const navigate = useNavigate();
   const location = useLocation();
   const isActive = path && location.pathname === path;
 
@@ -76,20 +75,27 @@ const NavbarItem = ({ title, path, children }) => {
       className={`${children ? styles.dropdown : ""} ${
         isActive ? styles.active : ""
       }`}
-      onClick={!children ? () => navigate(path) : undefined}
     >
       {/* FIXED ALIGNMENT WRAPPER */}
-      <div className={styles.navItemLabel}>
-        <PrimaryText size_14>{title}</PrimaryText>
-        {children && <span className={styles.arrow}></span>}
-      </div>
+      {path && !children ? (
+        <Link to={path} className={styles.navItemLabel} style={{ textDecoration: "none", color: "inherit" }}>
+          <PrimaryText size_14>{title}</PrimaryText>
+        </Link>
+      ) : (
+        <div className={styles.navItemLabel}>
+          <PrimaryText size_14>{title}</PrimaryText>
+          {children && <span className={styles.arrow}></span>}
+        </div>
+      )}
 
       {children && (
         <div className={styles.dropdownWrapper}>
           <ul className={styles.dropdownMenu}>
             {children.map((child, idx) => (
-              <li key={idx} onClick={() => navigate(child.path)}>
-                {child.title}
+              <li key={idx}>
+                <Link to={child.path} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+                  {child.title}
+                </Link>
               </li>
             ))}
           </ul>
