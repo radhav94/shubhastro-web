@@ -662,7 +662,7 @@ const HoroscopeNew = () => {
       {/* Centered Profile Selector with DOB/Place */}
       <div className="horoscope-profile-header">
         <div className="horoscope-profile-center" onClick={handleOpenModal}>
-          <span className="horoscope-profile-label">Select Profile</span>
+          <span className="horoscope-profile-label">{isLoggedIn ? "Select Profile" : "Select Zodiac"}</span>
           <span className="horoscope-profile-name">
             {activeProfile?.name || capitalizedSign}
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ marginLeft: '4px' }}>
