@@ -18,21 +18,23 @@ const SwitchWaitingPopup = ({ isVisible, switchType = "video", onCancel }) => {
   const Icon = isVideo ? IoVideocam : IoCall;
 
   return createPortal(
-    <div className={styles.container}>
-      <div className={styles.content}>
-        <div className={styles.iconWrapper}>
-          <Icon size={20} />
+    <div className={styles.overlay}>
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.iconWrapper}>
+            <Icon size={20} />
+          </div>
+          <div className={styles.info}>
+            <p className={styles.message}>Switching to {label}...</p>
+            <span className={styles.subtext}>Waiting for astrologer to accept</span>
+          </div>
+          <button className={styles.cancelBtn} onClick={onCancel}>
+            Cancel
+          </button>
         </div>
-        <div className={styles.info}>
-          <p className={styles.message}>Switching to {label}...</p>
-          <span className={styles.subtext}>Waiting for astrologer to accept</span>
+        <div className={styles.progressBar}>
+          <div className={styles.progressFill} />
         </div>
-        <button className={styles.cancelBtn} onClick={onCancel}>
-          Cancel
-        </button>
-      </div>
-      <div className={styles.progressBar}>
-        <div className={styles.progressFill} />
       </div>
     </div>,
     document.body

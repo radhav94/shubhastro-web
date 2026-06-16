@@ -16,6 +16,8 @@ import {
   Download,
   Search,
   Mail,
+  Calendar,
+  Clock,
 } from "lucide-react";
 import { TiUserDelete } from "react-icons/ti";
 import { LuPencilLine } from "react-icons/lu";
@@ -49,6 +51,7 @@ import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal"
 import { useGetAstroDetailsQuery } from "../../../redux/api/kundli/kundliApi";
 import { buildVedicParam } from "../../../utils/VedicParams.js/vedicParams";
 import { PATH } from "../../../utils/routes/Paths";
+import { PANDIT_AI_ID } from "../../../component/panditAI/usePanditAI";
 import { logout, updateRegistrationStatus, setEmail } from "../../../redux/auth/authSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import styles from "./Profile.module.scss";
@@ -314,6 +317,7 @@ const Profile = () => {
           date: item?.timestamp || new Date(),
           duration:`${formatDuration(Math.round(item?.totalDuration)) || 0}`,
           amount: item?.amount || 0,
+          channelBreakdown: item?.channelBreakdown || [],
           rate: 0,
           status: item?.status || "completed",
           roomId: item?.roomId,
@@ -345,6 +349,7 @@ const Profile = () => {
           date: firstChat?.createdAt || room?.createdAt || new Date(),
           duration: `${formatDuration(Math.round(room?.totalDuration)) || 0}`,
           amount: room?.amount || 0,
+          channelBreakdown: room?.channelBreakdown || [],
           rate: room?.rate || 0,
           status: "completed",
           roomId: room.roomId,
@@ -867,12 +872,17 @@ const Profile = () => {
   // Handle connect button click
   const handleConnectClick = (astrologer) => {
     console.log("astrologer", astrologer);
-    // if (WaitingList || callWaitingList) {
-    //   Toast.error(
-    //     "You are already waiting for an astrologer. Please cancel the current request first.",
-    //   );
-    //   return;
-    // }
+
+    // If this is a Pandit AI session, open Pandit AI chat
+    if (astrologer._id === PANDIT_AI_ID) {
+      if (!balance || balance <= 0) {
+        Toast.error("Insufficient balance. Please recharge to continue.");
+        return;
+      }
+      sessionStorage.setItem("panditai_open", "true");
+      navigate(PATH.privateRoutes.HOME.path);
+      return;
+    }
 
     setSelectedAstrologerId(astrologer._id);
     setSelectedAstrologer(astrologer);
@@ -1700,21 +1710,38 @@ const Profile = () => {
                                     </h5>
                                     <div className={styles.orderMeta}>
                                       <span className={styles.orderDate}>
-                                        📅{" "}
+                                        <Calendar size={15} className={styles.metaIcon} />{" "}
                                         {dayjs(order.date).format(
                                           "DD MMM, YYYY",
                                         )}
                                       </span>
                                       <span className={styles.orderTime}>
-                                        🕐 {dayjs(order.date).format("hh:mm A")}
+                                        <Clock size={15} className={styles.metaIcon} /> {dayjs(order.date).format("hh:mm A")}
                                       </span>
                                     </div>
                                     <p className={styles.orderDuration}>
                                       Duration : {order.duration}
                                     </p>
-                                    <p className={styles.orderAmount}>
-                                      ₹{order.amount}
-                                    </p>
+                                    {order.channelBreakdown?.length > 0 ? (
+                                      <div className={styles.channelBreakdown}>
+                                        {order.channelBreakdown.map((ch, i) => (
+                                          <div key={i} className={styles.channelItem}>
+                                            <span className={styles.channelLabel}>
+                                              {ch.type === "call" ? "Audio" : ch.type === "video" ? "Video" : "Chat"}
+                                            </span>
+                                            <span className={styles.channelAmount}>₹{ch.amount}</span>
+                                          </div>
+                                        ))}
+                                        <div className={styles.channelItemTotal}>
+                                          <span className={styles.channelLabel}>Total</span>
+                                          <span className={styles.channelTotalAmount}>₹{order.amount}</span>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <p className={styles.orderAmount}>
+                                        ₹{order.amount}
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
 
