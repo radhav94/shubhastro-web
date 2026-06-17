@@ -2041,19 +2041,39 @@ const Profile = () => {
                   })
                 }
               >
-                <div className={styles.supportGridIcon}>
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM12 6C9.79 6 8 7.79 8 10H10C10 8.9 10.9 8 12 8C13.1 8 14 8.9 14 10C14 12 11 11.75 11 15H13C13 12.75 16 12.5 16 10C16 7.79 14.21 6 12 6Z"
-                      fill="white"
-                    />
-                  </svg>
-                </div>
-                <h4 className={styles.supportGridTitle}>Customer Support</h4>
-                <p className={styles.supportGridDesc}>
-                  Chat with our team for quick help on app or consultation
-                  queries.
-                </p>
+                <div className={styles.supportGridIconWrap}>
+                  <div className={styles.supportGridIcon}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="23" height="21" viewBox="0 0 20 18" fill="none">
+                      <path d="M19 9.22C19 3.73 14.74 0 10 0C5.31 0 1 3.65 1 9.28C0.4 9.62 0 10.26 0 11V13C0 14.1 0.9 15 2 15C2.55 15 3 14.55 3 14V9.19C3 5.36 5.95 2.01 9.78 1.9C13.74 1.78 17 4.96 17 8.9V16H10C9.45 16 9 16.45 9 17C9 17.55 9.45 18 10 18H17C18.1 18 19 17.1 19 16V14.78C19.59 14.47 20 13.86 20 13.14V10.84C20 10.14 19.59 9.53 19 9.22Z" fill="url(#paint0_linear_16578_35306)"/>
+                      <path d="M7 11C7.55228 11 8 10.5523 8 10C8 9.44771 7.55228 9 7 9C6.44772 9 6 9.44771 6 10C6 10.5523 6.44772 11 7 11Z" fill="url(#paint1_linear_16578_35306)"/>
+                      <path d="M13 11C13.5523 11 14 10.5523 14 10C14 9.44771 13.5523 9 13 9C12.4477 9 12 9.44771 12 10C12 10.5523 12.4477 11 13 11Z" fill="url(#paint2_linear_16578_35306)"/>
+                      <path d="M16 8.03C15.52 5.18 13.04 3 10.05 3C7.02 3 3.76 5.51 4.02 9.45C6.49 8.44 8.35 6.24 8.88 3.56C10.19 6.19 12.88 8 16 8.03Z" fill="url(#paint3_linear_16578_35306)"/>
+                      <defs>
+                        <linearGradient id="paint0_linear_16578_35306" x1="0" y1="9" x2="20" y2="9" gradientUnits="userSpaceOnUse">
+                          <stop stop-color="#F75801"/>
+                          <stop offset="1" stop-color="#D43400"/>
+                        </linearGradient>
+                        <linearGradient id="paint1_linear_16578_35306" x1="0" y1="9" x2="20" y2="9" gradientUnits="userSpaceOnUse">
+                          <stop stop-color="#F75801"/>
+                          <stop offset="1" stop-color="#D43400"/>
+                        </linearGradient>
+                        <linearGradient id="paint2_linear_16578_35306" x1="0" y1="9" x2="20" y2="9" gradientUnits="userSpaceOnUse">
+                          <stop stop-color="#F75801"/>
+                          <stop offset="1" stop-color="#D43400"/>
+                        </linearGradient>
+                        <linearGradient id="paint3_linear_16578_35306" x1="0" y1="9" x2="20" y2="9" gradientUnits="userSpaceOnUse">
+                          <stop stop-color="#F75801"/>
+                          <stop offset="1" stop-color="#D43400"/>
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </div>
+                  <h4 className={styles.supportGridTitle}>Customer Support</h4>
+                  </div>
+                  <p className={styles.supportGridDesc}>
+                    Chat with our team for quick help on app or consultation
+                    queries.
+                  </p>
               </div>
 
               <div
@@ -2062,15 +2082,20 @@ const Profile = () => {
                   navigate("/faq", { state: { fromTab: "Support" } })
                 }
               >
-                <div className={styles.supportGridIcon}>
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 19H11V17H13V19ZM15.07 11.25L14.17 12.17C13.45 12.9 13 13.5 13 15H11V14.5C11 13.4 11.45 12.4 12.17 11.67L13.41 10.41C13.78 10.05 14 9.55 14 9C14 7.9 13.1 7 12 7C10.9 7 10 7.9 10 9H8C8 6.79 9.79 5 12 5C14.21 5 16 6.79 16 9C16 9.88 15.64 10.68 15.07 11.25Z"
-                      fill="white"
-                    />
-                  </svg>
+                <div className={styles.supportGridIconWrap}>
+                  <div className={styles.supportGridIcon}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M7.66982 7.04C6.86982 6.7 6.52982 5.71 7.00982 4.99C7.97982 3.55 9.59982 2.5 11.7398 2.5C14.0898 2.5 15.6998 3.57 16.5198 4.91C17.2198 6.06 17.6298 8.21 16.5498 9.81C15.3498 11.58 14.1998 12.12 13.5798 13.26C13.4298 13.53 13.3398 13.75 13.2798 14.2C13.1898 14.93 12.5898 15.5 11.8498 15.5C10.9798 15.5 10.2698 14.75 10.3698 13.88C10.4298 13.37 10.5498 12.84 10.8298 12.34C11.5998 10.95 13.0798 10.13 13.9398 8.9C14.8498 7.61 14.3398 5.2 11.7598 5.2C10.5898 5.2 9.82982 5.81 9.35982 6.54C9.00982 7.11 8.27982 7.29 7.66982 7.04ZM13.7498 19.5C13.7498 20.6 12.8498 21.5 11.7498 21.5C10.6498 21.5 9.74982 20.6 9.74982 19.5C9.74982 18.4 10.6498 17.5 11.7498 17.5C12.8498 17.5 13.7498 18.4 13.7498 19.5Z" fill="url(#paint0_linear_16578_38576)"/>
+                      <defs>
+                        <linearGradient id="paint0_linear_16578_38576" x1="6.78906" y1="12" x2="17.2123" y2="12" gradientUnits="userSpaceOnUse">
+                          <stop stop-color="#F75801"/>
+                          <stop offset="1" stop-color="#D43400"/>
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </div>
+                  <h4 className={styles.supportGridTitle}>FAQs</h4>
                 </div>
-                <h4 className={styles.supportGridTitle}>FAQs</h4>
                 <p className={styles.supportGridDesc}>
                   Find quick answers to common astrology and app questions.
                 </p>
@@ -2084,15 +2109,20 @@ const Profile = () => {
                   })
                 }
               >
-                <div className={styles.supportGridIcon}>
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM7 10H9V17H7V10ZM11 7H13V17H11V7ZM15 13H17V17H15V13Z"
-                      fill="white"
-                    />
-                  </svg>
+                <div className={styles.supportGridIconWrap}>
+                  <div className={styles.supportGridIcon}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M6 2C4.9 2 4.01 2.9 4.01 4L4 20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8.83C20 8.3 19.79 7.79 19.41 7.42L14.58 2.59C14.21 2.21 13.7 2 13.17 2H6ZM13 8V3.5L18.5 9H14C13.45 9 13 8.55 13 8Z" fill="url(#paint0_linear_16578_38538)"/>
+                      <defs>
+                        <linearGradient id="paint0_linear_16578_38538" x1="4" y1="12" x2="20" y2="12" gradientUnits="userSpaceOnUse">
+                          <stop stop-color="#F75801"/>
+                          <stop offset="1" stop-color="#D43400"/>
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </div>
+                  <h4 className={styles.supportGridTitle}>Recent Tickets</h4>
                 </div>
-                <h4 className={styles.supportGridTitle}>Recent Tickets</h4>
                 <p className={styles.supportGridDesc}>
                   Track updates on your latest support requests.
                 </p>
@@ -2102,15 +2132,20 @@ const Profile = () => {
                 className={styles.supportGridCard}
                 onClick={() => navigate("/privacy", { state: { activeTab } })}
               >
-                <div className={styles.supportGridIcon}>
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM12 11.99H19C18.47 16.11 15.72 19.78 12 20.93V12H5V6.3L12 3.19V11.99Z"
-                      fill="white"
-                    />
-                  </svg>
+                <div className={styles.supportGridIconWrap}>
+                  <div className={styles.supportGridIcon}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="21" viewBox="0 0 18 21" fill="none">
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M0 5C0 3.70871 0.82629 2.56229 2.05132 2.15395L8.05131 0.15395C8.66711 -0.0513164 9.33288 -0.051317 9.94868 0.15395L15.9487 2.15395C17.1737 2.56229 18 3.70871 18 5V10.3377C18 15.8397 12.4398 19.1795 10.0601 20.3569C9.38748 20.6896 8.61252 20.6896 7.93993 20.3569C5.56019 19.1795 0 15.8397 0 10.3377V5ZM12 7.33777C12 8.99462 10.6569 10.3378 9 10.3378C7.34315 10.3378 6 8.99462 6 7.33777C6 5.68091 7.34315 4.33777 9 4.33777C10.6569 4.33777 12 5.68091 12 7.33777ZM9.00003 12.3378C10.7944 12.3378 12.431 13.0129 13.6698 14.123C14.0352 14.4504 14.0409 15.0088 13.6998 15.3613C13.6392 15.4238 13.5779 15.4859 13.5157 15.5474C12.0429 17.0048 10.2698 18.0217 9.17318 18.5643C9.05954 18.6205 8.94053 18.6205 8.82688 18.5643C7.73031 18.0217 5.95721 17.0048 4.48435 15.5474C4.42218 15.4859 4.36082 15.4238 4.30031 15.3613C3.95912 15.0088 3.96487 14.4504 4.33023 14.123C5.56904 13.0129 7.20569 12.3378 9.00003 12.3378Z" fill="url(#paint0_linear_16578_38289)"/>
+                      <defs>
+                        <linearGradient id="paint0_linear_16578_38289" x1="0" y1="10.3032" x2="18" y2="10.3032" gradientUnits="userSpaceOnUse">
+                          <stop stop-color="#F75801"/>
+                          <stop offset="1" stop-color="#D43400"/>
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </div>
+                  <h4 className={styles.supportGridTitle}>Privacy & Security</h4>
                 </div>
-                <h4 className={styles.supportGridTitle}>Privacy & Security</h4>
                 <p className={styles.supportGridDesc}>
                   Manage your data and privacy preferences.
                 </p>
