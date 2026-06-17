@@ -168,7 +168,9 @@ function App() {
               child.path === "/community" ||
               child.path === "/aiwow/muhurat-calendar" ||
               child.path === "/business-pathfinder" ||
-              child.path === "/business-pathfinder/report"
+              child.path === "/business-pathfinder/report" ||
+              child.path === PATH.privateRoutes.LAL_KITAB?.path ||
+              child.path === PATH.privateRoutes.OCCULT?.path
             ) {
               return {
                 path: child.path,
