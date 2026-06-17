@@ -125,10 +125,14 @@ const HoroscopeNew = () => {
   });
   const kundliProfiles = kundliProfilesData?.data || [];
 
-  // Determine the active profile: header-selected > Self > first profile
-  const activeProfile = headerSelectedKundli?._id
-    ? headerSelectedKundli
-    : kundliProfiles.find((p) => p.relation?.toLowerCase() === 'self') || kundliProfiles[0] || null;
+  // Determine the active profile: header-selected > Self > first profile.
+  // Guests (not logged in) must never use a Kundli profile here — even if one
+  // was created/stored in redux — so they always get the "Select Zodiac" flow.
+  const activeProfile = !isLoggedIn
+    ? null
+    : headerSelectedKundli?._id
+      ? headerSelectedKundli
+      : kundliProfiles.find((p) => p.relation?.toLowerCase() === 'self') || kundliProfiles[0] || null;
 
   // Build vedic params from active profile to fetch sun sign
   const vedicParams = activeProfile
