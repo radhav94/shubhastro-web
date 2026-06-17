@@ -11,7 +11,7 @@ const BlogHeader = () => {
   const [activeCategory, setActiveCategory] = useState(""); // "" = All Blogs
 
   const { data: categoriesData } = useGetBlogCategoriesQuery();
-  const { data, isLoading } = useGetBlogQuery({ page, limit: 9, category: activeCategory });
+  const { data, isLoading } = useGetBlogQuery({ page, limit: 12, category: activeCategory });
 
   const categories = categoriesData?.data || [];
   const blogs = data?.data || [];
@@ -19,7 +19,7 @@ const BlogHeader = () => {
 
   // Results count: "Showing X to Y of Z results"
   const total = pagination?.totalDocs ?? blogs.length;
-  const limit = pagination?.limit ?? 9;
+  const limit = pagination?.limit ?? 12;
   const currentPage = pagination?.page ?? page;
   const rangeStart = total === 0 ? 0 : (currentPage - 1) * limit + 1;
   const rangeEnd = Math.min(currentPage * limit, total);
@@ -27,6 +27,11 @@ const BlogHeader = () => {
   const handleCategoryChange = (slug) => {
     setActiveCategory(slug);
     setPage(1);
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -42,12 +47,6 @@ const BlogHeader = () => {
               </svg>
               <span>Categories</span>
             </span>
-            {/* Filter button shown here on mobile */}
-            <button type="button" className={`${styles.filterBtn} ${styles.filterBtnMobile}`} aria-label="Filter">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M3 5h18M6 12h12M10 19h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
           </div>
           <ul className={styles.categoryList}>
             <li>
@@ -78,12 +77,6 @@ const BlogHeader = () => {
         <div className={styles.main}>
           <div className={styles.headerSection}>
             <h2 className={styles.headerTitle}>ALL BLOGS</h2>
-            <button type="button" className={`${styles.filterBtn} ${styles.filterBtnDesktop}`}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M3 5h18M6 12h12M10 19h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              Filter
-            </button>
           </div>
 
           {isLoading ? (
@@ -113,7 +106,7 @@ const BlogHeader = () => {
                   <p className={styles.resultsCount}>
                     Showing <strong>{rangeStart} to {rangeEnd}</strong> of {total} results
                   </p>
-                  <Pagination pagination={pagination} onPageChange={setPage} />
+                  <Pagination pagination={pagination} onPageChange={handlePageChange} />
                 </div>
               )}
             </>

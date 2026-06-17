@@ -137,6 +137,8 @@
   border-top-right-radius: 0;
   padding: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  position: relative;
+  z-index: 2;
 }
 
 .occasionHeader {
@@ -245,6 +247,36 @@
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.locationWrap {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  z-index: 20;
+
+  :global([class*="wrapper"]) {
+    min-width: 0;
+  }
+
+  :global([class*="dropdown"]) {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+}
+
+.locationLabel {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
 }
 
 .periodChip {

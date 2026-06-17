@@ -8,6 +8,8 @@ import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { FiMapPin, FiCalendar, FiChevronLeft, FiChevronRight, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
+import LocationSearch from '../../../../utils/location/locationSearchVedic';
+import useUserLocation from '../../../../utils/hooks/useUserLocation';
 
 const DEFAULT_OCCASIONS = [
   'Marriage',
@@ -46,6 +48,18 @@ const AgenticCalendar = () => {
   const [expandedOccasion, setExpandedOccasion] = useState(null);
   const [locked, setLocked] = useState(false); // Lock selections after clicking Get Timing
   const resultsRef = useRef(null);
+  const [locationValue, setLocationValue] = useState('');
+  const [locationData, setLocationData] = useState(null);
+  const userLocation = useUserLocation();
+
+  // Set location from browser geolocation (skip if nav state has location)
+  useEffect(() => {
+    if (navState.location) return;
+    if (userLocation.loaded && userLocation.locationName) {
+      setLocationValue(userLocation.locationName);
+      setLocationData({ address: userLocation.locationName, lat: userLocation.lat, lng: userLocation.lon });
+    }
+  }, [userLocation.loaded, userLocation.locationName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [navStateConsumed, setNavStateConsumed] = useState(false);
   const [autoSubmitPending, setAutoSubmitPending] = useState(false);
@@ -67,6 +81,10 @@ const AgenticCalendar = () => {
       setCustomFromDate(d);
       setCustomToDate(navState.customToDate ? new Date(navState.customToDate) : d);
       setSelectedPeriod(null);
+    }
+    if (navState.location) {
+      setLocationValue(navState.location.address || '');
+      setLocationData(navState.location);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -175,6 +193,8 @@ const AgenticCalendar = () => {
         fromDate,
         toDate,
         kundliId: profile?._id,
+        lat: locationData?.lat,
+        lng: locationData?.lng,
       });
       if (result.success) {
         setAnalysis(result.data);
@@ -367,10 +387,29 @@ const AgenticCalendar = () => {
             </button>
           </div>
 
+          {/* Location Field */}
+          <div className={styles.locationWrap}>
+            <label className={styles.locationLabel}>
+              Location
+            </label>
+            <LocationSearch
+              value={locationValue}
+              onChange={(e) => {
+                setLocationValue(e.target.value);
+                if (!e.target.value.trim()) setLocationData(null);
+              }}
+              onPlaceSelect={({ address, lat, lng }) => {
+                setLocationValue(address);
+                setLocationData({ address, lat, lng });
+              }}
+              disabled={locked}
+            />
+          </div>
+
           {/* Get Timing Button */}
           <button
             className={styles.getTimingsBtn}
-            disabled={selectedOccasions.length === 0 || isLoading}
+            disabled={selectedOccasions.length === 0 || isLoading || !locationData}
             onClick={() => {
               if (locked) {
                 setLocked(false);

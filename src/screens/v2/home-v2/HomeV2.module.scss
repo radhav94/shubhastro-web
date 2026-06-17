@@ -2036,6 +2036,7 @@
 .popularBox {
   border-radius: 16px;
   padding: 16px;
+  min-width: 0;
   // background: linear-gradient(114.19deg, #F6F7F8 0%, #F0EDF0 100%);
   border: 1.5px solid #FFFFFF;
   // box-shadow: 0px 4px 10px 0px #0000000F;
@@ -2087,7 +2088,9 @@
   border-radius: 20px;
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow: visible;
+  position: relative;
+  z-index: 2;
 }
 
 .calHead {
@@ -2110,6 +2113,26 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.calendarLocationField {
+  margin-top: 12px;
+  min-width: 0;
+  position: relative;
+  z-index: 10;
+
+  :global([class*="wrapper"]) {
+    min-width: 0;
+  }
+
+  :global([class*="dropdown"]) {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 180px;
+    z-index: 20;
+  }
 }
 
 .calOccasions {
@@ -2295,12 +2318,12 @@
 .calCta {
   height: 44px;
   padding: 0 32px;
-  background: #fff;
-  border: 1.5px solid #f75801;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  border: none;
   border-radius: 999px;
   font-size: 15px;
   font-weight: 600;
-  color: #f75801;
+  color: #fff;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
   align-self: center;
@@ -2312,7 +2335,7 @@
   }
 
   &:hover:not(:disabled) {
-    background: #fff7f0;
+    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
   }
 
   &:disabled {
@@ -4573,5 +4596,3 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
       font-size: 10px;
     }
 }
-
-
