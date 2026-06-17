@@ -6,7 +6,6 @@ import {
   useFetchTomorrowQuery,
   useFetchTomorrowMoonQuery,
   useFetchTomorrowNakshatraQuery,
-  useFetchWeeklyQuery, 
   useFetchYearlyQuery,
   useFetchDailyMoonQuery,
   useFetchDailySunQuery,
@@ -299,11 +298,6 @@ const HoroscopeNew = () => {
     skip: activeTab !== 'Tomorrow' || tomorrowSubTab !== 'Nakshatra'
   });
   
-  const { data: weeklyData, isLoading: weeklyLoading } = useFetchWeeklyQuery(activeSignNumber, {
-    skip: activeTab !== 'This Week' || weeklySubTab !== 'Sun'
-  });
-
-  // Weekly Moon
   const { data: weeklyMoonData, isLoading: weeklyMoonLoading } = useFetchWeeklyMoonQuery(activeSignNumber, {
     skip: activeTab !== 'This Week' || weeklySubTab !== 'Moon'
   });
@@ -317,7 +311,7 @@ const HoroscopeNew = () => {
     skip: activeTab !== 'This Year'
   });
 
-  const isLoading = dailyLoading || dailyMoonLoading || dailySunLoading || dailyNakshatraLoading || tomorrowLoading || tomorrowMoonLoading || tomorrowNakshatraLoading || weeklyLoading || weeklyMoonLoading || weeklySunLoading || yearlyLoading;
+  const isLoading = dailyLoading || dailyMoonLoading || dailySunLoading || dailyNakshatraLoading || tomorrowLoading || tomorrowMoonLoading || tomorrowNakshatraLoading || weeklyMoonLoading || weeklySunLoading || yearlyLoading;
 
   // Get current data based on active tab and sub-tab
   // Moon APIs return a different structure - normalize it
@@ -385,7 +379,7 @@ const HoroscopeNew = () => {
     }
     if (activeTab === 'This Week') {
       if (weeklySubTab === 'Moon') return normalizeMoonResponse(weeklyMoonData);
-      return weeklyData; // Sun
+      return normalizeMoonResponse(weeklySunData); // Sun
     }
     if (activeTab === 'This Year') return yearlyData;
     return null;
@@ -413,7 +407,7 @@ const HoroscopeNew = () => {
       }
     } else if ((activeTab === 'Today' && (dailyData?.response?.bot_response || dailyMoonData?.response?.bot_response || dailyNakshatraData?.response?.bot_response)) || 
                (activeTab === 'Tomorrow' && (tomorrowData?.response?.bot_response || tomorrowMoonData?.response || tomorrowNakshatraData?.response)) ||
-               (activeTab === 'This Week' && (weeklyData?.response?.bot_response || weeklyMoonData?.response?.bot_response))) {
+               (activeTab === 'This Week' && (weeklySunData?.response || weeklyMoonData?.response?.bot_response))) {
       // For daily/tomorrow/weekly, get categories from bot_response
       let bot;
       if (activeTab === 'Today') {
@@ -421,7 +415,7 @@ const HoroscopeNew = () => {
       } else if (activeTab === 'Tomorrow') {
         bot = tomorrowData?.response?.bot_response || normalizeMoonResponse(tomorrowMoonData)?.response?.bot_response || normalizeMoonResponse(tomorrowNakshatraData)?.response?.bot_response;
       } else {
-        bot = weeklyData?.response?.bot_response || weeklyMoonData?.response?.bot_response;
+        bot = normalizeMoonResponse(weeklySunData)?.response?.bot_response || normalizeMoonResponse(weeklyMoonData)?.response?.bot_response;
       }
       const dailyWeeklyCategories = Object.keys(bot).map(key => ({
         id: key,
@@ -448,7 +442,7 @@ const HoroscopeNew = () => {
         setActiveCategory('overview');
       }
     }
-  }, [activeTab, dailyData, dailyMoonData, dailyNakshatraData, tomorrowData, tomorrowMoonData, tomorrowNakshatraData, weeklyData, weeklyMoonData, yearlyData, activeCategory, dailySubTab, tomorrowSubTab, weeklySubTab]);
+  }, [activeTab, dailyData, dailyMoonData, dailyNakshatraData, tomorrowData, tomorrowMoonData, tomorrowNakshatraData, weeklySunData, weeklyMoonData, yearlyData, activeCategory, dailySubTab, tomorrowSubTab, weeklySubTab]);
 
   // Get content for active category
   const getContent = () => {
@@ -645,7 +639,6 @@ const HoroscopeNew = () => {
 
   return (
     <div className="horoscope-page">
-      <PrimaryLoader isLoading={isLoading} />
       
       {/* Page Header with Back Button */}
       <div className="horoscope-page-header">
