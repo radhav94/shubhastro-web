@@ -353,7 +353,7 @@ const HomeNew = () => {
           {/* Laal Kitaab — special card with image */}
           <div
             className={`${styles.featureCard} ${styles.laalKitaab}`}
-            onClick={() => { if (!requireAuth()) return; navigate('/laal-kitab'); }}
+            onClick={() => { navigate('/laal-kitab'); }}
             style={{
               cursor: 'pointer',
               backgroundImage: `url(${aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.images_for_web || aiServicesItems[0]?.image_url || laalKitaabImg})`,
@@ -368,7 +368,7 @@ const HomeNew = () => {
           </div>
           {/* Occult World */}
           <div className={`${styles.featureCard} ${styles.occultWorld}`}
-            onClick={() => { if (!requireAuth()) return; navigate('/occult'); }}
+            onClick={() => { navigate('/occult'); }}
             style={{ cursor: 'pointer', ...(aiServicesItems[1]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[1].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}) }}
           >
             <span className={styles.featureTag}>New</span>
