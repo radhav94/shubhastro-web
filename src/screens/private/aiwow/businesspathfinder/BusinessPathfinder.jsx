@@ -199,7 +199,7 @@ const BusinessPathfinder = () => {
                 <label>Add custom business name</label>
                 <input
                   type="text"
-                  placeholder="E.g. John Doe"
+                  placeholder=""
                   value={formData.customCategory}
                   onChange={(e) => setFormData(prev => ({ ...prev, customCategory: e.target.value }))}
                 />
