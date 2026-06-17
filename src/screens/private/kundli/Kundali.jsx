@@ -86,8 +86,8 @@ const Kundali = () => {
   // Require auth for protected tabs/subtabs
   const tab = searchParams.get('tab');
   const subtab = searchParams.get('subtab');
-  const protectedTabs = ['basic', 'dasha'];
-  const requiresAuth = (subtab && subtab.startsWith('remed')) || protectedTabs.includes(tab);
+  const protectedTabs = [];
+  const requiresAuth = (subtab && subtab.startsWith('remed'));
 
   // Get initial tab index from query params
   const getInitialTabIndex = () => {
