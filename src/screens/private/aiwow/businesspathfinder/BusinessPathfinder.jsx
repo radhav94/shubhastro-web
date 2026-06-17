@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './BusinessPathfinder.module.scss';
@@ -9,6 +9,8 @@ import { useGetBusinessPathfinderOptionsQuery } from '../../../../redux/api/aiwo
 import { ProfileManager } from '../../../../component/UI/Profile';
 import { setSelectedKundliProfile } from '../../../../redux/aiwow/aiwowSlice';
 import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
+import LocationSearch from '../../../../utils/location/locationSearchVedic';
+import useUserLocation from '../../../../utils/hooks/useUserLocation';
 
 const BusinessPathfinder = () => {
   const navigate = useNavigate();
@@ -39,9 +41,30 @@ const BusinessPathfinder = () => {
     partnership: '',
     timeline: '',
     businessInfo: '',
+    businessLocation: '',
+    businessLat: '',
+    businessLon: '',
+    businessTzone: '',
   });
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const userLocation = useUserLocation();
+  const locationManuallySet = useRef(false);
+
+  // Default the business location to the user's current location (fallback: Nagpur).
+  // Keeps syncing as the hook resolves the real place name, unless the user has typed/picked one.
+  useEffect(() => {
+    if (locationManuallySet.current) return;
+    if (userLocation.loaded && userLocation.locationName) {
+      setFormData(prev => ({
+        ...prev,
+        businessLocation: userLocation.locationName,
+        businessLat: String(userLocation.lat),
+        businessLon: String(userLocation.lon),
+        businessTzone: prev.businessTzone !== '' ? prev.businessTzone : 5.5,
+      }));
+    }
+  }, [userLocation.loaded, userLocation.locationName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCategorySelect = (cat) => {
     if (cat === 'Add Custom') {
@@ -72,6 +95,10 @@ const BusinessPathfinder = () => {
       Toast.error('Please select a timeline');
       return;
     }
+    if (!formData.businessLocation) {
+      Toast.error('Please select a business location');
+      return;
+    }
     if (!profile) {
       Toast.error('Please select a profile first');
       return;
@@ -94,10 +121,10 @@ const BusinessPathfinder = () => {
         hour: profile.hour || 0,
         min: profile.min || profile.minute || 0,
         second: 0,
-        place: profile.place,
-        lat: String(profile.lat),
-        lon: String(profile.lon),
-        tzone: profile.tzone || 5.5,
+        place: formData.businessLocation || profile.place,
+        lat: formData.businessLat || String(profile.lat),
+        lon: formData.businessLon || String(profile.lon),
+        tzone: formData.businessTzone !== '' ? formData.businessTzone : (profile.tzone || 5.5),
       };
 
       const token = localStorage.getItem('shubhtalk_customer_token');
@@ -292,6 +319,39 @@ const BusinessPathfinder = () => {
               value={formData.businessInfo}
               onChange={(e) => setFormData(prev => ({ ...prev, businessInfo: e.target.value }))}
               rows={3}
+            />
+          </div>
+        </div>
+
+        {/* 6. Business Location */}
+        <div className={styles.stepSection}>
+          <div className={styles.stepNumber}>6</div>
+          <div className={styles.stepContent}>
+            <h3 className={styles.stepTitle}>Business Location</h3>
+            <p className={styles.stepSubtitle}>Where are you planning to set up your business?</p>
+            <LocationSearch
+              value={formData.businessLocation}
+              placeholder="Search for a city..."
+              onChange={(e) => {
+                locationManuallySet.current = true;
+                setFormData(prev => ({
+                  ...prev,
+                  businessLocation: e.target.value,
+                  businessLat: '',
+                  businessLon: '',
+                  businessTzone: '',
+                }));
+              }}
+              onPlaceSelect={(place) => {
+                locationManuallySet.current = true;
+                setFormData(prev => ({
+                  ...prev,
+                  businessLocation: place.address,
+                  businessLat: String(place.lat),
+                  businessLon: String(place.lng),
+                  businessTzone: place.timezone,
+                }));
+              }}
             />
           </div>
         </div>

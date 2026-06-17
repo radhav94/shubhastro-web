@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 
-const DEFAULT_LAT = 19.132;
-const DEFAULT_LON = 72.342;
-const DEFAULT_LOCATION = "Mumbai, India";
+const DEFAULT_LAT = 21.1458;
+const DEFAULT_LON = 79.0882;
+const DEFAULT_LOCATION = "Nagpur, India";
 
 const useUserLocation = () => {
   // Get language from googtrans cookie

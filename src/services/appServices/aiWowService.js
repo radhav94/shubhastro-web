@@ -1003,12 +1003,16 @@ export const analyzeSmartMatchmaking = async (kundliIdA, kundliIdB) => {
  * @param {Array<string>} events - List of events to analyze
  * @returns {Promise} API response with timing recommendations
  */
-export const analyzeCalendarEvents = async (events, { fromDate, toDate, kundliId } = {}) => {
+export const analyzeCalendarEvents = async (events, { fromDate, toDate, kundliId, lat, lng } = {}) => {
   try {
     const payload = { events };
     if (fromDate) payload.fromDate = fromDate;
     if (toDate) payload.toDate = toDate;
     if (kundliId) payload.kundliId = kundliId;
+    if (lat != null && lng != null) {
+      payload.lat = lat;
+      payload.lon = lng;
+    }
 
     const response = await privatePost(
       'companion-suite/agentic-calendar/analyze',
