@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 import styles from './PalmistryResult.module.scss';
 import { getPalmistryResult } from '../../../../services/appServices/aiWowService';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
+import DownloadReportModal from '../components/DownloadReportModal';
+import { useAIWowDownload } from '../hooks/useAIWowDownload';
 
 const LineDropdown = ({ title, subtitle, children, isOpen, onToggle, ttsText }) => (
   <div className={styles.lineDropdown} style={{ position: 'relative' }}>
@@ -55,6 +58,20 @@ const PalmistryResult = () => {
   const reduxResultId = useSelector((state) => state.aiwow.palmistry.resultId);
   const palmImage = useSelector((state) => state.aiwow.palmistry.image);
 
+  console.log(reduxResult,"4567897654")
+
+  const downloadResultData = useMemo(() => {
+    if (!reduxResult) return null;
+    if (reduxResult.featureName) return reduxResult;
+    return { ...reduxResult, featureName: 'Palmistry Analysis' };
+  }, [reduxResult]);
+
+  const {
+    isDownloading, showDownloadModal, setShowDownloadModal,
+    isAlreadyDownloaded, downloadPrice, walletBalance,
+    handleDownloadClick, handleConfirmDownload, handleDirectDownload,
+  } = useAIWowDownload({ resultData: downloadResultData });
+
   const toggleLine = (lineName) => {
     setOpenLines(prev => ({ ...prev, [lineName]: !prev[lineName] }));
   };
@@ -71,18 +88,7 @@ const PalmistryResult = () => {
       
       // First, try Redux state
       if (reduxResult) {
-        // Handle different data structures
-        // API returns: { success: true, data: { lines, overallReading, ... } }
-        // Redux stores: result.data (which is the palmistry data)
         const palmData = reduxResult.data || reduxResult;
-        
-        console.log('PalmistryResult - Processing palm data:', {
-          hasPalmData: !!palmData,
-          palmDataType: typeof palmData,
-          palmDataKeys: palmData ? Object.keys(palmData) : [],
-          hasLines: !!(palmData?.lines),
-          hasOverallReading: !!(palmData?.overallReading)
-        });
         
         // Validate that we have the required fields
         if (palmData && (palmData.lines || palmData.overallReading)) {
@@ -94,9 +100,10 @@ const PalmistryResult = () => {
           return;
         }
         
-        // If we have resultId in URL but not in Redux, fetch from backend
-        if (resultId && resultId !== reduxResultId) {
-          await fetchFromBackend(resultId);
+        // Always fetch from backend if we have resultId to get latest pdfPath status
+        const idToFetch = resultId || reduxResultId;
+        if (idToFetch) {
+          await fetchFromBackend(idToFetch);
         }
         return;
       }
@@ -121,6 +128,10 @@ const PalmistryResult = () => {
       
       if (result.success) {
         const data = result.data?.data || result.data;
+        // Preserve pdfPath from the response even if nested differently
+        if (result.data?.pdfPath && !data?.pdfPath) {
+          data.pdfPath = result.data.pdfPath;
+        }
         setResultData(data);
       } else {
         setError(result.error || 'Failed to load result');
@@ -245,13 +256,13 @@ const PalmistryResult = () => {
           </svg>
         </button>
         <h1 className={styles.title}>Palmistry Analysis</h1>
-        <button className={styles.downloadButton} onClick={() => navigate('/ai-wow', { state: { tab: 'results' } })}>
+        <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          Download
+          {isDownloading ? "Downloading..." : "Download"}
         </button>
         </div>
       </header>
@@ -975,6 +986,17 @@ const PalmistryResult = () => {
           Consult with Expert Astrologer
         </button>
       </div>
+
+      <DownloadReportModal
+        isOpen={showDownloadModal}
+        onClose={() => setShowDownloadModal(false)}
+        onDownload={handleConfirmDownload}
+        featureName="Palmistry Analysis Report"
+        downloadCost={downloadPrice}
+        walletBalance={walletBalance ?? 0}
+        isDownloading={isDownloading}
+        showLanguageSelection={false}
+      />
     </div>
     </>
   );

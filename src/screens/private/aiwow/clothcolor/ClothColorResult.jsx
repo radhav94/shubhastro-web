@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styles from './ClothColorResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
+import DownloadReportModal from '../components/DownloadReportModal';
+import { useAIWowDownload } from '../hooks/useAIWowDownload';
 
 const ClothColorResult = () => {
   const navigate = useNavigate();
@@ -16,6 +18,18 @@ const ClothColorResult = () => {
   const reduxResult = useSelector((state) => state.aiwow.clothColor.result);
   const reduxImage = useSelector((state) => state.aiwow.clothColor.image);
   const reduxFormData = useSelector((state) => state.aiwow.clothColor.formData);
+
+  const downloadResultData = useMemo(() => {
+    if (!reduxResult) return null;
+    if (reduxResult.featureName) return reduxResult;
+    return { ...reduxResult, featureName: 'Clothes Color Analysis' };
+  }, [reduxResult]);
+
+  const {
+    isDownloading, showDownloadModal, setShowDownloadModal,
+    isAlreadyDownloaded, downloadPrice, walletBalance,
+    handleDownloadClick, handleConfirmDownload,
+  } = useAIWowDownload({ resultData: downloadResultData });
 
   useEffect(() => {
     console.log('ClothColorResult - Loading result:', {
@@ -355,6 +369,14 @@ const ClothColorResult = () => {
             </svg>
           </button>
           <h1 className={styles.title}>Color Analysis</h1>
+          <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {isDownloading ? "Downloading..." : "Download"}
+          </button>
         </div>
       </header>
 
@@ -398,6 +420,17 @@ const ClothColorResult = () => {
           Consult with Expert Astrologer
         </button>
       </div>
+
+      <DownloadReportModal
+        isOpen={showDownloadModal}
+        onClose={() => setShowDownloadModal(false)}
+        onDownload={handleConfirmDownload}
+        featureName="Clothes Colour Analysis Report"
+        downloadCost={downloadPrice}
+        walletBalance={walletBalance ?? 0}
+        isDownloading={isDownloading}
+        showLanguageSelection={false}
+      />
     </div>
     </>
   );

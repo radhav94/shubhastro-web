@@ -16,14 +16,21 @@ export const aiwowApi = privateRequestNew.injectEndpoints({
         method: "GET",
         headers: { accept: "application/json" },
       }),
+      providesTags: (result, error, { kundliId }) => [
+        { type: "AiHistory", id: kundliId },
+        "AiHistory",
+      ],
       serializeQueryArgs: ({ queryArgs }) => queryArgs.kundliId,
       merge: (currentCache, newItems, { arg }) => {
         if (arg.page === 1) return newItems;
+        // Deduplicate by _id when merging paginated results
+        const existingIds = new Set((currentCache?.data?.history || []).map((h) => h._id));
+        const uniqueNewItems = (newItems?.data?.history || []).filter((h) => !existingIds.has(h._id));
         return {
           ...newItems,
           data: {
             ...newItems.data,
-            history: [...(currentCache?.data?.history || []), ...(newItems?.data?.history || [])],
+            history: [...(currentCache?.data?.history || []), ...uniqueNewItems],
           },
         };
       },
@@ -48,7 +55,28 @@ export const aiwowApi = privateRequestNew.injectEndpoints({
       }),
       keepUnusedDataFor: 300,
     }),
+
+    // Fetch PDF URL for a given history item (handles payment deduction server-side)
+    downloadReportPdf: builder.mutation({
+      query: ({ historyId, language }) => {
+        const params = new URLSearchParams({ historyId });
+        if (language) params.append("language", language);
+        return {
+          url: `ai-history/pdf?${params.toString()}`,
+          method: "GET",
+          headers: { accept: "application/json" },
+        };
+      },
+      invalidatesTags: ["AiHistory"],
+    }),
   }),
 });
 
-export const { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery, useLazyGetChargesQuery, useGetBusinessPathfinderOptionsQuery } = aiwowApi;
+export const {
+  useGetAiWowPageDataQuery,
+  useGetAiHistoryQuery,
+  useGetChargesQuery,
+  useLazyGetChargesQuery,
+  useGetBusinessPathfinderOptionsQuery,
+  useDownloadReportPdfMutation,
+} = aiwowApi;
