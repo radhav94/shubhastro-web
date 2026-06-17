@@ -135,9 +135,11 @@ $font-primary: "Poppins", sans-serif;
 .author {
   font-weight: 500;
   color: #333;
+  text-transform: capitalize;
 }
 
 .date {
+  color: #555;
   position: relative;
   padding-left: 12px;
 
@@ -172,6 +174,63 @@ $font-primary: "Poppins", sans-serif;
     background: #fff4ec;
     border-color: $color-primary;
   }
+}
+
+.shareWrap {
+  position: relative;
+  display: inline-flex;
+
+  &:hover .shareIconSocial {
+    display: flex;
+  }
+}
+
+.shareIconSocial {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  padding-bottom: 8px;
+  gap: 6px;
+  z-index: 10;
+
+  .socialIconWrapper {
+    width: 32px;
+    height: 32px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    &:hover {
+      background: #f0f0f0;
+    }
+
+    svg {
+      width: 15px;
+      height: 15px;
+      color: #333;
+    }
+  }
+}
+
+.copiedText {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .bannerImage {
@@ -302,8 +361,18 @@ $font-primary: "Poppins", sans-serif;
   color: $color-muted;
 }
 
+.popularShareWrap {
+  position: relative;
+  display: inline-flex;
+
+  &:hover .shareIconSocial {
+    display: flex;
+  }
+}
+
 .popularShare {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
