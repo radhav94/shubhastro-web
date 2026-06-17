@@ -411,7 +411,7 @@ const HoroscopeNew = () => {
       // For daily/tomorrow/weekly, get categories from bot_response
       let bot;
       if (activeTab === 'Today') {
-        bot = dailyData?.response?.bot_response || dailyMoonData?.response?.bot_response || dailyNakshatraData?.response?.bot_response;
+        bot = dailyData?.response?.bot_response || normalizeMoonResponse(dailyMoonData)?.response?.bot_response || normalizeMoonResponse(dailyNakshatraData)?.response?.bot_response;
       } else if (activeTab === 'Tomorrow') {
         bot = tomorrowData?.response?.bot_response || normalizeMoonResponse(tomorrowMoonData)?.response?.bot_response || normalizeMoonResponse(tomorrowNakshatraData)?.response?.bot_response;
       } else {
