@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLazyGeoSearchQuery } from "../../redux/api/geoApi";
 import styles from "./locationSearch.module.scss";
 
-const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder }) => {
+const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled }) => {
   const [triggerGeoSearch, { data, isFetching }] = useLazyGeoSearchQuery();
   const [open, setOpen] = useState(false);
   const selectionMade = useRef(false); // Track if a place is selected
@@ -28,42 +28,13 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder }) => {
     try {
       const lat = Number(item.coordinates[0]);
       const lng = Number(item.coordinates[1]);
-      
-      // Get language from googtrans cookie for localized name
-      const cookie = document.cookie.split("; ").find((row) => row.startsWith("googtrans="));
-      let lang = "en";
-      if (cookie) {
-        const value = decodeURIComponent(cookie.split("=")[1]);
-        const parts = value.split("/").filter(Boolean);
-        if (parts.length > 1) lang = parts[1];
-      }
 
-      // If non-English, fetch localized name
-      if (lang !== "en") {
-        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=10&accept-language=${lang}`)
-          .then((res) => res.json())
-          .then((data) => {
-            const city = data?.address?.city || data?.address?.town || data?.address?.state_district || "";
-            const country = data?.address?.country || "";
-            const localizedName = [city, country].filter(Boolean).join(", ") || item.full_name;
-            onPlaceSelect({
-              address: localizedName,
-              lat,
-              lng,
-              timezone: item.tz != null ? Number(item.tz) : 5.5,
-            });
-          })
-          .catch(() => {
-            onPlaceSelect({ address: item.full_name, lat, lng, timezone: item.tz != null ? Number(item.tz) : 5.5 });
-          });
-      } else {
-        onPlaceSelect({
-          address: item.full_name,
-          lat,
-          lng,
-          timezone: item.tz != null ? Number(item.tz) : 5.5,
-        });
-      }
+      onPlaceSelect({
+        address: item.full_name,
+        lat,
+        lng,
+        timezone: item.tz != null ? Number(item.tz) : 5.5,
+      });
 
       selectionMade.current = true;
       setOpen(false);
@@ -73,7 +44,7 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder }) => {
   };
 
   return (
-    <div className={styles.wrapper}>
+    <div className={`${styles.wrapper} notranslate`}>
       <input
         type="text"
         value={value}
@@ -81,6 +52,7 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder }) => {
         placeholder={placeholder || "Search for a city..."}
         className={styles.input}
         autoComplete="off"
+        disabled={disabled}
       />
 
       {open && (
@@ -102,7 +74,9 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder }) => {
                 <div
                   key={`${item.full_name || index}-${index}`}
                   className={styles.item}
-                  onClick={() => handleSelect({ ...item, full_name: displayName })}
+                  onClick={(e) => {
+                    handleSelect({ ...item, full_name: displayName });
+                  }}
                 >
                   <strong>{displayName}</strong>
                 </div>

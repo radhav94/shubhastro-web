@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FiChevronRight, FiCalendar, FiChevronLeft } from "react-icons/fi";
+import LocationSearch from "../../../utils/location/locationSearchVedic";
+import useUserLocation from "../../../utils/hooks/useUserLocation";
 
 const OCCASIONS = [
   'Marriage', 'Job Interview', 'Business Launch', 'House Purchase',
@@ -23,6 +25,17 @@ const AgenticCalendarV2 = ({ styles }) => {
   const [customToDate, setCustomToDate] = useState(null);
   const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
+  const [locationValue, setLocationValue] = useState('');
+  const [locationData, setLocationData] = useState(null);
+  const userLocation = useUserLocation();
+
+  // Set location from browser geolocation
+  useEffect(() => {
+    if (userLocation.loaded && userLocation.locationName) {
+      setLocationValue(userLocation.locationName);
+      setLocationData({ address: userLocation.locationName, lat: userLocation.lat, lng: userLocation.lon });
+    }
+  }, [userLocation.loaded, userLocation.locationName]);
 
   const allOccasions = [...OCCASIONS, ...customOccasions];
 
@@ -57,6 +70,7 @@ const AgenticCalendarV2 = ({ styles }) => {
         period: selectedPeriod,
         customDate: customFromDate ? customFromDate.toISOString() : null,
         customToDate: customToDate ? customToDate.toISOString() : null,
+        location: locationData,
       },
     });
   };
@@ -143,10 +157,28 @@ const AgenticCalendarV2 = ({ styles }) => {
           </button>
         </div>
 
+        {/* Location */}
+        <div className={styles.calendarLocationField}>
+          <label style={{ fontSize: 15, fontWeight: 600, color: '#1f2937', display: 'block', marginBottom: 6 }}>
+            Location
+          </label>
+          <LocationSearch
+            value={locationValue}
+            onChange={(e) => {
+              setLocationValue(e.target.value);
+              if (!e.target.value.trim()) setLocationData(null);
+            }}
+            onPlaceSelect={({ address, lat, lng }) => {
+              setLocationValue(address);
+              setLocationData({ address, lat, lng });
+            }}
+          />
+        </div>
+
         {/* CTA */}
         <button
           className={styles.calCta}
-          disabled={selectedOccasions.length === 0}
+          disabled={selectedOccasions.length === 0 || !locationData}
           onClick={handleGetMuhurat}
         >
           View Muhuratas
