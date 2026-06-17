@@ -485,8 +485,16 @@ const LiveView = (props) => {
 
   const isHost = ROLE === "host";
   const safeRemoteUsers = remoteUsers.filter((u) => u);
-  const shouldRenderStream = !!props.channel && isConnected && !hostLeft && !roomEnded && safeRemoteUsers.length > 0;
-  const isAstrologerLive = shouldRenderStream;
+  // Connected to a live channel (joined Agora, room not ended / host not gone).
+  // This is independent of whether a publisher (video) is present yet — matches
+  // the iOS app, which shows the live UI on join and a placeholder when there's
+  // no video.
+  const isLiveConnected = !!props.channel && isConnected && !hostLeft && !roomEnded;
+  // Whether we actually have a remote publisher to render video for.
+  const shouldRenderStream = isLiveConnected && safeRemoteUsers.length > 0;
+  // Show the full live UI (astrologer bar, chat, action bar) as soon as we are
+  // connected to the live room, even if no video has arrived yet.
+  const isAstrologerLive = isLiveConnected;
   const viewerCount = participantCount || (safeRemoteUsers?.length || 0) + 1;
 
   const {
@@ -1295,8 +1303,17 @@ const LiveView = (props) => {
               </div>
             )}
 
-            {/* WAITING — no live video available */}
-            {!isHost && !shouldRenderStream && (
+            {/* Connected to the live room but no publisher/video yet.
+                Mirror the iOS app: stay inside the live experience and show a
+                placeholder background instead of a blocking "waiting" screen. */}
+            {!isHost && isLiveConnected && safeRemoteUsers.length === 0 && (
+              <div className="camera-off-overlay">
+                <img src={astrologerOfflineBg} alt="" className="camera-off-bg" />
+              </div>
+            )}
+
+            {/* WAITING — not connected yet, or host left / room ended */}
+            {!isHost && !isLiveConnected && (
               <div className="waiting-text">
                 <img src={astrologerOfflineBg} alt="" className="waiting-bg-img" />
                 <span className="waiting-text-label">

@@ -175,8 +175,15 @@ export const useLiveStreaming = (client, ROLE, channel, rejoinKey = 0, { onChann
           const isUidConflict = err?.code === "UID_CONFLICT" ||
             err?.message?.includes("UID_CONFLICT");
 
-          if (isUidConflict && attempt < MAX_RETRIES - 1) {
-            console.warn(`UID_CONFLICT on attempt ${attempt + 1}, retrying in ${RETRY_DELAY}ms...`);
+          if (attempt < MAX_RETRIES - 1) {
+            // Any join failure — a UID_CONFLICT, or (commonly after a page
+            // reload) a stale/invalid reconnect token — should fall back to a
+            // FRESH viewer token. Clearing the saved session makes the next
+            // attempt skip the reconnect-token branch and call getViewerToken,
+            // which is the path that reliably connects.
+            console.warn(
+              `Agora join failed on attempt ${attempt + 1} (${isUidConflict ? "UID_CONFLICT" : err?.message || err}); clearing session and retrying with a fresh token in ${RETRY_DELAY}ms...`
+            );
             clearViewerSession();
             // Leave again in case partial join happened
             await leaveChannel();
