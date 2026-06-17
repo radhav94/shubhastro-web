@@ -134,8 +134,8 @@ const BasicContent = (props) => {
     Tithi: birthDetails?.panchang?.tithi || "--",
     Yoga: birthDetails?.panchang?.yoga || "--",
     Karana: birthDetails?.panchang?.karana || "--",
-    Ayanamsha: birthDetails?.panchang?.ayanamsa ? birthDetails.panchang.ayanamsa.toFixed(5) : "--",
-    "Ayanamsha Type": birthDetails?.panchang?.ayanamsa_name || "--",
+    Ayanamsa: birthDetails?.panchang?.ayanamsa ? birthDetails.panchang.ayanamsa.toFixed(5) : "--",
+    "Ayanamsa Type": birthDetails?.panchang?.ayanamsa_name || "--",
   };
 
   const panchangDetailsData = {

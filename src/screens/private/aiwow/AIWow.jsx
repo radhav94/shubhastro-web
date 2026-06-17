@@ -1,17 +1,16 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import styles from "./AIWow.module.scss";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import SeoHelmet from "../../../component/SeoHelmet";
 import toast from "react-hot-toast";
-import axios from "axios";
 import FeatureCard from "./components/FeatureCard";
 import MobileAppModal from "./components/MobileAppModal";
 import ResultHistoryCard from "./components/ResultHistoryCard";
 import DownloadReportModal from "./components/DownloadReportModal";
 import { ProfileManager } from "../../../component/UI/Profile";
 import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
-import { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery } from "../../../redux/api/aiwow/aiwowApi";
+import { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery, useDownloadReportPdfMutation } from "../../../redux/api/aiwow/aiwowApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
@@ -53,6 +52,7 @@ const AIWow = () => {
   const [hasMoreHistory, setHasMoreHistory] = useState(true);
 
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
+  const [downloadReportPdf] = useDownloadReportPdfMutation();
 
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
   const headerSelectedKundli = useSelector((state) => state.kundli.selectedKundli);
@@ -80,8 +80,23 @@ const AIWow = () => {
 
   const profiles = data?.data || [];
   const aiwowSections = aiwowData?.data?.list || [];
-  const historyList = historyData?.data?.history || [];
+  const rawHistoryList = historyData?.data?.history || [];
   const charges = chargesData?.data || null;
+
+  // Deduplicate history — if same featureType + same summary within 5 seconds, keep the one with pdfPath
+  const historyList = useMemo(() => {
+    const seen = new Map();
+    for (const item of rawHistoryList) {
+      const time = new Date(item.createdAt).getTime();
+      // Group by featureType + rounded timestamp (5s window)
+      const key = `${item.featureType}-${Math.floor(time / 5000)}`;
+      const existing = seen.get(key);
+      if (!existing || (item.pdfPath && !existing.pdfPath)) {
+        seen.set(key, item);
+      }
+    }
+    return Array.from(seen.values());
+  }, [rawHistoryList]);
 
   // Check if more pages available
   useEffect(() => {
@@ -227,14 +242,8 @@ const AIWow = () => {
   };
 
   const fetchPdfUrl = async (featureId, language) => {
-    const BASE_URL = "/main";
-    const params = new URLSearchParams({ historyId: featureId });
-    if (language) params.append("language", language);
-    const response = await axios.get(
-      `${BASE_URL}/api/ai-history/pdf?${params.toString()}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    const pdfUrl = response.data?.data?.pdfUrl;
+    const result = await downloadReportPdf({ historyId: featureId, language }).unwrap();
+    const pdfUrl = result?.data?.pdfUrl;
     if (!pdfUrl) throw new Error("PDF URL not found in response");
     return pdfUrl;
   };
@@ -291,7 +300,8 @@ const AIWow = () => {
       setPaidToFreeIds(prev => ({ ...prev, [featureId]: true }));
       setDownloadModal({ open: false, featureId: null, featureName: "" });
       refreshWallet();
-      // Refetch history so API returns updated pdfPath (shows "Free" on reload)
+      // Reset to page 1 and refetch to get updated pdfPath (shows "Free" on reload)
+      setHistoryPage(1);
       refetchHistory();
     } catch {
       toast.error("Failed to download PDF", { id: "pdf-download" });

@@ -2,8 +2,12 @@ import { memo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { sortContentByOrder } from "../sectionRendererV2";
 import SectionTitle from "./shared/SectionTitle";
+import useRequireAuth from "../../../../utils/hooks/useRequireAuth";
 
 const COMMUNITY_AVATARS_FALLBACK = [];
+
+// Routes that require authentication
+const AUTH_REQUIRED_PATHS = ["/laal-kitab", "/occult"];
 
 /**
  * Mobile-only AI Services 2×2 grid.
@@ -11,14 +15,18 @@ const COMMUNITY_AVATARS_FALLBACK = [];
  */
 const AiServicesSection = memo(({ sectionData, styles, onlineCount }) => {
   const navigate = useNavigate();
+  const requireAuth = useRequireAuth();
   const items = sortContentByOrder(sectionData?.content || []);
 
   const handleCardClick = useCallback((item) => {
     const url = item?.redirect_url || item?.link;
     if (url) {
+      if (AUTH_REQUIRED_PATHS.some(path => url.startsWith(path))) {
+        if (!requireAuth()) return;
+      }
       navigate(url);
     }
-  }, [navigate]);
+  }, [navigate, requireAuth]);
 
   if (!items.length) return null;
 

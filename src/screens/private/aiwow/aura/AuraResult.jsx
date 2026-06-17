@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import toast from 'react-hot-toast';
-import axios from 'axios';
 import styles from './AuraResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
-import { useLazyGetChargesQuery } from '../../../../redux/api/aiwow/aiwowApi';
-import { useWalletBalance } from '../../wallet/useWalletBalance';
 import DownloadReportModal from '../components/DownloadReportModal';
+import { useAIWowDownload } from '../hooks/useAIWowDownload';
 
 const AuraResult = () => {
   const navigate = useNavigate();
@@ -20,8 +17,6 @@ const AuraResult = () => {
   const [expandedAstrological, setExpandedAstrological] = useState(false);
   const [expandedStrengths, setExpandedStrengths] = useState(false);
   const [expandedRecommendations, setExpandedRecommendations] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [showDownloadModal, setShowDownloadModal] = useState(false);
 
   // Helper to convert hex color codes to readable names for TTS
   const getColorName = (hex) => {
@@ -41,68 +36,17 @@ const AuraResult = () => {
   const analysisData = useSelector((state) => state.aiwow.aura.result);
   const auraImage = useSelector((state) => state.aiwow.aura.image);
 
-  const [triggerGetCharges, { data: chargesData }] = useLazyGetChargesQuery();
-  const { balance: walletBalance, refreshWallet } = useWalletBalance();
+  const downloadResultData = useMemo(() => {
+    if (!analysisData) return null;
+    if (analysisData.featureName) return analysisData;
+    return { ...analysisData, featureName: 'Aura Analysis' };
+  }, [analysisData]);
 
-  useEffect(() => {
-    triggerGetCharges();
-  }, []);
-
-  const getDownloadCost = () => {
-    const charges = chargesData?.data;
-    if (!charges) return null;
-    const slug = "aura-photography-report";
-    for (const section of charges) {
-      if (!Array.isArray(section?.list)) continue;
-      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug);
-      if (match) return match.amount ?? 0;
-    }
-    return null;
-  };
-
-  const downloadPrice = getDownloadCost();
-
-  const handleDownloadClick = () => {
-    refreshWallet();
-    setShowDownloadModal(true);
-  };
-
-  const handleConfirmDownload = async () => {
-    const historyId = analysisData?.historyId || analysisData?._id || analysisData?.data?.historyId;
-    if (!historyId) {
-      toast.error("PDF not available for this report");
-      return;
-    }
-    setIsDownloading(true);
-    try {
-      toast.loading("Downloading PDF...", { id: "aura-pdf" });
-      const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
-      const token = localStorage.getItem("shubhtalk_customer_token");
-      const response = await axios.get(
-        `${BASE_URL}/api/ai-history/pdf?historyId=${historyId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const pdfUrl = response.data?.data?.pdfUrl;
-      if (!pdfUrl) throw new Error("PDF URL not found");
-      const res = await fetch(pdfUrl);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = "aura-photography-report.pdf";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(blobUrl);
-      toast.success("PDF downloaded!", { id: "aura-pdf" });
-      setShowDownloadModal(false);
-      refreshWallet();
-    } catch {
-      toast.error("Failed to download PDF", { id: "aura-pdf" });
-    } finally {
-      setIsDownloading(false);
-    }
-  };
+  const {
+    isDownloading, showDownloadModal, setShowDownloadModal,
+    isAlreadyDownloaded, downloadPrice, walletBalance,
+    handleDownloadClick, handleConfirmDownload,
+  } = useAIWowDownload({ resultData: downloadResultData });
 
   useEffect(() => {
     console.log('AuraResult - Loading result:', {
@@ -267,7 +211,7 @@ const AuraResult = () => {
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            {isDownloading ? "Downloading..." : "Download Report"}
+            {isDownloading ? "Downloading..." : "Download"}
           </button>
         </div>
       </header>
@@ -659,7 +603,7 @@ const AuraResult = () => {
         onClose={() => setShowDownloadModal(false)}
         onDownload={handleConfirmDownload}
         featureName="Aura Photography Report"
-        downloadCost={downloadPrice ?? 0}
+        downloadCost={downloadPrice}
         walletBalance={walletBalance ?? 0}
         isDownloading={isDownloading}
         showLanguageSelection={false}

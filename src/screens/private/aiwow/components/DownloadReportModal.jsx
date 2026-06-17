@@ -30,17 +30,21 @@ const DownloadReportModal = ({
 
   // Check if selected language is already generated (free)
   const isLangFree = generatedLanguages && selectedLang in generatedLanguages && !!generatedLanguages[selectedLang];
-  const effectiveCost = isLangFree ? 0 : downloadCost;
+  const isFreeDownload = isLangFree || downloadCost === 0;
+  const effectiveCost = isFreeDownload ? 0 : downloadCost;
+  const isLoadingCost = downloadCost === null || downloadCost === undefined;
 
-  const canAfford = isLangFree || walletBalance >= downloadCost;
-  const deductionText = isLangFree
+  const canAfford = isFreeDownload || isLoadingCost || walletBalance >= downloadCost;
+  const deductionText = isFreeDownload
     ? "Already generated — Free download"
-    : canAfford
-      ? `₹${downloadCost} will be deducted from your wallet`
-      : `Insufficient balance. Please recharge ₹${downloadCost - walletBalance} more`;
+    : isLoadingCost
+      ? "Loading price..."
+      : canAfford
+        ? `₹${downloadCost} will be deducted from your wallet`
+        : `Insufficient balance. Please recharge ₹${downloadCost - walletBalance} more`;
 
   const handleDownload = () => {
-    if (!canAfford || isDownloading) return;
+    if (!canAfford || isDownloading || isLoadingCost) return;
     onDownload(selectedLang);
   };
 
@@ -74,7 +78,7 @@ const DownloadReportModal = ({
           <div className={styles.costRow}>
             <div>
               <span className={styles.costLabel}>Download Cost</span>
-              <span className={styles.costValue}>{isLangFree ? "Free" : `₹${downloadCost}`}</span>
+              <span className={styles.costValue}>{isFreeDownload ? "Free" : isLoadingCost ? "Loading..." : `₹${downloadCost}`}</span>
             </div>
             <div className={styles.balanceBlock}>
               <span className={styles.costLabel}>Your Balance</span>

@@ -2326,15 +2326,22 @@
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
   align-self: center;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
   @media (width <= 767px) {
     height: 34px;
     padding:0 20px;
     font-size: 13px;
   }
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+  }
+
+  &:disabled {
+    border-color: #d1d5db;
+    color: #9ca3af;
+    background: #f3f4f6;
+    cursor: not-allowed;
   }
 }
 
