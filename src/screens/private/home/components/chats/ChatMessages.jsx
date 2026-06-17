@@ -16,7 +16,7 @@ import LinkPreview from "./LinkPreview";
 import { detectURL } from "../../../../../utils/helper/linkPreview";
 import { getAttachmentDisplayName } from "../../../../../utils/helper/getAttachmentDisplayName";
 
-const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, customerName }) => {
+const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, customerName, onScroll, isLoadingMore }) => {
   const [iframeSrc, setIframeSrc] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const navigate = useNavigate();
@@ -273,7 +273,15 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
 
   return (
     <>
-      <div className={styles.messages} ref={messagesRef}>
+      <div className={styles.messages} ref={messagesRef} onScroll={onScroll}>
+        {isLoadingMore && (
+          <div className={styles.loadingMore}>
+            <span className={styles.loadingDot}></span>
+            <span className={styles.loadingDot}></span>
+            <span className={styles.loadingDot}></span>
+            <span className={styles.loadingText}>Loading older messages...</span>
+          </div>
+        )}
         {Object.entries(messageGroups).map(([date, msgs], groupIndex) => (
           <div key={`${date}-${groupIndex}`} className={styles.messageGroup}>
             <div className={styles.dateHeader}>
