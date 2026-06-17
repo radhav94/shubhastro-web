@@ -91,7 +91,7 @@ const FeedbackModal = ({
           value={review}
           onChange={(e) => setReview(e.target.value)}
           name="comment"
-          rows={6}
+          rows={3}
           aria-label="Write your review"
         />
 
