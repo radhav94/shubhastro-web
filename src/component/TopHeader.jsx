@@ -491,38 +491,6 @@ const TopHeader = () => {
               Shubh AI
             </NavLink> */}
             <NavLink
-              to="/blog"
-              className={({ isActive }) =>
-                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-              }
-            >
-              Blogs
-            </NavLink>
-            {/* <NavLink
-              to="/explore"
-              className={({ isActive }) =>
-                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-              }
-            >
-              Explore
-            </NavLink> */}
-            {/* <NavLink
-              to="/shop"
-              className={({ isActive }) =>
-                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-              }
-            >
-              ShubhMall
-            </NavLink> */}
-            {/* <NavLink
-              to={PATH.privateRoutes.KUNDLI.path}
-              className={({ isActive }) =>
-                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-              }
-            >
-              Kundli
-            </NavLink> */}
-            <NavLink
               to="/match-making"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
@@ -573,6 +541,14 @@ const TopHeader = () => {
             <CalculatorsDropdown />
             <BestAstrologersDropdown />
             <BestAstrologersGlobalDropdown />
+            <NavLink
+              to="/blog"
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Blog
+            </NavLink>
           </nav>
         </div>
 
@@ -660,15 +636,6 @@ const TopHeader = () => {
                 ShubhMall
               </NavLink>
             )}
-            <NavLink
-              to="/blog"
-              onClick={() => setIsDrawerOpen(false)}
-              className={({ isActive }) =>
-                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
-              }
-            >
-              Blogs
-            </NavLink>
             {/* <NavLink
               to="/explore"
               onClick={() => setIsDrawerOpen(false)}
@@ -753,6 +720,15 @@ const TopHeader = () => {
             <MobileCalculatorsAccordion onClose={() => setIsDrawerOpen(false)} isExpanded={activeAccordion === 'calculators'} onToggle={() => setActiveAccordion(prev => prev === 'calculators' ? null : 'calculators')} />
             <MobileBestAstrologersAccordion onClose={() => setIsDrawerOpen(false)} isExpanded={activeAccordion === 'bestIndia'} onToggle={() => setActiveAccordion(prev => prev === 'bestIndia' ? null : 'bestIndia')} />
             <MobileBestAstrologersGlobalAccordion onClose={() => setIsDrawerOpen(false)} isExpanded={activeAccordion === 'bestGlobal'} onToggle={() => setActiveAccordion(prev => prev === 'bestGlobal' ? null : 'bestGlobal')} />
+            <NavLink
+              to="/blog"
+              onClick={() => setIsDrawerOpen(false)}
+              className={({ isActive }) =>
+                `${styles.headerNavLink} ${isActive ? styles.active : ""}`
+              }
+            >
+              Blog
+            </NavLink>
             <NavLink
               to="/live"
               onClick={() => setIsDrawerOpen(false)}

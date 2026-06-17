@@ -322,6 +322,14 @@ $font-primary: "Poppins", sans-serif;
   gap: 16px;
   margin-top: 32px;
   flex-wrap: wrap;
+    background: rgb(255 255 255 / 60%);
+    border: 1px solid #FFFFFF;
+    opacity: 1;
+    border-radius: 16px;
+    padding-top: 10px;
+    padding-right: 20px;
+    padding-bottom: 10px;
+    padding-left: 20px;
 
   // Pagination component has its own vertical padding; trim it here
   > div:last-child {
