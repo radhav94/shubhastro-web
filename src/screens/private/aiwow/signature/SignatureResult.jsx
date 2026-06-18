@@ -319,7 +319,7 @@ const SignatureResult = () => {
       {resultData.personality.personalityTraits && resultData.personality.personalityTraits.length > 0 && (
         <div className={styles.traitsCard} style={{ position: 'relative' }}>
           <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-            <TTSButton text={`Personality Traits. ${resultData.personality.personalityTraits.map(t => t.trait + ': ' + t.score + ' percent. ' + (t.description || '')).join('. ')}`} />
+            <TTSButton text={`Personality Traits. ${resultData.personality.personalityTraits.map(t => t.trait + '. ' + (t.description || '')).join('. ')}`} />
           </span>
           <h3 className={styles.cardTitle}>Personality Traits</h3>
           <div className={styles.traitsGrid}>
@@ -346,7 +346,7 @@ const SignatureResult = () => {
         {resultData.personality.leadershipQualities && (
           <div className={styles.leadershipCard} style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Leadership Qualities. Score: ${resultData.personality.leadershipQualities.score} percent. ${resultData.personality.leadershipQualities.description || ''}${resultData.personality.leadershipQualities.strengths?.length > 0 ? '. Strengths: ' + resultData.personality.leadershipQualities.strengths.join(', ') : ''}`} />
+              <TTSButton text={`Leadership Qualities. ${resultData.personality.leadershipQualities.description || ''}${resultData.personality.leadershipQualities.strengths?.length > 0 ? '. Strengths: ' + resultData.personality.leadershipQualities.strengths.join(', ') : ''}`} />
             </span>
             <h3 className={styles.cardTitle}>Leadership Qualities</h3>
             <div className={styles.scoreHeader}>
@@ -447,7 +447,7 @@ const SignatureResult = () => {
         {resultData.personality.socialConfidence && (
           <div className={styles.socialCard} style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Social Confidence. Score: ${resultData.personality.socialConfidence.score} percent. Level: ${resultData.personality.socialConfidence.level}. ${resultData.personality.socialConfidence.description || ''}${resultData.personality.socialConfidence.characteristics?.length > 0 ? '. Characteristics: ' + resultData.personality.socialConfidence.characteristics.join(', ') : ''}`} />
+              <TTSButton text={`Social Confidence. Level: ${resultData.personality.socialConfidence.level}. ${resultData.personality.socialConfidence.description || ''}${resultData.personality.socialConfidence.characteristics?.length > 0 ? '. Characteristics: ' + resultData.personality.socialConfidence.characteristics.join(', ') : ''}`} />
             </span>
             <h3 className={styles.cardTitle}>Social Confidence</h3>
             <div className={styles.scoreHeader}>
