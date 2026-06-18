@@ -3,7 +3,7 @@ import { privateRequestNew } from "../../../services/appServices/privateRequestN
 export const callHistoryApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
     getCallHistory: builder.query({
-      query: ({ userId, page = 1, limit = 30, sortOrder, month, year }) => ({
+      query: ({ userId, page = 1, limit = 30, sortOrder, month, year, filterBy }) => ({
         url: "callSessions/callHistory",
         method: "GET",
         params: {
@@ -13,6 +13,7 @@ export const callHistoryApi = privateRequestNew.injectEndpoints({
           ...(sortOrder && { sortOrder }),
           ...(month && { month }),
           ...(year && { year }),
+          ...(filterBy && { filterBy }),
         },
       }),
       providesTags: ["CallHistory"],

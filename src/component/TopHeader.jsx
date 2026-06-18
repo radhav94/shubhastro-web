@@ -539,8 +539,6 @@ const TopHeader = () => {
               Occult
             </NavLink>
             <CalculatorsDropdown />
-            <BestAstrologersDropdown />
-            <BestAstrologersGlobalDropdown />
             <NavLink
               to="/blog"
               className={({ isActive }) =>
@@ -718,8 +716,6 @@ const TopHeader = () => {
               Occult
             </NavLink>
             <MobileCalculatorsAccordion onClose={() => setIsDrawerOpen(false)} isExpanded={activeAccordion === 'calculators'} onToggle={() => setActiveAccordion(prev => prev === 'calculators' ? null : 'calculators')} />
-            <MobileBestAstrologersAccordion onClose={() => setIsDrawerOpen(false)} isExpanded={activeAccordion === 'bestIndia'} onToggle={() => setActiveAccordion(prev => prev === 'bestIndia' ? null : 'bestIndia')} />
-            <MobileBestAstrologersGlobalAccordion onClose={() => setIsDrawerOpen(false)} isExpanded={activeAccordion === 'bestGlobal'} onToggle={() => setActiveAccordion(prev => prev === 'bestGlobal' ? null : 'bestGlobal')} />
             <NavLink
               to="/blog"
               onClick={() => setIsDrawerOpen(false)}

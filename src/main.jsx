@@ -62,7 +62,7 @@ import { createRoot } from "react-dom/client";
 
 import App from "./App.jsx";
 import "./global.css";
-import { Toaster } from "react-hot-toast";
+import { Toaster, ToastBar, toast } from "react-hot-toast";
 import { Provider } from "react-redux";
 import { store, persistor } from "./store/store.js";
 import { PersistGate } from "redux-persist/integration/react";
@@ -98,7 +98,39 @@ createRoot(document.getElementById("root")).render(
               zIndex: 10000000,
             },
           }}
-        />
+        >
+          {(t) => (
+            <ToastBar toast={t}>
+              {({ icon, message }) => (
+                <>
+                  {icon}
+                  {message}
+                  {t.type !== "loading" && (
+                    <button
+                      type="button"
+                      aria-label="Close"
+                      onClick={() => toast.dismiss(t.id)}
+                      style={{
+                        border: "none",
+                        background: "transparent",
+                        cursor: "pointer",
+                        color: "#9ca3af",
+                        fontSize: "16px",
+                        lineHeight: 1,
+                        padding: "2px 4px",
+                        marginLeft: "4px",
+                        alignSelf: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </>
+              )}
+            </ToastBar>
+          )}
+        </Toaster>
 
         <App />
       </PersistGate>

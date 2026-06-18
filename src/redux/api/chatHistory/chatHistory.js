@@ -18,13 +18,37 @@ export const chatHistory = privateRequestNew.injectEndpoints({
     }),
 
     getRoomChatMessages: builder.query({
-      query: (roomId) => ({
+      query: ({ roomId, page = 1, limit = 30 }) => ({
         url: "chat/messages",
         method: "GET",
         params: {
           roomId,
+          page,
+          limit,
         },
       }),
+      serializeQueryArgs: ({ queryArgs }) => queryArgs.roomId,
+      merge: (currentCache, newData, { arg }) => {
+        if (arg.page === 1) return newData;
+        const existingHistory = currentCache?.data?.[0]?.chatHistory || [];
+        const newHistory = newData?.data?.[0]?.chatHistory || [];
+        const existingIds = new Set(existingHistory.map((m) => m._id));
+        const uniqueNew = newHistory.filter((m) => !existingIds.has(m._id));
+        return {
+          ...newData,
+          data: [
+            {
+              ...(newData?.data?.[0] || {}),
+              chatHistory: [...uniqueNew, ...existingHistory],
+            },
+          ],
+          pagination: newData?.pagination,
+        };
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        if (!previousArg) return true;
+        return currentArg?.page !== previousArg?.page;
+      },
     }),
   }),
   overrideExisting: false,

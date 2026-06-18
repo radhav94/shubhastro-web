@@ -263,6 +263,7 @@ const Profile = () => {
       ...(appliedSortOrder && { sortOrder: appliedSortOrder }),
       ...(appliedMonth && { month: appliedMonth }),
       ...(appliedYear && { year: appliedYear }),
+      filterBy: "audio,video",
     },
     { skip: !userId },
   );
@@ -301,7 +302,6 @@ const Profile = () => {
   // Process order history data - current page call orders
   const callOrders = Array.isArray(callHistoryData?.data?.callHistory)
     ? callHistoryData.data.callHistory
-        .filter((item) => item?.type !== "chat")
         .map((item, index) => ({
           id: `call-${callHistoryPage}-${index}`,
           type: "call",
@@ -1811,6 +1811,9 @@ const Profile = () => {
                       onPageChange={(newPage) => {
                         if (isCall) setCallHistoryPage(newPage);
                         else setChatHistoryPage(newPage);
+                        if (newPage === totalPages && orderListRef.current) {
+                          orderListRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }
                       }}
                     />
                   ) : null;
@@ -1924,7 +1927,7 @@ const Profile = () => {
                               {transaction?.displayProfile?.name}
                             </h4>
                             <span className={styles.txnMeta}>
-                              {dayjs(transaction.createdAt).format("DD MMM, YYYY • hh:mm A")} • TXN #{transaction._id}
+                              {dayjs(transaction.createdAt).format("DD MMM, YYYY • hh:mm A")} • TXN #{transaction._id?.slice(-4)}
                             </span>
                           </div>
                         </div>
@@ -2017,7 +2020,7 @@ const Profile = () => {
             <div className={styles.stickyButtonContainer}>
               <button
                 className={styles.contactSupportButton}
-                onClick={() => navigate("/contact-us")}
+                onClick={() => navigate("/customer-support")}
               >
                 Contact Support
                 <ChevronLeft
