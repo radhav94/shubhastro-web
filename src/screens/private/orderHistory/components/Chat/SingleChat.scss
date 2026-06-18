@@ -101,6 +101,7 @@
   padding: 20px 18px;
   border-radius: 0 0 18px 18px;
   overflow-y: auto;
+  max-height: calc(100vh - 220px);
 
   display: flex;
   flex-direction: column;
@@ -111,6 +112,14 @@
     inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 
   background-image: url("https://www.transparenttextures.com/patterns/diagmonds-light.png");
+}
+
+/* Loading more indicator */
+.chat-loading-more {
+  text-align: center;
+  padding: 10px 0;
+  font-size: 12px;
+  color: #6b7280;
 }
 
 /* ===== Rows ===== */

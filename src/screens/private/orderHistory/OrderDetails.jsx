@@ -50,7 +50,7 @@ const OrderDetails = () => {
   );
 
   const { data: chatData, isLoading: isLoadingMessages, error, isFetching } = useGetChatHistoryQuery(
-    { userId: astrologerId },
+    { userId: astrologerId, page },
     { refetchOnMountOrArgChange: true }
   );
 

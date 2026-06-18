@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useLayoutEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useGetRoomChatMessagesQuery } from "../../../../../redux/api/chatHistory/chatHistory";
 import { useAddAstrologerReviewMutation } from "../../../../../redux/api/review/reviewApi";
@@ -8,15 +8,59 @@ import Feedback from "../../../home/components/chats/Feedback";
 
 const SingleChatHistory = () => {
   const { roomId } = useParams();
+  const [page, setPage] = useState(1);
+  const containerRef = useRef(null);
+  const isLoadingMoreRef = useRef(false);
+  const prevScrollHeightRef = useRef(null);
+  const initialScrollDoneRef = useRef(false);
 
-  const { data, isLoading, error } =
-    useGetRoomChatMessagesQuery(roomId);
+  const { data, isFetching } = useGetRoomChatMessagesQuery(
+    { roomId, page },
+    { skip: !roomId }
+  );
 
   const chatData = data?.data?.[0];
   const messages = chatData?.chatHistory || [];
   const astrologerId = chatData?.astrologerId;
+  const pagination = data?.pagination || {};
+  const hasMore = pagination.hasNextPage ?? (page < (pagination.totalPages || 1));
 
-  // 🔹 Feedback modal state
+  // Scroll to bottom on initial load
+  useLayoutEffect(() => {
+    if (initialScrollDoneRef.current) return;
+    if (messages.length > 0 && !isFetching) {
+      const container = containerRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+        initialScrollDoneRef.current = true;
+      }
+    }
+  }, [messages, isFetching]);
+
+  // Restore scroll position after older messages are prepended
+  useLayoutEffect(() => {
+    if (!isLoadingMoreRef.current || !prevScrollHeightRef.current) return;
+    if (isFetching) return;
+
+    const container = containerRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight - prevScrollHeightRef.current;
+      prevScrollHeightRef.current = null;
+      isLoadingMoreRef.current = false;
+    }
+  }, [messages, isFetching]);
+
+  // Scroll handler — load older messages when near top
+  const handleScroll = useCallback(() => {
+    if (!containerRef.current || isLoadingMoreRef.current || isFetching || !hasMore) return;
+    if (containerRef.current.scrollTop < 80) {
+      isLoadingMoreRef.current = true;
+      prevScrollHeightRef.current = containerRef.current.scrollHeight;
+      setPage((prev) => prev + 1);
+    }
+  }, [isFetching, hasMore]);
+
+  // Feedback modal state
   const [openFeedback, setOpenFeedback] = useState(false);
 
   // 🔹 Review mutation
@@ -43,9 +87,8 @@ const SingleChatHistory = () => {
     }
   };
 
-  if (isLoading) return <div className="chat-state">Loading chat…</div>;
-  if (error) return <div className="chat-state error">Failed to load chat</div>;
-  if (!messages.length)
+  if (isFetching && page === 1) return <div className="chat-state">Loading chat…</div>;
+  if (!messages.length && !isFetching)
     return <div className="chat-state">No messages</div>;
 
   return (
@@ -73,8 +116,11 @@ const SingleChatHistory = () => {
   </button>
         </div>
 
-        {/* ===== Chat Body ===== */}
-        <div className="chat-container">
+        {/* Chat Body */}
+        <div className="chat-container" ref={containerRef} onScroll={handleScroll}>
+          {isFetching && page > 1 && (
+            <div className="chat-loading-more">Loading older messages...</div>
+          )}
           {messages.map((msg) => {
             const isUser = msg.sender === "user";
 
@@ -107,8 +153,8 @@ const SingleChatHistory = () => {
           open={openFeedback}
           onClose={() => setOpenFeedback(false)}
           handleSubmit={handleReviewSubmit}
-          ratedUserName={astrologerId}      // abhi ID, baad me name
-          reviewerName={"User"}             // ya user?.firstName
+          ratedUserName={astrologerId}
+          reviewerName={"User"}
           loading={reviewLoading}
         />
 
