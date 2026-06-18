@@ -1300,7 +1300,7 @@ const TalkToAstrologer = () => {
         
       </div>
 
-      {!isFetching && allAstrologers.length === 0 && (
+      {!isFetching && allAstrologers.length === 0 && isFiltered && (
           <div className={styles.emptyState}>
             <PrimaryText>No astrologers found.</PrimaryText>
           </div>
