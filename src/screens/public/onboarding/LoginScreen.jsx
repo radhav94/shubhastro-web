@@ -8,6 +8,7 @@ import { logout } from "../../../redux/auth/authSlice";
 import { loginWithPhone } from "../../../services/appServices/authService";
 import { AppImages } from "../../../utils/appImages";
 import LanguageSelector from "../../../component/LanguageSelector";
+import BackButton from "../../../component/UI/BackButton/BackButton";
 
 const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const navigate = useNavigate();
@@ -72,17 +73,10 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
         />
       </div>
 
-      <button className={styles.backBtn} onClick={onBack}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M15 18L9 12L15 6"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+      <div className={styles.otpBackButtonWrap}>
+        <BackButton />
+      </div>
+      
 
       {/* Language Translator - top right corner */}
       <LanguageSelector />
