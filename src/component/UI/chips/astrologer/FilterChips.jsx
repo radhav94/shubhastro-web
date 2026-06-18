@@ -570,6 +570,7 @@ const FilterChips = ({
                       type="button"
                       className={styles.clearSearchBtn}
                       onClick={() => {
+                        clearTimeout(debounceTimerRef.current);
                         setFieldValue("searchText", "");
                         setSearchText("");
                         if (activeChips.length > 0) {
