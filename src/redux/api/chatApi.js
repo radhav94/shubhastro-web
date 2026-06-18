@@ -57,9 +57,27 @@ export const chatApi = privateRequestNew.injectEndpoints({
     }),
 
     getChatHistory: builder.query({
-      query: ({ userId }) => ({
+      query: ({ userId, page = 1, limit = 30 }) => ({
         url: `chat/messages/inbox/${userId}`,
+        params: { page, limit },
       }),
+      serializeQueryArgs: ({ queryArgs }) => queryArgs.userId,
+      merge: (currentCache, newData, { arg }) => {
+        if (arg.page === 1) return newData;
+        const existingIds = new Set((currentCache?.data || []).map((m) => m._id));
+        const uniqueNewMessages = (newData?.data || []).filter(
+          (m) => !existingIds.has(m._id)
+        );
+        return {
+          ...newData,
+          data: [...(currentCache?.data || []), ...uniqueNewMessages],
+          pagination: newData?.pagination,
+        };
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        if (!previousArg) return true;
+        return currentArg?.page !== previousArg?.page;
+      },
     }),
 
     // Virtual Assistant - send message
