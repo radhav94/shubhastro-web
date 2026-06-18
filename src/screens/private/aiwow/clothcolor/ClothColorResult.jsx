@@ -297,7 +297,7 @@ const ClothColorResult = () => {
           <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
             <TTSButton text={`Colors to Avoid. ${resultData.colorsToAvoid.map(c => c.colorName + (c.reason ? ': ' + c.reason : '')).join('. ')}`} />
           </span>
-          <h3 className={styles.cardTitle}>Colors to Avoid</h3>
+          <h3 className={styles.cardTitle}>Colors to Avoid Today</h3>
           <p className={styles.avoidIntro}>
             These colors may not be favorable for your intention on this day:
           </p>
