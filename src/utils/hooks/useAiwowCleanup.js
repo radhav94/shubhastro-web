@@ -3,9 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { clearAllAiwowData } from "../../redux/aiwow/aiwowSlice";
 
-const AIWOW_PREFIXES = [
-  "/ai-wow",
-  "/aiwow",
+const AIWOW_FEATURE_PREFIXES = [
   "/ai-palmistry-scanner",
   "/astro-face-reading",
   "/signature-analysis",
@@ -14,12 +12,19 @@ const AIWOW_PREFIXES = [
   "/aura-photography",
 ];
 
-const isAiwowPath = (path) =>
-  AIWOW_PREFIXES.some((prefix) => path.startsWith(prefix));
+/**
+ * Returns the aiwow feature prefix that matches the given path, or null if none.
+ * Hub paths (/ai-wow, /aiwow) are NOT considered features.
+ */
+const getFeaturePrefix = (path) =>
+  AIWOW_FEATURE_PREFIXES.find((prefix) => path.startsWith(prefix)) || null;
 
 /**
- * Clears aiwow session data when user navigates away from aiwow pages.
- * Data persists across page reloads (for language switch) but clears on route change.
+ * Clears aiwow session data only when user starts a different aiwow feature.
+ * Data persists when:
+ * - User leaves to non-aiwow pages (e.g., "Consult with Expert Astrologer" CTA)
+ * - User goes back to the /ai-wow hub
+ * This allows browser back to return to results without losing data.
  */
 export const useAiwowCleanup = () => {
   const { pathname } = useLocation();
@@ -30,7 +35,12 @@ export const useAiwowCleanup = () => {
     const prevPath = prevPathRef.current;
     prevPathRef.current = pathname;
 
-    if (isAiwowPath(prevPath) && !isAiwowPath(pathname)) {
+    const currentFeature = getFeaturePrefix(pathname);
+    const prevFeature = getFeaturePrefix(prevPath);
+
+    // Only clear when entering a different aiwow feature than the previous one
+    // e.g., user was on face-reading, now navigating to palmistry
+    if (currentFeature && prevFeature && currentFeature !== prevFeature) {
       dispatch(clearAllAiwowData());
     }
   }, [pathname, dispatch]);
