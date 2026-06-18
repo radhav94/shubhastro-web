@@ -18,6 +18,12 @@ const FeedbackModal = ({
 
   if (!open) return null;
 
+  const onCloseClick = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onClose();
+  };
+
   const onSubmitClick = async () => {
     await handleSubmit({
       rating,
@@ -35,9 +41,9 @@ const FeedbackModal = ({
   };
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
-        <button className={styles.closeBtn} onClick={onClose}>
+    <div className={styles.overlay} onClick={onCloseClick}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <button className={styles.closeBtn} onClick={onCloseClick}>
           <CircleX size={24} />
         </button>
 
