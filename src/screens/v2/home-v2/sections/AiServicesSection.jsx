@@ -7,7 +7,7 @@ import useRequireAuth from "../../../../utils/hooks/useRequireAuth";
 const COMMUNITY_AVATARS_FALLBACK = [];
 
 // Routes that require authentication
-const AUTH_REQUIRED_PATHS = ["/laal-kitab", "/occult"];
+const AUTH_REQUIRED_PATHS = [];
 
 /**
  * Mobile-only AI Services 2×2 grid.

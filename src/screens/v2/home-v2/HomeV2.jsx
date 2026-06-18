@@ -141,7 +141,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
           {renderSectionContent(leftSection)}
           {/* Laal Kitaab from ai-services — always in left column */}
           {aiServicesItems[0] && (
-            <div className={styles.qCardLaal} onClick={() => { if (!requireAuth()) return; const url = aiServicesItems[0]?.redirect_url || aiServicesItems[0]?.link; if (url) navigate(url); }} style={{ cursor: aiServicesItems[0]?.redirect_url || aiServicesItems[0]?.link ? 'pointer' : 'default' }}>
+            <div className={styles.qCardLaal} onClick={() => { const url = aiServicesItems[0]?.redirect_url || aiServicesItems[0]?.link; if (url) navigate(url); }} style={{ cursor: aiServicesItems[0]?.redirect_url || aiServicesItems[0]?.link ? 'pointer' : 'default' }}>
               <span className={styles.featureTag}>New</span>
               <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title}</h3>
               {aiServicesItems[0]?.description && <p>{aiServicesItems[0].description}</p>}
@@ -158,7 +158,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
           {aiServicesItems.length > 1 && (
             <div className={`${styles.centerFeatureRow} ${styles.desktopOnly}`}>
               {aiServicesItems[1] && (
-                <div className={`${styles.centerFeatureCard} ${styles.occultWorld}`} onClick={() => { if (!requireAuth()) return; const url = aiServicesItems[1]?.redirect_url || aiServicesItems[1]?.link; if (url) navigate(url); }} style={{ cursor: aiServicesItems[1]?.redirect_url || aiServicesItems[1]?.link ? 'pointer' : 'default' }}>
+                <div className={`${styles.centerFeatureCard} ${styles.occultWorld}`} onClick={() => { const url = aiServicesItems[1]?.redirect_url || aiServicesItems[1]?.link; if (url) navigate(url); }} style={{ cursor: aiServicesItems[1]?.redirect_url || aiServicesItems[1]?.link ? 'pointer' : 'default' }}>
                   <div className={styles.occultEllipse} />
                   <span className={styles.featureTag}>New</span>
                   <div className={styles.fcTop}>

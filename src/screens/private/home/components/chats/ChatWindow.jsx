@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useState, useRef, useEffect } from "react";
+import { useLayoutEffect, useMemo, useState, useRef, useEffect, useCallback } from "react";
 import styles from "./ChatWindow.module.scss";
 import { useLocation, useNavigate } from "react-router-dom";
 import useChat from "./useChatWindow";
@@ -146,11 +146,17 @@ const ChatWindow = () => {
   // not a global waiting list from other pending connections
   const waitingPopup = localWaitingPopup;
 
-  const { data } = useGetChatHistoryQuery(
-    { userId: astrologerId },
+  const [historyPage, setHistoryPage] = useState(1);
+  const isLoadingMoreRef = useRef(false);
+  const prevScrollHeightRef = useRef(null);
+
+  const { data, isFetching: isHistoryFetching } = useGetChatHistoryQuery(
+    { userId: astrologerId, page: historyPage },
     { refetchOnMountOrArgChange: true }
   );
   const history = data?.data || [];
+  const pagination = data?.pagination || {};
+  const hasMoreHistory = pagination.hasNextPage ?? (historyPage < (pagination.totalPages || 1));
 
   const finalMsgs = useMemo(() => {
     const historyMsgs = history.map((item) => {
@@ -207,6 +213,64 @@ const ChatWindow = () => {
       (a, b) => new Date(a.dateTime) - new Date(b.dateTime)
     );
   }, [history, messages, isUserSide]);
+
+  // Load older messages when scrolling to top
+  const handleMessagesScroll = useCallback(() => {
+    if (!messagesRef.current || isLoadingMoreRef.current || isHistoryFetching || !hasMoreHistory) return;
+    if (messagesRef.current.scrollTop < 80) {
+      isLoadingMoreRef.current = true;
+      prevScrollHeightRef.current = messagesRef.current.scrollHeight;
+      setHistoryPage((prev) => prev + 1);
+    }
+  }, [isHistoryFetching, hasMoreHistory]);
+
+  // Restore scroll position after older messages are prepended
+  useLayoutEffect(() => {
+    if (!isLoadingMoreRef.current || !prevScrollHeightRef.current) return;
+    if (isHistoryFetching) return;
+
+    const container = messagesRef.current;
+    if (container) {
+      const newScrollTop = container.scrollHeight - prevScrollHeightRef.current;
+      container.scrollTop = newScrollTop;
+      prevScrollHeightRef.current = null;
+      isLoadingMoreRef.current = false;
+    }
+  }, [history, isHistoryFetching]);
+
+  // Auto-scroll to bottom ONLY for new real-time messages or typing indicator
+  const prevSocketCountRef = useRef(messages.length);
+  useLayoutEffect(() => {
+    const container = messagesRef.current;
+    if (!container) return;
+
+    // Only scroll to bottom if socket messages count actually increased
+    if (messages.length > prevSocketCountRef.current) {
+      container.scrollTop = container.scrollHeight;
+    }
+    prevSocketCountRef.current = messages.length;
+  }, [messages.length]);
+
+  // Scroll to bottom when typing indicator appears
+  useLayoutEffect(() => {
+    if (!isTyping) return;
+    const container = messagesRef.current;
+    if (!container) return;
+    container.scrollTop = container.scrollHeight;
+  }, [isTyping]);
+
+  // On initial mount / first history load, scroll to bottom once
+  const initialScrollDoneRef = useRef(false);
+  useLayoutEffect(() => {
+    if (initialScrollDoneRef.current) return;
+    if (history.length > 0 && !isHistoryFetching) {
+      const container = messagesRef.current;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+        initialScrollDoneRef.current = true;
+      }
+    }
+  }, [history, isHistoryFetching]);
 
   const { isInactive, resetTimer } = useInactivityTimer(120000, !!activeCall);
 
@@ -271,14 +335,6 @@ const ChatWindow = () => {
     isUserSide ? sendMessage(message) : astroReply(message);
     setMessage("");
   };
-
-  useLayoutEffect(() => {
-    const container = messagesRef.current;
-    if (!container) return;
-
-    // ALWAYS keep latest message visible
-    container.scrollTop = container.scrollHeight;
-  }, [finalMsgs.length, isTyping]);
 
   const user = getUserFromStorage();
   const [addAstrologerReview, { isLoading }] = useAddAstrologerReviewMutation();
@@ -541,6 +597,8 @@ const ChatWindow = () => {
               messagesRef={messagesRef}
               astrologerName={astrologerName || fullName}
               customerName={user?.firstName}
+              onScroll={handleMessagesScroll}
+              isLoadingMore={isHistoryFetching && historyPage > 1}
             />
 
             <FloatingActions

@@ -61,9 +61,11 @@ export const chatApi = privateRequestNew.injectEndpoints({
         url: `chat/messages/inbox/${userId}`,
         params: { page, limit },
       }),
+      // Cache key is just userId so all pages merge into one entry
       serializeQueryArgs: ({ queryArgs }) => queryArgs.userId,
       merge: (currentCache, newData, { arg }) => {
         if (arg.page === 1) return newData;
+        // Deduplicate by _id and append older messages
         const existingIds = new Set((currentCache?.data || []).map((m) => m._id));
         const uniqueNewMessages = (newData?.data || []).filter(
           (m) => !existingIds.has(m._id)
