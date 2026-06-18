@@ -342,7 +342,10 @@ const TalkToAstrologer = () => {
   // MERGE API DATA - only for normal (non-filtered) mode
   useEffect(() => {
     if (isFiltered) return; // Don't process normal API data when in filtered mode
-    if (!data || data.length === 0) return;
+    if (!data || data.length === 0) {
+      setHasMore(false);
+      return;
+    }
 
     if (page === 1) {
       setAllAstrologers(data);
@@ -388,6 +391,7 @@ const TalkToAstrologer = () => {
       (entries) => {
         if (
           entries[0].isIntersecting &&
+          hasMoreRef.current &&
           !isFilteredRef.current &&
           !isFetchingRef.current
         ) {
