@@ -28,6 +28,7 @@ const serviceLinks = [
   { href: "/talk-to-astrologer", text: "Talk to Astrologer" },
   { href: "/numerology", text: "Numerology" },
   { href: "/blog", text: "Blogs" },
+  { href: "/important-links", text: "Important Links" },
 ];
 
 const shopLinks = isShubhMallEnabled()
