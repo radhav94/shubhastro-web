@@ -23,7 +23,7 @@ const sectionVariants = {
   },
 };
 
-const DynamicChart = ({ title, src, fontSize = 8 }) => {
+const DynamicChart = ({ title, src, fontSize = 10 }) => {
   if (!src) return null;
 
   const updatedSrc = updateSvgFontSize(src, fontSize);

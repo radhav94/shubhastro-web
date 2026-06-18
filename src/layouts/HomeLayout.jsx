@@ -272,7 +272,7 @@ const HomeLayout = () => {
           {location.pathname === "/" && (
           <div className={styles.topLinkWrap}>
             {/* Desktop view - inline links */}
-            <div className={styles.topLinkDesktop}>
+            {/* <div className={styles.topLinkDesktop}>
               {footerLinkSections.map((section) => (
                 <div className={styles.topLink} key={section.label}>
                   <span>{section.label} : </span>
@@ -284,9 +284,9 @@ const HomeLayout = () => {
                   ))}
                 </div>
               ))}
-            </div>
+            </div> */}
             {/* Mobile view - accordion */}
-            <FooterLinkAccordion sections={footerLinkSections} />
+            {/* <FooterLinkAccordion sections={footerLinkSections} /> */}
           </div>
           )}
           <Footer />
