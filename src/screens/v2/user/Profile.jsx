@@ -2017,7 +2017,7 @@ const Profile = () => {
             <div className={styles.stickyButtonContainer}>
               <button
                 className={styles.contactSupportButton}
-                onClick={() => navigate("/contact-us")}
+                onClick={() => navigate("/customer-support")}
               >
                 Contact Support
                 <ChevronLeft
