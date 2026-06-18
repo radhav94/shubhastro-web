@@ -6,13 +6,12 @@ export const useCall = (userId) => {
     data: apiResponse,
     isLoading,
     error,
-  } = useGetCallHistoryQuery(userId, {
+  } = useGetCallHistoryQuery({ userId, filterBy: "audio,video" }, {
     skip: !userId,
   });
 
   const data =
     apiResponse?.data
-      ?.filter((item) => item?.type !== "chat")
       ?.map((item, index) => {
         return {
           id: index + 1,

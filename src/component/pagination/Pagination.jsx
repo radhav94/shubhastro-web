@@ -5,39 +5,32 @@ const Pagination = ({ pagination, onPageChange }) => {
 
   const getPages = () => {
     // Few enough pages: show them all
-    if (totalPages <= 7) {
+    if (totalPages <= 5) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
-    const pages = new Set();
+    const pages = [];
 
-    // Always include first and last
-    pages.add(1);
-    pages.add(totalPages);
-
-    // Window around the current page
-    for (let i = page - 1; i <= page + 1; i++) {
-      if (i > 1 && i < totalPages) pages.add(i);
+    if (page <= 3) {
+      // Near the start: show first 4 pages + ... + last
+      for (let i = 1; i <= 4; i++) pages.push(i);
+      pages.push("...");
+      pages.push(totalPages);
+    } else if (page >= totalPages - 2) {
+      // Near the end: show first + ... + last 4 pages
+      pages.push(1);
+      pages.push("...");
+      for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
+    } else {
+      // Middle: show first + ... + current window + ... + last
+      pages.push(1);
+      pages.push("...");
+      for (let i = page - 1; i <= page + 1; i++) pages.push(i);
+      pages.push("...");
+      pages.push(totalPages);
     }
 
-    const sorted = [...pages].sort((a, b) => a - b);
-
-    // Build the final list, inserting "..." only when the gap is > 1.
-    // If the gap is exactly 1, show the missing page number instead of dots.
-    const result = [];
-    for (let i = 0; i < sorted.length; i++) {
-      result.push(sorted[i]);
-      const next = sorted[i + 1];
-      if (next) {
-        if (next - sorted[i] === 2) {
-          result.push(sorted[i] + 1);
-        } else if (next - sorted[i] > 2) {
-          result.push("...");
-        }
-      }
-    }
-
-    return result;
+    return pages;
   };
 
   if (!totalPages || totalPages <= 1) return null;
@@ -60,7 +53,7 @@ const Pagination = ({ pagination, onPageChange }) => {
       {getPages().map((item, index) =>
         item === "..." ? (
           <span key={`dots-${index}`} className={styles.dots}>
-            •••
+            ...
           </span>
         ) : (
           <button
