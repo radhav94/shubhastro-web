@@ -2088,7 +2088,7 @@
   border-radius: 20px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   z-index: 2;
 }
@@ -2104,6 +2104,8 @@
   margin-left: -16px;
   margin-right: -16px;
   margin-top: -16px;
+  border-top-left-radius: 13px;
+  border-top-right-radius: 13px;
 }
 
 .calBody {
@@ -2116,13 +2118,14 @@
 }
 
 .calendarLocationField {
-  margin-top: 12px;
+  // margin-top: 12px;
   min-width: 0;
   position: relative;
   z-index: 10;
 
   :global([class*="wrapper"]) {
     min-width: 0;
+    width: 100%;
   }
 
   :global([class*="dropdown"]) {
@@ -2316,21 +2319,22 @@
 }
 
 .calCta {
-  height: 44px;
-  padding: 0 32px;
+  height: 48px;
+  padding: 0 24px;
   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   border: none;
   border-radius: 999px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 500;
   color: #fff;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
   align-self: center;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
   @media (width <= 767px) {
-    height: 34px;
-    padding:0 20px;
+    // height: 34px;
+    // padding:0 20px;
     font-size: 13px;
   }
 
@@ -4595,4 +4599,20 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
   .wowCard span {
       font-size: 10px;
     }
+}
+.agenticCalLocation{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  input{
+    border-radius: 40px;
+    outline: none;
+    transition: 0.3s;
+    &:hover{
+      border: 1px solid #f75801;
+    }
+  }
+  @media (width <= 768px) {
+    flex-direction: column;
+  }
 }
