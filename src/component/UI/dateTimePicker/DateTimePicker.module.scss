@@ -60,6 +60,13 @@
 
   .input {
     padding-right: 40px;
+    @media (width <= 767px) {
+      padding-right: 32px;
+      padding-left: 6px;
+    }
+    @media (width <= 390px) {
+      font-size: 12px;
+    }
   }
 }
 

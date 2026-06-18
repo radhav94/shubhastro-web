@@ -871,8 +871,8 @@
     background-color: #fafafa;
     overflow-y: auto;
 
-    @media (min-width: 640px) {
-        width: 140px;
+    @media (width <= 767px) {
+      width: 70px;      
     }
 }
 
@@ -927,8 +927,8 @@
     scrollbar-width: thin;
     scrollbar-color: #F75801 #f5f0eb;
 
-    @media (min-width: 640px) {
-        padding: 1rem 1.25rem;
+    @media (max-width: 767px) {
+        padding: 1rem 0.5rem;
     }
 }
 
