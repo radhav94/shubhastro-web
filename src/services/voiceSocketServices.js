@@ -214,6 +214,7 @@ voiceSocket.on("connect_error", (err) => {
 
 if (typeof window !== "undefined") {
   window.addEventListener("online", () => {
+    if (!hasActiveSessions()) return;
     console.log("[VoiceSocket] 🌐 Browser is back online");
     resetRecoveryMarker();
     isReconnecting = true;
