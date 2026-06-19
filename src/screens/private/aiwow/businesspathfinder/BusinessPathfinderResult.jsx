@@ -351,7 +351,6 @@ const BusinessPathfinderResult = () => {
             <p>Get your detailed astrological business analysis in PDF format.</p>
             <div className={styles.downloadFeatures}>
               <span>✓ Detailed Analysis</span>
-              <span>✓ 8 Languages</span>
               <span>✓ Instant Download</span>
             </div>
           </div>

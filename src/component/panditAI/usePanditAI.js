@@ -67,7 +67,6 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   const historyLoadedRef = useRef(false);
   const pendingMessageRef = useRef(null);
   const sendTextRef = useRef(null);
-  const activityTimeoutRef = useRef(null);
 
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
@@ -187,6 +186,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
 
     // Handle socket reconnect while chat is open
     const handleSocketReconnect = () => {
+      // Socket is back — clear the "Reconnecting…" state
+      setChatDisabled(false);
       const currentRoomId = roomIdRef.current;
       if (currentRoomId && !chatEndedRef.current) {
         console.log("[PanditAI] Socket reconnected, emitting chat:reconnect");
@@ -214,10 +215,18 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       }
     };
 
+    // Only disable input on an actual network drop — socket.io will auto-
+    // reconnect and fire "connect", which triggers chat:reconnect above.
+    const handleSocketDisconnect = () => {
+      if (!chatEndedRef.current) setChatDisabled(true);
+    };
+
     voiceSocket.on("connect", handleSocketReconnect);
+    voiceSocket.on("disconnect", handleSocketDisconnect);
 
     return () => {
       voiceSocket.off("connect", handleSocketReconnect);
+      voiceSocket.off("disconnect", handleSocketDisconnect);
     };
   }, [isOpen, userIdLocal, createChatRoom]);
 
@@ -412,48 +421,6 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       voiceSocket.off("ai_followup_questions", handleFollowup);
     };
   }, [isOpen]);
-
-  // Activity timeout — if no activity received for 60s, disable input & re-initiate
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const resetActivityTimeout = () => {
-      setChatDisabled(false);
-      clearTimeout(activityTimeoutRef.current);
-      activityTimeoutRef.current = setTimeout(() => {
-        console.log("[PanditAI] No activity for 60s, re-initiating chat");
-        setChatDisabled(true);
-        // Re-initiate chat
-        if (voiceSocket.connected && userIdLocal) {
-          panditAIChatActive = true;
-          voiceSocket.emit("chat:initiate", {
-            userId: userIdLocal,
-            astrologerId: PANDIT_AI_ID,
-          });
-        }
-      }, 60000);
-    };
-
-    const handleActivityTick = (data) => {
-      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
-      resetActivityTimeout();
-    };
-
-    const handleAcceptedTick = (data) => {
-      if (data?.astrologerId === PANDIT_AI_ID) {
-        resetActivityTimeout();
-      }
-    };
-
-    voiceSocket.on("activity", handleActivityTick);
-    voiceSocket.on("chat:accepted", handleAcceptedTick);
-
-    return () => {
-      voiceSocket.off("activity", handleActivityTick);
-      voiceSocket.off("chat:accepted", handleAcceptedTick);
-      clearTimeout(activityTimeoutRef.current);
-    };
-  }, [isOpen, userIdLocal]);
 
   // Ref-based guard so sendText callback stays stable across send cycles
   const sendingRef = useRef(false);

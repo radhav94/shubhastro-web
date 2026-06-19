@@ -54,7 +54,7 @@ const Payment = () => {
           />
           Wallet Balance
           <span className={styles.dangerColor}>
-            {isFetching ? "..." : balance !== null ? `₹ ${balance.toFixed(2)}` : "₹ 0.00"}
+            {isFetching ? "..." : balance !== null ? `₹ ${Math.round(balance)}` : "₹ 0"}
           </span>
         </div>
 
