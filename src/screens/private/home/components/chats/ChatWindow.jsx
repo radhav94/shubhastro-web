@@ -502,26 +502,26 @@ const ChatWindow = () => {
     // Don't redirect while feedback modal is open
     if (openFeedback) return;
 
-    // Feedback just closed and no active session → redirect home
+    // Feedback just closed and no active session → redirect to astrologers list
     if (hadFeedback && !openFeedback && !isChatActive && !activeCall) {
-      navigate(PATH.privateRoutes.HOME.path, { replace: true });
+      navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path, { replace: true });
       return;
     }
 
-    // Chat was active and just ended → redirect home
+    // Chat was active and just ended → redirect to astrologers list
     // Use a short delay to allow feedback modal state to settle (e.g. report-triggered end)
     if (hadChat && !isChatActive && !activeCall) {
       const timer = setTimeout(() => {
         if (!openFeedbackRef.current) {
-          navigate(PATH.privateRoutes.HOME.path, { replace: true });
+          navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path, { replace: true });
         }
       }, 150);
       return () => clearTimeout(timer);
     }
 
-    // Voice/video call was active and just ended, no active chat → redirect home
+    // Voice/video call was active and just ended, no active chat → redirect to astrologers list
     if (hadCall && !activeCall && !isChatActive) {
-      navigate(PATH.privateRoutes.HOME.path, { replace: true });
+      navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path, { replace: true });
     }
   }, [activeCall, isChatActive, openFeedback, navigate]);
 
