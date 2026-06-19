@@ -45,7 +45,6 @@ const CALL_EVENTS = [
 ];
 
 /* ================= 🔄 RECONNECTION STATE ================= */
-// Track active sessions for automatic reconnection on socket reconnect
 let activeCallSession = null;
 let activeChatSession = null;
 let isReconnecting = false;
@@ -197,18 +196,9 @@ voiceSocket.io.on("reconnect_error", (err) => {
 });
 
 voiceSocket.io.on("reconnect_failed", () => {
-  console.log("[VoiceSocket] ❌ Reconnect failed after all attempts — retrying manually");
+  console.log("[VoiceSocket] ❌ Reconnect failed after all attempts");
   isReconnecting = false;
   resetRecoveryMarker();
-  // Even if socket.io gives up, keep trying when there are active sessions
-  if (hasActiveSessions()) {
-    setTimeout(() => {
-      if (!voiceSocket.connected) {
-        console.log("[VoiceSocket] 🔄 Manual reconnect attempt after failure");
-        voiceSocket.connect();
-      }
-    }, 5000);
-  }
 });
 
 voiceSocket.on("connect_error", (err) => {
@@ -237,15 +227,6 @@ if (typeof window !== "undefined") {
       emitSessionRecovery("browser online");
     }
   });
-
-  // Periodic check: if socket is disconnected but we have active sessions, try to reconnect
-  setInterval(() => {
-    if (hasActiveSessions() && !voiceSocket.connected && navigator.onLine) {
-      console.log("[VoiceSocket] 🔄 Periodic check — socket disconnected with active sessions, reconnecting");
-      resetRecoveryMarker();
-      voiceSocket.connect();
-    }
-  }, 15000);
 }
 
 // Log all call-related incoming events
@@ -259,7 +240,7 @@ CALL_EVENTS.forEach((event) => {
 const _originalEmit = voiceSocket.emit.bind(voiceSocket);
 voiceSocket.emit = (event, ...args) => {
   if (typeof event === "string" && !["ping", "pong"].includes(event)) {
-    console.log(`[VoiceSocket] 📤 ${event}`, JSON.stringify(args[0], null, 2));
+    console.log(`[VoiceSocket] � ${event}`, JSON.stringify(args[0], null, 2));
   }
   return _originalEmit(event, ...args);
 };
