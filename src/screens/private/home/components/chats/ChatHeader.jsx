@@ -45,7 +45,7 @@ const ChatHeader = ({
 
         <div className={styles.userInfo}>
           <PrimaryText size_16 isSemiBold>
-            {capitalizeWords(fullName) || "Chat User"}
+            {capitalizeWords(fullName) || "Astrologer"}
           </PrimaryText>
           {experience && (
             <span className={styles.experienceText}>

@@ -28,6 +28,7 @@ const serviceLinks = [
   { href: "/talk-to-astrologer", text: "Talk to Astrologer" },
   { href: "/numerology", text: "Numerology" },
   { href: "/blog", text: "Blogs" },
+  { href: "/important-links", text: "Important Links" },
 ];
 
 const shopLinks = isShubhMallEnabled()
@@ -130,7 +131,7 @@ const Footer = () => {
         <div className={`${styles.v2_column} ${styles.v2_logoCol}`}>
           <img src={ShubhAstroLogo} alt="ShubhAstro Logo" width="150" height="32" className={styles.v2_logo} />
           <p className={styles.v2_tagline}>
-           ShubhAstro is an AI-powered astrology platform in India, offering instant, trusted and personalized guidance for love, marriage, career, finance and relationships. Powered by AI astrology and Vedic astrology, it also provides insights through Palmistry, Face Reading, Signature Analysis, Occult Astrology, Numerology, Kundli and Vastu. ShubhAstro helps users understand life situations, find practical solutions and make better decisions with clarity, confidence and astrology guidance.          </p>
+           ShubhAstro is an AI-powered astrology platform offering personalized insights for love, marriage, career, finance, and relationships through Vedic Astrology, Kundli, Numerology, Palmistry, Face Reading, Signature Analysis, and Vastu, helping users make informed life decisions with confidence.</p>
           <p className={styles.v2_followLabel}>Follow Us</p>
           <div className={styles.v2_socialIcons}>
             <a href="https://www.facebook.com/profile.php?id=61589408862522" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
@@ -188,7 +189,7 @@ const Footer = () => {
       <div className={styles.v2_mobileFooter}>
         <div className={styles.v2_mobileLogo}>
           <img src={ShubhAstroLogo} alt="ShubhAstro Logo" width="150" height="32" className={styles.v2_logo} />
-          <p className={styles.v2_tagline}>ShubhAstro is an AI-powered astrology platform in India, offering instant, trusted and personalized guidance for love, marriage, career, finance and relationships. Powered by AI astrology and Vedic astrology, it also provides insights through Palmistry, Face Reading, Signature Analysis, Occult Astrology, Numerology, Kundli and Vastu. ShubhAstro helps users understand life situations, find practical solutions and make better decisions with clarity, confidence and astrology guidance.</p>
+          <p className={styles.v2_tagline}>ShubhAstro is an AI-powered astrology platform offering personalized insights for love, marriage, career, finance, and relationships through Vedic Astrology, Kundli, Numerology, Palmistry, Face Reading, Signature Analysis, and Vastu, helping users make informed life decisions with confidence.</p>
           <p className={styles.v2_followLabel}>Follow Us</p>
           <div className={styles.v2_socialIcons}>
             <a href="https://www.facebook.com/profile.php?id=61589408862522" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>

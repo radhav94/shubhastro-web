@@ -10,7 +10,14 @@ const LivePlayerPage = () => {
   const { channelId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoggedIn } = useSelector((state) => state.auth);
+  // The persisted redux `auth.isLoggedIn` can be stale (false) even when a
+  // valid customer token exists in localStorage (redux-persist rehydrates an
+  // old value over the token-derived initial state). The rest of the live
+  // module authenticates off the token, so treat a present token as logged in
+  // to avoid a false live -> login -> home redirect.
+  const reduxLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const hasCustomerToken = !!localStorage.getItem("shubhtalk_customer_token");
+  const isLoggedIn = reduxLoggedIn || hasCustomerToken;
   const [lives, setLives] = useState([]);
   const [autoStartIndex, setAutoStartIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);

@@ -20,10 +20,24 @@ const ensureString = (msg) => {
 };
 
 let activeToastId = null;
+let lastToastMessage = null;
+let lastToastTime = 0;
+
+const DEDUP_INTERVAL = 2000; // 2 seconds
 
 const showToast = (fn, msg, opts) => {
+  const message = ensureString(msg);
+  const now = Date.now();
+
+  // Skip duplicate message within dedup interval
+  if (message === lastToastMessage && now - lastToastTime < DEDUP_INTERVAL) {
+    return activeToastId;
+  }
+
   rht.dismiss(activeToastId);
-  activeToastId = fn(ensureString(msg), opts);
+  lastToastMessage = message;
+  lastToastTime = now;
+  activeToastId = fn(message, opts);
   return activeToastId;
 };
 
