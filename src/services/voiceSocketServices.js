@@ -4,8 +4,8 @@ export const voiceSocket = io("/", {
   transports: ["websocket"],
   autoConnect: false,
   reconnection: true,
-  reconnectionAttempts: 10,
-  reconnectionDelay: 1000,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 5000,
   reconnectionDelayMax: 5000,
   timeout: 20000,
   path: "/main/socket.io",
@@ -197,9 +197,18 @@ voiceSocket.io.on("reconnect_error", (err) => {
 });
 
 voiceSocket.io.on("reconnect_failed", () => {
-  console.log("[VoiceSocket] ❌ Reconnect failed after all attempts");
+  console.log("[VoiceSocket] ❌ Reconnect failed after all attempts — retrying manually");
   isReconnecting = false;
   resetRecoveryMarker();
+  // Even if socket.io gives up, keep trying when there are active sessions
+  if (hasActiveSessions()) {
+    setTimeout(() => {
+      if (!voiceSocket.connected) {
+        console.log("[VoiceSocket] 🔄 Manual reconnect attempt after failure");
+        voiceSocket.connect();
+      }
+    }, 5000);
+  }
 });
 
 voiceSocket.on("connect_error", (err) => {
@@ -215,8 +224,6 @@ voiceSocket.on("connect_error", (err) => {
 
 if (typeof window !== "undefined") {
   window.addEventListener("online", () => {
-    if (!hasActiveSessions()) return;
-
     console.log("[VoiceSocket] 🌐 Browser is back online");
     resetRecoveryMarker();
     isReconnecting = true;
@@ -226,8 +233,19 @@ if (typeof window !== "undefined") {
       return;
     }
 
-    emitSessionRecovery("browser online");
+    if (hasActiveSessions()) {
+      emitSessionRecovery("browser online");
+    }
   });
+
+  // Periodic check: if socket is disconnected but we have active sessions, try to reconnect
+  setInterval(() => {
+    if (hasActiveSessions() && !voiceSocket.connected && navigator.onLine) {
+      console.log("[VoiceSocket] 🔄 Periodic check — socket disconnected with active sessions, reconnecting");
+      resetRecoveryMarker();
+      voiceSocket.connect();
+    }
+  }, 15000);
 }
 
 // Log all call-related incoming events
