@@ -78,21 +78,17 @@ const Mangal = () => {
               Mangal Analysis Factors
             </h2>
             <span style={{ marginLeft: 'auto', marginRight: '5px', display: 'inline-flex' }}>
-              <TTSButton text={`Mangal Analysis Factors. ${[mangal.factors?.mars, mangal.factors?.moon].filter(Boolean).join('. ')}`} />
+              <TTSButton text={`Mangal Analysis Factors. ${Object.values(mangal.factors).filter(Boolean).join('. ')}`} />
             </span>
           </div>
           <div className={styles.factorsList}>
-            {mangal.factors.mars && (
-              <div className={styles.factorCard}>
-                <span className={styles.factorIcon}>•</span>
-                <p className={styles.factorText}>{mangal.factors.mars}</p>
-              </div>
-            )}
-            {mangal.factors.moon && (
-              <div className={styles.factorCard}>
-                <span className={styles.factorIcon}>•</span>
-                <p className={styles.factorText}>{mangal.factors.moon}</p>
-              </div>
+            {Object.entries(mangal.factors).map(([key, value]) => 
+              value ? (
+                <div key={key} className={styles.factorCard}>
+                  <span className={styles.factorIcon}>•</span>
+                  <p className={styles.factorText}>{value}</p>
+                </div>
+              ) : null
             )}
           </div>
         </div>

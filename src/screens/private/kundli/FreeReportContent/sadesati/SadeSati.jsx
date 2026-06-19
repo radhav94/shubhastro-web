@@ -51,6 +51,7 @@ const SadeSati = () => {
                   isInSadeSati ? "You Are in Sade Sati Period" : "You Are Not in Sade Sati",
                   sadeSatiData.shani_period_type ? `Period Type: ${sadeSatiData.shani_period_type}` : "",
                   sadeSatiData.bot_response ? `Analysis: ${sadeSatiData.bot_response}` : "",
+                  sadeSatiData.description ? `Description: ${sadeSatiData.description}` : "",
                   sadeSatiData.date_considered ? `As on ${sadeSatiData.date_considered}` : "",
                   sadeSatiData.remedies?.length ? `Recommended Remedies: ${sadeSatiData.remedies.join(". ")}` : "",
                 ].filter(Boolean).join(". ")}
@@ -77,6 +78,16 @@ const SadeSati = () => {
                 <div className={styles.summaryCard}>
                   <h3 className={styles.summaryTitle}>Analysis</h3>
                   <p className={styles.summaryText}>{sadeSatiData.bot_response}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Description */}
+            {sadeSatiData.description && (
+              <div className={styles.fullWidth}>
+                <div className={styles.summaryCard}>
+                  <h3 className={styles.summaryTitle}>Description</h3>
+                  <p className={styles.summaryText}>{sadeSatiData.description}</p>
                 </div>
               </div>
             )}
