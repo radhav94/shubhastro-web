@@ -1,7 +1,7 @@
 import styles from "./HomeV2.module.scss";
 import { useState, useMemo, useEffect, useCallback, lazy, Suspense, Fragment } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { useGetAiSuitesQuery, useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
@@ -47,7 +47,7 @@ const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
 
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
-const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, onlineCount }) => {
+const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, getWowCardPath, onlineCount }) => {
   // Sort sections by list_order to determine column placement
   // 1st by list_order → LEFT, 2nd → CENTER, 3rd → RIGHT
   // ai-services is special: it distributes across columns (laal kitaab left, occult/pandit center, community right)
@@ -113,14 +113,24 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
               </div>
               <div className={styles.wowGrid}>
                 {wowSections.flatMap((sec, si) =>
-                  (sec.content || []).map((item, i) => (
-                    <div key={`${si}-${i}`} className={styles.wowCard} onClick={() => handleWowCardClick(item)} style={{ cursor: item.slug ? 'pointer' : 'default' }}>
-                      <div className={styles.wowIconBox}>
-                        <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} width="40" height="40" loading="lazy" />
+                  (sec.content || []).map((item, i) => {
+                    const path = getWowCardPath(item);
+                    return path ? (
+                      <Link key={`${si}-${i}`} className={styles.wowCard} to={path} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
+                        <div className={styles.wowIconBox}>
+                          <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} width="40" height="40" loading="lazy" />
+                        </div>
+                        <span>{item.title}</span>
+                      </Link>
+                    ) : (
+                      <div key={`${si}-${i}`} className={styles.wowCard} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: item.slug ? 'pointer' : 'default' }}>
+                        <div className={styles.wowIconBox}>
+                          <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} width="40" height="40" loading="lazy" />
+                        </div>
+                        <span>{item.title}</span>
                       </div>
-                      <span>{item.title}</span>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -362,8 +372,15 @@ const HomeV2 = () => {
   }, [aiSuitesData]);
   const wowSuiteItems = useMemo(() => ({ title: wowSections[0]?.title || "WOW SUITE" }), [wowSections]);
 
-  const handleWowCardClick = useCallback((item) => {
+  const getWowCardPath = useCallback((item) => {
+    if (!item.slug) return null;
+    if (item.slug === "ar-vastu-scanner") return null;
+    return ["ai-palmistry-scanner","astro-face-reading","signature-analysis","clothes-colour-analysis","gemstone-authenticity","aura-photography"].includes(item.slug) ? `/${item.slug}` : `/aiwow/${item.slug}`;
+  }, []);
+
+  const handleWowCardClick = useCallback((item, e) => {
     if (!item.slug) return;
+    if (e) e.preventDefault();
     if (item.slug === "ar-vastu-scanner") { setShowMobileAppModal(true); return; }
     const path = ["ai-palmistry-scanner","astro-face-reading","signature-analysis","clothes-colour-analysis","gemstone-authenticity","aura-photography"].includes(item.slug) ? `/${item.slug}` : `/aiwow/${item.slug}`;
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -413,7 +430,7 @@ const HomeV2 = () => {
   const handleRechargeClose = useCallback(() => hookSetOpenModal((prev) => ({ ...prev, recharge: false })), [hookSetOpenModal]);
 
   // ─── Shared props for group renderers ─────────────────────────────────────
-  const heroProps = { styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, onlineCount };
+  const heroProps = { styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, getWowCardPath, onlineCount };
   const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id, astrologerMaleImg };
 
   // ─── Render ───────────────────────────────────────────────────────────────
