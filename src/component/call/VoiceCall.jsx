@@ -310,12 +310,8 @@ const AgoraVoiceCalling = ({ callData }) => {
         // Don't end call if we're upgrading to video
         if (isUpgradingToVideo.current) return;
 
-        console.log("[VoiceCall] 👋 user-left — uid:", user.uid, "starting 30s grace timer");
-        if (userLeftTimerRef.current) clearTimeout(userLeftTimerRef.current);
-        userLeftTimerRef.current = setTimeout(() => {
-          console.log("[VoiceCall] ⏰ user-left grace timer expired — ending call");
-          endCall();
-        }, 30000); // 30s grace period for rejoin
+        console.log("[VoiceCall] 👋 user-left — uid:", user.uid, "— backend will handle session end");
+        // No client-side endCall timer — backend owns session lifecycle
       });
 
       client.on("user-joined", (user) => {
@@ -611,7 +607,6 @@ const AgoraVoiceCalling = ({ callData }) => {
       }
       
       setIsReconnecting(false);
-      // Toast.success("Reconnected successfully!");
     };
 
     window.addEventListener('call:upgrading-to-video', handleUpgradeEvent);
