@@ -1493,7 +1493,7 @@ const VideoCalling = ({ callData }) => {
                 {/* Customer Name Label */}
                 <div className={styles.localVideoLabel}>
                   <span className={styles.localVideoName}>{capitalizeWords(customerName)}</span>
-                  <span className={styles.localVideoRole}>{capitalizeWords(user?.role || "Customer")}</span>
+                  <span className={styles.localVideoRole}>You</span>
                 </div>
               </div>
             </div>
