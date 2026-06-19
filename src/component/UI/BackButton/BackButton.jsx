@@ -10,11 +10,9 @@ const BackButton = ({ onClick, fallbackPath = "/" }) => {
       onClick();
       return;
     }
-    // If there's no same-origin referrer, user likely landed directly on this page
-    const referrer = document.referrer;
-    const isSameOrigin = referrer && new URL(referrer).origin === window.location.origin;
-    
-    if (isSameOrigin) {
+    // If there's history to go back to, use browser back navigation
+    // history.length > 1 means there's a previous entry in the session history
+    if (window.history.length > 1) {
       navigate(-1);
     } else {
       navigate(fallbackPath, { replace: true });
