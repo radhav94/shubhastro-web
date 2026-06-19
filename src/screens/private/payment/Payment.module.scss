@@ -32,7 +32,13 @@
       align-items: center;
       gap: 10px;
       font-weight: 600;
-      font-size: 17px;
+      font-size: 22px;
+      @media (width <= 767px) {
+        font-size: 17px;
+        img{
+          width: 35px;
+        }
+      }
 
       .dangerColor {
         color: #F75801;

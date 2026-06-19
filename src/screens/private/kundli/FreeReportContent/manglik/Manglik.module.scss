@@ -100,9 +100,9 @@ $font-primary: "Poppins", sans-serif;
 
 .statCard {
   border-radius: 15px;
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
-  background: var(--surface, rgba(255, 255, 255, 0.2));
-  // backdrop-filter: blur(10px);
+  border: 1.5px solid #fff;
+  background: var(--surface, rgba(255, 255, 255, 0.4));
+  backdrop-filter: blur(10px);
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -169,12 +169,12 @@ $font-primary: "Poppins", sans-serif;
 
 // --- Inline Summary Card (within column) ---
 .summaryCardInline {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
   border-radius: 8px;
   padding: 12px;
   margin-top: 16px;
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.5));
+  border: 1.5px solid #fff;
 
   @media (min-width: 768px) {
     padding: 14px;

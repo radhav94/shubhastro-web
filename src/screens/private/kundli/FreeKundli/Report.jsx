@@ -64,14 +64,14 @@ const Report = ({ data }) => {
     <div>
       {/* 🔥 Show Name + DOB same as BasicContent UI */}
       <div className="flex mb-4">
-        <PrimaryText isSemiBold size_20 color={appColors.tri}>
+        <PrimaryText isSemiBold size_16>
           {userDetails?.name?.charAt(0).toUpperCase() +
             userDetails?.name?.slice(1)}
         </PrimaryText>
 
         <div className="mx-2" />
 
-        <PrimaryText isSemiBold size_20 color={appColors.tri}>
+        <PrimaryText isSemiBold size_16>
           ({String(birthDetails?.day).padStart(2, "0")} - {String(birthDetails?.month).padStart(2, "0")} - {birthDetails?.year})
         </PrimaryText>
       </div>
