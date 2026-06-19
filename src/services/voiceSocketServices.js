@@ -4,8 +4,8 @@ export const voiceSocket = io("/", {
   transports: ["websocket"],
   autoConnect: false,
   reconnection: true,
-  reconnectionAttempts: 10,
-  reconnectionDelay: 1000,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 5000,
   reconnectionDelayMax: 5000,
   timeout: 20000,
   path: "/main/socket.io",
@@ -45,7 +45,6 @@ const CALL_EVENTS = [
 ];
 
 /* ================= 🔄 RECONNECTION STATE ================= */
-// Track active sessions for automatic reconnection on socket reconnect
 let activeCallSession = null;
 let activeChatSession = null;
 let isReconnecting = false;
@@ -216,7 +215,6 @@ voiceSocket.on("connect_error", (err) => {
 if (typeof window !== "undefined") {
   window.addEventListener("online", () => {
     if (!hasActiveSessions()) return;
-
     console.log("[VoiceSocket] 🌐 Browser is back online");
     resetRecoveryMarker();
     isReconnecting = true;
@@ -226,7 +224,9 @@ if (typeof window !== "undefined") {
       return;
     }
 
-    emitSessionRecovery("browser online");
+    if (hasActiveSessions()) {
+      emitSessionRecovery("browser online");
+    }
   });
 }
 
@@ -241,7 +241,7 @@ CALL_EVENTS.forEach((event) => {
 const _originalEmit = voiceSocket.emit.bind(voiceSocket);
 voiceSocket.emit = (event, ...args) => {
   if (typeof event === "string" && !["ping", "pong"].includes(event)) {
-    console.log(`[VoiceSocket] 📤 ${event}`, JSON.stringify(args[0], null, 2));
+    console.log(`[VoiceSocket] � ${event}`, JSON.stringify(args[0], null, 2));
   }
   return _originalEmit(event, ...args);
 };

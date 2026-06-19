@@ -104,6 +104,7 @@ import InteractiveLiveStreaming from "../../screens/private/home/components/live
 import LivePlayerPage from "../../screens/private/home/components/livestream/LivePlayerPage";
 
 import HoroscopeNew from "../../screens/private/horoscope/Horoscope";
+import HoroscopeOld from "../../screens/private/horoscope/HoroscopeOld";
 
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
@@ -361,6 +362,22 @@ export const PATH = {
       TODAY_NEW: {
         path: ["/horoscope/todays-horoscope/:sign", "/horoscope/todays-horoscope"],
         element: HoroscopeNew,
+      },
+      DAILY_OLD: {
+        path: ["/daily-horoscope-old/:sign", "/daily-horoscope-old"],
+        element: HoroscopeOld,
+      },
+      WEEKLY_OLD: {
+        path: ["/weekly-horoscope-old/:sign", "/weekly-horoscope-old"],
+        element: HoroscopeOld,
+      },
+      YEARLY_OLD: {
+        path: ["/yearly-horoscope-old/:sign", "/yearly-horoscope-old"],
+        element: HoroscopeOld,
+      },
+      TOMORROW_OLD: {
+        path: ["/tomorrow-horoscope-old/:sign", "/tomorrow-horoscope-old"],
+        element: HoroscopeOld,
       },
       MONTHLY: {
         path: "/monthly-horoscope",

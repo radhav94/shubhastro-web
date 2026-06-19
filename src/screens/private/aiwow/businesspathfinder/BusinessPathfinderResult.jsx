@@ -1,11 +1,12 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import styles from './BusinessPathfinderResult.module.scss';
 import { Toast } from '../../../../component';
 import TTSButton from '../../../../component/UI/TTSButton';
 import DownloadReportModal from '../components/DownloadReportModal';
 import { useWalletBalance } from '../../../private/wallet/useWalletBalance';
-import { useGetChargesQuery } from '../../../../redux/api/aiwow/aiwowApi';
+import { useGetChargesQuery, useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import remedyMortarImg from '../../../../assets/images/remedy-mortar.png';
 
 const BusinessPathfinderResult = () => {
@@ -14,14 +15,59 @@ const BusinessPathfinderResult = () => {
   const result = location.state?.result;
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  const reportId = result?.historyId || result?._id || result?.id || null;
+  const downloadedKey = reportId ? `bp_report_downloaded_${reportId}` : null;
+
+  // Locally track a download done in this session / persisted across refresh.
+  const [downloadedThisSession, setDownloadedThisSession] = useState(
+    () => !!downloadedKey && localStorage.getItem(downloadedKey) === 'true'
+  );
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
   const { data: chargesData } = useGetChargesQuery();
   const charges = chargesData?.data || null;
 
+  // Derive "already downloaded" from AI history so it persists across refresh.
+  const selectedProfile = useSelector((state) => state.aiwow?.selectedKundliProfile);
+  const kundliId = selectedProfile?._id || selectedProfile?.id || '';
+  const { data: historyData } = useGetAiHistoryQuery(
+    { kundliId, page: 1, limit: 10 },
+    { skip: !kundliId }
+  );
+
+  const historyId = reportId;
+  const historyItem = useMemo(
+    () => historyData?.data?.history?.find((h) => h._id === historyId || h.featureId === historyId) || null,
+    [historyData, historyId]
+  );
+
+  const isAlreadyDownloaded = useMemo(() => {
+    if (downloadedThisSession) return true;
+    const candidates = [historyItem?.pdfPath, result?.pdfPath, result?.data?.pdfPath];
+    return candidates.some((p) => typeof p === 'string' && p.startsWith('http'));
+  }, [downloadedThisSession, historyItem, result]);
+
+  // Find the Business Pathfinder download charge from the charges API.
+  // Response shape: { data: [{ title, list: [{ slug, title, amount }] }] }
+  const getChargeAmount = () => {
+    if (!Array.isArray(charges)) return null;
+    for (const section of charges) {
+      if (!Array.isArray(section?.list)) continue;
+      const match = section.list.find(
+        (c) =>
+          c?.slug?.toLowerCase() === 'business-pathfinder-report' ||
+          c?.slug?.toLowerCase()?.includes('business-pathfinder') ||
+          c?.title?.toLowerCase()?.includes('business pathfinder')
+      );
+      if (match) return match.amount ?? match.pdfDownloadCharge ?? null;
+    }
+    return null;
+  };
+
   const getDownloadCost = () => {
-    if (!charges) return 99;
-    const item = charges.find?.(c => c.featureName?.toLowerCase()?.includes('business')) || charges.find?.(c => c.featureName === 'default');
-    return item?.pdfDownloadCharge || 99;
+    if (isAlreadyDownloaded) return 0;
+    const amount = getChargeAmount();
+    return amount ?? 10;
   };
 
   const handleDownloadClick = () => {
@@ -54,6 +100,8 @@ const BusinessPathfinderResult = () => {
         link.remove();
         URL.revokeObjectURL(blobUrl);
         Toast.success('PDF downloaded!');
+        setDownloadedThisSession(true);
+        if (downloadedKey) localStorage.setItem(downloadedKey, 'true');
         refreshWallet();
       } else {
         Toast.error('Something went wrong. Please try again.');
@@ -303,12 +351,11 @@ const BusinessPathfinderResult = () => {
             <p>Get your detailed astrological business analysis in PDF format.</p>
             <div className={styles.downloadFeatures}>
               <span>✓ Detailed Analysis</span>
-              <span>✓ 8 Languages</span>
               <span>✓ Instant Download</span>
             </div>
           </div>
           <div className={styles.downloadRight}>
-            <span className={styles.downloadPrice}>₹{getDownloadCost()}</span>
+            <span className={styles.downloadPrice}>{getDownloadCost() === 0 ? 'Free' : `₹${getDownloadCost()}`}</span>
             <button className={styles.downloadBtn} onClick={handleDownloadClick}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>

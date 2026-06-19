@@ -1,5 +1,5 @@
 import { memo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { sortContentByOrder } from "../sectionRendererV2";
 
 const SLUG_PATHS = {
@@ -9,22 +9,17 @@ const SLUG_PATHS = {
 };
 
 const ComplementaryServicesSection = memo(({ sectionData, styles }) => {
-  const navigate = useNavigate();
   const content = sortContentByOrder(sectionData?.content || []);
-
-  const handleClick = useCallback((slug) => {
-    navigate(SLUG_PATHS[slug] || "/");
-  }, [navigate]);
 
   if (!content.length) return null;
 
   return (
     <>
       {content.map((card) => (
-        <div
+        <Link
           key={card.ID || card.slug || card.title}
           className={styles.qCard}
-          onClick={() => handleClick(card.slug)}
+          to={SLUG_PATHS[card.slug] || "/"}
         >
           <div className={styles.qText}>
             <h3>{card.title}</h3>
@@ -39,7 +34,7 @@ const ComplementaryServicesSection = memo(({ sectionData, styles }) => {
               fetchPriority="high"
             />
           </div>
-        </div>
+        </Link>
       ))}
     </>
   );
