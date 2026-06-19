@@ -35,7 +35,7 @@ const TicketDetails = () => {
   const isResolved = ticket.status === "resolved" || ticket.status === "closed";
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [ticket.messages]);
 
   const handleSendReply = async () => {
