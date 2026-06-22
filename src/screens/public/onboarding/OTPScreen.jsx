@@ -13,6 +13,7 @@ import { loginSuccess, setEmail } from "../../../redux/auth/authSlice";
 import { requestFCMToken } from "../../../services/firebase";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
+import { clearGuestKundliProfiles } from "../../../utils/helper/cookies";
 import onboardingBg from "../../../assets/images/onboarding.png";
 import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
 import LanguageSelector from "../../../component/LanguageSelector";
@@ -111,6 +112,9 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           // Clear any stale guest/previous user profile selection
           dispatch(clearSelectedKundli());
           localStorage.removeItem("selectedKundliProfile");
+
+          // Remove all kundli profiles added while browsing as a guest
+          clearGuestKundliProfiles();
 
           // Dispatch login action to Redux
           dispatch(
