@@ -318,6 +318,9 @@
   z-index: -1;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  @media (width <= 1180px) {
+    display: none;
+  }
 }
 .headerNavigationSubmenu{
   display: flex;
