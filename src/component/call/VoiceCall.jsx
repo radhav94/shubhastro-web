@@ -909,7 +909,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         astrologerName: callerName,
         astroID: activeCall.astrologerID,
         experience: activeCall.experience || lastRequestedAstro?.experience,
-        profileImgUrl: activeCall?.profileImgUrl || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
+        profileImgUrl: activeCall?.profileImgUrl || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
       }
     });
   };
@@ -994,7 +994,8 @@ const AgoraVoiceCalling = ({ callData }) => {
                         kundliId: activeCall?.kundliId,
                         astrologerName: callerName,
                         astroID: activeCall?.astrologerID,
-                        profileImgUrl: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
+                        experience: activeCall?.experience || lastRequestedAstro?.experience,
+                        profileImgUrl: activeCall?.profileImgUrl || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
                       }
                     });
                   }

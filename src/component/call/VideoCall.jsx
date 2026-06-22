@@ -1311,7 +1311,8 @@ const VideoCalling = ({ callData }) => {
                       kundliId: activeCall?.kundliId,
                       astrologerName: callerName,
                       astroID: activeCall?.astrologerID,
-                      profileImgUrl: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
+                      experience: activeCall?.experience || lastRequestedAstro?.experience,
+                      profileImgUrl: activeCall?.profileImgUrl || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
                     }
                   });
                 }
