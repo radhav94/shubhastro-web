@@ -56,6 +56,33 @@
   margin: 0 auto;
 }
 
+.horoscope-old-page .indian-horoscope-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 8px 20px;
+  border-radius: 50px;
+  border: 1.5px solid #F75801;
+  background: rgba(255, 255, 255,0.6);
+  color: #F75801;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.horoscope-old-page .indian-horoscope-btn:hover {
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
+@media (max-width: 767px) {
+  .horoscope-old-page .indian-horoscope-btn {
+    padding: 7px 16px;
+    font-size: 13px;
+  }
+}
+
 @media (max-width: 768px) {
 .horoscope-old-page .horoscope-page {
     padding-top: 0px; 

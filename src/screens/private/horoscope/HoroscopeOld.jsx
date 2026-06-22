@@ -230,15 +230,15 @@ const HoroscopeOld = () => {
     // Update URL to reflect the selected zodiac
     let newPath;
     if (pathname.includes('tomorrow-horoscope')) {
-      newPath = `/tomorrow-horoscope-old/${profileSunSign}`;
+      newPath = `/tomorrow-horoscope/${profileSunSign}`;
     } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
-      newPath = `/daily-horoscope-old/${profileSunSign}`;
+      newPath = `/daily-horoscope/${profileSunSign}`;
     } else if (pathname.includes('weekly-horoscope')) {
-      newPath = `/weekly-horoscope-old/${profileSunSign}`;
+      newPath = `/weekly-horoscope/${profileSunSign}`;
     } else if (pathname.includes('yearly-horoscope')) {
-      newPath = `/yearly-horoscope-old/${profileSunSign}`;
+      newPath = `/yearly-horoscope/${profileSunSign}`;
     } else {
-      newPath = `/daily-horoscope-old/${profileSunSign}`;
+      newPath = `/daily-horoscope/${profileSunSign}`;
     }
     navigate(newPath, { replace: true });
   }, [activeProfile?._id, profileSunSign, isAstroFetching]);
@@ -459,13 +459,13 @@ const HoroscopeOld = () => {
     // Navigate to corresponding route
     // Both "Today" and "Daily" go to daily-horoscope
     if (tab === 'Today' || tab === 'Daily') {
-      navigate(`/daily-horoscope-old/${selectedZodiac}`);
+      navigate(`/daily-horoscope/${selectedZodiac}`);
     } else if (tab === 'Tomorrow') {
-      navigate(`/tomorrow-horoscope-old/${selectedZodiac}`);
+      navigate(`/tomorrow-horoscope/${selectedZodiac}`);
     } else if (tab === 'This Week') {
-      navigate(`/weekly-horoscope-old/${selectedZodiac}`);
+      navigate(`/weekly-horoscope/${selectedZodiac}`);
     } else if (tab === 'This Year') {
-      navigate(`/yearly-horoscope-old/${selectedZodiac}`);
+      navigate(`/yearly-horoscope/${selectedZodiac}`);
     }
   };
 
@@ -480,16 +480,16 @@ const HoroscopeOld = () => {
     // Construct the new path based on current tab
     let newPath;
     if (pathname.includes('tomorrow-horoscope')) {
-      newPath = `/tomorrow-horoscope-old/${tempSelectedZodiac}`;
+      newPath = `/tomorrow-horoscope/${tempSelectedZodiac}`;
     } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
-      newPath = `/daily-horoscope-old/${tempSelectedZodiac}`;
+      newPath = `/daily-horoscope/${tempSelectedZodiac}`;
     } else if (pathname.includes('weekly-horoscope')) {
-      newPath = `/weekly-horoscope-old/${tempSelectedZodiac}`;
+      newPath = `/weekly-horoscope/${tempSelectedZodiac}`;
     } else if (pathname.includes('yearly-horoscope')) {
-      newPath = `/yearly-horoscope-old/${tempSelectedZodiac}`;
+      newPath = `/yearly-horoscope/${tempSelectedZodiac}`;
     } else {
       // Default to daily horoscope
-      newPath = `/daily-horoscope-old/${tempSelectedZodiac}`;
+      newPath = `/daily-horoscope/${tempSelectedZodiac}`;
     }
     
     navigate(newPath, { replace: true });
@@ -548,6 +548,12 @@ const HoroscopeOld = () => {
               </span>
             </div>
             <ChevronDown size={16} />
+          </button>
+          <button
+            className="indian-horoscope-btn"
+            onClick={() => navigate('/daily-horoscope-indian')}
+          >
+            Indian
           </button>
         </div>
       </div>

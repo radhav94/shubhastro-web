@@ -396,6 +396,10 @@
   height: fit-content;
   width: 100%;
   display: block;
+  line-height: 1.2;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 .category-item:has(.category-card.active) .category-label {
@@ -883,6 +887,10 @@
   .categoryImages{
     width: auto;
     height: 34px;
+    margin: 6px auto 4px;
+  }
+  .category-label {
+    font-size: 11px;
   }
   /* .category-card {
     height: 80px;

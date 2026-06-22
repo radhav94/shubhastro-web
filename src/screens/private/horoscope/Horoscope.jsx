@@ -241,15 +241,15 @@ const HoroscopeNew = () => {
     // Update URL to reflect the selected zodiac
     let newPath;
     if (pathname.includes('tomorrow-horoscope')) {
-      newPath = `/tomorrow-horoscope/${profileSunSign}`;
+      newPath = `/tomorrow-horoscope-indian/${profileSunSign}`;
     } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
-      newPath = `/daily-horoscope/${profileSunSign}`;
+      newPath = `/daily-horoscope-indian/${profileSunSign}`;
     } else if (pathname.includes('weekly-horoscope')) {
-      newPath = `/weekly-horoscope/${profileSunSign}`;
+      newPath = `/weekly-horoscope-indian/${profileSunSign}`;
     } else if (pathname.includes('yearly-horoscope')) {
-      newPath = `/yearly-horoscope/${profileSunSign}`;
+      newPath = `/yearly-horoscope-indian/${profileSunSign}`;
     } else {
-      newPath = `/daily-horoscope/${profileSunSign}`;
+      newPath = `/daily-horoscope-indian/${profileSunSign}`;
     }
     navigate(newPath, { replace: true });
   }, [activeProfile?._id, profileSunSign, isAstroFetching]);
@@ -564,13 +564,13 @@ const HoroscopeNew = () => {
     
     // Navigate to corresponding route
     if (tab === 'Today') {
-      navigate(`/daily-horoscope/${selectedZodiac}`);
+      navigate(`/daily-horoscope-indian/${selectedZodiac}`);
     } else if (tab === 'Tomorrow') {
-      navigate(`/tomorrow-horoscope/${selectedZodiac}`);
+      navigate(`/tomorrow-horoscope-indian/${selectedZodiac}`);
     } else if (tab === 'This Week') {
-      navigate(`/weekly-horoscope/${selectedZodiac}`);
+      navigate(`/weekly-horoscope-indian/${selectedZodiac}`);
     } else if (tab === 'This Year') {
-      navigate(`/yearly-horoscope/${selectedZodiac}`);
+      navigate(`/yearly-horoscope-indian/${selectedZodiac}`);
     }
   };
 
@@ -585,16 +585,16 @@ const HoroscopeNew = () => {
     // Construct the new path based on current tab
     let newPath;
     if (pathname.includes('tomorrow-horoscope')) {
-      newPath = `/tomorrow-horoscope/${tempSelectedZodiac}`;
+      newPath = `/tomorrow-horoscope-indian/${tempSelectedZodiac}`;
     } else if (pathname.includes('daily-horoscope') || pathname.includes('todays-horoscope')) {
-      newPath = `/daily-horoscope/${tempSelectedZodiac}`;
+      newPath = `/daily-horoscope-indian/${tempSelectedZodiac}`;
     } else if (pathname.includes('weekly-horoscope')) {
-      newPath = `/weekly-horoscope/${tempSelectedZodiac}`;
+      newPath = `/weekly-horoscope-indian/${tempSelectedZodiac}`;
     } else if (pathname.includes('yearly-horoscope')) {
-      newPath = `/yearly-horoscope/${tempSelectedZodiac}`;
+      newPath = `/yearly-horoscope-indian/${tempSelectedZodiac}`;
     } else {
       // Default to daily horoscope
-      newPath = `/daily-horoscope/${tempSelectedZodiac}`;
+      newPath = `/daily-horoscope-indian/${tempSelectedZodiac}`;
     }
     
     navigate(newPath, { replace: true });
