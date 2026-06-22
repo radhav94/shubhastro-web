@@ -91,11 +91,13 @@ const OrderDetails = () => {
 
   // Check if there's more data to load based on API pagination
   React.useEffect(() => {
-    if (chatData?.data?.pagination) {
-      const { hasNextPage } = chatData.data.pagination;
-      setHasMore(hasNextPage);
+    if (chatData?.pagination) {
+      setHasMore(chatData.pagination.hasNextPage === true);
+    } else if (chatData && !isFetching) {
+      // If no pagination info and not fetching, assume no more data
+      setHasMore(false);
     }
-  }, [chatData]);
+  }, [chatData, isFetching]);
 
   const loadMore = React.useCallback(() => {
     if (!isFetching && hasMore) {
