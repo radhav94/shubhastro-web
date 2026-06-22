@@ -32,6 +32,8 @@ const PanditAIVoiceBubble = () => {
 
   const {
     remainingPaidTime: hookRemainingPaidTime,
+    isFreePeriod: hookIsFreePeriod,
+    freeMinutesRemaining: hookFreeMinutesRemaining,
     showRechargeBanner,
     rechargeBannerMessage,
     walletBalance: hookWalletBalance,
@@ -39,10 +41,21 @@ const PanditAIVoiceBubble = () => {
     sessionEndedLowBalance,
   } = useAIFreeMinutes({ isOpen, roomId });
 
-  // Use hook values, fall back to initial billing from text chat
+  // Use hook values, fall back to initial billing seeded from the text chat
+  // handover so the badge shows instantly while chat:reconnect round-trips.
   const remainingPaidTime = hookRemainingPaidTime ?? initialBilling?.remainingPaidTime ?? null;
   const walletBalance = hookWalletBalance ?? initialBilling?.walletBalance ?? null;
   const ratePerMinute = hookRatePerMinute ?? initialBilling?.ratePerMinute ?? null;
+  const freeMinutesRemaining = hookFreeMinutesRemaining ?? initialBilling?.freeMinutesRemaining ?? null;
+  const isFreePeriod = hookIsFreePeriod || (hookFreeMinutesRemaining == null && (initialBilling?.isFreePeriod ?? false));
+
+  // Once the hook produces real session state, drop the seed so it can't keep
+  // showing a stale free badge after billing switches to paid.
+  useEffect(() => {
+    if (hookFreeMinutesRemaining != null || hookRemainingPaidTime != null) {
+      setInitialBilling(null);
+    }
+  }, [hookFreeMinutesRemaining, hookRemainingPaidTime]);
 
   // Listen for external open event (may include shared roomId from text chat)
   useEffect(() => {
@@ -56,8 +69,15 @@ const PanditAIVoiceBubble = () => {
       if (incomingRoomId) {
         setSharedRoomId(incomingRoomId);
       }
-      // Seed initial billing data from text chat
-      if (e.detail?.walletBalance != null) setInitialBilling(e.detail);
+      // Seed initial billing / free-minutes data from text chat
+      if (
+        e.detail &&
+        (e.detail.walletBalance != null ||
+          e.detail.remainingPaidTime != null ||
+          e.detail.freeMinutesRemaining != null)
+      ) {
+        setInitialBilling(e.detail);
+      }
       setIsOpen(true);
     };
     window.addEventListener("panditai-voice:open", handleOpen);
@@ -85,8 +105,11 @@ const PanditAIVoiceBubble = () => {
       markSkipCleanup();
       setIsOpen(false);
       setSharedRoomId(null);
-      // Reopen Pandit AI text chat (it will reconnect to the same room)
-      window.dispatchEvent(new CustomEvent("panditai:reopen"));
+      // Reopen Pandit AI text chat (it will reconnect to the same room) and
+      // hand the current billing/free-minutes state back for a seamless badge.
+      window.dispatchEvent(new CustomEvent("panditai:reopen", {
+        detail: { walletBalance, remainingPaidTime, ratePerMinute, isFreePeriod, freeMinutesRemaining },
+      }));
     } else {
       // Standalone voice session — end it fully
       endSession?.();
@@ -95,7 +118,7 @@ const PanditAIVoiceBubble = () => {
       // Always reopen text chat when voice closes
       window.dispatchEvent(new CustomEvent("panditai:reopen"));
     }
-  }, [endSession, sharedRoomId, markSkipCleanup, stopAudio]);
+  }, [endSession, sharedRoomId, markSkipCleanup, stopAudio, walletBalance, remainingPaidTime, ratePerMinute, isFreePeriod, freeMinutesRemaining]);
 
   const getStatusText = () => {
     if (connecting) return "Connecting...";
@@ -149,7 +172,16 @@ const PanditAIVoiceBubble = () => {
             </div>
           </div>
           <div className={styles.headerActions}>
-            {remainingPaidTime != null && !sessionEndedLowBalance && (
+            {isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
+              <div className={styles.freeBadge}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span className={styles.freeBadgeText}>{freeMinutesRemaining} min free</span>
+              </div>
+            )}
+            {!isFreePeriod && remainingPaidTime != null && !sessionEndedLowBalance && (
               <div className={styles.countdownBadge}>
                 {walletBalance != null && (
                   <span className={styles.countdownBalance}>

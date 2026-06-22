@@ -162,27 +162,28 @@ const AgenticCalendarV2 = ({ styles }) => {
           <label style={{ fontSize: 15, fontWeight: 600, color: '#1f2937', display: 'block', marginBottom: 6 }}>
             Location
           </label>
-          <LocationSearch
-            value={locationValue}
-            onChange={(e) => {
-              setLocationValue(e.target.value);
-              if (!e.target.value.trim()) setLocationData(null);
-            }}
-            onPlaceSelect={({ address, lat, lng }) => {
-              setLocationValue(address);
-              setLocationData({ address, lat, lng });
-            }}
-          />
+          <div className={styles.agenticCalLocation}>
+            <LocationSearch
+              value={locationValue}
+              onChange={(e) => {
+                setLocationValue(e.target.value);
+                if (!e.target.value.trim()) setLocationData(null);
+              }}
+              onPlaceSelect={({ address, lat, lng }) => {
+                setLocationValue(address);
+                setLocationData({ address, lat, lng });
+              }}
+            />
+            {/* CTA */}
+          <button
+            className={styles.calCta}
+            disabled={selectedOccasions.length === 0 || !locationData}
+            onClick={handleGetMuhurat}
+          >
+            View Muhuratas
+          </button>
+          </div>
         </div>
-
-        {/* CTA */}
-        <button
-          className={styles.calCta}
-          disabled={selectedOccasions.length === 0 || !locationData}
-          onClick={handleGetMuhurat}
-        >
-          View Muhuratas
-        </button>
       </div>
 
       {/* Date Picker Modal */}

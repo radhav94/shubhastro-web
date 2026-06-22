@@ -57,8 +57,11 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       setShowRechargeBanner(false);
       setSessionEndedLowBalance(false);
       setRechargeBannerMessage(null);
-      if (data.isFreePeriod !== undefined) setIsFreePeriod(data.isFreePeriod);
-      if (data.freeMinutesRemainingToday !== undefined) setFreeMinutesRemaining(data.freeMinutesRemainingToday);
+      // Free chat starts at 5 minutes (backend sends `freeMinutesRemaining`).
+      const fmr = data.freeMinutesRemaining ?? data.freeMinutesRemainingToday;
+      const freeMin = fmr !== undefined && fmr !== null ? fmr : 5;
+      setFreeMinutesRemaining(freeMin);
+      setIsFreePeriod(freeMin > 0);
       if (data.freeMinutesUsedToday !== undefined) setFreeMinutesUsed(data.freeMinutesUsedToday);
       if (data.walletBalance !== undefined) setWalletBalance(data.walletBalance);
       if (data.ratePerMinute !== undefined) setRatePerMinute(data.ratePerMinute);
@@ -75,13 +78,21 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       // Only process if this is for our room or is an AI session event
       if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
 
-      // Update free-window state from activity tick
-      if (data.isFreePeriod !== undefined) {
-        setIsFreePeriod(data.isFreePeriod);
+      // Free vs paid is decided purely by presence of `freeMinutesRemaining`.
+      // Present  -> still in the 5-minute free window (counts down 4→3→2→1).
+      // Absent   -> free window used up; paid wallet billing has started.
+      const fmr = data.freeMinutesRemaining ?? data.freeMinutesRemainingToday;
+      if (fmr !== undefined && fmr !== null) {
+        setFreeMinutesRemaining(fmr);
+        setIsFreePeriod(fmr > 0);
+        // In the free window there is no paid countdown to show.
+        setRemainingPaidTime(null);
+      } else {
+        setIsFreePeriod(false);
+        setFreeMinutesRemaining(null);
+        if (data.remainingTime !== undefined) setRemainingPaidTime(data.remainingTime);
       }
-      if (data.freeMinutesRemainingToday !== null && data.freeMinutesRemainingToday !== undefined) {
-        setFreeMinutesRemaining(data.freeMinutesRemainingToday);
-      }
+
       if (data.freeMinutesUsedToday !== null && data.freeMinutesUsedToday !== undefined) {
         setFreeMinutesUsed(data.freeMinutesUsedToday);
       }
@@ -97,9 +108,6 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       if (data.ratePerMinute !== undefined) {
         setRatePerMinute(data.ratePerMinute);
       }
-      if (data.remainingTime !== undefined) {
-        setRemainingPaidTime(data.remainingTime);
-      }
 
       // Auto-dismiss recharge banner if wallet is now sufficient
       if (showRechargeBanner && data.walletBalance >= data.ratePerMinute * 5) {
@@ -113,16 +121,33 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
 
       setShowRechargeBanner(true);
-      setWalletBalance(data.walletBalance);
-      setRatePerMinute(data.ratePerMinute);
-      if (data.minBalanceRequired !== undefined) {
-        setMinBalanceRequired(data.minBalanceRequired);
+      // Prefer the backend-provided message; fall back to a default.
+      setRechargeBannerMessage(data.message || "Recharge to keep chatting");
+      if (data.walletBalance !== undefined) setWalletBalance(data.walletBalance);
+      if (data.ratePerMinute !== undefined) setRatePerMinute(data.ratePerMinute);
+      const minReq = data.minRequired ?? data.minBalanceRequired;
+      if (minReq !== undefined) {
+        setMinBalanceRequired(minReq);
       }
       if (data.minutesUntilPaid !== undefined) {
         setMinutesUntilPaid(data.minutesUntilPaid);
       }
-      if (data.freeMinutesRemainingToday !== undefined) {
-        setFreeMinutesRemaining(data.freeMinutesRemainingToday);
+      if (data.remainingTime !== undefined) {
+        setRemainingPaidTime(data.remainingTime);
+      }
+      const fmr = data.freeMinutesRemaining ?? data.freeMinutesRemainingToday;
+      if (fmr !== undefined && fmr !== null) {
+        setFreeMinutesRemaining(fmr);
+      }
+    };
+
+    // Low-balance "warning" (paid mode) — show the alert without ending the
+    // session. Backend sends e.g. "Low balance alert! Remaining time: 1 min."
+    const handleWarning = (data) => {
+      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      if (data?.message) {
+        setShowRechargeBanner(true);
+        setRechargeBannerMessage(data.message);
       }
     };
 
@@ -154,9 +179,15 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
 
       // Full state refresh from reconnect
-      if (data.isFreePeriod !== undefined) setIsFreePeriod(data.isFreePeriod);
+      const fmr = data.freeMinutesRemaining ?? data.freeMinutesRemainingToday;
+      if (fmr !== undefined && fmr !== null) {
+        setFreeMinutesRemaining(fmr);
+        setIsFreePeriod(fmr > 0);
+      } else {
+        setIsFreePeriod(false);
+        setFreeMinutesRemaining(null);
+      }
       if (data.freeMinutesUsedToday !== undefined) setFreeMinutesUsed(data.freeMinutesUsedToday);
-      if (data.freeMinutesRemainingToday !== undefined) setFreeMinutesRemaining(data.freeMinutesRemainingToday);
       if (data.freeMinutesAllocated !== undefined) setFreeMinutesAllocated(data.freeMinutesAllocated);
       if (data.dayKeyIST) setDayKeyIST(data.dayKeyIST);
       if (data.walletBalance !== undefined) setWalletBalance(data.walletBalance);
@@ -176,26 +207,22 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       }
     };
 
-    const handleWarning = (data) => {
-      if (data?.message) {
-        setShowRechargeBanner(true);
-        setRechargeBannerMessage(data.message);
-        // Warning doesn't end session — input should stay visible
-      }
-    };
-
     voiceSocket.on("chat:accepted", handleChatAccepted);
     voiceSocket.on("activity", handleActivity);
+    // New backend event name (snake_case) + legacy name kept for safety.
+    voiceSocket.on("insufficient_balance", handleInsufficientBalance);
     voiceSocket.on("chat:insufficient-balance", handleInsufficientBalance);
     voiceSocket.on("chat:ended", handleChatEnded);
     voiceSocket.on("chat:free-window-renewed", handleFreeWindowRenewed);
     voiceSocket.on("chat:reconnected", handleReconnected);
     voiceSocket.on("error", handleError);
+    // Paid-mode low-balance alert.
     voiceSocket.on("warning", handleWarning);
 
     return () => {
       voiceSocket.off("chat:accepted", handleChatAccepted);
       voiceSocket.off("activity", handleActivity);
+      voiceSocket.off("insufficient_balance", handleInsufficientBalance);
       voiceSocket.off("chat:insufficient-balance", handleInsufficientBalance);
       voiceSocket.off("chat:ended", handleChatEnded);
       voiceSocket.off("chat:free-window-renewed", handleFreeWindowRenewed);

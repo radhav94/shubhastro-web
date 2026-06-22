@@ -36,11 +36,11 @@ const KundaliContent = () => {
     <div>
       {userDetails && (
         <div className="flex mb-4">
-          <PrimaryText isSemiBold size_20 color={appColors.tri}>
+          <PrimaryText isSemiBold size_16>
             {userDetails?.name || "--"}
           </PrimaryText>
           <div className="mr-2 ml-2" />
-          <PrimaryText isSemiBold size_20 color={appColors.tri}>
+          <PrimaryText isSemiBold size_16>
             ({String(userDetails?.day).padStart(2, "0")} - {monthToNumber(userDetails?.month)} - {userDetails?.year})
           </PrimaryText>
         </div>

@@ -29,8 +29,10 @@
   border: 1px solid #fff;
   backdrop-filter: blur(12px);
   flex-shrink: 0;
+  min-height: 300px;
   @media screen and (width <= 767px) {
     width: 145px;
+    min-height: 277px;
   }
   &:hover{
     transform: translateY(-2px);
@@ -151,9 +153,10 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   top: 5px;
   left: 8px;
-  // @media screen and (width <= 767px) {
-  //   padding: 4px 10px;
-  // }
+  @media screen and (width <= 767px) {
+    padding: 0px 8px;
+    top: 8px;
+  }
 }
 
 

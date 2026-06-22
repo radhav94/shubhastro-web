@@ -396,12 +396,8 @@ const VideoCalling = ({ callData }) => {
           // Don't end call if we're downgrading to audio
           if (isDowngradingToAudio.current) return;
 
-          console.log("[VideoCall] 👋 user-left — uid:", user.uid, "starting 15s grace timer");
-          if (userLeftTimerRef.current) clearTimeout(userLeftTimerRef.current);
-          userLeftTimerRef.current = setTimeout(() => {
-            console.log("[VideoCall] ⏰ user-left grace timer expired — ending call");
-            safeEndCall();
-          }, 30000); // 30s grace period for rejoin
+          console.log("[VideoCall] 👋 user-left — uid:", user.uid, "— backend will handle session end");
+          // No client-side endCall timer — backend owns session lifecycle
         });
 
         client.on("user-joined", (user) => {
@@ -1497,7 +1493,7 @@ const VideoCalling = ({ callData }) => {
                 {/* Customer Name Label */}
                 <div className={styles.localVideoLabel}>
                   <span className={styles.localVideoName}>{capitalizeWords(customerName)}</span>
-                  <span className={styles.localVideoRole}>{capitalizeWords(user?.role || "Customer")}</span>
+                  <span className={styles.localVideoRole}>You</span>
                 </div>
               </div>
             </div>

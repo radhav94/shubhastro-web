@@ -113,7 +113,7 @@ const ProfileManager = ({
     return {
       name: data.name,
       gender: data.identity.toLowerCase(),
-      relation: data.relation || "Self",
+      relation: data.relation || "",
       day: dateObj.getDate(),
       month: dateObj.getMonth() + 1,
       year: dateObj.getFullYear(),
