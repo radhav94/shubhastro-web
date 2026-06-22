@@ -578,7 +578,7 @@ const TopHeader = () => {
               }}
               style={{ cursor: 'pointer' }}
             >
-              <div className={styles.menuProfilePik}>
+              <div className={`${styles.menuProfilePik} notranslate`}>
                   {userAvatarDisplay || <User size={18} strokeWidth={0} fill="#d53400"/>}
               </div>
               <div className={`${styles.menuProfileNameMobile} notranslate`}>

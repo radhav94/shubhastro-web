@@ -199,6 +199,32 @@ div[id^="goog-gt-"] {
     display: none !important;
 }
 
+/* Hide Google Translate loading overlay (the blue spinning arc) */
+body > div:not(#root):not(#google_translate_element):not(noscript):not(script) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
+
+/* Ensure #root stays visible */
+#root {
+    display: block !important;
+    visibility: visible !important;
+    height: auto !important;
+    width: auto !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+}
+
 /* Remove moon dividers globally */
 [class*="titleDivider"],
 [class*="cosmicDivider"],
