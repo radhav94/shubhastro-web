@@ -1885,6 +1885,12 @@
   &::-webkit-scrollbar {
     display: none;
   }
+
+  @media screen and (min-width: 768px) {
+    gap: 65px;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
 }
 
 .gridItem {
