@@ -1,7 +1,8 @@
-import { memo, useCallback, useRef } from "react";
+import { memo, useCallback, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { sortContentByOrder } from "../sectionRendererV2";
 import SectionTitle from "./shared/SectionTitle";
+import defaultQuickImage from "../../../../assets/images/default_quickimage.png";
 
 const SLUG_ROUTE_MAP = {
   horoscope: "/daily-horoscope",
@@ -51,7 +52,20 @@ const SCROLL_AMOUNT = 200;
 const QuickLinkSection = memo(({ sectionData, styles }) => {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
+  const [hasOverflow, setHasOverflow] = useState(false);
   const items = sortContentByOrder(sectionData?.content || []);
+
+  const checkOverflow = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setHasOverflow(el.scrollWidth > el.clientWidth);
+  }, []);
+
+  useEffect(() => {
+    checkOverflow();
+    window.addEventListener("resize", checkOverflow);
+    return () => window.removeEventListener("resize", checkOverflow);
+  }, [checkOverflow, items.length]);
 
   const handleScroll = useCallback((direction) => {
     scrollRef.current?.scrollBy({
@@ -69,9 +83,11 @@ const QuickLinkSection = memo(({ sectionData, styles }) => {
       </div>
 
       <div className={styles.quickScrollWrap}>
-        <button className={styles.quickArrow} onClick={() => handleScroll(-1)} aria-label="Scroll left">
-          ‹
-        </button>
+        {hasOverflow && (
+          <button className={styles.quickArrow} onClick={() => handleScroll(-1)} aria-label="Scroll left">
+            ‹
+          </button>
+        )}
 
         <div className={styles.gridRow} ref={scrollRef}>
           {items.map((item) => (
@@ -84,22 +100,22 @@ const QuickLinkSection = memo(({ sectionData, styles }) => {
               onKeyDown={(e) => e.key === "Enter" && resolveRoute(item, navigate)}
             >
               <div className={styles.gridIconBox}>
-                {(item.image_url_web || item.image_url || item.icon) && (
-                  <img
-                    src={item.image_url_web || item.image_url || item.icon}
-                    alt={item.title}
-                    loading="lazy"
-                  />
-                )}
+                <img
+                  src={item.image_url_web || item.image_url || item.icon || defaultQuickImage}
+                  alt={item.title}
+                  loading="lazy"
+                />
               </div>
               <span>{item.title}</span>
             </div>
           ))}
         </div>
 
-        <button className={styles.quickArrow} onClick={() => handleScroll(1)} aria-label="Scroll right">
-          ›
-        </button>
+        {hasOverflow && (
+          <button className={styles.quickArrow} onClick={() => handleScroll(1)} aria-label="Scroll right">
+            ›
+          </button>
+        )}
       </div>
     </section>
   );
