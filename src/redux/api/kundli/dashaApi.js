@@ -151,5 +151,6 @@ export const {
   useGetSadesatiQuery,
   useGetSadeSatiTableQuery,
   useGetMatchMakingQuery,
+  useLazyGetMatchMakingQuery,
   useGetCurrentMahadashaFullQuery,
 } = dashaApi;

@@ -239,20 +239,6 @@ const Prediction = ({ params, skipToken }) => {
                           Probability: {formatValue(value.probability)}
                         </p>
 
-                        {(showPreview || value.contributors || value.houseScores) && (
-                          <button
-                            onClick={() =>
-                              setOpenMeta((p) => ({
-                                ...p,
-                                [metaKey]: !p[metaKey],
-                              }))
-                            }
-                            className="mt-3 text-xs text-blue-600 hover:underline"
-                          >
-                            {isMetaOpen ? "Show Less" : "Show More"}
-                          </button>
-                        )}
-
                         {isMetaOpen && (
                           <div className="mt-3 text-xs text-gray-600 space-y-3">
                             {value.contributors && (
@@ -287,6 +273,22 @@ const Prediction = ({ params, skipToken }) => {
                                 </div>
                               </div>
                             )}
+                          </div>
+                        )}
+
+                        {(showPreview || value.contributors || value.houseScores) && (
+                          <div className={styles.showMoreContainer}>
+                            <button
+                              onClick={() =>
+                                setOpenMeta((p) => ({
+                                  ...p,
+                                  [metaKey]: !p[metaKey],
+                                }))
+                              }
+                              className={styles.showMoreBtn}
+                            >
+                              {isMetaOpen ? "Show Less" : "Show More"}
+                            </button>
                           </div>
                         )}
                       </div>

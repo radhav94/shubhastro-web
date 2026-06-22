@@ -10,6 +10,7 @@ import {
 } from "../../../services/appServices/kundliServicesNew";
 import { PATH } from "../../../utils/routes/Paths";
 import { useLazyGetNumerologyPredictionQuery } from "../../../services/appServices/numerologyServices";
+import { useLazyGetMatchMakingQuery } from "../../../redux/api/kundli/dashaApi";
 import { Toast } from "../../../component";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
@@ -114,6 +115,7 @@ const MatchMaking = () => {
   const [deleteKundli] = useDeleteKundliMutation();
 
   const [getNumerologyPrediction] = useLazyGetNumerologyPredictionQuery();
+  const [getMatchMaking, { isFetching: isMatchLoading }] = useLazyGetMatchMakingQuery();
 
   // Combine saved profiles (if logged in) with temporary profiles (if not logged in)
   const savedProfiles = data?.data || [];
@@ -393,7 +395,7 @@ const MatchMaking = () => {
   };
 
   /* -------------------- PROCEED -------------------- */
-  const handleProceed = (e) => {
+  const handleProceed = async (e) => {
     e?.preventDefault();
 
     if (!primaryProfile || !partnerProfile) {
@@ -459,7 +461,14 @@ const MatchMaking = () => {
       };
     }
 
-    navigate(PATH.privateRoutes.MATCHMAKING_DETAILS.path, { state });
+    // Call API first — only navigate on success
+    try {
+      await getMatchMaking({ formData: state }).unwrap();
+      navigate(PATH.privateRoutes.MATCHMAKING_DETAILS.path, { state });
+    } catch (err) {
+      const errorMessage = err?.data?.message || "Something went wrong. Please try again.";
+      Toast.error(errorMessage);
+    }
   };
 
   /* -------------------- ADD PROFILE -------------------- */
@@ -665,11 +674,18 @@ const MatchMaking = () => {
               </div>
             </div>
 
-            <button className={styles.matchMakingBtn} onClick={handleProceed}>
-              Proceed Ahead 
-              <svg xmlns="http://www.w3.org/2000/svg" width="7" height="14" viewBox="0 0 7 14" fill="none">
-                <path d="M0.75 12.63L5.64 7.74C6.2175 7.1625 6.2175 6.2175 5.64 5.64L0.75 0.75" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+            <button
+              className={styles.matchMakingBtn}
+              onClick={handleProceed}
+              disabled={
+                isMatchLoading ||
+                (!!primaryProfile &&
+                !!partnerProfile &&
+                primaryProfile.gender?.toLowerCase() === "male" &&
+                partnerProfile.gender?.toLowerCase() === "male")
+              }
+            >
+              {isMatchLoading ? "Loading..." : "Proceed Ahead"}
             </button>
           </div>
 
