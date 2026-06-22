@@ -436,7 +436,11 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   /* ================= MIC TOGGLE ================= */
   useEffect(() => {
-    micTrackRef.current?.setEnabled(micOn);
+    try {
+      micTrackRef.current?.setEnabled(micOn);
+    } catch (e) {
+      console.warn("[VoiceCall] Mic setEnabled failed (connection not ready):", e.message);
+    }
   }, [micOn]);
 
   /* ================= SPEAKER TOGGLE ================= */
