@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FiChevronRight, FiCalendar, FiChevronLeft } from "react-icons/fi";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
-import useUserLocation from "../../../utils/hooks/useUserLocation";
 
 const OCCASIONS = [
   'Marriage', 'Job Interview', 'Business Launch', 'House Purchase',
@@ -27,15 +26,6 @@ const AgenticCalendarV2 = ({ styles }) => {
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
   const [locationValue, setLocationValue] = useState('');
   const [locationData, setLocationData] = useState(null);
-  const userLocation = useUserLocation();
-
-  // Set location from browser geolocation
-  useEffect(() => {
-    if (userLocation.loaded && userLocation.locationName) {
-      setLocationValue(userLocation.locationName);
-      setLocationData({ address: userLocation.locationName, lat: userLocation.lat, lng: userLocation.lon });
-    }
-  }, [userLocation.loaded, userLocation.locationName]);
 
   const allOccasions = [...OCCASIONS, ...customOccasions];
 
@@ -165,6 +155,7 @@ const AgenticCalendarV2 = ({ styles }) => {
           <div className={styles.agenticCalLocation}>
             <LocationSearch
               value={locationValue}
+              placeholder="Enter your location"
               onChange={(e) => {
                 setLocationValue(e.target.value);
                 if (!e.target.value.trim()) setLocationData(null);

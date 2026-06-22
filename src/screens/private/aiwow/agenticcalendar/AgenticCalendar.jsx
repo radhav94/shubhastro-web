@@ -9,7 +9,6 @@ import { FiMapPin, FiCalendar, FiChevronLeft, FiChevronRight, FiChevronUp, FiChe
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import LocationSearch from '../../../../utils/location/locationSearchVedic';
-import useUserLocation from '../../../../utils/hooks/useUserLocation';
 
 const DEFAULT_OCCASIONS = [
   'Marriage',
@@ -50,16 +49,6 @@ const AgenticCalendar = () => {
   const resultsRef = useRef(null);
   const [locationValue, setLocationValue] = useState('');
   const [locationData, setLocationData] = useState(null);
-  const userLocation = useUserLocation();
-
-  // Set location from browser geolocation (skip if nav state has location)
-  useEffect(() => {
-    if (navState.location) return;
-    if (userLocation.loaded && userLocation.locationName) {
-      setLocationValue(userLocation.locationName);
-      setLocationData({ address: userLocation.locationName, lat: userLocation.lat, lng: userLocation.lon });
-    }
-  }, [userLocation.loaded, userLocation.locationName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [navStateConsumed, setNavStateConsumed] = useState(false);
   const [autoSubmitPending, setAutoSubmitPending] = useState(false);
@@ -394,6 +383,7 @@ const AgenticCalendar = () => {
             </label>
             <LocationSearch
               value={locationValue}
+              placeholder="Enter your location"
               onChange={(e) => {
                 setLocationValue(e.target.value);
                 if (!e.target.value.trim()) setLocationData(null);
