@@ -80,13 +80,6 @@ $floating-button-gap: 14px;
   @media (width <= 1180px) {
     height: calc(100dvh - 53px);
   }
-  // @media (width <= 767px) {
-  //   height: calc(100dvh - 20px);
-  //   // &:has(.header,.callButtonsContainer){
-  //   //   height: calc(100dvh - 52px);
-  //   // }
-  // }
-  
 }
 
 /* CHAT CONTAINER */
@@ -1115,40 +1108,47 @@ $floating-button-gap: 14px;
 
 /* ==================== INPUT BAR ==================== */
 .inputBox {
-  min-height: var(--chat-input-height);
-  padding: $spacing-xl max(calc(50% - 720px + 20px), 16px);
+  // min-height: var(--chat-input-height);
+  padding: 8px max(calc(50% - 720px + 20px), 12px);
   display: flex;
-  align-items: center;
-  gap: $spacing-xl;
+  align-items: flex-end;
+  gap: 8px;
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(12px);
   border-top: none;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 .inputWrapper {
   flex: 1;
   display: flex;
-  align-items: center;
-  // background: $bg-input-field;
+  align-items: flex-end;
+  gap: 8px;
   border-radius: 32px;
-  // padding: 0 12px;
   box-shadow: none;
-  height: 56px;
-  min-width: 0; /* Allow flex item to shrink below content size */
+  min-width: 0;
 }
 
 .inputField {
   flex: 1;
-  height: 100%;
-  padding: 0 25px;
-  border: none;
+  height: 40px;
+  min-height: 40px;
+  max-height: 96px; /* 4 lines: 20px line-height × 4 + 16px padding */
+  padding: 10px 16px;
+  border: 1px solid #FFD6A8;
   font-size: 16px;
+  line-height: 20px;
   outline: none;
   color: #000;
-  border-radius: 16px;
-  border: 1px solid #FFD6A8;
+  border-radius: 20px;
   background: rgba(255, 247, 237, 0.50);
+  resize: none;
+  overflow-y: auto;
+  font-family: inherit;
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .inputField::placeholder {
@@ -1160,17 +1160,15 @@ $floating-button-gap: 14px;
 .inputIcons {
   display: flex;
   align-items: center;
-  gap: $message-gap;
-  padding-left: $message-gap;
+  gap: 6px;
+  flex-shrink: 0;
+  height: 40px;
 }
 
 .iconButton {
-  width: 44px;
-  height: 44px;
-  // min-width: 36px;
-  // border-radius: 50%;
+  width: 40px;
+  height: 40px;
   border: none;
-  // background: transparent;
   color: $icon-color;
   display: flex;
   align-items: center;
@@ -1198,8 +1196,8 @@ $floating-button-gap: 14px;
 }
 
 .sendButton {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   // min-width: 36px;
   // border-radius: 50%;
   border: none;
@@ -1538,12 +1536,11 @@ $floating-button-gap: 14px;
   }
 
   .inputBox {
-    padding: $spacing-lg $spacing-xl;
-    gap: $spacing-lg;
-    // background: #d9d9d9;
-    height: var(--chat-input-height);
+    padding: 8px 12px;
+    gap: 8px;
     min-height: var(--chat-input-height);
-    max-height: var(--chat-input-height);
+    max-height: none;
+    height: auto;
     flex-shrink: 0;
   }
 
@@ -1556,10 +1553,12 @@ $floating-button-gap: 14px;
   // }
 
   .inputField {
-    height: 100%;
     font-size: 16px;
     flex: 1;
     min-width: 0;
+    height: 40px;
+    min-height: 40px;
+    max-height: 96px;
   }
 
   .inputField::placeholder {
