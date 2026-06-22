@@ -37,6 +37,14 @@ import { ProfileManager } from "../../../component/UI/Profile";
 import DownloadReportModal from "../aiwow/components/DownloadReportModal";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { useGetChargesQuery } from "../../../redux/api/aiwow/aiwowApi";
+import {
+  getJSONCookie,
+  setJSONCookie,
+  removeCookie,
+} from "../../../utils/helper/cookies";
+
+// Cookie key for persisting guest (non-logged-in) kundli profiles across pages
+const GUEST_KUNDLI_COOKIE = "guestKundliProfiles";
 
 
 const Kundali = () => {
@@ -158,35 +166,26 @@ const Kundali = () => {
     return null;
   }
 
-  // Temporary profiles for non-logged-in users (persisted in sessionStorage)
-  const [tempProfiles, setTempProfiles] = useState(() => {
-    try {
-      const saved = sessionStorage.getItem("tempKundliProfiles");
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
-  });
+  // Temporary profiles for non-logged-in users (persisted in cookies so they
+  // survive page navigation and reloads)
+  const [tempProfiles, setTempProfiles] = useState(() =>
+    getJSONCookie(GUEST_KUNDLI_COOKIE, [])
+  );
 
-  // Sync tempProfiles to sessionStorage
+  // Sync tempProfiles to cookie
   useEffect(() => {
     if (!isLoggedIn) {
-      sessionStorage.setItem("tempKundliProfiles", JSON.stringify(tempProfiles));
+      setJSONCookie(GUEST_KUNDLI_COOKIE, tempProfiles);
     }
   }, [tempProfiles, isLoggedIn]);
 
   // Clear temp profiles when user logs in
   useEffect(() => {
     if (isLoggedIn) {
-      sessionStorage.removeItem("tempKundliProfiles");
+      removeCookie(GUEST_KUNDLI_COOKIE);
       setTempProfiles([]);
     }
   }, [isLoggedIn]);
-
-  // Clear temp profiles when navigating away
-  useEffect(() => {
-    return () => {
-      sessionStorage.removeItem("tempKundliProfiles");
-    };
-  }, []);
 
   // Get current user ID
   const currentUserId = role === "ASTROLOGER"

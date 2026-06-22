@@ -21,6 +21,14 @@ import matchMakingImgBottom from "../../../assets/images/match-making-bottom-img
 import { ProfileManager } from "../../../component/UI/Profile";
 import BackButton from "../../../component/UI/BackButton/BackButton";
 // import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
+import {
+  getJSONCookie,
+  setJSONCookie,
+  removeCookie,
+} from "../../../utils/helper/cookies";
+
+// Shared cookie key for guest (non-logged-in) kundli profiles across pages
+const GUEST_KUNDLI_COOKIE = "guestKundliProfiles";
 
 const MatchMaking = () => {
   const navigate = useNavigate();
@@ -58,7 +66,25 @@ const MatchMaking = () => {
       : localStorage.getItem("shubhtalk_customer_id");
 
   /* -------------------- TEMPORARY PROFILES (NON-LOGGED-IN) -------------------- */
-  const [tempProfiles, setTempProfiles] = useState([]);
+  // Persisted in cookies so guest kundli profiles survive page navigation/reloads
+  const [tempProfiles, setTempProfiles] = useState(() =>
+    getJSONCookie(GUEST_KUNDLI_COOKIE, [])
+  );
+
+  // Sync tempProfiles to cookie
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setJSONCookie(GUEST_KUNDLI_COOKIE, tempProfiles);
+    }
+  }, [tempProfiles, isLoggedIn]);
+
+  // Clear temp profiles when user logs in
+  useEffect(() => {
+    if (isLoggedIn) {
+      removeCookie(GUEST_KUNDLI_COOKIE);
+      setTempProfiles([]);
+    }
+  }, [isLoggedIn]);
 
   /* -------------------- CURL GENERATOR -------------------- */
   const generateCurlCommand = (endpoint, _method, payload, token) => {
@@ -519,10 +545,12 @@ const MatchMaking = () => {
       console.error("Error data:", err?.data);
       console.error("===========================");
 
-      const errorMessage =
-        err?.data?.message || err?.message || "Failed to add profile";
+      if (err?.message !== "Duplicate profile") {
+        const errorMessage =
+          err?.data?.message || err?.message || "Failed to add profile";
 
-      Toast.error(errorMessage);
+        Toast.error(errorMessage);
+      }
       throw err;
     }
   };
