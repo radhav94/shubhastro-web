@@ -436,7 +436,11 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   /* ================= MIC TOGGLE ================= */
   useEffect(() => {
-    micTrackRef.current?.setEnabled(micOn);
+    try {
+      micTrackRef.current?.setEnabled(micOn);
+    } catch (e) {
+      console.warn("[VoiceCall] Mic setEnabled failed (connection not ready):", e.message);
+    }
   }, [micOn]);
 
   /* ================= SPEAKER TOGGLE ================= */
@@ -909,7 +913,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         astrologerName: callerName,
         astroID: activeCall.astrologerID,
         experience: activeCall.experience || lastRequestedAstro?.experience,
-        profileImgUrl: activeCall?.profileImgUrl || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
+        profileImgUrl: activeCall?.profileImgUrl || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
       }
     });
   };
@@ -994,7 +998,8 @@ const AgoraVoiceCalling = ({ callData }) => {
                         kundliId: activeCall?.kundliId,
                         astrologerName: callerName,
                         astroID: activeCall?.astrologerID,
-                        profileImgUrl: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
+                        experience: activeCall?.experience || lastRequestedAstro?.experience,
+                        profileImgUrl: activeCall?.profileImgUrl || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
                       }
                     });
                   }
@@ -1134,7 +1139,10 @@ const AgoraVoiceCalling = ({ callData }) => {
           <div className={styles.voiceCenter}>
               <div className={styles.voiceCenterWrap}>
                 <div className={styles.avatarContainer}>
-                  <span className={styles.onlineCircle}></span>
+                  <span className={styles.ripple}></span>
+                  <span className={styles.ripple}></span>
+                  <span className={styles.ripple}></span>
+                  <span className={styles.ripple}></span>
                   <img
                     className={styles.avatar}
                     src={astrologerImage || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}

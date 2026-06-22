@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import ProfileListingModal from "./ProfileListingModal";
 import AddProfileModal from "./AddProfileModal";
 import EditProfileModal from "./EditProfileModal";
@@ -11,6 +12,10 @@ import {
   useEditKundliMutation,
 } from "../../../services/appServices/kundliServicesNew";
 import { getToken } from "../../../utils/token";
+import { getJSONCookie, setJSONCookie } from "../../../utils/helper/cookies";
+
+// Shared cookie key for guest (non-logged-in) kundli profiles across pages
+const GUEST_KUNDLI_COOKIE = "guestKundliProfiles";
 
 /**
  * ProfileManager - Complete profile management flow component
@@ -41,7 +46,7 @@ const ProfileManager = ({
   isOpen = false,
   onClose = () => {},
   onProfileSelect = () => {},
-  selectedProfileId = null,
+  selectedProfileId = undefined,
   title = "Select Profile",
   startCallMode = false,
   startCallModeBtnType = "",
@@ -82,9 +87,43 @@ const ProfileManager = ({
   });
 
   const savedProfiles = data?.data || [];
-  
-  // Use external profiles list if provided (for non-logged-in users), otherwise use saved profiles
-  const profiles = profilesList !== null ? profilesList : savedProfiles;
+
+  // For guests (no token) with no parent-managed list, this component owns the
+  // shared guest profiles cookie so the same profiles appear on every page.
+  const manageGuestCookie = !token && profilesList === null;
+  const [guestProfiles, setGuestProfiles] = useState(() =>
+    !token ? getJSONCookie(GUEST_KUNDLI_COOKIE, []) : []
+  );
+
+  // Refresh guest profiles from the cookie whenever the modal opens so profiles
+  // added on other pages show up here too.
+  useEffect(() => {
+    if (isOpen && manageGuestCookie) {
+      setGuestProfiles(getJSONCookie(GUEST_KUNDLI_COOKIE, []));
+    }
+  }, [isOpen, manageGuestCookie]);
+
+  // Use external profiles list if provided (parent-managed), otherwise saved
+  // profiles for logged-in users or the shared cookie list for guests.
+  const profiles =
+    profilesList !== null
+      ? profilesList
+      : token
+        ? savedProfiles
+        : guestProfiles;
+
+  // Highlight the currently selected kundli. When the caller doesn't pass
+  // selectedProfileId (most calculator forms track selection only via the
+  // global kundli slice), fall back to the selected kundli in Redux so the
+  // radio reflects the active profile. Skipped in matchmaking, where each slot
+  // manages its own selection.
+  const reduxSelectedKundli = useSelector((state) => state.kundli?.selectedKundli);
+  const effectiveSelectedId =
+    selectedProfileId !== undefined
+      ? selectedProfileId
+      : matchmakingMode
+        ? null
+        : reduxSelectedKundli?._id ?? null;
 
   // console.log(excludedProfileIds)
 
@@ -145,22 +184,12 @@ const ProfileManager = ({
 
   // Handler: Open add profile modal
   const handleAddProfile = () => {
-    // Check if maximum profile limit is reached (5 profiles max)
-    const MAX_PROFILES = 5;
-    
-    console.log("=== ADD PROFILE CHECK ===");
-    console.log("Current profiles:", profiles);
-    console.log("Current profiles count:", profiles.length);
-    console.log("Max allowed:", MAX_PROFILES);
-    console.log("Limit exceeded?", profiles.length >= MAX_PROFILES);
-    
-    if (profiles.length >= MAX_PROFILES) {
+    // Maximum of 5 profiles allowed
+    if (profiles.length >= 5) {
       Toast.error("Please Delete One Kundli from Existing One");
-      console.log("❌ Blocked: Profile limit reached");
       return;
     }
-    
-    console.log("✅ Opening Add Profile modal");
+
     setShowAddProfile(true);
   };
 
@@ -177,8 +206,6 @@ const ProfileManager = ({
       Toast.error("Cannot delete: Invalid profile ID");
       return;
     }
-    // Find the full profile object for logging
-    const profile = profiles.find(p => p._id === profileId);
     setProfileToDelete(profileId);
     setShowDeleteModal(true);
   };
@@ -226,22 +253,31 @@ const ProfileManager = ({
           }
         }
       } else {
-        // Non-logged-in user: just show success message
-        // The parent component should handle temporary profile creation
+        // Non-logged-in user: create a temporary profile
+        const tempProfile = {
+          ...payload,
+          _id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        };
+
+        // Persist to the shared guest cookie when this component owns the list
+        if (manageGuestCookie) {
+          setGuestProfiles((prev) => {
+            const next = [...prev, tempProfile];
+            setJSONCookie(GUEST_KUNDLI_COOKIE, next);
+            return next;
+          });
+        }
+
         Toast.success("Profile added");
-        
-        // Call onProfileSelect with the new profile data so parent can handle it
+
+        // Notify parent so it can select / persist the new profile
         if (onProfileSelect) {
-          const tempProfile = {
-            ...payload,
-            _id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          };
           onProfileSelect(tempProfile);
-          
-          // In Start Call mode, auto-select the newly created profile
-          if (startCallMode) {
-            setSelectedProfileForCall(tempProfile);
-          }
+        }
+
+        // In Start Call mode, auto-select the newly created profile
+        if (startCallMode) {
+          setSelectedProfileForCall(tempProfile);
         }
       }
       
@@ -299,15 +335,27 @@ const ProfileManager = ({
           onProfileSelect(updatedProfile);
         }
       } else {
-        // Non-logged-in user: just show success message
+        // Non-logged-in user: update the temporary profile
+        const updatedProfile = {
+          ...payload,
+          _id: profileToEdit._id,
+        };
+
+        // Persist the update to the shared guest cookie when owned here
+        if (manageGuestCookie) {
+          setGuestProfiles((prev) => {
+            const next = prev.map((p) =>
+              p._id === updatedProfile._id ? updatedProfile : p
+            );
+            setJSONCookie(GUEST_KUNDLI_COOKIE, next);
+            return next;
+          });
+        }
+
         Toast.success("Profile updated");
-        
+
         // Call onProfileSelect with updated profile so parent can handle it
         if (onProfileSelect) {
-          const updatedProfile = {
-            ...payload,
-            _id: profileToEdit._id,
-          };
           onProfileSelect(updatedProfile);
         }
       }
@@ -369,7 +417,15 @@ const ProfileManager = ({
         await deleteKundli(profileToDelete).unwrap();
         Toast.success("Profile deleted successfully");
       } else {
-        // Non-logged-in user: use callback if provided
+        // Non-logged-in user: remove from the shared guest cookie when owned here
+        if (manageGuestCookie) {
+          setGuestProfiles((prev) => {
+            const next = prev.filter((p) => p._id !== profileToDelete);
+            setJSONCookie(GUEST_KUNDLI_COOKIE, next);
+            return next;
+          });
+        }
+        // Also notify parent via callback if provided
         if (onDeleteProfileCallback) {
           onDeleteProfileCallback(profileToDelete);
         }
@@ -446,7 +502,7 @@ const ProfileManager = ({
         onClose={onClose}
         startCallMode={startCallMode}
         profiles={filteredProfiles}
-        selectedProfileId={startCallMode ? selectedProfileForCall?._id : selectedProfileId}
+        selectedProfileId={startCallMode ? selectedProfileForCall?._id : effectiveSelectedId}
         onSelectProfile={startCallMode ? handleProfileSelectForCall : onProfileSelect}
         onDeleteProfile={handleDeleteProfile}
         onEditProfile={handleEditProfile}

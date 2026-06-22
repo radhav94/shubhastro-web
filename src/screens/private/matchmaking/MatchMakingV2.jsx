@@ -10,6 +10,7 @@ import {
 } from "../../../services/appServices/kundliServicesNew";
 import { PATH } from "../../../utils/routes/Paths";
 import { useLazyGetNumerologyPredictionQuery } from "../../../services/appServices/numerologyServices";
+import { useLazyGetMatchMakingQuery } from "../../../redux/api/kundli/dashaApi";
 import { Toast } from "../../../component";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
@@ -21,6 +22,14 @@ import matchMakingImgBottom from "../../../assets/images/match-making-bottom-img
 import { ProfileManager } from "../../../component/UI/Profile";
 import BackButton from "../../../component/UI/BackButton/BackButton";
 // import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
+import {
+  getJSONCookie,
+  setJSONCookie,
+  removeCookie,
+} from "../../../utils/helper/cookies";
+
+// Shared cookie key for guest (non-logged-in) kundli profiles across pages
+const GUEST_KUNDLI_COOKIE = "guestKundliProfiles";
 
 const MatchMaking = () => {
   const navigate = useNavigate();
@@ -58,7 +67,25 @@ const MatchMaking = () => {
       : localStorage.getItem("shubhtalk_customer_id");
 
   /* -------------------- TEMPORARY PROFILES (NON-LOGGED-IN) -------------------- */
-  const [tempProfiles, setTempProfiles] = useState([]);
+  // Persisted in cookies so guest kundli profiles survive page navigation/reloads
+  const [tempProfiles, setTempProfiles] = useState(() =>
+    getJSONCookie(GUEST_KUNDLI_COOKIE, [])
+  );
+
+  // Sync tempProfiles to cookie
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setJSONCookie(GUEST_KUNDLI_COOKIE, tempProfiles);
+    }
+  }, [tempProfiles, isLoggedIn]);
+
+  // Clear temp profiles when user logs in
+  useEffect(() => {
+    if (isLoggedIn) {
+      removeCookie(GUEST_KUNDLI_COOKIE);
+      setTempProfiles([]);
+    }
+  }, [isLoggedIn]);
 
   /* -------------------- CURL GENERATOR -------------------- */
   const generateCurlCommand = (endpoint, _method, payload, token) => {
@@ -88,6 +115,7 @@ const MatchMaking = () => {
   const [deleteKundli] = useDeleteKundliMutation();
 
   const [getNumerologyPrediction] = useLazyGetNumerologyPredictionQuery();
+  const [getMatchMaking, { isFetching: isMatchLoading }] = useLazyGetMatchMakingQuery();
 
   // Combine saved profiles (if logged in) with temporary profiles (if not logged in)
   const savedProfiles = data?.data || [];
@@ -367,7 +395,7 @@ const MatchMaking = () => {
   };
 
   /* -------------------- PROCEED -------------------- */
-  const handleProceed = (e) => {
+  const handleProceed = async (e) => {
     e?.preventDefault();
 
     if (!primaryProfile || !partnerProfile) {
@@ -433,7 +461,14 @@ const MatchMaking = () => {
       };
     }
 
-    navigate(PATH.privateRoutes.MATCHMAKING_DETAILS.path, { state });
+    // Call API first — only navigate on success
+    try {
+      await getMatchMaking({ formData: state }).unwrap();
+      navigate(PATH.privateRoutes.MATCHMAKING_DETAILS.path, { state });
+    } catch (err) {
+      const errorMessage = err?.data?.message || "Something went wrong. Please try again.";
+      Toast.error(errorMessage);
+    }
   };
 
   /* -------------------- ADD PROFILE -------------------- */
@@ -519,10 +554,12 @@ const MatchMaking = () => {
       console.error("Error data:", err?.data);
       console.error("===========================");
 
-      const errorMessage =
-        err?.data?.message || err?.message || "Failed to add profile";
+      if (err?.message !== "Duplicate profile") {
+        const errorMessage =
+          err?.data?.message || err?.message || "Failed to add profile";
 
-      Toast.error(errorMessage);
+        Toast.error(errorMessage);
+      }
       throw err;
     }
   };
@@ -637,11 +674,18 @@ const MatchMaking = () => {
               </div>
             </div>
 
-            <button className={styles.matchMakingBtn} onClick={handleProceed}>
-              Proceed Ahead 
-              <svg xmlns="http://www.w3.org/2000/svg" width="7" height="14" viewBox="0 0 7 14" fill="none">
-                <path d="M0.75 12.63L5.64 7.74C6.2175 7.1625 6.2175 6.2175 5.64 5.64L0.75 0.75" stroke="white" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+            <button
+              className={styles.matchMakingBtn}
+              onClick={handleProceed}
+              disabled={
+                isMatchLoading ||
+                (!!primaryProfile &&
+                !!partnerProfile &&
+                primaryProfile.gender?.toLowerCase() === "male" &&
+                partnerProfile.gender?.toLowerCase() === "male")
+              }
+            >
+              {isMatchLoading ? "Loading..." : "Proceed Ahead"}
             </button>
           </div>
 

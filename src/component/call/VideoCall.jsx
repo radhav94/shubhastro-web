@@ -582,13 +582,21 @@ const VideoCalling = ({ callData }) => {
 
   useEffect(() => {
     if (micTrackRef.current) {
-      micTrackRef.current.setEnabled(micOn);
+      try {
+        micTrackRef.current.setEnabled(micOn);
+      } catch (e) {
+        console.warn("[VideoCall] Mic setEnabled failed (connection not ready):", e.message);
+      }
     }
   }, [micOn]);
 
   useEffect(() => {
     if (camTrackRef.current) {
-      camTrackRef.current.setEnabled(cameraOn);
+      try {
+        camTrackRef.current.setEnabled(cameraOn);
+      } catch (e) {
+        console.warn("[VideoCall] Camera setEnabled failed (connection not ready):", e.message);
+      }
     }
   }, [cameraOn]);
 
@@ -1311,7 +1319,8 @@ const VideoCalling = ({ callData }) => {
                       kundliId: activeCall?.kundliId,
                       astrologerName: callerName,
                       astroID: activeCall?.astrologerID,
-                      profileImgUrl: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
+                      experience: activeCall?.experience || lastRequestedAstro?.experience,
+                      profileImgUrl: activeCall?.profileImgUrl || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
                     }
                   });
                 }

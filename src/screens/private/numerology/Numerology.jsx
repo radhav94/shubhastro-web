@@ -23,6 +23,14 @@ import { ProfileManager } from "../../../component/UI/Profile";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { DefaultImages } from "../../../utils/appImages";
 import { setSelectedKundli, clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
+import {
+  getJSONCookie,
+  setJSONCookie,
+  removeCookie,
+} from "../../../utils/helper/cookies";
+
+// Shared cookie key for guest (non-logged-in) kundli profiles across pages
+const GUEST_KUNDLI_COOKIE = "guestKundliProfiles";
 
 const NumerologyWeb = () => {
   const navigate = useNavigate();
@@ -69,34 +77,32 @@ const NumerologyWeb = () => {
 
   const isLoggedIn = !!token;
 
-  // Temporary profiles for non-logged-in users (session-based)
-  const [tempProfiles, setTempProfiles] = useState(() => {
-    try {
-      const saved = sessionStorage.getItem("tempNumerologyProfiles");
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
-  });
+  // Temporary profiles for non-logged-in users (persisted in cookies so they
+  // survive page navigation and reloads)
+  const [tempProfiles, setTempProfiles] = useState(() =>
+    getJSONCookie(GUEST_KUNDLI_COOKIE, [])
+  );
 
-  // Sync tempProfiles to sessionStorage
+  // Sync tempProfiles to cookie
   useEffect(() => {
     if (!isLoggedIn) {
-      sessionStorage.setItem("tempNumerologyProfiles", JSON.stringify(tempProfiles));
+      setJSONCookie(GUEST_KUNDLI_COOKIE, tempProfiles);
     }
   }, [tempProfiles, isLoggedIn]);
 
   // Clear temp profiles when user logs in
   useEffect(() => {
     if (isLoggedIn) {
-      sessionStorage.removeItem("tempNumerologyProfiles");
+      removeCookie(GUEST_KUNDLI_COOKIE);
       setTempProfiles([]);
     }
   }, [isLoggedIn]);
 
-  // Clear temp profiles when navigating away
+  // Clear the selected kundli (Redux) when navigating away as a guest, but keep
+  // the persisted profiles in the cookie
   useEffect(() => {
     return () => {
       if (!isLoggedIn) {
-        sessionStorage.removeItem("tempNumerologyProfiles");
         dispatch(clearSelectedKundli());
       }
     };

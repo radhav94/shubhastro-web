@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { useGetMatchMakingQuery } from "../../../../redux/api/kundli/dashaApi";
@@ -6,6 +7,8 @@ import styles from "./MatchDetails.module.scss";
 import KundliSummary from "../../../../component/UI/circular/KundliSummaryV2";
 import DynamicTable from "../../../../component/UI/table/matching/DynamicTableV2";
 import TTSButton from "../../../../component/UI/TTSButton";
+import { Toast } from "../../../../component";
+import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 // const scores = [
 //   { type: "Vashya", score: "2/2" },
@@ -37,9 +40,21 @@ const MatchDetailsV2 = () => {
   const { boyData, girlData } = formData;
 
   // Call your matchmaking API (pass full payload)
-  const { data } = useGetMatchMakingQuery({ formData });
+  const { data, error, isLoading } = useGetMatchMakingQuery({ formData });
+
+  // Handle API error — show backend message as toast and go back
+  useEffect(() => {
+    if (error) {
+      const errorMessage = error?.data?.message || "Something went wrong. Please try again.";
+      Toast.error(errorMessage);
+    }
+  }, [error]);
+
+  if (isLoading) return <PrimaryLoader isLoading={true} />;
+  if (error) return null;
 
   const matchingDetails = data?.response;
+  if (!matchingDetails) return <PrimaryLoader isLoading={true} />;
 
   // const boyCard = {
   //   Name: boyData.name,

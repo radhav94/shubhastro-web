@@ -1,6 +1,6 @@
 import styles from "./ChatWindow.module.scss";
 import toast from "../../../../../component/toast";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import ProfileManager from "../../../../../component/UI/Profile/ProfileManager";
 import { useChat } from "../../../../../context/ChatContext";
 import { useVoiceRecorder } from "../../../talkToAstrologer/voiceChat/useVoiceRecorder";
@@ -28,9 +28,38 @@ const ChatInput = ({
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const canvasRef = useRef(null);
+  const inputBoxRef = useRef(null);
 
   const { openFileSelector } = useFileSelector();
   const { recording, paused, seconds, startRecording, stopRecording, pauseRecording, resumeRecording } = useVoiceRecorder();
+
+  // Handle mobile keyboard viewport resize (iOS/Android)
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const handleResize = () => {
+      // On iOS when keyboard opens, scroll the input into view
+      if (inputBoxRef.current) {
+        // Use a small delay to let the browser finish layout
+        requestAnimationFrame(() => {
+          inputBoxRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+        });
+      }
+    };
+
+    viewport.addEventListener('resize', handleResize);
+    return () => viewport.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Auto-resize textarea helper
+  const resizeTextarea = useCallback((el) => {
+    if (!el) return;
+    el.style.height = 'auto';
+    const lineHeight = parseInt(getComputedStyle(el).lineHeight) || 20;
+    const maxHeight = lineHeight * 4;
+    el.style.height = Math.min(el.scrollHeight, maxHeight) + 'px';
+  }, []);
 
   const handlePauseResume = () => {
     if (paused) {
@@ -211,7 +240,7 @@ const ChatInput = ({
       {/* Hidden canvas for capture */}
       <canvas ref={canvasRef} style={{ display: "none" }} />
 
-      <div className={styles.inputBox}>
+      <div className={styles.inputBox} ref={inputBoxRef}>
         <div className={styles.inputWrapper}>
           {recording ? (
             <VoiceRecorderPopup
@@ -228,17 +257,32 @@ const ChatInput = ({
               ref={inputRef}
               className={styles.inputField}
               value={value}
-              onChange={onChange}
+              onChange={(e) => {
+                onChange(e);
+                resizeTextarea(e.target);
+              }}
+              onFocus={() => {
+                // Scroll input into view on focus (helps on iOS/Android)
+                setTimeout(() => {
+                  inputBoxRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+                }, 300);
+              }}
               disabled={isMessageDisabled}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   onSend();
-                  setTimeout(() => inputRef.current?.focus(), 0);
+                  // Reset height after send
+                  setTimeout(() => {
+                    if (inputRef.current) {
+                      inputRef.current.style.height = 'auto';
+                      inputRef.current.focus();
+                    }
+                  }, 0);
                 }
               }}
               placeholder="Type your message here..."
-              autoFocus
+              rows={1}
             />
           <div className={styles.inputIcons}>
             <button type="button" className={styles.iconButton} onClick={handleAttachClick}>

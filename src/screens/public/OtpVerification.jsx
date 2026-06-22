@@ -8,6 +8,7 @@ import { PATH } from "../../utils/routes/Paths";
 import * as AuthServices from "../../services/appServices/authService";
 import { saveUserToStorage } from "../../utils/authStorage";
 import { requestFCMToken } from "../../services/firebase";
+import { clearGuestKundliProfiles } from "../../utils/helper/cookies";
 
 const OtpVerification = () => {
   const navigate = useNavigate();
@@ -140,6 +141,9 @@ const handleVerifyOtp = async (event) => {
         // Clear any cached profile data from previous user
         localStorage.removeItem("selectedKundliProfile");
       }
+
+      // Remove all kundli profiles added while browsing as a guest
+      clearGuestKundliProfiles();
 
       Toast.success("OTP verified successfully");
 

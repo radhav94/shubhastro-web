@@ -36,3 +36,25 @@
 .box{
     padding: 16px;
 }
+
+.showMoreContainer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+}
+
+.showMoreBtn {
+    background: linear-gradient(135deg, #F75801 0%, #ff7a2e 100%);
+    color: white;
+    border: none;
+    padding: 0.475rem 0.5rem;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.675rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:active {
+        transform: translateY(0);
+    }
+}
