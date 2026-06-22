@@ -3,7 +3,7 @@ import styles from "./OrderTabs.module.scss";
 import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
 
 const OrderTabs = ({ activeTab, onTabChange }) => {
-  const tabs = ["Call", "Chat", "Video", ...(isShubhMallEnabled() ? ["Remedies"] : [])];
+  const tabs = ["Call", "Chat", /* "Video", */ ...(isShubhMallEnabled() ? ["Remedies"] : [])];
   const tabsRef = useRef(null);
   const activeTabRef = useRef(null);
 
