@@ -818,6 +818,10 @@
 .mobileCalcAccordion {
   display: flex;
   flex-direction: column;
+
+  .headerNavLink {
+    font-weight: 600;
+  }
 }
 
 .mobileCalcLinks {

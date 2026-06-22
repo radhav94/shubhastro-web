@@ -428,6 +428,30 @@
   }
 }
 
+.inlineError {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 1rem;
+  margin-top: 1rem;
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.inlineErrorIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inlineErrorMessage {
+  color: #ef4444;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
 // Result Section (keeping existing styles)
 .resultSection {
   display: flex;
