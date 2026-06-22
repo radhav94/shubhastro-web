@@ -1312,7 +1312,7 @@ const VideoCalling = ({ callData }) => {
                       astrologerName: callerName,
                       astroID: activeCall?.astrologerID,
                       experience: activeCall?.experience || lastRequestedAstro?.experience,
-                      profileImgUrl: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
+                      profileImgUrl: activeCall?.profileImgUrl || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
                     }
                   });
                 }
