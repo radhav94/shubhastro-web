@@ -224,7 +224,7 @@ const ChatInput = ({
             />
           ) : (
             <>
-            <input
+            <textarea
               ref={inputRef}
               className={styles.inputField}
               value={value}
