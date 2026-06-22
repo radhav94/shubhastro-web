@@ -344,39 +344,39 @@ export const PATH = {
         element: SignScreen,
       },
       DAILY_NEW: {
-        path: ["/daily-horoscope/:sign", "/daily-horoscope"],
+        path: ["/daily-horoscope-indian/:sign", "/daily-horoscope-indian"],
         element: HoroscopeNew,
       },
       WEEKLY_NEW: {
-        path: ["/weekly-horoscope/:sign", "/weekly-horoscope"],
+        path: ["/weekly-horoscope-indian/:sign", "/weekly-horoscope-indian"],
         element: HoroscopeNew,
       },
       YEARLY_NEW: {
-        path: ["/yearly-horoscope/:sign", "/yearly-horoscope"],
+        path: ["/yearly-horoscope-indian/:sign", "/yearly-horoscope-indian"],
         element: HoroscopeNew,
       },
       TOMORROW_NEW: {
-        path: ["/tomorrow-horoscope/:sign", "/tomorrow-horoscope"],
+        path: ["/tomorrow-horoscope-indian/:sign", "/tomorrow-horoscope-indian"],
         element: HoroscopeNew,
       },
       TODAY_NEW: {
-        path: ["/horoscope/todays-horoscope/:sign", "/horoscope/todays-horoscope"],
+        path: ["/horoscope/todays-horoscope-indian/:sign", "/horoscope/todays-horoscope-indian"],
         element: HoroscopeNew,
       },
       DAILY_OLD: {
-        path: ["/daily-horoscope-old/:sign", "/daily-horoscope-old"],
+        path: ["/daily-horoscope/:sign", "/daily-horoscope"],
         element: HoroscopeOld,
       },
       WEEKLY_OLD: {
-        path: ["/weekly-horoscope-old/:sign", "/weekly-horoscope-old"],
+        path: ["/weekly-horoscope/:sign", "/weekly-horoscope"],
         element: HoroscopeOld,
       },
       YEARLY_OLD: {
-        path: ["/yearly-horoscope-old/:sign", "/yearly-horoscope-old"],
+        path: ["/yearly-horoscope/:sign", "/yearly-horoscope"],
         element: HoroscopeOld,
       },
       TOMORROW_OLD: {
-        path: ["/tomorrow-horoscope-old/:sign", "/tomorrow-horoscope-old"],
+        path: ["/tomorrow-horoscope/:sign", "/tomorrow-horoscope"],
         element: HoroscopeOld,
       },
       MONTHLY: {
