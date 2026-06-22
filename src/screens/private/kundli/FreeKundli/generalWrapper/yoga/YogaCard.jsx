@@ -7,7 +7,7 @@ import styles from "./YogaCard.module.scss";
 const YogaCard = ({ yoga }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  if (!yoga) return null;
+  if (!yoga || !yoga.yoga) return null;
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
