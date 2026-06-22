@@ -40,6 +40,7 @@ const PanditAIBubble = () => {
   const [isOpen, setIsOpen] = useState(() => sessionStorage.getItem("panditai_open") === "true");
   const [text, setText] = useState("");
   const [interimText, setInterimText] = useState("");
+  const [initialBilling, setInitialBilling] = useState(null);
   const inputRef = useRef(null);
   const lang = "en-IN";
 
@@ -60,17 +61,30 @@ const PanditAIBubble = () => {
   } = usePanditAI({ isOpen, lang });
 
   const {
-    remainingPaidTime,
+    remainingPaidTime: hookRemainingPaidTime,
+    isFreePeriod: hookIsFreePeriod,
+    freeMinutesRemaining: hookFreeMinutesRemaining,
     showRechargeBanner,
     rechargeBannerMessage,
-    minutesUntilPaid,
-    minBalanceRequired,
-    walletBalance,
-    ratePerMinute,
+    walletBalance: hookWalletBalance,
+    ratePerMinute: hookRatePerMinute,
     sessionEndedLowBalance,
-    dismissRechargeBanner,
-    resetFreeMinutesState,
   } = useAIFreeMinutes({ isOpen, roomId });
+
+  // Seed billing/free-minutes from a voice→text handover so the badge shows
+  // instantly while the chat:reconnect round-trips.
+  const remainingPaidTime = hookRemainingPaidTime ?? initialBilling?.remainingPaidTime ?? null;
+  const walletBalance = hookWalletBalance ?? initialBilling?.walletBalance ?? null;
+  const ratePerMinute = hookRatePerMinute ?? initialBilling?.ratePerMinute ?? null;
+  const freeMinutesRemaining = hookFreeMinutesRemaining ?? initialBilling?.freeMinutesRemaining ?? null;
+  const isFreePeriod = hookIsFreePeriod || (hookFreeMinutesRemaining == null && (initialBilling?.isFreePeriod ?? false));
+
+  // Drop the seed once the hook reports real session state.
+  useEffect(() => {
+    if (hookFreeMinutesRemaining != null || hookRemainingPaidTime != null) {
+      setInitialBilling(null);
+    }
+  }, [hookFreeMinutesRemaining, hookRemainingPaidTime]);
 
   // Group messages by date for date separators
   const messageGroups = useMemo(() => {
@@ -118,9 +132,10 @@ const PanditAIBubble = () => {
     return () => window.removeEventListener("panditai-voice:open", handleVoiceOpen);
   }, []);
 
-  // Reopen text chat when voice popup is closed
+  // Reopen text chat when voice popup is closed (carry billing/free state back)
   useEffect(() => {
-    const handleReopen = () => {
+    const handleReopen = (e) => {
+      if (e.detail) setInitialBilling(e.detail);
       setIsOpen(true);
     };
     window.addEventListener("panditai:reopen", handleReopen);
@@ -250,7 +265,16 @@ const PanditAIBubble = () => {
               </div>
             </div>
             <div className={styles.headerActions}>
-              {remainingPaidTime != null && !sessionEndedLowBalance && (
+              {isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
+                <div className={styles.freeBadge}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span className={styles.freeBadgeText}>{freeMinutesRemaining} min free</span>
+                </div>
+              )}
+              {!isFreePeriod && remainingPaidTime != null && !sessionEndedLowBalance && (
                 <div className={styles.countdownBadge}>
                   {walletBalance != null && (
                     <span className={styles.countdownBalance}>
@@ -365,7 +389,7 @@ const PanditAIBubble = () => {
                 onClick={() => {
                   setPanditAIVoiceHandover(true);
                   setIsOpen(false);
-                  window.dispatchEvent(new CustomEvent("panditai-voice:open", { detail: { roomId, walletBalance, remainingPaidTime, ratePerMinute } }));
+                  window.dispatchEvent(new CustomEvent("panditai-voice:open", { detail: { roomId, walletBalance, remainingPaidTime, ratePerMinute, isFreePeriod, freeMinutesRemaining } }));
                 }}
                 aria-label="Switch to voice chat"
                 type="button"

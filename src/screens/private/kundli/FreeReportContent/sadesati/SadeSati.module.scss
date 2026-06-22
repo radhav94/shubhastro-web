@@ -55,27 +55,32 @@
   margin-bottom: 1rem;
 
   @media (min-width: 768px) {
-    flex-direction: row;
-    gap: 1.5rem;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    align-items: stretch;
   }
 }
 
 .leftColumn {
-  flex: 0 0 auto;
   min-width: 0;
-
-  @media (min-width: 768px) {
-    flex: 0 0 48%;
-  }
 }
 
 .rightColumn {
-  flex: 1;
+  min-width: 0;
+}
+
+.fullWidth {
   min-width: 0;
 
   @media (min-width: 768px) {
-    flex: 0 0 48%;
+    grid-column: 1 / -1;
+  }
+
+  .summaryTitle {
+    font-size: 1.125rem;
+    color: #1a1a1a;
+    margin-bottom: 0.75rem;
   }
 }
 
@@ -179,6 +184,11 @@
   flex: 1;
   min-width: 0;
   flex-wrap: wrap;
+
+ @media screen and (max-width: 767px) {
+  font-size: 16px;
+  }
+
 }
 
 .sectionIcon {

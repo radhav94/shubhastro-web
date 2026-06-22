@@ -64,7 +64,9 @@ const Vimshottari = () => {
             onPlanetClick={handlePlanetClick}
           />
     <div className={styles.dashaContainer}>
-      {data.response.dashas.map((dasha, i) => (
+      {data.response.dashas.map((dasha, i) => {
+        if (!dasha.dasha) return null;
+        return (
         <div 
           key={i} 
           className={styles.dashaAccordion}
@@ -76,20 +78,24 @@ const Vimshottari = () => {
             onClick={() => toggleDasha(i)}
           >
             <div className={styles.headerContent}>
-              <div className={styles.dashaName}>
-                {dasha.dasha} Mahadasha
+              <div className={styles.dashaInfo}>
+                <div className={styles.dashaName}>
+                  {dasha.dasha} Mahadasha
+                </div>
+                <div className={styles.dateRange}>
+                  {dasha.dasha_start_year} - {dasha.dasha_end_year}
+                </div>
               </div>
-               <span onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center', marginLeft: 'auto' }}>
-              <TTSButton text={`${dasha.dasha} Mahadasha. ${dasha.dasha_start_year} to ${dasha.dasha_end_year}. Prediction: ${dasha.prediction || ''}. Planet in Zodiac: ${dasha.planet_in_zodiac || ''}`} />
-            </span>
-              <div className={styles.dateRange}>
-                {dasha.dasha_start_year} - {dasha.dasha_end_year}
+              <div className={styles.dashaActions}>
+                <span onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <TTSButton text={`${dasha.dasha} Mahadasha. ${dasha.dasha_start_year} to ${dasha.dasha_end_year}. Prediction: ${dasha.prediction || ''}. Planet in Zodiac: ${dasha.planet_in_zodiac || ''}`} />
+                </span>
+                <div className={`${styles.arrow} ${expandedIndex === i ? styles.arrowExpanded : ''}`}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
               </div>
-            </div>
-            <div className={`${styles.arrow} ${expandedIndex === i ? styles.arrowExpanded : ''}`}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
             </div>
           </div>
 
@@ -109,7 +115,8 @@ const Vimshottari = () => {
             </div>
           </div>
         </div>
-      ))}  
+        );
+      })}  
     </div>
     </>
   );

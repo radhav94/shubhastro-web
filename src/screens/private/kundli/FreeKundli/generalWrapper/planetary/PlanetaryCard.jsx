@@ -7,14 +7,8 @@ const PlanetaryCard = ({ planet }) => {
   const [showMore, setShowMore] = useState(false);
   const [showFullAffliction, setShowFullAffliction] = useState(false);
 
-  if (!planet) {
-    return (
-      <div className={styles.card}>
-        <PrimaryText size_16 color="#555">
-          No data available
-        </PrimaryText>
-      </div>
-    );
+  if (!planet || !planet.planet_considered) {
+    return null;
   }
 
   const safe = (value, fallback = "") =>

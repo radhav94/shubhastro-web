@@ -878,20 +878,16 @@
 }
 @media screen and (width <= 1024px) {
   .category-item {
-    height: 80px;
-    width: 80px;
+    height: 100px;
+    width: 100px;
     flex-shrink: 0;
   }
 }
 @media screen and (width <= 767px) {
-  .categoryImages{
+  /* .categoryImages{
     width: auto;
     height: 34px;
-    margin: 6px auto 4px;
-  }
-  .category-label {
-    font-size: 11px;
-  }
+  } */
   /* .category-card {
     height: 80px;
     width: 80px;

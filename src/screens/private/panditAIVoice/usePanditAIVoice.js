@@ -5,7 +5,7 @@ import {
 } from "../../../redux/api/chatApi";
 import { textToSpeech, SARVAM_LANGUAGES, SARVAM_SPEAKERS } from "../../../services/sarvamTTSService";
 import useSarvamSTT from "./useSarvamSTT";
-import { isPanditAIEvent, setPanditAIChatActive } from "../../../component/panditAI/usePanditAI";
+import { setPanditAIChatActive } from "../../../component/panditAI/usePanditAI";
 import toast from "../../../component/toast";
 
 export const PANDIT_AI_ID = "6928390dc00d56953b586c04";
@@ -180,6 +180,25 @@ export default function usePanditAIVoice({ enabled = true, sharedRoomId = null }
       voiceSocket.off("connect", handleSocketReconnect);
     };
   }, [enabled, userIdLocal, createChatRoom, setRoomIdPersist]);
+
+  // Seamless text -> voice handover: when a shared room is passed in, reconnect
+  // to that exact room (even if voice already initiated its own/empty session),
+  // and sync roomId so billing/free-minutes events match.
+  useEffect(() => {
+    if (!enabled || !sharedRoomId || chatEndedRef.current) return;
+    if (roomIdRef.current === sharedRoomId) return; // already on it
+    setRoomIdPersist(sharedRoomId);
+    setPanditAIChatActive(true, sharedRoomId);
+    if (voiceSocket.connected) {
+      console.log("[PanditAIVoice] Handover — reconnecting to shared room", sharedRoomId);
+      voiceSocket.emit("chat:reconnect", {
+        roomId: sharedRoomId,
+        userId: userIdLocal,
+        astrologerId: PANDIT_AI_ID,
+        callType: "chat",
+      });
+    }
+  }, [enabled, sharedRoomId, userIdLocal, setRoomIdPersist]);
 
   // Cleanup on unmount
   useEffect(() => {

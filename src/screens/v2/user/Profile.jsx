@@ -2640,6 +2640,7 @@ const Profile = () => {
                           }
                         }}
                         placeholder="From date"
+                        maxDate={new Date()}
                       />
                       <DateTimePicker
                         mode="date"
@@ -2656,6 +2657,7 @@ const Profile = () => {
                         }}
                         placeholder="To date"
                         minDate={txnCustomFromDate ? new Date(txnCustomFromDate) : undefined}
+                        maxDate={new Date()}
                       />
                     </div>
                   </>

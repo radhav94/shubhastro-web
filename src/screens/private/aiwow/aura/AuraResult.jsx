@@ -17,6 +17,7 @@ const AuraResult = () => {
   const [expandedAstrological, setExpandedAstrological] = useState(false);
   const [expandedStrengths, setExpandedStrengths] = useState(false);
   const [expandedRecommendations, setExpandedRecommendations] = useState(false);
+  const [expandedMood, setExpandedMood] = useState(false);
 
   // Helper to convert hex color codes to readable names for TTS
   const getColorName = (hex) => {
@@ -306,26 +307,31 @@ const AuraResult = () => {
                   </div>
                 )}
 
-                {/* {overallReading.strengths?.length > 0 && (
-                  <div className={styles.card}>
+                {moodData.detectedEmotion && (
+                  <div className={styles.card} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '40px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                      <TTSButton text={`Mood Analysis. Detected Emotion: ${moodData.detectedEmotion}. Energy Level: ${moodData.energyLevel}. Confidence: ${Math.round((moodData.confidence || 0) * 100)} percent`} />
+                    </span>
                     <button
                       className={styles.cardHeaderButton}
-                      onClick={() => setExpandedStrengths(!expandedStrengths)}
+                      onClick={() => setExpandedMood(!expandedMood)}
                     >
-                      <h3 className={styles.cardTitle}>✨ Strengths</h3>
+                      <h3 className={styles.cardTitle}>🎭 Mood Analysis</h3>
                       <span className={styles.dropdownArrow}>
-                        {expandedStrengths ? '▲' : '▼'}
+                        {expandedMood ? '▲' : '▼'}
                       </span>
                     </button>
-                    <div className={`${styles.cardDropdown} ${expandedStrengths ? styles.expanded : ''}`}>
-                      <ul className={styles.list}>
-                        {overallReading.strengths.map((strength, index) => (
-                          <li key={index} className={styles.listItem}>{strength}</li>
-                        ))}
-                      </ul>
+                    <div className={`${styles.cardDropdown} ${expandedMood ? styles.expanded : ''}`}>
+                      <div className={styles.chipContainer}>
+                        <span className={styles.chip}>Emotion: {moodData.detectedEmotion}</span>
+                        <span className={styles.chip}>Energy: {moodData.energyLevel}</span>
+                        {moodData.confidence && (
+                          <span className={styles.chip}>Confidence: {Math.round(moodData.confidence * 100)}%</span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                )} */}
+                )}
 
                 {overallReading.challenges?.length > 0 && (
                   <div className={styles.card} style={{ position: 'relative' }}>
