@@ -415,8 +415,8 @@
 
 .avatarContainer {
   position: relative;
-  width: 180px;
-  height: 180px;
+  width: 256px;
+  height: 256px;
   border-radius: 200px;
   margin: 0 auto 12px auto;
   display: flex;
@@ -424,61 +424,43 @@
 	align-items: center;
 	position: relative;
 
-  &::before, &::after {
-	content: '';
-	position: absolute;
-	width: calc(100%);
-	height: calc(100%);
-	border-radius: 50%;
-	border: 5px solid #44bd32;
-	animation: calling 2s ease-in-out infinite;
-  z-index: -1;
+  .ripple {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(75, 160, 29, 0.2);
+    animation: voiceAvatarRipple 2s ease-out infinite;
+    z-index: -1;
   }
 
-  &::after {
-    animation: calling 2s ease-in-out .35s infinite;
-  }
+  .ripple:nth-child(1) { animation-delay: 0s; }
+  .ripple:nth-child(2) { animation-delay: 0.3s; }
+  .ripple:nth-child(3) { animation-delay: 0.6s; }
+  .ripple:nth-child(4) { animation-delay: 0.9s; }
 
-  @keyframes calling {
+  @keyframes voiceAvatarRipple {
     0% {
-      width: calc(100%);     
-      height: calc(100%);
-      opacity: 1;
+      transform: scale(1);
+      opacity: 0.6;
     }
     100% {
-      width: calc(100% + 60px);     
-      height: calc(100% + 60px);
+      transform: scale(2.5);
       opacity: 0;
     }
   }
 
   @media (width <= 767px) {
-    width: 140px;
-    height: 140px;
+    width: 200px;
+    height: 200px;
     margin: 0 auto 10px auto;
   }
   @media (width <= 380px) {
-    width: 110px;
-    height: 110px;
+    width: 150px;
+    height: 150px;
     margin: 0 auto 6px auto;
-  }
-  .onlineCircle{
-    width: 25px;
-    height: 25px;
-    display: block;
-    background-color: #44bd32;
-    border-radius: 50px;
-    border: 2px solid #fff;
-    position: absolute;
-    bottom: 30px;
-    right: 11px;
-    @media (width <= 767px) {
-      right: 0px;
-    }
-    @media (width <= 380px) {
-      width: 20px;
-      height: 20px;
-    }
   }
 }
 .controlBtn.sendGiftBg{
@@ -512,9 +494,9 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 5px solid #44bd32;
+  border: 8px solid #b7d9a5;
   object-fit: cover;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 .callTimer {

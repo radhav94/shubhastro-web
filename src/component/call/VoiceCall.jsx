@@ -1134,7 +1134,10 @@ const AgoraVoiceCalling = ({ callData }) => {
           <div className={styles.voiceCenter}>
               <div className={styles.voiceCenterWrap}>
                 <div className={styles.avatarContainer}>
-                  <span className={styles.onlineCircle}></span>
+                  <span className={styles.ripple}></span>
+                  <span className={styles.ripple}></span>
+                  <span className={styles.ripple}></span>
+                  <span className={styles.ripple}></span>
                   <img
                     className={styles.avatar}
                     src={astrologerImage || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
