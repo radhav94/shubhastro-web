@@ -37,6 +37,7 @@ import GiftModal from "../../../../../component/call/GiftModal";
 import { ProfileManager } from "../../../../../component/UI/Profile";
 import { useChat as useChatContext } from "../../../../../context/ChatContext";
 import RechargeModal from "../../../../../component/recharge-modal/RechargeModal";
+import useAstrologerAvailability from "../../../../../utils/hooks/useAstrologerAvailability";
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -60,6 +61,12 @@ const ChatWindow = () => {
 
   const { activeCall, isCallMinimized, reviewData } = useCall();
   const [openFeedback, setOpenFeedback] = useState(false);
+
+  // Astrologer availability (chat/call/video) for the connected session.
+  // Used to hide the Voice/Video buttons when the astrologer disabled them.
+  const astroAvailability = useAstrologerAvailability(astrologerId, {
+    enabled: !!isUserSide,
+  });
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showProfileManagerModal, setShowProfileManagerModal] = useState(false);
   const [showGiftModal, setShowGiftModal] = useState(false);
@@ -567,27 +574,35 @@ const ChatWindow = () => {
           />
 
           {/* Call Buttons Below Header */}
-          <div className={styles.callButtonsContainer}>
-            <button
-              className={styles.voiceCallButton}
-              onClick={handleAudioCall}
-              disabled={!!activeCall}
-            >
-              <img src={CallIcon} alt="Voice Call" width="20" height="20" />
-              Voice Call
-            </button>
+          {(astroAvailability.call || astroAvailability.video) && (
+            <div className={styles.callButtonsContainer}>
+              {astroAvailability.call && (
+                <button
+                  className={styles.voiceCallButton}
+                  onClick={handleAudioCall}
+                  disabled={!!activeCall}
+                >
+                  <img src={CallIcon} alt="Voice Call" width="20" height="20" />
+                  Voice Call
+                </button>
+              )}
 
-            <span className={styles.dividerLine}></span>
-            
-            <button
-              className={styles.videoCallButton}
-              onClick={handleVideoCall}
-              disabled={!!activeCall}
-            >
-              <img src={VideocamIcon} alt="Video Call" width="20" height="20" />
-              Video Call
-            </button>
-          </div>
+              {astroAvailability.call && astroAvailability.video && (
+                <span className={styles.dividerLine}></span>
+              )}
+
+              {astroAvailability.video && (
+                <button
+                  className={styles.videoCallButton}
+                  onClick={handleVideoCall}
+                  disabled={!!activeCall}
+                >
+                  <img src={VideocamIcon} alt="Video Call" width="20" height="20" />
+                  Video Call
+                </button>
+              )}
+            </div>
+          )}
 
           <div className={styles.messagesContainer}>
             <ChatMessages
