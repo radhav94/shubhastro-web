@@ -40,12 +40,12 @@ const ConnectAstrologerSection = memo(({ sectionData, styles }) => {
   return (
     <div className={styles.ctaBanner}>
       <div className={styles.ctaLeft}>
-        <div className={styles.ctaTag}>
+        {/* <div className={styles.ctaTag}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="#f75801">
             <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
           </svg>
           {sectionData?.quick_message || "Don't Wait. Get Clarity Now."}
-        </div>
+        </div> */}
         <h3 className={styles.ctaHeading}>
           {sectionData?.display_title || sectionData?.title || "Talk to an Astrologer"}
         </h3>
