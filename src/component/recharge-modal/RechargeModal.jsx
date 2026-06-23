@@ -98,10 +98,12 @@ const RechargeModal = ({
   const handlePaymentSuccess = useCallback((data) => {
     setShowPaymentDetails(false);
     refreshWallet();
-    const amount = selectedPlan?.actualPrice || selectedPlan?.amount || selectedPlan?.price || data?.amount || "";
-    setSuccessAmount(amount);
+    const baseAmount = selectedPlan?.actualPrice || selectedPlan?.amount || selectedPlan?.price || data?.amount || 0;
+    const bonus = selectedPlan?.discountedPrice || 0;
+    const totalAdded = Number(baseAmount) + Number(bonus);
+    setSuccessAmount(totalAdded);
     if (typeof onClose === 'function') onClose();
-    if (typeof onSuccess === 'function') onSuccess({ ...data, amount });
+    if (typeof onSuccess === 'function') onSuccess({ ...data, amount: totalAdded });
   }, [onClose, onSuccess, refreshWallet, selectedPlan]);
 
   if (!isOpen && successAmount === null) return null;

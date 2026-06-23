@@ -93,7 +93,7 @@
 
 .astrologerName {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
   color: #333;
   margin: 0;
   line-height: 1.2;
@@ -260,12 +260,12 @@
 }
 .callerNameTitle{
   color: var(--title, #030303);
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 500;
   line-height: normal;
   margin-block: 4px;
   @media (width <= 380px) {
-    font-size: 18px;
+    font-size: 16px;
     margin-block: 2px;
   }
 }
@@ -406,17 +406,17 @@
   position: relative;
   padding-bottom: 160px;
   @media (width <= 767px) {
-    padding-bottom: 140px;
+    padding-bottom: 200px;
   }
   @media (width <= 380px) {
-    padding-bottom: 120px;
+    padding-bottom: 220px;
   }
 }
 
 .avatarContainer {
   position: relative;
-  width: 256px;
-  height: 256px;
+  width: 220px;
+  height: 220px;
   border-radius: 200px;
   margin: 0 auto 12px auto;
   display: flex;
@@ -453,13 +453,13 @@
   }
 
   @media (width <= 767px) {
-    width: 200px;
-    height: 200px;
+    width: 140px;
+    height: 140px;
     margin: 0 auto 10px auto;
   }
   @media (width <= 380px) {
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 120px;
     margin: 0 auto 6px auto;
   }
 }
@@ -691,13 +691,13 @@
 
 .controlBtn.active {
   background: #fff;
-  color: #E56329;
+  color: #E4342F;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .controlBtn.muted {
-  background: #fff;
-  color: #E56329;
+  background: #E4342F;
+  color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -877,7 +877,7 @@
   // }
 
   .astrologerName {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .astrologerExp {
@@ -981,7 +981,7 @@
   // }
 
   .astrologerName {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .astrologerExp {
@@ -1102,9 +1102,9 @@
   //   padding: 16px 24px;
   // }
 
-  .astrologerName {
-    font-size: 20px;
-  }
+  // .astrologerName {
+  //   font-size: 18px;
+  // }
 
   .astrologerExp {
     font-size: 14px;
