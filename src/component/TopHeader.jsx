@@ -189,9 +189,8 @@ const TopHeader = () => {
 
     // For amounts >= 1000, show in 'k' format
     if (amount >= 1000) {
-      const kValue = amount / 1000;
-      // Check if the k value has decimals
-      return kValue % 1 === 0 ? `₹${kValue}k` : `₹${kValue.toFixed(1)}k`;
+      const kValue = Math.floor(amount / 100) / 10;
+      return kValue % 1 === 0 ? `₹${kValue}k` : `₹${kValue}k`;
     }
 
     // For amounts < 1000, check if it has decimals
@@ -578,7 +577,7 @@ const TopHeader = () => {
               }}
               style={{ cursor: 'pointer' }}
             >
-              <div className={styles.menuProfilePik}>
+              <div className={`${styles.menuProfilePik} notranslate`}>
                   {userAvatarDisplay || <User size={18} strokeWidth={0} fill="#d53400"/>}
               </div>
               <div className={`${styles.menuProfileNameMobile} notranslate`}>

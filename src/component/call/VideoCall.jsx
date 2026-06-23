@@ -1179,8 +1179,8 @@ const VideoCalling = ({ callData }) => {
   const formatAmount = (amount) => {
     if (typeof amount !== "number") return `₹${amount}`;
     if (amount >= 1000) {
-      const kValue = amount / 1000;
-      return kValue % 1 === 0 ? `₹${kValue}k` : `₹${kValue.toFixed(1)}k`;
+      const kValue = Math.floor(amount / 100) / 10;
+      return kValue % 1 === 0 ? `₹${kValue}k` : `₹${kValue}k`;
     }
     return amount % 1 === 0 ? `₹${amount}` : `₹${amount.toFixed(2)}`;
   };

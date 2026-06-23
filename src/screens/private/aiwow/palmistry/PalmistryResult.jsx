@@ -96,7 +96,7 @@ const PalmistryResult = () => {
         } else {
           console.error('Invalid palmistry data structure:', palmData);
           Toast.error('Invalid analysis data. Please try again.');
-          navigate('/ai-palmistry-scanner/hand-selection');
+          navigate('/ai-wow/ai-palmistry-scanner/hand-selection');
           return;
         }
         
@@ -115,7 +115,7 @@ const PalmistryResult = () => {
       } else {
         // No data available
         Toast.error('No analysis results found');
-        navigate('/ai-palmistry-scanner/hand-selection');
+        navigate('/ai-wow/ai-palmistry-scanner/hand-selection');
       }
     };
 
@@ -191,7 +191,7 @@ const PalmistryResult = () => {
           <p className={styles.errorText}>
             {error || 'Unable to load analysis results. Please try again.'}
           </p>
-          <button className={styles.retryButton} onClick={() => navigate('/aiwow/palmistry')}>
+          <button className={styles.retryButton} onClick={() => navigate('/ai-wow/ai-palmistry-scanner')}>
             Start New Analysis
           </button>
         </div>
@@ -237,7 +237,7 @@ const PalmistryResult = () => {
           <p className={styles.errorText}>
             Incomplete analysis data. Please try analyzing your palm again.
           </p>
-          <button className={styles.retryButton} onClick={() => navigate('/aiwow/palmistry')}>
+          <button className={styles.retryButton} onClick={() => navigate('/ai-wow/ai-palmistry-scanner')}>
             Start New Analysis
           </button>
         </div>

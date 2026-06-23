@@ -36,7 +36,7 @@ const SignatureAnalysis = () => {
     if (profileLoading) return;
 
     if (!signatureImage) {
-      navigate(PATH.privateRoutes.SIGNATURE_INSTRUCTIONS.path);
+      navigate(PATH.privateRoutes.SIGNATURE_INSTRUCTIONS.path[0]);
       return;
     }
 
@@ -84,7 +84,7 @@ const SignatureAnalysis = () => {
         // Only navigate if component is still mounted
         setTimeout(() => {
           if (isMountedRef.current) {
-            navigate(PATH.privateRoutes.SIGNATURE_RESULT.path);
+            navigate(PATH.privateRoutes.SIGNATURE_RESULT.path[0]);
           } else {
             console.log('Component unmounted - skipping navigation to result');
           }
@@ -125,7 +125,7 @@ const SignatureAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate(PATH.privateRoutes.SIGNATURE_RESULT.path);
+      navigate(PATH.privateRoutes.SIGNATURE_RESULT.path[0]);
     }
   };
 
@@ -133,7 +133,7 @@ const SignatureAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearSignatureData());
-    navigate(PATH.privateRoutes.SIGNATURE_INSTRUCTIONS.path);
+    navigate(PATH.privateRoutes.SIGNATURE_INSTRUCTIONS.path[0]);
   };
 
   return (

@@ -9,8 +9,9 @@ import styles from "./NestedTabs.module.scss";
  * - Supports URL-based tab activation via subtab query parameter
  */
 const NestedTabs = ({ tabs = [] }) => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const subtabParam = searchParams.get('subtab');
+  const sectionParam = searchParams.get('section');
   
   const [outerActive, setOuterActive] = useState(tabs[0]?.value || "");
   const [innerActive, setInnerActive] = useState(
@@ -20,9 +21,22 @@ const NestedTabs = ({ tabs = [] }) => {
   // Reset to first tab whenever parent sends new `tabs` OR activate from URL
   useEffect(() => {
     if (tabs?.length > 0) {
-      // Check if subtab parameter exists in URL
+      // If section param exists, find which outer tab contains it
+      if (sectionParam) {
+        for (const tab of tabs) {
+          if (tab.children) {
+            const innerTab = tab.children.find(child => child.value === sectionParam);
+            if (innerTab) {
+              setOuterActive(tab.value);
+              setInnerActive(innerTab.value);
+              return;
+            }
+          }
+        }
+      }
+
+      // Check if subtab parameter matches an outer tab
       if (subtabParam) {
-        // First, check if subtab matches an outer tab value
         const outerTab = tabs.find(tab => tab.value === subtabParam);
         if (outerTab) {
           setOuterActive(outerTab.value);
@@ -30,25 +44,16 @@ const NestedTabs = ({ tabs = [] }) => {
           return;
         }
         
-        // If not, search in children (inner tabs)
-        let foundOuter = null;
-        let foundInner = null;
-        
+        // Check if subtab matches an inner tab value
         for (const tab of tabs) {
           if (tab.children) {
             const innerTab = tab.children.find(child => child.value === subtabParam);
             if (innerTab) {
-              foundOuter = tab.value;
-              foundInner = innerTab.value;
-              break;
+              setOuterActive(tab.value);
+              setInnerActive(innerTab.value);
+              return;
             }
           }
-        }
-        
-        if (foundOuter && foundInner) {
-          setOuterActive(foundOuter);
-          setInnerActive(foundInner);
-          return;
         }
       }
       
@@ -56,16 +61,32 @@ const NestedTabs = ({ tabs = [] }) => {
       setOuterActive(tabs[0].value);
       setInnerActive(tabs[0]?.children?.[0]?.value || "");
     }
-  }, [tabs, subtabParam]);
+  }, [subtabParam, sectionParam]);
 
   const handleOuterSelect = (value) => {
     setOuterActive(value);
     const selected = tabs.find((t) => t.value === value);
-    setInnerActive(selected?.children?.[0]?.value || "");
+    const firstChild = selected?.children?.[0]?.value || "";
+    setInnerActive(firstChild);
+    
+    // Update URL params
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('subtab', value);
+    if (firstChild) {
+      newParams.set('section', firstChild);
+    } else {
+      newParams.delete('section');
+    }
+    setSearchParams(newParams, { replace: true });
   };
 
   const handleInnerSelect = (value) => {
     setInnerActive(value);
+    
+    // Update section in URL
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('section', value);
+    setSearchParams(newParams, { replace: true });
   };
 
   const outerTab = tabs.find((t) => t.value === outerActive);

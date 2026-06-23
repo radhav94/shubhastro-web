@@ -41,14 +41,15 @@ const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0, onTabChange }) => {
     if (index === 6) {
       const newParams = new URLSearchParams(searchParams);
       newParams.set('tab', 'free-report');
-      newParams.set('subtab', 'generalInfo');
-      console.log('PrimaryTabs: Setting tab and subtab parameters:', newParams.toString());
+      newParams.set('subtab', 'general');
+      newParams.set('section', 'planetary');
       setSearchParams(newParams, { replace: true });
     } else {
       // Remove subtab parameter for other tabs
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('subtab');
       newParams.delete('tab');
+      newParams.delete('section');
       setSearchParams(newParams, { replace: true });
     }
   };

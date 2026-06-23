@@ -13,7 +13,7 @@ const SignatureInstructions = () => {
   const fileInputRef = useRef(null);
 
   const handleCamera = () => {
-    navigate('/signature-analysis/camera');
+    navigate('/ai-wow/signature-analysis/camera');
   };
 
   const handleUpload = () => {
@@ -25,7 +25,7 @@ const SignatureInstructions = () => {
     if (file) {
       compressImage(file).then((dataUrl) => {
         dispatch(setSignatureImage(dataUrl));
-        navigate('/signature-analysis/capture');
+        navigate('/ai-wow/signature-analysis/capture');
       });
     }
   };
@@ -35,7 +35,7 @@ const SignatureInstructions = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate('/signature-analysis')}>
+          <button className={styles.backButton} onClick={() => navigate('/ai-wow/signature-analysis')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

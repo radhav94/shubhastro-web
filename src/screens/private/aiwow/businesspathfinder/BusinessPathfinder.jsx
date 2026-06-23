@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './BusinessPathfinder.module.scss';
@@ -10,7 +10,6 @@ import { ProfileManager } from '../../../../component/UI/Profile';
 import { setSelectedKundliProfile } from '../../../../redux/aiwow/aiwowSlice';
 import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 import LocationSearch from '../../../../utils/location/locationSearchVedic';
-import useUserLocation from '../../../../utils/hooks/useUserLocation';
 
 const BusinessPathfinder = () => {
   const navigate = useNavigate();
@@ -48,23 +47,6 @@ const BusinessPathfinder = () => {
   });
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const userLocation = useUserLocation();
-  const locationManuallySet = useRef(false);
-
-  // Default the business location to the user's current location (fallback: Nagpur).
-  // Keeps syncing as the hook resolves the real place name, unless the user has typed/picked one.
-  useEffect(() => {
-    if (locationManuallySet.current) return;
-    if (userLocation.loaded && userLocation.locationName) {
-      setFormData(prev => ({
-        ...prev,
-        businessLocation: userLocation.locationName,
-        businessLat: String(userLocation.lat),
-        businessLon: String(userLocation.lon),
-        businessTzone: prev.businessTzone !== '' ? prev.businessTzone : 5.5,
-      }));
-    }
-  }, [userLocation.loaded, userLocation.locationName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCategorySelect = (cat) => {
     if (cat === 'Add Custom') {
@@ -144,7 +126,7 @@ const BusinessPathfinder = () => {
       if (result.success) {
         Toast.success('Report generated successfully!');
         // Navigate to result page with data
-        navigate('/business-pathfinder/report', { state: { result: result.data } });
+        navigate('/ai-wow/business-pathfinder/report', { state: { result: result.data } });
       } else {
         Toast.error(result.message || 'Something went wrong. Please try again.');
       }
@@ -163,7 +145,7 @@ const BusinessPathfinder = () => {
       {/* Header - outside container */}
       <div className={styles.pageHeader}>
         <div className={styles.pageHeaderInner}>
-        <button className={styles.backBtn} onClick={() => navigate('/ai-wow')}>
+        <button className={styles.backBtn} onClick={() => navigate(-1)}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -331,9 +313,8 @@ const BusinessPathfinder = () => {
             <p className={styles.stepSubtitle}>Where are you planning to set up your business?</p>
             <LocationSearch
               value={formData.businessLocation}
-              placeholder="Search for a city..."
+              placeholder="Enter your location"
               onChange={(e) => {
-                locationManuallySet.current = true;
                 setFormData(prev => ({
                   ...prev,
                   businessLocation: e.target.value,
@@ -343,7 +324,6 @@ const BusinessPathfinder = () => {
                 }));
               }}
               onPlaceSelect={(place) => {
-                locationManuallySet.current = true;
                 setFormData(prev => ({
                   ...prev,
                   businessLocation: place.address,

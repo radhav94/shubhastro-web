@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import {
   useGetSingleBlogQuery,
@@ -13,6 +13,7 @@ import { DefaultImages } from "../../../../utils/appImages";
 
 const SingleBlogDetails = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const { data, isLoading } = useGetSingleBlogQuery(slug);
   const singleBLogData = data?.data;
   const [copied, setCopied] = useState(false);
@@ -99,6 +100,11 @@ const SingleBlogDetails = () => {
     <div className={styles.pageWrapper}>
       {/* Breadcrumb */}
       <nav className={styles.breadcrumb}>
+        <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label="Go back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
         <Link to={PATH.privateRoutes.HOME.path}>Home</Link>
         <span className={styles.sep}>›</span>
         <Link to={PATH.privateRoutes.BLOG.path}>Blogs</Link>

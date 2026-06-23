@@ -167,8 +167,11 @@ function App() {
               child.path === "/profile" ||
               child.path === "/community" ||
               child.path === "/aiwow/muhurat-calendar" ||
+              child.path === "/ai-wow/muhurat-calendar" ||
               child.path === "/business-pathfinder" ||
               child.path === "/business-pathfinder/report" ||
+              child.path === "/ai-wow/business-pathfinder" ||
+              child.path === "/ai-wow/business-pathfinder/report" ||
               child.path === PATH.privateRoutes.LAL_KITAB?.path ||
               child.path === PATH.privateRoutes.OCCULT?.path
             ) {

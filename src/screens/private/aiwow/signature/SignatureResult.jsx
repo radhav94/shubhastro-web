@@ -65,12 +65,12 @@ const SignatureResult = () => {
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
-        navigate('/signature-analysis/instructions');
+        navigate('/ai-wow/signature-analysis/instructions');
         return;
       }
     } else {
       Toast.error('No analysis results found');
-      navigate('/signature-analysis/instructions');
+      navigate('/ai-wow/signature-analysis/instructions');
       return;
     }
     

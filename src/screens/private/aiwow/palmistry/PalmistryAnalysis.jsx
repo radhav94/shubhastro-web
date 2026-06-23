@@ -40,7 +40,7 @@ const PalmistryAnalysis = () => {
     if (profileLoading) return; // Wait for profile to load
 
     if (!palmImage || !selectedHand) {
-      navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path);
+      navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path[0]);
       return;
     }
 
@@ -93,7 +93,7 @@ const PalmistryAnalysis = () => {
           // Only navigate if component is still mounted
           setTimeout(() => {
             if (isMountedRef.current) {
-              navigate(`${PATH.privateRoutes.PALMISTRY_RESULT.path}/${resultId}`);
+              navigate(`${PATH.privateRoutes.PALMISTRY_RESULT.path[0]}/${resultId}`);
             } else {
               console.log('Component unmounted - skipping navigation to result');
             }
@@ -108,7 +108,7 @@ const PalmistryAnalysis = () => {
           // Only navigate if component is still mounted
           setTimeout(() => {
             if (isMountedRef.current) {
-              navigate(PATH.privateRoutes.PALMISTRY_RESULT.path);
+              navigate(PATH.privateRoutes.PALMISTRY_RESULT.path[0]);
             } else {
               console.log('Component unmounted - skipping navigation to result');
             }
@@ -160,7 +160,7 @@ const PalmistryAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate(PATH.privateRoutes.PALMISTRY_RESULT.path);
+      navigate(PATH.privateRoutes.PALMISTRY_RESULT.path[0]);
     }
   };
 
@@ -168,12 +168,12 @@ const PalmistryAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearPalmistryData());
-    navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path);
+    navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path[0]);
   };
 
   const handleBack = () => {
     dispatch(clearPalmistryData());
-    navigate('/ai-palmistry-scanner/hand-selection', { replace: true });
+    navigate('/ai-wow/ai-palmistry-scanner/hand-selection', { replace: true });
   };
 
   return (

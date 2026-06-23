@@ -93,12 +93,19 @@ const SmartMatchmaking = () => {
     if (selectingType === "PRIMARY") {
       if (profile._id === partnerProfile?._id) return;
       setPrimaryProfile(profile);
-      // dispatch(setSelectedKundli(profile));
+      // Check if both are same gender
+      if (partnerProfile && profile.gender === partnerProfile.gender) {
+        Toast.error('Matchmaking requires one male and one female profile');
+      }
     }
 
     if (selectingType === "PARTNER") {
       if (profile._id === primaryProfile?._id) return;
       setPartnerProfile(profile);
+      // Check if both are same gender
+      if (primaryProfile && primaryProfile.gender === profile.gender) {
+        Toast.error('Matchmaking requires one male and one female profile');
+      }
     }
 
     setShowSelectProfile(false);
@@ -291,7 +298,8 @@ const SmartMatchmaking = () => {
       if (apiResult.success) {
         setResult(apiResult.data);
       } else {
-        setError(apiResult.error);
+        // Show toast with backend error message only
+        Toast.error(apiResult.error?.message || 'Matchmaking analysis failed');
       }
     } catch (error) {
       console.error('Failed to analyze compatibility:', error);
@@ -302,7 +310,7 @@ const SmartMatchmaking = () => {
   };
 
   const handleBack = () => {
-    if (result || error) {
+    if (result) {
       setResult(null);
       setError(null);
     } else {
@@ -312,7 +320,6 @@ const SmartMatchmaking = () => {
 
   const handleRetry = () => {
     setError(null);
-    setResult(null);
   };
 
   return (
@@ -333,7 +340,7 @@ const SmartMatchmaking = () => {
         <img className={styles.topImg} src={matchMakingImg} alt="img" />
         
         <div className={styles.matchMakingCard}>
-          {!result && !error ? (
+          {!result ? (
             <>
               <div className={styles.topTitles}>
                 <h2>AI-Enhanced Compatibility</h2>
@@ -378,7 +385,7 @@ const SmartMatchmaking = () => {
                 <button 
                   type="submit"
                   className={styles.matchMakingBtn} 
-                  disabled={isLoading || !primaryProfile || !partnerProfile}
+                  disabled={isLoading || !primaryProfile || !partnerProfile || (primaryProfile?.gender === partnerProfile?.gender)}
                 >
                   {isLoading ? (
                     <>
@@ -400,48 +407,6 @@ const SmartMatchmaking = () => {
 
               <img className={styles.bottomImg} src={matchMakingImgBottom} alt="img" />
             </>
-          ) : error ? (
-            <div className={styles.errorSection} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                <TTSButton text={`Analysis Failed. ${error.message || ''}${error.details?.detectedIssue ? '. Issue Detected: ' + error.details.detectedIssue : ''}${error.details?.expected ? '. Expected: ' + error.details.expected : ''}`} />
-              </span>
-              <div className={styles.errorIcon}>
-                <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-                  <circle cx="32" cy="32" r="30" stroke="#ef4444" strokeWidth="2" fill="none"/>
-                  <path d="M32 20V36" stroke="#ef4444" strokeWidth="3" strokeLinecap="round"/>
-                  <circle cx="32" cy="44" r="2" fill="#ef4444"/>
-                </svg>
-              </div>
-
-              <div className={styles.errorDetails}>
-                <h3 className={styles.errorMessage}>{error.message}</h3>
-                
-                {error.details && (
-                  <div className={styles.errorDetailsBox}>
-                    {error.details.detectedIssue && (
-                      <div className={styles.errorDetailItem}>
-                        <strong>Issue Detected:</strong>
-                        <p>{error.details.detectedIssue}</p>
-                      </div>
-                    )}
-                    
-                    {error.details.expected && (
-                      <div className={styles.errorDetailItem}>
-                        <strong>Expected:</strong>
-                        <p>{error.details.expected}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <button 
-                className={styles.retryButton}
-                onClick={handleRetry}
-              >
-                Try Again
-              </button>
-            </div>
           ) : (
             <div className={styles.resultSection}>
               {/* Score and Summary Wrapper */}

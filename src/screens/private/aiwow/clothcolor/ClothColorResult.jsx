@@ -90,12 +90,12 @@ const ClothColorResult = () => {
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
-        navigate('/clothes-colour-analysis/instructions');
+        navigate('/ai-wow/clothes-colour-analysis/instructions');
         return;
       }
     } else {
       Toast.error('No analysis results found');
-      navigate('/clothes-colour-analysis/form', { replace: true });
+      navigate('/ai-wow/clothes-colour-analysis/form', { replace: true });
       return;
     }
     
