@@ -28,7 +28,6 @@ import InActiveStarIcon from "../assets/icons/inactive-star.png";
 
 
 // application all default images
-import AstrologerDefaultImg from "../assets/default-img/astrologer.svg";
 import AstrologerMaleDefaultImg from "../assets/default-img/astrologer male_v.1.png"; // Male astrologer
 import AstrologerFemaleDefaultImg from "../assets/default-img/astrologer female_v.1.png"; // Female astrologer
 import AstromallCategoryDefault from "../assets/default-img/astromall-category.png";
@@ -47,7 +46,6 @@ import TalkToDefaultAstrologer from "../assets/default-img/talk-to-defaultastrol
 import AstromallProductDefault from "../assets/default-img/astromall-product-default.svg";
 
 export const DefaultImages = {
-  AstrologerDefaultImg,
   AstrologerMaleDefaultImg,
   AstrologerFemaleDefaultImg,
   AstromallCategoryDefault,
@@ -72,7 +70,7 @@ export const DefaultImages = {
  * @returns {string} - Default image path
  */
 export const getAstrologerDefaultImage = (gender) => {
-  if (!gender) return DefaultImages.AstrologerDefaultImg;
+  if (!gender) return DefaultImages.AstrologerMaleDefaultImg;
   
   const genderLower = gender.toLowerCase();
   
@@ -82,7 +80,7 @@ export const getAstrologerDefaultImage = (gender) => {
     return DefaultImages.AstrologerFemaleDefaultImg;
   }
   
-  return DefaultImages.AstrologerDefaultImg;
+  return DefaultImages.AstrologerMaleDefaultImg;
 };
 
 
