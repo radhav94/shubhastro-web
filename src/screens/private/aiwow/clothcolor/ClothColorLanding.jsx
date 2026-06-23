@@ -73,7 +73,7 @@ const ClothColorLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/clothes-colour-analysis/form')}
+          onClick={() => navigate('/ai-wow/clothes-colour-analysis/form')}
         >
           Proceed Ahead
         </button>

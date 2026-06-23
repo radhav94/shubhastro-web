@@ -379,14 +379,14 @@ const HomeV2 = () => {
   const getWowCardPath = useCallback((item) => {
     if (!item.slug) return null;
     if (item.slug === "ar-vastu-scanner") return null;
-    return ["ai-palmistry-scanner","astro-face-reading","signature-analysis","clothes-colour-analysis","gemstone-authenticity","aura-photography"].includes(item.slug) ? `/${item.slug}` : `/aiwow/${item.slug}`;
+    return `/ai-wow/${item.slug}`;
   }, []);
 
   const handleWowCardClick = useCallback((item, e) => {
     if (!item.slug) return;
     if (e) e.preventDefault();
     if (item.slug === "ar-vastu-scanner") { setShowMobileAppModal(true); return; }
-    const path = ["ai-palmistry-scanner","astro-face-reading","signature-analysis","clothes-colour-analysis","gemstone-authenticity","aura-photography"].includes(item.slug) ? `/${item.slug}` : `/aiwow/${item.slug}`;
+    const path = `/ai-wow/${item.slug}`;
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) { localStorage.setItem("shubhtalk_redirect_after_login", path); window.location.href = "/login?skip=welcome"; return; }
     navigate(path);

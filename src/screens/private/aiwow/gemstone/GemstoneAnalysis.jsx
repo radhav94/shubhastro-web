@@ -36,7 +36,7 @@ const GemstoneAnalysis = () => {
     if (profileLoading) return;
 
     if (!gemstoneImage) {
-      navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path);
+      navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path[0]);
       return;
     }
 
@@ -84,7 +84,7 @@ const GemstoneAnalysis = () => {
         // Only navigate if component is still mounted
         setTimeout(() => {
           if (isMountedRef.current) {
-            navigate(PATH.privateRoutes.GEMSTONE_RESULT.path);
+            navigate(PATH.privateRoutes.GEMSTONE_RESULT.path[0]);
           } else {
             console.log('Component unmounted - skipping navigation to result');
           }
@@ -125,7 +125,7 @@ const GemstoneAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate(PATH.privateRoutes.GEMSTONE_RESULT.path);
+      navigate(PATH.privateRoutes.GEMSTONE_RESULT.path[0]);
     }
   };
 
@@ -133,7 +133,7 @@ const GemstoneAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearGemstoneData());
-    navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path);
+    navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path[0]);
   };
 
   return (

@@ -15,7 +15,7 @@ const AuraInstructions = () => {
   const gender = selectedProfile?.identity?.toLowerCase() || selectedProfile?.gender?.toLowerCase() || 'male';
 
   const handleCamera = () => {
-    navigate('/aura-photography/camera');
+    navigate('/ai-wow/aura-photography/camera');
   };
 
   const handleUpload = () => {
@@ -27,7 +27,7 @@ const AuraInstructions = () => {
     if (file) {
       compressImage(file).then((dataUrl) => {
         dispatch(setAuraImage(dataUrl));
-        navigate('/aura-photography/capture');
+        navigate('/ai-wow/aura-photography/capture');
       });
     }
   };
@@ -37,7 +37,7 @@ const AuraInstructions = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate('/aura-photography')}>
+          <button className={styles.backButton} onClick={() => navigate('/ai-wow/aura-photography')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

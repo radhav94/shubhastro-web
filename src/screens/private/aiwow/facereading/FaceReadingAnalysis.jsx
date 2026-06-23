@@ -36,7 +36,7 @@ const FaceReadingAnalysis = () => {
     if (profileLoading) return;
 
     if (!faceImage) {
-      navigate(PATH.privateRoutes.FACE_READING_INSTRUCTIONS.path);
+      navigate(PATH.privateRoutes.FACE_READING_INSTRUCTIONS.path[0]);
       return;
     }
 
@@ -84,7 +84,7 @@ const FaceReadingAnalysis = () => {
         // Only navigate if component is still mounted
         setTimeout(() => {
           if (isMountedRef.current) {
-            navigate(PATH.privateRoutes.FACE_READING_RESULT.path);
+            navigate(PATH.privateRoutes.FACE_READING_RESULT.path[0]);
           } else {
             console.log('Component unmounted - skipping navigation to result');
           }
@@ -127,7 +127,7 @@ const FaceReadingAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate(PATH.privateRoutes.FACE_READING_RESULT.path);
+      navigate(PATH.privateRoutes.FACE_READING_RESULT.path[0]);
     }
   };
 
@@ -135,7 +135,7 @@ const FaceReadingAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearFaceReadingData());
-    navigate(PATH.privateRoutes.FACE_READING_INSTRUCTIONS.path);
+    navigate(PATH.privateRoutes.FACE_READING_INSTRUCTIONS.path[0]);
   };
 
   return (

@@ -12,7 +12,7 @@ const PalmistryInstructions = () => {
   const fileInputRef = useRef(null);
 
   const handleCamera = () => {
-    navigate('/ai-palmistry-scanner/camera');
+    navigate('/ai-wow/ai-palmistry-scanner/camera');
   };
 
   const handleUpload = () => {
@@ -24,7 +24,7 @@ const PalmistryInstructions = () => {
     if (file) {
       compressImage(file).then((dataUrl) => {
         dispatch(setPalmistryImage(dataUrl));
-        navigate('/ai-palmistry-scanner/capture');
+        navigate('/ai-wow/ai-palmistry-scanner/capture');
       });
     }
   };

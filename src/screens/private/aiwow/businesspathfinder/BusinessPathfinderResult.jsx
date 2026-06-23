@@ -118,7 +118,7 @@ const BusinessPathfinderResult = () => {
     return (
       <>
         <div className={styles.pageHeader}>
-          <button className={styles.backBtn} onClick={() => navigate('/business-pathfinder')}>
+          <button className={styles.backBtn} onClick={() => navigate('/ai-wow/business-pathfinder')}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -128,7 +128,7 @@ const BusinessPathfinderResult = () => {
         <div className={styles.container}>
           <div className={styles.emptyState}>
             <p>No report data found. Please generate a report first.</p>
-            <button className={styles.generateBtn} onClick={() => navigate('/business-pathfinder')}>
+            <button className={styles.generateBtn} onClick={() => navigate('/ai-wow/business-pathfinder')}>
               Generate Report
             </button>
           </div>
@@ -165,7 +165,7 @@ const BusinessPathfinderResult = () => {
   return (
     <>
       <div className={styles.pageHeader}>
-        <button className={styles.backBtn} onClick={() => navigate('/business-pathfinder')}>
+        <button className={styles.backBtn} onClick={() => navigate('/ai-wow/business-pathfinder')}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -382,7 +382,7 @@ const BusinessPathfinderResult = () => {
 
         {/* Generate Another */}
         <div className={styles.generateWrap}>
-          <button className={styles.generateBtn} onClick={() => navigate('/business-pathfinder')}>
+          <button className={styles.generateBtn} onClick={() => navigate('/ai-wow/business-pathfinder')}>
             Generate another report
           </button>
         </div>

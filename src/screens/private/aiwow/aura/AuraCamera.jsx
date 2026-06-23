@@ -205,7 +205,7 @@ const AuraCamera = () => {
   const proceedWithImage = () => {
     if (capturedImage) {
       dispatch(setAuraImage(capturedImage));
-      navigate('/aura-photography/capture');
+      navigate('/ai-wow/aura-photography/capture');
     }
   };
 

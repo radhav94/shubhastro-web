@@ -49,7 +49,7 @@ const AuraAnalysis = () => {
         console.error('Invalid image format in Redux state:', typeof auraImage);
         Toast.error('Invalid image format. Please try again.');
         dispatch(clearAuraData());
-        navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path);
+        navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0]);
         return;
       }
 
@@ -57,7 +57,7 @@ const AuraAnalysis = () => {
     } else if (!auraImage && !isAnalyzing && !analysisComplete && !error && !profileLoading) {
       // Only redirect if we don't have an image and we're not in the middle of anything
       console.warn('No aura image found in Redux state, redirecting to instructions');
-      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path, { replace: true });
+      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0], { replace: true });
     }
   }, [auraImage, profile, profileLoading]); // Depend on profile and profileLoading
 
@@ -124,7 +124,7 @@ const AuraAnalysis = () => {
         // Only navigate if component is still mounted
         setTimeout(() => {
           if (isMountedRef.current) {
-            navigate(PATH.privateRoutes.AURA_RESULT.path);
+            navigate(PATH.privateRoutes.AURA_RESULT.path[0]);
           } else {
             console.log('Component unmounted - skipping navigation to result');
           }
@@ -192,7 +192,7 @@ const AuraAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate(PATH.privateRoutes.AURA_RESULT.path);
+      navigate(PATH.privateRoutes.AURA_RESULT.path[0]);
     }
   };
 
@@ -200,7 +200,7 @@ const AuraAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearAuraData());
-    navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path);
+    navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0]);
   };
 
   return (

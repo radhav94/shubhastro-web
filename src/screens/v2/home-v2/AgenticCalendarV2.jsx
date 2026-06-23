@@ -54,7 +54,7 @@ const AgenticCalendarV2 = ({ styles }) => {
 
   const handleGetMuhurat = () => {
     if (!isLoggedIn) { navigate("/login"); return; }
-    navigate("/aiwow/muhurat-calendar", {
+    navigate("/ai-wow/muhurat-calendar", {
       state: {
         occasions: selectedOccasions,
         period: selectedPeriod,
@@ -77,7 +77,7 @@ const AgenticCalendarV2 = ({ styles }) => {
             </svg>
           </div>
         </div>
-        <button className={styles.viewAllBtn} style={{ color: '#f75801' }} onClick={() => { if (!isLoggedIn) { navigate('/login'); return; } navigate('/aiwow/muhurat-calendar'); }}>
+        <button className={styles.viewAllBtn} style={{ color: '#f75801' }} onClick={() => { if (!isLoggedIn) { navigate('/login'); return; } navigate('/ai-wow/muhurat-calendar'); }}>
           View All <FiChevronRight size={14} />
         </button>
       </div>
@@ -179,7 +179,7 @@ const AgenticCalendarV2 = ({ styles }) => {
 
       {/* Date Picker Modal */}
       {showDatePicker && createPortal(
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999 }}
+        <div className="app-portal" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999 }}
           onClick={() => setShowDatePicker(false)}>
           <div style={{ background:'#fff', borderRadius:16, padding:24, width:340, maxWidth:'90vw' }}
             onClick={e => e.stopPropagation()}>
@@ -253,7 +253,7 @@ const AgenticCalendarV2 = ({ styles }) => {
 
       {/* Add Custom Modal */}
       {showCustomModal && createPortal(
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999 }}
+        <div className="app-portal" style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999 }}
           onClick={() => setShowCustomModal(false)}>
           <div style={{ background:'#fff', borderRadius:16, padding:24, width:320, maxWidth:'90vw' }}
             onClick={e => e.stopPropagation()}>
