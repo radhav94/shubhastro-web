@@ -249,8 +249,8 @@ const ThreeColGroupLayout = ({ sections, styles }) => {
           </div>
         );
       case "discover-more":
-        // DiscoverMoreSectionV2 hidden — replaced with LiveSessionCard
-        // return <DiscoverMoreSectionV2 sectionData={section} styles={styles} />;
+        return <DiscoverMoreSectionV2 sectionData={section} styles={styles} />;
+      case "live-widget":
         return <LiveSessionCard styles={styles} />;
       default:
         return null;
@@ -318,8 +318,8 @@ const renderUngroupedThreeColSection = (section, props) => {
     case "ai-agentic":
       return <div key={key} className={styles.calendarBox}><Suspense fallback={null}><AgenticCalendarV2 styles={styles} /></Suspense></div>;
     case "discover-more":
-      // DiscoverMoreSectionV2 hidden — replaced with LiveSessionCard
-      // return <div key={key}><DiscoverMoreSectionV2 sectionData={section} styles={styles} /></div>;
+      return <div key={key}><DiscoverMoreSectionV2 sectionData={section} styles={styles} /></div>;
+    case "live-widget":
       return <div key={key}><LiveSessionCard styles={styles} /></div>;
     default:
       return null;

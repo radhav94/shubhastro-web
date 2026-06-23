@@ -26,6 +26,7 @@ export const THREE_COL_LAYOUT_TYPES = new Set([
   "astrologers-by-category",
   "ai-agentic",
   "discover-more",
+  "live-widget"
 ]);
 
 // Types that are always skipped (rendered elsewhere)
@@ -210,6 +211,7 @@ export const renderStandaloneSection = (section, options = {}) => {
     case "astrologers-by-category":
     case "ai-agentic":
     case "discover-more":
+    case "live-widget":
       // Return a marker so the parent knows to render this type standalone
       return null;
 
