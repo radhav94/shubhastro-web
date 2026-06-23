@@ -7,7 +7,7 @@ const LiveSessionCard = memo(({ styles, sectionData }) => {
 
   const title = sectionData?.sub_title || "Talk to Astrologers Live";
   const description = sectionData?.description || "Join astrologers live and start a consultation whenever you need trusted advice.";
-  const image = sectionData?.image_url || joinLiveSessionImg;
+  const image = sectionData?.image_url?.original || joinLiveSessionImg;
   const displayTitle = sectionData?.display_title || sectionData?.title || "Live Sessions";
 
   return (
