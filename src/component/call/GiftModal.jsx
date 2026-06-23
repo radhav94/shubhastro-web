@@ -259,7 +259,7 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
                 {/* Other Gifts */}
                 {otherGifts.length > 0 && (
                   <div className={styles.giftSection}>
-                    <h3 className={styles.sectionTitle}>Other Gifts</h3>
+                    {/* <h3 className={styles.sectionTitle}>Other Gifts</h3> */}
                     <div className={styles.giftGrid}>
                       {otherGifts.map((gift) => (
                         <div
