@@ -74,7 +74,7 @@ const SignatureLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/signature-analysis/instructions')}
+          onClick={() => navigate('/ai-wow/signature-analysis/instructions')}
         >
           Proceed Ahead
         </button>

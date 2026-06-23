@@ -222,17 +222,8 @@ const AIWow = () => {
     if (slug === "ar-vastu-scanner") {
       setShowMobileAppModal(true);
     } else {
-      // Landing pages moved to root level
-      const rootLevelSlugs = [
-        "ai-palmistry-scanner",
-        "astro-face-reading",
-        "signature-analysis",
-        "clothes-colour-analysis",
-        "gemstone-authenticity",
-        "aura-photography",
-      ];
-      const path = rootLevelSlugs.includes(slug) ? `/${slug}` : `/aiwow/${slug}`;
-      navigate(path);
+      // All AI WOW features live under the /ai-wow/ prefix
+      navigate(`/ai-wow/${slug}`);
     }
   };
 

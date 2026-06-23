@@ -264,7 +264,7 @@ const FaceReadingCamera = () => {
   const proceedWithImage = () => {
     if (capturedImage) {
       dispatch(setFaceReadingImage(capturedImage));
-      navigate('/astro-face-reading/capture');
+      navigate('/ai-wow/astro-face-reading/capture');
     }
   };
 

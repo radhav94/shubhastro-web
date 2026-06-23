@@ -126,7 +126,7 @@ const BusinessPathfinder = () => {
       if (result.success) {
         Toast.success('Report generated successfully!');
         // Navigate to result page with data
-        navigate('/business-pathfinder/report', { state: { result: result.data } });
+        navigate('/ai-wow/business-pathfinder/report', { state: { result: result.data } });
       } else {
         Toast.error(result.message || 'Something went wrong. Please try again.');
       }
@@ -145,7 +145,7 @@ const BusinessPathfinder = () => {
       {/* Header - outside container */}
       <div className={styles.pageHeader}>
         <div className={styles.pageHeaderInner}>
-        <button className={styles.backBtn} onClick={() => navigate('/ai-wow')}>
+        <button className={styles.backBtn} onClick={() => navigate(-1)}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>

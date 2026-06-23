@@ -204,7 +204,7 @@ const ClothColorCamera = () => {
   const proceedWithImage = () => {
     if (capturedImage) {
       dispatch(setClothColorImage(capturedImage));
-      navigate('/clothes-colour-analysis/capture');
+      navigate('/ai-wow/clothes-colour-analysis/capture');
     }
   };
 

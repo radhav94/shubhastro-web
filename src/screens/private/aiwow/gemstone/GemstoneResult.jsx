@@ -72,12 +72,12 @@ const GemstoneResult = () => {
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
-        navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path, { replace: true });
+        navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path[0], { replace: true });
         return;
       }
     } else {
       Toast.error('No analysis results found');
-      navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path, { replace: true });
+      navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path[0], { replace: true });
       return;
     }
     setLoading(false);

@@ -264,7 +264,7 @@ const PalmistryCamera = () => {
   const proceedWithImage = () => {
     if (capturedImage) {
       dispatch(setPalmistryImage(capturedImage));
-      navigate('/ai-palmistry-scanner/capture');
+      navigate('/ai-wow/ai-palmistry-scanner/capture');
     }
   };
 
