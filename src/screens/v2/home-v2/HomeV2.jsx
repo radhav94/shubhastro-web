@@ -17,7 +17,7 @@ import WelcomeBonusModal from "../../../component/UI/modal/WelcomeBonusModal/Wel
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
-import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, AstrologersByCategorySection, DiscoverMoreSectionV2 } from "./sections";
+import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, AstrologersByCategorySection, DiscoverMoreSectionV2, LiveSessionCard } from "./sections";
 
 // Lazy-load below-the-fold components
 const ProfileModals = lazy(() => import("../../private/kundli/components/ProfileModals"));
@@ -249,7 +249,9 @@ const ThreeColGroupLayout = ({ sections, styles }) => {
           </div>
         );
       case "discover-more":
-        return <DiscoverMoreSectionV2 sectionData={section} styles={styles} />;
+        // DiscoverMoreSectionV2 hidden — replaced with LiveSessionCard
+        // return <DiscoverMoreSectionV2 sectionData={section} styles={styles} />;
+        return <LiveSessionCard styles={styles} />;
       default:
         return null;
     }
@@ -316,7 +318,9 @@ const renderUngroupedThreeColSection = (section, props) => {
     case "ai-agentic":
       return <div key={key} className={styles.calendarBox}><Suspense fallback={null}><AgenticCalendarV2 styles={styles} /></Suspense></div>;
     case "discover-more":
-      return <div key={key}><DiscoverMoreSectionV2 sectionData={section} styles={styles} /></div>;
+      // DiscoverMoreSectionV2 hidden — replaced with LiveSessionCard
+      // return <div key={key}><DiscoverMoreSectionV2 sectionData={section} styles={styles} /></div>;
+      return <div key={key}><LiveSessionCard styles={styles} /></div>;
     default:
       return null;
   }
