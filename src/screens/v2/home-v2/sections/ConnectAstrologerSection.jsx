@@ -47,11 +47,11 @@ const ConnectAstrologerSection = memo(({ sectionData, styles }) => {
           {sectionData?.quick_message || "Don't Wait. Get Clarity Now."}
         </div>
         <h3 className={styles.ctaHeading}>
-          {sectionData?.display_title || sectionData?.title || "Your Answers Are Waiting."}
+          {sectionData?.display_title || sectionData?.title || "Talk to an Astrologer"}
         </h3>
-        <p className={styles.ctaOrange}>{sectionData?.sub_title || "Connect with an Astrologer Now!"}</p>
+        <p className={styles.ctaOrange}>{sectionData?.sub_title || "Get Clarity on What Matter Most!"}</p>
         <p className={styles.ctaDesc}>
-          {sectionData?.description || "Talk to verified astrologers and get clarity on love, career, health, finance and more."}
+          {sectionData?.description || "Connect with verified astrologers and get guidance on love, career, health, finance and more."}
         </p>
         <div className={styles.ctaAvatarRow}>
           <div className={styles.ctaAvatars}>
