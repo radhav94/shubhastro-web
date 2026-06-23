@@ -20,7 +20,7 @@ const NotFound = () => {
         {/* Right — Content */}
         <div className={styles.content}>
           <span className={styles.oopsBadge}>Oops!</span>
-          <h1 className={styles.title}>Your destiny path is lost</h1>
+          <h1 className={styles.title}>This page is written in no one's Kundli</h1>
           <p className={styles.subtitle}>
             The page you're looking for doesn't exist or has moved.<br />
             Let our AI guide you back to the right path.

@@ -6,17 +6,17 @@ $font-primary: "Poppins", sans-serif;
 
 .blogSection {
   width: 100%;
-  max-width: 1440px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 20px;
+  // padding: 0 20px;
 
-  @media (max-width: 1180px) {
-    padding: 0 16px;
-  }
+  // @media (max-width: 1180px) {
+  //   padding: 0 16px;
+  // }
 
-  @media (max-width: 767px) {
-    padding: 0 12px;
-  }
+  // @media (max-width: 767px) {
+  //   padding: 0 12px;
+  // }
 }
 
 /* ---------------------------------------
@@ -50,7 +50,7 @@ $font-primary: "Poppins", sans-serif;
     min-width: 0;
     max-width: 100%;
     overflow: hidden;
-    padding: 20px 12px;
+    padding: 10px 16px;
   }
 }
 
@@ -281,21 +281,19 @@ $font-primary: "Poppins", sans-serif;
 -----------------------------------------*/
 .blogsContainer {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
 
   @media (max-width: 1200px) {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 
   @media (max-width: 991px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 18px;
+    grid-template-columns: repeat(3, 1fr);
   }
 
-  @media (max-width: 576px) {
+  @media (max-width: 767px) {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
   }
 }
 
