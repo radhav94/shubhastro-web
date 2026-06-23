@@ -251,7 +251,7 @@ const ThreeColGroupLayout = ({ sections, styles }) => {
       case "discover-more":
         return <DiscoverMoreSectionV2 sectionData={section} styles={styles} />;
       case "live-widget":
-        return <LiveSessionCard styles={styles} />;
+        return <LiveSessionCard styles={styles} sectionData={section} />;
       default:
         return null;
     }
@@ -320,7 +320,7 @@ const renderUngroupedThreeColSection = (section, props) => {
     case "discover-more":
       return <div key={key}><DiscoverMoreSectionV2 sectionData={section} styles={styles} /></div>;
     case "live-widget":
-      return <div key={key}><LiveSessionCard styles={styles} /></div>;
+      return <div key={key}><LiveSessionCard styles={styles} sectionData={section} /></div>;
     default:
       return null;
   }

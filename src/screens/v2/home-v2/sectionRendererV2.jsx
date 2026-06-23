@@ -43,6 +43,7 @@ const CONTENT_NOT_REQUIRED = new Set([
   "my-sessions",
   "connect-astrologer",
   "live-tracking",
+  "live-widget",
 ]);
 
 /**
