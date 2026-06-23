@@ -498,7 +498,7 @@ const HomeV2 = () => {
 // Helper to determine family for standalone rendering
 function getStandaloneFamily(displayType) {
   if (["complementary-services", "ai-powered-astrology", "muharat-widget", "ai-services"].includes(displayType)) return "hero";
-  if (["astrologers-by-category", "ai-agentic", "discover-more"].includes(displayType)) return "three-col";
+  if (["astrologers-by-category", "ai-agentic", "discover-more","live-widget"].includes(displayType)) return "three-col";
   return "standalone";
 }
 
