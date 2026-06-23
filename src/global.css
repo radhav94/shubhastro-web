@@ -202,7 +202,7 @@ div[id^="goog-gt-"] {
 /* Hide Google Translate loading overlay (the blue spinning arc).
    `.app-portal` is excluded so app modals/popups rendered via React portals
    to <body> are not hidden by this catch-all. */
-body > div:not(#root):not(#google_translate_element):not(noscript):not(script):not(.app-portal) {
+/* body > div:not(#root):not(#google_translate_element):not(noscript):not(script):not(.app-portal) {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
@@ -212,10 +212,10 @@ body > div:not(#root):not(#google_translate_element):not(noscript):not(script):n
     position: absolute !important;
     top: -9999px !important;
     left: -9999px !important;
-}
+} */
 
 /* Ensure #root stays visible */
-#root {
+/* #root {
     display: block !important;
     visibility: visible !important;
     height: auto !important;
@@ -225,7 +225,7 @@ body > div:not(#root):not(#google_translate_element):not(noscript):not(script):n
     position: relative !important;
     top: auto !important;
     left: auto !important;
-}
+} */
 
 /* Remove moon dividers globally */
 [class*="titleDivider"],
