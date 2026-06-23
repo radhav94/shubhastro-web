@@ -3,6 +3,7 @@ import { privateRequestNew } from "../../../services/appServices/privateRequestN
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { useLazyGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
+import { PANDIT_AI_ID } from "../../../component/panditAI/usePanditAI";
 
 const EmergencySessionModal = lazy(() => import("../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal"));
 
@@ -213,13 +214,15 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
                   </div>
                 )}
 
-                {/* Action button */}
-                <button
-                  className={styles.sessionCallBtn}
-                  onClick={() => handleAgain(session)}
-                >
-                  {session.sessiontype === 'chat' ? 'Chat Again' : 'Call Again'}
-                </button>
+                {/* Action button - hide for AI Astrologer */}
+                {session._id !== PANDIT_AI_ID && (
+                  <button
+                    className={styles.sessionCallBtn}
+                    onClick={() => handleAgain(session)}
+                  >
+                    {session.sessiontype === 'chat' ? 'Chat Again' : 'Call Again'}
+                  </button>
+                )}
               </div>
             </div>
           </div>

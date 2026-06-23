@@ -158,7 +158,9 @@ const LiveStreamingContainer = ({ client }) => {
 
       if (wasWatchingThis) {
         // Show modal first, defer removeLive until modal closes/auto-dismisses
-        setEndedInfo({ hostName, profileImage, gender, roomId });
+        // Use profileImage from socket event, fallback to currentLive's imageUrl
+        const resolvedImage = profileImage || liveList?.getCurrentLive()?.imageUrl || null;
+        setEndedInfo({ hostName, profileImage: resolvedImage, gender, roomId });
         if (endedTimerRef.current) clearTimeout(endedTimerRef.current);
         endedTimerRef.current = setTimeout(() => {
           setEndedInfo((prev) => {
@@ -221,11 +223,16 @@ const LiveStreamingContainer = ({ client }) => {
       return;
     }
 
-    // Show session ended modal, defer removeLive until modal closes
-    const currentAstro = liveList?.getCurrentLive();
-    setEndedInfo({
-      hostName: currentAstro?.astrologerName || "Astrologer",
-      roomId: targetRoom,
+    // If endedInfo is already showing (from handleAstrologerStatus), don't overwrite it
+    setEndedInfo((prev) => {
+      if (prev) return prev;
+      const currentAstro = liveList?.getCurrentLive();
+      return {
+        hostName: currentAstro?.astrologerName || "Astrologer",
+        profileImage: currentAstro?.imageUrl || null,
+        gender: currentAstro?.gender || null,
+        roomId: targetRoom,
+      };
     });
     if (endedTimerRef.current) clearTimeout(endedTimerRef.current);
     endedTimerRef.current = setTimeout(() => {
