@@ -30,10 +30,13 @@ const NoInternet = () => {
             No internet
           </div>
 
-          <h2 className={styles.title}>No internet connection</h2>
+          <h2 className={styles.title}>The stars can't reach you right now!</h2>
           <p className={styles.desc}>
-            It seems you're offline. Please check your internet connection and try again.
+            Please check your internet and tap Try Again to continue
           </p>
+          <button className={styles.btn} onClick={() => window.location.reload()}>
+            Try Again
+          </button>
         </div>
       </div>
     </div>

@@ -83,8 +83,8 @@ const FinalPay = () => {
         // Refresh wallet balance
         refreshWallet();
         
-        // Show payment success popup
-        setSuccessAmount(amount);
+        // Show payment success popup (actualPrice + bonus)
+        setSuccessAmount(amount + extra);
       },
       onFailure: (error) => {
         console.error("Payment failed:", error);
