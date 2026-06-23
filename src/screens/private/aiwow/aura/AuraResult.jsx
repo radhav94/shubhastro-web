@@ -60,7 +60,7 @@ const AuraResult = () => {
     if (!analysisData) {
       console.error('No analysis data found in Redux state');
       Toast.error('No analysis results found. Please analyze your aura first.');
-      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path, { replace: true });
+      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0], { replace: true });
       return;
     }
 
@@ -96,7 +96,7 @@ const AuraResult = () => {
     } catch (error) {
       console.error('Data validation error:', error);
       Toast.error('Invalid analysis data format. Please try again.');
-      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path, { replace: true });
+      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0], { replace: true });
     }
   }, [analysisData, navigate]);
 
@@ -123,7 +123,7 @@ const AuraResult = () => {
       <div className={styles.container}>
         <div className={styles.errorContainer}>
           <p>No analysis data available</p>
-          <button onClick={() => navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path)}>
+          <button onClick={() => navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0])}>
             Try Again
           </button>
         </div>

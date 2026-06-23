@@ -154,7 +154,7 @@ const GemstoneCamera = () => {
   const proceedWithImage = () => {
     if (capturedImage) {
       dispatch(setGemstoneImage(capturedImage));
-      navigate('/gemstone-authenticity/capture');
+      navigate('/ai-wow/gemstone-authenticity/capture');
     }
   };
 

@@ -37,7 +37,7 @@ const ClothColorAnalysis = () => {
     if (profileLoading) return;
 
     if (!clothImage) {
-      navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path);
+      navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path[0]);
       return;
     }
 
@@ -86,7 +86,7 @@ const ClothColorAnalysis = () => {
         // Only navigate if component is still mounted
         setTimeout(() => {
           if (isMountedRef.current) {
-            navigate(PATH.privateRoutes.CLOTH_COLOR_RESULT.path);
+            navigate(PATH.privateRoutes.CLOTH_COLOR_RESULT.path[0]);
           } else {
             console.log('Component unmounted - skipping navigation to result');
           }
@@ -127,7 +127,7 @@ const ClothColorAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate(PATH.privateRoutes.CLOTH_COLOR_RESULT.path);
+      navigate(PATH.privateRoutes.CLOTH_COLOR_RESULT.path[0]);
     }
   };
 
@@ -135,7 +135,7 @@ const ClothColorAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearClothColorData());
-    navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path);
+    navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path[0]);
   };
 
   return (

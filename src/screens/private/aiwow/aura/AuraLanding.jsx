@@ -74,7 +74,7 @@ const AuraLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/aura-photography/instructions')}
+          onClick={() => navigate('/ai-wow/aura-photography/instructions')}
         >
           Proceed Ahead
         </button>

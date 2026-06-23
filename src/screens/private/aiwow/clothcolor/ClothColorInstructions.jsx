@@ -15,7 +15,7 @@ const ClothColorInstructions = () => {
   const gender = selectedProfile?.identity?.toLowerCase() || selectedProfile?.gender?.toLowerCase() || 'male';
 
   const handleCamera = () => {
-    navigate('/clothes-colour-analysis/camera');
+    navigate('/ai-wow/clothes-colour-analysis/camera');
   };
 
   const handleUpload = () => {
@@ -27,7 +27,7 @@ const ClothColorInstructions = () => {
     if (file) {
       compressImage(file).then((dataUrl) => {
         dispatch(setClothColorImage(dataUrl));
-        navigate('/clothes-colour-analysis/capture');
+        navigate('/ai-wow/clothes-colour-analysis/capture');
       });
     }
   };
@@ -37,7 +37,7 @@ const ClothColorInstructions = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate('/clothes-colour-analysis/form')}>
+          <button className={styles.backButton} onClick={() => navigate('/ai-wow/clothes-colour-analysis/form')}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
