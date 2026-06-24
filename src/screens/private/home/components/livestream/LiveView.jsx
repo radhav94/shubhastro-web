@@ -45,7 +45,7 @@ import KundliSelectModal from "../../../../../screens/private/talkToAstrologer/k
 import SuggestedRemedyPanel from "../../../../../component/call/SuggestedRemedyPanel";
 import { addRemedy, clearNewRemedy, clearAllRemedy } from "../../../../../redux/remedy/remedySlice";
 import RechargeModal from "../../../../../component/recharge-modal/RechargeModal";
-import LowBalanceModal from "../../../../../component/UI/modal/LowBalanceModal/LowBalanceModal";
+import InsufficientBalanceModal from "../../../../../component/UI/modal/InsufficientBalanceModal/InsufficientBalanceModal";
 import { useWalletBalance } from "../../../../private/wallet/useWalletBalance";
 
 const FixedLayer = ({ children }) => {
@@ -116,6 +116,10 @@ const LiveView = (props) => {
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
   const [showRechargeButton, setShowRechargeButton] = useState(false);
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
+  // Insufficient balance popup (shown when preSessionBalanceCheck returns status:false)
+  const [insufficientBalanceInfo, setInsufficientBalanceInfo] = useState(null);
+  // Low-balance details for the active-call recharge popup
+  const [lowBalanceInfo, setLowBalanceInfo] = useState(null);
   const dispatch = useDispatch();
   const suggestedRemedyData = useSelector((s) => s.remedy);
   const hasNewRemedy = suggestedRemedyData.hasNewRemedy;
@@ -269,7 +273,7 @@ const LiveView = (props) => {
   const [createChatRoom] = useCreateChatRoomMutation();
   const [getBalance] = useGetBalanceMutation();
   const { checkPermission } = useMediaPermission();
-  const { refreshWallet } = useWalletBalance();
+  const { balance: walletBalance, refreshWallet } = useWalletBalance();
 
   // Follow/unfollow astrologer
   const astrologerId = astrologer?._id || astrologer?.astrologerId;
@@ -581,7 +585,13 @@ const LiveView = (props) => {
       const result = await getBalance({ astrologerId, type: "call" });
 
       if (result?.data?.data?.status === false) {
-        Toast.error("Insufficient balance. Please recharge.");
+        const bal = result?.data?.data || {};
+        setInsufficientBalanceInfo({
+          sessionType: bal?.type || "audio",
+          availableAmount: bal?.availableAmount,
+          requiredAmount: bal?.requiredAmount,
+          pricePerMinute: bal?.pricePerMinute,
+        });
         return;
       }
     } catch (error) {
@@ -671,6 +681,27 @@ const LiveView = (props) => {
     // Check if already in queue for this astrologer+type
     if (isInQueue(astrologerId, type)) {
       Toast.error("Already waiting for this astrologer");
+      return;
+    }
+
+    // Check wallet balance before initiating the call
+    try {
+      const result = await getBalance({ astrologerId, type });
+
+      if (result?.data?.data?.status === false) {
+        const bal = result?.data?.data || {};
+        setInsufficientBalanceInfo({
+          sessionType: bal?.type || type,
+          availableAmount: bal?.availableAmount,
+          requiredAmount: bal?.requiredAmount,
+          pricePerMinute: bal?.pricePerMinute,
+        });
+        setShowCallPopup(false);
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking balance:", error);
+      Toast.error("Failed to check wallet balance");
       return;
     }
 
@@ -833,10 +864,50 @@ const LiveView = (props) => {
   // Listen for low balance warning from VoiceCall/VideoCall
   useEffect(() => {
     if (!isCallForCurrentAstrologer) return;
-    const handleLowBalance = () => setShowRechargeButton(true);
+    const handleLowBalance = (e) => {
+      setShowRechargeButton(true);
+      refreshWallet();
+
+      const detail = e?.detail || {};
+      const callType = activeCall?.type || pendingCallType || "audio";
+
+      // Per-minute rate from astrologer data (preSessionBalanceCheck errors
+      // mid-call, so derive locally instead of calling it again).
+      const audioRate =
+        astrologer?.audioCallRate ?? fullAstro?.price?.audioRate?.amount;
+      const videoRate =
+        astrologer?.videoCallRate ?? fullAstro?.price?.videoCallRate?.amount;
+      const rateRaw =
+        detail.pricePerMinute ??
+        detail.ratePerMinute ??
+        (callType === "video" ? videoRate : audioRate);
+      const ratePerMin = Number(rateRaw) || 0;
+
+      // Minimum balance required to (re)start a session = 5 minutes of talk time.
+      const MIN_SESSION_MINUTES = 5;
+      const available =
+        detail.availableAmount ?? detail.walletBalance ?? walletBalance;
+      const required =
+        detail.requiredAmount ??
+        (ratePerMin > 0 ? ratePerMin * MIN_SESSION_MINUTES : undefined);
+
+      setLowBalanceInfo({
+        availableAmount: available,
+        requiredAmount: required,
+        pricePerMinute: ratePerMin,
+      });
+    };
     window.addEventListener("call:low-balance", handleLowBalance);
     return () => window.removeEventListener("call:low-balance", handleLowBalance);
-  }, [isCallForCurrentAstrologer]);
+  }, [
+    isCallForCurrentAstrologer,
+    activeCall,
+    pendingCallType,
+    astrologer,
+    fullAstro,
+    walletBalance,
+    refreshWallet,
+  ]);
 
   // Socket event handlers
   useEffect(() => {
@@ -985,7 +1056,12 @@ const LiveView = (props) => {
 
     const handleWarning = (msg) => {
       if (msg?.message?.includes("Low balance alert")) {
-        setShowRechargeButton(true);
+        // Forward to the low-balance effect (which has fresh deps and fetches
+        // accurate balance details) instead of toggling state from this
+        // stale-closure socket handler.
+        window.dispatchEvent(
+          new CustomEvent("call:low-balance", { detail: msg || {} })
+        );
       }
       Toast.warning(msg.message);
     };
@@ -1253,10 +1329,20 @@ const LiveView = (props) => {
               </div>
             )}
             {/* Low Balance Modal — visible during active call on low balance */}
-            <LowBalanceModal
+            <InsufficientBalanceModal
               isOpen={isCallForCurrentAstrologer && showRechargeButton}
-              onClose={() => setShowRechargeButton(false)}
-              onRecharge={() => setIsRechargeModalOpen(true)}
+              onClose={() => {
+                setShowRechargeButton(false);
+                setLowBalanceInfo(null);
+              }}
+              onRecharge={() => {
+                setShowRechargeButton(false);
+                setIsRechargeModalOpen(true);
+              }}
+              sessionType={lowBalanceInfo?.sessionType}
+              availableAmount={lowBalanceInfo?.availableAmount}
+              requiredAmount={lowBalanceInfo?.requiredAmount}
+              pricePerMinute={lowBalanceInfo?.pricePerMinute}
             />
 
             {/* <div className="live-status">
@@ -1709,6 +1795,20 @@ const LiveView = (props) => {
             setShowRechargeButton(false);
           }}
           title="Recharge to Continue Call"
+        />
+
+        {/* Insufficient Balance popup — shown when preSessionBalanceCheck returns status:false */}
+        <InsufficientBalanceModal
+          isOpen={!!insufficientBalanceInfo}
+          onClose={() => setInsufficientBalanceInfo(null)}
+          onRecharge={() => {
+            setInsufficientBalanceInfo(null);
+            setIsRechargeModalOpen(true);
+          }}
+          sessionType={insufficientBalanceInfo?.sessionType}
+          availableAmount={insufficientBalanceInfo?.availableAmount}
+          requiredAmount={insufficientBalanceInfo?.requiredAmount}
+          pricePerMinute={insufficientBalanceInfo?.pricePerMinute}
         />
       </div>
     </FixedLayer>
