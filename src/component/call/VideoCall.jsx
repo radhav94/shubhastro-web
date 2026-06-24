@@ -36,6 +36,7 @@ import RechargeModal from "../recharge-modal/RechargeModal";
 import { PATH } from "../../utils/routes/Paths";
 import ChatNotificationBanner from "../UI/ChatNotificationBanner/ChatNotificationBanner";
 import { capitalizeWords } from "../../utils/capitalize";
+import { getAstrologerDefaultImage } from "../../utils/appImages";
 import VideocamIcon from "../../assets/chat/Videocam.svg";
 import CallIcon from "../../assets/chat/Call.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
@@ -43,6 +44,7 @@ import SwitchWaitingPopup from "../UI/switchWaiting/SwitchWaitingPopup";
 import headerCoin from "../../assets/images/headerCoin.svg";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
 import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
+import useAstrologerAvailability from "../../utils/hooks/useAstrologerAvailability";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
@@ -54,6 +56,12 @@ const VideoCalling = ({ callData }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isOnLivePage = location.pathname.startsWith("/live");
+
+  // Astrologer availability for the connected call — used to hide the
+  // "Chat"/"Audio" switch buttons when the astrologer disabled those modes.
+  const astroAvailability = useAstrologerAvailability(activeCall?.astrologerId, {
+    enabled: !!activeCall && activeCall.callType === "video",
+  });
 
   if (!activeCall || activeCall.callType !== "video") return null;
 
@@ -136,7 +144,7 @@ const VideoCalling = ({ callData }) => {
   }, [speakerOn]);
 
   // Default avatar URL
-  const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+  const DEFAULT_AVATAR = getAstrologerDefaultImage();
 
   /* ================= CHAT NOTIFICATION ================= */
   const [chatNotification, setChatNotification] = useState(null);
@@ -1342,6 +1350,20 @@ const VideoCalling = ({ callData }) => {
                 <IoArrowBack size={24} />
               </button>
 
+              <img
+                src={
+                  activeCall?.profileImgUrl ||
+                  lastRequestedAstro?.profileImgUrl ||
+                  lastRequestedAstro?.imageUrl ||
+                  getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender)
+                }
+                alt={callerName}
+                onError={(e) => {
+                  e.currentTarget.src = getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender);
+                }}
+                style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", marginLeft: 12, marginRight: 0, flexShrink: 0 }}
+              />
+
               <div className={styles.astrologerInfo}>
                 <h3 className={styles.astrologerName}>{capitalizeWords(callerName)}</h3>
                 <p className={styles.astrologerExp}>
@@ -1353,6 +1375,7 @@ const VideoCalling = ({ callData }) => {
 
 
               <div className={styles.groupBtns}>
+                {astroAvailability.chat && (
                 <button 
                   className={styles.chateM}
                   onClick={handleNavigateToChat}
@@ -1368,7 +1391,9 @@ const VideoCalling = ({ callData }) => {
                   </svg>
                   Chat
                 </button>
+                )}
   
+                {astroAvailability.call && (
                 <button 
                   className={styles.chateM}
                   onClick={switchToAudio}
@@ -1376,6 +1401,7 @@ const VideoCalling = ({ callData }) => {
                   <img src={CallIcon} alt="audio" width="17" height="17" />
                   Audio
                 </button>
+                )}
   
                 <span class={styles.dividerLine}></span>
               </div>
@@ -1470,9 +1496,17 @@ const VideoCalling = ({ callData }) => {
               {!remoteVideoEnabled && (
                 <div className={styles.avatarOverlay}>
                   <img
-                    src={DEFAULT_AVATAR}
+                    src={
+                      activeCall?.profileImgUrl ||
+                      lastRequestedAstro?.profileImgUrl ||
+                      lastRequestedAstro?.imageUrl ||
+                      getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender)
+                    }
                     alt={callerName}
                     className={styles.avatarImage}
+                    onError={(e) => {
+                      e.currentTarget.src = getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender);
+                    }}
                   />
                   <p className={styles.avatarName}>{capitalizeWords(callerName)}</p>
                   <p className={styles.avatarStatus}>Camera is off</p>

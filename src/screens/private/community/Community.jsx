@@ -31,7 +31,7 @@ const TABS = [
   { id: "feed", label: "Your Feed", icon: LuNewspaper },
   { id: "communities", label: "Communities", icon: FiUsers },
   { id: "posts", label: "Your Posts", icon: FiFileText },
-  { id: "create", label: "Create Post", icon: FiPlus },
+  // { id: "create", label: "Create Post", icon: FiPlus },
 ];
 
 const formatMemberCount = (count) => {

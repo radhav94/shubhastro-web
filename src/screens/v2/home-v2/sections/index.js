@@ -4,6 +4,7 @@ export { default as QuickLinkSection } from "./QuickLinkSection";
 export { default as AstrologerGridSection } from "./AstrologerGridSection";
 export { default as AstrologersByCategorySection } from "./AstrologersByCategorySection";
 export { default as DiscoverMoreSectionV2 } from "./DiscoverMoreSectionV2";
+export { default as LiveSessionCard } from "./LiveSessionCard";
 export { default as MuhuratSectionV2 } from "./MuhuratSectionV2";
 export { default as BlogSectionV2 } from "./BlogSectionV2";
 export { default as LiveTrackingSection } from "./LiveTrackingSection";

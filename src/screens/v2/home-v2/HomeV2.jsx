@@ -17,7 +17,7 @@ import WelcomeBonusModal from "../../../component/UI/modal/WelcomeBonusModal/Wel
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
-import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, AstrologersByCategorySection, DiscoverMoreSectionV2 } from "./sections";
+import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, AstrologersByCategorySection, DiscoverMoreSectionV2, LiveSessionCard } from "./sections";
 
 // Lazy-load below-the-fold components
 const ProfileModals = lazy(() => import("../../private/kundli/components/ProfileModals"));
@@ -270,6 +270,8 @@ const ThreeColGroupLayout = ({ sections, styles }) => {
         );
       case "discover-more":
         return <DiscoverMoreSectionV2 sectionData={section} styles={styles} />;
+      case "live-widget":
+        return <LiveSessionCard styles={styles} sectionData={section} />;
       default:
         return null;
     }
@@ -337,6 +339,8 @@ const renderUngroupedThreeColSection = (section, props) => {
       return <div key={key} className={styles.calendarBox}><Suspense fallback={null}><AgenticCalendarV2 styles={styles} /></Suspense></div>;
     case "discover-more":
       return <div key={key}><DiscoverMoreSectionV2 sectionData={section} styles={styles} /></div>;
+    case "live-widget":
+      return <div key={key}><LiveSessionCard styles={styles} sectionData={section} /></div>;
     default:
       return null;
   }
@@ -540,7 +544,7 @@ const HomeV2 = () => {
 // Helper to determine family for standalone rendering
 function getStandaloneFamily(displayType) {
   if (["complementary-services", "ai-powered-astrology", "muharat-widget", "ai-services"].includes(displayType)) return "hero";
-  if (["astrologers-by-category", "ai-agentic", "discover-more"].includes(displayType)) return "three-col";
+  if (["astrologers-by-category", "ai-agentic", "discover-more","live-widget"].includes(displayType)) return "three-col";
   return "standalone";
 }
 

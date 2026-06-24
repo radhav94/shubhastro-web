@@ -38,6 +38,7 @@ import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
 import SwitchWaitingPopup from "../UI/switchWaiting/SwitchWaitingPopup";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
 import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
+import useAstrologerAvailability from "../../utils/hooks/useAstrologerAvailability";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
@@ -49,6 +50,12 @@ const AgoraVoiceCalling = ({ callData }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isOnLivePage = location.pathname.startsWith("/live");
+
+  // Astrologer availability for the connected call — used to hide the
+  // "Video"/"Chat" switch buttons when the astrologer disabled those modes.
+  const astroAvailability = useAstrologerAvailability(activeCall?.astrologerId, {
+    enabled: !!activeCall && activeCall.callType === "audio",
+  });
 
   if (!activeCall || activeCall.callType !== "audio") {
     return null;
@@ -301,7 +308,6 @@ const AgoraVoiceCalling = ({ callData }) => {
         console.log("[VoiceCall] 📴 user-unpublished — uid:", user.uid, "mediaType:", mediaType);
         if (mediaType === "video") {
           user.videoTrack?.stop();
-          setIsRemoteVideo(false)
         }
       });
 
@@ -1016,7 +1022,22 @@ const AgoraVoiceCalling = ({ callData }) => {
             >
               <IoArrowBack size={24} />
             </button>
-            
+
+            <img
+              src={
+                activeCall?.profileImgUrl ||
+                astrologerImage ||
+                lastRequestedAstro?.profileImgUrl ||
+                lastRequestedAstro?.imageUrl ||
+                getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender)
+              }
+              alt={callerName}
+              onError={(e) => {
+                e.currentTarget.src = getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender);
+              }}
+              style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", marginLeft: 12, marginRight: 0, flexShrink: 0 }}
+            />
+
             <div className={styles.astrologerInfo}>
               <h3 className={styles.astrologerName}>{capitalizeWords(callerName)}</h3>
               <p className={styles.astrologerExp}>
@@ -1027,6 +1048,7 @@ const AgoraVoiceCalling = ({ callData }) => {
             </div>
 
             <div className={styles.groupBtns}>
+              {astroAvailability.chat && (
               <button 
                 className={styles.chateM}
                 onClick={handleNavigateToChat}
@@ -1042,7 +1064,9 @@ const AgoraVoiceCalling = ({ callData }) => {
                 </svg>
                 Chat
               </button>
+              )}
 
+              {astroAvailability.video && (
               <button className={styles.chateM} onClick={toggleCamera} disabled={isCheckingBalance}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="17" height="11" viewBox="0 0 17 11" fill="none">
                   <path d="M12.8333 4.125V0.916667C12.8333 0.4125 12.4208 0 11.9167 0H0.916667C0.4125 0 0 0.4125 0 0.916667V10.0833C0 10.5875 0.4125 11 0.916667 11H11.9167C12.4208 11 12.8333 10.5875 12.8333 10.0833V6.875L14.9325 8.97417C15.51 9.55167 16.5 9.13917 16.5 8.32333V2.6675C16.5 1.85167 15.51 1.43917 14.9325 2.01667L12.8333 4.125Z" fill="url(#paint0_linear_8989_303)"/>
@@ -1055,6 +1079,7 @@ const AgoraVoiceCalling = ({ callData }) => {
                 </svg>
                 {isCheckingBalance ? "Checking..." : "Video"}
               </button>
+              )}
 
               <span className={styles.dividerLine}></span>
             </div>
@@ -1145,8 +1170,17 @@ const AgoraVoiceCalling = ({ callData }) => {
                   <span className={styles.ripple}></span>
                   <img
                     className={styles.avatar}
-                    src={astrologerImage || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                    src={
+                      activeCall?.profileImgUrl ||
+                      astrologerImage ||
+                      lastRequestedAstro?.profileImgUrl ||
+                      lastRequestedAstro?.imageUrl ||
+                      getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender)
+                    }
                     alt={callerName}
+                    onError={(e) => {
+                      e.currentTarget.src = getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender);
+                    }}
                   />
                 </div>
                 <h1 className={styles.callerNameTitle}>{capitalizeWords(callerName)}</h1>

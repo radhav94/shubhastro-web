@@ -1133,6 +1133,9 @@ $floating-button-gap: 14px;
 
 .inputField {
   flex: 1;
+  height: 100%;
+  padding: 0 16px;
+  border: none;
   height: 40px;
   min-height: 40px;
   max-height: 96px; /* 4 lines: 20px line-height × 4 + 16px padding */

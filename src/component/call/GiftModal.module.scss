@@ -96,7 +96,7 @@
 
 .modalHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   padding: 20px 24px 16px;
   padding-right: 48px;
@@ -104,7 +104,7 @@
 }
 
 .modalTitle {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
@@ -118,7 +118,7 @@
 }
 
 .balanceAmount {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: #1a1a1a;
   line-height: 1;
@@ -159,9 +159,9 @@
    GIFT SECTIONS
    =============================== */
 
-.giftSection {
-  margin-bottom: 28px;
-}
+// .giftSection {
+//   margin-bottom: 28px;
+// }
 
 .sectionHeader {
   display: flex;
@@ -185,6 +185,7 @@
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 12px;
+  padding: 2px;
 }
 
 .giftItem {
@@ -210,8 +211,8 @@
 .giftImageWrapper {
   width: 100%;
   aspect-ratio: 1;
-  margin: 0 auto 8px;
-  border-radius: 20px;
+  margin: 0 auto 0px;
+  border-radius: 12px;
   overflow: hidden;
   background: #f5f5f5;
   display: flex;
@@ -459,7 +460,7 @@
   }
 
   .modalTitle {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .balanceAmount {
@@ -475,9 +476,9 @@
     gap: 10px;
   }
 
-  .giftItem {
-    padding: 10px 8px;
-  }
+  // .giftItem {
+  //   padding: 10px 8px;
+  // }
 
   .giftPrice {
     font-size: 12px;
@@ -513,9 +514,9 @@
     gap: 8px;
   }
 
-  .giftItem {
-    padding: 8px 6px;
-  }
+  // .giftItem {
+  //   padding: 8px 6px;
+  // }
 
   .giftPrice {
     font-size: 11px;
