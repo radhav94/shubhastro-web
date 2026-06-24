@@ -22,32 +22,10 @@ const SectionCard = ({ title, titleExtra, children }) => {
 
 const GemStoneCard = ({ gem }) => {
   const [showAllFlaws, setShowAllFlaws] = useState(false);
-  const [showFullTimeToWear, setShowFullTimeToWear] = useState(false);
-  const [showFullMethods, setShowFullMethods] = useState(false);
-  const [showFullMantra, setShowFullMantra] = useState(false);
-
   if (!gem) return null;
 
   const flawsToShow = showAllFlaws ? gem.flaw_results : gem.flaw_results.slice(0, 4);
   const hasMoreFlaws = gem.flaw_results.length > 4;
-
-  const timeToWearText = gem.time_to_wear || "";
-  const shouldTruncateTimeToWear = timeToWearText.length > 300;
-  const displayTimeToWear = shouldTruncateTimeToWear && !showFullTimeToWear 
-    ? timeToWearText.slice(0, 300) + "..." 
-    : timeToWearText;
-
-  const methodsText = gem.methods || "";
-  const shouldTruncateMethods = methodsText.length > 300;
-  const displayMethods = shouldTruncateMethods && !showFullMethods 
-    ? methodsText.slice(0, 300) + "..." 
-    : methodsText;
-
-  const mantraText = gem.mantra || "";
-  const shouldTruncateMantra = mantraText.length > 300;
-  const displayMantra = shouldTruncateMantra && !showFullMantra 
-    ? mantraText.slice(0, 300) + "..." 
-    : mantraText;
 
   return (
     <div className={styles.wrapper}>
@@ -186,16 +164,8 @@ const GemStoneCard = ({ gem }) => {
           title="Time to Wear"
         >
           <PrimaryText marginBottom="5px" size="base">
-            {displayTimeToWear}
+            {gem.time_to_wear}
           </PrimaryText>
-          {shouldTruncateTimeToWear && (
-            <span 
-              className={styles.showMoreText}
-              onClick={() => setShowFullTimeToWear(!showFullTimeToWear)}
-            >
-              {showFullTimeToWear ? 'Show Less' : 'Show More'}
-            </span>
-          )}
           <PrimaryText marginTop="5px" size="lg">
             In short : {gem.time_to_wear_short}
           </PrimaryText>
@@ -205,30 +175,14 @@ const GemStoneCard = ({ gem }) => {
         <SectionCard 
           title="How to Wear"
         >
-          <PrimaryText size="base">{displayMethods}</PrimaryText>
-          {shouldTruncateMethods && (
-            <span 
-              className={styles.showMoreText}
-              onClick={() => setShowFullMethods(!showFullMethods)}
-            >
-              {showFullMethods ? 'Show Less' : 'Show More'}
-            </span>
-          )}
+          <PrimaryText size="base">{gem.methods}</PrimaryText>
         </SectionCard>
 
         {/* MANTRA */}
         <SectionCard title="Mantra">
           <PrimaryText size="base" className={styles.mantra}>
-            {displayMantra}
+            {gem.mantra}
           </PrimaryText>
-          {shouldTruncateMantra && (
-            <span 
-              className={styles.showMoreText}
-              onClick={() => setShowFullMantra(!showFullMantra)}
-            >
-              {showFullMantra ? 'Show Less' : 'Show More'}
-            </span>
-          )}
         </SectionCard>
       </div>
     </div>
