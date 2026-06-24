@@ -52,10 +52,16 @@ const StickyChatFooter = () => {
 
   if (!chatApproval && !activeChat && !missedApproval) return null;
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = String(seconds % 60).padStart(2, "0");
-    return `${mins}:${secs}`;
+  const formatTime = (sec) => {
+    const totalSec = Math.max(0, Math.floor(Number(sec) || 0));
+    const hours = Math.floor(totalSec / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+
+    if (hours > 0) {
+      return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    }
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
   return (
