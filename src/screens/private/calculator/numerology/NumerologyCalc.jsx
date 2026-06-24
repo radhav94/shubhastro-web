@@ -62,7 +62,7 @@ const NumerologyCalc = () => {
       <BackButton />
       <div className={styles.page}>
       <div className={styles.hero}>
-        <h1>Name Numerology Calculator</h1>
+        <h1>Numerology Calculator</h1>
         <p>Accurate Name Number Calculator Online</p>
       </div>
 
