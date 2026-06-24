@@ -2,6 +2,7 @@ import axios from "axios";
 import { Toast } from "../component";
 import { getToken } from "../utils/utlis";
 import { navigateToLogin } from "../utils/navigationHelper";
+import { attachSecureTransport } from "../utils/security/secureAxios";
 
 let unAuthorizedCount = 0;
 const privateRequest = axios.create({
@@ -10,6 +11,10 @@ const privateRequest = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+// Attach BFF session header + response decryption FIRST so envelopes are
+// decrypted before the error handler below inspects response bodies.
+attachSecureTransport(privateRequest);
 
 privateRequest.interceptors.request.use(
   (config) => {

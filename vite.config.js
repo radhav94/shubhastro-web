@@ -81,33 +81,24 @@ export default defineConfig({
   },
   server: {
     host: true,
-    proxy: {
-      // Main backend API + WebSocket
-      "/main": {
-        target: process.env.VITE_APP_API_BASE_URL || "https://devapi-shubhtalk.epicon.in",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/main/, ""),
-        ws: true,
-      },
-      // Vedic astrology API
-      "/vedic": {
-        target: "https://json.astrologyapi.com",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/vedic/, ""),
-      },
-      // Chart generation service
-      "/chart": {
-        target: "https://pyapi-shubhtalk.epicon.in",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/chart/, ""),
-      },
-      // Voice TTS/STT service
-      "/voice": {
-        target: "https://api.sarvam.ai",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/voice/, ""),
-      },
-    },
+    proxy: (() => {
+      // All API traffic now goes through the encrypting BFF (see /bff).
+      // The BFF strips the route prefix and forwards to the real upstream, so
+      // we must NOT rewrite the path here. Start the BFF first: `cd bff && npm start`.
+      const BFF_URL = process.env.BFF_URL || "http://127.0.0.1:8787";
+      return {
+        // ECDH handshake endpoint
+        "/__bff": { target: BFF_URL, changeOrigin: true },
+        // Main backend API + WebSocket (socket.io)
+        "/main": { target: BFF_URL, changeOrigin: true, ws: true },
+        // Vedic astrology API
+        "/vedic": { target: BFF_URL, changeOrigin: true },
+        // Chart generation service
+        "/chart": { target: BFF_URL, changeOrigin: true },
+        // Voice TTS/STT service (passthrough, not encrypted)
+        "/voice": { target: BFF_URL, changeOrigin: true },
+      };
+    })(),
   },
   esbuild: {
     // Remove console.log and console.warn in production, keep console.error

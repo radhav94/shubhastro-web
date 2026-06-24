@@ -1,4 +1,5 @@
 import axios from "axios";
+import { attachSecureTransport } from "../utils/security/secureAxios";
 
 const publicRequest = axios.create({
   baseURL: "/main/api/",
@@ -6,6 +7,9 @@ const publicRequest = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+// Attach BFF session header + response decryption.
+attachSecureTransport(publicRequest);
 
 publicRequest.interceptors.request.use(
   (config) => {

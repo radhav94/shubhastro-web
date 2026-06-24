@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createSecureBaseQuery } from "../../../utils/security/secureBaseQuery";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 
 // Direct API base for payment-critical endpoints (bypasses /main proxy)
@@ -6,7 +7,7 @@ const DIRECT_API_BASE = import.meta.env.VITE_APP_API_BASE_URL;
 
 const paymentDirectApi = createApi({
   reducerPath: "paymentDirectApi",
-  baseQuery: fetchBaseQuery({
+  baseQuery: createSecureBaseQuery({
     baseUrl: `${DIRECT_API_BASE}/api/`,
     prepareHeaders: (headers) => {
       const role = localStorage.getItem("shubhtalk_role");
