@@ -47,7 +47,7 @@ const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
 
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
-const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, getWowCardPath, onlineCount }) => {
+const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, getWowCardPath, onlineCount, quickLinkItems = [], handleQuickLinkClick }) => {
   // Sort sections by list_order to determine column placement
   // 1st by list_order → LEFT, 2nd → CENTER, 3rd → RIGHT
   // ai-services is special: it distributes across columns (laal kitaab left, occult/pandit center, community right)
@@ -132,6 +132,26 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
                     );
                   })
                 )}
+                {/* Quick-link cards appended after the AI suite cards */}
+                {quickLinkItems.map((item, qi) => (
+                  <div
+                    key={`ql-${item.ID || item.slug || qi}`}
+                    className={styles.wowCard}
+                    onClick={(e) => handleQuickLinkClick(item, e)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className={styles.wowIconBox}>
+                      <img
+                        src={item.image_url_web || item.image_url || item.icon || item.icon_url}
+                        alt={item.title}
+                        width="40"
+                        height="40"
+                        loading="lazy"
+                      />
+                    </div>
+                    <span>{item.title}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -372,6 +392,16 @@ const HomeV2 = () => {
   }, [aiSuitesData]);
   const wowSuiteItems = useMemo(() => ({ title: wowSections[0]?.title || "WOW SUITE" }), [wowSections]);
 
+  // Quick-link items from the home API — appended into the AI Suite grid
+  const quickLinkSection = useMemo(
+    () => homeList?.find((s) => s.slug === "quick-link-section" || s.display_type === "quick-link-section"),
+    [homeList]
+  );
+  const quickLinkItems = useMemo(
+    () => sortContentByOrder(quickLinkSection?.content || []),
+    [quickLinkSection]
+  );
+
   const getWowCardPath = useCallback((item) => {
     if (!item.slug) return null;
     if (item.slug === "ar-vastu-scanner") return null;
@@ -386,6 +416,22 @@ const HomeV2 = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) { localStorage.setItem("shubhtalk_redirect_after_login", path); window.location.href = "/login?skip=welcome"; return; }
     navigate(path);
+  }, [navigate]);
+
+  // Quick-link card click — supports internal routes and external links
+  const handleQuickLinkClick = useCallback((item, e) => {
+    if (e) e.preventDefault();
+    if (item.is_internal === true || item.is_internal === "true") {
+      const path = item.redirect_url || item.slug;
+      if (path) navigate(path.startsWith("/") ? path : `/${path}`);
+      return;
+    }
+    if (item.redirect_url) {
+      window.open(item.redirect_url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    const slug = item.slug || item.title?.toLowerCase().replace(/\s+/g, "-") || "";
+    if (slug) navigate(slug.startsWith("/") ? slug : `/${slug}`);
   }, [navigate]);
 
   // Mahadasha
@@ -430,7 +476,7 @@ const HomeV2 = () => {
   const handleRechargeClose = useCallback(() => hookSetOpenModal((prev) => ({ ...prev, recharge: false })), [hookSetOpenModal]);
 
   // ─── Shared props for group renderers ─────────────────────────────────────
-  const heroProps = { styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, getWowCardPath, onlineCount };
+  const heroProps = { styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, getWowCardPath, onlineCount, quickLinkItems, handleQuickLinkClick };
   const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id, astrologerMaleImg };
 
   // ─── Render ───────────────────────────────────────────────────────────────
