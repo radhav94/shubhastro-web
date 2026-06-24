@@ -233,7 +233,7 @@ const ClothColorCamera = () => {
     }
     
     // Navigate after stopping camera
-    navigate('/ai-wow');
+    navigate(-1);
   };
 
   if (error) {

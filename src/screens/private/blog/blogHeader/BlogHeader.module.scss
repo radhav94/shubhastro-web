@@ -6,17 +6,17 @@ $font-primary: "Poppins", sans-serif;
 
 .blogSection {
   width: 100%;
-  max-width: 100%;
+  max-width: 1440px;
   margin: 0 auto;
-  // padding: 0 20px;
+  padding: 0 20px;
 
-  // @media (max-width: 1180px) {
-  //   padding: 0 16px;
-  // }
+  @media (max-width: 1180px) {
+    padding: 0 16px;
+  }
 
-  // @media (max-width: 767px) {
-  //   padding: 0 12px;
-  // }
+  @media (max-width: 767px) {
+    padding: 0 12px;
+  }
 }
 
 /* ---------------------------------------
@@ -37,20 +37,43 @@ $font-primary: "Poppins", sans-serif;
   }
 }
 
+// No categories — main panel takes full width
+.layoutFull {
+  grid-template-columns: 1fr;
+
+  @media (max-width: 991px) {
+    grid-template-columns: 1fr;
+  }
+
+  .main {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
 /* ---------------------------------------
     SIDEBAR - Categories (flush to left & top, no gap)
 -----------------------------------------*/
 .sidebar {
   background: #FFFFFF99;
-  padding: 20px 16px;
+  padding: 20px 16px 20px 0;
   align-self: stretch;
+  // Bleed the background into the section's left padding so there's no gap
+  margin-left: -20px;
+  padding-left: 20px;
+
+  @media (max-width: 1180px) {
+    margin-left: -16px;
+    padding-left: 16px;
+  }
 
   @media (max-width: 767px) {
     position: static;
     min-width: 0;
     max-width: 100%;
     overflow: hidden;
-    padding: 10px 16px;
+    margin-left: -12px;
+    padding: 10px 16px 10px 12px;
   }
 }
 

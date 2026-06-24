@@ -18,8 +18,8 @@ export const blogApi = privateRequestNew.injectEndpoints({
     getBlog: builder.query({
       query: ({ page = 1, limit = 10, category = "" } = {}) => {
         const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+        params.set("categorized", "true");
         if (category) {
-          params.set("categorized", "true");
           params.set("category", category);
         }
         return {
