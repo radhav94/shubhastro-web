@@ -63,7 +63,7 @@ const NameCompatibilityCalc = () => {
       <BackButton />
       <div className={styles.page}>
         <div className={styles.hero}>
-          <h1>Name Compatibility Calculator</h1>
+          <h1>Compatibility Calculator</h1>
           <p>Discover how well your names align through Chaldean numerology</p>
         </div>
 

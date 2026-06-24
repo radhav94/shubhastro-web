@@ -79,7 +79,7 @@ export const kundliVedicApi = vedicApi.injectEndpoints({
           color: "%23ff850b3d",
           planet: chartType,
           size: 300,
-          font_size: 30,
+          font_size: 40,
           lang: params.lang || "en",
           format: "svg", //  IMPORTANT (use svg not base64)
         },
