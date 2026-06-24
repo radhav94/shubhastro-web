@@ -292,15 +292,18 @@ const AgoraVoiceCalling = ({ callData }) => {
           console.log("[VoiceCall] ✅ user-published: cancelled pending endCall grace timer");
         }
 
-        await client.subscribe(user, mediaType);
-        if (mediaType === "audio") {
-          if (speakerOnRef.current) {
-            user.audioTrack?.setVolume(100);
-            user.audioTrack?.play();
-          } else {
-            user.audioTrack?.setVolume(0);
-            // Don't play if speaker is off (iOS Safari won't respect setVolume(0))
+        try {
+          await client.subscribe(user, mediaType);
+          if (mediaType === "audio") {
+            if (speakerOnRef.current) {
+              user.audioTrack?.setVolume(100);
+              user.audioTrack?.play();
+            } else {
+              user.audioTrack?.setVolume(0);
+            }
           }
+        } catch (err) {
+          console.warn("[VoiceCall] ⚠️ Subscribe failed (will retry on next publish):", err.message);
         }
       });
 
@@ -428,7 +431,12 @@ const AgoraVoiceCalling = ({ callData }) => {
       startTimer();
     };
 
-    startCall().catch((err) => console.error("[VoiceCall] ❌ startCall error:", err));
+    startCall().catch((err) => {
+      console.error("[VoiceCall] ❌ startCall error:", err);
+      // Don't crash the call UI — Agora connection failed but socket session is still alive
+      // The call will continue without local audio until reconnection
+      Toast.error("Audio connection failed. Please check your network.");
+    });
 
     // On unmount: only release Agora resources
     // Do NOT clear activeCall — if this is a refresh, we need it to persist
