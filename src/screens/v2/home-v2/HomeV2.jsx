@@ -47,7 +47,7 @@ const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
 
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
-const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, getWowCardPath, onlineCount }) => {
+const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, getWowCardPath, onlineCount, otherServiceItems = [], handleOtherServiceClick }) => {
   // Sort sections by list_order to determine column placement
   // 1st by list_order → LEFT, 2nd → CENTER, 3rd → RIGHT
   // ai-services is special: it distributes across columns (laal kitaab left, occult/pandit center, community right)
@@ -132,6 +132,26 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
                     );
                   })
                 )}
+                {/* Other Service cards appended after the AI suite cards */}
+                {otherServiceItems.map((item, oi) => (
+                  <div
+                    key={`os-${item.ID || item.slug || oi}`}
+                    className={styles.wowCard}
+                    onClick={(e) => handleOtherServiceClick(item, e)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className={styles.wowIconBox}>
+                      <img
+                        src={item.image_url_web || item.icon || item.image_url_app}
+                        alt={item.title}
+                        width="40"
+                        height="40"
+                        loading="lazy"
+                      />
+                    </div>
+                    <span>{item.title}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -376,6 +396,16 @@ const HomeV2 = () => {
   }, [aiSuitesData]);
   const wowSuiteItems = useMemo(() => ({ title: wowSections[0]?.title || "WOW SUITE" }), [wowSections]);
 
+  // "Other Service" items from the home API — appended into the AI Suite grid
+  const otherServiceSection = useMemo(
+    () => homeList?.find((s) => s.slug === "other-service" || s.display_type === "other-service"),
+    [homeList]
+  );
+  const otherServiceItems = useMemo(
+    () => sortContentByOrder(otherServiceSection?.content || []),
+    [otherServiceSection]
+  );
+
   const getWowCardPath = useCallback((item) => {
     if (!item.slug) return null;
     if (item.slug === "ar-vastu-scanner") return null;
@@ -390,6 +420,20 @@ const HomeV2 = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) { localStorage.setItem("shubhtalk_redirect_after_login", path); window.location.href = "/login?skip=welcome"; return; }
     navigate(path);
+  }, [navigate]);
+
+  // "Other Service" card click — supports internal routes and external links
+  const handleOtherServiceClick = useCallback((item, e) => {
+    if (e) e.preventDefault();
+    const target = item.redirect_url || item.slug;
+    if (!target) return;
+    if (item.is_internal === true || item.is_internal === "true") {
+      navigate(target.startsWith("/") ? target : `/${target}`);
+    } else if (item.redirect_url) {
+      window.open(item.redirect_url, "_blank", "noopener,noreferrer");
+    } else {
+      navigate(target.startsWith("/") ? target : `/${target}`);
+    }
   }, [navigate]);
 
   // Mahadasha
@@ -434,7 +478,7 @@ const HomeV2 = () => {
   const handleRechargeClose = useCallback(() => hookSetOpenModal((prev) => ({ ...prev, recharge: false })), [hookSetOpenModal]);
 
   // ─── Shared props for group renderers ─────────────────────────────────────
-  const heroProps = { styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, getWowCardPath, onlineCount };
+  const heroProps = { styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, getWowCardPath, onlineCount, otherServiceItems, handleOtherServiceClick };
   const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id, astrologerMaleImg };
 
   // ─── Render ───────────────────────────────────────────────────────────────
