@@ -113,6 +113,48 @@
   margin-bottom: 16px;
 }
 
+/* Ripple effect around the camera-off avatar (matches voice call) */
+.avatarRippleWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+
+  .avatarImage {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 0;
+  }
+
+  .ripple {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(75, 160, 29, 0.2);
+    animation: videoAvatarRipple 2s ease-out infinite;
+    z-index: 0;
+  }
+
+  .ripple:nth-child(1) { animation-delay: 0s; }
+  .ripple:nth-child(2) { animation-delay: 0.3s; }
+  .ripple:nth-child(3) { animation-delay: 0.6s; }
+  .ripple:nth-child(4) { animation-delay: 0.9s; }
+}
+
+@keyframes videoAvatarRipple {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
 .avatarName {
   font-size: 24px;
   font-weight: 600;

@@ -1056,7 +1056,7 @@ const AgoraVoiceCalling = ({ callData }) => {
             </div>
 
             <div className={styles.groupBtns}>
-              {astroAvailability.chat && (
+              {/* Chat switch — always available */}
               <button 
                 className={styles.chateM}
                 onClick={handleNavigateToChat}
@@ -1072,7 +1072,6 @@ const AgoraVoiceCalling = ({ callData }) => {
                 </svg>
                 Chat
               </button>
-              )}
 
               {astroAvailability.video && (
               <button className={styles.chateM} onClick={toggleCamera} disabled={isCheckingBalance}>
