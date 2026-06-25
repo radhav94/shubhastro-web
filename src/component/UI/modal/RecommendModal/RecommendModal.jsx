@@ -276,10 +276,12 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
+          astrologerID: astro?.astrologer_ID || data?.astrologer?.astrologer_ID,
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
+          profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 

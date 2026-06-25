@@ -717,6 +717,7 @@ const VideoCalling = ({ callData }) => {
         fullName: currentCall?.callerName || callerName,
         profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
         roomId,
+        gender: lastRequestedAstro?.gender || chatLastRequestedAstro?.gender || activeCall?.gender,
       });
 
       // Try to emit call:end - if socket is disconnected, it will be queued
@@ -811,6 +812,7 @@ const VideoCalling = ({ callData }) => {
           fullName: currentCall?.callerName || callerName,
           profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
           roomId,
+          gender: lastRequestedAstro?.gender || chatLastRequestedAstro?.gender || activeCall?.gender,
         });
 
         // Refresh wallet balance after call ends

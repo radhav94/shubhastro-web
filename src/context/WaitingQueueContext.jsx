@@ -548,6 +548,7 @@ export const WaitingQueueProvider = ({ children }) => {
         userId: userIdLocal,
         astrologerId,
         astrologerName: astro?.firstName || "",
+        astrologerID: astro?.astrologer_ID,
         remainingTime: data?.remainingTime,
         isEmergency: data?.isEmergency || false,
         profileImgUrl: astro?.profileImgUrl,
