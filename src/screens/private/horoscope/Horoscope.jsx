@@ -653,6 +653,12 @@ const HoroscopeNew = () => {
             </svg>
           </button>
           <span className="horoscope-page-title">Kundli Horoscope</span>
+          <button
+            className="horoscope-western-btn"
+            onClick={() => navigate('/daily-horoscope')}
+          >
+            Western
+          </button>
         </div>
       </div>
 
