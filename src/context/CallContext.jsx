@@ -311,6 +311,7 @@ export const CallProvider = ({ children }) => {
             fullName: reconnectCall?.callerName,
             profileImage: reconnectCall?.profileImgUrl,
             roomId: reconnectCall?.roomId,
+            gender: reconnectCall?.gender,
           });
           setOpenReview(true);
         }
@@ -481,6 +482,7 @@ export const CallProvider = ({ children }) => {
             fullName: activeCall?.callerName,
             profileImage: activeCall?.profileImgUrl,
             roomId: activeCall?.roomId,
+            gender: activeCall?.gender,
           });
           setOpenReview(true);
         }

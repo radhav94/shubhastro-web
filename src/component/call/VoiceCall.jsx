@@ -524,6 +524,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         fullName: currentCall?.callerName || callerName,
         profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
         roomId,
+        gender: lastRequestedAstro?.gender || chatLastRequestedAstro?.gender || activeCall?.gender,
       });
 
       voiceSocket.emit("call:end", {
@@ -691,6 +692,7 @@ const AgoraVoiceCalling = ({ callData }) => {
           fullName: currentCall?.callerName || callerName,
           profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
           roomId,
+          gender: lastRequestedAstro?.gender || chatLastRequestedAstro?.gender || activeCall?.gender,
         });
 
         // Refresh wallet balance after call ends

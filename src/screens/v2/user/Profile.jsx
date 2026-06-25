@@ -669,10 +669,12 @@ const Profile = () => {
           isUserSide: true,
           userId: userId,
           astrologerId: astrologerId,
+          astrologerID: astro?.astrologer_ID,
           kundliId,
           astrologerName: astro?.firstName || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
+          profileImgUrl: astro?.profileImgUrl,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 

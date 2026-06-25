@@ -880,7 +880,7 @@ const TalkToAstrologer = () => {
       // Only remove this specific connection from pending — keep others alive
       removePendingConnection(roomId);
 
-      const astro = data?.astrologer || activeCallAstroRef;
+      const astro = data?.astrologer || activeCallAstroRef.current;
       const kundliId = kundliRef.current;
 
       try {
@@ -893,6 +893,7 @@ const TalkToAstrologer = () => {
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
+          astrologerID: astro?.astrologer_ID || data?.astrologer?.astrologer_ID,
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,

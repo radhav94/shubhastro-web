@@ -9,13 +9,13 @@ export const reviewApi = privateRequestNew.injectEndpoints({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
+        body: {
           astrologerID,
           rating,
           review,
           isAnonymous,
           roomId
-        }),
+        },
       }),
       invalidatesTags: (result, error, { astrologerID }) => [
         { type: 'AstrologerReviews', id: astrologerID }
