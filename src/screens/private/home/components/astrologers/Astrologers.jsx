@@ -477,6 +477,10 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           setShowEmergencyModal(false);
           hookHandleCallStart(astro, "audio", true);
         }}
+        onVideoNow={(astro) => {
+          setShowEmergencyModal(false);
+          hookHandleCallStart(astro, "video", true);
+        }}
       />
     </div>
   );
