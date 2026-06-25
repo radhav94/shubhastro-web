@@ -704,9 +704,9 @@ const AgoraVoiceCalling = ({ callData }) => {
 
         Toast.success("Call ended.");
         
-        // Show review: if astrologer ended the call, always show (both sessions ending).
-        // If user ended, only show when no ongoing chat.
-        if (data?.endedBy === "ASTROLOGER" || !hasOngoingChat()) {
+        // Show review only when there's no ongoing chat session.
+        // If chat is still active (e.g. voice was upgraded from chat), skip review.
+        if (!hasOngoingChat()) {
           setOpenReview(true);
         }
       }

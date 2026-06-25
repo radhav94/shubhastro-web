@@ -27,8 +27,24 @@ const LoShuReport = () => {
 
   const report = data.data;
 
-  // Build TTS text
-  const ttsText = `Lo Shu Grid Report. Driver Number ${report.driverNumber}. Conductor Number ${report.conductorNumber}. Numbers present: ${report.numbersPresent.map((n) => `${n.number} ${n.title}`).join(", ")}. Numbers missing: ${report.numbersMissing.map((n) => `${n.number} ${n.title}`).join(", ")}.`;
+  // Build TTS text with all report data
+  const gridText = report.grid
+    .flat()
+    .map((cell) => {
+      const num = cell.present ? cell.number : cell.baseNumber;
+      return `Number ${num}, ${cell.title}, Planet ${cell.planet}, Element ${cell.element}${cell.present ? ", present in your grid" : ", missing from your grid"}`;
+    })
+    .join(". ");
+
+  const presentText = report.numbersPresent?.length
+    ? `Numbers present in your grid: ${report.numbersPresent.map((n) => `Number ${n.number}, ${n.title}, appears ${n.count} time${n.count > 1 ? "s" : ""}. ${n.description}`).join(". ")}.`
+    : "";
+
+  const missingText = report.numbersMissing?.length
+    ? `Numbers missing from your grid: ${report.numbersMissing.map((n) => `Number ${n.number}, ${n.title}. ${n.description}`).join(". ")}.`
+    : "";
+
+  const ttsText = `Lo Shu Grid Report. Your numerology grid based on date of birth ${report.dob}. Driver Number ${report.driverNumber}. Conductor Number ${report.conductorNumber}. Your Lo Shu Grid: ${gridText}. ${presentText} ${missingText}`.trim();
 
   return (
     <div className={styles.wrapper}>
