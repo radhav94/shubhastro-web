@@ -524,6 +524,9 @@
   @media (width <= 1180px) {
     padding: 0px 0px 0px;
   }
+  @media (width <= 767px) {
+    padding: 16px 0px 0px;
+  }
 }
 
 /* WOW header — title left, View More right */
