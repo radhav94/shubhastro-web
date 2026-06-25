@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useState, useRef, useEffect, useCallback } from "react";
 import styles from "./ChatWindow.module.scss";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import useChat from "./useChatWindow";
 import { useGetChatHistoryQuery } from "../../../../../redux/api/chatApi";
 import { useInactivityTimer } from "../../../../../utils/hooks/useInactivityTimer";
@@ -28,6 +28,7 @@ const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
 const MIN_CHAT_SECONDS = 0;
 
 import { useGetS3SignedUrlMutation } from "../../../../../redux/api/s3SignedApi";
+import { useGetAstrologerByIdQuery } from "../../../../../redux/api/astrologer/astrologerApi";
 import SwitchWaitingPopup from "../../../../../component/UI/switchWaiting/SwitchWaitingPopup";
 import { useWalletBalance } from "../../../wallet/useWalletBalance";
 import { PATH } from "../../../../../utils/routes/Paths";
@@ -43,9 +44,10 @@ const ChatWindow = () => {
   const messagesRef = useRef(null);
   const navigate = useNavigate();
   const { state } = useLocation();
+  const { id: urlAstrologerId } = useParams();
   const {
     userId,
-    astrologerId,
+    astrologerId: stateAstrologerId,
     roomId,
     fullName,
     isUserSide,
@@ -57,6 +59,7 @@ const ChatWindow = () => {
     profileImgUrl: stateProfileImgUrl,
     gender: stateGender
   } = state || {};
+  const astrologerId = stateAstrologerId || urlAstrologerId;
   // console.log('kundliId in chat', kundliId)
 
   const { activeCall, isCallMinimized, reviewData } = useCall();
@@ -75,13 +78,32 @@ const ChatWindow = () => {
   const [showEndChatConfirm, setShowEndChatConfirm] = useState(false);
   const { activeChat, isReconnecting } = useChatContext();
 
-  // Resolve profileImgUrl: prefer route state, fallback to activeChat context or query param
-  const profileImgUrl = stateProfileImgUrl || activeChat?.profileImgUrl || (() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("profileImgUrl") || "";
-    } catch { return ""; }
-  })();
+  // Capture astrologerID (numeric) for review submission - persists after activeChat is cleared
+  const lastAstrologerIDRef = useRef(astroID || null);
+  useEffect(() => {
+    if (activeChat?.astrologerID) {
+      lastAstrologerIDRef.current = activeChat.astrologerID;
+    }
+  }, [activeChat?.astrologerID]);
+
+  // Fetch astrologer profile to get the correct/up-to-date avatar
+  const { data: astrologerProfileData } = useGetAstrologerByIdQuery(
+    { id: astrologerId },
+    { skip: !astrologerId }
+  );
+
+  // Resolve profileImgUrl: prefer fresh API data; only use fallbacks while API is loading
+  const profileImgUrl = astrologerProfileData
+    ? (astrologerProfileData?.data?.profileImgUrl || "")
+    : (stateProfileImgUrl || activeChat?.profileImgUrl || (() => {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          return params.get("profileImgUrl") || "";
+        } catch { return ""; }
+      })());
+
+  // Resolve gender from fetched data
+  const gender = astrologerProfileData?.data?.gender || stateGender || activeChat?.gender;
 
   // Check if there's an active call (audio or video)
   const isVideoCallActive = activeCall && activeCall.callType === "video" && !isCallMinimized;
@@ -347,8 +369,8 @@ const ChatWindow = () => {
   const [addAstrologerReview, { isLoading }] = useAddAstrologerReviewMutation();
   const handleReviewSubmit = async ({ rating, review, isAnonymous }) => {
     try {
-      // Use astroID from location state, fall back to activeCall or reviewData
-      const reviewAstrologerID = astroID || activeCall?.astrologerID || activeCall?.astrologerId || reviewData?.astrologerID || reviewData?.astrologer_ID;
+      // Use astroID from location state, fall back to captured ref, activeChat, activeCall, or reviewData
+      const reviewAstrologerID = astroID || lastAstrologerIDRef.current || activeChat?.astrologerID || activeCall?.astrologerID || activeCall?.astrologerId || reviewData?.astrologerID || reviewData?.astrologer_ID;
       
       if (!reviewAstrologerID) {
         Toast.error("Something went wrong. Please try again.");
@@ -570,7 +592,7 @@ const ChatWindow = () => {
             isChatActive={isChatActive}
             isEnding={isEnding || waitingPopup}
             profileImgUrl={profileImgUrl}
-            gender={stateGender || activeChat?.gender}
+            gender={gender}
           />
 
           {/* Call Buttons Below Header */}
@@ -661,8 +683,9 @@ const ChatWindow = () => {
             onClose={() => setOpenFeedback(false)}
             handleSubmit={handleReviewSubmit}
             ratedUserName={fullName}
-            profileImgUrl={profileImgUrl || reviewData?.profileImage || reviewData?.profileImgUrl}
+            profileImgUrl={profileImgUrl}
             loading={isLoading}
+            gender={gender}
           />
 
           {isReconnecting && (

@@ -187,6 +187,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
+          astrologerID: astro?.astrologer_ID,
           kundliId,
           astrologerName: astro?.firstName || "",
           experience: astro?.experience || "",

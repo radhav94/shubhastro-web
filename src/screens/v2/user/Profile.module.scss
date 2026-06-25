@@ -1286,6 +1286,26 @@
   flex: 1;
 }
 
+.txnSearchClearBtn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+
+  &:hover {
+    color: #111;
+  }
+}
+
 .txnSearchIcon {
   position: absolute;
   left: 12px;
