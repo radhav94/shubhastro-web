@@ -1756,6 +1756,7 @@ const AstrologerProfile = () => {
         astrologer={data}
         onChatNow={(astro) => handleChatStart(astro, true)}
         onCallNow={(astro) => handleCallStart(astro, "audio", true)}
+        onVideoNow={(astro) => handleCallStart(astro, "video", true)}
       />
 
       {/* Modals */}
