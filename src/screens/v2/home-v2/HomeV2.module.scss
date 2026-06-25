@@ -1043,8 +1043,16 @@
   position: relative;
   width: 160px;
   height: 160px;
+  img{
+    width: auto;
+    height: 100%;
+    margin: 0 auto;
+  }
   @media (width <= 1180px) {
     height: 147px;
+  }
+  @media (width <= 1024px) {
+    height: 108px;
   }
 }
 
@@ -4460,10 +4468,10 @@
     left: 0;
     right: 0;
     margin: 0 auto;
-    bottom: 0;
+    bottom: 5px;
   }
   @media (width <= 767px) {
-    width: 100px;
+    width: 94px;
     // bottom: 0px;
   }
 }

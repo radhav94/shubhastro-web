@@ -227,13 +227,13 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
               {aiServicesItems[3]?.action_btn && <button className={styles.liveCommunityBtn}>{aiServicesItems[3].action_btn}</button>}
               <div className={styles.avatarCluster}>
                 <div className={styles.avatarClusterInner}>
-                  {COMMUNITY_AVATARS.map((src, i) => (
-                    <img key={i} src={src} alt="" width="36" height="36" className={`${styles.clusterAvatar} ${styles[`ca${i + 1}`]}`} loading="lazy" />
-                  ))}
-                  <div className={`${styles.clusterAvatar} ${styles.ca6} ${styles.clusterCount}`}>
-                    <span>+{onlineCount}</span>
-                    <span>Online</span>
-                  </div>
+                  {aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon ? (
+              <img
+                src={aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon}
+                alt={aiServicesItems[3]?.title || ""}
+                loading="lazy"
+              />
+            ) : null}
                 </div>
               </div>
             </div>
