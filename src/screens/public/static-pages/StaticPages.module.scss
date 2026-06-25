@@ -481,3 +481,92 @@
     width: 100%;
   }
 }
+
+/* CMS Accordion */
+.cmsAccordion {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.cmsAccordionItem {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1.5px solid #fff;
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.cmsAccordionToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 12px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #fafafaa0;
+  }
+}
+
+.cmsAccordionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.cmsAccordionIconWrapper {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cmsAccordionIcon {
+  color: #ff6b35;
+}
+
+.cmsAccordionContent {
+  padding: 0 20px 20px;
+  animation: cmsSlideDown 0.3s ease-out;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+@keyframes cmsSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .cmsAccordion {
+    padding: 16px;
+  }
+
+  .cmsAccordionTitle {
+    font-size: 14px;
+  }
+
+  .cmsAccordionToggle {
+    padding: 14px 16px;
+  }
+
+  .cmsAccordionContent {
+    padding: 0 16px 16px;
+  }
+}

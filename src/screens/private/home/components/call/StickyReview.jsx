@@ -55,6 +55,7 @@ const StickyReview = () => {
           handleSubmit={handleReviewSubmit}
           ratedUserName={reviewData?.fullName}
           profileImgUrl={reviewData?.profileImage || reviewData?.profileImgUrl}
+          gender={reviewData?.gender}
         />
     </div>
   );

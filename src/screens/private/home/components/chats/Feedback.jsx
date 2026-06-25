@@ -1,7 +1,7 @@
 import FeedbackModal from "./FeedbackModal";
 import React from "react";
 
-const Feedback = ({ open, onClose, handleSubmit, ratedUserName, profileImgUrl, loading }) => {
+const Feedback = ({ open, onClose, handleSubmit, ratedUserName, profileImgUrl, loading, gender }) => {
 
   return (
     <>
@@ -12,6 +12,7 @@ const Feedback = ({ open, onClose, handleSubmit, ratedUserName, profileImgUrl, l
         ratedUserName={ratedUserName}
         profileImgUrl={profileImgUrl}
         loading={loading}
+        gender={gender}
       />
     </>
   );

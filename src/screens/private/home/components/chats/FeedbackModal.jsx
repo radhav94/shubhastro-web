@@ -10,6 +10,7 @@ const FeedbackModal = ({
   ratedUserName,
   profileImgUrl,
   loading,
+  gender,
 }) => {
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
@@ -50,10 +51,10 @@ const FeedbackModal = ({
         <div className={styles.astrologerRow}>
           <img
             className={styles.astrologerAvatar}
-            src={profileImgUrl || getAstrologerDefaultImage()}
+            src={profileImgUrl || getAstrologerDefaultImage(gender)}
             alt={ratedUserName || "Astrologer"}
             onError={(e) => {
-              e.target.src = getAstrologerDefaultImage();
+              e.target.src = getAstrologerDefaultImage(gender);
             }}
           />
           <span className={styles.astrologerName}>{ratedUserName || "Astrologer"}</span>

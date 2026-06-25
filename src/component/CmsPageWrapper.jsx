@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { Plus, Minus } from "lucide-react";
 import { useGetStaticPageBySlugQuery } from "../redux/api/staticPages/staticPagesApi";
 import styles from "../screens/public/static-pages/StaticPages.module.scss";
 
@@ -8,9 +10,9 @@ const EXCLUDED_PATHS = [
   "/",
   "/home-new",
   "/home-v2",
-  "/ai-wow",
+  // "/ai-wow",
   "/shubh-mall",
-  "/explore",
+  // "/explore",
   "/blog",
   "/community"
 ];
@@ -138,17 +140,59 @@ const CmsPageWrapper = ({ children }) => {
       {hasBody ? (
         <>
           {children}
-          <div className={styles.container}>
-            <div
-              className={styles.htmlContent}
-              dangerouslySetInnerHTML={{ __html: pageData.body }}
-            />
-          </div>
+          <CmsAccordion title={pageData.title} body={pageData.body} />
         </>
       ) : (
         children
       )}
     </>
+  );
+};
+
+/**
+ * CmsAccordion - Collapsible section for CMS body content (FAQ-style)
+ * Uses first line of body as header text, remaining as expandable content.
+ */
+const CmsAccordion = ({ title, body }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Extract first line (text content of first HTML tag) as header
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = body;
+  const firstElement = tempDiv.querySelector("p, h1, h2, h3, h4, h5, h6, div, span");
+  const headerText = firstElement ? firstElement.textContent.trim() : title || "Read More";
+
+  // Remove first element from body to get remaining content
+  if (firstElement) firstElement.remove();
+  const remainingBody = tempDiv.innerHTML;
+
+  return (
+    <div className={styles.cmsAccordion}>
+      <div className={styles.cmsAccordionItem}>
+        <button
+          className={styles.cmsAccordionToggle}
+          onClick={() => setIsOpen((prev) => !prev)}
+          aria-expanded={isOpen}
+        >
+          <span className={styles.cmsAccordionTitle}>{headerText}</span>
+          <span className={styles.cmsAccordionIconWrapper}>
+            {isOpen ? (
+              <Minus size={20} className={styles.cmsAccordionIcon} />
+            ) : (
+              <Plus size={20} className={styles.cmsAccordionIcon} />
+            )}
+          </span>
+        </button>
+        {isOpen && (
+          <div className={styles.cmsAccordionContent}>
+            <div
+              className={styles.htmlContent}
+              dangerouslySetInnerHTML={{ __html: remainingBody }}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
