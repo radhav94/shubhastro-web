@@ -58,12 +58,12 @@
   justify-content: center;
   color: #fff;
   cursor: pointer;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border: 1.5px solid #F75801;
 
   svg {
     width: 32px;
     height: 32px;
-    stroke: #fff;
+    stroke: #F75801;
     stroke-width: 2;
     // filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   }
@@ -1987,18 +1987,18 @@
   }
 
   .input-wrapper input {
-    border-color: rgba(0, 0, 0, 0.12);
-    background: rgba(0, 0, 0, 0.04);
-    color: #1a1a1a;
+    border:1.5px solid rgba(255, 255, 255, 0.5);
+    // background: rgba(0, 0, 0, 0.04);
+    color: #fff;
     backdrop-filter: none;
 
     &:focus {
-      border-color: rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.6);
       background: rgba(0, 0, 0, 0.06);
     }
 
     &::placeholder {
-      color: #999;
+      color: #fff;
     }
   }
 
