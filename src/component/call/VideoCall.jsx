@@ -1375,7 +1375,7 @@ const VideoCalling = ({ callData }) => {
 
 
               <div className={styles.groupBtns}>
-                {astroAvailability.chat && (
+                {/* Chat switch — always available */}
                 <button 
                   className={styles.chateM}
                   onClick={handleNavigateToChat}
@@ -1391,7 +1391,6 @@ const VideoCalling = ({ callData }) => {
                   </svg>
                   Chat
                 </button>
-                )}
   
                 {astroAvailability.call && (
                 <button 
@@ -1495,19 +1494,25 @@ const VideoCalling = ({ callData }) => {
               {/* Avatar Overlay - Separate layer */}
               {!remoteVideoEnabled && (
                 <div className={styles.avatarOverlay}>
-                  <img
-                    src={
-                      activeCall?.profileImgUrl ||
-                      lastRequestedAstro?.profileImgUrl ||
-                      lastRequestedAstro?.imageUrl ||
-                      getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender)
-                    }
-                    alt={callerName}
-                    className={styles.avatarImage}
-                    onError={(e) => {
-                      e.currentTarget.src = getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender);
-                    }}
-                  />
+                  <div className={styles.avatarRippleWrap}>
+                    <span className={styles.ripple}></span>
+                    <span className={styles.ripple}></span>
+                    <span className={styles.ripple}></span>
+                    <span className={styles.ripple}></span>
+                    <img
+                      src={
+                        activeCall?.profileImgUrl ||
+                        lastRequestedAstro?.profileImgUrl ||
+                        lastRequestedAstro?.imageUrl ||
+                        getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender)
+                      }
+                      alt={callerName}
+                      className={styles.avatarImage}
+                      onError={(e) => {
+                        e.currentTarget.src = getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender);
+                      }}
+                    />
+                  </div>
                   <p className={styles.avatarName}>{capitalizeWords(callerName)}</p>
                   <p className={styles.avatarStatus}>Camera is off</p>
                 </div>
