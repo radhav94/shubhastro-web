@@ -151,6 +151,7 @@ const NewAstrologerDetailsCard = ({
         astrologer={astrologer}
         onChatNow={(astro) => onConnect(astro, "chat", true)}
         onCallNow={(astro) => onConnect(astro, "audio", true)}
+        onVideoNow={(astro) => onConnect(astro, "video", true)}
       />
     </div>
   );

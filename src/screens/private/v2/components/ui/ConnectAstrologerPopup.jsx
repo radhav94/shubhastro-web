@@ -10,18 +10,43 @@ const ConnectAstrologerPopup = ({
   onCallStart,
   isEmergency = false,
   onEmergencyAvailable,
+  isLoadingAstrologer = false,
 }) => {
 
-  // Auto-redirect to emergency modal if astrologer is offline but emergency is available
+  // Determine synchronously whether we should bypass this popup and go
+  // straight to the emergency modal — avoids a flash of the call modal.
+  // Trigger when emergency is available AND the astrologer is offline OR has
+  // disabled all normal options (chat/call/video).
+  //
+  // IMPORTANT: only treat options as "disabled" when price data is actually
+  // present. While the full astrologer is still loading (some screens open the
+  // popup with a minimal object that has no `price`), we must NOT assume the
+  // astrologer is disabled — otherwise every astrologer would redirect.
+  const p = astrologer?.price;
+  const hasPriceData = !!p;
+  const allNormalDisabled =
+    hasPriceData &&
+    !(p?.chatRate?.amount > 0) &&
+    !(p?.audioRate?.amount > 0) &&
+    !(p?.videoCallRate?.amount > 0);
+  const shouldRedirectToEmergency =
+    !isEmergency &&
+    !isLoadingAstrologer &&
+    !!astrologer &&
+    !!astrologer.isEmergencyAvailable &&
+    !!onEmergencyAvailable &&
+    (astrologer.isActive === false || allNormalDisabled);
+
   useEffect(() => {
-    if (!isOpen || !astrologer || isEmergency) return;
-    if (astrologer.isActive === false && astrologer.isEmergencyAvailable && onEmergencyAvailable) {
+    if (!isOpen) return;
+    if (shouldRedirectToEmergency) {
       onClose();
       onEmergencyAvailable(astrologer);
     }
-  }, [isOpen, astrologer?.isActive, astrologer?.isEmergencyAvailable]);
+  }, [isOpen, shouldRedirectToEmergency]);
 
-  if (!isOpen) return null;
+  // Don't render the call modal at all when redirecting to emergency.
+  if (!isOpen || shouldRedirectToEmergency) return null;
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();

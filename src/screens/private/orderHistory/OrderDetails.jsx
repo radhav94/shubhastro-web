@@ -502,6 +502,11 @@ const OrderDetails = () => {
           activeAstroRef.current = astro;
           handleCallStart(astro, "audio", true);
         }}
+        onVideoNow={(astro) => {
+          setShowEmergencyModal(false);
+          activeAstroRef.current = astro;
+          handleCallStart(astro, "video", true);
+        }}
       />
 
       {/* Recharge Modal for insufficient balance */}
