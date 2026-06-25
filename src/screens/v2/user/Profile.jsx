@@ -18,6 +18,7 @@ import {
   Mail,
   Calendar,
   Clock,
+  X,
 } from "lucide-react";
 import { TiUserDelete } from "react-icons/ti";
 import { LuPencilLine } from "react-icons/lu";
@@ -1875,6 +1876,20 @@ const Profile = () => {
                     }, 500);
                   }}
                 />
+                {txnSearchText && (
+                  <button
+                    className={styles.txnSearchClearBtn}
+                    onClick={() => {
+                      setTxnSearchText("");
+                      setTxnAppliedSearch("");
+                      setCurrentPage(1);
+                      setAllLoadedTransactions([]);
+                    }}
+                    aria-label="Clear search"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
               </div>
               <button
                 className={styles.filterButton}
