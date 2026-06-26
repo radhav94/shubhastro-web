@@ -259,6 +259,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
+          astrologerID: astro?.astrologer_ID || data?.astrologer?.astrologer_ID,
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
           remainingTime: data?.remainingTime,
@@ -475,6 +476,10 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
         onCallNow={(astro) => {
           setShowEmergencyModal(false);
           hookHandleCallStart(astro, "audio", true);
+        }}
+        onVideoNow={(astro) => {
+          setShowEmergencyModal(false);
+          hookHandleCallStart(astro, "video", true);
         }}
       />
     </div>

@@ -494,11 +494,13 @@ const AstrologerProfile = () => {
           isUserSide: true,
           userId: userId,
           astrologerId: astrologerId,
+          astrologerID: astro?.astrologer_ID || data?.astrologer?.astrologer_ID,
           kundliId,
           astrologerName: data?.astrologer?.firstName || "",
           experience: data?.astrologer?.experience || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
+          profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
 
@@ -1754,6 +1756,7 @@ const AstrologerProfile = () => {
         astrologer={data}
         onChatNow={(astro) => handleChatStart(astro, true)}
         onCallNow={(astro) => handleCallStart(astro, "audio", true)}
+        onVideoNow={(astro) => handleCallStart(astro, "video", true)}
       />
 
       {/* Modals */}

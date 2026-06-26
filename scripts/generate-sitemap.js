@@ -14,6 +14,9 @@ const __dirname = path.dirname(__filename);
 // Site base URL — uses dynamic domain
 const SITE_URL = process.env.SITE_URL || 'https://shubhastro.ai';
 
+// API base URL for fetching dynamic content (static pages, etc.)
+const API_BASE_URL = process.env.SITEMAP_API_URL || 'https://devapi-shubhtalk.epicon.in/api';
+
 // Zodiac signs for horoscope routes
 const zodiacSigns = ['aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'];
 
@@ -89,12 +92,47 @@ horoscopeTypes.forEach(type => {
 // Combine all routes
 const allRoutes = [...staticRoutes, ...dynamicRoutes];
 
-// Generate XML
-const today = new Date().toISOString().split('T')[0];
+// Fetch dynamic static pages from the API and return them as sitemap routes
+async function fetchStaticPageRoutes() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/static-pages/list`, {
+      headers: { accept: 'application/json' },
+    });
+    if (!res.ok) {
+      console.warn(`⚠️  static-pages/list returned ${res.status}; skipping static pages`);
+      return [];
+    }
+    const json = await res.json();
+    const list = json?.data || [];
+    return list
+      .filter((page) => page?.slug)
+      .map((page) => ({
+        path: `/${page.slug}`,
+        priority: '0.4',
+        changefreq: 'monthly',
+      }));
+  } catch (err) {
+    console.warn(`⚠️  Failed to fetch static pages: ${err.message}; skipping`);
+    return [];
+  }
+}
 
-const xml = `<?xml version="1.0" encoding="UTF-8"?>
+async function generate() {
+  const staticPageRoutes = await fetchStaticPageRoutes();
+
+  // Merge, de-duplicating by path (existing staticRoutes take precedence)
+  const seen = new Set(allRoutes.map((r) => r.path));
+  const mergedRoutes = [
+    ...allRoutes,
+    ...staticPageRoutes.filter((r) => !seen.has(r.path)),
+  ];
+
+  // Generate XML
+  const today = new Date().toISOString().split('T')[0];
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${allRoutes.map(route => `  <url>
+${mergedRoutes.map(route => `  <url>
     <loc>${SITE_URL}${route.path}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${route.changefreq}</changefreq>
@@ -103,17 +141,20 @@ ${allRoutes.map(route => `  <url>
 </urlset>
 `;
 
-// Write to dist and public folders
-const distPath = path.resolve(__dirname, '../dist/sitemap.xml');
-const publicPath = path.resolve(__dirname, '../public/sitemap.xml');
+  // Write to dist and public folders
+  const distPath = path.resolve(__dirname, '../dist/sitemap.xml');
+  const publicPath = path.resolve(__dirname, '../public/sitemap.xml');
 
-// Write to public (for dev server)
-fs.writeFileSync(publicPath, xml, 'utf-8');
-console.log(`✅ Sitemap generated: public/sitemap.xml (${allRoutes.length} URLs)`);
+  // Write to public (for dev server)
+  fs.writeFileSync(publicPath, xml, 'utf-8');
+  console.log(`✅ Sitemap generated: public/sitemap.xml (${mergedRoutes.length} URLs, ${staticPageRoutes.length} static pages)`);
 
-// Write to dist if it exists (for production build)
-const distDir = path.resolve(__dirname, '../dist');
-if (fs.existsSync(distDir)) {
-  fs.writeFileSync(distPath, xml, 'utf-8');
-  console.log(`✅ Sitemap generated: dist/sitemap.xml (${allRoutes.length} URLs)`);
+  // Write to dist if it exists (for production build)
+  const distDir = path.resolve(__dirname, '../dist');
+  if (fs.existsSync(distDir)) {
+    fs.writeFileSync(distPath, xml, 'utf-8');
+    console.log(`✅ Sitemap generated: dist/sitemap.xml (${mergedRoutes.length} URLs)`);
+  }
 }
+
+generate();

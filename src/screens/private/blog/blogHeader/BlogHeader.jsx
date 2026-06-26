@@ -14,6 +14,7 @@ const BlogHeader = () => {
   const { data, isLoading } = useGetBlogQuery({ page, limit: 12, category: activeCategory });
 
   const categories = categoriesData?.data || [];
+  const hasCategories = categories.length > 0;
   const blogs = data?.data || [];
   const pagination = data?.pagination;
 
@@ -36,8 +37,9 @@ const BlogHeader = () => {
 
   return (
     <section className={styles.blogSection}>
-      <div className={styles.layout}>
+      <div className={`${styles.layout} ${!hasCategories ? styles.layoutFull : ""}`}>
         {/* Sidebar - Categories */}
+        {hasCategories && (
         <aside className={styles.sidebar}>
           <div className={styles.sidebarInner}>
           <div className={styles.sidebarTitle}>
@@ -72,6 +74,7 @@ const BlogHeader = () => {
           </ul>
           </div>
         </aside>
+        )}
 
         {/* Main content */}
         <div className={styles.main}>

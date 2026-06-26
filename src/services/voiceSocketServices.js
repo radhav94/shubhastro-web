@@ -237,6 +237,26 @@ CALL_EVENTS.forEach((event) => {
   });
 });
 
+// Suppress CONTENT_BLOCKED errors globally — they are not session/connection errors
+// and should never cause any component to reset call/chat state
+// We still show a toast so the user knows their message was blocked
+const _originalOn = voiceSocket.on.bind(voiceSocket);
+voiceSocket.on = (event, fn) => {
+  if (event === "error") {
+    return _originalOn(event, (data) => {
+      if (data?.code === "CONTENT_BLOCKED" || data?.message?.includes?.("inappropriate language")) {
+        console.log("[VoiceSocket] 🚫 Suppressed CONTENT_BLOCKED error from propagating to components");
+        import("../component/toast").then(({ default: toast }) => {
+          toast.error(data.message || "Message blocked due to inappropriate content.");
+        });
+        return;
+      }
+      fn(data);
+    });
+  }
+  return _originalOn(event, fn);
+};
+
 // Monkey-patch emit to log outgoing events
 const _originalEmit = voiceSocket.emit.bind(voiceSocket);
 voiceSocket.emit = (event, ...args) => {

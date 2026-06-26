@@ -287,7 +287,7 @@ const FaceReadingCamera = () => {
     setVideoActive(false);
     
     // 4️⃣ Navigate immediately
-    navigate('/ai-wow');
+    navigate(-1);
   };
 
   if (error) {

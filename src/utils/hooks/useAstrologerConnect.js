@@ -354,8 +354,8 @@ export const useAstrologerConnect = () => {
           return
         }
 
-        // Check if same astrologer already has any pending request (call or chat)
-        if (isInQueue(astro._id, connectionType) || isInQueue(astro._id, "chat")) {
+        // Check if same astrologer already has any pending request (audio, video, or chat)
+        if (isInQueue(astro._id, "audio") || isInQueue(astro._id, "video") || isInQueue(astro._id, "chat")) {
           console.log("[NormalFlow] ⏭️ Already in queue for this astrologer");
           Toast.error("Already waiting for this astrologer");
           return;
