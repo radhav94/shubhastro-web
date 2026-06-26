@@ -22,10 +22,12 @@ class SocketService {
     });
 
     this.socket.on("connect_error", () => {
+      // Silently handle connection errors — voiceSocket handles reconnection
+      // Don't show "Unable to connect" toasts as they're misleading during server restarts
       const now = Date.now();
       if (now - this._lastConnectErrorAt > 15000) {
         this._lastConnectErrorAt = now;
-        onError?.("Unable to connect to server");
+        console.warn("[socketService] connect_error — server may be restarting");
       }
     });
 
