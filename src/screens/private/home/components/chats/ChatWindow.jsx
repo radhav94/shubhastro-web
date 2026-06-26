@@ -42,6 +42,7 @@ import useAstrologerAvailability from "../../../../../utils/hooks/useAstrologerA
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
+  const chatPageRef = useRef(null);
   const navigate = useNavigate();
   const { state } = useLocation();
   const { id: urlAstrologerId } = useParams();
@@ -127,6 +128,46 @@ const ChatWindow = () => {
     window.addEventListener("walletBalanceUpdated", handleBalanceUpdate);
     return () => window.removeEventListener("walletBalanceUpdated", handleBalanceUpdate);
   }, [refreshWallet]);
+
+  // iOS/Android keyboard fix: resize chatPage based on visualViewport height
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport || !chatPageRef.current) return;
+
+    // Only apply on mobile (touch devices)
+    const isMobile = window.innerWidth <= 1180;
+    if (!isMobile) return;
+
+    const initialHeight = window.innerHeight;
+
+    const onResize = () => {
+      if (!chatPageRef.current) return;
+      const currentHeight = viewport.height;
+      // Only set explicit height when keyboard is open (viewport is significantly smaller)
+      if (currentHeight < initialHeight - 50) {
+        chatPageRef.current.style.height = `${currentHeight}px`;
+        chatPageRef.current.style.bottom = 'auto';
+      } else {
+        chatPageRef.current.style.height = '';
+        chatPageRef.current.style.bottom = '0';
+      }
+      // Prevent parent page from scrolling when keyboard opens
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    viewport.addEventListener('resize', onResize);
+    viewport.addEventListener('scroll', onResize);
+
+    return () => {
+      viewport.removeEventListener('resize', onResize);
+      viewport.removeEventListener('scroll', onResize);
+      if (chatPageRef.current) {
+        chatPageRef.current.style.height = '';
+        chatPageRef.current.style.bottom = '0';
+      }
+    };
+  }, []);
 
   const {
     messages,
@@ -574,7 +615,7 @@ const ChatWindow = () => {
         switchType={switchType || "audio"}
         onCancel={handleCancelCall}
       />
-      <div className={styles.chatPage}>
+      <div className={styles.chatPage} ref={chatPageRef}>
         <div className={styles.chatWindow}>
           <ChatHeader
             fullName={fullName}
