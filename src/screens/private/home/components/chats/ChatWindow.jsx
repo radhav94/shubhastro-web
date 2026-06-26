@@ -129,45 +129,77 @@ const ChatWindow = () => {
     return () => window.removeEventListener("walletBalanceUpdated", handleBalanceUpdate);
   }, [refreshWallet]);
 
-  // iOS/Android keyboard fix: resize chatPage based on visualViewport height
+  // iOS/Android keyboard fix: resize chatPage based on viewport changes
   useEffect(() => {
-    const viewport = window.visualViewport;
-    if (!viewport || !chatPageRef.current) return;
+    if (!chatPageRef.current) return;
 
     // Only apply on mobile (touch devices)
     const isMobile = window.innerWidth <= 1180;
     if (!isMobile) return;
 
-    const onResize = () => {
-      if (!chatPageRef.current) return;
-      const currentHeight = viewport.height;
-      const fullHeight = window.screen.height;
-      // Keyboard is considered open if visual viewport is noticeably smaller than screen
-      const keyboardOpen = currentHeight < fullHeight * 0.75;
-      
-      if (keyboardOpen) {
-        chatPageRef.current.style.height = `${currentHeight}px`;
-        chatPageRef.current.style.bottom = 'auto';
-      } else {
-        chatPageRef.current.style.height = '';
-        chatPageRef.current.style.bottom = '0';
-      }
-      // Prevent parent page from scrolling when keyboard opens
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    };
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/.test(navigator.userAgent);
 
-    viewport.addEventListener('resize', onResize);
-    viewport.addEventListener('scroll', onResize);
+    if (isIOS) {
+      // iOS: Use visualViewport API — iOS ignores interactive-widget meta,
+      // so visualViewport.height reflects the visible area above the keyboard
+      const viewport = window.visualViewport;
+      if (!viewport) return;
 
-    return () => {
-      viewport.removeEventListener('resize', onResize);
-      viewport.removeEventListener('scroll', onResize);
-      if (chatPageRef.current) {
-        chatPageRef.current.style.height = '';
-        chatPageRef.current.style.bottom = '0';
-      }
-    };
+      const onResize = () => {
+        if (!chatPageRef.current) return;
+        const currentHeight = viewport.height;
+        const fullHeight = window.screen.height;
+        const keyboardOpen = currentHeight < fullHeight * 0.75;
+
+        if (keyboardOpen) {
+          chatPageRef.current.style.height = `${currentHeight}px`;
+          chatPageRef.current.style.bottom = 'auto';
+        } else {
+          chatPageRef.current.style.height = '';
+          chatPageRef.current.style.bottom = '0';
+        }
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      };
+
+      viewport.addEventListener('resize', onResize);
+      viewport.addEventListener('scroll', onResize);
+
+      return () => {
+        viewport.removeEventListener('resize', onResize);
+        viewport.removeEventListener('scroll', onResize);
+        if (chatPageRef.current) {
+          chatPageRef.current.style.height = '';
+          chatPageRef.current.style.bottom = '0';
+        }
+      };
+    } else if (isAndroid) {
+      // Android with resizes-content: the window itself resizes when keyboard opens.
+      // position:fixed elements relative to layout viewport get pushed up correctly,
+      // but we need to update height to match the new window size.
+      const onResize = () => {
+        if (!chatPageRef.current) return;
+        const newHeight = window.innerHeight;
+        // On Android with resizes-content, innerHeight shrinks when keyboard opens
+        chatPageRef.current.style.height = `${newHeight - 53}px`; // subtract top header
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      };
+
+      // Set initial
+      onResize();
+
+      window.addEventListener('resize', onResize);
+
+      return () => {
+        window.removeEventListener('resize', onResize);
+        if (chatPageRef.current) {
+          chatPageRef.current.style.height = '';
+          chatPageRef.current.style.bottom = '0';
+        }
+      };
+    }
   }, []);
 
   const {
