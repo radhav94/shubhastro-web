@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   useFetchDailyQuery, 
   useFetchTomorrowQuery,
@@ -26,6 +26,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useGetAstroDetailsQuery } from '../../../redux/api/kundli/kundliApi';
 import { buildVedicParam } from '../../../utils/VedicParams.js/vedicParams';
 import { setSelectedKundli } from '../../../redux/kundli/kundliSlice';
+import { getJSONCookie, GUEST_KUNDLI_COOKIE } from '../../../utils/helper/cookies';
 const overViewImg = "https://assets.shubhastro.ai/images/horoscope/overview.png";
 const financeImg = "https://assets.shubhastro.ai/images/horoscope/finances.png";
 const scoreImg = "https://assets.shubhastro.ai/images/horoscope/total-score.png";
@@ -125,10 +126,18 @@ const HoroscopeNew = () => {
   const kundliProfiles = kundliProfilesData?.data || [];
 
   // Determine the active profile: header-selected > Self > first profile.
-  // Guests (not logged in) must never use a Kundli profile here — even if one
-  // was created/stored in redux — so they always get the "Select Zodiac" flow.
+  // For guests (not logged in): if a guest Kundli profile exists (selected in
+  // redux or stored in the cookie), use it; otherwise fall back to the
+  // "Select Zodiac" flow.
+  const guestProfile = useMemo(() => {
+    if (isLoggedIn) return null;
+    if (headerSelectedKundli?._id || headerSelectedKundli?.name) return headerSelectedKundli;
+    const stored = getJSONCookie(GUEST_KUNDLI_COOKIE, []);
+    return Array.isArray(stored) && stored.length > 0 ? stored[0] : null;
+  }, [isLoggedIn, headerSelectedKundli]);
+
   const activeProfile = !isLoggedIn
-    ? null
+    ? guestProfile
     : headerSelectedKundli?._id
       ? headerSelectedKundli
       : kundliProfiles.find((p) => p.relation?.toLowerCase() === 'self') || kundliProfiles[0] || null;
@@ -601,10 +610,12 @@ const HoroscopeNew = () => {
   };
 
   const handleOpenModal = () => {
-    if (isLoggedIn) {
+    if (isLoggedIn || activeProfile) {
+      // Logged-in users, or guests who already have a Kundli profile,
+      // open the profile manager (it handles guest profiles via cookie).
       setShowProfileSelector(true);
     } else {
-      // Guest user — show zodiac selector
+      // Guest user with no profile — show zodiac selector
       setTempSelectedZodiac(selectedZodiac);
       setShowZodiacModal(true);
     }
@@ -665,7 +676,7 @@ const HoroscopeNew = () => {
       {/* Centered Profile Selector with DOB/Place */}
       <div className="horoscope-profile-header">
         <div className="horoscope-profile-center" onClick={handleOpenModal}>
-          <span className="horoscope-profile-label">{isLoggedIn ? "Select Profile" : "Select Zodiac"}</span>
+          <span className="horoscope-profile-label">{activeProfile ? "Select Profile" : "Select Zodiac"}</span>
           <span className="horoscope-profile-name">
             {activeProfile?.name || capitalizedSign}
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ marginLeft: '4px' }}>
