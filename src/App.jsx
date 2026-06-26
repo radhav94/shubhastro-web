@@ -25,6 +25,7 @@ import { initializeFCM } from "./services/fcmService.jsx";
 import { HelmetProvider } from "react-helmet-async";
 import CmsPageWrapper from "./component/CmsPageWrapper";
 import CmsNotFoundPage from "./component/CmsNotFoundPage";
+import useAstrologerStatusSocket from "./hooks/useAstrologerStatusSocket";
 
 // Flatten routes helper - moved outside component for better performance
 const flattenRoutes = (routes) => {
@@ -110,6 +111,9 @@ const handleChunkLoadError = (context) => {
 
 function App() {
   const isOnline = useOnlineStatus();
+
+  // Real-time astrologer online/offline status updates across all pages
+  useAstrologerStatusSocket();
 
   // Memoize router creation - only create once
   const roleWiseRouting = useMemo(() => {
