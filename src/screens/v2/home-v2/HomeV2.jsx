@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
 import { getUserFromStorage } from "../../../utils/authStorage";
-import { useGetAiSuitesQuery, useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
+import { useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
@@ -29,10 +29,6 @@ const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));
 import kundliImg from "../../../assets/images/home-hero-kundli.png";
 import astrologerImg from "../../../assets/images/home-hero-astrologer.png";
 import horoscopeImg from "../../../assets/images/home-hero-horoscope.png";
-import vastuIcon from "../../../assets/aiwow/wow-vastu.svg";
-import palmIcon from "../../../assets/aiwow/wow-palmistry.svg";
-import faceIcon from "../../../assets/aiwow/wow-face.svg";
-import signatureIcon from "../../../assets/aiwow/wow-signature.svg";
 import astrologerMaleImg from "../../../assets/default-img/astrologer male_v.1.png";
 
 // Community avatars — loaded lazily via URL (below-the-fold, decorative)
@@ -47,7 +43,7 @@ const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
 
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
-const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, getWowCardPath, onlineCount, otherServiceItems = [], handleOtherServiceClick }) => {
+const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount }) => {
   // Sort sections by list_order to determine column placement
   // 1st by list_order → LEFT, 2nd → CENTER, 3rd → RIGHT
   // ai-services is special: it distributes across columns (laal kitaab left, occult/pandit center, community right)
@@ -101,7 +97,6 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
               <div className={styles.wowGlow} />
               <div className={styles.wowHeader}>
                 <div className={styles.titleWithBottomDevider}>
-                  {/* <h4 className={styles.wowTitle}>{wowSuiteItems.title}</h4> */}
                   <h2 className={styles.wowTitle}>Your Astrology Suite</h2>
                   <div className={styles.BottomDevider}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
@@ -112,46 +107,25 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, w
                 {/* <button className={styles.wowViewMore} onClick={() => navigate('/ai-wow')}>View More &rsaquo;</button> */}
               </div>
               <div className={styles.wowGrid}>
-                {wowSections.flatMap((sec, si) =>
-                  (sec.content || []).map((item, i) => {
-                    const path = getWowCardPath(item);
-                    return path ? (
-                      <Link key={`${si}-${i}`} className={styles.wowCard} to={path} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
-                        <div className={styles.wowIconBox}>
-                          <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} width="40" height="40" loading="lazy" />
-                        </div>
-                        <span>{item.title}</span>
-                      </Link>
-                    ) : (
-                      <div key={`${si}-${i}`} className={styles.wowCard} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: item.slug ? 'pointer' : 'default' }}>
-                        <div className={styles.wowIconBox}>
-                          <img src={item.icon || item.iconUrl || item.icon_url} alt={item.title} width="40" height="40" loading="lazy" />
-                        </div>
-                        <span>{item.title}</span>
+                {sortContentByOrder(section.content || []).map((item, i) => {
+                  const path = getWowCardPath(item);
+                  const iconSrc = item.icon || item.image_url_web || item.iconUrl || item.icon_url || item.image_url_app;
+                  return path ? (
+                    <Link key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} to={path} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
+                      <div className={styles.wowIconBox}>
+                        <img src={iconSrc} alt={item.title} width="40" height="40" loading="lazy" />
                       </div>
-                    );
-                  })
-                )}
-                {/* Other Service cards appended after the AI suite cards */}
-                {otherServiceItems.map((item, oi) => (
-                  <div
-                    key={`os-${item.ID || item.slug || oi}`}
-                    className={styles.wowCard}
-                    onClick={(e) => handleOtherServiceClick(item, e)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className={styles.wowIconBox}>
-                      <img
-                        src={item.image_url_web || item.icon || item.image_url_app}
-                        alt={item.title}
-                        width="40"
-                        height="40"
-                        loading="lazy"
-                      />
+                      <span>{item.title}</span>
+                    </Link>
+                  ) : (
+                    <div key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: item.slug ? 'pointer' : 'default' }}>
+                      <div className={styles.wowIconBox}>
+                        <img src={iconSrc} alt={item.title} width="40" height="40" loading="lazy" />
+                      </div>
+                      <span>{item.title}</span>
                     </div>
-                    <span>{item.title}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -291,7 +265,7 @@ const ThreeColGroupLayout = ({ sections, styles }) => {
 // ─── Standalone Renderers for Hero/ThreeCol types when ungrouped ──────────────
 
 const renderUngroupedHeroSection = (section, props) => {
-  const { styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, onlineCount } = props;
+  const { styles, navigate, name, currentMahadasha, handleWowCardClick, onlineCount } = props;
   const dt = section.display_type;
   const key = `ungrouped-${section.list_order}-${dt}`;
 
@@ -383,57 +357,49 @@ const HomeV2 = () => {
   const sortedSections = useMemo(() => sortSections(homeList), [homeList]);
   const renderPlan = useMemo(() => buildRenderPlan(sortedSections), [sortedSections]);
 
-  const { data: aiSuitesData } = useGetAiSuitesQuery();
-  const wowSections = useMemo(() => {
-    const list = aiSuitesData?.data?.list || [];
-    if (list.length > 0) return list;
-    return [{ title: "WOW SUITE", content: [
-      { icon: vastuIcon, title: "AR Vastu\nScanner", slug: "ar-vastu-scanner" },
-      { icon: palmIcon, title: "Ai Palmistry\nScanner", slug: "ai-palmistry" },
-      { icon: faceIcon, title: "Astro Face\nReading", slug: "astro-face-reading" },
-      { icon: signatureIcon, title: "AI Signature\nAnalysis", slug: "ai-signature" },
-    ]}];
-  }, [aiSuitesData]);
-  const wowSuiteItems = useMemo(() => ({ title: wowSections[0]?.title || "WOW SUITE" }), [wowSections]);
-
-  // "Other Service" items from the home API — appended into the AI Suite grid
-  const otherServiceSection = useMemo(
-    () => homeList?.find((s) => s.slug === "other-service" || s.display_type === "other-service"),
-    [homeList]
-  );
-  const otherServiceItems = useMemo(
-    () => sortContentByOrder(otherServiceSection?.content || []),
-    [otherServiceSection]
-  );
-
+  // Path resolver for an AI suite card based on its source
   const getWowCardPath = useCallback((item) => {
+    if (!item) return null;
+    // quick-link-section items use their redirect_url directly
+    if (item.source === "quick-link-section") {
+      if (item.is_internal === true || item.is_internal === "true") {
+        const target = item.redirect_url || item.slug;
+        if (!target) return null;
+        return target.startsWith("/") ? target : `/${target}`;
+      }
+      return null; // external links handled in click handler
+    }
+    // ai-model items
     if (!item.slug) return null;
     if (item.slug === "ar-vastu-scanner") return null;
     return `/ai-wow/${item.slug}`;
   }, []);
 
   const handleWowCardClick = useCallback((item, e) => {
-    if (!item.slug) return;
+    if (!item) return;
     if (e) e.preventDefault();
+
+    // quick-link-section items
+    if (item.source === "quick-link-section") {
+      const target = item.redirect_url || item.slug;
+      if (!target) return;
+      if (item.is_internal === true || item.is_internal === "true") {
+        navigate(target.startsWith("/") ? target : `/${target}`);
+      } else if (item.redirect_url) {
+        window.open(item.redirect_url, "_blank", "noopener,noreferrer");
+      } else {
+        navigate(target.startsWith("/") ? target : `/${target}`);
+      }
+      return;
+    }
+
+    // ai-model items
+    if (!item.slug) return;
     if (item.slug === "ar-vastu-scanner") { setShowMobileAppModal(true); return; }
     const path = `/ai-wow/${item.slug}`;
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) { localStorage.setItem("shubhtalk_redirect_after_login", path); window.location.href = "/login?skip=welcome"; return; }
     navigate(path);
-  }, [navigate]);
-
-  // "Other Service" card click — supports internal routes and external links
-  const handleOtherServiceClick = useCallback((item, e) => {
-    if (e) e.preventDefault();
-    const target = item.redirect_url || item.slug;
-    if (!target) return;
-    if (item.is_internal === true || item.is_internal === "true") {
-      navigate(target.startsWith("/") ? target : `/${target}`);
-    } else if (item.redirect_url) {
-      window.open(item.redirect_url, "_blank", "noopener,noreferrer");
-    } else {
-      navigate(target.startsWith("/") ? target : `/${target}`);
-    }
   }, [navigate]);
 
   // Mahadasha
@@ -478,7 +444,7 @@ const HomeV2 = () => {
   const handleRechargeClose = useCallback(() => hookSetOpenModal((prev) => ({ ...prev, recharge: false })), [hookSetOpenModal]);
 
   // ─── Shared props for group renderers ─────────────────────────────────────
-  const heroProps = { styles, navigate, name, currentMahadasha, wowSections, wowSuiteItems, handleWowCardClick, getWowCardPath, onlineCount, otherServiceItems, handleOtherServiceClick };
+  const heroProps = { styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount };
   const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id, astrologerMaleImg };
 
   // ─── Render ───────────────────────────────────────────────────────────────
