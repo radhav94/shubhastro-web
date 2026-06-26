@@ -50,7 +50,7 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
 
   const formatProfileDisplay = (profile) => {
     if (!profile)
-      return { initials: "?", birthDate: "", birthTime: "", relation: "Self" };
+      return { initials: "?", birthDate: "", birthTime: "", relation: "" };
 
     const initials = profile.name
       ? profile.name
@@ -92,7 +92,7 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
         ? `${String(hour12).padStart(2, "0")}:${String(profile.min).padStart(2, "0")} ${meridiem}`
         : "";
 
-    const relation = profile.relation || "Self";
+    const relation = profile.relation || "";
 
     return { initials, birthDate, birthTime, relation };
   };
@@ -294,9 +294,11 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                           {formatted.initials}
                         </div>
                         <div className={styles.profileInfo}>
-                          <span className={styles.relationBadge}>
-                            {formatted.relation}
-                          </span>
+                          {formatted.relation?.trim() && (
+                            <span className={styles.relationBadge}>
+                              {formatted.relation}
+                            </span>
+                          )}
                           <h3 className={styles.profileName}>{profile.name}</h3>
                           <p className={styles.profileDetails}>
                             {formatted.birthDate} • {formatted.birthTime}

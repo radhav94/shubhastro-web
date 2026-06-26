@@ -586,6 +586,7 @@ const AstrologerProfile = () => {
           remainingTime,
           experience: astro?.experience,
           isEmergency: rest?.isEmergency || false,
+          profileImgUrl: astro?.profileImgUrl || astro?.imageUrl,
         });
       } catch (error) {
         console.error("Call accepted error:", error);

@@ -130,6 +130,15 @@ const StickyWaitingQueue = () => {
 
   return (
     <div className={styles.container}>
+      {/* Toggle arrow on top of the modal (reflects open/close state) */}
+      <button
+        className={styles.toggleArrow}
+        aria-label={expanded ? "Collapse list" : "Expand list"}
+        onClick={() => setExpanded((e) => !e)}
+      >
+        {expanded ? <ChevronDown size={24} /> : <ChevronUp size={24} />}
+      </button>
+
       {/* Header pill */}
       <div className={styles.header} onClick={() => setExpanded((e) => !e)}>
         <span className={styles.headerText}>
@@ -143,10 +152,9 @@ const StickyWaitingQueue = () => {
         </button>
       </div>
 
-      {/* Expanded card list */}
+      {/* Card list */}
       {expanded && (
-        <>
-          <div className={styles.list} ref={listRef}>
+        <div className={styles.list} ref={listRef}>
             {pendingConnections.map((conn) => {
               const name = `${conn.astrologer?.firstName || conn.astrologer?.astrologerName || ""} ${conn.astrologer?.lastName || ""}`.trim() || "Astrologer";
               const status = conn.status || "waiting";
@@ -223,17 +231,6 @@ const StickyWaitingQueue = () => {
               );
             })}
           </div>
-
-          <button className={styles.viewToggle} onClick={() => setExpanded(false)}>
-            View Less <ChevronUp size={14} />
-          </button>
-        </>
-      )}
-
-      {!expanded && (
-        <button className={styles.viewToggle} onClick={() => setExpanded(true)}>
-          View More <ChevronDown size={14} />
-        </button>
       )}
     </div>
   );

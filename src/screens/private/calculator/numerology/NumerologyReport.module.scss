@@ -50,6 +50,7 @@
 
 /* CARD */
 .card {
+  position: relative;
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(12px);
   border: 1.5px solid #fff;
@@ -62,15 +63,24 @@
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 }
 
+/* TTS BUTTON - top left */
+.ttsBtn {
+  position: absolute;
+  top: 10px;
+  right: 25px;
+  display: inline-flex;
+  z-index: 1;
+}
+
 /* NUMBER BOX */
 .circle {
-  width: 56px;
-  height: 56px;
-  min-width: 56px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
   border-radius: 12px;
   background: #fff3e8;
   color: #d43400;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -81,6 +91,7 @@
 .cardContent {
   flex: 1;
   min-width: 0;
+  padding-top: 16px;
 }
 
 .title {
@@ -234,11 +245,16 @@
     gap: 12px;
   }
 
+  .ttsBtn {
+    top: 8px;
+    right: 20px;
+  }
+
   .circle {
-    width: 46px;
-    height: 46px;
+    width: 40px;
+    height: 40px;
     min-width: 46px;
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .title {

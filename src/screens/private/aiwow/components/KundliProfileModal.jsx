@@ -46,7 +46,7 @@ const KundliProfileModal = ({ isOpen, onClose, onSelectProfile,setShowAddProfile
       initials,
       birthDate,
       birthTime,
-      relation: profile.relation || 'Self',
+      relation: profile.relation || '',
     };
   };
 

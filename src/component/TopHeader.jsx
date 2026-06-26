@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { NavLink, Link, useNavigate } from "react-router-dom";
+import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "./TopHeader.module.scss";
 import { PATH } from "../utils/routes/Paths";
@@ -784,6 +784,7 @@ const CALCULATOR_LINKS = [
 const CalculatorsDropdown = () => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -816,7 +817,7 @@ const CalculatorsDropdown = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={styles.calcDropdownItem}
+              className={`${styles.calcDropdownItem} ${pathname.startsWith(item.path) ? styles.calcDropdownItemActive : ""}`}
               onClick={() => setOpen(false)}
             >
               {item.title}

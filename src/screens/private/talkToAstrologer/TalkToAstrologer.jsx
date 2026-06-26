@@ -331,6 +331,32 @@ const TalkToAstrologer = () => {
     }
   }, [astrodata?.data?.topTenAstrologer]);
 
+  // Update local astrologer state when real-time status event fires
+  useEffect(() => {
+    const handleStatusUpdate = (e) => {
+      const { astrologerId, isActive, isActiveType, astrologer } = e.detail;
+
+      setTopTenAstrologers((prev) =>
+        prev.map((a) =>
+          a._id === astrologerId
+            ? { ...a, isActive, isActiveType: isActiveType || [], ...(astrologer?.price && { price: astrologer.price }) }
+            : a
+        )
+      );
+
+      setAllAstrologers((prev) =>
+        prev.map((a) =>
+          a._id === astrologerId
+            ? { ...a, isActive, isActiveType: isActiveType || [], ...(astrologer?.price && { price: astrologer.price }) }
+            : a
+        )
+      );
+    };
+
+    window.addEventListener("astrologer:status", handleStatusUpdate);
+    return () => window.removeEventListener("astrologer:status", handleStatusUpdate);
+  }, []);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     setPage(1);

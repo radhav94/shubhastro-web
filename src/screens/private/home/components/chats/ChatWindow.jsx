@@ -42,6 +42,7 @@ import useAstrologerAvailability from "../../../../../utils/hooks/useAstrologerA
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
+  const chatPageRef = useRef(null);
   const navigate = useNavigate();
   const { state } = useLocation();
   const { id: urlAstrologerId } = useParams();
@@ -127,6 +128,47 @@ const ChatWindow = () => {
     window.addEventListener("walletBalanceUpdated", handleBalanceUpdate);
     return () => window.removeEventListener("walletBalanceUpdated", handleBalanceUpdate);
   }, [refreshWallet]);
+
+  // iOS/Android keyboard fix: resize chatPage based on visualViewport height
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport || !chatPageRef.current) return;
+
+    // Only apply on mobile (touch devices)
+    const isMobile = window.innerWidth <= 1180;
+    if (!isMobile) return;
+
+    const onResize = () => {
+      if (!chatPageRef.current) return;
+      const currentHeight = viewport.height;
+      const fullHeight = window.screen.height;
+      // Keyboard is considered open if visual viewport is noticeably smaller than screen
+      const keyboardOpen = currentHeight < fullHeight * 0.75;
+      
+      if (keyboardOpen) {
+        chatPageRef.current.style.height = `${currentHeight}px`;
+        chatPageRef.current.style.bottom = 'auto';
+      } else {
+        chatPageRef.current.style.height = '';
+        chatPageRef.current.style.bottom = '0';
+      }
+      // Prevent parent page from scrolling when keyboard opens
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    viewport.addEventListener('resize', onResize);
+    viewport.addEventListener('scroll', onResize);
+
+    return () => {
+      viewport.removeEventListener('resize', onResize);
+      viewport.removeEventListener('scroll', onResize);
+      if (chatPageRef.current) {
+        chatPageRef.current.style.height = '';
+        chatPageRef.current.style.bottom = '0';
+      }
+    };
+  }, []);
 
   const {
     messages,
@@ -574,7 +616,7 @@ const ChatWindow = () => {
         switchType={switchType || "audio"}
         onCancel={handleCancelCall}
       />
-      <div className={styles.chatPage}>
+      <div className={styles.chatPage} ref={chatPageRef}>
         <div className={styles.chatWindow}>
           <ChatHeader
             fullName={fullName}
