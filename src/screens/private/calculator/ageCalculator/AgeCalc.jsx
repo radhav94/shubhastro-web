@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
 import styles from "./AgeCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
@@ -11,7 +12,7 @@ const STORAGE_KEY = "age_calculator";
 
 const initialFormState = {
   dob: "",
-  asOf: "",
+  asOf: dayjs().format("YYYY-MM-DD"),
 };
 
 const AgeCalc = () => {
