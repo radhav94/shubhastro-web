@@ -12,7 +12,7 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 18px;
-  padding: 12px;
+  padding: 30px 12px 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
   border: 1px solid #e5e7eb;
   animation: slideUp 0.3s ease-out;
@@ -70,18 +70,32 @@
   }
 }
 
-.viewToggle {
-  font-size: 13px;
-  font-weight: 600;
+.toggleArrow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #ffe0b2;
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.3);
   color: #f75801;
-  background: none;
-  border: none;
-  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 4px;
-  align-self: center;
-  padding: 4px 0;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    box-shadow: 0 6px 18px rgba(247, 88, 1, 0.4);
+  }
+
+  &:active {
+    transform: translate(-50%, -50%) scale(0.94);
+  }
 }
 
 /* Card list */
