@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import SeoHelmet from "../../../../component/SeoHelmet";
 import {
   useGetSingleBlogQuery,
   useGetRelatedBlogsQuery,
@@ -96,8 +97,15 @@ const SingleBlogDetails = () => {
   if (isLoading) return <p style={{ textAlign: "center", padding: "60px" }}>Loading...</p>;
   if (!singleBLogData) return <p style={{ textAlign: "center", padding: "60px" }}>No blog found</p>;
 
+  const seoData = {
+    meta_title: singleBLogData.meta_title || singleBLogData.title,
+    meta_description: singleBLogData.meta_description || singleBLogData.description || cleanText?.slice(0, 160),
+  };
+
   return (
     <div className={styles.pageWrapper}>
+      <SeoHelmet data={seoData} />
+
       {/* Breadcrumb */}
       <nav className={styles.breadcrumb}>
         <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label="Go back">
