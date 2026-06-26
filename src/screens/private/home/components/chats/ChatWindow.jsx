@@ -138,15 +138,23 @@ const ChatWindow = () => {
     const isMobile = window.innerWidth <= 1180;
     if (!isMobile) return;
 
+    const initialHeight = window.innerHeight;
+
     const onResize = () => {
       if (!chatPageRef.current) return;
-      const height = viewport.height;
-      chatPageRef.current.style.height = `${height}px`;
-      window.scrollTo(0, viewport.offsetTop);
+      const currentHeight = viewport.height;
+      // Only set explicit height when keyboard is open (viewport is significantly smaller)
+      if (currentHeight < initialHeight - 50) {
+        chatPageRef.current.style.height = `${currentHeight}px`;
+        chatPageRef.current.style.bottom = 'auto';
+      } else {
+        chatPageRef.current.style.height = '';
+        chatPageRef.current.style.bottom = '0';
+      }
+      // Prevent parent page from scrolling when keyboard opens
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
     };
-
-    // Set initial height immediately
-    onResize();
 
     viewport.addEventListener('resize', onResize);
     viewport.addEventListener('scroll', onResize);
@@ -156,6 +164,7 @@ const ChatWindow = () => {
       viewport.removeEventListener('scroll', onResize);
       if (chatPageRef.current) {
         chatPageRef.current.style.height = '';
+        chatPageRef.current.style.bottom = '0';
       }
     };
   }, []);
