@@ -804,9 +804,13 @@
   display: block;
 
   &:hover {
-    background: #fff3ed;
     color: #F75801;
   }
+}
+
+.calcDropdownItemActive {
+  color: #F75801;
+  font-weight: 600;
 }
 
 @keyframes fadeIn {

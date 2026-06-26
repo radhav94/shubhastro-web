@@ -45,13 +45,11 @@ const NumerologyReport = () => {
       <div className={styles.cardsGrid}>
         {cards.map((item) => (
           <div key={item.category} className={styles.card}>
+            <span className={styles.ttsBtn}>
+              <TTSButton text={`${item.title}. Number ${item.number}. ${item.description}${item.master ? '. Master Number' : ''}`} />
+            </span>
             <div className={styles.cardContent}>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <h3 className={styles.title}>{item.title}</h3>
-                <span style={{ marginLeft: "auto", display: "inline-flex" }}>
-                  <TTSButton text={`${item.title}. Number ${item.number}. ${item.description}${item.master ? '. Master Number' : ''}`} />
-                </span>
-              </div>
+              <h3 className={styles.title}>{item.title}</h3>
               <p className={styles.text}>{item.description}</p>
               {item.master && (
                 <span className={styles.master}>Master Number</span>
