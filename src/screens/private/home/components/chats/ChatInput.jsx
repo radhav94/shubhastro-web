@@ -281,7 +281,7 @@ const ChatInput = ({
                   }, 0);
                 }
               }}
-              placeholder="Type your message here..."
+              placeholder="Type a message..."
               rows={1}
             />
           <div className={styles.inputIcons}>

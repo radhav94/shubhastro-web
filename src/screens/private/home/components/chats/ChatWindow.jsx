@@ -42,6 +42,7 @@ import useAstrologerAvailability from "../../../../../utils/hooks/useAstrologerA
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
+  const chatPageRef = useRef(null);
   const navigate = useNavigate();
   const { state } = useLocation();
   const { id: urlAstrologerId } = useParams();
@@ -127,6 +128,37 @@ const ChatWindow = () => {
     window.addEventListener("walletBalanceUpdated", handleBalanceUpdate);
     return () => window.removeEventListener("walletBalanceUpdated", handleBalanceUpdate);
   }, [refreshWallet]);
+
+  // iOS/Android keyboard fix: resize chatPage based on visualViewport height
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport || !chatPageRef.current) return;
+
+    // Only apply on mobile (touch devices)
+    const isMobile = window.innerWidth <= 1180;
+    if (!isMobile) return;
+
+    const onResize = () => {
+      if (!chatPageRef.current) return;
+      const height = viewport.height;
+      chatPageRef.current.style.height = `${height}px`;
+      window.scrollTo(0, viewport.offsetTop);
+    };
+
+    // Set initial height immediately
+    onResize();
+
+    viewport.addEventListener('resize', onResize);
+    viewport.addEventListener('scroll', onResize);
+
+    return () => {
+      viewport.removeEventListener('resize', onResize);
+      viewport.removeEventListener('scroll', onResize);
+      if (chatPageRef.current) {
+        chatPageRef.current.style.height = '';
+      }
+    };
+  }, []);
 
   const {
     messages,
@@ -574,7 +606,7 @@ const ChatWindow = () => {
         switchType={switchType || "audio"}
         onCancel={handleCancelCall}
       />
-      <div className={styles.chatPage}>
+      <div className={styles.chatPage} ref={chatPageRef}>
         <div className={styles.chatWindow}>
           <ChatHeader
             fullName={fullName}

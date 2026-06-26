@@ -71,14 +71,16 @@ $floating-button-gap: 14px;
 /* PAGE WRAPPER */
 .chatPage {
   height: calc(100dvh - 95px);
-  // padding: 0 16px;
-  // background: #fff;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   margin: 0 auto;
   @media (width <= 1180px) {
     height: calc(100dvh - 53px);
+  }
+  @media (width <= 767px) {
+    height: calc(100dvh - 53px);
+    /* Remove any bottom spacing — input bar should touch the edge */
   }
 }
 
@@ -1108,17 +1110,16 @@ $floating-button-gap: 14px;
 
 /* ==================== INPUT BAR ==================== */
 .inputBox {
-  // min-height: var(--chat-input-height);
   padding: 8px max(calc(50% - 720px + 20px), 12px);
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: none;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
+  z-index: 10;
 }
 
 .inputWrapper {
@@ -1157,7 +1158,10 @@ $floating-button-gap: 14px;
 .inputField::placeholder {
   color: $bg-footer;
   font-weight: 300;
-  font-size: 16px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .inputIcons {
@@ -1541,9 +1545,6 @@ $floating-button-gap: 14px;
   .inputBox {
     padding: 8px 12px;
     gap: 8px;
-    min-height: var(--chat-input-height);
-    max-height: none;
-    height: auto;
     flex-shrink: 0;
   }
 

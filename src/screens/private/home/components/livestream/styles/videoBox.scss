@@ -23,7 +23,7 @@
 .reel-scroll-root {
   position: relative;
   width: 100%;
-  height: 100%;
+  height: 100dvh;
   will-change: transform;
   display: flex;
   flex-direction: column;
