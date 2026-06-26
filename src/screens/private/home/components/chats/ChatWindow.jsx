@@ -138,13 +138,14 @@ const ChatWindow = () => {
     const isMobile = window.innerWidth <= 1180;
     if (!isMobile) return;
 
-    const initialHeight = window.innerHeight;
-
     const onResize = () => {
       if (!chatPageRef.current) return;
       const currentHeight = viewport.height;
-      // Only set explicit height when keyboard is open (viewport is significantly smaller)
-      if (currentHeight < initialHeight - 50) {
+      const fullHeight = window.screen.height;
+      // Keyboard is considered open if visual viewport is noticeably smaller than screen
+      const keyboardOpen = currentHeight < fullHeight * 0.75;
+      
+      if (keyboardOpen) {
         chatPageRef.current.style.height = `${currentHeight}px`;
         chatPageRef.current.style.bottom = 'auto';
       } else {
