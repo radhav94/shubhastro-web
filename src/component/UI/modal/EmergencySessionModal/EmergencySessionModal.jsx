@@ -1,4 +1,4 @@
-import { X, MessageSquare, Phone } from "lucide-react";
+import { X, MessageSquare, Phone, Video } from "lucide-react";
 import { createPortal } from "react-dom";
 import styles from "./EmergencySessionModal.module.scss";
 import { getAstrologerDefaultImage } from "../../../../utils/appImages";
@@ -9,6 +9,7 @@ const EmergencySessionModal = ({
   astrologer,
   onChatNow,
   onCallNow,
+  onVideoNow,
 }) => {
   if (!isOpen || !astrologer) return null;
 
@@ -17,6 +18,7 @@ const EmergencySessionModal = ({
   const emergencyPrice = astrologer.emergencyPrice || {};
   const chatRate = emergencyPrice.chatRate?.amount || 0;
   const audioRate = emergencyPrice.audioRate?.amount || 0;
+  const videoRate = emergencyPrice.videoCallRate?.amount || 0;
 
   return createPortal(
     <div className={styles.overlay} onClick={onClose}>
@@ -47,7 +49,7 @@ const EmergencySessionModal = ({
           {chatRate > 0 && (
             <div className={styles.actionWrapper}>
               <button className={styles.actionBtn} onClick={() => { onChatNow(astrologer); onClose(); }}>
-                <MessageSquare size={18} /> Chat Now
+                <MessageSquare size={16} /> Chat
               </button>
               <span className={styles.actionPrice}>₹{chatRate}/min</span>
             </div>
@@ -55,9 +57,17 @@ const EmergencySessionModal = ({
           {audioRate > 0 && (
             <div className={styles.actionWrapper}>
               <button className={styles.actionBtn} onClick={() => { onCallNow(astrologer); onClose(); }}>
-                <Phone size={18} /> Call Now
+                <Phone size={16} /> Call
               </button>
               <span className={styles.actionPrice}>₹{audioRate}/min</span>
+            </div>
+          )}
+          {videoRate > 0 && (
+            <div className={styles.actionWrapper}>
+              <button className={styles.actionBtn} onClick={() => { onVideoNow?.(astrologer); onClose(); }}>
+                <Video size={16} /> Video
+              </button>
+              <span className={styles.actionPrice}>₹{videoRate}/min</span>
             </div>
           )}
         </div>

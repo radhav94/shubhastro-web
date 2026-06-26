@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import AgoraRTC from "agora-rtc-sdk-ng";
-import { applyVideoEncoderConfig, VIDEO_CALL_ENCODER_CONFIG, AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
+import { AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
 import {
   IoMic,
   IoMicOff,
@@ -30,7 +30,6 @@ import { useGetBalanceMutation } from "../../redux/api/wallet/walletApi";
 import ProfileManager from "../UI/Profile/ProfileManager";
 import { useGetAllKundlisQuery } from "../../services/appServices/kundliServicesNew";
 import { Toast } from "../index";
-import { getUserFromStorage } from "../../utils/authStorage";
 import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
 import RechargeModal from "../recharge-modal/RechargeModal";
 import { PATH } from "../../utils/routes/Paths";
@@ -76,9 +75,6 @@ const VideoCalling = ({ callData }) => {
   const micTrackRef = useRef(null);
   const camTrackRef = useRef(null);
 
-  const localVideoFullRef = useRef(null);
-  const [isLocalBig, setIsLocalBig] = useState(false);
-
   const localVideoMiniRef = useRef(null);
   const remoteVideoRef = useRef(null);
 
@@ -95,7 +91,6 @@ const VideoCalling = ({ callData }) => {
   const [joined, setJoined] = useState(false);
   const micOn = isMicOn;
   const setMicOn = setIsMicOn;
-  const [cameraOn, setCameraOn] = useState(true);
   const speakerOn = isSpeakerOn;
   const setSpeakerOn = setIsSpeakerOn;
   // Use context's isCallMinimized instead of local state
@@ -213,21 +208,6 @@ const VideoCalling = ({ callData }) => {
     };
   }, [showChatNotification]);
 
-  // Get customer name from storage
-  const user = getUserFromStorage();
-  const customerName = useMemo(() => {
-    console.log("🔍 User from storage:", user);
-    if (!user) {
-      console.log("⚠️ No user found in storage");
-      return "Customer";
-    }
-    const name = user.firstName && user.lastName 
-      ? `${user.firstName} ${user.lastName}`.trim()
-      : user.firstName || "Customer";
-    console.log("✅ Customer name:", name);
-    return name;
-  }, [user]);
-
   /* ================= PREVENT ACCIDENTAL REFRESH & DETECT REFRESH ================= */
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -240,40 +220,9 @@ const VideoCalling = ({ callData }) => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  /* ================= LOCAL VIDEO ================= */
-  const playLocalVideo = (container) => {
-    if (!camTrackRef.current || !container) return;
-
-    try {
-      camTrackRef.current.stop();
-    } catch (e) {
-      console.error("Error stopping camera track:", e);
-    }
-
-    container.innerHTML = "";
-    camTrackRef.current.play(container);
-  };
-
-
   /* ================= REMOTE VIDEO SAFE PLAY ================= */
-  // const safePlayRemoteVideo = (track) => {
-  //   if (!remoteVideoRef.current || !track) return;
-
-  //   remoteVideoRef.current.innerHTML = "";
-  //   const div = document.createElement("div");
-  //   div.style.width = "100%";
-  //   div.style.height = "100%";
-  //   remoteVideoRef.current.appendChild(div);
-
-  //   setTimeout(() => {
-  //     try {
-  //       track.play(div);
-  //     } catch (e) {
-  //       console.warn("Retry remote video play");
-  //       setTimeout(() => track.play(div), 300);
-  //     }
-  //   }, 150);
-  // };
+  // One-way video: the user broadcasts no camera, so the astrologer's remote
+  // video is the only video shown — in the full view or the minimized view.
 
   // Use "contain" on desktop so full frame is visible, "cover" on mobile for full-screen feel
   const videoFit = window.innerWidth >= 768 ? "contain" : "cover";
@@ -281,8 +230,9 @@ const VideoCalling = ({ callData }) => {
   const safePlayRemoteVideo = (track) => {
     if (!track) return;
 
-    const container = isLocalBig
-      ? localVideoFullRef.current
+    // Show the astrologer's video in whichever container is currently visible.
+    const container = isMinimized
+      ? localVideoMiniRef.current
       : remoteVideoRef.current;
 
     if (!container) return;
@@ -426,42 +376,38 @@ const VideoCalling = ({ callData }) => {
         // concurrently and releasing its mic track. If the browser hasn't fully
         // freed the device yet, createMicrophoneAndCameraTracks can fail. Retry
         // a few times with a short delay to give the old track time to close.
-        let micTrack, camTrack;
+        // One-way video: the customer does NOT publish a camera, so the
+        // astrologer can never see the user. We only capture the microphone;
+        // the user still subscribes to and sees the astrologer's video.
+        let micTrack;
         const MAX_TRACK_RETRIES = 3;
         const TRACK_RETRY_DELAY = 800; // ms
         for (let attempt = 1; attempt <= MAX_TRACK_RETRIES; attempt++) {
           if (didCancelStart || cleanupRef.current || endCallRef.current) return;
           try {
-            [micTrack, camTrack] = await AgoraRTC.createMicrophoneAndCameraTracks(
-              {
-                encoderConfig: {
-                  sampleRate: AUDIO_ENCODER_CONFIG.sampleRate,
-                  stereo: AUDIO_ENCODER_CONFIG.stereo,
-                  bitrate: AUDIO_ENCODER_CONFIG.bitrate,
-                },
+            micTrack = await AgoraRTC.createMicrophoneAudioTrack({
+              encoderConfig: {
+                sampleRate: AUDIO_ENCODER_CONFIG.sampleRate,
+                stereo: AUDIO_ENCODER_CONFIG.stereo,
+                bitrate: AUDIO_ENCODER_CONFIG.bitrate,
               },
-              {}
-            );
+            });
             break; // success
           } catch (trackErr) {
-            console.warn(`[VideoCall] ⚠️ Track creation attempt ${attempt}/${MAX_TRACK_RETRIES} failed:`, trackErr.message);
+            console.warn(`[VideoCall] ⚠️ Mic track creation attempt ${attempt}/${MAX_TRACK_RETRIES} failed:`, trackErr.message);
             if (attempt === MAX_TRACK_RETRIES) throw trackErr;
             await new Promise((r) => setTimeout(r, TRACK_RETRY_DELAY));
           }
         }
         if (didCancelStart || cleanupRef.current || endCallRef.current) {
-          micTrack.stop();
-          micTrack.close();
-          camTrack.stop();
-          camTrack.close();
+          micTrack?.stop();
+          micTrack?.close();
           return;
         }
 
         micTrackRef.current = micTrack;
-        camTrackRef.current = camTrack;
-
-        // Apply low-bandwidth encoding settings
-        await applyVideoEncoderConfig(camTrack, VIDEO_CALL_ENCODER_CONFIG);
+        // No local camera track — the user does not broadcast video.
+        camTrackRef.current = null;
 
         // Retry join with exponential backoff — Agora channel may not be ready immediately
         // after two-way accept (server creates channel after both sides accept)
@@ -500,7 +446,9 @@ const VideoCalling = ({ callData }) => {
         // publishing disabled tracks with TRACK_IS_DISABLED. We apply the
         // mute state (isMicOn) AFTER publishing so the track is accepted
         // by the server and then silenced locally.
-        await client.publish([micTrackRef.current, camTrackRef.current]);
+        // Publish ONLY the microphone — never the camera. This is what
+        // prevents the astrologer from receiving/seeing the user's video.
+        await client.publish([micTrackRef.current]);
 
         // Now sync mic track with context mute state (persists across remounts)
         micTrackRef.current.setEnabled(isMicOn);
@@ -571,21 +519,11 @@ const VideoCalling = ({ callData }) => {
 
   useEffect(() => {
     if (!joined) return;
-
-    if (isMinimized) {
-      playLocalVideo(localVideoMiniRef.current);
-    } else if (isLocalBig) {
-      playLocalVideo(remoteVideoRef.current); // local goes big
-    } else {
-      playLocalVideo(localVideoFullRef.current); // local stays small
-    }
-  }, [joined, isMinimized, isLocalBig]);
-
-  useEffect(() => {
-    if (!clientRef.current) return;
+    // Re-play the astrologer's remote video into the correct container when
+    // switching between full and minimized views, or when the astrologer
+    // toggles their camera.
     resumeRemoteTracks();
-    // eslint-disable-next-line
-  }, [isLocalBig]);
+  }, [joined, isMinimized, remoteVideoEnabled]);
 
 
   useEffect(() => {
@@ -597,16 +535,6 @@ const VideoCalling = ({ callData }) => {
       }
     }
   }, [micOn]);
-
-  useEffect(() => {
-    if (camTrackRef.current) {
-      try {
-        camTrackRef.current.setEnabled(cameraOn);
-      } catch (e) {
-        console.warn("[VideoCall] Camera setEnabled failed (connection not ready):", e.message);
-      }
-    }
-  }, [cameraOn]);
 
   /* ================= SPEAKER CONTROL ================= */
   useEffect(() => {
@@ -821,9 +749,9 @@ const VideoCalling = ({ callData }) => {
 
         Toast.success("Video session ended.");
 
-        // Show review: if astrologer ended the call, always show (both sessions ending).
-        // If user ended, only show when no ongoing chat.
-        if (data?.endedBy === "ASTROLOGER" || !hasOngoingChat()) {
+        // Show review only when there's no ongoing chat session.
+        // If chat is still active (e.g. video was upgraded from chat), skip review.
+        if (!hasOngoingChat()) {
           setOpenReview(true);
         }
       }
@@ -1270,13 +1198,19 @@ const VideoCalling = ({ callData }) => {
             ref={localVideoMiniRef}
             style={{ width: "100%", height: "100%", transform: "scaleX(-1)" }}
           />
-          {/* Avatar Overlay - Separate layer */}
-          {!cameraOn && (
+          {/* Avatar Overlay — astrologer camera off */}
+          {!remoteVideoEnabled && (
             <div className={styles.avatarOverlayMini}>
               <img
-                src={DEFAULT_AVATAR}
-                alt="You"
+                src={
+                  activeCall?.profileImgUrl ||
+                  lastRequestedAstro?.profileImgUrl ||
+                  lastRequestedAstro?.imageUrl ||
+                  getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender)
+                }
+                alt={callerName}
                 className={styles.avatarImageMini}
+                onError={(e) => { e.currentTarget.src = getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender); }}
               />
             </div>
           )}
@@ -1285,9 +1219,6 @@ const VideoCalling = ({ callData }) => {
         <div className={styles.miniControls}>
           <button onClick={() => setMicOn((p) => !p)}>
             {micOn ? <IoMic size={18} /> : <IoMicOff size={18} />}
-          </button>
-          <button onClick={() => setCameraOn((p) => !p)}>
-            {cameraOn ? <IoVideocam size={18} /> : <IoVideocamOff size={18} />}
           </button>
           <button onClick={() => setSpeakerOn((p) => !p)}>
             {speakerOn ? <IoVolumeHigh size={18} /> : <IoVolumeMute size={18} />}
@@ -1520,32 +1451,8 @@ const VideoCalling = ({ callData }) => {
                 </div>
               )}
 
-              {/* Local Video Preview (PIP) */}
-              <div
-                className={styles.localVideoPreview}
-                onClick={() => setIsLocalBig((p) => !p)}
-              >
-                {/* Local Video Container - Always rendered */}
-                <div
-                  ref={localVideoFullRef}
-                  style={{ width: "100%", height: "100%", cursor: "pointer" }}
-                />
-                {/* Avatar Overlay - Separate layer */}
-                {!cameraOn && (
-                  <div className={styles.avatarOverlayLocal}>
-                    <img
-                      src={DEFAULT_AVATAR}
-                      alt="You"
-                      className={styles.avatarImageLocal}
-                    />
-                  </div>
-                )}
-                {/* Customer Name Label */}
-                <div className={styles.localVideoLabel}>
-                  <span className={styles.localVideoName}>{capitalizeWords(customerName)}</span>
-                  <span className={styles.localVideoRole}>You</span>
-                </div>
-              </div>
+              {/* Local self-preview removed — one-way video: the user only
+                  sees the astrologer's video and does not broadcast their own. */}
             </div>
 
             {/* Bottom Controls */}

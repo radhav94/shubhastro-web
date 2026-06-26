@@ -177,6 +177,7 @@ const Communities = ({ onCommunityClick, topAstrologers = [], sectionContent = [
             astrologer={emergencyAstrologer}
             onChatNow={(astro) => handleConnect(astro, "chat", true)}
             onCallNow={(astro) => handleConnect(astro, "audio", true)}
+            onVideoNow={(astro) => handleConnect(astro, "video", true)}
           />
         </Suspense>
       )}
