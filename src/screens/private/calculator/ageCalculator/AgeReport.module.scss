@@ -106,7 +106,7 @@
 /* Mobile responsive */
 @media (max-width: 480px) {
   .wrapper {
-    margin: 70px auto 20px;
+    margin: 70px 20px;
     padding: 16px 12px;
   }
 
@@ -133,7 +133,6 @@
 
 /* ── Connect Card ── */
 .connectCardWrap {
-  margin: 4px 0;
-  border-radius: 14px;
-  overflow: hidden;
+  max-width: 760px;
+  margin: 0 auto ;
 }
