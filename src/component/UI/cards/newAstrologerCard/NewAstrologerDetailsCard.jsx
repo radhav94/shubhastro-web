@@ -43,7 +43,7 @@ const NewAstrologerDetailsCard = ({
         <span>{isOnline ? "Online" : "Offline"}</span>
       </div>
 
-      <Link to={`/astrologer/${astrologer._id}`} className={styles.detailsImageLink}>
+      <Link to={`/astrologer/${astrologer._id}`} className={styles.detailsImageLink}></Link>
         <div className={styles.detailsImageWrapper}>
           <img
             src={imageUrl}
@@ -52,7 +52,6 @@ const NewAstrologerDetailsCard = ({
             onError={(e) => { e.target.src = getAstrologerDefaultImage(astrologer?.gender); }}
           />
         </div>
-      </Link>
 
       <div className={styles.detailsInfo}>
         <Link to={`/astrologer/${astrologer?._id}`} className={styles.detailsNameLink}>
