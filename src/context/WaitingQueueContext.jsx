@@ -438,6 +438,7 @@ export const WaitingQueueProvider = ({ children }) => {
               astrologerId: astroId,
               remainingTime: billedMinutes || 0,
               isEmergency: session.isEmergency || false,
+              profileImgUrl: astro?.profileImgUrl || user?.astro?.profileImgUrl || null,
             });
 
             voiceSocket.emit("call:reconnect", {

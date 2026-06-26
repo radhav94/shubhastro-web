@@ -522,7 +522,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       setReviewData({
         astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
         fullName: currentCall?.callerName || callerName,
-        profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
+        profileImage: currentCall?.profileImgUrl || currentCall?.astrologerImage,
         roomId,
         gender: lastRequestedAstro?.gender || chatLastRequestedAstro?.gender || activeCall?.gender,
       });
@@ -690,7 +690,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         setReviewData({
           astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
           fullName: currentCall?.callerName || callerName,
-          profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
+          profileImage: currentCall?.profileImgUrl || currentCall?.astrologerImage,
           roomId,
           gender: lastRequestedAstro?.gender || chatLastRequestedAstro?.gender || activeCall?.gender,
         });
