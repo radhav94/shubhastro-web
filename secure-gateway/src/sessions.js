@@ -4,7 +4,7 @@
  * Maps a session id -> { key: Buffer, createdAt: number }. Sessions expire
  * after SESSION_TTL_MS and are swept periodically.
  *
- * SCALING NOTE: this is per-process. If you run more than one BFF instance
+ * SCALING NOTE: this is per-process. If you run more than one secure gateway instance
  * behind a load balancer, move this to a shared store (e.g. Redis) or enable
  * sticky sessions, otherwise a request can land on an instance that doesn't
  * hold the session key and decryption on the client will fail.

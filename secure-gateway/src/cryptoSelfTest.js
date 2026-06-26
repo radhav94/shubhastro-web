@@ -5,7 +5,7 @@
  * and proves it can decrypt what the server side (node:crypto in crypto.js)
  * produces. This mirrors src/utils/security/cryptoClient.js step for step.
  *
- * Run: npm run selftest  (from the bff/ directory)
+ * Run: npm run selftest  (from the secure-gateway/ directory)
  */
 
 import assert from "node:assert";

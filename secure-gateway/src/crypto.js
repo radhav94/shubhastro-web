@@ -1,5 +1,5 @@
 /**
- * BFF crypto helpers.
+ * secure gateway crypto helpers.
  *
  * Key agreement: ephemeral ECDH on the P-256 (prime256v1) curve. This avoids
  * shipping a static key inside the browser bundle — each session derives its

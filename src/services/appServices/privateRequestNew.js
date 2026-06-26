@@ -3,9 +3,10 @@ import { createSecureBaseQuery } from "../../utils/security/secureBaseQuery";
 import Toast from "../../component/toast";
 import { getToken } from "../../utils/utlis";
 import { navigateToLogin } from "../../utils/navigationHelper";
+import { BACKEND_PROXY } from "../../utils/apiConfig";
 
 let unAuthorizedCount = 0;
-const BASE_URL = "/main";
+const BASE_URL = BACKEND_PROXY;
 
 // Endpoints that should be accessible without authentication (no login redirect on 401)
 const PUBLIC_ENDPOINTS = ["getAstrologerById", "getAstrologers", "getRecommendedAstrologers"];

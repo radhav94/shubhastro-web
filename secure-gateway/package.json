@@ -1,9 +1,9 @@
 {
-  "name": "shubhtalk-bff",
+  "name": "shubhtalk-secure-gateway",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Encrypting BFF proxy that sits in front of the ShubhTalk upstream APIs and encrypts JSON response bodies so they appear as ciphertext in the browser Network tab.",
+  "description": "Encrypting secure gateway that sits in front of the ShubhTalk upstream APIs and encrypts JSON response bodies so they appear as ciphertext in the browser Network tab.",
   "engines": {
     "node": ">=18"
   },

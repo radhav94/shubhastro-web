@@ -1,7 +1,7 @@
 /**
  * ECDH handshake endpoint.
  *
- * POST /__bff/handshake
+ * POST /__sgw/handshake
  *   body: { clientPublicKey: base64(uncompressed P-256 point) }
  *   resp: { sid, serverPublicKey: base64(uncompressed P-256 point), ttlMs }
  *
@@ -18,7 +18,7 @@ import { SESSION_TTL_MS } from "./config.js";
 
 export const handshakeRouter = express.Router();
 
-handshakeRouter.post("/__bff/handshake", express.json({ limit: "8kb" }), (req, res) => {
+handshakeRouter.post("/__sgw/handshake", express.json({ limit: "8kb" }), (req, res) => {
   try {
     const clientPublicKeyB64 = req.body?.clientPublicKey;
     if (!clientPublicKeyB64 || typeof clientPublicKeyB64 !== "string") {

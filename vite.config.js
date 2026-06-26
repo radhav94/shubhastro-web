@@ -81,24 +81,19 @@ export default defineConfig({
   },
   server: {
     host: true,
-    proxy: (() => {
-      // All API traffic now goes through the encrypting BFF (see /bff).
-      // The BFF strips the route prefix and forwards to the real upstream, so
-      // we must NOT rewrite the path here. Start the BFF first: `cd bff && npm start`.
-      const BFF_URL = process.env.BFF_URL || "http://127.0.0.1:8787";
-      return {
-        // ECDH handshake endpoint
-        "/__bff": { target: BFF_URL, changeOrigin: true },
-        // Main backend API + WebSocket (socket.io)
-        "/main": { target: BFF_URL, changeOrigin: true, ws: true },
-        // Vedic astrology API
-        "/vedic": { target: BFF_URL, changeOrigin: true },
-        // Chart generation service
-        "/chart": { target: BFF_URL, changeOrigin: true },
-        // Voice TTS/STT service (passthrough, not encrypted)
-        "/voice": { target: BFF_URL, changeOrigin: true },
-      };
-    })(),
+    // Dev mirrors production's same-origin path setup: the frontend calls
+    // "/sgw/..." (VITE_SGW_URL="/sgw") and vite proxies that to the local
+    // secure gateway, stripping the /sgw prefix — exactly like nginx does in
+    // prod. Start the gateway first: `cd secure-gateway && npm start`
+    // (defaults to 127.0.0.1:8787). Override with SGW_URL if needed.
+    proxy: {
+      "/sgw": {
+        target: process.env.SGW_URL || "http://127.0.0.1:8787",
+        changeOrigin: true,
+        ws: true,
+        rewrite: (path) => path.replace(/^\/sgw/, ""),
+      },
+    },
   },
   esbuild: {
     // Remove console.log and console.warn in production, keep console.error

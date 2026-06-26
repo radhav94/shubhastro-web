@@ -14,12 +14,41 @@ import { createProxyMiddleware, responseInterceptor } from "http-proxy-middlewar
 import { ROUTES } from "./config.js";
 import { encryptJson } from "./crypto.js";
 import { getSessionKey } from "./sessions.js";
+import { applyCorsHeaders } from "./cors.js";
 
-const SID_HEADER = "x-bff-sid";
+const SID_HEADER = "x-sgw-sid";
 
 function isJsonResponse(proxyRes) {
   const ct = String(proxyRes.headers["content-type"] || "").toLowerCase();
   return ct.includes("application/json") || ct.includes("+json");
+}
+
+/**
+ * Fail-closed guard for encrypted routes.
+ *
+ * Mounted BEFORE the proxy so a request without a valid session is rejected
+ * with 428 *before* it reaches the upstream — this prevents a header-stripped
+ * request (e.g. "copy as cURL" minus x-sgw-sid) from getting plaintext, and
+ * avoids double-executing mutations on retry.
+ *
+ * Not applied to passthrough routes (e.g. /voice binary) or WebSocket upgrades
+ * (socket.io handshakes over the `upgrade` event, never through here).
+ *
+ * The client (secureBaseQuery / secureAxios) re-handshakes and replays once on
+ * 428, so legitimate traffic recovers transparently after key expiry.
+ */
+function requireSession(req, res, next) {
+  const sid = req.headers[SID_HEADER];
+  const key = sid ? getSessionKey(String(sid)) : null;
+  if (!key) {
+    applyCorsHeaders(req, res);
+    res.setHeader("x-sgw-enc", "0");
+    return res.status(428).json({
+      error: "secure session required",
+      code: "SGW_SESSION_REQUIRED",
+    });
+  }
+  next();
 }
 
 function buildEncryptingProxy(route) {
@@ -34,6 +63,9 @@ function buildEncryptingProxy(route) {
     selfHandleResponse: true,
     on: {
       proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
+        // Ensure CORS headers are present on the (rewritten) cross-origin response.
+        applyCorsHeaders(req, res);
+
         // Only touch JSON. Binary/file/streaming responses pass straight through.
         if (!isJsonResponse(proxyRes)) {
           return responseBuffer;
@@ -42,9 +74,10 @@ function buildEncryptingProxy(route) {
         const sid = req.headers[SID_HEADER];
         const key = sid ? getSessionKey(String(sid)) : null;
 
-        // No valid session key -> return plaintext so nothing breaks. The app
-        // always handshakes first, so legitimate traffic is encrypted; this is
-        // only a safety net during bootstrap / expiry.
+        // The requireSession guard already rejected sessionless requests with
+        // 428, so a missing key here is only a rare TTL race (key expired
+        // between the guard check and this response). Fail open on that narrow
+        // window rather than corrupting an already-executed response.
         if (!key) {
           return responseBuffer;
         }
@@ -53,7 +86,7 @@ function buildEncryptingProxy(route) {
           const plaintext = responseBuffer.toString("utf8");
           const envelope = encryptJson(plaintext, key);
           res.setHeader("content-type", "application/json; charset=utf-8");
-          res.setHeader("x-bff-enc", "1");
+          res.setHeader("x-sgw-enc", "1");
           return JSON.stringify(envelope);
         } catch (err) {
           // If anything goes wrong, fail open with the original body rather
@@ -79,6 +112,13 @@ function buildPassthroughProxy(route) {
     ws: !!route.ws,
     xfwd: true,
     pathRewrite: { [`^${route.prefix}`]: "" },
+    on: {
+      // Attach CORS headers to the upstream response (set before the body is
+      // piped, so they survive the upstream header copy).
+      proxyRes: (proxyRes, req, res) => {
+        applyCorsHeaders(req, res);
+      },
+    },
   });
 }
 
@@ -90,7 +130,12 @@ export function mountProxies(app) {
   const mounted = [];
   for (const route of ROUTES) {
     const mw = route.encrypt ? buildEncryptingProxy(route) : buildPassthroughProxy(route);
-    app.use(route.prefix, mw);
+    if (route.encrypt) {
+      // Fail-closed: reject sessionless HTTP requests before they reach upstream.
+      app.use(route.prefix, requireSession, mw);
+    } else {
+      app.use(route.prefix, mw);
+    }
     mounted.push({ route, mw });
   }
   return mounted;

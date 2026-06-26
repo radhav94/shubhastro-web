@@ -1,5 +1,5 @@
 /**
- * BFF configuration.
+ * secure gateway configuration.
  *
  * Each route maps an incoming path prefix (the same prefixes the frontend
  * already uses: /main, /vedic, /chart, /voice) to an upstream target.
@@ -15,39 +15,46 @@
 
 const env = process.env;
 
-export const PORT = Number(env.BFF_PORT || 8787);
+export const PORT = Number(env.SGW_PORT || 8787);
 
-// Bind address. Keep on localhost when nginx/vite sit in front of the BFF.
-export const HOST = env.BFF_HOST || "127.0.0.1";
+// Bind address. Keep on localhost when nginx/vite sit in front of the secure gateway.
+export const HOST = env.SGW_HOST || "127.0.0.1";
 
 // Session key time-to-live (ms). After this the client must re-handshake.
-export const SESSION_TTL_MS = Number(env.BFF_SESSION_TTL_MS || 1000 * 60 * 60); // 1h
+export const SESSION_TTL_MS = Number(env.SGW_SESSION_TTL_MS || 1000 * 60 * 60); // 1h
 
 // HKDF info string — must match the frontend crypto client exactly.
-export const HKDF_INFO = "shubhtalk-bff-aesgcm-v1";
+export const HKDF_INFO = "shubhtalk-sgw-aesgcm-v1";
+
+// Allowed CORS origins (comma-separated). Empty => reflect any origin (dev).
+// Example prod value: "https://shubhastro.ai,https://www.shubhastro.ai"
+export const ALLOWED_ORIGINS = String(env.SGW_ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
 
 export const ROUTES = [
   {
     prefix: "/main",
-    target: env.BFF_MAIN_TARGET || "https://devapi-shubhtalk.epicon.in",
+    target: env.SGW_MAIN_TARGET || "https://devapi-shubhtalk.epicon.in",
     encrypt: true,
     ws: true, // socket.io passes through here (not encrypted)
   },
   {
     prefix: "/vedic",
-    target: env.BFF_VEDIC_TARGET || "https://json.astrologyapi.com",
+    target: env.SGW_VEDIC_TARGET || "https://json.astrologyapi.com",
     encrypt: true,
     ws: false,
   },
   {
     prefix: "/chart",
-    target: env.BFF_CHART_TARGET || "https://pyapi-shubhtalk.epicon.in",
+    target: env.SGW_CHART_TARGET || "https://pyapi-shubhtalk.epicon.in",
     encrypt: true,
     ws: false,
   },
   {
     prefix: "/voice",
-    target: env.BFF_VOICE_TARGET || "https://api.sarvam.ai",
+    target: env.SGW_VOICE_TARGET || "https://api.sarvam.ai",
     // Sarvam returns binary audio (TTS/STT) — leave it untouched so streaming
     // and binary payloads are not corrupted. Only application/json is ever
     // encrypted anyway, but disabling here avoids any overhead.

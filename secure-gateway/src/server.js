@@ -1,9 +1,9 @@
 /**
- * BFF entry point.
+ * secure gateway entry point.
  *
  * Order matters:
- *   1. /__bff/health  — liveness probe.
- *   2. /__bff/handshake — JSON-parsed ECDH key exchange.
+ *   1. /__sgw/health  — liveness probe.
+ *   2. /__sgw/handshake — JSON-parsed ECDH key exchange.
  *   3. proxy routes — mounted WITHOUT a global body parser so request bodies
  *      stream straight to the upstream (a global parser would break POSTs).
  *
@@ -16,11 +16,16 @@ import express from "express";
 import { PORT, HOST, ROUTES } from "./config.js";
 import { handshakeRouter } from "./handshake.js";
 import { mountProxies } from "./proxy.js";
+import { corsMiddleware } from "./cors.js";
 
 const app = express();
 app.disable("x-powered-by");
 
-app.get("/__bff/health", (req, res) => {
+// CORS first — the frontend calls the secure gateway cross-origin, so preflight (OPTIONS)
+// must be answered before reaching the handshake router or the proxies.
+app.use(corsMiddleware);
+
+app.get("/__sgw/health", (req, res) => {
   res.json({ ok: true, routes: ROUTES.map((r) => ({ prefix: r.prefix, encrypt: r.encrypt, ws: !!r.ws })) });
 });
 
@@ -46,9 +51,9 @@ server.on("upgrade", (req, socket, head) => {
 
 server.listen(PORT, HOST, () => {
   // eslint-disable-next-line no-console
-  console.log(`[bff] listening on http://${HOST}:${PORT}`);
+  console.log(`[sgw] listening on http://${HOST}:${PORT}`);
   for (const r of ROUTES) {
     // eslint-disable-next-line no-console
-    console.log(`[bff]   ${r.prefix}  ->  ${r.target}  (encrypt=${r.encrypt}, ws=${!!r.ws})`);
+    console.log(`[sgw]   ${r.prefix}  ->  ${r.target}  (encrypt=${r.encrypt}, ws=${!!r.ws})`);
   }
 });

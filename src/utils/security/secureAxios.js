@@ -3,20 +3,21 @@
  *
  * Attaches:
  *   - a request interceptor that establishes the ECDH session and adds the
- *     `x-bff-sid` header, and
- *   - a response interceptor (success + error) that decrypts BFF envelopes back
+ *     `x-sgw-sid` header, and
+ *   - a response interceptor (success + error) that decrypts secure gateway envelopes back
  *     into the plain JSON existing callers/error handlers expect.
  *
  * Call attachSecureTransport(instance) BEFORE registering the instance's own
  * response error handler so decryption runs first in the response chain.
  *
- * Decryption is envelope-shape gated, so non-BFF / binary responses are
+ * Decryption is envelope-shape gated, so non-secure gateway / binary responses are
  * untouched.
  */
 
 import {
   ensureSession,
   getSessionId,
+  resetSession,
   isEncryptedEnvelope,
   decryptEnvelope,
 } from "./cryptoClient";
@@ -28,10 +29,11 @@ export function attachSecureTransport(instance) {
       const sid = getSessionId();
       if (sid) {
         config.headers = config.headers || {};
-        config.headers["x-bff-sid"] = sid;
+        config.headers["x-sgw-sid"] = sid;
       }
     } catch {
-      // Fail open — request proceeds, BFF returns plaintext.
+      // Handshake failed (e.g. Web Crypto unavailable). The gateway is
+      // fail-closed and will answer 428; surfaced to the caller below.
     }
     return config;
   });
@@ -48,6 +50,21 @@ export function attachSecureTransport(instance) {
       return response;
     },
     async (error) => {
+      const config = error?.config;
+
+      // Fail-closed recovery: gateway 428 (session missing/expired). Drop the
+      // session, re-handshake, and replay the original request once.
+      if (error?.response?.status === 428 && config && !config.__sgwRetried) {
+        config.__sgwRetried = true;
+        resetSession();
+        try {
+          await ensureSession();
+        } catch {
+          /* if it still can't handshake, fall through and reject below */
+        }
+        return instance(config);
+      }
+
       if (error?.response && isEncryptedEnvelope(error.response.data)) {
         try {
           error.response.data = await decryptEnvelope(error.response.data);

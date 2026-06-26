@@ -1,15 +1,16 @@
 // socketService.js
 import { io } from "socket.io-client";
+import { SOCKET_URL, SOCKET_PATH } from "../utils/apiConfig";
 
 class SocketService {
   socket = null;
   _lastConnectErrorAt = 0;
 
   connect({ onConnected, onDisconnected, onError, onWarn }) {
-    this.socket = io("/", {
+    this.socket = io(SOCKET_URL, {
       transports: ["websocket"],
       autoConnect: true,
-      path: "/main/socket.io",
+      path: SOCKET_PATH,
     });
 
     this.socket.on("connect", () => {

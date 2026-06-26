@@ -1,14 +1,15 @@
 import axios from "axios";
 import { attachSecureTransport } from "../utils/security/secureAxios";
+import { BACKEND_PROXY } from "../utils/apiConfig";
 
 const publicRequest = axios.create({
-  baseURL: "/main/api/",
+  baseURL: `${BACKEND_PROXY}/api/`,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Attach BFF session header + response decryption.
+// Attach secure gateway session header + response decryption.
 attachSecureTransport(publicRequest);
 
 publicRequest.interceptors.request.use(

@@ -3,16 +3,17 @@ import { Toast } from "../component";
 import { getToken } from "../utils/utlis";
 import { navigateToLogin } from "../utils/navigationHelper";
 import { attachSecureTransport } from "../utils/security/secureAxios";
+import { BACKEND_PROXY } from "../utils/apiConfig";
 
 let unAuthorizedCount = 0;
 const privateRequest = axios.create({
-  baseURL: "/main/api/",
+  baseURL: `${BACKEND_PROXY}/api/`,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Attach BFF session header + response decryption FIRST so envelopes are
+// Attach secure gateway session header + response decryption FIRST so envelopes are
 // decrypted before the error handler below inspects response bodies.
 attachSecureTransport(privateRequest);
 

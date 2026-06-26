@@ -12,6 +12,7 @@ import { PATH } from "../../../utils/routes/Paths";
 import { useLazyGetNumerologyPredictionQuery } from "../../../services/appServices/numerologyServices";
 import { useLazyGetMatchMakingQuery } from "../../../redux/api/kundli/dashaApi";
 import { Toast } from "../../../component";
+import { BACKEND_PROXY } from "../../../utils/apiConfig";
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
@@ -89,7 +90,7 @@ const MatchMaking = () => {
 
   /* -------------------- CURL GENERATOR -------------------- */
   const generateCurlCommand = (endpoint, _method, payload, token) => {
-    const baseUrl = "/main";
+    const baseUrl = BACKEND_PROXY;
     const url = `${baseUrl}/api/${endpoint}`;
 
     let curl = `curl --location '${url}' \\\n`;
