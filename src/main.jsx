@@ -34,10 +34,22 @@ if (typeof Node !== 'undefined') {
  * This is a customer-facing app — astrologer tokens/data from the
  * astrologer dashboard should never persist here.
  */
-import { runBrowserCleanup } from './utils/browserCleanup';
-
-// Run cleanup before anything else — if it returns true, app won't mount (page reloads)
-const cleanupTriggered = runBrowserCleanup();
+(() => {
+  const role = localStorage.getItem('shubhtalk_role');
+  if (role === 'ASTROLOGER') {
+    // Clear all localStorage
+    localStorage.clear();
+    // Clear all sessionStorage
+    sessionStorage.clear();
+    // Clear all cookies
+    document.cookie.split(';').forEach((c) => {
+      const name = c.split('=')[0].trim();
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    });
+  }
+  // Always remove stale onboarding session data
+  sessionStorage.removeItem('onboardingSession');
+})()
 
 // import { StrictMode } from "react";
 // import { createRoot } from "react-dom/client";
@@ -89,8 +101,6 @@ if (window.visualViewport) {
   window.visualViewport.addEventListener('scroll', updateToastPosition);
 }
 
-// Only mount React if cleanup didn't trigger a reload
-if (!cleanupTriggered) {
 createRoot(document.getElementById("root")).render(
   // <StrictMode>
   // <AgoraProvider>
@@ -150,4 +160,3 @@ createRoot(document.getElementById("root")).render(
   // </AgoraProvider>
   // </StrictMode>
 );
-} // end if (!cleanupTriggered)
