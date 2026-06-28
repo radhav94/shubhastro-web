@@ -29,6 +29,26 @@ if (typeof Node !== 'undefined') {
   };
 }
 
+/**
+ * Guard: Clear all data if an ASTROLOGER session is detected.
+ * This is a customer-facing app — astrologer tokens/data from the
+ * astrologer dashboard should never persist here.
+ */
+(() => {
+  const role = localStorage.getItem('shubhtalk_role');
+  if (role === 'ASTROLOGER') {
+    // Clear all localStorage
+    localStorage.clear();
+    // Clear all sessionStorage
+    sessionStorage.clear();
+    // Clear all cookies
+    document.cookie.split(';').forEach((c) => {
+      const name = c.split('=')[0].trim();
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    });
+  }
+})()
+
 // import { StrictMode } from "react";
 // import { createRoot } from "react-dom/client";
 
