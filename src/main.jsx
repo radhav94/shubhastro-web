@@ -68,6 +68,11 @@ import { store, persistor } from "./store/store.js";
 import { PersistGate } from "redux-persist/integration/react";
 
 import { AgoraProvider } from "./agora/agoraClient";  // <-- IMPORTANT
+import { runDomainMigrationCleanup } from "./utils/domainMigrationCleanup";
+
+// Run domain migration cleanup BEFORE app renders
+// Clears stale localStorage/sessionStorage/cookies/SW from old domain
+const migrationRedirected = runDomainMigrationCleanup();
 
 // Dynamically adjust toast position based on visual viewport (keyboard open/close)
 if (window.visualViewport) {
@@ -79,6 +84,8 @@ if (window.visualViewport) {
   window.visualViewport.addEventListener('scroll', updateToastPosition);
 }
 
+// Skip rendering if migration triggered a redirect (loop prevention)
+if (!migrationRedirected) {
 createRoot(document.getElementById("root")).render(
   // <StrictMode>
   // <AgoraProvider>
@@ -138,3 +145,4 @@ createRoot(document.getElementById("root")).render(
   // </AgoraProvider>
   // </StrictMode>
 );
+} // end migrationRedirected guard
