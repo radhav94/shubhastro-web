@@ -319,7 +319,7 @@
 
 // Dynamic HTML content from CMS
 .htmlContent {
-  font-size: 16px;
+  font-size: 13px;
   line-height: 1.8;
   color: #444;
   text-align: justify;
@@ -329,16 +329,17 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
+    font-size: 14px;
     color: #1a1a1a;
-    margin-top: 24px;
-    margin-bottom: 12px;
+    margin-top: 16px;
+    margin-bottom: 8px;
     font-weight: bold;
+    @media (width <= 767px) {
+      font-size: 13px;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
   }
-
-  h1 { font-size: 18px; }
-  h2 { font-size: 18px; }
-  h3 { font-size: 18px; }
-  h4 { font-size: 18px; }
 
   ul, ol {
     margin: 16px 0;

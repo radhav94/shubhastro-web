@@ -2212,7 +2212,7 @@
 .calChipActive {
   height: 36px;
   padding: 0 6px 0 16px;
-  background: #f75801;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
   border: none;
   border-radius: 999px;
   font-size: 14px;
@@ -2324,7 +2324,7 @@
 .calDateActive {
   height: 36px;
   padding: 0 10px;
-  background: #f75801;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
   border: none;
   border-radius: 999px;
   font-size: 14px;
