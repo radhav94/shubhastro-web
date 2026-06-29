@@ -4,8 +4,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-  <meta name="robots" content="index, follow"/>
-  <meta name="googlebot" content="index,follow" />
+  <meta name="robots" content="noindex, nofollow" id="robots-meta"/>
+  <meta name="googlebot" content="noindex,nofollow" id="googlebot-meta"/>
+  <script>
+    if (window.location.hostname === 'www.shubhastro.ai') {
+      document.getElementById('robots-meta').setAttribute('content', 'index, follow');
+      document.getElementById('googlebot-meta').setAttribute('content', 'index, follow');
+    }
+  </script>
   <meta name="copyright" content="shubhastro.ai" />
   <meta name="google-site-verification" content="rul7_n9V8ZCcyyJBZ6TpxHZdhz2BWtKHpn0kSRmmtO0" />
 
