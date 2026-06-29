@@ -142,14 +142,16 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className={styles.v2_column}>
-          <h3 className={styles.v2_heading}>Horoscope</h3>
-          {renderLinks(horoscopeLinks)}
-        </div>
+        <div>
+          <div className={styles.v2_column}>
+            <h3 className={styles.v2_heading}>Horoscope</h3>
+            {renderLinks(horoscopeLinks)}
+          </div>
 
-        <div className={styles.v2_column}>
-          <h3 className={styles.v2_heading}>Explore Services</h3>
-          {renderLinks(serviceLinks)}
+          <div className={styles.v2_column} style={{marginTop:"16px"}}>
+            <h3 className={styles.v2_heading}>Explore Services</h3>
+            {renderLinks(serviceLinks)}
+          </div>
         </div>
 
         {/* {isShubhMallEnabled() && (
