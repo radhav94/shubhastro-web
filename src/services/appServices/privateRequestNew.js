@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Toast from "../../component/toast";
 import { getToken } from "../../utils/utlis";
-import { navigateToLogin } from "../../utils/navigationHelper";
+import { refreshTokenAndReload } from "../../utils/tokenRefresh";
 
 let unAuthorizedCount = 0;
 const BASE_URL = "/main";
@@ -21,34 +21,29 @@ const handleApiError = (error, endpoint) => {
   const data = error?.data;
   const message = data?.message || data?.error || "Some Error Occurred";
 
-  switch (status) {
+  // fetchBaseQuery reports a non-numeric status (e.g. "PARSING_ERROR") when the
+  // response body isn't valid JSON, keeping the real HTTP code in originalStatus.
+  // Normalize so 401 is detected regardless of the response body format.
+  const httpStatus = typeof status === "number" ? status : error?.originalStatus;
+
+  switch (httpStatus) {
     case 401:
-      // Skip login redirect for public-facing endpoints
+      // Skip refresh for public-facing endpoints
       if (PUBLIC_ENDPOINTS.includes(endpoint)) break;
-      // Only redirect if user was previously authenticated (token expired/invalid)
-      // Don't redirect guest users who never had a token
+      // Only attempt refresh if user was previously authenticated (token expired/invalid).
+      // Don't touch guest users who never had a token.
       const role = localStorage.getItem("shubhtalk_role");
       const hasToken = role === "ASTROLOGER"
         ? localStorage.getItem("shubhtalk_astro_token")
         : localStorage.getItem("shubhtalk_customer_token");
       if (!hasToken) break;
       if (!unAuthorizedCount) {
-        // Don't redirect guest users (no token means they're browsing without login)
-        const role = localStorage.getItem("shubhtalk_role");
-        const hasToken = role === "ASTROLOGER"
-          ? localStorage.getItem("shubhtalk_astro_token")
-          : localStorage.getItem("shubhtalk_customer_token");
-
-        if (!hasToken) break;
-
         unAuthorizedCount++;
 
-        // Get current path for redirect after login
-        const currentPath = window.location.pathname + window.location.search;
-        
-        // Use navigation helper (no page refresh)
-        navigateToLogin(currentPath);
-        
+        // Token expired/invalid — try to refresh it and reload the page.
+        // Falls back to login if the refresh fails (handled inside helper).
+        refreshTokenAndReload();
+
         setTimeout(() => {
           unAuthorizedCount = 0;
         }, 100);
