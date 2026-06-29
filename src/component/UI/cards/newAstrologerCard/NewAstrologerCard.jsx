@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { BookOpen } from "lucide-react";
 import styles from "./NewAstrologerCard.module.scss";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AppIcons, getAstrologerDefaultImage } from "../../../../utils/appImages";
 
 const NewAstrologerCard = memo(({ 
@@ -11,12 +11,16 @@ const NewAstrologerCard = memo(({
   className = "", 
   style = {} 
 }) => {
+  const navigate = useNavigate();
   const isOnline = astrologer?.isActive === true;
+  const isLive = astrologer?.astrologerLiveStatus?.isLive === true;
+  const liveRoomId = astrologer?.astrologerLiveStatus?.roomId || astrologer?._id;
   const activeTypes = astrologer?.isActiveType || [];
   const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;
   const callPrice = Number(astrologer?.price?.audioRate?.amount) || 0;
-  const chatEnabled = isOnline && (activeTypes.includes("all") || activeTypes.includes("chat")) && chatPrice > 0;
-  const callEnabled = isOnline && (activeTypes.includes("all") || activeTypes.includes("audio")) && callPrice > 0;
+  // When the astrologer is live streaming, chat and call are not available.
+  const chatEnabled = isOnline && !isLive && (activeTypes.includes("all") || activeTypes.includes("chat")) && chatPrice > 0;
+  const callEnabled = isOnline && !isLive && (activeTypes.includes("all") || activeTypes.includes("audio")) && callPrice > 0;
 
   const hasEmergency = astrologer?.isEmergencyAvailable && (
     astrologer?.emergencyPrice?.chatRate?.amount > 0 || 
@@ -34,11 +38,23 @@ const NewAstrologerCard = memo(({
       className={`${styles.astrologerCard} ${!isOnline ? styles.offlineCard : ''} ${className}`.trim()} 
       style={style}
     >
-      {/* Online/Offline badge */}
-      <div className={`${styles.statusBadge} ${isOnline ? styles.online : styles.offline}`}>
-        <span className={styles.statusDot} />
-        <span>{isOnline ? 'Online' : 'Offline'}</span>
-      </div>
+      {/* Live / Online / Offline badge */}
+      {isLive ? (
+        <button
+          type="button"
+          className={`${styles.statusBadge} ${styles.live}`}
+          onClick={() => navigate(`/live/${liveRoomId}`)}
+          aria-label="Astrologer is live, click to watch"
+        >
+          <span className={styles.liveDot} />
+          <span>LIVE</span>
+        </button>
+      ) : (
+        <div className={`${styles.statusBadge} ${isOnline ? styles.online : styles.offline}`}>
+          <span className={styles.statusDot} />
+          <span>{isOnline ? 'Online' : 'Offline'}</span>
+        </div>
+      )}
 
       <div className={styles.ratingBadge}>
             <span className={styles.star}>
