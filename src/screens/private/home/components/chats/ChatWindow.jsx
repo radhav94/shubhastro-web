@@ -379,7 +379,6 @@ const ChatWindow = () => {
 
   const handleDisconnect = () => {
     if (isEnding) return;
-    setIsEnding(true);
     try {
       voiceSocket.emit("chat:end", { roomId, endedBy: "CUSTOMER" });
       
