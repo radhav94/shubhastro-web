@@ -1,5 +1,6 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { ChevronLeft } from "lucide-react";
 import styles from "./Onboarding.module.scss";
 import LanguageSelector from "../../../component/LanguageSelector";
 
@@ -40,17 +41,27 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData, c
       {({ values, setFieldValue, errors, touched, isValid }) => (
         <Form className={styles.personalizeScreen}>
           <div className={styles.header}>
-            <div className={styles.progressDots}>
-              {Array.from({ length: totalSteps }).map((_, index) => (
-                <span
-                  key={index}
-                  className={
-                    index === currentStep ? styles.dotActive : styles.dotInactive
-                  }
-                  onClick={() => onStepChange && onStepChange(index)}
-                  style={{ cursor: onStepChange ? 'pointer' : 'default' }}
-                ></span>
-              ))}
+            <div className={styles.headerLeft}>
+              <button
+                type="button"
+                className={styles.backBtnInline}
+                onClick={onBack}
+                aria-label="Go back"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <div className={styles.progressDots}>
+                {Array.from({ length: totalSteps }).map((_, index) => (
+                  <span
+                    key={index}
+                    className={
+                      index === currentStep ? styles.dotActive : styles.dotInactive
+                    }
+                    onClick={() => onStepChange && onStepChange(index)}
+                    style={{ cursor: onStepChange ? 'pointer' : 'default' }}
+                  ></span>
+                ))}
+              </div>
             </div>
 
             {/* Language Translator */}

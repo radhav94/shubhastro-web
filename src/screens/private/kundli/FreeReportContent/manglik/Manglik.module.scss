@@ -32,9 +32,9 @@ $font-primary: "Poppins", sans-serif;
   margin-bottom: 24px;
 
   @media (min-width: 1024px) {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    flex-direction: row;
+    gap: 24px;
+    align-items: flex-start;
   }
 
   @media (max-width: 768px) {
@@ -46,32 +46,68 @@ $font-primary: "Poppins", sans-serif;
   min-width: 0;
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 // --- Header Card ---
 .headerCard {
   position: relative;
   background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 24px;
   min-height: 300px;
-  // box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+  border: 1.5px solid #fff;
 }
 
 .headerOverlay {
   position: absolute;
   inset: 0;
   border-radius: 15px;
-  border: 1px solid var(--border-50, rgba(189, 189, 189, 0.50));
-  // background: var(--surface, #FEFEFE);
 }
 
 .headerContent {
   position: relative;
   z-index: 1;
   padding: 16px;
-  color: #ffffff;
+}
+
+// --- Two Column Content Wrapper (like KaalSarp) ---
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  @media (min-width: 768px) {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.leftColumn {
+  flex: 1;
+  min-width: 0;
+
+  @media (min-width: 768px) {
+    flex: 0 0 58%;
+  }
+
+  &:only-child {
+    @media (min-width: 768px) {
+      flex: 1;
+    }
+  }
+}
+
+.rightColumn {
+  flex: 1;
+  min-width: 0;
+
+  @media (min-width: 768px) {
+    flex: 0 0 38%;
+  }
 }
 
 .headerTitle {
@@ -94,7 +130,7 @@ $font-primary: "Poppins", sans-serif;
   gap: 12px;
 
   @media (min-width: 768px) {
-    gap: 14px;
+    gap: 16px;
   }
 }
 
@@ -140,18 +176,20 @@ $font-primary: "Poppins", sans-serif;
   border-radius: 12px;
   padding: 16px;
   border: 1px solid var(--border-50, rgba(189, 189, 189, 0.5));
+  height: 100%;
 }
 
 .summaryTitle {
   font-size: 14px;
   font-weight: 600;
   color: #2d2d2d;
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 
   @media (min-width: 768px) {
     font-size: 15px;
+    margin-bottom: 16px;
   }
 }
 

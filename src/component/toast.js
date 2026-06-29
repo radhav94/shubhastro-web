@@ -1,7 +1,7 @@
 import { toast as rht } from "react-hot-toast";
 
 const options = {
-  duration: 5000,
+  duration: 3000,
   position: "top-right",
     zIndex: 9999999999,
 };

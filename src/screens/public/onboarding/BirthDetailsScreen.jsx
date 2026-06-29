@@ -10,7 +10,7 @@ import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker"
 import LanguageSelector from "../../../component/LanguageSelector";
 import { registerUser } from "../../../services/appServices/authService";
 import { useCreateKundliMutation } from "../../../services/appServices/kundliServicesNew";
-import { setEmail } from "../../../redux/auth/authSlice";
+import { setEmail, logout } from "../../../redux/auth/authSlice";
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -69,13 +69,6 @@ const BirthDetailsScreen = ({
     setRegistering(true);
 
     try {
-      const token = localStorage.getItem("shubhtalk_customer_token");
-      if (!token) {
-        toast.error("Please complete login and OTP verification first");
-        setRegistering(false);
-        return;
-      }
-
       const fullName = mergedFormData.name || "";
       const nameParts = fullName.trim().split(/\s+/);
       const firstName = nameParts[0] || "";
@@ -104,10 +97,11 @@ const BirthDetailsScreen = ({
         ...(mergedFormData.email && { email: mergedFormData.email }),
       };
 
-      const response = await registerUser(payload);
+      const response = await registerUser(payload, { skipToast: true });
 
       if (response?.data?.statusCode === 201 || response?.data?.success) {
-        toast.success("Registration successful!");
+        toast.dismiss();
+        toast.success(response?.data?.message || "Registration successful!");
         localStorage.setItem("shubhtalk_show_welcome_bonus", "true");
 
         const currentUserData = localStorage.getItem("userData");
@@ -172,11 +166,52 @@ const BirthDetailsScreen = ({
 
         onNext();
       } else {
-        toast.error(response?.data?.message || "Registration failed");
+        const failMessage = response?.data?.message || "Registration failed";
+        toast.error(failMessage);
+
+        // "User already registered" → the account exists, so send the user to
+        // the login screen instead of leaving them stuck on the form.
+        if (failMessage.toLowerCase().includes("already registered")) {
+          dispatch(logout());
+          try {
+            localStorage.clear();
+            window.dispatchEvent(new Event("auth-change"));
+          } catch {
+            /* ignore */
+          }
+          // Small delay so the user can read the message before the redirect.
+          setTimeout(() => {
+            window.location.replace("/login?skip=welcome");
+          }, 1500);
+        }
       }
     } catch (error) {
-      if (error.response?.status === 401 || error.response?.data?.message?.includes("Authorization")) {
-        toast.error("Session expired. Please login again.");
+      // The API is the source of truth for the session/account. Both an
+      // invalid session (401) and an "already registered" account (400) mean
+      // the user should be sent to the login screen rather than being left
+      // stranded on the form.
+      const status = error.response?.status;
+      const message = error.response?.data?.message || "";
+      const isAuthError =
+        status === 401 ||
+        message.includes("Authorization") ||
+        message.includes("Invalid access token");
+      const isAlreadyRegistered = message.toLowerCase().includes("already registered");
+
+      if (isAuthError || isAlreadyRegistered) {
+        toast.error(isAuthError ? "Session expired. Please login again." : message);
+        dispatch(logout());
+        try {
+          localStorage.clear();
+          window.dispatchEvent(new Event("auth-change"));
+        } catch {
+          /* ignore */
+        }
+        // Small delay so the user can read the message before the hard redirect
+        // (which reloads the page and would otherwise clear the toast).
+        setTimeout(() => {
+          window.location.replace("/login?skip=welcome");
+        }, 1500);
       } else {
         toast.error(error.response?.data?.message || "Failed to register. Please try again.");
       }

@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
+import { logout } from "../../../redux/auth/authSlice";
+import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
+import { useLogoutUserMutation } from "../../../redux/api/userSession/userSessionApi";
 import LoadingScreen from "./LoadingScreen";
 import WelcomeScreen from "./WelcomeScreen";
 import GuidanceScreen from "./GuidanceScreen";
@@ -14,6 +18,8 @@ import LoginScreen from "./LoginScreen";
 const Onboarding = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const dispatch = useDispatch();
+  const [logoutUser] = useLogoutUserMutation();
 
   const isPersonalizeFlow = searchParams.get("step") === "personalize";
   const skipGuidance = searchParams.get("skip") === "welcome" || isPersonalizeFlow;
@@ -100,6 +106,33 @@ const Onboarding = () => {
 
   const handleSkip = () => navigate(PATH.privateRoutes.HOME.path || "/");
 
+  // Logs the user out and sends them back to the home/login entry point.
+  // Used by the back button on the personalize (registration) step.
+  const performLogout = async () => {
+    try {
+      await logoutUser({ deviceType: "web" }).unwrap();
+    } catch (err) {
+      // Proceed with local logout even if the API call fails.
+      console.error("Logout API error:", err);
+    } finally {
+      dispatch(logout());
+      dispatch(clearSelectedKundli());
+      localStorage.clear();
+      window.dispatchEvent(new Event("auth-change"));
+      // Hard redirect so the onboarding state fully resets to the login screen
+      // (a React Router navigate would keep the same /login component mounted
+      // on the personalize step).
+      window.location.replace("/login?skip=welcome");
+    }
+  };
+
+  // Back button on the Personalize step always logs the user out (in both the
+  // deep-link flow and the normal enter-number → OTP → personalize flow),
+  // rather than stepping back to the OTP screen.
+  const handlePersonalizeBack = () => {
+    performLogout();
+  };
+
   const updateFormData = (data) => {
     setFormData((prev) => ({ ...prev, ...data }));
   };
@@ -123,7 +156,7 @@ const Onboarding = () => {
     <PersonalizeScreen
       key="personalize"
       onNext={handleNext}
-      onBack={handleBack}
+      onBack={handlePersonalizeBack}
       onSkip={handleSkip}
       formData={formData}
       updateFormData={updateFormData}
