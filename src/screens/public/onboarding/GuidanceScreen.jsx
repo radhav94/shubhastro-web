@@ -128,7 +128,8 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
       console.log("📊 Status code:", response?.data?.statusCode);
 
       if (response?.data?.statusCode === 201 || response?.data?.success) {
-        toast.success("Registration successful!");
+        toast.dismiss();
+        toast.success(response?.data?.message || "Registration successful!");
         localStorage.setItem("shubhtalk_show_welcome_bonus", "true");
         
         // Update user data in localStorage

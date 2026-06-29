@@ -107,7 +107,8 @@ const BirthDetailsScreen = ({
       const response = await registerUser(payload);
 
       if (response?.data?.statusCode === 201 || response?.data?.success) {
-        toast.success("Registration successful!");
+        toast.dismiss();
+        toast.success(response?.data?.message || "Registration successful!");
         localStorage.setItem("shubhtalk_show_welcome_bonus", "true");
 
         const currentUserData = localStorage.getItem("userData");

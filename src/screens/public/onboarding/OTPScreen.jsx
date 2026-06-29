@@ -71,8 +71,6 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         const response = await verifyOtp(payload);
 
         if (response.data.success && response.data.statusCode === 200) {
-          toast.success(response.data.message || "User verified successfully");
-
           // Store tokens and user data
           const { data: userData } = response.data;
           const accessToken = userData.accessToken;
@@ -136,6 +134,12 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
             userData: userData,
           });
 
+          // Dismiss any lingering toasts (error toasts, OTP send toast, etc.)
+          toast.dismiss();
+
+          // Show backend success message
+          toast.success(response.data.message || "User verified successfully");
+
           // Check if user is already registered
           if (userData.isRegister) {
             // User is already registered, check for redirect path
@@ -153,7 +157,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
               // Clear the redirect path
               localStorage.removeItem("shubhtalk_redirect_after_login");
               console.log("✅ Redirecting to saved path:", redirectPath);
-              toast.success("Welcome back!");
+              // toast.success("Welcome back!");
               setTimeout(() => {
                 console.log("🚀 Executing navigate to:", redirectPath);
                 navigate(redirectPath);
