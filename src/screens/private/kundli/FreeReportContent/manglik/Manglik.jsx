@@ -26,67 +26,80 @@ const Manglik = () => {
     );
   }
 
+  const hasFactors = manglik.factors?.length > 0;
+  const hasAspects = manglik.aspects?.length > 0;
+  const hasMultipleColumns = hasFactors || hasAspects;
+
   return (
     <div className={styles.manglikContainer}>
-      {/* Three Column Layout: Manglik Dosh Analysis, Factors, and Aspects */}
-      <div className={styles.threeColumnLayout}>
+      {/* Layout: Manglik Dosh Analysis, Factors, and Aspects */}
+      <div className={hasMultipleColumns ? styles.threeColumnLayout : undefined}>
         {/* Column 1: Manglik Dosh Analysis */}
-        <div className={styles.column}>
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>
-              <span className={styles.sectionIcon}>📊</span>
-              Manglik Dosh Analysis
-              <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
-                <TTSButton
-                  text={[
-                    "Manglik Dosh Analysis",
-                    `By Mars: ${manglik.manglik_by_mars ? "Yes" : "No"}`,
-                    `By Rahu/Ketu: ${manglik.manglik_by_rahuketu ? "Yes" : "No"}`,
-                    `By Saturn: ${manglik.manglik_by_saturn ? "Yes" : "No"}`,
-                    `Score: ${manglik.score}%`,
-                    manglik.bot_response ? `Summary: ${manglik.bot_response}` : "",
-                  ].filter(Boolean).join(". ")}
-                />
-              </span>
-            </h2>
-            
-            <div className={styles.statsGrid}>
-              <div className={styles.statCard}>
-                <span className={styles.statLabel}>By Mars</span>
-                <span className={styles.statValue}>
-                  {manglik.manglik_by_mars ? "Yes" : "No"}
+        <div className={hasMultipleColumns ? styles.column : undefined}>
+          <div className={styles.headerCard}>
+            <div className={styles.headerOverlay}></div>
+            <div className={styles.headerContent}>
+              <h2 className={styles.sectionTitle}>
+                <span className={styles.sectionIcon}>📊</span>
+                Manglik Dosh Analysis
+                <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
+                  <TTSButton
+                    text={[
+                      "Manglik Dosh Analysis",
+                      `By Mars: ${manglik.manglik_by_mars ? "Yes" : "No"}`,
+                      `By Rahu/Ketu: ${manglik.manglik_by_rahuketu ? "Yes" : "No"}`,
+                      `By Saturn: ${manglik.manglik_by_saturn ? "Yes" : "No"}`,
+                      `Score: ${manglik.score}%`,
+                      manglik.bot_response ? `Summary: ${manglik.bot_response}` : "",
+                    ].filter(Boolean).join(". ")}
+                  />
                 </span>
-              </div>
-              <div className={styles.statCard}>
-                <span className={styles.statLabel}>By Rahu/Ketu</span>
-                <span className={styles.statValue}>
-                  {manglik.manglik_by_rahuketu ? "Yes" : "No"}
-                </span>
-              </div>
-              <div className={styles.statCard}>
-                <span className={styles.statLabel}>By Saturn</span>
-                <span className={styles.statValue}>
-                  {manglik.manglik_by_saturn ? "Yes" : "No"}
-                </span>
-              </div>
-              <div className={styles.statCard}>
-                <span className={styles.statLabel}>Score</span>
-                <span className={styles.statValue}>{manglik.score}%</span>
+              </h2>
+
+              <div className={styles.contentWrapper}>
+                <div className={styles.leftColumn}>
+                  <div className={styles.statsGrid}>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>By Mars</span>
+                      <span className={styles.statValue}>
+                        {manglik.manglik_by_mars ? "Yes" : "No"}
+                      </span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>By Rahu/Ketu</span>
+                      <span className={styles.statValue}>
+                        {manglik.manglik_by_rahuketu ? "Yes" : "No"}
+                      </span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>By Saturn</span>
+                      <span className={styles.statValue}>
+                        {manglik.manglik_by_saturn ? "Yes" : "No"}
+                      </span>
+                    </div>
+                    <div className={styles.statCard}>
+                      <span className={styles.statLabel}>Score</span>
+                      <span className={styles.statValue}>{manglik.score}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Summary as right column */}
+                {manglik.bot_response && (
+                  <div className={styles.rightColumn}>
+                    <div className={styles.summaryCard}>
+                      <h3 className={styles.summaryTitle}>Summary</h3>
+                      <p className={styles.summaryText}>{manglik.bot_response}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-
-            {/* Summary at bottom */}
-            {manglik.bot_response && (
-              <div className={styles.summaryCardInline}>
-                <h3 className={styles.summaryTitleInline}>Summary</h3>
-                <p className={styles.summaryTextInline}>{manglik.bot_response}</p>
-              </div>
-            )}
           </div>
         </div>
 
         {/* Column 2: Manglik Analysis Factors */}
-        {manglik.factors?.length > 0 && (
+        {hasFactors && (
           <div className={styles.column}>
             <div className={styles.section}>
               <h2 className={styles.sectionTitle}>
@@ -109,7 +122,7 @@ const Manglik = () => {
         )}
 
         {/* Column 3: Manglik Aspects */}
-        {manglik.aspects?.length > 0 && (
+        {hasAspects && (
           <div className={styles.column}>
             <div className={styles.section}>
               <h2 className={styles.sectionTitle}>
