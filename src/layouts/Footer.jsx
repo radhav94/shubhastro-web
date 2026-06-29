@@ -172,7 +172,7 @@ const Footer = () => {
           <a href="tel:+918655682877" className={styles.v2_contactText}>+91 86556 82877</a>
           <h4 className={`${styles.v2_phoneLink}`}>Registered Company Address</h4>
           <p className={styles.v2_contactText}>
-            Raheja District I, B3 & B4, RICC, Plot Gen-2/1/B, D Block, T.T.C. Industrial Area, Juinagar, Navi Mumbai, Maharashtra 400705
+            Vaibhav Chambers, 9th Rd, opposite Income Tax Office, Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400051
           </p>
           <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
           <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
@@ -211,7 +211,7 @@ const Footer = () => {
           <a href="tel:+918655682877" className={styles.v2_contactText}>+91 86556 82877</a>
           <h4 className={`${styles.v2_phoneLink} `}>Registered Company Address</h4>
           <p className={styles.v2_contactText}>
-            Raheja District I, B3 & B4, RICC, Plot Gen-2/1/B, D Block, T.T.C. Industrial Area, Juinagar, Navi Mumbai, Maharashtra 400705
+            Vaibhav Chambers, 9th Rd, opposite Income Tax Office, Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400051
           </p>
           <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
           <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
