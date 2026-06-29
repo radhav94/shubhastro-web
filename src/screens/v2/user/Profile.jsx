@@ -1686,12 +1686,6 @@ const Profile = () => {
                                       <img
                                         src={order.astrologer.image}
                                         alt={order.astrologer.name}
-                                        style={{
-                                          width: "100%",
-                                          height: "100%",
-                                          borderRadius: "50%",
-                                          objectFit: "cover",
-                                        }}
                                       />
                                     ) : (
                                       <span>

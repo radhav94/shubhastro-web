@@ -684,6 +684,7 @@
     text-align: center;
     white-space: pre-line;
     line-height: 1.4;
+    height: 36px;
     @media (width <= 1024px) {
       font-size: 0.75rem;
     }
@@ -2839,6 +2840,7 @@
     height: 110px;
     border-radius: 50%;
     object-fit: cover;
+    object-position: top;
     border: 2px solid #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     @media (width <= 767px) {
