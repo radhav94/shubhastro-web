@@ -126,6 +126,15 @@ const KpContent = () => {
     ? Object.values(data.response).filter((item) => typeof item === "object")
     : [];
 
+  // KP "Bhav Chalit" chart SVG from the API doesn't include planet degrees,
+  // so build a { planetAbbr: degree } map to inject them into the chart.
+  const degreeMap = kpPlanets.reduce((acc, p) => {
+    if (p?.name && (p.local_degree || p.local_degree === 0)) {
+      acc[p.name] = Math.floor(p.local_degree);
+    }
+    return acc;
+  }, {});
+
   const svgChalitUrl = sanitizeSvg(chalitChart) || null;
 
   return (
@@ -149,7 +158,7 @@ const KpContent = () => {
       <PrimaryLoader isLoading={chalitLoading} />
       <div className={styles.grid}>
         {/* Chalit Chart */}
-        <DynamicChart title="Bhav Chalit Chart" src={svgChalitUrl} />
+        <DynamicChart title="Bhav Chalit Chart" src={svgChalitUrl} degreeMap={degreeMap} />
       </div>
 
       {/* Planetary Table */}
