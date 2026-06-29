@@ -114,6 +114,7 @@ createRoot(document.getElementById("root")).render(
             top: 'calc(8px + var(--toast-top-offset, 0px))',
           }}
           toastOptions={{
+            duration:3000,
             style: {
               fontFamily: "Poppins",
               fontSize: "14px",
