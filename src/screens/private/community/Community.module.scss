@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // ─── Variables ────────────────────────────────────────────────────────────────
 $primary: #e65100;
 $primary-light: #fff8f3;
@@ -422,7 +424,7 @@ $radius-sm: 8px;
   white-space: nowrap;
 
   &:hover {
-    background: darken($primary, 8%);
+    background: color.adjust($primary, $lightness: -8%);
   }
 }
 
@@ -503,7 +505,7 @@ $radius-sm: 8px;
   flex-shrink: 0;
 
   &:hover {
-    background: darken($primary, 8%);
+    background: color.adjust($primary, $lightness: -8%);
   }
 }
 
@@ -730,7 +732,7 @@ $radius-sm: 8px;
   flex-shrink: 0;
 
   &:hover {
-    background: darken($primary, 8%);
+    background: color.adjust($primary, $lightness: -8%);
   }
 }
 
@@ -845,7 +847,7 @@ $radius-sm: 8px;
   }
 
   &:hover {
-    background: darken($primary, 8%);
+    background: color.adjust($primary, $lightness: -8%);
   }
 
   &.leaveBtn {
