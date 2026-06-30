@@ -246,6 +246,14 @@ export default function useChat({
     return () => window.removeEventListener("global:chat:ended", handleGlobalChatEnded);
   }, [astrologerId, activeCall, openReview, setOpenFeedback]);
 
+  // Re-enable input and timer when activeChat is restored after reconnect
+  useEffect(() => {
+    if (activeChat?.astrologerId === astrologerId && activeChat?.roomId) {
+      setIsMessageDisabled(false);
+      startTimer();
+    }
+  }, [activeChat?.roomId, activeChat?.astrologerId, astrologerId]);
+
   // ─── Message Queue (for offline/disconnected sends) ─────────────────────────
   const messageQueueRef = useRef([]);
 
