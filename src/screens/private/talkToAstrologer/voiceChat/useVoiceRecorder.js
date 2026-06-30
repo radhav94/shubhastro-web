@@ -17,7 +17,9 @@ export const useVoiceRecorder = () => {
   const activeSecondsRef = useRef(0);
 
   const getSupportedMimeType = () => {
-    const types = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus", ""];
+    // Prefer audio/mp4 (AAC) so recordings play across platforms (esp. iOS).
+    // Falls back to webm/ogg only if the browser can't record mp4.
+    const types = ["audio/mp4", "audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", ""];
     for (const type of types) {
       if (!type || MediaRecorder.isTypeSupported(type)) return type;
     }
@@ -113,8 +115,9 @@ export const useVoiceRecorder = () => {
             return reject("No audio data captured");
           }
 
+          const mimeType = mimeTypeRef.current || "audio/mp4";
           const blob = new Blob(chunksRef.current, {
-            type: mimeTypeRef.current || "audio/webm",
+            type: mimeType,
           });
 
           mediaRecorderRef.current = null;
@@ -122,7 +125,7 @@ export const useVoiceRecorder = () => {
           setSeconds(0);
           activeSecondsRef.current = 0;
 
-          resolve({ blob, duration, codec: "webm" });
+          resolve({ blob, duration, mimeType });
         };
 
         recorder.stop();
