@@ -43,7 +43,7 @@ export const useVoiceRecorder = () => {
       if (e.data?.size > 0) chunksRef.current.push(e.data);
     };
 
-    recorder.start(100);
+    recorder.start();
 
     setRecording(true);
     setPaused(false);
