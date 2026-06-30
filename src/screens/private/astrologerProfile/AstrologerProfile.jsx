@@ -135,13 +135,16 @@ const AstrologerProfile = () => {
     data: astrologerData,
     isLoading,
     error,
-  } = useGetAstrologerByIdQuery({ id }, { skip: !id, pollingInterval: 10000 });
+  } = useGetAstrologerByIdQuery({ id }, { skip: !id });
 
   const data = astrologerData?.data;
 
-  // Live status
-  const isLive = data?.astrologerLiveStatus?.isLive || false;
-  const liveRoomId = data?.astrologerLiveStatus?.roomId;
+  // Live status — seeded from the fetched astrologer, then kept up to date via
+  // the live:astrologer_status socket event (no polling needed).
+  const { isLive, roomId: liveRoomId } = useAstrologerLiveStatus(
+    id,
+    data?.astrologerLiveStatus
+  );
 
   const handleJoinLive = () => {
     if (liveRoomId) {
@@ -1125,10 +1128,10 @@ const AstrologerProfile = () => {
           <div className={styles.profileContentMain}>
             {/* Profile Card */}
             <div className={styles.profileCard}>
-              {data?.astrologerLiveStatus?.isLive && (
+              {isLive && (
                 <button
                   className={styles.liveIndicator}
-                  onClick={() => navigate(`/live/${data?.astrologerLiveStatus?.roomId || data?._id}`)}
+                  onClick={() => navigate(`/live/${liveRoomId || data?._id}`)}
                   aria-label="Astrologer is live, click to watch"
                 >
                   <span className={styles.liveDot}></span>
