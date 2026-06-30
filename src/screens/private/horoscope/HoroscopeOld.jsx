@@ -151,7 +151,8 @@ const HoroscopeOld = () => {
   const { data: astroData, isFetching: isAstroFetching } = useGetAstroDetailsQuery(vedicParams, {
     skip: !vedicParams,
   });
-  const profileSunSign = astroData?.response?.sun_sign?.toLowerCase() || null;
+  // For Western horoscope page, prefer westernSign from kundli profile over Vedic sun_sign
+  const profileSunSign = activeProfile?.westernSign?.toLowerCase() || astroData?.response?.sun_sign?.toLowerCase() || null;
   
   // Default to first sign if no sign in URL
   const [selectedZodiac, setSelectedZodiac] = useState(sign?.toLowerCase() || 'aries');
@@ -191,8 +192,8 @@ const HoroscopeOld = () => {
   // Set default zodiac based on profile's sun sign when page loads without a sign in URL
   // AND react to profile switches from the header
   useEffect(() => {
-    // Wait until astro data is done fetching for the current profile
-    if (isAstroFetching) return;
+    // Wait until astro data is done fetching (unless westernSign is already available from profile)
+    if (isAstroFetching && !activeProfile?.westernSign) return;
     if (!profileSunSign || !signToNumber[profileSunSign]) return;
 
     const currentProfileId = activeProfile?._id || null;
