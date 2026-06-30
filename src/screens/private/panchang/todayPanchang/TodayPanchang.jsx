@@ -10,6 +10,7 @@ import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { setForm } from "../../../../redux/kundliform/formSlice";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
+import { trackEvent } from "../../../../utils/analytics";
 
 import { PanchangInputCard } from "../../../../component";
 import PanchangCards from "../../../../component/UI/cards/PanchangCards";
@@ -45,6 +46,14 @@ const TodayPanchang = () => {
   const dispatch = useDispatch();
   const pad = (num) => String(num).padStart(2, "0");
   const userLocation = useUserLocation();
+
+  // Track panchang page view on mount
+  useEffect(() => {
+    const now = new Date();
+    trackEvent("panchang_viewed", {
+      date_viewed: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`,
+    });
+  }, []);
 
   // Profile selector state
   const [showSelectProfile, setShowSelectProfile] = useState(false);
@@ -497,6 +506,12 @@ const TodayPanchang = () => {
     const now = new Date();
     const dob = details?.dateOfBirth ? new Date(details.dateOfBirth) : null;
     const pad = (val) => (val < 10 ? "0" + val : val);
+
+    const newDate = dob || now;
+    trackEvent("panchang_date_changed", {
+      new_date: `${newDate.getFullYear()}-${pad(newDate.getMonth() + 1)}-${pad(newDate.getDate())}`,
+    });
+
     setPayload({
       day: dob ? dob.getUTCDate() : now.getDate(),
       month: dob ? dob.getUTCMonth() + 1 : now.getMonth() + 1,

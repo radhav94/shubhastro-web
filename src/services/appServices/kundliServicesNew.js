@@ -1,5 +1,6 @@
 import { privateRequestNew } from "./privateRequestNew";
 import { getProfile, getProfileId } from "./profileService";
+import { trackEvent } from "../../utils/analytics";
 
 /**
  * Clears the local session and sends the user to the login screen.
@@ -95,6 +96,17 @@ export const kundliApi = privateRequestNew.injectEndpoints({
         headers: { "Content-Type": "application/json", accept: "application/json" },
       }),
       invalidatesTags: () => [{ type: "Kundlis", id: "LIST" }, "Kundlis"],
+      async onQueryStarted(body, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          trackEvent("kundli_generated", {
+            profile_id: data?.data?._id || null,
+            sun_sign: data?.data?.sunSign || null,
+            moon_sign: data?.data?.moonSign || null,
+            ascendant: data?.data?.ascendant || null,
+          });
+        } catch { /* don't track failed attempts */ }
+      },
     }),
 
     deleteKundli: builder.mutation({

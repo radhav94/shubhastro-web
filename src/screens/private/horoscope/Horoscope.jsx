@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { trackEvent } from '../../../utils/analytics';
 import { 
   useFetchDailyQuery, 
   useFetchTomorrowQuery,
@@ -207,6 +208,18 @@ const HoroscopeNew = () => {
       setTempSelectedZodiac(sign.toLowerCase());
     }
   }, [sign]);
+
+  // Track horoscope page view
+  // Track horoscope page view on mount
+  useEffect(() => {
+    const timePeriodMap = { 'Today': 'daily', 'Tomorrow': 'daily', 'This Week': 'weekly', 'This Year': 'yearly' };
+    trackEvent("horoscope_viewed", {
+      horoscope_type: "Indian",
+      sign: selectedZodiac,
+      time_period: timePeriodMap[activeTab] || 'daily',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Set default zodiac based on profile's sun sign when page loads without a sign in URL
   // AND react to profile switches from the header
@@ -567,6 +580,10 @@ const HoroscopeNew = () => {
   const currentContent = getContent();
 
   const handleTabChange = (tab) => {
+    trackEvent("horoscope_time_period_switched", {
+      from_period: activeTab.toLowerCase().replace(/\s+/g, '_'),
+      to_period: tab.toLowerCase().replace(/\s+/g, '_'),
+    });
     setActiveTab(tab);
     setCameFromOverview(false);
     setSelectedPhase('phase_1');
@@ -588,6 +605,10 @@ const HoroscopeNew = () => {
   };
 
   const handleConfirmZodiac = () => {
+    trackEvent("horoscope_sign_switched", {
+      from_sign: selectedZodiac,
+      to_sign: tempSelectedZodiac,
+    });
     setSelectedZodiac(tempSelectedZodiac);
     setShowZodiacModal(false);
     
@@ -706,6 +727,10 @@ const HoroscopeNew = () => {
                     className={`sign-tab ${isActive ? 'active' : ''}`}
                     onClick={() => {
                       const val = signTab === 'Moon Sign' ? 'Moon' : 'Sun';
+                      trackEvent("horoscope_sub_type_switched", {
+                        from_sub_type: activeSignTab.toLowerCase(),
+                        to_sub_type: val.toLowerCase(),
+                      });
                       setActiveSignTab(val);
                       setDailySubTab(val);
                       setTomorrowSubTab(val);
