@@ -127,15 +127,15 @@ const BasicContent = (props) => {
     Nakshatra: birthDetails?.nakshatra || "--",
     "Nakshatra Pada": birthDetails?.nakshatra_pada ?? "--",
     "Day of Birth": birthDetails?.panchang?.day_of_birth || "--",
-    "Day Lord": birthDetails?.panchang?.day_lord || "--",
-    "Hora Lord": birthDetails?.panchang?.hora_lord || "--",
-    Sunrise: birthDetails?.panchang?.sunrise_at_birth || "--",
-    Sunset: birthDetails?.panchang?.sunset_at_birth || "--",
-    Tithi: birthDetails?.panchang?.tithi || "--",
-    Yoga: birthDetails?.panchang?.yoga || "--",
-    Karana: birthDetails?.panchang?.karana || "--",
+    // "Day Lord": birthDetails?.panchang?.day_lord || "--",
+    // "Hora Lord": birthDetails?.panchang?.hora_lord || "--",
+    // Sunrise: birthDetails?.panchang?.sunrise_at_birth || "--",
+    // Sunset: birthDetails?.panchang?.sunset_at_birth || "--",
+    // Tithi: birthDetails?.panchang?.tithi || "--",
+    // Yoga: birthDetails?.panchang?.yoga || "--",
+    // Karana: birthDetails?.panchang?.karana || "--",
     Ayanamsa: birthDetails?.panchang?.ayanamsa ? birthDetails.panchang.ayanamsa.toFixed(5) : "--",
-    "Ayanamsa Type": birthDetails?.panchang?.ayanamsa_name || "--",
+    // "Ayanamsa Type": birthDetails?.panchang?.ayanamsa_name || "--",
   };
 
   const panchangDetailsData = {
@@ -147,7 +147,7 @@ const BasicContent = (props) => {
     "Hora Lord": birthPanchang.hora_lord || "--",
     Sunrise: birthPanchang.sunrise_at_birth || "--",
     Sunset: birthPanchang.sunset_at_birth || "--",
-    Ayanamsa: birthPanchang.ayanamsa_name || "--",
+    AyanamsaType: birthPanchang.ayanamsa_name || "--",
   };
 
   const avakhadaDetailsData = {
