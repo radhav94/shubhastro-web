@@ -221,8 +221,8 @@ const ChatInput = ({
 
   const handleStopRecording = async () => {
     try {
-      const { blob, duration } = await stopRecording();
-      await sendVoiceMessage(blob, duration);
+      const { blob, duration, mimeType } = await stopRecording();
+      await sendVoiceMessage(blob, duration, mimeType);
     } catch (err) {
       console.error("[VoiceRecorder] Stop failed:", err);
     }
