@@ -114,7 +114,19 @@ const AstrologerProfile = () => {
   }, [data?.astrologer_ID, refetchReviews]);
 
   const [showFullAbout, setShowFullAbout] = useState(false);
+  const [isAboutTruncated, setIsAboutTruncated] = useState(false);
+  const aboutTextRef = useRef(null);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+
+  useEffect(() => {
+    const el = aboutTextRef.current;
+    if (el && !showFullAbout) {
+      // Use requestAnimationFrame to ensure layout is computed
+      requestAnimationFrame(() => {
+        setIsAboutTruncated(el.scrollHeight > el.clientHeight);
+      });
+    }
+  }, [data?.description, showFullAbout]);
   const [isVAOpen, setIsVAOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
 
@@ -1277,22 +1289,30 @@ const AstrologerProfile = () => {
 
               {displayData.description && (
               <p
+                ref={aboutTextRef}
                 className={`${styles.aboutText} ${
                   showFullAbout ? styles.expanded : ""
                 }`}
               >
-                {showFullAbout
-                  ? displayData.description
-                  : displayData.description}
+                {displayData.description}
               </p>
               )}
 
-              {displayData.description?.length > 200 && (
+              {isAboutTruncated && !showFullAbout && (
                 <button
                   className={styles.readMoreBtn}
                   onClick={() => setShowFullAbout((prev) => !prev)}
                 >
-                  {showFullAbout ? "Read Less" : "Read More"}
+                  Read More
+                </button>
+              )}
+
+              {showFullAbout && (
+                <button
+                  className={styles.readMoreBtn}
+                  onClick={() => setShowFullAbout((prev) => !prev)}
+                >
+                  Read Less
                 </button>
               )}
 
