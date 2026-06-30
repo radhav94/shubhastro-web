@@ -329,12 +329,8 @@
   padding: 0.875rem 0.875rem 1rem 0.875rem;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
-  // border-top: 1.5px solid #e5e7eb;
+  border-top: 1.5px solid #e5e7eb;
   flex-shrink: 0;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  z-index: 99;
 
   @media (min-width: 640px) {
     padding: 1rem 1rem 1.125rem 1rem;
