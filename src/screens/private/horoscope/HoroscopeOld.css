@@ -403,7 +403,7 @@
   font-size: 22px;
   font-weight: 600;
   color: #000000;
-  margin: 0 0 16px 0;
+  margin: 0 0 8px 0;
   line-height: 1.3;
 }
 
@@ -868,14 +868,12 @@
   }
 .horoscope-old-page .content-title {
     font-size: 18px;
-    margin-bottom: 18px;
+    padding: 10px;
+    /* margin-bottom: 18px; */
   }
 }
 
 @media (min-width: 768px) {
-.horoscope-old-page .horoscope-page {
-    
-  }
 .horoscope-old-page .zodiac-date-range {
     font-size: 15px;
   }
@@ -904,6 +902,9 @@
     width: 100px;
     height: 100px;
   }
+  .horoscope-old-page .content-text p:last-child{
+  padding: 10px;
+}
 }
 
 @media (max-width: 375px) {
