@@ -2,10 +2,10 @@ import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { 
-  useFetchDailyQuery, 
-  useFetchTomorrowQuery,
+  useFetchWesternDailyQuery, 
+  useFetchWesternTomorrowQuery,
   useFetchWeeklyQuery, 
-  useFetchYearlyQuery
+  useFetchWesternYearlyQuery
 } from '../../../redux/api/horoscope/zodiacApi';
 import { signToNumber, zodiacDateRanges } from './utils';
 import PrimaryLoader from '../../../component/UI/PrimaryLoader';
@@ -252,11 +252,11 @@ const HoroscopeOld = () => {
   
   // Fetch data based on active tab
   // Both "Today" and "Daily" use the same daily API
-  const { data: dailyData, isLoading: dailyLoading } = useFetchDailyQuery(signNumber, {
+  const { data: dailyData, isLoading: dailyLoading } = useFetchWesternDailyQuery(signNumber, {
     skip: activeTab !== 'Today' && activeTab !== 'Daily'
   });
 
-  const { data: tomorrowData, isLoading: tomorrowLoading } = useFetchTomorrowQuery(signNumber, {
+  const { data: tomorrowData, isLoading: tomorrowLoading } = useFetchWesternTomorrowQuery(signNumber, {
     skip: activeTab !== 'Tomorrow'
   });
   
@@ -264,7 +264,7 @@ const HoroscopeOld = () => {
     skip: activeTab !== 'This Week'
   });
   
-  const { data: yearlyData, isLoading: yearlyLoading } = useFetchYearlyQuery(signNumber, {
+  const { data: yearlyData, isLoading: yearlyLoading } = useFetchWesternYearlyQuery(signNumber, {
     skip: activeTab !== 'This Year'
   });
 
