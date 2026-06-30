@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import Toast from "../../component/toast";
 import { getToken } from "../../utils/utlis";
 import { refreshTokenAndReload } from "../../utils/tokenRefresh";
+import { navigateToLogin } from "../../utils/navigationHelper";
 
 let unAuthorizedCount = 0;
 const BASE_URL = "/main";
@@ -27,28 +28,38 @@ const handleApiError = (error, endpoint) => {
   const httpStatus = typeof status === "number" ? status : error?.originalStatus;
 
   switch (httpStatus) {
-    case 401:
+    case 401: {
       // Skip refresh for public-facing endpoints
-      if (PUBLIC_ENDPOINTS.includes(endpoint)) break;
-      // Only attempt refresh if user was previously authenticated (token expired/invalid).
-      // Don't touch guest users who never had a token.
-      const role = localStorage.getItem("shubhtalk_role");
-      const hasToken = role === "ASTROLOGER"
-        ? localStorage.getItem("shubhtalk_astro_token")
-        : localStorage.getItem("shubhtalk_customer_token");
-      if (!hasToken) break;
-      if (!unAuthorizedCount) {
-        unAuthorizedCount++;
+      if (PUBLIC_ENDPOINTS.includes(endpoint)) {
+        console.warn("[401] skipped — public endpoint:", endpoint);
+        break;
+      }
+      // Handle a single 401 per tick (multiple queries can fail together).
+      if (unAuthorizedCount) {
+        console.warn("[401] already handling — skipping:", endpoint);
+        break;
+      }
+      unAuthorizedCount++;
+      setTimeout(() => {
+        unAuthorizedCount = 0;
+      }, 100);
 
-        // Token expired/invalid — try to refresh it and reload the page.
-        // Falls back to login if the refresh fails (handled inside helper).
+      const refreshToken = localStorage.getItem("refreshToken");
+      const currentPath = window.location.pathname + window.location.search;
+
+      if (refreshToken) {
+        // Try to refresh the session and reload. If the refresh fails, the
+        // helper opens the login screen.
+        console.warn("[401] calling refreshTokenAndReload()");
         refreshTokenAndReload();
-
-        setTimeout(() => {
-          unAuthorizedCount = 0;
-        }, 100);
+      } else {
+        // No refresh token — session is gone (e.g. logged out in another tab).
+        // Open the login screen.
+        console.warn("[401] no refresh token — opening login screen");
+        navigateToLogin(currentPath);
       }
       break;
+    }
 
     case 400:
       Toast.error(message || "Invalid Value / Bad Request");

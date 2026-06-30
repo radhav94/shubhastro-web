@@ -57,33 +57,43 @@ export const refreshTokenAndReload = () => {
   // are getting 401s again, the session can't be recovered — go to login.
   const lastRefresh = Number(sessionStorage.getItem(LAST_REFRESH_TS_KEY) || 0);
   if (lastRefresh && Date.now() - lastRefresh < REFRESH_LOOP_WINDOW_MS) {
+    console.warn("[refresh] loop-guard hit (refreshed", Date.now() - lastRefresh, "ms ago) — redirecting to login instead of refreshing");
     sessionStorage.removeItem(LAST_REFRESH_TS_KEY);
     redirectToLogin();
     return Promise.resolve();
   }
 
-  if (refreshPromise) return refreshPromise;
+  if (refreshPromise) {
+    console.warn("[refresh] already in flight — reusing pending request");
+    return refreshPromise;
+  }
 
+  console.warn("[refresh] POST", REFRESH_URL);
   refreshPromise = (async () => {
     try {
-      // The refresh-token endpoint reads the refresh token from the httpOnly
-      // cookie set at login (matching the documented call: empty body, no
-      // Authorization header). withCredentials ensures that cookie is sent.
+      // The refresh-token endpoint authenticates via the stored refresh token,
+      // sent as the Bearer token in the Authorization header. Body is empty.
+      const refreshToken = localStorage.getItem("refreshToken");
+
       const response = await axios.post(
         REFRESH_URL,
         {},
         {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+            ...(refreshToken ? { Authorization: `Bearer ${refreshToken}` } : {}),
+          },
         }
       );
 
       const payload = response?.data?.data || response?.data || {};
       const newAccessToken = payload.accessToken || payload.token;
       const newRefreshToken = payload.refreshToken;
+      console.warn("[refresh] response received | hasNewToken:", !!newAccessToken);
 
       if (!newAccessToken) {
         // Backend did not return a usable token — treat as expired session.
+        console.warn("[refresh] no token in response — redirecting to login");
         redirectToLogin();
         return;
       }
@@ -93,9 +103,11 @@ export const refreshTokenAndReload = () => {
       // Mark the attempt so a subsequent immediate 401 won't loop.
       sessionStorage.setItem(LAST_REFRESH_TS_KEY, String(Date.now()));
 
+      console.warn("[refresh] token refreshed — reloading page");
       window.location.reload();
-    } catch {
+    } catch (err) {
       // Refresh failed — session is no longer valid.
+      console.warn("[refresh] request failed — redirecting to login:", err?.response?.status, err?.message);
       redirectToLogin();
     } finally {
       refreshPromise = null;
