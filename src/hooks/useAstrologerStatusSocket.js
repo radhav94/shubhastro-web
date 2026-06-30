@@ -45,7 +45,7 @@ export default function useAstrologerStatusSocket() {
         }
 
         // Handle list endpoints
-        const listEndpoints = ["getAstrologers", "filterAstrologers", "getRecommendedAstrologers", "getNewHomeDetails", "getHomeDetails"];
+        const listEndpoints = ["getAstrologers", "filterAstrologers", "getRecommendedAstrologers", "getNewHomeDetails", "getHomeDetails", "getAllUserSessions"];
         const matchedEndpoint = listEndpoints.find((ep) => cacheKey.startsWith(ep + "("));
         if (!matchedEndpoint) return;
 
@@ -68,7 +68,62 @@ export default function useAstrologerStatusSocket() {
     };
 
     voiceSocket.on("astrologer:status", handleAstrologerStatus);
-    return () => voiceSocket.off("astrologer:status", handleAstrologerStatus);
+
+    const handleLiveStatus = (data) => {
+      const hostId = data?.hostId;
+      if (!hostId) return;
+
+      const isLive = data?.status === "started";
+      const roomId = data?.roomId || data?.channel || null;
+      const liveStatus = { isLive, roomId: isLive ? roomId : null };
+      console.log("[LiveStatus] 📥 Received:", { hostId, status: data?.status, roomId });
+
+      const state = store.getState();
+      const queries = state.privateRequestNew?.queries;
+
+      if (queries) {
+        Object.entries(queries).forEach(([cacheKey, entry]) => {
+          if (!entry || entry.status !== "fulfilled" || !entry.data) return;
+
+          // Detail endpoint (getAstrologerById)
+          if (cacheKey.startsWith("getAstrologerById(")) {
+            const astro = entry.data?.data;
+            if (astro?._id === hostId) {
+              store.dispatch(
+                privateRequestNew.util.updateQueryData("getAstrologerById", entry.originalArgs, (draft) => {
+                  if (draft?.data) draft.data.astrologerLiveStatus = liveStatus;
+                })
+              );
+            }
+            return;
+          }
+
+          // List endpoints
+          const listEndpoints = ["getAstrologers", "filterAstrologers", "getRecommendedAstrologers", "getNewHomeDetails", "getHomeDetails", "getAllUserSessions"];
+          const matchedEndpoint = listEndpoints.find((ep) => cacheKey.startsWith(ep + "("));
+          if (!matchedEndpoint) return;
+          if (!deepContainsAstrologer(entry.data, hostId)) return;
+
+          store.dispatch(
+            privateRequestNew.util.updateQueryData(matchedEndpoint, entry.originalArgs, (draft) => {
+              deepApplyToAstrologer(draft, hostId, (node) => {
+                node.astrologerLiveStatus = liveStatus;
+              });
+            })
+          );
+        });
+      }
+
+      // Re-dispatch for card-level subscribers (covers pages that hold local state).
+      window.dispatchEvent(new CustomEvent("live:astrologer_status", { detail: data }));
+    };
+
+    voiceSocket.on("live:astrologer_status", handleLiveStatus);
+
+    return () => {
+      voiceSocket.off("astrologer:status", handleAstrologerStatus);
+      voiceSocket.off("live:astrologer_status", handleLiveStatus);
+    };
   }, []);
 }
 
@@ -78,6 +133,22 @@ function deepContainsAstrologer(obj, astrologerId, depth = 0) {
   if (obj._id === astrologerId) return true;
   if (Array.isArray(obj)) return obj.some((item) => deepContainsAstrologer(item, astrologerId, depth + 1));
   return Object.values(obj).some((val) => val && typeof val === "object" && deepContainsAstrologer(val, astrologerId, depth + 1));
+}
+
+/** Recursively applies a mutation to every node whose _id matches the astrologer */
+function deepApplyToAstrologer(obj, astrologerId, applyFn, depth = 0) {
+  if (!obj || typeof obj !== "object" || depth > 6) return;
+  if (obj._id === astrologerId) {
+    applyFn(obj);
+    return;
+  }
+  if (Array.isArray(obj)) {
+    obj.forEach((item) => deepApplyToAstrologer(item, astrologerId, applyFn, depth + 1));
+    return;
+  }
+  Object.values(obj).forEach((val) => {
+    if (val && typeof val === "object") deepApplyToAstrologer(val, astrologerId, applyFn, depth + 1);
+  });
 }
 
 /** Recursively patches astrologer fields in an Immer draft */

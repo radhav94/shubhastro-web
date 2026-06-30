@@ -3,6 +3,7 @@ import { BookOpen } from "lucide-react";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { AppIcons, getAstrologerDefaultImage } from "../../../../utils/appImages";
+import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 
 const NewAstrologerCard = memo(({ 
   astrologer, 
@@ -13,8 +14,7 @@ const NewAstrologerCard = memo(({
 }) => {
   const navigate = useNavigate();
   const isOnline = astrologer?.isActive === true;
-  const isLive = astrologer?.astrologerLiveStatus?.isLive === true;
-  const liveRoomId = astrologer?.astrologerLiveStatus?.roomId || astrologer?._id;
+  const { isLive, roomId: liveRoomId } = useAstrologerLiveStatus(astrologer?._id, astrologer?.astrologerLiveStatus);
   const activeTypes = astrologer?.isActiveType || [];
   const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;
   const callPrice = Number(astrologer?.price?.audioRate?.amount) || 0;

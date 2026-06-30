@@ -8,6 +8,7 @@ import {
   appSvgs,
 } from "../../../../utils/appImages";
 import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySessionModal";
+import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 
 const NewAstrologerDetailsCard = ({
   astrologer,
@@ -17,8 +18,7 @@ const NewAstrologerDetailsCard = ({
 }) => {
   const navigate = useNavigate();
   const isOnline = astrologer?.isActive === true;
-  const isLive = astrologer?.astrologerLiveStatus?.isLive === true;
-  const liveRoomId = astrologer?.astrologerLiveStatus?.roomId || astrologer?._id;
+  const { isLive, roomId: liveRoomId } = useAstrologerLiveStatus(astrologer?._id, astrologer?.astrologerLiveStatus);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const activeTypes = astrologer?.isActiveType || [];
   const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;

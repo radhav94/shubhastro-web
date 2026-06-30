@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, lazy, Suspense } from "react";
+import { useMemo, useState, lazy, Suspense } from "react";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
@@ -50,7 +50,6 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
     setOpenModal,
     selectedAstrologer,
     activeCallAstroRef,
-    kundliRef,
   } = useAstrologerConnect();
 
   const [fetchAstrologer] = useLazyGetAstrologerByIdQuery();
@@ -72,6 +71,9 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
       return;
     }
 
+    // Block re-connect while the astrologer is live streaming.
+    if (session?.astrologerLiveStatus?.isLive === true) return;
+
     // Fetch full astrologer data to get experience and other fields
     let astrologer = {
       _id: session._id,
@@ -89,7 +91,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
       if (astroData?.data) {
         astrologer = { ...astrologer, ...astroData.data };
       }
-    } catch (e) {
+    } catch {
       console.warn("Failed to fetch astrologer details, using session data");
     }
 
@@ -129,7 +131,9 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
       </div>
 
       <div className={styles.sessionScroll}>
-        {sessions.map((session, idx) => (
+        {sessions.map((session, idx) => {
+          const isLive = session?.astrologerLiveStatus?.isLive === true;
+          return (
           <div key={session.roomId || idx} className={styles.sessionCard}>
             {/* Avatar */}
             <div className={styles.sessionAvatar}>
@@ -138,7 +142,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
                 alt={session.astrologerName}
                 onError={e => { e.target.src = astrologerMaleImg; }}
               />
-              <span className={styles.sessionOnlineDot} style={{ background: session.isActive ? '#22c55e' : '#9ca3af' }} />
+              <span className={styles.sessionOnlineDot} style={{ background: isLive ? '#e53e3e' : session.isActive ? '#22c55e' : '#9ca3af' }} />
             </div>
 
             {/* Info */}
@@ -219,6 +223,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
                   <button
                     className={styles.sessionCallBtn}
                     onClick={() => handleAgain(session)}
+                    disabled={isLive}
                   >
                     {session.sessiontype === 'chat' ? 'Chat Again' : 'Call Again'}
                   </button>
@@ -226,7 +231,8 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Recharge Modal for insufficient balance */}
