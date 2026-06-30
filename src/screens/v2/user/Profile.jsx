@@ -1336,9 +1336,13 @@ const Profile = () => {
             <span className={styles.zodiacLabel}>
               {isLoadingAstro
                 ? "Loading..."
-                : isAstroError || !astroDetails?.sun_sign
-                  ? "-"
-                  : astroDetails.sun_sign}
+                : primaryProfile?.westernSign
+                  ? primaryProfile.westernSign
+                  : primaryProfile?.sunSign
+                    ? primaryProfile.sunSign
+                    : isAstroError || !astroDetails?.sun_sign
+                      ? "-"
+                      : astroDetails.sun_sign}
             </span>
             <span className={styles.zodiacValue}>Sun Sign</span>
           </div>
