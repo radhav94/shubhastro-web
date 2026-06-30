@@ -74,6 +74,36 @@ import { useLogoutUserMutation } from "../../../redux/api/userSession/userSessio
 import { useSelector } from "react-redux";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
+import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
+
+// "Consult Again" button that disables in real time when the astrologer is live.
+// Uses useAstrologerLiveStatus so it reacts to the live socket event even when
+// the live status arrives after the initial render (the list data alone doesn't
+// update reactively for socket-driven live changes).
+const ConsultAgainButton = ({ astrologer, seedLiveStatus, onConsultAgain }) => {
+  const { isLive } = useAstrologerLiveStatus(astrologer?._id, seedLiveStatus);
+  return (
+    <button
+      className={styles.consultAgainButton}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (isLive) return;
+        onConsultAgain(astrologer);
+      }}
+      disabled={isLive}
+    >
+      Consult Again
+    </button>
+  );
+};
+
+// Pulsing red dot shown on an order card when the astrologer is currently live.
+// Renders nothing otherwise. Reactive via the live socket event.
+const LiveDot = ({ astrologer, seedLiveStatus }) => {
+  const { isLive } = useAstrologerLiveStatus(astrologer?._id, seedLiveStatus);
+  if (!isLive) return null;
+  return <span className={styles.orderLiveDot} title="Live now" aria-label="Astrologer is live" />;
+};
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -301,6 +331,16 @@ const Profile = () => {
     return `${mins} Min ${secs} Sec`;
   };
   // Process order history data - current page call orders
+  // Live status is only returned by the call-history endpoint (not chat/recordings),
+  // so build a per-astrologer live map from it and reuse it on the chat tab.
+  const liveAstrologerMap = Array.isArray(callHistoryData?.data?.callHistory)
+    ? callHistoryData.data.callHistory.reduce((acc, item) => {
+        const aId = item?.receiverId;
+        if (aId && item?.astrologerLiveStatus?.isLive === true) acc[aId] = true;
+        return acc;
+      }, {})
+    : {};
+
   const callOrders = Array.isArray(callHistoryData?.data?.callHistory)
     ? callHistoryData.data.callHistory
         .map((item, index) => ({
@@ -323,6 +363,8 @@ const Profile = () => {
           rate: 0,
           status: item?.status || "completed",
           roomId: item?.roomId,
+          isLive: item?.astrologerLiveStatus?.isLive === true,
+          liveStatus: item?.astrologerLiveStatus,
           year: item?.timestamp
             ? new Date(item.timestamp).getFullYear()
             : new Date().getFullYear(),
@@ -355,6 +397,12 @@ const Profile = () => {
           rate: room?.rate || 0,
           status: "completed",
           roomId: room.roomId,
+          isLive:
+            room?.astrologerLiveStatus?.isLive === true ||
+            liveAstrologerMap[room.astrologerId] === true,
+          liveStatus:
+            room?.astrologerLiveStatus ||
+            { isLive: liveAstrologerMap[room.astrologerId] === true },
           year: firstChat?.createdAt
             ? new Date(firstChat.createdAt).getFullYear()
             : room?.createdAt
@@ -1696,6 +1744,10 @@ const Profile = () => {
                                         {getInitials(order.astrologer.name)}
                                       </span>
                                     )}
+                                    <LiveDot
+                                      astrologer={order.astrologer}
+                                      seedLiveStatus={order.liveStatus}
+                                    />
                                   </div>
                                   <div className={styles.orderInfo}>
                                     <h5
@@ -1774,15 +1826,11 @@ const Profile = () => {
                                   Rate Consultation
                                 </button>
                                 <div className={styles.buttonSeparator}></div>
-                                <button
-                                  className={styles.consultAgainButton}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleConnectClick(order.astrologer);
-                                  }}
-                                >
-                                  Consult Again
-                                </button>
+                                <ConsultAgainButton
+                                  astrologer={order.astrologer}
+                                  seedLiveStatus={order.liveStatus}
+                                  onConsultAgain={handleConnectClick}
+                                />
                               </div>
                             </div>
                           ))}

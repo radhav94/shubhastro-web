@@ -11,6 +11,7 @@ import { Toast } from "../../../component";
 import { useGetChatHistoryQuery, useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 import { useGetCallRecordingsQuery } from "../../../redux/api/callHistory/callHistory";
+import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -47,6 +48,12 @@ const OrderDetails = () => {
 
   const { data: astrologerData, isLoading: isLoadingAstrologer } = useGetAstrologerByIdQuery(
     { id: astrologerId }
+  );
+
+  // Live status for this astrologer (real-time). Used to disable "Consult Again".
+  const { isLive: isAstrologerLive } = useAstrologerLiveStatus(
+    astrologerId,
+    astrologerData?.data?.astrologerLiveStatus
   );
 
   const { data: chatData, isLoading: isLoadingMessages, error, isFetching } = useGetChatHistoryQuery(
@@ -397,6 +404,7 @@ const OrderDetails = () => {
                 roomId={rec.roomId || rec.sessionId}
                 onRateConsultation={handleRateConsultation}
                 onConsultAgain={handleConsultAgain}
+                isLive={isAstrologerLive}
               />
             ))}
           </div>
@@ -441,6 +449,7 @@ const OrderDetails = () => {
                 roomId={rec.roomId || rec.sessionId}
                 onRateConsultation={handleRateConsultation}
                 onConsultAgain={handleConsultAgain}
+                isLive={isAstrologerLive}
               />
             ))}
           </div>

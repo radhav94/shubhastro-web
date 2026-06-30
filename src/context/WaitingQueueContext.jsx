@@ -4,7 +4,7 @@ import { useCall } from "./CallContext";
 import { useChat } from "./ChatContext";
 import { PANDIT_AI_ID } from "../component/panditAI/usePanditAI";
 import { Toast } from "../component";
-
+import { startIncomingSound, stopIncomingSound } from "../utils/incomingSound";
 const WaitingQueueContext = createContext();
 
 // LocalStorage key for persistence
@@ -217,6 +217,21 @@ export const WaitingQueueProvider = ({ children }) => {
   const { setChatApprovalData, chatApprovalData, activeChat, setActiveChat, setChatSeconds, setWaitingList: setChatWaitingList, stopTimer: stopChatTimer } = useChat();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
+  // Ring sound: loop while an astrologer has accepted and the user is being
+  // asked to join (approval data is set), and stop the moment that state is
+  // cleared — i.e. when the user joins, cancels, or rejects, or the ring ends
+  // (on_hold / unavailable / timeout / accepted all clear the approval data).
+  useEffect(() => {
+    if (callApprovalData || chatApprovalData) {
+      startIncomingSound();
+    } else {
+      stopIncomingSound();
+    }
+  }, [callApprovalData, chatApprovalData]);
+
+  // Always stop the sound if the provider unmounts.
+  useEffect(() => stopIncomingSound, []);
+
   useEffect(() => {
     if (!userIdLocal) return;
 
@@ -236,6 +251,8 @@ export const WaitingQueueProvider = ({ children }) => {
 
     const handleCallOnHold = (data) => {
       console.log("[GlobalTwoWay] ⏸️ call:on_hold", JSON.stringify(data));
+      // Ring expired / put on hold — stop the ring sound immediately.
+      stopIncomingSound();
       const { roomId } = data;
       if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
       if (roomId) updateStatusByRoomId(roomId, "on_hold");
@@ -243,24 +260,29 @@ export const WaitingQueueProvider = ({ children }) => {
 
     const handleChatOnHold = (data) => {
       console.log("[GlobalTwoWay] ⏸️ chat:on_hold", JSON.stringify(data));
+      // Ring expired / put on hold — stop the ring sound immediately.
+      stopIncomingSound();
       const { roomId } = data;
       if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
       if (roomId) updateStatusByRoomId(roomId, "on_hold");
     };
 
     const handleCallUnavailable = (data) => {
+      stopIncomingSound();
       const { roomId } = data;
       if (roomId) removePendingConnection(roomId);
       if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
     };
 
     const handleChatUnavailable = (data) => {
+      stopIncomingSound();
       const { roomId } = data;
       if (roomId) removePendingConnection(roomId);
       if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
     };
 
     const handleCanceled = (data) => {
+      stopIncomingSound();
       const canceledRoomId = data?.roomId || data?.sessionData?.roomId;
       if (canceledRoomId) {
         removePendingConnection(canceledRoomId);
@@ -271,6 +293,7 @@ export const WaitingQueueProvider = ({ children }) => {
 
     const handleRejected = (data) => {
       if (data?.switchRejected) return;
+      stopIncomingSound();
       const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
       const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
       if (rejectedRoomId) {
