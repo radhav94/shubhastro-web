@@ -88,6 +88,46 @@ export const zodiacApi = vedicApi.injectEndpoints({
       }),
     }),
 
+    // --- Western page endpoints (used by HoroscopeOld / /daily-horoscope) ---
+    fetchWesternDaily: builder.query({
+      query: (zodiac) => ({
+        url: "western/daily-horoscope",
+        params: {
+          zodiac,
+          date: new Date().toLocaleDateString("en-GB"),
+          split: true,
+          type: "big",
+          lang: getCurrentLang(),
+        },
+      }),
+    }),
+    fetchWesternTomorrow: builder.query({
+      query: (zodiac) => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return {
+          url: "western/daily-horoscope",
+          params: {
+            zodiac,
+            date: tomorrow.toLocaleDateString("en-GB"),
+            split: true,
+            type: "big",
+            lang: getCurrentLang(),
+          },
+        };
+      },
+    }),
+    fetchWesternYearly: builder.query({
+      query: (zodiac) => ({
+        url: "western/yearly-horoscope",
+        params: {
+          zodiac,
+          year: new Date().getFullYear(),
+          lang: getCurrentLang(),
+        },
+      }),
+    }),
+
     fetchPrevios: builder.query({
       query: ({ sign, payload }) => ({
         url: `sun_sign_prediction/daily/previous/${sign}`,
@@ -187,6 +227,9 @@ export const {
   useFetchMonthQuery,
   useFetchWeeklyQuery,
   useFetchYearlyQuery,
+  useFetchWesternDailyQuery,
+  useFetchWesternTomorrowQuery,
+  useFetchWesternYearlyQuery,
   useFetchDailyMoonQuery,
   useFetchDailySunQuery,
   useFetchDailyNakshatraQuery,
