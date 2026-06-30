@@ -122,7 +122,8 @@ const NewAstrologerCard = memo(({
           <div className={styles.emergencyButtonWrapper}>
             <button
               className={styles.emergencySingleBtn}
-              onClick={() => onEmergencyClick?.(astrologer)}
+              onClick={() => !isLive && onEmergencyClick?.(astrologer)}
+              disabled={isLive}
             >
               Emergency Session{emergencyMinRate > 0 ? ` - ₹${emergencyMinRate}/min` : ''}
             </button>

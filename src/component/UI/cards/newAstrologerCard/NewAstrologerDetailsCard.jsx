@@ -109,7 +109,7 @@ const NewAstrologerDetailsCard = ({
         <div className={styles.detailsActionButtons}>
           {!isOnline && hasEmergency ? (
             <div className={styles.emergencyButtonWrapper}>
-              <button className={styles.emergencySingleBtn} onClick={() => setShowEmergencyModal(true)}>
+              <button className={styles.emergencySingleBtn} onClick={() => !isLive && setShowEmergencyModal(true)} disabled={isLive}>
                 Emergency Session{emergencyMinRate > 0 ? ` - ₹${emergencyMinRate}/min` : ''}
               </button>
             </div>

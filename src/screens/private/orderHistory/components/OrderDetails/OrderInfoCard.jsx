@@ -19,6 +19,7 @@ const OrderInfoCard = ({
   initialRating = null,
   roomId,
   onRateConsultation,
+  isLive = false,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -194,7 +195,13 @@ const OrderInfoCard = ({
                 </button>
               )}
             </div>
-            <div className={styles.consultAgain} onClick={onConsultAgain}>Consult Again</div>
+            <div
+              className={`${styles.consultAgain} ${isLive ? styles.consultAgainDisabled : ""}`.trim()}
+              onClick={isLive ? undefined : onConsultAgain}
+              aria-disabled={isLive}
+            >
+              Consult Again
+            </div>
           </div>
         </div>
       </div>
