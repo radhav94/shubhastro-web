@@ -110,11 +110,17 @@ const NewAstrologerDetailsCard = ({
           {!isOnline && hasEmergency ? (
             <div className={styles.emergencyButtonWrapper}>
               <button className={styles.emergencySingleBtn} onClick={() => !isLive && setShowEmergencyModal(true)} disabled={isLive}>
-                Emergency Session{emergencyMinRate > 0 ? ` - ₹${emergencyMinRate}/min` : ''}
+                Emergency
               </button>
+              {emergencyMinRate > 0 && (
+                <p className={styles.detailsPriceText}>
+                  <span className={styles.detailsPriceAmount}>₹{emergencyMinRate}</span>/min
+                </p>
+              )}
             </div>
           ) : (
             <>
+              {chatEnabled && (
               <div className={styles.detailsButtonWrapper}>
                 <button
                   className={styles.detailsChatBtn}
@@ -135,6 +141,8 @@ const NewAstrologerDetailsCard = ({
                   )}
                 </p>
               </div>
+              )}
+              {callEnabled && (
               <div className={styles.detailsButtonWrapper}>
                 <button
                   className={styles.detailsCallBtn}
@@ -155,6 +163,7 @@ const NewAstrologerDetailsCard = ({
                   )}
                 </p>
               </div>
+              )}
             </>
           )}
         </div>
