@@ -1,12 +1,22 @@
-import { useState, useCallback, memo, lazy, Suspense } from "react";
+import { useState, useCallback, useRef, useEffect, memo, lazy, Suspense } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import SectionHeader from "./SectionHeader";
 import NewAstrologerCard from "../../../../component/UI/cards/newAstrologerCard/NewAstrologerCard";
+import useIsOverflowing from "../../../../hooks/useIsOverflowing";
 import styles from "../Home.module.scss";
 
 const EmergencySessionModal = lazy(() => import("../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal"));
 
-const AstrologersSection = memo(({ title, astrologers, onConnect }) => {
+const AstrologersSection = memo(({ title, astrologers, onConnect, gridRef, hideSliderButtons = false, onScrollableChange }) => {
     const [emergencyAstrologer, setEmergencyAstrologer] = useState(null);
+    const internalRef = useRef(null);
+    const listRef = gridRef || internalRef;
+    const canScroll = useIsOverflowing(listRef, [astrologers]);
+
+    // Report scrollability to a parent that renders external slider buttons.
+    useEffect(() => {
+        onScrollableChange?.(canScroll);
+    }, [canScroll, onScrollableChange]);
 
     const handleEmergencyClick = useCallback((astrologer) => {
         setEmergencyAstrologer(astrologer);
@@ -16,20 +26,49 @@ const AstrologersSection = memo(({ title, astrologers, onConnect }) => {
         setEmergencyAstrologer(null);
     }, []);
 
+    const scrollByCards = useCallback((direction) => {
+        const grid = listRef.current;
+        if (!grid) return;
+        const amount = Math.max(grid.clientWidth * 0.8, 240);
+        grid.scrollBy({ left: direction === "left" ? -amount : amount, behavior: "smooth" });
+    }, [listRef]);
+
     if (!astrologers || astrologers.length === 0) return null;
 
     return (
         <section className={styles.astrologersSection}>
             <SectionHeader title={title} />
-            <div className={styles.astrologersGrid}>
-                {astrologers.map((astrologer) => (
-                    <NewAstrologerCard
-                        key={astrologer._id}
-                        astrologer={astrologer}
-                        onConnect={onConnect}
-                        onEmergencyClick={handleEmergencyClick}
-                    />
-                ))}
+            <div className={styles.gridWrapper}>
+                {!hideSliderButtons && canScroll && (
+                    <button
+                        type="button"
+                        className={`${styles.sliderBtn} ${styles.sliderBtnLeft}`}
+                        onClick={() => scrollByCards("left")}
+                        aria-label="Scroll left"
+                    >
+                        <ChevronLeft size={20} />
+                    </button>
+                )}
+                <div className={styles.astrologersGrid} ref={listRef}>
+                    {astrologers.map((astrologer) => (
+                        <NewAstrologerCard
+                            key={astrologer._id}
+                            astrologer={astrologer}
+                            onConnect={onConnect}
+                            onEmergencyClick={handleEmergencyClick}
+                        />
+                    ))}
+                </div>
+                {!hideSliderButtons && canScroll && (
+                    <button
+                        type="button"
+                        className={`${styles.sliderBtn} ${styles.sliderBtnRight}`}
+                        onClick={() => scrollByCards("right")}
+                        aria-label="Scroll right"
+                    >
+                        <ChevronRight size={20} />
+                    </button>
+                )}
             </div>
             {emergencyAstrologer && (
                 <Suspense fallback={null}>

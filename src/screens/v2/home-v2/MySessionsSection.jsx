@@ -1,4 +1,6 @@
-import { useMemo, useState, lazy, Suspense } from "react";
+import { useMemo, useState, useRef, useCallback, lazy, Suspense } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import useIsOverflowing from "../../../hooks/useIsOverflowing";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
@@ -56,12 +58,22 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
   const [lastConnectionType, setLastConnectionType] = useState("chat");
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [emergencyAstrologer, setEmergencyAstrologer] = useState(null);
+  const scrollRef = useRef(null);
+
+  const scrollByCards = useCallback((direction) => {
+    const grid = scrollRef.current;
+    if (!grid) return;
+    const amount = Math.max(grid.clientWidth * 0.8, 240);
+    grid.scrollBy({ left: direction === "left" ? -amount : amount, behavior: "smooth" });
+  }, []);
 
   const sessions = useMemo(() => {
     return Array.isArray(data?.data?.recentSessions)
       ? data.data.recentSessions.slice(0, 6)
       : [];
   }, [data]);
+
+  const canScroll = useIsOverflowing(scrollRef, [sessions]);
 
   if (isLoading || !sessions.length) return null;
 
@@ -117,7 +129,18 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
   };
 
   return (
-    <section className={styles.mySessionsSection}>
+    <div className={styles.astrologerSliderWrapper} style={{ position: "relative" }}>
+      {canScroll && (
+        <button
+          type="button"
+          className={`${styles.gridSliderBtn} ${styles.gridSliderBtnLeft}`}
+          onClick={() => scrollByCards("left")}
+          aria-label="Scroll left"
+        >
+          <ChevronLeft size={20} />
+        </button>
+      )}
+      <section className={styles.mySessionsSection}>
       <div className={styles.mySessionsHeader}>
         <div className={`${styles.titleWithBottomDevider}`}>
           <h4 className={styles.wowTitle}>MY SESSIONS</h4>
@@ -130,7 +153,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
         <button className={styles.viewAllBtn} onClick={() => navigate('/profile', { state: { activeTab: 'Order History' } })}>View All &rsaquo;</button>
       </div>
 
-      <div className={styles.sessionScroll}>
+      <div className={styles.sessionScroll} ref={scrollRef}>
         {sessions.map((session, idx) => {
           const isLive = session?.astrologerLiveStatus?.isLive === true;
           return (
@@ -255,7 +278,18 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
           />
         </Suspense>
       )}
-    </section>
+      </section>
+      {canScroll && (
+        <button
+          type="button"
+          className={`${styles.gridSliderBtn} ${styles.gridSliderBtnRight}`}
+          onClick={() => scrollByCards("right")}
+          aria-label="Scroll right"
+        >
+          <ChevronRight size={20} />
+        </button>
+      )}
+    </div>
   );
 };
 

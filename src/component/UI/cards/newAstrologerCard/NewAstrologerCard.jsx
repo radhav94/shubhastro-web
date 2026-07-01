@@ -125,11 +125,17 @@ const NewAstrologerCard = memo(({
               onClick={() => !isLive && onEmergencyClick?.(astrologer)}
               disabled={isLive}
             >
-              Emergency Session{emergencyMinRate > 0 ? ` - ₹${emergencyMinRate}/min` : ''}
+              Emergency
             </button>
+            {emergencyMinRate > 0 && (
+              <p className={styles.priceText}>
+                <span className={styles.priceAmount}>₹{emergencyMinRate}</span>/min
+              </p>
+            )}
           </div>
         ) : (
           <>
+            {chatEnabled && (
             <div className={styles.buttonWrapper}>
               <button
                 className={styles.chatBtn}
@@ -150,6 +156,8 @@ const NewAstrologerCard = memo(({
                 )}
               </p>
             </div>
+            )}
+            {callEnabled && (
             <div className={styles.buttonWrapper}>
               <button
                 className={styles.callBtn}
@@ -170,6 +178,7 @@ const NewAstrologerCard = memo(({
                 )}
               </p>
             </div>
+            )}
           </>
         )}
       </div>

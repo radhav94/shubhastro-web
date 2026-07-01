@@ -1618,7 +1618,7 @@ const AstrologerProfile = () => {
                   className={styles.emergencyBtn}
                   onClick={() => setShowEmergencyModal(true)}
                 >
-                  Emergency Session{(() => {
+                  Emergency{(() => {
                     const eChatRate = Number(data?.emergencyPrice?.chatRate?.amount) || 0;
                     const eCallRate = Number(data?.emergencyPrice?.audioRate?.amount) || 0;
                     const minRate = eChatRate > 0 && eCallRate > 0 ? Math.min(eChatRate, eCallRate) : eChatRate || eCallRate;
@@ -1754,7 +1754,7 @@ const AstrologerProfile = () => {
             className={styles.mobileEmergencyBtn}
             onClick={() => setShowEmergencyModal(true)}
           >
-            Emergency Session{(() => {
+            Emergency{(() => {
               const eChatRate = Number(data?.emergencyPrice?.chatRate?.amount) || 0;
               const eCallRate = Number(data?.emergencyPrice?.audioRate?.amount) || 0;
               const minRate = eChatRate > 0 && eCallRate > 0 ? Math.min(eChatRate, eCallRate) : eChatRate || eCallRate;
