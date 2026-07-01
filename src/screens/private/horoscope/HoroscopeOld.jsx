@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Share2 } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { 
@@ -17,6 +17,8 @@ import { useGetAllKundlisQuery } from '../../../services/appServices/kundliServi
 import { useSelector } from 'react-redux';
 import { useGetAstroDetailsQuery } from '../../../redux/api/kundli/kundliApi';
 import { buildVedicParam } from '../../../utils/VedicParams.js/vedicParams';
+import { trackEvent } from '../../../utils/analytics';
+import toast from 'react-hot-toast';
 const overViewImg = "https://assets.shubhastro.ai/images/horoscope/overview.png";
 const financeImg = "https://assets.shubhastro.ai/images/horoscope/finances.png";
 const scoreImg = "https://assets.shubhastro.ai/images/horoscope/total-score.png";
@@ -500,6 +502,31 @@ const HoroscopeOld = () => {
     setShowZodiacModal(true);
   };
 
+  // Share the current horoscope (native share if available, else copy link)
+  const handleShareHoroscope = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)} Horoscope`,
+          text: `Check out the ${activeTab} horoscope for ${selectedZodiac}`,
+          url,
+        });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        toast.success('Link copied to clipboard');
+      }
+    } catch {
+      // User cancelled the share sheet — don't record a share.
+      return;
+    }
+    trackEvent('horoscope_shared', {
+      horoscope_type: 'western',
+      sign: selectedZodiac,
+      period: activeTab,
+    });
+  };
+
   const selectedZodiacData = zodiacSigns.find(
     z => z.name.toLowerCase() === selectedZodiac.toLowerCase()
   );
@@ -551,9 +578,20 @@ const HoroscopeOld = () => {
           </button>
           <button
             className="indian-horoscope-btn"
-            onClick={() => navigate('/daily-horoscope-indian')}
+            onClick={() => {
+              trackEvent('horoscope_type_switched', { from_type: 'western', to_type: 'indian' });
+              navigate('/daily-horoscope-indian');
+            }}
           >
             Indian
+          </button>
+          <button
+            className="horoscope-share-btn"
+            onClick={handleShareHoroscope}
+            aria-label="Share horoscope"
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'inherit' }}
+          >
+            <Share2 size={18} />
           </button>
         </div>
       </div>
