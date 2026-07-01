@@ -3,21 +3,15 @@
   margin: 0 auto;
   padding: 24px 16px 48px;
 }
-
 .hero {
   text-align: center;
-  margin-bottom: 24px;
+  width: 75%;
+  margin: -66px auto 20px auto;
+  h1 { font-size: 26px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px; }
+  p { font-size: 14px; color: #030303; margin: 0; }
+}
 
-  h1 {
-    font-size: 26px;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin: 0 0 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .headingUnderline {
+.headingUnderline {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -34,13 +28,6 @@
     line-height: 0;
     color: #030303;
   }
-
-  p {
-    font-size: 14px;
-    color: #030303;
-    margin: 0;
-  }
-}
 
 .infoCard {
   // background: #fffaf5;
@@ -99,8 +86,8 @@
   display: block;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 767px) {
   .hero h1 {
-    font-size: 22px;
+    font-size: 18px;
   }
 }
