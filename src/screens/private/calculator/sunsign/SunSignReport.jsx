@@ -15,9 +15,9 @@ const SunSignReport = () => {
   const [profileOpen, setProfileOpen] = useState(false);
 
   const stored = useSelector(selectCalculatorData("sun_sign"));
-  const { data, isLoading } = useGetSunSignQuery(stored);
+  const { data, isLoading } = useGetSunSignQuery(stored, { skip: !stored });
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
+  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
   if (!data?.response) return <div>No data found</div>;
 
   const { sun_sign, prediction, bot_response } = data.response;
@@ -80,7 +80,7 @@ const SunSignReport = () => {
 
           <button
             className={styles.backBtn}
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/sun-sign-calculator")}
           >
             Calculate Again
           </button>
