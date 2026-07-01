@@ -17,11 +17,11 @@ const DashaReport = () => {
   const [openIndex, setOpenIndex] = useState(0);
 
   const stored = useSelector(selectCalculatorData("dasha_calc"));
-  const { data, isLoading } = useGetDashaRepQuery(stored);
+  const { data, isLoading } = useGetDashaRepQuery(stored, { skip: !stored });
   const { data: periodsData, isLoading: periodsLoading } =
-    useGetDashaPeriodsQuery(stored);
+    useGetDashaPeriodsQuery(stored, { skip: !stored });
 
-  if (isLoading || periodsLoading) return <PrimaryLoader isLoading={true} />;
+  if (!stored || isLoading || periodsLoading) return <PrimaryLoader isLoading={true} />;
   if (!data?.response?.dashas) return <div>No data found</div>;
 
   const dashas = data.response.dashas;
@@ -131,7 +131,7 @@ const DashaReport = () => {
 
       {/* ACTIONS */}
       <div className={styles.actions}>
-        <button className={styles.calculateBtn} onClick={() => navigate(-1)}>
+        <button className={styles.calculateBtn} onClick={() => navigate("/dasha-calculator")}>
           Calculate Again
         </button>
       </div>

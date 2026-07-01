@@ -16,9 +16,9 @@ const RashiReport = () => {
   const [aboutOpen, setAboutOpen] = useState(true);
 
   const stored = useSelector(selectCalculatorData("rashi_moon_sign"));
-  const { data, isLoading } = useGetRashiCalQuery(stored);
+  const { data, isLoading } = useGetRashiCalQuery(stored, { skip: !stored });
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
+  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
   if (!data?.response) return <div>No data found</div>;
 
   const { moon_sign, bot_response, prediction } = data.response;
@@ -56,7 +56,7 @@ const RashiReport = () => {
               </div>
             )}
           </div>
-          <button className={styles.calcAgainBtn} onClick={() => navigate(-1)}>
+          <button className={styles.calcAgainBtn} onClick={() => navigate("/rashi-calculator")}>
             Calculate Again
           </button>
         </>

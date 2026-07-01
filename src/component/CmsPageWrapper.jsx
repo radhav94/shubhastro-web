@@ -14,7 +14,8 @@ const EXCLUDED_PATHS = [
   "/shubh-mall",
   // "/explore",
   "/blog",
-  "/community"
+  "/community",
+  "/live"
 ];
 
 /**

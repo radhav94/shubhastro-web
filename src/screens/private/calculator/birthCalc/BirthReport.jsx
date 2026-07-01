@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -127,6 +127,8 @@ const BirthReport = () => {
 
   const loading = planetLoading || birthLoading || navLoading;
 
+  if (!payload) return null;
+
   const svgBirthUrl = birthChart || null;
 
   const svgNavamsaUrl = navamsaChart
@@ -170,7 +172,7 @@ const BirthReport = () => {
             )}
           </div>
 
-          <button className={styles.calcAgainBtn} onClick={() => navigate(-1)}>
+          <button className={styles.calcAgainBtn} onClick={() => navigate("/birth-natal-chart-calculator")}>
             Calculate Again
           </button>
 

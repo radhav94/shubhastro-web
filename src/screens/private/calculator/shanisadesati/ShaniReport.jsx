@@ -15,9 +15,9 @@ const ShaniReport = () => {
   const [aboutOpen, setAboutOpen] = useState(true);
 
   const stored = useSelector(selectCalculatorData("shani_sade_sati"));
-  const { data, isLoading } = useGetSadeSatiReportQuery(stored);
+  const { data, isLoading } = useGetSadeSatiReportQuery(stored, { skip: !stored });
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
+  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
   if (!data?.response) return <div>No data found</div>;
 
   const {
@@ -140,7 +140,7 @@ const ShaniReport = () => {
 
       {/* ACTIONS */}
       <div className={styles.actions}>
-        <button className={styles.calculateBtn} onClick={() => navigate(-1)}>
+        <button className={styles.calculateBtn} onClick={() => navigate("/shani-sade-sati-calculator")}>
           Calculate Again
         </button>
       </div>
