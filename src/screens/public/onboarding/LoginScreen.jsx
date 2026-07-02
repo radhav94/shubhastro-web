@@ -83,7 +83,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
       
 
       {/* Language Translator - top right corner */}
-      <LanguageSelector />
+      {/* <LanguageSelector /> */}
 
       <div className={styles.loginContent}>
         <h1 className={styles.loginTitle}>Begin your journey</h1>

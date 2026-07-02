@@ -60,7 +60,6 @@ const MangalDosha = () => {
   const onReset = () => {
     setFormData(initialFormState);
     setErrors({});
-    dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
   };
 
   const token = localStorage.getItem("shubhtalk_customer_token");

@@ -323,13 +323,15 @@ const BusinessPathfinderResult = () => {
 
         {/* Funding Outlook */}
         {fundingOutlook && (
-          <div className={styles.resultCard} style={{ position: 'relative' }}>
+          <div className={styles.resultCardStacked} style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
               <TTSButton text={`Funding Outlook. ${fundingOutlook}`} />
             </span>
-            <div className={styles.cardIcon}>🔮</div>
-            <div className={styles.cardContent}>
-              <h3>Funding Outlook</h3>
+            <div className={styles.cardHeaderRow}>
+              <div className={styles.cardIcon}>🔮</div>
+              <p>Funding Outlook</p>
+            </div>
+            <div className={styles.cardBody}>
               <p>{fundingOutlook}</p>
             </div>
           </div>
@@ -337,13 +339,15 @@ const BusinessPathfinderResult = () => {
 
         {/* Suggested Remedy */}
         {suggestedRemedy && (
-          <div className={styles.resultCard + ' ' + styles.remedyCard} style={{ position: 'relative' }}>
+          <div className={styles.resultCardStacked + ' ' + styles.remedyCard} style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
               <TTSButton text={`Suggested Remedy. ${suggestedRemedy}`} />
             </span>
-            <img src={remedyMortarImg} alt="Remedy" className={styles.remedyImg} />
-            <div className={styles.cardContent}>
-              <h3>Suggested Remedy</h3>
+            <div className={styles.cardHeaderRow}>
+              <img src={remedyMortarImg} alt="Remedy" className={styles.remedyImg} />
+              <p>Suggested Remedy</p>
+            </div>
+            <div className={styles.cardBody}>
               <p>{suggestedRemedy}</p>
             </div>
           </div>

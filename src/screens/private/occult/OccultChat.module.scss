@@ -194,6 +194,8 @@
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
+  width: 100%;
+  max-width: 400px;
 
   &:hover {
     border-color: #F75801;
@@ -243,6 +245,7 @@
 
 .selectBtn {
   width: 100%;
+  max-width: 400px;
   display: flex;
     align-items: center;
     gap: 8px;
@@ -266,7 +269,8 @@
 
 /* Generate Button */
 .generateBtn {
-  width: fit-content;
+  width: 100%;
+  max-width: 400px;
   padding: 15px 30px;
   border: none;
   border-radius: 100px;

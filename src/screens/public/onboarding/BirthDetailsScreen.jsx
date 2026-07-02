@@ -259,7 +259,7 @@ const BirthDetailsScreen = ({
             </div>
 
             {/* Language Translator */}
-            <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
+            {/* <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} /> */}
           </div>
 
           <div className={styles.content}>

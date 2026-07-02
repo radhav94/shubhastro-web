@@ -481,19 +481,24 @@ const ChatWindow = () => {
   };
 
   const [getS3SignedUrl] = useGetS3SignedUrlMutation();
-  const sendVoiceMessage = async (blob = null, duration) => {
+  const sendVoiceMessage = async (blob = null, duration, mimeType) => {
     // Upload in background — don't block the chat UI
     (async () => {
       try {
-        // Request .m4a URL from S3 — use audio/x-m4a so backend generates .m4a extension
-        const signedUrl = await getS3SignedUrl({
-          fileType: "audio/x-m4a",
-        }).unwrap();
+        // Label the upload by the actual recorded format. Recording as mp4 but
+        // uploading as .x-m4a (the old behaviour) breaks playback on iOS when
+        // the device actually recorded webm.
+        const recordedType = mimeType || blob?.type || "audio/mp4";
+        const isM4a = recordedType.includes("mp4");
+        const fileType = isM4a ? "audio/x-m4a" : "audio/webm";
+
+        const signedUrl = await getS3SignedUrl({ fileType }).unwrap();
         const audioUrl = signedUrl.uploadUrl.split("?")[0];
         const uploadUrl = signedUrl.uploadUrl;
-        // Re-wrap blob with matching MIME type so S3 Content-Type header matches the signed URL
-        const m4aBlob = new Blob([blob], { type: "audio/x-m4a" });
-        await uploadFileToS3(uploadUrl, m4aBlob);
+        // Re-label the blob so the S3 Content-Type matches the signed file type
+        // (bytes are unchanged).
+        const uploadBlob = new Blob([blob], { type: fileType });
+        await uploadFileToS3(uploadUrl, uploadBlob);
         sendMessage(audioUrl, "audio");
       } catch (err) {
         console.error("Voice upload failed:", err);

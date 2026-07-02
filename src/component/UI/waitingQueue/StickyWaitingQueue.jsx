@@ -5,6 +5,7 @@ import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { useCall } from "../../../context/CallContext";
 import { useChat } from "../../../context/ChatContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
+import { stopIncomingSound } from "../../../utils/incomingSound";
 import styles from "./StickyWaitingQueue.module.scss";
 
 /**
@@ -62,6 +63,7 @@ const StickyWaitingQueue = () => {
   const count = pendingConnections.length;
 
   const handleCancelAll = () => {
+    stopIncomingSound();
     cancelAll();
     setWaitingList(false);
     setCallWaitingList(false);
@@ -70,11 +72,13 @@ const StickyWaitingQueue = () => {
   };
 
   const handleCancelOne = (conn) => {
+    stopIncomingSound();
     cancelPendingConnection(conn.roomId, conn.type, conn.astrologer?._id);
   };
 
   const handleAccept = (conn) => {
     if (!conn.roomId) return;
+    stopIncomingSound();
     const eventName = conn.type === "chat" ? "chat:user_accept" : "call:user_accept";
     voiceSocket.emit(eventName, { roomId: conn.roomId });
     window.dispatchEvent(new CustomEvent("waitlist:accepted", {

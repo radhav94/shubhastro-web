@@ -13,9 +13,9 @@ const KaalSarpReport = () => {
   const navigate = useNavigate();
 
   const stored = useSelector(selectCalculatorData("kaal_sarp"));
-  const { data, isLoading } = useGetKaalSarpReportQuery(stored);
+  const { data, isLoading } = useGetKaalSarpReportQuery(stored, { skip: !stored });
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
+  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
   if (!data?.response) return <div>No data found</div>;
 
   const { is_dosha_present, bot_response, remedies } = data.response;
@@ -80,7 +80,7 @@ const KaalSarpReport = () => {
           Share Your Report
         </button>
 
-        <button className={styles.calculateBtn} onClick={() => navigate(-1)}>
+        <button className={styles.calculateBtn} onClick={() => navigate("/kaal-sarpa-dosh-calculator")}>
           Calculate Again
         </button>
       </div>

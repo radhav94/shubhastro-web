@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 
 const SITE_ORIGIN = typeof window !== "undefined" ? window.location.origin : "";
-const OG_IMAGE_PATH = "/images/ShubhAstrologo.png";
+const OG_IMAGE_PATH = "/images/shubhastro-logo-banner.jpeg";
 const OG_IMAGE_URL = `${SITE_ORIGIN}${OG_IMAGE_PATH}`;
 const FAVICON_PATH = "/images/mobile-shubh-astro-logo.svg";
 const FAVICON_URL = `${SITE_ORIGIN}${FAVICON_PATH}`;
@@ -30,13 +30,15 @@ const parseKeywords = (keywords) => {
  * @param {string} [props.data.meta_title] - Page title
  * @param {string} [props.data.meta_description] - Page description
  * @param {string|string[]} [props.data.meta_keywords] - Page keywords
+ * @param {string} [props.image] - Optional image URL for og:image / twitter:image
  */
-const SeoHelmet = ({ data }) => {
+const SeoHelmet = ({ data, image }) => {
   if (!data || typeof data !== "object") return null;
 
   const title = data.meta_title || DEFAULT_TITLE;
   const description = data.meta_description || "";
   const keywords = parseKeywords(data.meta_keywords);
+  const ogImage = image || OG_IMAGE_URL;
   // Strip query params and hash for canonical URL to avoid duplicate content
   const canonicalUrl = typeof window !== "undefined"
     ? `${window.location.origin}${window.location.pathname}`
@@ -56,14 +58,14 @@ const SeoHelmet = ({ data }) => {
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={OG_IMAGE_URL} />
-      <meta property="og:image:secure_url" content={OG_IMAGE_URL} />
+      <meta property="og:image" content={ogImage} />
+      <meta property="og:image:secure_url" content={ogImage} />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={OG_IMAGE_URL} />
+      <meta name="twitter:image" content={ogImage} />
     </Helmet>
   );
 };

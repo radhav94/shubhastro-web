@@ -149,7 +149,11 @@ const ProfileSelector = ({
 
                         <div className={styles.profileActions}>
                           <div className={styles.radioBtn}>
-                            {selectedProfileId === profile._id ? "●" : "○"}
+                            {selectedProfileId === profile._id ? (
+                              <span className={styles.filledCircle}></span>
+                            ) : (
+                              <span className={styles.outlineCircle}></span>
+                            )}
                           </div>
                           {onDelete && (
                             <button

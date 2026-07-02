@@ -44,6 +44,8 @@ import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeMod
 import { Link } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 import { AppIcons, getAstrologerDefaultImage } from "../../../utils/appImages";
+import AstrologerLiveBadge from "../../../component/UI/astrologerLiveBadge/AstrologerLiveBadge";
+import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
 
 // Import custom SVG icons
 import ExperienceIcon from "../../../assets/icons/experience.svg";
@@ -64,6 +66,68 @@ import VirtualAssistant from "../../../component/virtualAssistant/VirtualAssista
 import { useGetChatHistoryQuery } from "../../../redux/api/chatApi";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 
+// Chat/Call actions for a top-astrologer sidebar card. Mirrors the homepage
+// (NewAstrologerCard) enable logic: both buttons always render, and are enabled
+// only when the astrologer is online, not live-streaming, active for that
+// session type, and has a price for it. Extracted into a component so the
+// live-status hook can be used per astrologer inside the list.
+const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
+  const isOnline = astrologer?.isActive === true;
+  const { isLive } = useAstrologerLiveStatus(astrologer?._id, astrologer?.astrologerLiveStatus);
+  const activeTypes = astrologer?.isActiveType || [];
+  const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;
+  const callPrice = Number(astrologer?.price?.audioRate?.amount) || 0;
+  const chatEnabled =
+    isOnline && !isLive && (activeTypes.includes("all") || activeTypes.includes("chat")) && chatPrice > 0;
+  const callEnabled =
+    isOnline && !isLive && (activeTypes.includes("all") || activeTypes.includes("audio")) && callPrice > 0;
+
+  return (
+    <div className={styles.actionButtons}>
+      <div className={styles.buttonWrapper}>
+        <button
+          className={styles.chatBtn}
+          onClick={() => chatEnabled && onChat(astrologer)}
+          disabled={!chatEnabled}
+        >
+          <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+        </button>
+        <p className={styles.priceText}>
+          {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
+            <>
+              <span className={styles.originalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{chatPrice}</span> min
+            </>
+          ) : (
+            <>
+              <span className={styles.priceAmount}>₹{chatPrice}</span> min
+            </>
+          )}
+        </p>
+      </div>
+      <div className={styles.buttonWrapper}>
+        <button
+          className={styles.callBtn}
+          onClick={() => callEnabled && onCall(astrologer, "audio")}
+          disabled={!callEnabled}
+        >
+          <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+        </button>
+        <p className={styles.priceText}>
+          {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
+            <>
+              <span className={styles.originalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{callPrice}</span> min
+            </>
+          ) : (
+            <>
+              <span className={styles.priceAmount}>₹{callPrice}</span> min
+            </>
+          )}
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const AstrologerProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -72,7 +136,7 @@ const AstrologerProfile = () => {
     data: astrologerData,
     isLoading,
     error,
-  } = useGetAstrologerByIdQuery({ id }, { skip: !id, pollingInterval: 10000 });
+  } = useGetAstrologerByIdQuery({ id }, { skip: !id });
 
   const data = astrologerData?.data;
 
@@ -81,9 +145,12 @@ const AstrologerProfile = () => {
     if (id) trackEvent("astrologer_profile_viewed", { astrologer_id: id });
   }, [id]);
 
-  // Live status
-  const isLive = data?.astrologerLiveStatus?.isLive || false;
-  const liveRoomId = data?.astrologerLiveStatus?.roomId;
+  // Live status — seeded from the fetched astrologer, then kept up to date via
+  // the live:astrologer_status socket event (no polling needed).
+  const { isLive, roomId: liveRoomId } = useAstrologerLiveStatus(
+    id,
+    data?.astrologerLiveStatus
+  );
 
   const handleJoinLive = () => {
     if (liveRoomId) {
@@ -121,7 +188,19 @@ const AstrologerProfile = () => {
   }, [data?.astrologer_ID, refetchReviews]);
 
   const [showFullAbout, setShowFullAbout] = useState(false);
+  const [isAboutTruncated, setIsAboutTruncated] = useState(false);
+  const aboutTextRef = useRef(null);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+
+  useEffect(() => {
+    const el = aboutTextRef.current;
+    if (el && !showFullAbout) {
+      // Use requestAnimationFrame to ensure layout is computed
+      requestAnimationFrame(() => {
+        setIsAboutTruncated(el.scrollHeight > el.clientHeight);
+      });
+    }
+  }, [data?.description, showFullAbout]);
   const [isVAOpen, setIsVAOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
 
@@ -978,6 +1057,10 @@ const AstrologerProfile = () => {
             <div className={styles.astrologersGrid}>
               {topAstrologers.slice(0, 3).map((astrologer) => (
                 <div key={astrologer._id} className={styles.astrologerCard}>
+                  <AstrologerLiveBadge
+                    astrologerId={astrologer?._id}
+                    initialStatus={astrologer?.astrologerLiveStatus}
+                  />
                   <Link
                     to={`/astrologer/${astrologer?._id}`}
                     className={styles.cardLink}
@@ -1047,54 +1130,11 @@ const AstrologerProfile = () => {
                       )}
                     </div>
                   </Link>
-                  <div className={styles.actionButtons}>
-                    {(astrologer?.isActiveType?.includes("all") ||
-                      astrologer?.isActiveType?.includes("chat")) && (
-                      <div className={styles.buttonWrapper}>
-                        <button
-                          className={styles.chatBtn}
-                          onClick={() => handleChatStart(astrologer)}
-                          disabled={!astrologer?.price?.chatRate?.amount}
-                        >
-                          <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
-                        </button>
-                        <p className={styles.priceText}>
-                          {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
-                            <>
-                              <span className={styles.originalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{astrologer?.price?.chatRate?.amount || 0}</span> min
-                            </>
-                          ) : (
-                            <>
-                              <span className={styles.priceAmount}>₹{astrologer?.price?.chatRate?.amount || 0}</span> min
-                            </>
-                          )}
-                        </p>
-                      </div>
-                    )}
-                    {(astrologer?.isActiveType?.includes("all") ||
-                      astrologer?.isActiveType?.includes("audio")) && (
-                      <div className={styles.buttonWrapper}>
-                        <button
-                          className={styles.callBtn}
-                          onClick={() => handleCallStart(astrologer, "audio")}
-                          disabled={!astrologer?.price?.audioRate?.amount}
-                        >
-                          <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
-                        </button>
-                        <p className={styles.priceText}>
-                          {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
-                            <>
-                              <span className={styles.originalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{astrologer?.price?.audioRate?.amount || 0}</span> min
-                            </>
-                          ) : (
-                            <>
-                              <span className={styles.priceAmount}>₹{astrologer?.price?.audioRate?.amount || 0}</span> min
-                            </>
-                          )}
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  <TopAstrologerActions
+                    astrologer={astrologer}
+                    onChat={handleChatStart}
+                    onCall={handleCallStart}
+                  />
                 </div>
               ))}
             </div>
@@ -1107,10 +1147,10 @@ const AstrologerProfile = () => {
           <div className={styles.profileContentMain}>
             {/* Profile Card */}
             <div className={styles.profileCard}>
-              {data?.astrologerLiveStatus?.isLive && (
+              {isLive && (
                 <button
                   className={styles.liveIndicator}
-                  onClick={() => navigate(`/live/${data?.astrologerLiveStatus?.roomId || data?._id}`)}
+                  onClick={() => navigate(`/live/${liveRoomId || data?._id}`)}
                   aria-label="Astrologer is live, click to watch"
                 >
                   <span className={styles.liveDot}></span>
@@ -1284,22 +1324,30 @@ const AstrologerProfile = () => {
 
               {displayData.description && (
               <p
+                ref={aboutTextRef}
                 className={`${styles.aboutText} ${
                   showFullAbout ? styles.expanded : ""
                 }`}
               >
-                {showFullAbout
-                  ? displayData.description
-                  : displayData.description}
+                {displayData.description}
               </p>
               )}
 
-              {displayData.description?.length > 200 && (
+              {isAboutTruncated && !showFullAbout && (
                 <button
                   className={styles.readMoreBtn}
                   onClick={() => setShowFullAbout((prev) => !prev)}
                 >
-                  {showFullAbout ? "Read Less" : "Read More"}
+                  Read More
+                </button>
+              )}
+
+              {showFullAbout && (
+                <button
+                  className={styles.readMoreBtn}
+                  onClick={() => setShowFullAbout((prev) => !prev)}
+                >
+                  Read Less
                 </button>
               )}
 
@@ -1577,7 +1625,7 @@ const AstrologerProfile = () => {
                   className={styles.emergencyBtn}
                   onClick={() => setShowEmergencyModal(true)}
                 >
-                  Emergency Session{(() => {
+                  Emergency{(() => {
                     const eChatRate = Number(data?.emergencyPrice?.chatRate?.amount) || 0;
                     const eCallRate = Number(data?.emergencyPrice?.audioRate?.amount) || 0;
                     const minRate = eChatRate > 0 && eCallRate > 0 ? Math.min(eChatRate, eCallRate) : eChatRate || eCallRate;
@@ -1713,7 +1761,7 @@ const AstrologerProfile = () => {
             className={styles.mobileEmergencyBtn}
             onClick={() => setShowEmergencyModal(true)}
           >
-            Emergency Session{(() => {
+            Emergency{(() => {
               const eChatRate = Number(data?.emergencyPrice?.chatRate?.amount) || 0;
               const eCallRate = Number(data?.emergencyPrice?.audioRate?.amount) || 0;
               const minRate = eChatRate > 0 && eCallRate > 0 ? Math.min(eChatRate, eCallRate) : eChatRate || eCallRate;

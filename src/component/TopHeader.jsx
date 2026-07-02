@@ -395,7 +395,7 @@ const TopHeader = () => {
           <div className={styles.headerActions}>
 
             {/* language start */}
-            <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
+            {/* <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} /> */}
             {/* language end */}
 
             {isLoggedIn && (

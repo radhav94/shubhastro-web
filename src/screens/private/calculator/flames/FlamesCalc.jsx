@@ -52,7 +52,6 @@ const FlamesCalc = () => {
   const onReset = () => {
     setFormData(initialFormState);
     setErrors({});
-    dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
   };
 
   const handleSubmit = (e) => {

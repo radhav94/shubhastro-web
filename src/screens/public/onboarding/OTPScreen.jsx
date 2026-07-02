@@ -265,7 +265,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
       </div>
 
       {/* Language Translator - top right corner */}
-      <LanguageSelector />
+      {/* <LanguageSelector /> */}
 
       <div className={styles.loginContent}>
         <h1 className={styles.title}>Aligning your stars...</h1>

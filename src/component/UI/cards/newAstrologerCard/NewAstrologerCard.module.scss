@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 @mixin line-clamp($lines: 3) {
   @if $lines != null {
@@ -411,6 +410,10 @@
 
 .emergencyButtonWrapper {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 
 .emergencySingleBtn {
@@ -429,6 +432,14 @@
   &:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+  }
+
+  &:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
 }
 

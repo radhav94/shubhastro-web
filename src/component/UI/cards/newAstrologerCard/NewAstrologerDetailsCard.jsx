@@ -8,6 +8,7 @@ import {
   appSvgs,
 } from "../../../../utils/appImages";
 import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySessionModal";
+import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 
 const NewAstrologerDetailsCard = ({
   astrologer,
@@ -17,8 +18,7 @@ const NewAstrologerDetailsCard = ({
 }) => {
   const navigate = useNavigate();
   const isOnline = astrologer?.isActive === true;
-  const isLive = astrologer?.astrologerLiveStatus?.isLive === true;
-  const liveRoomId = astrologer?.astrologerLiveStatus?.roomId || astrologer?._id;
+  const { isLive, roomId: liveRoomId } = useAstrologerLiveStatus(astrologer?._id, astrologer?.astrologerLiveStatus);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const activeTypes = astrologer?.isActiveType || [];
   const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;
@@ -109,12 +109,18 @@ const NewAstrologerDetailsCard = ({
         <div className={styles.detailsActionButtons}>
           {!isOnline && hasEmergency ? (
             <div className={styles.emergencyButtonWrapper}>
-              <button className={styles.emergencySingleBtn} onClick={() => setShowEmergencyModal(true)}>
-                Emergency Session{emergencyMinRate > 0 ? ` - ₹${emergencyMinRate}/min` : ''}
+              <button className={styles.emergencySingleBtn} onClick={() => !isLive && setShowEmergencyModal(true)} disabled={isLive}>
+                Emergency
               </button>
+              {emergencyMinRate > 0 && (
+                <p className={styles.detailsPriceText}>
+                  <span className={styles.detailsPriceAmount}>₹{emergencyMinRate}</span>/min
+                </p>
+              )}
             </div>
           ) : (
             <>
+              {chatEnabled && (
               <div className={styles.detailsButtonWrapper}>
                 <button
                   className={styles.detailsChatBtn}
@@ -135,6 +141,8 @@ const NewAstrologerDetailsCard = ({
                   )}
                 </p>
               </div>
+              )}
+              {callEnabled && (
               <div className={styles.detailsButtonWrapper}>
                 <button
                   className={styles.detailsCallBtn}
@@ -155,6 +163,7 @@ const NewAstrologerDetailsCard = ({
                   )}
                 </p>
               </div>
+              )}
             </>
           )}
         </div>

@@ -15,9 +15,9 @@ const RisingSignReport = () => {
   const [aboutOpen, setAboutOpen] = useState(true);
 
   const stored = useSelector(selectCalculatorData("rising_sign"));
-  const { data, isLoading } = useGetRisingSignQuery(stored);
+  const { data, isLoading } = useGetRisingSignQuery(stored, { skip: !stored });
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
+  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
   if (!data?.response) return <div>No data found</div>;
 
   const { ascendant, bot_response, prediction } = data.response;
@@ -54,7 +54,7 @@ const RisingSignReport = () => {
 
           <button
             className={styles.backBtn}
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/rising-ascendant-sign-calculator")}
           >
             Calculate Again
           </button>

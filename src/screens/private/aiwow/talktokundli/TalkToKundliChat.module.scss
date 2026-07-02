@@ -42,6 +42,12 @@
   overflow-y: auto;
   min-height: 0;
   width: 100%;
+  @media (width <= 768px) {
+    padding-top: 106px;
+  }
+  @media (width <= 767px) {
+    padding-top: 71px;
+  }
 
 }
 .backButton {
@@ -291,7 +297,8 @@
 
 .suggestedList {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
@@ -307,6 +314,7 @@
   transition: all 0.2s;
   // box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   line-height: 1.4;
+  width: fit-content;
 
   @media (min-width: 640px) {
     padding: 0.75rem 1rem;
@@ -329,12 +337,12 @@
   padding: 0.875rem 0.875rem 1rem 0.875rem;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
-  // border-top: 1.5px solid #e5e7eb;
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1.5px solid #e5e7eb;
   flex-shrink: 0;
-  position: fixed;
+  position: sticky;
   bottom: 0;
-  width: 100%;
-  z-index: 99;
+  z-index: 10;
 
   @media (min-width: 640px) {
     padding: 1rem 1rem 1.125rem 1rem;
@@ -377,7 +385,7 @@
   font-size: 0.875rem;
   font-family: inherit;
   resize: none;
-  overflow: hidden;
+  overflow: auto;
   line-height: 1.4;
   min-height: 40px;
   max-height: 100px;
@@ -457,5 +465,11 @@
       width: 20px;
       height: 20px;
     }
+  }
+}
+.heiT{
+  height: calc(100dvh - 272px);
+  @media (width <= 767px) {
+    height: calc(100dvh - 219px);
   }
 }

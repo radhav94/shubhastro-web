@@ -1,4 +1,6 @@
-import { useMemo, useState, useCallback, lazy, Suspense } from "react";
+import { useMemo, useState, useRef, useCallback, lazy, Suspense } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import useIsOverflowing from "../../../hooks/useIsOverflowing";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
@@ -50,19 +52,28 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
     setOpenModal,
     selectedAstrologer,
     activeCallAstroRef,
-    kundliRef,
   } = useAstrologerConnect();
 
   const [fetchAstrologer] = useLazyGetAstrologerByIdQuery();
   const [lastConnectionType, setLastConnectionType] = useState("chat");
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [emergencyAstrologer, setEmergencyAstrologer] = useState(null);
+  const scrollRef = useRef(null);
+
+  const scrollByCards = useCallback((direction) => {
+    const grid = scrollRef.current;
+    if (!grid) return;
+    const amount = Math.max(grid.clientWidth * 0.8, 240);
+    grid.scrollBy({ left: direction === "left" ? -amount : amount, behavior: "smooth" });
+  }, []);
 
   const sessions = useMemo(() => {
     return Array.isArray(data?.data?.recentSessions)
       ? data.data.recentSessions.slice(0, 6)
       : [];
   }, [data]);
+
+  const canScroll = useIsOverflowing(scrollRef, [sessions]);
 
   if (isLoading || !sessions.length) return null;
 
@@ -71,6 +82,9 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
       console.error("Astrologer _id not found in session");
       return;
     }
+
+    // Block re-connect while the astrologer is live streaming.
+    if (session?.astrologerLiveStatus?.isLive === true) return;
 
     // Fetch full astrologer data to get experience and other fields
     let astrologer = {
@@ -89,7 +103,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
       if (astroData?.data) {
         astrologer = { ...astrologer, ...astroData.data };
       }
-    } catch (e) {
+    } catch {
       console.warn("Failed to fetch astrologer details, using session data");
     }
 
@@ -115,7 +129,18 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
   };
 
   return (
-    <section className={styles.mySessionsSection}>
+    <div className={styles.astrologerSliderWrapper} style={{ position: "relative" }}>
+      {canScroll && (
+        <button
+          type="button"
+          className={`${styles.gridSliderBtn} ${styles.gridSliderBtnLeft}`}
+          onClick={() => scrollByCards("left")}
+          aria-label="Scroll left"
+        >
+          <ChevronLeft size={20} />
+        </button>
+      )}
+      <section className={styles.mySessionsSection}>
       <div className={styles.mySessionsHeader}>
         <div className={`${styles.titleWithBottomDevider}`}>
           <h4 className={styles.wowTitle}>MY SESSIONS</h4>
@@ -128,8 +153,10 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
         <button className={styles.viewAllBtn} onClick={() => navigate('/profile', { state: { activeTab: 'Order History' } })}>View All &rsaquo;</button>
       </div>
 
-      <div className={styles.sessionScroll}>
-        {sessions.map((session, idx) => (
+      <div className={styles.sessionScroll} ref={scrollRef}>
+        {sessions.map((session, idx) => {
+          const isLive = session?.astrologerLiveStatus?.isLive === true;
+          return (
           <div key={session.roomId || idx} className={styles.sessionCard}>
             {/* Avatar */}
             <div className={styles.sessionAvatar}>
@@ -138,7 +165,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
                 alt={session.astrologerName}
                 onError={e => { e.target.src = astrologerMaleImg; }}
               />
-              <span className={styles.sessionOnlineDot} style={{ background: session.isActive ? '#22c55e' : '#9ca3af' }} />
+              <span className={styles.sessionOnlineDot} style={{ background: isLive ? '#e53e3e' : session.isActive ? '#22c55e' : '#9ca3af' }} />
             </div>
 
             {/* Info */}
@@ -219,6 +246,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
                   <button
                     className={styles.sessionCallBtn}
                     onClick={() => handleAgain(session)}
+                    disabled={isLive}
                   >
                     {session.sessiontype === 'chat' ? 'Chat Again' : 'Call Again'}
                   </button>
@@ -226,7 +254,8 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Recharge Modal for insufficient balance */}
@@ -249,7 +278,18 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
           />
         </Suspense>
       )}
-    </section>
+      </section>
+      {canScroll && (
+        <button
+          type="button"
+          className={`${styles.gridSliderBtn} ${styles.gridSliderBtnRight}`}
+          onClick={() => scrollByCards("right")}
+          aria-label="Scroll right"
+        >
+          <ChevronRight size={20} />
+        </button>
+      )}
+    </div>
   );
 };
 
