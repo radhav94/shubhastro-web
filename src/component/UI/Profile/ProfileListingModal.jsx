@@ -140,7 +140,11 @@ const ProfileListingModal = ({
 
                     <div className={styles.profileActions}>
                       <div className={styles.radioBtn}>
-                        {isSelected ? "●" : "○"}
+                        {isSelected ? (
+                            <span className={styles.filledCircle}></span>
+                          ) : (
+                            <span className={styles.outlineCircle}></span>
+                        )}
                       </div>
                       {showEditButton && (
                         <button

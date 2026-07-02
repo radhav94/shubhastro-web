@@ -308,8 +308,12 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                           </p>
                         </div>
                         <div className={styles.radioBtn}>
-                          {selectedKundli?._id === profile._id ? "●" : "○"}
-                        </div>
+                            {selectedKundli?._id === profile._id ? (
+                              <span className={styles.filledCircle}></span>
+                            ) : (
+                              <span className={styles.outlineCircle}></span>
+                            )}
+                          </div>
                       </div>
                     );
                   })}

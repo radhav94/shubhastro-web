@@ -116,7 +116,11 @@ const KundliProfileModal = ({ isOpen, onClose, onSelectProfile,setShowAddProfile
                       <p className={styles.profileLocation}>{profile.place}</p>
                     </div>
                     <div className={styles.radioBtn}>
-                      {selectedProfile?._id === profile._id ? "●" : "○"}
+                      {selectedProfile?._id === profile._id ? (
+                        <span className={styles.filledCircle}></span>
+                      ) : (
+                        <span className={styles.outlineCircle}></span>
+                      )}
                     </div>
                   </div>
                 );

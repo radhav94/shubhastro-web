@@ -57,7 +57,11 @@ const ProfileModals = ({
                                             </div>
                                             <div className={styles.profileActions}>
                                                 <div className={styles.radioBtn}>
-                                                    {selectedProfile?._id === profile._id ? "●" : "○"}
+                                                    {selectedProfile?._id === profile._id ? (
+                                                        <span className={styles.filledCircle}></span>
+                                                    ) : (
+                                                        <span className={styles.outlineCircle}></span>
+                                                    )}
                                                 </div>
                                                 <button
                                                     className={styles.editBtn}

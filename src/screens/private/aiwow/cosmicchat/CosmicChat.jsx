@@ -41,13 +41,15 @@ const CosmicChat = () => {
     }
   }, [profile, profileLoading]);
 
-  // Auto-scroll to bottom
-  // useEffect(() => {
-  //   scrollToBottom();
-  // }, [messages]);
+  // Auto-scroll to show latest message above input
+  useEffect(() => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 100);
+  }, [messages, isLoading]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   };
 
   const startSession = async (profile) => {
@@ -212,13 +214,14 @@ const CosmicChat = () => {
 
       {/* Messages */}
       <div className={styles.containerDiv}>
-      <div className={styles.messagesContainer}>
-        {messages.length === 0 && !isLoading && (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>✨</div>
-            <p>Connecting to cosmic energies...</p>
-          </div>
-        )}
+        <div className={styles.heiT}>
+          <div className={styles.messagesContainer}>
+          {messages.length === 0 && !isLoading && (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon}>✨</div>
+              <p>Connecting to cosmic energies...</p>
+            </div>
+          )}
 
         {messages.map((message) => (
           <div
@@ -272,6 +275,7 @@ const CosmicChat = () => {
         </div>
       )}
 
+      </div>
       </div>
 
       {/* Input */}
