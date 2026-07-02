@@ -71,6 +71,7 @@
   border-radius: 20px;
   z-index: 2;
   white-space: nowrap;
+  text-transform: capitalize;
 
   &.online {
     color: #16a34a;
@@ -88,7 +89,7 @@
     color: #fff;
     background: #e53e3e;
     border: none;
-    font-weight: 700;
+    font-weight: 500;
     letter-spacing: 0.5px;
     cursor: pointer;
     animation: livePulse 2s ease-in-out infinite;
@@ -406,7 +407,7 @@
   border-radius: 50px;
   font-family: "Poppins", sans-serif;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
