@@ -83,7 +83,7 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
           aria-label="Astrologer is live, click to watch"
         >
           <span className={styles.sessionLiveDot} />
-          <span>LIVE</span>
+          <span>Live</span>
         </button>
       ) : (
         <div className={`${styles.sessionStatusBadge} ${isOnline ? styles.sessionStatusOnline : styles.sessionStatusOffline}`}>
