@@ -14,6 +14,7 @@ import { requestFCMToken } from "../../../services/firebase";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearGuestKundliProfiles } from "../../../utils/helper/cookies";
+import { trackEvent } from "../../../utils/analytics";
 import onboardingBg from "../../../assets/images/onboarding.png";
 import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
 import LanguageSelector from "../../../component/LanguageSelector";
@@ -58,6 +59,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     const otpValue = otp;
     if (otpValue.length === 6) {
       setLoading(true);
+      trackEvent("otp_entered", { mobile_number: formData.phoneNumber });
       try {
         const fcmTokens = await requestFCMToken();
 
@@ -75,6 +77,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           const { data: userData } = response.data;
           const accessToken = userData.accessToken;
           const refreshToken = userData.refreshToken;
+          trackEvent("otp_verified_success", { user_id: userData._id, mobile_number: formData.phoneNumber });
 
           // Set role FIRST before setting tokens
           localStorage.setItem("shubhtalk_role", "CUSTOMER");
@@ -142,6 +145,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
           // Check if user is already registered
           if (userData.isRegister) {
+            trackEvent("login_success", { user_id: userData._id });
             // User is already registered, check for redirect path
             const redirectPath = localStorage.getItem(
               "shubhtalk_redirect_after_login",
@@ -175,13 +179,16 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           } else {
             // New user, proceed to personalization
             console.log("👤 New user, proceeding to personalization");
+            trackEvent("profile_creation_started", { user_id: userData._id });
             onNext();
           }
         } else {
+          trackEvent("otp_verified_failed", { mobile_number: formData.phoneNumber, error_reason: response.data.message || "invalid_otp" });
           toast.error(response.data.message || "Invalid OTP");
         }
       } catch (error) {
         console.error("OTP verification error:", error);
+        trackEvent("otp_verified_failed", { mobile_number: formData.phoneNumber, error_reason: error.response?.data?.message || "verify_error" });
         toast.error(
           error.response?.data?.message ||
           "Failed to verify OTP. Please try again.",
@@ -211,6 +218,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
   const handleResend = async () => {
     if (resendTimer === 0) {
+      trackEvent("otp_resend_requested", { mobile_number: formData.phoneNumber });
       try {
         const payload = {
           phoneNumber: `91${formData.phoneNumber}`,

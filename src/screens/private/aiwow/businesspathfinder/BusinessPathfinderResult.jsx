@@ -8,6 +8,7 @@ import DownloadReportModal from '../components/DownloadReportModal';
 import { useWalletBalance } from '../../../private/wallet/useWalletBalance';
 import { useGetChargesQuery, useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import remedyMortarImg from '../../../../assets/images/remedy-mortar.png';
+import { trackEvent } from '../../../../utils/analytics';
 
 const BusinessPathfinderResult = () => {
   const navigate = useNavigate();
@@ -103,6 +104,10 @@ const BusinessPathfinderResult = () => {
         setDownloadedThisSession(true);
         if (downloadedKey) localStorage.setItem(downloadedKey, 'true');
         refreshWallet();
+        const cost = getChargeAmount();
+        if (cost > 0) {
+          trackEvent('business_pathfinder_payment_completed', { amount: cost });
+        }
       } else {
         Toast.error('Something went wrong. Please try again.');
       }

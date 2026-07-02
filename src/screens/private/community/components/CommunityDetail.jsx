@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiHeart, FiMessageCircle, FiUsers, FiFilter, FiTrash2 } from "react-icons/fi";
 import styles from "../Community.module.scss";
+import { trackEvent } from "../../../../utils/analytics";
 import TrendingAstrologers from "./TrendingAstrologers";
 import CommentSection from "./CommentSection";
 import {
@@ -142,6 +143,7 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
 
     try {
       await likePost({ targetId: postId, targetType: "post" }).unwrap();
+      trackEvent("community_post_reacted", { post_id: postId, reaction_type: "like" });
     } catch {
       setLikeState((prev) => {
         const current = prev[postId];

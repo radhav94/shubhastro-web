@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
@@ -50,6 +51,7 @@ const NameCompatibilityCalc = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Name Compatibility" });
     const newErrors = {};
     if (!formData.name1) newErrors.name1 = "Your name is required";
     if (!formData.name2) newErrors.name2 = "Partner name is required";

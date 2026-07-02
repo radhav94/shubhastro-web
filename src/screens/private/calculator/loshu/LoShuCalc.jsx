@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
@@ -50,6 +51,7 @@ const LoShuCalc = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Lo Shu Grid" });
     const newErrors = {};
     if (!formData.dob) newErrors.dob = "Date of birth is required";
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }

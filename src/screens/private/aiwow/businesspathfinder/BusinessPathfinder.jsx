@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './BusinessPathfinder.module.scss';
@@ -10,6 +10,7 @@ import { ProfileManager } from '../../../../component/UI/Profile';
 import { setSelectedKundliProfile } from '../../../../redux/aiwow/aiwowSlice';
 import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 import LocationSearch from '../../../../utils/location/locationSearchVedic';
+import { trackEvent } from '../../../../utils/analytics';
 
 const BusinessPathfinder = () => {
   const navigate = useNavigate();
@@ -17,6 +18,12 @@ const BusinessPathfinder = () => {
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
   const { data: optionsData, isLoading: optionsLoading } = useGetBusinessPathfinderOptionsQuery();
   const [showProfileSelector, setShowProfileSelector] = useState(false);
+
+  // Track feature open (once on mount)
+  useEffect(() => {
+    trackEvent("business_pathfinder_opened", {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleProfileSelect = (selected) => {
     if (selected) {
@@ -55,6 +62,7 @@ const BusinessPathfinder = () => {
     } else {
       setShowCustomInput(false);
       setFormData(prev => ({ ...prev, category: cat, customCategory: '' }));
+      trackEvent("business_pathfinder_industry_selected", { industry: cat });
     }
   };
 
@@ -125,6 +133,9 @@ const BusinessPathfinder = () => {
 
       if (result.success) {
         Toast.success('Report generated successfully!');
+        trackEvent("business_pathfinder_report_generated", {
+          compatibility_score: result?.data?.compatibilityScore ?? result?.data?.compatibility_score,
+        });
         // Navigate to result page with data
         navigate('/ai-wow/business-pathfinder/report', { state: { result: result.data } });
       } else {
@@ -231,7 +242,7 @@ const BusinessPathfinder = () => {
                   <button
                     key={value}
                     className={`${styles.chip} ${formData.scale === value ? styles.chipActive : ''}`}
-                    onClick={() => setFormData(prev => ({ ...prev, scale: value }))}
+                    onClick={() => { setFormData(prev => ({ ...prev, scale: value })); trackEvent("business_pathfinder_scale_selected", { scale: value }); }}
                   >
                     {label}
                   </button>
@@ -255,7 +266,7 @@ const BusinessPathfinder = () => {
                   <button
                     key={value}
                     className={`${styles.chip} ${formData.partnership === value ? styles.chipActive : ''}`}
-                    onClick={() => setFormData(prev => ({ ...prev, partnership: value }))}
+                    onClick={() => { setFormData(prev => ({ ...prev, partnership: value })); trackEvent("business_pathfinder_partnership_selected", { partnership_type: value }); }}
                   >
                     {label}
                   </button>
@@ -279,7 +290,7 @@ const BusinessPathfinder = () => {
                   <button
                     key={value}
                     className={`${styles.chip} ${formData.timeline === value ? styles.chipActive : ''}`}
-                    onClick={() => setFormData(prev => ({ ...prev, timeline: value }))}
+                    onClick={() => { setFormData(prev => ({ ...prev, timeline: value })); trackEvent("business_pathfinder_timeline_selected", { timeline: value }); }}
                   >
                     {label}
                   </button>

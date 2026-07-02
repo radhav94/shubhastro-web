@@ -18,6 +18,7 @@ import { setSelectedKundli, clearSelectedKundli } from "../redux/kundli/kundliSl
 import { setSelectedKundliProfile } from "../redux/aiwow/aiwowSlice";
 import LanguageSelector from "./LanguageSelector";
 import { isShubhMallEnabled } from "../utils/featureConfig";
+import { trackEvent } from "../utils/analytics";
 import { logout } from "../redux/auth/authSlice";
 import { useLogoutUserMutation } from "../redux/api/userSession/userSessionApi";
 import { privateRequestNew } from "../services/appServices/privateRequestNew";
@@ -179,6 +180,7 @@ const TopHeader = () => {
     dispatch(setSelectedKundli(profile));
     dispatch(setSelectedKundliProfile(profile));
     localStorage.setItem("selectedKundliProfile", JSON.stringify(profile));
+    trackEvent("profile_switched", { switched_to_profile_id: profile._id });
   };
 
   const formatAmount = (amount) => {

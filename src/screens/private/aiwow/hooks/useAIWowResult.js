@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Toast } from '../../../../component';
 import { safeGet, sanitizeAnalysisData, validateReduxState } from '../../../../utils/helper/dataValidation';
+import { trackEvent } from '../../../../utils/analytics';
 
 /**
  * Custom hook for safely accessing and validating AI Wow analysis results
@@ -62,6 +63,7 @@ export const useAIWowResult = (moduleName, requiredFields = []) => {
 
         setValidatedData(sanitized);
         setLoading(false);
+        trackEvent("shubh_ai_report_viewed", { feature_name: moduleName });
       } catch (err) {
         console.error(`Error validating ${moduleName} result:`, err);
         Toast.error('Failed to load analysis results. Please try again.');

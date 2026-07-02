@@ -38,6 +38,7 @@ import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect"
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useChat } from "../../../context/ChatContext";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
+import { trackEvent } from "../../../utils/analytics";
 import { ProfileManager } from "../../../component/UI/Profile";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { Link } from "react-router-dom";
@@ -75,12 +76,18 @@ const AstrologerProfile = () => {
 
   const data = astrologerData?.data;
 
+  // Track astrologer profile view (fires when a new astrologer id is opened)
+  useEffect(() => {
+    if (id) trackEvent("astrologer_profile_viewed", { astrologer_id: id });
+  }, [id]);
+
   // Live status
   const isLive = data?.astrologerLiveStatus?.isLive || false;
   const liveRoomId = data?.astrologerLiveStatus?.roomId;
 
   const handleJoinLive = () => {
     if (liveRoomId) {
+      trackEvent("live_stream_joined", { astrologer_id: id, stream_id: liveRoomId });
       navigate(`/live/${liveRoomId}`, { state: { from: `/astrologer/${id}` } });
     }
   };

@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiHeart, FiMessageCircle, FiUsers, FiTrash2, FiEdit2 } from "react-icons/fi";
 import styles from "../Community.module.scss";
+import { trackEvent } from "../../../../utils/analytics";
 import TrendingAstrologers from "./TrendingAstrologers";
 import CommentSection from "./CommentSection";
 import { useGetCommunityFeedQuery, useLikeCommunityPostMutation, useDeleteCommunityPostMutation, useShareCommunityPostMutation } from "../../../../redux/api/community/communityApi";
@@ -105,6 +106,7 @@ const YourFeed = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces 
 
     try {
       await likePost({ targetId: postId, targetType: "post" }).unwrap();
+      trackEvent("community_post_reacted", { post_id: postId, reaction_type: "like" });
     } catch {
       // Revert on error
       setLikeState((prev) => {

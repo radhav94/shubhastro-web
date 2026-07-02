@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useGetMyTicketsQuery } from "../../../redux/api/supportApi/supportApi";
 import styles from "./RecentTickets.module.scss";
+import { trackEvent } from "../../../utils/analytics";
 
 const RecentTickets = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const RecentTickets = () => {
   const pagination = ticketsData?.data?.pagination;
 
   const handleTicketClick = (ticket) => {
+    trackEvent("support_ticket_opened", { ticket_id: ticket._id || ticket.id, viewer_type: "user" });
     navigate(`/recent-tickets/${ticket._id || ticket.id}`);
   };
 

@@ -18,6 +18,7 @@ import {
 } from "../../../redux/api/astrologer/astrologerApi";
 import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
+import { trackEvent } from "../../../utils/analytics";
 import ProfileModals from "../kundli/components/ProfileModals";
 import { useProfileManager } from "../kundli/hooks/useProfileManager";
 import { ProfileManager } from "../../../component/UI/Profile";
@@ -363,6 +364,7 @@ const TalkToAstrologer = () => {
     setAllAstrologers([]);
     setHasMore(true);
     setIsFiltered(false);
+    trackEvent("astrologer_list_viewed", { filter_applied: false });
   }, []);
 
   // MERGE API DATA - only for normal (non-filtered) mode
@@ -456,6 +458,7 @@ const TalkToAstrologer = () => {
       // Reset to normal pagination mode
       resetFilters();
     } else {
+      trackEvent("astrologer_filter_applied", { filter_type: "specialization", filter_value: category });
       setSpecialty(category);
       setIsFiltered(true);
       setPage(1);

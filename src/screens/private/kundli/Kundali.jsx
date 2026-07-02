@@ -589,7 +589,14 @@ const Kundali = () => {
   // Handlers
   const handleTabChange = async (tabIndex, tabLabel) => {
     console.log("Tab change requested:", tabIndex, tabLabel);
-    
+
+    if (tabLabel) {
+      trackEvent("kundli_chart_section_viewed", {
+        profile_id: selectedProfile?._id,
+        section_name: typeof tabLabel === "string" ? tabLabel : String(tabIndex),
+      });
+    }
+
     // For all tabs, allow change
     return true;
   };

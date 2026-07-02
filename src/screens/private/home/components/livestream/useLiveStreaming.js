@@ -18,6 +18,7 @@ import {
   restoreViewerSession,
   clearViewerSession,
 } from "../../../../../utils/liveSessionStorage";
+import { trackEvent } from "../../../../../utils/analytics";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const MAX_RETRIES = 3;
@@ -308,6 +309,7 @@ export const useLiveStreaming = (client, ROLE, channel, rejoinKey = 0, { onChann
 
   // Intentional leave (back button)
   const handleLeave = useCallback(async () => {
+    trackEvent("live_stream_left", { stream_id: channel });
     clearViewerSession();
     setCalling(false);
     await leaveChannel();

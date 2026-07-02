@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useCreateOrderMutation, useVerifyPaymentMutation } from "../../redux/api/payment/paymentApi";
 import { useLazyGetWalletBalanceQuery } from "../../redux/api/wallet/walletApi";
 import Toast from "../../component/toast";
+import { trackEvent } from "../analytics";
 
 // Constants
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
@@ -270,6 +271,8 @@ export const useRazorpayPayment = () => {
 
       // Step 3: Show success message
       Toast.success("Payment successful! Wallet credited.");
+      trackEvent("payment_completed", { amount: response?.amount, transaction_id: response?.razorpay_payment_id, payment_method: "razorpay" });
+      trackEvent("recharge_payment_completed", { amount: response?.amount, payment_method: "razorpay" });
 
       // Step 4: Dispatch wallet update events
       window.dispatchEvent(new Event("wallet-updated"));
@@ -318,6 +321,9 @@ export const useRazorpayPayment = () => {
     
     Toast.error(errorMessage);
 
+    trackEvent("payment_failed", { payment_method: "razorpay", error_code: error?.code, reason: errorMessage });
+    trackEvent("recharge_payment_failed", { payment_method: "razorpay", reason: errorMessage });
+
     if (typeof onFailure === "function") {
       onFailure(error);
     }
@@ -349,6 +355,8 @@ export const useRazorpayPayment = () => {
     }
     
     Toast.info("Payment cancelled");
+
+    trackEvent("payment_cancelled", { payment_method: "razorpay" });
 
     if (typeof onFailure === "function") {
       onFailure({ cancelled: true });
@@ -466,6 +474,7 @@ export const useRazorpayPayment = () => {
 
       // Open modal
       razorpayInstance.open();
+      trackEvent("payment_gateway_opened", { gateway: "razorpay", amount: options?.amount ? options.amount / 100 : undefined });
     } catch (error) {
       console.error("[Razorpay] Error opening checkout:", error);
       throw error;

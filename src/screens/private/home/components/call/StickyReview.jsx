@@ -3,6 +3,7 @@ import { useCall } from "../../../../../context/CallContext";
 import { useAddAstrologerReviewMutation } from "../../../../../redux/api/review/reviewApi";
 import { Toast } from "../../../../../component";
 import FeedbackModal from "../../../home/components/chats/FeedbackModal";
+import { trackEvent } from "../../../../../utils/analytics";
 
 const StickyReview = () => {
   const {
@@ -36,6 +37,10 @@ const StickyReview = () => {
 
       if (res.success) {
         Toast.success(res.message || "Review submitted successfully");
+        trackEvent("session_rated", { astrologer_id: astrologerID, session_id: reviewData?.roomId, rating });
+        if (review) {
+          trackEvent("session_review_submitted", { astrologer_id: astrologerID, session_id: reviewData?.roomId, review_length: review.length });
+        }
         setOpenReview(false);
       } else {
         Toast.error("Something went wrong. Please try again.");

@@ -1,4 +1,5 @@
 import { privatePost, privateGet } from '../privateRequest';
+import { trackEvent } from '../../utils/analytics';
 
 /**
  * Helper function to get profile data from localStorage
@@ -78,6 +79,7 @@ export const analyzeFace = async (imageData, signal = null) => {
       }
     );
 
+    trackEvent("shubh_ai_report_generated", { feature_name: "astro-face-reading" });
     return {
       success: true,
       data: response.data,
@@ -204,6 +206,7 @@ export const analyzePalm = async (imageData, hand = 'right', signal = null) => {
       }
     );
 
+    trackEvent("shubh_ai_report_generated", { feature_name: "ai-palmistry-scanner" });
     return {
       success: true,
       data: response.data,
@@ -326,6 +329,7 @@ export const analyzeSignature = async (imageData, signal = null) => {
       }
     );
 
+    trackEvent("shubh_ai_report_generated", { feature_name: "signature-analysis" });
     return {
       success: true,
       data: response.data,
@@ -459,6 +463,7 @@ export const analyzeClothColor = async (imageData, intentionData, signal = null)
       }
     );
 
+    trackEvent("shubh_ai_report_generated", { feature_name: "clothes-colour-analysis" });
     return {
       success: true,
       data: response.data,
@@ -631,6 +636,7 @@ export const analyzeAura = async (imageData, signal = null) => {
       }
     );
 
+    trackEvent("shubh_ai_report_generated", { feature_name: "aura-photography" });
     return {
       success: true,
       data: response.data,
@@ -753,6 +759,7 @@ export const analyzeGemstone = async (imageData, signal = null) => {
       }
     );
 
+    trackEvent("shubh_ai_report_generated", { feature_name: "gemstone-authenticity" });
     return {
       success: true,
       data: response.data,

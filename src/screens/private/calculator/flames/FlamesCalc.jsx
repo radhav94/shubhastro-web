@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
@@ -56,6 +57,7 @@ const FlamesCalc = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Flames" });
     const newErrors = {};
     if (!formData.name1) newErrors.name1 = "Your name is required";
     if (!formData.name2) newErrors.name2 = "Partner's name is required";

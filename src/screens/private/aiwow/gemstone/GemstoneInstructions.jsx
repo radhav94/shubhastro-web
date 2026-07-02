@@ -6,6 +6,7 @@ import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setGemstoneImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
 import { compressImage } from '../../../../utils/helper/compressImage';
+import { trackEvent } from '../../../../utils/analytics';
 
 const GemstoneInstructions = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const GemstoneInstructions = () => {
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
+      trackEvent("shubh_ai_input_provided", { feature_name: "gemstone-authenticity", input_type: "image" });
       compressImage(file).then((dataUrl) => {
         dispatch(setGemstoneImage(dataUrl));
         navigate('/ai-wow/gemstone-authenticity/capture');
