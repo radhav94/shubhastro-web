@@ -104,7 +104,7 @@ const SingleBlogDetails = () => {
 
   return (
     <div className={styles.pageWrapper}>
-      <SeoHelmet data={seoData} />
+      <SeoHelmet data={seoData} image={singleBLogData.img} />
 
       {/* Breadcrumb */}
       <nav className={styles.breadcrumb}>
