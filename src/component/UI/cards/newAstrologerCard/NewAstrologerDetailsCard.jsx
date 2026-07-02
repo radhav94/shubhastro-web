@@ -50,7 +50,7 @@ const NewAstrologerDetailsCard = ({
           aria-label="Astrologer is live, click to watch"
         >
           <span className={styles.liveDot} />
-          <span>LIVE</span>
+          <span>Live</span>
         </button>
       ) : (
         <div className={`${styles.statusBadge} ${isOnline ? styles.online : styles.offline}`}>
