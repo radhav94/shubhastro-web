@@ -107,9 +107,26 @@ const NewAstrologerDetailsCard = ({
         )}
 
         <div className={styles.detailsActionButtons}>
-          {!isOnline && hasEmergency ? (
+          {isLive ? (
+            <div className={styles.detailsButtonWrapper} style={{ width: '100%' }}>
+              <button
+                className={styles.liveBtn}
+                onClick={() => navigate(`/live/${liveRoomId}`)}
+              >
+                <svg width="16" height="16" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="4" fill="#f75801"/>
+                  <path d="M10.5 21.5C8.5 19.5 7.5 17 7.5 14.5C7.5 12 8.5 9.5 10.5 7.5" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round"/>
+                  <path d="M21.5 7.5C23.5 9.5 24.5 12 24.5 14.5C24.5 17 23.5 19.5 21.5 21.5" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round"/>
+                  <path d="M13 19C11.5 17.5 11 16 11 14.5C11 13 11.5 11.5 13 10" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round"/>
+                  <path d="M19 10C20.5 11.5 21 13 21 14.5C21 16 20.5 17.5 19 19" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round"/>
+                </svg>
+                Join Live
+              </button>
+              <p className={styles.detailsPriceText}>&nbsp;</p>
+            </div>
+          ) : !isOnline && hasEmergency ? (
             <div className={styles.emergencyButtonWrapper}>
-              <button className={styles.emergencySingleBtn} onClick={() => !isLive && setShowEmergencyModal(true)} disabled={isLive}>
+              <button className={styles.emergencySingleBtn} onClick={() => setShowEmergencyModal(true)}>
                 Emergency
               </button>
               {emergencyMinRate > 0 && (
@@ -117,6 +134,16 @@ const NewAstrologerDetailsCard = ({
                   <span className={styles.detailsPriceAmount}>₹{emergencyMinRate}</span>/min
                 </p>
               )}
+            </div>
+          ) : !isOnline && !hasEmergency ? (
+            <div className={styles.detailsButtonWrapper} style={{ width: '100%' }}>
+              <button
+                className={styles.viewProfileBtn}
+                onClick={() => navigate(`/astrologer/${astrologer?._id}`)}
+              >
+                View Profile
+              </button>
+              <p className={styles.detailsPriceText}>&nbsp;</p>
             </div>
           ) : (
             <>
