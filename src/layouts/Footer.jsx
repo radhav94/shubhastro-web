@@ -131,7 +131,7 @@ const Footer = () => {
         <div className={`${styles.v2_column} ${styles.v2_logoCol}`}>
           <img src={ShubhAstroLogo} alt="ShubhAstro Logo" width="150" height="32" className={styles.v2_logo} />
           <p className={styles.v2_tagline}>
-           ShubhAstro is an AI-powered astrology platform offering personalized insights for love, marriage, career, finance, and relationships through Vedic Astrology, Kundli, Numerology, Palmistry, Face Reading, Signature Analysis, and Vastu, helping users make informed life decisions with confidence.</p>
+           ShubhAstro. ai offers AI-powered astrology guidance for love, marriage, career, finance, and life decisions through Kundli, Numerology, Palmistry, Face Reading, Signature Analysis and Vastu.</p>
           <p className={styles.v2_followLabel}>Follow Us</p>
           <div className={styles.v2_socialIcons}>
             <a href="https://www.facebook.com/profile.php?id=61589408862522" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
@@ -191,7 +191,7 @@ const Footer = () => {
       <div className={styles.v2_mobileFooter}>
         <div className={styles.v2_mobileLogo}>
           <img src={ShubhAstroLogo} alt="ShubhAstro Logo" width="150" height="32" className={styles.v2_logo} />
-          <p className={styles.v2_tagline}>ShubhAstro is an AI-powered astrology platform offering personalized insights for love, marriage, career, finance, and relationships through Vedic Astrology, Kundli, Numerology, Palmistry, Face Reading, Signature Analysis, and Vastu, helping users make informed life decisions with confidence.</p>
+          <p className={styles.v2_tagline}>ShubhAstro. ai offers AI-powered astrology guidance for love, marriage, career, finance, and life decisions through Kundli, Numerology, Palmistry, Face Reading, Signature Analysis and Vastu.</p>
           <p className={styles.v2_followLabel}>Follow Us</p>
           <div className={styles.v2_socialIcons}>
             <a href="https://www.facebook.com/profile.php?id=61589408862522" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
