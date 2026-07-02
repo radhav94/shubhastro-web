@@ -65,7 +65,7 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData, c
             </div>
 
             {/* Language Translator */}
-            <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
+            {/* <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} /> */}
           </div>
 
           <div className={styles.content}>

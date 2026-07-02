@@ -16,7 +16,7 @@ const NumerologyReport = () => {
     skip: !stored,
   });
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
+  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
   if (!data?.response) return <div>No data found</div>;
 
   const { destiny, soul, character, personality, attitude, agenda, purpose } =

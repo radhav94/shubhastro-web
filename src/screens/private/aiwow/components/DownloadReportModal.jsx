@@ -4,10 +4,15 @@ import styles from "./DownloadReportModal.module.scss";
 const DEFAULT_LANGUAGES = [
   { id: "en", label: "English", sub: "English" },
   { id: "hi", label: "Hindi", sub: "हिंदी" },
-  { id: "ta", label: "Tamil", sub: "" },
-  { id: "te", label: "Telugu", sub: "" },
-  { id: "bn", label: "Bengali", sub: "" },
   { id: "mr", label: "Marathi", sub: "मराठी" },
+  { id: "gu", label: "Gujarati", sub: "ગુજરાતી" },
+  { id: "bn", label: "Bengali", sub: "বাংলা" },
+  { id: "ka", label: "Kannada", sub: "ಕನ್ನಡ" },
+  { id: "ml", label: "Malayalam", sub: "മലയാളം" },
+  { id: "ta", label: "Tamil", sub: "தமிழ்" },
+  { id: "te", label: "Telugu", sub: "తెలుగు" },
+  { id: "ne", label: "Nepali", sub: "नेपाली" },
+  { id: "si", label: "Sinhala", sub: "සිංහල" },
 ];
 
 const DownloadReportModal = ({

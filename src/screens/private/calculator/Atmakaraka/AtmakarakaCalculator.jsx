@@ -282,7 +282,6 @@ const AtmakarakaCalculator = () => {
             onClick={() => {
               setFormData(initialFormState);
               setErrors({});
-              dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
             }}
           >
             Reset

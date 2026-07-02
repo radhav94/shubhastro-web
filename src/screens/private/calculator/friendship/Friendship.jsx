@@ -73,7 +73,6 @@ const Friendship = () => {
         onReset={() => {
           setFormData(initialFormState);
           setErrors({});
-          dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
         }}
       />
     </div>

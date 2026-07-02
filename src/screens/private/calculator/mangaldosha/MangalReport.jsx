@@ -11,9 +11,9 @@ const MangalReport = () => {
   const navigate = useNavigate();
 
   const stored = useSelector(selectCalculatorData("mangal_dosha"));
-  const { data, isLoading } = useGetMangalDoshaReportQuery(stored);
+  const { data, isLoading } = useGetMangalDoshaReportQuery(stored, { skip: !stored });
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
+  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
   if (!data?.response) return <div>No data found</div>;
 
   const {
@@ -135,7 +135,7 @@ const MangalReport = () => {
 
       {/* ACTIONS */}
       <div className={styles.actions}>
-        <button className={styles.calculateBtn} onClick={() => navigate(-1)}>
+        <button className={styles.calculateBtn} onClick={() => navigate("/mangal-dasha-calculator")}>
           Calculate Again
         </button>
       </div>
