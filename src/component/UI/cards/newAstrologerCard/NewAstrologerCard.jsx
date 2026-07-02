@@ -149,19 +149,9 @@ const NewAstrologerCard = memo(({
               </p>
             )}
           </div>
-        ) : !isOnline && !hasEmergency ? (
-          <div className={styles.buttonWrapper} style={{ width: '100%' }}>
-            <button
-              className={styles.viewProfileBtn}
-              onClick={() => navigate(`/astrologer/${astrologer?._id}`)}
-            >
-              View Profile
-            </button>
-            <p className={styles.priceText}>&nbsp;</p>
-          </div>
         ) : (
           <>
-            {chatEnabled && (
+            {(chatEnabled || !callEnabled) && (
             <div className={styles.buttonWrapper}>
               <button
                 className={styles.chatBtn}
@@ -171,19 +161,21 @@ const NewAstrologerCard = memo(({
                 <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
               </button>
               <p className={styles.priceText}>
-                {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
-                  <>
-                    <span className={styles.originalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{chatPrice}</span> min
-                  </>
-                ) : (
-                  <>
-                    <span className={styles.priceAmount}>₹{chatPrice}</span> min
-                  </>
-                )}
+                {chatPrice > 0 ? (
+                  astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
+                    <>
+                      <span className={styles.originalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{chatPrice}</span> min
+                    </>
+                  ) : (
+                    <>
+                      <span className={styles.priceAmount}>₹{chatPrice}</span> min
+                    </>
+                  )
+                ) : <>&nbsp;</>}
               </p>
             </div>
             )}
-            {callEnabled && (
+            {(callEnabled || !chatEnabled) && (
             <div className={styles.buttonWrapper}>
               <button
                 className={styles.callBtn}
@@ -193,15 +185,17 @@ const NewAstrologerCard = memo(({
                 <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
               </button>
               <p className={styles.priceText}>
-                {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
-                  <>
-                    <span className={styles.originalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{callPrice}</span> min
-                  </>
-                ) : (
-                  <>
-                    <span className={styles.priceAmount}>₹{callPrice}</span> min
-                  </>
-                )}
+                {callPrice > 0 ? (
+                  astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
+                    <>
+                      <span className={styles.originalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{callPrice}</span> min
+                    </>
+                  ) : (
+                    <>
+                      <span className={styles.priceAmount}>₹{callPrice}</span> min
+                    </>
+                  )
+                ) : <>&nbsp;</>}
               </p>
             </div>
             )}

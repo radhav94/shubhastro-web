@@ -135,19 +135,9 @@ const NewAstrologerDetailsCard = ({
                 </p>
               )}
             </div>
-          ) : !isOnline && !hasEmergency ? (
-            <div className={styles.detailsButtonWrapper} style={{ width: '100%' }}>
-              <button
-                className={styles.viewProfileBtn}
-                onClick={() => navigate(`/astrologer/${astrologer?._id}`)}
-              >
-                View Profile
-              </button>
-              <p className={styles.detailsPriceText}>&nbsp;</p>
-            </div>
           ) : (
             <>
-              {chatEnabled && (
+              {(chatEnabled || !callEnabled) && (
               <div className={styles.detailsButtonWrapper}>
                 <button
                   className={styles.detailsChatBtn}
@@ -157,19 +147,21 @@ const NewAstrologerDetailsCard = ({
                   <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
                 </button>
                 <p className={styles.detailsPriceText}>
-                  {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
-                    <>
-                      <span className={styles.detailsOriginalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.detailsPriceAmount}>{chatPrice}</span> min
-                    </>
-                  ) : (
-                    <>
-                      <span className={styles.detailsPriceAmount}>₹{chatPrice}</span> min
-                    </>
-                  )}
+                  {chatPrice > 0 ? (
+                    astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
+                      <>
+                        <span className={styles.detailsOriginalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.detailsPriceAmount}>{chatPrice}</span> min
+                      </>
+                    ) : (
+                      <>
+                        <span className={styles.detailsPriceAmount}>₹{chatPrice}</span> min
+                      </>
+                    )
+                  ) : <>&nbsp;</>}
                 </p>
               </div>
               )}
-              {callEnabled && (
+              {(callEnabled || !chatEnabled) && (
               <div className={styles.detailsButtonWrapper}>
                 <button
                   className={styles.detailsCallBtn}
@@ -179,15 +171,17 @@ const NewAstrologerDetailsCard = ({
                   <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
                 </button>
                 <p className={styles.detailsPriceText}>
-                  {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
-                    <>
-                      <span className={styles.detailsOriginalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.detailsPriceAmount}>{callPrice}</span> min
-                    </>
-                  ) : (
-                    <>
-                      <span className={styles.detailsPriceAmount}>₹{callPrice}</span> min
-                    </>
-                  )}
+                  {callPrice > 0 ? (
+                    astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
+                      <>
+                        <span className={styles.detailsOriginalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.detailsPriceAmount}>{callPrice}</span> min
+                      </>
+                    ) : (
+                      <>
+                        <span className={styles.detailsPriceAmount}>₹{callPrice}</span> min
+                      </>
+                    )
+                  ) : <>&nbsp;</>}
                 </p>
               </div>
               )}
