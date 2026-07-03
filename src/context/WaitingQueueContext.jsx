@@ -462,6 +462,8 @@ export const WaitingQueueProvider = ({ children }) => {
               remainingTime: billedMinutes || 0,
               isEmergency: session.isEmergency || false,
               profileImgUrl: astro?.profileImgUrl || user?.astro?.profileImgUrl || null,
+              origin: session.isLive ? "live" : undefined,
+              liveChannel: session.liveRoomDetails?.channel || session.liveRoomDetails?.roomId || null,
             });
 
             voiceSocket.emit("call:reconnect", {
