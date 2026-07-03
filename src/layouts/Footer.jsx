@@ -97,7 +97,7 @@ const Footer = () => {
 
   const storeButtons = (
     <div className={styles.v2_storeButtons}>
-      <a href="https://play.google.com/store/apps/details?id=com.shubhtalk" target="_blank" rel="noopener noreferrer" className={styles.v2_storeBtn}>
+      <a href="https://play.google.com/store/apps/details?id=com.pittieglobal.shubhastro&pcampaignid=web_share" target="_blank" rel="noopener noreferrer" className={styles.v2_storeBtn}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M3 20.5V3.5C3 2.91 3.34 2.39 3.84 2.15L13.69 12L3.84 21.85C3.34 21.6 3 21.09 3 20.5Z" fill="#4CAF50"/>
           <path d="M16.81 15.12L6.05 21.34L14.54 12.85L16.81 15.12Z" fill="#F44336"/>

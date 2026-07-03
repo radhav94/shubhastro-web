@@ -373,6 +373,14 @@
     gap: 16px;
   }
 
+  &.resultsOne {
+    @media (width > 767px) {
+      grid-template-columns: 1fr;
+      max-width: 500px;
+      margin: 20px auto 0;
+    }
+  }
+
   &.resultsTwo {
     @media (width > 767px) {
       grid-template-columns: repeat(2, 1fr);
