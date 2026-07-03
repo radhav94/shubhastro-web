@@ -4,6 +4,8 @@ import { useCall } from "./CallContext";
 import { useChat } from "./ChatContext";
 import { PANDIT_AI_ID } from "../component/panditAI/usePanditAI";
 import { Toast } from "../component";
+import { trackEvent } from "../utils/analytics";
+
 import { startIncomingSound, stopIncomingSound } from "../utils/incomingSound";
 const WaitingQueueContext = createContext();
 
@@ -296,6 +298,7 @@ export const WaitingQueueProvider = ({ children }) => {
       stopIncomingSound();
       const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
       const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
+      trackEvent("session_request_rejected", { astrologer_id: rejectedAstrologerId, channel: data?.type || "chat" });
       if (rejectedRoomId) {
         removePendingConnection(rejectedRoomId);
         if (callApprovalData?.roomId === rejectedRoomId) setCallApprovalData(null);
@@ -535,6 +538,13 @@ export const WaitingQueueProvider = ({ children }) => {
 
       // Show toast notification
       Toast.success("Chat ended.");
+
+      const endReason = data?.endReason || data?.sessionData?.sessionEndReason;
+      if (endReason === "low-balance" || endReason === "insufficient-balance") {
+        trackEvent("session_auto_ended_low_balance", { astrologer_id: data?.astrologerId, session_id: endedRoomId });
+      } else {
+        trackEvent("session_ended_completely", { astrologer_id: data?.astrologerId, session_id: endedRoomId });
+      }
 
       // Refresh wallet balance after chat ends
       window.dispatchEvent(new Event("walletBalanceUpdated"));

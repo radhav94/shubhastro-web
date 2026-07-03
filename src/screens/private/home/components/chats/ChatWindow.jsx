@@ -16,6 +16,7 @@ import useChatSocket from "./useChatSocket";
 import Feedback from "./Feedback";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
 import { useAddAstrologerReviewMutation } from "../../../../../redux/api/review/reviewApi";
+import { trackEvent } from "../../../../../utils/analytics";
 import { Toast } from "../../../../../component";
 import dayjs from "dayjs";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
@@ -435,6 +436,9 @@ const ChatWindow = () => {
 
     if (!message.trim()) return;
     isUserSide ? sendMessage(message) : astroReply(message);
+    if (isUserSide) {
+      trackEvent("session_message_sent", { astrologer_id: astroID || activeChat?.astrologerId, session_id: activeChat?.roomId });
+    }
     setMessage("");
   };
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import AstroBirthForm from "../forms/AstroBirthForm";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -49,6 +50,7 @@ const DashaCalc = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Dasha" });
 
     const newErrors = {};
 

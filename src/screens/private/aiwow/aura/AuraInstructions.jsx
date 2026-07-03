@@ -6,6 +6,7 @@ import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setAuraImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
 import { compressImage } from '../../../../utils/helper/compressImage';
+import { trackEvent } from '../../../../utils/analytics';
 
 const AuraInstructions = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const AuraInstructions = () => {
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
+      trackEvent("shubh_ai_input_provided", { feature_name: "aura-photography", input_type: "image" });
       compressImage(file).then((dataUrl) => {
         dispatch(setAuraImage(dataUrl));
         navigate('/ai-wow/aura-photography/capture');

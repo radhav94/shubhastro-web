@@ -10,6 +10,7 @@ import { registerUser } from "../../../services/appServices/authService";
 import { useCreateKundliMutation } from "../../../services/appServices/kundliServicesNew";
 import { useGetExpertiseFiltersQuery } from "../../../redux/api/astrologer/astrologerApi";
 import { setEmail } from "../../../redux/auth/authSlice";
+import { trackEvent } from "../../../utils/analytics";
 
 // Static mapping for icon and color by slug (API doesn't provide these)
 const slugStyleMap = {
@@ -130,6 +131,7 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
       if (response?.data?.statusCode === 201 || response?.data?.success) {
         toast.dismiss();
         toast.success(response?.data?.message || "Registration successful!");
+        trackEvent("profile_created", { user_id: localStorage.getItem("shubhtalk_customer_id") });
         localStorage.setItem("shubhtalk_show_welcome_bonus", "true");
         
         // Update user data in localStorage

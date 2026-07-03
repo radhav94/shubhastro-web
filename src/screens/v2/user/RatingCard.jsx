@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRateTicketMutation } from "../../../redux/api/supportApi/supportApi";
 import styles from "./RatingCard.module.scss";
+import { trackEvent } from "../../../utils/analytics";
 
 const RatingCard = ({ ticketId }) => {
   const [rating, setRating] = useState(0);
@@ -13,6 +14,7 @@ const RatingCard = ({ ticketId }) => {
     try {
       await rateTicket({ ticketId, rating: star, feedback: "" }).unwrap();
       setRated(true);
+      trackEvent("support_ticket_rating_given", { ticket_id: ticketId, rating: star });
     } catch {
       // error handled by privateRequestNew
     }

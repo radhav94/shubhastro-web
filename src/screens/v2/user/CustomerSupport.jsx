@@ -6,6 +6,7 @@ import EntityCard from "./entityCards/EntityCard";
 import entityCardStyles from "./entityCards/EntityCards.module.scss";
 import RatingCard from "./RatingCard";
 import styles from "./CustomerSupport.module.scss";
+import { trackEvent } from "../../../utils/analytics";
 
 const CustomerSupport = () => {
   const navigate = useNavigate();
@@ -222,6 +223,7 @@ const CustomerSupport = () => {
       }).unwrap();
 
       const newTicketId = result?.data?._id || result?.data?.ticketId || null;
+      trackEvent("support_ticket_created_by_user", { ticket_id: newTicketId, category: currentTopicName, subject: ticketIssue.trim().slice(0, 80) });
       setShowTicketModal(false);
       setTicketIssue("");
       setTicketCreated(true);
