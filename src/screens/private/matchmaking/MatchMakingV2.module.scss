@@ -11,8 +11,11 @@
   }
 }
 .matchMakingCard{
-  padding: 16px;
+  padding: 0px 16px 16px 16px;
   border-radius: 12px;
+  @media (width <= 767px) {
+    padding: 16px;
+  }
 }
 .matchMaking{
   width: 100%;
@@ -54,7 +57,7 @@
   }
 }
 .topTitles{
-  margin-block: 20px 40px;
+  margin: 0px 40px 20px 40px;
   text-align: center;
   @media (width <= 767px) {
     margin: -10px 0px 20px 0px;
