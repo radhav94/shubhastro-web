@@ -20,6 +20,7 @@ import { useLiveList } from "../../../../../context/LiveListContext";
 import { useCall } from "../../../../../context/CallContext";
 import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import { ownsRoom } from "../../../../../utils/tabSession";
 import WaitingModal from "../../../../../component/UI/modal/waitingModal/WaitingModal";
 import WaitlistModal from "../../../../../component/UI/modal/waitlistModal/WaitlistModal";
 import Toast from "../../../../../component/toast";
@@ -1099,10 +1100,13 @@ const LiveView = (props) => {
       }
     };
 
-    // When astrologer accepts, show waitlist popup (no scroll)
+    // When astrologer accepts, show waitlist popup (no scroll).
+    // Only react in the tab that initiated the request — the event is broadcast
+    // to every open tab, so non-initiating tabs must ignore it.
     const handleAstrologerAcceptedScroll = (data) => {
       const acceptedAstroId = data?.astrologerId;
       if (!acceptedAstroId) return;
+      if (!ownsRoom(data?.roomId)) return;
       setShowWaitingPopup(true);
     };
 
