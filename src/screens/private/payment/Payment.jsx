@@ -5,6 +5,7 @@ import { useGetAllPlansQuery } from "../../../redux/api/plansApi/plansApi";
 import { getToken } from "../../../utils/token";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import BackButton from "../../../component/UI/BackButton/BackButton";
+import { trackEvent } from "../../../utils/analytics";
 
 const RechargePack = ({ name, actualPrice, discountedPrice, offerPrice, Active }) => (
   <div className={styles.rechargeAmountWrapper}>
@@ -40,6 +41,12 @@ const Payment = () => {
     refreshWallet();
   }, [refreshWallet]);
 
+  // Track recharge flow start (once on mount)
+  useEffect(() => {
+    trackEvent("recharge_initiated", {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className={styles.rechargeWrapper}>
       <BackButton />
@@ -67,6 +74,7 @@ const Payment = () => {
               state={{ planId: pack?._id, returnUrl }}
               key={pack._id}
               className={styles.linkWrapper}
+              onClick={() => trackEvent("recharge_amount_selected", { amount: pack?.actualPrice, is_preset: true })}
             >
               <RechargePack {...pack} />
             </Link>

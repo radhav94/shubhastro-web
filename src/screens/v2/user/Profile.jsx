@@ -60,6 +60,7 @@ import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import emailIconSet from "../../../assets/images/icon_set (1).png";
 import { Toast } from "../../../component/index";
 import StickyReview from "../../private/home/components/call/StickyReview";
+import { trackEvent } from "../../../utils/analytics";
 import MallHistoryContent from "../../private/shubhAstroMallHistory/MallHistoryContent";
 import { isShubhMallEnabled } from "../../../utils/featureConfig";
 import {
@@ -126,6 +127,12 @@ const Profile = () => {
     return navTab || "Profile";
   });
   const [orderHistoryTab, setOrderHistoryTab] = useState("call"); // Sub-tab for order history
+
+  // Track profile screen view (once on mount)
+  useEffect(() => {
+    trackEvent("profile_viewed", { user_id: localStorage.getItem("shubhtalk_customer_id") });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Scroll to tabs section when navigated with activeTab state
   useEffect(() => {
@@ -704,6 +711,8 @@ const Profile = () => {
       // Clear localStorage
       localStorage.removeItem("waitingState");
       removePendingConnection(roomId);
+      trackEvent("session_request_accepted", { astrologer_id: astrologerId, channel: "chat" });
+      trackEvent("session_started_chat", { astrologer_id: astrologerId, session_id: roomId });
 
       const astro = data?.astrologer || activeAstroRef.current || {};
       const kundliId = selectedProfile?._id;
@@ -779,6 +788,7 @@ const Profile = () => {
       // Clear localStorage
       localStorage.removeItem("waitingState");
       removePendingConnection(roomId);
+      trackEvent("session_request_accepted", { astrologer_id: rest?.astrologer?._id, channel: type || "audio" });
 
       const astro = rest?.astrologer || activeAstroRef.current;
       const kundliId = selectedProfile?._id;
@@ -975,6 +985,7 @@ const Profile = () => {
   };
 
   const handleEditClick = (kundli) => {
+    trackEvent("profile_edit_started", { profile_id: kundli?._id });
     setProfileToEdit(kundli);
     setShowEditProfileModal(true);
   };
@@ -1207,6 +1218,7 @@ const Profile = () => {
       
       Toast.success("Profile added successfully");
       setShowAddProfileModal(false);
+      trackEvent("additional_profile_added", { profile_count: (savedKundlis?.length || 0) + 1 });
     } catch (err) {
       console.error("Add profile error:", err);
       setShowAddProfileModal(false);
@@ -1236,6 +1248,7 @@ const Profile = () => {
 
       setShowEditProfileModal(false);
       setProfileToEdit(null);
+      trackEvent("profile_updated", { profile_id: profileToEdit?._id });
     } catch (err) {
       console.error("Edit profile error:", err);
       throw err;
@@ -1258,6 +1271,7 @@ const Profile = () => {
       const result = await deleteKundli(profileToDelete).unwrap();
       console.log("Delete successful:", result);
       Toast.success("Profile deleted successfully");
+      trackEvent("profile_deleted", { deleted_profile_id: profileToDelete });
 
       setShowDeleteModal(false);
       setProfileToDelete(null);
@@ -1277,6 +1291,7 @@ const Profile = () => {
 
   const handleLogout = async () => {
     // Call logout API
+    trackEvent("logout_initiated", { user_id: localStorage.getItem("shubhtalk_customer_id") });
     try {
       await logoutUser({ deviceType: "web" }).unwrap();
       // Dispatch Redux logout action

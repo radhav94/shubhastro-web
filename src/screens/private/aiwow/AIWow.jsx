@@ -17,6 +17,7 @@ import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { PATH } from "../../../utils/routes/Paths";
+import { trackEvent } from "../../../utils/analytics";
 
 // Reusable Section Title with Divider (same as Explore page, auto-width)
 const SectionTitleWithDivider = ({ title, description, styles }) => (
@@ -223,6 +224,7 @@ const AIWow = () => {
       setShowMobileAppModal(true);
     } else {
       // All AI WOW features live under the /ai-wow/ prefix
+      trackEvent("shubh_ai_feature_opened", { feature_name: slug });
       navigate(`/ai-wow/${slug}`);
     }
   };
@@ -315,6 +317,7 @@ const AIWow = () => {
   const handleResultHistory = () =>{
     if (!requireAuth()) return null;
     setActiveTab("results")
+    trackEvent("shubh_ai_past_reports_viewed", {});
   }
 
   return (

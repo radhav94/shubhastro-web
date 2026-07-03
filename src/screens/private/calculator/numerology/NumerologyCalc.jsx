@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import NumerologyForm from "../forms/NumerologyForm";
@@ -39,6 +40,7 @@ const NumerologyCalc = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Numerology" });
 
     const newErrors = {};
 

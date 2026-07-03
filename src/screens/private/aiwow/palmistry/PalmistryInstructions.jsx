@@ -6,6 +6,7 @@ import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
 import { compressImage } from '../../../../utils/helper/compressImage';
+import { trackEvent } from '../../../../utils/analytics';
 const PalmistryInstructions = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -22,6 +23,7 @@ const PalmistryInstructions = () => {
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
+      trackEvent("shubh_ai_input_provided", { feature_name: "ai-palmistry-scanner", input_type: "image" });
       compressImage(file).then((dataUrl) => {
         dispatch(setPalmistryImage(dataUrl));
         navigate('/ai-wow/ai-palmistry-scanner/capture');

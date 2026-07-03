@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
@@ -65,6 +66,7 @@ const KaalSarpCalc = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Kaal Sarp" });
     const newErrors = {};
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.gender) newErrors.gender = "Gender is required";

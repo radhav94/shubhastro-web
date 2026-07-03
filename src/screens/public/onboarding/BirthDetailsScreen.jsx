@@ -10,6 +10,7 @@ import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker"
 import LanguageSelector from "../../../component/LanguageSelector";
 import { registerUser } from "../../../services/appServices/authService";
 import { useCreateKundliMutation } from "../../../services/appServices/kundliServicesNew";
+import { trackEvent } from "../../../utils/analytics";
 import { setEmail, logout } from "../../../redux/auth/authSlice";
 
 // Validation schema
@@ -102,6 +103,7 @@ const BirthDetailsScreen = ({
       if (response?.data?.statusCode === 201 || response?.data?.success) {
         toast.dismiss();
         toast.success(response?.data?.message || "Registration successful!");
+        trackEvent("profile_created", { user_id: localStorage.getItem("shubhtalk_customer_id") });
         localStorage.setItem("shubhtalk_show_welcome_bonus", "true");
 
         const currentUserData = localStorage.getItem("userData");

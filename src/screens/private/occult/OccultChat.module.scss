@@ -45,6 +45,7 @@
   max-width: 480px;
   @media (width <= 767px) {
     text-align: center;
+    font-size: 14px;
   }
 }
 /* Hero Row */
@@ -276,17 +277,18 @@
   border-radius: 100px;
   background: linear-gradient(90deg, #F75801, #D43400);
   color: #fff;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
   margin-bottom: 24px;
   margin-top: 16px;
-  box-shadow: 0 4px 16px rgba(247, 88, 1, 0.2);
+  box-shadow: 0 6px 20px rgba(247,88,1,0.35);
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
 
   &:hover {
-    opacity: 0.92;
-    box-shadow: 0 6px 20px rgba(247, 88, 1, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(247,88,1,0.45);
   }
 
   &:disabled {

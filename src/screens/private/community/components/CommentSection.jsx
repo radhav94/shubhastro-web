@@ -9,6 +9,7 @@ import {
 import Toast from "../../../../component/toast";
 import { getUserFromStorage } from "../../../../utils/authStorage";
 import { DeleteConfirmationModal } from "../../../../component";
+import { trackEvent } from "../../../../utils/analytics";
 
 const getTimeAgo = (dateStr) => {
   if (!dateStr) return "";
@@ -134,6 +135,7 @@ const CommentSection = ({ postId }) => {
         body: commentText.trim(),
         isAnonymous: false,
       }).unwrap();
+      trackEvent("community_post_commented", { post_id: postId });
       setCommentText("");
       setRefetchKey((k) => k + 1);
       setTimeout(() => {

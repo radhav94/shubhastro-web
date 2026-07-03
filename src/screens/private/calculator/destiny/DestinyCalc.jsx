@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
@@ -54,6 +55,7 @@ const DestinyCalc = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Destiny Number" });
     const newErrors = {};
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";

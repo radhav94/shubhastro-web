@@ -12,6 +12,7 @@ import { useCreateChatRoomMutation } from "../../redux/api/chatApi";
 import { useGetAllKundlisQuery } from "../../services/appServices/kundliServicesNew";
 import Toast from "../../component/toast";
 import { useMediaPermission } from "./useMediaPermission";
+import { trackEvent } from "../analytics";
 
 export const useAstrologerConnect = () => {
   const navigate = useNavigate();
@@ -371,6 +372,7 @@ export const useAstrologerConnect = () => {
         };
         console.log("[NormalFlow] 📤 Emitting call:initiate");
         console.log("[NormalFlow]   → payload:", JSON.stringify(payload));
+        trackEvent("session_initiation_attempted", { astrologer_id: astro._id, channel: connectionType });
         voiceSocket.emit("call:initiate", payload);
 
         // Add to waiting queue (roomId will be assigned when call:room arrives)
@@ -382,6 +384,7 @@ export const useAstrologerConnect = () => {
           waitingTime: 5,
           isEmergency,
         });
+        trackEvent("session_waitlist_joined", { astrologer_id: astro._id, channel: connectionType });
 
         console.log("[NormalFlow] ✅ call:initiate emitted — waiting for call:room / call:accepted / error");
       } else {
@@ -408,6 +411,7 @@ export const useAstrologerConnect = () => {
         };
         console.log("[NormalFlow] 📤 Emitting chat:initiate");
         console.log("[NormalFlow]   → payload:", JSON.stringify(payload));
+        trackEvent("session_initiation_attempted", { astrologer_id: astro._id, channel: "chat" });
         voiceSocket.emit("chat:initiate", payload);
 
         // Add to waiting queue (roomId will be assigned when chat:room arrives)
@@ -419,6 +423,7 @@ export const useAstrologerConnect = () => {
           waitingTime: 2,
           isEmergency,
         });
+        trackEvent("session_waitlist_joined", { astrologer_id: astro._id, channel: "chat" });
 
         console.log("[NormalFlow] ✅ chat:initiate emitted — waiting for chat:room / chat:accepted / error");
       }

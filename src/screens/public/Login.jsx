@@ -6,6 +6,7 @@ import styles from "./Login.module.scss";
 import { PATH } from "../../utils/routes/Paths";
 import { AppIcons, appSvgs } from "../../utils/appImages";
 import * as AuthServices from "../../services/appServices/authService";
+import { trackEvent } from "../../utils/analytics";
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,6 +18,12 @@ const Login = () => {
   const [selectedRole, setSelectedRole] = useState("USER"); // USER / ASTROLOGER
 
   const isMobileNumberValid = mobileNumber.length === 10;
+
+  // Track login screen open
+  useEffect(() => {
+    trackEvent("login_initiated", { source_screen: location.state?.from || "direct" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Already logged in? Send user back to where they came from
   useEffect(() => {
@@ -42,6 +49,14 @@ const Login = () => {
       phoneNumber: "91" + mobileNumber,
       type: type,
     };
+
+    if (type === "ASTROLOGER") {
+      trackEvent("astro_signup_started", { source: "login" });
+      trackEvent("astro_mobile_entered", { mobile_number: mobileNumber });
+    } else {
+      trackEvent("login_mobile_entered", { mobile_number: mobileNumber });
+    }
+    trackEvent("login_otp_requested", { mobile_number: mobileNumber });
 
     try {
       const response = await AuthServices.loginWithPhone(payload);

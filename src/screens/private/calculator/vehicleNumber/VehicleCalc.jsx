@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
@@ -57,6 +58,7 @@ const VehicleCalc = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Vehicle Number" });
 
     const payload = {
       dob: formData.dob,

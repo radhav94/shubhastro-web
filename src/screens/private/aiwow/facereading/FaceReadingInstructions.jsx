@@ -6,6 +6,7 @@ import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
 import { compressImage } from '../../../../utils/helper/compressImage';
+import { trackEvent } from '../../../../utils/analytics';
 
 const FaceReadingInstructions = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const FaceReadingInstructions = () => {
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
+      trackEvent("shubh_ai_input_provided", { feature_name: "astro-face-reading", input_type: "image" });
       compressImage(file).then((dataUrl) => {
         dispatch(setFaceReadingImage(dataUrl));
         navigate('/ai-wow/astro-face-reading/capture');

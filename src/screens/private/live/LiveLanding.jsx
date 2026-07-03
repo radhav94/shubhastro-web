@@ -3,12 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Heart, MessageCircle, Share2 } from "lucide-react";
 import { AppImages } from "../../../utils/appImages";
 import styles from "./LiveLanding.module.scss";
+import { trackEvent } from "../../../utils/analytics";
 
 const LiveLanding = () => {
     const [activeTab, setActiveTab] = useState("daily");
     const navigate = useNavigate();
     const contentRef = useRef(null);
     const autoScrollInterval = useRef(null);
+
+    // Track live stream section view (once on mount)
+    useEffect(() => {
+        trackEvent("live_stream_list_viewed", {});
+    }, []);
 
     const insights = [
         {

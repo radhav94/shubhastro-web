@@ -1,4 +1,5 @@
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
+import { trackEvent } from "../../../utils/analytics";
 
 export const astrologerApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
@@ -27,6 +28,12 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         { type: "Following", id: astrologerId },
         "FollowedAstrologers",
       ],
+      async onQueryStarted({ astrologerId }, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          trackEvent("astrologer_followed", { astrologer_id: astrologerId });
+        } catch { /* don't track failed attempts */ }
+      },
     }),
 
     // UNFOLLOW ASTROLOGER BY ID
@@ -43,6 +50,12 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         { type: "Following", id: astrologerId },
         "FollowedAstrologers",
       ],
+      async onQueryStarted({ astrologerId }, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          trackEvent("astrologer_unfollowed", { astrologer_id: astrologerId });
+        } catch { /* don't track failed attempts */ }
+      },
     }),
   }),
 });

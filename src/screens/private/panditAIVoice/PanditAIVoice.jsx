@@ -10,9 +10,17 @@ import styles from "./PanditAIVoice.module.scss";
 import usePanditAIVoice from "./usePanditAIVoice";
 import useAIFreeMinutes from "../../../component/panditAI/useAIFreeMinutes";
 import AIRechargeBanner from "../../../component/panditAI/AIRechargeBanner";
+import { useEffect } from "react";
+import { trackEvent } from "../../../utils/analytics";
 
 const PanditAIVoice = () => {
   const navigate = useNavigate();
+
+  // Track AI Pandit opened in voice mode (once on mount)
+  useEffect(() => {
+    trackEvent("ai_pandit_opened", { mode: "voice" });
+    trackEvent("ai_pandit_voice_mode_used", {});
+  }, []);
 
   const {
     status,
