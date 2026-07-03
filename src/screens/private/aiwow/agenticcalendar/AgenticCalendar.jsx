@@ -441,7 +441,7 @@ const AgenticCalendar = () => {
 
           {/* Results Grid (Desktop) / Accordion (Mobile) */}
           {analysis?.optimalTimings?.length > 0 && (
-            <div className={`${styles.resultsWrap} ${analysis.optimalTimings.length === 2 ? styles.resultsTwo : ''}`} ref={resultsRef}>
+            <div className={`${styles.resultsWrap} ${[...new Set(analysis.optimalTimings.map(t => t.eventName))].length === 2 ? styles.resultsTwo : ''} ${[...new Set(analysis.optimalTimings.map(t => t.eventName))].length === 1 ? styles.resultsOne : ''}`} ref={resultsRef}>
               {(() => {
                 // Group timings by eventName
                 const sorted = [...analysis.optimalTimings].sort((a, b) => {
