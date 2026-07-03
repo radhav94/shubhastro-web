@@ -1728,9 +1728,14 @@ const Profile = () => {
                                       tab:
                                         order.type === "chat"
                                           ? "Chat"
-                                          : order.sessionType === "video"
-                                            ? "Video"
-                                            : "Call",
+                                          : "Call",
+                                      // NOTE: Previously routed video to separate "Video" tab
+                                      // tab:
+                                      //   order.type === "chat"
+                                      //     ? "Chat"
+                                      //     : order.sessionType === "video"
+                                      //       ? "Video"
+                                      //       : "Call",
                                     },
                                   },
                                 )

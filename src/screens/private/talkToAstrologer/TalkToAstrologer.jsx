@@ -26,6 +26,7 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { PATH } from "../../../utils/routes/Paths";
 import { getToken } from "../../../utils/token";
 import { voiceSocket } from "../../../services/voiceSocketServices";
+import { claimRoom } from "../../../utils/tabSession";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { useCall } from "../../../context/CallContext";
 import useRecommendTrigger from "../../../utils/hooks/useRecommendTrigger";
@@ -745,6 +746,10 @@ const TalkToAstrologer = () => {
       console.log("[TwoWayAccept] 📥 call:astrologer_accepted", JSON.stringify(data));
       const { roomId, sessionId, astrologerId, astrologerDetail, type, isEmergency } = data;
 
+      // Only react in the tab that initiated this request (event is broadcast to
+      // all of the user's open tabs).
+      if (!claimRoom(roomId, type || "audio")) return;
+
       // Update queue status
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
 
@@ -762,6 +767,9 @@ const TalkToAstrologer = () => {
     const handleChatAstrologerAccepted = (data) => {
       console.log("[TwoWayAccept] 📥 chat:astrologer_accepted", JSON.stringify(data));
       const { roomId, sessionId, astrologerId, astrologerDetail, type, isEmergency } = data;
+
+      // Only react in the tab that initiated this request.
+      if (!claimRoom(roomId, "chat")) return;
 
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
 

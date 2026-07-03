@@ -1,4 +1,5 @@
 import { io } from "socket.io-client";
+import { markInitiated, claimRoom } from "../utils/tabSession";
 
 export const voiceSocket = io("/", {
   transports: ["websocket"],
@@ -263,5 +264,24 @@ voiceSocket.emit = (event, ...args) => {
   if (typeof event === "string" && !["ping", "pong"].includes(event)) {
     console.log(`[VoiceSocket] � ${event}`, JSON.stringify(args[0], null, 2));
   }
+
+  // Multi-tab ring scoping: remember that THIS tab initiated the request so
+  // only this tab reacts to the (broadcast) astrologer_accepted / ring events.
+  if (event === "call:initiate") {
+    markInitiated(args[0]?.type || "audio");
+  } else if (event === "chat:initiate") {
+    markInitiated("chat");
+  }
+
   return _originalEmit(event, ...args);
 };
+
+// Bind the server-assigned roomId to this tab as soon as the room is created.
+// `call:room` / `chat:room` is the direct response to this tab's initiate, so
+// only the initiating tab (which has a pending intent) will claim it.
+voiceSocket.on("call:room", (data) => {
+  if (data?.roomId) claimRoom(data.roomId, data?.type || "audio");
+});
+voiceSocket.on("chat:room", (data) => {
+  if (data?.roomId) claimRoom(data.roomId, "chat");
+});
