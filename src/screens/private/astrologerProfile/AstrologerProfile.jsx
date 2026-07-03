@@ -243,6 +243,7 @@ const AstrologerProfile = () => {
 
   // State
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
+  const [showMobileConnectPopup, setShowMobileConnectPopup] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
 
   const { activeCall, setActiveCall, setOpenReview, setReviewData, lastSelectedKundli } = useCall();
@@ -1769,42 +1770,24 @@ const AstrologerProfile = () => {
             })()}
           </button>
         ) : (
-          <>
-            <button
-              className={styles.mobileChatBtn}
-              onClick={() => handleChatStart(data)}
-              disabled={!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) || !data?.price?.chatRate?.amount}
-            >
-              <img src={ChatMinutesIcon} alt="Chat" className={styles.mobileBtnIcon} />
-              <div className={styles.btnContent}>
-                <span className={styles.btnLabel}>Chat</span>
-                <span className={styles.btnPrice}>
-                  ₹{data?.price?.chatRate?.amount || 0}/min
-                  {data?.price?.chatRate?.isDiscountActive && data?.price?.chatRate?.beforeDiscountPrice && (
-                    <span className={styles.originalPrice}>₹{data?.price?.chatRate?.beforeDiscountPrice}/min</span>
-                  )}
-                </span>
-              </div>
-            </button>
-            <button
-              className={styles.mobileCallBtn}
-              onClick={() => handleCallStart(data, "audio")}
-              disabled={!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) || !data?.price?.audioRate?.amount}
-            >
-              <img src={CallMinutesIcon} alt="Call" className={styles.mobileBtnIcon} />
-              <div className={styles.btnContent}>
-                <span className={styles.btnLabel}>Call</span>
-                <span className={styles.btnPrice}>
-                  ₹{data?.price?.audioRate?.amount || 0}/min
-                  {data?.price?.audioRate?.isDiscountActive && data?.price?.audioRate?.beforeDiscountPrice && (
-                    <span className={styles.originalPrice}>₹{data?.price?.audioRate?.beforeDiscountPrice}/min</span>
-                  )}
-                </span>
-              </div>
-            </button>
-          </>
+          <button
+            className={styles.mobileConnectBtn}
+            onClick={() => setShowMobileConnectPopup(true)}
+            disabled={!data?.isActive}
+          >
+            Connect Now
+          </button>
         )}
       </div>
+
+      {/* Mobile Connect Popup */}
+      <ConnectAstrologerPopup
+        isOpen={showMobileConnectPopup}
+        onClose={() => setShowMobileConnectPopup(false)}
+        astrologer={data}
+        onChatStart={handleChatStart}
+        onCallStart={handleCallStart}
+      />
 
       <EmergencySessionModal
         isOpen={showEmergencyModal}
