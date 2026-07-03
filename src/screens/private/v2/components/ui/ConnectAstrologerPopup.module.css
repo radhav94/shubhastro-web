@@ -151,7 +151,8 @@
 
 @media (max-width: 640px) {
   .popup {
-    padding: 20px;
+    padding: 12px;
+    padding-bottom: 70px;
   }
 
   .title {
@@ -182,6 +183,7 @@
 
   .optionPrice {
     font-size: 14px;
+    color: #333;
   }
 }
 
@@ -210,5 +212,6 @@
 
   .optionPrice {
     font-size: 13px;
+    color: #333;
   }
 }
