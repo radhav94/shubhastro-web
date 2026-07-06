@@ -1129,6 +1129,10 @@ const TalkToAstrologer = () => {
   }, [userIdLocal, isRecommendModalOpen]);
 
   //JSX
+  if (isFetching && page === 1 && allAstrologers.length === 0) {
+    return <PrimaryLoader isLoading={true} />;
+  }
+
   return (
     <div className={styles.mainContainer}>
       <BackButton />
@@ -1335,7 +1339,7 @@ const TalkToAstrologer = () => {
 
         {isFetching && (
           <div className={styles.loaderWrapper}>
-            <PrimaryLoader />
+            <PrimaryLoader isLoading={true} fullscreen={false} />
           </div>
         )}
 
@@ -1349,7 +1353,7 @@ const TalkToAstrologer = () => {
         )}
 
       <div ref={loadMoreRef} className={styles.loaderWrapper}>
-        {isFetching && <PrimaryLoader />}
+        {isFetching && <PrimaryLoader isLoading={true} fullscreen={false} />}
       </div>
 
       {!hasMore && allAstrologers.length > 0 && recommendedAstrologers.length > 0 && (
