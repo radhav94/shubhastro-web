@@ -48,6 +48,10 @@ const LoShuCalc = () => {
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Lo Shu Grid" });
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Lo Shu Grid" });

@@ -64,6 +64,10 @@ const KaalSarpCalc = () => {
     setErrors({});
   };
 
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Kaal Sarp" });
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Kaal Sarp" });

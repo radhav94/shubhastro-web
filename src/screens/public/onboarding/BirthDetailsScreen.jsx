@@ -277,6 +277,7 @@ const BirthDetailsScreen = ({
                     const yyyy = date.getFullYear();
                     const mm = String(date.getMonth() + 1).padStart(2, "0");
                     const dd = String(date.getDate()).padStart(2, "0");
+                    trackEvent("profile_field_completed", { field_name: "birth_date" });
                     setFieldValue("birthDate", `${yyyy}-${mm}-${dd}`).then(() => {
                       setFieldTouched("birthDate", true, true);
                     });
@@ -344,6 +345,7 @@ const BirthDetailsScreen = ({
                     }
                   }}
                   onPlaceSelect={(place) => {
+                    trackEvent("profile_field_completed", { field_name: "birth_place" });
                     setFieldValue("birthPlace", place.address);
                     setFieldValue("latitude", place.lat);
                     setFieldValue("longitude", place.lng);
