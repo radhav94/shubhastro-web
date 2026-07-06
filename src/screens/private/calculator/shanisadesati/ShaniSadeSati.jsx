@@ -71,6 +71,10 @@ const ShaniSadeSati = () => {
     setErrors({});
   };
 
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Shani Sade Sati" });
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Shani Sade Sati" });

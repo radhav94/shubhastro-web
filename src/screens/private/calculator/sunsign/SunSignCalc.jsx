@@ -77,6 +77,10 @@ const SunSignCalc = () => {
     setShowProfileModal(false);
   };
 
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Sun Sign" });
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Sun Sign" });

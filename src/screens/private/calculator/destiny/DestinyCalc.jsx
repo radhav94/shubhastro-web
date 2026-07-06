@@ -53,6 +53,10 @@ const DestinyCalc = () => {
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Destiny Number" });
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Destiny Number" });
