@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Styles from "./BlogCard.module.scss";
 import { DefaultImages } from "../../../utils/appImages";
+import defaultBlogImg from "../../../assets/images/default_image_16x9_1920x1080.png";
 
 const BlogCard = ({ image, title, author, date, authorIcon, blogId, slug }) => {
   const [copiedId, setCopiedId] = useState(null);
@@ -58,14 +59,14 @@ const BlogCard = ({ image, title, author, date, authorIcon, blogId, slug }) => {
   return (
     <article className={Styles.blogCard}>
       <div className={Styles.imageContainer}>
-        <img src={image || DefaultImages.BlogsDefault} alt={title} className={Styles.mainImage} />
+        <img src={image || defaultBlogImg} alt={title} className={Styles.mainImage} onError={(e) => { e.target.onerror = null; e.target.src = defaultBlogImg; }} />
       </div>
 
       <div className={Styles.contentContainer}>
         {author && (
           <div className={Styles.authorTop}>
             {authorIcon && (
-              <img src={authorIcon} alt={author} className={Styles.authorIcon} />
+              <img src={authorIcon || defaultBlogImg} alt={author} className={Styles.authorIcon} />
             )}
             <span className={Styles.authorName}>{author}</span>
           </div>

@@ -2,6 +2,7 @@ import { memo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { sortContentByOrder } from "../sectionRendererV2";
 import SectionTitle from "./shared/SectionTitle";
+import defaultSquareImg from "../../../../assets/images/default_image_square_500x500.png";
 
 const AstrologersByCategorySection = memo(({ sectionData, styles }) => {
   const navigate = useNavigate();
@@ -32,9 +33,7 @@ const AstrologersByCategorySection = memo(({ sectionData, styles }) => {
             <div
               className={styles.catIconBox}
               style={{
-                background: c.image_url
-                  ? `url(${c.image_url}) center/100% no-repeat`
-                  : "transparent",
+                background: `url(${c.image_url || defaultSquareImg}) center/100% no-repeat`,
               }}
             />
             <span>{c.title}</span>

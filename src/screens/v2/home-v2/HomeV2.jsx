@@ -30,6 +30,7 @@ import kundliImg from "../../../assets/images/home-hero-kundli.png";
 import astrologerImg from "../../../assets/images/home-hero-astrologer.png";
 import horoscopeImg from "../../../assets/images/home-hero-horoscope.png";
 import astrologerMaleImg from "../../../assets/default-img/astrologer male_v.1.png";
+import defaultSquareImg from "../../../assets/images/default_image_square_500x500.png";
 
 // Community avatars — loaded lazily via URL (below-the-fold, decorative)
 const COMMUNITY_AVATARS = [
@@ -113,14 +114,14 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   return path ? (
                     <Link key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} to={path} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
                       <div className={styles.wowIconBox}>
-                        <img src={iconSrc} alt={item.title} width="40" height="40" loading="lazy" />
+                        <img src={iconSrc || defaultSquareImg} alt={item.title} width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
                       <span>{item.title}</span>
                     </Link>
                   ) : (
                     <div key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: item.slug ? 'pointer' : 'default' }}>
                       <div className={styles.wowIconBox}>
-                        <img src={iconSrc} alt={item.title} width="40" height="40" loading="lazy" />
+                        <img src={iconSrc || defaultSquareImg} alt={item.title} width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
                       <span>{item.title}</span>
                     </div>
