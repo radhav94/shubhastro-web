@@ -1,5 +1,4 @@
-import { ChevronLeft, ChevronDown, Share2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { trackEvent } from '../../../utils/analytics';
@@ -674,31 +673,6 @@ const HoroscopeNew = () => {
     setActiveCategory(categoryId);
   };
 
-  // Share the current horoscope (native share if available, else copy link)
-  const handleShareHoroscope = async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: `${selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)} Horoscope`,
-          text: `Check out the ${activeTab} horoscope for ${selectedZodiac}`,
-          url,
-        });
-      } else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(url);
-        toast.success('Link copied to clipboard');
-      }
-    } catch {
-      // User cancelled the share sheet — don't record a share.
-      return;
-    }
-    trackEvent('horoscope_shared', {
-      horoscope_type: 'indian',
-      sign: selectedZodiac,
-      period: activeTab,
-    });
-  };
-
   return (
     <div className="horoscope-page">
       
@@ -711,25 +685,15 @@ const HoroscopeNew = () => {
             </svg>
           </button>
           <span className="horoscope-page-title">Kundli Horoscope</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              className="horoscope-share-btn"
-              onClick={handleShareHoroscope}
-              aria-label="Share horoscope"
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'inherit' }}
-            >
-              <Share2 size={18} />
-            </button>
-            <button
-              className="horoscope-western-btn"
-              onClick={() => {
-                trackEvent('horoscope_type_switched', { from_type: 'indian', to_type: 'western' });
-                navigate('/daily-horoscope');
-              }}
-            >
-              Western
-            </button>
-          </div>
+          <button
+            className="horoscope-western-btn"
+            onClick={() => {
+              trackEvent('horoscope_type_switched', { from_type: 'indian', to_type: 'western' });
+              navigate('/daily-horoscope');
+            }}
+          >
+            Western
+          </button>
         </div>
       </div>
 
