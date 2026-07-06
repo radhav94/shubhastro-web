@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PATH } from "../../../../utils/routes/Paths";
 import SectionHeader from "./SectionHeader";
+import useIsOverflowing from "../../../../hooks/useIsOverflowing";
 import styles from "../Home.module.scss";
 import { DefaultImages } from "../../../../utils/appImages";
 
@@ -18,8 +20,14 @@ export function formatDateToReadable(input) {
   return date.isValid() ? date.format("DD MMM, YYYY") : input;
 }
 
-const BlogsSection = ({ blogData = [], title, showMore }) => {
+const BlogsSection = ({ blogData = [], title, showMore, gridRef, onScrollableChange }) => {
   const navigate = useNavigate();
+
+  // Report horizontal scrollability to a parent that renders external slider buttons.
+  const canScroll = useIsOverflowing(gridRef, [blogData]);
+  useEffect(() => {
+    onScrollableChange?.(canScroll);
+  }, [canScroll, onScrollableChange]);
 
   if (!blogData || blogData.length === 0) return null;
 
@@ -78,7 +86,7 @@ const BlogsSection = ({ blogData = [], title, showMore }) => {
         )}
       </div>
 
-      <div className={styles.blogsGrid}>
+      <div className={styles.blogsGrid} ref={gridRef}>
         {blogData.map((blog, i) => (
           <div
             key={i}
