@@ -70,15 +70,20 @@ $floating-button-gap: 14px;
 }
 /* PAGE WRAPPER */
 .chatPage {
-  height: calc(100dvh - 95px);
-  // padding: 0 16px;
-  // background: #fff;
+  position: fixed;
+  top: 95px;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
+  z-index: 2000;
   @media (width <= 1180px) {
-    height: calc(100dvh - 53px);
+    top: 53px;
+  }
+  @media (width <= 767px) {
+    top: 53px;
   }
 }
 
@@ -390,12 +395,14 @@ $floating-button-gap: 14px;
 .messages {
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px 16px 50px 16px;
   display: flex;
   flex-direction: column;
   gap: $message-group-gap;
   background: $bg-main;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Loading More Messages Indicator */
@@ -441,7 +448,7 @@ $floating-button-gap: 14px;
 /* Message Wrapper - ensures proper alignment */
 .messageWrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   width: 100%;
   margin-bottom: $message-gap;
   position: relative;
@@ -497,7 +504,7 @@ $floating-button-gap: 14px;
 
 /* ==================== MESSAGE BUBBLES ==================== */
 .msgBubble {
-  max-width: 75%;
+  max-width: 80%;
   min-width: 80px;
   padding: $spacing-xl $spacing-xxxl;
   padding-bottom: $message-gap;
@@ -507,6 +514,7 @@ $floating-button-gap: 14px;
   position: relative;
   word-wrap: break-word;
   word-break: break-word;
+  overflow-wrap: break-word;
   box-shadow: none;
   margin-bottom: $message-bottom-margin;
 }
@@ -1108,17 +1116,17 @@ $floating-button-gap: 14px;
 
 /* ==================== INPUT BAR ==================== */
 .inputBox {
-  // min-height: var(--chat-input-height);
   padding: 8px max(calc(50% - 720px + 20px), 12px);
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: none;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
+  z-index: 10;
 }
 
 .inputWrapper {
@@ -1157,7 +1165,10 @@ $floating-button-gap: 14px;
 .inputField::placeholder {
   color: $bg-footer;
   font-weight: 300;
-  font-size: 16px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .inputIcons {
@@ -1484,8 +1495,7 @@ $floating-button-gap: 14px;
   .messagesContainer {
     flex: 1;
     min-height: 0;
-    // max-height: calc(100dvh - var(--chat-header-height) - var(--chat-input-height) - var(--chat-footer-height));
-    max-height: calc(100dvh - 231px);
+    max-height: none;
     overflow: hidden;
     position: relative;
   }
@@ -1503,7 +1513,7 @@ $floating-button-gap: 14px;
   }
 
   .msgBubble {
-    max-width: 75%;
+    max-width: 85%;
     padding: $spacing-lg $spacing-xl;
     padding-bottom: $message-gap;
     min-width: 70px;
@@ -1540,10 +1550,8 @@ $floating-button-gap: 14px;
 
   .inputBox {
     padding: 8px 12px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     gap: 8px;
-    min-height: var(--chat-input-height);
-    max-height: none;
-    height: auto;
     flex-shrink: 0;
   }
 

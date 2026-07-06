@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
@@ -59,7 +60,6 @@ const MangalDosha = () => {
   const onReset = () => {
     setFormData(initialFormState);
     setErrors({});
-    dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
   };
 
   const token = localStorage.getItem("shubhtalk_customer_token");
@@ -83,6 +83,7 @@ const MangalDosha = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Mangal Dosha" });
     const newErrors = {};
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.gender) newErrors.gender = "Gender is required";

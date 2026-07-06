@@ -360,7 +360,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-around;
   padding: 5px;
   overflow: hidden;
 }
@@ -374,7 +374,7 @@
   height: 50px;
   position: relative;
   z-index: 9;
-  margin: 10px auto;
+  margin: 0px auto;
 }
 
 .horoscope-old-page .category-label {
@@ -395,7 +395,7 @@
 .horoscope-old-page .horoscope-content {
   padding: 16px;
   border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.5);
+  /* background-color: rgba(255, 255, 255, 0.5); */
   border: 1px solid #fff;
 }
 
@@ -403,7 +403,7 @@
   font-size: 22px;
   font-weight: 600;
   color: #000000;
-  margin: 0 0 16px 0;
+  margin: 0 0 8px 0;
   line-height: 1.3;
 }
 
@@ -592,9 +592,6 @@
 }
 
 @media (max-width: 1024px) {
-.horoscope-old-page .horoscope-content {
-    padding: 0px;
-  }
 .horoscope-old-page .overview-cards-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 14px;
@@ -619,6 +616,10 @@
 }
 
 @media (max-width: 640px) {
+  .horoscope-old-page .horoscope-content {
+    padding: 0px;
+    border: none;
+  }
 .horoscope-old-page .back-button {
       width: 36px;
       height: 36px;
@@ -853,7 +854,7 @@
 @media screen and (width <= 1024px) {
 .horoscope-old-page .category-item {
     height: 80px;
-    width: 80px;
+    width: 90px;
     flex-shrink: 0;
   }
 }
@@ -868,14 +869,13 @@
   }
 .horoscope-old-page .content-title {
     font-size: 18px;
-    margin-bottom: 18px;
+    padding: 10px 10px 10px 0px;
+    margin-bottom: 0px;
+    /* margin-bottom: 18px; */
   }
 }
 
 @media (min-width: 768px) {
-.horoscope-old-page .horoscope-page {
-    
-  }
 .horoscope-old-page .zodiac-date-range {
     font-size: 15px;
   }
@@ -904,6 +904,9 @@
     width: 100px;
     height: 100px;
   }
+  .horoscope-old-page .content-text p:last-child{
+  padding: 10px;
+}
 }
 
 @media (max-width: 375px) {

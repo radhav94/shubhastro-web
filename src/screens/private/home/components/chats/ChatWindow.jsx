@@ -16,6 +16,7 @@ import useChatSocket from "./useChatSocket";
 import Feedback from "./Feedback";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
 import { useAddAstrologerReviewMutation } from "../../../../../redux/api/review/reviewApi";
+import { trackEvent } from "../../../../../utils/analytics";
 import { Toast } from "../../../../../component";
 import dayjs from "dayjs";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
@@ -42,6 +43,7 @@ import useAstrologerAvailability from "../../../../../utils/hooks/useAstrologerA
 
 const ChatWindow = () => {
   const messagesRef = useRef(null);
+  const chatPageRef = useRef(null);
   const navigate = useNavigate();
   const { state } = useLocation();
   const { id: urlAstrologerId } = useParams();
@@ -127,6 +129,79 @@ const ChatWindow = () => {
     window.addEventListener("walletBalanceUpdated", handleBalanceUpdate);
     return () => window.removeEventListener("walletBalanceUpdated", handleBalanceUpdate);
   }, [refreshWallet]);
+
+  // iOS/Android keyboard fix: resize chatPage based on viewport changes
+  useEffect(() => {
+    if (!chatPageRef.current) return;
+
+    // Only apply on mobile (touch devices)
+    const isMobile = window.innerWidth <= 1180;
+    if (!isMobile) return;
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/.test(navigator.userAgent);
+
+    if (isIOS) {
+      // iOS: Use visualViewport API — iOS ignores interactive-widget meta,
+      // so visualViewport.height reflects the visible area above the keyboard
+      const viewport = window.visualViewport;
+      if (!viewport) return;
+
+      const onResize = () => {
+        if (!chatPageRef.current) return;
+        const currentHeight = viewport.height;
+        const fullHeight = window.screen.height;
+        const keyboardOpen = currentHeight < fullHeight * 0.75;
+
+        if (keyboardOpen) {
+          chatPageRef.current.style.height = `${currentHeight}px`;
+          chatPageRef.current.style.bottom = 'auto';
+        } else {
+          chatPageRef.current.style.height = '';
+          chatPageRef.current.style.bottom = '0';
+        }
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      };
+
+      viewport.addEventListener('resize', onResize);
+      viewport.addEventListener('scroll', onResize);
+
+      return () => {
+        viewport.removeEventListener('resize', onResize);
+        viewport.removeEventListener('scroll', onResize);
+        if (chatPageRef.current) {
+          chatPageRef.current.style.height = '';
+          chatPageRef.current.style.bottom = '0';
+        }
+      };
+    } else if (isAndroid) {
+      // Android with resizes-content: the window itself resizes when keyboard opens.
+      // position:fixed elements relative to layout viewport get pushed up correctly,
+      // but we need to update height to match the new window size.
+      const onResize = () => {
+        if (!chatPageRef.current) return;
+        const newHeight = window.innerHeight;
+        // On Android with resizes-content, innerHeight shrinks when keyboard opens
+        chatPageRef.current.style.height = `${newHeight - 53}px`; // subtract top header
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      };
+
+      // Set initial
+      onResize();
+
+      window.addEventListener('resize', onResize);
+
+      return () => {
+        window.removeEventListener('resize', onResize);
+        if (chatPageRef.current) {
+          chatPageRef.current.style.height = '';
+          chatPageRef.current.style.bottom = '0';
+        }
+      };
+    }
+  }, []);
 
   const {
     messages,
@@ -305,7 +380,6 @@ const ChatWindow = () => {
 
   const handleDisconnect = () => {
     if (isEnding) return;
-    setIsEnding(true);
     try {
       voiceSocket.emit("chat:end", { roomId, endedBy: "CUSTOMER" });
       
@@ -362,6 +436,9 @@ const ChatWindow = () => {
 
     if (!message.trim()) return;
     isUserSide ? sendMessage(message) : astroReply(message);
+    if (isUserSide) {
+      trackEvent("session_message_sent", { astrologer_id: astroID || activeChat?.astrologerId, session_id: activeChat?.roomId });
+    }
     setMessage("");
   };
 
@@ -404,19 +481,24 @@ const ChatWindow = () => {
   };
 
   const [getS3SignedUrl] = useGetS3SignedUrlMutation();
-  const sendVoiceMessage = async (blob = null, duration) => {
+  const sendVoiceMessage = async (blob = null, duration, mimeType) => {
     // Upload in background — don't block the chat UI
     (async () => {
       try {
-        // Request .m4a URL from S3 — use audio/x-m4a so backend generates .m4a extension
-        const signedUrl = await getS3SignedUrl({
-          fileType: "audio/x-m4a",
-        }).unwrap();
+        // Label the upload by the actual recorded format. Recording as mp4 but
+        // uploading as .x-m4a (the old behaviour) breaks playback on iOS when
+        // the device actually recorded webm.
+        const recordedType = mimeType || blob?.type || "audio/mp4";
+        const isM4a = recordedType.includes("mp4");
+        const fileType = isM4a ? "audio/x-m4a" : "audio/webm";
+
+        const signedUrl = await getS3SignedUrl({ fileType }).unwrap();
         const audioUrl = signedUrl.uploadUrl.split("?")[0];
         const uploadUrl = signedUrl.uploadUrl;
-        // Re-wrap blob with matching MIME type so S3 Content-Type header matches the signed URL
-        const m4aBlob = new Blob([blob], { type: "audio/x-m4a" });
-        await uploadFileToS3(uploadUrl, m4aBlob);
+        // Re-label the blob so the S3 Content-Type matches the signed file type
+        // (bytes are unchanged).
+        const uploadBlob = new Blob([blob], { type: fileType });
+        await uploadFileToS3(uploadUrl, uploadBlob);
         sendMessage(audioUrl, "audio");
       } catch (err) {
         console.error("Voice upload failed:", err);
@@ -574,7 +656,7 @@ const ChatWindow = () => {
         switchType={switchType || "audio"}
         onCancel={handleCancelCall}
       />
-      <div className={styles.chatPage}>
+      <div className={styles.chatPage} ref={chatPageRef}>
         <div className={styles.chatWindow}>
           <ChatHeader
             fullName={fullName}

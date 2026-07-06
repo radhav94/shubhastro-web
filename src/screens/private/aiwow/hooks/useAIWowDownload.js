@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useGetChargesQuery, useDownloadReportPdfMutation, useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import { useWalletBalance } from '../../wallet/useWalletBalance';
+import { trackEvent } from '../../../../utils/analytics';
 
 /**
  * Extracts the history ID from a result object, checking multiple possible locations.
@@ -138,6 +139,7 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
 
   const handleDownloadClick = useCallback(() => {
     refreshWallet();
+    trackEvent("shubh_ai_payment_initiated", { feature_name: featureName, price: downloadPrice });
     setShowDownloadModal(true);
   }, [refreshWallet]);
 
@@ -166,8 +168,13 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
       setShowDownloadModal(false);
       setDownloadedPdfUrl(pdfUrl);
       refreshWallet();
+      if (downloadPrice > 0) {
+        trackEvent("shubh_ai_payment_completed", { feature_name: featureName, amount_paid: downloadPrice });
+      }
+      trackEvent("shubh_ai_report_downloaded", { feature_name: featureName });
     } catch {
       toast.error('Failed to download PDF', { id });
+      trackEvent("shubh_ai_payment_failed", { feature_name: featureName, reason: "download_failed" });
     } finally {
       setIsDownloading(false);
     }

@@ -9,6 +9,7 @@ import * as AuthServices from "../../services/appServices/authService";
 import { saveUserToStorage } from "../../utils/authStorage";
 import { requestFCMToken } from "../../services/firebase";
 import { clearGuestKundliProfiles } from "../../utils/helper/cookies";
+import { trackEvent } from "../../utils/analytics";
 
 const OtpVerification = () => {
   const navigate = useNavigate();
@@ -131,6 +132,8 @@ const handleVerifyOtp = async (event) => {
         
         // Clear any cached profile data from previous user
         localStorage.removeItem("selectedKundliProfile");
+        trackEvent("login_otp_verified", { user_id: _id });
+        trackEvent("login_success", { user_id: _id });
       }
 
       if (type === "ASTROLOGER") {
@@ -140,6 +143,7 @@ const handleVerifyOtp = async (event) => {
         
         // Clear any cached profile data from previous user
         localStorage.removeItem("selectedKundliProfile");
+        trackEvent("astro_otp_verified", { astrologer_id: _id, mobile_number: phoneNumber });
       }
 
       // Remove all kundli profiles added while browsing as a guest
@@ -171,6 +175,7 @@ const handleVerifyOtp = async (event) => {
     }
   } catch (error) {
     Toast.error(error?.response?.data?.message || "OTP verification failed");
+    trackEvent("login_failed", { mobile_number: phoneNumber, error_reason: error?.response?.data?.message || "otp_failed" });
     // Clear OTP input on error
     setOtp("");
     // Focus first OTP input after clearing

@@ -246,17 +246,45 @@ export default function useChat({
     return () => window.removeEventListener("global:chat:ended", handleGlobalChatEnded);
   }, [astrologerId, activeCall, openReview, setOpenFeedback]);
 
-  // USER SEND — prefer socketService, fallback to voiceSocket (which is already in the room after reconnect)
+  // Re-enable input and timer when activeChat is restored after reconnect
+  useEffect(() => {
+    if (activeChat?.astrologerId === astrologerId && activeChat?.roomId) {
+      setIsMessageDisabled(false);
+      startTimer();
+    }
+  }, [activeChat?.roomId, activeChat?.astrologerId, astrologerId]);
+
+  // ─── Message Queue (for offline/disconnected sends) ─────────────────────────
+  const messageQueueRef = useRef([]);
+
+  // Flush queued messages when socket reconnects
+  useEffect(() => {
+    const flushQueue = () => {
+      if (messageQueueRef.current.length === 0) return;
+      console.log("[ChatWindow] 🔄 Flushing", messageQueueRef.current.length, "queued messages");
+      const queue = [...messageQueueRef.current];
+      messageQueueRef.current = [];
+      queue.forEach((payload) => {
+        voiceSocket.emit("chat:message", payload);
+      });
+    };
+
+    voiceSocket.on("connect", flushQueue);
+    return () => voiceSocket.off("connect", flushQueue);
+  }, []);
+  
+
+  // USER SEND — uses voiceSocket, queues if disconnected
   const sendMessage = (text, type = "message", kundliID = null) => {
-    console.log("sendMessage",text)
-    setHighLightText(text)
+    console.log("sendMessage", text);
+    setHighLightText(text);
 
     // Clear typing state immediately on send
     handleMessageSent();
 
     const payload = {
       sender: "user",
-      kundliId : kundliID ?? kundliId,
+      kundliId: kundliID ?? kundliId,
       roomId,
       userId,
       astrologerId,
@@ -264,47 +292,30 @@ export default function useChat({
       type,
     };
 
-    // If socketService socket is connected, use it (normal flow)
-    if (socketService.socket?.connected) {
-      const res = socketService.sendMessage({
-        message: text,
-        roomId,
-        userId,
-        astrologerId,
-        kundliId: kundliID ?? kundliId,
-        type
-      });
-      console.log("Hi Bro",res)
-      if (res?.error) {
-        setError(res.error);
-      }
-      return;
-    }
-
-    // Fallback: use voiceSocket which is already connected & in the room after reconnect
     if (voiceSocket.connected) {
-      console.log("[ChatWindow] 📤 socketService not connected, sending via voiceSocket");
       voiceSocket.emit("chat:message", payload);
       return;
     }
 
-    setError("Socket not connected, try again.");
-    toast.error("Socket not connected, try again.");
+    // Socket disconnected — queue the message for delivery on reconnect
+    messageQueueRef.current.push(payload);
+    console.log("[ChatWindow] 📦 Message queued (socket disconnected). Queue size:", messageQueueRef.current.length);
   };
 
   // ASTRO SEND
   const astroReply = (text) => {
-    const res = socketService.astrologerReplied({
-      message: text,
+    if (!voiceSocket.connected) {
+      setError("Socket not connected, try again.");
+      return;
+    }
+
+    voiceSocket.emit("astrologer_sent_message", {
+      sender: astrologerId,
       roomId,
       userId,
       astrologerId,
+      message: text,
     });
-
-    if (res?.error) {
-      setError(res.error);
-      return;
-    }
 
     addMessage({
       text,

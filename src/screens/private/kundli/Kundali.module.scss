@@ -228,6 +228,16 @@
   font-weight: 600;
   color: #666;
 }
+.filledCircle,.outlineCircle{
+  width: 10px;
+  height: 10px;
+  border-radius: 20px;
+  border: 1px solid #F75801;
+}
+.filledCircle{
+  border: none;
+  background-color: #F75801;
+}
 
 .profileInfo {
   flex: 1;

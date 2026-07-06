@@ -13,8 +13,8 @@ export const logout = async (data) => {
   return await publicRequest.post("users/verifyOtp", data);
 };
 
-export const registerUser = async (data) => {
-  return await privateRequest.post("users/registerUser", data);
+export const registerUser = async (data, config = {}) => {
+  return await privateRequest.post("users/registerUser", data, config);
 };
 
 export const getAstrologerLiveList = async (data) => {

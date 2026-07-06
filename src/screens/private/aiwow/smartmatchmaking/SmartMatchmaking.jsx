@@ -19,6 +19,7 @@ import matchMakingImg from '../../../../assets/images/match-making-top-img.svg';
 import matchMakingImgBottom from '../../../../assets/images/match-making-bottom-img.svg';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
+import { trackEvent } from '../../../../utils/analytics';
 // import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 
 const SmartMatchmaking = () => {
@@ -50,6 +51,12 @@ const SmartMatchmaking = () => {
   const [deleteKundli] = useDeleteKundliMutation();
 
   const profiles = data?.data || [];
+
+  // Track match making feature open (once on mount)
+  useEffect(() => {
+    trackEvent("match_making_opened", {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Listen to header profile changes from Redux
   const headerSelectedKundli = useSelector((state) => state.kundli.selectedKundli);
@@ -96,6 +103,9 @@ const SmartMatchmaking = () => {
       // Check if both are same gender
       if (partnerProfile && profile.gender === partnerProfile.gender) {
         Toast.error('Matchmaking requires one male and one female profile');
+        trackEvent(profile.gender === 'female' ? "match_making_validation_failed_same_gender_female" : "match_making_validation_failed_same_gender_male", {});
+      } else if (partnerProfile) {
+        trackEvent("match_making_profiles_selected", { profile_a_id: profile._id, profile_b_id: partnerProfile._id });
       }
     }
 
@@ -105,6 +115,9 @@ const SmartMatchmaking = () => {
       // Check if both are same gender
       if (primaryProfile && primaryProfile.gender === profile.gender) {
         Toast.error('Matchmaking requires one male and one female profile');
+        trackEvent(profile.gender === 'female' ? "match_making_validation_failed_same_gender_female" : "match_making_validation_failed_same_gender_male", {});
+      } else if (primaryProfile) {
+        trackEvent("match_making_profiles_selected", { profile_a_id: primaryProfile._id, profile_b_id: profile._id });
       }
     }
 
@@ -286,6 +299,7 @@ const SmartMatchmaking = () => {
 
     if (!primaryProfile || !partnerProfile) {
       Toast.error('Please select both profiles');
+      trackEvent("match_making_validation_failed_missing_fields", { missing_fields: !primaryProfile ? "primary_profile" : "partner_profile" });
       return;
     }
 
@@ -297,6 +311,11 @@ const SmartMatchmaking = () => {
 
       if (apiResult.success) {
         setResult(apiResult.data);
+        trackEvent("match_making_result_generated", {
+          total_gunas: apiResult.data?.totalGunas ?? apiResult.data?.total_gunas,
+          compatibility_score: apiResult.data?.compatibilityScore ?? apiResult.data?.compatibility_score,
+        });
+        trackEvent("match_making_result_viewed", { profile_a_id: primaryProfile._id, profile_b_id: partnerProfile._id });
       } else {
         // Show toast with backend error message only
         Toast.error(apiResult.error?.message || 'Matchmaking analysis failed');

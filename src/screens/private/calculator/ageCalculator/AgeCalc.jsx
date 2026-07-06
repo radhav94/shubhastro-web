@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 import DateWithSingleInputForm from "../forms/DateWithSingleInputForm";
 import styles from "./AgeCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
@@ -11,7 +13,7 @@ const STORAGE_KEY = "age_calculator";
 
 const initialFormState = {
   dob: "",
-  asOf: "",
+  asOf: dayjs().format("YYYY-MM-DD"),
 };
 
 const AgeCalc = () => {
@@ -52,6 +54,7 @@ const AgeCalc = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Age Calculator" });
     const payload = {
       dob: formData.dob,
       asOf: formData.asOf,
@@ -99,7 +102,6 @@ const AgeCalc = () => {
         onReset={() => {
           setFormData(initialFormState);
           setErrors({});
-          dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
         }}
       />
     </div>

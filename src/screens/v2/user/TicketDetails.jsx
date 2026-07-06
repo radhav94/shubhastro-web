@@ -7,6 +7,7 @@ import { useGetS3SignedUrlMutation } from "../../../redux/api/s3SignedApi";
 import { Toast } from "../../../component/index";
 import RatingCard from "./RatingCard";
 import styles from "./TicketDetails.module.scss";
+import { trackEvent } from "../../../utils/analytics";
 
 const TicketDetails = () => {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ const TicketDetails = () => {
         body.attachments = attachments;
       }
       await replyToTicket({ ticketId: ticket._id || ticketId, ...body }).unwrap();
+      trackEvent("support_ticket_comment_added", { ticket_id: ticket._id || ticketId, user_id: localStorage.getItem("shubhtalk_customer_id"), comment_length: text.length });
       setReplyText("");
       setAttachments([]);
       refetch();

@@ -20,6 +20,7 @@ import { useLiveList } from "../../../../../context/LiveListContext";
 import { useCall } from "../../../../../context/CallContext";
 import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import { ownsRoom } from "../../../../../utils/tabSession";
 import WaitingModal from "../../../../../component/UI/modal/waitingModal/WaitingModal";
 import WaitlistModal from "../../../../../component/UI/modal/waitlistModal/WaitlistModal";
 import Toast from "../../../../../component/toast";
@@ -476,15 +477,31 @@ const LiveView = (props) => {
   }, [displayMessages.length]);
 
   const messagesOverlayRef = useRef(null);
+  const prevScrollLenRef = useRef(0);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Pin the comments list to the bottom whenever it (re)mounts — e.g. joining a
+  // call re-renders/remounts the chat panel, which would otherwise reset the
+  // scroll position to the top. Landing at the bottom keeps the newest comments
+  // in view instead.
+  const setMessagesOverlayRef = useCallback((node) => {
+    messagesOverlayRef.current = node;
+    if (node) node.scrollTop = node.scrollHeight;
+  }, []);
+
+  // Keep pinned to the newest messages on fresh load (list was empty) or when
+  // the user is already at the bottom. Don't yank them if they've scrolled up.
   useEffect(() => {
     const container = messagesOverlayRef.current;
-    if (!container) return;
+    if (!container) {
+      prevScrollLenRef.current = displayMessages.length;
+      return;
+    }
+    const wasEmpty = prevScrollLenRef.current === 0;
     const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
-    if (isAtBottom) {
+    if (wasEmpty || isAtBottom) {
       container.scrollTop = container.scrollHeight;
     }
+    prevScrollLenRef.current = displayMessages.length;
   }, [displayMessages.length]);
 
   const isHost = ROLE === "host";
@@ -1083,10 +1100,13 @@ const LiveView = (props) => {
       }
     };
 
-    // When astrologer accepts, show waitlist popup (no scroll)
+    // When astrologer accepts, show waitlist popup (no scroll).
+    // Only react in the tab that initiated the request — the event is broadcast
+    // to every open tab, so non-initiating tabs must ignore it.
     const handleAstrologerAcceptedScroll = (data) => {
       const acceptedAstroId = data?.astrologerId;
       if (!acceptedAstroId) return;
+      if (!ownsRoom(data?.roomId)) return;
       setShowWaitingPopup(true);
     };
 
@@ -1431,7 +1451,7 @@ const LiveView = (props) => {
           {isAstrologerLive && (
           <div className="chat-panel" onTouchStart={(e) => e.stopPropagation()} onTouchEnd={(e) => e.stopPropagation()}>
             {/* Inline Messages Overlay */}
-            <div className="inline-messages-overlay" ref={messagesOverlayRef}>
+            <div className="inline-messages-overlay" ref={setMessagesOverlayRef}>
               {displayMessages.map((m, index) => {
                 // System messages (join) — show first letter like regular messages
                 if (m.isSystem) {

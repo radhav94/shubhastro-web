@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
@@ -78,6 +79,7 @@ const SunSignCalc = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Sun Sign" });
 
     const newErrors = {};
     if (!formData.name) newErrors.name = "Name is required";
@@ -282,7 +284,6 @@ const SunSignCalc = () => {
             onClick={() => {
               setFormData(initialFormState);
               setErrors({});
-              dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
             }}
           >
             Reset

@@ -40,13 +40,15 @@ const TalkToKundliChat = () => {
     }
   }, [profile, profileLoading]);
 
-  // Auto-scroll to bottom
-  // useEffect(() => {
-  //   // scrollToBottom();
-  // }, [messages]);
+  // Auto-scroll to show latest message above input
+  useEffect(() => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 100);
+  }, [messages, isLoading]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   };
 
   const startSession = async (profile) => {
@@ -210,6 +212,7 @@ const TalkToKundliChat = () => {
       </header>
       
       <div className={styles.containerDiv}>
+        <div className={styles.heiT}>
         {/* Messages */}
         <div className={styles.messagesContainer}>
           {messages.length === 0 && !isLoading && (
@@ -278,6 +281,7 @@ const TalkToKundliChat = () => {
             </div>
           </div>
         )}  
+      </div>
       </div>
 
       {/* Input */}

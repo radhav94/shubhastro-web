@@ -42,6 +42,7 @@ import {
   setJSONCookie,
   removeCookie,
 } from "../../../utils/helper/cookies";
+import { trackEvent } from "../../../utils/analytics";
 
 // Cookie key for persisting guest (non-logged-in) kundli profiles across pages
 const GUEST_KUNDLI_COOKIE = "guestKundliProfiles";
@@ -329,6 +330,16 @@ const Kundali = () => {
 
   const astroDetails = data?.response;
 
+  // Track kundli page view when profile data is loaded
+  useEffect(() => {
+    if (selectedProfile?._id) {
+      trackEvent("kundli_viewed", {
+        profile_id: selectedProfile._id,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProfile?._id]);
+
   // Function to handle PDF download
   const handlePdfDownload = async (selectedLanguage) => {
     if (isDownloadingPdf) return;
@@ -369,6 +380,7 @@ const Kundali = () => {
             link.remove();
             URL.revokeObjectURL(blobUrl);
             Toast.success("PDF downloaded!");
+            trackEvent("kundli_downloaded", { profile_id: selectedProfile._id });
           } catch (fetchError) {
             console.error("Failed to fetch PDF as blob:", fetchError);
             Toast.error("Failed to download PDF");
@@ -577,7 +589,14 @@ const Kundali = () => {
   // Handlers
   const handleTabChange = async (tabIndex, tabLabel) => {
     console.log("Tab change requested:", tabIndex, tabLabel);
-    
+
+    if (tabLabel) {
+      trackEvent("kundli_chart_section_viewed", {
+        profile_id: selectedProfile?._id,
+        section_name: typeof tabLabel === "string" ? tabLabel : String(tabIndex),
+      });
+    }
+
     // For all tabs, allow change
     return true;
   };
@@ -915,6 +934,7 @@ const Kundali = () => {
               link.remove();
               URL.revokeObjectURL(blobUrl);
               Toast.success("PDF downloaded!");
+              trackEvent("kundli_downloaded", { profile_id: selectedProfile?._id });
             } catch {
               Toast.error("Failed to download PDF");
             }
@@ -946,6 +966,12 @@ const Kundali = () => {
           { id: "mr", label: "Marathi", sub: "मराठी" },
           { id: "gu", label: "Gujarati", sub: "ગુજરાતી" },
           { id: "bn", label: "Bengali", sub: "বাংলা" },
+          { id: "ka", label: "Kannada", sub: "ಕನ್ನಡ" },
+          { id: "ml", label: "Malayalam", sub: "മലയാളം" },
+          { id: "ta", label: "Tamil", sub: "தமிழ்" },
+          { id: "te", label: "Telugu", sub: "తెలుగు" },
+          { id: "ne", label: "Nepali", sub: "नेपाली" },
+          { id: "si", label: "Sinhala", sub: "සිංහල" },
         ]}
         generatedLanguages={(() => {
           const freshProfile = profiles.find(p => p._id === selectedProfile?._id);

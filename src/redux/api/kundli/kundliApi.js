@@ -51,8 +51,8 @@ export const kundliVedicApi = vedicApi.injectEndpoints({
           stroke: 2,
           lat: params.lat,
           lon: params.lon,
-          color: "%23ff850b3d",
-          font_size: 40,
+          color: "#ff850b3d",
+          font_size: 35,
           font_style: "Nunito",
           colorful_planets: true,
           format: "svg", //  IMPORTANT (use svg not base64)
@@ -76,10 +76,10 @@ export const kundliVedicApi = vedicApi.injectEndpoints({
           lon: params.lon,
           tz: params.tz || 5.5,
           style: params.style || "north",
-          color: "%23ff850b3d",
+          color: "#ff850b3d",
           planet: chartType,
           size: 300,
-          font_size: 40,
+          font_size: 35,
           lang: params.lang || "en",
           format: "svg", //  IMPORTANT (use svg not base64)
         },

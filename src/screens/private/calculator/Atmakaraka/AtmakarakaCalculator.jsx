@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
@@ -77,6 +78,7 @@ const AtmakarakaCalculator = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Atmakaraka" });
 
     const newErrors = {};
 
@@ -282,7 +284,6 @@ const AtmakarakaCalculator = () => {
             onClick={() => {
               setFormData(initialFormState);
               setErrors({});
-              dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
             }}
           >
             Reset

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
@@ -46,6 +47,7 @@ const MobileCalc = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Mobile Number" });
 
     const payload = {
       dob: formData.dob,
@@ -93,7 +95,6 @@ const MobileCalc = () => {
         onReset={() => {
           setFormData(initialFormState);
           setErrors({});
-          dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
         }}
       />
     </div>

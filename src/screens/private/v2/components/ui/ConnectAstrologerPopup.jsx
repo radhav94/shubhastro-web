@@ -56,10 +56,13 @@ const ConnectAstrologerPopup = ({
   // Use emergency pricing if in emergency mode
   const pricing = isEmergency ? astrologer?.emergencyPrice : astrologer?.price;
 
-  // Check if service is available
-  const isChatAvailable = pricing ? pricing.chatRate?.amount > 0 : true;
-  const isCallAvailable = pricing ? pricing.audioRate?.amount > 0 : true;
-  const isVideoAvailable = pricing ? pricing.videoCallRate?.amount > 0 : true;
+  // Check if service is available (price > 0 AND activeType includes it)
+  const activeTypes = astrologer?.isActiveType || [];
+  const isTypeActive = (type) => activeTypes.includes("all") || activeTypes.includes(type);
+
+  const isChatAvailable = pricing ? (pricing.chatRate?.amount > 0 && isTypeActive("chat")) : true;
+  const isCallAvailable = pricing ? (pricing.audioRate?.amount > 0 && isTypeActive("audio")) : true;
+  const isVideoAvailable = pricing ? (pricing.videoCallRate?.amount > 0 && isTypeActive("video")) : true;
 
   const handleConnect = async (type) => {
     if (!astrologer) return;
@@ -71,7 +74,7 @@ const ConnectAstrologerPopup = ({
     let result = false;
 
     if (type === "chat") {
-      result = await onChatStart(astrologer, true, isEmergency);
+      result = await onChatStart(astrologer, isEmergency);
     } else if (type === "call") {
       result = await onCallStart(astrologer, "audio", isEmergency);
     } else if (type === "video") {

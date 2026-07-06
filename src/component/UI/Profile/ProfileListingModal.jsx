@@ -126,9 +126,11 @@ const ProfileListingModal = ({
                     </div>
 
                     <div className={styles.profileInfo}>
-                      <span className={styles.relationBadge}>
-                        {formatted.relation}
-                      </span>
+                      {formatted.relation?.trim() && (
+                        <span className={styles.relationBadge}>
+                          {formatted.relation}
+                        </span>
+                      )}
                       <h3 className={styles.profileName}>{profile.name}</h3>
                       <p className={styles.profileMeta}>
                         {formatted.birthDate} • {formatted.birthTime}
@@ -138,7 +140,11 @@ const ProfileListingModal = ({
 
                     <div className={styles.profileActions}>
                       <div className={styles.radioBtn}>
-                        {isSelected ? "●" : "○"}
+                        {isSelected ? (
+                            <span className={styles.filledCircle}></span>
+                          ) : (
+                            <span className={styles.outlineCircle}></span>
+                        )}
                       </div>
                       {showEditButton && (
                         <button

@@ -1,11 +1,11 @@
-import { ChevronLeft, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Share2 } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { 
-  useFetchDailyQuery, 
-  useFetchTomorrowQuery,
+  useFetchWesternDailyQuery, 
+  useFetchWesternTomorrowQuery,
   useFetchWeeklyQuery, 
-  useFetchYearlyQuery
+  useFetchWesternYearlyQuery
 } from '../../../redux/api/horoscope/zodiacApi';
 import { signToNumber, zodiacDateRanges } from './utils';
 import PrimaryLoader from '../../../component/UI/PrimaryLoader';
@@ -17,6 +17,8 @@ import { useGetAllKundlisQuery } from '../../../services/appServices/kundliServi
 import { useSelector } from 'react-redux';
 import { useGetAstroDetailsQuery } from '../../../redux/api/kundli/kundliApi';
 import { buildVedicParam } from '../../../utils/VedicParams.js/vedicParams';
+import { trackEvent } from '../../../utils/analytics';
+import toast from 'react-hot-toast';
 const overViewImg = "https://assets.shubhastro.ai/images/horoscope/overview.png";
 const financeImg = "https://assets.shubhastro.ai/images/horoscope/finances.png";
 const scoreImg = "https://assets.shubhastro.ai/images/horoscope/total-score.png";
@@ -151,7 +153,8 @@ const HoroscopeOld = () => {
   const { data: astroData, isFetching: isAstroFetching } = useGetAstroDetailsQuery(vedicParams, {
     skip: !vedicParams,
   });
-  const profileSunSign = astroData?.response?.sun_sign?.toLowerCase() || null;
+  // For Western horoscope page, prefer westernSign from kundli profile over Vedic sun_sign
+  const profileSunSign = activeProfile?.westernSign?.toLowerCase() || astroData?.response?.sun_sign?.toLowerCase() || null;
   
   // Default to first sign if no sign in URL
   const [selectedZodiac, setSelectedZodiac] = useState(sign?.toLowerCase() || 'aries');
@@ -191,8 +194,8 @@ const HoroscopeOld = () => {
   // Set default zodiac based on profile's sun sign when page loads without a sign in URL
   // AND react to profile switches from the header
   useEffect(() => {
-    // Wait until astro data is done fetching for the current profile
-    if (isAstroFetching) return;
+    // Wait until astro data is done fetching (unless westernSign is already available from profile)
+    if (isAstroFetching && !activeProfile?.westernSign) return;
     if (!profileSunSign || !signToNumber[profileSunSign]) return;
 
     const currentProfileId = activeProfile?._id || null;
@@ -252,11 +255,11 @@ const HoroscopeOld = () => {
   
   // Fetch data based on active tab
   // Both "Today" and "Daily" use the same daily API
-  const { data: dailyData, isLoading: dailyLoading } = useFetchDailyQuery(signNumber, {
+  const { data: dailyData, isLoading: dailyLoading } = useFetchWesternDailyQuery(signNumber, {
     skip: activeTab !== 'Today' && activeTab !== 'Daily'
   });
 
-  const { data: tomorrowData, isLoading: tomorrowLoading } = useFetchTomorrowQuery(signNumber, {
+  const { data: tomorrowData, isLoading: tomorrowLoading } = useFetchWesternTomorrowQuery(signNumber, {
     skip: activeTab !== 'Tomorrow'
   });
   
@@ -264,7 +267,7 @@ const HoroscopeOld = () => {
     skip: activeTab !== 'This Week'
   });
   
-  const { data: yearlyData, isLoading: yearlyLoading } = useFetchYearlyQuery(signNumber, {
+  const { data: yearlyData, isLoading: yearlyLoading } = useFetchWesternYearlyQuery(signNumber, {
     skip: activeTab !== 'This Year'
   });
 
@@ -500,6 +503,31 @@ const HoroscopeOld = () => {
     setShowZodiacModal(true);
   };
 
+  // Share the current horoscope (native share if available, else copy link)
+  const handleShareHoroscope = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)} Horoscope`,
+          text: `Check out the ${activeTab} horoscope for ${selectedZodiac}`,
+          url,
+        });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        toast.success('Link copied to clipboard');
+      }
+    } catch {
+      // User cancelled the share sheet — don't record a share.
+      return;
+    }
+    trackEvent('horoscope_shared', {
+      horoscope_type: 'western',
+      sign: selectedZodiac,
+      period: activeTab,
+    });
+  };
+
   const selectedZodiacData = zodiacSigns.find(
     z => z.name.toLowerCase() === selectedZodiac.toLowerCase()
   );
@@ -551,9 +579,20 @@ const HoroscopeOld = () => {
           </button>
           <button
             className="indian-horoscope-btn"
-            onClick={() => navigate('/daily-horoscope-indian')}
+            onClick={() => {
+              trackEvent('horoscope_type_switched', { from_type: 'western', to_type: 'indian' });
+              navigate('/daily-horoscope-indian');
+            }}
           >
             Indian
+          </button>
+          <button
+            className="horoscope-share-btn"
+            onClick={handleShareHoroscope}
+            aria-label="Share horoscope"
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'inherit' }}
+          >
+            <Share2 size={18} />
           </button>
         </div>
       </div>

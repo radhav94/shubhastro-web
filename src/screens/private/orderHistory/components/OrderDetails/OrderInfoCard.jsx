@@ -19,6 +19,7 @@ const OrderInfoCard = ({
   initialRating = null,
   roomId,
   onRateConsultation,
+  isLive = false,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -49,14 +50,16 @@ const OrderInfoCard = ({
     return null;
   };
 
-  // Setup HLS for audio (call tab)
+  // Audio (call tab) is attached lazily on first play (see handleCardClick) so
+  // recordings don't all load on page mount. Just clean up on unmount.
   useEffect(() => {
-    if (type === "video" || !recordingUrl) return;
-    const media = mediaRef.current;
-    if (!media) return;
-    const hls = attachHls(media, recordingUrl, hlsRef);
-    return () => { if (hls) hls.destroy(); hlsRef.current = null; };
-  }, [recordingUrl, type]);
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, []);
 
   // Setup HLS for video modal
   useEffect(() => {
@@ -75,6 +78,18 @@ const OrderInfoCard = ({
     } else {
       const media = mediaRef.current;
       if (!media) return;
+      // Lazily attach HLS the first time the user plays, so audio loads only
+      // when clicked instead of for every card on page load.
+      if (!hlsRef.current && !media.src) {
+        const hls = attachHls(media, recordingUrl, hlsRef);
+        if (hls) {
+          // HLS.js: start playback once the manifest has been parsed.
+          hls.once(Hls.Events.MANIFEST_PARSED, () => media.play().catch(() => {}));
+        } else {
+          media.play().catch(() => {});
+        }
+        return;
+      }
       if (isPlaying) { media.pause(); } else { media.play().catch(() => {}); }
     }
   }, [isPlaying, type, recordingUrl]);
@@ -194,7 +209,13 @@ const OrderInfoCard = ({
                 </button>
               )}
             </div>
-            <div className={styles.consultAgain} onClick={onConsultAgain}>Consult Again</div>
+            <div
+              className={`${styles.consultAgain} ${isLive ? styles.consultAgainDisabled : ""}`.trim()}
+              onClick={isLive ? undefined : onConsultAgain}
+              aria-disabled={isLive}
+            >
+              Consult Again
+            </div>
           </div>
         </div>
       </div>

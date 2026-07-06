@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useLazyGetWalletBalanceQuery } from "../../redux/api/wallet/walletApi";
+import { trackEvent } from "../../utils/analytics";
 
 /**
  * Hook that manages the AI free-minutes state machine.
@@ -32,6 +33,9 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
 
   const roomIdRef = useRef(roomId);
   roomIdRef.current = roomId;
+
+  // Fire the free→paid transition analytics only once per session.
+  const paidStartedRef = useRef(false);
 
   // Fetch wallet balance on open
   const [getWalletBalance] = useLazyGetWalletBalanceQuery();
@@ -91,6 +95,11 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
         setIsFreePeriod(false);
         setFreeMinutesRemaining(null);
         if (data.remainingTime !== undefined) setRemainingPaidTime(data.remainingTime);
+        if (!paidStartedRef.current) {
+          paidStartedRef.current = true;
+          trackEvent("ai_pandit_free_quota_exhausted", { mode: "text", minutes_used: data.freeMinutesUsedToday });
+          trackEvent("ai_pandit_paid_session_started", { mode: "text", rate_per_min: data.ratePerMinute });
+        }
       }
 
       if (data.freeMinutesUsedToday !== null && data.freeMinutesUsedToday !== undefined) {
@@ -242,6 +251,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
     setRemainingPaidTime(null);
     setFreeMinutesRemaining(null);
     setIsFreePeriod(false);
+    paidStartedRef.current = false;
   }, []);
 
   // Auto-reset when popup closes

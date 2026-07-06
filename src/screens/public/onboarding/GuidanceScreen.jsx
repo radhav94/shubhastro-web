@@ -10,6 +10,7 @@ import { registerUser } from "../../../services/appServices/authService";
 import { useCreateKundliMutation } from "../../../services/appServices/kundliServicesNew";
 import { useGetExpertiseFiltersQuery } from "../../../redux/api/astrologer/astrologerApi";
 import { setEmail } from "../../../redux/auth/authSlice";
+import { trackEvent } from "../../../utils/analytics";
 
 // Static mapping for icon and color by slug (API doesn't provide these)
 const slugStyleMap = {
@@ -128,7 +129,9 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
       console.log("📊 Status code:", response?.data?.statusCode);
 
       if (response?.data?.statusCode === 201 || response?.data?.success) {
-        toast.success("Registration successful!");
+        toast.dismiss();
+        toast.success(response?.data?.message || "Registration successful!");
+        trackEvent("profile_created", { user_id: localStorage.getItem("shubhtalk_customer_id") });
         localStorage.setItem("shubhtalk_show_welcome_bonus", "true");
         
         // Update user data in localStorage
@@ -278,7 +281,7 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
               </div>
 
               {/* Language Translator */}
-              <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
+              {/* <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} /> */}
             </div>
 
             <div className={styles.content}>

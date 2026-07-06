@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
@@ -68,11 +69,11 @@ const ShaniSadeSati = () => {
   const onReset = () => {
     setFormData(initialFormState);
     setErrors({});
-    dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Shani Sade Sati" });
     const newErrors = {};
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.gender) newErrors.gender = "Gender is required";

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Calendar, Clock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "../Home.module.scss";
 import {
   getAstrologerDefaultImage,
@@ -8,9 +8,12 @@ import {
 } from "../../../../utils/appImages";
 import EmergencySessionModal from "../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import { useGetAstrologerByIdQuery } from "../../../../redux/api/astrologer/astrologerApi";
+import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 
 const SessionCard = ({ session, onCallAgain, isLoading }) => {
+  const navigate = useNavigate();
   const isOnline = session?.isActive === true;
+  const { isLive, roomId: liveRoomId } = useAstrologerLiveStatus(session?._id, session?.astrologerLiveStatus);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
 
   // Fetch full astrologer details for emergency pricing
@@ -61,17 +64,33 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
   const handleButtonClick = (e, astrologer, connectionType) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isOnline) return;
+    if (!isOnline || isLive) return;
     onCallAgain(astrologer, connectionType);
   };
 
   return (
     <div className={`${styles.sessionCard} ${!isOnline ? styles.sessionCardOffline : ''}`}>
-      {/* Online/Offline badge */}
-      <div className={`${styles.sessionStatusBadge} ${isOnline ? styles.sessionStatusOnline : styles.sessionStatusOffline}`}>
-        <span className={styles.sessionStatusDot} />
-        <span>{isOnline ? 'Online' : 'Offline'}</span>
-      </div>
+      {/* Live / Online / Offline badge */}
+      {isLive ? (
+        <button
+          type="button"
+          className={`${styles.sessionStatusBadge} ${styles.sessionStatusLive}`}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            navigate(`/live/${liveRoomId || session?._id}`);
+          }}
+          aria-label="Astrologer is live, click to watch"
+        >
+          <span className={styles.sessionLiveDot} />
+          <span>Live</span>
+        </button>
+      ) : (
+        <div className={`${styles.sessionStatusBadge} ${isOnline ? styles.sessionStatusOnline : styles.sessionStatusOffline}`}>
+          <span className={styles.sessionStatusDot} />
+          <span>{isOnline ? 'Online' : 'Offline'}</span>
+        </div>
+      )}
       {session._id ? (
         <Link
           to={`/astrologer/${session._id}`}
@@ -150,7 +169,7 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
                   <button
                     className={styles.sessionChatBtn}
                     onClick={(e) => handleButtonClick(e, session, "chat")}
-                    disabled={isLoading}
+                    disabled={isLoading || isLive}
                   >
                     <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
                   </button>
@@ -164,7 +183,7 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
                   <button
                     className={styles.sessionCallBtn}
                     onClick={(e) => handleButtonClick(e, session, "call")}
-                    disabled={isLoading}
+                    disabled={isLoading || isLive}
                   >
                     <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
                   </button>
@@ -195,11 +214,11 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
         isOpen={showEmergencyModal}
         onClose={() => setShowEmergencyModal(false)}
         astrologer={fullAstrologer || session}
-        onChatNow={(astro) => {
+        onChatNow={() => {
           setShowEmergencyModal(false);
           onCallAgain(session, "chat", true);
         }}
-        onCallNow={(astro) => {
+        onCallNow={() => {
           setShowEmergencyModal(false);
           onCallAgain(session, "audio", true);
         }}

@@ -34,7 +34,7 @@ export const initializeFCM = async () => {
 
   // Notification sound — unlock audio on first user interaction
   let audioUnlocked = false;
-  const notificationSound = new Audio("/notification.mp3");
+  const notificationSound = new Audio("https://shubhastroassets.s3.ap-south-1.amazonaws.com/sound/push-notification.mpeg");
   notificationSound.preload = "auto";
 
   const unlockAudio = () => {

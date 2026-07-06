@@ -6,23 +6,10 @@
 
 .hero {
   text-align: center;
-  margin-bottom: 24px;
-
-  h1 {
-    font-size: 26px;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin: 0 0 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  p {
-    font-size: 14px;
-    color: #030303;
-    margin: 0;
-    font-style: italic;
-  }
+  width: 75%;
+  margin: -66px auto 20px auto;
+  h1 { font-size: 26px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px; }
+  p { font-size: 14px; color: #030303; margin: 0; }
 }
 
 .headingUnderline {
@@ -298,7 +285,7 @@
 
 @media (max-width: 768px) {
   .hero h1 {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .formCard {

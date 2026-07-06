@@ -4,7 +4,10 @@ import { useCall } from "./CallContext";
 import { useChat } from "./ChatContext";
 import { PANDIT_AI_ID } from "../component/panditAI/usePanditAI";
 import { Toast } from "../component";
+import { trackEvent } from "../utils/analytics";
 
+import { startIncomingSound, stopIncomingSound } from "../utils/incomingSound";
+import { claimRoom, releaseRoom } from "../utils/tabSession";
 const WaitingQueueContext = createContext();
 
 // LocalStorage key for persistence
@@ -217,12 +220,34 @@ export const WaitingQueueProvider = ({ children }) => {
   const { setChatApprovalData, chatApprovalData, activeChat, setActiveChat, setChatSeconds, setWaitingList: setChatWaitingList, stopTimer: stopChatTimer } = useChat();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
+  // Ring sound: loop while an astrologer has accepted and the user is being
+  // asked to join (approval data is set), and stop the moment that state is
+  // cleared — i.e. when the user joins, cancels, or rejects, or the ring ends
+  // (on_hold / unavailable / timeout / accepted all clear the approval data).
+  useEffect(() => {
+    if (callApprovalData || chatApprovalData) {
+      startIncomingSound();
+    } else {
+      stopIncomingSound();
+    }
+  }, [callApprovalData, chatApprovalData]);
+
+  // Always stop the sound if the provider unmounts.
+  useEffect(() => stopIncomingSound, []);
+
   useEffect(() => {
     if (!userIdLocal) return;
 
     const handleCallAstrologerAccepted = (data) => {
       console.log("[GlobalTwoWay] 📥 call:astrologer_accepted", JSON.stringify(data));
       const { roomId, sessionId, astrologerId, astrologerDetail, type, isEmergency } = data;
+      // Only ring in the tab that initiated this request. The event is broadcast
+      // to every tab the user has open, so tabs that didn't start the request
+      // (and have no accept/reject UI) must ignore it.
+      if (!claimRoom(roomId, type || "audio")) {
+        console.log("[GlobalTwoWay] ⏭️ Ignoring call:astrologer_accepted — not this tab's request", roomId);
+        return;
+      }
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
       setCallApprovalData({ roomId, sessionId, astrologerId, astrologerDetail, type, isEmergency });
     };
@@ -230,39 +255,55 @@ export const WaitingQueueProvider = ({ children }) => {
     const handleChatAstrologerAccepted = (data) => {
       console.log("[GlobalTwoWay] 📥 chat:astrologer_accepted", JSON.stringify(data));
       const { roomId, sessionId, astrologerId, astrologerDetail, type, isEmergency } = data;
+      if (!claimRoom(roomId, "chat")) {
+        console.log("[GlobalTwoWay] ⏭️ Ignoring chat:astrologer_accepted — not this tab's request", roomId);
+        return;
+      }
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
       setChatApprovalData({ roomId, sessionId, astrologerId, astrologerDetail, type: type || "chat", isEmergency });
     };
 
     const handleCallOnHold = (data) => {
       console.log("[GlobalTwoWay] ⏸️ call:on_hold", JSON.stringify(data));
+      // Ring expired / put on hold — stop the ring sound immediately.
+      stopIncomingSound();
       const { roomId } = data;
+      if (roomId) releaseRoom(roomId);
       if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
       if (roomId) updateStatusByRoomId(roomId, "on_hold");
     };
 
     const handleChatOnHold = (data) => {
       console.log("[GlobalTwoWay] ⏸️ chat:on_hold", JSON.stringify(data));
+      // Ring expired / put on hold — stop the ring sound immediately.
+      stopIncomingSound();
       const { roomId } = data;
+      if (roomId) releaseRoom(roomId);
       if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
       if (roomId) updateStatusByRoomId(roomId, "on_hold");
     };
 
     const handleCallUnavailable = (data) => {
+      stopIncomingSound();
       const { roomId } = data;
+      if (roomId) releaseRoom(roomId);
       if (roomId) removePendingConnection(roomId);
       if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
     };
 
     const handleChatUnavailable = (data) => {
+      stopIncomingSound();
       const { roomId } = data;
+      if (roomId) releaseRoom(roomId);
       if (roomId) removePendingConnection(roomId);
       if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
     };
 
     const handleCanceled = (data) => {
+      stopIncomingSound();
       const canceledRoomId = data?.roomId || data?.sessionData?.roomId;
       if (canceledRoomId) {
+        releaseRoom(canceledRoomId);
         removePendingConnection(canceledRoomId);
         if (callApprovalData?.roomId === canceledRoomId) setCallApprovalData(null);
         if (chatApprovalData?.roomId === canceledRoomId) setChatApprovalData(null);
@@ -271,9 +312,12 @@ export const WaitingQueueProvider = ({ children }) => {
 
     const handleRejected = (data) => {
       if (data?.switchRejected) return;
+      stopIncomingSound();
       const rejectedRoomId = data?.roomId || data?.sessionData?.roomId;
       const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
+      trackEvent("session_request_rejected", { astrologer_id: rejectedAstrologerId, channel: data?.type || "chat" });
       if (rejectedRoomId) {
+        releaseRoom(rejectedRoomId);
         removePendingConnection(rejectedRoomId);
         if (callApprovalData?.roomId === rejectedRoomId) setCallApprovalData(null);
         if (chatApprovalData?.roomId === rejectedRoomId) setChatApprovalData(null);
@@ -438,6 +482,9 @@ export const WaitingQueueProvider = ({ children }) => {
               astrologerId: astroId,
               remainingTime: billedMinutes || 0,
               isEmergency: session.isEmergency || false,
+              profileImgUrl: astro?.profileImgUrl || user?.astro?.profileImgUrl || null,
+              origin: session.isLive ? "live" : undefined,
+              liveChannel: session.liveRoomDetails?.channel || session.liveRoomDetails?.roomId || null,
             });
 
             voiceSocket.emit("call:reconnect", {
@@ -512,6 +559,13 @@ export const WaitingQueueProvider = ({ children }) => {
       // Show toast notification
       Toast.success("Chat ended.");
 
+      const endReason = data?.endReason || data?.sessionData?.sessionEndReason;
+      if (endReason === "low-balance" || endReason === "insufficient-balance") {
+        trackEvent("session_auto_ended_low_balance", { astrologer_id: data?.astrologerId, session_id: endedRoomId });
+      } else {
+        trackEvent("session_ended_completely", { astrologer_id: data?.astrologerId, session_id: endedRoomId });
+      }
+
       // Refresh wallet balance after chat ends
       window.dispatchEvent(new Event("walletBalanceUpdated"));
 
@@ -533,6 +587,7 @@ export const WaitingQueueProvider = ({ children }) => {
 
       // Clear approval data and remove from pending queue
       setChatApprovalData(null);
+      releaseRoom(roomId);
       removePendingConnection(roomId);
 
       // Build astrologer info from event payload
@@ -586,6 +641,7 @@ export const WaitingQueueProvider = ({ children }) => {
 
       // Clear approval data and remove from pending queue
       setCallApprovalData(null);
+      releaseRoom(roomId);
       removePendingConnection(roomId);
       resetCallFlow();
 

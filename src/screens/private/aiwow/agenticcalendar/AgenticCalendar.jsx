@@ -9,6 +9,7 @@ import { FiMapPin, FiCalendar, FiChevronLeft, FiChevronRight, FiChevronUp, FiChe
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import LocationSearch from '../../../../utils/location/locationSearchVedic';
+import useUserLocation from '../../../../utils/hooks/useUserLocation';
 
 const DEFAULT_OCCASIONS = [
   'Marriage',
@@ -27,6 +28,7 @@ const AgenticCalendar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({ required: false, showToast: false });
+  const userLocation = useUserLocation();
 
   // State from MuhuratSection navigation
   const navState = location.state || {};
@@ -76,6 +78,21 @@ const AgenticCalendar = () => {
       setLocationData(navState.location);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-fill location from detected user location (same source as Today's Muhurat)
+  useEffect(() => {
+    if (!userLocation.isDefault && userLocation.loaded && userLocation.locationName && userLocation.locationName !== "Your Location") {
+      // Only auto-fill if no location was provided via navigation state
+      if (!locationValue && !locationData) {
+        setLocationValue(userLocation.locationName);
+        setLocationData({
+          address: userLocation.locationName,
+          lat: userLocation.lat,
+          lng: userLocation.lon,
+        });
+      }
+    }
+  }, [userLocation.isDefault, userLocation.loaded, userLocation.locationName]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-submit when redirected from home with pre-selected occasions
   useEffect(() => {
@@ -424,7 +441,7 @@ const AgenticCalendar = () => {
 
           {/* Results Grid (Desktop) / Accordion (Mobile) */}
           {analysis?.optimalTimings?.length > 0 && (
-            <div className={`${styles.resultsWrap} ${analysis.optimalTimings.length === 2 ? styles.resultsTwo : ''}`} ref={resultsRef}>
+            <div className={`${styles.resultsWrap} ${[...new Set(analysis.optimalTimings.map(t => t.eventName))].length === 2 ? styles.resultsTwo : ''} ${[...new Set(analysis.optimalTimings.map(t => t.eventName))].length === 1 ? styles.resultsOne : ''}`} ref={resultsRef}>
               {(() => {
                 // Group timings by eventName
                 const sorted = [...analysis.optimalTimings].sort((a, b) => {

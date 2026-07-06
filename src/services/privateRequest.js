@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Toast } from "../component";
 import { getToken } from "../utils/utlis";
-import { navigateToLogin } from "../utils/navigationHelper";
+import { refreshTokenAndReload } from "../utils/tokenRefresh";
 import { attachSecureTransport } from "../utils/security/secureAxios";
 import { BACKEND_PROXY } from "../utils/apiConfig";
 
@@ -97,7 +97,7 @@ const responseErrorHandler = (error) => {
     switch (status) {
       case 401:
         if (!unAuthorizedCount) {
-          // Don't redirect guest users (no token means they're browsing without login)
+          // Don't refresh for guest users (no token means they're browsing without login)
           const role = localStorage.getItem("shubhtalk_role");
           const hasToken = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -106,13 +106,11 @@ const responseErrorHandler = (error) => {
           if (!hasToken) break;
 
           unAuthorizedCount++;
-          
-          // Get current path for redirect after login
-          const currentPath = window.location.pathname + window.location.search;
-          
-          // Use navigation helper (no page refresh)
-          navigateToLogin(currentPath);
-          
+
+          // Token expired/invalid — try to refresh it and reload the page.
+          // Falls back to login if the refresh fails (handled inside helper).
+          refreshTokenAndReload();
+
           setTimeout(() => {
             unAuthorizedCount = 0;
           }, 100);

@@ -1,8 +1,9 @@
 import { memo } from "react";
 import { BookOpen } from "lucide-react";
 import styles from "./NewAstrologerCard.module.scss";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AppIcons, getAstrologerDefaultImage } from "../../../../utils/appImages";
+import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 
 const NewAstrologerCard = memo(({ 
   astrologer, 
@@ -11,12 +12,15 @@ const NewAstrologerCard = memo(({
   className = "", 
   style = {} 
 }) => {
+  const navigate = useNavigate();
   const isOnline = astrologer?.isActive === true;
+  const { isLive, roomId: liveRoomId } = useAstrologerLiveStatus(astrologer?._id, astrologer?.astrologerLiveStatus);
   const activeTypes = astrologer?.isActiveType || [];
   const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;
   const callPrice = Number(astrologer?.price?.audioRate?.amount) || 0;
-  const chatEnabled = isOnline && (activeTypes.includes("all") || activeTypes.includes("chat")) && chatPrice > 0;
-  const callEnabled = isOnline && (activeTypes.includes("all") || activeTypes.includes("audio")) && callPrice > 0;
+  // When the astrologer is live streaming, chat and call are not available.
+  const chatEnabled = isOnline && !isLive && (activeTypes.includes("all") || activeTypes.includes("chat")) && chatPrice > 0;
+  const callEnabled = isOnline && !isLive && (activeTypes.includes("all") || activeTypes.includes("audio")) && callPrice > 0;
 
   const hasEmergency = astrologer?.isEmergencyAvailable && (
     astrologer?.emergencyPrice?.chatRate?.amount > 0 || 
@@ -34,11 +38,23 @@ const NewAstrologerCard = memo(({
       className={`${styles.astrologerCard} ${!isOnline ? styles.offlineCard : ''} ${className}`.trim()} 
       style={style}
     >
-      {/* Online/Offline badge */}
-      <div className={`${styles.statusBadge} ${isOnline ? styles.online : styles.offline}`}>
-        <span className={styles.statusDot} />
-        <span>{isOnline ? 'Online' : 'Offline'}</span>
-      </div>
+      {/* Live / Online / Offline badge */}
+      {isLive ? (
+        <button
+          type="button"
+          className={`${styles.statusBadge} ${styles.live}`}
+          onClick={() => navigate(`/live/${liveRoomId}`)}
+          aria-label="Astrologer is live, click to watch"
+        >
+          <span className={styles.liveDot} />
+          <span>Live</span>
+        </button>
+      ) : (
+        <div className={`${styles.statusBadge} ${isOnline ? styles.online : styles.offline}`}>
+          <span className={styles.statusDot} />
+          <span>{isOnline ? 'Online' : 'Offline'}</span>
+        </div>
+      )}
 
       <div className={styles.ratingBadge}>
             <span className={styles.star}>
@@ -102,17 +118,40 @@ const NewAstrologerCard = memo(({
         )}
       </Link>
       <div className={styles.actionButtons}>
-        {!isOnline && hasEmergency ? (
+        {isLive ? (
+          <div className={styles.buttonWrapper} style={{ width: '100%' }}>
+            <button
+              className={styles.liveBtn}
+              onClick={() => navigate(`/live/${liveRoomId}`)}
+            >
+              <svg width="16" height="16" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="4" fill="#f75801"/>
+                <path d="M10.5 21.5C8.5 19.5 7.5 17 7.5 14.5C7.5 12 8.5 9.5 10.5 7.5" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round"/>
+                <path d="M21.5 7.5C23.5 9.5 24.5 12 24.5 14.5C24.5 17 23.5 19.5 21.5 21.5" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round"/>
+                <path d="M13 19C11.5 17.5 11 16 11 14.5C11 13 11.5 11.5 13 10" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round"/>
+                <path d="M19 10C20.5 11.5 21 13 21 14.5C21 16 20.5 17.5 19 19" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round"/>
+              </svg>
+              Join Live
+            </button>
+            <p className={styles.priceText}>&nbsp;</p>
+          </div>
+        ) : !isOnline && hasEmergency ? (
           <div className={styles.emergencyButtonWrapper}>
             <button
               className={styles.emergencySingleBtn}
               onClick={() => onEmergencyClick?.(astrologer)}
             >
-              Emergency Session{emergencyMinRate > 0 ? ` - ₹${emergencyMinRate}/min` : ''}
+              Emergency
             </button>
+            {emergencyMinRate > 0 && (
+              <p className={styles.priceText}>
+                <span className={styles.priceAmount}>₹{emergencyMinRate}</span>/min
+              </p>
+            )}
           </div>
         ) : (
           <>
+            {(chatEnabled || !callEnabled) && (
             <div className={styles.buttonWrapper}>
               <button
                 className={styles.chatBtn}
@@ -122,17 +161,21 @@ const NewAstrologerCard = memo(({
                 <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
               </button>
               <p className={styles.priceText}>
-                {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
-                  <>
-                    <span className={styles.originalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{chatPrice}</span> min
-                  </>
-                ) : (
-                  <>
-                    <span className={styles.priceAmount}>₹{chatPrice}</span> min
-                  </>
-                )}
+                {chatPrice > 0 ? (
+                  astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
+                    <>
+                      <span className={styles.originalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{chatPrice}</span> min
+                    </>
+                  ) : (
+                    <>
+                      <span className={styles.priceAmount}>₹{chatPrice}</span> min
+                    </>
+                  )
+                ) : <>&nbsp;</>}
               </p>
             </div>
+            )}
+            {(callEnabled || !chatEnabled) && (
             <div className={styles.buttonWrapper}>
               <button
                 className={styles.callBtn}
@@ -142,17 +185,20 @@ const NewAstrologerCard = memo(({
                 <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
               </button>
               <p className={styles.priceText}>
-                {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
-                  <>
-                    <span className={styles.originalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{callPrice}</span> min
-                  </>
-                ) : (
-                  <>
-                    <span className={styles.priceAmount}>₹{callPrice}</span> min
-                  </>
-                )}
+                {callPrice > 0 ? (
+                  astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
+                    <>
+                      <span className={styles.originalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{callPrice}</span> min
+                    </>
+                  ) : (
+                    <>
+                      <span className={styles.priceAmount}>₹{callPrice}</span> min
+                    </>
+                  )
+                ) : <>&nbsp;</>}
               </p>
             </div>
+            )}
           </>
         )}
       </div>

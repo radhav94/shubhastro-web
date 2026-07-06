@@ -169,6 +169,15 @@
   }
 }
 
+.consultAgainDisabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+
+  &:hover {
+    color: #9ca3af;
+  }
+}
+
 .rateButton {
   background: transparent;
   border: none;

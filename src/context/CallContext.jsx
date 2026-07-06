@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useRef, useEffect, useCallback } from "react";
 import { voiceSocket, registerCallSession, clearCallSession } from "../services/voiceSocketServices";
+import { trackEvent } from "../utils/analytics";
 
 const CallContext = createContext();
 
@@ -415,6 +416,7 @@ export const CallProvider = ({ children }) => {
         // Upgrade: audio → video
         if (prevCall && prevCall.callType === "audio" && data.type === "video") {
           console.log("✅ Upgrading call from audio to video");
+          trackEvent("session_ladder_upgrade_accepted", { astrologer_id: prevCall.astrologerId, session_id: prevCall.roomId, from_channel: "audio", to_channel: "video" });
           const upgraded = {
             ...prevCall,
             callType: "video",
@@ -428,6 +430,7 @@ export const CallProvider = ({ children }) => {
         // Downgrade: video → audio
         if (prevCall && prevCall.callType === "video" && data.type === "audio") {
           console.log("✅ Downgrading call from video to audio");
+          trackEvent("session_ladder_downgrade", { astrologer_id: prevCall.astrologerId, session_id: prevCall.roomId, from_channel: "video", to_channel: "audio" });
           const downgraded = {
             ...prevCall,
             callType: "audio",

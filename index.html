@@ -3,28 +3,29 @@
 
 <head>
   <meta charset="UTF-8" />
-  <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" /> -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
-  <meta name="robots" content="index, follow"/>
-  <meta name="googlebot" content="index,follow" />
+  <meta name="robots" content="%VITE_ROBOTS_CONTENT%" />
+  <meta name="googlebot" content="%VITE_ROBOTS_CONTENT%" />
   <meta name="copyright" content="shubhastro.ai" />
   <meta name="google-site-verification" content="rul7_n9V8ZCcyyJBZ6TpxHZdhz2BWtKHpn0kSRmmtO0" />
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/images/mobile-shubh-astro-logo.svg" />
   <link rel="shortcut icon" href="/images/mobile-shubh-astro-logo.svg" />
-  <link rel="apple-touch-icon" href="/images/shubhastro-logo-banner.jpeg" />
+  <link rel="apple-touch-icon" href="/images/mobile-shubh-astro-logo.svg" />
 
-  <!-- Static fallback SEO tags (React Helmet overrides these per-page) -->
-  <title>ShubhAstro - AI Powered Astrology, Kundli & Horoscope</title>
-  <meta name="description" content="Connect with expert astrologers for personalized consultations. Get free Kundli, daily horoscope, tarot readings, numerology, and AI-powered astrology services." />
-
+  <!-- SEO meta tags injected dynamically -->
   <!-- Preconnect to critical third-party origins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://assets.shubhastro.ai" />
   <link rel="preconnect" href="https://www.googletagmanager.com" />
   <link rel="preconnect" href="https://translate.googleapis.com" />
   <link rel="dns-prefetch" href="https://www.gstatic.com" />
   <link rel="dns-prefetch" href="https://firebaseinstallations.googleapis.com" />
+
+  <!-- Single Google Fonts load (consolidates all weights used across the app) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" />
 
   <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/1778659648-1576013064.png" fetchpriority="low" />
   <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/1778659743-240854750.png" fetchpriority="high" />
@@ -57,6 +58,16 @@
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','dataLayer','GTM-T5DTGXHW');</script>
   <!-- End Google Tag Manager -->
+
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xeickgmcun");
+  </script>
+  <!-- End Microsoft Clarity -->
 </head>
 
 <body>

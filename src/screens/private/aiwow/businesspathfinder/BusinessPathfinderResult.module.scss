@@ -289,6 +289,38 @@
   margin-top: 2px;
 }
 
+// Stacked Result Card (icon + title on top, text below)
+.resultCardStacked {
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid #fff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+
+  .cardHeaderRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 0;
+    }
+  }
+
+  .cardBody {
+    p {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.7;
+      margin: 0;
+    }
+  }
+}
+
 .highlightText {
   font-size: 16px !important;
   font-weight: 700 !important;
@@ -302,9 +334,9 @@
 
 .remedyImg {
   width: 60px;
-  height: 60px;
-  object-fit: contain;
-  flex-shrink: 0;
+  height: 40px;
+  // object-fit: contain;
+  // flex-shrink: 0;
 }
 
 // Two Column Card

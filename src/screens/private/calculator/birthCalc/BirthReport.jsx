@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -127,6 +127,8 @@ const BirthReport = () => {
 
   const loading = planetLoading || birthLoading || navLoading;
 
+  if (!payload) return null;
+
   const svgBirthUrl = birthChart || null;
 
   const svgNavamsaUrl = navamsaChart
@@ -170,7 +172,7 @@ const BirthReport = () => {
             )}
           </div>
 
-          <button className={styles.calcAgainBtn} onClick={() => navigate(-1)}>
+          <button className={styles.calcAgainBtn} onClick={() => navigate("/birth-natal-chart-calculator")}>
             Calculate Again
           </button>
 
@@ -184,6 +186,17 @@ const BirthReport = () => {
 };
 
 export default BirthReport;
+
+export function decimalToDMS(decimal) {
+  if (decimal === null || decimal === undefined || isNaN(decimal)) {
+    return "-";
+  }
+
+  const degrees = Math.trunc(decimal);
+  const minutes = Math.trunc((decimal - degrees) * 60);
+
+  return `${degrees}° ${String(minutes).padStart(2, "0")}′`;
+}
 
 export function formatPlanetData(rawResponse) {
   if (!rawResponse) return [];
@@ -204,7 +217,7 @@ export function formatPlanetData(rawResponse) {
         nakshatra_lord: value.nakshatra_lord || "-",
         nakshatra_pada: value.nakshatra_pada || "-",
 
-        local_degree: value.local_degree?.toFixed(2) || "-",
+        local_degree: decimalToDMS(value.local_degree) || "-",
         global_degree: value.global_degree?.toFixed(2) || "-",
         progress_percentage: value.progress_in_percentage?.toFixed(2) || "-",
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +32,7 @@ const Friendship = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Friendship" });
 
     const newErrors = {};
     if (!formData.name1) newErrors.name1 = "Name is required";
@@ -73,7 +75,6 @@ const Friendship = () => {
         onReset={() => {
           setFormData(initialFormState);
           setErrors({});
-          dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
         }}
       />
     </div>

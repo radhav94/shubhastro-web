@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import { AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
+import { trackEvent } from "../../utils/analytics";
 import {
   IoMic,
   IoMicOff,
@@ -522,7 +523,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       setReviewData({
         astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
         fullName: currentCall?.callerName || callerName,
-        profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
+        profileImage: currentCall?.profileImgUrl || currentCall?.astrologerImage,
         roomId,
         gender: lastRequestedAstro?.gender || chatLastRequestedAstro?.gender || activeCall?.gender,
       });
@@ -690,7 +691,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         setReviewData({
           astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
           fullName: currentCall?.callerName || callerName,
-          profileImage: lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || astrologerImage,
+          profileImage: currentCall?.profileImgUrl || currentCall?.astrologerImage,
           roomId,
           gender: lastRequestedAstro?.gender || chatLastRequestedAstro?.gender || activeCall?.gender,
         });
@@ -753,6 +754,7 @@ const AgoraVoiceCalling = ({ callData }) => {
 
     const handleSwitchRejected = (data) => {
       console.log("🔄 call:switch_rejected in VoiceCall", data);
+      trackEvent("session_ladder_upgrade_rejected", { astrologer_id: activeCall?.astrologerId, session_id: socketRoomId, requested_channel: "video" });
       isUpgradingToVideo.current = false;
       setIsSwitching(false);
       setWaitingList(null);
@@ -883,6 +885,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       Toast.success("Switching to video call...");
       setIsSwitching(true);
 
+      trackEvent("session_ladder_upgrade_requested", { astrologer_id: activeCall.astrologerId, session_id: socketRoomId, from_channel: "audio", to_channel: "video" });
       voiceSocket.emit("call:initiate", {
         userId: activeCall.userId,
         astrologerId: activeCall.astrologerId,

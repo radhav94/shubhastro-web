@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FiChevronRight, FiCalendar, FiChevronLeft } from "react-icons/fi";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
+import useUserLocation from "../../../utils/hooks/useUserLocation";
 
 const OCCASIONS = [
   'Marriage', 'Job Interview', 'Business Launch', 'House Purchase',
@@ -13,6 +14,7 @@ const OCCASIONS = [
 const AgenticCalendarV2 = ({ styles }) => {
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const userLocation = useUserLocation();
 
   const [selectedOccasions, setSelectedOccasions] = useState([]);
   const [customOccasions, setCustomOccasions] = useState([]);
@@ -26,6 +28,21 @@ const AgenticCalendarV2 = ({ styles }) => {
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
   const [locationValue, setLocationValue] = useState('');
   const [locationData, setLocationData] = useState(null);
+
+  // Auto-fill location from detected user location (same source as Today's Muhurat)
+  useEffect(() => {
+    if (!userLocation.isDefault && userLocation.loaded && userLocation.locationName && userLocation.locationName !== "Your Location") {
+      // Only auto-fill if user hasn't manually entered a location
+      if (!locationValue) {
+        setLocationValue(userLocation.locationName);
+        setLocationData({
+          address: userLocation.locationName,
+          lat: userLocation.lat,
+          lng: userLocation.lon,
+        });
+      }
+    }
+  }, [userLocation.isDefault, userLocation.loaded, userLocation.locationName]);
 
   const allOccasions = [...OCCASIONS, ...customOccasions];
 

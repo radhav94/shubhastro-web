@@ -60,6 +60,7 @@ import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import emailIconSet from "../../../assets/images/icon_set (1).png";
 import { Toast } from "../../../component/index";
 import StickyReview from "../../private/home/components/call/StickyReview";
+import { trackEvent } from "../../../utils/analytics";
 import MallHistoryContent from "../../private/shubhAstroMallHistory/MallHistoryContent";
 import { isShubhMallEnabled } from "../../../utils/featureConfig";
 import {
@@ -74,6 +75,36 @@ import { useLogoutUserMutation } from "../../../redux/api/userSession/userSessio
 import { useSelector } from "react-redux";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
+import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
+
+// "Consult Again" button that disables in real time when the astrologer is live.
+// Uses useAstrologerLiveStatus so it reacts to the live socket event even when
+// the live status arrives after the initial render (the list data alone doesn't
+// update reactively for socket-driven live changes).
+const ConsultAgainButton = ({ astrologer, seedLiveStatus, onConsultAgain }) => {
+  const { isLive } = useAstrologerLiveStatus(astrologer?._id, seedLiveStatus);
+  return (
+    <button
+      className={styles.consultAgainButton}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (isLive) return;
+        onConsultAgain(astrologer);
+      }}
+      disabled={isLive}
+    >
+      Consult Again
+    </button>
+  );
+};
+
+// Pulsing red dot shown on an order card when the astrologer is currently live.
+// Renders nothing otherwise. Reactive via the live socket event.
+const LiveDot = ({ astrologer, seedLiveStatus }) => {
+  const { isLive } = useAstrologerLiveStatus(astrologer?._id, seedLiveStatus);
+  if (!isLive) return null;
+  return <span className={styles.orderLiveDot} title="Live now" aria-label="Astrologer is live" />;
+};
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -96,6 +127,12 @@ const Profile = () => {
     return navTab || "Profile";
   });
   const [orderHistoryTab, setOrderHistoryTab] = useState("call"); // Sub-tab for order history
+
+  // Track profile screen view (once on mount)
+  useEffect(() => {
+    trackEvent("profile_viewed", { user_id: localStorage.getItem("shubhtalk_customer_id") });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Scroll to tabs section when navigated with activeTab state
   useEffect(() => {
@@ -301,6 +338,16 @@ const Profile = () => {
     return `${mins} Min ${secs} Sec`;
   };
   // Process order history data - current page call orders
+  // Live status is only returned by the call-history endpoint (not chat/recordings),
+  // so build a per-astrologer live map from it and reuse it on the chat tab.
+  const liveAstrologerMap = Array.isArray(callHistoryData?.data?.callHistory)
+    ? callHistoryData.data.callHistory.reduce((acc, item) => {
+        const aId = item?.receiverId;
+        if (aId && item?.astrologerLiveStatus?.isLive === true) acc[aId] = true;
+        return acc;
+      }, {})
+    : {};
+
   const callOrders = Array.isArray(callHistoryData?.data?.callHistory)
     ? callHistoryData.data.callHistory
         .map((item, index) => ({
@@ -323,6 +370,8 @@ const Profile = () => {
           rate: 0,
           status: item?.status || "completed",
           roomId: item?.roomId,
+          isLive: item?.astrologerLiveStatus?.isLive === true,
+          liveStatus: item?.astrologerLiveStatus,
           year: item?.timestamp
             ? new Date(item.timestamp).getFullYear()
             : new Date().getFullYear(),
@@ -355,6 +404,12 @@ const Profile = () => {
           rate: room?.rate || 0,
           status: "completed",
           roomId: room.roomId,
+          isLive:
+            room?.astrologerLiveStatus?.isLive === true ||
+            liveAstrologerMap[room.astrologerId] === true,
+          liveStatus:
+            room?.astrologerLiveStatus ||
+            { isLive: liveAstrologerMap[room.astrologerId] === true },
           year: firstChat?.createdAt
             ? new Date(firstChat.createdAt).getFullYear()
             : room?.createdAt
@@ -656,6 +711,8 @@ const Profile = () => {
       // Clear localStorage
       localStorage.removeItem("waitingState");
       removePendingConnection(roomId);
+      trackEvent("session_request_accepted", { astrologer_id: astrologerId, channel: "chat" });
+      trackEvent("session_started_chat", { astrologer_id: astrologerId, session_id: roomId });
 
       const astro = data?.astrologer || activeAstroRef.current || {};
       const kundliId = selectedProfile?._id;
@@ -731,6 +788,7 @@ const Profile = () => {
       // Clear localStorage
       localStorage.removeItem("waitingState");
       removePendingConnection(roomId);
+      trackEvent("session_request_accepted", { astrologer_id: rest?.astrologer?._id, channel: type || "audio" });
 
       const astro = rest?.astrologer || activeAstroRef.current;
       const kundliId = selectedProfile?._id;
@@ -927,6 +985,7 @@ const Profile = () => {
   };
 
   const handleEditClick = (kundli) => {
+    trackEvent("profile_edit_started", { profile_id: kundli?._id });
     setProfileToEdit(kundli);
     setShowEditProfileModal(true);
   };
@@ -1159,6 +1218,7 @@ const Profile = () => {
       
       Toast.success("Profile added successfully");
       setShowAddProfileModal(false);
+      trackEvent("additional_profile_added", { profile_count: (savedKundlis?.length || 0) + 1 });
     } catch (err) {
       console.error("Add profile error:", err);
       setShowAddProfileModal(false);
@@ -1188,6 +1248,7 @@ const Profile = () => {
 
       setShowEditProfileModal(false);
       setProfileToEdit(null);
+      trackEvent("profile_updated", { profile_id: profileToEdit?._id });
     } catch (err) {
       console.error("Edit profile error:", err);
       throw err;
@@ -1210,6 +1271,7 @@ const Profile = () => {
       const result = await deleteKundli(profileToDelete).unwrap();
       console.log("Delete successful:", result);
       Toast.success("Profile deleted successfully");
+      trackEvent("profile_deleted", { deleted_profile_id: profileToDelete });
 
       setShowDeleteModal(false);
       setProfileToDelete(null);
@@ -1229,6 +1291,7 @@ const Profile = () => {
 
   const handleLogout = async () => {
     // Call logout API
+    trackEvent("logout_initiated", { user_id: localStorage.getItem("shubhtalk_customer_id") });
     try {
       await logoutUser({ deviceType: "web" }).unwrap();
       // Dispatch Redux logout action
@@ -1336,9 +1399,13 @@ const Profile = () => {
             <span className={styles.zodiacLabel}>
               {isLoadingAstro
                 ? "Loading..."
-                : isAstroError || !astroDetails?.sun_sign
-                  ? "-"
-                  : astroDetails.sun_sign}
+                : primaryProfile?.westernSign
+                  ? primaryProfile.westernSign
+                  : primaryProfile?.sunSign
+                    ? primaryProfile.sunSign
+                    : isAstroError || !astroDetails?.sun_sign
+                      ? "-"
+                      : astroDetails.sun_sign}
             </span>
             <span className={styles.zodiacValue}>Sun Sign</span>
           </div>
@@ -1661,9 +1728,14 @@ const Profile = () => {
                                       tab:
                                         order.type === "chat"
                                           ? "Chat"
-                                          : order.sessionType === "video"
-                                            ? "Video"
-                                            : "Call",
+                                          : "Call",
+                                      // NOTE: Previously routed video to separate "Video" tab
+                                      // tab:
+                                      //   order.type === "chat"
+                                      //     ? "Chat"
+                                      //     : order.sessionType === "video"
+                                      //       ? "Video"
+                                      //       : "Call",
                                     },
                                   },
                                 )
@@ -1686,18 +1758,16 @@ const Profile = () => {
                                       <img
                                         src={order.astrologer.image}
                                         alt={order.astrologer.name}
-                                        style={{
-                                          width: "100%",
-                                          height: "100%",
-                                          borderRadius: "50%",
-                                          objectFit: "cover",
-                                        }}
                                       />
                                     ) : (
                                       <span>
                                         {getInitials(order.astrologer.name)}
                                       </span>
                                     )}
+                                    <LiveDot
+                                      astrologer={order.astrologer}
+                                      seedLiveStatus={order.liveStatus}
+                                    />
                                   </div>
                                   <div className={styles.orderInfo}>
                                     <h5
@@ -1776,15 +1846,11 @@ const Profile = () => {
                                   Rate Consultation
                                 </button>
                                 <div className={styles.buttonSeparator}></div>
-                                <button
-                                  className={styles.consultAgainButton}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleConnectClick(order.astrologer);
-                                  }}
-                                >
-                                  Consult Again
-                                </button>
+                                <ConsultAgainButton
+                                  astrologer={order.astrologer}
+                                  seedLiveStatus={order.liveStatus}
+                                  onConsultAgain={handleConnectClick}
+                                />
                               </div>
                             </div>
                           ))}

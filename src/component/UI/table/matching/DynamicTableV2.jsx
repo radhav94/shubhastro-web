@@ -10,7 +10,7 @@ const DynamicTable = ({data}) => {
   return (
     <>
         {rows.map((item, index) => {
-          const cardText = `${item.name}. Score: ${item?.varna ?? 0} out of ${item?.full_score ?? 0}. Male: ${item?.boy_varna || ''}. Female: ${item?.girl_varna || ''}. ${item?.description || ''}`;
+          const cardText = `${item.name}. Score: ${item?.varna ?? 0} out of ${item?.full_score ?? 0}. Male: ${item?.boy_varna || ''}. Female: ${item?.girl_varna || ''}. Description: ${item?.description || ''}`;
           return (
           <div
           key={index}

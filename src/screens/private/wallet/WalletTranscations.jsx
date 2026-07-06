@@ -4,6 +4,7 @@ import { useGetTransactionsQuery } from "../../../services/appServices/transacti
 import { Link } from "react-router-dom";
 import { useWalletBalance } from "./useWalletBalance";
 import { FaSync } from "react-icons/fa";
+import { trackEvent } from "../../../utils/analytics";
 
 const PAYMENT = "payment";
 const WALLET = "wallet";
@@ -18,6 +19,13 @@ const WalletTranscations = () => {
     refreshWallet,
     isFetching: isFetchingWallet,
   } = useWalletBalance();
+
+  // Track wallet screen open + transaction history view (once on mount)
+  useEffect(() => {
+    trackEvent("wallet_screen_opened", {});
+    trackEvent("transaction_history_viewed", {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (activeTab === PAYMENT) {

@@ -5,6 +5,7 @@ import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { useCall } from "../../../context/CallContext";
 import { useChat } from "../../../context/ChatContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
+import { stopIncomingSound } from "../../../utils/incomingSound";
 import styles from "./StickyWaitingQueue.module.scss";
 
 /**
@@ -62,6 +63,7 @@ const StickyWaitingQueue = () => {
   const count = pendingConnections.length;
 
   const handleCancelAll = () => {
+    stopIncomingSound();
     cancelAll();
     setWaitingList(false);
     setCallWaitingList(false);
@@ -70,11 +72,13 @@ const StickyWaitingQueue = () => {
   };
 
   const handleCancelOne = (conn) => {
+    stopIncomingSound();
     cancelPendingConnection(conn.roomId, conn.type, conn.astrologer?._id);
   };
 
   const handleAccept = (conn) => {
     if (!conn.roomId) return;
+    stopIncomingSound();
     const eventName = conn.type === "chat" ? "chat:user_accept" : "call:user_accept";
     voiceSocket.emit(eventName, { roomId: conn.roomId });
     window.dispatchEvent(new CustomEvent("waitlist:accepted", {
@@ -130,6 +134,15 @@ const StickyWaitingQueue = () => {
 
   return (
     <div className={styles.container}>
+      {/* Toggle arrow on top of the modal (reflects open/close state) */}
+      <button
+        className={styles.toggleArrow}
+        aria-label={expanded ? "Collapse list" : "Expand list"}
+        onClick={() => setExpanded((e) => !e)}
+      >
+        {expanded ? <ChevronDown size={24} /> : <ChevronUp size={24} />}
+      </button>
+
       {/* Header pill */}
       <div className={styles.header} onClick={() => setExpanded((e) => !e)}>
         <span className={styles.headerText}>
@@ -143,10 +156,9 @@ const StickyWaitingQueue = () => {
         </button>
       </div>
 
-      {/* Expanded card list */}
+      {/* Card list */}
       {expanded && (
-        <>
-          <div className={styles.list} ref={listRef}>
+        <div className={styles.list} ref={listRef}>
             {pendingConnections.map((conn) => {
               const name = `${conn.astrologer?.firstName || conn.astrologer?.astrologerName || ""} ${conn.astrologer?.lastName || ""}`.trim() || "Astrologer";
               const status = conn.status || "waiting";
@@ -223,17 +235,6 @@ const StickyWaitingQueue = () => {
               );
             })}
           </div>
-
-          <button className={styles.viewToggle} onClick={() => setExpanded(false)}>
-            View Less <ChevronUp size={14} />
-          </button>
-        </>
-      )}
-
-      {!expanded && (
-        <button className={styles.viewToggle} onClick={() => setExpanded(true)}>
-          View More <ChevronDown size={14} />
-        </button>
       )}
     </div>
   );

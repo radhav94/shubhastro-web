@@ -16,6 +16,7 @@ import {
 } from "../../../redux/api/community/communityApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import Toast from "../../../component/toast";
+import { trackEvent } from "../../../utils/analytics";
 
 // Redirect component for non-joined community access
 const CommunityNotJoined = ({ setSearchParams }) => {
@@ -46,6 +47,11 @@ const Community = () => {
   const activeTab = searchParams.get("tab") || "feed";
   const communityId = searchParams.get("community");
   const editPostId = searchParams.get("postId");
+
+  // Track community feed view
+  useEffect(() => {
+    if (activeTab === "feed" && !communityId) trackEvent("community_feed_viewed", {});
+  }, [activeTab, communityId]);
   const mobileTabBarRef = useRef(null);
 
   // Auto-scroll mobile tab bar to show active tab

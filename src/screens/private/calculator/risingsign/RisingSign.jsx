@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import AstroBirthForm from "../forms/AstroBirthForm";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -50,6 +51,7 @@ const RisingSign = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Rising Sign" });
 
     const newErrors = {};
 
@@ -104,7 +106,6 @@ const RisingSign = () => {
         onReset={() => {
           setFormData(initialFormState);
           setErrors({});
-          dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
         }}
       />
     </div>

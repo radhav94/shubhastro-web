@@ -10,6 +10,7 @@ import {
   useGetChatHistoryQuery,
 } from "../../redux/api/chatApi";
 import toast from "../toast";
+import { trackEvent } from "../../utils/analytics";
 
 export const PANDIT_AI_ID = "6928390dc00d56953b586c04";
 const DEFAULT_LANGUAGE = {
@@ -121,6 +122,11 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   useEffect(() => {
     if (isOpen) scrollToBottom();
   }, [isOpen, scrollToBottom]);
+
+  // Track AI Pandit open
+  useEffect(() => {
+    if (isOpen) trackEvent("ai_pandit_opened", { mode: "text" });
+  }, [isOpen]);
 
   // Initiate chat session when bubble opens
   useEffect(() => {
@@ -252,6 +258,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         userId: userIdLocal,
         astrologerId: PANDIT_AI_ID,
       });
+      trackEvent("ai_pandit_session_ended", { mode: "text" });
     }
     setRoomId(null);
     panditAIRoomId = null;
@@ -357,6 +364,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       };
       setMessages((prev) => [...prev, msg]);
       setSending(false);
+      trackEvent("ai_pandit_response_received", { mode: "text" });
     };
 
     const handleError = (err) => {
@@ -455,6 +463,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           }).toUpperCase(),
         };
         setMessages((prev) => [...prev, userMsg]);
+        trackEvent("ai_pandit_question_asked", { mode: "text", question_length: trimmedText.length });
       }
 
       if (voiceSocket.connected) {

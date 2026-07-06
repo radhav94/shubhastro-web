@@ -684,6 +684,7 @@
     text-align: center;
     white-space: pre-line;
     line-height: 1.4;
+    height: 36px;
     @media (width <= 1024px) {
       font-size: 0.75rem;
     }
@@ -2211,7 +2212,7 @@
 .calChipActive {
   height: 36px;
   padding: 0 6px 0 16px;
-  background: #f75801;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
   border: none;
   border-radius: 999px;
   font-size: 14px;
@@ -2323,7 +2324,7 @@
 .calDateActive {
   height: 36px;
   padding: 0 10px;
-  background: #f75801;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
   border: none;
   border-radius: 999px;
   font-size: 14px;
@@ -2839,6 +2840,7 @@
     height: 110px;
     border-radius: 50%;
     object-fit: cover;
+    object-position: top;
     border: 2px solid #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     @media (width <= 767px) {
@@ -3022,6 +3024,13 @@
 
   &:hover {
     transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    &:hover { transform: none; }
   }
 }
 
@@ -4497,6 +4506,59 @@
 /* ═══ HomeV2 — Astrologer section crystal glass ═══ */
 .astrologerSection {
   background: transparent !important;
+}
+
+/* Slider buttons straddling the astrologer card's start/end edges */
+.astrologerSliderWrapper {
+  position: relative;
+}
+
+.gridSliderBtn {
+  position: absolute;
+  top: 58%;
+  transform: translateY(-50%);
+  z-index: 6;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  color: #d43400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+  transition: background 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background: #fff4ec;
+  }
+
+  &:active {
+    transform: translateY(-50%) scale(0.94);
+  }
+
+  @media (width <= 767px) {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.gridSliderBtnLeft {
+  left: -19px;
+
+  @media (width <= 767px) {
+    left: -14px;
+  }
+}
+
+.gridSliderBtnRight {
+  right: -19px;
+
+  @media (width <= 767px) {
+    right: -14px;
+  }
 }
 
 :global(body.home-v2-page) {

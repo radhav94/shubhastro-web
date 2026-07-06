@@ -27,7 +27,7 @@ const serviceLinks = [
   { href: "/chat-to-astrologer", text: "Chat with Astrologer" },
   { href: "/talk-to-astrologer", text: "Talk to Astrologer" },
   { href: "/numerology", text: "Numerology" },
-  { href: "/blog", text: "Blogs" },
+  { href: "/blog", text: "Blog" },
   { href: "/important-links", text: "Important Links" },
 ];
 
@@ -97,7 +97,7 @@ const Footer = () => {
 
   const storeButtons = (
     <div className={styles.v2_storeButtons}>
-      <a href="https://play.google.com/store/apps/details?id=com.shubhtalk" target="_blank" rel="noopener noreferrer" className={styles.v2_storeBtn}>
+      <a href="https://play.google.com/store/apps/details?id=com.pittieglobal.shubhastro&pcampaignid=web_share" target="_blank" rel="noopener noreferrer" className={styles.v2_storeBtn}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M3 20.5V3.5C3 2.91 3.34 2.39 3.84 2.15L13.69 12L3.84 21.85C3.34 21.6 3 21.09 3 20.5Z" fill="#4CAF50"/>
           <path d="M16.81 15.12L6.05 21.34L14.54 12.85L16.81 15.12Z" fill="#F44336"/>
@@ -131,7 +131,7 @@ const Footer = () => {
         <div className={`${styles.v2_column} ${styles.v2_logoCol}`}>
           <img src={ShubhAstroLogo} alt="ShubhAstro Logo" width="150" height="32" className={styles.v2_logo} />
           <p className={styles.v2_tagline}>
-           ShubhAstro is an AI-powered astrology platform offering personalized insights for love, marriage, career, finance, and relationships through Vedic Astrology, Kundli, Numerology, Palmistry, Face Reading, Signature Analysis, and Vastu, helping users make informed life decisions with confidence.</p>
+           ShubhAstro.ai offers AI-powered astrology guidance for love, marriage, career, finance, and life decisions through Kundli, Numerology, Palmistry, Face Reading, Signature Analysis and Vastu.</p>
           <p className={styles.v2_followLabel}>Follow Us</p>
           <div className={styles.v2_socialIcons}>
             <a href="https://www.facebook.com/profile.php?id=61589408862522" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
@@ -142,14 +142,16 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className={styles.v2_column}>
-          <h3 className={styles.v2_heading}>Horoscope</h3>
-          {renderLinks(horoscopeLinks)}
-        </div>
+        <div>
+          <div className={styles.v2_column}>
+            <h3 className={styles.v2_heading}>Horoscope</h3>
+            {renderLinks(horoscopeLinks)}
+          </div>
 
-        <div className={styles.v2_column}>
-          <h3 className={styles.v2_heading}>Explore Services</h3>
-          {renderLinks(serviceLinks)}
+          <div className={styles.v2_column} style={{marginTop:"16px"}}>
+            <h3 className={styles.v2_heading}>Explore Services</h3>
+            {renderLinks(serviceLinks)}
+          </div>
         </div>
 
         {/* {isShubhMallEnabled() && (
@@ -172,7 +174,7 @@ const Footer = () => {
           <a href="tel:+918655682877" className={styles.v2_contactText}>+91 86556 82877</a>
           <h4 className={`${styles.v2_phoneLink}`}>Registered Company Address</h4>
           <p className={styles.v2_contactText}>
-            Raheja District I, B3 & B4, RICC, Plot Gen-2/1/B, D Block, T.T.C. Industrial Area, Juinagar, Navi Mumbai, Maharashtra 400705
+            Vaibhav Chambers, 9th Rd, opposite Income Tax Office, Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400051
           </p>
           <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
           <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
@@ -189,7 +191,7 @@ const Footer = () => {
       <div className={styles.v2_mobileFooter}>
         <div className={styles.v2_mobileLogo}>
           <img src={ShubhAstroLogo} alt="ShubhAstro Logo" width="150" height="32" className={styles.v2_logo} />
-          <p className={styles.v2_tagline}>ShubhAstro is an AI-powered astrology platform offering personalized insights for love, marriage, career, finance, and relationships through Vedic Astrology, Kundli, Numerology, Palmistry, Face Reading, Signature Analysis, and Vastu, helping users make informed life decisions with confidence.</p>
+          <p className={styles.v2_tagline}>ShubhAstro.ai offers AI-powered astrology guidance for love, marriage, career, finance, and life decisions through Kundli, Numerology, Palmistry, Face Reading, Signature Analysis and Vastu.</p>
           <p className={styles.v2_followLabel}>Follow Us</p>
           <div className={styles.v2_socialIcons}>
             <a href="https://www.facebook.com/profile.php?id=61589408862522" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><IoLogoFacebook /></a>
@@ -211,7 +213,7 @@ const Footer = () => {
           <a href="tel:+918655682877" className={styles.v2_contactText}>+91 86556 82877</a>
           <h4 className={`${styles.v2_phoneLink} `}>Registered Company Address</h4>
           <p className={styles.v2_contactText}>
-            Raheja District I, B3 & B4, RICC, Plot Gen-2/1/B, D Block, T.T.C. Industrial Area, Juinagar, Navi Mumbai, Maharashtra 400705
+            Vaibhav Chambers, 9th Rd, opposite Income Tax Office, Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400051
           </p>
           <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
           <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>

@@ -12,9 +12,9 @@ const AtmakarakaReport = () => {
 
   const stored = useSelector(selectCalculatorData("atmakaraka-and-darakaraka"));
 
-  const { data, isLoading } = useGetAtmakarakaQuery(stored);
+  const { data, isLoading } = useGetAtmakarakaQuery(stored, { skip: !stored });
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
+  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
   if (!data?.response) return <div>No data found</div>;
 
   // 🔥 Convert response object to array
@@ -59,7 +59,7 @@ const AtmakarakaReport = () => {
       </div>
 
       {/* ACTIONS */}
-      <button className={styles.calculateBtn} onClick={() => navigate(-1)}>
+      <button className={styles.calculateBtn} onClick={() => navigate("/atmakaraka-and-darakaraka-calculator")}>
         Calculate Again
       </button>
 

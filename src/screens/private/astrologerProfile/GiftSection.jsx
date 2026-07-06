@@ -8,6 +8,7 @@ import {
 import toast from "../../../component/toast";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
+import { trackEvent } from "../../../utils/analytics";
 
 const GiftSection = ({ astrologer }) => {
   const { data, isLoading } = useGetAllGiftsQuery();
@@ -18,6 +19,14 @@ const GiftSection = ({ astrologer }) => {
   const gifts = (data?.data || []).filter(g => g.status === true);
   const { balance, refreshWallet } = useWalletBalance();
 
+  // Track gift catalog view once gifts are loaded
+  useEffect(() => {
+    if (gifts.length > 0) {
+      trackEvent("gift_catalog_viewed", { astrologer_id: astrologer?._id });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gifts.length]);
+
   const handleSend = async () => {
     if (!selected || !astrologer) return;
 
@@ -26,6 +35,8 @@ const GiftSection = ({ astrologer }) => {
         giftId: selected?._id,
         astrologerId: astrologer?._id,
       }).unwrap();
+      trackEvent("gift_sent", { astrologer_id: astrologer?._id, gift_id: selected?._id, gift_price: selected?.price });
+      trackEvent("gift_payment_completed", { astrologer_id: astrologer?._id, gift_id: selected?._id, amount: selected?.price });
       setSelected(null);
       refreshWallet();
       toast.success("Gift sent successfully");

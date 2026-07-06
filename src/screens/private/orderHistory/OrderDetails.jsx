@@ -11,6 +11,7 @@ import { Toast } from "../../../component";
 import { useGetChatHistoryQuery, useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 import { useGetCallRecordingsQuery } from "../../../redux/api/callHistory/callHistory";
+import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -26,7 +27,9 @@ const OrderDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const userId = localStorage.getItem("shubhtalk_customer_id");
-  const [activeTab, setActiveTab] = useState(location.state?.tab || "Call");
+  const [activeTab, setActiveTab] = useState(
+    location.state?.tab === "Video" ? "Call" : (location.state?.tab || "Call")
+  );
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
@@ -49,6 +52,12 @@ const OrderDetails = () => {
     { id: astrologerId }
   );
 
+  // Live status for this astrologer (real-time). Used to disable "Consult Again".
+  const { isLive: isAstrologerLive } = useAstrologerLiveStatus(
+    astrologerId,
+    astrologerData?.data?.astrologerLiveStatus
+  );
+
   const { data: chatData, isLoading: isLoadingMessages, error, isFetching } = useGetChatHistoryQuery(
     { userId: astrologerId, page },
     { refetchOnMountOrArgChange: true }
@@ -68,20 +77,25 @@ const OrderDetails = () => {
     return () => window.removeEventListener("reviewSubmitted", handleReviewSubmitted);
   }, [refetchRecordings]);
 
-  // Split recordings into call (audio) and video
-  const { callRecordings, videoRecordings } = React.useMemo(() => {
-    const list = recordingsData?.data || [];
-    const calls = [];
-    const videos = [];
-    list.forEach((rec) => {
-      if (rec.sessionType === "video") {
-        videos.push(rec);
-      } else {
-        calls.push(rec);
-      }
-    });
-    return { callRecordings: calls, videoRecordings: videos };
+  // All recordings (audio + video) shown together in the Call tab
+  const allRecordings = React.useMemo(() => {
+    return recordingsData?.data || [];
   }, [recordingsData]);
+
+  // NOTE: Previously split into separate audio/video lists. Kept for reference.
+  // const { callRecordings, videoRecordings } = React.useMemo(() => {
+  //   const list = recordingsData?.data || [];
+  //   const calls = [];
+  //   const videos = [];
+  //   list.forEach((rec) => {
+  //     if (rec.sessionType === "video") {
+  //       videos.push(rec);
+  //     } else {
+  //       calls.push(rec);
+  //     }
+  //   });
+  //   return { callRecordings: calls, videoRecordings: videos };
+  // }, [recordingsData]);
 
   // Reset pagination when astrologerId changes
   React.useEffect(() => {
@@ -374,7 +388,7 @@ const OrderDetails = () => {
         if (isLoadingRecordings) {
           return <PrimaryLoader />;
         }
-        if (callRecordings.length === 0) {
+        if (allRecordings.length === 0) {
           return (
             <div className={styles.emptyState}>
               <p>No call recordings found</p>
@@ -383,7 +397,7 @@ const OrderDetails = () => {
         }
         return (
           <div className={styles.recordingsList}>
-            {callRecordings.map((rec) => (
+            {allRecordings.map((rec) => (
               <OrderInfoCard
                 key={rec.sessionId}
                 orderId={rec.orderId || rec.sessionId}
@@ -392,11 +406,14 @@ const OrderDetails = () => {
                 duration={rec.duration}
                 amount={rec.amount || 0}
                 recordingUrl={rec.recordingUrl}
-                type="audio"
+                type={rec.sessionType === "video" ? "video" : "audio"}
+                astrologerName={astrologerInfo.name}
+                astrologerImage={astrologerInfo.image}
                 initialRating={rec.rating ?? null}
                 roomId={rec.roomId || rec.sessionId}
                 onRateConsultation={handleRateConsultation}
                 onConsultAgain={handleConsultAgain}
+                isLive={isAstrologerLive}
               />
             ))}
           </div>
@@ -413,40 +430,42 @@ const OrderDetails = () => {
             isLoading={isFetching}
           />
         );
-      case "Video":
-        if (isLoadingRecordings) {
-          return <PrimaryLoader />;
-        }
-        if (videoRecordings.length === 0) {
-          return (
-            <div className={styles.emptyState}>
-              <p>No video consultations found</p>
-            </div>
-          );
-        }
-        return (
-          <div className={styles.recordingsList}>
-            {videoRecordings.map((rec) => (
-              <OrderInfoCard
-                key={rec.sessionId}
-                date={formatRecordingDate(rec.sessionDate)}
-                time={formatRecordingTime(rec.sessionDate)}
-                duration={rec.duration}
-                amount={rec.amount || 0}
-                recordingUrl={rec.recordingUrl}
-                type="video"
-                astrologerName={astrologerInfo.name}
-                astrologerImage={astrologerInfo.image}
-                initialRating={rec.rating ?? null}
-                roomId={rec.roomId || rec.sessionId}
-                onRateConsultation={handleRateConsultation}
-                onConsultAgain={handleConsultAgain}
-              />
-            ))}
-          </div>
-        );
       case "Remedies":
         return <RemediesTab astrologerId={astrologerId} />;
+      // NOTE: Video tab removed — video sessions now render inside "Call" tab.
+      // case "Video":
+      //   if (isLoadingRecordings) {
+      //     return <PrimaryLoader />;
+      //   }
+      //   if (videoRecordings.length === 0) {
+      //     return (
+      //       <div className={styles.emptyState}>
+      //         <p>No video consultations found</p>
+      //       </div>
+      //     );
+      //   }
+      //   return (
+      //     <div className={styles.recordingsList}>
+      //       {videoRecordings.map((rec) => (
+      //         <OrderInfoCard
+      //           key={rec.sessionId}
+      //           date={formatRecordingDate(rec.sessionDate)}
+      //           time={formatRecordingTime(rec.sessionDate)}
+      //           duration={rec.duration}
+      //           amount={rec.amount || 0}
+      //           recordingUrl={rec.recordingUrl}
+      //           type="video"
+      //           astrologerName={astrologerInfo.name}
+      //           astrologerImage={astrologerInfo.image}
+      //           initialRating={rec.rating ?? null}
+      //           roomId={rec.roomId || rec.sessionId}
+      //           onRateConsultation={handleRateConsultation}
+      //           onConsultAgain={handleConsultAgain}
+      //           isLive={isAstrologerLive}
+      //         />
+      //       ))}
+      //     </div>
+      //   );
       default:
         return null;
     }

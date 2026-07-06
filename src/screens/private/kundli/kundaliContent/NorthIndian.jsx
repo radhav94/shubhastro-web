@@ -184,9 +184,8 @@ export function decimalToDMS(decimal) {
     return "-";
   }
 
-  const degrees = Math.floor(decimal);
-  const minutesFloat = (decimal - degrees) * 100;
-  const minutes = Math.round(minutesFloat);
+  const degrees = Math.trunc(decimal);
+  const minutes = Math.trunc((decimal - degrees) * 60);
 
-  return `${degrees}° ${minutes}′`;
+  return `${degrees}° ${String(minutes).padStart(2, "0")}′`;
 }

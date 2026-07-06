@@ -1,80 +1,89 @@
 // socketService.js
-import { io } from "socket.io-client";
-import { SOCKET_URL, SOCKET_PATH } from "../utils/apiConfig";
+// Thin wrapper around voiceSocket — no separate socket connection.
+// All operations go through the shared voiceSocket instance.
+import { voiceSocket } from "./voiceSocketServices";
 
 class SocketService {
-  socket = null;
-  _lastConnectErrorAt = 0;
+  _hasShownConnectError = false;
 
+  /**
+   * connect() is a no-op for socket creation. voiceSocket is already
+   * connected by ChatContext/CallContext. Fires onConnected when ready.
+   * Returns a cleanup function to remove listeners on unmount.
+   */
   connect({ onConnected, onDisconnected, onError, onWarn }) {
-    this.socket = io(SOCKET_URL, {
-      transports: ["websocket"],
-      autoConnect: true,
-      path: SOCKET_PATH,
-    });
+    if (window.self !== window.top) return () => {};
 
-    this.socket.on("connect", () => {
-      this._lastConnectErrorAt = 0;
+    if (voiceSocket.connected) {
+      this._hasShownConnectError = false;
       onConnected?.();
-    });
+      if (onDisconnected) voiceSocket.on("disconnect", onDisconnected);
+      return () => {
+        if (onDisconnected) voiceSocket.off("disconnect", onDisconnected);
+      };
+    }
 
-    this.socket.on("disconnect", (reason) => {
-      onDisconnected?.(reason);
-    });
+    const handleConnect = () => {
+      this._hasShownConnectError = false;
+      onConnected?.();
+    };
 
-    this.socket.on("connect_error", () => {
-      const now = Date.now();
-      if (now - this._lastConnectErrorAt > 15000) {
-        this._lastConnectErrorAt = now;
-        onError?.("Unable to connect to server");
-      }
-    });
+    const handleConnectError = () => {
+      // Silently handle — voiceSocket manages reconnection
+      console.warn("[socketService] connect_error — server may be restarting");
+    };
 
-    this.socket.on("error", (err) => {
-      onError?.(err.message || "Unknown error occurred");
-    });
-    this.socket.on("warning", (msg) => {
-      onWarn?.(msg.message || "Warning");
-    });
+    const handleError = (err) => {
+      onError?.(err?.message || "Unknown error occurred");
+    };
+
+    const handleWarning = (msg) => {
+      onWarn?.(msg?.message || "Warning");
+    };
+
+    voiceSocket.on("connect", handleConnect);
+    voiceSocket.on("connect_error", handleConnectError);
+    voiceSocket.on("error", handleError);
+    voiceSocket.on("warning", handleWarning);
+    if (onDisconnected) voiceSocket.on("disconnect", onDisconnected);
+
+    return () => {
+      voiceSocket.off("connect", handleConnect);
+      voiceSocket.off("connect_error", handleConnectError);
+      voiceSocket.off("error", handleError);
+      voiceSocket.off("warning", handleWarning);
+      if (onDisconnected) voiceSocket.off("disconnect", onDisconnected);
+    };
   }
 
   disconnect() {
-    if (this.socket) {
-      this.socket.disconnect();
-    }
+    // No-op — voiceSocket lifecycle is managed by contexts
+    this._hasShownConnectError = false;
   }
 
-  joinRoom({ roomId, userId, astrologerId }) {
-    this.socket.emit(
-      "joinRoom",
-      { roomId, userId, astrologerId },
-      (response) => {
-        if (response?.error) {
-          console.error("JOIN FAILED:", response.error);
-        } else {
-          console.log("ROOM JOINED SUCCESSFULLY");
-        }
-      }
-    );
+  get socket() {
+    return voiceSocket;
+  }
+
+  isConnected() {
+    return voiceSocket.connected;
   }
 
   // USER SEND
   sendMessage({ roomId, userId, astrologerId, message, kundliId, type = "message" }) {
     try {
-      if (!this.socket?.connected)
+      if (!voiceSocket.connected)
         throw new Error("Socket not connected, try again.");
 
-      const payload = {
+      voiceSocket.emit("chat:message", {
         sender: "user",
         kundliId,
         roomId,
         userId,
         astrologerId,
         message,
-        type
-      };
-
-      this.socket.emit("chat:message", payload);
+        type,
+      });
 
       return { success: true };
     } catch (error) {
@@ -85,10 +94,10 @@ class SocketService {
   // ASTRO SEND
   astrologerReplied({ roomId, userId, astrologerId, message }) {
     try {
-      if (!this.socket?.connected)
+      if (!voiceSocket.connected)
         throw new Error("Socket not connected, try again.");
 
-      this.socket.emit("astrologer_sent_message", {
+      voiceSocket.emit("astrologer_sent_message", {
         sender: astrologerId,
         roomId,
         userId,
@@ -102,24 +111,11 @@ class SocketService {
     }
   }
 
-  // ⭐ TYPING ACTIVITY EVENT
+  // TYPING ACTIVITY
   sendActivity({ roomId, activity, sender }) {
-    if (this.socket?.connected) {
-      this.socket.emit("activity:update", { roomId, activity, sender });
+    if (voiceSocket.connected) {
+      voiceSocket.emit("activity:update", { roomId, activity, sender });
     }
-  }
-
-  // ⭐ LISTEN EVENTS (MESSAGE)
-  listenEvents(callbacks) {
-    const { onMessage } = callbacks;
-
-    this.socket.on("message:recieved", (data) => {
-      onMessage?.({
-        sender: data.sender,
-        message: data.message || data.response,
-        dateTime: data.createdAt || new Date().toISOString(),
-      });
-    });
   }
 }
 

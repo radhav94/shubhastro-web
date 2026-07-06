@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 .explorePage {
   // min-height: 100vh;
@@ -1076,6 +1075,17 @@
   font-size: 20px;
   font-weight: 600;
   color: #666;
+}
+
+.filledCircle,.outlineCircle{
+  width: 10px;
+  height: 10px;
+  border-radius: 20px;
+  border: 1px solid #F75801;
+}
+.filledCircle{
+  border: none;
+  background-color: #F75801;
 }
 
 .profileInfo {

@@ -11,9 +11,9 @@ import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard"
 const DestinyReport = () => {
   const navigate = useNavigate();
   const stored = useSelector(selectCalculatorData("destiny_calc"));
-  const { data, isLoading } = useGetNumerologyReportQuery(stored);
+  const { data, isLoading } = useGetNumerologyReportQuery(stored, { skip: !stored });
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
+  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
   if (!data?.response?.destiny) return <div>No data found</div>;
 
   const destiny = data.response.destiny;

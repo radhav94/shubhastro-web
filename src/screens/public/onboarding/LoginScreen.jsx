@@ -9,6 +9,7 @@ import { loginWithPhone } from "../../../services/appServices/authService";
 import { AppImages } from "../../../utils/appImages";
 import LanguageSelector from "../../../component/LanguageSelector";
 import BackButton from "../../../component/UI/BackButton/BackButton";
+import { trackEvent } from "../../../utils/analytics";
 
 const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const handleGetOTP = async () => {
     if (phoneNumber.length >= 10) {
       setLoading(true);
+      trackEvent("mobile_number_entered", { mobile_number: phoneNumber, country_code: "91" });
+      trackEvent("otp_requested", { mobile_number: phoneNumber });
       try {
         const payload = {
           phoneNumber: `91${phoneNumber}`,
@@ -28,6 +31,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
         const response = await loginWithPhone(payload);
 
         if (response.data.success && response.data.statusCode === 200) {
+          trackEvent("otp_sent", { mobile_number: phoneNumber, delivery_status: "success" });
           toast.success(response.data.message || "OTP sent successfully");
           updateFormData({ phoneNumber });
           onNext(); // Go to OTP screen
@@ -79,7 +83,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
       
 
       {/* Language Translator - top right corner */}
-      <LanguageSelector />
+      {/* <LanguageSelector /> */}
 
       <div className={styles.loginContent}>
         <h1 className={styles.loginTitle}>Begin your journey</h1>

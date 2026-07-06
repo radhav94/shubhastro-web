@@ -18,6 +18,7 @@ import {
 } from "../../../redux/api/astrologer/astrologerApi";
 import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
+import { trackEvent } from "../../../utils/analytics";
 import ProfileModals from "../kundli/components/ProfileModals";
 import { useProfileManager } from "../kundli/hooks/useProfileManager";
 import { ProfileManager } from "../../../component/UI/Profile";
@@ -25,6 +26,7 @@ import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { PATH } from "../../../utils/routes/Paths";
 import { getToken } from "../../../utils/token";
 import { voiceSocket } from "../../../services/voiceSocketServices";
+import { claimRoom } from "../../../utils/tabSession";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { useCall } from "../../../context/CallContext";
 import useRecommendTrigger from "../../../utils/hooks/useRecommendTrigger";
@@ -331,12 +333,39 @@ const TalkToAstrologer = () => {
     }
   }, [astrodata?.data?.topTenAstrologer]);
 
+  // Update local astrologer state when real-time status event fires
+  useEffect(() => {
+    const handleStatusUpdate = (e) => {
+      const { astrologerId, isActive, isActiveType, astrologer } = e.detail;
+
+      setTopTenAstrologers((prev) =>
+        prev.map((a) =>
+          a._id === astrologerId
+            ? { ...a, isActive, isActiveType: isActiveType || [], ...(astrologer?.price && { price: astrologer.price }) }
+            : a
+        )
+      );
+
+      setAllAstrologers((prev) =>
+        prev.map((a) =>
+          a._id === astrologerId
+            ? { ...a, isActive, isActiveType: isActiveType || [], ...(astrologer?.price && { price: astrologer.price }) }
+            : a
+        )
+      );
+    };
+
+    window.addEventListener("astrologer:status", handleStatusUpdate);
+    return () => window.removeEventListener("astrologer:status", handleStatusUpdate);
+  }, []);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     setPage(1);
     setAllAstrologers([]);
     setHasMore(true);
     setIsFiltered(false);
+    trackEvent("astrologer_list_viewed", { filter_applied: false });
   }, []);
 
   // MERGE API DATA - only for normal (non-filtered) mode
@@ -430,6 +459,7 @@ const TalkToAstrologer = () => {
       // Reset to normal pagination mode
       resetFilters();
     } else {
+      trackEvent("astrologer_filter_applied", { filter_type: "specialization", filter_value: category });
       setSpecialty(category);
       setIsFiltered(true);
       setPage(1);
@@ -716,6 +746,10 @@ const TalkToAstrologer = () => {
       console.log("[TwoWayAccept] 📥 call:astrologer_accepted", JSON.stringify(data));
       const { roomId, sessionId, astrologerId, astrologerDetail, type, isEmergency } = data;
 
+      // Only react in the tab that initiated this request (event is broadcast to
+      // all of the user's open tabs).
+      if (!claimRoom(roomId, type || "audio")) return;
+
       // Update queue status
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
 
@@ -733,6 +767,9 @@ const TalkToAstrologer = () => {
     const handleChatAstrologerAccepted = (data) => {
       console.log("[TwoWayAccept] 📥 chat:astrologer_accepted", JSON.stringify(data));
       const { roomId, sessionId, astrologerId, astrologerDetail, type, isEmergency } = data;
+
+      // Only react in the tab that initiated this request.
+      if (!claimRoom(roomId, "chat")) return;
 
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
 

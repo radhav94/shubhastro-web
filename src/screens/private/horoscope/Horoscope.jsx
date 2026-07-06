@@ -1,6 +1,8 @@
-import { ChevronLeft, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Share2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { trackEvent } from '../../../utils/analytics';
 import { 
   useFetchDailyQuery, 
   useFetchTomorrowQuery,
@@ -26,6 +28,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useGetAstroDetailsQuery } from '../../../redux/api/kundli/kundliApi';
 import { buildVedicParam } from '../../../utils/VedicParams.js/vedicParams';
 import { setSelectedKundli } from '../../../redux/kundli/kundliSlice';
+import { getJSONCookie, GUEST_KUNDLI_COOKIE } from '../../../utils/helper/cookies';
 const overViewImg = "https://assets.shubhastro.ai/images/horoscope/overview.png";
 const financeImg = "https://assets.shubhastro.ai/images/horoscope/finances.png";
 const scoreImg = "https://assets.shubhastro.ai/images/horoscope/total-score.png";
@@ -125,10 +128,18 @@ const HoroscopeNew = () => {
   const kundliProfiles = kundliProfilesData?.data || [];
 
   // Determine the active profile: header-selected > Self > first profile.
-  // Guests (not logged in) must never use a Kundli profile here — even if one
-  // was created/stored in redux — so they always get the "Select Zodiac" flow.
+  // For guests (not logged in): if a guest Kundli profile exists (selected in
+  // redux or stored in the cookie), use it; otherwise fall back to the
+  // "Select Zodiac" flow.
+  const guestProfile = useMemo(() => {
+    if (isLoggedIn) return null;
+    if (headerSelectedKundli?._id || headerSelectedKundli?.name) return headerSelectedKundli;
+    const stored = getJSONCookie(GUEST_KUNDLI_COOKIE, []);
+    return Array.isArray(stored) && stored.length > 0 ? stored[0] : null;
+  }, [isLoggedIn, headerSelectedKundli]);
+
   const activeProfile = !isLoggedIn
-    ? null
+    ? guestProfile
     : headerSelectedKundli?._id
       ? headerSelectedKundli
       : kundliProfiles.find((p) => p.relation?.toLowerCase() === 'self') || kundliProfiles[0] || null;
@@ -198,6 +209,18 @@ const HoroscopeNew = () => {
       setTempSelectedZodiac(sign.toLowerCase());
     }
   }, [sign]);
+
+  // Track horoscope page view
+  // Track horoscope page view on mount
+  useEffect(() => {
+    const timePeriodMap = { 'Today': 'daily', 'Tomorrow': 'daily', 'This Week': 'weekly', 'This Year': 'yearly' };
+    trackEvent("horoscope_viewed", {
+      horoscope_type: "Indian",
+      sign: selectedZodiac,
+      time_period: timePeriodMap[activeTab] || 'daily',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Set default zodiac based on profile's sun sign when page loads without a sign in URL
   // AND react to profile switches from the header
@@ -558,6 +581,10 @@ const HoroscopeNew = () => {
   const currentContent = getContent();
 
   const handleTabChange = (tab) => {
+    trackEvent("horoscope_time_period_switched", {
+      from_period: activeTab.toLowerCase().replace(/\s+/g, '_'),
+      to_period: tab.toLowerCase().replace(/\s+/g, '_'),
+    });
     setActiveTab(tab);
     setCameFromOverview(false);
     setSelectedPhase('phase_1');
@@ -579,6 +606,10 @@ const HoroscopeNew = () => {
   };
 
   const handleConfirmZodiac = () => {
+    trackEvent("horoscope_sign_switched", {
+      from_sign: selectedZodiac,
+      to_sign: tempSelectedZodiac,
+    });
     setSelectedZodiac(tempSelectedZodiac);
     setShowZodiacModal(false);
     
@@ -601,10 +632,12 @@ const HoroscopeNew = () => {
   };
 
   const handleOpenModal = () => {
-    if (isLoggedIn) {
+    if (isLoggedIn || activeProfile) {
+      // Logged-in users, or guests who already have a Kundli profile,
+      // open the profile manager (it handles guest profiles via cookie).
       setShowProfileSelector(true);
     } else {
-      // Guest user — show zodiac selector
+      // Guest user with no profile — show zodiac selector
       setTempSelectedZodiac(selectedZodiac);
       setShowZodiacModal(true);
     }
@@ -641,6 +674,31 @@ const HoroscopeNew = () => {
     setActiveCategory(categoryId);
   };
 
+  // Share the current horoscope (native share if available, else copy link)
+  const handleShareHoroscope = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)} Horoscope`,
+          text: `Check out the ${activeTab} horoscope for ${selectedZodiac}`,
+          url,
+        });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        toast.success('Link copied to clipboard');
+      }
+    } catch {
+      // User cancelled the share sheet — don't record a share.
+      return;
+    }
+    trackEvent('horoscope_shared', {
+      horoscope_type: 'indian',
+      sign: selectedZodiac,
+      period: activeTab,
+    });
+  };
+
   return (
     <div className="horoscope-page">
       
@@ -653,19 +711,32 @@ const HoroscopeNew = () => {
             </svg>
           </button>
           <span className="horoscope-page-title">Kundli Horoscope</span>
-          <button
-            className="horoscope-western-btn"
-            onClick={() => navigate('/daily-horoscope')}
-          >
-            Western
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              className="horoscope-share-btn"
+              onClick={handleShareHoroscope}
+              aria-label="Share horoscope"
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'inherit' }}
+            >
+              <Share2 size={18} />
+            </button>
+            <button
+              className="horoscope-western-btn"
+              onClick={() => {
+                trackEvent('horoscope_type_switched', { from_type: 'indian', to_type: 'western' });
+                navigate('/daily-horoscope');
+              }}
+            >
+              Western
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Centered Profile Selector with DOB/Place */}
       <div className="horoscope-profile-header">
         <div className="horoscope-profile-center" onClick={handleOpenModal}>
-          <span className="horoscope-profile-label">{isLoggedIn ? "Select Profile" : "Select Zodiac"}</span>
+          <span className="horoscope-profile-label">{activeProfile ? "Select Profile" : "Select Zodiac"}</span>
           <span className="horoscope-profile-name">
             {activeProfile?.name || capitalizedSign}
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ marginLeft: '4px' }}>
@@ -695,6 +766,10 @@ const HoroscopeNew = () => {
                     className={`sign-tab ${isActive ? 'active' : ''}`}
                     onClick={() => {
                       const val = signTab === 'Moon Sign' ? 'Moon' : 'Sun';
+                      trackEvent("horoscope_sub_type_switched", {
+                        from_sub_type: activeSignTab.toLowerCase(),
+                        to_sub_type: val.toLowerCase(),
+                      });
                       setActiveSignTab(val);
                       setDailySubTab(val);
                       setTomorrowSubTab(val);

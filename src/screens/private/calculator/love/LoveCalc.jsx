@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import LoveMatchForm from "../forms/LoveMatchForm";
@@ -41,11 +42,11 @@ const LoveCalc = () => {
   const handleReset = () => {
     setFormData(initialFormState);
     setErrors({});
-    dispatch(setCalculatorData({ key: STORAGE_KEY, data: null }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    trackEvent("calculator_used", { calculator_name: "Love Compatibility" });
 
     const newErrors = {};
     if (!formData.name1) newErrors.name1 = "Name is required";
