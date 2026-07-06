@@ -11,6 +11,7 @@ import styles from "./SingleBlogDetails.module.scss";
 import TTSButton from "../../../../component/UI/TTSButton";
 import { PATH } from "../../../../utils/routes/Paths";
 import { DefaultImages } from "../../../../utils/appImages";
+import defaultBlogImg from "../../../../assets/images/default_image_16x9_1920x1080.png";
 
 const SingleBlogDetails = () => {
   const { slug } = useParams();
@@ -166,9 +167,10 @@ const SingleBlogDetails = () => {
 
           {/* Banner Image */}
           <img
-            src={singleBLogData.img || DefaultImages.BlogsDefault}
+            src={singleBLogData.img || defaultBlogImg}
             alt={singleBLogData.title}
             className={styles.bannerImage}
+            onError={(e) => { e.target.onerror = null; e.target.src = defaultBlogImg; }}
           />
 
           {/* Blog Content */}

@@ -1,7 +1,7 @@
 import { memo, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { sortContentByOrder } from "../sectionRendererV2";
-
+import defaultSquareImg from "../../../../assets/images/default_image_square_500x500.png"
 const SLUG_PATHS = {
   "free-kundli": "/kundli",
   "talk-to-astrologer": "/chat-to-astrologer",
@@ -28,7 +28,7 @@ const ComplementaryServicesSection = memo(({ sectionData, styles }) => {
           <div className={styles.qImgWrap}>
             <div className={styles.qImgGlow} />
             <img
-              src={card.image_url || card.icon}
+              src={card.image_url || card.icon || defaultSquareImg}
               alt={card.title}
               loading="eager"
               fetchPriority="high"

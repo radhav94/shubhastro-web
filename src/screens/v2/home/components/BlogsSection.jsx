@@ -6,6 +6,7 @@ import SectionHeader from "./SectionHeader";
 import useIsOverflowing from "../../../../hooks/useIsOverflowing";
 import styles from "../Home.module.scss";
 import { DefaultImages } from "../../../../utils/appImages";
+import defaultBlogImg from "../../../../assets/images/default_image_16x9_1920x1080.png";
 
 export function formatDateToReadable(input) {
   if (!input) return "";
@@ -103,11 +104,12 @@ const BlogsSection = ({ blogData = [], title, showMore, gridRef, onScrollableCha
           >
             <div className={styles.blogImageWrapper}>
               <img
-                src={blog.imageUrl || blog.img || DefaultImages.BlogsDefault}
+                src={blog.imageUrl || blog.img || defaultBlogImg}
                 alt={blog.title}
                 className={styles.blogImage}
                 onError={(e) => {
-                  e.target.style.display = "none";
+                  e.target.onerror = null;
+                  e.target.src = defaultBlogImg;
                 }}
               />
             </div>
