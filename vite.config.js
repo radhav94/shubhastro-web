@@ -81,31 +81,17 @@ export default defineConfig({
   },
   server: {
     host: true,
+    // Dev mirrors production's same-origin path setup: the frontend calls
+    // "/sgw/..." (VITE_SGW_URL="/sgw") and vite proxies that to the local
+    // secure gateway, stripping the /sgw prefix — exactly like nginx does in
+    // prod. Start the gateway first: `cd secure-gateway && npm start`
+    // (defaults to 127.0.0.1:8787). Override with SGW_URL if needed.
     proxy: {
-      // Main backend API + WebSocket
-      "/main": {
-        target: process.env.VITE_APP_API_BASE_URL || "https://devapi-shubhtalk.epicon.in",
+      "/sgw": {
+        target: process.env.SGW_URL || "http://127.0.0.1:8787",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/main/, ""),
         ws: true,
-      },
-      // Vedic astrology API
-      "/vedic": {
-        target: "https://json.astrologyapi.com",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/vedic/, ""),
-      },
-      // Chart generation service
-      "/chart": {
-        target: "https://pyapi-shubhtalk.epicon.in",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/chart/, ""),
-      },
-      // Voice TTS/STT service
-      "/voice": {
-        target: "https://api.sarvam.ai",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/voice/, ""),
+        rewrite: (path) => path.replace(/^\/sgw/, ""),
       },
     },
   },

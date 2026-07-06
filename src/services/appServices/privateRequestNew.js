@@ -1,11 +1,13 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createSecureBaseQuery } from "../../utils/security/secureBaseQuery";
 import Toast from "../../component/toast";
 import { getToken } from "../../utils/utlis";
 import { refreshTokenAndReload } from "../../utils/tokenRefresh";
 import { navigateToLogin } from "../../utils/navigationHelper";
+import { BACKEND_PROXY } from "../../utils/apiConfig";
 
 let unAuthorizedCount = 0;
-const BASE_URL = "/main";
+const BASE_URL = BACKEND_PROXY;
 
 // Endpoints that should be accessible without authentication (no login redirect on 401)
 const PUBLIC_ENDPOINTS = ["getAstrologerById", "getAstrologers", "getRecommendedAstrologers"];
@@ -89,7 +91,7 @@ export const privateRequestNew = createApi({
   reducerPath: "privateRequestNew",
 
   baseQuery: async (args, api, extraOptions) => {
-    const rawBaseQuery = fetchBaseQuery({
+    const rawBaseQuery = createSecureBaseQuery({
       baseUrl: `${BASE_URL}/api/`,
       prepareHeaders: (headers, { endpoint }) => {
         const role = localStorage.getItem("shubhtalk_role");
@@ -131,7 +133,7 @@ export const localReuqqestApi = createApi({
   reducerPath: "localReuqqestApi",
 
   baseQuery: async (args, api, extraOptions) => {
-    const rawBaseQuery = fetchBaseQuery({
+    const rawBaseQuery = createSecureBaseQuery({
       baseUrl: "http://192.168.12.114:3000/",
       prepareHeaders: (headers) => {
         const role = localStorage.getItem("shubhtalk_role");

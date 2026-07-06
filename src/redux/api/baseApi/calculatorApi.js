@@ -1,9 +1,11 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createSecureBaseQuery } from "../../../utils/security/secureBaseQuery";
+import { BACKEND_PROXY } from "../../../utils/apiConfig";
 
 export const calculatorApi = createApi({
   reducerPath: "calculatorApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "/main/api/astro/v3-json",
+  baseQuery: createSecureBaseQuery({
+    baseUrl: `${BACKEND_PROXY}/api/astro/v3-json`,
   }),
   endpoints: () => ({}),
 });
