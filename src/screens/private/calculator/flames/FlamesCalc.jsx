@@ -54,6 +54,10 @@ const FlamesCalc = () => {
     setErrors({});
   };
 
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Flames" });
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Flames" });

@@ -81,6 +81,10 @@ const MangalDosha = () => {
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Mangal Dosha" });
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Mangal Dosha" });

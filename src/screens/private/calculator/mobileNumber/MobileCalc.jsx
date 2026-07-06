@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trackEvent } from "../../../../utils/analytics";
 import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
@@ -44,6 +44,10 @@ const MobileCalc = () => {
 
     return errors;
   };
+
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Mobile Number" });
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

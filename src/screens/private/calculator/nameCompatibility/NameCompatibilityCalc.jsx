@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -47,6 +47,10 @@ const NameCompatibilityCalc = () => {
     dispatch(setSelectedKundli(profile));
     setShowProfileModal(false);
   };
+
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Name Compatibility" });
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();

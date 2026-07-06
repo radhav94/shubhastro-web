@@ -48,6 +48,10 @@ const MulankCalc = () => {
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Mulank" });
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Mulank" });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -43,6 +43,10 @@ const LoveCalc = () => {
     setFormData(initialFormState);
     setErrors({});
   };
+
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Love Compatibility" });
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();

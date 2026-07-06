@@ -71,6 +71,10 @@ const BirthCalc = () => {
     setErrors({});
   };
 
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Birth Details" });
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Birth Details" });
