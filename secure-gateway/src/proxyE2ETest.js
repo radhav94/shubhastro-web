@@ -104,6 +104,18 @@ async function run() {
     assert.deepStrictEqual(decrypted, JSON_PAYLOAD, "decrypted == original");
     console.log("[e2e] JSON encrypted + decrypted correctly, plaintext absent from wire");
 
+    // 1b. Encrypted envelopes are session-scoped and must never be cached or
+    // revalidated by the browser — a stale ciphertext can't be decrypted by a
+    // later session's key. Verify no-store + no validators leak through.
+    const cacheControl = String(encRes.headers.get("cache-control") || "");
+    assert.ok(cacheControl.includes("no-store"), "encrypted response must be no-store");
+    assert.strictEqual(encRes.headers.get("etag"), null, "encrypted response must not carry an ETag");
+    assert.strictEqual(
+      encRes.headers.get("last-modified"), null,
+      "encrypted response must not carry a Last-Modified validator"
+    );
+    console.log("[e2e] encrypted response is no-store with no cache validators");
+
     // 2. JSON through secure gateway WITHOUT session header -> 428 (fail-closed)
     const noSidRes = await fetch("http://127.0.0.1:8799/main/api/thing");
     assert.strictEqual(noSidRes.status, 428, "sessionless request must be rejected (fail-closed)");

@@ -62,6 +62,16 @@ function buildEncryptingProxy(route) {
     // Required so responseInterceptor can rewrite the body.
     selfHandleResponse: true,
     on: {
+      // Encrypted envelopes are keyed to the CURRENT ECDH session. If the
+      // browser is allowed to cache/revalidate them, a later page load with a
+      // fresh session key will be served a stale envelope it can no longer
+      // decrypt (surfaces as a broken page + generic error toast). Strip the
+      // conditional-request headers so the upstream always returns a full 200
+      // body we can encrypt for this session, never a bodiless 304.
+      proxyReq: (proxyReq) => {
+        proxyReq.removeHeader("if-none-match");
+        proxyReq.removeHeader("if-modified-since");
+      },
       proxyRes: responseInterceptor(async (responseBuffer, proxyRes, req, res) => {
         // Ensure CORS headers are present on the (rewritten) cross-origin response.
         applyCorsHeaders(req, res);
@@ -87,6 +97,12 @@ function buildEncryptingProxy(route) {
           const envelope = encryptJson(plaintext, key);
           res.setHeader("content-type", "application/json; charset=utf-8");
           res.setHeader("x-sgw-enc", "1");
+          // Never let the browser cache or revalidate a session-scoped envelope:
+          // a cached ciphertext cannot be decrypted by a later session's key.
+          res.setHeader("cache-control", "no-store, no-cache, must-revalidate");
+          res.removeHeader("etag");
+          res.removeHeader("last-modified");
+          res.removeHeader("expires");
           return JSON.stringify(envelope);
         } catch (err) {
           // If anything goes wrong, fail open with the original body rather
