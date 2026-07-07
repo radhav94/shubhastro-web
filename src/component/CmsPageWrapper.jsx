@@ -15,7 +15,8 @@ const EXCLUDED_PATHS = [
   // "/explore",
   "/blog",
   "/community",
-  "/live"
+  "/live",
+  "/chat-to-astrologer"
 ];
 
 /**
