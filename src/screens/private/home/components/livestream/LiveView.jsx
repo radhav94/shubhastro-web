@@ -1198,9 +1198,17 @@ const LiveView = (props) => {
               <div className="host-info">
               <img
                 className="host-avatar-img"
-                src={fullAstro?.profileImgUrl || getAstrologerDefaultImage(fullAstro?.gender)}
+                src={
+                  fullAstro?.profileImgUrl ||
+                  astrologer?.profileImgUrl ||
+                  astrologer?.imageUrl ||
+                  getAstrologerDefaultImage(fullAstro?.gender || astrologer?.gender)
+                }
                 alt={astrologer?.astrologerName || "Astrologer"}
-                onError={(e) => { e.target.src = getAstrologerDefaultImage(fullAstro?.gender); }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = getAstrologerDefaultImage(fullAstro?.gender || astrologer?.gender);
+                }}
               />
               <div className="host-text">
                 <div className="host-name host-name-truncate">
