@@ -54,6 +54,7 @@ const SeoHelmet = ({ data, image }) => {
       {keywords && <meta name="keywords" content={keywords} />}
 
       {/* Open Graph */}
+      <meta property="og:site_name" content="ShubhAstro" />
       <meta property="og:locale" content="en_IN" />
       <meta property="og:type" content="website" />
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}

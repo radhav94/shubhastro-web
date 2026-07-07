@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Plus, Minus } from "lucide-react";
 import { useGetStaticPageBySlugQuery } from "../redux/api/staticPages/staticPagesApi";
+import JsonLd from "./JsonLd";
 import styles from "../screens/public/static-pages/StaticPages.module.scss";
 
 // Routes excluded from CMS static page lookup
@@ -98,6 +99,7 @@ const CmsPageWrapper = ({ children }) => {
 
   return (
     <>
+      <JsonLd pageTitle={title} pageDescription={description} />
       {pageData ? (
         <Helmet>
           <title>{title}</title>
@@ -108,6 +110,7 @@ const CmsPageWrapper = ({ children }) => {
           {keywords && <meta name="keywords" content={keywords} />}
 
           {/* Open Graph */}
+          <meta property="og:site_name" content="ShubhAstro" />
           <meta property="og:locale" content="en_IN" />
           <meta property="og:type" content="website" />
           {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
@@ -130,6 +133,7 @@ const CmsPageWrapper = ({ children }) => {
           {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
           <link rel="icon" type="image/svg+xml" href={FAVICON_URL} />
           <link rel="shortcut icon" href={FAVICON_URL} />
+          <meta property="og:site_name" content="ShubhAstro" />
           <meta property="og:locale" content="en_IN" />
           <meta property="og:type" content="website" />
           {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
