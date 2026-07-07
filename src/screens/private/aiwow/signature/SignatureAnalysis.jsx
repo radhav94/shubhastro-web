@@ -26,6 +26,7 @@ const SignatureAnalysis = () => {
   
   const isMountedRef = React.useRef(true);
   const abortControllerRef = React.useRef(null);
+  const hasStartedRef = React.useRef(false);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -41,6 +42,8 @@ const SignatureAnalysis = () => {
     }
 
     if (profile && !isAnalyzing && !analysisComplete && !error) {
+      if (hasStartedRef.current) return;
+      hasStartedRef.current = true;
       performAnalysis(signatureImage);
     }
   }, [signatureImage, profile, profileLoading]);
@@ -84,7 +87,7 @@ const SignatureAnalysis = () => {
         // Only navigate if component is still mounted
         setTimeout(() => {
           if (isMountedRef.current) {
-            navigate(PATH.privateRoutes.SIGNATURE_RESULT.path[0]);
+            navigate(PATH.privateRoutes.SIGNATURE_RESULT.path[0], { replace: true });
           } else {
             console.log('Component unmounted - skipping navigation to result');
           }
@@ -125,7 +128,7 @@ const SignatureAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate(PATH.privateRoutes.SIGNATURE_RESULT.path[0]);
+      navigate(PATH.privateRoutes.SIGNATURE_RESULT.path[0], { replace: true });
     }
   };
 

@@ -27,6 +27,7 @@ const ClothColorAnalysis = () => {
   
   const isMountedRef = useRef(true);
   const abortControllerRef = useRef(null);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -42,6 +43,8 @@ const ClothColorAnalysis = () => {
     }
 
     if (profile && !isAnalyzing && !analysisComplete && !error) {
+      if (hasStartedRef.current) return;
+      hasStartedRef.current = true;
       performAnalysis(clothImage);
     }
   }, [clothImage, profile, profileLoading]);
@@ -86,7 +89,7 @@ const ClothColorAnalysis = () => {
         // Only navigate if component is still mounted
         setTimeout(() => {
           if (isMountedRef.current) {
-            navigate(PATH.privateRoutes.CLOTH_COLOR_RESULT.path[0]);
+            navigate(PATH.privateRoutes.CLOTH_COLOR_RESULT.path[0], { replace: true });
           } else {
             console.log('Component unmounted - skipping navigation to result');
           }
@@ -127,7 +130,7 @@ const ClothColorAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate(PATH.privateRoutes.CLOTH_COLOR_RESULT.path[0]);
+      navigate(PATH.privateRoutes.CLOTH_COLOR_RESULT.path[0], { replace: true });
     }
   };
 

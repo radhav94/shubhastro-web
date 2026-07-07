@@ -10,6 +10,7 @@ import { useAIWowDownload } from '../hooks/useAIWowDownload';
 
 const AuraResult = () => {
   const navigate = useNavigate();
+  const handleBack = () => navigate('/ai-wow/aura-photography', { replace: true });
   const [activeTab, setActiveTab] = useState('overall');
   const [loading, setLoading] = useState(true);
   const [validationError, setValidationError] = useState(null);
@@ -60,7 +61,7 @@ const AuraResult = () => {
     if (!analysisData) {
       console.error('No analysis data found in Redux state');
       Toast.error('No analysis results found. Please analyze your aura first.');
-      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0], { replace: true });
+      navigate('/ai-wow/aura-photography', { replace: true });
       return;
     }
 
@@ -96,7 +97,7 @@ const AuraResult = () => {
     } catch (error) {
       console.error('Data validation error:', error);
       Toast.error('Invalid analysis data format. Please try again.');
-      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0], { replace: true });
+      navigate('/ai-wow/aura-photography', { replace: true });
     }
   }, [analysisData, navigate]);
 
@@ -123,7 +124,7 @@ const AuraResult = () => {
       <div className={styles.container}>
         <div className={styles.errorContainer}>
           <p>No analysis data available</p>
-          <button onClick={() => navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0])}>
+          <button onClick={() => navigate('/ai-wow/aura-photography', { replace: true })}>
             Try Again
           </button>
         </div>
@@ -191,7 +192,7 @@ const AuraResult = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate('/ai-wow/aura-photography/instructions')}>
+          <button className={styles.backButton} onClick={handleBack}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

@@ -9,6 +9,7 @@ import { useAIWowDownload } from '../hooks/useAIWowDownload';
 
 const FaceReadingResult = () => {
   const navigate = useNavigate();
+  const handleBack = () => navigate('/ai-wow/astro-face-reading', { replace: true });
   const [activeTab, setActiveTab] = useState('overall');
   const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -56,12 +57,12 @@ const FaceReadingResult = () => {
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
-        navigate('/ai-wow/astro-face-reading/instructions');
+        navigate('/ai-wow/astro-face-reading', { replace: true });
         return;
       }
     } else {
       Toast.error('No analysis results found');
-      navigate('/ai-wow/astro-face-reading/instructions');
+      navigate('/ai-wow/astro-face-reading', { replace: true });
       return;
     }
     
@@ -105,7 +106,7 @@ const FaceReadingResult = () => {
       <div className={styles.container}>
         <div className={styles.errorContainer}>
           <p>No analysis data available</p>
-          <button onClick={() => navigate('/ai-wow/astro-face-reading/instructions')}>
+          <button onClick={() => navigate('/ai-wow/astro-face-reading', { replace: true })}>
             Try Again
           </button>
         </div>
@@ -129,7 +130,7 @@ const FaceReadingResult = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate('/ai-wow/astro-face-reading/instructions')}>
+        <button className={styles.backButton} onClick={handleBack}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
