@@ -262,12 +262,13 @@ const TopHeader = () => {
   // If in iframe mode, show minimal header with only language and close button
   if (isIframeMode) {
     return (
-      <header className={styles.iframeHeader}>
-        <div className={styles.iframeHeaderContent}>
-          {/* Language Dropdown */}
-          <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
-        </div>
-      </header>
+      null
+      // <header className={styles.iframeHeader}>
+      //   <div className={styles.iframeHeaderContent}>
+      //     Language Dropdown
+      //     <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
+      //   </div>
+      // </header>
     );
   }
 
