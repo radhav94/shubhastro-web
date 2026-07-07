@@ -151,8 +151,10 @@ const responseErrorHandler = (error) => {
     }
   } else if (error?.code === "ERR_CANCELED") {
     return Promise.reject(error);
-  } else {
-    Toast.error(String(error?.message || "Some Error Occurred"));
+  } else if (error?.message && error.message !== "Network Error") {
+    // Only show a toast for meaningful errors. Suppress the generic
+    // "Some Error Occurred" fallback when there's no useful message.
+    Toast.error(String(error.message));
   }
   return Promise.reject(error);
 };

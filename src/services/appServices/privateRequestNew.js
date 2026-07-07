@@ -20,7 +20,10 @@ const handleApiError = (error, endpoint) => {
 
   const status = error?.status;
   const data = error?.data;
-  const message = data?.message || data?.error || "Some Error Occurred";
+  // Real message from the server, if any. Used to avoid showing the unhelpful
+  // generic "Some Error Occurred" toast when the backend/network gave nothing.
+  const serverMessage = data?.message || data?.error;
+  const message = serverMessage || "Some Error Occurred";
 
   // fetchBaseQuery reports a non-numeric status (e.g. "PARSING_ERROR") when the
   // response body isn't valid JSON, keeping the real HTTP code in originalStatus.
@@ -80,7 +83,9 @@ const handleApiError = (error, endpoint) => {
       Toast.error("Network Error");
       break;
     default:
-      Toast.error(message);
+      // Only surface a toast when the server actually sent a message.
+      // Suppress the generic "Some Error Occurred" fallback.
+      if (serverMessage) Toast.error(serverMessage);
   }
 };
 

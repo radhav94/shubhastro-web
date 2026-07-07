@@ -551,9 +551,19 @@ const LiveView = (props) => {
       } else {
         clearViewerSession();
       }
-      // Navigate back to referrer or home
-      const backPath = location.state?.from || "/";
-      navigate(backPath, { replace: true });
+      // Navigate back to where the user came from. Prefer real history back so
+      // the live entry is popped off the stack. Using replace here would leave
+      // the detail<->live pair in history, so pressing back on the detail page
+      // would re-open the live stream after a few join/leave cycles.
+      // Fall back to the referrer/home only when there's no in-app history
+      // (e.g. the live stream was opened via a direct link or a new tab).
+      const canGoBack = (window.history.state?.idx ?? 0) > 0;
+      if (canGoBack) {
+        navigate(-1);
+      } else {
+        const backPath = location.state?.from || "/";
+        navigate(backPath, { replace: true });
+      }
     }
   };
 
@@ -1198,9 +1208,17 @@ const LiveView = (props) => {
               <div className="host-info">
               <img
                 className="host-avatar-img"
-                src={fullAstro?.profileImgUrl || getAstrologerDefaultImage(fullAstro?.gender)}
+                src={
+                  fullAstro?.profileImgUrl ||
+                  astrologer?.profileImgUrl ||
+                  astrologer?.imageUrl ||
+                  getAstrologerDefaultImage(fullAstro?.gender || astrologer?.gender)
+                }
                 alt={astrologer?.astrologerName || "Astrologer"}
-                onError={(e) => { e.target.src = getAstrologerDefaultImage(fullAstro?.gender); }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = getAstrologerDefaultImage(fullAstro?.gender || astrologer?.gender);
+                }}
               />
               <div className="host-text">
                 <div className="host-name host-name-truncate">
