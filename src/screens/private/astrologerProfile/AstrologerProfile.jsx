@@ -753,7 +753,7 @@ const AstrologerProfile = () => {
   ]);
 
   const reviews = reviewsData?.data?.getDetail || [];
-  const totalReviews = reviewsData?.data?.totalRecords || 0;
+  const totalReviews = data?.totalRatings || reviewsData?.data?.totalRecords || 0;
 
   // Sync initial reviews from API into allReviews
   useEffect(() => {
