@@ -1244,6 +1244,19 @@ const Profile = () => {
         ...payload,
       }).unwrap();
 
+      // If Self profile, also update user profile
+      const isSelfProfile =
+        profileToEdit.relation?.toLowerCase() === "self" ||
+        formData.relation?.toLowerCase() === "self";
+
+      if (isSelfProfile && formData.name?.trim()) {
+        try {
+          await updateUserProfile({ fullName: formData.name.trim() });
+        } catch (e) {
+          console.error("User profile update error:", e);
+        }
+      }
+
       Toast.success("Profile updated successfully");
 
       setShowEditProfileModal(false);
