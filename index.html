@@ -88,6 +88,36 @@
     })(window, document, "clarity", "script", "xeickgmcun");
   </script>
   <!-- End Microsoft Clarity -->
+
+  <!-- Structured Data (JSON-LD) — static fallback for non-JS crawlers -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ShubhAstro",
+    "url": "https://www.shubhastro.ai",
+    "logo": "https://www.shubhastro.ai/images/ShubhAstrologo.png",
+    "description": "AI Powered Astrology consultation platform with Kundli, Horoscope, Tarot readings and live astrologer consultations.",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "availableLanguage": ["English", "Hindi"]
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ShubhAstro",
+    "url": "https://www.shubhastro.ai",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://www.shubhastro.ai/talk-to-astrologer?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 </head>
 
 <body>
