@@ -1,4 +1,4 @@
-import { useState, useRef, forwardRef } from "react";
+import { useState, useRef, forwardRef, useEffect } from "react";
 import { FiSend, FiTrash2 } from "react-icons/fi";
 import styles from "../Community.module.scss";
 import {
@@ -102,6 +102,11 @@ const CommentSection = ({ postId }) => {
   });
   const [addComment, { isLoading: isSending }] = useAddPostCommentMutation();
   const [deleteComment] = useDeleteCommunityCommentMutation();
+
+  // Track post view when the post's comment section opens
+  useEffect(() => {
+    if (postId) trackEvent("community_post_viewed", { post_id: postId });
+  }, [postId]);
 
   const comments = (data?.comments || []).filter((c) => !deletedIds.includes(c._id)).slice().reverse();
 

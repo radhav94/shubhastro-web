@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trackEvent } from "../../../../utils/analytics";
 import AstroBirthForm from "../forms/AstroBirthForm";
 import { useNavigate } from "react-router-dom";
@@ -48,6 +48,10 @@ const RisingSign = () => {
     // clear error on change
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
+
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Rising Sign" });
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();

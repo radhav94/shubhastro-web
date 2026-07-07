@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trackEvent } from "../../../../utils/analytics";
 import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
@@ -29,6 +29,10 @@ const Friendship = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
+
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Friendship" });
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();

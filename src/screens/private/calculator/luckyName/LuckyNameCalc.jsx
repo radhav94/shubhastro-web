@@ -54,6 +54,10 @@ const LuckyNameCalc = () => {
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Lucky Name" });
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Lucky Name" });

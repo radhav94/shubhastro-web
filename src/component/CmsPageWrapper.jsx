@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Plus, Minus } from "lucide-react";
 import { useGetStaticPageBySlugQuery } from "../redux/api/staticPages/staticPagesApi";
+import JsonLd from "./JsonLd";
 import styles from "../screens/public/static-pages/StaticPages.module.scss";
 
 // Routes excluded from CMS static page lookup
@@ -98,6 +99,7 @@ const CmsPageWrapper = ({ children }) => {
 
   return (
     <>
+      <JsonLd pageTitle={title} pageDescription={description} />
       {pageData ? (
         <Helmet>
           <title>{title}</title>
@@ -108,12 +110,16 @@ const CmsPageWrapper = ({ children }) => {
           {keywords && <meta name="keywords" content={keywords} />}
 
           {/* Open Graph */}
+          <meta property="og:site_name" content="ShubhAstro" />
+          <meta property="og:locale" content="en_IN" />
           <meta property="og:type" content="website" />
           {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
           <meta property="og:title" content={title} />
           <meta property="og:description" content={description} />
           <meta property="og:image" content={OG_IMAGE_URL} />
           <meta property="og:image:secure_url" content={OG_IMAGE_URL} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
 
           {/* Twitter */}
           <meta name="twitter:card" content="summary_large_image" />
@@ -127,11 +133,15 @@ const CmsPageWrapper = ({ children }) => {
           {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
           <link rel="icon" type="image/svg+xml" href={FAVICON_URL} />
           <link rel="shortcut icon" href={FAVICON_URL} />
+          <meta property="og:site_name" content="ShubhAstro" />
+          <meta property="og:locale" content="en_IN" />
           <meta property="og:type" content="website" />
           {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
           <meta property="og:title" content={DEFAULT_TITLE} />
           <meta property="og:image" content={OG_IMAGE_URL} />
           <meta property="og:image:secure_url" content={OG_IMAGE_URL} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={DEFAULT_TITLE} />
           <meta name="twitter:image" content={OG_IMAGE_URL} />

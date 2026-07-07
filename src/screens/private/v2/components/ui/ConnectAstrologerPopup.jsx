@@ -74,7 +74,7 @@ const ConnectAstrologerPopup = ({
     let result = false;
 
     if (type === "chat") {
-      result = await onChatStart(astrologer, true, isEmergency);
+      result = await onChatStart(astrologer, isEmergency);
     } else if (type === "call") {
       result = await onCallStart(astrologer, "audio", isEmergency);
     } else if (type === "video") {

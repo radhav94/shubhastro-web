@@ -76,6 +76,10 @@ const AtmakarakaCalculator = () => {
     setShowProfileModal(false);
   };
 
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Atmakaraka" });
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Atmakaraka" });
