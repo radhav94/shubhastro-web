@@ -22,7 +22,6 @@ import RouteErrorBoundary from "./component/RouteErrorBoundary";
 import PrimaryLoader from "./component/UI/PrimaryLoader";
 import NoInternet, { useOnlineStatus } from "./component/NoInternet/NoInternet";
 import { initializeFCM } from "./services/fcmService.jsx";
-import { HelmetProvider } from "react-helmet-async";
 import CmsPageWrapper from "./component/CmsPageWrapper";
 import CmsNotFoundPage from "./component/CmsNotFoundPage";
 import useAstrologerStatusSocket from "./hooks/useAstrologerStatusSocket";
@@ -284,22 +283,20 @@ function App() {
   }, []);
 
   return (
-    <HelmetProvider>
-      <ErrorBoundary>
-        <CallProvider>
-          <ChatProvider>
-            <WaitingQueueProvider>
-              <div className={classes.app}>
-                <Suspense fallback={<PrimaryLoader isLoading={true} />}>
-                  <RouterProvider router={roleWiseRouting} />
-                </Suspense>
-              </div>
-              <PermissionModalProvider />
-            </WaitingQueueProvider>
-          </ChatProvider>
-        </CallProvider>
-      </ErrorBoundary>
-    </HelmetProvider>
+    <ErrorBoundary>
+      <CallProvider>
+        <ChatProvider>
+          <WaitingQueueProvider>
+            <div className={classes.app}>
+              <Suspense fallback={<PrimaryLoader isLoading={true} />}>
+                <RouterProvider router={roleWiseRouting} />
+              </Suspense>
+            </div>
+            <PermissionModalProvider />
+          </WaitingQueueProvider>
+        </ChatProvider>
+      </CallProvider>
+    </ErrorBoundary>
   );
 }
 

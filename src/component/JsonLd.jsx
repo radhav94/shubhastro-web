@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet-async";
+import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
 const SITE_URL = "https://www.shubhastro.ai";
@@ -7,65 +7,68 @@ const LOGO_URL = `${SITE_URL}/images/ShubhAstrologo.png`;
 
 /**
  * JsonLd — Injects structured data (JSON-LD) into the page head.
- * Automatically generates Organization + WebSite schema on every page,
- * plus page-specific schema based on the current route.
+ * Directly manages script elements in the DOM (no Helmet dependency).
  */
 const JsonLd = ({ pageTitle, pageDescription }) => {
   const { pathname } = useLocation();
   const currentUrl = `${SITE_URL}${pathname}`;
+  const scriptRefs = useRef([]);
 
-  // Base Organization schema (present on all pages)
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: SITE_NAME,
-    url: SITE_URL,
-    logo: LOGO_URL,
-    sameAs: [],
-    contactPoint: {
-      "@type": "ContactPoint",
-      contactType: "customer service",
-      availableLanguage: ["English", "Hindi"],
-    },
-  };
+  useEffect(() => {
+    // Clean up previous scripts
+    scriptRefs.current.forEach((el) => el.remove());
+    scriptRefs.current = [];
 
-  // WebSite schema with search action
-  const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: SITE_NAME,
-    url: SITE_URL,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${SITE_URL}/talk-to-astrologer?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
-  };
+    const organizationSchema = {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: LOGO_URL,
+      sameAs: [],
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer service",
+        availableLanguage: ["English", "Hindi"],
+      },
+    };
 
-  // BreadcrumbList based on current path
-  const breadcrumbSchema = buildBreadcrumb(pathname);
+    const websiteSchema = {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/talk-to-astrologer?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    };
 
-  // Page-specific schema
-  const pageSchema = getPageSchema(pathname, currentUrl, pageTitle, pageDescription);
+    const breadcrumbSchema = buildBreadcrumb(pathname);
+    const pageSchema = getPageSchema(pathname, currentUrl, pageTitle, pageDescription);
 
-  const schemas = [organizationSchema, websiteSchema];
-  if (breadcrumbSchema) schemas.push(breadcrumbSchema);
-  if (pageSchema) schemas.push(pageSchema);
+    const schemas = [organizationSchema, websiteSchema];
+    if (breadcrumbSchema) schemas.push(breadcrumbSchema);
+    if (pageSchema) schemas.push(pageSchema);
 
-  return (
-    <Helmet>
-      {schemas.map((schema, i) => (
-        <script key={i} type="application/ld+json">
-          {JSON.stringify(schema)}
-        </script>
-      ))}
-    </Helmet>
-  );
+    schemas.forEach((schema) => {
+      const script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.textContent = JSON.stringify(schema);
+      document.head.appendChild(script);
+      scriptRefs.current.push(script);
+    });
+
+    return () => {
+      scriptRefs.current.forEach((el) => el.remove());
+      scriptRefs.current = [];
+    };
+  }, [pathname, pageTitle, pageDescription, currentUrl]);
+
+  return null;
 };
 
-/**
- * Builds a BreadcrumbList schema from the URL path.
- */
 function buildBreadcrumb(pathname) {
   if (pathname === "/") return null;
 
@@ -94,11 +97,7 @@ function buildBreadcrumb(pathname) {
   };
 }
 
-/**
- * Returns page-specific schema based on the current route.
- */
 function getPageSchema(pathname, currentUrl, title, description) {
-  // Home page — WebApplication
   if (pathname === "/") {
     return {
       "@context": "https://schema.org",
@@ -108,16 +107,10 @@ function getPageSchema(pathname, currentUrl, title, description) {
       applicationCategory: "LifestyleApplication",
       operatingSystem: "Web",
       description: description || "AI Powered Astrology consultation platform with Kundli, Horoscope, Tarot readings and live astrologer consultations.",
-      offers: {
-        "@type": "Offer",
-        price: "0",
-        priceCurrency: "INR",
-        description: "Free Kundli, Horoscope & Tarot readings",
-      },
+      offers: { "@type": "Offer", price: "0", priceCurrency: "INR", description: "Free Kundli, Horoscope & Tarot readings" },
     };
   }
 
-  // Astrologer listing
   if (pathname.includes("talk-to-astrologer") || pathname.includes("chat-to-astrologer")) {
     return {
       "@context": "https://schema.org",
@@ -131,7 +124,6 @@ function getPageSchema(pathname, currentUrl, title, description) {
     };
   }
 
-  // Horoscope pages
   if (pathname.includes("horoscope")) {
     return {
       "@context": "https://schema.org",
@@ -143,7 +135,6 @@ function getPageSchema(pathname, currentUrl, title, description) {
     };
   }
 
-  // Kundli
   if (pathname.includes("kundli") || pathname.includes("free-kundli")) {
     return {
       "@context": "https://schema.org",
@@ -157,7 +148,6 @@ function getPageSchema(pathname, currentUrl, title, description) {
     };
   }
 
-  // Tarot
   if (pathname.includes("tarot")) {
     return {
       "@context": "https://schema.org",
@@ -170,7 +160,6 @@ function getPageSchema(pathname, currentUrl, title, description) {
     };
   }
 
-  // Numerology
   if (pathname.includes("numerology")) {
     return {
       "@context": "https://schema.org",
@@ -183,7 +172,6 @@ function getPageSchema(pathname, currentUrl, title, description) {
     };
   }
 
-  // Match Making
   if (pathname.includes("match-making") || pathname.includes("compatibility")) {
     return {
       "@context": "https://schema.org",
@@ -196,7 +184,6 @@ function getPageSchema(pathname, currentUrl, title, description) {
     };
   }
 
-  // Panchang
   if (pathname.includes("panchang")) {
     return {
       "@context": "https://schema.org",
@@ -208,7 +195,6 @@ function getPageSchema(pathname, currentUrl, title, description) {
     };
   }
 
-  // Calculator pages
   if (pathname.includes("calculator")) {
     return {
       "@context": "https://schema.org",
@@ -222,7 +208,6 @@ function getPageSchema(pathname, currentUrl, title, description) {
     };
   }
 
-  // Blog
   if (pathname.includes("blog")) {
     return {
       "@context": "https://schema.org",
@@ -234,7 +219,6 @@ function getPageSchema(pathname, currentUrl, title, description) {
     };
   }
 
-  // AI features
   if (pathname.includes("ai-wow") || pathname.includes("palmistry") || pathname.includes("face-reading") || pathname.includes("signature-analysis") || pathname.includes("aura")) {
     return {
       "@context": "https://schema.org",
@@ -247,7 +231,6 @@ function getPageSchema(pathname, currentUrl, title, description) {
     };
   }
 
-  // Default WebPage for all other routes
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
