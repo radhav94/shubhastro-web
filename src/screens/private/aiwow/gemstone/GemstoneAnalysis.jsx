@@ -26,6 +26,7 @@ const GemstoneAnalysis = () => {
   
   const isMountedRef = useRef(true);
   const abortControllerRef = useRef(null);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -41,6 +42,8 @@ const GemstoneAnalysis = () => {
     }
 
     if (profile && !isAnalyzing && !analysisComplete && !error) {
+      if (hasStartedRef.current) return;
+      hasStartedRef.current = true;
       performAnalysis(gemstoneImage);
     }
   }, [gemstoneImage, profile, profileLoading]);
@@ -84,7 +87,7 @@ const GemstoneAnalysis = () => {
         // Only navigate if component is still mounted
         setTimeout(() => {
           if (isMountedRef.current) {
-            navigate(PATH.privateRoutes.GEMSTONE_RESULT.path[0]);
+            navigate(PATH.privateRoutes.GEMSTONE_RESULT.path[0], { replace: true });
           } else {
             console.log('Component unmounted - skipping navigation to result');
           }
@@ -125,7 +128,7 @@ const GemstoneAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate(PATH.privateRoutes.GEMSTONE_RESULT.path[0]);
+      navigate(PATH.privateRoutes.GEMSTONE_RESULT.path[0], { replace: true });
     }
   };
 

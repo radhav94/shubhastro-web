@@ -46,6 +46,7 @@ import { BookOpen } from "lucide-react";
 import { AppIcons, getAstrologerDefaultImage } from "../../../utils/appImages";
 import AstrologerLiveBadge from "../../../component/UI/astrologerLiveBadge/AstrologerLiveBadge";
 import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
+import AudioIntro from "./AudioIntro";
 
 // Import custom SVG icons
 import ExperienceIcon from "../../../assets/icons/experience.svg";
@@ -753,7 +754,7 @@ const AstrologerProfile = () => {
   ]);
 
   const reviews = reviewsData?.data?.getDetail || [];
-  const totalReviews = reviewsData?.data?.totalRecords || 0;
+  const totalReviews = data?.totalRatings || reviewsData?.data?.totalRecords || 0;
 
   // Sync initial reviews from API into allReviews
   useEffect(() => {
@@ -1402,6 +1403,15 @@ const AstrologerProfile = () => {
                 <img src={SendGiftImage} alt="Send Gift" />
               </div>
             </div> */}
+
+            {/* Astrologer voice intro */}
+            {data?.voiceNoteUrl && (
+              <AudioIntro
+                name={displayData.firstName}
+                src={data.voiceNoteUrl}
+                isNew
+              />
+            )}
 
             {/* User Reviews */}
             <div className={styles.reviewsSection}>

@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { Plus, Minus } from "lucide-react";
 import { useGetStaticPageBySlugQuery } from "../redux/api/staticPages/staticPagesApi";
+import JsonLd from "./JsonLd";
+import { updateMeta, resetMeta } from "../utils/updateMeta";
 import styles from "../screens/public/static-pages/StaticPages.module.scss";
 
 // Routes excluded from CMS static page lookup
@@ -15,7 +16,8 @@ const EXCLUDED_PATHS = [
   // "/explore",
   "/blog",
   "/community",
-  "/live"
+  "/live",
+  "/chat-to-astrologer"
 ];
 
 /**
@@ -28,24 +30,16 @@ const isExcluded = (pathname) =>
       pathname === excluded || pathname.startsWith(`${excluded}/`)
   );
 
-const SITE_ORIGIN = typeof window !== "undefined" ? window.location.origin : "";
-const OG_IMAGE_PATH = "/images/shubhastro-logo-banner.jpeg";
-const OG_IMAGE_URL = `${SITE_ORIGIN}${OG_IMAGE_PATH}`;
-const FAVICON_PATH = "/images/mobile-shubh-astro-logo.svg";
-const FAVICON_URL = `${SITE_ORIGIN}${FAVICON_PATH}`;
-const DEFAULT_TITLE = "ShubhAstro";
-
 /**
  * CmsPageWrapper
  *
  * Wraps every route's component. For non-excluded routes:
  * 1. Calls GET /api/static-pages?slug=<path> using the current URL as slug
- * 2. Sets meta tags (title, description, keywords, OG, Twitter, canonical) from API response
+ * 2. Updates existing meta tags in index.html with CMS data (no duplicates)
  * 3. If body is non-empty → appends CMS HTML body below the child component
  * 4. If body is empty → renders the original child component (with meta still applied)
  *
- * Always renders a default Helmet with fallback title so no page is ever without a <title>.
- * Page-specific Helmets (SeoHelmet or CMS data) override this via react-helmet-async priority.
+ * Uses direct DOM manipulation via updateMeta() to replace meta tag values in-place.
  */
 const CmsPageWrapper = ({ children }) => {
   const { pathname } = useLocation();
@@ -84,59 +78,26 @@ const CmsPageWrapper = ({ children }) => {
     : null;
   const hasBody = pageData?.body && pageData.body.trim().length > 0;
 
-  const title = pageData?.meta_title || pageData?.title || DEFAULT_TITLE;
+  const title = pageData?.meta_title || pageData?.title || "";
   const description = pageData?.meta_description || pageData?.title || "";
   const keywords = pageData?.meta_tags
     ? Array.isArray(pageData.meta_tags)
       ? pageData.meta_tags.join(", ")
       : pageData.meta_tags
     : "";
-  // Strip query params and hash for canonical URL to avoid duplicate content
-  const canonicalUrl = typeof window !== "undefined"
-    ? `${window.location.origin}${window.location.pathname}`
-    : "";
+
+  // Update meta tags when CMS data changes
+  useEffect(() => {
+    if (pageData) {
+      updateMeta({ title, description, keywords });
+    }
+    // Reset to defaults when navigating away
+    return () => resetMeta();
+  }, [pageData, title, description, keywords]);
 
   return (
     <>
-      {pageData ? (
-        <Helmet>
-          <title>{title}</title>
-          {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
-          <link rel="icon" type="image/svg+xml" href={FAVICON_URL} />
-          <link rel="shortcut icon" href={FAVICON_URL} />
-          <meta name="description" content={description} />
-          {keywords && <meta name="keywords" content={keywords} />}
-
-          {/* Open Graph */}
-          <meta property="og:type" content="website" />
-          {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
-          <meta property="og:title" content={title} />
-          <meta property="og:description" content={description} />
-          <meta property="og:image" content={OG_IMAGE_URL} />
-          <meta property="og:image:secure_url" content={OG_IMAGE_URL} />
-
-          {/* Twitter */}
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={title} />
-          <meta name="twitter:description" content={description} />
-          <meta name="twitter:image" content={OG_IMAGE_URL} />
-        </Helmet>
-      ) : !shouldSkip && (
-        <Helmet>
-          <title>{DEFAULT_TITLE}</title>
-          {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
-          <link rel="icon" type="image/svg+xml" href={FAVICON_URL} />
-          <link rel="shortcut icon" href={FAVICON_URL} />
-          <meta property="og:type" content="website" />
-          {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
-          <meta property="og:title" content={DEFAULT_TITLE} />
-          <meta property="og:image" content={OG_IMAGE_URL} />
-          <meta property="og:image:secure_url" content={OG_IMAGE_URL} />
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={DEFAULT_TITLE} />
-          <meta name="twitter:image" content={OG_IMAGE_URL} />
-        </Helmet>
-      )}
+      <JsonLd pageTitle={title || "ShubhAstro"} pageDescription={description} />
 
       {hasBody ? (
         <>

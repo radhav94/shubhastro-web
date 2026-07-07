@@ -7,7 +7,7 @@ import abhijitIcon from "../../../../assets/images/Abhijit-Muhurat 1.png";
 import rahuKaalIcon from "../../../../assets/images/Crucial Muhurats.png";
 import gulikaIcon from "../../../../assets/images/Gulika-icon 1.png";
 import yamakantaIcon from "../../../../assets/images/Crucial Muhurats (1).png";
-
+import defaultSquareImg from "../../../../assets/images/default_image_square_500x500.png";
 const MUHURAT_ICONS = [abhijitIcon, rahuKaalIcon, gulikaIcon, yamakantaIcon];
 
 /** Strips seconds from time string: "12:17:35" → "12:17" (works with any script) */
@@ -87,7 +87,7 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
           <div key={m.name} className={styles.muhuratItem}>
             <div className={styles.muhuratTop}>
               <div className={styles.muhuratIcon}>
-                <img src={MUHURAT_ICONS[i]} alt={m.name} width="40" height="40" loading="lazy" />
+                <img src={MUHURAT_ICONS[i] || defaultSquareImg} alt={m.name} width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
               </div>
               <h5>{m.name}</h5>
             </div>

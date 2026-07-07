@@ -38,6 +38,7 @@ const LineDropdown = ({ title, subtitle, children, isOpen, onToggle, ttsText }) 
 const PalmistryResult = () => {
   const navigate = useNavigate();
   const { resultId } = useParams();
+  const handleBack = () => navigate('/ai-wow/ai-palmistry-scanner', { replace: true });
   const [activeTab, setActiveTab] = useState('overview');
   const [resultData, setResultData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -160,7 +161,7 @@ const PalmistryResult = () => {
       <div className={styles.container}>
         <header className={styles.headerWrap}>
           <div className={styles.header}>
-            <button className={styles.backButton} onClick={() => navigate('/ai-wow/ai-palmistry-scanner/instructions')}>
+            <button className={styles.backButton} onClick={handleBack}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -179,7 +180,7 @@ const PalmistryResult = () => {
       <div className={styles.container}>
         <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate('/ai-wow/ai-palmistry-scanner/instructions')}>
+          <button className={styles.backButton} onClick={handleBack}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -225,7 +226,7 @@ const PalmistryResult = () => {
       <div className={styles.container}>
         <header className={styles.headerWrap}>
           <div className={styles.header}>
-            <button className={styles.backButton} onClick={() => navigate('/ai-wow/ai-palmistry-scanner/instructions')}>
+            <button className={styles.backButton} onClick={handleBack}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -250,7 +251,7 @@ const PalmistryResult = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={() => navigate('/ai-wow/ai-palmistry-scanner/instructions')}>
+        <button className={styles.backButton} onClick={handleBack}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>

@@ -403,7 +403,7 @@ const TopHeader = () => {
                 onClick={() => requireAuth() && navigate(PATH.privateRoutes.RECHARGE.path)}
                 style={{ cursor: 'pointer' }}
               >
-                <img src={headerCoin} className={styles.coinImg} alt="coin icon" />
+                <img src={headerCoin} className={styles.coinImg} alt="coin icon" width="20" height="20" />
                 <span className={styles.walletAmount}>
                   {formatAmount(isFetchingBalance ? "..." : balance || 0)}
                 </span>

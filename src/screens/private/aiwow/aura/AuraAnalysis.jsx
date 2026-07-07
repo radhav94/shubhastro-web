@@ -27,6 +27,7 @@ const AuraAnalysis = () => {
   const [error, setError] = useState(null);
   const isMountedRef = React.useRef(true); // Track if component is mounted
   const abortControllerRef = React.useRef(null); // Store abort controller
+  const hasStartedRef = React.useRef(false);
 
   useEffect(() => {
     // Set mounted flag
@@ -44,6 +45,7 @@ const AuraAnalysis = () => {
   useEffect(() => {
     // Only run analysis if we have both image and profile, and haven't started yet
     if (auraImage && profile && !profileLoading && !isAnalyzing && !analysisComplete && !error) {
+      if (hasStartedRef.current) return;
       // Validate image format
       if (typeof auraImage !== 'string' || !auraImage.startsWith('data:image/')) {
         console.error('Invalid image format in Redux state:', typeof auraImage);
@@ -53,6 +55,7 @@ const AuraAnalysis = () => {
         return;
       }
 
+      hasStartedRef.current = true;
       performAnalysis(auraImage);
     } else if (!auraImage && !isAnalyzing && !analysisComplete && !error && !profileLoading) {
       // Only redirect if we don't have an image and we're not in the middle of anything
@@ -124,7 +127,7 @@ const AuraAnalysis = () => {
         // Only navigate if component is still mounted
         setTimeout(() => {
           if (isMountedRef.current) {
-            navigate(PATH.privateRoutes.AURA_RESULT.path[0]);
+            navigate(PATH.privateRoutes.AURA_RESULT.path[0], { replace: true });
           } else {
             console.log('Component unmounted - skipping navigation to result');
           }
@@ -192,7 +195,7 @@ const AuraAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate(PATH.privateRoutes.AURA_RESULT.path[0]);
+      navigate(PATH.privateRoutes.AURA_RESULT.path[0], { replace: true });
     }
   };
 

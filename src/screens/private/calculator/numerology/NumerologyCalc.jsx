@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -37,6 +37,10 @@ const NumerologyCalc = () => {
     // clear error on change
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
+
+  useEffect(() => {
+    trackEvent("calculator_opened", { calculator_name: "Numerology" });
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();

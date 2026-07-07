@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#F75801">
   <meta name="robots" content="%VITE_ROBOTS_CONTENT%" />
   <meta name="googlebot" content="%VITE_ROBOTS_CONTENT%" />
   <meta name="copyright" content="shubhastro.ai" />
@@ -13,14 +14,46 @@
   <link rel="icon" type="image/svg+xml" href="/images/mobile-shubh-astro-logo.svg" />
   <link rel="shortcut icon" href="/images/mobile-shubh-astro-logo.svg" />
   <link rel="apple-touch-icon" href="/images/mobile-shubh-astro-logo.svg" />
+  <link rel="manifest" href="/site.webmanifest" />
 
-  <!-- SEO meta tags injected dynamically -->
+  <!-- Mobile -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="ShubhAstro" />
+
+  <!-- Manifest -->
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- SEO defaults (updated in-place by JS when dynamic data loads) -->
+  <title>ShubhAstro - Talk to Best Astrologers Online | Kundli, Horoscope & Tarot</title>
+  <meta name="description" content="Connect with expert astrologers for personalized consultations via chat, call & video. Get free Kundli, daily horoscope, tarot readings, Panchang & more on ShubhAstro." />
+  <meta name="keywords" content="astrology, astrologer, kundli, horoscope, tarot reading, panchang, numerology, talk to astrologer, online astrology, vedic astrology, birth chart" />
+  <link rel="canonical" href="https://www.shubhastro.ai" />
+
+  <!-- Open Graph defaults -->
+  <meta property="og:site_name" content="ShubhAstro" />
+  <meta property="og:locale" content="en_IN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.shubhastro.ai" />
+  <meta property="og:title" content="ShubhAstro - Talk to Best Astrologers Online" />
+  <meta property="og:description" content="Connect with expert astrologers for personalized consultations via chat, call & video. Get free Kundli, daily horoscope, tarot readings & more." />
+  <meta property="og:image" content="https://www.shubhastro.ai/images/shubhastro-logo-banner.jpeg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="ShubhAstro - AI Powered Astrology Platform" />
+
+  <!-- Twitter Card defaults -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ShubhAstro - Talk to Best Astrologers Online" />
+  <meta name="twitter:description" content="Connect with expert astrologers for personalized consultations via chat, call & video. Get free Kundli, daily horoscope, tarot readings & more." />
+  <meta name="twitter:image" content="https://www.shubhastro.ai/images/shubhastro-logo-banner.jpeg" />
   <!-- Preconnect to critical third-party origins -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://assets.shubhastro.ai" />
-  <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-  <link rel="dns-prefetch" href="https://translate.googleapis.com" />
+  <link rel="preconnect" href="https://www.googletagmanager.com" />
+  <!-- <link rel="dns-prefetch" href="https://translate.googleapis.com" /> -->
   <link rel="dns-prefetch" href="https://www.gstatic.com" />
   <link rel="dns-prefetch" href="https://firebaseinstallations.googleapis.com" />
 
@@ -29,7 +62,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" /></noscript>
 
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/1778659648-1576013064.png" fetchpriority="low" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/1778659648-1576013064.png" fetchpriority="high" />
   <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/1778659743-240854750.png" fetchpriority="high" />
 
   <style>
@@ -65,12 +98,22 @@
   </style>
 
   <!-- Google Tag Manager -->
-  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  <!-- <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
   j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-T5DTGXHW');</script>
+  })(window,document,'script','dataLayer','GTM-T5DTGXHW');</script> -->
   <!-- End Google Tag Manager -->
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MQBQTN9GSH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-MQBQTN9GSH');
+  </script>
+  <!-- End Google tag (gtag.js) -->
 
   <!-- Microsoft Clarity -->
   <script type="text/javascript">
@@ -81,6 +124,36 @@
     })(window, document, "clarity", "script", "xeickgmcun");
   </script>
   <!-- End Microsoft Clarity -->
+
+  <!-- Structured Data (JSON-LD) — static fallback for non-JS crawlers -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ShubhAstro",
+    "url": "https://www.shubhastro.ai",
+    "logo": "https://www.shubhastro.ai/images/ShubhAstrologo.png",
+    "description": "AI Powered Astrology consultation platform with Kundli, Horoscope, Tarot readings and live astrologer consultations.",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "availableLanguage": ["English", "Hindi"]
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ShubhAstro",
+    "url": "https://www.shubhastro.ai",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://www.shubhastro.ai/talk-to-astrologer?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
 </head>
 
 <body>
@@ -89,9 +162,10 @@
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- End Google Tag Manager (noscript) -->
   <div id="root"></div>
+  <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">ShubhAstro - AI Powered Astrology, Kundli & Horoscope</h1>
   <script type="module" src="/src/main.jsx"></script>
   <!-- Google translate -->
-  <div id="google_translate_element"></div>
+  <!-- <div id="google_translate_element"></div>
 
   <script type="text/javascript">
     function googleTranslateElementInit() {
@@ -100,10 +174,7 @@
         "google_translate_element"
       );
     }
-  </script>
-
-  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
-
+  </script> -->
+  <!-- <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script> -->
 </body>
-
 </html>

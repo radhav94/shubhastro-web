@@ -26,6 +26,7 @@ const FaceReadingAnalysis = () => {
   
   const isMountedRef = React.useRef(true);
   const abortControllerRef = React.useRef(null);
+  const hasStartedRef = React.useRef(false);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -41,6 +42,8 @@ const FaceReadingAnalysis = () => {
     }
 
     if (profile && !isAnalyzing && !analysisComplete && !error) {
+      if (hasStartedRef.current) return;
+      hasStartedRef.current = true;
       performAnalysis(faceImage);
     }
   }, [faceImage, profile, profileLoading]);
@@ -84,7 +87,7 @@ const FaceReadingAnalysis = () => {
         // Only navigate if component is still mounted
         setTimeout(() => {
           if (isMountedRef.current) {
-            navigate(PATH.privateRoutes.FACE_READING_RESULT.path[0]);
+            navigate(PATH.privateRoutes.FACE_READING_RESULT.path[0], { replace: true });
           } else {
             console.log('Component unmounted - skipping navigation to result');
           }
@@ -127,7 +130,7 @@ const FaceReadingAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate(PATH.privateRoutes.FACE_READING_RESULT.path[0]);
+      navigate(PATH.privateRoutes.FACE_READING_RESULT.path[0], { replace: true });
     }
   };
 
