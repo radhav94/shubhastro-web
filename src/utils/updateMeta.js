@@ -53,6 +53,7 @@ export const updateMeta = ({ title, description, keywords, image, url } = {}) =>
   setMeta("property", "og:title", pageTitle);
   setMeta("property", "og:description", pageDesc);
   setMeta("property", "og:image", pageImage);
+  setMeta("property", "og:image:alt", pageTitle);
   setMeta("property", "og:url", pageUrl);
 
   // Twitter
