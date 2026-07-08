@@ -65,9 +65,20 @@ export default defineConfig({
     minify: 'esbuild',
     rollupOptions: {
       output: {
-        // Disable manual chunks to prevent React 19 internal splitting issues
-        // This ensures React and its dependencies stay together
-        manualChunks: undefined,
+        manualChunks(id) {
+          // Keep React core together
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/scheduler/')) {
+            return 'react-vendor';
+          }
+          // Redux + RTK in own chunk
+          if (id.includes('node_modules/@reduxjs/') || id.includes('node_modules/redux') || id.includes('node_modules/react-redux')) {
+            return 'redux-vendor';
+          }
+          // Router
+          if (id.includes('node_modules/react-router')) {
+            return 'router-vendor';
+          }
+        },
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]'

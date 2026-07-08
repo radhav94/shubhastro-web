@@ -57,13 +57,25 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com" />
   <link rel="dns-prefetch" href="https://firebaseinstallations.googleapis.com" />
 
-  <!-- Single Google Fonts load (consolidates all weights used across the app) -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" />
+  <!-- Non-render-blocking font load -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" /></noscript>
 
   <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/1778659648-1576013064.png" fetchpriority="high" />
   <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/1778659743-240854750.png" fetchpriority="high" />
 
   <style>
+    /* Size-adjusted fallback to reduce CLS from font swap */
+    @font-face {
+      font-family: 'Poppins Fallback';
+      src: local('Arial');
+      size-adjust: 110%;
+      ascent-override: 90%;
+      descent-override: 22%;
+      line-gap-override: 0%;
+    }
+
     body {
       background-color: #ebecf2;
       background-image: url('/src/assets/images/main-body-bg-new.png');
@@ -74,6 +86,7 @@
       margin: 0;
       padding: 0;
       min-height: 100dvh!important;
+      font-family: 'Poppins', 'Poppins Fallback', sans-serif;
     }
 
     /* Astrologer card — global background */

@@ -21,6 +21,7 @@ $font-primary:     "Poppins", sans-serif;
   width: 100%;
   position: relative;
   font-size: 14px;
+  contain: layout style;
 }
 
 /* Old footer — dark bg for all other pages */
@@ -138,6 +139,8 @@ $font-primary:     "Poppins", sans-serif;
 
 .v2_logo {
   width: 180px;
+  height: auto;
+  aspect-ratio: 150 / 32;
   margin-bottom: 16px;
 }
 
