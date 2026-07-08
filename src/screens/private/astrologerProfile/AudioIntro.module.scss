@@ -1,0 +1,130 @@
+.audioIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 2px solid #ffffff;
+  box-shadow: none;
+  margin: 10px 0;
+
+  @media (width <= 767px) {
+    border-radius: 12px;
+    gap: 10px;
+  }
+}
+
+.playerRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+
+  @media (width <= 767px) {
+    gap: 12px;
+  }
+}
+
+.playBtn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: #ec6a2b;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition: transform 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    background: #d95d20;
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.playIcon {
+  // nudge the triangle to look optically centered
+  margin-left: 2px;
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2b2b2b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.newBadge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+  background: #ec6a2b;
+  padding: 4px 8px;
+  border-radius: 10px;
+}
+
+.waveform {
+  flex: 1 1 auto; // fill the row between the play button and the duration
+  min-width: 0;
+  display: flex;
+  align-items: center; // mirror bars around the vertical center line
+  gap: 1px;
+  height: 40px;
+  overflow: hidden;
+}
+
+.bar {
+  flex: 1 1 0; // stretch to fill the full waveform width, up to the duration
+  min-width: 0;
+  border-radius: 1px;
+  background: #f4c4a4;
+  transition: background 0.1s linear;
+}
+
+.barPlayed {
+  background: #ec6a2b;
+}
+
+.duration {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b6b6b;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 480px) {
+  .audioIntro {
+    gap: 10px;
+  }
+
+  .playBtn {
+    width: 38px;
+    height: 38px;
+    font-size: 13px;
+  }
+
+  .title {
+    font-size: 13px;
+  }
+}

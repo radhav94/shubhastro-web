@@ -28,6 +28,7 @@ const PalmistryAnalysis = () => {
   // Track component mount status to prevent navigation after unmount
   const isMountedRef = React.useRef(true);
   const abortControllerRef = React.useRef(null);
+  const hasStartedRef = React.useRef(false);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -45,6 +46,8 @@ const PalmistryAnalysis = () => {
     }
 
     if (profile && !isAnalyzing && !analysisComplete && !error) {
+      if (hasStartedRef.current) return;
+      hasStartedRef.current = true;
       performAnalysis(palmImage, selectedHand);
     }
   }, [palmImage, selectedHand, profile, profileLoading]);
@@ -93,7 +96,7 @@ const PalmistryAnalysis = () => {
           // Only navigate if component is still mounted
           setTimeout(() => {
             if (isMountedRef.current) {
-              navigate(`${PATH.privateRoutes.PALMISTRY_RESULT.path[0]}/${resultId}`);
+              navigate(`${PATH.privateRoutes.PALMISTRY_RESULT.path[0]}/${resultId}`, { replace: true });
             } else {
               console.log('Component unmounted - skipping navigation to result');
             }
@@ -108,7 +111,7 @@ const PalmistryAnalysis = () => {
           // Only navigate if component is still mounted
           setTimeout(() => {
             if (isMountedRef.current) {
-              navigate(PATH.privateRoutes.PALMISTRY_RESULT.path[0]);
+              navigate(PATH.privateRoutes.PALMISTRY_RESULT.path[0], { replace: true });
             } else {
               console.log('Component unmounted - skipping navigation to result');
             }
@@ -160,7 +163,7 @@ const PalmistryAnalysis = () => {
 
   const handleShowResult = () => {
     if (analysisComplete) {
-      navigate(PATH.privateRoutes.PALMISTRY_RESULT.path[0]);
+      navigate(PATH.privateRoutes.PALMISTRY_RESULT.path[0], { replace: true });
     }
   };
 

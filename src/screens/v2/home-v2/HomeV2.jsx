@@ -114,14 +114,14 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   return path ? (
                     <Link key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} to={path} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
                       <div className={styles.wowIconBox}>
-                        <img src={iconSrc || defaultSquareImg} alt={item.title} width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
                       <span>{item.title}</span>
                     </Link>
                   ) : (
                     <div key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: item.slug ? 'pointer' : 'default' }}>
                       <div className={styles.wowIconBox}>
-                        <img src={iconSrc || defaultSquareImg} alt={item.title} width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
                       <span>{item.title}</span>
                     </div>
@@ -205,7 +205,9 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   {aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon ? (
               <img
                 src={aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon}
-                alt={aiServicesItems[3]?.title || ""}
+                alt={aiServicesItems[3]?.title || "ShubhAstro Live Community"}
+                width="200"
+                height="200"
                 loading="lazy"
               />
             ) : null}

@@ -248,11 +248,19 @@ const MatchMaking = () => {
       setPrimaryProfile(profile);
       setSelectedProfile(profile);
       // dispatch(setSelectedKundli(profile));
+      // Check if both are same gender
+      if (partnerProfile && profile.gender?.toLowerCase() === partnerProfile.gender?.toLowerCase()) {
+        Toast.error('Matchmaking requires one male and one female profile');
+      }
     }
 
     if (selectingType === "PARTNER") {
       if (profile._id === primaryProfile?._id) return; // prevent selecting same as primary
       setPartnerProfile(profile);
+      // Check if both are same gender
+      if (primaryProfile && primaryProfile.gender?.toLowerCase() === profile.gender?.toLowerCase()) {
+        Toast.error('Matchmaking requires one male and one female profile');
+      }
     }
 
     setShowSelectProfile(false);
@@ -680,10 +688,9 @@ const MatchMaking = () => {
               onClick={handleProceed}
               disabled={
                 isMatchLoading ||
-                (!!primaryProfile &&
-                !!partnerProfile &&
-                primaryProfile.gender?.toLowerCase() === "male" &&
-                partnerProfile.gender?.toLowerCase() === "male")
+                !primaryProfile ||
+                !partnerProfile ||
+                (primaryProfile?.gender?.toLowerCase() === partnerProfile?.gender?.toLowerCase())
               }
             >
               {isMatchLoading ? "Loading..." : "Proceed Ahead"}
