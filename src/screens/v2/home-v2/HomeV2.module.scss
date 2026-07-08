@@ -3254,9 +3254,9 @@
   // max-width: 500px;
   position: relative;
   z-index: 1;
-  // @media (width <= 768px) {
-  //   max-width: 100%;
-  // }
+  @media (width <= 768px) {
+    align-items: center;
+  }
 }
 
 .ctaTag {
@@ -3293,8 +3293,9 @@
   margin: 0;
   font-family: 'Poppins', sans-serif;
   line-height: 1.2;
-  @media (width <= 767px) {
+  @media (width <= 768px) {
     font-size: 18px;
+    text-align: center;
   }
 }
 
@@ -3305,6 +3306,9 @@
   font-family: 'Poppins', sans-serif;
   line-height: 1.6;
   font-weight: 400;
+  @media (width <= 768px) {
+    text-align: center;
+  }
 }
 
 .ctaAvatarRow {
@@ -3320,17 +3324,17 @@
 }
 
 .ctaAvatar {
-  width: 65px;
+  width: fit-content;
   height: 65px;
-  border-radius: 50%;
+  // border-radius: 50%;
   object-fit: cover;
-  border: 1.8px solid #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  margin-left: -16px;
+  // border: 1.8px solid #fff;
+  // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  // margin-left: -16px;
 
-  &:first-child {
-    margin-left: 0;
-  }
+  // &:first-child {
+  //   margin-left: 0;
+  // }
 }
 
 .ctaAvatarCount {
@@ -3463,6 +3467,9 @@
   gap: 20px;
   flex-wrap: wrap;
   padding-top: 6px;
+  @media (width <= 767px) {
+    gap: 12px;
+  }
 }
 
 .ctaTrustItem {
@@ -3473,6 +3480,13 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  @media (width <= 767px) {
+    font-size: 10px;
+    svg{
+      width: 15px;
+      height: 15px;
+    }
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
