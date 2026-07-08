@@ -60,7 +60,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: false,
+    sourcemap: 'hidden',
     // Strip console.log and console.warn in production builds
     minify: 'esbuild',
     rollupOptions: {
