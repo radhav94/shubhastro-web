@@ -64,7 +64,7 @@ const AstrologerCard = ({ astrologer, onConnect }) => {
             className={styles.chatBtn}
             onClick={() => onConnect(astrologer, "chat")}
           >
-            <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+            <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
           </button>
           <p className={styles.priceText}>
             <span className={styles.priceAmount}>₹{astrologer?.price?.chatRate?.amount || 0}</span>/min
@@ -75,7 +75,7 @@ const AstrologerCard = ({ astrologer, onConnect }) => {
             className={styles.callBtn}
             onClick={() => onConnect(astrologer, "audio")}
           >
-            <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+            <img src={AppIcons.CallMinutesIcon} alt="" /> Call
           </button>
           <p className={styles.priceText}>
             <span className={styles.priceAmount}>₹{astrologer?.price?.audioRate?.amount || 0}</span>/min

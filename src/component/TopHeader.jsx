@@ -262,12 +262,13 @@ const TopHeader = () => {
   // If in iframe mode, show minimal header with only language and close button
   if (isIframeMode) {
     return (
-      <header className={styles.iframeHeader}>
-        <div className={styles.iframeHeaderContent}>
-          {/* Language Dropdown */}
-          <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
-        </div>
-      </header>
+      null
+      // <header className={styles.iframeHeader}>
+      //   <div className={styles.iframeHeaderContent}>
+      //     Language Dropdown
+      //     <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
+      //   </div>
+      // </header>
     );
   }
 
@@ -403,7 +404,7 @@ const TopHeader = () => {
                 onClick={() => requireAuth() && navigate(PATH.privateRoutes.RECHARGE.path)}
                 style={{ cursor: 'pointer' }}
               >
-                <img src={headerCoin} className={styles.coinImg} alt="coin icon" />
+                <img src={headerCoin} className={styles.coinImg} alt="coin icon" width="20" height="20" />
                 <span className={styles.walletAmount}>
                   {formatAmount(isFetchingBalance ? "..." : balance || 0)}
                 </span>

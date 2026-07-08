@@ -245,7 +245,7 @@ const HomeLayout = () => {
         {showHeader && !isWebview && <Breadcrumb />}
 
         <Suspense fallback={<CircleSpinner />}>
-          <div className={styles.outletDiv} style={!isOnline ? { background: 'transparent' } : {}}>
+          <main className={styles.outletDiv} style={!isOnline ? { background: 'transparent' } : {}}>
             {/* Always keep Outlet mounted — NoInternet is an overlay so active calls aren't disrupted */}
             <Outlet />
             {!isOnline && (
@@ -263,7 +263,7 @@ const HomeLayout = () => {
                 <NoInternet />
               </div>
             )}
-          </div>
+          </main>
         </Suspense>
       </div>
 

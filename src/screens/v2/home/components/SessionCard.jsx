@@ -171,7 +171,7 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
                     onClick={(e) => handleButtonClick(e, session, "chat")}
                     disabled={isLoading || isLive}
                   >
-                    <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+                    <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
                   </button>
                   <p className={styles.sessionPriceText}>
                     <span className={styles.sessionPriceAmount}>₹{session?.price?.chatRate?.amount || session?.chatRate || 0}</span>/min
@@ -185,7 +185,7 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
                     onClick={(e) => handleButtonClick(e, session, "call")}
                     disabled={isLoading || isLive}
                   >
-                    <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+                    <img src={AppIcons.CallMinutesIcon} alt="" /> Call
                   </button>
                   <p className={styles.sessionPriceText}>
                     <span className={styles.sessionPriceAmount}>₹{session?.price?.audioRate?.amount || session?.callRate || 0}</span>/min

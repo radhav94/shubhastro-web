@@ -10,6 +10,7 @@ import { useAIWowDownload } from '../hooks/useAIWowDownload';
 
 const GemstoneResult = () => {
   const navigate = useNavigate();
+  const handleBack = () => navigate('/ai-wow/gemstone-authenticity', { replace: true });
   const [gemstones, setGemstones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedGemstoneIndex, setSelectedGemstoneIndex] = useState(0);
@@ -72,12 +73,12 @@ const GemstoneResult = () => {
       } catch (error) {
         console.error('Error parsing result:', error);
         Toast.error('Failed to load analysis results');
-        navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path[0], { replace: true });
+        navigate('/ai-wow/gemstone-authenticity', { replace: true });
         return;
       }
     } else {
       Toast.error('No analysis results found');
-      navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path[0], { replace: true });
+      navigate('/ai-wow/gemstone-authenticity', { replace: true });
       return;
     }
     setLoading(false);
@@ -638,7 +639,7 @@ const GemstoneResult = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate('/ai-wow/gemstone-authenticity/instructions')}>
+          <button className={styles.backButton} onClick={handleBack}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

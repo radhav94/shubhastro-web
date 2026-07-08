@@ -1,6 +1,8 @@
 import styles from "../Home.module.scss";
 
 const SectionHeader = ({ title }) => {
+    if (!title) return null;
+
     return (
         <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>{title}</h2>

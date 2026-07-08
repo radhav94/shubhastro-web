@@ -158,7 +158,7 @@ const NewAstrologerCard = memo(({
                 onClick={() => chatEnabled && onConnect(astrologer, "chat")}
                 disabled={!chatEnabled}
               >
-                <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+                <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
               </button>
               <p className={styles.priceText}>
                 {chatPrice > 0 ? (
@@ -182,7 +182,7 @@ const NewAstrologerCard = memo(({
                 onClick={() => callEnabled && onConnect(astrologer, "audio")}
                 disabled={!callEnabled}
               >
-                <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+                <img src={AppIcons.CallMinutesIcon} alt="" /> Call
               </button>
               <p className={styles.priceText}>
                 {callPrice > 0 ? (
