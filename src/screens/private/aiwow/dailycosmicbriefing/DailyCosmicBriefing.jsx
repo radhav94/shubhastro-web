@@ -232,9 +232,9 @@ const DailyCosmicBriefing = () => {
 
         <button
           className={styles.dailyBriefButton}
-          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
+          onClick={() => navigate(`${PATH.privateRoutes.TALK_TO_ASTROLOGER.path}/dream-interpretation`)}
         >
-          Consult with Expert Astrologer
+          Consult with Expert Astrologer 
         </button>
       </div>
     </div>

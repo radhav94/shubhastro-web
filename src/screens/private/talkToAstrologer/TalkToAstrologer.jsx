@@ -88,8 +88,9 @@ const TalkToAstrologer = () => {
 
   const pathParts = location.pathname.split("/").filter(Boolean);
   const moduleName = pathParts[0]; // talk-to-astrologers | chat-with-astrologers
-  const secondParam = pathParts[1]; // online | undefined
+  const secondParam = pathParts[1]; // online | category slug | undefined
   const isOnlineFromURL = secondParam === "online";
+  const categoryFromURL = secondParam && secondParam !== "online" ? secondParam : null;
   const getActiveConfigFromURL = () => {
     let isActiveOnline = false;
     let isActiveType = null;
@@ -1149,9 +1150,10 @@ const TalkToAstrologer = () => {
         onApplyFilters={handleApplyFilters}
         isOnlineFromURL={isOnlineFromURL}
         setShowFilterAstrologer={setShowFilterAstrologer}
-        selectedType={location.state?.selectedType}
+        selectedType={categoryFromURL || location.state?.selectedType}
         astroFilterTab={astroFilterTab}
         isFetchingFilterTab={isFetchingFilterTab}
+        moduleName={moduleName}
       />
 
       {/* Top Astrologers Section - New Design */}

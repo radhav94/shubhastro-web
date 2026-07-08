@@ -332,8 +332,16 @@ export const PATH = {
       path: "/talk-to-astrologer/online",
       element: TalkToAstrologer,
     },
+    TALK_TO_ASTROLOGER_CATEGORY: {
+      path: "/talk-to-astrologer/:category",
+      element: TalkToAstrologer,
+    },
     Chat_With_ASTROLOGER: {
       path: "/chat-to-astrologer",
+      element: TalkToAstrologer,
+    },
+    CHAT_TO_ASTROLOGER_CATEGORY: {
+      path: "/chat-to-astrologer/:category",
       element: TalkToAstrologer,
     },
     HOROSCOPE: {
