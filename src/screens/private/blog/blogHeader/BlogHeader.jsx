@@ -99,6 +99,7 @@ const BlogHeader = () => {
                       author={blog.author}
                       date={blog.publishDate}
                       blogId={blog.blogId || blog._id}
+                      slug={blog.slug}
                     />
                   </Link>
                 ))}
