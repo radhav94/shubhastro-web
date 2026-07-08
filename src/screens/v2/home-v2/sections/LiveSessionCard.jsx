@@ -40,6 +40,8 @@ const LiveSessionCard = memo(({ styles, sectionData }) => {
           src={image}
           alt="Live astrology session"
           className={styles.liveSessionImg}
+          width={395}
+          height={329}
           loading="lazy"
         />
       </div>
