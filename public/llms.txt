@@ -1,0 +1,28 @@
+# ShubhTalk
+
+> ShubhTalk is an astrology consultation platform connecting users with astrologers for personalized readings and services.
+
+## About
+
+ShubhTalk offers a comprehensive suite of astrology services including live consultations via chat, voice, and video calls with verified astrologers. The platform provides Kundli generation, horoscope predictions, tarot readings, Panchang information, and an astrology products marketplace.
+
+## Key Pages
+
+- [Home](https://shubhtalk.com/)
+- [Astrologers](https://shubhtalk.com/astrologers)
+- [Horoscope](https://shubhtalk.com/horoscope)
+- [Kundli](https://shubhtalk.com/kundli)
+- [Tarot](https://shubhtalk.com/tarot)
+- [Panchang](https://shubhtalk.com/panchang)
+- [Shop](https://shubhtalk.com/shop)
+- [Blog](https://shubhtalk.com/blog)
+
+## Services
+
+- **Live Consultations**: Chat, voice, and video calls with astrologers
+- **Kundli**: Birth chart generation, matching, and detailed analysis
+- **Horoscope**: Daily, weekly, monthly, and yearly predictions for all zodiac signs
+- **Tarot Readings**: Daily, love, career, and yes/no tarot card readings
+- **Panchang**: Hindu calendar, muhurat, and auspicious timing
+- **Numerology**: Name and number compatibility calculators
+- **Astromall**: Astrology products and remedies marketplace
