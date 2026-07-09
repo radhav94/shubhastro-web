@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import { AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
+import { getWorstNetworkQuality } from "../../agora/networkQuality";
 import {
   IoMic,
   IoMicOff,
@@ -18,6 +19,7 @@ import {
   IoChatbubbleEllipses,
   IoCall,
   IoWallet,
+  IoCellular,
 } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./VideoCalling.module.scss";
@@ -103,6 +105,11 @@ const VideoCalling = ({ callData }) => {
   const [showRechargeButton, setShowRechargeButton] = useState(false);
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
   const [remoteVideoEnabled, setRemoteVideoEnabled] = useState(true);
+  // Agora network/signal quality of the weakest link (uplink/downlink)
+  const [networkQuality, setNetworkQuality] = useState({ label: "Connecting…", level: "unknown", quality: 0 });
+  // True when the signal drops to "Connecting…" (quality 0) after being connected
+  const [isNetworkLost, setIsNetworkLost] = useState(false);
+  const hadNetworkRef = useRef(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
@@ -310,6 +317,20 @@ const VideoCalling = ({ callData }) => {
 
         const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
         clientRef.current = client;
+
+        // Signal/network quality — fires ~every 2s with uplink/downlink ratings
+        client.on("network-quality", (stats) => {
+          const info = getWorstNetworkQuality(stats);
+          setNetworkQuality(info);
+          // Once we've had a real reading, a drop back to 0 means the signal
+          // was lost — surface the reconnecting banner.
+          if (info.quality > 0) {
+            hadNetworkRef.current = true;
+            setIsNetworkLost(false);
+          } else if (hadNetworkRef.current) {
+            setIsNetworkLost(true);
+          }
+        });
 
         client.on("user-published", async (user, mediaType) => {
           console.log("[VideoCall] 📡 user-published — uid:", user.uid, "mediaType:", mediaType);
@@ -1419,6 +1440,15 @@ const VideoCalling = ({ callData }) => {
               </button>
             </div>
 
+            {/* Network / signal quality indicator */}
+            <span
+              className={styles.networkStatus}
+              style={{ backgroundColor: networkQuality.color, color: "#fff" }}
+            >
+              <IoCellular className={styles.networkIcon} size={14} />
+              {networkQuality.label}
+            </span>
+
             {/* Video Area */}
             <div className={styles.videoWrapper}>
               {/* Remote Video Container - Always rendered */}
@@ -1459,7 +1489,7 @@ const VideoCalling = ({ callData }) => {
             <div className={styles.bottomControls}>
               {/* Call Duration Timer */}
               <div className={styles.callTimer}>
-                {isReconnecting ? (
+                {isReconnecting || isNetworkLost ? (
                   <span className={styles.reconnecting}>Reconnecting...</span>
                 ) : joined ? (
                   formatTime(callSeconds)
@@ -1653,7 +1683,7 @@ const VideoCalling = ({ callData }) => {
         />
 
         {/* Reconnection Overlay */}
-        {isReconnecting && (
+        {(isReconnecting || isNetworkLost) && (
           <div className={styles.reconnectOverlay}>
             <div className={styles.reconnectModal}>
               <div className={styles.reconnectSpinner}>
