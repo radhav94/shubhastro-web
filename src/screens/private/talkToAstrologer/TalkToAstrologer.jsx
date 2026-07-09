@@ -72,6 +72,7 @@ const TalkToAstrologer = () => {
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [showFilterAstrologer, setShowFilterAstrologer] = useState(false);
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
 
   const { data: astroFilterTab, isFetchingFilterTab } = useGetAstrologerFilterCategoryTabQuery();
 
@@ -1139,8 +1140,11 @@ const TalkToAstrologer = () => {
         selectedType={location.state?.selectedType || new URLSearchParams(location.search).get("category") || categoryFromParams || undefined}
         astroFilterTab={astroFilterTab}
         isFetchingFilterTab={isFetchingFilterTab}
+        onFilterLoading={setIsFilterLoading}
       />
 
+
+      <PrimaryLoader isLoading={isFilterLoading} />
       {/* Top Astrologers Section - New Design */}
       {!showFilterAstrologer && topTenAstrologers.length > 0 && (
         <>

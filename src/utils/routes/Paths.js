@@ -340,6 +340,10 @@ export const PATH = {
       path: "/astrologers",
       element: TalkToAstrologer,
     },
+    ASTROLOGERS_CATEGORY: {
+      path: "/astrologers/:category",
+      element: TalkToAstrologer,
+    },
     HOROSCOPE: {
       path: "/horoscope",
       element: Horoscope,

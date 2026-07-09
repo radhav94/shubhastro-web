@@ -150,8 +150,8 @@
 
   &.activeChip {
     border-color: orangered !important;
-    background: #fff3e0 !important;
-    color: #2c2c2c !important;
+    background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #d43400 100%));
+    color: #ffff !important;
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(255, 167, 38, 0.2);
   }
