@@ -318,7 +318,7 @@ const TopHeader = () => {
               Explore
             </NavLink> */}
             <NavLink
-              to="/chat-to-astrologer"
+              to="/astrologers"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -477,7 +477,7 @@ const TopHeader = () => {
               Tarot
             </NavLink> */}
             {/* <NavLink
-              to="/chat-to-astrologer"
+              to="/astrologers"
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`
               }
@@ -608,7 +608,7 @@ const TopHeader = () => {
               Home
             </NavLink>
             <NavLink
-              to="/chat-to-astrologer"
+              to="/astrologers"
               onClick={() => setIsDrawerOpen(false)}
               className={({ isActive }) =>
                 `${styles.headerNavLink} ${isActive ? styles.active : ""}`

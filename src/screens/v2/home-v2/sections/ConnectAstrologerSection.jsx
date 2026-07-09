@@ -33,7 +33,7 @@ const ConnectAstrologerSection = memo(({ sectionData, styles }) => {
   const navigate = useNavigate();
 
   const handleNavigate = useCallback(() => {
-    navigate("/chat-to-astrologer");
+    navigate("/astrologers");
   }, [navigate]);
 
   const trustLabels = sectionData?.tag_label || DEFAULT_TRUST_LABELS;

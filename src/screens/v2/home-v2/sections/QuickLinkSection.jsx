@@ -17,9 +17,9 @@ const SLUG_ROUTE_MAP = {
   match: "/match-making",
   session: "/profile",
   order: "/profile",
-  talk: "/chat-to-astrologer",
-  consult: "/chat-to-astrologer",
-  astrologer: "/chat-to-astrologer",
+  talk: "/astrologers",
+  consult: "/astrologers",
+  astrologer: "/astrologers",
 };
 
 const resolveRoute = (item, navigate) => {

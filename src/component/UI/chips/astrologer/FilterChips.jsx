@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./FilterChips.module.scss";
 import { useLazyFilterAstrologersQuery } from "../../../../redux/api/astrologer/astrologerApi";
 import { FaCheck } from "react-icons/fa";
@@ -15,6 +16,7 @@ const searchValidationSchema = Yup.object({
 const FilterChips = ({
   onSelect,
   onApplyFilters,
+  onFilterLoading,
   isActiveType,
   isOnlineFromURL,
   setShowFilterAstrologer,
@@ -23,6 +25,8 @@ const FilterChips = ({
   isFetchingFilterTab = false,
 }) => {
 
+  const navigate = useNavigate();
+  const location = useLocation();
   const [triggerFilter, { isLoading }] = useLazyFilterAstrologersQuery();
   const [active, setActive] = useState(
     selectedType === "All" ? "all" : selectedType
@@ -167,7 +171,7 @@ const FilterChips = ({
   const skillFilterData = filterTabData?.find((item) => item.title === "Skill");
   const filterButtons = [
     { name: "All",slug:"all" },
-    { name: "Online",slug:"online" },
+    // { name: "Online",slug:"online" },
     ...(skillFilterData?.list || []).map((skill) => ({ name: skill.title,slug:skill.slug })),
   ];
 
@@ -253,7 +257,7 @@ const FilterChips = ({
     try {
       loadingMoreRef.current = true;
       isFilterActiveRef.current = true;
-
+      if (!append) onFilterLoading?.(true);
       const response = await triggerFilter({
         searchText: finalSearchText,
         selectedSkills: finalSkills,
@@ -289,6 +293,7 @@ const FilterChips = ({
       console.error(error);
     } finally {
       loadingMoreRef.current = false;
+      onFilterLoading?.(false);
     }
   };
 
@@ -437,6 +442,9 @@ const FilterChips = ({
     const clickedButton = filterButtons.find(btn => btn.slug === itemSlug);
     const itemName = clickedButton?.slug || itemSlug;
 
+    // Determine the base path from current URL (supports /astrologers, /talk-to-astrologer, /chat-to-astrologer)
+    const basePath = location.pathname.split("/").filter(Boolean)[0] || "astrologers";
+
     setPage(1);
     pageRef.current = 1;
     setHasMore(true);
@@ -453,6 +461,7 @@ const FilterChips = ({
       isFilterActiveRef.current = false;
       setShowFilterAstrologer(false);
       onSelect?.(null);
+      navigate(`/${basePath}`, { replace: true });
       return;
     }
 
@@ -467,6 +476,7 @@ const FilterChips = ({
       setSearchText("");
       isFilterActiveRef.current = true;
 
+      navigate(`/${basePath}/online`, { replace: true });
       applyFilters({
         pageNo: 1,
         experties: "online",
@@ -476,41 +486,40 @@ const FilterChips = ({
       return;
     }
 
-    // Skill chips — multi-select toggle (preserve searchText)
-    let newChips;
+    // Skill chips — single select only (clicking same chip deselects it)
     if (activeChips.includes(itemSlug)) {
-      newChips = activeChips.filter((c) => c !== itemSlug);
-    } else {
-      newChips = [...activeChips, itemSlug];
-    }
-
-    // If all chips deselected and no search, revert to "All"
-    if (newChips.length === 0 && !searchText) {
-      setActive("all");
-      setActiveChips([]);
-      setEexperties("");
-      setSelectedSkills([]);
-      isFilterActiveRef.current = false;
-      setShowFilterAstrologer(false);
-      onSelect?.(null);
+      // Deselecting the active chip
+      if (!searchText) {
+        setActive("all");
+        setActiveChips([]);
+        setEexperties("");
+        setSelectedSkills([]);
+        isFilterActiveRef.current = false;
+        setShowFilterAstrologer(false);
+        onSelect?.(null);
+        navigate(`/${basePath}`, { replace: true });
+      } else {
+        // Search is active, keep search mode
+        setActiveChips([]);
+        setSelectedSkills([]);
+        setEexperties("");
+        isFilterActiveRef.current = true;
+        navigate(`/${basePath}`, { replace: true });
+        applyFilters({
+          pageNo: 1,
+          searchValue: searchText,
+          skills: [],
+          category: "search",
+          append: false,
+        });
+      }
       return;
     }
 
-    // If all chips deselected but search is active, keep search mode
-    if (newChips.length === 0 && searchText) {
-      setActiveChips([]);
-      setSelectedSkills([]);
-      setEexperties("");
-      isFilterActiveRef.current = true;
-      applyFilters({
-        pageNo: 1,
-        searchValue: searchText,
-        skills: [],
-        category: "search",
-        append: false,
-      });
-      return;
-    }
+    // Selecting a new chip — replace any previous selection (single select)
+    const newChips = [itemSlug];
+
+    navigate(`/${basePath}/${itemSlug}`, { replace: true });
 
     setActive("");
     setActiveChips(newChips);

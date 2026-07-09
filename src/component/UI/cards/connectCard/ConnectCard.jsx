@@ -8,7 +8,7 @@ import askToAsrtroMob from "../../../../assets/images/ask-an-astrologer-mob.png"
 const ConnectCard = () => {
   return (
     <div className={styles.connectCard}>
-      <Link to="/chat-to-astrologer">
+      <Link to="/astrologers">
         <img src={askToAsrtroDesktop} className={styles.askToAsrtroDesktop} alt="ask to astrologer" />
         <img src={askToAsrtroMob} className={styles.askToAsrtroMob} alt="ask to astrologer" />
         <button className={styles.askAnAstrobtn}>Consult with an Astrologer</button>
@@ -19,12 +19,12 @@ const ConnectCard = () => {
       </p> */}
 
       {/* <div className={styles.buttons}>
-        <Link to="/chat-to-astrologer" className={styles.btn}>
+        <Link to="/astrologers" className={styles.btn}>
           <FiPhoneCall className={styles.icon} />
           Talk to Astrologer
         </Link>
 
-        <Link to="/chat-to-astrologer" className={styles.btn}>
+        <Link to="/astrologers" className={styles.btn}>
           <BsChatDots className={styles.icon} />
           Chat with Astrologer
         </Link>

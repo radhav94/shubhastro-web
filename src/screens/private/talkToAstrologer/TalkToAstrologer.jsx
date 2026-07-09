@@ -9,7 +9,7 @@ import {
   Toast,
 } from "../../../component";
 import styles from "./TalkToAstrologer.module.scss";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useTalkToAstrologer } from "./useTalkToAstrologer";
 import {
   useGetAstrologersQuery,
@@ -61,6 +61,7 @@ const astroImages = [
 const TalkToAstrologer = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { category: categoryFromParams } = useParams();
   const requireAuth = useRequireAuth();
   const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
@@ -71,6 +72,7 @@ const TalkToAstrologer = () => {
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [showFilterAstrologer, setShowFilterAstrologer] = useState(false);
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
 
   const { data: astroFilterTab, isFetchingFilterTab } = useGetAstrologerFilterCategoryTabQuery();
 
@@ -80,15 +82,15 @@ const TalkToAstrologer = () => {
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
 
   const location = useLocation(); //  get current URL
-  // const isChatMode = location.pathname === "/chat-to-astrologer";
+  // const isChatMode = location.pathname === "/astrologers";
   const currentPath = location.pathname.split("/").pop();
 
   const showCTA = useRecommendTrigger(120, resetTrigger);
   /* ---------------------- URL BASED LOGIC ---------------------- */
 
   const pathParts = location.pathname.split("/").filter(Boolean);
-  const moduleName = pathParts[0]; // talk-to-astrologers | chat-with-astrologers
-  const secondParam = pathParts[1]; // online | undefined
+  const moduleName = pathParts[0]; // astrologers
+  const secondParam = pathParts[1]; // online | category slug | undefined
   const isOnlineFromURL = secondParam === "online";
   const getActiveConfigFromURL = () => {
     let isActiveOnline = false;
@@ -96,14 +98,6 @@ const TalkToAstrologer = () => {
 
     if (secondParam === "online") {
       isActiveOnline = true;
-
-      if (moduleName === "chat-with-astrologers") {
-        isActiveType = "chat";
-      }
-
-      if (moduleName === "talk-to-astrologers") {
-        isActiveType = "video,audio";
-      }
     }
 
     return { isActiveOnline, isActiveType };
@@ -117,7 +111,7 @@ const TalkToAstrologer = () => {
     setActiveConfig(getActiveConfigFromURL());
   }, [location.pathname]);
 
-  const isChatMode = moduleName === "chat-with-astrologers";
+  const isChatMode = false;
   useEffect(() => {
     if (showCTA) {
       setShowRecommend(true);
@@ -236,13 +230,7 @@ const TalkToAstrologer = () => {
 
   // Detect type based on URL
   const getTypeFromURL = () => {
-    if (moduleName === "chat-with-astrologers") {
-      return "chat";
-    }
-
-    if (moduleName === "talk-to-astrologers") {
-      return "video,audio";
-    }
+    return undefined;
   };
 
   // 🔥 Set initial activeType from URL
@@ -1149,11 +1137,14 @@ const TalkToAstrologer = () => {
         onApplyFilters={handleApplyFilters}
         isOnlineFromURL={isOnlineFromURL}
         setShowFilterAstrologer={setShowFilterAstrologer}
-        selectedType={location.state?.selectedType}
+        selectedType={location.state?.selectedType || new URLSearchParams(location.search).get("category") || categoryFromParams || undefined}
         astroFilterTab={astroFilterTab}
         isFetchingFilterTab={isFetchingFilterTab}
+        onFilterLoading={setIsFilterLoading}
       />
 
+
+      <PrimaryLoader isLoading={isFilterLoading} />
       {/* Top Astrologers Section - New Design */}
       {!showFilterAstrologer && topTenAstrologers.length > 0 && (
         <>

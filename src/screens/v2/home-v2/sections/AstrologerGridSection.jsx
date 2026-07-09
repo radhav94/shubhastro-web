@@ -124,7 +124,7 @@ const AstrologerGridSection = memo(({ sectionData, styles, onConnect }) => {
             <button
               className={styles.viewAllBtn}
               style={{ marginRight: "16px" }}
-              onClick={() => navigate("/chat-to-astrologer")}
+              onClick={() => navigate("/astrologers")}
             >
               View All →
             </button>

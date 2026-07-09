@@ -206,7 +206,7 @@ const LalKitabDetail = () => {
 
       {/* Consult with Astrologer */}
       <div className={styles.consultCta}>
-        <button className={styles.consultBtn} onClick={() => navigate("/talk-to-astrologer")}>
+        <button className={styles.consultBtn} onClick={() => navigate("/astrologers")}>
           Consult with Expert Astrologer
         </button>
       </div>
