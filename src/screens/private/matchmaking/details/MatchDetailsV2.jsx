@@ -32,7 +32,7 @@ const MatchDetailsV2 = () => {
   };
 
   const handleTalkToExpert = () => {
-    navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path, {
+    navigate(PATH.privateRoutes.ASTROLOGERS_LIST.path, {
       state: { selectedType: "matchmaking" }
     });
   };

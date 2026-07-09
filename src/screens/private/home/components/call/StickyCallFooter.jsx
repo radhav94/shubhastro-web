@@ -22,7 +22,7 @@ const StickyCallFooter = () => {
   const { hasAnyPending } = useWaitingQueue();
   const navigate = useNavigate();
 
-  const onTalkDetailPage = useMatch("/talk-to-astrologer/:id");
+  const onTalkDetailPage = useMatch("/chat-to-astrologer/:id");
 
   useEffect(() => {
     if (!callApproval) return;
@@ -74,7 +74,7 @@ const StickyCallFooter = () => {
             </div>
             <button
               onClick={() =>
-                navigate(`/talk-to-astrologer/${activeCall.astrologerId}`, {
+                navigate(`/astrologers/${activeCall.astrologerId}`, {
                   state: {
                     userId: activeCall.userId,
                     astrologerId: activeCall.astrologerId,

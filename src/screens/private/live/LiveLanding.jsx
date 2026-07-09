@@ -84,7 +84,7 @@ const LiveLanding = () => {
     };
 
     const handleTalkToAstrologer = () => {
-        navigate("/chat-to-astrologer");
+        navigate("/astrologers");
     };
 
     return (

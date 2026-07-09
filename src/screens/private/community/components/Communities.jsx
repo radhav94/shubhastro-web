@@ -150,7 +150,7 @@ const Communities = ({ onCommunityClick, topAstrologers = [], sectionContent = [
             </h2>
             <button
               className={styles.viewAllBtn}
-              onClick={() => navigate("/chat-to-astrologer")}
+              onClick={() => navigate("/astrologers")}
             >
               View all &gt;
             </button>

@@ -6,6 +6,7 @@ import { Toast, PieChart } from '../../../../component';
 import TTSButton from '../../../../component/UI/TTSButton';
 import DownloadReportModal from '../components/DownloadReportModal';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
+import { PATH } from '../../../../utils/routes/Paths';
 
 const FaceReadingResult = () => {
   const navigate = useNavigate();
@@ -687,7 +688,7 @@ const FaceReadingResult = () => {
         <div className='text-center'>
           <button 
             className={styles.consultButton}
-            onClick={() => navigate('/chat-to-astrologer')}
+            onClick={() => navigate(PATH.privateRoutes.ASTROLOGERS_LIST.path)}
           >
             Consult with Expert Astrologer
           </button>

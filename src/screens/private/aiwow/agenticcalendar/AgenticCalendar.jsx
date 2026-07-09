@@ -559,7 +559,7 @@ const AgenticCalendar = () => {
           {analysis?.optimalTimings?.length > 0 && (
             <button
               className={styles.consultButton}
-              onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}
+              onClick={() => navigate(PATH.privateRoutes.ASTROLOGERS_LIST.path)}
             >
               Consult With Expert Astrologer
             </button>
