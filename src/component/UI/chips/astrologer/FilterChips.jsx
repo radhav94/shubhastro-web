@@ -6,7 +6,6 @@ import { FaCheck } from "react-icons/fa";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { AppIcons, AppImages } from "../../../../utils/appImages";
-import { useNavigate, useLocation } from "react-router-dom";
 
 // NEW: Yup validation schema for search input — only alphabetic characters and spaces allowed
 const searchValidationSchema = Yup.object({
@@ -22,11 +21,8 @@ const FilterChips = ({
   selectedType = "All",
   astroFilterTab = [],
   isFetchingFilterTab = false,
-  moduleName,
 }) => {
 
-  const navigate = useNavigate();
-  const location = useLocation();
   const [triggerFilter, { isLoading }] = useLazyFilterAstrologersQuery();
   const [active, setActive] = useState(
     selectedType === "All" ? "all" : selectedType
@@ -128,8 +124,6 @@ const FilterChips = ({
     if (selectedType && selectedType !== "All") {
       setActive(selectedType);
       setEexperties(selectedType);
-      setActiveChips([selectedType]);
-      setSelectedSkills([selectedType]);
       setPage(1);
       pageRef.current = 1;
       setHasMore(true);
@@ -138,7 +132,7 @@ const FilterChips = ({
       // Trigger the filter API call
       applyFilters({
         pageNo: 1,
-        skills: [selectedType],
+        experties: selectedType,
         ignoreSearch: true,
         append: false,
       });
@@ -442,7 +436,6 @@ const FilterChips = ({
   const handleClick = (itemSlug) => {
     const clickedButton = filterButtons.find(btn => btn.slug === itemSlug);
     const itemName = clickedButton?.slug || itemSlug;
-    const basePath = `/${moduleName || location.pathname.split("/").filter(Boolean)[0] || "chat-to-astrologer"}`;
 
     setPage(1);
     pageRef.current = 1;
@@ -459,7 +452,6 @@ const FilterChips = ({
       setSearchText("");
       isFilterActiveRef.current = false;
       setShowFilterAstrologer(false);
-      navigate(basePath, { replace: true });
       onSelect?.(null);
       return;
     }
@@ -474,7 +466,6 @@ const FilterChips = ({
       setSelectedSort("");
       setSearchText("");
       isFilterActiveRef.current = true;
-      navigate(`${basePath}/online`, { replace: true });
 
       applyFilters({
         pageNo: 1,
@@ -501,7 +492,6 @@ const FilterChips = ({
       setSelectedSkills([]);
       isFilterActiveRef.current = false;
       setShowFilterAstrologer(false);
-      navigate(basePath, { replace: true });
       onSelect?.(null);
       return;
     }
@@ -527,14 +517,6 @@ const FilterChips = ({
     setSelectedSkills(newChips);
     setEexperties("");
     isFilterActiveRef.current = true;
-
-    // Update URL with category slug (use last selected chip for URL)
-    if (newChips.length === 1) {
-      navigate(`${basePath}/${newChips[0]}`, { replace: true });
-    } else if (newChips.length > 1) {
-      // For multi-select, use the last added chip in URL
-      navigate(`${basePath}/${newChips[newChips.length - 1]}`, { replace: true });
-    }
 
     applyFilters({
       pageNo: 1,

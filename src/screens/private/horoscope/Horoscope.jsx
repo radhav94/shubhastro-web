@@ -568,7 +568,7 @@ const HoroscopeNew = () => {
     return {
       title: categories.find(c => c.id === activeCategory)?.label || activeCategory,
       subtitle: activeTab === 'Today' ? formatted : activeTab === 'Tomorrow' ? 'Tomorrow' : 'Sunday - Saturday',
-      content: categoryData?.split_response,
+      content: categoryData?.split_response || 'Content coming soon.',
       score: categoryData?.score,
       luckyColor: response.lucky_color,
       luckyColorCode: response.lucky_color_code,

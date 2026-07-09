@@ -735,7 +735,7 @@ const SmartMatchmaking = () => {
               </div>
             </div>
 
-            <button className={styles.newAnalysisButton} onClick={() => navigate(`${PATH.privateRoutes.Chat_With_ASTROLOGER.path}/matchmaking`)}>
+            <button className={styles.newAnalysisButton} onClick={() => navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path)}>
               Consult With Expert Astrologer
             </button>
           </div>
