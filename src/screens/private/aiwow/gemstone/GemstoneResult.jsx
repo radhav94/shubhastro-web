@@ -708,7 +708,7 @@ const GemstoneResult = () => {
 
         <button 
           className={styles.consultButton}
-          onClick={() => navigate(`${PATH.privateRoutes.TALK_TO_ASTROLOGER.path}/gemstone-advice`)}
+          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
         >
           Consult with Expert Astrologer
         </button>

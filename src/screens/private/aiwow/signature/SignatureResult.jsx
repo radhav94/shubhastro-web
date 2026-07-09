@@ -632,7 +632,7 @@ const SignatureResult = () => {
 
         <button 
           className={styles.consultButton}
-          onClick={() => navigate(`${PATH.privateRoutes.TALK_TO_ASTROLOGER.path}/signature-analysis`)}
+          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
         >
           Consult with Expert Astrologer
         </button>
