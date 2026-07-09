@@ -658,6 +658,8 @@
 
 /* WOW Card — target design */
 .wowCard {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -676,7 +678,7 @@
     transform: translateY(-2px);
   }
 
-  span {
+  .wowCardTitle {
     font-family: 'Poppins', sans-serif;
     font-size: 0.8rem;
     font-weight: 500;
@@ -700,10 +702,37 @@
     padding: 10px 6px;
     justify-content: flex-start;
     gap: 6px;
-    span {
+    .wowCardTitle {
       font-size: 13px;
     }
   }
+}
+
+/* Paid corner ribbon on WOW cards — compact banner overhanging the top-right corner */
+.wowPaidRibbon {
+  position: absolute;
+  top: 1px;
+  right: clamp(-25px, -1.7vw, -18px);
+  transform: rotate(45deg);
+  transform-origin: center;
+  background: linear-gradient(135deg, #ff6a3d 0%, #e11d1d 100%);
+  color: #ffffff;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(9px, 0.84vw, 12px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: clamp(0.2px, 0.03vw, 0.4px);
+  text-transform: capitalize;
+  padding:
+    clamp(4px, 0.55vw, 8px)
+    clamp(18px, 1.75vw, 25px);
+  border-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+  z-index: 3;
+  height: auto;
+  white-space: nowrap;
 }
 
 .wowIconBox {
@@ -3743,7 +3772,7 @@
 
   // .wowCard { min-height: 160px; padding: 16px 8px; }
   // .wowIconBox { width: 40px; height: 40px;}
-  .wowCard span {
+  .wowCard .wowCardTitle {
     font-size: 13px;
   }
 
@@ -3808,7 +3837,7 @@
     grid-template-columns: 1fr;
   }
 
-  .wowCard span {
+  .wowCard .wowCardTitle {
     font-size: 12px;
   }
 
@@ -4320,7 +4349,7 @@
     display: none;
   }
 
-  >* {
+  > :not(.wowPaidRibbon) {
     position: relative;
     z-index: 1;
   }
@@ -4862,7 +4891,7 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
   // outline: 1.5px solid rgba(255,255,255,0.95) !important;
 }
 @media (width <= 390px) {
-  .wowCard span {
+  .wowCard .wowCardTitle {
       font-size: 10px;
     }
 }

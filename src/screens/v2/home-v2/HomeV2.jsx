@@ -23,6 +23,7 @@ import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, Astr
 const ProfileModals = lazy(() => import("../../private/kundli/components/ProfileModals"));
 const EmergencySessionModal = lazy(() => import("../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal"));
 const MobileAppModal = lazy(() => import("../../private/aiwow/components/MobileAppModal"));
+const SubscriptionModal = lazy(() => import("../../../component/UI/modal/SubscriptionModal/SubscriptionModal"));
 const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));
 
 // Fallback images
@@ -44,7 +45,7 @@ const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
 
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
-const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount }) => {
+const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick }) => {
   // Sort sections by list_order to determine column placement
   // 1st by list_order → LEFT, 2nd → CENTER, 3rd → RIGHT
   // ai-services is special: it distributes across columns (laal kitaab left, occult/pandit center, community right)
@@ -111,19 +112,38 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                 {sortContentByOrder(section.content || []).map((item, i) => {
                   const path = getWowCardPath(item);
                   const iconSrc = item.icon || item.image_url_web || item.iconUrl || item.icon_url || item.image_url_app;
+                  // Show the "Paid" ribbon on the first card of the suite.
+                  const paidLabel = i === 0 ? "Paid" : null;
+                  const cardIcon = (
+                    <div className={styles.wowIconBox}>
+                      <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                    </div>
+                  );
+                  // The paid card (first card) opens the premium plans modal instead of navigating.
+                  if (i === 0) {
+                    return (
+                      <div key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} onClick={() => onPaidCardClick(item)} style={{ cursor: 'pointer' }}>
+                        {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
+                        {cardIcon}
+                        <span className={styles.wowCardTitle}>{item.title}</span>
+                      </div>
+                    );
+                  }
                   return path ? (
                     <Link key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} to={path} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
+                      {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
                       <div className={styles.wowIconBox}>
                         <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
-                      <span>{item.title}</span>
+                      <span className={styles.wowCardTitle}>{item.title}</span>
                     </Link>
                   ) : (
                     <div key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: item.slug ? 'pointer' : 'default' }}>
+                      {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
                       <div className={styles.wowIconBox}>
                         <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
-                      <span>{item.title}</span>
+                      <span className={styles.wowCardTitle}>{item.title}</span>
                     </div>
                   );
                 })}
@@ -352,6 +372,7 @@ const HomeV2 = () => {
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   // ─── Data Fetching ────────────────────────────────────────────────────────
   const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery();
@@ -444,10 +465,11 @@ const HomeV2 = () => {
   const handleEmergencyChatNow = useCallback((a) => handleConnectClick(a, "chat", true), [handleConnectClick]);
   const handleEmergencyCallNow = useCallback((a) => handleConnectClick(a, "audio", true), [handleConnectClick]);
   const handleMobileAppClose = useCallback(() => setShowMobileAppModal(false), []);
+  const handlePaidCardClick = useCallback(() => setShowSubscriptionModal(true), []);
   const handleRechargeClose = useCallback(() => hookSetOpenModal((prev) => ({ ...prev, recharge: false })), [hookSetOpenModal]);
 
   // ─── Shared props for group renderers ─────────────────────────────────────
-  const heroProps = { styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount };
+  const heroProps = { styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick: handlePaidCardClick };
   const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id, astrologerMaleImg };
 
   // ─── Render ───────────────────────────────────────────────────────────────
@@ -495,6 +517,7 @@ const HomeV2 = () => {
         <ProfileModals profiles={profiles} isCreating={isCreating} showAddProfile={showAddProfile} showEditProfile={showEditProfile} formData={formData} editFormData={editFormData} setShowAddProfile={setShowAddProfile} setShowEditProfile={setShowEditProfile} setFormData={setFormData} setEditFormData={setEditFormData} handleAddProfile={handleAddProfile} handleSubmitProfile={handleSubmitProfile} handleSubmitEditProfile={handleSubmitEditProfile} formatProfileDisplay={formatProfileDisplay} openModal={hookOpenModal} setOpenModal={hookSetOpenModal} selectedAstrologer={hookSelectedAstrologer} localSelectedProfile={localSelectedProfile} setLocalSelectedProfile={setLocalSelectedProfile} onContinue={handleProfileManagerStartCall} connectionType={connectionType} />
         <EmergencySessionModal isOpen={showEmergencyModal} onClose={handleEmergencyClose} astrologer={selectedAstrologer} onChatNow={handleEmergencyChatNow} onCallNow={handleEmergencyCallNow} />
         <MobileAppModal isOpen={showMobileAppModal} onClose={handleMobileAppClose} />
+        <SubscriptionModal isOpen={showSubscriptionModal} onClose={() => setShowSubscriptionModal(false)} />
       </Suspense>
       <RechargeModal
         isOpen={hookOpenModal.recharge}
