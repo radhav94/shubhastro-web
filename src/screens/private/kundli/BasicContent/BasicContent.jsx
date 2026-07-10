@@ -134,7 +134,7 @@ const BasicContent = (props) => {
     // Tithi: birthDetails?.panchang?.tithi || "--",
     // Yoga: birthDetails?.panchang?.yoga || "--",
     // Karana: birthDetails?.panchang?.karana || "--",
-    Ayanamsa: birthDetails?.panchang?.ayanamsa ? birthDetails.panchang.ayanamsa.toFixed(5) : "--",
+    Ayanamsa: birthDetails?.panchang?.ayanamsa ? `${birthDetails.panchang.ayanamsa.toFixed(2)}°` : "--",
     // "Ayanamsa Type": birthDetails?.panchang?.ayanamsa_name || "--",
   };
 
@@ -174,7 +174,7 @@ const BasicContent = (props) => {
     Tithi: capitalizeWords(astroDetails.tithi) || "--",
     Karana: capitalizeWords(astroDetails.karana) || "--",
     Yoga: capitalizeWords(astroDetails.yoga) || "--",
-    Ayanamsha: astroDetails.ayanamsa ? astroDetails.ayanamsa.toFixed(5) : "--",
+    Ayanamsha: astroDetails.ayanamsa ? `${astroDetails.ayanamsa.toFixed(2)}°` : "--",
   };
 
   return (

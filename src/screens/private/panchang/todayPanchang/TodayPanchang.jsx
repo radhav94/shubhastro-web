@@ -524,6 +524,7 @@ const TodayPanchang = () => {
     });
   };
 
+  const intialDate = `${payload.year}-${String(payload.month).padStart(2, "0")}-${String(payload.day).padStart(2, "0")}`
   return (
     <>
       <BackButton />
@@ -562,7 +563,7 @@ const TodayPanchang = () => {
               key={panchangTab}
               onTap={onTap} 
               title="Panchang"
-              initialDate={initialDate}
+              initialDate={intialDate}
               initialLocation={finalLocation}
               initialLatitude={finalLat}
               initialLongitude={finalLon}
