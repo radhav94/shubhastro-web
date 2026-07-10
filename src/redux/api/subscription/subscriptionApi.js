@@ -9,7 +9,18 @@ export const subscriptionApi = privateRequestNew.injectEndpoints({
         headers: { accept: "application/json" },
       }),
     }),
+    getSubscriptionStatus: builder.query({
+      query: () => ({
+        url: "subscription-entitlements/status",
+        method: "GET",
+        headers: { accept: "application/json" },
+      }),
+    }),
   }),
 });
 
-export const { useGetSubscriptionPlansQuery } = subscriptionApi;
+export const {
+  useGetSubscriptionPlansQuery,
+  useGetSubscriptionStatusQuery,
+  useLazyGetSubscriptionStatusQuery,
+} = subscriptionApi;

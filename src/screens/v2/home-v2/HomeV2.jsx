@@ -10,6 +10,7 @@ import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect"
 import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import { useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscription/subscriptionApi";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
@@ -373,6 +374,7 @@ const HomeV2 = () => {
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [triggerSubscriptionStatus] = useLazyGetSubscriptionStatusQuery();
 
   // ─── Data Fetching ────────────────────────────────────────────────────────
   const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery();
@@ -465,7 +467,23 @@ const HomeV2 = () => {
   const handleEmergencyChatNow = useCallback((a) => handleConnectClick(a, "chat", true), [handleConnectClick]);
   const handleEmergencyCallNow = useCallback((a) => handleConnectClick(a, "audio", true), [handleConnectClick]);
   const handleMobileAppClose = useCallback(() => setShowMobileAppModal(false), []);
-  const handlePaidCardClick = useCallback(() => setShowSubscriptionModal(true), []);
+  const handlePaidCardClick = useCallback(async (item) => {
+    // Require login before checking subscription (opens login flow if needed).
+    if (!requireAuth()) return;
+    try {
+      const res = await triggerSubscriptionStatus().unwrap();
+      if (res?.data?.hasActiveSubscription) {
+        // Subscribed → open the service like a normal suite card.
+        handleWowCardClick(item);
+      } else {
+        // Not subscribed → show the subscription modal.
+        setShowSubscriptionModal(true);
+      }
+    } catch {
+      // On any error fetching status, fall back to showing the subscription modal.
+      setShowSubscriptionModal(true);
+    }
+  }, [requireAuth, triggerSubscriptionStatus, handleWowCardClick]);
   const handleRechargeClose = useCallback(() => hookSetOpenModal((prev) => ({ ...prev, recharge: false })), [hookSetOpenModal]);
 
   // ─── Shared props for group renderers ─────────────────────────────────────
