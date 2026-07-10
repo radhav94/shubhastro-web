@@ -42,6 +42,7 @@ export const zodiacApi = vedicApi.injectEndpoints({
           params: {
             zodiac,
             date: tomorrow.toLocaleDateString("en-GB"),
+            split: true,
             show_same: true,
             lang: getCurrentLang(),
           },

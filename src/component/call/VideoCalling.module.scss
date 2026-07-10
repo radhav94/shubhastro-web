@@ -37,6 +37,34 @@
   z-index: 1;
 }
 
+.networkStatus {
+  position: relative;
+  z-index: 100;
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 auto 8px auto;
+  padding: 6px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  color: #fff;
+  border-radius: 50px;
+  background: #9ca3af;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  .networkIcon {
+    flex-shrink: 0;
+    color: inherit;
+  }
+
+  @media (width <= 767px) {
+    font-size: 13px;
+  }
+}
+
 .remoteVideoArea {
   width: 100%;
   height: 100%;

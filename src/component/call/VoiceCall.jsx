@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import { AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
+import { getWorstNetworkQuality } from "../../agora/networkQuality";
 import { trackEvent } from "../../utils/analytics";
 import {
   IoMic,
@@ -11,6 +12,7 @@ import {
   IoVolumeHigh,
   IoVolumeMute,
   IoCallSharp,
+  IoCellular,
 } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./VoiceCall.module.scss";
@@ -106,6 +108,11 @@ const AgoraVoiceCalling = ({ callData }) => {
   const speakerOn = isSpeakerOn;
   const setSpeakerOn = setIsSpeakerOn;
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
+  // Agora network/signal quality of the weakest link (uplink/downlink)
+  const [networkQuality, setNetworkQuality] = useState({ label: "Connecting…", level: "unknown", quality: 0 });
+  // True when the signal drops to "Connecting…" (quality 0) after being connected
+  const [isNetworkLost, setIsNetworkLost] = useState(false);
+  const hadNetworkRef = useRef(false);
 
   // Auto-minimize when call originated from live and user is not on live page
   useEffect(() => {
@@ -283,6 +290,20 @@ const AgoraVoiceCalling = ({ callData }) => {
       console.log("[VoiceCall]   → callData keys:", Object.keys(callData));
       const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
       clientRef.current = client;
+
+      // Signal/network quality — fires ~every 2s with uplink/downlink ratings
+      client.on("network-quality", (stats) => {
+        const info = getWorstNetworkQuality(stats);
+        setNetworkQuality(info);
+        // Once we've had a real reading, a drop back to 0 means the signal
+        // was lost — surface the reconnecting banner.
+        if (info.quality > 0) {
+          hadNetworkRef.current = true;
+          setIsNetworkLost(false);
+        } else if (hadNetworkRef.current) {
+          setIsNetworkLost(true);
+        }
+      });
 
       client.on("user-published", async (user, mediaType) => {
         console.log("[VoiceCall] 📡 user-published — uid:", user.uid, "mediaType:", mediaType, "pendingTimer:", !!userLeftTimerRef.current);
@@ -1172,6 +1193,17 @@ const AgoraVoiceCalling = ({ callData }) => {
             </button>
           </div>
 
+          {/* Network / signal quality indicator */}
+          {joined && (
+            <span
+              className={styles.networkStatus}
+              style={{ color: networkQuality.color }}
+            >
+              <IoCellular className={styles.networkIcon} size={14} />
+              {networkQuality.label}
+            </span>
+          )}
+
           {/* Voice Center (Avatar & Timer) */}
           <div className={styles.voiceCenter}>
               <div className={styles.voiceCenterWrap}>
@@ -1212,7 +1244,7 @@ const AgoraVoiceCalling = ({ callData }) => {
               )}
 
               <div className={styles.callTimer}>
-                {isReconnecting ? (
+                {isReconnecting || isNetworkLost ? (
                   <span className={styles.reconnecting}>Reconnecting...</span>
                 ) : joined ? (
                   formatTime(callSeconds)
@@ -1347,7 +1379,7 @@ const AgoraVoiceCalling = ({ callData }) => {
       />
 
       {/* Reconnection Overlay */}
-      {isReconnecting && (
+      {(isReconnecting || isNetworkLost) && (
         <div className={styles.reconnectOverlay}>
           <div className={styles.reconnectModal}>
             <div className={styles.reconnectSpinner}>

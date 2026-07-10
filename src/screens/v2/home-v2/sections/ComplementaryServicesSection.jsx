@@ -4,7 +4,7 @@ import { sortContentByOrder } from "../sectionRendererV2";
 import defaultSquareImg from "../../../../assets/images/default_image_square_500x500.png"
 const SLUG_PATHS = {
   "free-kundli": "/kundli",
-  "talk-to-astrologer": "/chat-to-astrologer",
+  "talk-to-astrologer": "/astrologers",
   "daily-horoscope": "/daily-horoscope",
 };
 

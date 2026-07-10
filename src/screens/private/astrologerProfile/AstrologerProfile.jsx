@@ -91,7 +91,7 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
           onClick={() => chatEnabled && onChat(astrologer)}
           disabled={!chatEnabled}
         >
-          <img src={AppIcons.ChatMinutesIcon} alt="chat" /> Chat
+          <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
         </button>
         <p className={styles.priceText}>
           {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
@@ -111,7 +111,7 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
           onClick={() => callEnabled && onCall(astrologer, "audio")}
           disabled={!callEnabled}
         >
-          <img src={AppIcons.CallMinutesIcon} alt="call" /> Call
+          <img src={AppIcons.CallMinutesIcon} alt="" /> Call
         </button>
         <p className={styles.priceText}>
           {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (

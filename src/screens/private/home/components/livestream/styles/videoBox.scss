@@ -902,6 +902,8 @@
   // Cap the visible chat height; older messages remain accessible on scroll.
   max-height: 150px;
   max-width: 60%;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%);
 
   @media (max-width: 768px) {
     max-width: 85%;

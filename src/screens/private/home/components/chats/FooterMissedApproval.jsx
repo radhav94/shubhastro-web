@@ -16,7 +16,7 @@ export const FooterMissedApproval = () => {
       <button
         onClick={() => {
           setMissedApproval(false);
-            navigate(`/chat-to-astrologer/`, {
+            navigate(`/astrologers/`, {
                 state: { rejoinAstro: lastRequestedAstro }
             })
         }}

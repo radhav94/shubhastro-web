@@ -5,6 +5,7 @@ import avatar1 from "../../../../assets/images/community-avatar-1.png";
 import avatar2 from "../../../../assets/images/community-avatar-2.png";
 import avatar3 from "../../../../assets/images/community-avatar-3.png";
 import avatar4 from "../../../../assets/images/community-avatar-4.png";
+import profilsImg from "../../../../assets/images/profilsImg.png";
 
 const CTA_AVATARS = [avatar1, avatar2, avatar3, avatar4];
 
@@ -32,7 +33,7 @@ const ConnectAstrologerSection = memo(({ sectionData, styles }) => {
   const navigate = useNavigate();
 
   const handleNavigate = useCallback(() => {
-    navigate("/chat-to-astrologer");
+    navigate("/astrologers");
   }, [navigate]);
 
   const trustLabels = sectionData?.tag_label || DEFAULT_TRUST_LABELS;
@@ -55,10 +56,11 @@ const ConnectAstrologerSection = memo(({ sectionData, styles }) => {
         </p>
         <div className={styles.ctaAvatarRow}>
           <div className={styles.ctaAvatars}>
-            {CTA_AVATARS.map((av, i) => (
+            {/* {CTA_AVATARS.map((av, i) => (
               <img key={i} src={av} alt="" className={styles.ctaAvatar} loading="lazy" />
             ))}
-            <span className={styles.ctaAvatarCount}>50+</span>
+            <span className={styles.ctaAvatarCount}>50+</span> */}
+            <img src={profilsImg} alt="" className={styles.ctaAvatar} loading="lazy" />
           </div>
           <span className={styles.ctaOnline}>
             <span className={styles.ctaOnlineDot} />

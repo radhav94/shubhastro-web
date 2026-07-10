@@ -49,6 +49,31 @@ export const requestFCMToken = async () => {
         console.warn("No FCM token received");
         return null;
     } catch (error) {
+        // Handle IndexedDB version mismatch (stale service worker)
+        if (error?.name === "VersionError") {
+            console.warn("FCM IndexedDB version conflict — clearing and retrying");
+            try {
+                const databases = await indexedDB.databases();
+                const fcmDbs = databases.filter(db => db.name?.includes("firebase-messaging"));
+                await Promise.all(fcmDbs.map(db => new Promise((resolve, reject) => {
+                    const req = indexedDB.deleteDatabase(db.name);
+                    req.onsuccess = resolve;
+                    req.onerror = reject;
+                })));
+                // Re-register service worker to pick up new version
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (const reg of registrations) {
+                    await reg.update();
+                }
+                const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                if (token) {
+                    console.log("FCM Token received after DB reset");
+                    return token;
+                }
+            } catch (retryError) {
+                console.error("FCM token retry failed:", retryError);
+            }
+        }
         console.error("Error getting FCM token:", error);
         return null;
     }
