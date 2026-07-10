@@ -158,7 +158,7 @@
   align-items: center;
   justify-content: space-between;
   background: rgba(255, 255, 255, 0.85);
-  border: 2px solid #fff;
+  border: 1.5px solid #fff;
   border-radius: 20px;
   padding: 16px;
   cursor: pointer;
@@ -768,7 +768,7 @@
   position: relative;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.4);
-  border: 2px solid #FFFFFF;
+  border: 1.5px solid #FFFFFF;
   flex: 1; // fill remaining height
   min-height: 180px;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -2224,6 +2224,9 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  @media (width <= 767px) {
+    font-size: 12px;
+  }
 }
 
 .calChipX {
@@ -2244,8 +2247,8 @@
 .calChip {
   height: 36px;
   padding: 0 18px;
-  background: #fff;
-  border: 1.5px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
   border-radius: 999px;
   font-size: 14px;
   font-weight: 500;
@@ -2254,6 +2257,7 @@
   font-family: 'Poppins', sans-serif;
   flex-shrink: 0;
   white-space: nowrap;
+  transition: 0.2s ease-in;
   @media (width <= 767px) {
     font-size: 12px;
     padding: 0 12px;
@@ -2279,6 +2283,9 @@
   font-family: 'Poppins', sans-serif;
   flex-shrink: 0;
   white-space: nowrap;
+  @media (width <= 767px) {
+    font-size: 12px;
+  }
 }
 
 .calHint {
@@ -2323,7 +2330,7 @@
 
 .calDateActive {
   height: 36px;
-  padding: 0 10px;
+  padding: 0 16px;
   background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
   border: none;
   border-radius: 999px;
@@ -2335,14 +2342,15 @@
   flex-shrink: 0;
   @media (width <= 767px) {
       font-size: 12px;
+      padding: 0 16px;
   }
 }
 
 .calDateChip {
   height: 36px;
   padding: 0 16px;
-  background: #fff;
-  border: 1.5px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
   border-radius: 999px;
   font-size: 14px;
   font-weight: 500;
@@ -2350,6 +2358,7 @@
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
   flex-shrink: 0;
+  transition: 0.2s ease-in;
   @media (width <= 767px) {
       font-size: 12px;
   }
@@ -2386,9 +2395,10 @@
 
   &:disabled {
     border-color: #d1d5db;
-    color: #9ca3af;
-    background: #f3f4f6;
+    // color: #9ca3af;
+    // background: #f3f4f6;
     cursor: not-allowed;
+    opacity: 0.5;
   }
 }
 
@@ -2841,7 +2851,7 @@
     border-radius: 50%;
     object-fit: cover;
     object-position: top;
-    border: 2px solid #fff;
+    border: 1.5px solid #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     @media (width <= 767px) {
       width: 70px;
@@ -2858,7 +2868,7 @@
   height: 13px;
   border-radius: 50%;
   background: #22c55e;
-  // border: 2px solid #fff;
+  // border: 1.5px solid #fff;
   left: 50%;
   transform: translateX(-50%);
 }
@@ -3206,7 +3216,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 48px;
-  border: 2px solid rgba(255, 255, 255, 1);
+  border: 1.5px solid rgba(255, 255, 255, 1);
   margin-bottom: 28px;
   // box-shadow: 0px 4px 24px 0px rgba(120, 80, 200, 0.08);
   position: relative;
@@ -3654,7 +3664,7 @@
   // Store buttons — white bg, dark border
   footer [class*="v2_storeBtn"] {
     background: #fff !important;
-    border: 2px solid #1a1a1a !important;
+    border: 1.5px solid #1a1a1a !important;
   }
 
   footer [class*="v2_storeBtn"] * {
@@ -4229,7 +4239,7 @@
 /* centerCard keeps the glass look */
 .centerCard {
   background: #FFFFFF66 !important;
-  border: 2px solid #FFFFFF !important;
+  border: 1.5px solid #FFFFFF !important;
   border-radius: 20px !important;
   box-shadow: none !important;
   backdrop-filter: blur(4px) !important;
@@ -4240,7 +4250,7 @@
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  border: 2px solid white;
+  border: 1.5px solid white;
   box-shadow: none !important;
   outline: none !important;
   border-radius: 16px;
@@ -4874,8 +4884,10 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
     border-radius: 40px;
     outline: none;
     transition: 0.3s;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1.5px solid #ffffff;
     &:hover{
-      border: 1px solid #f75801;
+      border: 1.5px solid #f75801;
     }
   }
   @media (width <= 768px) {
