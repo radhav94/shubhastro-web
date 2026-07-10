@@ -990,6 +990,7 @@ const AgoraVoiceCalling = ({ callData }) => {
             <button onClick={() => {
               if (activeCall?.origin === "live") {
                 const channel = activeCall.liveChannel;
+                setIsMinimized(true);
                 navigate(channel ? `/live/${channel}` : "/live");
               } else {
                 setIsMinimized(false);
