@@ -1106,7 +1106,8 @@ export const getDailyCosmicBriefing = async (zodiacSign, params) => {
       place: params.place,
       lat: String(params.lat),
       lon: String(params.lon),
-      tzone: String(params.tzone)
+      tzone: String(params.tzone),
+      kundliId: params.kundliId
     }).toString();
 
     const response = await privateGet(

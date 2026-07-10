@@ -800,6 +800,8 @@ const Kundali = () => {
           selectedProfile={selectedProfile}
           onSelectClick={() => setShowSelectProfile(true)}
           onEditClick={handleEditProfile}
+          isGuest={!isLoggedIn}
+          onAddClick={() => setShowSelectProfile(true)}
         />
       )}
 
