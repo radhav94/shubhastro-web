@@ -531,7 +531,7 @@ const HomeNew = () => {
               </div>
             </div>
             <p className={styles.calHint}>Select one or more occasions to view Muhurat</p>
-            <button className={styles.calCta}>View Muhuratas</button>
+            <button className={styles.calCta}>View Muhurat</button>
           </div>
         </div>
       </section>
