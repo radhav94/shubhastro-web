@@ -724,9 +724,10 @@
   line-height: 1.2;
   letter-spacing: clamp(0.2px, 0.03vw, 0.4px);
   text-transform: capitalize;
-  padding:
-    clamp(4px, 0.55vw, 8px)
-    clamp(18px, 1.75vw, 25px);
+  padding-top: calc(clamp(4px, 0.55vw, 8px) + 2px);
+  padding-right: clamp(18px, 1.75vw, 25px);
+  padding-bottom: 4px;
+  padding-left: clamp(18px, 1.75vw, 25px);
   border-radius: 2px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.22);
   pointer-events: none;

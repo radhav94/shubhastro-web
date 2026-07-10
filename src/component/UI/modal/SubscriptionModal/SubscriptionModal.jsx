@@ -1,58 +1,65 @@
 import { IoClose } from "react-icons/io5";
-import { useEffect, useRef } from "react";
 import styles from "./SubscriptionModal.module.scss";
-import brandLogo from "../../../../assets/images/mobile-shubh-astro-logo.svg";
+import { useGetSubscriptionPlansQuery } from "../../../../redux/api/subscription/subscriptionApi";
+import shubhLogoMobile from "../../../../assets/images/mobile-shubh-astro-logo.svg";
 
-// Plan data — placeholder feature copy ("Lorem Ipsum") mirrors the design and is
-// easy to swap for real content or API-driven plans later.
-const PLANS = [
-  {
-    id: "one-time",
+// Maps API plan `code` -> presentation config. Prices, description and feature
+// rows are all driven by the API response (see buildFeatures below).
+const PLAN_ORDER = ["free", "premium_monthly", "premium_quarterly"];
+
+const PLAN_DISPLAY = {
+  free: {
     title: "One-Time Unlock",
-    price: "₹10",
-    cta: "Subscribe",
+    cta: "Unlock Now",
     highlighted: false,
-    features: [
-      { label: "Single Report · Wallet payment", included: true },
-      { label: "Lorem Ipsum", included: true },
-      { label: "Lorem Ipsum", included: false },
-      { label: "Lorem Ipsum", included: false },
-      { label: "Lorem Ipsum", included: false },
-      { label: "Lorem Ipsum", included: false },
-    ],
+    priceSource: "overage", // one-time per-report price
   },
-  {
-    id: "monthly",
+  premium_monthly: {
     title: "Monthly Pass",
-    price: "₹129",
     cta: "Subscribe",
     highlighted: false,
-    features: [
-      { label: "Single Report · Wallet payment", included: true },
-      { label: "Lorem Ipsum", included: true },
-      { label: "Lorem Ipsum", included: false },
-      { label: "Lorem Ipsum", included: false },
-      { label: "Lorem Ipsum", included: false },
-      { label: "Lorem Ipsum", included: false },
-    ],
+    priceSource: "price",
   },
-  {
-    id: "quarterly",
+  premium_quarterly: {
     title: "Quarterly Pass",
-    price: "₹299",
     cta: "Subscribe",
     highlighted: true,
     badge: "Best Value · Save 23%",
-    features: [
-      { label: "Single Report · Wallet payment", included: true },
-      { label: "Lorem Ipsum", included: true },
-      { label: "Lorem Ipsum", included: true },
-      { label: "Lorem Ipsum", included: true },
-      { label: "Lorem Ipsum", included: true },
-      { label: "Lorem Ipsum", included: true },
-    ],
+    priceSource: "price",
   },
-];
+};
+
+// Build the "What's included" rows from real plan fields. If the API ever returns
+// a non-empty `features` array, use it directly; otherwise derive sensible rows.
+const buildFeatures = (plan) => {
+  if (Array.isArray(plan.features) && plan.features.length > 0) {
+    return plan.features.map((f) =>
+      typeof f === "string"
+        ? { label: f, included: true }
+        : { label: f.label ?? f.name ?? "", included: f.included !== false }
+    );
+  }
+
+  const quota = plan.monthlyReportQuota || 0;
+  const rows = [
+    plan.description ? { label: plan.description, included: true } : null,
+    quota > 0
+      ? { label: `${quota} reports / month`, included: true }
+      : { label: "No monthly report quota", included: false },
+    plan.overagePrice != null
+      ? { label: `₹${plan.overagePrice} per extra report`, included: true }
+      : null,
+    plan.durationMonths > 0
+      ? { label: `${plan.durationMonths} month${plan.durationMonths > 1 ? "s" : ""} validity`, included: true }
+      : { label: "Pay as you go — no validity", included: true },
+    { label: plan.gstInclusive ? "GST inclusive" : "GST extra", included: !!plan.gstInclusive },
+  ];
+  return rows.filter(Boolean);
+};
+
+const PlanIcon = () => (
+  <img src={shubhLogoMobile} alt="ShubhAstro" className={styles.planLogo} />
+);
 
 const CheckIcon = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -69,29 +76,32 @@ const CrossIcon = () => (
 );
 
 const SubscriptionModal = ({ isOpen, onClose, onSelectPlan }) => {
-  const plansGridRef = useRef(null);
-  const highlightedPlanRef = useRef(null);
-
-  useEffect(() => {
-    if (!isOpen || !window.matchMedia("(max-width: 900px)").matches) return;
-
-    const frame = window.requestAnimationFrame(() => {
-      const grid = plansGridRef.current;
-      const highlightedCard = highlightedPlanRef.current;
-      if (!grid || !highlightedCard) return;
-
-      grid.scrollLeft =
-        highlightedCard.offsetLeft -
-        (grid.clientWidth - highlightedCard.offsetWidth) / 2;
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [isOpen]);
+  const { data, isLoading, isFetching } = useGetSubscriptionPlansQuery(undefined, { skip: !isOpen });
 
   if (!isOpen) return null;
 
-  const handleSelect = (plan) => {
-    if (onSelectPlan) onSelectPlan(plan);
+  const apiPlans = Array.isArray(data?.data) ? data.data : [];
+  const cards = PLAN_ORDER
+    .map((code) => {
+      const apiPlan = apiPlans.find((p) => p.code === code && p.status === "active");
+      if (!apiPlan) return null;
+      const cfg = PLAN_DISPLAY[code];
+      const priceValue = cfg.priceSource === "overage" ? apiPlan.overagePrice : apiPlan.price;
+      return {
+        id: code,
+        ...cfg,
+        title: apiPlan.name || cfg.title,
+        price: `₹${priceValue ?? 0}`,
+        features: buildFeatures(apiPlan),
+        plan: apiPlan,
+      };
+    })
+    .filter(Boolean);
+
+  const loading = isLoading || isFetching;
+
+  const handleSelect = (card) => {
+    if (onSelectPlan) onSelectPlan(card.plan);
   };
 
   return (
@@ -105,64 +115,68 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan }) => {
           <h2 className={styles.title}>
             <span className={styles.titleIcon} aria-hidden="true">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <path d="M5.4 5.2h13.2L22 10.1 12 22 2 10.1l3.4-4.9Z" fill="#F75801" />
-                <path d="m5.4 5.2 2.8 4.9L12 5.2l3.8 4.9 2.8-4.9M2 10.1h20M8.2 10.1 12 22l3.8-11.9" stroke="#FF8A4C" strokeWidth="0.8" strokeLinejoin="round" />
+                <path d="M12 2l8 3v6c0 5-3.4 8.5-8 11-4.6-2.5-8-6-8-11V5l8-3z" fill="#F75801" />
               </svg>
             </span>
-            Unlock Premium Features
+            Choose Your Subscription
           </h2>
-          <p className={styles.subtitle}>Choose a plan to continue</p>
+          <p className={styles.subtitle}>Pick a plan to unlock premium features</p>
         </div>
 
-        <div className={styles.plansGrid} ref={plansGridRef}>
-          {PLANS.map((plan) => (
-            <div
-              key={plan.id}
-              ref={plan.highlighted ? highlightedPlanRef : null}
-              className={`${styles.planCard} ${plan.highlighted ? styles.planCardHighlighted : ""}`}
-            >
-              {plan.badge && (
-                <span className={styles.planBadge}>
-                  <span className={styles.badgeStar} aria-hidden="true">★</span>
-                  {plan.badge}
-                </span>
-              )}
-
-              <div className={styles.planIconBox}>
-                <img src={brandLogo} alt="" aria-hidden="true" />
-              </div>
-
-              <div className={styles.planHead}>
-                <span className={styles.planTitle}>{plan.title}</span>
-                <span className={styles.planPrice}>{plan.price}</span>
-              </div>
-
-              <button
-                type="button"
-                className={`${styles.planCta} ${plan.highlighted ? styles.planCtaFilled : styles.planCtaOutline}`}
-                onClick={() => handleSelect(plan)}
+        {loading ? (
+          <div className={styles.stateMsg}>Loading plans…</div>
+        ) : cards.length === 0 ? (
+          <div className={styles.stateMsg}>No plans available right now.</div>
+        ) : (
+          <div className={styles.plansGrid}>
+            {cards.map((plan) => (
+              <div
+                key={plan.id}
+                className={`${styles.planCard} ${plan.highlighted ? styles.planCardHighlighted : ""}`}
               >
-                {plan.cta}
-              </button>
+                {plan.badge && (
+                  <span className={styles.planBadge}>
+                    <span className={styles.badgeStar} aria-hidden="true">★</span>
+                    {plan.badge}
+                  </span>
+                )}
 
-              <div className={styles.divider} />
+                <div className={styles.planIconBox}>
+                  <PlanIcon />
+                </div>
 
-              <p className={styles.includedTitle}>What&apos;s included ?</p>
+                <div className={styles.planHead}>
+                  <span className={styles.planTitle}>{plan.title}</span>
+                  <span className={styles.planPrice}>{plan.price}</span>
+                </div>
 
-              <ul className={styles.featureList}>
-                {plan.features.map((feature, idx) => (
-                  <li
-                    key={idx}
-                    className={`${styles.featureItem} ${feature.included ? "" : styles.featureExcluded}`}
-                  >
-                    {feature.included ? <CheckIcon /> : <CrossIcon />}
-                    <span>{feature.label}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+                <button
+                  type="button"
+                  className={`${styles.planCta} ${plan.highlighted ? styles.planCtaFilled : styles.planCtaOutline}`}
+                  onClick={() => handleSelect(plan)}
+                >
+                  {plan.cta}
+                </button>
+
+                <div className={styles.divider} />
+
+                <p className={styles.includedTitle}>What&apos;s included ?</p>
+
+                <ul className={styles.featureList}>
+                  {plan.features.map((feature, idx) => (
+                    <li
+                      key={idx}
+                      className={`${styles.featureItem} ${feature.included ? "" : styles.featureExcluded}`}
+                    >
+                      {feature.included ? <CheckIcon /> : <CrossIcon />}
+                      <span>{feature.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

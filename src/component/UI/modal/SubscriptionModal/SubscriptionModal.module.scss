@@ -198,22 +198,26 @@
 
 .planHead {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 13px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .planTitle {
-  font-size: 16px;
-  font-weight: 500;
-  color: #080808;
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.3;
 }
 
 .planPrice {
-  font-size: 36px;
-  font-weight: 500;
-  color: #080808;
+  flex-shrink: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
   line-height: 1;
 }
 
@@ -287,4 +291,17 @@
   span {
     color: #161616;
   }
+}
+
+.stateMsg {
+  padding: 48px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.planLogo {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
 }
