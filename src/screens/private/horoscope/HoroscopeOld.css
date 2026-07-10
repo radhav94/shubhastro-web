@@ -36,12 +36,12 @@
 .horoscope-old-page .horoscope-page-content {
   max-width: 1440px;
   margin: 0 auto;
-  padding-top: 72px;
+  padding-top: 0;
 }
 
 @media screen and (max-width: 768px) {
 .horoscope-old-page .horoscope-page-content {
-    padding-top: 60px;
+    padding-top: 0;
   }
 }
 
