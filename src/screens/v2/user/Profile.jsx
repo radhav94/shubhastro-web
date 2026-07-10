@@ -56,6 +56,8 @@ import { PANDIT_AI_ID } from "../../../component/panditAI/usePanditAI";
 import { logout, updateRegistrationStatus, setEmail } from "../../../redux/auth/authSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import styles from "./Profile.module.scss";
+import MembershipCard from "./MembershipCard";
+import SubscriptionModal from "../../../component/UI/modal/SubscriptionModal/SubscriptionModal";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import emailIconSet from "../../../assets/images/icon_set (1).png";
 import { Toast } from "../../../component/index";
@@ -231,6 +233,7 @@ const Profile = () => {
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEmailEditModal, setShowEmailEditModal] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [editEmailValue, setEditEmailValue] = useState("");
   const [emailError, setEmailError] = useState("");
   const [profileToEdit, setProfileToEdit] = useState(null);
@@ -1463,51 +1466,59 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Balance Card */}
-      <div
-        className={styles.balanceCard}
-        style={{ backgroundImage: `url(${profileWallet})` }}
-      >
-        <div className={styles.balanceLeft}>
-          <div className={styles.balanceHeader}>
-            <div className={styles.coinIcon}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  fill="#FFD700"
-                  stroke="#FFA500"
-                  strokeWidth="2"
-                />
-                <circle cx="12" cy="12" r="6" fill="#FFA500" />
-                <text
-                  x="12"
-                  y="16"
-                  textAnchor="middle"
-                  fill="#FFF"
-                  fontSize="10"
-                  fontWeight="bold"
-                >
-                  ₹
-                </text>
-              </svg>
+      <div className={styles.balanceMembershipRow}>
+        <div className={styles.balanceMembershipItem}>
+          {/* Balance Card */}
+          <div
+            className={styles.balanceCard}
+            style={{ backgroundImage: `url(${profileWallet})` }}
+          >
+            <div className={styles.balanceLeft}>
+              <div className={styles.balanceHeader}>
+                <div className={styles.coinIcon}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      fill="#FFD700"
+                      stroke="#FFA500"
+                      strokeWidth="2"
+                    />
+                    <circle cx="12" cy="12" r="6" fill="#FFA500" />
+                    <text
+                      x="12"
+                      y="16"
+                      textAnchor="middle"
+                      fill="#FFF"
+                      fontSize="10"
+                      fontWeight="bold"
+                    >
+                      ₹
+                    </text>
+                  </svg>
+                </div>
+                {/* <Sparkles size={16} fill="#FFF" color="#FFF" /> */}
+                <span className={styles.balanceLabel}>Balance</span>
+              </div>
+              <div className={styles.balanceAmount}>
+                ₹{Number(balance || 0).toLocaleString("en-IN")}
+              </div>
             </div>
-            {/* <Sparkles size={16} fill="#FFF" color="#FFF" /> */}
-            <span className={styles.balanceLabel}>Balance</span>
-          </div>
-          <div className={styles.balanceAmount}>
-            ₹{Number(balance || 0).toLocaleString("en-IN")}
+
+            <button
+              className={styles.addMinutesButton}
+              onClick={() => navigate("/recharge")}
+            >
+              Recharge Wallet
+              <ChevronLeft size={20} style={{ transform: "rotate(180deg)" }} />
+            </button>
           </div>
         </div>
 
-        <button
-          className={styles.addMinutesButton}
-          onClick={() => navigate("/recharge")}
-        >
-          Recharge Wallet
-          <ChevronLeft size={20} style={{ transform: "rotate(180deg)" }} />
-        </button>
+        <div className={styles.balanceMembershipItem}>
+          <MembershipCard onManage={() => setShowSubscriptionModal(true)} />
+        </div>
       </div>
 
       {/* Email & Following Row */}
@@ -2381,6 +2392,12 @@ const Profile = () => {
         onClose={() => hookSetOpenModal((prev) => ({ ...prev, recharge: false }))}
         astrologer={latestAstrologerData?.data || selectedAstrologer}
         connectionType={lastConnectionType}
+      />
+
+      {/* Subscription / Membership Management Modal */}
+      <SubscriptionModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
       />
 
       {/* Add Profile Modal */}
