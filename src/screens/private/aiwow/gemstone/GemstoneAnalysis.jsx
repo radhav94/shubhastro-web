@@ -22,6 +22,7 @@ const GemstoneAnalysis = () => {
   const [progress, setProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [error, setError] = useState(null);
   
   const isMountedRef = useRef(true);
@@ -127,7 +128,8 @@ const GemstoneAnalysis = () => {
   };
 
   const handleShowResult = () => {
-    if (analysisComplete) {
+    if (analysisComplete && !isNavigating) {
+      setIsNavigating(true);
       navigate(PATH.privateRoutes.GEMSTONE_RESULT.path[0], { replace: true });
     }
   };
@@ -141,7 +143,7 @@ const GemstoneAnalysis = () => {
 
   return (
     <div className={styles.container}>
-      <BackButton />
+      <BackButton disabled={isAnalyzing} />
       <div className={styles.content}>
         <div className={styles.leftSection}>
           <h2 className={styles.title}>
@@ -193,10 +195,10 @@ const GemstoneAnalysis = () => {
             <button 
               className={styles.resultButton}
               onClick={handleShowResult}
-              disabled={!analysisComplete}
-              style={{ opacity: analysisComplete ? 1 : 0.6 }}
+              disabled={!analysisComplete || isNavigating}
+              style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6, cursor: (!analysisComplete || isNavigating) ? 'not-allowed' : 'pointer' }}
             >
-              Analysing...
+              {analysisComplete ? 'View Result' : 'Analysing...'}
             </button>
           </>
         ) : (
