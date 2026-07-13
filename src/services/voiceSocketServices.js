@@ -1,5 +1,6 @@
 import { io } from "socket.io-client";
 import { markInitiated, claimRoom } from "../utils/tabSession";
+import Toast from "../component/toast";
 
 export const voiceSocket = io("/", {
   transports: ["websocket"],
@@ -247,9 +248,7 @@ voiceSocket.on = (event, fn) => {
     return _originalOn(event, (data) => {
       if (data?.code === "CONTENT_BLOCKED" || data?.message?.includes?.("inappropriate language")) {
         console.log("[VoiceSocket] 🚫 Suppressed CONTENT_BLOCKED error from propagating to components");
-        import("../component/toast").then(({ default: toast }) => {
-          toast.error(data.message || "Message blocked due to inappropriate content.");
-        });
+        Toast.error(data.message || "Message blocked due to inappropriate content.");
         return;
       }
       fn(data);

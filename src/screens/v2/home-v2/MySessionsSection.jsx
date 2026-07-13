@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useCallback, lazy, Suspense } from "react";
+import { useMemo, useState, useRef, useCallback, Suspense } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useIsOverflowing from "../../../hooks/useIsOverflowing";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
@@ -6,8 +6,7 @@ import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect"
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { useLazyGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 import { PANDIT_AI_ID } from "../../../component/panditAI/usePanditAI";
-
-const EmergencySessionModal = lazy(() => import("../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal"));
+import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 
 // Inject getAllUserSessions endpoint
 const sessionsApi = privateRequestNew.injectEndpoints({
