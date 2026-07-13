@@ -18,7 +18,8 @@ export const reviewApi = privateRequestNew.injectEndpoints({
         },
       }),
       invalidatesTags: (result, error, { astrologerID }) => [
-        { type: 'AstrologerReviews', id: astrologerID }
+        { type: 'AstrologerReviews', id: astrologerID },
+        "CallHistory",
       ],
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {

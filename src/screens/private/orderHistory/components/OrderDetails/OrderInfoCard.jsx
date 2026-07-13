@@ -141,9 +141,9 @@ const OrderInfoCard = ({
           {orderId && (
             <div className={styles.cardHeader}>
               <h3 className={styles.orderId}>#{String(orderId).slice(-4)}</h3>
-              <button className={styles.menuButton} aria-label="More options">
+              {/* <button className={styles.menuButton} aria-label="More options">
                 <MoreVertical size={20} />
-              </button>
+              </button> */}
             </div>
           )}
 
