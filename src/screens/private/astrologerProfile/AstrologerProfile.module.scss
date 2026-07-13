@@ -1940,16 +1940,12 @@
   margin-bottom: 16px;
 }
 
-.starFilled,.starHalf,.starEmpty  {
+.starFilled,.starEmpty  {
   color: #F75801;
   font-size: 30px;
   @media (width <= 767px) {
     font-size: 22px;
   }
-}
-
-.starHalf {
-  opacity: 0.5;
 }
 
 .starEmpty {
