@@ -311,12 +311,19 @@ const HoroscopeOld = () => {
         : activeTab === 'Tomorrow'
           ? tomorrowData.response.bot_response
           : weeklyData.response.bot_response;
-      const dailyWeeklyCategories = Object.keys(bot).map(key => ({
-        id: key,
-        label: key.replace(/_/g, ' ').split(' ').map(word => 
-          word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ')
-      }));
+      const dailyWeeklyCategories = Object.keys(bot)
+        // Only show categories that actually have content (avoids empty cards
+        // when the API returns partial/regenerating data).
+        .filter(key => {
+          const text = bot[key]?.split_response;
+          return typeof text === 'string' && text.trim().length > 0;
+        })
+        .map(key => ({
+          id: key,
+          label: key.replace(/_/g, ' ').split(' ').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1)
+          ).join(' ')
+        }));
       newCategories = [...newCategories, ...dailyWeeklyCategories];
       console.log('Daily/Weekly Category IDs:', dailyWeeklyCategories.map(c => c.id));
     }
@@ -457,6 +464,9 @@ const HoroscopeOld = () => {
     setActiveTab(tab);
     setCameFromOverview(false);
     setSelectedPhase('phase_1');
+    // Reset to Overview so a category that only exists on another tab
+    // (e.g. "Physique" is daily-only) doesn't linger and show empty content.
+    setActiveCategory('overview');
     
     // Navigate to corresponding route
     // Both "Today" and "Daily" go to daily-horoscope
