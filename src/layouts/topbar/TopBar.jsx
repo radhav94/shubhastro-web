@@ -356,8 +356,8 @@ const TopBar = () => {
         },
       ],
     },
-    { title: "Chat with Astrologer", path: "/chat-to-astrologer" },
-    { title: "Talk to Astrologer", path: "/talk-to-astrologer" },
+    { title: "Chat with Astrologer", path: "/astrologers" },
+    { title: "Talk to Astrologer", path: "/astrologers" },
     { title: "Join Live", path: "/live" },
 
     ...(isShubhMallEnabled() ? [{ title: "ShubhMall", path: "/shop" }] : []),

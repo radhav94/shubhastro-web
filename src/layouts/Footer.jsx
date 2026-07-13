@@ -20,12 +20,12 @@ const horoscopeLinks = [
 
 const serviceLinks = [
   ...(isShubhMallEnabled() ? [{ href: "/shubh-mall", text: "ShubhMall" }] : []),
-  { href: "/talk-to-astrologer", text: "Live Astrologers" },
+  { href: "/astrologers", text: "Live Astrologers" },
   { href: "/kundli", text: "Free Kundli" },
   { href: "/match-making", text: "Kundli Matching" },
   { href: "/tarot", text: "Tarot" },
-  { href: "/chat-to-astrologer", text: "Chat with Astrologer" },
-  { href: "/talk-to-astrologer", text: "Talk to Astrologer" },
+  { href: "/astrologers", text: "Chat with Astrologer" },
+  { href: "/astrologers", text: "Talk to Astrologer" },
   { href: "/numerology", text: "Numerology" },
   { href: "/blog", text: "Blog" },
   { href: "/important-links", text: "Important Links" },
