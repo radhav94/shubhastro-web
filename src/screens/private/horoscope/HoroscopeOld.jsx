@@ -1,6 +1,6 @@
-import { ChevronLeft, ChevronDown } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   useFetchWesternDailyQuery, 
   useFetchWesternTomorrowQuery,
@@ -14,10 +14,13 @@ import { formatted } from '../../../utils/dateFormat/date';
 import { zodiac, zodiacSignImages } from './zodiac';
 import './HoroscopeOld.css';
 import { useGetAllKundlisQuery } from '../../../services/appServices/kundliServicesNew';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useGetAstroDetailsQuery } from '../../../redux/api/kundli/kundliApi';
 import { buildVedicParam } from '../../../utils/VedicParams.js/vedicParams';
 import { trackEvent } from '../../../utils/analytics';
+import { ProfileManager } from '../../../component/UI/Profile';
+import { setSelectedKundli } from '../../../redux/kundli/kundliSlice';
+import { getJSONCookie, GUEST_KUNDLI_COOKIE } from '../../../utils/helper/cookies';
 const overViewImg = "https://assets.shubhastro.ai/images/horoscope/overview.png";
 const financeImg = "https://assets.shubhastro.ai/images/horoscope/finances.png";
 const scoreImg = "https://assets.shubhastro.ai/images/horoscope/total-score.png";
@@ -45,6 +48,7 @@ const isLightColor = (color) => {
 
 const HoroscopeOld = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { sign } = useParams();
   const location = useLocation();
   const { pathname } = location;
@@ -128,10 +132,22 @@ const HoroscopeOld = () => {
   });
   const kundliProfiles = kundliProfilesData?.data || [];
 
-  // Determine the active profile: header-selected > Self > first profile
-  const activeProfile = headerSelectedKundli?._id
-    ? headerSelectedKundli
-    : kundliProfiles.find((p) => p.relation?.toLowerCase() === 'self') || kundliProfiles[0] || null;
+  // Determine the active profile: header-selected > Self > first profile.
+  // For guests (not logged in): if a guest Kundli profile exists (selected in
+  // redux or stored in the cookie), use it; otherwise fall back to the
+  // "Select Zodiac" flow.
+  const guestProfile = useMemo(() => {
+    if (isLoggedIn) return null;
+    if (headerSelectedKundli?._id || headerSelectedKundli?.name) return headerSelectedKundli;
+    const stored = getJSONCookie(GUEST_KUNDLI_COOKIE, []);
+    return Array.isArray(stored) && stored.length > 0 ? stored[0] : null;
+  }, [isLoggedIn, headerSelectedKundli]);
+
+  const activeProfile = !isLoggedIn
+    ? guestProfile
+    : headerSelectedKundli?._id
+      ? headerSelectedKundli
+      : kundliProfiles.find((p) => p.relation?.toLowerCase() === 'self') || kundliProfiles[0] || null;
 
   // Build vedic params from active profile to fetch sun sign
   const vedicParams = activeProfile
@@ -163,6 +179,7 @@ const HoroscopeOld = () => {
   const [cameFromOverview, setCameFromOverview] = useState(false);
   const [overviewCardIndex, setOverviewCardIndex] = useState(null);
   const [showZodiacModal, setShowZodiacModal] = useState(false);
+  const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState('phase_1');
 
   // Track if we've already applied the Kundli-based default
@@ -508,8 +525,15 @@ const HoroscopeOld = () => {
   };
 
   const handleOpenModal = () => {
-    setTempSelectedZodiac(selectedZodiac);
-    setShowZodiacModal(true);
+    if (isLoggedIn || activeProfile) {
+      // Logged-in users, or guests who already have a Kundli profile,
+      // open the profile manager (it handles guest profiles via cookie).
+      setShowProfileSelector(true);
+    } else {
+      // Guest user with no profile — show zodiac selector
+      setTempSelectedZodiac(selectedZodiac);
+      setShowZodiacModal(true);
+    }
   };
 
   const selectedZodiacData = zodiacSigns.find(
@@ -537,6 +561,7 @@ const HoroscopeOld = () => {
   };
 
   return (
+    <>
     <div className="horoscope-old-page">
     <div className="horoscope-page">
       <PrimaryLoader isLoading={isLoading} />
@@ -552,15 +577,7 @@ const HoroscopeOld = () => {
           }}>
             <ChevronLeft size={24} />
           </button>
-          <button className="profile-selector" onClick={handleOpenModal}>
-            <div className="selector-content">
-              <span className="selector-label">Select Horoscope</span>
-              <span className="selector-value">
-                {selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)}
-              </span>
-            </div>
-            <ChevronDown size={16} />
-          </button>
+          <span className="horoscope-page-title">Western Horoscope</span>
           <button
             className="indian-horoscope-btn"
             onClick={() => {
@@ -574,6 +591,24 @@ const HoroscopeOld = () => {
       </div>
 
       <div className="horoscope-page-content">
+        {/* Centered Profile Selector with DOB/Place */}
+        <div className="horoscope-profile-header">
+          <div className="horoscope-profile-center" onClick={handleOpenModal}>
+            <span className="horoscope-profile-label">{activeProfile ? 'Select Profile' : 'Select Zodiac'}</span>
+            <span className="horoscope-profile-name">
+              {activeProfile?.name || (selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1))}
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ marginLeft: '4px' }}>
+                <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
+            {activeProfile && (
+              <span className="horoscope-profile-dob">
+                Date of birth: {activeProfile.day} {['', 'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][activeProfile.month]}, {activeProfile.year} | Time:  {String(((activeProfile.hour || 0) % 12) || 12).padStart(2, '0')}:{String(activeProfile.min || 0).padStart(2, '0')} {activeProfile.hour >= 12 ? 'PM' : 'AM'} | Place: {activeProfile.place}
+              </span>
+            )}
+          </div>
+        </div>
+
         <div className="horoscope-container">
           <div className="zodiac-display">
             <div className="zodiac-info">
@@ -823,6 +858,27 @@ const HoroscopeOld = () => {
       </div>
     </div>
     </div>
+
+    {/* Profile Manager - rendered outside .horoscope-old-page so the page's
+        global CSS reset does not affect the shared modal styling */}
+    <ProfileManager
+      isOpen={showProfileSelector}
+      onClose={() => setShowProfileSelector(false)}
+      onProfileSelect={(profile) => {
+        setShowProfileSelector(false);
+        // Update Redux with selected profile so useEffect picks up the new sun sign
+        dispatch(setSelectedKundli(profile));
+      }}
+      selectedProfileId={activeProfile?._id}
+      title="Select Profile"
+      enabledOperations={{
+        list: true,
+        add: true,
+        edit: true,
+        delete: true,
+      }}
+    />
+    </>
   );
 };
 
