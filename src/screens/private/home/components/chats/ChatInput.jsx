@@ -33,6 +33,16 @@ const ChatInput = ({
   const { openFileSelector } = useFileSelector();
   const { recording, paused, seconds, startRecording, stopRecording, pauseRecording, resumeRecording } = useVoiceRecorder();
 
+  // Auto-focus the input when chat becomes active (isMessageDisabled goes from true to false)
+  useEffect(() => {
+    if (!isMessageDisabled && inputRef.current) {
+      // Small delay to ensure DOM is ready after state change
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [isMessageDisabled]);
+
   // Handle mobile keyboard viewport resize (iOS/Android)
   useEffect(() => {
     const viewport = window.visualViewport;
