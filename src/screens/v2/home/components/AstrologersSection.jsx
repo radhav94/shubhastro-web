@@ -1,11 +1,10 @@
-import { useState, useCallback, useRef, useEffect, memo, lazy, Suspense } from "react";
+import { useState, useCallback, useRef, useEffect, memo, Suspense } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SectionHeader from "./SectionHeader";
 import NewAstrologerCard from "../../../../component/UI/cards/newAstrologerCard/NewAstrologerCard";
 import useIsOverflowing from "../../../../hooks/useIsOverflowing";
 import styles from "../Home.module.scss";
-
-const EmergencySessionModal = lazy(() => import("../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal"));
+import EmergencySessionModal from "../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 
 const AstrologersSection = memo(({ title, astrologers, onConnect, gridRef, hideSliderButtons = false, onScrollableChange }) => {
     const [emergencyAstrologer, setEmergencyAstrologer] = useState(null);

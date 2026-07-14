@@ -1,7 +1,6 @@
-import { memo, Suspense, lazy, useRef, useState, useCallback } from "react";
+import { memo, Suspense, useRef, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
-const BlogsSection = lazy(() => import("../../home/components/BlogsSection"));
+import BlogsSection from "../../home/components/BlogsSection";
 
 const BlogSectionV2 = memo(({ sectionData, styles }) => {
   const blogData = sectionData?.content || [];

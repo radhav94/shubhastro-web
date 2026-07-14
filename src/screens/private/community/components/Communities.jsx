@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, lazy, Suspense } from "react";
+import { useMemo, useState, useCallback, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiUsers } from "react-icons/fi";
 import styles from "../Community.module.scss";
@@ -9,8 +9,7 @@ import {
   useLeaveCommunitySpaceMutation,
 } from "../../../../redux/api/community/communityApi";
 import Toast from "../../../../component/toast";
-
-const EmergencySessionModal = lazy(() => import("../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal"));
+import EmergencySessionModal from "../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 
 const formatMemberCount = (count) => {
   if (!count) return "0";

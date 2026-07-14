@@ -1,9 +1,8 @@
-import { memo, useMemo, useRef, useState, useEffect, useCallback, Suspense, lazy } from "react";
+import { memo, useMemo, useRef, useState, useEffect, useCallback, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { sortContentByOrder } from "../sectionRendererV2";
-
-const AstrologersSection = lazy(() => import("../../home/components/AstrologersSection"));
+import AstrologersSection from "../../home/components/AstrologersSection";
 
 // Is this the emergency / "URGENT GUIDANCE" grid (vs. a generic top-rated grid)?
 const isEmergencySection = (sectionData) => {
