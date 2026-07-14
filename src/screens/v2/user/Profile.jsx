@@ -412,6 +412,7 @@ const Profile = () => {
           rate: 0,
           status: item?.status || "completed",
           roomId: item?.roomId,
+          rating: item?.rating || null,
           isLive: item?.astrologerLiveStatus?.isLive === true,
           liveStatus: item?.astrologerLiveStatus,
           year: item?.timestamp
@@ -446,6 +447,7 @@ const Profile = () => {
           rate: room?.rate || 0,
           status: "completed",
           roomId: room.roomId,
+          rating: room?.rating || null,
           isLive:
             room?.astrologerLiveStatus?.isLive === true ||
             liveAstrologerMap[room.astrologerId] === true,
@@ -1919,18 +1921,34 @@ const Profile = () => {
                               </div>
 
                               <div className={styles.orderCardBottom}>
-                                <button
-                                  className={styles.rateButton}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRateConsultation(
-                                      order.astrologer,
-                                      order.roomId,
-                                    );
-                                  }}
-                                >
-                                  Rate Consultation
-                                </button>
+                                {order.rating ? (
+                                  <div className={styles.ratingDisplay}>
+                                    <span className={styles.ratingLabel}>Your Rating</span>
+                                    <div className={styles.ratingStars}>
+                                      {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star
+                                          key={star}
+                                          size={16}
+                                          fill={star <= order.rating ? "#F97316" : "none"}
+                                          color="#F97316"
+                                        />
+                                      ))}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    className={styles.rateButton}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRateConsultation(
+                                        order.astrologer,
+                                        order.roomId,
+                                      );
+                                    }}
+                                  >
+                                    Rate Consultation
+                                  </button>
+                                )}
                                 <div className={styles.buttonSeparator}></div>
                                 <ConsultAgainButton
                                   astrologer={order.astrologer}

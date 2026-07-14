@@ -21,10 +21,10 @@ import WelcomeBonusModal from "../../../component/UI/modal/WelcomeBonusModal/Wel
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
 import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, AstrologersByCategorySection, DiscoverMoreSectionV2, LiveSessionCard } from "./sections";
 
-// Lazy-load below-the-fold components
-const ProfileModals = lazy(() => import("../../private/kundli/components/ProfileModals"));
-const EmergencySessionModal = lazy(() => import("../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal"));
-const MobileAppModal = lazy(() => import("../../private/aiwow/components/MobileAppModal"));
+// Below-the-fold components (static — shared with many other pages)
+import ProfileModals from "../../private/kundli/components/ProfileModals";
+import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
+import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
 const SubscriptionModal = lazy(() => import("../../../component/UI/modal/SubscriptionModal/SubscriptionModal"));
 const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));
 

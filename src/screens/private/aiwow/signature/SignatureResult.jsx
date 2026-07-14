@@ -92,7 +92,7 @@ const SignatureResult = () => {
         </div>
 
         <div className={styles.qualityCard} style={{ position: 'relative' }}>
-          <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
             <TTSButton text={`Quality Metrics. Overall Quality: ${resultData.quality.overallQuality} percent. Clarity: ${resultData.quality.clarity} percent. Contrast: ${resultData.quality.contrast} percent. Completeness: ${resultData.quality.completeness} percent. Status: ${resultData.quality.isAcceptable ? 'Acceptable' : 'Not Acceptable'}`} />
           </span>
           <h3 className={styles.cardTitle}>Quality Metrics</h3>
@@ -124,7 +124,7 @@ const SignatureResult = () => {
       </div>
 
       <div className={styles.styleCard} style={{ position: 'relative' }}>
-        <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+        <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
           <TTSButton text={`Overall Style. Legibility Score: ${resultData.style.legibility?.score} percent. ${resultData.style.legibility?.description || ''}. Uniqueness Score: ${resultData.style.uniqueness?.score} percent. ${resultData.style.uniqueness?.description || ''}. Formality: ${resultData.style.formality || ''}. Complexity: ${resultData.style.complexity || ''}${resultData.style.characteristics?.length > 0 ? '. Key Characteristics: ' + resultData.style.characteristics.join(', ') : ''}`} />
         </span>
         <h3 className={styles.cardTitle}>Overall Style</h3>
@@ -151,7 +151,7 @@ const SignatureResult = () => {
         
         {resultData.style.characteristics && resultData.style.characteristics.length > 0 && (
           <>
-            <h4 className={styles.subTitle}>Key Characteristics</h4>
+            <h4 className={styles.subTitle}>Characteristics</h4>
             <div className={styles.characteristicsTags}>
               {resultData.style.characteristics.map((char, index) => (
                 <span key={index} className={styles.tag}>{char}</span>
@@ -166,7 +166,7 @@ const SignatureResult = () => {
   const renderStrokeAnalysis = () => (
     <div className={styles.tabContent}>
       <div className={styles.analysisCard} style={{ position: 'relative' }}>
-        <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+        <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
           <TTSButton text={`Stroke Analysis. ${resultData.stroke.direction ? 'Direction: ' + resultData.stroke.direction.type + '. ' + (resultData.stroke.direction.description || '') + '. ' : ''}${resultData.stroke.slant ? 'Slant: ' + resultData.stroke.slant.type + ', Angle: ' + resultData.stroke.slant.angle + ' degrees. ' + (resultData.stroke.slant.description || '') + '. ' : ''}${resultData.stroke.pressure ? 'Pressure: ' + resultData.stroke.pressure.level + '. ' + (resultData.stroke.pressure.description || '') + '. ' : ''}${resultData.stroke.speed ? 'Speed: ' + resultData.stroke.speed.type + '. ' + (resultData.stroke.speed.description || '') + '. ' : ''}${resultData.stroke.fluidity ? 'Fluidity: ' + resultData.stroke.fluidity.type + '. ' + (resultData.stroke.fluidity.description || '') : ''}`} />
         </span>
         <h3 className={styles.cardTitle}>Stroke Analysis</h3>
@@ -238,7 +238,7 @@ const SignatureResult = () => {
       </div>
 
       <div className={styles.analysisCard} style={{ position: 'relative' }}>
-        <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+        <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
           <TTSButton text={`Letter Analysis. ${resultData.letter.size ? 'Size: ' + resultData.letter.size.overall + ', Consistency: ' + resultData.letter.size.consistency + '. ' + (resultData.letter.size.description || '') + '. ' : ''}${resultData.letter.spacing ? 'Letter Spacing: ' + resultData.letter.spacing.letterSpacing + ', Word Spacing: ' + resultData.letter.spacing.wordSpacing + '. ' + (resultData.letter.spacing.description || '') + '. ' : ''}${resultData.letter.style ? 'Legibility: ' + resultData.letter.style.legibility + ', Simplicity: ' + resultData.letter.style.simplicity + '. ' + (resultData.letter.style.description || '') : ''}`} />
         </span>
         <h3 className={styles.cardTitle}>Letter Analysis</h3>
@@ -296,7 +296,7 @@ const SignatureResult = () => {
       </div>
 
       <div className={styles.analysisItem} style={{ position: 'relative' }}>
-        <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+        <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
           <TTSButton text={`Baseline Analysis. Alignment: ${resultData.baseline.alignment}. Consistency: ${resultData.baseline.consistency}. Angle: ${resultData.baseline.angle} degrees. ${resultData.baseline.description || ''}`} />
         </span>
         <h3 className={styles.cardTitle}>Baseline Analysis</h3>
@@ -321,7 +321,7 @@ const SignatureResult = () => {
     <div className={styles.tabContent}>
       {resultData.personality.personalityTraits && resultData.personality.personalityTraits.length > 0 && (
         <div className={styles.traitsCard} style={{ position: 'relative' }}>
-          <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
             <TTSButton text={`Personality Traits. ${resultData.personality.personalityTraits.map(t => t.trait + '. ' + (t.description || '')).join('. ')}`} />
           </span>
           <h3 className={styles.cardTitle}>Personality Traits</h3>
@@ -348,7 +348,7 @@ const SignatureResult = () => {
       <div className={styles.personalityCardsGrid}>
         {resultData.personality.leadershipQualities && (
           <div className={styles.leadershipCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
               <TTSButton text={`Leadership Qualities. ${resultData.personality.leadershipQualities.description || ''}${resultData.personality.leadershipQualities.strengths?.length > 0 ? '. Strengths: ' + resultData.personality.leadershipQualities.strengths.join(', ') : ''}`} />
             </span>
             <h3 className={styles.cardTitle}>Leadership Qualities</h3>
@@ -372,11 +372,11 @@ const SignatureResult = () => {
             {resultData.personality.leadershipQualities.areas && resultData.personality.leadershipQualities.areas.length > 0 && (
               <>
                 <h4 className={styles.subTitle}>Areas for Development</h4>
-                <ul className={styles.areasList}>
+                <div className={styles.strengthsTags}>
                   {resultData.personality.leadershipQualities.areas.map((area, index) => (
-                    <li key={index} className={styles.areaItem}>{area}</li>
+                    <span key={index} className={styles.tag}>{area}</span>
                   ))}
-                </ul>
+                </div>
               </>
             )}
           </div>
@@ -384,7 +384,7 @@ const SignatureResult = () => {
 
         {resultData.personality.communicationStyle && (
           <div className={styles.communicationCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
               <TTSButton text={`Communication Style. Type: ${resultData.personality.communicationStyle.type}. ${resultData.personality.communicationStyle.description || ''}${resultData.personality.communicationStyle.characteristics?.length > 0 ? '. Characteristics: ' + resultData.personality.communicationStyle.characteristics.join(', ') : ''}`} />
             </span>
             <h3 className={styles.cardTitle}>Communication Style</h3>
@@ -420,7 +420,7 @@ const SignatureResult = () => {
 
         {resultData.personality.emotionalPatterns && (
           <div className={styles.emotionalCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
               <TTSButton text={`Emotional Patterns. Stability: ${resultData.personality.emotionalPatterns.stability}. Expression: ${resultData.personality.emotionalPatterns.expression}. ${resultData.personality.emotionalPatterns.description || ''}${resultData.personality.emotionalPatterns.characteristics?.length > 0 ? '. Characteristics: ' + resultData.personality.emotionalPatterns.characteristics.join(', ') : ''}`} />
             </span>
             <h3 className={styles.cardTitle}>Emotional Patterns</h3>
@@ -449,7 +449,7 @@ const SignatureResult = () => {
 
         {resultData.personality.socialConfidence && (
           <div className={styles.socialCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
               <TTSButton text={`Social Confidence. Level: ${resultData.personality.socialConfidence.level}. ${resultData.personality.socialConfidence.description || ''}${resultData.personality.socialConfidence.characteristics?.length > 0 ? '. Characteristics: ' + resultData.personality.socialConfidence.characteristics.join(', ') : ''}`} />
             </span>
             <h3 className={styles.cardTitle}>Social Confidence</h3>
@@ -484,7 +484,7 @@ const SignatureResult = () => {
       <div className={styles.insightsGrid}>
         {resultData.detailed.strengths && resultData.detailed.strengths.length > 0 && (
           <div className={styles.insightsCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
               <TTSButton text={`Strengths. ${resultData.detailed.strengths.join('. ')}`} />
             </span>
             <h3 className={styles.cardTitle}>Strengths</h3>
@@ -498,7 +498,7 @@ const SignatureResult = () => {
 
         {resultData.detailed.challenges && resultData.detailed.challenges.length > 0 && (
           <div className={styles.insightsCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
               <TTSButton text={`Challenges. ${resultData.detailed.challenges.join('. ')}`} />
             </span>
             <h3 className={styles.cardTitle}>Challenges</h3>
@@ -512,7 +512,7 @@ const SignatureResult = () => {
 
         {resultData.detailed.recommendations && resultData.detailed.recommendations.length > 0 && (
           <div className={styles.insightsCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
               <TTSButton text={`Recommendations. ${resultData.detailed.recommendations.join('. ')}`} />
             </span>
             <h3 className={styles.cardTitle}>Recommendations</h3>
@@ -526,7 +526,7 @@ const SignatureResult = () => {
 
         {resultData.detailed.careerSuggestions && resultData.detailed.careerSuggestions.length > 0 && (
           <div className={styles.insightsCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
               <TTSButton text={`Career Suggestions. ${resultData.detailed.careerSuggestions.join('. ')}`} />
             </span>
             <h3 className={styles.cardTitle}>Career Suggestions</h3>
@@ -540,7 +540,7 @@ const SignatureResult = () => {
 
         {resultData.detailed.relationshipInsights && resultData.detailed.relationshipInsights.length > 0 && (
           <div className={styles.insightsCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '0px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
               <TTSButton text={`Relationship Insights. ${resultData.detailed.relationshipInsights.join('. ')}`} />
             </span>
             <h3 className={styles.cardTitle}>Relationship Insights</h3>
