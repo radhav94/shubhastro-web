@@ -188,7 +188,7 @@ const AgenticCalendarV2 = ({ styles }) => {
             disabled={selectedOccasions.length === 0 || !locationData}
             onClick={handleGetMuhurat}
           >
-            View Muhuratas
+            View Muhurat
           </button>
           </div>
         </div>

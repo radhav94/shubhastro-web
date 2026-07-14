@@ -26,6 +26,13 @@ const PanchangInputCard = ({
     latitude: initialLatitude || userLocation.lat,
     longitude: initialLongitude || userLocation.lon,
   });
+
+  // Sync dateOfBirth when initialDate prop changes (e.g., on page load, refresh, profile change)
+  useEffect(() => {
+    if (initialDate) {
+      setFormData((prev) => ({ ...prev, dateOfBirth: initialDate }));
+    }
+  }, [initialDate]);
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long", // Thursday
     year: "numeric", // 2025

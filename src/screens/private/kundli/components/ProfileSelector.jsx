@@ -1,8 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import styles from "./ProfileSelector.module.scss";
 
-const ProfileSelector = ({ selectedProfile, onSelectClick, onEditClick }) => {
+const ProfileSelector = ({ selectedProfile, onSelectClick, onEditClick, isGuest, onAddClick }) => {
     const navigate = useNavigate();
+
+    const showAddNew = isGuest && !selectedProfile;
+    const label = "Select Profile";
+    const displayName = selectedProfile ? selectedProfile.name : (showAddNew ? "Add New Profile" : "Select Profile");
+
+    const handleClick = () => {
+        if (showAddNew && onAddClick) {
+            onAddClick();
+        } else {
+            onSelectClick();
+        }
+    };
 
     return (
         <>
@@ -15,9 +27,9 @@ const ProfileSelector = ({ selectedProfile, onSelectClick, onEditClick }) => {
                         </svg>
                     </button>
                     <div className={styles.profileSelector}>
-                        <span className={styles.selectLabel}>Select Profile</span>
-                        <span className={styles.profileName} onClick={onSelectClick}>
-                            {selectedProfile ? selectedProfile.name : "Select Profile"}
+                        <span className={styles.selectLabel}>{label}</span>
+                        <span className={styles.profileName} onClick={handleClick}>
+                            {displayName}
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block', marginLeft: '4px', verticalAlign: 'middle' }}>
                                 <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>

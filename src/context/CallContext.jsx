@@ -137,6 +137,8 @@ export const CallProvider = ({ children }) => {
           clearPersistedCallState();
           clearCallSession();
           setIsCallMinimized(false);
+          setIsMicOn(true);
+          setIsSpeakerOn(true);
         }
         return resolved;
       });
@@ -155,6 +157,8 @@ export const CallProvider = ({ children }) => {
         clearPersistedCallState();
         clearCallSession();
         setIsCallMinimized(false);
+        setIsMicOn(true);
+        setIsSpeakerOn(true);
       }
     }
   }, [persistCallState, clearPersistedCallState]);

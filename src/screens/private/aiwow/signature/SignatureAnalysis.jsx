@@ -22,6 +22,7 @@ const SignatureAnalysis = () => {
   const [progress, setProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [error, setError] = useState(null);
   
   const isMountedRef = React.useRef(true);
@@ -127,7 +128,8 @@ const SignatureAnalysis = () => {
   };
 
   const handleShowResult = () => {
-    if (analysisComplete) {
+    if (analysisComplete && !isNavigating) {
+      setIsNavigating(true);
       navigate(PATH.privateRoutes.SIGNATURE_RESULT.path[0], { replace: true });
     }
   };
@@ -141,7 +143,7 @@ const SignatureAnalysis = () => {
 
   return (
     <div className={styles.container}>
-      <BackButton />
+      <BackButton disabled={isAnalyzing} />
       {/* <header className={styles.headerWrap}>
         <div className={styles.header}>
           <button className={styles.backButton} onClick={() => navigate(-1)}>
@@ -203,10 +205,10 @@ const SignatureAnalysis = () => {
             <button 
               className={styles.resultButton}
               onClick={handleShowResult}
-              disabled={!analysisComplete}
-              style={{ opacity: analysisComplete ? 1 : 0.6 }}
+              disabled={!analysisComplete || isNavigating}
+              style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6, cursor: (!analysisComplete || isNavigating) ? 'not-allowed' : 'pointer' }}
             >
-              Analysing...
+              {analysisComplete ? 'View Result' : 'Analysing...'}
             </button>
           </>
         ) : (

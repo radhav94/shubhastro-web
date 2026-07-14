@@ -186,6 +186,10 @@
   margin: 0;
   border-radius: 7px;
   overflow: hidden;
+  // Center the signature both ways so small images sit in the middle of the box
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
   @media (max-width: 767px) {
     width: 70%;
@@ -194,10 +198,12 @@
 }
 
 .signatureImage {
-  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
   height: auto;
   display: block;
   object-fit: contain;
+  margin: auto;
 }
 
 .cornerTopLeft,

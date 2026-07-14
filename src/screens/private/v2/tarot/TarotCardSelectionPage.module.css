@@ -195,14 +195,14 @@
   }
   .title {
     font-size: 22px;
-    text-align: start;
+    text-align: center;
     width: 100%;
   }
 
   .subtitle {
     font-size: 13px;
-    padding: 0px 16px 0px 0px;
-    text-align: start;
+    padding: 0px 16px;
+    text-align: center;
     width: 100%;
   }
 

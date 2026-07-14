@@ -23,6 +23,7 @@ const PalmistryAnalysis = () => {
   const [progress, setProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [error, setError] = useState(null);
   
   // Track component mount status to prevent navigation after unmount
@@ -162,7 +163,8 @@ const PalmistryAnalysis = () => {
   };
 
   const handleShowResult = () => {
-    if (analysisComplete) {
+    if (analysisComplete && !isNavigating) {
+      setIsNavigating(true);
       navigate(PATH.privateRoutes.PALMISTRY_RESULT.path[0], { replace: true });
     }
   };
@@ -181,7 +183,7 @@ const PalmistryAnalysis = () => {
 
   return (
     <div className={styles.container}>
-      <BackButton onClick={handleBack} />
+      <BackButton onClick={handleBack} disabled={isAnalyzing} />
       <div className={styles.content}>
         <div className={styles.leftSection}>
           <h2 className={styles.title}>
@@ -239,10 +241,10 @@ const PalmistryAnalysis = () => {
             <button 
               className={styles.resultButton}
               onClick={handleShowResult}
-              disabled={!analysisComplete}
-              style={{ opacity: analysisComplete ? 1 : 0.6 }}
+              disabled={!analysisComplete || isNavigating}
+              style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6, cursor: (!analysisComplete || isNavigating) ? 'not-allowed' : 'pointer' }}
             >
-              Analysing...
+              {analysisComplete ? 'View Result' : 'Analysing...'}
             </button>
           </>
         ) : (
