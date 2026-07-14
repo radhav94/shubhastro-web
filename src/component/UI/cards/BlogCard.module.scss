@@ -56,12 +56,12 @@ $color-text-secondary: #6c757d;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 3px;
 }
 
 .authorName {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
   color: $color-text-secondary;
   text-transform: capitalize;
 }
@@ -71,7 +71,7 @@ $color-text-secondary: #6c757d;
   font-size: 16px;
   font-weight: 500;
   color: $color-text-primary;
-  line-height: 1.5;
+  // line-height: 1.5;
   margin: 0;
   flex-grow: 1; // Pushes the author info to the bottom
 
@@ -89,7 +89,7 @@ $color-text-secondary: #6c757d;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 16px; // Space between title and author info
+  margin-top: 8px; // Space between title and author info
 }
 
 .authorDate {
