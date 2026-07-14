@@ -11,6 +11,7 @@ import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscription/subscriptionApi";
+import { isPremiumFeature } from "../../../utils/subscription/featureGating";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
@@ -113,15 +114,16 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                 {sortContentByOrder(section.content || []).map((item, i) => {
                   const path = getWowCardPath(item);
                   const iconSrc = item.icon || item.image_url_web || item.iconUrl || item.icon_url || item.image_url_app;
-                  // Show the "Paid" ribbon on the first card of the suite.
-                  const paidLabel = i === 0 ? "Paid" : null;
+                  // Show the "Paid" ribbon on premium suite cards.
+                  const premium = isPremiumFeature(item.slug);
+                  const paidLabel = premium ? "Paid" : null;
                   const cardIcon = (
                     <div className={styles.wowIconBox}>
                       <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                     </div>
                   );
-                  // The paid card (first card) opens the premium plans modal instead of navigating.
-                  if (i === 0) {
+                  // Premium cards open the premium plans modal instead of navigating.
+                  if (premium) {
                     return (
                       <div key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} onClick={() => onPaidCardClick(item)} style={{ cursor: 'pointer' }}>
                         {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}

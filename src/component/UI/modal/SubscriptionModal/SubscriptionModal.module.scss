@@ -305,3 +305,70 @@
   height: 26px;
   object-fit: contain;
 }
+
+.stateView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 14px;
+  padding: 48px 24px;
+  min-height: 260px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #ffe3d2;
+  border-top-color: #f75801;
+  border-radius: 50%;
+  animation: subscriptionSpin 0.8s linear infinite;
+}
+
+@keyframes subscriptionSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.successIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #22a45d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(34, 164, 93, 0.35);
+}
+
+.stateTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.stateText {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.continueBtn {
+  margin-top: 8px;
+  min-width: 160px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  border: none;
+  background: #f75801;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.92;
+  }
+}

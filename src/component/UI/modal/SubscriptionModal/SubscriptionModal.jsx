@@ -1,6 +1,9 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
 import styles from "./SubscriptionModal.module.scss";
-import { useGetSubscriptionPlansQuery } from "../../../../redux/api/subscription/subscriptionApi";
+import { useGetSubscriptionPlansQuery, usePurchaseWalletSubscriptionMutation } from "../../../../redux/api/subscription/subscriptionApi";
 import shubhLogoMobile from "../../../../assets/images/mobile-shubh-astro-logo.svg";
 
 // Maps API plan `code` -> presentation config. Prices, description and feature
@@ -46,7 +49,7 @@ const buildFeatures = (plan) => {
     quota > 0
       ? { label: `${quota} reports / month`, included: true }
       : { label: "No monthly report quota", included: false },
-    plan.overagePrice != null
+    plan.overagePrice > 0
       ? { label: `₹${plan.overagePrice} per extra report`, included: true }
       : null,
     plan.durationMonths > 0
@@ -75,33 +78,92 @@ const CrossIcon = () => (
   </svg>
 );
 
-const SubscriptionModal = ({ isOpen, onClose, onSelectPlan }) => {
+const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant = "basic" }) => {
   const { data, isLoading, isFetching } = useGetSubscriptionPlansQuery(undefined, { skip: !isOpen });
+
+  const navigate = useNavigate();
+  const [purchaseWallet] = usePurchaseWalletSubscriptionMutation();
+  const [pendingCode, setPendingCode] = useState(null);
+  const [flow, setFlow] = useState("idle"); // "idle" | "processing" | "success"
+  const [successPlan, setSuccessPlan] = useState(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setFlow("idle");
+      setSuccessPlan(null);
+      setPendingCode(null);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const apiPlans = Array.isArray(data?.data) ? data.data : [];
-  const cards = PLAN_ORDER
-    .map((code) => {
-      const apiPlan = apiPlans.find((p) => p.code === code && p.status === "active");
-      if (!apiPlan) return null;
-      const cfg = PLAN_DISPLAY[code];
-      const priceValue = cfg.priceSource === "overage" ? apiPlan.overagePrice : apiPlan.price;
-      return {
-        id: code,
-        ...cfg,
-        title: apiPlan.name || cfg.title,
-        price: `₹${priceValue ?? 0}`,
-        features: buildFeatures(apiPlan),
-        plan: apiPlan,
-      };
-    })
-    .filter(Boolean);
+  const isExtended = variant === "extended";
+  const cards = isExtended
+    ? apiPlans
+        .filter((p) => p.status === "active" && (p.planType === "extended" || (p.code || "").startsWith("extended")))
+        .slice()
+        .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || (a.price ?? 0) - (b.price ?? 0))
+        .map((p) => ({
+          id: p.code,
+          title: p.name,
+          cta: "Buy Now",
+          highlighted: false,
+          price: `₹${p.price ?? 0}`,
+          features: buildFeatures(p),
+          plan: p,
+        }))
+    : PLAN_ORDER.map((code) => {
+        const apiPlan = apiPlans.find((p) => p.code === code && p.status === "active");
+        if (!apiPlan) return null;
+        const cfg = PLAN_DISPLAY[code];
+        const priceValue = cfg.priceSource === "overage" ? apiPlan.overagePrice : apiPlan.price;
+        return {
+          id: code,
+          ...cfg,
+          title: apiPlan.name || cfg.title,
+          price: `₹${priceValue ?? 0}`,
+          features: buildFeatures(apiPlan),
+          plan: apiPlan,
+        };
+      }).filter(Boolean);
 
   const loading = isLoading || isFetching;
 
-  const handleSelect = (card) => {
-    if (onSelectPlan) onSelectPlan(card.plan);
+  const handleSelect = async (card) => {
+    // Free plan is not a purchasable subscription.
+    if (!card?.plan?.code || card.plan.price === 0) {
+      if (onSelectPlan) onSelectPlan(card.plan);
+      return;
+    }
+    setPendingCode(card.id);
+    setFlow("processing");
+    try {
+      const res = await purchaseWallet({ planCode: card.plan.code, device: "web", country: "IN" });
+      const body = res?.data || res?.error?.data;
+      const reason = body?.data?.reason || body?.reason;
+      if (body?.success === true) {
+        setSuccessPlan(card);
+        setFlow("success");
+        if (onPurchased) onPurchased(card.plan);
+      } else if (reason === "INSUFFICIENT_WALLET_BALANCE") {
+        setFlow("idle");
+        toast.error("Insufficient wallet balance. Please recharge to continue.");
+        if (onClose) onClose();
+        navigate("/recharge");
+      } else if (reason === "AI_WOW_PREMIUM_FLOW_DISABLED") {
+        setFlow("idle");
+        toast.error("Subscriptions aren't available right now.");
+      } else {
+        setFlow("idle");
+        toast.error(body?.message || "Purchase failed. Please try again.");
+      }
+    } catch {
+      setFlow("idle");
+      toast.error("Purchase failed. Please try again.");
+    } finally {
+      setPendingCode(null);
+    }
   };
 
   return (
@@ -111,6 +173,29 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan }) => {
           <IoClose size={22} />
         </button>
 
+        {flow === "processing" ? (
+          <div className={styles.stateView}>
+            <div className={styles.spinner} />
+            <h3 className={styles.stateTitle}>Activating your subscription…</h3>
+            <p className={styles.stateText}>Please wait while we confirm your plan.</p>
+          </div>
+        ) : flow === "success" ? (
+          <div className={styles.stateView}>
+            <div className={styles.successIcon}>
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+                <path d="M20 6L9 17l-5-5" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <h3 className={styles.stateTitle}>Subscription Activated</h3>
+            <p className={styles.stateText}>
+              {successPlan?.title ? `${successPlan.title} is now active.` : "Your plan is now active."}
+            </p>
+            <button type="button" className={styles.continueBtn} onClick={onClose}>
+              Continue
+            </button>
+          </div>
+        ) : (
+          <>
         <div className={styles.header}>
           <h2 className={styles.title}>
             <span className={styles.titleIcon} aria-hidden="true">
@@ -118,15 +203,15 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan }) => {
                 <path d="M12 2l8 3v6c0 5-3.4 8.5-8 11-4.6-2.5-8-6-8-11V5l8-3z" fill="#F75801" />
               </svg>
             </span>
-            Choose Your Subscription
+            {isExtended ? "Extend Your Reports" : "Choose Your Subscription"}
           </h2>
-          <p className={styles.subtitle}>Pick a plan to unlock premium features</p>
+          <p className={styles.subtitle}>{isExtended ? "Your plan limit is exhausted. Pick an extended plan to continue." : "Pick a plan to unlock premium features"}</p>
         </div>
 
         {loading ? (
           <div className={styles.stateMsg}>Loading plans…</div>
         ) : cards.length === 0 ? (
-          <div className={styles.stateMsg}>No plans available right now.</div>
+          <div className={styles.stateMsg}>{isExtended ? "No extended plans available right now." : "No plans available right now."}</div>
         ) : (
           <div className={styles.plansGrid}>
             {cards.map((plan) => (
@@ -154,8 +239,9 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan }) => {
                   type="button"
                   className={`${styles.planCta} ${plan.highlighted ? styles.planCtaFilled : styles.planCtaOutline}`}
                   onClick={() => handleSelect(plan)}
+                  disabled={pendingCode === plan.id}
                 >
-                  {plan.cta}
+                  {pendingCode === plan.id ? "Processing..." : plan.cta}
                 </button>
 
                 <div className={styles.divider} />
@@ -176,6 +262,8 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan }) => {
               </div>
             ))}
           </div>
+        )}
+          </>
         )}
       </div>
     </div>

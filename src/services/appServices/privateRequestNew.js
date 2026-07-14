@@ -127,7 +127,7 @@ export const privateRequestNew = createApi({
 
     return result;
   },
-  tagTypes: ["Kundlis", "VirtualAssistant", "Following", "FollowedAstrologers", "JoinedSpaces", "CommunitySpaces", "CommunityLibrary", "CommunitySpaceDetail", "AiHistory"],
+  tagTypes: ["Kundlis", "VirtualAssistant", "Following", "FollowedAstrologers", "JoinedSpaces", "CommunitySpaces", "CommunityLibrary", "CommunitySpaceDetail", "AiHistory", "SubscriptionStatus"],
 
   endpoints: () => ({}), // EMPTY — endpoints later inject honge
 });

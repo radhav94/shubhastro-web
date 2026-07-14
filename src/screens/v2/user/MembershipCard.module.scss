@@ -139,17 +139,21 @@
     margin-top: 10px;
   }
 
-  .manageBtn {
+  .manageWrap {
     grid-column: 3;
     grid-row: 1;
     align-self: start;
     justify-self: end;
+    margin-left: auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .manageBtn {
     min-width: 130px;
     min-height: 39px;
     padding: 8px 14px;
     font-size: 18px;
-    position: relative;
-    z-index: 1;
   }
 }
 
@@ -190,5 +194,102 @@
     min-height: 36px;
     font-size: 14px;
     padding: 7px 10px;
+  }
+}
+
+.quota {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quotaBar {
+  width: 100%;
+  max-width: 260px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.quotaFill {
+  height: 100%;
+  background: #f75801;
+  border-radius: 999px;
+}
+
+.quotaText {
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.manageWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.manageChevron {
+  transition: transform 0.15s ease;
+}
+
+.manageChevronOpen {
+  transform: rotate(180deg);
+}
+
+.manageMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 230px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  padding: 8px;
+  z-index: 20;
+}
+
+.manageMenuDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 10px 10px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 6px;
+}
+
+.manageMenuRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+  color: #6b7280;
+
+  strong {
+    color: #1f2937;
+    font-weight: 600;
+  }
+}
+
+.cancelMenuItem {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e5484d;
+  cursor: pointer;
+
+  &:hover {
+    background: #fdecec;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
   }
 }

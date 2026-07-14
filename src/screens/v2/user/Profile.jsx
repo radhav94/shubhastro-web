@@ -46,6 +46,7 @@ import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrolo
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
+import SubscriptionModal from "../../../component/UI/modal/SubscriptionModal/SubscriptionModal";
 import { useGetFollowedAstrologersQuery } from "../../../redux/api/astrologer/followedAstrologersApi";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
@@ -57,7 +58,7 @@ import { logout, updateRegistrationStatus, setEmail } from "../../../redux/auth/
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import styles from "./Profile.module.scss";
 import MembershipCard from "./MembershipCard";
-import SubscriptionModal from "../../../component/UI/modal/SubscriptionModal/SubscriptionModal";
+import { useGetSubscriptionStatusQuery, useCancelSubscriptionMutation } from "../../../redux/api/subscription/subscriptionApi";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import emailIconSet from "../../../assets/images/icon_set (1).png";
 import { Toast } from "../../../component/index";
@@ -164,6 +165,43 @@ const Profile = () => {
   //   : "Guest User";
   const userId = localStorage.getItem("shubhtalk_customer_id");
 
+  const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !userId });
+  const [cancelSubscription, { isLoading: isCancellingSubscription }] = useCancelSubscriptionMutation();
+  const activeSubscriptionId = subscriptionStatus?.data?.subscription?._id;
+  const subData = subscriptionStatus?.data;
+  const hasActiveSubscription = !!subData?.hasActiveSubscription;
+  const subPlanName = subData?.plan?.name || subData?.subscription?.planName || subData?.subscription?.planCode || "Premium";
+  const subEndDate = subData?.subscription?.subscriptionEndDate || subData?.subscription?.endDate || null;
+  const subValidTill = subEndDate ? dayjs(subEndDate).format("DD MMM YYYY") : null;
+  const subRemainingDays = subEndDate
+    ? Math.max(0, dayjs(subEndDate).startOf("day").diff(dayjs().startOf("day"), "day"))
+    : null;
+  const subQuota = subData?.quota || null;
+
+  const handleCancelSubscription = () => {
+    if (!activeSubscriptionId) {
+      Toast.error("No active subscription to cancel.");
+      return;
+    }
+    setShowCancelConfirm(true);
+  };
+
+  const handleConfirmCancelSubscription = async () => {
+    try {
+      const res = await cancelSubscription({ subscriptionId: activeSubscriptionId });
+      const body = res?.data || res?.error?.data;
+      if (body?.success) {
+        Toast.success(body?.message || "Subscription cancelled");
+      } else {
+        Toast.error(body?.message || "Failed to cancel subscription");
+      }
+    } catch {
+      Toast.error("Failed to cancel subscription");
+    } finally {
+      setShowCancelConfirm(false);
+    }
+  };
+
   // Connect popup state
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
@@ -234,6 +272,7 @@ const Profile = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEmailEditModal, setShowEmailEditModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [editEmailValue, setEditEmailValue] = useState("");
   const [emailError, setEmailError] = useState("");
   const [profileToEdit, setProfileToEdit] = useState(null);
@@ -478,6 +517,18 @@ const Profile = () => {
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   };
+
+  const subStartDate = subData?.subscription?.subscriptionStartDate || null;
+  const subscriptionDetails = hasActiveSubscription
+    ? [
+        { label: "Status", value: capitalizeWords(subData?.subscription?.status || "active") },
+        { label: "Started", value: subStartDate ? dayjs(subStartDate).format("DD MMM YYYY") : "-" },
+        { label: "Amount", value: `₹${subData?.subscription?.planAmount ?? subData?.plan?.price ?? 0}` },
+        { label: "Payment", value: capitalizeWords(subData?.subscription?.paymentGateway || "wallet") },
+        { label: "Reports left", value: subQuota ? `${subQuota.remainingQuota} of ${subQuota.monthlyQuota}` : "-" },
+        { label: "Extra report", value: `₹${subData?.subscription?.overagePrice ?? subQuota?.overagePrice ?? 0} each` },
+      ]
+    : [];
 
     // Get user name with fallback to first Kundli name
  
@@ -1517,7 +1568,18 @@ const Profile = () => {
         </div>
 
         <div className={styles.balanceMembershipItem}>
-          <MembershipCard onManage={() => setShowSubscriptionModal(true)} />
+          <MembershipCard
+                  hasSubscription={hasActiveSubscription}
+                  planName={subPlanName}
+                  validTill={subValidTill}
+                  remainingDays={subRemainingDays}
+                  quotaUsed={subQuota?.usedQuota}
+                  quotaTotal={subQuota?.monthlyQuota}
+                  details={subscriptionDetails}
+                  onCancel={handleCancelSubscription}
+                  isCancelling={isCancellingSubscription}
+                  onSubscribe={() => setShowSubscriptionModal(true)}
+                />
         </div>
       </div>
 
@@ -2386,18 +2448,25 @@ const Profile = () => {
         }}
       />
 
+      <SubscriptionModal isOpen={showSubscriptionModal} onClose={() => setShowSubscriptionModal(false)} />
+
+      <DeleteConfirmationModal
+        isOpen={showCancelConfirm}
+        onClose={() => setShowCancelConfirm(false)}
+        onConfirm={handleConfirmCancelSubscription}
+        isLoading={isCancellingSubscription}
+        title="Cancel Subscription"
+        message="Cancel your subscription? You'll lose premium access."
+        confirmText="Yes, Cancel"
+        loadingText="Cancelling..."
+      />
+
       {/* Recharge Modal for insufficient balance */}
       <RechargeModal
         isOpen={hookOpenModal.recharge}
         onClose={() => hookSetOpenModal((prev) => ({ ...prev, recharge: false }))}
         astrologer={latestAstrologerData?.data || selectedAstrologer}
         connectionType={lastConnectionType}
-      />
-
-      {/* Subscription / Membership Management Modal */}
-      <SubscriptionModal
-        isOpen={showSubscriptionModal}
-        onClose={() => setShowSubscriptionModal(false)}
       />
 
       {/* Add Profile Modal */}
