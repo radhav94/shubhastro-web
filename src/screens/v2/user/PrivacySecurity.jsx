@@ -15,6 +15,8 @@ const PrivacySecurity = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+
+  const isWebview = new URLSearchParams(location.search).get("type") === "webview";
   // Get the active tab from navigation state
   const { activeTab } = location.state || {};
 
@@ -72,7 +74,8 @@ const PrivacySecurity = () => {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${isWebview ? styles.webviewContainer : ''}`}>
+      {!isWebview && (
       <header className={styles.headerWrap}>
         <div className={styles.header}>
           <button
@@ -85,8 +88,9 @@ const PrivacySecurity = () => {
           <h1 className={styles.title}>Privacy and Security</h1>
         </div>
       </header>
+      )}
 
-      <div className={styles.content}>
+      <div className={`${styles.content} ${isWebview ? styles.webviewContent : ''}`}>
         {menuItems.map((item) => (
           <div
             key={item.id}
@@ -101,6 +105,8 @@ const PrivacySecurity = () => {
           </div>
         ))}
 
+
+    {!isWebview && (
         <div
           className={`${styles.menuItem} ${styles.deleteMenuItem} ${styles.delteButton}`}
           onClick={() => setShowDeleteModal(true)}
@@ -115,8 +121,9 @@ const PrivacySecurity = () => {
           </div>
           <ChevronRight size={20} className={styles.deleteIcon} />
         </div>
+        )}
       </div>
-
+           
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
