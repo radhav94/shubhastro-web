@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './GemstoneLanding.module.scss';
 import ClarityIcon from '../../../../assets/icons/clarity.png';
@@ -9,15 +9,15 @@ import CaratIcon from '../../../../assets/icons/carat.png';
 const GemstoneLanding = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/gemstone-authenticity");
+      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/gemstone-authenticity/instructions");
       window.location.href = "/login?skip=welcome";
+      return;
     }
-  }, []);
-
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
+    navigate('/ai-wow/gemstone-authenticity/instructions');
+  };
   const features = [
     {
       icon: ClarityIcon,
@@ -74,7 +74,7 @@ const GemstoneLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/ai-wow/gemstone-authenticity/instructions')}
+          onClick={handleProceed}
         >
           Proceed Ahead
         </button>

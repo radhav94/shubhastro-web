@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ClothColorLanding.module.scss';
 import AuraSpectrumIcon from '../../../../assets/icons/auraspectrum.png';
@@ -9,15 +8,17 @@ import StyleCaratIcon from '../../../../assets/icons/stylecarat.png';
 const ClothColorLanding = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/clothes-colour-analysis");
+      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/clothes-colour-analysis/form");
       window.location.href = "/login?skip=welcome";
+      return;
     }
-  }, []);
+    navigate('/ai-wow/clothes-colour-analysis/form');
+  };
 
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;  const features = [
+  const features = [
     {
       icon: AuraSpectrumIcon,
       title: 'Aura Spectrum',
@@ -73,7 +74,7 @@ const ClothColorLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/ai-wow/clothes-colour-analysis/form')}
+          onClick={handleProceed}
         >
           Proceed Ahead
         </button>
