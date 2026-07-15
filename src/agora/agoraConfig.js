@@ -9,9 +9,9 @@
 export const VIDEO_CALL_ENCODER_CONFIG = {
   width: 320,
   height: 240,
-  frameRate: 15,
-  bitrateMin: 100,
-  bitrateMax: 200,
+  frameRate: 30,
+  bitrateMin: 200,
+  bitrateMax: 500,
   degradationPreference: "maintain-framerate",
 };
 
@@ -19,9 +19,9 @@ export const VIDEO_CALL_ENCODER_CONFIG = {
 export const LIVE_STREAM_ENCODER_CONFIG = {
   width: 320,
   height: 240,
-  frameRate: 15,
-  bitrateMin: 100,
-  bitrateMax: 200,
+  frameRate: 30,
+  bitrateMin: 200,
+  bitrateMax: 500,
   degradationPreference: "maintain-framerate",
 };
 
@@ -29,7 +29,7 @@ export const LIVE_STREAM_ENCODER_CONFIG = {
 export const AUDIO_ENCODER_CONFIG = {
   sampleRate: 16000,
   stereo: false,
-  bitrate: 18,
+  bitrate: 26,
 };
 
 /**
