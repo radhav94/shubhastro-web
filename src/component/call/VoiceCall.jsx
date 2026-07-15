@@ -123,6 +123,15 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+
+  // Restore pending switch state after reconnect
+  useEffect(() => {
+    if (activeCall?.pendingSwitch?.isPending) {
+      setIsSwitching(true);
+      // Clear from activeCall to avoid re-triggering
+      setActiveCall((prev) => prev ? { ...prev, pendingSwitch: null } : prev);
+    }
+  }, [activeCall?.pendingSwitch, setActiveCall]);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showRechargeButton, setShowRechargeButton] = useState(false);
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);

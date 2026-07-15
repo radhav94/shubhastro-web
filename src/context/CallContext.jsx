@@ -282,13 +282,13 @@ export const CallProvider = ({ children }) => {
       console.log("[CallReconnect]   → type:", data?.type);
       console.log("[CallReconnect]   → agoraToken:", data?.agoraToken ? "present" : "missing");
       console.log("[CallReconnect]   → remainingTime:", data?.remainingTime);
+      console.log("[CallReconnect]   → pendingSwitch:", JSON.stringify(data?.pendingSwitch));
       console.log("[CallReconnect]   → full data:", JSON.stringify(data));
       voiceSocket.offAny(debugAnyEvent);
       cleanupAll();
 
       if (data && data.active) {
         // Use the type from backend response — it reflects the ACTUAL current session type
-        // This is critical for audio→video upgrades where savedCall may still say "audio"
         const actualCallType = data.type || reconnectCall.callType;
         console.log("[CallReconnect] 🎉 Call is still active — restoring state");
         console.log("[CallReconnect]   → savedCall.callType:", reconnectCall.callType, "→ actualCallType:", actualCallType);
@@ -298,6 +298,8 @@ export const CallProvider = ({ children }) => {
           callType: actualCallType,
           agoraToken: data.agoraToken || reconnectCall.agoraToken,
           remainingTime: data.remainingTime || reconnectCall.remainingTime,
+          // Pass pending switch info so VoiceCall can restore the waiting popup
+          pendingSwitch: data.pendingSwitch || null,
         };
         setActiveCall(restoredCall);
         
@@ -479,6 +481,11 @@ export const CallProvider = ({ children }) => {
         if (data.type && activeCall && data.type !== activeCall.callType) {
           console.log("[CallContext] 🔄 Call type changed during disconnect:", activeCall.callType, "→", data.type);
           setActiveCall((prev) => prev ? { ...prev, callType: data.type, agoraToken: data.agoraToken || prev.agoraToken } : prev);
+        }
+        // Restore pending switch state if present
+        if (data.pendingSwitch?.isPending) {
+          console.log("[CallContext] 🔄 Pending switch detected:", data.pendingSwitch.requestedType);
+          setActiveCall((prev) => prev ? { ...prev, pendingSwitch: data.pendingSwitch } : prev);
         }
       } else {
         console.log("[CallContext] ❌ Auto-reconnect failed, call ended:", data?.reason);
