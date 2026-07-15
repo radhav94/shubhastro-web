@@ -37,12 +37,15 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  border: 1px solid #F75801;
-  background: #fff;
+  background: rgb(255, 244, 236);
+  border: 1px solid #D43400;
+  color: #D43400;
   cursor: pointer;
-  color: #F75801;
   flex-shrink: 0;
   transition: all 0.2s;
+  &:hover {
+     transform: translateY(-2px);
+  }
 }
 
 .downloadBtn {
@@ -64,7 +67,7 @@
     background: #fef3c7;
     color: #1f2937;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 500;
     padding: 4px 16px;
     border-radius: 20px;
     margin-bottom: -10px;
@@ -75,10 +78,14 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: linear-gradient(135deg, #f97316, #ea580c);
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
     color: #fff;
-    padding: 8px 8px;
-    border-radius: 16px;
+    padding: 8px 16px;
+    border-radius: 50px;
+    transition: all 0.2s;
+    &:hover {
+      transform: translateY(-2px);
+    }
   }
 
   .downloadText {
@@ -89,7 +96,7 @@
 
   .downloadTitle {
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 600;
     color: #fff;
   }
 
@@ -106,7 +113,7 @@
 
   @media (max-width: 600px) {
     .downloadContent {
-      padding: 12px 18px;
+      padding: 8px 18px;
       gap: 10px;
     }
     .downloadTitle {

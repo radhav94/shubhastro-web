@@ -1050,3 +1050,56 @@
 @media (min-width: 1440px) {
 
 }
+
+/* Centered Profile Selector with DOB/Place (mirrors Indian horoscope) */
+.horoscope-old-page .horoscope-profile-header {
+  padding: 12px 20px 8px;
+  text-align: center;
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 8px;
+}
+
+.horoscope-old-page .horoscope-profile-center {
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.horoscope-old-page .horoscope-profile-label {
+  font-size: 14px;
+  color: #000000;
+  letter-spacing: 0.05em;
+}
+
+.horoscope-old-page .horoscope-profile-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.horoscope-old-page .horoscope-profile-dob {
+  font-size: 12px;
+  color: #000000;
+  margin-top: 2px;
+}
+
+@media (max-width: 767px) {
+  .horoscope-old-page .horoscope-profile-name {
+    font-size: 16px;
+  }
+  .horoscope-old-page .horoscope-profile-dob {
+    font-size: 11px;
+  }
+}
+
+/* Header title (matches Indian horoscope layout) */
+.horoscope-old-page .horoscope-page-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}

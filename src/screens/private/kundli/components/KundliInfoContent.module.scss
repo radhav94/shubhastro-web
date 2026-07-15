@@ -12,31 +12,23 @@
 }
 
 .infoParagraph {
-  font-size: 16px;
-  line-height: 1.8;
+  font-size: 14px;
   color: #333;
-  margin: 0 0 20px 0;
+  margin: 0 0 16px 0;
   text-align: justify;
+  @media (width <= 767px) {
+    font-size: 12px;
+    margin: 0 0 10px 0;
+  }
 }
 
 .infoHeading {
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 600;
   color: #000;
-  margin: 20px 0 16px 0;
+  margin: 16px 0 16px 0;
   @media (width <= 767px) {
-    font-size: 18px;
+    font-size: 14px;
+    margin: 10px 0 10px 0;
   }
-}
-
-@media (min-width: 769px) {
-  .infoParagraph {
-    font-size: 16px;
-    line-height: 1.9;
-  }
-
-  // .infoHeading {
-  //   font-size: 28px;
-  //   margin: 50px 0 24px 0;
-  // }
 }

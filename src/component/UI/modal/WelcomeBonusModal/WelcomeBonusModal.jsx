@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./WelcomeBonusModal.module.scss";
 import { IoClose } from "react-icons/io5";
 import welcomeBg from "../../../../assets/images/welcome-bonus-bg.webp";
 import welcomeBgMobile from "../../../../assets/images/welcome-bonus-bg-mobile.webp";
 import welcomeIcon from "../../../../assets/images/welcome-bonus-icon.webp";
+import {useLazyGetWalletBalanceQuery} from "../../../../../src/redux/api/wallet/walletApi"
 
 const WelcomeBonusModal = () => {
   const [isOpen, setIsOpen] = useState(() => {
@@ -14,6 +15,15 @@ const WelcomeBonusModal = () => {
     }
     return false;
   });
+   const [getWalletBalance, { data, isLoading, error }] = useLazyGetWalletBalanceQuery();
+   
+    useEffect(() => {
+    if (isOpen) {
+      getWalletBalance();
+    }
+  }, [isOpen, getWalletBalance]);
+
+  const amount = data?.data ?? 0;
 
   if (!isOpen) return null;
 
@@ -31,7 +41,7 @@ const WelcomeBonusModal = () => {
           <img src={welcomeIcon} alt="Bonus" className={styles.icon} />
           <p className={styles.welcome}>Welcome to ShubhAstro!</p>
           <h2 className={styles.title}>A Little Gift From Us</h2>
-          <p className={styles.amount}>₹1,000</p>
+          <p className={styles.amount}>₹{amount}</p>
           <div className={styles.badge}>
             <span>₹</span> Welcome bonus added to your wallet
           </div>

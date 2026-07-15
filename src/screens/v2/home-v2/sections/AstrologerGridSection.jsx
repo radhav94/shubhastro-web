@@ -113,7 +113,7 @@ const AstrologerGridSection = memo(({ sectionData, styles, onConnect }) => {
         className={styles.astrologerSection}
         style={{ backgroundColor: "#FFE9E5", paddingBottom: "1px", paddingTop: "16px", paddingRight: "0px" }}
       >
-        <div className={styles.sectionHeader} style={{ marginBottom: "0px" }}>
+        <div className={styles.sectionHeader}>
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>
               {sectionData?.display_title || sectionData?.title || "TOP RATED ASTROLOGERS FOR YOU"}
