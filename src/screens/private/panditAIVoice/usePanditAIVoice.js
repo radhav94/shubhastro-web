@@ -318,7 +318,7 @@ export default function usePanditAIVoice({ enabled = true, sharedRoomId = null }
         const audioBase64 = await textToSpeech(responseText, {
           language: ttsLanguage,
           speaker: SARVAM_SPEAKERS.PRIYA,
-          pace: 1.05,
+          pace: 1.25,
           signal,
         });
 

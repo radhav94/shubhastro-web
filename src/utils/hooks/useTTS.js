@@ -127,7 +127,7 @@ const useTTS = () => {
         firstAudio = await textToSpeech(chunks[0], {
           language: sarvamLang,
           speaker: "priya",
-          pace: 1.0,
+          pace: 1.25,
           signal: controller.signal,
         });
         cacheSet(firstCacheKey, firstAudio);
@@ -150,7 +150,7 @@ const useTTS = () => {
           audioBase64 = await textToSpeech(chunks[i], {
             language: sarvamLang,
             speaker: "priya",
-            pace: 1.0,
+            pace: 1.25,
             signal: controller.signal,
           });
           cacheSet(cacheKey, audioBase64);
@@ -166,7 +166,7 @@ const useTTS = () => {
             nextChunkPromise = textToSpeech(chunks[i + 1], {
               language: sarvamLang,
               speaker: "priya",
-              pace: 1.0,
+              pace: 1.25,
               signal: controller.signal,
             }).then((audio) => {
               cacheSet(nextCacheKey, audio);
