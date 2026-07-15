@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
@@ -6,37 +6,17 @@ import styles from "./SubscriptionModal.module.scss";
 import { useGetSubscriptionPlansQuery, usePurchaseWalletSubscriptionMutation, useGetSubscriptionStatusQuery } from "../../../../redux/api/subscription/subscriptionApi";
 import shubhLogoMobile from "../../../../assets/images/mobile-shubh-astro-logo.svg";
 
-// Build the "What's included" rows from real plan fields. If the API ever returns
-// a non-empty `features` array, use it directly; otherwise derive sensible rows.
+// Build the "What's included" rows straight from the API response — the
+// marketing bullets in `metadata.highlights`. No derived defaults; whatever the
+// API sends is what we show. (The `features` key is reserved for other use.)
 const buildFeatures = (plan) => {
-  if (Array.isArray(plan.features) && plan.features.length > 0) {
-    return plan.features
-      .map((f) =>
-        typeof f === "string"
-          ? { label: f, included: true }
-          : {
-              label: f.displayName ?? f.label ?? f.name ?? f.featureKey ?? "",
-              included: f.included !== false,
-            }
-      )
-      .filter((row) => row.label);
+  const highlights = plan.metadata?.highlights;
+  if (Array.isArray(highlights) && highlights.length > 0) {
+    return highlights
+      .map((h) => (typeof h === "string" ? { label: h, included: true } : null))
+      .filter((row) => row && row.label);
   }
-
-  const quota = plan.monthlyReportQuota || 0;
-  const rows = [
-    plan.description ? { label: plan.description, included: true } : null,
-    quota > 0
-      ? { label: `${quota} reports / month`, included: true }
-      : { label: "No monthly report quota", included: false },
-    plan.overagePrice > 0
-      ? { label: `₹${plan.overagePrice} per extra report`, included: true }
-      : null,
-    plan.durationMonths > 0
-      ? { label: `${plan.durationMonths} month${plan.durationMonths > 1 ? "s" : ""} validity`, included: true }
-      : { label: "Pay as you go — no validity", included: true },
-    { label: plan.gstInclusive ? "GST inclusive" : "GST extra", included: !!plan.gstInclusive },
-  ];
-  return rows.filter(Boolean);
+  return [];
 };
 
 const PlanIcon = () => (
@@ -72,10 +52,24 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
   });
   const currentPlanCode = statusData?.data?.subscription?.planCode;
 
-  const { data, isLoading, isFetching } = useGetSubscriptionPlansQuery(
+  const plansQuery = useGetSubscriptionPlansQuery(
     isExtended ? { planType: "extended", planCode: currentPlanCode } : undefined,
     { skip: !isOpen || !!providedPlans || (isExtended && !currentPlanCode) }
   );
+  const { data, isLoading, isFetching, isError, error, refetch } = plansQuery;
+
+  // The plans API occasionally 500s — retry it automatically (a few times) so
+  // the popup can still load without the user having to reopen it.
+  const plansRetryRef = useRef(0);
+  useEffect(() => {
+    const status = error?.status ?? error?.originalStatus;
+    if (isError && status === 500 && plansRetryRef.current < 3) {
+      plansRetryRef.current += 1;
+      const timer = setTimeout(() => refetch(), 1000);
+      return () => clearTimeout(timer);
+    }
+    if (!isError) plansRetryRef.current = 0;
+  }, [isError, error, refetch]);
 
   const navigate = useNavigate();
   const [purchaseWallet] = usePurchaseWalletSubscriptionMutation();
@@ -116,14 +110,17 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
         .slice()
         .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || (a.price ?? 0) - (b.price ?? 0))
         .map((p, idx, arr) => {
-          // Highlight the best-value (last / highest sortOrder) plan when there are multiple.
-          const highlighted = arr.length > 1 && idx === arr.length - 1;
+          // Prefer the API-provided badge (e.g. "Best value"); otherwise fall
+          // back to highlighting the last / highest-sortOrder plan.
+          const apiBadge = p.metadata?.badge;
+          const anyApiBadge = arr.some((x) => x.metadata?.badge);
+          const highlighted = apiBadge ? true : (!anyApiBadge && arr.length > 1 && idx === arr.length - 1);
           return {
             id: p.code,
             title: p.name,
             cta: (p.price ?? 0) > 0 ? "Subscribe" : "Unlock Now",
             highlighted,
-            badge: highlighted ? "Best Value" : undefined,
+            badge: apiBadge || (highlighted ? "Best Value" : undefined),
             price: `₹${p.price ?? 0}`,
             priceValue: Number(p.price) || 0,
             features: buildFeatures(p),
@@ -138,7 +135,12 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
   // the modal is capped by its max-width when there are many plans.
   // card 300px + 20px gap, horizontal padding 76px (38 * 2).
   const columns = Math.min(Math.max(cards.length, 1), 3);
-  const modalStyle = { "--modal-w": `min(${columns * 300 + (columns - 1) * 20 + 76}px, 100%)` };
+  // The processing/success state views are simple centered messages — keep them
+  // compact instead of inheriting the wide multi-plan grid width.
+  const isStateView = flow === "processing" || flow === "success";
+  const modalStyle = isStateView
+    ? { "--modal-w": "min(420px, 100%)" }
+    : { "--modal-w": `min(${columns * 300 + (columns - 1) * 20 + 76}px, 100%)` };
 
   const handleSelect = async (card) => {
     // Free plan is not a purchasable subscription.
