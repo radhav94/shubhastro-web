@@ -47,7 +47,11 @@ const OccultChat = () => {
   }, [profiles.length]);
 
   const handleGenerate = async () => {
-    if (!token) { requireAuth(); return; }
+    if (!token) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/occult");
+      window.location.href = "/login?skip=welcome";
+      return;
+    }
     if (!selectedProfile?._id) { Toast.error("Please select a Kundli profile first"); return; }
 
     try {
@@ -133,26 +137,30 @@ const OccultChat = () => {
           <span className={styles.heroBadge}>AI-powered occult analysis</span>
           <h1 class={styles.heroTitle}>Occult World</h1>
           <p class={styles.heroDesc}>AI-powered Occult Astrology on ShubhAstro.ai helps you understand hidden energies and life patterns through Vedic astrology, tarot reading, numerology, palmistry, face reading, psychic reading, vastu, Lal Kitab, kundli analysis, and spiritual guidance for love, career, health, and relationships.</p>
-          {/* <h2 className={styles.sectionTitle}>Select Kundli Profile</h2> */}
-          {selectedProfile ? (
-            <div className={styles.selectedCard} onClick={() => setShowProfileManager(true)}>
-              <div className={styles.selectedAvatar}>
-                {(selectedProfile.name || "U").charAt(0).toUpperCase()}
-              </div>
-              <div className={styles.selectedInfo}>
-                <span className={styles.selectedName}>{selectedProfile.name}</span>
-                <span className={styles.selectedDetails}>
-                  {selectedProfile.day}/{selectedProfile.month}/{selectedProfile.year} • {selectedProfile.place}
-                </span>
-              </div>
-              <span className={styles.changeBtn}>Change</span>
-            </div>
-          ) : (
-            <button className={styles.selectBtn} onClick={() => { if (!token) { requireAuth(); return; } setShowProfileManager(true); }}>
-              + Select Kundli Profile
-            </button>
+          {/* Profile selector — only shown for logged-in users */}
+          {token && (
+            <>
+              {selectedProfile ? (
+                <div className={styles.selectedCard} onClick={() => setShowProfileManager(true)}>
+                  <div className={styles.selectedAvatar}>
+                    {(selectedProfile.name || "U").charAt(0).toUpperCase()}
+                  </div>
+                  <div className={styles.selectedInfo}>
+                    <span className={styles.selectedName}>{selectedProfile.name}</span>
+                    <span className={styles.selectedDetails}>
+                      {selectedProfile.day}/{selectedProfile.month}/{selectedProfile.year} • {selectedProfile.place}
+                    </span>
+                  </div>
+                  <span className={styles.changeBtn}>Change</span>
+                </div>
+              ) : (
+                <button className={styles.selectBtn} onClick={() => setShowProfileManager(true)}>
+                  + Select Kundli Profile
+                </button>
+              )}
+            </>
           )}
-          <button className={styles.generateBtn} onClick={handleGenerate} disabled={!selectedProfile || isGenerating}>
+          <button className={styles.generateBtn} onClick={handleGenerate} disabled={token && (!selectedProfile || isGenerating)}>
             {isGenerating ? "Analyzing..." : "Get Occult Reading"}
           </button>
         </div>

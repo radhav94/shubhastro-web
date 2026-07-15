@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './PalmistryLanding.module.scss';
 import PalmLineIcon from '../../../../assets/icons/palmline.png';
@@ -10,15 +10,15 @@ import LoveIcon from '../../../../assets/icons/loveIcon.png';
 const PalmistryLanding = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-palmistry-scanner");
+      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/ai-palmistry-scanner/hand-selection");
       window.location.href = "/login?skip=welcome";
+      return;
     }
-  }, []);
-
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
+    navigate('/ai-wow/ai-palmistry-scanner/hand-selection');
+  };
   const features = [
     {
       icon: PalmLineIcon,
@@ -75,7 +75,7 @@ const PalmistryLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/ai-wow/ai-palmistry-scanner/hand-selection')}
+          onClick={handleProceed}
         >
           Proceed Ahead
         </button>
