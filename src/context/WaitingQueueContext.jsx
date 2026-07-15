@@ -639,6 +639,9 @@ export const WaitingQueueProvider = ({ children }) => {
         return;
       }
 
+      // Look up pending connection BEFORE removing it — to preserve live origin info
+      const connData = getConnectionByRoomId(roomId);
+
       // Clear approval data and remove from pending queue
       setCallApprovalData(null);
       releaseRoom(roomId);
@@ -649,6 +652,10 @@ export const WaitingQueueProvider = ({ children }) => {
       const astro = rest?.astrologer || {};
       const astroName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
       const agoraChannel = channelName || roomId;
+
+      // Determine if this call originated from a live stream
+      const isFromLive = connData?.fromLive || connData?.origin === "live" || false;
+      const liveChannel = connData?.liveChannelId || connData?.liveChannel || null;
 
       // Set active call in context — VoiceCall/VideoCall component renders globally
       setActiveCall({
@@ -665,6 +672,7 @@ export const WaitingQueueProvider = ({ children }) => {
         experience: astro?.experience,
         isEmergency: rest?.isEmergency || false,
         profileImgUrl: astro?.profileImgUrl,
+        ...(isFromLive && { origin: "live", liveChannel }),
       });
       setCallSeconds(Number(remainingTime || 0) * 60);
     };

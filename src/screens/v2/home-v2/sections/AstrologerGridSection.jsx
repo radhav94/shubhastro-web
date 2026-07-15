@@ -1,9 +1,8 @@
-import { memo, useMemo, useRef, useState, useEffect, useCallback, Suspense, lazy } from "react";
+import { memo, useMemo, useRef, useState, useEffect, useCallback, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { sortContentByOrder } from "../sectionRendererV2";
-
-const AstrologersSection = lazy(() => import("../../home/components/AstrologersSection"));
+import AstrologersSection from "../../home/components/AstrologersSection";
 
 // Is this the emergency / "URGENT GUIDANCE" grid (vs. a generic top-rated grid)?
 const isEmergencySection = (sectionData) => {
@@ -114,7 +113,7 @@ const AstrologerGridSection = memo(({ sectionData, styles, onConnect }) => {
         className={styles.astrologerSection}
         style={{ backgroundColor: "#FFE9E5", paddingBottom: "1px", paddingTop: "16px", paddingRight: "0px" }}
       >
-        <div className={styles.sectionHeader} style={{ marginBottom: "0px" }}>
+        <div className={styles.sectionHeader}>
           <div className={styles.sectionTitleBlock}>
             <h2 className={styles.sectionTitle}>
               {sectionData?.display_title || sectionData?.title || "TOP RATED ASTROLOGERS FOR YOU"}

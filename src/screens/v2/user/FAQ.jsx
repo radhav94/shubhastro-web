@@ -352,6 +352,7 @@ const FAQ = () => {
         </div>
 
         {/* Contact Support Section */}
+        {!isWebview && (
         <div className={styles.contactSection}>
           <p className={styles.contactText}>Still have a query?</p>
           <button
@@ -362,6 +363,7 @@ const FAQ = () => {
             <span className={styles.arrow}>›</span>
           </button>
         </div>
+        )}
       </div>
     </div>
   );

@@ -48,21 +48,23 @@ const ChatWindow = () => {
   const { state } = useLocation();
   const { id: urlAstrologerId } = useParams();
   const {
-    userId,
+    userId: stateUserId,
     astrologerId: stateAstrologerId,
-    roomId,
-    fullName,
-    isUserSide,
-    kundliId,
-    astrologerName,
-    refreshKey,
-    astroID,
-    experience,
+    roomId: stateRoomId,
+    fullName: stateFullName,
+    isUserSide: stateIsUserSide,
+    kundliId: stateKundliId,
+    astrologerName: stateAstrologerName,
+    refreshKey: stateRefreshKey,
+    astroID: stateAstroID,
+    experience: stateExperience,
     profileImgUrl: stateProfileImgUrl,
     gender: stateGender
   } = state || {};
   const astrologerId = stateAstrologerId || urlAstrologerId;
-  // console.log('kundliId in chat', kundliId)
+
+  // Always customer side — this app is the customer-facing frontend
+  const isUserSide = stateIsUserSide ?? true;
 
   const { activeCall, isCallMinimized, reviewData } = useCall();
   const [openFeedback, setOpenFeedback] = useState(false);
@@ -80,6 +82,22 @@ const ChatWindow = () => {
   const [showEndChatConfirm, setShowEndChatConfirm] = useState(false);
   const { activeChat, isReconnecting } = useChatContext();
 
+  // Fetch astrologer profile to get the correct/up-to-date avatar
+  const { data: astrologerProfileData } = useGetAstrologerByIdQuery(
+    { id: astrologerId },
+    { skip: !astrologerId }
+  );
+
+  // Resolve values: prefer navigation state, fall back to activeChat, then API data (for new tab scenarios)
+  const userId = stateUserId || activeChat?.userId || localStorage.getItem("shubhtalk_customer_id");
+  const roomId = stateRoomId || activeChat?.roomId;
+  const fullName = stateFullName || activeChat?.fullName || activeChat?.callerName;
+  const kundliId = stateKundliId || activeChat?.kundliId;
+  const astrologerName = stateAstrologerName || activeChat?.astrologerName || astrologerProfileData?.data?.astrologerName || astrologerProfileData?.data?.firstName || "";
+  const refreshKey = stateRefreshKey;
+  const astroID = stateAstroID || activeChat?.astrologerID;
+  const experience = stateExperience || activeChat?.experience || astrologerProfileData?.data?.experience || "";
+
   // Capture astrologerID (numeric) for review submission - persists after activeChat is cleared
   const lastAstrologerIDRef = useRef(astroID || null);
   useEffect(() => {
@@ -87,12 +105,6 @@ const ChatWindow = () => {
       lastAstrologerIDRef.current = activeChat.astrologerID;
     }
   }, [activeChat?.astrologerID]);
-
-  // Fetch astrologer profile to get the correct/up-to-date avatar
-  const { data: astrologerProfileData } = useGetAstrologerByIdQuery(
-    { id: astrologerId },
-    { skip: !astrologerId }
-  );
 
   // Resolve profileImgUrl: prefer fresh API data; only use fallbacks while API is loading
   const profileImgUrl = astrologerProfileData

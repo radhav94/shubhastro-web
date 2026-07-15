@@ -195,14 +195,14 @@
   }
   .title {
     font-size: 22px;
-    text-align: start;
+    text-align: center;
     width: 100%;
   }
 
   .subtitle {
     font-size: 13px;
-    padding: 0px 16px 0px 0px;
-    text-align: start;
+    padding: 0px 16px;
+    text-align: center;
     width: 100%;
   }
 
@@ -333,9 +333,10 @@
 }
 
 .showReadingButton.disabled {
-  background: #ccc;
+  /* background: #ccc; */
   cursor: not-allowed;
   box-shadow: none;
+  opacity: 0.5;
 }
 
 /* Love Triangle draw sequence labels */
@@ -349,19 +350,22 @@
 
 .sequenceItem {
   font-size: 14px;
-  color: #999;
+  color: #f7570156;
   font-weight: 500;
   padding: 4px 12px;
   border-radius: 20px;
-  background: #f0f0f0;
+  background: rgba(255, 255, 255, 0.4);
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  border: 1px solid #fff;
+  font-weight: 600;
 }
 
 .sequenceActive {
   color: #F75801;
   background: #fff4ec;
   border: 1px solid #F75801;
-  font-weight: 600;
 }
 
 .sequenceDone {

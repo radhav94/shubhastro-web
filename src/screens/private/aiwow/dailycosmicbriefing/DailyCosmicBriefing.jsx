@@ -35,17 +35,18 @@ const DailyCosmicBriefing = () => {
       setIsLoading(true);
 
       const params = {
+        kundliId: profile._id,
         name: profile.name,
         gender: profile.identity?.toLowerCase() || 'male',
         day: profile.day,
         month: profile.month,
         year: profile.year,
         hour: profile.hour || 0,
-        min: profile.minute || 0,
+        min: profile.min || profile.minute || 0,
         second: 0,
         place: profile.place,
-        lat: profile.latitude || 0,
-        lon: profile.longitude || 0,
+        lat: profile.latitude || profile.lat || 0,
+        lon: profile.longitude || profile.lon || 0,
         tzone: profile.tzone || 5.5
       };
 

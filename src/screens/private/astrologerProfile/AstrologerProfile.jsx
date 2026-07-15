@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./AstrologerProfile.module.scss";
-import { FaPlay, FaStar, FaChevronRight } from "react-icons/fa";
+import { FaPlay, FaStar, FaStarHalfAlt, FaRegStar, FaChevronRight } from "react-icons/fa";
 import { Radio } from "lucide-react";
 import { IoMdTime } from "react-icons/io";
 import {
@@ -986,9 +986,9 @@ const AstrologerProfile = () => {
             return <FaStar key={i} className={styles.starFilled} />;
           }
           if (rating >= starIndex - 0.5) {
-            return <FaStar key={i} className={styles.starHalf} />;
+            return <FaStarHalfAlt key={i} className={styles.starFilled} />;
           }
-          return <FaStar key={i} className={styles.starEmpty} />;
+          return <FaRegStar key={i} className={styles.starEmpty} />;
         })}
       </div>
     );
