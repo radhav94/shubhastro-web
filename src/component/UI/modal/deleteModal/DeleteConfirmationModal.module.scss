@@ -16,12 +16,13 @@
 }
 
 .modalContainer {
-  width: 360px;
-  background: linear-gradient(90deg, rgb(254, 254, 254) 0%, rgb(255, 248, 236));
-  border-radius: 18px;
-  padding: 22px;
-  text-align: center;
-  box-shadow: 0px 12px 35px rgba(0, 0, 0, 0.25);
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px 28px 26px;
+  text-align: left;
+  box-shadow: 0px 16px 40px rgba(0, 0, 0, 0.22);
   animation: scaleUp 0.25s ease-out forwards;
   display: flex;
   flex-direction: column;
@@ -31,54 +32,73 @@
 
 .title {
   margin: 0;
-  line-height: 1.3;
+  font-size: 22px;
+  line-height: 1.25;
   letter-spacing: -0.01em;
 }
 
 .message {
-  margin: 0 auto;
-  max-width: 30ch;
+  margin: 0;
   line-height: 1.55;
 }
 
 .modalButtons {
   display: flex;
-  justify-content: center;
+  justify-content: stretch;
   gap: 14px;
+  margin-top: 12px;
 }
 
+// Shared pill button base
+.rejectBtn,
+.confirmPrimary,
+.cancelBtn {
+  flex: 1;
+  min-height: 52px;
+  border-radius: 999px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: 0.2s ease-in-out;
+  font-family: 'Poppins', sans-serif;
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: default;
+  }
+}
+
+// Outlined "cancel / secondary" pill — light CTA tint ("Keep it")
+.cancelBtn {
+  background: var(--cta-10, rgba(229, 99, 41, 0.1));
+  color: #f75801;
+  border: 1.5px solid #f9b98e;
+
+  &:hover:not(:disabled) {
+    background: rgba(229, 99, 41, 0.16);
+  }
+}
+
+// Primary (orange gradient) confirm — e.g. "Yes, Cancel"
+.confirmPrimary {
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 16px rgba(247, 88, 1, 0.28);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(90deg, #e64f00 0%, #c22f00 100%);
+  }
+}
+
+// Danger (red) confirm — default for destructive deletes
 .rejectBtn {
   background: #d93b3b;
   color: #fff;
   border: none;
-  border-radius: 12px;
-  padding: 10px 20px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 15px;
-  min-width: 110px;
-  transition: 0.2s ease-in-out;
-  font-family: 'Poppins', sans-serif;
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: #b63030;
-  }
-}
-
-.cancelBtn {
-  background: #f1f1f1;
-  color: #333;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 10px 20px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 15px;
-  min-width: 110px;
-  transition: 0.2s ease-in-out;
-  font-family: 'Poppins', sans-serif;
-
-  &:hover {
-    background: #e2e2e2;
   }
 }

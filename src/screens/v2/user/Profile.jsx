@@ -2473,10 +2473,12 @@ const Profile = () => {
         onClose={() => setShowCancelConfirm(false)}
         onConfirm={handleConfirmCancelSubscription}
         isLoading={isCancellingSubscription}
-        title="Cancel Subscription"
-        message="Cancel your subscription? You'll lose premium access."
+        tone="primary"
+        title="Are you sure want to cancel?"
+        message="You'll lose access to premium AI features and your remaining report quota once your subscription ends."
         confirmText="Yes, Cancel"
         loadingText="Cancelling..."
+        cancelText="No, Keep it"
       />
 
       {/* Recharge Modal for insufficient balance */}

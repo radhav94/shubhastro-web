@@ -10,7 +10,9 @@ const DeleteConfirmationModal = ({
   onClose,
   isLoading = false,
   confirmText = "Delete",
-  loadingText = "Deleting..."
+  loadingText = "Deleting...",
+  cancelText = "Cancel",
+  tone = "danger", // "danger" (red) | "primary" (orange)
 }) => {
   if (!isOpen) return null;
 
@@ -22,11 +24,11 @@ const DeleteConfirmationModal = ({
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContainer}>
-        <PrimaryText as="h3" size_20 isBold isCenter color="#1f2937" className={styles.title}>
+        <PrimaryText as="h3" size_20 isBold color="#111827" className={styles.title}>
            {title}
         </PrimaryText>
 
-        <PrimaryText isCenter size_14 color="#6b7280" className={styles.message}>
+        <PrimaryText size_14 color="#6b7280" className={styles.message}>
           {message}
         </PrimaryText>
 
@@ -36,10 +38,10 @@ const DeleteConfirmationModal = ({
             onClick={handleCancel}
             disabled={isLoading}
           >
-            Cancel
+            {cancelText}
           </button>
           <button 
-            className={styles.rejectBtn} 
+            className={tone === "primary" ? styles.confirmPrimary : styles.rejectBtn} 
             onClick={onConfirm}
             disabled={isLoading}
           >

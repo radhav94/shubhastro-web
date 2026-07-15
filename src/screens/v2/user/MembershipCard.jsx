@@ -12,7 +12,6 @@ const MembershipCard = ({
   remainingDays,
   quotaUsed,
   quotaTotal,
-  details = [],
   onCancel,
   isCancelling = false,
   onSubscribe,
@@ -53,7 +52,7 @@ const MembershipCard = ({
 
   const total = Number(quotaTotal) || 0;
   const used = Number(quotaUsed) || 0;
-  const pct = total > 0 ? Math.min(100, Math.round((used / total) * 100)) : 0;
+  const remaining = Math.max(0, total - used);
 
   const handleCancelClick = () => {
     setMenuOpen(false);
@@ -74,16 +73,15 @@ const MembershipCard = ({
           {remainingDays != null && (
             <>
               <span className={styles.metaDivider} aria-hidden="true">|</span>
-              <span>Remaining <strong>{remainingDays} {remainingDays === 1 ? "day" : "days"}</strong></span>
+              <span>Remaining days <strong>{remainingDays}</strong></span>
             </>
           )}
         </div>
         {total > 0 && (
           <div className={styles.quota}>
-            <div className={styles.quotaBar}>
-              <div className={styles.quotaFill} style={{ width: `${pct}%` }} />
-            </div>
-            <span className={styles.quotaText}>{used} of {total} reports used this month</span>
+            <span className={styles.quotaText}>
+              <strong>{remaining}</strong> / {total} generations left
+            </span>
           </div>
         )}
       </div>
@@ -105,16 +103,6 @@ const MembershipCard = ({
 
         {menuOpen && (
           <div className={styles.manageMenu} role="menu">
-            {details.length > 0 && (
-              <div className={styles.manageMenuDetails}>
-                {details.map((item, idx) => (
-                  <div key={idx} className={styles.manageMenuRow}>
-                    <span>{item.label}</span>
-                    <strong>{item.value}</strong>
-                  </div>
-                ))}
-              </div>
-            )}
             <button
               type="button"
               className={styles.cancelMenuItem}
