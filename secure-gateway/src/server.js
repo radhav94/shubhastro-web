@@ -12,13 +12,11 @@
  */
 
 import http from "node:http";
-import path from "node:path";
 import express from "express";
-import { PORT, HOST, ROUTES, DIST_PATH } from "./config.js";
+import { PORT, HOST, ROUTES } from "./config.js";
 import { handshakeRouter } from "./handshake.js";
 import { mountProxies } from "./proxy.js";
 import { corsMiddleware } from "./cors.js";
-import { metaInjectorMiddleware } from "./metaInjector.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -34,19 +32,8 @@ app.get("/__sgw/health", (req, res) => {
 // Handshake first (parses its own JSON body).
 app.use(handshakeRouter);
 
-// Meta tag injection for bot crawlers (before proxies and static serving).
-app.use(metaInjectorMiddleware);
-
 // Then the streaming proxies.
 const mounted = mountProxies(app);
-
-// Static file serving + SPA fallback (after API proxies).
-// Serves the built frontend from dist/ and falls back to index.html for SPA routes.
-const distAbsolute = path.resolve(DIST_PATH);
-app.use(express.static(distAbsolute));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(distAbsolute, "index.html"));
-});
 
 const server = http.createServer(app);
 
