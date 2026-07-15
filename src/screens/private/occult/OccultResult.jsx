@@ -7,6 +7,8 @@ import { PATH } from "../../../utils/routes/Paths";
 import astralCompass from "../../../assets/icons/astral-compass.svg";
 import { format12HourTime } from "../../../utils/dateFormat/dateTime";
 import { useGetOccultPdfMutation } from "../../../redux/api/occult/occultApi";
+import { useGetChargesQuery } from "../../../redux/api/aiwow/aiwowApi";
+import { useGetSubscriptionStatusQuery } from "../../../redux/api/subscription/subscriptionApi";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { FiDownload } from "react-icons/fi";
 import DownloadReportModal from "../aiwow/components/DownloadReportModal";
@@ -66,6 +68,14 @@ const OccultResult = () => {
   const [getOccultPdf] = useGetOccultPdfMutation();
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
 
+  const customerToken = typeof window !== "undefined" ? localStorage.getItem("shubhtalk_customer_token") : null;
+  const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken });
+  const hasActiveSubscription = !!subscriptionStatus?.data?.hasActiveSubscription;
+
+  // Charges only matter for non-subscribed users; subscribed users download
+  // directly with no popup, so skip the charges API for them.
+  const { data: chargesData } = useGetChargesQuery(undefined, { skip: hasActiveSubscription });
+
   // Check if report was already downloaded (pdfPath exists in state data)
   useEffect(() => {
     const pdfUrl =
@@ -77,11 +87,28 @@ const OccultResult = () => {
     }
   }, [result, state]);
 
-  // Occult is part of the subscription module — reports are covered by the plan
-  // quota, so we don't call the charges API and there's no per-download price.
-  const downloadPrice = 0;
+  // Download price from charges API (non-subscribed users only).
+  const getDownloadCost = () => {
+    if (isFreeReport || hasActiveSubscription) return 0;
+    const charges = chargesData?.data;
+    if (!charges) return null;
+    const slug = "occult-dosha-report";
+    for (const section of charges) {
+      if (!Array.isArray(section?.list)) continue;
+      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug);
+      if (match) return match.amount ?? 0;
+    }
+    return null;
+  };
+
+  const downloadPrice = getDownloadCost();
 
   const handleDownloadClick = () => {
+    // Subscribed users download directly — no charge popup.
+    if (hasActiveSubscription) {
+      handleConfirmDownload();
+      return;
+    }
     refreshWallet();
     setShowDownloadModal(true);
   };

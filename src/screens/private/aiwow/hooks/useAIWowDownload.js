@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { useDownloadReportPdfMutation, useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
+import { useGetChargesQuery, useDownloadReportPdfMutation, useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import { useWalletBalance } from '../../wallet/useWalletBalance';
 import { trackEvent } from '../../../../utils/analytics';
 import { useGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
@@ -16,6 +16,29 @@ const extractHistoryId = (result) =>
   result?.data?.historyId || result?.data?._id || result?.data?.id || null;
 
 /**
+/**
+ * Finds the matching download charge from the charges API response by feature.
+ * Response shape: { data: [{ title, list: [{ title, slug, amount, ... }] }] }
+ */
+const findChargeAmount = (charges, featureName) => {
+  if (!Array.isArray(charges) || !featureName) return null;
+  const normalized = featureName.trim().toLowerCase();
+  const exactSlug = normalized.replace(/\s+/g, '-') + '-report';
+  const keyword = normalized.split(/\s+/)[0];
+  for (const section of charges) {
+    if (!Array.isArray(section?.list)) continue;
+    const exactMatch = section.list.find((c) => c?.slug?.toLowerCase() === exactSlug);
+    if (exactMatch) return exactMatch.amount ?? exactMatch.pdfDownloadCharge ?? 0;
+    if (keyword) {
+      const keywordMatch = section.list.find(
+        (c) => c?.slug?.toLowerCase()?.includes(keyword) || c?.title?.toLowerCase()?.includes(keyword)
+      );
+      if (keywordMatch) return keywordMatch.amount ?? keywordMatch.pdfDownloadCharge ?? 0;
+    }
+  }
+  return null;
+};
+
 /**
  * Handles an entitlement block reason from the report/PDF endpoint (thrown error
  * or a 200 { success:false } body). Opens the subscription/extended modal via
@@ -64,6 +87,10 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
   const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken });
   const hasActiveSubscription = !!subscriptionStatus?.data?.hasActiveSubscription;
 
+  // Charges are only relevant for users WITHOUT a subscription. Subscribed users
+  // download directly (no charge popup), so skip the charges API entirely.
+  const { data: chargesData } = useGetChargesQuery(undefined, { skip: hasActiveSubscription });
+
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscriptionModalVariant, setSubscriptionModalVariant] = useState('basic');
   const [extendedPlans, setExtendedPlans] = useState(null);
@@ -102,19 +129,15 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
   // Resolve featureName dynamically from resultData or history item
   const featureName = resultData?.featureName || resultData?.data?.featureName || historyItem?.featureName || 'ai-report';
 
-  // Download cost — no charges API. AI WOW reports run through the subscription
-  // quota (backend enforces at generate-time), so downloads are free here; any
-  // price provided on the result object is respected as a fallback.
+  // Download cost — subscribed users pay nothing (direct download, no popup).
+  // Non-subscribed users see the charge popup with the price from the charges API.
   const downloadPrice = useMemo(() => {
     if (isAlreadyDownloaded) return 0;
-    if (hasActiveSubscription) return 0; // covered by subscription quota — no wallet charge
-    const fromResult =
-      resultData?.downloadPrice ??
-      resultData?.data?.downloadPrice ??
-      resultData?.pdfDownloadCharge ??
-      resultData?.data?.pdfDownloadCharge;
-    return typeof fromResult === 'number' ? fromResult : 0;
-  }, [isAlreadyDownloaded, hasActiveSubscription, resultData]);
+    if (hasActiveSubscription) return 0; // covered by subscription — no wallet charge
+    const charges = chargesData?.data;
+    if (!charges) return null;
+    return findChargeAmount(charges, featureName);
+  }, [isAlreadyDownloaded, hasActiveSubscription, chargesData, featureName]);
 
   const id = toastId || `${featureName.replace(/\s+/g, '-').toLowerCase()}-pdf`;
   const fileName = useMemo(() => {

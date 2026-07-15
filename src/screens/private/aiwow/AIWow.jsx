@@ -10,7 +10,7 @@ import ResultHistoryCard from "./components/ResultHistoryCard";
 import DownloadReportModal from "./components/DownloadReportModal";
 import { ProfileManager } from "../../../component/UI/Profile";
 import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
-import { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useDownloadReportPdfMutation } from "../../../redux/api/aiwow/aiwowApi";
+import { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery, useDownloadReportPdfMutation } from "../../../redux/api/aiwow/aiwowApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
@@ -19,7 +19,7 @@ import { useWalletBalance } from "../wallet/useWalletBalance";
 import { PATH } from "../../../utils/routes/Paths";
 import { trackEvent } from "../../../utils/analytics";
 import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from "../../../utils/subscription/featureGating";
-import { useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscription/subscriptionApi";
+import { useGetSubscriptionStatusQuery, useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscription/subscriptionApi";
 import SubscriptionModal from "../../../component/UI/modal/SubscriptionModal/SubscriptionModal";
 
 // Reusable Section Title with Divider (same as Explore page, auto-width)
@@ -61,6 +61,15 @@ const AIWow = () => {
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
   const [downloadReportPdf] = useDownloadReportPdfMutation();
   const [triggerSubscriptionStatus] = useLazyGetSubscriptionStatusQuery();
+  const { data: subscriptionStatusData } = useGetSubscriptionStatusQuery(undefined, {
+    skip: !localStorage.getItem("shubhtalk_customer_token"),
+  });
+  const hasActiveSubscription = !!subscriptionStatusData?.data?.hasActiveSubscription;
+
+  // Charges only matter for non-subscribed users; subscribed users download
+  // directly with no popup, so skip the charges API for them.
+  const { data: chargesData } = useGetChargesQuery(undefined, { skip: hasActiveSubscription });
+  const charges = chargesData?.data || null;
 
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
   const headerSelectedKundli = useSelector((state) => state.kundli.selectedKundli);
@@ -144,9 +153,18 @@ const AIWow = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [activeTab, hasMoreHistory]);
 
-  // AI WOW is part of the subscription module — reports are covered by the plan
-  // quota, so no charges API call and no per-download price.
-  const getDownloadCost = () => 0;
+  // Download cost from charges (non-subscribed users only). Subscribed users
+  // download directly with no charge.
+  const getDownloadCost = (featureName) => {
+    if (hasActiveSubscription || !charges || !featureName) return 0;
+    const slug = featureName.trim().replace(/\s+/g, "-").toLowerCase() + "-report";
+    for (const section of charges) {
+      if (!Array.isArray(section?.list)) continue;
+      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug);
+      if (match) return match.amount ?? 0;
+    }
+    return 0;
+  };
 
   useEffect(() => {
     if (isFetching) return;
@@ -286,8 +304,8 @@ const AIWow = () => {
     const pdfKey = `${item.featureType}PdfPath`;
     const existingPdfUrl = item.pdfPath || item[pdfKey];
     
-    if (existingPdfUrl || paidToFreeIds[item.featureId]) {
-      // Free — directly download existing PDF
+    if (existingPdfUrl || paidToFreeIds[item.featureId] || hasActiveSubscription) {
+      // Free / subscribed — directly download the PDF, no charge popup
       try {
         toast.loading("Downloading PDF...", { id: "pdf-download" });
         const url = existingPdfUrl || await fetchPdfUrl(item.featureId);
@@ -500,7 +518,7 @@ const AIWow = () => {
                         summary: item.summary || "",
                         isPaid: !item.pdfPath && !item[`${item.featureType}PdfPath`] && !paidToFreeIds[item.featureId],
                         price: null,
-                        charges: null,
+                        charges,
                         onViewResult: () => handleViewResultPdf(item.featureId),
                         onDownload: () => handleDownloadPdf(item),
                       }}
