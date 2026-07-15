@@ -7,7 +7,6 @@ import { PATH } from "../../../utils/routes/Paths";
 import astralCompass from "../../../assets/icons/astral-compass.svg";
 import { format12HourTime } from "../../../utils/dateFormat/dateTime";
 import { useGetOccultPdfMutation } from "../../../redux/api/occult/occultApi";
-import { useLazyGetChargesQuery } from "../../../redux/api/aiwow/aiwowApi";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { FiDownload } from "react-icons/fi";
 import DownloadReportModal from "../aiwow/components/DownloadReportModal";
@@ -65,13 +64,7 @@ const OccultResult = () => {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [isFreeReport, setIsFreeReport] = useState(false);
   const [getOccultPdf] = useGetOccultPdfMutation();
-  const [triggerGetCharges, { data: chargesData }] = useLazyGetChargesQuery();
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
-
-  // Fetch charges on mount to display dynamic price
-  useEffect(() => {
-    triggerGetCharges();
-  }, []);
 
   // Check if report was already downloaded (pdfPath exists in state data)
   useEffect(() => {
@@ -84,20 +77,9 @@ const OccultResult = () => {
     }
   }, [result, state]);
 
-  // Get download price from charges API data
-  const getDownloadCost = () => {
-    const charges = chargesData?.data;
-    if (!charges) return null;
-    const slug = "occult-dosha-report";
-    for (const section of charges) {
-      if (!Array.isArray(section?.list)) continue;
-      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug);
-      if (match) return match.amount ?? 0;
-    }
-    return null;
-  };
-
-  const downloadPrice = getDownloadCost();
+  // Occult is part of the subscription module — reports are covered by the plan
+  // quota, so we don't call the charges API and there's no per-download price.
+  const downloadPrice = 0;
 
   const handleDownloadClick = () => {
     refreshWallet();

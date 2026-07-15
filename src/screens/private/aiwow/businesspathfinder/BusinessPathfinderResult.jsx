@@ -6,7 +6,7 @@ import { Toast } from '../../../../component';
 import TTSButton from '../../../../component/UI/TTSButton';
 import DownloadReportModal from '../components/DownloadReportModal';
 import { useWalletBalance } from '../../../private/wallet/useWalletBalance';
-import { useGetChargesQuery, useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
+import { useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import remedyMortarImg from '../../../../assets/images/remedy-mortar.png';
 import { trackEvent } from '../../../../utils/analytics';
 
@@ -25,8 +25,6 @@ const BusinessPathfinderResult = () => {
     () => !!downloadedKey && localStorage.getItem(downloadedKey) === 'true'
   );
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
-  const { data: chargesData } = useGetChargesQuery();
-  const charges = chargesData?.data || null;
 
   // Derive "already downloaded" from AI history so it persists across refresh.
   const selectedProfile = useSelector((state) => state.aiwow?.selectedKundliProfile);
@@ -48,28 +46,11 @@ const BusinessPathfinderResult = () => {
     return candidates.some((p) => typeof p === 'string' && p.startsWith('http'));
   }, [downloadedThisSession, historyItem, result]);
 
-  // Find the Business Pathfinder download charge from the charges API.
-  // Response shape: { data: [{ title, list: [{ slug, title, amount }] }] }
-  const getChargeAmount = () => {
-    if (!Array.isArray(charges)) return null;
-    for (const section of charges) {
-      if (!Array.isArray(section?.list)) continue;
-      const match = section.list.find(
-        (c) =>
-          c?.slug?.toLowerCase() === 'business-pathfinder-report' ||
-          c?.slug?.toLowerCase()?.includes('business-pathfinder') ||
-          c?.title?.toLowerCase()?.includes('business pathfinder')
-      );
-      if (match) return match.amount ?? match.pdfDownloadCharge ?? null;
-    }
-    return null;
-  };
-
-  const getDownloadCost = () => {
-    if (isAlreadyDownloaded) return 0;
-    const amount = getChargeAmount();
-    return amount ?? 10;
-  };
+  // Business Pathfinder is part of the subscription module — reports are covered
+  // by the plan quota, so no charges API call and no per-download price.
+  // (already-downloaded reports were free before and remain free.)
+  const getChargeAmount = () => null;
+  const getDownloadCost = () => (isAlreadyDownloaded ? 0 : 0);
 
   const handleDownloadClick = () => {
     refreshWallet();

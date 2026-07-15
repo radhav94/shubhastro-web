@@ -7,12 +7,14 @@ import { setPalmistryResult, setPalmistryResultId, clearPalmistryData } from '..
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import BackButton from '../../../../component/UI/BackButton/BackButton';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const PalmistryAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const palmImage = useSelector((state) => state.aiwow.palmistry.image);
   const selectedHand = useSelector((state) => state.aiwow.palmistry.selectedHand);
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'palmistry' });
 
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
     required: true,
@@ -73,13 +75,21 @@ const PalmistryAnalysis = () => {
       }, 200);
 
       // Call the API with hand parameter and abort signal
-      const result = await analyzePalm(imageData, hand, abortController.signal);
+      const result = await runWithEntitlement(() => analyzePalm(imageData, hand, abortController.signal));
 
       clearInterval(progressInterval);
 
       // Check if component is still mounted before processing result
       if (!isMountedRef.current) {
         console.log('Component unmounted - ignoring API result');
+        return;
+      }
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      if (result.blocked) {
+        setProgress(0);
+        setIsAnalyzing(false);
+        setError({ message: 'Choose a plan to continue with your report.' });
         return;
       }
 
@@ -296,6 +306,7 @@ const PalmistryAnalysis = () => {
         )}
         </div>
       </div>
+      {subscriptionModal}
     </div>
   );
 };

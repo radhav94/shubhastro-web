@@ -7,11 +7,13 @@ import { setFaceReadingResult, clearFaceReadingData } from '../../../../redux/ai
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import BackButton from '../../../../component/UI/BackButton/BackButton';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const FaceReadingAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const faceImage = useSelector((state) => state.aiwow.faceReading.image);
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'astro-face-reading' });
 
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
     required: true,
@@ -69,13 +71,21 @@ const FaceReadingAnalysis = () => {
       }, 200);
 
       // Call the API with abort signal
-      const result = await analyzeFace(imageData, abortController.signal);
+      const result = await runWithEntitlement(() => analyzeFace(imageData, abortController.signal));
 
       clearInterval(progressInterval);
 
       // Check if component is still mounted before processing result
       if (!isMountedRef.current) {
         console.log('Component unmounted - ignoring API result');
+        return;
+      }
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      if (result.blocked) {
+        setProgress(0);
+        setIsAnalyzing(false);
+        setError({ message: 'Choose a plan to continue with your report.' });
         return;
       }
 
@@ -246,6 +256,7 @@ const FaceReadingAnalysis = () => {
         )}
         </div>
       </div>
+      {subscriptionModal}
     </div>
   );
 };

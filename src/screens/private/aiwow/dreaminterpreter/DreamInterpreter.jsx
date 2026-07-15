@@ -7,10 +7,12 @@ import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliP
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const DreamInterpreter = () => {
   const navigate = useNavigate();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'dream-interpreter' });
 
   useEffect(() => {
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -89,7 +91,15 @@ const DreamInterpreter = () => {
         }
       }
 
-      const result = await interpretDream(dreamData);
+      const result = await runWithEntitlement(() => interpretDream(dreamData));
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      if (result.blocked) {
+        setIsLoading(false);
+        setError('Choose a plan to continue with your report.');
+        setInterpretation(null);
+        return;
+      }
 
       if (result.success) {
         // API returns data.dream object
@@ -774,6 +784,7 @@ const DreamInterpreter = () => {
           </div>
         )}
       </div>
+      {subscriptionModal}
     </div>
     </>
   );

@@ -3,9 +3,10 @@ import styles from './FeatureCard.module.scss';
 import { getAIWowIcon } from '../../../../utils/appImages';
 import TTSButton from '../../../../component/UI/TTSButton';
 import defaultSquareImg from "../../../../assets/images/default_image_square_500x500.png"
-const FeatureCard = ({ badge, badgeType, title, description, icon, onStartNow, largeIcon }) => {
+const FeatureCard = ({ badge, badgeType, title, description, icon, onStartNow, largeIcon, isPaid }) => {
   return (
     <div className={styles.card} onClick={onStartNow}>
+      {isPaid && <span className={styles.paidRibbon}>Paid</span>}
       <div className={styles.iconWrapper}>
         <div className={styles.iconBackground}>
           <img src={icon || defaultSquareImg} alt={title} className={styles.icon} />

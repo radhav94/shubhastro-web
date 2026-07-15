@@ -3,9 +3,11 @@ import { privateRequestNew } from "../../../services/appServices/privateRequestN
 export const subscriptionApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
     getSubscriptionPlans: builder.query({
-      query: () => ({
+      // Optional arg: pass an object of query params, e.g. { planType: "extended" }.
+      query: (arg) => ({
         url: "subscription-entitlements/plans",
         method: "GET",
+        params: arg && typeof arg === "object" ? arg : undefined,
         headers: { accept: "application/json" },
       }),
     }),
@@ -48,6 +50,7 @@ export const subscriptionApi = privateRequestNew.injectEndpoints({
 
 export const {
   useGetSubscriptionPlansQuery,
+  useLazyGetSubscriptionPlansQuery,
   useGetSubscriptionStatusQuery,
   useLazyGetSubscriptionStatusQuery,
   usePurchaseWalletSubscriptionMutation,

@@ -1,11 +1,12 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { useGetChargesQuery, useDownloadReportPdfMutation, useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
+import { useDownloadReportPdfMutation, useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import { useWalletBalance } from '../../wallet/useWalletBalance';
 import { trackEvent } from '../../../../utils/analytics';
 import { useGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
 import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from '../../../../utils/subscription/featureGating';
+import { extractExtendedPlans } from './useAIWowSubscriptionGate';
 
 /**
  * Extracts the history ID from a result object, checking multiple possible locations.
@@ -15,51 +16,12 @@ const extractHistoryId = (result) =>
   result?.data?.historyId || result?.data?._id || result?.data?.id || null;
 
 /**
- * Finds the matching charge amount from the charges API response dynamically.
- *
- * The charges API returns: { data: [{ title, list: [{ title, slug, amount, ... }] }] }
- *
- * Matching strategy (no hardcoding):
- *   1. Exact slug match (featureName → slug conversion)
- *   2. Keyword match on slug or title fields
- */
-const findChargeAmount = (charges, featureName) => {
-  if (!Array.isArray(charges) || !featureName) return null;
-
-  const normalized = featureName.trim().toLowerCase();
-  // e.g. "Palmistry Analysis" → "palmistry-analysis-report"
-  const exactSlug = normalized.replace(/\s+/g, '-') + '-report';
-  // Primary keyword: first word, e.g. "palmistry"
-  const keyword = normalized.split(/\s+/)[0];
-
-  for (const section of charges) {
-    if (!Array.isArray(section?.list)) continue;
-
-    // Strategy 1: exact slug match
-    const exactMatch = section.list.find(
-      (c) => c?.slug?.toLowerCase() === exactSlug
-    );
-    if (exactMatch) return exactMatch.amount ?? exactMatch.pdfDownloadCharge ?? 0;
-
-    // Strategy 2: slug or title contains the keyword
-    if (keyword) {
-      const keywordMatch = section.list.find(
-        (c) => c?.slug?.toLowerCase()?.includes(keyword) ||
-               c?.title?.toLowerCase()?.includes(keyword)
-      );
-      if (keywordMatch) return keywordMatch.amount ?? keywordMatch.pdfDownloadCharge ?? 0;
-    }
-  }
-
-  return null;
-};
-
 /**
  * Handles an entitlement block reason from the report/PDF endpoint (thrown error
  * or a 200 { success:false } body). Opens the subscription/extended modal via
  * onUpsell for premium/extended reasons; toasts for wallet/unknown failures.
  */
-const handleReportBlock = (reason, { id, featureName, onUpsell }) => {
+const handleReportBlock = (reason, { id, featureName, onUpsell, extendedPlans }) => {
   if (reason === SUBSCRIPTION_REASON.PREMIUM_REQUIRED) {
     toast.dismiss(id);
     if (onUpsell) onUpsell('basic');
@@ -67,8 +29,9 @@ const handleReportBlock = (reason, { id, featureName, onUpsell }) => {
     reason === SUBSCRIPTION_REASON.EXTENDED_PLAN_REQUIRED ||
     reason === SUBSCRIPTION_REASON.EXTENDED_PLAN_EXHAUSTED
   ) {
+    // Show the extended popup using the plans returned inline in the response.
     toast.dismiss(id);
-    if (onUpsell) onUpsell('extended');
+    if (onUpsell) onUpsell('extended', extendedPlans);
   } else if (reason === SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE) {
     toast.error('Insufficient wallet balance. Please recharge.', { id });
   } else {
@@ -94,7 +57,6 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
   const [downloadedPdfUrl, setDownloadedPdfUrl] = useState(null);
 
   // Shared queries — RTK Query deduplicates identical args across components
-  const { data: chargesData } = useGetChargesQuery();
   const [downloadReportPdf] = useDownloadReportPdfMutation();
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
 
@@ -102,21 +64,12 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
   const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken });
   const hasActiveSubscription = !!subscriptionStatus?.data?.hasActiveSubscription;
 
-  const subFlags = subscriptionStatus?.data?.flags || {};
-  const subQuota = subscriptionStatus?.data?.quota || null;
-  const isQuotaExhausted =
-    hasActiveSubscription &&
-    (subFlags.extendedPlanRequired === true ||
-      subFlags.basicPlanExhausted === true ||
-      (subQuota && typeof subQuota.remainingQuota === 'number' && subQuota.remainingQuota <= 0));
-  const isSubscriptionRequired =
-    !hasActiveSubscription &&
-    (subFlags.subscriptionRequired === true || subFlags.showSubscriptionPopup === true);
-
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscriptionModalVariant, setSubscriptionModalVariant] = useState('basic');
-  const openSubscriptionModal = useCallback((mode = 'basic') => {
+  const [extendedPlans, setExtendedPlans] = useState(null);
+  const openSubscriptionModal = useCallback((mode = 'basic', plans = null) => {
     setSubscriptionModalVariant(mode);
+    setExtendedPlans(Array.isArray(plans) && plans.length > 0 ? plans : null);
     setShowSubscriptionModal(true);
   }, []);
 
@@ -149,14 +102,19 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
   // Resolve featureName dynamically from resultData or history item
   const featureName = resultData?.featureName || resultData?.data?.featureName || historyItem?.featureName || 'ai-report';
 
-  // Download cost — dynamically matches against charges API using featureName
+  // Download cost — no charges API. AI WOW reports run through the subscription
+  // quota (backend enforces at generate-time), so downloads are free here; any
+  // price provided on the result object is respected as a fallback.
   const downloadPrice = useMemo(() => {
     if (isAlreadyDownloaded) return 0;
     if (hasActiveSubscription) return 0; // covered by subscription quota — no wallet charge
-    const charges = chargesData?.data;
-    if (!charges) return null;
-    return findChargeAmount(charges, featureName);
-  }, [isAlreadyDownloaded, hasActiveSubscription, chargesData, featureName]);
+    const fromResult =
+      resultData?.downloadPrice ??
+      resultData?.data?.downloadPrice ??
+      resultData?.pdfDownloadCharge ??
+      resultData?.data?.pdfDownloadCharge;
+    return typeof fromResult === 'number' ? fromResult : 0;
+  }, [isAlreadyDownloaded, hasActiveSubscription, resultData]);
 
   const id = toastId || `${featureName.replace(/\s+/g, '-').toLowerCase()}-pdf`;
   const fileName = useMemo(() => {
@@ -193,56 +151,71 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
     setIsDownloading(true);
     try {
       toast.loading('Downloading PDF...', { id });
-      const result = await downloadReportPdf({ historyId, language }).unwrap();
-      // Backend may block a report via a 200 body { success:false, reason/error.code }.
-      if (result?.success === false) {
-        handleReportBlock(getSubscriptionErrorReason(result), { id, featureName, onUpsell: openSubscriptionModal });
+      let result;
+      let reason = null;
+      try {
+        result = await downloadReportPdf({ historyId, language }).unwrap();
+        if (result?.success === false) reason = getSubscriptionErrorReason(result);
+      } catch (err) {
+        reason = getSubscriptionErrorReason(err);
+        result = err?.data || err;
+        if (!reason) {
+          toast.error('Failed to download PDF', { id });
+          return;
+        }
+      }
+
+      // Success — download the PDF.
+      if (!reason) {
+        const pdfUrl = result?.data?.pdfUrl;
+        if (!pdfUrl) {
+          toast.error('Failed to download PDF', { id });
+          return;
+        }
+        const res = await fetch(pdfUrl);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(blobUrl);
+        toast.success('PDF downloaded!', { id });
+        setShowDownloadModal(false);
+        setDownloadedPdfUrl(pdfUrl);
+        refreshWallet();
+        if (downloadPrice > 0) {
+          trackEvent("shubh_ai_payment_completed", { feature_name: featureName, amount_paid: downloadPrice });
+        }
+        trackEvent("shubh_ai_report_downloaded", { feature_name: featureName });
         return;
       }
-      const pdfUrl = result?.data?.pdfUrl;
-      if (!pdfUrl) throw new Error('PDF URL not found');
-      const res = await fetch(pdfUrl);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(blobUrl);
-      toast.success('PDF downloaded!', { id });
+
+      // Blocked — for EXTENDED_PLAN_REQUIRED show the extended popup populated
+      // from the plans returned inline in the response (no silent auto-charge).
       setShowDownloadModal(false);
-      setDownloadedPdfUrl(pdfUrl);
-      refreshWallet();
-      if (downloadPrice > 0) {
-        trackEvent("shubh_ai_payment_completed", { feature_name: featureName, amount_paid: downloadPrice });
-      }
-      trackEvent("shubh_ai_report_downloaded", { feature_name: featureName });
-    } catch (err) {
-      handleReportBlock(getSubscriptionErrorReason(err), { id, featureName, onUpsell: openSubscriptionModal });
+      handleReportBlock(reason, {
+        id,
+        featureName,
+        onUpsell: openSubscriptionModal,
+        extendedPlans: extractExtendedPlans(result),
+      });
     } finally {
       setIsDownloading(false);
     }
-  }, [historyId, id, fileName, downloadReportPdf, refreshWallet, openSubscriptionModal]);
+  }, [historyId, id, fileName, downloadReportPdf, refreshWallet, downloadPrice, openSubscriptionModal, featureName]);
 
   const handleDownloadClick = useCallback(() => {
     if (hasActiveSubscription) {
-      if (isQuotaExhausted) {
-        openSubscriptionModal('extended');
-        return;
-      }
       handleConfirmDownload('en');
-      return;
-    }
-    if (isSubscriptionRequired) {
-      openSubscriptionModal('basic');
       return;
     }
     refreshWallet();
     trackEvent('shubh_ai_payment_initiated', { feature_name: featureName, price: downloadPrice });
     setShowDownloadModal(true);
-  }, [hasActiveSubscription, isQuotaExhausted, isSubscriptionRequired, openSubscriptionModal, handleConfirmDownload, refreshWallet, downloadPrice, featureName]);
+  }, [hasActiveSubscription, handleConfirmDownload, refreshWallet, downloadPrice, featureName]);
 
   return {
     // State
@@ -257,6 +230,7 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
     showSubscriptionModal,
     setShowSubscriptionModal,
     subscriptionModalVariant,
+    extendedPlans,
 
     // Handlers
     handleDownloadClick,

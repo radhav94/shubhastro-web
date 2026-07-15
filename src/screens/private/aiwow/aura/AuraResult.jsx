@@ -49,7 +49,7 @@ const AuraResult = () => {
     isDownloading, showDownloadModal, setShowDownloadModal,
     isAlreadyDownloaded, downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload,
-    showSubscriptionModal, setShowSubscriptionModal, subscriptionModalVariant,
+    showSubscriptionModal, setShowSubscriptionModal, subscriptionModalVariant, extendedPlans,
   } = useAIWowDownload({ resultData: downloadResultData });
 
   useEffect(() => {
@@ -621,6 +621,7 @@ const AuraResult = () => {
         isOpen={showSubscriptionModal}
         onClose={() => setShowSubscriptionModal(false)}
         variant={subscriptionModalVariant}
+        plans={subscriptionModalVariant === 'extended' ? extendedPlans : undefined}
       />
     </div>
     </>

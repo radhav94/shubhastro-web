@@ -11,7 +11,6 @@ import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscription/subscriptionApi";
-import { isPremiumFeature } from "../../../utils/subscription/featureGating";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
@@ -115,7 +114,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   const path = getWowCardPath(item);
                   const iconSrc = item.icon || item.image_url_web || item.iconUrl || item.icon_url || item.image_url_app;
                   // Show the "Paid" ribbon on premium suite cards.
-                  const premium = isPremiumFeature(item.slug);
+                  const premium = item.isPaid === true;
                   const paidLabel = premium ? "Paid" : null;
                   const cardIcon = (
                     <div className={styles.wowIconBox}>
@@ -376,6 +375,7 @@ const HomeV2 = () => {
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [pendingServiceItem, setPendingServiceItem] = useState(null);
   const [triggerSubscriptionStatus] = useLazyGetSubscriptionStatusQuery();
 
   // ─── Data Fetching ────────────────────────────────────────────────────────
@@ -472,6 +472,8 @@ const HomeV2 = () => {
   const handlePaidCardClick = useCallback(async (item) => {
     // Require login before checking subscription (opens login flow if needed).
     if (!requireAuth()) return;
+    // Remember which service was requested so "Unlock Now" (free plan) can open it.
+    setPendingServiceItem(item);
     try {
       const res = await triggerSubscriptionStatus().unwrap();
       if (res?.data?.hasActiveSubscription) {
@@ -486,6 +488,13 @@ const HomeV2 = () => {
       setShowSubscriptionModal(true);
     }
   }, [requireAuth, triggerSubscriptionStatus, handleWowCardClick]);
+
+  // Free plan "Unlock Now" → close the modal and open the requested service.
+  const handleFreeUnlock = useCallback(() => {
+    setShowSubscriptionModal(false);
+    if (pendingServiceItem) handleWowCardClick(pendingServiceItem);
+  }, [pendingServiceItem, handleWowCardClick]);
+
   const handleRechargeClose = useCallback(() => hookSetOpenModal((prev) => ({ ...prev, recharge: false })), [hookSetOpenModal]);
 
   // ─── Shared props for group renderers ─────────────────────────────────────
@@ -537,7 +546,7 @@ const HomeV2 = () => {
         <ProfileModals profiles={profiles} isCreating={isCreating} showAddProfile={showAddProfile} showEditProfile={showEditProfile} formData={formData} editFormData={editFormData} setShowAddProfile={setShowAddProfile} setShowEditProfile={setShowEditProfile} setFormData={setFormData} setEditFormData={setEditFormData} handleAddProfile={handleAddProfile} handleSubmitProfile={handleSubmitProfile} handleSubmitEditProfile={handleSubmitEditProfile} formatProfileDisplay={formatProfileDisplay} openModal={hookOpenModal} setOpenModal={hookSetOpenModal} selectedAstrologer={hookSelectedAstrologer} localSelectedProfile={localSelectedProfile} setLocalSelectedProfile={setLocalSelectedProfile} onContinue={handleProfileManagerStartCall} connectionType={connectionType} />
         <EmergencySessionModal isOpen={showEmergencyModal} onClose={handleEmergencyClose} astrologer={selectedAstrologer} onChatNow={handleEmergencyChatNow} onCallNow={handleEmergencyCallNow} />
         <MobileAppModal isOpen={showMobileAppModal} onClose={handleMobileAppClose} />
-        <SubscriptionModal isOpen={showSubscriptionModal} onClose={() => setShowSubscriptionModal(false)} />
+        <SubscriptionModal isOpen={showSubscriptionModal} onClose={() => setShowSubscriptionModal(false)} onSelectPlan={handleFreeUnlock} />
       </Suspense>
       <RechargeModal
         isOpen={hookOpenModal.recharge}

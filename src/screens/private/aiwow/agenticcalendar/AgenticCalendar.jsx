@@ -10,6 +10,7 @@ import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import LocationSearch from '../../../../utils/location/locationSearchVedic';
 import useUserLocation from '../../../../utils/hooks/useUserLocation';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const DEFAULT_OCCASIONS = [
   'Marriage',
@@ -29,6 +30,7 @@ const AgenticCalendar = () => {
   const location = useLocation();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({ required: false, showToast: false });
   const userLocation = useUserLocation();
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'agentic-calendar' });
 
   // State from MuhuratSection navigation
   const navState = location.state || {};
@@ -195,13 +197,21 @@ const AgenticCalendar = () => {
         toDate = fromDate;
       }
 
-      const result = await analyzeCalendarEvents(occasions, {
+      const result = await runWithEntitlement(() => analyzeCalendarEvents(occasions, {
         fromDate,
         toDate,
         kundliId: profile?._id,
         lat: locationData?.lat,
         lng: locationData?.lng,
-      });
+      }));
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      if (result.blocked) {
+        setIsLoading(false);
+        setLocked(false);
+        return;
+      }
+
       if (result.success) {
         setAnalysis(result.data);
         setExpandedOccasion(occasions[0]);
@@ -683,6 +693,7 @@ const AgenticCalendar = () => {
           </div>
         </div>
       )}
+      {subscriptionModal}
     </div>
     </>
   );

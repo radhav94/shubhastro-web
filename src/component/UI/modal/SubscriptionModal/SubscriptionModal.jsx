@@ -3,44 +3,23 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
 import styles from "./SubscriptionModal.module.scss";
-import { useGetSubscriptionPlansQuery, usePurchaseWalletSubscriptionMutation } from "../../../../redux/api/subscription/subscriptionApi";
+import { useGetSubscriptionPlansQuery, usePurchaseWalletSubscriptionMutation, useGetSubscriptionStatusQuery } from "../../../../redux/api/subscription/subscriptionApi";
 import shubhLogoMobile from "../../../../assets/images/mobile-shubh-astro-logo.svg";
-
-// Maps API plan `code` -> presentation config. Prices, description and feature
-// rows are all driven by the API response (see buildFeatures below).
-const PLAN_ORDER = ["free", "premium_monthly", "premium_quarterly"];
-
-const PLAN_DISPLAY = {
-  free: {
-    title: "One-Time Unlock",
-    cta: "Unlock Now",
-    highlighted: false,
-    priceSource: "overage", // one-time per-report price
-  },
-  premium_monthly: {
-    title: "Monthly Pass",
-    cta: "Subscribe",
-    highlighted: false,
-    priceSource: "price",
-  },
-  premium_quarterly: {
-    title: "Quarterly Pass",
-    cta: "Subscribe",
-    highlighted: true,
-    badge: "Best Value · Save 23%",
-    priceSource: "price",
-  },
-};
 
 // Build the "What's included" rows from real plan fields. If the API ever returns
 // a non-empty `features` array, use it directly; otherwise derive sensible rows.
 const buildFeatures = (plan) => {
   if (Array.isArray(plan.features) && plan.features.length > 0) {
-    return plan.features.map((f) =>
-      typeof f === "string"
-        ? { label: f, included: true }
-        : { label: f.label ?? f.name ?? "", included: f.included !== false }
-    );
+    return plan.features
+      .map((f) =>
+        typeof f === "string"
+          ? { label: f, included: true }
+          : {
+              label: f.displayName ?? f.label ?? f.name ?? f.featureKey ?? "",
+              included: f.included !== false,
+            }
+      )
+      .filter((row) => row.label);
   }
 
   const quota = plan.monthlyReportQuota || 0;
@@ -78,8 +57,25 @@ const CrossIcon = () => (
   </svg>
 );
 
-const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant = "basic" }) => {
-  const { data, isLoading, isFetching } = useGetSubscriptionPlansQuery(undefined, { skip: !isOpen });
+const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant = "basic", plans }) => {
+  const isExtended = variant === "extended";
+
+  // Extended plans are returned inline by the generate/report response. When the
+  // caller passes them via `plans`, use them directly and skip the plans API.
+  const providedPlans = Array.isArray(plans) && plans.length > 0 ? plans : null;
+
+  // Fallback (no inline plans): the extended plans API needs the user's CURRENT
+  // plan code to return the correct pack(s).
+  const customerToken = typeof window !== "undefined" ? localStorage.getItem("shubhtalk_customer_token") : null;
+  const { data: statusData } = useGetSubscriptionStatusQuery(undefined, {
+    skip: !isOpen || !isExtended || !customerToken || !!providedPlans,
+  });
+  const currentPlanCode = statusData?.data?.subscription?.planCode;
+
+  const { data, isLoading, isFetching } = useGetSubscriptionPlansQuery(
+    isExtended ? { planType: "extended", planCode: currentPlanCode } : undefined,
+    { skip: !isOpen || !!providedPlans || (isExtended && !currentPlanCode) }
+  );
 
   const navigate = useNavigate();
   const [purchaseWallet] = usePurchaseWalletSubscriptionMutation();
@@ -97,11 +93,12 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
 
   if (!isOpen) return null;
 
-  const apiPlans = Array.isArray(data?.data) ? data.data : [];
-  const isExtended = variant === "extended";
+  const apiPlans = providedPlans || (Array.isArray(data?.data) ? data.data : []);
   const cards = isExtended
     ? apiPlans
-        .filter((p) => p.status === "active" && (p.planType === "extended" || (p.code || "").startsWith("extended")))
+        // Inline plans from the response are already the valid pack(s) and may
+        // not carry a `status` field, so only status-filter API-fetched plans.
+        .filter((p) => providedPlans || p.status === "active")
         .slice()
         .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || (a.price ?? 0) - (b.price ?? 0))
         .map((p) => ({
@@ -110,25 +107,38 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
           cta: "Buy Now",
           highlighted: false,
           price: `₹${p.price ?? 0}`,
+          priceValue: Number(p.price) || 0,
           features: buildFeatures(p),
           plan: p,
         }))
-    : PLAN_ORDER.map((code) => {
-        const apiPlan = apiPlans.find((p) => p.code === code && p.status === "active");
-        if (!apiPlan) return null;
-        const cfg = PLAN_DISPLAY[code];
-        const priceValue = cfg.priceSource === "overage" ? apiPlan.overagePrice : apiPlan.price;
-        return {
-          id: code,
-          ...cfg,
-          title: apiPlan.name || cfg.title,
-          price: `₹${priceValue ?? 0}`,
-          features: buildFeatures(apiPlan),
-          plan: apiPlan,
-        };
-      }).filter(Boolean);
+    : apiPlans
+        .filter((p) => p.status === "active" && !(p.planType === "extended" || (p.code || "").startsWith("extended")))
+        .slice()
+        .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || (a.price ?? 0) - (b.price ?? 0))
+        .map((p, idx, arr) => {
+          // Highlight the best-value (last / highest sortOrder) plan when there are multiple.
+          const highlighted = arr.length > 1 && idx === arr.length - 1;
+          return {
+            id: p.code,
+            title: p.name,
+            cta: (p.price ?? 0) > 0 ? "Subscribe" : "Unlock Now",
+            highlighted,
+            badge: highlighted ? "Best Value" : undefined,
+            price: `₹${p.price ?? 0}`,
+            priceValue: Number(p.price) || 0,
+            features: buildFeatures(p),
+            plan: p,
+          };
+        });
 
-  const loading = isLoading || isFetching;
+  const loading = providedPlans ? false : (isLoading || isFetching);
+
+  // Size the modal to the number of cards so it hugs them (no leftover side
+  // space) while keeping each card a fixed, consistent width. Cards wrap and
+  // the modal is capped by its max-width when there are many plans.
+  // card 300px + 20px gap, horizontal padding 76px (38 * 2).
+  const columns = Math.min(Math.max(cards.length, 1), 3);
+  const modalStyle = { "--modal-w": `min(${columns * 300 + (columns - 1) * 20 + 76}px, 100%)` };
 
   const handleSelect = async (card) => {
     // Free plan is not a purchasable subscription.
@@ -168,7 +178,7 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Choose Your Subscription">
+      <div className={styles.modal} style={modalStyle} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Choose Your Subscription">
         <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
           <IoClose size={22} />
         </button>
@@ -232,7 +242,7 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
 
                 <div className={styles.planHead}>
                   <span className={styles.planTitle}>{plan.title}</span>
-                  <span className={styles.planPrice}>{plan.price}</span>
+                  {plan.priceValue > 0 && <span className={styles.planPrice}>{plan.price}</span>}
                 </div>
 
                 <button

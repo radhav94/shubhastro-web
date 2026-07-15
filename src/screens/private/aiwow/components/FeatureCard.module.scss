@@ -202,3 +202,23 @@
     stroke: #fff;
   }
 }
+
+/* Paid corner ribbon */
+.paidRibbon {
+  position: absolute;
+  top: 14px;
+  right: -24px;
+  transform: rotate(45deg);
+  background: linear-gradient(135deg, #ff6a3d 0%, #e11d1d 100%);
+  color: #ffffff;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: capitalize;
+  padding: 3px 26px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  z-index: 3;
+}
