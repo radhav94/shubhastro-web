@@ -33,6 +33,10 @@ export const ALLOWED_ORIGINS = String(env.SGW_ALLOWED_ORIGINS || "")
   .map((o) => o.trim())
   .filter(Boolean);
 
+// Path to the built frontend dist folder (for meta injection on bot requests).
+// Default assumes secure-gateway is a sibling of the frontend project root.
+export const DIST_PATH = env.SGW_DIST_PATH || "../dist";
+
 export const ROUTES = [
   {
     prefix: "/main",
