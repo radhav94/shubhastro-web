@@ -108,7 +108,10 @@ const PanchangInputCard = ({
           </h1>
         )}
         <p className={styles.titleText}>
-          {formData?.location || initialLocation || userLocation.locationName},&nbsp;
+          {(() => {
+            const loc = formData?.location || initialLocation || (!userLocation.isDefault ? userLocation.locationName : "");
+            return loc ? `${loc},\u00A0` : "";
+          })()}
           {formData.dateOfBirth ? Userdob : today}{" "}
         </p>
 

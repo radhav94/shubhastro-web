@@ -5,9 +5,12 @@ import ClarityIcon from '../../../../assets/icons/clarity.png';
 import ColorGradingIcon from '../../../../assets/icons/colorgrading.png';
 import CutPrecisionIcon from '../../../../assets/icons/curprecision.png';
 import CaratIcon from '../../../../assets/icons/carat.png';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const GemstoneLanding = () => {
   const navigate = useNavigate();
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'gemstone-authenticity')?.title || 'Gemstone Authenticity';
 
   const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -51,7 +54,7 @@ const GemstoneLanding = () => {
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <h1 className={styles.title}>Gemstone Authenticity</h1>
+        <h1 className={styles.title}>{featureTitle}</h1>
         </div>
       </header>
 

@@ -7,11 +7,15 @@ import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
 import { compressImage } from '../../../../utils/helper/compressImage';
 import { trackEvent } from '../../../../utils/analytics';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const SignatureInstructions = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'signature-analysis')?.title || 'AI Signature Analysis';
 
   const handleCamera = () => {
     navigate('/ai-wow/signature-analysis/camera');
@@ -42,7 +46,7 @@ const SignatureInstructions = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className={styles.headerTitle}>AI Signature Analysis</h1>
+          <h1 className={styles.headerTitle}>{featureTitle}</h1>
         </div>
       </header>
       <div className={styles.content}>
