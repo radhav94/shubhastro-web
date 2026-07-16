@@ -89,21 +89,23 @@ const AIWowSection = () => {
   const remainingSections = activeSections.slice(1);
 
   const handleCardClick = (slug) => {
-    if (!requireAuth()) return;
     if (slug === "ar-vastu-scanner") {
+      if (!requireAuth()) return;
       setShowMobileAppModal(true);
-    } else {
-      const rootLevelSlugs = [
-        "ai-palmistry-scanner",
-        "astro-face-reading",
-        "signature-analysis",
-        "clothes-colour-analysis",
-        "gemstone-authenticity",
-        "aura-photography",
-      ];
-      const path = rootLevelSlugs.includes(slug) ? `/${slug}` : `/aiwow/${slug}`;
-      navigate(path);
+      return;
     }
+    const rootLevelSlugs = [
+      "ai-palmistry-scanner",
+      "astro-face-reading",
+      "signature-analysis",
+      "clothes-colour-analysis",
+      "gemstone-authenticity",
+      "aura-photography",
+    ];
+    // Guests can open the intro pages for these features; others require login.
+    if (!rootLevelSlugs.includes(slug) && !requireAuth()) return;
+    const path = rootLevelSlugs.includes(slug) ? `/${slug}` : `/aiwow/${slug}`;
+    navigate(path);
   };
 
   if (activeSections.length === 0) return null;

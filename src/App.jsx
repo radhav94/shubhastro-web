@@ -174,9 +174,7 @@ function App() {
               child.path === "/business-pathfinder" ||
               child.path === "/business-pathfinder/report" ||
               child.path === "/ai-wow/business-pathfinder" ||
-              child.path === "/ai-wow/business-pathfinder/report" ||
-              child.path === PATH.privateRoutes.LAL_KITAB?.path ||
-              child.path === PATH.privateRoutes.OCCULT?.path
+              child.path === "/ai-wow/business-pathfinder/report"
             ) {
               return {
                 path: child.path,

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './SignatureLanding.module.scss';
 import StrokeIcon from '../../../../assets/icons/Stroke.png';
@@ -9,15 +9,15 @@ import SignatureSizeIcon from '../../../../assets/icons/signauresize.png';
 const SignatureLanding = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/signature-analysis");
+      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/signature-analysis/instructions");
       window.location.href = "/login?skip=welcome";
+      return;
     }
-  }, []);
-
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
+    navigate('/ai-wow/signature-analysis/instructions');
+  };
   const features = [
     {
       icon: StrokeIcon,
@@ -74,7 +74,7 @@ const SignatureLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/ai-wow/signature-analysis/instructions')}
+          onClick={handleProceed}
         >
           Proceed Ahead
         </button>

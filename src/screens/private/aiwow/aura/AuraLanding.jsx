@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AuraLanding.module.scss';
 import SmileIcon from '../../../../assets/icons/Smile.png';
@@ -9,15 +9,15 @@ import AuraSizeIcon from '../../../../assets/icons/aurasize.png';
 const AuraLanding = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/aura-photography");
+      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/aura-photography/instructions");
       window.location.href = "/login?skip=welcome";
+      return;
     }
-  }, []);
-
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
+    navigate('/ai-wow/aura-photography/instructions');
+  };
   const features = [
     {
       icon: SmileIcon,
@@ -74,7 +74,7 @@ const AuraLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/ai-wow/aura-photography/instructions')}
+          onClick={handleProceed}
         >
           Proceed Ahead
         </button>

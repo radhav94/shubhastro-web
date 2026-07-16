@@ -65,7 +65,11 @@ const LalKitab = () => {
   }, [profiles.length, selectedProfile]);
 
   const handleGenerate = async () => {
-    if (!isLoggedIn) { requireAuth(); return; }
+    if (!isLoggedIn) {
+      localStorage.setItem("shubhtalk_redirect_after_login", "/laal-kitab");
+      window.location.href = "/login?skip=welcome";
+      return;
+    }
     if (!selectedProfile?._id) { Toast.error("Please select a Kundli profile first"); return; }
 
     // Route the generate call through the subscription gate — shows the plans
@@ -112,7 +116,8 @@ const LalKitab = () => {
             Get personalized planetary analysis, karmic debt insights, and powerful daily remedies.
           </p>
 
-          {/* Profile selector */}
+          {/* Profile selector — only shown for logged-in users */}
+          {isLoggedIn && (
           <div className={styles.profileBox}>
             <p className={styles.profileLabel}>Select your Kundli profile to begin</p>
             {selectedProfile ? (
@@ -155,6 +160,22 @@ const LalKitab = () => {
               )}
             </button>
           </div>
+          )}
+
+          {/* Guest user CTA */}
+          {!isLoggedIn && (
+          <div className={styles.profileBox}>
+            <button
+              className={styles.generateBtn}
+              onClick={handleGenerate}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+              </svg>
+              Generate Laal Kitab 
+            </button>
+          </div>
+          )}
         </div>
 
         {/* Hero image */}

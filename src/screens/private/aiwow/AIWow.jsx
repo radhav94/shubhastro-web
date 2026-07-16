@@ -264,6 +264,12 @@ const AIWow = () => {
   };
 
   const handleClick = async (slug, isPaid) => {
+    // Allow guest users to view intro pages for these features
+    const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
+    if (guestAccessSlugs.includes(slug)) {
+      openService(slug);
+      return;
+    }
     if (!requireAuth()) return;
     if (!selectedProfile) {
       toast.error("Please select one Kundli to proceed.");
