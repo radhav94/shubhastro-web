@@ -8,6 +8,7 @@ import TTSButton from '../../../../component/UI/TTSButton';
 import DownloadReportModal from '../components/DownloadReportModal';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const GemstoneResult = () => {
   const navigate = useNavigate();
@@ -39,11 +40,14 @@ const GemstoneResult = () => {
   const reduxResult = useSelector((state) => state.aiwow.gemstone.result);
   const reduxImage = useSelector((state) => state.aiwow.gemstone.image);
 
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'gemstone-authenticity')?.title || 'Gemstone Analysis';
+
   const downloadResultData = useMemo(() => {
     if (!reduxResult) return null;
     if (reduxResult.featureName) return reduxResult;
-    return { ...reduxResult, featureName: 'Gemstone Scanner' };
-  }, [reduxResult]);
+    return { ...reduxResult, featureName: featureTitle };
+  }, [reduxResult, featureTitle]);
 
   const {
     isDownloading, showDownloadModal, setShowDownloadModal,
@@ -646,7 +650,7 @@ const GemstoneResult = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className={styles.title}>Gemstone Analysis</h1>
+          <h1 className={styles.title}>{featureTitle}</h1>
           <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -720,7 +724,7 @@ const GemstoneResult = () => {
         isOpen={showDownloadModal}
         onClose={() => setShowDownloadModal(false)}
         onDownload={handleConfirmDownload}
-        featureName="Gemstone Analysis Report"
+        featureName={`${featureTitle} Report`}
         downloadCost={downloadPrice}
         walletBalance={walletBalance ?? 0}
         isDownloading={isDownloading}

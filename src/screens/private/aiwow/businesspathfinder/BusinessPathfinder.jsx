@@ -10,6 +10,7 @@ import { ProfileManager } from '../../../../component/UI/Profile';
 import { setSelectedKundliProfile } from '../../../../redux/aiwow/aiwowSlice';
 import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 import LocationSearch from '../../../../utils/location/locationSearchVedic';
+import useUserLocation from '../../../../utils/hooks/useUserLocation';
 import { trackEvent } from '../../../../utils/analytics';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
@@ -19,6 +20,7 @@ const BusinessPathfinder = () => {
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
   const { data: optionsData, isLoading: optionsLoading } = useGetBusinessPathfinderOptionsQuery();
   const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'business-pathfinder' });
+  const userLocation = useUserLocation();
   const [showProfileSelector, setShowProfileSelector] = useState(false);
 
   // Track feature open (once on mount)
@@ -27,6 +29,17 @@ const BusinessPathfinder = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Auto-fill location when geolocation is enabled (not default Delhi)
+  useEffect(() => {
+    if (userLocation.loaded && !userLocation.isDefault && userLocation.locationName && userLocation.locationName !== "Your Location") {
+      setFormData(prev => ({
+        ...prev,
+        businessLocation: userLocation.locationName,
+        businessLat: String(userLocation.lat),
+        businessLon: String(userLocation.lon),
+      }));
+    }
+  }, [userLocation.loaded, userLocation.isDefault, userLocation.locationName]);
   const handleProfileSelect = (selected) => {
     if (selected) {
       dispatch(setSelectedKundliProfile(selected));

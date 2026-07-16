@@ -8,6 +8,7 @@ import DownloadReportModal from '../components/DownloadReportModal';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
 import { PATH } from '../../../../utils/routes/Paths';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const FaceReadingResult = () => {
   const navigate = useNavigate();
@@ -21,11 +22,14 @@ const FaceReadingResult = () => {
   const reduxResult = useSelector((state) => state.aiwow.faceReading.result);
   const reduxImage = useSelector((state) => state.aiwow.faceReading.image);
 
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'astro-face-reading')?.title || 'Face Reading Analysis';
+
   const downloadResultData = useMemo(() => {
     if (!reduxResult) return null;
     if (reduxResult.featureName) return reduxResult;
-    return { ...reduxResult, featureName: 'Face Analysis' };
-  }, [reduxResult]);
+    return { ...reduxResult, featureName: featureTitle };
+  }, [reduxResult, featureTitle]);
 
   const {
     isDownloading, showDownloadModal, setShowDownloadModal,
@@ -138,7 +142,7 @@ const FaceReadingResult = () => {
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <h1 className={styles.title}>Face Reading Analysis</h1>
+        <h1 className={styles.title}>{featureTitle}</h1>
         <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -701,7 +705,7 @@ const FaceReadingResult = () => {
         isOpen={showDownloadModal}
         onClose={() => setShowDownloadModal(false)}
         onDownload={handleConfirmDownload}
-        featureName="Face Reading Report"
+        featureName={`${featureTitle} Report`}
         downloadCost={downloadPrice}
         walletBalance={walletBalance ?? 0}
         isDownloading={isDownloading}

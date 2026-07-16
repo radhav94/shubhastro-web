@@ -70,7 +70,7 @@ const TodayPanchang = () => {
   
   const finalLat = initialLat || queryLat || userLocation.lat;
   const finalLon = initialLon || queryLon || userLocation.lon;
-  const finalLocation = initialLocation || userLocation.locationName;
+  const finalLocation = initialLocation || (!userLocation.isDefault ? userLocation.locationName : "");
   
   // Initialize with passed data or current date/location
   const now = initialDate ? new Date(initialDate) : new Date();

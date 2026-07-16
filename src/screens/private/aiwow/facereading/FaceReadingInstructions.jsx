@@ -7,6 +7,7 @@ import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
 import { compressImage } from '../../../../utils/helper/compressImage';
 import { trackEvent } from '../../../../utils/analytics';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const FaceReadingInstructions = () => {
   const navigate = useNavigate();
@@ -14,6 +15,9 @@ const FaceReadingInstructions = () => {
   const fileInputRef = useRef(null);
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
   const gender = selectedProfile?.identity?.toLowerCase() || selectedProfile?.gender?.toLowerCase() || 'male';
+
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'astro-face-reading')?.title || 'AI Powered Face Reading';
 
   const handleCamera = () => {
     navigate('/ai-wow/astro-face-reading/camera');
@@ -44,7 +48,7 @@ const FaceReadingInstructions = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className={styles.headerTitle}>AI Powered Face Reading</h1>
+          <h1 className={styles.headerTitle}>{featureTitle}</h1>
         </div>
       </header>
       <div className={styles.content}>

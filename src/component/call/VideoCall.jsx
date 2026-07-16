@@ -114,6 +114,14 @@ const VideoCalling = ({ callData }) => {
   const [isRemedyPanelOpen, setIsRemedyPanelOpen] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
 
+  // Restore pending switch state after reconnect
+  useEffect(() => {
+    if (activeCall?.pendingSwitch?.isPending) {
+      setIsSwitching(true);
+      setActiveCall((prev) => prev ? { ...prev, pendingSwitch: null } : prev);
+    }
+  }, [activeCall?.pendingSwitch, setActiveCall]);
+
   // Auto-minimize when call originated from live and user is not on live page
   useEffect(() => {
     if (activeCall?.origin === "live" && !isOnLivePage && !isMinimized) {

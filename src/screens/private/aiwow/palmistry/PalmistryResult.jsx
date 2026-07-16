@@ -11,6 +11,7 @@ import TTSButton from '../../../../component/UI/TTSButton';
 import DownloadReportModal from '../components/DownloadReportModal';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const LineDropdown = ({ title, subtitle, children, isOpen, onToggle, ttsText }) => (
   <div className={styles.lineDropdown} style={{ position: 'relative' }}>
@@ -44,6 +45,9 @@ const PalmistryResult = () => {
   const [resultData, setResultData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'ai-palmistry-scanner')?.title || 'Palmistry Analysis';
   const [openLines, setOpenLines] = useState({
     fate: false,
     heart: false,
@@ -65,7 +69,7 @@ const PalmistryResult = () => {
   const downloadResultData = useMemo(() => {
     if (!reduxResult) return null;
     if (reduxResult.featureName) return reduxResult;
-    return { ...reduxResult, featureName: 'Palmistry Analysis' };
+    return { ...reduxResult, featureName: featureTitle };
   }, [reduxResult]);
 
   const {
@@ -168,7 +172,7 @@ const PalmistryResult = () => {
                 <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
-            <h1 className={styles.title}>Palmistry Analysis</h1>
+            <h1 className={styles.title}>{featureTitle}</h1>
           </div>
         </header>
         <PrimaryLoader />
@@ -187,7 +191,7 @@ const PalmistryResult = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className={styles.title}>Palmistry Analysis</h1>
+          <h1 className={styles.title}>{featureTitle}</h1>
           </div>
         </header>
         <div className={styles.errorContainer}>
@@ -233,7 +237,7 @@ const PalmistryResult = () => {
                 <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
-            <h1 className={styles.title}>Palmistry Analysis</h1>
+            <h1 className={styles.title}>{featureTitle}</h1>
           </div>
         </header>
         <div className={styles.errorContainer}>
@@ -258,7 +262,7 @@ const PalmistryResult = () => {
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <h1 className={styles.title}>Palmistry Analysis</h1>
+        <h1 className={styles.title}>{featureTitle}</h1>
         <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -994,7 +998,7 @@ const PalmistryResult = () => {
         isOpen={showDownloadModal}
         onClose={() => setShowDownloadModal(false)}
         onDownload={handleConfirmDownload}
-        featureName="Palmistry Analysis Report"
+        featureName={`${featureTitle} Report`}
         downloadCost={downloadPrice}
         walletBalance={walletBalance ?? 0}
         isDownloading={isDownloading}

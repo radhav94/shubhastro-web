@@ -5,9 +5,12 @@ import StrokeIcon from '../../../../assets/icons/Stroke.png';
 import PressureIcon from '../../../../assets/icons/pressure.png';
 import LetterIcon from '../../../../assets/icons/letter.png';
 import SignatureSizeIcon from '../../../../assets/icons/signauresize.png';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const SignatureLanding = () => {
   const navigate = useNavigate();
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'signature-analysis')?.title || 'AI Signature Analysis';
 
   const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -51,7 +54,7 @@ const SignatureLanding = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className={styles.title}>AI Signature Analysis</h1>
+          <h1 className={styles.title}>{featureTitle}</h1>
         </div>
       </header>
 

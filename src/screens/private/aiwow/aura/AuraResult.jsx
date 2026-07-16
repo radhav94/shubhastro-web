@@ -9,8 +9,12 @@ import DownloadReportModal from '../components/DownloadReportModal';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
 
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
+
 const AuraResult = () => {
   const navigate = useNavigate();
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'aura-photography')?.title || 'Aura Analysis';
   const handleBack = () => navigate('/ai-wow/aura-photography', { replace: true });
   const [activeTab, setActiveTab] = useState('overall');
   const [loading, setLoading] = useState(true);
@@ -199,7 +203,7 @@ const AuraResult = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             </button>
-          <h1 className={styles.title}>Aura Analysis</h1>
+          <h1 className={styles.title}>{featureTitle}</h1>
           <button className={styles.downloadBtn} onClick={handleDownloadClick} disabled={isDownloading}>
             <svg 
               width="18" 
