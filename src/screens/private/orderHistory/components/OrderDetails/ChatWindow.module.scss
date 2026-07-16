@@ -4,7 +4,11 @@
   min-height: 400px;
   background-color: rgba($color: #ffffff, $alpha: 0.4);
   backdrop-filter: blur(12px);
-
+  max-width: 900px;
+  margin: 42px auto 0 auto;
+  @media (width <= 1180px) {
+    margin: 0px auto 0 auto;
+  }
   @media (max-width: 639px) {
     padding: 0px 16px 40px;
   }
