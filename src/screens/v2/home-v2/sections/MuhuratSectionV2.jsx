@@ -75,12 +75,12 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
     <div className={styles.rightPanel}>
       <div className={styles.muhuratHeader}>
         <h4>{sectionData?.display_title || sectionData?.title || "TODAY'S MUHARAT"}</h4>
-        <span className={styles.muhuratLocation}>
-          <IoLocationOutline />
-          {userLocation.locationName
-            ? userLocation.locationName.split(",")[0]
-            : "Mumbai"}
-        </span>
+        {!userLocation.isDefault && userLocation.locationName && (
+          <span className={styles.muhuratLocation}>
+            <IoLocationOutline />
+            {userLocation.locationName.split(",")[0]}
+          </span>
+        )}
       </div>
       <div className={styles.muhuratGrid}>
         {muhurats.map((m, i) => (

@@ -1,23 +1,26 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './GemstoneLanding.module.scss';
 import ClarityIcon from '../../../../assets/icons/clarity.png';
 import ColorGradingIcon from '../../../../assets/icons/colorgrading.png';
 import CutPrecisionIcon from '../../../../assets/icons/curprecision.png';
 import CaratIcon from '../../../../assets/icons/carat.png';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const GemstoneLanding = () => {
   const navigate = useNavigate();
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'gemstone-authenticity')?.title || 'Gemstone Authenticity';
 
-  useEffect(() => {
+  const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/gemstone-authenticity");
+      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/gemstone-authenticity/instructions");
       window.location.href = "/login?skip=welcome";
+      return;
     }
-  }, []);
-
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
+    navigate('/ai-wow/gemstone-authenticity/instructions');
+  };
   const features = [
     {
       icon: ClarityIcon,
@@ -51,7 +54,7 @@ const GemstoneLanding = () => {
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <h1 className={styles.title}>Gemstone Authenticity</h1>
+        <h1 className={styles.title}>{featureTitle}</h1>
         </div>
       </header>
 
@@ -74,7 +77,7 @@ const GemstoneLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/ai-wow/gemstone-authenticity/instructions')}
+          onClick={handleProceed}
         >
           Proceed Ahead
         </button>

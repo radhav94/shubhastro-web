@@ -1,24 +1,26 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './PalmistryLanding.module.scss';
 import PalmLineIcon from '../../../../assets/icons/palmline.png';
 import PalmMountIcon from '../../../../assets/icons/palmmount.png';
 import CakeIcon from '../../../../assets/icons/Cake.png';
 import LoveIcon from '../../../../assets/icons/loveIcon.png';
-
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const PalmistryLanding = () => {
   const navigate = useNavigate();
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'ai-palmistry-scanner')?.title || 'Palmistry Scanner';
 
-  useEffect(() => {
+  const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-palmistry-scanner");
+      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/ai-palmistry-scanner/hand-selection");
       window.location.href = "/login?skip=welcome";
+      return;
     }
-  }, []);
-
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
+    navigate('/ai-wow/ai-palmistry-scanner/hand-selection');
+  };
   const features = [
     {
       icon: PalmLineIcon,
@@ -52,7 +54,7 @@ const PalmistryLanding = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className={styles.title}>Palmistry Scanner</h1>
+          <h1 className={styles.title}>{featureTitle}</h1>
         </div>
       </header>
 
@@ -75,7 +77,7 @@ const PalmistryLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/ai-wow/ai-palmistry-scanner/hand-selection')}
+          onClick={handleProceed}
         >
           Proceed Ahead
         </button>

@@ -108,7 +108,10 @@ const PanchangInputCard = ({
           </PrimaryText>
         )}
         <PrimaryText isCenter size_20 color={appColors.greyDark}>
-          {formData?.location || initialLocation || userLocation.locationName},&nbsp;
+          {(() => {
+            const loc = formData?.location || initialLocation || (!userLocation.isDefault ? userLocation.locationName : "");
+            return loc ? `${loc},\u00A0` : "";
+          })()}
           {formData.dateOfBirth ? Userdob : today}{" "}
         </PrimaryText>
 

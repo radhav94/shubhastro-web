@@ -1,23 +1,26 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AuraLanding.module.scss';
 import SmileIcon from '../../../../assets/icons/Smile.png';
 import EnergyLevelsIcon from '../../../../assets/icons/energylevels.png';
 import ChakraIcon from '../../../../assets/icons/chakra.png';
 import AuraSizeIcon from '../../../../assets/icons/aurasize.png';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const AuraLanding = () => {
   const navigate = useNavigate();
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'aura-photography')?.title || 'AI Powered Aura Photography';
 
-  useEffect(() => {
+  const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/aura-photography");
+      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/aura-photography/instructions");
       window.location.href = "/login?skip=welcome";
+      return;
     }
-  }, []);
-
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
+    navigate('/ai-wow/aura-photography/instructions');
+  };
   const features = [
     {
       icon: SmileIcon,
@@ -51,7 +54,7 @@ const AuraLanding = () => {
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <h1 className={styles.title}>AI Powered Aura Photography</h1>
+        <h1 className={styles.title}>{featureTitle}</h1>
         </div>
       </header>
 
@@ -74,7 +77,7 @@ const AuraLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/ai-wow/aura-photography/instructions')}
+          onClick={handleProceed}
         >
           Proceed Ahead
         </button>

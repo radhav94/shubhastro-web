@@ -1,23 +1,26 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './SignatureLanding.module.scss';
 import StrokeIcon from '../../../../assets/icons/Stroke.png';
 import PressureIcon from '../../../../assets/icons/pressure.png';
 import LetterIcon from '../../../../assets/icons/letter.png';
 import SignatureSizeIcon from '../../../../assets/icons/signauresize.png';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const SignatureLanding = () => {
   const navigate = useNavigate();
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'signature-analysis')?.title || 'AI Signature Analysis';
 
-  useEffect(() => {
+  const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/signature-analysis");
+      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/signature-analysis/instructions");
       window.location.href = "/login?skip=welcome";
+      return;
     }
-  }, []);
-
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
+    navigate('/ai-wow/signature-analysis/instructions');
+  };
   const features = [
     {
       icon: StrokeIcon,
@@ -51,7 +54,7 @@ const SignatureLanding = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className={styles.title}>AI Signature Analysis</h1>
+          <h1 className={styles.title}>{featureTitle}</h1>
         </div>
       </header>
 
@@ -74,7 +77,7 @@ const SignatureLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/ai-wow/signature-analysis/instructions')}
+          onClick={handleProceed}
         >
           Proceed Ahead
         </button>

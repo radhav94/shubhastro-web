@@ -1,22 +1,26 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './FaceReadingLanding.module.scss';
 import SmileIcon from '../../../../assets/icons/Smile.png';
 import CakeIcon from '../../../../assets/icons/Cake.png';
 import FlowerIcon from '../../../../assets/icons/Flower.png';
 import ContactsIcon from '../../../../assets/icons/Contacts.png';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
+
 const FaceReadingLanding = () => {
   const navigate = useNavigate();
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'astro-face-reading')?.title || 'AI Powered Face Reading';
 
-  useEffect(() => {
+  const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/astro-face-reading");
+      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/astro-face-reading/instructions");
       window.location.href = "/login?skip=welcome";
+      return;
     }
-  }, []);
-
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
+    navigate('/ai-wow/astro-face-reading/instructions');
+  };
 
   const features = [
     {
@@ -51,7 +55,7 @@ const FaceReadingLanding = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className={styles.title}>AI Powered Face Reading</h1>
+          <h1 className={styles.title}>{featureTitle}</h1>
         </div>
       </header>
 
@@ -74,7 +78,7 @@ const FaceReadingLanding = () => {
 
         <button 
           className={styles.proceedButton}
-          onClick={() => navigate('/ai-wow/astro-face-reading/instructions')}
+          onClick={handleProceed}
         >
           Proceed Ahead
         </button>
