@@ -400,6 +400,9 @@ const HomeV2 = () => {
     if (!item.slug) return;
     if (item.slug === "ar-vastu-scanner") { setShowMobileAppModal(true); return; }
     const path = `/ai-wow/${item.slug}`;
+    // Allow guest users to view intro pages for these features
+    const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
+    if (guestAccessSlugs.includes(item.slug)) { navigate(path); return; }
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) { localStorage.setItem("shubhtalk_redirect_after_login", path); window.location.href = "/login?skip=welcome"; return; }
     navigate(path);
