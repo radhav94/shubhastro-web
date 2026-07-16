@@ -360,6 +360,10 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
     const handleSocketError = (err) => {
       console.log("[NormalFlow] ⚠️ Socket error event received");
       console.log("[NormalFlow]   → message:", err?.message);
+
+      // 409 is handled centrally in WaitingQueueContext
+      if (err?.statusCode === 409) return;
+
       Toast.error(err?.message || "Connection error");
       localStorage.removeItem("waitingState");
       resetChatFlow();

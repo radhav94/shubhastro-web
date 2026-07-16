@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Hls from "hls.js";
 import { Video, Phone, Calendar, Clock, X, MoreVertical } from "lucide-react";
+import { playAudio, stopAudio } from "../../../talkToAstrologer/voiceChat/audioController";
 import styles from "./OrderInfoCard.module.scss";
 import RatingStars from "./RatingStars";
 import ProgressBar from "./ProgressBar";
@@ -84,13 +85,13 @@ const OrderInfoCard = ({
         const hls = attachHls(media, recordingUrl, hlsRef);
         if (hls) {
           // HLS.js: start playback once the manifest has been parsed.
-          hls.once(Hls.Events.MANIFEST_PARSED, () => media.play().catch(() => {}));
+          hls.once(Hls.Events.MANIFEST_PARSED, () => playAudio(media));
         } else {
-          media.play().catch(() => {});
+          playAudio(media);
         }
         return;
       }
-      if (isPlaying) { media.pause(); } else { media.play().catch(() => {}); }
+      if (isPlaying) { stopAudio(media); } else { playAudio(media); }
     }
   }, [isPlaying, type, recordingUrl]);
 
@@ -147,10 +148,10 @@ const OrderInfoCard = ({
             </div>
           )}
 
-          <div className={styles.cardContent} onClick={handleCardClick} role="button">
-            <div className={styles.waveformIcon}>
+          <div className={styles.cardContent}>
+            <div className={styles.waveformIcon} onClick={handleCardClick}>
               {isPlaying ? (
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" >
                   <rect width="3" height="20" x="4" y="10" fill="#111827" rx="1.5">
                     <animate attributeName="height" values="20;30;20" dur="1s" repeatCount="indefinite" />
                     <animate attributeName="y" values="10;5;10" dur="1s" repeatCount="indefinite" />
@@ -193,7 +194,17 @@ const OrderInfoCard = ({
             </div>
           </div>
 
-          <ProgressBar progress={progress} />
+          <ProgressBar
+              progress={progress}
+              onSeek={(percentage) => {
+                const media = mediaRef.current;
+
+                if (!media || !media.duration) return;
+
+                media.currentTime = (percentage / 100) * media.duration;
+                setProgress(percentage);
+              }}
+            />
           <audio ref={mediaRef} preload="auto" style={{ display: "none" }} />
 
           <div className={styles.ratingSection}>
@@ -226,6 +237,11 @@ const OrderInfoCard = ({
   return (
     <div className={styles.orderInfoCard}>
       <div className={styles.cardWrapper}>
+        {orderId && (
+          <div className={styles.cardHeader}>
+            <h3 className={styles.orderId}>#{String(orderId).slice(-4)}</h3>
+          </div>
+        )}
         <div className={styles.cardContent} onClick={handleCardClick} role="button">
           <img
             src={astrologerImage || "https://via.placeholder.com/100"}

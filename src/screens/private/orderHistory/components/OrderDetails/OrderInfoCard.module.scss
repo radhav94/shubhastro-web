@@ -48,7 +48,7 @@
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  cursor: pointer;
+  // cursor: pointer;
   position: relative;
 }
 
@@ -74,6 +74,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  cursor: pointer;
 
   @media (max-width: 639px) {
     width: 75px;
@@ -144,13 +145,15 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-content: center;
 }
 
 .ratingLabel {
   font-size: 14px;
-  color: #111827;
+  color: #030303;
   font-weight: 500;
   white-space: nowrap;
+  
 }
 
 .consultAgain {
@@ -158,14 +161,14 @@
   text-align: center;
   font-size: 14px;
   font-weight: 600;
-  color: #F97316;
+  color: #030303;
   cursor: pointer;
   white-space: nowrap;
   padding-left: 12px;
   border-left: 1px solid #ffffff;
 
   &:hover {
-    color: #ea580c;
+    color: #030303;
   }
 }
 
