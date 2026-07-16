@@ -7,11 +7,13 @@ import { setGemstoneResult, clearGemstoneData } from '../../../../redux/aiwow/ai
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import BackButton from '../../../../component/UI/BackButton/BackButton';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const GemstoneAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const gemstoneImage = useSelector((state) => state.aiwow.gemstone.image);
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'gemstone-scanner' });
 
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
     required: true,
@@ -69,13 +71,21 @@ const GemstoneAnalysis = () => {
       }, 200);
 
       // Call the API with abort signal
-      const result = await analyzeGemstone(imageData, abortController.signal);
+      const result = await runWithEntitlement(() => analyzeGemstone(imageData, abortController.signal));
 
       clearInterval(progressInterval);
 
       // Check if component is still mounted before processing result
       if (!isMountedRef.current) {
         console.log('Component unmounted - ignoring API result');
+        return;
+      }
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      if (result.blocked) {
+        setProgress(0);
+        setIsAnalyzing(false);
+        setError({ message: 'Choose a plan to continue with your report.' });
         return;
       }
 
@@ -243,6 +253,7 @@ const GemstoneAnalysis = () => {
         )}
         </div>
       </div>
+      {subscriptionModal}
     </div>
   );
 };

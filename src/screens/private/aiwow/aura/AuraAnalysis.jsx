@@ -8,11 +8,13 @@ import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import BackButton from '../../../../component/UI/BackButton/BackButton';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const AuraAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const auraImage = useSelector((state) => state.aiwow.aura.image);
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'aura-photography' });
   
   // Use the hook to get selected Kundli profile with error handling
   const { profile, isLoading: profileLoading, error: profileError } = useSelectedKundliProfile({
@@ -96,8 +98,10 @@ const AuraAnalysis = () => {
         });
       }, 200);
 
-      // Pass only image data and abort signal to API
-      const result = await analyzeAura(imageData, abortController.signal);
+      // Pass the generate call through the entitlement gate. It auto-purchases
+      // the extended pack (and retries) or opens the plans popup when the
+      // backend blocks generation on subscription/quota.
+      const result = await runWithEntitlement(() => analyzeAura(imageData, abortController.signal));
 
       clearInterval(progressInterval);
 
@@ -110,6 +114,15 @@ const AuraAnalysis = () => {
       // Validate API response structure
       if (!result || typeof result !== 'object') {
         throw new Error('Invalid API response format');
+      }
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      // Reset progress and show a retry state so the user can continue after
+      // choosing a plan.
+      if (result.blocked) {
+        setProgress(0);
+        setError({ message: 'Choose a plan to continue with your report.' });
+        return;
       }
 
       if (result.success) {
@@ -317,6 +330,7 @@ const AuraAnalysis = () => {
         )}
         </div>
       </div>
+      {subscriptionModal}
     </div>
   );
 };

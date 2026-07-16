@@ -98,7 +98,8 @@ export const analyzeFace = async (imageData, signal = null) => {
           code: errorData.error.code || 'UNKNOWN_ERROR',
           message: errorData.error.message || 'Analysis failed',
           details: errorData.error.details || null
-        }
+        },
+        data: errorData.data ?? null,
       };
     }
     
@@ -225,7 +226,8 @@ export const analyzePalm = async (imageData, hand = 'right', signal = null) => {
           code: errorData.error.code || 'UNKNOWN_ERROR',
           message: errorData.error.message || 'Analysis failed',
           details: errorData.error.details || null
-        }
+        },
+        data: errorData.data ?? null,
       };
     }
     
@@ -348,7 +350,8 @@ export const analyzeSignature = async (imageData, signal = null) => {
           code: errorData.error.code || 'UNKNOWN_ERROR',
           message: errorData.error.message || 'Analysis failed',
           details: errorData.error.details || null
-        }
+        },
+        data: errorData.data ?? null,
       };
     }
     
@@ -482,7 +485,8 @@ export const analyzeClothColor = async (imageData, intentionData, signal = null)
           code: errorData.error.code || 'UNKNOWN_ERROR',
           message: errorData.error.message || 'Analysis failed',
           details: errorData.error.details || null
-        }
+        },
+        data: errorData.data ?? null,
       };
     }
     
@@ -655,7 +659,8 @@ export const analyzeAura = async (imageData, signal = null) => {
           code: errorData.error.code || 'UNKNOWN_ERROR',
           message: errorData.error.message || 'Analysis failed',
           details: errorData.error.details || null
-        }
+        },
+        data: errorData.data ?? null,
       };
     }
     
@@ -778,7 +783,8 @@ export const analyzeGemstone = async (imageData, signal = null) => {
           code: errorData.error.code || 'UNKNOWN_ERROR',
           message: errorData.error.message || 'Analysis failed',
           details: errorData.error.details || null
-        }
+        },
+        data: errorData.data ?? null,
       };
     }
     
@@ -877,7 +883,9 @@ export const startKundliChat = async (kundliData) => {
     return {
       success: false,
       error: errorMessage,
-      code: error.response?.status || 'UNKNOWN_ERROR'
+      code: error.response?.status || 'UNKNOWN_ERROR',
+      reason: errorData?.error?.code || errorData?.reason || errorData?.data?.reason || null,
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -913,7 +921,9 @@ export const sendKundliChatMessage = async (sessionId, message) => {
     return {
       success: false,
       error: errorMessage,
-      code: error.response?.status || 'UNKNOWN_ERROR'
+      code: error.response?.status || 'UNKNOWN_ERROR',
+      reason: errorData?.error?.code || errorData?.reason || errorData?.data?.reason || null,
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -949,7 +959,9 @@ export const analyzeKarmicDebt = async (data) => {
     return {
       success: false,
       error: errorMessage,
-      code: error.response?.status || 'UNKNOWN_ERROR'
+      code: error.response?.status || 'UNKNOWN_ERROR',
+      reason: errorData?.error?.code || errorData?.reason || errorData?.data?.reason || null,
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -988,7 +1000,8 @@ export const analyzeSmartMatchmaking = async (kundliIdA, kundliIdB) => {
           code: errorData.error.code || 'UNKNOWN_ERROR',
           message: errorData.error.message || 'Matchmaking analysis failed',
           details: errorData.error.details || null
-        }
+        },
+        data: errorData.data ?? null,
       };
     }
     
@@ -1044,7 +1057,9 @@ export const analyzeCalendarEvents = async (events, { fromDate, toDate, kundliId
     return {
       success: false,
       error: errorMessage,
-      code: error.response?.status || 'UNKNOWN_ERROR'
+      code: error.response?.status || 'UNKNOWN_ERROR',
+      reason: errorData?.error?.code || errorData?.reason || errorData?.data?.reason || null,
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -1080,7 +1095,9 @@ export const interpretDream = async (dreamData) => {
     return {
       success: false,
       error: errorMessage,
-      code: error.response?.status || 'UNKNOWN_ERROR'
+      code: error.response?.status || 'UNKNOWN_ERROR',
+      reason: errorData?.error?.code || errorData?.reason || errorData?.data?.reason || null,
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -1132,7 +1149,9 @@ export const getDailyCosmicBriefing = async (zodiacSign, params) => {
     return {
       success: false,
       error: errorMessage,
-      code: error.response?.status || 'UNKNOWN_ERROR'
+      code: error.response?.status || 'UNKNOWN_ERROR',
+      reason: errorData?.error?.code || errorData?.reason || errorData?.data?.reason || null,
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -1176,7 +1195,9 @@ export const startCosmicChat = async (kundliData) => {
     return {
       success: false,
       error: errorMessage,
-      code: error.response?.status || 'UNKNOWN_ERROR'
+      code: error.response?.status || 'UNKNOWN_ERROR',
+      reason: errorData?.error?.code || errorData?.reason || errorData?.data?.reason || null,
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -1212,7 +1233,9 @@ export const sendCosmicChatMessage = async (sessionId, message) => {
     return {
       success: false,
       error: errorMessage,
-      code: error.response?.status || 'UNKNOWN_ERROR'
+      code: error.response?.status || 'UNKNOWN_ERROR',
+      reason: errorData?.error?.code || errorData?.reason || errorData?.data?.reason || null,
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -1248,7 +1271,9 @@ export const syncAstroVitals = async (vitalsData) => {
     return {
       success: false,
       error: errorMessage,
-      code: error.response?.status || 'UNKNOWN_ERROR'
+      code: error.response?.status || 'UNKNOWN_ERROR',
+      reason: errorData?.error?.code || errorData?.reason || errorData?.data?.reason || null,
+      data: errorData?.data ?? null,
     };
   }
 };

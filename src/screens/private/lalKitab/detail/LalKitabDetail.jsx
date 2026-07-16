@@ -8,7 +8,8 @@ import {
   useGetLalKitabDebtsQuery,
   useLazyGetLalKitabPdfQuery,
 } from "../../../../redux/api/lalKitab/lalKitabApi";
-import { useLazyGetChargesQuery } from "../../../../redux/api/aiwow/aiwowApi";
+import { useGetChargesQuery } from "../../../../redux/api/aiwow/aiwowApi";
+import { useGetSubscriptionStatusQuery } from "../../../../redux/api/subscription/subscriptionApi";
 import { useWalletBalance } from "../../wallet/useWalletBalance";
 import { FiDownload } from "react-icons/fi";
 import DownloadReportModal from "../../aiwow/components/DownloadReportModal";
@@ -86,16 +87,19 @@ const LalKitabDetail = () => {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [isFreeReport, setIsFreeReport] = useState(false);
   const [triggerGetPdf] = useLazyGetLalKitabPdfQuery();
-  const [triggerGetCharges, { data: chargesData }] = useLazyGetChargesQuery();
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
 
-  // Fetch charges on mount to display dynamic price
-  useEffect(() => {
-    triggerGetCharges();
-  }, []);
+  const customerToken = typeof window !== "undefined" ? localStorage.getItem("shubhtalk_customer_token") : null;
+  const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken });
+  const hasActiveSubscription = !!subscriptionStatus?.data?.hasActiveSubscription;
 
-  // Get download price from charges API data
+  // Charges only matter for non-subscribed users; subscribed users download
+  // directly with no popup, so skip the charges API for them.
+  const { data: chargesData } = useGetChargesQuery(undefined, { skip: hasActiveSubscription });
+
+  // Download price from charges API (non-subscribed users only).
   const getDownloadCost = () => {
+    if (isFreeReport || hasActiveSubscription) return 0;
     const charges = chargesData?.data;
     if (!charges) return null;
     const slug = "lal-kitab-report";
@@ -122,6 +126,11 @@ const LalKitabDetail = () => {
   }, [chartData, tevaData]);
 
   const handleDownloadClick = () => {
+    // Subscribed users download directly — no charge popup.
+    if (hasActiveSubscription) {
+      handleConfirmDownload();
+      return;
+    }
     refreshWallet();
     setShowDownloadModal(true);
   };

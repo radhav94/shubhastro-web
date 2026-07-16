@@ -7,11 +7,13 @@ import { setSignatureResult, clearSignatureData } from '../../../../redux/aiwow/
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import BackButton from '../../../../component/UI/BackButton/BackButton';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const SignatureAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const signatureImage = useSelector((state) => state.aiwow.signature.image);
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'signature' });
 
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
     required: true,
@@ -69,13 +71,21 @@ const SignatureAnalysis = () => {
       }, 200);
 
       // Call the API with abort signal
-      const result = await analyzeSignature(imageData, abortController.signal);
+      const result = await runWithEntitlement(() => analyzeSignature(imageData, abortController.signal));
 
       clearInterval(progressInterval);
 
       // Check if component is still mounted before processing result
       if (!isMountedRef.current) {
         console.log('Component unmounted - ignoring API result');
+        return;
+      }
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      if (result.blocked) {
+        setProgress(0);
+        setIsAnalyzing(false);
+        setError({ message: 'Choose a plan to continue with your report.' });
         return;
       }
 
@@ -253,6 +263,7 @@ const SignatureAnalysis = () => {
         )}
         </div>
       </div>
+      {subscriptionModal}
     </div>
   );
 };

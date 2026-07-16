@@ -18,6 +18,9 @@ import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { PATH } from "../../../utils/routes/Paths";
 import { trackEvent } from "../../../utils/analytics";
+import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from "../../../utils/subscription/featureGating";
+import { useGetSubscriptionStatusQuery, useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscription/subscriptionApi";
+import SubscriptionModal from "../../../component/UI/modal/SubscriptionModal/SubscriptionModal";
 
 // Reusable Section Title with Divider (same as Explore page, auto-width)
 const SectionTitleWithDivider = ({ title, description, styles }) => (
@@ -45,6 +48,9 @@ const AIWow = () => {
   const requireAuth = useRequireAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [subscriptionModalVariant, setSubscriptionModalVariant] = useState("basic");
+  const [pendingServiceSlug, setPendingServiceSlug] = useState(null);
   const [activeTab, setActiveTab] = useState("aiwow");
   const [downloadModal, setDownloadModal] = useState({ open: false, featureId: null, featureName: "" });
   const [isDownloading, setIsDownloading] = useState(false);
@@ -54,6 +60,16 @@ const AIWow = () => {
 
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
   const [downloadReportPdf] = useDownloadReportPdfMutation();
+  const [triggerSubscriptionStatus] = useLazyGetSubscriptionStatusQuery();
+  const { data: subscriptionStatusData } = useGetSubscriptionStatusQuery(undefined, {
+    skip: !localStorage.getItem("shubhtalk_customer_token"),
+  });
+  const hasActiveSubscription = !!subscriptionStatusData?.data?.hasActiveSubscription;
+
+  // Charges only matter for non-subscribed users; subscribed users download
+  // directly with no popup, so skip the charges API for them.
+  const { data: chargesData } = useGetChargesQuery(undefined, { skip: hasActiveSubscription });
+  const charges = chargesData?.data || null;
 
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
   const headerSelectedKundli = useSelector((state) => state.kundli.selectedKundli);
@@ -70,9 +86,6 @@ const AIWow = () => {
 
   const { data: aiwowData } = useGetAiWowPageDataQuery();
 
-  // Charges data — fetched once, cached for 5 min by RTK Query
-  const { data: chargesData } = useGetChargesQuery();
-
   const kundliId = selectedProfile?._id || selectedProfile?.id || "";
   const { data: historyData, isLoading: isHistoryLoading, isFetching: isHistoryFetching, refetch: refetchHistory } = useGetAiHistoryQuery(
     { kundliId, page: historyPage, limit: 10 },
@@ -82,7 +95,6 @@ const AIWow = () => {
   const profiles = data?.data || [];
   const aiwowSections = aiwowData?.data?.list || [];
   const rawHistoryList = historyData?.data?.history || [];
-  const charges = chargesData?.data || null;
 
   // Deduplicate history — same featureType within same minute means same analysis, keep the one with pdfPath
   const historyList = useMemo(() => {
@@ -141,14 +153,14 @@ const AIWow = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [activeTab, hasMoreHistory]);
 
-  // Find download cost from charges data by matching featureName to slug in charges
+  // Download cost from charges (non-subscribed users only). Subscribed users
+  // download directly with no charge.
   const getDownloadCost = (featureName) => {
-    if (!charges || !featureName) return 0;
-    const slug = featureName.trim().replace(/\s+/g, "-") + "-report";
-    // charges is array of sections, each has a .list array with { slug, amount }
+    if (hasActiveSubscription || !charges || !featureName) return 0;
+    const slug = featureName.trim().replace(/\s+/g, "-").toLowerCase() + "-report";
     for (const section of charges) {
       if (!Array.isArray(section?.list)) continue;
-      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug.toLowerCase());
+      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug);
       if (match) return match.amount ?? 0;
     }
     return 0;
@@ -209,25 +221,76 @@ const AIWow = () => {
     setShowProfileModal(false);
   };
 
-  const handleClick = (slug) => {
+  const openSubscriptionModal = (mode = "basic") => {
+    setSubscriptionModalVariant(mode);
+    setShowSubscriptionModal(true);
+  };
+
+  // Opens the actual feature (ar-vastu shows the app modal; others navigate).
+  const openService = (slug) => {
+    if (slug === "ar-vastu-scanner") {
+      setShowMobileAppModal(true);
+      return;
+    }
+    trackEvent("shubh_ai_feature_opened", { feature_name: slug });
+    navigate(`/ai-wow/${slug}`);
+  };
+
+  // Free plan "Unlock Now" → close the modal and open the requested service.
+  const handleFreeUnlock = () => {
+    setShowSubscriptionModal(false);
+    if (pendingServiceSlug) openService(pendingServiceSlug);
+  };
+
+  const handleReportEntitlementError = (err) => {
+    const reason = getSubscriptionErrorReason(err);
+    if (!reason) return false;
+    toast.dismiss("pdf-download");
+    toast.dismiss("pdf-view");
+    if (reason === SUBSCRIPTION_REASON.PREMIUM_REQUIRED) {
+      openSubscriptionModal("basic");
+    } else if (
+      reason === SUBSCRIPTION_REASON.EXTENDED_PLAN_REQUIRED ||
+      reason === SUBSCRIPTION_REASON.EXTENDED_PLAN_EXHAUSTED
+    ) {
+      openSubscriptionModal("extended");
+    } else if (reason === SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE) {
+      toast.error("Insufficient wallet balance. Please recharge to continue.");
+      navigate("/recharge");
+    } else {
+      return false;
+    }
+    return true;
+  };
+
+  const handleClick = async (slug, isPaid) => {
     // Allow guest users to view intro pages for these features
     const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
-    // All features require login
-    const freeAccessSlugs = [];
-    if (!freeAccessSlugs.includes(slug) && !guestAccessSlugs.includes(slug)) {
-      if (!requireAuth()) return;
-      if (!selectedProfile) {
-        toast.error("Please select one Kundli to proceed.");
+    if (guestAccessSlugs.includes(slug)) {
+      openService(slug);
+      return;
+    }
+    if (!requireAuth()) return;
+    if (!selectedProfile) {
+      toast.error("Please select one Kundli to proceed.");
+      return;
+    }
+    // Paid features require an active subscription.
+    if (isPaid) {
+      try {
+        const res = await triggerSubscriptionStatus().unwrap();
+        if (!res?.data?.hasActiveSubscription) {
+          setPendingServiceSlug(slug);
+          openSubscriptionModal("basic");
+          return;
+        }
+      } catch {
+        setPendingServiceSlug(slug);
+        openSubscriptionModal("basic");
         return;
       }
     }
-    if (slug === "ar-vastu-scanner") {
-      setShowMobileAppModal(true);
-    } else {
-      // All AI WOW features live under the /ai-wow/ prefix
-      trackEvent("shubh_ai_feature_opened", { feature_name: slug });
-      navigate(`/ai-wow/${slug}`);
-    }
+    openService(slug);
   };
 
   const handleProfileClick = () => {
@@ -247,8 +310,8 @@ const AIWow = () => {
     const pdfKey = `${item.featureType}PdfPath`;
     const existingPdfUrl = item.pdfPath || item[pdfKey];
     
-    if (existingPdfUrl || paidToFreeIds[item.featureId]) {
-      // Free — directly download existing PDF
+    if (existingPdfUrl || paidToFreeIds[item.featureId] || hasActiveSubscription) {
+      // Free / subscribed — directly download the PDF, no charge popup
       try {
         toast.loading("Downloading PDF...", { id: "pdf-download" });
         const url = existingPdfUrl || await fetchPdfUrl(item.featureId);
@@ -263,8 +326,8 @@ const AIWow = () => {
         link.remove();
         URL.revokeObjectURL(blobUrl);
         toast.success("PDF downloaded!", { id: "pdf-download" });
-      } catch {
-        toast.error("Failed to download PDF", { id: "pdf-download" });
+      } catch (err) {
+        if (!handleReportEntitlementError(err)) toast.error("Failed to download PDF", { id: "pdf-download" });
       }
     } else {
       // Paid — open the download modal
@@ -297,8 +360,8 @@ const AIWow = () => {
       // Reset to page 1 and refetch to get updated pdfPath (shows "Free" on reload)
       setHistoryPage(1);
       refetchHistory();
-    } catch {
-      toast.error("Failed to download PDF", { id: "pdf-download" });
+    } catch (err) {
+      if (!handleReportEntitlementError(err)) toast.error("Failed to download PDF", { id: "pdf-download" });
     } finally {
       setIsDownloading(false);
     }
@@ -310,8 +373,8 @@ const AIWow = () => {
       const pdfUrl = await fetchPdfUrl(featureId);
       window.open(pdfUrl, "_blank", "noopener,noreferrer");
       toast.success("PDF opened!", { id: "pdf-view" });
-    } catch {
-      toast.error("Failed to open PDF", { id: "pdf-view" });
+    } catch (err) {
+      if (!handleReportEntitlementError(err)) toast.error("Failed to open PDF", { id: "pdf-view" });
     }
   };
 
@@ -420,7 +483,8 @@ const AIWow = () => {
                             title={feature.title}
                             description={feature.description}
                             icon={feature.icon}
-                            onStartNow={() => handleClick(feature?.slug)}
+                            isPaid={feature.isPaid}
+                            onStartNow={() => handleClick(feature?.slug, feature?.isPaid)}
                           />
                         ) : null
                       )}
@@ -488,6 +552,13 @@ const AIWow = () => {
         <MobileAppModal
           isOpen={showMobileAppModal}
           onClose={() => setShowMobileAppModal(false)}
+        />
+
+        <SubscriptionModal
+          isOpen={showSubscriptionModal}
+          onClose={() => setShowSubscriptionModal(false)}
+          onSelectPlan={handleFreeUnlock}
+          variant={subscriptionModalVariant}
         />
 
         <DownloadReportModal

@@ -20,6 +20,16 @@ const handleApiError = (error, endpoint) => {
 
   const status = error?.status;
   const data = error?.data;
+
+  // Subscription entitlement blocks are handled by the UI (it opens the plans /
+  // extended-plan popup), so don't surface them as generic error toasts.
+  const entitlementReason = data?.error?.code || data?.data?.reason || data?.reason;
+  const SILENT_ENTITLEMENT_REASONS = [
+    "PREMIUM_REQUIRED",
+    "EXTENDED_PLAN_REQUIRED",
+    "EXTENDED_PLAN_EXHAUSTED",
+  ];
+  if (entitlementReason && SILENT_ENTITLEMENT_REASONS.includes(entitlementReason)) return;
   // Real message from the server, if any. Used to avoid showing the unhelpful
   // generic "Some Error Occurred" toast when the backend/network gave nothing.
   const serverMessage = data?.message || data?.error;
@@ -127,7 +137,7 @@ export const privateRequestNew = createApi({
 
     return result;
   },
-  tagTypes: ["Kundlis", "VirtualAssistant", "Following", "FollowedAstrologers", "JoinedSpaces", "CommunitySpaces", "CommunityLibrary", "CommunitySpaceDetail", "AiHistory"],
+  tagTypes: ["Kundlis", "VirtualAssistant", "Following", "FollowedAstrologers", "JoinedSpaces", "CommunitySpaces", "CommunityLibrary", "CommunitySpaceDetail", "AiHistory", "SubscriptionStatus"],
 
   endpoints: () => ({}), // EMPTY — endpoints later inject honge
 });

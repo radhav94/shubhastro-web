@@ -7,12 +7,14 @@ import { setClothColorResult, clearClothColorData } from '../../../../redux/aiwo
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import BackButton from '../../../../component/UI/BackButton/BackButton';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const ClothColorAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const clothImage = useSelector((state) => state.aiwow.clothColor.image);
   const formData = useSelector((state) => state.aiwow.clothColor.formData);
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'clothes-color' });
 
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
     required: true,
@@ -71,13 +73,21 @@ const ClothColorAnalysis = () => {
       // Get form data from Redux
       const birthData = formData || null;
 
-      const result = await analyzeClothColor(imageData, birthData, abortController.signal);
+      const result = await runWithEntitlement(() => analyzeClothColor(imageData, birthData, abortController.signal));
 
       clearInterval(progressInterval);
 
       // Check if component is still mounted before processing result
       if (!isMountedRef.current) {
         console.log('Component unmounted - ignoring API result');
+        return;
+      }
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      if (result.blocked) {
+        setProgress(0);
+        setIsAnalyzing(false);
+        setError({ message: 'Choose a plan to continue with your report.' });
         return;
       }
 
@@ -245,6 +255,7 @@ const ClothColorAnalysis = () => {
         )}
         </div>
       </div>
+      {subscriptionModal}
     </div>
   );
 };

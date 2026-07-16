@@ -20,11 +20,13 @@ import matchMakingImgBottom from '../../../../assets/images/match-making-bottom-
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import { trackEvent } from '../../../../utils/analytics';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 // import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 
 const SmartMatchmaking = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'smart-matchmaking' });
   const [showSelectProfile, setShowSelectProfile] = useState(false);
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -307,7 +309,14 @@ const SmartMatchmaking = () => {
       setIsLoading(true);
       setError(null);
 
-      const apiResult = await analyzeSmartMatchmaking(primaryProfile._id, partnerProfile._id);
+      const apiResult = await runWithEntitlement(() => analyzeSmartMatchmaking(primaryProfile._id, partnerProfile._id));
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      if (apiResult.blocked) {
+        setIsLoading(false);
+        setError({ message: 'Choose a plan to continue with your report.' });
+        return;
+      }
 
       if (apiResult.success) {
         setResult(apiResult.data);
@@ -832,6 +841,7 @@ const SmartMatchmaking = () => {
           onConfirm={confirmDeleteProfile}
         />
       )}
+      {subscriptionModal}
     </div>
     </>
   );

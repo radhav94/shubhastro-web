@@ -13,6 +13,7 @@ import { PATH } from "../../../utils/routes/Paths";
 import BackButton from "../../../component/UI/BackButton/BackButton";
 import aiImage from "../../../assets/images/Ai Image.png";
 import occultImg from "../../../assets/images/occult-img.svg";
+import useAIWowSubscriptionGate from "../aiwow/hooks/useAIWowSubscriptionGate";
 
 const OccultChat = () => {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ const OccultChat = () => {
   const { data: kundliData, isLoading: isLoadingProfiles } = useGetAllKundlisQuery(undefined, { skip: !token });
   const profiles = kundliData?.data || [];
   const [getOccultDasha, { isLoading: isGenerating }] = useGetOccultDashaMutation();
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: "occult-dosha" });
 
   const setSelectedProfile = (profile) => {
     setSelectedProfileLocal(profile);
@@ -54,36 +56,51 @@ const OccultChat = () => {
     }
     if (!selectedProfile?._id) { Toast.error("Please select a Kundli profile first"); return; }
 
-    try {
-      const body = selectedProfile._id?.startsWith("temp_")
-        ? {
-            kundliDetails: {
-              name: selectedProfile.name,
-              gender: selectedProfile.gender,
-              day: Number(selectedProfile.day),
-              month: Number(selectedProfile.month),
-              year: Number(selectedProfile.year),
-              hour: Number(selectedProfile.hour),
-              min: Number(selectedProfile.min),
-              second: 0,
-              lat: String(selectedProfile.lat || "0"),
-              lon: String(selectedProfile.lon || "0"),
-              tzone: selectedProfile.tzone ?? 5.5,
-              place: selectedProfile.place,
-            },
-          }
-        : { kundliId: selectedProfile._id };
+    const body = selectedProfile._id?.startsWith("temp_")
+      ? {
+          kundliDetails: {
+            name: selectedProfile.name,
+            gender: selectedProfile.gender,
+            day: Number(selectedProfile.day),
+            month: Number(selectedProfile.month),
+            year: Number(selectedProfile.year),
+            hour: Number(selectedProfile.hour),
+            min: Number(selectedProfile.min),
+            second: 0,
+            lat: String(selectedProfile.lat || "0"),
+            lon: String(selectedProfile.lon || "0"),
+            tzone: selectedProfile.tzone ?? 5.5,
+            place: selectedProfile.place,
+          },
+        }
+      : { kundliId: selectedProfile._id };
 
-      const result = await getOccultDasha(body).unwrap();
-      const historyId = result?.message?._id || result?._id;
-      const data = result?.message?.message || result?.message || result;
-      if (data) {
-        navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile: selectedProfile, historyId } });
-      } else {
-        Toast.error("Failed to generate reading");
+    // Route the generate call through the subscription gate. On PREMIUM_REQUIRED
+    // it opens the plans popup (and retries after purchase); on EXTENDED it shows
+    // the extended plans popup.
+    const result = await runWithEntitlement(async () => {
+      try {
+        return await getOccultDasha(body).unwrap();
+      } catch (err) {
+        return err?.data || { success: false, error: err };
       }
-    } catch (err) {
-      Toast.error(err?.data?.message || "Failed to generate Occult Dosha analysis");
+    });
+
+    // Entitlement block handled by the gate (popup shown / user cancelled).
+    if (result?.blocked) return;
+
+    // Genuine (non-entitlement) failure.
+    if (result?.success === false) {
+      Toast.error(result?.error?.message || result?.message || "Failed to generate Occult Dosha analysis");
+      return;
+    }
+
+    const historyId = result?.message?._id || result?._id;
+    const data = result?.message?.message || result?.message || result;
+    if (data) {
+      navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile: selectedProfile, historyId } });
+    } else {
+      Toast.error("Failed to generate reading");
     }
   };
 
@@ -216,6 +233,7 @@ const OccultChat = () => {
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
       />
     </div>
+    {subscriptionModal}
     </>
   );
 };

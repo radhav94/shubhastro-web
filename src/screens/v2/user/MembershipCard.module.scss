@@ -1,0 +1,282 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(90deg, #FFEDD5 0%, #FCC8C8 100%), #FFFFFF;
+  border-radius: 16px;
+  padding: 16px 20px;
+  width: 100%;
+  min-height: 108px;
+  height: 100%;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+.iconBox {
+  width: 52px;
+  height: 52px;
+  background: transparent;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.crownImg {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.label {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.1;
+}
+
+.planName {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 13px;
+  color: #4b5563;
+  margin-top: 6px;
+
+  strong {
+    color: #1f2937;
+    font-weight: 600;
+    margin-left: 4px;
+  }
+}
+
+.metaDivider {
+  color: #c9b7ad;
+}
+
+.manageBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #ffffff;
+  color: #f75801;
+  border: none;
+  border-radius: 999px;
+  min-width: 118px;
+  min-height: 40px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+  &:hover {
+    background: #fff6f1;
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    min-height: 123px;
+    padding: 12px 14px 14px;
+    border-radius: 12px;
+  }
+
+  .iconBox {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: center;
+    width: 58px;
+    height: 58px;
+  }
+
+  .crownImg {
+    width: 52px;
+    height: 52px;
+  }
+
+  .info {
+    grid-column: 2 / 4;
+    grid-row: 1 / span 2;
+    padding-left: 0;
+  }
+
+  .label {
+    font-size: 18px;
+    margin-right: 118px;
+  }
+
+  .planName {
+    font-size: 26px;
+    line-height: 1.15;
+  }
+
+  .meta {
+    gap: 8px;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+
+  .manageWrap {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: start;
+    justify-self: end;
+    margin-left: auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .manageBtn {
+    min-width: 130px;
+    min-height: 39px;
+    padding: 8px 14px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .card {
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 8px;
+    min-height: 112px;
+    padding: 12px;
+  }
+
+  .iconBox {
+    width: 48px;
+    height: 48px;
+  }
+
+  .crownImg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .label {
+    font-size: 14px;
+    margin-right: 102px;
+  }
+
+  .planName {
+    font-size: 21px;
+  }
+
+  .meta {
+    font-size: 10.5px;
+    gap: 5px;
+  }
+
+  .manageBtn {
+    min-width: 104px;
+    min-height: 36px;
+    font-size: 14px;
+    padding: 7px 10px;
+  }
+}
+
+.quota {
+  margin-top: 6px;
+}
+
+.quotaText {
+  font-size: 13px;
+  color: #4b5563;
+
+  strong {
+    color: #1f2937;
+    font-weight: 600;
+  }
+}
+
+.manageWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.manageChevron {
+  transition: transform 0.15s ease;
+}
+
+.manageChevronOpen {
+  transform: rotate(180deg);
+}
+
+.manageMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 230px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  padding: 8px;
+  z-index: 20;
+}
+
+.manageMenuDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 10px 10px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 6px;
+}
+
+.manageMenuRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+  color: #6b7280;
+
+  strong {
+    color: #1f2937;
+    font-weight: 600;
+  }
+}
+
+.cancelMenuItem {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e5484d;
+  cursor: pointer;
+
+  &:hover {
+    background: #fdecec;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
