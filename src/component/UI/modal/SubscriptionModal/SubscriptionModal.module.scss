@@ -384,3 +384,149 @@
     opacity: 0.92;
   }
 }
+
+/* Celebratory subscription-success view — mirrors the wallet top-up popup */
+.successCelebrate {
+  position: relative;
+  /* Cancel the modal's padding so the background image is full-bleed */
+  margin: -30px -38px -38px;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 360px;
+
+  @media (max-width: 768px) {
+    margin: -30px -16px -20px;
+  }
+}
+
+.successBgWrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  .successBg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .successBgDesktop {
+    display: block;
+  }
+
+  .successBgMobile {
+    display: none;
+  }
+
+  @media (max-width: 520px) {
+    .successBgDesktop {
+      display: none;
+    }
+    .successBgMobile {
+      display: block;
+    }
+  }
+}
+
+.successContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 34px 24px 28px;
+}
+
+.successIconImg {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-bottom: 10px;
+
+  @media (max-width: 520px) {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+.successWelcome {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  color: #333;
+  margin: 0 0 2px;
+  font-weight: 500;
+}
+
+.successTitle {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+
+  @media (max-width: 520px) {
+    font-size: 18px;
+  }
+}
+
+.successPlanName {
+  font-family: 'Poppins', sans-serif;
+  font-size: 34px;
+  font-weight: 900;
+  color: #f75801;
+  margin: 0 0 10px;
+  line-height: 1.2;
+
+  @media (max-width: 520px) {
+    font-size: 28px;
+  }
+}
+
+.successBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-radius: 30px;
+  background: rgba(255, 228, 186, 1);
+  border: 1px solid rgba(255, 210, 142, 1);
+  color: #f75801;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.successDesc {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: #444;
+  line-height: 1.5;
+  margin: 0 0 16px;
+  max-width: 320px;
+}
+
+.successBtn {
+  width: 100%;
+  max-width: 220px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #f75801, #d43400);
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+
+  &:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}

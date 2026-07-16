@@ -5,6 +5,9 @@ import { IoClose } from "react-icons/io5";
 import styles from "./SubscriptionModal.module.scss";
 import { useGetSubscriptionPlansQuery, usePurchaseWalletSubscriptionMutation, useGetSubscriptionStatusQuery } from "../../../../redux/api/subscription/subscriptionApi";
 import shubhLogoMobile from "../../../../assets/images/mobile-shubh-astro-logo.svg";
+import welcomeBg from "../../../../assets/images/welcome-bonus-bg.webp";
+import welcomeBgMobile from "../../../../assets/images/welcome-bonus-bg-mobile.webp";
+import welcomeIcon from "../../../../assets/images/welcome-bonus-icon.webp";
 
 // Build the "What's included" rows straight from the API response — the
 // marketing bullets in `metadata.highlights`. No derived defaults; whatever the
@@ -138,9 +141,11 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
   // The processing/success state views are simple centered messages — keep them
   // compact instead of inheriting the wide multi-plan grid width.
   const isStateView = flow === "processing" || flow === "success";
-  const modalStyle = isStateView
-    ? { "--modal-w": "min(420px, 100%)" }
-    : { "--modal-w": `min(${columns * 300 + (columns - 1) * 20 + 76}px, 100%)` };
+  const modalStyle = flow === "success"
+    ? { "--modal-w": "min(480px, 100%)" }
+    : isStateView
+      ? { "--modal-w": "min(420px, 100%)" }
+      : { "--modal-w": `min(${columns * 300 + (columns - 1) * 20 + 76}px, 100%)` };
 
   const handleSelect = async (card) => {
     // Free plan is not a purchasable subscription.
@@ -192,19 +197,26 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
             <p className={styles.stateText}>Please wait while we confirm your plan.</p>
           </div>
         ) : flow === "success" ? (
-          <div className={styles.stateView}>
-            <div className={styles.successIcon}>
-              <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
-                <path d="M20 6L9 17l-5-5" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+          <div className={styles.successCelebrate}>
+            <div className={styles.successBgWrapper}>
+              <img src={welcomeBg} alt="" className={`${styles.successBg} ${styles.successBgDesktop}`} />
+              <img src={welcomeBgMobile} alt="" className={`${styles.successBg} ${styles.successBgMobile}`} />
             </div>
-            <h3 className={styles.stateTitle}>Subscription Activated</h3>
-            <p className={styles.stateText}>
-              {successPlan?.title ? `${successPlan.title} is now active.` : "Your plan is now active."}
-            </p>
-            <button type="button" className={styles.continueBtn} onClick={onClose}>
-              Continue
-            </button>
+            <div className={styles.successContent}>
+              <img src={welcomeIcon} alt="Success" className={styles.successIconImg} />
+              <p className={styles.successWelcome}>Payment Successful!</p>
+              <h2 className={styles.successTitle}>Subscription Activated</h2>
+              {successPlan?.title && <p className={styles.successPlanName}>{successPlan.title}</p>}
+              <div className={styles.successBadge}>
+                <span aria-hidden="true">✦</span> Premium features unlocked
+              </div>
+              <p className={styles.successDesc}>
+                You&apos;re all set! Enjoy your Shubh AI reports and continue your journey.
+              </p>
+              <button type="button" className={styles.successBtn} onClick={onClose}>
+                Continue
+              </button>
+            </div>
           </div>
         ) : (
           <>
