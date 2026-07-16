@@ -1444,7 +1444,7 @@
 
 .horoscope-profile-header {
   position: sticky;
-  top: 153px;
+  top: 166px;
   z-index: 100;
   padding: 12px 20px 8px;
   text-align: center;
@@ -1456,7 +1456,13 @@
 
 @media screen and (max-width: 1180px) {
   .horoscope-profile-header {
-    top: 107px;
+    top: 126px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .horoscope-profile-header {
+    top: 106px;
   }
 }
 

@@ -103,14 +103,14 @@ const PanchangInputCard = ({
 
       <div className={styles.rightSide}>
         {title && (
-          <PrimaryText isCenter isSemiBold size_28>
+          <h1 className={styles.title}>
             {title}
-          </PrimaryText>
+          </h1>
         )}
-        <PrimaryText isCenter size_20 color={appColors.greyDark}>
+        <p className={styles.titleText}>
           {formData?.location || initialLocation || userLocation.locationName},&nbsp;
           {formData.dateOfBirth ? Userdob : today}{" "}
-        </PrimaryText>
+        </p>
 
        
              

@@ -171,7 +171,7 @@ const Footer = () => {
           <p className={styles.v2_contactText}>Have questions?</p>
           <a href="mailto:connect@pittiegroup.com" className={styles.v2_emailLink}>connect@pittiegroup.com</a>
           <p className={styles.v2_contactText}>Or call us at</p>
-          <a href="tel:+918655682877" className={styles.v2_contactText}>+91 86556 82877</a>
+          <a href="tel:+918655682877" className={`${styles.v2_contactText} ${styles.v2_callUs}`}>+91 86556 82877</a>
           <h4 className={`${styles.v2_phoneLink}`}>Registered Company Address</h4>
           <p className={styles.v2_contactText}>
             Vaibhav Chambers, 9th Rd, opposite Income Tax Office, Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400051
