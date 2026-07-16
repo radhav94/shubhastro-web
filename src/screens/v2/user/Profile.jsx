@@ -177,6 +177,11 @@ const Profile = () => {
     ? Math.max(0, dayjs(subEndDate).startOf("day").diff(dayjs().startOf("day"), "day"))
     : null;
   const subQuota = subData?.quota || null;
+  const extQuota = subData?.extendedQuota || null;
+  // Total generations = basic plan quota + any extended pack quota (combined).
+  // Basic plan is always the primary; extended packs add on top of it.
+  const combinedQuotaTotal = (Number(subQuota?.monthlyQuota) || 0) + (Number(extQuota?.monthlyQuota) || 0);
+  const combinedQuotaUsed = (Number(subQuota?.usedQuota) || 0) + (Number(extQuota?.usedQuota) || 0);
 
   const handleCancelSubscription = () => {
     if (!activeSubscriptionId) {
@@ -1575,8 +1580,8 @@ const Profile = () => {
                   planName={subPlanName}
                   validTill={subValidTill}
                   remainingDays={subRemainingDays}
-                  quotaUsed={subQuota?.usedQuota}
-                  quotaTotal={subQuota?.monthlyQuota}
+                  quotaUsed={combinedQuotaUsed}
+                  quotaTotal={combinedQuotaTotal}
                   details={subscriptionDetails}
                   onCancel={handleCancelSubscription}
                   isCancelling={isCancellingSubscription}
