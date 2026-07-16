@@ -125,7 +125,8 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   if (premium) {
                     return (
                       <div key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} onClick={() => onPaidCardClick(item)} style={{ cursor: 'pointer' }}>
-                        {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
+                        {/* Paid ribbon hidden temporarily */}
+                        {/* {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>} */}
                         {cardIcon}
                         <span className={styles.wowCardTitle}>{item.title}</span>
                       </div>

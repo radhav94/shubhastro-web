@@ -134,7 +134,7 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
   // space) while keeping each card a fixed, consistent width. Cards wrap and
   // the modal is capped by its max-width when there are many plans.
   // card 300px + 20px gap, horizontal padding 76px (38 * 2).
-  const columns = Math.min(Math.max(cards.length, 1), 3);
+  const columns = Math.min(Math.max(cards.length, 1), 4);
   // The processing/success state views are simple centered messages — keep them
   // compact instead of inheriting the wide multi-plan grid width.
   const isStateView = flow === "processing" || flow === "success";

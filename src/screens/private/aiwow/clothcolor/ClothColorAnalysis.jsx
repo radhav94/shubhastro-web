@@ -3,10 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './ClothColorAnalysis.module.scss';
 import { analyzeClothColor } from '../../../../services/appServices/aiWowService';
-import { setClothColorResult, clearClothColorData } from '../../../../redux/aiwow/aiwowSlice';
+import { setClothColorResult, clearClothColorData, setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
-import BackButton from '../../../../component/UI/BackButton/BackButton';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const ClothColorAnalysis = () => {
@@ -44,12 +43,8 @@ const ClothColorAnalysis = () => {
       navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path[0]);
       return;
     }
-
-    if (profile && !isAnalyzing && !analysisComplete && !error) {
-      if (hasStartedRef.current) return;
-      hasStartedRef.current = true;
-      performAnalysis(clothImage);
-    }
+    // Note: analysis is no longer triggered automatically on mount.
+    // The user must explicitly click "Generate analysis".
   }, [clothImage, profile, profileLoading]);
 
   const performAnalysis = async (imageData) => {
@@ -84,10 +79,14 @@ const ClothColorAnalysis = () => {
       }
 
       // Entitlement block handled by the gate (plans popup / recharge toast).
+      // Do NOT show the "Analysis Failed" screen — just return to the previous
+      // (pre-analysis) screen so the user can try again.
       if (result.blocked) {
         setProgress(0);
         setIsAnalyzing(false);
-        setError({ message: 'Choose a plan to continue with your report.' });
+        setAnalysisComplete(false);
+        setError(null);
+        hasStartedRef.current = false;
         return;
       }
 
@@ -139,6 +138,20 @@ const ClothColorAnalysis = () => {
     }
   };
 
+  const handleGenerateAnalysis = () => {
+    if (isAnalyzing || analysisComplete) return;
+    if (!clothImage || !profile) return;
+    hasStartedRef.current = true;
+    setError(null);
+    performAnalysis(clothImage);
+  };
+
+  const handleRetakePicture = () => {
+    // Clear only the captured image and go back to the instructions screen.
+    dispatch(setClothColorImage(null));
+    navigate(PATH.privateRoutes.CLOTH_COLOR_INSTRUCTIONS.path[0]);
+  };
+
   const handleShowResult = () => {
     if (analysisComplete && !isNavigating) {
       setIsNavigating(true);
@@ -153,15 +166,29 @@ const ClothColorAnalysis = () => {
     navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path[0]);
   };
 
+  const handleBack = () => {
+    dispatch(clearClothColorData());
+    navigate(PATH.privateRoutes.CLOTH_COLOR_INSTRUCTIONS.path[0], { replace: true });
+  };
+
   return (
     <div className={styles.container}>
-      <BackButton disabled={isAnalyzing} />
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={handleBack} disabled={isAnalyzing}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.headerTitle}>Colour Clothes Analysis</h1>
+        </div>
+      </header>
       <div className={styles.content}>
+        <h2 className={styles.pageTitle}>
+          {error ? 'Analysis Failed' : 'Analysing Clothes'}
+        </h2>
+        <div className={styles.middleContent}>
         <div className={styles.leftSection}>
-          <h2 className={styles.title}>
-            {error ? 'Analysis Failed' : 'Analysing Clothes'}
-          </h2>
-
           <div className={styles.imageWrapper}>
             {clothImage ? (
               <img 
@@ -181,38 +208,98 @@ const ClothColorAnalysis = () => {
 
         <div className={styles.rightSection}>
         {!error ? (
-          <>
-            <div className={styles.progressSection}>
-              <div className={styles.progressBar}>
-                <div 
-                  className={styles.progressFill} 
-                  style={{ width: `${progress}%` }}
-                ></div>
+          !isAnalyzing && !analysisComplete ? (
+            <>
+              <div className={styles.checklistSection}>
+                <div className={styles.checkItem}>
+                  <div className={styles.checkIcon}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className={styles.checkTitle}>Analyze Wardrobe Choices</h3>
+                    <p className={styles.checkDescription}>Examine how the choice of clothing colors reflects personal traits and moods.</p>
+                  </div>
+                </div>
+
+                <div className={styles.checkItem}>
+                  <div className={styles.checkIcon}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className={styles.checkTitle}>Identify Color Preferences</h3>
+                    <p className={styles.checkDescription}>Explore which colors individuals gravitate towards and what they signify about their personality.</p>
+                  </div>
+                </div>
+
+                <div className={styles.checkItem}>
+                  <div className={styles.checkIcon}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className={styles.checkTitle}>Assess Seasonal Impact</h3>
+                    <p className={styles.checkDescription}>Consider how seasonal color trends influence personal style and self-expression.</p>
+                  </div>
+                </div>
               </div>
-              {/* <div className={styles.progressBar}>
-                <div 
-                  className={styles.progressFill} 
-                  style={{ width: `${Math.max(0, progress - 20)}%` }}
-                ></div>
-              </div> */}
-            </div>
 
-            <div className={styles.messageSection}>
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
-                <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
-              </svg>
-              <h3 className={styles.message}>Hold tight as we are analysing your clothes</h3>
-            </div>
+              <div className={styles.disclaimer}>
+                <h4 className={styles.disclaimerTitle}>Disclaimer</h4>
+                <p className={styles.disclaimerText}>
+                  This color analysis is for informational purposes only and is not a substitute for professional style advice. Our insights are generated using advanced algorithms.
+                </p>
+              </div>
 
-            <button 
-              className={styles.resultButton}
-              onClick={handleShowResult}
-              disabled={!analysisComplete || isNavigating}
-              style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6, cursor: (!analysisComplete || isNavigating) ? 'not-allowed' : 'pointer' }}
-            >
-              {analysisComplete ? 'View Result' : 'Analysing...'}
-            </button>
-          </>
+              <div className={styles.actionButtons}>
+                <button
+                  className={styles.retakeButton}
+                  onClick={handleRetakePicture}
+                >
+                  Retake picture
+                </button>
+                <button
+                  className={styles.resultButton}
+                  onClick={handleGenerateAnalysis}
+                  disabled={!profile || profileLoading}
+                  style={{ opacity: (!profile || profileLoading) ? 0.6 : 1, cursor: (!profile || profileLoading) ? 'not-allowed' : 'pointer' }}
+                >
+                  Generate analysis
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.progressSection}>
+                <div className={styles.progressBar}>
+                  <div 
+                    className={styles.progressFill} 
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className={styles.messageSection}>
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
+                  <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
+                </svg>
+                <h3 className={styles.message}>Hold tight as we are analysing your clothes</h3>
+              </div>
+
+              <button 
+                className={styles.resultButton}
+                onClick={handleShowResult}
+                disabled={!analysisComplete || isNavigating}
+                style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6, cursor: (!analysisComplete || isNavigating) ? 'not-allowed' : 'pointer' }}
+              >
+                {analysisComplete ? 'View Result' : 'Analysing...'}
+              </button>
+            </>
+          )
         ) : (
           <div className={styles.errorSection}>
             <div className={styles.errorIcon}>
@@ -253,6 +340,7 @@ const ClothColorAnalysis = () => {
             </button>
           </div>
         )}
+        </div>
         </div>
       </div>
       {subscriptionModal}
