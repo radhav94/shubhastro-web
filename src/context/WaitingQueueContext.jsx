@@ -712,6 +712,20 @@ export const WaitingQueueProvider = ({ children }) => {
     voiceSocket.on("call:accepted", handleGlobalCallAccepted);
     voiceSocket.on("chat:ended", handleGlobalChatEnded);
 
+    // 409 — Astrologer is starting a live session, remove failed pending connection
+    const handleInitiationError = (err) => {
+      if (err?.statusCode === 409) {
+        Toast.error(err?.message || "Astrologer is unavailable right now. Please try again shortly.");
+        // Remove the most recently added pending connection (no roomId yet — failed before call:room/chat:room)
+        const current = pendingConnectionsRef.current;
+        const lastPending = current[current.length - 1];
+        if (lastPending && !lastPending.roomId) {
+          removePendingByAstrologer(lastPending.astrologer?._id);
+        }
+      }
+    };
+    voiceSocket.on("error", handleInitiationError);
+
     return () => {
       voiceSocket.off("call:astrologer_accepted", handleCallAstrologerAccepted);
       voiceSocket.off("chat:astrologer_accepted", handleChatAstrologerAccepted);
@@ -734,6 +748,7 @@ export const WaitingQueueProvider = ({ children }) => {
       voiceSocket.off("chat:accepted", handleGlobalChatAccepted);
       voiceSocket.off("call:accepted", handleGlobalCallAccepted);
       voiceSocket.off("chat:ended", handleGlobalChatEnded);
+      voiceSocket.off("error", handleInitiationError);
     };
   }, [userIdLocal]);
 
