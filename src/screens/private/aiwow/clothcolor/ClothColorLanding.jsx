@@ -1,12 +1,16 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ClothColorLanding.module.scss';
 import AuraSpectrumIcon from '../../../../assets/icons/auraspectrum.png';
 import VibrancyIcon from '../../../../assets/icons/vibrancy.png';
 import PatternIcon from '../../../../assets/icons/pattern.png';
 import StyleCaratIcon from '../../../../assets/icons/stylecarat.png';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const ClothColorLanding = () => {
   const navigate = useNavigate();
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'clothes-colour-analysis')?.title || 'Colour Clothes Analysis';
 
   const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -17,6 +21,7 @@ const ClothColorLanding = () => {
     }
     navigate('/ai-wow/clothes-colour-analysis/form');
   };
+
 
   const features = [
     {
@@ -51,7 +56,7 @@ const ClothColorLanding = () => {
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        <h1 className={styles.title}>Colour Clothes Analysis</h1>
+        <h1 className={styles.title}>{featureTitle}</h1>
         </div>
       </header>
 

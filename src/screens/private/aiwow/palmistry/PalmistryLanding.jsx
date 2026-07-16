@@ -5,10 +5,12 @@ import PalmLineIcon from '../../../../assets/icons/palmline.png';
 import PalmMountIcon from '../../../../assets/icons/palmmount.png';
 import CakeIcon from '../../../../assets/icons/Cake.png';
 import LoveIcon from '../../../../assets/icons/loveIcon.png';
-
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const PalmistryLanding = () => {
   const navigate = useNavigate();
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'ai-palmistry-scanner')?.title || 'Palmistry Scanner';
 
   const handleProceed = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -52,7 +54,7 @@ const PalmistryLanding = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className={styles.title}>Palmistry Scanner</h1>
+          <h1 className={styles.title}>{featureTitle}</h1>
         </div>
       </header>
 

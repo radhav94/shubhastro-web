@@ -7,6 +7,7 @@ import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
 import { compressImage } from '../../../../utils/helper/compressImage';
 import { trackEvent } from '../../../../utils/analytics';
+import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const ClothColorInstructions = () => {
   const navigate = useNavigate();
@@ -14,6 +15,9 @@ const ClothColorInstructions = () => {
   const fileInputRef = useRef(null);
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
   const gender = selectedProfile?.identity?.toLowerCase() || selectedProfile?.gender?.toLowerCase() || 'male';
+
+  const { data: aiwowData } = useGetAiWowPageDataQuery();
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'clothes-colour-analysis')?.title || 'Colour Clothes Analysis';
 
   const handleCamera = () => {
     navigate('/ai-wow/clothes-colour-analysis/camera');
@@ -44,7 +48,7 @@ const ClothColorInstructions = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className={styles.headerTitle}>Colour Clothes Analysis</h1>
+          <h1 className={styles.headerTitle}>{featureTitle}</h1>
         </div>
       </header>
       <div className={styles.content}>
