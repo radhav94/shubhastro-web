@@ -326,6 +326,9 @@ $font-primary:     "Poppins", sans-serif;
   line-height: 1.6;
   margin: 6px 0 4px;
 }
+.v2_callUs:hover{
+    color: #F75801;
+  }
 
 .v2_emailLink {
   color: $color-dark;
@@ -348,7 +351,7 @@ $font-primary:     "Poppins", sans-serif;
   margin-bottom: 4px;
   margin-top: 10px;
   transition: color 0.2s;
-  &:hover { color: $color-accent; }
+  // &:hover { color: $color-accent; }
 }
 
 .v2_chatLink {
