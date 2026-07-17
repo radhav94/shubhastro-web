@@ -677,7 +677,6 @@
   }
 
   span {
-    font-family: 'Poppins', sans-serif;
     font-size: 0.8rem;
     font-weight: 500;
     color: #1f2937;
@@ -686,14 +685,18 @@
     line-height: 1.4;
     height: 36px;
     @media (width <= 1024px) {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
+      height: 30px;
+    }
+    @media (width <= 820px) {
+      height: 36px;
     }
   }
   @media (width <= 1180px) {
     padding: 7px;
-    gap: 10px;
+    gap: 4px;
   }
-  @media (width <= 1024px) {
+  @media (width <= 820px) {
     gap: 8px;
   }
   @media (max-width: 767px) {
@@ -858,6 +861,9 @@
   //   right: -40px;
   //   width: 56%;
   // }
+  @media (width <= 1180px) {
+    width: 78%;
+  }
 }
 
 /* ═══ Center col — bottom 2 feature cards row ═══ */
@@ -1053,7 +1059,7 @@
     height: 147px;
   }
   @media (width <= 1024px) {
-    height: 108px;
+    height: 130px;
   }
 }
 
