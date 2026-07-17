@@ -44,9 +44,8 @@ export const trackEvent = (eventName, properties = {}) => {
   // Direct GA4
   if (typeof window.gtag === "function") {
     window.gtag("event", eventName, payload);
+    console.log("Gtag event called");
   }
 
-  if (IS_DEV) {
-    console.log("[Analytics]", eventName, payload);
-  }
+  console.log("[Analytics]", eventName, payload);
 };
