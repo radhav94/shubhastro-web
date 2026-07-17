@@ -123,7 +123,10 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
 
   // Camera stream management - MUST be before early return (React hooks rule)
   useEffect(() => {
-    if (!cameraOpen) return;
+    // Also gate on `isOpen`: this is a persistent floating widget that renders
+    // null (without unmounting) when closed, so we must stop the camera when the
+    // widget is closed / hidden as well as on unmount and browser Back.
+    if (!cameraOpen || !isOpen) return undefined;
     let active = true;
     const startStream = async () => {
       if (streamRef.current) {
@@ -155,8 +158,37 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
     startStream();
     return () => {
       active = false;
+      // Release the camera on teardown (camera closed, facing switch, widget
+      // closed, unmount, or browser Back) so it never stays on.
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
     };
-  }, [cameraOpen, facingMode]);
+  }, [cameraOpen, facingMode, isOpen]);
+
+  // Reset camera/attach state whenever the widget is closed so it never reopens
+  // silently with the camera running.
+  useEffect(() => {
+    if (!isOpen) {
+      setCameraOpen(false);
+      setAttachMenuOpen(false);
+    }
+  }, [isOpen]);
+
+  // This widget stays mounted across route changes, so the browser Back button
+  // won't unmount it. Stop the camera explicitly on back/forward navigation.
+  useEffect(() => {
+    const handlePopState = () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+      setCameraOpen(false);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   // Early return after ALL hooks are called
   if (!isOpen || !videoCallData) return null;
