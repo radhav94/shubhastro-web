@@ -29,7 +29,7 @@ export const trackEvent = (eventName, properties = {}) => {
   const dataLayer = window.dataLayer;
 
   if (!Array.isArray(dataLayer)) {
-    if (IS_DEV) console.warn("[Analytics] dataLayer not available, skipping:", eventName);
+    console.warn("[Analytics] dataLayer not available, skipping:", eventName);
     return;
   }
 
@@ -43,8 +43,5 @@ export const trackEvent = (eventName, properties = {}) => {
   };
 
   dataLayer.push(payload);
-
-  if (IS_DEV) {
-    console.log("[Analytics]", eventName, payload);
-  }
+  console.log("[Analytics]", eventName, payload);
 };
