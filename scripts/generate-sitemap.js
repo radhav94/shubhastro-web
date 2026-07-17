@@ -117,15 +117,118 @@ async function fetchStaticPageRoutes() {
   }
 }
 
-async function generate() {
-  const staticPageRoutes = await fetchStaticPageRoutes();
+// Important astrologer SEO landing links (cities + global locations).
+// These map to the `/astrologers/:category` route and mirror the footer/header nav.
+const astrologerLocationSlugs = [
+  // India
+  'mumbai', 'delhi', 'chennai', 'kolkata', 'hyderabad', 'bangalore', 'lucknow',
+  'bhopal', 'cochin', 'pune', 'gurgaon', 'noida', 'chandigarh', 'jaipur',
+  'nagpur', 'patna', 'indore', 'varanasi', 'coimbatore', 'vijaywada',
+  // Global
+  'usa', 'canada', 'uk', 'dubai', 'singapore', 'sharjah', 'california',
+  'chicago', 'dallas', 'new-jersey', 'toronto', 'abu-dhabi', 'doha', 'riyadh',
+  'london', 'sydney', 'kuala-lampur',
+];
 
-  // Merge, de-duplicating by path (existing staticRoutes take precedence)
-  const seen = new Set(allRoutes.map((r) => r.path));
-  const mergedRoutes = [
+const astrologerLocationRoutes = astrologerLocationSlugs.map((slug) => ({
+  path: `/astrologers/${slug}`,
+  priority: '0.5',
+  changefreq: 'monthly',
+}));
+
+// Fetch all blog detail pages (/blog/:slug) by paginating through the blogs API.
+async function fetchBlogRoutes() {
+  const routes = [];
+  const limit = 100;
+  const MAX_PAGES = 500; // safety cap to avoid an accidental infinite loop
+  let page = 1;
+
+  try {
+    while (page <= MAX_PAGES) {
+      const res = await fetch(
+        `${API_BASE_URL}/blogs/all?page=${page}&limit=${limit}&categorized=true`,
+        { headers: { accept: 'application/json' } }
+      );
+      if (!res.ok) {
+        console.warn(`⚠️  blogs/all page ${page} returned ${res.status}; stopping blog fetch`);
+        break;
+      }
+      const json = await res.json();
+      const list = json?.data || [];
+      for (const blog of list) {
+        if (!blog?.slug) continue;
+        const lastmod = blog?.publishDate
+          ? new Date(blog.publishDate).toISOString().split('T')[0]
+          : undefined;
+        routes.push({
+          path: `/blog/${blog.slug}`,
+          priority: '0.6',
+          changefreq: 'weekly',
+          ...(lastmod ? { lastmod } : {}),
+        });
+      }
+      const hasNext = json?.pagination?.hasNextPage;
+      const totalPages = json?.pagination?.totalPages;
+      if (!hasNext || (totalPages && page >= totalPages) || list.length === 0) break;
+      page += 1;
+    }
+  } catch (err) {
+    console.warn(`⚠️  Failed to fetch blogs: ${err.message}; skipping blog detail pages`);
+  }
+  return routes;
+}
+
+// Fetch astrologer categories (skills/specialities) → /astrologers/:category
+async function fetchAstrologerCategoryRoutes() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/filters/get-filters/skills`, {
+      headers: { accept: 'application/json' },
+    });
+    if (!res.ok) {
+      console.warn(`⚠️  filters/get-filters/skills returned ${res.status}; skipping astrologer categories`);
+      return [];
+    }
+    const json = await res.json();
+    // Response shape: { data: [ { title, list: [ { slug, ... } ] } ] }
+    const groups = json?.data || [];
+    const slugs = groups.flatMap((group) =>
+      (group?.list || []).map((item) => item?.slug).filter(Boolean)
+    );
+    // De-duplicate slugs within the categories themselves
+    const uniqueSlugs = [...new Set(slugs)];
+    return uniqueSlugs.map((slug) => ({
+      path: `/astrologers/${slug}`,
+      priority: '0.6',
+      changefreq: 'weekly',
+    }));
+  } catch (err) {
+    console.warn(`⚠️  Failed to fetch astrologer categories: ${err.message}; skipping`);
+    return [];
+  }
+}
+
+async function generate() {
+  const [staticPageRoutes, blogRoutes, astrologerCategoryRoutes] = await Promise.all([
+    fetchStaticPageRoutes(),
+    fetchBlogRoutes(),
+    fetchAstrologerCategoryRoutes(),
+  ]);
+
+  // Merge, de-duplicating by path. Earlier entries take precedence, so the
+  // curated static routes win over any dynamically fetched duplicates.
+  const seen = new Set();
+  const mergedRoutes = [];
+  for (const route of [
     ...allRoutes,
-    ...staticPageRoutes.filter((r) => !seen.has(r.path)),
-  ];
+    ...astrologerLocationRoutes,
+    ...astrologerCategoryRoutes,
+    ...staticPageRoutes,
+    ...blogRoutes,
+  ]) {
+    if (seen.has(route.path)) continue;
+    seen.add(route.path);
+    mergedRoutes.push(route);
+  }
 
   // Generate XML
   const today = new Date().toISOString().split('T')[0];
@@ -134,7 +237,7 @@ async function generate() {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${mergedRoutes.map(route => `  <url>
     <loc>${SITE_URL}${route.path}</loc>
-    <lastmod>${today}</lastmod>
+    <lastmod>${route.lastmod || today}</lastmod>
     <changefreq>${route.changefreq}</changefreq>
     <priority>${route.priority}</priority>
   </url>`).join('\n')}
@@ -147,7 +250,11 @@ ${mergedRoutes.map(route => `  <url>
 
   // Write to public (for dev server)
   fs.writeFileSync(publicPath, xml, 'utf-8');
-  console.log(`✅ Sitemap generated: public/sitemap.xml (${mergedRoutes.length} URLs, ${staticPageRoutes.length} static pages)`);
+  console.log(
+    `✅ Sitemap generated: public/sitemap.xml (${mergedRoutes.length} URLs — ` +
+    `${blogRoutes.length} blog pages, ${astrologerCategoryRoutes.length} astrologer categories, ` +
+    `${astrologerLocationRoutes.length} astrologer locations, ${staticPageRoutes.length} static pages)`
+  );
 
   // Write to dist if it exists (for production build)
   const distDir = path.resolve(__dirname, '../dist');
