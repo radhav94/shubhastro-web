@@ -13,6 +13,16 @@ const FaceReadingCamera = () => {
   const detectionCanvasRef = useRef(null);
   
   const [stream, setStream] = useState(null);
+  const streamRef = useRef(null);
+  // Keep a ref to the live stream and force-stop it on unmount so the camera
+  // turns off even when the user leaves via the browser Back button.
+  useEffect(() => { streamRef.current = stream; }, [stream]);
+  useEffect(() => () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+  }, []);
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
