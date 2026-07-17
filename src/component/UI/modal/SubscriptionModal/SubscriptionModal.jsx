@@ -162,6 +162,8 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
       if (body?.success === true) {
         setSuccessPlan(card);
         setFlow("success");
+        // Plan was paid from the wallet — refresh the wallet balance everywhere.
+        window.dispatchEvent(new Event("walletBalanceUpdated"));
         if (onPurchased) onPurchased(card.plan);
       } else if (reason === "INSUFFICIENT_WALLET_BALANCE") {
         setFlow("idle");
@@ -184,8 +186,8 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} style={modalStyle} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Choose Your Subscription">
+    <div className={styles.overlay}>
+      <div className={styles.modal} style={modalStyle} role="dialog" aria-modal="true" aria-label="Choose Your Subscription">
         <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
           <IoClose size={22} />
         </button>

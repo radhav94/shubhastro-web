@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
 import { useGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
@@ -49,7 +49,6 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
   // closing the success view resolves as 'purchased'.
   const modalResolveRef = useRef(null);
   const purchasedRef = useRef(false);
-  const autoContinueTimerRef = useRef(null);
 
   const openSubscriptionModal = useCallback((mode = 'basic', plans = null) => {
     setSubscriptionModalVariant(mode);
@@ -66,10 +65,6 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
   );
 
   const handleModalClose = useCallback(() => {
-    if (autoContinueTimerRef.current) {
-      clearTimeout(autoContinueTimerRef.current);
-      autoContinueTimerRef.current = null;
-    }
     setShowSubscriptionModal(false);
     const outcome = purchasedRef.current ? 'purchased' : 'cancelled';
     purchasedRef.current = false;
@@ -78,17 +73,11 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
     if (resolve) resolve(outcome);
   }, []);
 
-  // On a successful purchase, keep the success modal visible briefly (2s) then
-  // auto-close and continue report generation. The modal's own Continue button
-  // still lets the user proceed immediately.
+  // On a successful purchase, just mark it as purchased. The success modal stays
+  // open until the user explicitly closes it via the Continue button.
   const handleModalPurchased = useCallback(() => {
     purchasedRef.current = true;
-    if (autoContinueTimerRef.current) clearTimeout(autoContinueTimerRef.current);
-    autoContinueTimerRef.current = setTimeout(() => {
-      autoContinueTimerRef.current = null;
-      handleModalClose();
-    }, 2000);
-  }, [handleModalClose]);
+  }, []);
 
   /**
    * Runs a generate call and handles entitlement blocks. When blocked, it opens
@@ -134,10 +123,6 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
     }
     return { blocked: true, reason: 'RETRY_LIMIT' };
   }, [featureName, openSubscriptionModal, waitForModalOutcome]);
-
-  useEffect(() => () => {
-    if (autoContinueTimerRef.current) clearTimeout(autoContinueTimerRef.current);
-  }, []);
 
   const subscriptionModal = (
     <SubscriptionModal
