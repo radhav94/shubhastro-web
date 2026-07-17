@@ -1,0 +1,20 @@
+{
+  "activitycontinuation": {
+    "apps": [
+      "LUM7EKQ8XM.com.pittieglobal.shubhastro"
+    ]
+  },
+  "applinks": {
+    "apps": [
+      
+    ],
+    "details": [
+      {
+        "appID": "LUM7EKQ8XM.com.pittieglobal.shubhastro",
+        "paths": [
+          "/*"
+        ]
+      }
+    ]
+  }
+}
