@@ -696,6 +696,9 @@
     padding: 7px;
     gap: 4px;
   }
+  @media (width <= 1024px) {
+    gap: 4px;
+  }
   @media (width <= 820px) {
     gap: 8px;
   }
