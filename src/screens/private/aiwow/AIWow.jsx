@@ -263,6 +263,12 @@ const AIWow = () => {
   };
 
   const handleClick = async (slug, isPaid) => {
+    // AR Vastu Scanner is mobile-app only — just show the app modal. No
+    // auth/profile/subscription gating for this informational popup.
+    if (slug === "ar-vastu-scanner") {
+      openService(slug);
+      return;
+    }
     // Allow guest users to view intro pages for these features
     const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
     if (guestAccessSlugs.includes(slug)) {

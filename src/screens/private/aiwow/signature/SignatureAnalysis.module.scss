@@ -384,9 +384,21 @@
   gap: 0.75rem;
   margin-top: auto;
 
-  .resultButton {
+  .resultButton,
+  .retakeButton {
     margin-top: 0;
     flex: 1;
+    white-space: nowrap;
+  }
+
+  @media (width <= 480px) {
+    gap: 0.5rem;
+
+    .resultButton,
+    .retakeButton {
+      padding: 0.85rem 0.4rem;
+      font-size: 0.8rem;
+    }
   }
 }
 
