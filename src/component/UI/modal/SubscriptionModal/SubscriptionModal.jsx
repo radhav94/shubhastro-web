@@ -141,11 +141,15 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
   // The processing/success state views are simple centered messages — keep them
   // compact instead of inheriting the wide multi-plan grid width.
   const isStateView = flow === "processing" || flow === "success";
+  // When there are more cards than fit in one row (columns capped at 4), trim
+  // the modal width by ~half a card so the next card peeks through, hinting the
+  // row is horizontally scrollable (mobile-carousel style).
+  const peek = cards.length > columns ? 150 : 0;
   const modalStyle = flow === "success"
     ? { "--modal-w": "min(480px, 100%)" }
     : isStateView
       ? { "--modal-w": "min(420px, 100%)" }
-      : { "--modal-w": `min(${columns * 300 + (columns - 1) * 20 + 76}px, 100%)` };
+      : { "--modal-w": `min(${columns * 300 + (columns - 1) * 20 + 76 - peek}px, 100%)` };
 
   const handleSelect = async (card) => {
     // Free plan is not a purchasable subscription.

@@ -97,6 +97,30 @@
   gap: 20px;
   margin-top: 0;
 
+  // Keep all plans on a single row on larger screens; scroll horizontally
+  // (like the mobile carousel) with a peek of the next card and no scrollbar.
+  @media (min-width: 901px) {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 2px 0 4px;
+    scroll-snap-type: x proximity;
+    scroll-behavior: smooth;
+
+    // Hide the scrollbar
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .planCard {
+      scroll-snap-align: start;
+    }
+  }
+
   @media (max-width: 900px) {
     display: flex;
     flex-wrap: nowrap;
