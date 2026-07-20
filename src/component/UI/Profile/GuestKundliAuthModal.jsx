@@ -7,7 +7,7 @@ import * as AuthServices from "../../../services/appServices/authService";
 import { saveUserToStorage } from "../../../utils/authStorage";
 import { requestFCMToken } from "../../../services/firebase";
 import { clearGuestKundliProfiles } from "../../../utils/helper/cookies";
-import { loginSuccess, updateRegistrationStatus } from "../../../redux/auth/authSlice";
+import { loginSuccess } from "../../../redux/auth/authSlice";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { useCreateKundliMutation, useLazyGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
@@ -64,6 +64,24 @@ const GuestKundliAuthModal = ({
     };
   };
 
+  // Normalizes the HTTP status out of an RTK Query error (fetchBaseQuery uses a
+  // string status like "PARSING_ERROR" with the real code in originalStatus).
+  const getErrorStatus = (err) =>
+    typeof err?.status === "number" ? err.status : err?.originalStatus;
+
+  // Creates the kundli, retrying once if the server responds with a 500.
+  const createKundliWithRetry = async (payload) => {
+    try {
+      return await createKundli(payload).unwrap();
+    } catch (err) {
+      if (getErrorStatus(err) === 500) {
+        // Recall the API once on a server error.
+        return await createKundli(payload).unwrap();
+      }
+      throw err;
+    }
+  };
+
   // Registers a new user in the background from the entered kundli details so
   // they never see the "personalize" onboarding screen.
   const registerGuestUser = async (userId) => {
@@ -90,8 +108,14 @@ const GuestKundliAuthModal = ({
 
     await AuthServices.registerUser(registerPayload, { skipToast: true });
 
-    // Reflect the new registration status in Redux + storage.
-    dispatch(updateRegistrationStatus({ isRegister: true }));
+    // Trigger the welcome-bonus popup shown to newly registered users.
+    localStorage.setItem("shubhtalk_show_welcome_bonus", "true");
+
+    // NOTE: Do NOT dispatch any redux auth change here. Components like
+    // TopHeader run getAllKundlis with `skip: !token`; a redux change would
+    // re-render them and fire getAllKundlis BEFORE the kundli is created,
+    // which triggers the profile 404 -> personalize redirect. The logged-in
+    // state is flipped later via loginSuccess, after the kundli exists.
     try {
       const currentUserData = JSON.parse(localStorage.getItem("userData") || "{}");
       localStorage.setItem(
@@ -182,27 +206,37 @@ const GuestKundliAuthModal = ({
       // queries; if they run before the profile/kundli exist, the app redirects
       // the user to the "personalize" onboarding screen.
 
-      // ── Seamless registration for new users ──
-      let registered = String(userData?.isRegister) !== "false";
-      if (!registered) {
-        try {
-          await registerGuestUser(_id);
-          registered = true;
-        } catch (registerErr) {
-          // Non-blocking: if registration fails (e.g. already registered), keep going.
-          console.error("Guest background registration failed:", registerErr);
-        }
+      // ── Seamless background registration ──
+      // Always call registerUser so the user has a complete profile. This is
+      // what completes the guest flow and prevents the "personalize" screen.
+      // The isRegister flag from the backend is not reliable here, so we don't
+      // gate on it; "already registered" errors are simply ignored.
+      let registered = true;
+      try {
+        await registerGuestUser(_id);
+      } catch (registerErr) {
+        // Non-blocking: an existing user returns "already registered" — fine.
+        console.error("Guest background registration skipped/failed:", registerErr);
+        registered = String(userData?.isRegister) !== "false";
       }
 
       // ── Create the "self" kundli now that the token is available ──
+      // Retries once on a 500; if it still fails, send the user back to the
+      // add-profile step so they can try again.
       let createdProfile = null;
       try {
-        const result = await createKundli(buildKundliPayload(pendingKundli)).unwrap();
+        const result = await createKundliWithRetry(buildKundliPayload(pendingKundli));
         createdProfile = result?.data || null;
       } catch (kundliErr) {
-        // Creation can fail for a returning user (e.g. a "self" kundli already
-        // exists). Discard the entered kundli and use the user's existing self
-        // kundli instead — without showing an error.
+        if (getErrorStatus(kundliErr) === 500) {
+          // Failed twice with a server error — return to the add-profile form.
+          console.error("Guest kundli creation failed twice (500):", kundliErr);
+          Toast.error("Something went wrong. Please try again.");
+          setStep("kundli");
+          return false;
+        }
+        // Other errors (e.g. a "self" kundli already exists for a returning
+        // user). Discard the entered kundli and use the existing self kundli.
         console.error("Guest kundli creation failed, using existing kundli:", kundliErr);
         try {
           const listResult = await fetchAllKundlis().unwrap();

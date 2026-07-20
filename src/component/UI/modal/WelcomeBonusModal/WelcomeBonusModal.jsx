@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import styles from "./WelcomeBonusModal.module.scss";
 import { IoClose } from "react-icons/io5";
 import welcomeBg from "../../../../assets/images/welcome-bonus-bg.webp";
@@ -7,16 +8,20 @@ import welcomeIcon from "../../../../assets/images/welcome-bonus-icon.webp";
 import {useLazyGetWalletBalanceQuery} from "../../../../../src/redux/api/wallet/walletApi"
 
 const WelcomeBonusModal = () => {
-  const [isOpen, setIsOpen] = useState(() => {
-    const showBonus = localStorage.getItem("shubhtalk_show_welcome_bonus");
-    if (showBonus === "true") {
+  const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
+  const [getWalletBalance, { data }] = useLazyGetWalletBalanceQuery();
+
+  // Show the bonus whenever the flag is set. Checked on mount AND on every
+  // navigation, so it works even when this modal is mounted persistently
+  // (e.g. the user is registered mid-flow and then lands on a result screen).
+  useEffect(() => {
+    if (localStorage.getItem("shubhtalk_show_welcome_bonus") === "true") {
       localStorage.removeItem("shubhtalk_show_welcome_bonus");
-      return true;
+      setIsOpen(true);
     }
-    return false;
-  });
-   const [getWalletBalance, { data, isLoading, error }] = useLazyGetWalletBalanceQuery();
-   
+  }, [location.pathname]);
+
     useEffect(() => {
     if (isOpen) {
       getWalletBalance();

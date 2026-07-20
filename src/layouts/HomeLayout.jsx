@@ -17,6 +17,7 @@ import StickyWaitingQueue from "../component/UI/waitingQueue/StickyWaitingQueue"
 
 import NoInternet, { useOnlineStatus } from "../component/NoInternet/NoInternet";
 import { useAiwowCleanup } from "../utils/hooks/useAiwowCleanup";
+import WelcomeBonusModal from "../component/UI/modal/WelcomeBonusModal/WelcomeBonusModal";
 
 
 
@@ -292,6 +293,9 @@ const HomeLayout = () => {
           <Footer />
         </div>
       )}
+
+      {/* Welcome bonus popup — shown on any screen right after registration */}
+      <WelcomeBonusModal />
 
       {/* ✅ FLOATING CALL UI (IMPORTANT LINE) */}
       <VideoCallContainer />
