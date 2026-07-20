@@ -30,7 +30,7 @@ const FaceReadingResult = () => {
     const cleanData = data ? (() => { const { pdfPath: _p, ...d } = data; return d; })() : undefined;
     const result = cleanData !== undefined ? { ...rest, data: cleanData } : rest;
     if (result.featureName) return result;
-    return { ...result, featureName: 'astro-face-reading' };
+    return { ...result, featureName: 'face-analysis' };
   }, [reduxResult]);
 
   const {

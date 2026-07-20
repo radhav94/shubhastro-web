@@ -84,17 +84,38 @@ const AIWow = () => {
   const rawHistoryList = historyData?.data?.history || [];
   const charges = chargesData?.data || null;
 
-  // Deduplicate history — same featureId means same analysis, keep the one with pdfPath (completed)
+  // Deduplicate history — same featureId OR same featureType within 2 min = same analysis
   const historyList = useMemo(() => {
-    const seen = new Map();
+    // Pass 1: deduplicate by featureId
+    const byFeatureId = new Map();
     for (const item of rawHistoryList) {
       const key = item.featureId || item._id;
-      const existing = seen.get(key);
+      const existing = byFeatureId.get(key);
       if (!existing || (item.pdfPath && !existing.pdfPath)) {
-        seen.set(key, item);
+        byFeatureId.set(key, item);
       }
     }
-    return Array.from(seen.values());
+    // Pass 2: sort by time desc, then collapse items of same featureType within 2 min
+    const sorted = Array.from(byFeatureId.values()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    const result = [];
+    for (const item of sorted) {
+      const time = new Date(item.createdAt).getTime();
+      const duplicate = result.find(
+        (r) => r.featureType === item.featureType && Math.abs(new Date(r.createdAt).getTime() - time) < 120000
+      );
+      if (duplicate) {
+        // Keep the one with pdfPath
+        if (item.pdfPath && !duplicate.pdfPath) {
+          const idx = result.indexOf(duplicate);
+          result[idx] = item;
+        }
+      } else {
+        result.push(item);
+      }
+    }
+    return result;
   }, [rawHistoryList]);
 
   // Check if more pages available
@@ -251,16 +272,16 @@ const AIWow = () => {
       try {
         toast.loading("Downloading PDF...", { id: "pdf-download" });
         const url = existingPdfUrl || await fetchPdfUrl(item.featureId);
-        const res = await fetch(url);
-        const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = `${item.featureName || "ai-report"}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(blobUrl);
+          const res = await fetch(url);
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = blobUrl;
+          link.download = `${item.featureName || "ai-report"}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(blobUrl);
         toast.success("PDF downloaded!", { id: "pdf-download" });
       } catch {
         toast.error("Failed to download PDF", { id: "pdf-download" });
@@ -278,16 +299,16 @@ const AIWow = () => {
     try {
       toast.loading("Downloading PDF...", { id: "pdf-download" });
       const pdfUrl = await fetchPdfUrl(featureId, language);
-      const res = await fetch(pdfUrl);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `${featureName || "ai-report"}-${language}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(blobUrl);
+        const res = await fetch(pdfUrl);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = `${featureName || "ai-report"}-${language}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(blobUrl);
       toast.success("PDF downloaded!", { id: "pdf-download" });
       // Mark this feature as free locally so ribbon updates
       setPaidToFreeIds(prev => ({ ...prev, [featureId]: true }));
