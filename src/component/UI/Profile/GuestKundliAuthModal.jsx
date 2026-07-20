@@ -206,38 +206,27 @@ const GuestKundliAuthModal = ({
       // queries; if they run before the profile/kundli exist, the app redirects
       // the user to the "personalize" onboarding screen.
 
-      // ── Seamless background registration ──
-      // Always call registerUser so the user has a complete profile. This is
-      // what completes the guest flow and prevents the "personalize" screen.
-      // The isRegister flag from the backend is not reliable here, so we don't
-      // gate on it; "already registered" errors are simply ignored.
-      let registered = true;
-      try {
-        await registerGuestUser(_id);
-      } catch (registerErr) {
-        // Non-blocking: an existing user returns "already registered" — fine.
-        console.error("Guest background registration skipped/failed:", registerErr);
-        registered = String(userData?.isRegister) !== "false";
-      }
+      // Decide the flow from the verifyOtp response's `isRegister` flag:
+      //   true  → existing account: DON'T register or create a kundli; reuse the
+      //           user's existing kundli and show the "welcome back" popup.
+      //   false → new user: register (sets welcome-bonus) + create a self kundli.
+      // New users are the only ones the backend marks isRegister === false;
+      // anything else (true / missing) is an existing account.
+      const isExistingUser = String(userData?.isRegister) !== "false";
 
-      // ── Create the "self" kundli now that the token is available ──
-      // Retries once on a 500; if it still fails, send the user back to the
-      // add-profile step so they can try again.
+      let registered = true;
       let createdProfile = null;
-      try {
-        const result = await createKundliWithRetry(buildKundliPayload(pendingKundli));
-        createdProfile = result?.data || null;
-      } catch (kundliErr) {
-        if (getErrorStatus(kundliErr) === 500) {
-          // Failed twice with a server error — return to the add-profile form.
-          console.error("Guest kundli creation failed twice (500):", kundliErr);
-          Toast.error("Something went wrong. Please try again.");
-          setStep("kundli");
-          return false;
-        }
-        // Other errors (e.g. a "self" kundli already exists for a returning
-        // user). Discard the entered kundli and use the existing self kundli.
-        console.error("Guest kundli creation failed, using existing kundli:", kundliErr);
+
+      if (isExistingUser) {
+        // Welcome-back popup for existing users.
+        const backName =
+          userData?.firstName ||
+          (pendingKundli?.name || "").trim().split(/\s+/)[0] ||
+          "";
+        localStorage.setItem("shubhtalk_welcome_back_name", backName);
+        localStorage.setItem("shubhtalk_show_welcome_back", "true");
+
+        // Reuse the existing self kundli — no register/create calls.
         try {
           const listResult = await fetchAllKundlis().unwrap();
           const kundlis = listResult?.data || [];
@@ -247,6 +236,42 @@ const GuestKundliAuthModal = ({
             null;
         } catch (fetchErr) {
           console.error("Failed to fetch existing kundlis:", fetchErr);
+        }
+      } else {
+        // ── New user: register (creates profile + sets welcome-bonus flag) ──
+        // Done BEFORE flipping the session so global queries don't trigger the
+        // "personalize" redirect.
+        try {
+          await registerGuestUser(_id);
+        } catch (registerErr) {
+          console.error("Guest background registration failed:", registerErr);
+          registered = String(userData?.isRegister) !== "false";
+        }
+
+        // ── Create the "self" kundli (retry once on 500) ──
+        try {
+          const result = await createKundliWithRetry(buildKundliPayload(pendingKundli));
+          createdProfile = result?.data || null;
+        } catch (kundliErr) {
+          if (getErrorStatus(kundliErr) === 500) {
+            // Failed twice with a server error — return to the add-profile form.
+            console.error("Guest kundli creation failed twice (500):", kundliErr);
+            Toast.error("Something went wrong. Please try again.");
+            setStep("kundli");
+            return false;
+          }
+          // Fallback: a self kundli may already exist — use it.
+          console.error("Guest kundli creation failed, using existing kundli:", kundliErr);
+          try {
+            const listResult = await fetchAllKundlis().unwrap();
+            const kundlis = listResult?.data || [];
+            createdProfile =
+              kundlis.find((k) => k.relation?.toLowerCase() === "self") ||
+              kundlis[0] ||
+              null;
+          } catch (fetchErr) {
+            console.error("Failed to fetch existing kundlis:", fetchErr);
+          }
         }
       }
 

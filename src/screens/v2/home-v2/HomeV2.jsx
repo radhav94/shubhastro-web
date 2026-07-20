@@ -389,7 +389,23 @@ const HomeV2 = () => {
       const target = item.redirect_url || item.slug;
       if (!target) return;
       if (item.is_internal === true || item.is_internal === "true") {
-        navigate(target.startsWith("/") ? target : `/${target}`);
+        const path = target.startsWith("/") ? target : `/${target}`;
+        // Guests: kundli-based features open the add-kundli guest flow instead
+        // of navigating to a page that would bounce them to login. This covers
+        // AI-Wow features and Kundli "free-report" deep links (e.g. Gemstone
+        // Remedy → /kundli?tab=free-report&subtab=remedies&section=gemstones).
+        // The plain Free Kundli generator stays public.
+        const token = localStorage.getItem("shubhtalk_customer_token");
+        const needsKundliAuth =
+          path.startsWith("/ai-wow") ||
+          path.startsWith("/aiwow") ||
+          path.includes("tab=free-report");
+        if (!token && needsKundliAuth) {
+          pendingWowPathRef.current = path;
+          setShowGuestAuthModal(true);
+          return;
+        }
+        navigate(path);
       } else if (item.redirect_url) {
         window.open(item.redirect_url, "_blank", "noopener,noreferrer");
       } else {
