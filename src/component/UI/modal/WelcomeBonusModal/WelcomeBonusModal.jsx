@@ -5,12 +5,14 @@ import { IoClose } from "react-icons/io5";
 import welcomeBg from "../../../../assets/images/welcome-bonus-bg.webp";
 import welcomeBgMobile from "../../../../assets/images/welcome-bonus-bg-mobile.webp";
 import welcomeIcon from "../../../../assets/images/welcome-bonus-icon.webp";
-import {useLazyGetWalletBalanceQuery} from "../../../../../src/redux/api/wallet/walletApi"
+import { useWalletBalance } from "../../../../screens/private/wallet/useWalletBalance";
 
 const WelcomeBonusModal = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const [getWalletBalance, { data }] = useLazyGetWalletBalanceQuery();
+  // Use the same wallet-balance source as the header so the amount matches what
+  // the app shows (it persists to localStorage and refreshes on wallet events).
+  const { balance, refreshWallet } = useWalletBalance();
 
   // Show the bonus whenever the flag is set. Checked on mount AND on every
   // navigation, so it works even when this modal is mounted persistently
@@ -22,13 +24,14 @@ const WelcomeBonusModal = () => {
     }
   }, [location.pathname]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
-      getWalletBalance();
+      // Pull the latest balance so the just-credited welcome bonus is reflected.
+      refreshWallet();
     }
-  }, [isOpen, getWalletBalance]);
+  }, [isOpen, refreshWallet]);
 
-  const amount = data?.data ?? 0;
+  const amount = balance ?? 0;
 
   if (!isOpen) return null;
 
