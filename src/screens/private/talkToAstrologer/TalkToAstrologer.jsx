@@ -1123,12 +1123,22 @@ const TalkToAstrologer = () => {
 
   return (
     <div className={styles.mainContainer}>
-      <BackButton />
       <div className={styles.pageHeader}>
+
+        <button className={styles.localBackBtn} onClick={() => {
+          if (window.history.length > 1) navigate(-1);
+          else navigate("/", { replace: true });
+          }} aria-label="Go back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+
         <h1 className={styles.pageTitle}>
           Chat With Best <span className={styles.highlight}>Astrologers</span>{" "}
           Online
         </h1>
+        
       </div>
 
       <FilterChips

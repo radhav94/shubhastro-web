@@ -61,6 +61,7 @@
   font-weight: 400;
   font-size: clamp(0.9rem, 2vw, 1rem);
   margin-bottom: 0px;
+  color: #484848;
   @media (width <= 767px) {
     text-align: left;
   }
@@ -377,7 +378,7 @@
   text-align: center;
   cursor: pointer;
   user-select: none;
-  padding: 4px 12px;
+  padding: 4px 40px 4px 12px;;
   border-radius: 8px;
   transition: 0.2s ease;
 
@@ -459,7 +460,7 @@
 
 .sheetTitle {
   font-size: 24px;
-  font-weight: 600;
+  font-weight: 500;
   margin-bottom: 24px;
   color: #000;
 }
@@ -1033,7 +1034,7 @@
 
 .numerologyCard {
   border-radius: 16px;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -1046,7 +1047,7 @@
   background: rgba(255, 255, 255, 0.4);
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    border: 2px solid white;
+    border: 1.5px solid white;
 
   &:hover {
     transform: translateY(-2px);
@@ -1074,6 +1075,8 @@
   text-transform: uppercase;
   color: #303030;
   margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
 }
 
 .cardDescription {
@@ -1116,17 +1119,16 @@
   //   gap: 20px;
   // }
 
-  .numerologyCard {
-    padding: 28px;
-    gap: 24px;
-  }
+  // .numerologyCard {
+  //   padding: 28px;
+  //   gap: 24px;
+  // }
 
   .cardLabel {
     font-size: 13px;
   }
 
   .cardTitle {
-    font-size: 20px;
     margin-bottom: 10px;
   }
 
