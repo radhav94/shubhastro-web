@@ -23,6 +23,7 @@ import ProfileModals from "../../private/kundli/components/ProfileModals";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
 import { GuestKundliAuthModal } from "../../../component/UI/Profile";
+import HomeIntroPopup from "./HomeIntroPopup";
 const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));
 
 // Fallback images
@@ -541,6 +542,7 @@ const HomeV2 = () => {
       />
       <PanditAIBubble />
       <PanditAIVoiceBubble />
+      <HomeIntroPopup />
     </>
   );
 };
