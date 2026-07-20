@@ -13,12 +13,7 @@ const ClothColorLanding = () => {
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'clothes-colour-analysis')?.title || 'Colour Clothes Analysis';
 
   const handleProceed = () => {
-    const token = localStorage.getItem("shubhtalk_customer_token");
-    if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/clothes-colour-analysis/form");
-      window.location.href = "/login?skip=welcome";
-      return;
-    }
+    // Guests can browse freely; auth is requested at the photo capture/upload step.
     navigate('/ai-wow/clothes-colour-analysis/form');
   };
 

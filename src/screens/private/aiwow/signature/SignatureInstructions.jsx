@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './SignatureInstructions.module.scss';
@@ -8,14 +8,35 @@ import TTSButton from '../../../../component/UI/TTSButton';
 import { compressImage } from '../../../../utils/helper/compressImage';
 import { trackEvent } from '../../../../utils/analytics';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const SignatureInstructions = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingActionRef = useRef(null);
 
   const { data: aiwowData } = useGetAiWowPageDataQuery();
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'signature-analysis')?.title || 'AI Signature Analysis';
+
+  // Guests must add a kundli + verify OTP before capturing/uploading a photo.
+  const runOrAuth = (action) => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      pendingActionRef.current = action;
+      setShowGuestAuthModal(true);
+      return;
+    }
+    action();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    if (action) action();
+  };
 
   const handleCamera = () => {
     navigate('/ai-wow/signature-analysis/camera');
@@ -30,8 +51,11 @@ const SignatureInstructions = () => {
     if (file) {
       trackEvent("shubh_ai_input_provided", { feature_name: "signature-analysis", input_type: "image" });
       compressImage(file).then((dataUrl) => {
-        dispatch(setSignatureImage(dataUrl));
-        navigate('/ai-wow/signature-analysis/capture');
+        // Guests must authenticate at the moment the photo is submitted.
+        runOrAuth(() => {
+          dispatch(setSignatureImage(dataUrl));
+          navigate('/ai-wow/signature-analysis/capture');
+        });
       });
     }
   };
@@ -142,6 +166,12 @@ const SignatureInstructions = () => {
         </div>
       </div>
     </div>
+
+    <GuestKundliAuthModal
+      isOpen={showGuestAuthModal}
+      onClose={() => setShowGuestAuthModal(false)}
+      onSuccess={handleGuestAuthSuccess}
+    />
     </>
   );
 };

@@ -13,12 +13,7 @@ const PalmistryLanding = () => {
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'ai-palmistry-scanner')?.title || 'Palmistry Scanner';
 
   const handleProceed = () => {
-    const token = localStorage.getItem("shubhtalk_customer_token");
-    if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/ai-palmistry-scanner/hand-selection");
-      window.location.href = "/login?skip=welcome";
-      return;
-    }
+    // Guests can browse freely; auth is requested at the photo capture/upload step.
     navigate('/ai-wow/ai-palmistry-scanner/hand-selection');
   };
   const features = [

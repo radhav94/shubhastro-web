@@ -8,13 +8,12 @@ import FeatureCard from "./components/FeatureCard";
 import MobileAppModal from "./components/MobileAppModal";
 import ResultHistoryCard from "./components/ResultHistoryCard";
 import DownloadReportModal from "./components/DownloadReportModal";
-import { ProfileManager } from "../../../component/UI/Profile";
+import { ProfileManager, GuestKundliAuthModal } from "../../../component/UI/Profile";
 import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
 import { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery, useDownloadReportPdfMutation } from "../../../redux/api/aiwow/aiwowApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
-import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { PATH } from "../../../utils/routes/Paths";
 import { trackEvent } from "../../../utils/analytics";
@@ -42,8 +41,9 @@ const AIWow = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const requireAuth = useRequireAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingGuestActionRef = useRef(null);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const [activeTab, setActiveTab] = useState("aiwow");
   const [downloadModal, setDownloadModal] = useState({ open: false, featureId: null, featureName: "" });
@@ -229,18 +229,29 @@ const AIWow = () => {
     setShowProfileModal(false);
   };
 
-  const handleClick = (slug) => {
-    // Allow guest users to view intro pages for these features
-    const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
-    // All features require login
-    const freeAccessSlugs = [];
-    if (!freeAccessSlugs.includes(slug) && !guestAccessSlugs.includes(slug)) {
-      if (!requireAuth()) return;
-      if (!selectedProfile) {
-        toast.error("Please select one Kundli to proceed.");
-        return;
-      }
+  // A guest has no auth token yet.
+  const isGuest = !token;
+
+  // Open the guest kundli+OTP flow, remembering the action to run afterwards.
+  const startGuestAuth = (action) => {
+    pendingGuestActionRef.current = typeof action === "function" ? action : null;
+    setShowGuestAuthModal(true);
+  };
+
+  // After the guest logs in and their kundli is created, run the pending action.
+  const handleGuestAuthSuccess = (profile) => {
+    setShowGuestAuthModal(false);
+    if (profile?._id) {
+      dispatch(setSelectedKundliProfile(profile));
+      dispatch(setSelectedKundli(profile));
+      localStorage.setItem("selectedKundliProfile", JSON.stringify(profile));
     }
+    const action = pendingGuestActionRef.current;
+    pendingGuestActionRef.current = null;
+    if (action) action(profile);
+  };
+
+  const navigateToFeature = (slug) => {
     if (slug === "ar-vastu-scanner") {
       setShowMobileAppModal(true);
     } else {
@@ -250,8 +261,30 @@ const AIWow = () => {
     }
   };
 
+  const handleClick = (slug) => {
+    // Allow guest users to view intro pages for these features
+    const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
+    // All features require login
+    const freeAccessSlugs = [];
+    if (!freeAccessSlugs.includes(slug) && !guestAccessSlugs.includes(slug)) {
+      // Guests: collect kundli details + verify OTP instead of redirecting to login.
+      if (isGuest) {
+        startGuestAuth(() => navigateToFeature(slug));
+        return;
+      }
+      if (!selectedProfile) {
+        toast.error("Please select one Kundli to proceed.");
+        return;
+      }
+    }
+    navigateToFeature(slug);
+  };
+
   const handleProfileClick = () => {
-    if (!requireAuth()) return null;
+    if (isGuest) {
+      startGuestAuth(() => setShowProfileModal(true));
+      return null;
+    }
     setShowProfileModal(true);
   };
 
@@ -336,7 +369,13 @@ const AIWow = () => {
   };
 
   const handleResultHistory = () =>{
-    if (!requireAuth()) return null;
+    if (isGuest) {
+      startGuestAuth(() => {
+        setActiveTab("results");
+        trackEvent("shubh_ai_past_reports_viewed", {});
+      });
+      return null;
+    }
     setActiveTab("results")
     trackEvent("shubh_ai_past_reports_viewed", {});
   }
@@ -503,6 +542,15 @@ const AIWow = () => {
           selectedProfileId={selectedProfile?._id}
           title="Select Profile"
           enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+        />
+
+        <GuestKundliAuthModal
+          isOpen={showGuestAuthModal}
+          onClose={() => {
+            setShowGuestAuthModal(false);
+            pendingGuestActionRef.current = null;
+          }}
+          onSuccess={handleGuestAuthSuccess}
         />
 
         <MobileAppModal
