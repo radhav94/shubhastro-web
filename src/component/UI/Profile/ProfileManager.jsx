@@ -4,6 +4,7 @@ import ProfileListingModal from "./ProfileListingModal";
 import AddProfileModal from "./AddProfileModal";
 import EditProfileModal from "./EditProfileModal";
 import DeleteConfirmationModal from "../modal/deleteModal/DeleteConfirmationModal";
+import GuestKundliAuthModal from "./GuestKundliAuthModal";
 import { Toast } from "../../index";
 import {
   useCreateKundliMutation,
@@ -67,6 +68,7 @@ const ProfileManager = ({
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState(null);
   const [profileToEdit, setProfileToEdit] = useState(null);
 
@@ -187,6 +189,13 @@ const ProfileManager = ({
     // Maximum of 5 profiles allowed
     if (profiles.length >= 5) {
       Toast.error("Please Delete One Kundli from Existing One");
+      return;
+    }
+
+    // If user is not logged in, open guest auth modal instead
+    if (!token) {
+      onClose();
+      setShowGuestAuthModal(true);
       return;
     }
 
@@ -547,6 +556,19 @@ const ProfileManager = ({
         message="Are you sure you want to delete this profile? This action cannot be undone."
         onCancel={handleCancelDelete}
         onConfirm={confirmDeleteProfile}
+      />
+
+      {/* Guest Auth Modal — shown when non-logged-in user tries to add profile */}
+      <GuestKundliAuthModal
+        isOpen={showGuestAuthModal}
+        onClose={() => setShowGuestAuthModal(false)}
+        onSuccess={(profile) => {
+          setShowGuestAuthModal(false);
+          if (profile && onProfileSelect) {
+            onProfileSelect(profile);
+          }
+          onClose();
+        }}
       />
     </>
   );
