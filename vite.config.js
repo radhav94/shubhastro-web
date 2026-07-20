@@ -121,8 +121,8 @@ export default defineConfig({
     },
   },
   esbuild: {
-    // Remove console.log and console.warn in production, keep console.error
-    pure: process.env.NODE_ENV === 'production' ? ['console.log', 'console.warn', 'console.info', 'console.debug'] : [],
-    drop: process.env.NODE_ENV === 'production' ? ['debugger'] : [],
+    // Console logs enabled on all environments for debugging
+    pure: [],
+    drop: [],
   },
 });
