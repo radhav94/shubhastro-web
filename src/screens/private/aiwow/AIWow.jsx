@@ -84,12 +84,11 @@ const AIWow = () => {
   const rawHistoryList = historyData?.data?.history || [];
   const charges = chargesData?.data || null;
 
-  // Deduplicate history — same featureType within same minute means same analysis, keep the one with pdfPath
+  // Deduplicate history — same featureId means same analysis, keep the one with pdfPath (completed)
   const historyList = useMemo(() => {
     const seen = new Map();
     for (const item of rawHistoryList) {
-      const time = new Date(item.createdAt).getTime();
-      const key = `${item.featureType}-${Math.floor(time / 60000)}`;
+      const key = item.featureId || item._id;
       const existing = seen.get(key);
       if (!existing || (item.pdfPath && !existing.pdfPath)) {
         seen.set(key, item);

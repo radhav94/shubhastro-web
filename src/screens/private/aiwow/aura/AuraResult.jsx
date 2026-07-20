@@ -44,8 +44,11 @@ const AuraResult = () => {
 
   const downloadResultData = useMemo(() => {
     if (!analysisData) return null;
-    if (analysisData.featureName) return analysisData;
-    return { ...analysisData, featureName: 'Aura Analysis' };
+    const { pdfPath, data, ...rest } = analysisData;
+    const cleanData = data ? (() => { const { pdfPath: _p, ...d } = data; return d; })() : undefined;
+    const result = cleanData !== undefined ? { ...rest, data: cleanData } : rest;
+    if (result.featureName) return result;
+    return { ...result, featureName: 'aura-analysis' };
   }, [analysisData]);
 
   const {

@@ -1,9 +1,8 @@
 /**
- * Analytics utility — pushes events to GTM dataLayer
+ * Analytics utility — pushes events to both GTM dataLayer and direct GA4 gtag.
  *
- * GTM (GTM-T5DTGXHW) is already configured in index.html.
- * Events are pushed via dataLayer and routed to GA4/other
- * destinations through GTM triggers.
+ * GTM (GTM-T5DTGXHW) and gtag (G-MQBQTN9GSH) are configured in index.html.
+ * Events are pushed to both for redundancy.
  *
  * All events automatically include base context:
  * - user_id: customer ID from localStorage
@@ -21,20 +20,12 @@ const APP_VERSION = import.meta.env.VITE_APP_VERSION || "1.0.0";
 const DEVICE_TYPE = /Mobi|Android/i.test(navigator.userAgent) ? "mobile" : "desktop";
 
 /**
- * Track an analytics event via GTM dataLayer
+ * Track an analytics event via GTM dataLayer + direct GA4 gtag
  * @param {string} eventName - snake_case event name
  * @param {Record<string, unknown>} [properties] - event-specific properties
  */
 export const trackEvent = (eventName, properties = {}) => {
-  const dataLayer = window.dataLayer;
-
-  if (!Array.isArray(dataLayer)) {
-    if (IS_DEV) console.warn("[Analytics] dataLayer not available, skipping:", eventName);
-    return;
-  }
-
   const payload = {
-    event: eventName,
     user_id: localStorage.getItem("shubhtalk_customer_id") || "anonymous",
     timestamp: new Date().toISOString(),
     app_version: APP_VERSION,
@@ -42,9 +33,19 @@ export const trackEvent = (eventName, properties = {}) => {
     ...properties,
   };
 
-  dataLayer.push(payload);
-
-  if (IS_DEV) {
-    console.log("[Analytics]", eventName, payload);
+  // GTM
+  if (Array.isArray(window.dataLayer)) {
+    window.dataLayer.push({
+      event: eventName,
+      ...payload,
+    });
   }
+
+  // Direct GA4
+  if (typeof window.gtag === "function") {
+    window.gtag("event", eventName, payload);
+    console.log("Gtag event called");
+  }
+
+  console.log("[Analytics]", eventName, payload);
 };

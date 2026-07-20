@@ -23,9 +23,12 @@ export const aiwowApi = privateRequestNew.injectEndpoints({
       serializeQueryArgs: ({ queryArgs }) => queryArgs.kundliId,
       merge: (currentCache, newItems, { arg }) => {
         if (arg.page === 1) return newItems;
-        // Deduplicate by _id when merging paginated results
+        // Deduplicate by _id and featureId when merging paginated results
         const existingIds = new Set((currentCache?.data?.history || []).map((h) => h._id));
-        const uniqueNewItems = (newItems?.data?.history || []).filter((h) => !existingIds.has(h._id));
+        const existingFeatureIds = new Set((currentCache?.data?.history || []).filter((h) => h.featureId).map((h) => h.featureId));
+        const uniqueNewItems = (newItems?.data?.history || []).filter(
+          (h) => !existingIds.has(h._id) && (!h.featureId || !existingFeatureIds.has(h.featureId))
+        );
         return {
           ...newItems,
           data: {
