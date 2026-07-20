@@ -110,6 +110,12 @@ const AIWowSection = () => {
   };
 
   const handleCardClick = (slug) => {
+    // AR Vastu Scanner is an app-only feature — show its own modal directly,
+    // never the guest kundli popup.
+    if (slug === "ar-vastu-scanner") {
+      setShowMobileAppModal(true);
+      return;
+    }
     // Guests: kundli-based features collect kundli + verify OTP up front;
     // image-based features are gated later at the photo step.
     if (!isLoggedIn && !guestAccessSlugs.includes(slug)) {

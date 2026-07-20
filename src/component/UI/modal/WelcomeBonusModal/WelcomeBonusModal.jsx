@@ -31,6 +31,13 @@ const WelcomeBonusModal = () => {
     }
   }, [isOpen, refreshWallet]);
 
+  // Auto-hide the popup after 5 seconds.
+  useEffect(() => {
+    if (!isOpen) return;
+    const timer = setTimeout(() => setIsOpen(false), 5000);
+    return () => clearTimeout(timer);
+  }, [isOpen]);
+
   const amount = balance ?? 0;
 
   if (!isOpen) return null;

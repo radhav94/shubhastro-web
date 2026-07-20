@@ -5,21 +5,21 @@ import { Toast } from '../../../../component';
 import { startKundliChat, sendKundliChatMessage } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const TalkToKundliChat = () => {
   const navigate = useNavigate();
-  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  // Guests have no token yet — show the add-kundli guest flow instead of
+  // redirecting. Flips to true once the guest completes the flow.
+  const [hasToken, setHasToken] = useState(
+    () => !!localStorage.getItem("shubhtalk_customer_token")
+  );
+  // Don't force a profile/redirect for guests; the guest flow handles it.
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
+    required: hasToken,
+    showToast: hasToken,
+  });
 
-  useEffect(() => {
-    const token = localStorage.getItem("shubhtalk_customer_token");
-    if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/aiwow/talk-to-your-kundli");
-      window.location.href = "/login?skip=welcome";
-    }
-  }, []);
-
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
-  
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,10 +35,10 @@ const TalkToKundliChat = () => {
 
   // Start session when profile is loaded
   useEffect(() => {
-    if (profile && !profileLoading) {
+    if (hasToken && profile && !profileLoading) {
       startSession(profile);
     }
-  }, [profile, profileLoading]);
+  }, [hasToken, profile, profileLoading]);
 
   // Auto-scroll to show latest message above input
   useEffect(() => {
@@ -46,10 +46,6 @@ const TalkToKundliChat = () => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }, 100);
   }, [messages, isLoading]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  };
 
   const startSession = async (profile) => {
     try {
@@ -187,6 +183,18 @@ const TalkToKundliChat = () => {
   const handleBack = () => {
     navigate('/ai-wow');
   };
+
+  // Guest: open the add-kundli flow (kundli + OTP). On success the token and a
+  // self kundli exist, so we flip to the chat.
+  if (!hasToken) {
+    return (
+      <GuestKundliAuthModal
+        isOpen
+        onClose={() => navigate('/ai-wow')}
+        onSuccess={() => setHasToken(true)}
+      />
+    );
+  }
 
   if (profileLoading) {
     return <PrimaryLoader isLoading={true} />;

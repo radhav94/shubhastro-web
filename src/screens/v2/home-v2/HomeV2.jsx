@@ -1,5 +1,5 @@
 import styles from "./HomeV2.module.scss";
-import { useState, useMemo, useEffect, useCallback, lazy, Suspense, Fragment } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense, Fragment } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
@@ -22,6 +22,7 @@ import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, Astr
 import ProfileModals from "../../private/kundli/components/ProfileModals";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
+import { GuestKundliAuthModal } from "../../../component/UI/Profile";
 const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));
 
 // Fallback images
@@ -351,6 +352,8 @@ const HomeV2 = () => {
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingWowPathRef = useRef(null);
 
   // ─── Data Fetching ────────────────────────────────────────────────────────
   const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery();
@@ -403,8 +406,20 @@ const HomeV2 = () => {
     const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
     if (guestAccessSlugs.includes(item.slug)) { navigate(path); return; }
     const token = localStorage.getItem("shubhtalk_customer_token");
-    if (!token) { localStorage.setItem("shubhtalk_redirect_after_login", path); window.location.href = "/login?skip=welcome"; return; }
+    if (!token) {
+      // Guests: open the add-kundli guest flow instead of redirecting to login.
+      pendingWowPathRef.current = path;
+      setShowGuestAuthModal(true);
+      return;
+    }
     navigate(path);
+  }, [navigate]);
+
+  const handleGuestAuthSuccess = useCallback(() => {
+    setShowGuestAuthModal(false);
+    const path = pendingWowPathRef.current;
+    pendingWowPathRef.current = null;
+    if (path) navigate(path);
   }, [navigate]);
 
   // Mahadasha
@@ -496,6 +511,11 @@ const HomeV2 = () => {
         <ProfileModals profiles={profiles} isCreating={isCreating} showAddProfile={showAddProfile} showEditProfile={showEditProfile} formData={formData} editFormData={editFormData} setShowAddProfile={setShowAddProfile} setShowEditProfile={setShowEditProfile} setFormData={setFormData} setEditFormData={setEditFormData} handleAddProfile={handleAddProfile} handleSubmitProfile={handleSubmitProfile} handleSubmitEditProfile={handleSubmitEditProfile} formatProfileDisplay={formatProfileDisplay} openModal={hookOpenModal} setOpenModal={hookSetOpenModal} selectedAstrologer={hookSelectedAstrologer} localSelectedProfile={localSelectedProfile} setLocalSelectedProfile={setLocalSelectedProfile} onContinue={handleProfileManagerStartCall} connectionType={connectionType} />
         <EmergencySessionModal isOpen={showEmergencyModal} onClose={handleEmergencyClose} astrologer={selectedAstrologer} onChatNow={handleEmergencyChatNow} onCallNow={handleEmergencyCallNow} />
         <MobileAppModal isOpen={showMobileAppModal} onClose={handleMobileAppClose} />
+        <GuestKundliAuthModal
+          isOpen={showGuestAuthModal}
+          onClose={() => { setShowGuestAuthModal(false); pendingWowPathRef.current = null; }}
+          onSuccess={handleGuestAuthSuccess}
+        />
       </Suspense>
       <RechargeModal
         isOpen={hookOpenModal.recharge}

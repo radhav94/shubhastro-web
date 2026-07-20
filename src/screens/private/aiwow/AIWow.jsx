@@ -262,6 +262,12 @@ const AIWow = () => {
   };
 
   const handleClick = (slug) => {
+    // AR Vastu Scanner is an app-only feature — show its own modal directly,
+    // never the guest kundli popup or an auth gate.
+    if (slug === "ar-vastu-scanner") {
+      setShowMobileAppModal(true);
+      return;
+    }
     // Allow guest users to view intro pages for these features
     const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
     // All features require login

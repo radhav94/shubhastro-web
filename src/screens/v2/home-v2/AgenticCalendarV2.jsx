@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FiChevronRight, FiCalendar, FiChevronLeft } from "react-icons/fi";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import useUserLocation from "../../../utils/hooks/useUserLocation";
+import { GuestKundliAuthModal } from "../../../component/UI/Profile";
 
 const OCCASIONS = [
   'Marriage', 'Job Interview', 'Business Launch', 'House Purchase',
@@ -15,6 +16,21 @@ const AgenticCalendarV2 = ({ styles }) => {
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const userLocation = useUserLocation();
+
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingActionRef = useRef(null);
+
+  // Guests open the add-kundli flow; the pending navigation runs after login.
+  const openGuestAuth = (action) => {
+    pendingActionRef.current = action;
+    setShowGuestAuthModal(true);
+  };
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    if (action) action();
+  };
 
   const [selectedOccasions, setSelectedOccasions] = useState([]);
   const [customOccasions, setCustomOccasions] = useState([]);
@@ -70,16 +86,16 @@ const AgenticCalendarV2 = ({ styles }) => {
   };
 
   const handleGetMuhurat = () => {
-    if (!isLoggedIn) { navigate("/login"); return; }
-    navigate("/ai-wow/muhurat-calendar", {
-      state: {
-        occasions: selectedOccasions,
-        period: selectedPeriod,
-        customDate: customFromDate ? customFromDate.toISOString() : null,
-        customToDate: customToDate ? customToDate.toISOString() : null,
-        location: locationData,
-      },
-    });
+    const state = {
+      occasions: selectedOccasions,
+      period: selectedPeriod,
+      customDate: customFromDate ? customFromDate.toISOString() : null,
+      customToDate: customToDate ? customToDate.toISOString() : null,
+      location: locationData,
+    };
+    const go = () => navigate("/ai-wow/muhurat-calendar", { state });
+    if (!isLoggedIn) { openGuestAuth(go); return; }
+    go();
   };
 
   return (
@@ -94,7 +110,7 @@ const AgenticCalendarV2 = ({ styles }) => {
             </svg>
           </div>
         </div>
-        <button className={styles.viewAllBtn} style={{ color: '#f75801' }} onClick={() => { if (!isLoggedIn) { navigate('/login'); return; } navigate('/ai-wow/muhurat-calendar'); }}>
+        <button className={styles.viewAllBtn} style={{ color: '#f75801' }} onClick={() => { const go = () => navigate('/ai-wow/muhurat-calendar'); if (!isLoggedIn) { openGuestAuth(go); return; } go(); }}>
           View All <FiChevronRight size={14} />
         </button>
       </div>
@@ -300,6 +316,15 @@ const AgenticCalendarV2 = ({ styles }) => {
             >Add</button>
           </div>
         </div>,
+        document.body
+      )}
+
+      {showGuestAuthModal && createPortal(
+        <GuestKundliAuthModal
+          isOpen
+          onClose={() => { setShowGuestAuthModal(false); pendingActionRef.current = null; }}
+          onSuccess={handleGuestAuthSuccess}
+        />,
         document.body
       )}
     </>
