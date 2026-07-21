@@ -68,9 +68,13 @@ const ProfileManager = ({
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState(null);
   const [profileToEdit, setProfileToEdit] = useState(null);
+
+  // Track whether we started a guest auth flow. This prevents the
+  // ProfileListingModal from flashing when `loginSuccess` sets a token
+  // mid-flow (the ternary would otherwise flip to the listing branch).
+  const [guestAuthInProgress, setGuestAuthInProgress] = useState(false);
 
   // State for Start Call mode
   const [selectedProfileForCall, setSelectedProfileForCall] = useState(null);
@@ -143,6 +147,7 @@ const ProfileManager = ({
       setProfileToDelete(null);
       setProfileToEdit(null);
       setSelectedProfileForCall(null);
+      setGuestAuthInProgress(false);
     }
   }, [isOpen]);
 
@@ -503,14 +508,27 @@ const ProfileManager = ({
     };
   };
 
+  // When a guest opens ProfileManager, mark that the auth flow started.
+  // This prevents the ProfileListingModal from flashing when loginSuccess
+  // sets a token mid-flow (which flips the !token condition).
+  useEffect(() => {
+    if (!token && isOpen) {
+      setGuestAuthInProgress(true);
+    }
+  }, [isOpen, token]);
+
   return (
     <>
-      {/* For guests: show GuestKundliAuthModal directly instead of profile listing */}
-      {!token && isOpen ? (
+      {/* For guests (or mid-auth-flow): show GuestKundliAuthModal instead of profile listing */}
+      {(!token || guestAuthInProgress) && isOpen ? (
         <GuestKundliAuthModal
           isOpen={true}
-          onClose={onClose}
+          onClose={() => {
+            setGuestAuthInProgress(false);
+            onClose();
+          }}
           onSuccess={(profile) => {
+            setGuestAuthInProgress(false);
             if (profile && onProfileSelect) {
               onProfileSelect(profile);
             }
