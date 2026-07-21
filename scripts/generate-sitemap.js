@@ -39,10 +39,10 @@ const staticRoutes = [
   { path: '/kundli', priority: '0.8', changefreq: 'monthly' },
   { path: '/match-making', priority: '0.8', changefreq: 'monthly' },
   
-  // AI WOW features
-  { path: '/aiwow', priority: '0.8', changefreq: 'weekly' },
-  { path: '/ai-palmistry-scanner', priority: '0.7', changefreq: 'monthly' },
-  { path: '/clothes-colour-analysis', priority: '0.7', changefreq: 'monthly' },
+  // AI WOW features (canonical base is /ai-wow, feature pages live under /ai-wow/<slug>)
+  { path: '/ai-wow', priority: '0.8', changefreq: 'weekly' },
+  { path: '/ai-wow/ai-palmistry-scanner', priority: '0.7', changefreq: 'monthly' },
+  { path: '/ai-wow/clothes-colour-analysis', priority: '0.7', changefreq: 'monthly' },
   
   // Calculators
   { path: '/numerology-calculator', priority: '0.7', changefreq: 'monthly' },
@@ -92,6 +92,30 @@ horoscopeTypes.forEach(type => {
 // Combine all routes
 const allRoutes = [...staticRoutes, ...dynamicRoutes];
 
+// AI-Wow feature slugs. Their canonical route is /ai-wow/<slug>, but several
+// APIs (and the static-pages list) expose them as bare slugs. Any of these must
+// resolve to the /ai-wow/ path in the sitemap, not the root alias.
+const AI_WOW_FEATURE_SLUGS = new Set([
+  'ai-palmistry-scanner',
+  'astro-face-reading',
+  'signature-analysis',
+  'gemstone-authenticity',
+  'clothes-colour-analysis',
+  'aura-photography',
+  'talk-to-your-kundli',
+  'cosmic-chat',
+  'daily-cosmic-briefing',
+  'dream-interpreter',
+  'smart-matchmaking',
+  'ar-vastu-scanner',
+]);
+
+// Build a sitemap path from an API slug, prefixing AI-Wow features with /ai-wow.
+const slugToPath = (slug) => {
+  const clean = String(slug).replace(/^\/+/, '');
+  return AI_WOW_FEATURE_SLUGS.has(clean) ? `/ai-wow/${clean}` : `/${clean}`;
+};
+
 // Fetch dynamic static pages from the API and return them as sitemap routes
 async function fetchStaticPageRoutes() {
   try {
@@ -107,7 +131,7 @@ async function fetchStaticPageRoutes() {
     return list
       .filter((page) => page?.slug)
       .map((page) => ({
-        path: `/${page.slug}`,
+        path: slugToPath(page.slug),
         priority: '0.4',
         changefreq: 'monthly',
       }));
