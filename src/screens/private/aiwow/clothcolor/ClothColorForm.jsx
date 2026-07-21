@@ -110,9 +110,12 @@ const ClothColorForm = () => {
             </div>
           </div>
 
-          <button type="submit" className={styles.submitButton}>
-            Continue
-          </button>
+          <div className={styles.mobileBottomBar}>
+            <button type="submit" className={styles.submitButton}>
+              Continue
+            </button>
+          </div>
+          
         </form>
       </div>
     </div>

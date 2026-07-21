@@ -6,10 +6,13 @@
 }
 
 .title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   width: fit-content;
   margin: 0 auto 0 auto;
+  @media (width <= 767px) {
+    font-size: 18px;
+  }
 }
 
 .headingUnderline {
@@ -31,9 +34,14 @@
 }
 
 .subtitle {
-  color: #030303;
+  color: #484848;
   margin-bottom: 24px;
-  font-weight: 500;
+  // font-weight: 500;
+  font-size: 16px;
+  @media (width <= 767px) {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
 }
 
 .tableWrapper {
@@ -61,6 +69,9 @@ td {
   padding: 14px;
   font-size: 14px;
   text-align: left;
+  &:not(:first-child){
+    text-align: center;
+  }
 }
 
 tbody tr:not(:last-child) {
