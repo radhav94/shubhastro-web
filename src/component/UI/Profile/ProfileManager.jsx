@@ -505,6 +505,20 @@ const ProfileManager = ({
 
   return (
     <>
+      {/* For guests: show GuestKundliAuthModal directly instead of profile listing */}
+      {!token && isOpen ? (
+        <GuestKundliAuthModal
+          isOpen={true}
+          onClose={onClose}
+          onSuccess={(profile) => {
+            if (profile && onProfileSelect) {
+              onProfileSelect(profile);
+            }
+            onClose();
+          }}
+        />
+      ) : (
+      <>
       {/* Profile Listing Modal */}
       <ProfileListingModal
         isOpen={isOpen}
@@ -557,19 +571,8 @@ const ProfileManager = ({
         onCancel={handleCancelDelete}
         onConfirm={confirmDeleteProfile}
       />
-
-      {/* Guest Auth Modal — shown when non-logged-in user tries to add profile */}
-      <GuestKundliAuthModal
-        isOpen={showGuestAuthModal}
-        onClose={() => setShowGuestAuthModal(false)}
-        onSuccess={(profile) => {
-          setShowGuestAuthModal(false);
-          if (profile && onProfileSelect) {
-            onProfileSelect(profile);
-          }
-          onClose();
-        }}
-      />
+      </>
+      )}
     </>
   );
 };
