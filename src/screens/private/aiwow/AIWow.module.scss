@@ -31,13 +31,9 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding:16px 16px;
+  padding:4px 16px;
   max-width: 1440px;
   margin: 0 auto;
-  @media (width <= 767px) {
-    // justify-content: space-between;
-    padding:6px 16px;
-  }
 }
 .headerBack{
   display: flex;
