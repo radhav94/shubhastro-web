@@ -461,6 +461,17 @@ const Profile = () => {
 
   // Helper: Get primary profile (prioritize Redux selectedKundli, then 'self' relation, otherwise first profile)
   const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
+
+  // Clear stale selectedKundli if the profile no longer exists in the fetched list
+  useEffect(() => {
+    if (selectedKundli?._id && savedKundlis.length > 0) {
+      const exists = savedKundlis.some(p => p._id === selectedKundli._id);
+      if (!exists) {
+        dispatch(clearSelectedKundli());
+      }
+    }
+  }, [savedKundlis, selectedKundli, dispatch]);
+
   const primaryProfile = (() => {
     if (selectedKundli?._id) {
       const found = savedKundlis.find(p => p._id === selectedKundli._id);
@@ -1287,6 +1298,11 @@ const Profile = () => {
       console.log("Delete successful:", result);
       Toast.success("Profile deleted successfully");
       trackEvent("profile_deleted", { deleted_profile_id: profileToDelete });
+
+      // Clear selected kundli if the deleted profile was the one selected
+      if (selectedKundli?._id === profileToDelete) {
+        dispatch(clearSelectedKundli());
+      }
 
       setShowDeleteModal(false);
       setProfileToDelete(null);
