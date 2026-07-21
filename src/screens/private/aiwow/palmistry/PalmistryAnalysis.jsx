@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './PalmistryAnalysis.module.scss';
 import { analyzePalm } from '../../../../services/appServices/aiWowService';
-import { setPalmistryResult, setPalmistryResultId, clearPalmistryData } from '../../../../redux/aiwow/aiwowSlice';
+import { setPalmistryResult, setPalmistryResultId, clearPalmistryData, setPalmistrySelectedHand } from '../../../../redux/aiwow/aiwowSlice';
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import BackButton from '../../../../component/UI/BackButton/BackButton';
@@ -30,6 +30,26 @@ const PalmistryAnalysis = () => {
   const isMountedRef = React.useRef(true);
   const abortControllerRef = React.useRef(null);
   const hasStartedRef = React.useRef(false);
+  // Ensures we only auto-retry with the opposite hand once, to avoid a loop
+  // when the image isn't a valid palm at all.
+  const handSwapAttemptedRef = React.useRef(false);
+
+  // The backend AI rejects the image when the detected palm side doesn't match
+  // the selected hand (e.g. "please upload your left hand"). Hand-side detection
+  // is unreliable (mirroring), so instead of blocking the user we transparently
+  // re-run the analysis for the opposite hand.
+  const isHandMismatchError = (err) => {
+    const msg = (typeof err === 'string' ? err : err?.message || '').toLowerCase();
+    if (!msg.includes('hand') && !msg.includes('palm')) return false;
+    return (
+      msg.includes('left') ||
+      msg.includes('right') ||
+      msg.includes('upload') ||
+      msg.includes('other') ||
+      msg.includes('different') ||
+      msg.includes('match')
+    );
+  };
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -121,7 +141,19 @@ const PalmistryAnalysis = () => {
       } else {
         // DON'T clear data on error - keep image and hand selection for retry
         // dispatch(clearPalmistryData());
-        
+
+        // Hand-side mismatch: the backend thinks this is the other hand.
+        // Auto-retry once with the opposite hand so the user isn't blocked,
+        // and update the stored selection so the result shows the right label.
+        if (isHandMismatchError(result.error) && !handSwapAttemptedRef.current) {
+          handSwapAttemptedRef.current = true;
+          const otherHand = hand === 'left' ? 'right' : 'left';
+          dispatch(setPalmistrySelectedHand(otherHand));
+          setProgress(0);
+          await performAnalysis(imageData, otherHand);
+          return;
+        }
+
         setProgress(0);
         // Don't show Toast here - interceptor already showed it
         // Show generic error to users
