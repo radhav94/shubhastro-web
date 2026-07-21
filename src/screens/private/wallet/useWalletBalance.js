@@ -12,6 +12,7 @@ export const useWalletBalance = () => {
 
   const [trigger, { data, isFetching }] = useLazyGetWalletBalanceQuery();
   const fetchCount = useRef(0);
+  const isSelfUpdate = useRef(false);
 
   useEffect(() => {
     if (!getToken()) return;
@@ -25,6 +26,11 @@ export const useWalletBalance = () => {
       const newBalance = Number(data.data);
       localStorage.setItem(LOCAL_KEY, newBalance);
       setBalance(newBalance);
+      // Notify other hook instances in the same tab
+      isSelfUpdate.current = true;
+      window.dispatchEvent(
+        new CustomEvent("walletBalanceSynced", { detail: { balance: newBalance } })
+      );
     }
   }, [data, fetchCount.current]);
 
@@ -54,10 +60,42 @@ export const useWalletBalance = () => {
       if (newBalance !== undefined && !isNaN(newBalance)) {
         localStorage.setItem(LOCAL_KEY, String(newBalance));
         setBalance(Number(newBalance));
+        // Notify other hook instances in the same tab
+        isSelfUpdate.current = true;
+        window.dispatchEvent(
+          new CustomEvent("walletBalanceSynced", { detail: { balance: Number(newBalance) } })
+        );
       }
     };
     window.addEventListener("walletBalanceFromSocket", handleSocketBalance);
     return () => window.removeEventListener("walletBalanceFromSocket", handleSocketBalance);
+  }, []);
+
+  // Sync balance across multiple hook instances within the same tab
+  useEffect(() => {
+    const handleBalanceSync = (e) => {
+      if (isSelfUpdate.current) {
+        isSelfUpdate.current = false;
+        return;
+      }
+      const newBalance = e.detail?.balance;
+      if (newBalance !== undefined && !isNaN(newBalance)) {
+        setBalance(Number(newBalance));
+      }
+    };
+    window.addEventListener("walletBalanceSynced", handleBalanceSync);
+    return () => window.removeEventListener("walletBalanceSynced", handleBalanceSync);
+  }, []);
+
+  // Sync balance across browser tabs via storage event
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === LOCAL_KEY && e.newValue !== null) {
+        setBalance(Number(e.newValue));
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   return {
