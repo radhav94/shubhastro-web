@@ -14,15 +14,24 @@ const WelcomeBonusModal = () => {
   // the app shows (it persists to localStorage and refreshes on wallet events).
   const { balance, refreshWallet } = useWalletBalance();
 
-  // Show the bonus whenever the flag is set. Checked on mount AND on every
-  // navigation, so it works even when this modal is mounted persistently
-  // (e.g. the user is registered mid-flow and then lands on a result screen).
-  useEffect(() => {
+  // Show the bonus whenever the flag is set. Checked on mount, on every
+  // navigation, AND when explicitly triggered via a custom event (so it appears
+  // immediately after guest registration without requiring a route change).
+  const checkAndShowBonus = () => {
     if (localStorage.getItem("shubhtalk_show_welcome_bonus") === "true") {
       localStorage.removeItem("shubhtalk_show_welcome_bonus");
       setIsOpen(true);
     }
+  };
+
+  useEffect(() => {
+    checkAndShowBonus();
   }, [location.pathname]);
+
+  useEffect(() => {
+    window.addEventListener("show-welcome-bonus", checkAndShowBonus);
+    return () => window.removeEventListener("show-welcome-bonus", checkAndShowBonus);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -34,9 +43,15 @@ const WelcomeBonusModal = () => {
   // Auto-hide the popup after 5 seconds.
   useEffect(() => {
     if (!isOpen) return;
-    const timer = setTimeout(() => setIsOpen(false), 5000);
+    const timer = setTimeout(() => handleClose(), 5000);
     return () => clearTimeout(timer);
   }, [isOpen]);
+
+  const handleClose = () => {
+    setIsOpen(false);
+    // Notify listeners (e.g. GuestKundliAuthModal) that the popup has been dismissed.
+    window.dispatchEvent(new Event("welcome-bonus-closed"));
+  };
 
   const amount = balance ?? 0;
 
@@ -45,7 +60,7 @@ const WelcomeBonusModal = () => {
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        <button className={styles.closeBtn} onClick={() => setIsOpen(false)} aria-label="Close">
+        <button className={styles.closeBtn} onClick={handleClose} aria-label="Close">
           <IoClose size={22} />
         </button>
         <div className={styles.bgWrapper}>
@@ -63,7 +78,7 @@ const WelcomeBonusModal = () => {
           <p className={styles.desc}>
             Use it to talk to expert astrologers & begin your cosmic journey.
           </p>
-          <button className={styles.doneBtn} onClick={() => setIsOpen(false)}>
+          <button className={styles.doneBtn} onClick={handleClose}>
             Start Exploring
           </button>
         </div>

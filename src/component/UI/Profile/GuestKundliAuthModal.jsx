@@ -37,7 +37,7 @@ const GuestKundliAuthModal = ({
   const [createKundli] = useCreateKundliMutation();
   const [fetchAllKundlis] = useLazyGetAllKundlisQuery();
 
-  const [step, setStep] = useState("kundli"); // "kundli" | "otp"
+  const [step, setStep] = useState("kundli"); // "kundli" | "otp" | "done"
   const [pendingKundli, setPendingKundli] = useState(null);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [sendingOtp, setSendingOtp] = useState(false);
@@ -296,6 +296,33 @@ const GuestKundliAuthModal = ({
       }
 
       Toast.success("Logged in successfully");
+
+      // Move to a "done" step so neither the kundli form nor OTP modal re-appears
+      // while we wait for the welcome-bonus popup to close.
+      setStep("done");
+
+      // For new users, the welcome-bonus popup should be visible before we
+      // trigger the success callback (which navigates/shows results). Wait for
+      // the popup to close via the custom event it dispatches.
+      if (!isExistingUser) {
+        // Immediately tell the WelcomeBonusModal to check the flag (no route
+        // change happens here, so the pathname-based effect won't fire on its own).
+        window.dispatchEvent(new Event("show-welcome-bonus"));
+
+        await new Promise((resolve) => {
+          const handler = () => {
+            window.removeEventListener("welcome-bonus-closed", handler);
+            resolve();
+          };
+          window.addEventListener("welcome-bonus-closed", handler);
+          // Safety timeout in case the event never fires (e.g. component unmounted).
+          setTimeout(() => {
+            window.removeEventListener("welcome-bonus-closed", handler);
+            resolve();
+          }, 6000);
+        });
+      }
+
       resetState();
       onSuccess?.(createdProfile);
       return true;
