@@ -37,7 +37,7 @@ const GuestKundliAuthModal = ({
   const [createKundli] = useCreateKundliMutation();
   const [fetchAllKundlis] = useLazyGetAllKundlisQuery();
 
-  const [step, setStep] = useState("kundli"); // "kundli" | "otp"
+  const [step, setStep] = useState("kundli"); // "kundli" | "otp" | "done"
   const [pendingKundli, setPendingKundli] = useState(null);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [sendingOtp, setSendingOtp] = useState(false);
@@ -296,6 +296,54 @@ const GuestKundliAuthModal = ({
       }
 
       Toast.success("Logged in successfully");
+
+      // Move to a "done" step so neither the kundli form nor OTP modal re-appears
+      // while we wait for the welcome-bonus popup to close.
+      setStep("done");
+
+      // For new users, the welcome-bonus popup should be visible before we
+      // trigger the success callback (which navigates/shows results). Wait for
+      // the popup to close via the custom event it dispatches.
+      if (!isExistingUser) {
+        // Immediately tell the WelcomeBonusModal to check the flag (no route
+        // change happens here, so the pathname-based effect won't fire on its own).
+        // Small delay to let React settle after loginSuccess re-renders the tree.
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        window.dispatchEvent(new Event("show-welcome-bonus"));
+
+        await new Promise((resolve) => {
+          const handler = () => {
+            window.removeEventListener("welcome-bonus-closed", handler);
+            resolve();
+          };
+          window.addEventListener("welcome-bonus-closed", handler);
+          // Safety timeout in case the event never fires (e.g. component unmounted).
+          setTimeout(() => {
+            window.removeEventListener("welcome-bonus-closed", handler);
+            resolve();
+          }, 6000);
+        });
+      } else {
+        // For existing users, show the welcome-back popup immediately and wait
+        // for it to close before proceeding. Use a short delay to let React
+        // settle after loginSuccess re-renders the tree (WelcomeBackModal may
+        // remount and needs its event listener attached first).
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        window.dispatchEvent(new Event("show-welcome-back"));
+
+        await new Promise((resolve) => {
+          const handler = () => {
+            window.removeEventListener("welcome-back-closed", handler);
+            resolve();
+          };
+          window.addEventListener("welcome-back-closed", handler);
+          setTimeout(() => {
+            window.removeEventListener("welcome-back-closed", handler);
+            resolve();
+          }, 6000);
+        });
+      }
+
       resetState();
       onSuccess?.(createdProfile);
       return true;
