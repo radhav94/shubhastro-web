@@ -117,25 +117,6 @@ async function fetchStaticPageRoutes() {
   }
 }
 
-// Important astrologer SEO landing links (cities + global locations).
-// These map to the `/astrologers/:category` route and mirror the footer/header nav.
-const astrologerLocationSlugs = [
-  // India
-  'mumbai', 'delhi', 'chennai', 'kolkata', 'hyderabad', 'bangalore', 'lucknow',
-  'bhopal', 'cochin', 'pune', 'gurgaon', 'noida', 'chandigarh', 'jaipur',
-  'nagpur', 'patna', 'indore', 'varanasi', 'coimbatore', 'vijaywada',
-  // Global
-  'usa', 'canada', 'uk', 'dubai', 'singapore', 'sharjah', 'california',
-  'chicago', 'dallas', 'new-jersey', 'toronto', 'abu-dhabi', 'doha', 'riyadh',
-  'london', 'sydney', 'kuala-lampur',
-];
-
-const astrologerLocationRoutes = astrologerLocationSlugs.map((slug) => ({
-  path: `/astrologers/${slug}`,
-  priority: '0.5',
-  changefreq: 'monthly',
-}));
-
 // Fetch all blog detail pages (/blog/:slug) by paginating through the blogs API.
 async function fetchBlogRoutes() {
   const routes = [];
@@ -220,7 +201,6 @@ async function generate() {
   const mergedRoutes = [];
   for (const route of [
     ...allRoutes,
-    ...astrologerLocationRoutes,
     ...astrologerCategoryRoutes,
     ...staticPageRoutes,
     ...blogRoutes,
@@ -253,7 +233,7 @@ ${mergedRoutes.map(route => `  <url>
   console.log(
     `✅ Sitemap generated: public/sitemap.xml (${mergedRoutes.length} URLs — ` +
     `${blogRoutes.length} blog pages, ${astrologerCategoryRoutes.length} astrologer categories, ` +
-    `${astrologerLocationRoutes.length} astrologer locations, ${staticPageRoutes.length} static pages)`
+    `${staticPageRoutes.length} static pages)`
   );
 
   // Write to dist if it exists (for production build)
