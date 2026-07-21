@@ -307,6 +307,8 @@ const GuestKundliAuthModal = ({
       if (!isExistingUser) {
         // Immediately tell the WelcomeBonusModal to check the flag (no route
         // change happens here, so the pathname-based effect won't fire on its own).
+        // Small delay to let React settle after loginSuccess re-renders the tree.
+        await new Promise((resolve) => setTimeout(resolve, 100));
         window.dispatchEvent(new Event("show-welcome-bonus"));
 
         await new Promise((resolve) => {
@@ -318,6 +320,25 @@ const GuestKundliAuthModal = ({
           // Safety timeout in case the event never fires (e.g. component unmounted).
           setTimeout(() => {
             window.removeEventListener("welcome-bonus-closed", handler);
+            resolve();
+          }, 6000);
+        });
+      } else {
+        // For existing users, show the welcome-back popup immediately and wait
+        // for it to close before proceeding. Use a short delay to let React
+        // settle after loginSuccess re-renders the tree (WelcomeBackModal may
+        // remount and needs its event listener attached first).
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        window.dispatchEvent(new Event("show-welcome-back"));
+
+        await new Promise((resolve) => {
+          const handler = () => {
+            window.removeEventListener("welcome-back-closed", handler);
+            resolve();
+          };
+          window.addEventListener("welcome-back-closed", handler);
+          setTimeout(() => {
+            window.removeEventListener("welcome-back-closed", handler);
             resolve();
           }, 6000);
         });

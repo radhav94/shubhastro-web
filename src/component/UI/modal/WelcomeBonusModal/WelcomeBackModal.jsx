@@ -20,19 +20,34 @@ const WelcomeBackModal = () => {
     selectedKundli?.name?.split(" ")[0] ||
     "there";
 
-  // Show whenever the flag is set — checked on mount and on every navigation,
-  // so it works even when this modal is mounted persistently.
-  useEffect(() => {
+  // Show whenever the flag is set — checked on mount, on every navigation,
+  // AND when explicitly triggered via a custom event (so it appears immediately
+  // after guest login without requiring a route change).
+  const checkAndShowBack = () => {
     if (localStorage.getItem("shubhtalk_show_welcome_back") === "true") {
       localStorage.removeItem("shubhtalk_show_welcome_back");
       setIsOpen(true);
     }
+  };
+
+  useEffect(() => {
+    checkAndShowBack();
   }, [location.pathname]);
+
+  useEffect(() => {
+    window.addEventListener("show-welcome-back", checkAndShowBack);
+    return () => window.removeEventListener("show-welcome-back", checkAndShowBack);
+  }, []);
+
+  const handleClose = () => {
+    setIsOpen(false);
+    window.dispatchEvent(new Event("welcome-back-closed"));
+  };
 
   // Auto-hide the popup after 5 seconds.
   useEffect(() => {
     if (!isOpen) return;
-    const timer = setTimeout(() => setIsOpen(false), 5000);
+    const timer = setTimeout(() => handleClose(), 5000);
     return () => clearTimeout(timer);
   }, [isOpen]);
 
@@ -41,7 +56,7 @@ const WelcomeBackModal = () => {
   return (
     <div className={styles.overlay}>
       <div className={styles.modal} style={{ aspectRatio: "auto" }}>
-        <button className={styles.closeBtn} onClick={() => setIsOpen(false)} aria-label="Close">
+        <button className={styles.closeBtn} onClick={handleClose} aria-label="Close">
           <IoClose size={22} />
         </button>
         <div className={styles.bgWrapper}>
@@ -55,7 +70,7 @@ const WelcomeBackModal = () => {
           </p>
           <h2 className={styles.title}>Your personalized astrology experience is ready</h2>
           <p className={styles.desc}>Continue where you left off.</p>
-          <button className={styles.doneBtn} onClick={() => setIsOpen(false)}>
+          <button className={styles.doneBtn} onClick={handleClose}>
             Continue
           </button>
         </div>
