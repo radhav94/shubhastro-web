@@ -17,6 +17,52 @@ const SITE_URL = process.env.SITE_URL || 'https://shubhastro.ai';
 // API base URL for fetching dynamic content (static pages, etc.)
 const API_BASE_URL = process.env.SITEMAP_API_URL || 'https://devapi-shubhtalk.epicon.in/api';
 
+// Path to the app's route definitions — used to detect drift between the
+// curated sitemap routes and the actual app routes.
+const PATHS_FILE = path.resolve(__dirname, '../src/utils/routes/Paths.js');
+
+/**
+ * Reads Paths.js and returns a Set of every literal route path declared there
+ * (including each entry of array-form `path: [...]`). Used to warn when a
+ * hardcoded sitemap route no longer matches any real app route.
+ */
+function readAppRoutePaths() {
+  try {
+    const src = fs.readFileSync(PATHS_FILE, 'utf-8');
+    const paths = new Set();
+    // Match every quoted string that starts with "/" (route path literals).
+    const regex = /["'](\/[^"'\s]*)["']/g;
+    let match;
+    while ((match = regex.exec(src)) !== null) {
+      paths.add(match[1]);
+    }
+    return paths;
+  } catch (err) {
+    console.warn(`⚠️  Could not read Paths.js for route validation: ${err.message}`);
+    return null;
+  }
+}
+
+/**
+ * Warns if any curated sitemap route is missing from Paths.js (i.e. a path was
+ * renamed/removed in the app but not updated here). Non-fatal — it only prints
+ * a clear warning so the drift is caught during the build.
+ */
+function validateRoutesAgainstApp(routes) {
+  const appPaths = readAppRoutePaths();
+  if (!appPaths) return;
+  const stale = routes
+    .map((r) => r.path)
+    .filter((p) => p !== '/' && !appPaths.has(p));
+  if (stale.length > 0) {
+    console.warn(
+      '\n⚠️  SITEMAP DRIFT DETECTED — these hardcoded routes are not in Paths.js ' +
+      '(they may have been renamed/removed). Update staticRoutes in generate-sitemap.js:\n' +
+      stale.map((p) => `   - ${p}`).join('\n') + '\n'
+    );
+  }
+}
+
 // Zodiac signs for horoscope routes
 const zodiacSigns = ['aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces'];
 
@@ -95,29 +141,40 @@ const allRoutes = [...staticRoutes, ...dynamicRoutes];
 // AI-Wow feature slugs. Their canonical route is /ai-wow/<slug>, but several
 // APIs (and the static-pages list) expose them as bare slugs. Any of these must
 // resolve to the /ai-wow/ path in the sitemap, not the root alias.
-const AI_WOW_FEATURE_SLUGS = new Set([
-  'ai-palmistry-scanner',
-  'astro-face-reading',
-  'signature-analysis',
-  'gemstone-authenticity',
-  'clothes-colour-analysis',
-  'aura-photography',
-  'talk-to-your-kundli',
-  'cosmic-chat',
-  'daily-cosmic-briefing',
-  'dream-interpreter',
-  'smart-matchmaking',
-  'ar-vastu-scanner',
-]);
 
 // Build a sitemap path from an API slug, prefixing AI-Wow features with /ai-wow.
-const slugToPath = (slug) => {
+const slugToPath = (slug, aiWowSlugs) => {
   const clean = String(slug).replace(/^\/+/, '');
-  return AI_WOW_FEATURE_SLUGS.has(clean) ? `/ai-wow/${clean}` : `/${clean}`;
+  return aiWowSlugs.has(clean) ? `/ai-wow/${clean}` : `/${clean}`;
 };
 
+// Fetch the AI-Wow feature slugs from the AI-suites API. These are the features
+// that live under /ai-wow/<slug>. Fully dynamic — no hardcoded fallback.
+async function fetchAiWowFeatureSlugs() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/homepage/?slug=ai-suites`, {
+      headers: { accept: 'application/json' },
+    });
+    if (!res.ok) throw new Error(`ai-suites returned ${res.status}`);
+    const json = await res.json();
+    const sections = json?.data?.list || [];
+    // Each suite section holds its features in `content[]`.
+    const slugs = sections
+      .flatMap((section) => section?.content || [])
+      .map((item) => item?.slug)
+      .filter(Boolean);
+    if (slugs.length === 0) {
+      console.warn('⚠️  ai-suites returned no feature slugs; AI-Wow pages may be emitted at the root path (/<slug>) instead of /ai-wow/<slug>');
+    }
+    return new Set(slugs);
+  } catch (err) {
+    console.warn(`⚠️  Failed to fetch AI-Wow feature slugs: ${err.message}; AI-Wow pages may be emitted at the root path (/<slug>) instead of /ai-wow/<slug>`);
+    return new Set();
+  }
+}
+
 // Fetch dynamic static pages from the API and return them as sitemap routes
-async function fetchStaticPageRoutes() {
+async function fetchStaticPageRoutes(aiWowSlugs) {
   try {
     const res = await fetch(`${API_BASE_URL}/static-pages/list`, {
       headers: { accept: 'application/json' },
@@ -131,7 +188,7 @@ async function fetchStaticPageRoutes() {
     return list
       .filter((page) => page?.slug)
       .map((page) => ({
-        path: slugToPath(page.slug),
+        path: slugToPath(page.slug, aiWowSlugs),
         priority: '0.4',
         changefreq: 'monthly',
       }));
@@ -213,8 +270,15 @@ async function fetchAstrologerCategoryRoutes() {
 }
 
 async function generate() {
+  // Warn if any curated route no longer matches the app's Paths.js (drift).
+  validateRoutesAgainstApp(staticRoutes);
+
+  // The AI-Wow feature slugs are needed to correctly prefix static-page routes
+  // with /ai-wow, so fetch them first.
+  const aiWowSlugs = await fetchAiWowFeatureSlugs();
+
   const [staticPageRoutes, blogRoutes, astrologerCategoryRoutes] = await Promise.all([
-    fetchStaticPageRoutes(),
+    fetchStaticPageRoutes(aiWowSlugs),
     fetchBlogRoutes(),
     fetchAstrologerCategoryRoutes(),
   ]);
