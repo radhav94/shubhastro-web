@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Plus, Minus } from "lucide-react";
 import { useGetStaticPageBySlugQuery } from "../redux/api/staticPages/staticPagesApi";
 import JsonLd from "./JsonLd";
-import { updateMeta, resetMeta } from "../utils/updateMeta";
+import { updateMeta, resetMeta, updateCanonical } from "../utils/updateMeta";
 import styles from "../screens/public/static-pages/StaticPages.module.scss";
 
 // Routes excluded from CMS static page lookup
@@ -85,6 +85,14 @@ const CmsPageWrapper = ({ children }) => {
       ? pageData.meta_tags.join(", ")
       : pageData.meta_tags
     : "";
+
+  // Always keep the canonical link in sync with the current URL on every
+  // navigation — even for routes excluded from CMS lookup (e.g. astrologer
+  // pages) or routes without a matching CMS entry. Without this, the canonical
+  // would remain stale from the previous page or the index.html default.
+  useEffect(() => {
+    updateCanonical();
+  }, [pathname]);
 
   // Update meta tags when CMS data changes
   useEffect(() => {

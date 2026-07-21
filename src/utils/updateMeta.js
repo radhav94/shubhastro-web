@@ -67,6 +67,23 @@ export const updateMeta = ({ title, description, keywords, image, url } = {}) =>
 };
 
 /**
+ * Update only the canonical link to the given URL (or the current page URL).
+ * Safe to call on every route change, independent of CMS/meta data.
+ *
+ * @param {string} [url] - Absolute URL to set as canonical. Defaults to current page.
+ */
+export const updateCanonical = (url) => {
+  if (typeof document === "undefined") return;
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) {
+    canonical.setAttribute(
+      "href",
+      url || `${window.location.origin}${window.location.pathname}`
+    );
+  }
+};
+
+/**
  * Reset all meta tags back to index.html defaults.
  */
 export const resetMeta = () => {
