@@ -188,6 +188,7 @@ const FinalPay = () => {
 
       <PaymentSuccessModal
         isOpen={successAmount !== null}
+        redirectTo={null}
         onClose={() => {
           setSuccessAmount(null);
           if (returnUrl) {
