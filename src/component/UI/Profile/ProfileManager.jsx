@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import ProfileListingModal from "./ProfileListingModal";
 import AddProfileModal from "./AddProfileModal";
 import EditProfileModal from "./EditProfileModal";
@@ -13,6 +13,7 @@ import {
 } from "../../../services/appServices/kundliServicesNew";
 import { getToken } from "../../../utils/token";
 import { getJSONCookie, setJSONCookie } from "../../../utils/helper/cookies";
+import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 
 // Shared cookie key for guest (non-logged-in) kundli profiles across pages
 const GUEST_KUNDLI_COOKIE = "guestKundliProfiles";
@@ -72,6 +73,8 @@ const ProfileManager = ({
 
   // State for Start Call mode
   const [selectedProfileForCall, setSelectedProfileForCall] = useState(null);
+
+  const dispatch = useDispatch();
 
   // Get token
   const token = getToken();
@@ -415,6 +418,10 @@ const ProfileManager = ({
       if (token) {
         console.log("✅ Calling deleteKundli API with ID:", profileToDelete);
         await deleteKundli(profileToDelete).unwrap();
+        // Clear selected kundli if the deleted profile was the one selected
+        if (reduxSelectedKundli?._id === profileToDelete) {
+          dispatch(clearSelectedKundli());
+        }
         Toast.success("Profile deleted successfully");
       } else {
         // Non-logged-in user: remove from the shared guest cookie when owned here
