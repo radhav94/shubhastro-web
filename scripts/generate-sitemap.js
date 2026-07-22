@@ -171,19 +171,6 @@ async function fetchAiWowFeatureSlugs() {
     console.warn(`⚠️  Failed to fetch AI-Wow feature slugs: ${err.message}; AI-Wow pages may be emitted at the root path (/<slug>) instead of /ai-wow/<slug>`);
     return new Set();
   }
-}   if (!res.ok) throw new Error(`ai-suites returned ${res.status}`);
-    const json = await res.json();
-    const sections = json?.data?.list || [];
-    // Each suite section holds its features in `content[]`.
-    const slugs = sections
-      .flatMap((section) => section?.content || [])
-      .map((item) => item?.slug)
-      .filter(Boolean);
-    return slugs.length > 0 ? new Set(slugs) : new Set(AI_WOW_FEATURE_SLUGS_FALLBACK);
-  } catch (err) {
-    console.warn(`⚠️  Failed to fetch AI-Wow feature slugs: ${err.message}; using fallback list`);
-    return new Set(AI_WOW_FEATURE_SLUGS_FALLBACK);
-  }
 }
 
 // Fetch dynamic static pages from the API and return them as sitemap routes
