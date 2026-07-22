@@ -376,8 +376,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  background: #fff;
+  min-height: 300px;
+  margin: 0 auto;
+  min-width: 500px;
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 12px;
   color: #6b7280;
   font-size: 1rem;
