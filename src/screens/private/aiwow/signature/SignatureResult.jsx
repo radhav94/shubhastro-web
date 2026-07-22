@@ -133,17 +133,19 @@ const SignatureResult = () => {
           <TTSButton text={`Overall Style. Legibility Score: ${resultData.style.legibility?.score} percent. ${resultData.style.legibility?.description || ''}. Uniqueness Score: ${resultData.style.uniqueness?.score} percent. ${resultData.style.uniqueness?.description || ''}. Formality: ${resultData.style.formality || ''}. Complexity: ${resultData.style.complexity || ''}${resultData.style.characteristics?.length > 0 ? '. Key Characteristics: ' + resultData.style.characteristics.join(', ') : ''}`} />
         </span>
         <h3 className={styles.cardTitle}>Overall Style</h3>
-        <div className={styles.infoRow}>
+        {/* <div className={styles.infoRow}>
           <span className={styles.label}>Legibility Score:</span>
           <span className={styles.value}>{resultData.style.legibility?.score}%</span>
-        </div>
+        </div> */}
+        <span className={styles.label}>Legibility Score:</span>
         <p className={styles.description}>{resultData.style.legibility?.description}</p>
         
-        <div className={styles.infoRow}>
+        {/* <div className={styles.infoRow}>
           <span className={styles.label}>Uniqueness Score:</span>
           <span className={styles.value}>{resultData.style.uniqueness?.score}%</span>
-        </div>
-        <p className={styles.description}>{resultData.style.uniqueness?.description}</p>
+        </div> */}
+          <span className={styles.label}>Uniqueness Score:</span>
+           <p className={styles.description}>{resultData.style.uniqueness?.description}</p>
         
         <div className={styles.infoRow}>
           <span className={styles.label}>Formality:</span>
