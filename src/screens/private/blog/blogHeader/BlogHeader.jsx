@@ -94,7 +94,7 @@ const BlogHeader = () => {
                     className={`${styles.blogLink} ${index === 0 ? styles.featured : ""}`}
                   >
                     <BlogCard
-                      image={blog.img}
+                      image={blog?.image?.small || blog?.img}
                       title={blog.title}
                       author={blog.author}
                       date={blog.publishDate}

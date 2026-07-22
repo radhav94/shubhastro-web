@@ -89,7 +89,7 @@ const Blogs = ({ titleShow = true, data }) => {
             className={Styles.blogLink}
           >
             <BlogCard
-              image={blog?.imageUrl}
+              image={blog?.image?.small || blog?.imageUrl}
               title={blog.title}
               author={blog.author}
               date={blog.publishDate}
