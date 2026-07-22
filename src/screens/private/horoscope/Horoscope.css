@@ -51,9 +51,7 @@
   display: flex;
   align-items: center;
   padding: 16px;
-  /* background: #ffffff; */
   gap: 12px;
-  /* margin-bottom: 10px; */
   max-width: 1440px;
   margin: 0 auto;
 }
@@ -1372,7 +1370,12 @@
 @media screen and (max-width: 1180px) {
   .horoscope-page-header {
     top: 53px;
-    padding: 10px 0px;
+    padding: 13px 0px;
+  }
+}
+@media screen and (max-width: 767px) {
+  .horoscope-page-header {
+    padding: 5px 0px;
   }
 }
 
@@ -1382,7 +1385,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding-inline: 16px;
+  padding: 3px 16px;
 }
 
 .horoscope-back-btn {
