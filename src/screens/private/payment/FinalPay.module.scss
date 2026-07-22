@@ -11,13 +11,14 @@ $desktop: 1024px;
 
 .container {
   max-width: 480px;
-  margin: 0 auto;
+  margin: -66px auto 0 auto;
   padding: 16px;
   text-align: center;
 
   @media (max-width: $mobile) {
     padding: 12px;
     max-width: 100%;
+    margin: -54px auto 0 auto;
   }
 
   @media (min-width: $tablet) {
@@ -26,39 +27,26 @@ $desktop: 1024px;
 }
 
 .header {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 600;
   margin-bottom: 20px;
   color: #222;
 
   @media (max-width: $mobile) {
-    font-size: 20px;
+    font-size: 18px;
     margin-bottom: 16px;
-  }
-
-  @media (min-width: $tablet) {
-    font-size: 28px;
-    margin-bottom: 25px;
   }
 }
 
 .card {
   background: white;
   border-radius: 14px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  padding: 20px;
-  margin-bottom: 20px;
+  // box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  margin-bottom: 16px;
 
   @media (max-width: $mobile) {
     border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-
-  @media (min-width: $tablet) {
-    padding: 24px;
-    margin-bottom: 24px;
   }
 }
 
@@ -421,15 +409,10 @@ $desktop: 1024px;
     padding: 12px 16px;
   }
 
-  .header {
-    font-size: 18px;
-    margin-bottom: 12px;
-  }
-
-  .card {
-    padding: 14px;
-    margin-bottom: 14px;
-  }
+  // .card {
+  //   padding: 14px;
+  //   margin-bottom: 14px;
+  // }
 
   .table td {
     padding: 8px 4px;
@@ -452,10 +435,6 @@ $desktop: 1024px;
 @media (max-width: 360px) {
   .container {
     padding: 10px;
-  }
-
-  .header {
-    font-size: 18px;
   }
 
   .table td {
@@ -489,13 +468,9 @@ $desktop: 1024px;
     padding: 24px;
   }
 
-  .header {
-    font-size: 30px;
-  }
-
-  .card {
-    padding: 28px;
-  }
+  // .card {
+  //   padding: 28px;
+  // }
 
   .table td {
     font-size: 17px;
@@ -515,10 +490,10 @@ $desktop: 1024px;
     padding: 0;
   }
 
-  .card {
-    box-shadow: none;
-    border: 1px solid #ddd;
-  }
+  // .card {
+  //   box-shadow: none;
+  //   border: 1px solid #ddd;
+  // }
 }
 
 // Dark mode support (if needed in future)
