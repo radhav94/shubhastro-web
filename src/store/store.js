@@ -29,7 +29,7 @@ import { paymentDirectApi } from "../redux/api/payment/paymentApi";
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth", "kundli", "calculator", "form"], // persist auth, kundli, calculator, and form slices
+  whitelist: ["kundli", "calculator", "form"], // persist kundli, calculator, and form slices
 };
 
 // Persist aiwow results in sessionStorage (clears when tab closes)
