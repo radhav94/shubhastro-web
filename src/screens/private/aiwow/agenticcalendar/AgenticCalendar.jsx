@@ -443,17 +443,8 @@ const AgenticCalendar = () => {
           {analysis?.optimalTimings?.length > 0 && (
             <div className={`${styles.resultsWrap} ${[...new Set(analysis.optimalTimings.map(t => t.eventName))].length === 2 ? styles.resultsTwo : ''} ${[...new Set(analysis.optimalTimings.map(t => t.eventName))].length === 1 ? styles.resultsOne : ''}`} ref={resultsRef}>
               {(() => {
-                // Group timings by eventName
-                const sorted = [...analysis.optimalTimings].sort((a, b) => {
-                  const dateA = a.bestDate || '';
-                  const dateB = b.bestDate || '';
-                  if (dateA !== dateB) return dateA.localeCompare(dateB);
-                  const timeA = a.bestTimeRange || '';
-                  const timeB = b.bestTimeRange || '';
-                  return timeA.localeCompare(timeB);
-                });
-
-                const grouped = sorted.reduce((acc, item) => {
+                // Keep original response order (already ranked by API)
+                const grouped = analysis.optimalTimings.reduce((acc, item) => {
                   if (!acc[item.eventName]) acc[item.eventName] = [];
                   acc[item.eventName].push(item);
                   return acc;
