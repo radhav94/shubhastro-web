@@ -62,8 +62,22 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
   const scrollByCards = useCallback((direction) => {
     const grid = scrollRef.current;
     if (!grid) return;
-    const amount = Math.max(grid.clientWidth * 0.8, 240);
-    grid.scrollBy({ left: direction === "left" ? -amount : amount, behavior: "smooth" });
+    const { scrollLeft, scrollWidth, clientWidth } = grid;
+
+    if (direction === "right") {
+      // Don't scroll if already at the end
+      if (scrollLeft + clientWidth >= scrollWidth - 4) return;
+      // Clamp so we never scroll past the last card
+      const maxScrollRight = scrollWidth - clientWidth - scrollLeft;
+      const amount = Math.min(Math.max(clientWidth * 0.8, 240), maxScrollRight);
+      grid.scrollTo({ left: scrollLeft + amount, behavior: "smooth" });
+    } else {
+      // Don't scroll if already at the start
+      if (scrollLeft <= 4) return;
+      // Clamp so we never scroll before the first card
+      const amount = Math.min(Math.max(clientWidth * 0.8, 240), scrollLeft);
+      grid.scrollTo({ left: scrollLeft - amount, behavior: "smooth" });
+    }
   }, []);
 
   const sessions = useMemo(() => {
