@@ -167,7 +167,7 @@ const SingleBlogDetails = () => {
 
           {/* Banner Image */}
           <img
-            src={singleBLogData.img || defaultBlogImg}
+            src={singleBLogData?.image?.medium || singleBLogData?.img || defaultBlogImg}
             alt={singleBLogData.title}
             className={styles.bannerImage}
             onError={(e) => { e.target.onerror = null; e.target.src = defaultBlogImg; }}
