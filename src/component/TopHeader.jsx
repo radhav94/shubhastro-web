@@ -450,6 +450,13 @@ const TopHeader = () => {
                     My Account
                   </div>
                   <div className={styles.profileDropdownDivider} />
+                   <div
+                    className={styles.profileDropdownItem}
+                    onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen(false); navigate("/ai-wow", { state: { tab: "results" } }); }}
+                  >
+                    Manage Reports
+                  </div>
+                  <div className={styles.profileDropdownDivider} />
                   <div
                     className={`${styles.profileDropdownItem} ${styles.profileDropdownLogout}`}
                     onClick={(e) => { e.stopPropagation(); handleLogout(); }}
