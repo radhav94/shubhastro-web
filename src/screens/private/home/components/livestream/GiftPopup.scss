@@ -31,6 +31,24 @@
   color: #1a1a1a;
 }
 
+.gift-header-right {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.gift-close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  position: relative;
+  top: -2px;
+}
+
 .gift-wallet {
   display: flex;
   flex-direction: column;

@@ -1281,7 +1281,7 @@ const LiveView = (props) => {
                     ? "Following"
                     : "+ Follow"}
                 </button>
-                {isHostMuted && !localPrivateCall && remoteUsers.length > 0 && !roomEnded && (
+                {/* {isHostMuted && !localPrivateCall && remoteUsers.length > 0 && !roomEnded && (
                   <div className="mute-indicator">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="1" y1="1" x2="23" y2="23" />
@@ -1291,7 +1291,7 @@ const LiveView = (props) => {
                       <line x1="8" y1="23" x2="16" y2="23" />
                     </svg>
                   </div>
-                )}
+                )} */}
                 {!localPrivateCall && (
                   <button className="live-grid-btn" onClick={async () => {
                     try {
