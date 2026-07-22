@@ -115,8 +115,8 @@ export const initializeFCM = async () => {
                 fontFamily: "Poppins, sans-serif",
                 color: "#666",
                 overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                // textOverflow: "ellipsis",
+                // whiteSpace: "nowrap",
               }}
             >
               {body || "You have a new notification"}

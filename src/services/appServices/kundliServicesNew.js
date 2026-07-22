@@ -141,6 +141,7 @@ export const kundliApi = privateRequestNew.injectEndpoints({
 
 export const {
   useGetAllKundlisQuery,
+  useLazyGetAllKundlisQuery,
   useCreateKundliMutation,
   useDeleteKundliMutation,
   useEditKundliMutation,

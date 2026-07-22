@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styles from "./LalKitab.module.scss";
 import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
 import { useGenerateLalKitabTevaMutation } from "../../../redux/api/lalKitab/lalKitabApi";
-import { ProfileManager } from "../../../component/UI/Profile";
+import { ProfileManager, GuestKundliAuthModal } from "../../../component/UI/Profile";
 import { Toast } from "../../../component";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
@@ -28,6 +28,8 @@ const LalKitab = () => {
   const requireAuth = useRequireAuth();
 
   const [showProfileManager, setShowProfileManager] = useState(false);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingGuestActionRef = useRef(null);
   const [selectedProfile, setSelectedProfileLocal] = useState(null);
 
   const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
@@ -64,8 +66,8 @@ const LalKitab = () => {
 
   const handleGenerate = async () => {
     if (!isLoggedIn) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/laal-kitab");
-      window.location.href = "/login?skip=welcome";
+      pendingGuestActionRef.current = () => handleGenerate();
+      setShowGuestAuthModal(true);
       return;
     }
     if (!selectedProfile?._id) { Toast.error("Please select a Kundli profile first"); return; }
@@ -201,6 +203,18 @@ const LalKitab = () => {
         selectedProfileId={selectedProfile?._id}
         title="Select Kundli"
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+      />
+
+      <GuestKundliAuthModal
+        isOpen={showGuestAuthModal}
+        onClose={() => { setShowGuestAuthModal(false); pendingGuestActionRef.current = null; }}
+        onSuccess={(profile) => {
+          setShowGuestAuthModal(false);
+          if (profile?._id) setSelectedProfile(profile);
+          const action = pendingGuestActionRef.current;
+          pendingGuestActionRef.current = null;
+          if (action) action(profile);
+        }}
       />
     </div>
     </>
