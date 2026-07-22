@@ -219,6 +219,9 @@ const HomeLayout = () => {
 
   const isOnboardingPage = location.pathname === "/login";
   const isLivePage = location.pathname.startsWith("/live") && !location.pathname.startsWith("/live-chat-policy");
+  // On the guest chat screen the waiting state is shown inline, so suppress the
+  // global sticky waiting popup there (it reappears once the user navigates away).
+  const isGuestChatPage = location.pathname.startsWith("/guest-chat");
   
   const showTopHeader = showRouteTopHeader && !isOnboardingPage && !isLivePage && !isWebview;
 
@@ -308,7 +311,7 @@ const HomeLayout = () => {
 
       <StickyChatFooter />
       <StickyCallFooter />
-      {!isLivePage && <StickyWaitingQueue />}
+      {!isLivePage && !isGuestChatPage && <StickyWaitingQueue />}
       <StickyReview />
     </div>
   );

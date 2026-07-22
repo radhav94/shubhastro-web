@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
 import { getUserFromStorage } from "../../../utils/authStorage";
+import { getToken } from "../../../utils/token";
 import { useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -462,6 +463,12 @@ const HomeV2 = () => {
   }, [selectedAstrologer, pendingConnectionType, handleChatStart, handleCallStart]);
 
   const handleConnectClick = useCallback(async (astrologer, connType, isEmergency = false) => {
+    // Guest chat flow: an unauthenticated user tapping "Chat" goes to the
+    // conversational guest screen instead of the login redirect.
+    if (connType === "chat" && !getToken()) {
+      navigate(`/guest-chat/${astrologer._id}`, { state: { astrologer } });
+      return;
+    }
     if (!requireAuth()) return;
     setSelectedAstrologer(astrologer);
     setAstrologerRef(astrologer);
@@ -471,7 +478,7 @@ const HomeV2 = () => {
       else result = await handleCallStart(astrologer, "audio", isEmergency);
       if (result?.emergencyAvailable) { setShowEmergencyModal(true); return; }
     } else { setPendingConnectionType(connType); hookSetOpenModal(prev => ({ ...prev, kundli: true })); }
-  }, [requireAuth, hasKundli, handleChatStart, handleCallStart, setAstrologerRef, hookSetOpenModal]);
+  }, [requireAuth, hasKundli, handleChatStart, handleCallStart, setAstrologerRef, hookSetOpenModal, navigate]);
 
   // ─── Memoized modal handlers ──────────────────────────────────────────────
   const handleEmergencyClose = useCallback(() => setShowEmergencyModal(false), []);

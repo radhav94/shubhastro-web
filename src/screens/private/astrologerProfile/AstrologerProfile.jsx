@@ -374,8 +374,10 @@ const AstrologerProfile = () => {
   };
 
   const handleChatStart = async (astro, isEmergency = false) => {
+    // Guests start chat through the conversational guest flow rather than login.
     if (!token) {
-      navigate("/login", { state: { from: location.pathname } });
+      const targetAstro = astro || data;
+      navigate(`/guest-chat/${targetAstro?._id}`, { state: { astrologer: targetAstro } });
       return;
     }
     

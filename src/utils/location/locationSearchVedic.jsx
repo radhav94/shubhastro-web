@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLazyGeoSearchQuery } from "../../redux/api/geoApi";
 import styles from "./locationSearch.module.scss";
 
-const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled }) => {
+const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled, dropUp = false }) => {
   const [triggerGeoSearch, { data, isFetching }] = useLazyGeoSearchQuery();
   const [open, setOpen] = useState(false);
   const selectionMade = useRef(false); // Track if a place is selected
@@ -56,7 +56,10 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled 
       />
 
       {open && (
-        <div className={styles.dropdown}>
+        <div
+          className={styles.dropdown}
+          style={dropUp ? { top: "auto", bottom: "100%", marginBottom: 8 } : undefined}
+        >
           {isFetching && <div className={styles.loading}>Searching…</div>}
 
           {!isFetching && results.length === 0 && (

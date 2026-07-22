@@ -520,6 +520,14 @@ const TalkToAstrologer = () => {
   // Handle connect button click - reused from Home page
   // Receives connectionType (chat or audio) from NewAstrologerCard
   const handleConnectClick = async (astrologer, connectionType, isEmergency = false) => {
+    // Guest chat flow: an unauthenticated user tapping "Chat" is taken to a
+    // conversational screen that collects their details, verifies OTP, registers
+    // them, and then initiates the chat — instead of the login redirect.
+    if (connectionType === "chat" && !getToken()) {
+      navigate(`/guest-chat/${astrologer._id}`, { state: { astrologer } });
+      return;
+    }
+
     if (!requireAuth()) return;
 
     // if (WaitingList || callWaitingList) {
