@@ -209,12 +209,21 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   // Keep ref updated for Web OTP auto-submit
   handleContinueRef.current = handleContinue;
 
-  // Auto-submit when all 6 digits are filled
+  // Auto-submit when all 6 digits are filled (debounced to prevent flickering)
+  const autoSubmitTimerRef = useRef(null);
   useEffect(() => {
     if (otp.length === 6 && !loading) {
-      handleContinue();
+      // Small delay to let the UI render the last digit before submitting
+      autoSubmitTimerRef.current = setTimeout(() => {
+        handleContinueRef.current?.();
+      }, 400);
     }
-  }, [otp]);
+    return () => {
+      if (autoSubmitTimerRef.current) {
+        clearTimeout(autoSubmitTimerRef.current);
+      }
+    };
+  }, [otp, loading]);
 
   const handleResend = async () => {
     if (resendTimer === 0) {
