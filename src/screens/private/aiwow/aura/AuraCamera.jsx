@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './AuraCamera.module.scss';
 import { useFaceDetection } from '../../../../utils/hooks/useFaceDetection';
+import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setAuraImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
@@ -155,49 +156,58 @@ const AuraCamera = () => {
     setFacingMode(nextMode);
   };
 
-  const captureImage = () => {
-    if (videoRef.current && canvasRef.current && captureAreaRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      // Draw full frame first
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  // Draw the current video frame, cropped to the capture box, onto a canvas.
+  const cropCurrentFrameToCanvas = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !captureAreaRef.current || !video.videoWidth) return null;
 
-      // Calculate crop bounds from the capture area box
-      const videoRect = video.getBoundingClientRect();
-      const boxRect = captureAreaRef.current.getBoundingClientRect();
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      const bounds = {
-        left: (boxRect.left - videoRect.left) / videoRect.width,
-        right: (boxRect.right - videoRect.left) / videoRect.width,
-        top: (boxRect.top - videoRect.top) / videoRect.height,
-        bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
-      };
+    const videoRect = video.getBoundingClientRect();
+    const boxRect = captureAreaRef.current.getBoundingClientRect();
+    const bounds = {
+      left: (boxRect.left - videoRect.left) / videoRect.width,
+      right: (boxRect.right - videoRect.left) / videoRect.width,
+      top: (boxRect.top - videoRect.top) / videoRect.height,
+      bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
+    };
+    const boxX = bounds.left * canvas.width;
+    const boxY = bounds.top * canvas.height;
+    const boxWidth = (bounds.right - bounds.left) * canvas.width;
+    const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
 
-      const boxX = bounds.left * canvas.width;
-      const boxY = bounds.top * canvas.height;
-      const boxWidth = (bounds.right - bounds.left) * canvas.width;
-      const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
-
-      // Create cropped canvas
-      const cropCanvas = document.createElement('canvas');
-      cropCanvas.width = boxWidth;
-      cropCanvas.height = boxHeight;
-      const cropContext = cropCanvas.getContext('2d');
-      cropContext.drawImage(
-        canvas,
-        boxX, boxY, boxWidth, boxHeight,
-        0, 0, boxWidth, boxHeight
-      );
-
-      const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
-      setCapturedImage(croppedImage);
-      stopCamera();
-    }
+    const cropCanvas = document.createElement('canvas');
+    cropCanvas.width = boxWidth;
+    cropCanvas.height = boxHeight;
+    cropCanvas.getContext('2d').drawImage(
+      canvas,
+      boxX, boxY, boxWidth, boxHeight,
+      0, 0, boxWidth, boxHeight
+    );
+    return cropCanvas;
   };
+
+  const captureImage = () => {
+    const cropCanvas = cropCurrentFrameToCanvas();
+    if (!cropCanvas) return;
+    setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
+    stopCamera();
+  };
+
+  // Auto-capture the sharpest frame once a face is steady in the frame.
+  const { autoCapturing } = useAutoCapture({
+    ready: modelsLoaded && videoReady && faceDetected,
+    active: !capturedImage,
+    getFrameCanvas: cropCurrentFrameToCanvas,
+    onCapture: (dataUrl) => {
+      setCapturedImage(dataUrl);
+      stopCamera();
+    },
+  });
 
   const retakePhoto = () => {
     setCapturedImage(null);
@@ -324,6 +334,11 @@ const AuraCamera = () => {
             {!faceDetected && modelsLoaded && (
               <div className={styles.faceDetectionMessage}>
                 <p>Position your face within the frame</p>
+              </div>
+            )}
+            {faceDetected && autoCapturing && modelsLoaded && (
+              <div className={styles.faceDetectionMessage}>
+                <p>Hold steady… capturing</p>
               </div>
             )}
           </>

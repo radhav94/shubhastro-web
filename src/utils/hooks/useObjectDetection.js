@@ -88,43 +88,87 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
   };
 
   /* ------------------ GEMSTONE DETECTION ------------------ */
+  // Stricter heuristic to avoid false positives (skin, background, clothes).
+  // A real gemstone in frame: a colourful + bright object in the centre that
+  // (a) has bright specular highlights (sparkle) and (b) clearly stands out
+  // from the surrounding background.
   const detectGemstone = (imageData, width, height) => {
     const data = imageData.data;
-    let colorfulPixels = 0;
-    let brightPixels = 0;
-    let totalPixels = data.length / 4;
-
-    // Sample center region (gemstone should be centered)
     const centerX = width / 2;
     const centerY = height / 2;
-    const sampleRadius = Math.min(width, height) * 0.3;
+    const centerRadius = Math.min(width, height) * 0.22; // tight centre
+    const bgRadius = Math.min(width, height) * 0.45;      // surrounding ring
+    const centerR2 = centerRadius * centerRadius;
+    const bgR2 = bgRadius * bgRadius;
 
-    for (let y = centerY - sampleRadius; y < centerY + sampleRadius; y++) {
-      for (let x = centerX - sampleRadius; x < centerX + sampleRadius; x++) {
+    let colorfulPixels = 0;
+    let brightPixels = 0;
+    let specularPixels = 0; // sparkle: very bright highlights
+    let centerCount = 0;
+    let centerBrightnessSum = 0;
+
+    for (let y = Math.floor(centerY - centerRadius); y < centerY + centerRadius; y++) {
+      for (let x = Math.floor(centerX - centerRadius); x < centerX + centerRadius; x++) {
         if (x < 0 || x >= width || y < 0 || y >= height) continue;
+        const dx = x - centerX;
+        const dy = y - centerY;
+        if (dx * dx + dy * dy > centerR2) continue; // circular sample
 
-        const i = (Math.floor(y) * width + Math.floor(x)) * 4;
+        const i = (y * width + x) * 4;
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
-
-        // Check for color saturation (gemstones are usually colorful)
         const max = Math.max(r, g, b);
         const min = Math.min(r, g, b);
         const saturation = max === 0 ? 0 : (max - min) / max;
+        const brightness = (r + g + b) / 3;
 
-        if (saturation > 0.2) colorfulPixels++;
-        if (max > 100) brightPixels++;
+        centerCount++;
+        centerBrightnessSum += brightness;
+        if (saturation > 0.35) colorfulPixels++;   // stricter than before
+        if (max > 120) brightPixels++;
+        if (max > 230 && brightness > 200) specularPixels++; // sparkle
       }
     }
 
-    const sampleSize = Math.PI * sampleRadius * sampleRadius;
-    const colorRatio = colorfulPixels / sampleSize;
-    const brightRatio = brightPixels / sampleSize;
+    if (centerCount === 0) return { detected: false, quality: 0 };
 
-    // Gemstone detected if center has colorful and bright pixels
-    const detected = colorRatio > 0.15 && brightRatio > 0.3;
-    const quality = Math.min(100, Math.round((colorRatio + brightRatio) * 50));
+    // Sample the surrounding background ring for contrast comparison.
+    let bgCount = 0;
+    let bgBrightnessSum = 0;
+    for (let y = Math.floor(centerY - bgRadius); y < centerY + bgRadius; y += 3) {
+      for (let x = Math.floor(centerX - bgRadius); x < centerX + bgRadius; x += 3) {
+        if (x < 0 || x >= width || y < 0 || y >= height) continue;
+        const dx = x - centerX;
+        const dy = y - centerY;
+        const dist2 = dx * dx + dy * dy;
+        if (dist2 <= centerR2 || dist2 > bgR2) continue; // ring only
+
+        const i = (y * width + x) * 4;
+        bgBrightnessSum += (data[i] + data[i + 1] + data[i + 2]) / 3;
+        bgCount++;
+      }
+    }
+
+    const colorRatio = colorfulPixels / centerCount;
+    const brightRatio = brightPixels / centerCount;
+    const specularRatio = specularPixels / centerCount;
+    const centerBrightness = centerBrightnessSum / centerCount;
+    const bgBrightness = bgCount ? bgBrightnessSum / bgCount : centerBrightness;
+
+    const hasSparkle = specularRatio > 0.004 && specularRatio < 0.45;
+    // Object should be noticeably brighter than the background (stands out).
+    const standsOut = centerBrightness > bgBrightness * 1.12;
+
+    const detected =
+      colorRatio > 0.25 &&
+      brightRatio > 0.35 &&
+      hasSparkle &&
+      standsOut;
+
+    const quality = detected
+      ? Math.min(100, Math.round((colorRatio + brightRatio + specularRatio * 6) * 40))
+      : 0;
 
     return { detected, quality };
   };
