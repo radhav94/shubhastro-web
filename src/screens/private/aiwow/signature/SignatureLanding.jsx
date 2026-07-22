@@ -1,21 +1,69 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './SignatureLanding.module.scss';
 import StrokeIcon from '../../../../assets/icons/Stroke.png';
 import PressureIcon from '../../../../assets/icons/pressure.png';
 import LetterIcon from '../../../../assets/icons/letter.png';
 import SignatureSizeIcon from '../../../../assets/icons/signauresize.png';
+import TTSButton from '../../../../component/UI/TTSButton';
+import { getAIWowInstructionImage } from '../../../../utils/appImages';
+import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
+import { compressImage } from '../../../../utils/helper/compressImage';
+import { trackEvent } from '../../../../utils/analytics';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const SignatureLanding = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const fileInputRef = useRef(null);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingActionRef = useRef(null);
+
   const { data: aiwowData } = useGetAiWowPageDataQuery();
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'signature-analysis')?.title || 'AI Signature Analysis';
 
-  const handleProceed = () => {
-    // Guests can browse freely; auth is requested at the photo capture/upload step.
-    navigate('/ai-wow/signature-analysis/instructions');
+  // Guests must add a kundli + verify OTP before capturing/uploading a photo.
+  const runOrAuth = (action) => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      pendingActionRef.current = action;
+      setShowGuestAuthModal(true);
+      return;
+    }
+    action();
   };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    if (action) action();
+  };
+
+  const handleCamera = () => {
+    navigate('/ai-wow/signature-analysis/camera');
+  };
+
+  const handleUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      trackEvent("shubh_ai_input_provided", { feature_name: "signature-analysis", input_type: "image" });
+      compressImage(file).then((dataUrl) => {
+        // Guests must authenticate at the moment the photo is submitted.
+        runOrAuth(() => {
+          dispatch(setSignatureImage(dataUrl));
+          navigate('/ai-wow/signature-analysis/capture');
+        });
+      });
+    }
+  };
+
   const features = [
     {
       icon: StrokeIcon,
@@ -54,30 +102,127 @@ const SignatureLanding = () => {
       </header>
 
       <div className={styles.content}>
-        <p className={styles.description}>
-          Unlock the secrets of your inner self with our AI Signature Analysis, which deciphers the unique patterns in your signature to reveal insights about your personality, strengths, and potential.
-        </p>
+        {/* Instructions Section - At Top */}
+        <div className={styles.instructionsWrapper}>
+          <h2 className={styles.instructionsTitle}>Before you start</h2>
 
-        <div className={styles.featuresGrid}>
-          {features.map((feature, index) => (
-            <div key={index} className={styles.featureCard}>
-              <div className={styles.iconWrapper}>
-                <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
-              </div>
-              <h3 className={styles.featureTitle}>{feature.title}</h3>
-              <p className={styles.featureDescription}>{feature.description}</p>
+          <div className={styles.middleContent}>
+            <div className={styles.imageWrapper}>
+              <img 
+                src={getAIWowInstructionImage('signature')} 
+                alt="Signature example" 
+                className={styles.signatureImage}
+              />
+              <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
+              <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
+              <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
+              <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
             </div>
-          ))}
+
+            <div>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', top: '0', right: '0', display: 'flex' }}>
+                  <TTSButton text={`Highlight Signature. Emphasize the signature area to draw attention to authenticity. Adjust Contrast. Enhance contrast to make the signature more legible against the background. Add Annotations. Include notes or markers to indicate specific features of the signature. Disclaimer. This signature analysis is for informational purposes only, not a substitute for professional authentication. Analysis is AI-driven.`} />
+                </span>
+                <div className={styles.checklistSection}>
+                  <div className={styles.checkItem}>
+                    <div className={styles.checkIcon}>
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className={styles.checkTitle}>Highlight Signature</h3>
+                      <p className={styles.checkDescription}>Emphasize the signature area to draw attention to authenticity.</p>
+                    </div>
+                  </div>
+
+                  <div className={styles.checkItem}>
+                    <div className={styles.checkIcon}>
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className={styles.checkTitle}>Adjust Contrast</h3>
+                      <p className={styles.checkDescription}>Enhance contrast to make the signature more legible against the background.</p>
+                    </div>
+                  </div>
+
+                  <div className={styles.checkItem}>
+                    <div className={styles.checkIcon}>
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className={styles.checkTitle}>Add Annotations</h3>
+                      <p className={styles.checkDescription}>Include notes or markers to indicate specific features of the signature.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.disclaimer}>
+                  <h4 className={styles.disclaimerTitle}>Disclaimer</h4>
+                  <p className={styles.disclaimerText}>
+                    This signature analysis is for informational purposes only, not a substitute for professional authentication. Analysis is AI-driven.
+                  </p>
+                </div>
+
+                <div className={styles.buttonGroup}>
+                  <button 
+                    className={styles.uploadButton}
+                    onClick={handleUpload}
+                  >
+                    Upload Photo
+                  </button>
+                  <button 
+                    className={styles.cameraButton}
+                    onClick={handleCamera}
+                  >
+                    Use Camera
+                  </button>
+                </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleFileChange}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <button 
-          className={styles.proceedButton}
-          onClick={handleProceed}
-        >
-          Proceed Ahead
-        </button>
+        {/* Feature Cards Section - Below */}
+        <div className={styles.featuresWrapper}>
+          <h2 className={styles.featuresTitle}>What you'll discover</h2>
+          <p className={styles.featuresDescription}>
+            Unlock the secrets of your inner self with our AI Signature Analysis, which deciphers the unique patterns in your signature to reveal insights about your personality, strengths, and potential.
+          </p>
+
+          <div className={styles.featuresGrid}>
+            {features.map((feature, index) => (
+              <div key={index} className={styles.featureCard}>
+                <div className={styles.iconWrapper}>
+                  <img src={feature.icon} alt={feature.title} className={styles.featureIcon} />
+                </div>
+                <h3 className={styles.featureTitle}>{feature.title}</h3>
+                <p className={styles.featureDescription}>{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
+
+    <GuestKundliAuthModal
+      isOpen={showGuestAuthModal}
+      onClose={() => setShowGuestAuthModal(false)}
+      onSuccess={handleGuestAuthSuccess}
+    />
     </>
   );
 };

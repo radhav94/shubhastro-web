@@ -52,7 +52,7 @@ const AuraAnalysis = () => {
         console.error('Invalid image format in Redux state:', typeof auraImage);
         Toast.error('Invalid image format. Please try again.');
         dispatch(clearAuraData());
-        navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0]);
+        navigate(PATH.privateRoutes.AURA_LANDING.path[0]);
         return;
       }
 
@@ -60,8 +60,8 @@ const AuraAnalysis = () => {
       performAnalysis(auraImage);
     } else if (!auraImage && !isAnalyzing && !analysisComplete && !error && !profileLoading) {
       // Only redirect if we don't have an image and we're not in the middle of anything
-      console.warn('No aura image found in Redux state, redirecting to instructions');
-      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0], { replace: true });
+      console.warn('No aura image found in Redux state, redirecting to landing');
+      navigate(PATH.privateRoutes.AURA_LANDING.path[0], { replace: true });
     }
   }, [auraImage, profile, profileLoading]); // Depend on profile and profileLoading
 
@@ -205,7 +205,7 @@ const AuraAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearAuraData());
-    navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0]);
+    navigate(PATH.privateRoutes.AURA_LANDING.path[0]);
   };
 
   return (
