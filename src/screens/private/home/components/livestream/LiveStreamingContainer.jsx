@@ -288,19 +288,20 @@ const LiveStreamingContainer = ({ client }) => {
 
   // When astrologer goes live and the channel matches, retry joining the chat room
   // Don't retry if the room was already reported as not found
+  // NOTE: The initial join is handled inside useLiveChat's room effect.
+  // This retry only kicks in if the room isn't ready after a delay (server
+  // may not have created the room yet when the user joins Agora first).
   useEffect(() => {
     if (!channel || !chat.isConnected || chat.roomReady) return;
     if (roomNotFoundRef.current.has(channel)) return;
 
-    // Immediate attempt
-    chat.retryJoinRoom(channel);
-
-    // Retry after 2s if still not ready (room may not be set up yet on server)
+    // Only retry after a delay — the initial join inside useLiveChat handles
+    // the first attempt. Firing immediately here causes a double join_room emit.
     const retryTimer = setTimeout(() => {
       if (!chat.roomReady) {
         chat.retryJoinRoom(channel);
       }
-    }, 2000);
+    }, 3000);
 
     return () => clearTimeout(retryTimer);
   }, [channel, chat.isConnected, chat.roomReady]);
