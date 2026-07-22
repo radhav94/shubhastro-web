@@ -173,7 +173,8 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
         setFlow("idle");
         toast.error("Insufficient wallet balance. Please recharge to continue.");
         if (onClose) onClose();
-        navigate("/recharge");
+        const returnUrl = window.location.pathname + window.location.search;
+        navigate(`/recharge?returnUrl=${encodeURIComponent(returnUrl)}`);
       } else if (reason === "AI_WOW_PREMIUM_FLOW_DISABLED") {
         setFlow("idle");
         toast.error("Subscriptions aren't available right now.");
