@@ -368,7 +368,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  max-width: 800px;
+  max-width: 500px;
   margin: 0 auto;
 }
 
@@ -376,8 +376,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  background: #fff;
+  min-height: 300px;
+  background: rgba(255, 255, 255, 0.4);
   border-radius: 12px;
   color: #6b7280;
   font-size: 1rem;
