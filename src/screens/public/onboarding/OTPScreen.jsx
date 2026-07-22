@@ -270,7 +270,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
       <div className={styles.loginContent}>
         <h1 className={styles.title}>Aligning your stars...</h1>
         <p className={styles.subtitle}>
-          We've sent a 6-digit code to your mobile +91{" "}
+          We've sent a 6-digit code to your mobile <br></br>+91{" "}
           {formData.phoneNumber || "98989 98989"}. Enter it below to continue.
         </p>
 
@@ -278,9 +278,9 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           <OtpInput
             value={otp}
             onChange={(val) => {
-              // Chrome autofill may paste full OTP into one input
-              // react-otp-input passes the full string through onChange
-              setOtp(val);
+              // Only accept numeric digits (0-9)
+              const numericVal = val.replace(/[^0-9]/g, "");
+              setOtp(numericVal);
             }}
             numInputs={6}
             shouldAutoFocus
@@ -293,9 +293,23 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
                 inputMode="numeric"
                 pattern="[0-9]*"
                 autoComplete="one-time-code"
+                onKeyDown={(e) => {
+                  // Block non-numeric keys except navigation keys
+                  if (
+                    !/^[0-9]$/.test(e.key) &&
+                    !["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key)
+                  ) {
+                    e.preventDefault();
+                  }
+                  if (props.onKeyDown) props.onKeyDown(e);
+                }}
                 onInput={(e) => {
+                  // Strip non-numeric characters at DOM level
+                  const value = e.target.value.replace(/[^0-9]/g, "");
+                  if (value !== e.target.value) {
+                    e.target.value = value;
+                  }
                   // Handle Chrome autofill pasting full OTP into first input
-                  const value = e.target.value;
                   if (value.length > 1 && /^\d+$/.test(value)) {
                     e.preventDefault();
                     setOtp(value.slice(0, 6));
