@@ -248,7 +248,11 @@ const handleVerifyOtp = async (event) => {
           <form onSubmit={handleVerifyOtp}>
             <OtpInput
               value={otp}
-              onChange={setOtp}
+              onChange={(val) => {
+                // Only accept numeric digits
+                const numericVal = val.replace(/[^0-9]/g, "");
+                setOtp(numericVal);
+              }}
               numInputs={6}
               shouldAutoFocus
               containerStyle={styles.otpInputContainer}
@@ -261,8 +265,12 @@ const handleVerifyOtp = async (event) => {
                   pattern="[0-9]*"
                   autoComplete="one-time-code"
                   onInput={(e) => {
+                    // Strip non-numeric characters
+                    const value = e.target.value.replace(/[^0-9]/g, "");
+                    if (value !== e.target.value) {
+                      e.target.value = value;
+                    }
                     // Handle Chrome autofill pasting full OTP into one input
-                    const value = e.target.value;
                     if (value.length > 1 && /^\d+$/.test(value)) {
                       e.preventDefault();
                       setOtp(value.slice(0, 6));
@@ -291,17 +299,22 @@ const handleVerifyOtp = async (event) => {
 
                         prevInput?.focus();
                       }
+                      return;
                     }
 
-                    // allow only numbers
+                    // block non-numeric keys except navigation
                     if (
                       !/^[0-9]$/.test(e.key) &&
-                      !["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(
+                      !["Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(
                         e.key
                       )
                     ) {
                       e.preventDefault();
+                      return;
                     }
+
+                    // Pass through to library's handler for valid keys
+                    if (props.onKeyDown) props.onKeyDown(e);
                   }}
                 />
               )}
