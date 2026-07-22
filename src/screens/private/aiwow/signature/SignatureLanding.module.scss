@@ -5,7 +5,7 @@
   position: relative;
   min-height: 100vh;
   padding-top: 95px;
-  padding-bottom: 40px;
+  // padding-bottom: 40px;
   @media screen and (width <= 1180px) {
     padding-top: 53px;
   }
@@ -83,6 +83,7 @@
 .instructionsWrapper {
   margin-bottom: 3rem;
   padding: 2rem;
+  margin-top: 4rem;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 1.5rem;
   backdrop-filter: blur(12px);
@@ -97,8 +98,11 @@
 
 .instructionsTitle {
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #333;
+  font-weight: 600;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 1.5rem 0;
   text-align: center;
 
@@ -315,9 +319,9 @@
 // ============================================
 // FEATURES WRAPPER - BELOW
 // ============================================
-.featuresWrapper {
-  margin-bottom: 2rem;
-}
+// .featuresWrapper {
+//   margin-bottom: 2rem;
+// }
 
 .featuresTitle {
   font-size: 1.5rem;

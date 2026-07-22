@@ -81,14 +81,15 @@
 // ============================================
 .handSelectionWrapper {
   margin-bottom: 3rem;
-  padding: 2rem;
+  margin-top: 4rem;
+  padding: 1rem;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 1.5rem;
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.3);
 
   @media (max-width: 768px) {
-    padding: 1.5rem;
+    // padding: 1.5rem;
     margin-bottom: 2rem;
     border-radius: 1rem;
   }
@@ -101,7 +102,7 @@
 
 .handSelectionTitle {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -199,7 +200,7 @@
 
 .handLabel {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -253,20 +254,20 @@
   gap: 0.5rem;
 
   &:hover:not(.disabled) {
-    background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
+    background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(247, 88, 1, 0.4);
   }
 
   &.disabled {
-    background: #d1d5db;
-    color: #9ca3af;
+    background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+    color: #fff;
     cursor: not-allowed;
     box-shadow: none;
 
     &:hover {
-      transform: none;
-      background: #d1d5db;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(247, 88, 1, 0.4);
     }
   }
 
@@ -287,7 +288,7 @@
 
 .featuresTitle {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -392,25 +393,26 @@
 // Privacy Text
 .privacyText {
   text-align: center;
-  font-size: 0.8rem;
-  color: #6b7280;
-  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #333;
+  // margin-top: 1.5rem;
   margin-bottom: 0;
 
   @media (max-width: 768px) {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
   }
 }
 
 // Disabled state
 .disabled {
-  background: #d1d5db;
-  color: #9ca3af;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
   cursor: not-allowed;
   box-shadow: none;
+  opacity: 0.5;
 
   &:hover {
-    background: #d1d5db;
+    background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
     transform: none;
   }
 }

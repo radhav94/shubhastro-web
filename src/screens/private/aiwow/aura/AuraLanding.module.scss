@@ -5,7 +5,7 @@
   position: relative;
   min-height: 90vh;
   padding-top: 130px;
-  padding-bottom: 26px;
+  // padding-bottom: 26px;
   @media screen and (width <= 1180px) {
     padding-top: 80px;
   }
@@ -20,10 +20,10 @@
   left: 0;
   right: 0;
   z-index: 100;
-  padding-bottom: 16px;
+  // padding-bottom: 16px;
   @media screen and (width <= 1180px) {
     top: 53px;
-    padding-bottom: 12px;
+    // padding-bottom: 12px;
   }
 }
 
@@ -93,6 +93,7 @@
   border: 1.5px solid rgba(255, 255, 255, 1);
   padding: 1.5rem;
   margin-bottom: 2rem;
+  margin-top: 1.5rem;
   @media (max-width: 768px) {
     padding: 1rem;
     margin-bottom: 1.5rem;
@@ -102,8 +103,12 @@
 .instructionsTitle {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 1.5rem 0;
+  text-align: center;
   @media (max-width: 768px) {
     font-size: 1.1rem;
     margin-bottom: 1rem;
@@ -111,13 +116,11 @@
 }
 
 .middleContent {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  display: flex;
+  gap: 1rem;
   align-items: start;
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+  @media (max-width: 767px) {
+    flex-direction: column;
   }
 }
 
@@ -210,10 +213,7 @@
 .buttonGroup {
   display: flex;
   gap: 1rem;
-  flex-direction: column;
-  @media (min-width: 768px) {
-    flex-direction: row;
-  }
+  flex-direction: row;
 }
 
 .uploadButton,
