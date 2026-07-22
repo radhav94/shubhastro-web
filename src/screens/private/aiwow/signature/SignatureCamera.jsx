@@ -4,10 +4,12 @@ import { useDispatch } from 'react-redux';
 import styles from './SignatureCamera.module.scss';
 import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
 import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const SignatureCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -226,11 +228,24 @@ const SignatureCamera = () => {
     startCamera();
   };
 
+  const submitImage = () => {
+    dispatch(setSignatureImage(capturedImage));
+    navigate('/ai-wow/signature-analysis/capture');
+  };
+
   const proceedWithImage = () => {
-    if (capturedImage) {
-      dispatch(setSignatureImage(capturedImage));
-      navigate('/ai-wow/signature-analysis/capture');
+    if (!capturedImage) return;
+    // Guests must add a kundli + verify OTP at the moment the photo is submitted.
+    if (!localStorage.getItem("shubhtalk_customer_token")) {
+      setShowGuestAuthModal(true);
+      return;
     }
+    submitImage();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    submitImage();
   };
 
   const handleBack = () => {
@@ -289,6 +304,20 @@ const SignatureCamera = () => {
           </div>
         </div>
       </div>
+    );
+  }
+
+  // While the guest auth flow is open, hide the camera view entirely.
+  if (showGuestAuthModal) {
+    return (
+      <GuestKundliAuthModal
+        isOpen
+        onClose={() => {
+          setShowGuestAuthModal(false);
+          navigate('/ai-wow/signature-analysis/instructions');
+        }}
+        onSuccess={handleGuestAuthSuccess}
+      />
     );
   }
 

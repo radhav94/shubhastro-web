@@ -9,7 +9,7 @@ import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliSe
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { setForm } from "../../../../redux/kundliform/formSlice";
-import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
+import { setSelectedKundli, clearSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 import { trackEvent } from "../../../../utils/analytics";
 
 import { PanchangInputCard } from "../../../../component";
@@ -101,6 +101,19 @@ const TodayPanchang = () => {
   });
   const profiles = kundliProfilesData?.data || [];
   const selfProfile = profiles.find((p) => p.relation?.toLowerCase() === "self") || profiles[0];
+
+  // Clear stale selectedKundli/selectedProfile if the profile no longer exists
+  useEffect(() => {
+    if (profiles.length > 0) {
+      if (selectedKundli?._id && !profiles.some(p => p._id === selectedKundli._id)) {
+        dispatch(clearSelectedKundli());
+      }
+      if (selectedProfile?._id && !profiles.some(p => p._id === selectedProfile._id)) {
+        setSelectedProfile(null);
+      }
+    }
+  }, [profiles, selectedKundli, selectedProfile, dispatch]);
+
   const activeProfile = selectedProfile
     ? profiles.find((p) => p._id === selectedProfile._id) || selectedProfile
     : selectedKundli?._id

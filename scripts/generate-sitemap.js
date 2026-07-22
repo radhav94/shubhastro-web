@@ -12,10 +12,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Site base URL — uses dynamic domain
-const SITE_URL = process.env.SITE_URL || 'https://shubhastro.ai';
+const SITE_URL = process.env.SITE_URL || 'https://www.shubhastro.ai';
 
 // API base URL for fetching dynamic content (static pages, etc.)
-const API_BASE_URL = process.env.SITEMAP_API_URL || 'https://devapi-shubhtalk.epicon.in/api';
+const API_BASE_URL = process.env.SITEMAP_API_URL || ' https://njsapi.shubhastro.ai/api';
 
 // Path to the app's route definitions — used to detect drift between the
 // curated sitemap routes and the actual app routes.

@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import ProfileListingModal from "./ProfileListingModal";
 import AddProfileModal from "./AddProfileModal";
 import EditProfileModal from "./EditProfileModal";
 import DeleteConfirmationModal from "../modal/deleteModal/DeleteConfirmationModal";
+import GuestKundliAuthModal from "./GuestKundliAuthModal";
 import { Toast } from "../../index";
 import {
   useCreateKundliMutation,
@@ -13,6 +14,7 @@ import {
 } from "../../../services/appServices/kundliServicesNew";
 import { getToken } from "../../../utils/token";
 import { getJSONCookie, setJSONCookie } from "../../../utils/helper/cookies";
+import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 
 // Shared cookie key for guest (non-logged-in) kundli profiles across pages
 const GUEST_KUNDLI_COOKIE = "guestKundliProfiles";
@@ -70,8 +72,15 @@ const ProfileManager = ({
   const [profileToDelete, setProfileToDelete] = useState(null);
   const [profileToEdit, setProfileToEdit] = useState(null);
 
+  // Track whether we started a guest auth flow. This prevents the
+  // ProfileListingModal from flashing when `loginSuccess` sets a token
+  // mid-flow (the ternary would otherwise flip to the listing branch).
+  const [guestAuthInProgress, setGuestAuthInProgress] = useState(false);
+
   // State for Start Call mode
   const [selectedProfileForCall, setSelectedProfileForCall] = useState(null);
+
+  const dispatch = useDispatch();
 
   // Get token
   const token = getToken();
@@ -141,6 +150,7 @@ const ProfileManager = ({
       setProfileToDelete(null);
       setProfileToEdit(null);
       setSelectedProfileForCall(null);
+      setGuestAuthInProgress(false);
     }
   }, [isOpen]);
 
@@ -187,6 +197,13 @@ const ProfileManager = ({
     // Maximum of 5 profiles allowed
     if (profiles.length >= 5) {
       Toast.error("Please Delete One Kundli from Existing One");
+      return;
+    }
+
+    // If user is not logged in, open guest auth modal instead
+    if (!token) {
+      onClose();
+      setShowGuestAuthModal(true);
       return;
     }
 
@@ -415,6 +432,10 @@ const ProfileManager = ({
       if (token) {
         console.log("✅ Calling deleteKundli API with ID:", profileToDelete);
         await deleteKundli(profileToDelete).unwrap();
+        // Clear selected kundli if the deleted profile was the one selected
+        if (reduxSelectedKundli?._id === profileToDelete) {
+          dispatch(clearSelectedKundli());
+        }
         Toast.success("Profile deleted successfully");
       } else {
         // Non-logged-in user: remove from the shared guest cookie when owned here
@@ -494,8 +515,35 @@ const ProfileManager = ({
     };
   };
 
+  // When a guest opens ProfileManager, mark that the auth flow started.
+  // This prevents the ProfileListingModal from flashing when loginSuccess
+  // sets a token mid-flow (which flips the !token condition).
+  useEffect(() => {
+    if (!token && isOpen) {
+      setGuestAuthInProgress(true);
+    }
+  }, [isOpen, token]);
+
   return (
     <>
+      {/* For guests (or mid-auth-flow): show GuestKundliAuthModal instead of profile listing */}
+      {(!token || guestAuthInProgress) && isOpen ? (
+        <GuestKundliAuthModal
+          isOpen={true}
+          onClose={() => {
+            setGuestAuthInProgress(false);
+            onClose();
+          }}
+          onSuccess={(profile) => {
+            setGuestAuthInProgress(false);
+            if (profile && onProfileSelect) {
+              onProfileSelect(profile);
+            }
+            onClose();
+          }}
+        />
+      ) : (
+      <>
       {/* Profile Listing Modal */}
       <ProfileListingModal
         isOpen={isOpen}
@@ -548,6 +596,8 @@ const ProfileManager = ({
         onCancel={handleCancelDelete}
         onConfirm={confirmDeleteProfile}
       />
+      </>
+      )}
     </>
   );
 };

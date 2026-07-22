@@ -1,0 +1,111 @@
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  padding: 16px;
+}
+
+.sheet {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 24px 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  border: none;
+  background: transparent;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  color: #555;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #1a1a1a;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 24px;
+  line-height: 1.5;
+
+  strong {
+    color: #1a1a1a;
+  }
+}
+
+.otpInputContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+
+  :global(> div) {
+    gap: 8px;
+  }
+}
+
+.otpInput {
+  width: 44px !important;
+  height: 52px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s ease;
+
+  &:focus {
+    border-color: #e65100;
+  }
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #e65100;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.resendRow {
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.timer {
+  color: #888;
+}
+
+.resendBtn {
+  border: none;
+  background: transparent;
+  color: #e65100;
+  font-weight: 600;
+  cursor: pointer;
+}

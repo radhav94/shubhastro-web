@@ -5,11 +5,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import styles from './PalmistryCamera.module.scss';
 import { useHandDetection } from '../../../../utils/hooks/useHandDetection';
 import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const PalmistryCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const selectedHand = useSelector((state) => state.aiwow.palmistry.selectedHand) || 'right';
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
 
   // Lock body scroll when camera is open (fullscreen on mobile)
   useEffect(() => {
@@ -261,11 +263,24 @@ const PalmistryCamera = () => {
     startCamera();
   };
 
+  const submitImage = () => {
+    dispatch(setPalmistryImage(capturedImage));
+    navigate('/ai-wow/ai-palmistry-scanner/capture');
+  };
+
   const proceedWithImage = () => {
-    if (capturedImage) {
-      dispatch(setPalmistryImage(capturedImage));
-      navigate('/ai-wow/ai-palmistry-scanner/capture');
+    if (!capturedImage) return;
+    // Guests must add a kundli + verify OTP at the moment the photo is submitted.
+    if (!localStorage.getItem("shubhtalk_customer_token")) {
+      setShowGuestAuthModal(true);
+      return;
     }
+    submitImage();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    submitImage();
   };
 
   const handleBack = () => {
@@ -324,6 +339,21 @@ const PalmistryCamera = () => {
           </div>
         </div>
       </div>,
+      document.body
+    );
+  }
+
+  // While the guest auth flow is open, hide the camera view entirely.
+  if (showGuestAuthModal) {
+    return createPortal(
+      <GuestKundliAuthModal
+        isOpen
+        onClose={() => {
+          setShowGuestAuthModal(false);
+          navigate('/ai-wow/ai-palmistry-scanner/instructions');
+        }}
+        onSuccess={handleGuestAuthSuccess}
+      />,
       document.body
     );
   }

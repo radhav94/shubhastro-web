@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './BusinessPathfinder.module.scss';
@@ -6,7 +6,7 @@ import { Toast } from '../../../../component';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { useGetBusinessPathfinderOptionsQuery } from '../../../../redux/api/aiwow/aiwowApi';
-import { ProfileManager } from '../../../../component/UI/Profile';
+import { ProfileManager, GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import { setSelectedKundliProfile } from '../../../../redux/aiwow/aiwowSlice';
 import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 import LocationSearch from '../../../../utils/location/locationSearchVedic';
@@ -16,10 +16,14 @@ import { trackEvent } from '../../../../utils/analytics';
 const BusinessPathfinder = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  const { profile: rawProfile, isLoading: profileLoading } = useSelectedKundliProfile({ required: false });
+  const token = localStorage.getItem('shubhtalk_customer_token');
+  const profile = token ? rawProfile : null;
   const { data: optionsData, isLoading: optionsLoading } = useGetBusinessPathfinderOptionsQuery();
   const userLocation = useUserLocation();
   const [showProfileSelector, setShowProfileSelector] = useState(false);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingGuestActionRef = useRef(null);
 
   // Track feature open (once on mount)
   useEffect(() => {
@@ -80,6 +84,13 @@ const BusinessPathfinder = () => {
   };
 
   const handleSubmit = async () => {
+    const token = localStorage.getItem('shubhtalk_customer_token');
+    if (!token) {
+      pendingGuestActionRef.current = () => handleSubmit();
+      setShowGuestAuthModal(true);
+      return;
+    }
+
     const category = showCustomInput ? formData.customCategory : formData.category;
     
     if (!category) {
@@ -381,6 +392,22 @@ const BusinessPathfinder = () => {
       selectedProfileId={profile?._id}
       title="Select Profile"
       enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+    />
+
+    <GuestKundliAuthModal
+      isOpen={showGuestAuthModal}
+      onClose={() => { setShowGuestAuthModal(false); pendingGuestActionRef.current = null; }}
+      onSuccess={(newProfile) => {
+        setShowGuestAuthModal(false);
+        if (newProfile?._id) {
+          dispatch(setSelectedKundliProfile(newProfile));
+          dispatch(setSelectedKundli(newProfile));
+          localStorage.setItem('selectedKundliProfile', JSON.stringify(newProfile));
+        }
+        const action = pendingGuestActionRef.current;
+        pendingGuestActionRef.current = null;
+        if (action) action(newProfile);
+      }}
     />
     </>
   );
