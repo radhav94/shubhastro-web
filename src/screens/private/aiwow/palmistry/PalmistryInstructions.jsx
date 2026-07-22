@@ -8,13 +8,34 @@ import TTSButton from '../../../../component/UI/TTSButton';
 import { compressImage } from '../../../../utils/helper/compressImage';
 import { trackEvent } from '../../../../utils/analytics';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 const PalmistryInstructions = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingActionRef = useRef(null);
 
   const { data: aiwowData } = useGetAiWowPageDataQuery();
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'ai-palmistry-scanner')?.title || 'Palmistry Scanner';
+
+  // Guests must add a kundli + verify OTP before capturing/uploading a photo.
+  const runOrAuth = (action) => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      pendingActionRef.current = action;
+      setShowGuestAuthModal(true);
+      return;
+    }
+    action();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    if (action) action();
+  };
 
   const handleCamera = () => {
     navigate('/ai-wow/ai-palmistry-scanner/camera');
@@ -29,8 +50,11 @@ const PalmistryInstructions = () => {
     if (file) {
       trackEvent("shubh_ai_input_provided", { feature_name: "ai-palmistry-scanner", input_type: "image" });
       compressImage(file).then((dataUrl) => {
-        dispatch(setPalmistryImage(dataUrl));
-        navigate('/ai-wow/ai-palmistry-scanner/capture');
+        // Guests must authenticate at the moment the photo is submitted.
+        runOrAuth(() => {
+          dispatch(setPalmistryImage(dataUrl));
+          navigate('/ai-wow/ai-palmistry-scanner/capture');
+        });
       });
     }
   };
@@ -139,6 +163,12 @@ const PalmistryInstructions = () => {
         </div>
       </div>
     </div>
+
+    <GuestKundliAuthModal
+      isOpen={showGuestAuthModal}
+      onClose={() => setShowGuestAuthModal(false)}
+      onSuccess={handleGuestAuthSuccess}
+    />
     </>
   );
 };

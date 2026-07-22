@@ -74,7 +74,7 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
   return (
     <div className={styles.rightPanel}>
       <div className={styles.muhuratHeader}>
-        <h4>{sectionData?.display_title || sectionData?.title || "TODAY'S MUHARAT"}</h4>
+        <h4>{sectionData?.display_title || sectionData?.title || "TODAY'S MUHURAT"}</h4>
         {!userLocation.isDefault && userLocation.locationName && (
           <span className={styles.muhuratLocation}>
             <IoLocationOutline />

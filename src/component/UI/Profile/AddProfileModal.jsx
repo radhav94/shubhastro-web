@@ -23,12 +23,21 @@ const AddProfileModal = ({
   savedKundlis = [],
   // Matchmaking mode - hides "Others" gender and Relation field
   matchmakingMode = false,
+  // Guest/AIWow mode - shows an extra mobile-number field
+  showMobileField = false,
+  // Custom submit button label (e.g. "Continue")
+  submitButtonText = null,
+  // When false, clicking the overlay/outside does not close the modal
+  closeOnOverlayClick = true,
+  // Hides the relation dropdown (relation is assumed "self")
+  hideRelation = false,
 }) => {
   const [showListing, setShowListing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     identity: "Male",
     relation: "",
+    mobileNumber: "",
     birthDate: "",
     birthTime: "",
     birthPlace: "",
@@ -48,7 +57,7 @@ const AddProfileModal = ({
     name: Yup.string()
       .required("Name is required")
       .matches(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces"),
-    relation: matchmakingMode
+    relation: (matchmakingMode || hideRelation)
       ? Yup.string().notRequired()
       : Yup.string()
         .required("Relation is required")
@@ -62,6 +71,11 @@ const AddProfileModal = ({
             return true;
           }
         ),
+    mobileNumber: showMobileField
+      ? Yup.string()
+        .required("Mobile number is required")
+        .matches(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number")
+      : Yup.string().notRequired(),
     birthDate: Yup.string().required("Birth date is required"),
     birthTime: Yup.string().when("unknownBirthTime", {
       is: false,
@@ -97,6 +111,7 @@ const AddProfileModal = ({
       name: "",
       identity: "Male",
       relation: "",
+      mobileNumber: "",
       birthDate: "",
       birthTime: "",
       birthPlace: "",
@@ -151,7 +166,10 @@ const AddProfileModal = ({
   }
 
   return (
-    <div className={styles.modalOverlay} onClick={handleClose}>
+    <div
+      className={styles.modalOverlay}
+      onClick={closeOnOverlayClick ? handleClose : undefined}
+    >
       <div className={styles.sideSheet} onClick={(e) => e.stopPropagation()}>
         <div className={styles.sheetHeader}>
           <div className={styles.sheetHandle}></div>
@@ -179,6 +197,23 @@ const AddProfileModal = ({
                   />
                   <ErrorMessage name="name" component="div" className={styles.errorText} />
                 </div>
+
+                {showMobileField && (
+                  <div className={styles.formGroup}>
+                    <label>Mobile Number <span className={styles.required}>*</span></label>
+                    <Field
+                      type="tel"
+                      name="mobileNumber"
+                      placeholder="Enter 10-digit mobile number"
+                      maxLength={10}
+                      inputMode="numeric"
+                      onInput={(e) => {
+                        e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                      }}
+                    />
+                    <ErrorMessage name="mobileNumber" component="div" className={styles.errorText} />
+                  </div>
+                )}
 
                 <div className={styles.formGroup}>
                   <label>Identity</label>
@@ -265,7 +300,7 @@ const AddProfileModal = ({
                   </div>
                 </div>
 
-                {!matchmakingMode && (
+                {!matchmakingMode && !hideRelation && (
                 <div className={styles.formGroup}>
                   <label>Relation <span className={styles.required}>*</span></label>
                   <Field
@@ -350,7 +385,7 @@ const AddProfileModal = ({
                   className={styles.submitBtn}
                   disabled={isLoading}
                 >
-                  {isLoading ? "Adding..." : "Add Profile"}
+                  {isLoading ? "Adding..." : (submitButtonText || "Add Profile")}
                 </button>
               </Form>
             )}

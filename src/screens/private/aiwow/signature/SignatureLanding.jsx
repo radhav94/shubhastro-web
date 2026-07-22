@@ -13,12 +13,7 @@ const SignatureLanding = () => {
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'signature-analysis')?.title || 'AI Signature Analysis';
 
   const handleProceed = () => {
-    const token = localStorage.getItem("shubhtalk_customer_token");
-    if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/ai-wow/signature-analysis/instructions");
-      window.location.href = "/login?skip=welcome";
-      return;
-    }
+    // Guests can browse freely; auth is requested at the photo capture/upload step.
     navigate('/ai-wow/signature-analysis/instructions');
   };
   const features = [

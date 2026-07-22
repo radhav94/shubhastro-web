@@ -4,10 +4,12 @@ import { useDispatch } from 'react-redux';
 import styles from './AuraCamera.module.scss';
 import { useFaceDetection } from '../../../../utils/hooks/useFaceDetection';
 import { setAuraImage } from '../../../../redux/aiwow/aiwowSlice';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const AuraCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -202,11 +204,24 @@ const AuraCamera = () => {
     startCamera();
   };
 
+  const submitImage = () => {
+    dispatch(setAuraImage(capturedImage));
+    navigate('/ai-wow/aura-photography/capture');
+  };
+
   const proceedWithImage = () => {
-    if (capturedImage) {
-      dispatch(setAuraImage(capturedImage));
-      navigate('/ai-wow/aura-photography/capture');
+    if (!capturedImage) return;
+    // Guests must add a kundli + verify OTP at the moment the photo is submitted.
+    if (!localStorage.getItem("shubhtalk_customer_token")) {
+      setShowGuestAuthModal(true);
+      return;
     }
+    submitImage();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    submitImage();
   };
 
   const handleBack = () => {
@@ -242,6 +257,20 @@ const AuraCamera = () => {
           </div>
         </div>
       </div>
+    );
+  }
+
+  // While the guest auth flow is open, hide the camera view entirely.
+  if (showGuestAuthModal) {
+    return (
+      <GuestKundliAuthModal
+        isOpen
+        onClose={() => {
+          setShowGuestAuthModal(false);
+          navigate('/ai-wow/aura-photography/instructions');
+        }}
+        onSuccess={handleGuestAuthSuccess}
+      />
     );
   }
 

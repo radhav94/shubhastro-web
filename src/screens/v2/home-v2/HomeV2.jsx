@@ -1,5 +1,5 @@
 import styles from "./HomeV2.module.scss";
-import { useState, useMemo, useEffect, useCallback, lazy, Suspense, Fragment } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense, Fragment } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
@@ -13,7 +13,6 @@ import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
-import WelcomeBonusModal from "../../../component/UI/modal/WelcomeBonusModal/WelcomeBonusModal";
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
@@ -23,6 +22,8 @@ import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, Astr
 import ProfileModals from "../../private/kundli/components/ProfileModals";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
+import { GuestKundliAuthModal } from "../../../component/UI/Profile";
+import HomeIntroPopup from "./HomeIntroPopup";
 const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));
 
 // Fallback images
@@ -352,6 +353,8 @@ const HomeV2 = () => {
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingWowPathRef = useRef(null);
 
   // ─── Data Fetching ────────────────────────────────────────────────────────
   const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery();
@@ -387,7 +390,23 @@ const HomeV2 = () => {
       const target = item.redirect_url || item.slug;
       if (!target) return;
       if (item.is_internal === true || item.is_internal === "true") {
-        navigate(target.startsWith("/") ? target : `/${target}`);
+        const path = target.startsWith("/") ? target : `/${target}`;
+        // Guests: kundli-based features open the add-kundli guest flow instead
+        // of navigating to a page that would bounce them to login. This covers
+        // AI-Wow features and Kundli "free-report" deep links (e.g. Gemstone
+        // Remedy → /kundli?tab=free-report&subtab=remedies&section=gemstones).
+        // The plain Free Kundli generator stays public.
+        const token = localStorage.getItem("shubhtalk_customer_token");
+        const needsKundliAuth =
+          path.startsWith("/ai-wow") ||
+          path.startsWith("/aiwow") ||
+          path.includes("tab=free-report");
+        if (!token && needsKundliAuth) {
+          pendingWowPathRef.current = path;
+          setShowGuestAuthModal(true);
+          return;
+        }
+        navigate(path);
       } else if (item.redirect_url) {
         window.open(item.redirect_url, "_blank", "noopener,noreferrer");
       } else {
@@ -404,8 +423,20 @@ const HomeV2 = () => {
     const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
     if (guestAccessSlugs.includes(item.slug)) { navigate(path); return; }
     const token = localStorage.getItem("shubhtalk_customer_token");
-    if (!token) { localStorage.setItem("shubhtalk_redirect_after_login", path); window.location.href = "/login?skip=welcome"; return; }
+    if (!token) {
+      // Guests: open the add-kundli guest flow instead of redirecting to login.
+      pendingWowPathRef.current = path;
+      setShowGuestAuthModal(true);
+      return;
+    }
     navigate(path);
+  }, [navigate]);
+
+  const handleGuestAuthSuccess = useCallback(() => {
+    setShowGuestAuthModal(false);
+    const path = pendingWowPathRef.current;
+    pendingWowPathRef.current = null;
+    if (path) navigate(path);
   }, [navigate]);
 
   // Mahadasha
@@ -468,7 +499,6 @@ const HomeV2 = () => {
   return (
     <>
       <SeoHelmet data={newHomeData?.data} />
-      <WelcomeBonusModal />
       <div className={styles.page}>
         {renderPlan.map((block, idx) => {
           switch (block.type) {
@@ -498,6 +528,11 @@ const HomeV2 = () => {
         <ProfileModals profiles={profiles} isCreating={isCreating} showAddProfile={showAddProfile} showEditProfile={showEditProfile} formData={formData} editFormData={editFormData} setShowAddProfile={setShowAddProfile} setShowEditProfile={setShowEditProfile} setFormData={setFormData} setEditFormData={setEditFormData} handleAddProfile={handleAddProfile} handleSubmitProfile={handleSubmitProfile} handleSubmitEditProfile={handleSubmitEditProfile} formatProfileDisplay={formatProfileDisplay} openModal={hookOpenModal} setOpenModal={hookSetOpenModal} selectedAstrologer={hookSelectedAstrologer} localSelectedProfile={localSelectedProfile} setLocalSelectedProfile={setLocalSelectedProfile} onContinue={handleProfileManagerStartCall} connectionType={connectionType} />
         <EmergencySessionModal isOpen={showEmergencyModal} onClose={handleEmergencyClose} astrologer={selectedAstrologer} onChatNow={handleEmergencyChatNow} onCallNow={handleEmergencyCallNow} />
         <MobileAppModal isOpen={showMobileAppModal} onClose={handleMobileAppClose} />
+        <GuestKundliAuthModal
+          isOpen={showGuestAuthModal}
+          onClose={() => { setShowGuestAuthModal(false); pendingWowPathRef.current = null; }}
+          onSuccess={handleGuestAuthSuccess}
+        />
       </Suspense>
       <RechargeModal
         isOpen={hookOpenModal.recharge}
@@ -507,6 +542,7 @@ const HomeV2 = () => {
       />
       <PanditAIBubble />
       <PanditAIVoiceBubble />
+      <HomeIntroPopup />
     </>
   );
 };
