@@ -365,7 +365,7 @@ const GuestKundliAuthModal = ({
   return (
     <>
       <AddProfileModal
-        isOpen={isOpen && step === "kundli"}
+        isOpen={isOpen && step === "kundli" && !localStorage.getItem("shubhtalk_customer_token")}
         onClose={handleClose}
         onSubmit={handleKundliSubmit}
         isLoading={sendingOtp}
