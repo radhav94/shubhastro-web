@@ -1337,14 +1337,6 @@ const TalkToAstrologer = () => {
             </div>
           </>
         ))}
-
-        {isFetching && (
-          <div className={styles.loaderWrapper}>
-            <PrimaryLoader isLoading={true} fullscreen={false} />
-          </div>
-        )}
-
-        
       </div>
 
       {!isFetching && allAstrologers.length === 0 && isFiltered && (
