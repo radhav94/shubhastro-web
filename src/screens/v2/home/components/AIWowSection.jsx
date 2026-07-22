@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaAngleDoubleDown, FaAngleDoubleUp } from "react-icons/fa";
 import { useGetAiWowPageDataQuery } from "../../../../redux/api/aiwow/aiwowApi";
@@ -7,7 +7,7 @@ import MobileAppModal from "../../../private/aiwow/components/MobileAppModal";
 import styles from "./AIWowSection.module.scss";
 import wireBg from "../../../../assets/images/wire-bg.svg";
 import { useSelector } from "react-redux";
-import useRequireAuth from "../../../../utils/hooks/useRequireAuth";
+import { GuestKundliAuthModal } from "../../../../component/UI/Profile";
 
 const COLLAPSED_COUNT = 4;
 
@@ -58,10 +58,11 @@ const AIWowSection = () => {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingSlugRef = useRef(null);
   const { data: aiwowData } = useGetAiWowPageDataQuery();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
-  const requireAuth = useRequireAuth();
 
   const { data: profilesData } = useGetAllKundlisQuery(undefined, {
     skip: !isLoggedIn,
@@ -88,22 +89,48 @@ const AIWowSection = () => {
   const firstSection = activeSections[0];
   const remainingSections = activeSections.slice(1);
 
-  const handleCardClick = (slug) => {
-    if (!requireAuth()) return;
+  // Image-based features let guests browse the intro; auth is requested later
+  // at the photo capture/upload step inside the feature flow.
+  const guestAccessSlugs = [
+    "ai-palmistry-scanner",
+    "astro-face-reading",
+    "signature-analysis",
+    "clothes-colour-analysis",
+    "gemstone-authenticity",
+    "aura-photography",
+  ];
+
+  const navigateToFeature = (slug) => {
     if (slug === "ar-vastu-scanner") {
       setShowMobileAppModal(true);
     } else {
-      const rootLevelSlugs = [
-        "ai-palmistry-scanner",
-        "astro-face-reading",
-        "signature-analysis",
-        "clothes-colour-analysis",
-        "gemstone-authenticity",
-        "aura-photography",
-      ];
-      const path = rootLevelSlugs.includes(slug) ? `/${slug}` : `/aiwow/${slug}`;
+      const path = guestAccessSlugs.includes(slug) ? `/${slug}` : `/aiwow/${slug}`;
       navigate(path);
     }
+  };
+
+  const handleCardClick = (slug) => {
+    // AR Vastu Scanner is an app-only feature — show its own modal directly,
+    // never the guest kundli popup.
+    if (slug === "ar-vastu-scanner") {
+      setShowMobileAppModal(true);
+      return;
+    }
+    // Guests: kundli-based features collect kundli + verify OTP up front;
+    // image-based features are gated later at the photo step.
+    if (!isLoggedIn && !guestAccessSlugs.includes(slug)) {
+      pendingSlugRef.current = slug;
+      setShowGuestAuthModal(true);
+      return;
+    }
+    navigateToFeature(slug);
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    const slug = pendingSlugRef.current;
+    pendingSlugRef.current = null;
+    if (slug) navigateToFeature(slug);
   };
 
   if (activeSections.length === 0) return null;
@@ -191,6 +218,15 @@ const AIWowSection = () => {
       <MobileAppModal
         isOpen={showMobileAppModal}
         onClose={() => setShowMobileAppModal(false)}
+      />
+
+      <GuestKundliAuthModal
+        isOpen={showGuestAuthModal}
+        onClose={() => {
+          setShowGuestAuthModal(false);
+          pendingSlugRef.current = null;
+        }}
+        onSuccess={handleGuestAuthSuccess}
       />
     </section>
     </div>

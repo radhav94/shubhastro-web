@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './FaceReadingInstructions.module.scss';
@@ -8,16 +8,37 @@ import TTSButton from '../../../../component/UI/TTSButton';
 import { compressImage } from '../../../../utils/helper/compressImage';
 import { trackEvent } from '../../../../utils/analytics';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const FaceReadingInstructions = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingActionRef = useRef(null);
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
   const gender = selectedProfile?.identity?.toLowerCase() || selectedProfile?.gender?.toLowerCase() || 'male';
 
   const { data: aiwowData } = useGetAiWowPageDataQuery();
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'astro-face-reading')?.title || 'AI Powered Face Reading';
+
+  // Guests must add a kundli + verify OTP before capturing/uploading a photo.
+  const runOrAuth = (action) => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      pendingActionRef.current = action;
+      setShowGuestAuthModal(true);
+      return;
+    }
+    action();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    if (action) action();
+  };
 
   const handleCamera = () => {
     navigate('/ai-wow/astro-face-reading/camera');
@@ -32,8 +53,11 @@ const FaceReadingInstructions = () => {
     if (file) {
       trackEvent("shubh_ai_input_provided", { feature_name: "astro-face-reading", input_type: "image" });
       compressImage(file).then((dataUrl) => {
-        dispatch(setFaceReadingImage(dataUrl));
-        navigate('/ai-wow/astro-face-reading/capture');
+        // Guests must authenticate at the moment the photo is submitted.
+        runOrAuth(() => {
+          dispatch(setFaceReadingImage(dataUrl));
+          navigate('/ai-wow/astro-face-reading/capture');
+        });
       });
     }
   };
@@ -145,6 +169,12 @@ const FaceReadingInstructions = () => {
         </div>
       </div>
     </div>
+
+    <GuestKundliAuthModal
+      isOpen={showGuestAuthModal}
+      onClose={() => setShowGuestAuthModal(false)}
+      onSuccess={handleGuestAuthSuccess}
+    />
     </>
   );
 };
