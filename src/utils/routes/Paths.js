@@ -112,28 +112,23 @@ import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm
 
 import AIWow from "../../screens/private/aiwow/AIWow";
 import PalmistryLanding from "../../screens/private/aiwow/palmistry/PalmistryLanding";
-import PalmistryHandSelection from "../../screens/private/aiwow/palmistry/PalmistryHandSelection";
 import PalmistryInstructions from "../../screens/private/aiwow/palmistry/PalmistryInstructions";
 import PalmistryCamera from "../../screens/private/aiwow/palmistry/PalmistryCamera";
 import PalmistryAnalysis from "../../screens/private/aiwow/palmistry/PalmistryAnalysis";
 import PalmistryResult from "../../screens/private/aiwow/palmistry/PalmistryResult";
 import FaceReadingLanding from "../../screens/private/aiwow/facereading/FaceReadingLanding";
-import FaceReadingInstructions from "../../screens/private/aiwow/facereading/FaceReadingInstructions";
 import FaceReadingCamera from "../../screens/private/aiwow/facereading/FaceReadingCamera";
 import FaceReadingAnalysis from "../../screens/private/aiwow/facereading/FaceReadingAnalysis";
 import FaceReadingResult from "../../screens/private/aiwow/facereading/FaceReadingResult";
 import SignatureLanding from "../../screens/private/aiwow/signature/SignatureLanding";
-import SignatureInstructions from "../../screens/private/aiwow/signature/SignatureInstructions";
 import SignatureCamera from "../../screens/private/aiwow/signature/SignatureCamera";
 import SignatureAnalysis from "../../screens/private/aiwow/signature/SignatureAnalysis";
 import SignatureResult from "../../screens/private/aiwow/signature/SignatureResult";
 import GemstoneLanding from "../../screens/private/aiwow/gemstone/GemstoneLanding";
-import GemstoneInstructions from "../../screens/private/aiwow/gemstone/GemstoneInstructions";
 import GemstoneCamera from "../../screens/private/aiwow/gemstone/GemstoneCamera";
 import GemstoneAnalysis from "../../screens/private/aiwow/gemstone/GemstoneAnalysis";
 import GemstoneResult from "../../screens/private/aiwow/gemstone/GemstoneResult";
 import ClothColorLanding from "../../screens/private/aiwow/clothcolor/ClothColorLanding";
-import ClothColorForm from "../../screens/private/aiwow/clothcolor/ClothColorForm";
 import ClothColorInstructions from "../../screens/private/aiwow/clothcolor/ClothColorInstructions";
 import ClothColorCamera from "../../screens/private/aiwow/clothcolor/ClothColorCamera";
 import ClothColorAnalysis from "../../screens/private/aiwow/clothcolor/ClothColorAnalysis";
@@ -147,7 +142,6 @@ import BusinessPathfinder from "../../screens/private/aiwow/businesspathfinder/B
 import BusinessPathfinderResult from "../../screens/private/aiwow/businesspathfinder/BusinessPathfinderResult";
 import SmartMatchmaking from "../../screens/private/aiwow/smartmatchmaking/SmartMatchmaking";
 import AuraLanding from "../../screens/private/aiwow/aura/AuraLanding";
-import AuraInstructions from "../../screens/private/aiwow/aura/AuraInstructions";
 import AuraCamera from "../../screens/private/aiwow/aura/AuraCamera";
 import AuraAnalysis from "../../screens/private/aiwow/aura/AuraAnalysis";
 import AuraResult from "../../screens/private/aiwow/aura/AuraResult";
@@ -683,11 +677,6 @@ export const PATH = {
       element: PalmistryLanding,
       header: false,
     },
-    PALMISTRY_HAND_SELECTION: {
-      path: ["/ai-wow/ai-palmistry-scanner/hand-selection", "/ai-palmistry-scanner/hand-selection"],
-      element: PalmistryHandSelection,
-      header: false,
-    },
     PALMISTRY_INSTRUCTIONS: {
       path: ["/ai-wow/ai-palmistry-scanner/instructions", "/ai-palmistry-scanner/instructions"],
       element: PalmistryInstructions,
@@ -713,11 +702,6 @@ export const PATH = {
       element: FaceReadingLanding,
       header: false,
     },
-    FACE_READING_INSTRUCTIONS: {
-      path: ["/ai-wow/astro-face-reading/instructions", "/astro-face-reading/instructions"],
-      element: FaceReadingInstructions,
-      header: false,
-    },
     FACE_READING_CAMERA: {
       path: ["/ai-wow/astro-face-reading/camera", "/astro-face-reading/camera"],
       element: FaceReadingCamera,
@@ -736,11 +720,6 @@ export const PATH = {
     SIGNATURE_LANDING: {
       path: ["/ai-wow/signature-analysis", "/signature-analysis"],
       element: SignatureLanding,
-      header: false,
-    },
-    SIGNATURE_INSTRUCTIONS: {
-      path: ["/ai-wow/signature-analysis/instructions", "/signature-analysis/instructions"],
-      element: SignatureInstructions,
       header: false,
     },
     SIGNATURE_CAMERA: {
@@ -763,11 +742,6 @@ export const PATH = {
       element: GemstoneLanding,
       header: false,
     },
-    GEMSTONE_INSTRUCTIONS: {
-      path: ["/ai-wow/gemstone-authenticity/instructions", "/gemstone-authenticity/instructions"],
-      element: GemstoneInstructions,
-      header: false,
-    },
     GEMSTONE_CAMERA: {
       path: ["/ai-wow/gemstone-authenticity/camera", "/gemstone-authenticity/camera"],
       element: GemstoneCamera,
@@ -786,11 +760,6 @@ export const PATH = {
     CLOTH_COLOR_LANDING: {
       path: ["/ai-wow/clothes-colour-analysis", "/clothes-colour-analysis"],
       element: ClothColorLanding,
-      header: false,
-    },
-    CLOTH_COLOR_FORM: {
-      path: ["/ai-wow/clothes-colour-analysis/form", "/clothes-colour-analysis/form"],
-      element: ClothColorForm,
       header: false,
     },
     CLOTH_COLOR_INSTRUCTIONS: {
@@ -870,11 +839,6 @@ export const PATH = {
     AURA_LANDING: {
       path: ["/ai-wow/aura-photography", "/aura-photography"],
       element: AuraLanding,
-      header: false,
-    },
-    AURA_INSTRUCTIONS: {
-      path: ["/ai-wow/aura-photography/instructions", "/aura-photography/instructions"],
-      element: AuraInstructions,
       header: false,
     },
     AURA_CAMERA: {

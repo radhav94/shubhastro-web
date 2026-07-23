@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './GemstoneCamera.module.scss';
 import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
+import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setGemstoneImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
@@ -22,6 +23,7 @@ const GemstoneCamera = () => {
   const {
     detectionReady,
     objectDetected,
+    detectionQuality,
     startDetection,
     stopDetection
   } = useObjectDetection({ videoRef, canvasRef: detectionCanvasRef, detectionType: 'gemstone' });
@@ -129,24 +131,39 @@ const GemstoneCamera = () => {
     // Start camera with new mode will be handled by useEffect
   };
 
+  // Draw the current full video frame onto a canvas.
+  const cropCurrentFrameToCanvas = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !video.videoWidth) return null;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas;
+  };
+
   const captureImage = () => {
     stopDetection();
-    
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      const imageData = canvas.toDataURL('image/jpeg');
-      setCapturedImage(imageData);
-      stopCamera();
-    }
+    const canvas = cropCurrentFrameToCanvas();
+    if (!canvas) return;
+    setCapturedImage(canvas.toDataURL('image/jpeg', 0.95));
+    stopCamera();
   };
+
+  // Auto-capture the sharpest frame once the gemstone is steady in the frame.
+  // Gemstone detection is heuristic, so require a strong-quality, longer-held
+  // detection before auto-capturing to avoid firing on false positives.
+  const { autoCapturing } = useAutoCapture({
+    ready: detectionReady && objectDetected && detectionQuality >= 55,
+    active: !capturedImage,
+    getFrameCanvas: cropCurrentFrameToCanvas,
+    onCapture: (dataUrl) => {
+      stopDetection();
+      setCapturedImage(dataUrl);
+      stopCamera();
+    },
+    options: { minHoldMs: 1000 },
+  });
 
   const retakePhoto = () => {
     setCapturedImage(null);
@@ -239,7 +256,7 @@ const GemstoneCamera = () => {
         isOpen
         onClose={() => {
           setShowGuestAuthModal(false);
-          navigate('/ai-wow/gemstone-authenticity/instructions');
+          navigate('/ai-wow/gemstone-authenticity');
         }}
         onSuccess={handleGuestAuthSuccess}
       />
@@ -289,6 +306,11 @@ const GemstoneCamera = () => {
             {!objectDetected && detectionReady && (
               <div className={styles.detectionMessage}>
                 <p>Position your gemstone in the center</p>
+              </div>
+            )}
+            {objectDetected && autoCapturing && detectionReady && (
+              <div className={styles.detectionMessage}>
+                <p>Hold steady… capturing</p>
               </div>
             )}
           </>

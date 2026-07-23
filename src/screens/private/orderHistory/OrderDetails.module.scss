@@ -27,6 +27,11 @@
 
 .tabContent {
   padding: 0;
+  max-width: 900px;
+  margin: 44px auto 0 auto;
+  @media (width <= 1180px) {
+    margin: 0px auto 0 auto;
+  }
 }
 
 .videoList {

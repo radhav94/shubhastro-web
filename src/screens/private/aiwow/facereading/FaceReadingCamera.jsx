@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './FaceReadingCamera.module.scss';
 import { useFaceDetection } from '../../../../utils/hooks/useFaceDetection';
+import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
@@ -198,65 +199,64 @@ const FaceReadingCamera = () => {
   // Capture allowed only when face is detected, in circle, and not too far
   const canCapture = faceDetected && faceInCircle && !isTooFar;
 
-  const captureImage = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      // Get circle bounds
-      const circleBounds = getCircleBounds();
-      if (!circleBounds) return;
-      
-      const { centerX, centerY, radius } = circleBounds;
-      
-      // Scale to video dimensions for high quality
-      const scaleX = video.videoWidth / video.offsetWidth;
-      const scaleY = video.videoHeight / video.offsetHeight;
-      
-      const scaledCenterX = centerX * scaleX;
-      const scaledCenterY = centerY * scaleY;
-      const scaledRadius = radius * Math.min(scaleX, scaleY);
-      
-      // Set canvas to circle diameter for square output (easier for processing)
-      const diameter = scaledRadius * 2;
-      canvas.width = diameter;
-      canvas.height = diameter;
-      
-      const context = canvas.getContext('2d');
-      
-      // Clear canvas
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Create circular clipping path
-      context.save();
-      context.beginPath();
-      context.arc(diameter / 2, diameter / 2, scaledRadius, 0, Math.PI * 2);
-      context.closePath();
-      context.clip();
-      
-      // Draw the circular portion of the video
-      // Source: area from video that corresponds to the circle
-      // Destination: centered in canvas
-      context.drawImage(
-        video,
-        scaledCenterX - scaledRadius, // source x
-        scaledCenterY - scaledRadius, // source y
-        diameter, // source width
-        diameter, // source height
-        0, // destination x
-        0, // destination y
-        diameter, // destination width
-        diameter  // destination height
-      );
-      
-      context.restore();
-      
-      // Convert to high quality JPEG (0.95 quality)
-      const imageData = canvas.toDataURL('image/jpeg', 0.95);
-      setCapturedImage(imageData);
-      stopCamera();
-    }
+  // Draw the current video frame, cropped to the face circle, onto a canvas.
+  const cropCurrentFrameToCanvas = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !video.videoWidth) return null;
+
+    const circleBounds = getCircleBounds();
+    if (!circleBounds) return null;
+
+    const { centerX, centerY, radius } = circleBounds;
+    const scaleX = video.videoWidth / video.offsetWidth;
+    const scaleY = video.videoHeight / video.offsetHeight;
+    const scaledCenterX = centerX * scaleX;
+    const scaledCenterY = centerY * scaleY;
+    const scaledRadius = radius * Math.min(scaleX, scaleY);
+    const diameter = scaledRadius * 2;
+
+    canvas.width = diameter;
+    canvas.height = diameter;
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.save();
+    context.beginPath();
+    context.arc(diameter / 2, diameter / 2, scaledRadius, 0, Math.PI * 2);
+    context.closePath();
+    context.clip();
+    context.drawImage(
+      video,
+      scaledCenterX - scaledRadius,
+      scaledCenterY - scaledRadius,
+      diameter,
+      diameter,
+      0,
+      0,
+      diameter,
+      diameter
+    );
+    context.restore();
+    return canvas;
   };
+
+  const captureImage = () => {
+    const canvas = cropCurrentFrameToCanvas();
+    if (!canvas) return;
+    setCapturedImage(canvas.toDataURL('image/jpeg', 0.95));
+    stopCamera();
+  };
+
+  // Auto-capture the sharpest frame once a valid face is steady in the circle.
+  const { autoCapturing } = useAutoCapture({
+    ready: modelsLoaded && videoReady && canCapture,
+    active: !capturedImage,
+    getFrameCanvas: cropCurrentFrameToCanvas,
+    onCapture: (dataUrl) => {
+      setCapturedImage(dataUrl);
+      stopCamera();
+    },
+  });
 
   const retakePhoto = () => {
     setCapturedImage(null);
@@ -343,7 +343,7 @@ const FaceReadingCamera = () => {
         isOpen
         onClose={() => {
           setShowGuestAuthModal(false);
-          navigate('/ai-wow/astro-face-reading/instructions');
+          navigate('/ai-wow/astro-face-reading');
         }}
         onSuccess={handleGuestAuthSuccess}
       />
@@ -413,6 +413,11 @@ const FaceReadingCamera = () => {
                     ? 'Position your face within the circle'
                     : ''}
                 </p>
+              </div>
+            )}
+            {canCapture && autoCapturing && modelsLoaded && (
+              <div className={styles.faceDetectionMessage}>
+                <p>Hold steady… capturing</p>
               </div>
             )}
           </>

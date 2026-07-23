@@ -831,7 +831,9 @@
   font-weight: 600;
   color: black;
   outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
 
   &:focus {
     border-color: #d43400;
@@ -917,6 +919,8 @@
   border-radius: 32px 32px 0 0;
   min-height: auto;
   z-index: 1;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .loginTitle {

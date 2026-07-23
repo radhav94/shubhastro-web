@@ -273,7 +273,7 @@ const HoroscopeNew = () => {
     } else {
       newPath = `/daily-horoscope-indian/${profileSunSign}`;
     }
-    navigate(newPath, { replace: true, state: location.state });
+    navigate(newPath, { replace: true});
   }, [activeProfile?._id, profileSunSign, isAstroFetching]);
 
   // Update active tab when pathname changes
@@ -689,7 +689,7 @@ const HoroscopeNew = () => {
             className="horoscope-western-btn"
             onClick={() => {
               trackEvent('horoscope_type_switched', { from_type: 'indian', to_type: 'western' });
-              navigate('/daily-horoscope', { state: { category: activeCategory } });
+              navigate('/daily-horoscope');
             }}
           >
             Western

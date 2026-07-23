@@ -38,7 +38,7 @@ const GemstoneAnalysis = () => {
     if (profileLoading) return;
 
     if (!gemstoneImage) {
-      navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path[0]);
+      navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0]);
       return;
     }
 
@@ -138,7 +138,7 @@ const GemstoneAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearGemstoneData());
-    navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path[0]);
+    navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0]);
   };
 
   return (

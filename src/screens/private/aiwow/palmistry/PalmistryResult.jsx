@@ -104,7 +104,7 @@ const PalmistryResult = () => {
         } else {
           console.error('Invalid palmistry data structure:', palmData);
           Toast.error('Invalid analysis data. Please try again.');
-          navigate('/ai-wow/ai-palmistry-scanner/hand-selection');
+          navigate('/ai-wow/ai-palmistry-scanner');
           return;
         }
         
@@ -123,7 +123,7 @@ const PalmistryResult = () => {
       } else {
         // No data available
         Toast.error('No analysis results found');
-        navigate('/ai-wow/ai-palmistry-scanner/hand-selection');
+        navigate('/ai-wow/ai-palmistry-scanner');
       }
     };
 

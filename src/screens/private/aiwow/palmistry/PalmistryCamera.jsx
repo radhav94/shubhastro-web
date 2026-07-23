@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './PalmistryCamera.module.scss';
 import { useHandDetection } from '../../../../utils/hooks/useHandDetection';
+import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
@@ -85,6 +86,49 @@ const PalmistryCamera = () => {
 
   // Wrong hand: hand detected but it's not the selected hand
   const isWrongHand = handDetected && detectedHandSide !== null && detectedHandSide !== selectedHand;
+
+  // ─── Auto-capture (blur-safe) ────────────────────────────────────────────
+  // Fire automatically once a valid palm is steadily in frame; the shared hook
+  // picks the sharpest frame so we never save a blurry image.
+  const ready = handsLoaded && handDetected && isPalmOpen && isInBounds && !isWrongHand && !isTooFar;
+
+  // Draw the current video frame, cropped to the orange box, onto a canvas.
+  const cropCurrentFrameToCanvas = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !video.videoWidth) return null;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const bounds = getCaptureBoxBounds();
+    const boxX = bounds.left * canvas.width;
+    const boxY = bounds.top * canvas.height;
+    const boxWidth = (bounds.right - bounds.left) * canvas.width;
+    const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
+
+    const cropCanvas = document.createElement('canvas');
+    cropCanvas.width = boxWidth;
+    cropCanvas.height = boxHeight;
+    cropCanvas.getContext('2d').drawImage(
+      canvas,
+      boxX, boxY, boxWidth, boxHeight,
+      0, 0, boxWidth, boxHeight
+    );
+    return cropCanvas;
+  };
+
+  const { autoCapturing } = useAutoCapture({
+    ready,
+    active: !capturedImage,
+    getFrameCanvas: cropCurrentFrameToCanvas,
+    onCapture: (dataUrl) => {
+      setCapturedImage(dataUrl);
+      stopCamera();
+    },
+  });
 
   // Start detection when models are loaded and video is ready
   useEffect(() => {
@@ -205,46 +249,11 @@ const PalmistryCamera = () => {
   };
 
   const captureImage = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      // Get orange box bounds dynamically
-      const bounds = getCaptureBoxBounds();
-
-      // Calculate crop dimensions based on orange box bounds
-      const boxX = bounds.left * canvas.width;
-      const boxY = bounds.top * canvas.height;
-      const boxWidth = (bounds.right - bounds.left) * canvas.width;
-      const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
-
-      console.log('📸 Cropping to orange box:', { boxX, boxY, boxWidth, boxHeight });
-
-      // Create a new canvas for the cropped image (only orange box area)
-      const cropCanvas = document.createElement('canvas');
-      cropCanvas.width = boxWidth;
-      cropCanvas.height = boxHeight;
-      const cropContext = cropCanvas.getContext('2d');
-
-      // Draw only the orange box region
-      cropContext.drawImage(
-        canvas,
-        boxX, boxY, boxWidth, boxHeight,  // Source rectangle (from original canvas)
-        0, 0, boxWidth, boxHeight          // Destination rectangle (to crop canvas)
-      );
-
-      // Get the cropped image
-      const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
-
-      setCapturedImage(croppedImage);
-      stopCamera();
-    }
+    const cropCanvas = cropCurrentFrameToCanvas();
+    if (!cropCanvas) return;
+    const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
+    setCapturedImage(croppedImage);
+    stopCamera();
   };
 
   const switchCamera = () => {
@@ -259,7 +268,7 @@ const PalmistryCamera = () => {
   };
 
   const retakePhoto = () => {
-    setCapturedImage(null);
+    setCapturedImage(null); // clearing this re-activates auto-capture in the hook
     startCamera();
   };
 
@@ -438,6 +447,11 @@ const PalmistryCamera = () => {
                     : !isInBounds ? 'Move your hand inside the box'
                     : ''}
                 </p>
+              </div>
+            )}
+            {ready && autoCapturing && handsLoaded && (
+              <div className={styles.handDetectionMessage}>
+                <p>Hold steady… capturing</p>
               </div>
             )}
           </>

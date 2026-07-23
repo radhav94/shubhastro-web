@@ -297,8 +297,8 @@
   background: linear-gradient(135deg, #F75801 0%, #D43400 100%);
   color: white;
   border: none;
-  padding: 1rem 1.5rem;
-  border-radius: 0.75rem;
+  padding: 1rem 2rem;
+  border-radius: 5rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -308,9 +308,10 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-
-  @media (min-width: 768px) {
-    font-size: 1.0625rem;
+  width: fit-content;
+  margin: 0 auto;
+  @media (width <= 767px) {
+    padding: 0.7rem 2rem;
   }
 
   &:hover:not(:disabled) {
@@ -450,17 +451,6 @@
   max-height: 320px;
   overflow: hidden;
   position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 50px;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95));
-    pointer-events: none;
-  }
 }
 
 .cardText {
@@ -683,7 +673,7 @@
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.75rem;
-  background: #f9fafb;
+  background: #fff3;
   border-radius: 0.5rem;
   border-left: 3px solid #F75801;
 }
@@ -870,7 +860,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 0.75rem;
-  background: #f9fafb;
+  background: #fff3;
   border-radius: 0.5rem;
 }
 
@@ -907,7 +897,7 @@
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.5rem 0.75rem;
-  background: #f9fafb;
+  background: #fff3;
   border-radius: 0.5rem;
   border-left: 3px solid #F75801;
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './SignatureCamera.module.scss';
 import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
+import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
@@ -129,59 +130,60 @@ const SignatureCamera = () => {
     // Start camera with new mode will be handled by useEffect
   };
 
-  const captureImage = async () => {
-    stopDetection();
-    
-    if (videoRef.current && canvasRef.current && captureAreaRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      // Calculate capture box bounds based on the visible capture area
-      const videoRect = video.getBoundingClientRect();
-      const boxRect = captureAreaRef.current.getBoundingClientRect();
-      
-      // Calculate bounds as percentage of video dimensions
-      const bounds = {
-        left: (boxRect.left - videoRect.left) / videoRect.width,
-        right: (boxRect.right - videoRect.left) / videoRect.width,
-        top: (boxRect.top - videoRect.top) / videoRect.height,
-        bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
-      };
-      
-      // Calculate crop dimensions based on capture box bounds
-      const boxX = bounds.left * canvas.width;
-      const boxY = bounds.top * canvas.height;
-      const boxWidth = (bounds.right - bounds.left) * canvas.width;
-      const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
-      
-      console.log('📸 Cropping to capture box:', { boxX, boxY, boxWidth, boxHeight });
-      
-      // Create a new canvas for the cropped image (only capture box area)
-      const cropCanvas = document.createElement('canvas');
-      cropCanvas.width = boxWidth;
-      cropCanvas.height = boxHeight;
-      const cropContext = cropCanvas.getContext('2d');
-      
-      // Draw only the capture box region
-      cropContext.drawImage(
-        canvas,
-        boxX, boxY, boxWidth, boxHeight,  // Source rectangle (from original canvas)
-        0, 0, boxWidth, boxHeight          // Destination rectangle (to crop canvas)
-      );
-      
-      // Get the cropped image
-      const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
-      
-      setCapturedImage(croppedImage);
-      stopCamera();
-    }
+  // Draw the current video frame, cropped to the capture box, onto a canvas.
+  const cropCurrentFrameToCanvas = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !captureAreaRef.current || !video.videoWidth) return null;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const videoRect = video.getBoundingClientRect();
+    const boxRect = captureAreaRef.current.getBoundingClientRect();
+    const bounds = {
+      left: (boxRect.left - videoRect.left) / videoRect.width,
+      right: (boxRect.right - videoRect.left) / videoRect.width,
+      top: (boxRect.top - videoRect.top) / videoRect.height,
+      bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
+    };
+    const boxX = bounds.left * canvas.width;
+    const boxY = bounds.top * canvas.height;
+    const boxWidth = (bounds.right - bounds.left) * canvas.width;
+    const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
+
+    const cropCanvas = document.createElement('canvas');
+    cropCanvas.width = boxWidth;
+    cropCanvas.height = boxHeight;
+    cropCanvas.getContext('2d').drawImage(
+      canvas,
+      boxX, boxY, boxWidth, boxHeight,
+      0, 0, boxWidth, boxHeight
+    );
+    return cropCanvas;
   };
+
+  const captureImage = () => {
+    stopDetection();
+    const cropCanvas = cropCurrentFrameToCanvas();
+    if (!cropCanvas) return;
+    setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
+    stopCamera();
+  };
+
+  // Auto-capture the sharpest frame once the signature is steady in the frame.
+  const { autoCapturing } = useAutoCapture({
+    ready: detectionReady && objectDetected,
+    active: !capturedImage,
+    getFrameCanvas: cropCurrentFrameToCanvas,
+    onCapture: (dataUrl) => {
+      stopDetection();
+      setCapturedImage(dataUrl);
+      stopCamera();
+    },
+  });
 
   // Helper function to find signature bounding box using edge detection
   const findSignatureBounds = (imageData) => {
@@ -314,7 +316,7 @@ const SignatureCamera = () => {
         isOpen
         onClose={() => {
           setShowGuestAuthModal(false);
-          navigate('/ai-wow/signature-analysis/instructions');
+          navigate('/ai-wow/signature-analysis');
         }}
         onSuccess={handleGuestAuthSuccess}
       />
@@ -367,6 +369,11 @@ const SignatureCamera = () => {
             {!objectDetected && detectionReady && (
               <div className={styles.detectionMessage}>
                 <p>Position your signature within the frame</p>
+              </div>
+            )}
+            {objectDetected && autoCapturing && detectionReady && (
+              <div className={styles.detectionMessage}>
+                <p>Hold steady… capturing</p>
               </div>
             )}
           </>
