@@ -32,13 +32,13 @@ export const useGuestChatAuth = () => {
   const [sendingOtp, setSendingOtp] = useState(false);
   const [verifying, setVerifying] = useState(false);
 
-  const buildKundliPayload = (data) => {
+  const buildKundliPayload = (data, relation = "self") => {
     const dateObj = new Date(data.birthDate);
     const timeObj = data.birthTime ? data.birthTime.split(":") : ["0", "0"];
     return {
       name: data.name,
       gender: data.identity.toLowerCase(),
-      relation: "self",
+      relation,
       day: dateObj.getDate(),
       month: dateObj.getMonth() + 1,
       year: dateObj.getFullYear(),
@@ -172,13 +172,22 @@ export const useGuestChatAuth = () => {
         let createdProfile = null;
 
         if (isExistingUser) {
+          // Existing account: the "self" kundli is already theirs, so create a
+          // NEW profile labeled "other" from the details entered in this flow
+          // and use that (instead of reusing their existing self kundli).
           try {
-            const listResult = await fetchAllKundlis().unwrap();
-            const kundlis = listResult?.data || [];
-            createdProfile =
-              kundlis.find((k) => k.relation?.toLowerCase() === "self") || kundlis[0] || null;
-          } catch (fetchErr) {
-            console.error("Failed to fetch existing kundlis:", fetchErr);
+            const result = await createKundliWithRetry(buildKundliPayload(details, "other"));
+            createdProfile = result?.data || null;
+          } catch (kundliErr) {
+            console.error("Guest 'other' kundli creation failed, falling back:", kundliErr);
+            try {
+              const listResult = await fetchAllKundlis().unwrap();
+              const kundlis = listResult?.data || [];
+              createdProfile =
+                kundlis.find((k) => k.relation?.toLowerCase() === "self") || kundlis[0] || null;
+            } catch (fetchErr) {
+              console.error("Failed to fetch existing kundlis:", fetchErr);
+            }
           }
         } else {
           try {
@@ -223,10 +232,16 @@ export const useGuestChatAuth = () => {
           localStorage.setItem("selectedKundliProfile", JSON.stringify(createdProfile));
         }
 
-        // New users get a welcome bonus — tell the (already-mounted)
-        // WelcomeBonusModal to show it, since no route change occurs here.
+        // Show the appropriate welcome popup (bonus for new users, welcome-back
+        // for existing) — both are mounted in HomeLayout and shown via events.
         if (!isExistingUser) {
           setTimeout(() => window.dispatchEvent(new Event("show-welcome-bonus")), 150);
+        } else {
+          const backName =
+            userData?.firstName || (details?.name || "").trim().split(/\s+/)[0] || "";
+          localStorage.setItem("shubhtalk_welcome_back_name", backName);
+          localStorage.setItem("shubhtalk_show_welcome_back", "true");
+          setTimeout(() => window.dispatchEvent(new Event("show-welcome-back")), 150);
         }
 
         return { ok: true, userId: _id, profile: createdProfile, isExistingUser };
