@@ -120,6 +120,16 @@
   margin-top: 4px;
 }
 
+/* Portaled calendar (portalId) must sit above modals/overlays. */
+:global(#rdp-portal) {
+  position: relative;
+  z-index: 100000;
+}
+
+:global(.react-datepicker-popper) {
+  z-index: 100000 !important;
+}
+
 .hiddenPicker {
   position: absolute;
   width: 0;

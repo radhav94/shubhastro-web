@@ -23,6 +23,8 @@ import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrolo
 import { getAstrologerDefaultImage } from "../../../utils/appImages";
 import { getToken } from "../../../utils/token";
 import { capitalizeWords } from "../../../utils/capitalize";
+import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
+import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 import { GUEST_AUTO_ACCEPT_KEY } from "./guestChatConstants";
 import { useGuestChatAuth } from "./useGuestChatAuth";
 import chat from "../../private/home/components/chats/ChatWindow.module.scss";
@@ -62,6 +64,8 @@ const GuestChatFlow = () => {
   const { setActiveChat, setChatSeconds } = useChat();
   const { addPendingConnection, removePendingConnection } = useWaitingQueue();
   const { sendOtp, resendOtp, verifyAndRegister, sendingOtp, verifying } = useGuestChatAuth();
+  const [getBalance] = useGetBalanceMutation();
+  const welcomeHandledRef = useRef(false);
 
   const astroFromState = location.state?.astrologer || null;
   const { data: astroApi } = useGetAstrologerByIdQuery(
@@ -123,12 +127,40 @@ const GuestChatFlow = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [astroName]);
 
-  const isTyping = phase === "connecting" || phase === "waiting";
+  const isTyping = ["welcome", "connecting", "recharge", "waiting"].includes(phase);
 
   useEffect(() => {
     const el = messagesRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, isTyping]);
+
+  // Guest chat only: after registration a welcome popup appears (bonus for new
+  // users, welcome-back for existing). Once it's closed, check the balance:
+  //  - low balance  → show the recharge popup
+  //  - enough       → initiate the chat and show the waiting popup
+  useEffect(() => {
+    // New user (welcome-bonus): check balance → recharge or initiate chat.
+    const onBonusClosed = () => {
+      if (welcomeHandledRef.current) return;
+      welcomeHandledRef.current = true;
+      handleWelcomeClosed();
+    };
+    // Existing user (welcome-back): initiate the chat request, then send them to
+    // the astrologers page (the request continues via the global waiting queue).
+    const onBackClosed = () => {
+      if (welcomeHandledRef.current) return;
+      welcomeHandledRef.current = true;
+      initiateChat();
+      navigate("/astrologers", { replace: true });
+    };
+    window.addEventListener("welcome-bonus-closed", onBonusClosed);
+    window.addEventListener("welcome-back-closed", onBackClosed);
+    return () => {
+      window.removeEventListener("welcome-bonus-closed", onBonusClosed);
+      window.removeEventListener("welcome-back-closed", onBackClosed);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ------------------------------- form logic ------------------------------- */
   const setField = (key, value) => {
@@ -168,28 +200,8 @@ const GuestChatFlow = () => {
       mobileNumber: form.mobileNumber,
     };
     detailsRef.current = details;
-
-    // Replace any previous details summary so re-submitting (e.g. after closing
-    // the OTP popup) updates the same message instead of stacking duplicates.
-    const summary = `${details.name}, ${form.identity}, born ${formatDob(form.dob)}${
-      details.birthPlace ? ` in ${details.birthPlace}` : ""
-    }`;
-    setMessages((m) => [
-      ...m.filter((msg) => !msg.isSummary),
-      {
-        id: `u-summary-${Date.now()}`,
-        text: summary,
-        isSender: true,
-        time: nowTime(),
-        isSummary: true,
-      },
-    ]);
-
     await beginOtp(details);
   };
-
-  const formatDob = (d) =>
-    d ? `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}` : "";
 
   /* ------------------------------- OTP + auth ------------------------------- */
   const beginOtp = async (finalDetails) => {
@@ -213,10 +225,54 @@ const GuestChatFlow = () => {
       Toast.error(result.message || "OTP verification failed");
       return false;
     }
-    setPhase("connecting");
-    pushBot(`You're all set! Connecting you with ${astroName}...`);
-    setTimeout(() => initiateChat(), 300);
+    // The welcome popup (bonus/back) is now shown; the balance check + chat
+    // initiation happen once it's closed (see the welcome-closed listener).
+    welcomeHandledRef.current = false;
+    setPhase("welcome");
+    pushBot("You're all set!");
+    // Safety: the welcome popup auto-closes ~5s and fires a close event; if that
+    // event is somehow missed, proceed anyway after a short grace period.
+    setTimeout(() => {
+      if (!welcomeHandledRef.current) {
+        welcomeHandledRef.current = true;
+        handleWelcomeClosed();
+      }
+    }, 7000);
     return true;
+  };
+
+  // After the welcome popup closes: check balance → recharge or initiate chat.
+  const handleWelcomeClosed = async () => {
+    const astro = astrologerRef.current;
+    if (!astro?._id) {
+      navigate("/astrologers", { replace: true });
+      return;
+    }
+    try {
+      const result = await getBalance({ astrologerId: astro._id });
+      if (result?.data?.data?.status === false) {
+        setPhase("recharge");
+        return;
+      }
+    } catch (err) {
+      console.error("Guest balance check failed:", err);
+    }
+    // Balance OK: initiate the chat request and move to the astrologers page
+    // (the request continues in the background via the global waiting queue).
+    initiateChat();
+    navigate("/astrologers", { replace: true });
+  };
+
+  // Recharge completed → initiate the chat and move to the astrologers page
+  // (the request continues in the background via the waiting queue).
+  const handleRechargeSuccess = () => {
+    initiateChat();
+    navigate("/astrologers", { replace: true });
+  };
+
+  // Recharge popup dismissed without recharging → go to the astrologers page.
+  const handleRechargeClose = () => {
+    navigate("/astrologers", { replace: true });
   };
 
   const handleResendOtp = async () => {
@@ -256,7 +312,6 @@ const GuestChatFlow = () => {
     });
 
     setPhase("waiting");
-    pushBot(`Waiting for ${astro.firstName || astroName} to connect...`);
     voiceSocket.emit("chat:initiate", {
       userId,
       astrologerId: astro._id,
@@ -665,6 +720,12 @@ const GuestChatFlow = () => {
         onClose={handleOtpClose}
         isVerifying={verifying}
         closeOnOverlayClick={false}
+      />
+
+      <RechargeModal
+        isOpen={phase === "recharge"}
+        onClose={handleRechargeClose}
+        onSuccess={handleRechargeSuccess}
       />
 
       {confirmLeave &&

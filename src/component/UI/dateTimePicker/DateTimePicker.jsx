@@ -347,6 +347,9 @@ const DateTimePicker = ({
   dropUp = false,
   // When true, clicking the input opens the picker and disables manual typing
   openOnClick = false,
+  // When true, the calendar renders in a body-level portal (avoids clipping
+  // inside scrollable/overflow-hidden containers like modals)
+  portal = false,
   // Legacy prop support
   showTime,
 }) => {
@@ -530,6 +533,7 @@ const DateTimePicker = ({
           popperPlacement={dropUp ? "top-start" : "bottom-start"}
           popperClassName={styles.popper}
           calendarClassName={styles.calendar}
+          {...(portal ? { portalId: "rdp-portal" } : {})}
         />
       </div>
     </div>
