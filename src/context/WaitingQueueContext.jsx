@@ -8,6 +8,7 @@ import { trackEvent } from "../utils/analytics";
 
 import { startIncomingSound, stopIncomingSound } from "../utils/incomingSound";
 import { claimRoom, releaseRoom } from "../utils/tabSession";
+import { GUEST_AUTO_ACCEPT_KEY } from "../screens/public/guestChat/guestChatConstants";
 const WaitingQueueContext = createContext();
 
 // LocalStorage key for persistence
@@ -249,6 +250,17 @@ export const WaitingQueueProvider = ({ children }) => {
         return;
       }
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
+
+      // Guest call/video flow: auto-accept on the user's behalf (no accept popup).
+      const guestAutoAcceptCall = sessionStorage.getItem(GUEST_AUTO_ACCEPT_KEY);
+      if (guestAutoAcceptCall && roomId) {
+        console.log("[GlobalTwoWay] 🤖 Guest auto-accept — emitting call:user_accept", roomId);
+        stopIncomingSound();
+        voiceSocket.emit("call:user_accept", { roomId });
+        sessionStorage.removeItem(GUEST_AUTO_ACCEPT_KEY);
+        return;
+      }
+
       setCallApprovalData({ roomId, sessionId, astrologerId, astrologerDetail, type, isEmergency });
     };
 
@@ -260,6 +272,17 @@ export const WaitingQueueProvider = ({ children }) => {
         return;
       }
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
+
+      // Guest chat flow: auto-accept on the user's behalf (no accept popup).
+      const guestAutoAccept = sessionStorage.getItem(GUEST_AUTO_ACCEPT_KEY);
+      if (guestAutoAccept && roomId) {
+        console.log("[GlobalTwoWay] 🤖 Guest auto-accept — emitting chat:user_accept", roomId);
+        stopIncomingSound();
+        voiceSocket.emit("chat:user_accept", { roomId });
+        sessionStorage.removeItem(GUEST_AUTO_ACCEPT_KEY);
+        return;
+      }
+
       setChatApprovalData({ roomId, sessionId, astrologerId, astrologerDetail, type: type || "chat", isEmergency });
     };
 

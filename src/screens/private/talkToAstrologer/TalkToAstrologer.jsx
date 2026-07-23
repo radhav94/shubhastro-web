@@ -47,6 +47,7 @@ import NewAstrologerDetailsCard from "../../../component/UI/cards/newAstrologerC
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import AstrologerRingModal from "../../../component/UI/modal/AstrologerRingModal/AstrologerRingModal";
+import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -63,6 +64,7 @@ const TalkToAstrologer = () => {
   const dispatch = useDispatch();
   const { category: categoryFromParams } = useParams();
   const requireAuth = useRequireAuth();
+  const { openGuestConnect, guestConnectModal } = useGuestConnectFlow();
   const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
@@ -520,6 +522,18 @@ const TalkToAstrologer = () => {
   // Handle connect button click - reused from Home page
   // Receives connectionType (chat or audio) from NewAstrologerCard
   const handleConnectClick = async (astrologer, connectionType, isEmergency = false) => {
+    // Guest flows (no login redirect):
+    //  - chat  → conversational guest screen
+    //  - call/video → AI Wow-style guest modal, then initiate the call
+    if (!getToken()) {
+      if (connectionType === "chat") {
+        navigate(`/guest-chat/${astrologer._id}`, { state: { astrologer } });
+      } else {
+        openGuestConnect(astrologer, connectionType);
+      }
+      return;
+    }
+
     if (!requireAuth()) return;
 
     // if (WaitingList || callWaitingList) {
@@ -1579,6 +1593,9 @@ const TalkToAstrologer = () => {
           variant="toast"
         />
       ))}
+
+      {/* Guest call/video flow (AI Wow-style details + OTP, then initiate call) */}
+      {guestConnectModal}
     </div>
   );
 };

@@ -18,6 +18,7 @@ import Blog from "../../screens/private/blog/Blog";
 import SessionDetails from "../../screens/private/sessionDetails/SessionDetails";
 import Shop from "../../screens/private/shop/Shop";
 import TalkToAstrologer from "../../screens/private/talkToAstrologer/TalkToAstrologer";
+import GuestChatFlow from "../../screens/public/guestChat/GuestChatFlow";
 import Payment from "../../screens/private/payment/Payment";
 import Astrologers from "../../screens/private/astrologersold/Astrologers";
 import Streaming from "../../screens/private/astroLive/streaming/Streaming";
@@ -329,6 +330,11 @@ export const PATH = {
     Chat_With_ASTROLOGER: {
       path: "/chat-to-astrologer",
       element: TalkToAstrologer,
+    },
+    GUEST_CHAT: {
+      path: "/guest-chat/:astrologerId",
+      element: GuestChatFlow,
+      footer: false,
     },
     ASTROLOGERS_LIST: {
       path: "/astrologers",

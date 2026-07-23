@@ -16,7 +16,7 @@ import LinkPreview from "./LinkPreview";
 import { detectURL } from "../../../../../utils/helper/linkPreview";
 import { getAttachmentDisplayName } from "../../../../../utils/helper/getAttachmentDisplayName";
 
-const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, customerName, onScroll, isLoadingMore }) => {
+const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, customerName, onScroll, isLoadingMore, onMessageAction }) => {
   const [iframeSrc, setIframeSrc] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const navigate = useNavigate();
@@ -35,11 +35,15 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
     }
   };
 
-  // Memoize message groups for performance
+  // Memoize message groups for performance.
+  // Always derive the header from dateTime so history + socket messages use a
+  // single consistent format (avoids the same day appearing under two headers).
   const messageGroups = useMemo(() => {
     const groups = {};
     messages.forEach((msg) => {
-      const date = msg.date || dayjs(msg.dateTime).format("MMM DD, YYYY");
+      const date = msg.dateTime
+        ? dayjs(msg.dateTime).format("MMM DD, YYYY")
+        : msg.date || dayjs().format("MMM DD, YYYY");
       if (!groups[date]) {
         groups[date] = [];
       }
@@ -305,7 +309,38 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
                   }`}
                 >
                   <div className={styles.bubbleContent}>
-                    {renderMessageContent(msg)}
+                    {msg.actionLabel ? (
+                      <span
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-end",
+                          justifyContent: "space-between",
+                          gap: 12,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <span style={{ flex: 1, minWidth: 0 }}>{renderMessageContent(msg)}</span>
+                        <button
+                          type="button"
+                          onClick={() => onMessageAction?.(msg)}
+                          style={{
+                            flexShrink: 0,
+                            background: "none",
+                            border: "none",
+                            padding: 0,
+                            color: "#f75801",
+                            fontSize: 13,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            textDecoration: "underline",
+                          }}
+                        >
+                          {msg.actionLabel}
+                        </button>
+                      </span>
+                    ) : (
+                      renderMessageContent(msg)
+                    )}
                   </div>
                   <div className={styles.msgTimeWrapper}>
                     <span className={styles.msgTime}>{msg.time}</span>
