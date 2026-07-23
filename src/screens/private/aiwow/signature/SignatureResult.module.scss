@@ -138,9 +138,13 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   
-  &:hover {
-    color: #E54D00;
+  @media (hover: hover) {
+    &:hover {
+      color: #E54D00;
+    }
   }
   
   &.active {
