@@ -1760,6 +1760,7 @@ const Profile = () => {
                                         order.type === "chat"
                                           ? "Chat"
                                           : "Call",
+                                      from: "profile",
                                       // NOTE: Previously routed video to separate "Video" tab
                                       // tab:
                                       //   order.type === "chat"

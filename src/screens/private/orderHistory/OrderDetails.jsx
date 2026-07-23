@@ -310,7 +310,13 @@ const OrderDetails = () => {
   }, [chatRoomIdLocal, callRoomIdLocal, connectionType]);
 
   const handleBack = () => {
-    navigate(-1);
+    // If user came from the profile/order history page, navigate back with tab state preserved
+    const fromProfile = location.state?.from === "profile" || document.referrer.includes("/profile");
+    if (fromProfile || window.history.length <= 2) {
+      navigate("/profile", { state: { activeTab: "Order History" } });
+    } else {
+      navigate(-1);
+    }
   };
 
   const astrologer = astrologerData?.data;
