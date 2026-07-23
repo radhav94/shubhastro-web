@@ -15,9 +15,11 @@ import styles from "./Home.module.scss";
 import {ProfileManager} from "../../../component/UI/Profile";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
+import { getToken } from "../../../utils/token";
 
 const Home = () => {
   const requireAuth = useRequireAuth();
+  const navigate = useNavigate();
   
   // COMMENTED OUT: No longer using ConnectAstrologerPopup
   // const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
@@ -128,6 +130,13 @@ const Home = () => {
 
   // Handle connect button click - now receives connectionType (chat or audio)
   const handleConnectClick = async (astrologer, connectionType, isEmergency = false) => {
+    // Guest chat flow: an unauthenticated user tapping "Chat" goes to the
+    // conversational guest screen instead of the login redirect.
+    if (connectionType === "chat" && !getToken()) {
+      navigate(`/guest-chat/${astrologer._id}`, { state: { astrologer } });
+      return;
+    }
+
     if (!requireAuth()) return;
 
     setSelectedAstrologer(astrologer);

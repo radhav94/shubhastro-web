@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import styles from './DreamInterpreter.module.scss';
 import { Toast } from '../../../../component';
 import { interpretDream } from '../../../../services/appServices/aiWowService';
@@ -7,9 +8,12 @@ import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliP
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
+import { setDreamInterpreterResult, clearDreamInterpreterResult } from '../../../../redux/aiwow/aiwowSlice';
 
 const DreamInterpreter = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const savedDreamResult = useSelector((state) => state.aiwow.dreamInterpreter?.result);
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
 
   useEffect(() => {
@@ -26,7 +30,7 @@ const DreamInterpreter = () => {
   const [lifePhase, setLifePhase] = useState('');
   const [challenges, setChallenges] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [interpretation, setInterpretation] = useState(null);
+  const [interpretation, setInterpretation] = useState(savedDreamResult);
   const [error, setError] = useState(null);
   const [showMorePsych, setShowMorePsych] = useState(false);
   const [showMoreAstro, setShowMoreAstro] = useState(false);
@@ -93,7 +97,9 @@ const DreamInterpreter = () => {
 
       if (result.success) {
         // API returns data.dream object
-        setInterpretation(result.data?.dream || result.data);
+        const interpretationData = result.data?.dream || result.data;
+        setInterpretation(interpretationData);
+        dispatch(setDreamInterpreterResult(interpretationData));
         setError(null);
       } else {
         // Set error state to show error UI
@@ -117,6 +123,7 @@ const DreamInterpreter = () => {
       setTags('');
       setLifePhase('');
       setChallenges('');
+      dispatch(clearDreamInterpreterResult());
     } else {
       navigate('/ai-wow');
     }

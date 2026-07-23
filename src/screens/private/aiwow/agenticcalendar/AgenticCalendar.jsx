@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import styles from './AgenticCalendar.module.scss';
 import { Toast } from '../../../../component';
 import { analyzeCalendarEvents } from '../../../../services/appServices/aiWowService';
@@ -10,6 +11,7 @@ import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import LocationSearch from '../../../../utils/location/locationSearchVedic';
 import useUserLocation from '../../../../utils/hooks/useUserLocation';
+import { setMuhuratCalendarResult, clearMuhuratCalendarResult } from '../../../../redux/aiwow/aiwowSlice';
 
 const DEFAULT_OCCASIONS = [
   'Marriage',
@@ -27,6 +29,8 @@ const DEFAULT_OCCASIONS = [
 const AgenticCalendar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
+  const savedMuhuratResult = useSelector((state) => state.aiwow.muhuratCalendar?.result);
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({ required: false, showToast: false });
   const userLocation = useUserLocation();
 
@@ -45,9 +49,12 @@ const AgenticCalendar = () => {
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
 
   const [isLoading, setIsLoading] = useState(false);
-  const [analysis, setAnalysis] = useState(null);
-  const [expandedOccasion, setExpandedOccasion] = useState(null);
-  const [locked, setLocked] = useState(false); // Lock selections after clicking Get Timing
+  const [analysis, setAnalysis] = useState(savedMuhuratResult);
+  const [expandedOccasion, setExpandedOccasion] = useState(() => {
+    if (savedMuhuratResult?.optimalTimings?.length > 0) return savedMuhuratResult.optimalTimings[0].eventName;
+    return null;
+  });
+  const [locked, setLocked] = useState(!!savedMuhuratResult); // Lock selections after clicking Get Timing
   const resultsRef = useRef(null);
   const [locationValue, setLocationValue] = useState('');
   const [locationData, setLocationData] = useState(null);
@@ -204,6 +211,7 @@ const AgenticCalendar = () => {
       });
       if (result.success) {
         setAnalysis(result.data);
+        dispatch(setMuhuratCalendarResult(result.data));
         setExpandedOccasion(occasions[0]);
         setTimeout(() => {
           resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -422,6 +430,7 @@ const AgenticCalendar = () => {
                 setLocked(false);
                 setAnalysis(null);
                 setExpandedOccasion(null);
+                dispatch(clearMuhuratCalendarResult());
               } else {
                 handleGetTimings();
               }
