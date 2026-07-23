@@ -25,7 +25,11 @@ const ResultTarot = ({ card, userName = "", onReset }) => {
     );
   }
 
-  const allText = [card.meaning, card.description].filter(Boolean).join(". ");
+  // Yes/No tarot may return the verdict in `answer` (and the meaning/guidance
+  // in `meaning`/`description`). Include all so TTS always has content.
+  const allText = [card.answer, card.meaning, card.description]
+    .filter(Boolean)
+    .join(". ");
 
   return (
     <div className={styles.resultContainer}>
@@ -53,8 +57,21 @@ const ResultTarot = ({ card, userName = "", onReset }) => {
               <TTSButton text={`Reading and Guidance. ${allText}`} />
             </div>
           )}
-          <p>{card.meaning}</p>
-          <p>{card.description}</p>
+          {card.answer && (
+            <p>
+              <strong>Answer: </strong>
+              <span
+                style={{
+                  color: String(card.answer).toLowerCase() === 'yes' ? '#16a34a' : '#dc2626',
+                  fontWeight: 700,
+                }}
+              >
+                {card.answer}
+              </span>
+            </p>
+          )}
+          {card.meaning && <p>{card.meaning}</p>}
+          {card.description && <p>{card.description}</p>}
           <button
             type="button"
             className={styles.actionButton}
