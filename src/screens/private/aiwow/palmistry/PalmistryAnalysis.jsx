@@ -8,6 +8,11 @@ import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import BackButton from '../../../../component/UI/BackButton/BackButton';
 
+// Session flag: set while an analysis is in progress / not yet successful, so a
+// page reload doesn't auto re-analyze a failed image. Shared with the capture
+// screens so a fresh capture clears it.
+export const PALMISTRY_ANALYSIS_FLAG = 'palmistryAnalysisStarted';
+
 const PalmistryAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -69,6 +74,18 @@ const PalmistryAnalysis = () => {
     if (profile && !isAnalyzing && !analysisComplete && !error) {
       if (hasStartedRef.current) return;
       hasStartedRef.current = true;
+
+      // On iOS Chrome, reloading the /capture page would silently re-analyze
+      // the (often failed) image because the image/hand persist in Redux while
+      // the error state does not. A session flag marks that an analysis was
+      // already started; if the page is reloaded before it succeeds, show the
+      // retry screen instead of auto re-running. The flag is cleared on a new
+      // capture or an explicit retry.
+      if (sessionStorage.getItem(PALMISTRY_ANALYSIS_FLAG) === '1') {
+        setError({ message: "Your previous analysis didn't complete. Please try again." });
+        return;
+      }
+      sessionStorage.setItem(PALMISTRY_ANALYSIS_FLAG, '1');
       performAnalysis(palmImage, selectedHand);
     }
   }, [palmImage, selectedHand, profile, profileLoading]);
@@ -104,6 +121,8 @@ const PalmistryAnalysis = () => {
       }
 
       if (result.success) {
+        // Analysis succeeded — clear the reload guard.
+        sessionStorage.removeItem(PALMISTRY_ANALYSIS_FLAG);
         const resultId = result.data?.id || result.data?._id;
         
         if (resultId) {
@@ -203,6 +222,7 @@ const PalmistryAnalysis = () => {
 
   const handleRetry = () => {
     // Clear error and data, then navigate back to start over
+    sessionStorage.removeItem(PALMISTRY_ANALYSIS_FLAG);
     setError(null);
     dispatch(clearPalmistryData());
     navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path[0]);

@@ -276,12 +276,16 @@
   flex-direction: column;
   gap: 0.125rem;
   min-width: 0;
+  // Reserve space for the absolutely-positioned TTS button (top-right) so the
+  // label/value never run underneath and get clipped.
+  padding-right: 1.75rem;
 }
 
 .infoLabel {
   font-size: 0.75rem;
   color: #000000;
   font-weight: 500;
+  line-height: 1.2;
 }
 
 .infoValue {
