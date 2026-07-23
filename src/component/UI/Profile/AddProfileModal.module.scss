@@ -1,190 +1,305 @@
-/* MODAL OVERLAY - Higher z-index for stacking above ProfileListingModal */
+/* MODAL OVERLAY */
 .modalOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   z-index: 10000;
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  overscroll-behavior: contain;
 }
 
-/* SIDE SHEET */
+/* SHEET */
 .sideSheet {
-  background: linear-gradient(90deg, rgba(254, 254, 254, 0.9) 0%, rgba(255, 248, 236, 0.9));
-  backdrop-filter: blur(12px);
+  background: #fff8f0;
   border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 500px;
-  max-height: 90vh;
+  max-height: 92vh;
   display: flex;
   flex-direction: column;
   animation: slideUp 0.3s ease-out;
+  overflow: hidden;
 }
 
 @keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .sheetHeader {
   flex-shrink: 0;
   position: relative;
-  // background: white;
-  border-radius: 24px 24px 0 0;
-  padding: 24px 16px 24px 16px;
+  padding: 10px 16px 6px;
 }
 
 .sheetHandle {
   width: 40px;
   height: 4px;
-  background: #ddd;
+  background: #e6d8c8;
   border-radius: 2px;
-  margin: 12px auto 16px;
-}
-
-.sheetContent {
-  padding: 0 1rem 1rem;
-  position: relative;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-}
-
-.sheetTitle {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 0;
-  color: #000;
+  margin: 0 auto 10px;
 }
 
 .closeBtn {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 24px;
-  background: #0001;
-  border: none;
-  font-size: 28px;
-  color: #666;
+  top: 14px;
+  right: 16px;
+  background: #fff;
+  border: 1px solid #f0e2d4;
+  font-size: 20px;
+  color: #4a3728;
   cursor: pointer;
-  padding: 0;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: 0.2s ease;
-  z-index: 2;
+  z-index: 3;
 
-  &:hover {
-    background: #f0f0f0;
-    color: #333;
-  }
+  &:hover { background: #fff2ea; }
 }
 
-/* PROFILE FORM */
+.sheetTitle {
+  font-size: 21px;
+  font-weight: 800;
+  margin: 0;
+  color: #1c130b;
+}
+
+/* Guest "Add Kundli Details" header */
+.guestHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.onlineBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #6b5949;
+
+  b { color: #f75801; font-weight: 700; }
+}
+
+.badgeIcon {
+  color: #f75801;
+  font-size: 18px;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.headerText {
+  min-width: 0;
+}
+
+.headerSub {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: #7a6553;
+  max-width: 220px;
+}
+
+.giftImg {
+  width: 80px;
+  height: auto;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.sheetContent {
+  padding: 2px 16px 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
+}
+
+/* FORM */
 .profileForm {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 9px;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 3px;
+  min-width: 0;
 
   label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #333;
+    font-size: 13px;
+    font-weight: 700;
+    color: #2b1d12;
   }
 
   input,
   select {
-    padding: 14px 16px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #ece3d8;
+    border-radius: 10px;
+    font-size: 14px;
+    background: #fff;
     outline: none;
-    transition: 0.2s ease;
+    transition: border-color 0.2s ease;
 
-    &:focus {
-      border-color: #999;
-    }
-
-    &::placeholder {
-      color: #aaa;
-    }
+    &:focus { border-color: #f75801; }
+    &::placeholder { color: #a7998b; }
   }
 
-  input[type="date"],
-  input[type="time"] {
-    cursor: pointer;
-    -webkit-appearance: none;
+  select {
     appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+}
 
-    &::-webkit-calendar-picker-indicator {
-      cursor: pointer;
-      opacity: 1;
+/* Left-icon fields */
+.iconField {
+  position: relative;
+
+  .leftIcon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9a8776;
+    font-size: 18px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  input {
+    border: 1px solid #ece3d8;
+    border-radius: 10px;
+  }
+
+  /* hide DateTimePicker's built-in right icon (design uses left icons) */
+  button[tabindex="-1"] {
+    display: none;
+  }
+}
+
+.formGroup .iconField input {
+  padding-left: 42px;
+  padding-right: 12px;
+}
+
+/* Mobile number with flag box */
+.mobileWrap {
+  display: flex;
+  align-items: center;
+  height: 42px;
+  border: 1px solid #ece3d8;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+
+  &:focus-within { border-color: #f75801; }
+
+  .flagBox {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 12px;
+    align-self: stretch;
+    white-space: nowrap;
+    color: #2b1d12;
+    font-size: 14px;
+    border-right: 1px solid #ece3d8;
+    background: #fbf6f0;
+  }
+
+  .flag { font-size: 16px; }
+}
+
+.formGroup .mobileWrap input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Birth date + time on one row */
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.row2 .formGroup .iconField input {
+  padding-left: 38px;
+  font-size: 14px;
+}
+
+.row2 .iconField .leftIcon {
+  left: 11px;
+  font-size: 16px;
+}
+
+/* Identity cards */
+.identityButtons {
+  display: flex;
+  gap: 10px;
+
+  button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 6px;
+    border: 1px solid #ece3d8;
+    background: #fff;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    transition: 0.15s ease;
+
+    &.active {
+      border-color: #f75801;
+      background: #fff2ea;
+      color: #f75801;
+
+      .identityIcon { color: #f75801; }
+    }
+
+    &:hover:not(.active) {
+      border-color: #f9b98e;
     }
   }
 }
 
-.identityButtons {
-  display: flex;
-  gap: 12px;
-
-  button {
-    flex: 1;
-    padding: 12px;
-    border: 1px solid var(--primary-100, #FFE4BA);
-    background: var(--primary-25, #FFF5EC);
-    border-radius: 12px;
-    font-size: 15px;
-    cursor: pointer;
-    transition: 0.2s ease;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    @media (width <= 767px) {
-      flex-direction: column;
-    }
-
-    &.active {
-      background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-      color: white;
-      svg path{
-        stroke: #fff;
-      }
-    }
-
-    &:hover:not(.active) {
-      background: #f7580126;
-    }
-  }
+.identityIcon {
+  font-size: 18px;
+  color: #8a7666;
 }
 
 .checkboxLabel {
@@ -192,239 +307,93 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #666;
-  margin-top: 8px;
+  color: #6b5949;
+  cursor: pointer;
+  margin-top: -4px;
 
   input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
+    accent-color: #f75801;
     cursor: pointer;
   }
 }
 
 .submitBtn {
   width: 100%;
-  padding: 16px;
-  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-  color: white;
+  padding: 13px;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+  color: #fff;
   border: none;
-  border-radius: 40px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 8px;
-  transition: 0.2s ease;
-
-  // &:hover:not(:disabled) {
-  //   background: #333;
-  // }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.viewProfilesBtn {
-  width: 100%;
-  padding: 16px;
-  background: white;
-  color: #F75801;
-  border: 2px solid #F75801;
   border-radius: 12px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 8px 20px rgba(247, 88, 1, 0.3);
   transition: 0.2s ease;
 
-  &:hover {
-    background: rgba(247, 88, 1, 0.05);
-    border-color: #D43400;
-    color: #D43400;
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
-/* RESPONSIVE - DESKTOP */
-@media (min-width: 769px) {
-  .modalOverlay {
-    align-items: center;
-    justify-content: center;
-  }
-
-  .sideSheet {
-    border-radius: 20px !important;
-    width: 50%;
-    max-width: 1000px;
-    max-height: 80vh;
-    animation: fadeIn 0.3s ease-out !important;
-    position: relative !important;
-    top: 0px;
-    left: auto !important;
-    transform: none !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    display: flex;
-    flex-direction: column;
-  }
-
-  // .sheetHeader {
-  //   border-radius: 20px 20px 0 0;
-  //   // padding: 20px 40px 20px;
-  // }
-
-  .sheetContent {
-    padding: 0 1rem 1rem;
-  }
-
-  .sheetTitle {
-    font-size: 20px;
-    margin-bottom: 0;
-    font-weight: 700;
-    color: #000;
-  }
-
-  .closeBtn {
-    display: flex;
-    top: 50%;
-    transform: translateY(-50%);
-    right: 32px;
-    font-size: 24px;
-    width: 30px;
-    height: 30px;
-    color: #888;
-    z-index: 2;
-
-    &:hover {
-      background: #f5f5f5;
-      color: #333;
-    }
-  }
-
-  .sheetHandle {
-    display: none;
-  }
-
-  .profileForm {
-    gap: 24px;
-  }
-
-  .formGroup {
-    gap: 8px;
-
-    label {
-      font-size: 14px;
-      font-weight: 500;
-      color: #555;
-    }
-
-    input,
-    select {
-      padding: 14px 18px;
-      font-size: 16px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      background: #fafafa;
-      color: #333;
-
-      &:hover {
-        border-color: #ccc;
-        // background: #fff;
-      }
-
-      &:focus {
-        // background: #fff;
-        border-color: #999;
-        outline: none;
-      }
-
-      &::placeholder {
-        color: #aaa;
-      }
-    }
-
-    select {
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 16px center;
-      padding-right: 40px;
-    }
-  }
-
-  // .identityButtons {
-  //   gap: 12px;
-
-  //   button {
-  //     padding: 14px;
-  //     font-size: 15px;
-  //     border-radius: 8px;
-  //     background: #f7580126;
-  //     border: 1px solid #e0e0e0;
-  //     color: #666;
-  //     font-weight: 500;
-
-  //     &.active {
-  //       background: #333;
-  //       color: white;
-  //       border-color: #333;
-  //     }
-
-  //     &:hover:not(.active) {
-  //       background: #ebebeb;
-  //       border-color: #d0d0d0;
-  //     }
-  //   }
-  // }
-
-  .submitBtn {
-    padding: 16px;
-    font-size: 16px;
-    border-radius: 40px;
-    margin-top: 8px;
-    font-weight: 600;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-  }
-
-  .viewProfilesBtn {
-    padding: 16px;
-    font-size: 16px;
-    border-radius: 8px;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(247, 88, 1, 0.2);
-    }
-  }
-
-  .checkboxLabel {
-    font-size: 14px;
-    margin-top: 10px;
-    color: #666;
-
-    input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-    }
-  }
+.secureRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #8a7666;
+  margin-top: 2px;
 }
 
-/* ERROR TEXT */
 .errorText {
   color: #f75801;
-  font-size: 12px;
-  margin-top: 4px;
-  font-family: "Poppins", sans-serif;
+  font-size: 11px;
+  line-height: 1.2;
+  margin-top: 0;
 }
 
-/* REQUIRED ASTERISK */
 .required {
   color: #f75801;
   margin-left: 2px;
+}
+
+/* DESKTOP */
+@media (min-width: 769px) {
+  .modalOverlay {
+    align-items: center;
+  }
+
+  .sideSheet {
+    border-radius: 20px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    animation: fadeIn 0.25s ease-out;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  }
+
+  .sheetHandle { display: none; }
+
+  .sheetHeader { padding: 22px 24px 12px; }
+
+  .sheetContent { padding: 4px 24px 24px; }
+
+  /* Roomier spacing on desktop where there's space */
+  .sheetTitle { font-size: 24px; }
+  .headerSub { font-size: 13px; max-width: 260px; }
+  .giftImg { width: 96px; }
+  .profileForm { gap: 16px; }
+
+  .formGroup input,
+  .formGroup select { height: 48px; font-size: 15px; }
+
+  .mobileWrap { height: 48px; }
+  .formGroup .mobileWrap input { height: 46px; }
+
+  .identityButtons button { padding: 14px 6px; }
 }
