@@ -17,7 +17,6 @@ import HousesGrid from "../components/HousesGrid";
 import PlanetDetailsAccordion from "../components/PlanetDetailsAccordion";
 import DebtsSection from "../components/DebtsSection";
 import SummaryHeader from "../components/SummaryHeader";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 
 const TABS = [
   { key: "houses", label: "Houses" },
@@ -62,10 +61,16 @@ const LalKitabDetail = () => {
   // Use teva data from navigation state (from generate-teva response)
   const tevaData = location.state?.tevaData;
 
-  // Always call planet details and debts APIs — generate-teva response often has empty data
-  const { data: planetData, isLoading: planetLoading } = useGetLalKitabPlanetDetailsQuery(lalKitabId);
-  const { data: debtsData, isLoading: debtsLoading } = useGetLalKitabDebtsQuery(lalKitabId);
-  const { data: chartData, isLoading: chartLoading } = useGetLalKitabChartQuery(lalKitabId);
+  // Lazy-load tab data — only fetch when the relevant tab is active or data is needed
+  const { data: chartData, isLoading: chartLoading } = useGetLalKitabChartQuery(lalKitabId, {
+    skip: activeTab !== "houses" && activeTab !== "chart",
+  });
+  const { data: planetData, isLoading: planetLoading } = useGetLalKitabPlanetDetailsQuery(lalKitabId, {
+    skip: activeTab !== "planets",
+  });
+  const { data: debtsData, isLoading: debtsLoading, isError: debtsError } = useGetLalKitabDebtsQuery(lalKitabId, {
+    skip: activeTab !== "debts",
+  });
 
   // Merge: prefer API data (more complete), fall back to teva data
   const houses = chartData?.data?.houses || tevaData?.houses || [];
@@ -81,7 +86,11 @@ const LalKitabDetail = () => {
 
   const summary = tevaData?.birthDetails || tevaData || chartData?.data?.summary || {};
 
-  const isAnyLoading = planetLoading || debtsLoading || chartLoading;
+  const isAnyLoading =
+    (activeTab === "houses" && chartLoading) ||
+    (activeTab === "planets" && planetLoading) ||
+    (activeTab === "debts" && debtsLoading) ||
+    (activeTab === "chart" && chartLoading);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [isFreeReport, setIsFreeReport] = useState(false);
@@ -156,7 +165,6 @@ const LalKitabDetail = () => {
 
   return (
     <div className={styles.container}>
-      {isAnyLoading && <PrimaryLoader />}
 
       <div className={styles.headerRow}>
         <button className={styles.backButton} onClick={() => navigate(-1)}>
@@ -190,17 +198,20 @@ const LalKitabDetail = () => {
       </div>
 
       <div className={styles.content}>
-        {activeTab === "houses" && (
-          <HousesGrid houses={houses} isLoading={chartLoading && !houses.length} />
+        {isAnyLoading && (
+          <div className={styles.tabLoading}>Loading...</div>
         )}
-        {activeTab === "planets" && (
-          <PlanetDetailsAccordion planets={planetDetails} isLoading={planetLoading} initialSelected={initialPlanet} onPlanetChange={handlePlanetChange} />
+        {activeTab === "houses" && !chartLoading && (
+          <HousesGrid houses={houses} isLoading={false} />
         )}
-        {activeTab === "debts" && (
-          <DebtsSection debts={debts} isLoading={debtsLoading && !debtsError && !debts} />
+        {activeTab === "planets" && !planetLoading && (
+          <PlanetDetailsAccordion planets={planetDetails} isLoading={false} initialSelected={initialPlanet} onPlanetChange={handlePlanetChange} />
         )}
-        {activeTab === "chart" && (
-          <ChartSection chart={chart} isLoading={chartLoading && !chart} />
+        {activeTab === "debts" && !debtsLoading && (
+          <DebtsSection debts={debts} isLoading={false} />
+        )}
+        {activeTab === "chart" && !chartLoading && (
+          <ChartSection chart={chart} isLoading={false} />
         )}
       </div>
 
