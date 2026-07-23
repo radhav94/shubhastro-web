@@ -490,17 +490,18 @@ const NumerologyWeb = () => {
         <section className={styles.numerologySection}>
           {Object.values(numerologyResponse).map((item, index) => (
             <div key={index} className={styles.numerologyCard}>
-              <div className={styles.cardContent}>
-                <span className={styles.cardLabel}>{item.title}
+              <div className={styles.cardHeader}>
+                <span className={styles.cardLabel}>{item.title} Number</span>
+                <span className={styles.ttsBtn}>
+                  <TTSButton text={`${item.title} Number. ${item?.number ? `${item.number}.` : ''} ${item?.meaning || ''}`} />
                 </span>
-                <h3 className={styles.cardTitle}>{item.category}
-                  <span style={{ marginLeft: '8px', display: 'inline-flex', verticalAlign: 'middle' }}>
-                      <TTSButton text={`${[item?.category,item?.meaning].filter(Boolean).join('. ')}`} />
-                  </span>
-                </h3>
-                <p className={styles.cardDescription}>{item.meaning}</p>
               </div>
-              {item?.number && <div className={styles.cardNumber}>{item.number}</div>}
+              <div className={styles.cardBody}>
+                <div className={styles.cardContent}>
+                  <p className={styles.cardDescription}>{item.meaning}</p>
+                </div>
+                {item?.number && <div className={styles.cardNumber}>{item.number}</div>}
+              </div>
             </div>
           ))}
         </section>
