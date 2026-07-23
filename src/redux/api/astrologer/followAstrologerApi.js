@@ -28,11 +28,31 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         { type: "Following", id: astrologerId },
         "FollowedAstrologers",
       ],
-      async onQueryStarted({ astrologerId }, { queryFulfilled }) {
+      async onQueryStarted({ astrologerId }, { dispatch, queryFulfilled }) {
+        // Optimistic update — immediately show "Following" in the UI
+        const patchResult = dispatch(
+          privateRequestNew.util.updateQueryData(
+            'checkFollowingStatus',
+            { astrologerId },
+            (draft) => {
+              if (draft?.data) {
+                const existing = draft.data.find((item) => item.astrologerId === astrologerId);
+                if (existing) {
+                  existing.isFollowing = true;
+                } else {
+                  draft.data.push({ astrologerId, isFollowing: true });
+                }
+              }
+            }
+          )
+        );
         try {
           await queryFulfilled;
           trackEvent("astrologer_followed", { astrologer_id: astrologerId });
-        } catch { /* don't track failed attempts */ }
+        } catch {
+          // Revert optimistic update on failure
+          patchResult.undo();
+        }
       },
     }),
 
@@ -50,11 +70,29 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         { type: "Following", id: astrologerId },
         "FollowedAstrologers",
       ],
-      async onQueryStarted({ astrologerId }, { queryFulfilled }) {
+      async onQueryStarted({ astrologerId }, { dispatch, queryFulfilled }) {
+        // Optimistic update — immediately show "Follow" in the UI
+        const patchResult = dispatch(
+          privateRequestNew.util.updateQueryData(
+            'checkFollowingStatus',
+            { astrologerId },
+            (draft) => {
+              if (draft?.data) {
+                const existing = draft.data.find((item) => item.astrologerId === astrologerId);
+                if (existing) {
+                  existing.isFollowing = false;
+                }
+              }
+            }
+          )
+        );
         try {
           await queryFulfilled;
           trackEvent("astrologer_unfollowed", { astrologer_id: astrologerId });
-        } catch { /* don't track failed attempts */ }
+        } catch {
+          // Revert optimistic update on failure
+          patchResult.undo();
+        }
       },
     }),
   }),
