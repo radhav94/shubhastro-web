@@ -102,45 +102,75 @@
   }
 }
 
-/* ------- Compact details form inside the bot bubble ------- */
+/* The form message row spans the full width (form is the main content). */
+.formRow {
+  max-width: 100%;
+  width: 100%;
+}
+
+/* ------- Details form inside the bot bubble (matches app design) ------- */
 .formBubble {
-  padding: 12px;
-  width: min(360px, 82vw);
+  flex: 1;
+  min-width: 0;
+  max-width: 440px;
+  padding: 14px;
+  background: #fff7ef;
+  border: 1px solid #f3e4d5;
 }
 
 .formCard {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
 }
 
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2b1d12;
+}
+
+.req {
+  color: #f75801;
+}
+
+/* Birth date + time share a row; tighten icon padding so placeholders fit. */
 .row2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
-/* Unify height/font of every field (own inputs + DateTimePicker + LocationSearch)
-   so they all match. Border/radius are set to the same values used by those
-   components (#ddd / 8px). Checkbox is excluded. */
+.row2 .iconField input {
+  padding-left: 34px;
+  padding-right: 8px;
+  font-size: 13px;
+}
+
+.row2 .iconField .leftIcon {
+  left: 9px;
+  font-size: 16px;
+}
+
+/* Unify height/font of every field (own inputs + DateTimePicker + LocationSearch). */
 .formCard input:not([type="checkbox"]) {
-  height: 48px;
+  height: 46px;
   font-size: 14px;
 }
 
 .input {
   width: 100%;
-  height: 48px;
+  height: 46px;
   padding: 0 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid #ece3d8;
+  border-radius: 10px;
   font-size: 14px;
   outline: none;
   background: #fff;
@@ -150,12 +180,40 @@
   }
 }
 
+/* Left-icon fields (name, birth date, birth time, place). */
+.iconField {
+  position: relative;
+
+  .leftIcon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9a8776;
+    font-size: 18px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* room for the icon + unified border on every nested input */
+  input {
+    padding-left: 40px;
+    border: 1px solid #ece3d8;
+    border-radius: 10px;
+  }
+
+  /* hide DateTimePicker's built-in right icon button (design uses left icons) */
+  button[tabindex="-1"] {
+    display: none;
+  }
+}
+
 .mobileWrap {
   display: flex;
   align-items: center;
-  height: 48px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  height: 46px;
+  border: 1px solid #ece3d8;
+  border-radius: 10px;
   background: #fff;
   overflow: hidden;
 
@@ -163,15 +221,21 @@
     border-color: #f75801;
   }
 
-  .prefix {
-    padding: 0 12px;
-    align-self: stretch;
+  .flagBox {
     display: flex;
     align-items: center;
+    gap: 4px;
+    padding: 0 10px;
+    align-self: stretch;
     white-space: nowrap;
-    color: #6b5949;
+    color: #2b1d12;
     font-size: 14px;
-    border-right: 1px solid #ddd;
+    border-right: 1px solid #ece3d8;
+    background: #fbf6f0;
+  }
+
+  .flag {
+    font-size: 16px;
   }
 
   .input {
@@ -183,36 +247,46 @@
   }
 }
 
-.chipRow {
-  display: flex;
+/* Identity cards */
+.genderRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
-.chip {
-  flex: 1;
-  height: 48px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+.genderCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 4px;
+  border: 1px solid #ece3d8;
+  border-radius: 12px;
   background: #fff;
   color: #555;
+  font-size: 13px;
   font-weight: 500;
-  font-size: 14px;
   cursor: pointer;
   transition: all 0.15s ease;
 
   &:hover {
-    border-color: #f75801;
-    color: #f75801;
+    border-color: #f9b98e;
   }
 }
 
-.chipActive {
-  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
-  border-color: transparent;
-  color: #fff;
+.genderIcon {
+  font-size: 18px;
+  color: #8a7666;
+}
 
-  &:hover {
-    color: #fff;
+.genderActive {
+  border-color: #f75801;
+  background: #fff2ea;
+  color: #f75801;
+
+  .genderIcon {
+    color: #f75801;
   }
 }
 
@@ -223,6 +297,7 @@
   font-size: 12px;
   color: #6b5949;
   cursor: pointer;
+  margin-top: 2px;
 
   input {
     width: 15px;
@@ -237,21 +312,36 @@
 }
 
 .submitBtn {
-  margin-top: 2px;
+  margin-top: 4px;
   width: 100%;
-  padding: 11px;
+  padding: 13px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 6px 16px rgba(247, 88, 1, 0.3);
 
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
+}
+
+.secureRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #8a7666;
+  margin-top: 2px;
 }
 
 /* ---------- Leave / cancel-request confirmation modal ---------- */

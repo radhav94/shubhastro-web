@@ -1,7 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { IoArrowBack } from "react-icons/io5";
+import {
+  IoArrowBack,
+  IoPersonOutline,
+  IoCalendarOutline,
+  IoTimeOutline,
+  IoLocationOutline,
+  IoChevronDown,
+  IoSparkles,
+  IoShieldCheckmarkOutline,
+} from "react-icons/io5";
+import { FaMars, FaVenus, FaTransgenderAlt } from "react-icons/fa";
 import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import OtpModal from "../../../component/UI/Profile/OtpModal";
@@ -410,56 +420,112 @@ const GuestChatFlow = () => {
   }, [isRequestPending]);
 
   /* -------------------------------- render --------------------------------- */
-  // Compact details form rendered inside a bot message bubble.
+  const GENDERS = [
+    { value: "Male", label: "Male", Icon: FaMars },
+    { value: "Female", label: "Female", Icon: FaVenus },
+    { value: "Others", label: "Others", Icon: FaTransgenderAlt },
+  ];
+
+  // Details form rendered inside a bot message bubble.
   const renderFormBubble = () => (
     <div className={styles.formCard}>
+      {/* Name */}
       <div className={styles.field}>
-        <input
-          className={styles.input}
-          value={form.name}
-          onChange={(e) => setField("name", e.target.value)}
-          placeholder="Full name *"
-        />
+        <label className={styles.label}>
+          Name <span className={styles.req}>*</span>
+        </label>
+        <div className={styles.iconField}>
+          <IoPersonOutline className={styles.leftIcon} />
+          <input
+            className={styles.input}
+            value={form.name}
+            onChange={(e) => setField("name", e.target.value)}
+            placeholder="Enter your name"
+          />
+        </div>
         {errors.name && <span className={styles.err}>{errors.name}</span>}
       </div>
 
+      {/* Mobile number */}
       <div className={styles.field}>
-        <div className={styles.chipRow}>
-          {["Male", "Female", "Others"].map((g) => (
+        <label className={styles.label}>
+          Mobile Number <span className={styles.req}>*</span>
+        </label>
+        <div className={styles.mobileWrap}>
+          <span className={styles.flagBox}>
+            <span className={styles.flag}>🇮🇳</span>
+            +91
+            <IoChevronDown size={12} />
+          </span>
+          <input
+            className={styles.input}
+            type="tel"
+            inputMode="numeric"
+            maxLength={10}
+            value={form.mobileNumber}
+            onChange={(e) => setField("mobileNumber", e.target.value.replace(/[^0-9]/g, "").slice(0, 10))}
+            placeholder="Enter mobile number"
+          />
+        </div>
+        {errors.mobileNumber && <span className={styles.err}>{errors.mobileNumber}</span>}
+      </div>
+
+      {/* Identity */}
+      <div className={styles.field}>
+        <label className={styles.label}>
+          Identity <span className={styles.req}>*</span>
+        </label>
+        <div className={styles.genderRow}>
+          {GENDERS.map(({ value, label, Icon }) => (
             <button
-              key={g}
+              key={value}
               type="button"
-              className={`${styles.chip} ${form.identity === g ? styles.chipActive : ""}`}
-              onClick={() => setField("identity", g)}
+              className={`${styles.genderCard} ${form.identity === value ? styles.genderActive : ""}`}
+              onClick={() => setField("identity", value)}
             >
-              {g}
+              <Icon className={styles.genderIcon} />
+              <span>{label}</span>
             </button>
           ))}
         </div>
         {errors.identity && <span className={styles.err}>{errors.identity}</span>}
       </div>
 
+      {/* Birth date + time on one row */}
       <div className={styles.row2}>
         <div className={styles.field}>
-          <DateTimePicker
-            mode="date"
-            openOnClick
-            selected={form.dob}
-            onChange={(d) => setField("dob", d)}
-            maxDate={new Date()}
-            placeholder="Date of birth *"
-          />
+          <label className={styles.label}>
+            Birth Date <span className={styles.req}>*</span>
+          </label>
+          <div className={styles.iconField}>
+            <IoCalendarOutline className={styles.leftIcon} />
+            <DateTimePicker
+              mode="date"
+              openOnClick
+              selected={form.dob}
+              onChange={(d) => setField("dob", d)}
+              maxDate={new Date()}
+              placeholder="DD/MM/YYYY"
+            />
+          </div>
           {errors.dob && <span className={styles.err}>{errors.dob}</span>}
         </div>
+
         <div className={styles.field}>
-          <DateTimePicker
-            mode="time"
-            openOnClick
-            disabled={form.unknownBirthTime}
-            selected={form.time}
-            onChange={(d) => setField("time", d)}
-            placeholder="Time of birth *"
-          />
+          <label className={styles.label}>
+            Birth Time <span className={styles.req}>*</span>
+          </label>
+          <div className={styles.iconField}>
+            <IoTimeOutline className={styles.leftIcon} />
+            <DateTimePicker
+              mode="time"
+              openOnClick
+              disabled={form.unknownBirthTime}
+              selected={form.time}
+              onChange={(d) => setField("time", d)}
+              placeholder="HH:MM"
+            />
+          </div>
           {errors.time && <span className={styles.err}>{errors.time}</span>}
         </div>
       </div>
@@ -470,45 +536,42 @@ const GuestChatFlow = () => {
           checked={form.unknownBirthTime}
           onChange={(e) => setField("unknownBirthTime", e.target.checked)}
         />
-        I don't know my exact birth time
+        Don't know the exact time of birth
       </label>
 
+      {/* Place of birth */}
       <div className={styles.field}>
-        <LocationSearch
-          value={form.birthPlace}
-          onChange={(e) => setField("birthPlace", e.target.value)}
-          onPlaceSelect={(place) =>
-            setForm((f) => ({
-              ...f,
-              birthPlace: place.address,
-              latitude: place.lat,
-              longitude: place.lng,
-              timezone: place.timezone ?? 5.5,
-            }))
-          }
-        />
+        <label className={styles.label}>
+          Place of Birth <span className={styles.req}>*</span>
+        </label>
+        <div className={styles.iconField}>
+          <IoLocationOutline className={styles.leftIcon} />
+          <LocationSearch
+            value={form.birthPlace}
+            onChange={(e) => setField("birthPlace", e.target.value)}
+            onPlaceSelect={(place) =>
+              setForm((f) => ({
+                ...f,
+                birthPlace: place.address,
+                latitude: place.lat,
+                longitude: place.lng,
+                timezone: place.timezone ?? 5.5,
+              }))
+            }
+          />
+        </div>
         {errors.birthPlace && <span className={styles.err}>{errors.birthPlace}</span>}
       </div>
 
-      <div className={styles.field}>
-        <div className={styles.mobileWrap}>
-          <span className={styles.prefix}>+91</span>
-          <input
-            className={styles.input}
-            type="tel"
-            inputMode="numeric"
-            maxLength={10}
-            value={form.mobileNumber}
-            onChange={(e) => setField("mobileNumber", e.target.value.replace(/[^0-9]/g, "").slice(0, 10))}
-            placeholder="Mobile number *"
-          />
-        </div>
-        {errors.mobileNumber && <span className={styles.err}>{errors.mobileNumber}</span>}
-      </div>
-
       <button type="button" className={styles.submitBtn} onClick={handleSubmit} disabled={sendingOtp}>
-        {sendingOtp ? "Sending OTP..." : "Continue"}
+        <IoSparkles size={18} />
+        {sendingOtp ? "Sending OTP..." : "Continue & Get ₹250 Bonus"}
       </button>
+
+      <div className={styles.secureRow}>
+        <IoShieldCheckmarkOutline size={14} />
+        100% Secure&nbsp;&nbsp;|&nbsp;&nbsp;Your data is safe with us
+      </div>
     </div>
   );
 
@@ -562,9 +625,9 @@ const GuestChatFlow = () => {
             </div>
           ))}
 
-          {/* Compact details form shown as a bot message bubble */}
-          {phase === "collecting" && (
-            <div className={`${styles.msgRow} ${styles.botRow}`}>
+          {/* Details form shown as a bot message bubble (stays visible behind the OTP popup) */}
+          {(phase === "collecting" || phase === "otp") && (
+            <div className={`${styles.msgRow} ${styles.botRow} ${styles.formRow}`}>
               <img
                 src={imgError || !astrologer?.profileImgUrl ? getAstrologerDefaultImage(astrologer?.gender) : astroImg}
                 className={styles.msgAvatar}
