@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
 import { getUserFromStorage } from "../../../utils/authStorage";
+import { getToken } from "../../../utils/token";
 import { useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -12,6 +13,7 @@ import { useProfileManager } from "../../private/kundli/hooks/useProfileManager"
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
+import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 
 // Dynamic section rendering
@@ -329,6 +331,7 @@ const renderUngroupedThreeColSection = (section, props) => {
 const HomeV2 = () => {
   const requireAuth = useRequireAuth();
   const navigate = useNavigate();
+  const { openGuestConnect, guestConnectModal } = useGuestConnectFlow();
   const user = getUserFromStorage();
   const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
   const name = selectedKundli?.name?.split(" ")[0] || user?.firstName || "Guest";
@@ -462,6 +465,17 @@ const HomeV2 = () => {
   }, [selectedAstrologer, pendingConnectionType, handleChatStart, handleCallStart]);
 
   const handleConnectClick = useCallback(async (astrologer, connType, isEmergency = false) => {
+    // Guest flows (no login redirect):
+    //  - chat → conversational guest screen
+    //  - call/video → AI Wow-style guest modal, then initiate the call
+    if (!getToken()) {
+      if (connType === "chat") {
+        navigate(`/guest-chat/${astrologer._id}`, { state: { astrologer } });
+      } else {
+        openGuestConnect(astrologer, connType);
+      }
+      return;
+    }
     if (!requireAuth()) return;
     setSelectedAstrologer(astrologer);
     setAstrologerRef(astrologer);
@@ -471,7 +485,7 @@ const HomeV2 = () => {
       else result = await handleCallStart(astrologer, "audio", isEmergency);
       if (result?.emergencyAvailable) { setShowEmergencyModal(true); return; }
     } else { setPendingConnectionType(connType); hookSetOpenModal(prev => ({ ...prev, kundli: true })); }
-  }, [requireAuth, hasKundli, handleChatStart, handleCallStart, setAstrologerRef, hookSetOpenModal]);
+  }, [requireAuth, hasKundli, handleChatStart, handleCallStart, setAstrologerRef, hookSetOpenModal, navigate, openGuestConnect]);
 
   // ─── Memoized modal handlers ──────────────────────────────────────────────
   const handleEmergencyClose = useCallback(() => setShowEmergencyModal(false), []);
@@ -533,6 +547,8 @@ const HomeV2 = () => {
           onClose={() => { setShowGuestAuthModal(false); pendingWowPathRef.current = null; }}
           onSuccess={handleGuestAuthSuccess}
         />
+        {/* Guest call/video flow (AI Wow-style details + OTP, then initiate call) */}
+        {guestConnectModal}
       </Suspense>
       <RechargeModal
         isOpen={hookOpenModal.recharge}

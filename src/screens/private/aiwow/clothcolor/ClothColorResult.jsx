@@ -103,7 +103,7 @@ const ClothColorResult = () => {
       }
     } else {
       Toast.error('No analysis results found');
-      navigate('/ai-wow/clothes-colour-analysis/form', { replace: true });
+      navigate('/ai-wow/clothes-colour-analysis', { replace: true });
       return;
     }
     

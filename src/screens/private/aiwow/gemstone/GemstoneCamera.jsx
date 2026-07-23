@@ -256,7 +256,7 @@ const GemstoneCamera = () => {
         isOpen
         onClose={() => {
           setShowGuestAuthModal(false);
-          navigate('/ai-wow/gemstone-authenticity/instructions');
+          navigate('/ai-wow/gemstone-authenticity');
         }}
         onSuccess={handleGuestAuthSuccess}
       />

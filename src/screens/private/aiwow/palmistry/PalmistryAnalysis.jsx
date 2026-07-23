@@ -230,7 +230,7 @@ const PalmistryAnalysis = () => {
 
   const handleBack = () => {
     dispatch(clearPalmistryData());
-    navigate('/ai-wow/ai-palmistry-scanner/hand-selection', { replace: true });
+    navigate('/ai-wow/ai-palmistry-scanner', { replace: true });
   };
 
   return (

@@ -16,6 +16,11 @@
   @media (width <= 768px) {
     font-size: 20px;
   }
+  @media (width <= 767px) {
+    padding-left: 16px;
+    text-align: left;
+    font-size: 18px;
+  }
 }
 
 .subtitle {
@@ -139,10 +144,16 @@
   justify-content: center;
   position: relative;
   padding-block: 10px;
+  @media (width <= 767px) {
+    justify-content: flex-start;
+  }
 
   > div:first-child {
     position: absolute;
     left: 0;
+    @media (width <= 767px) {
+       position: unset;
+    }
 
     > div {
       max-width: unset;

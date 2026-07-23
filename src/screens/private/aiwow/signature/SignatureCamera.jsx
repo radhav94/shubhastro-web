@@ -316,7 +316,7 @@ const SignatureCamera = () => {
         isOpen
         onClose={() => {
           setShowGuestAuthModal(false);
-          navigate('/ai-wow/signature-analysis/instructions');
+          navigate('/ai-wow/signature-analysis');
         }}
         onSuccess={handleGuestAuthSuccess}
       />

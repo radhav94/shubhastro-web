@@ -343,7 +343,7 @@ const FaceReadingCamera = () => {
         isOpen
         onClose={() => {
           setShowGuestAuthModal(false);
-          navigate('/ai-wow/astro-face-reading/instructions');
+          navigate('/ai-wow/astro-face-reading');
         }}
         onSuccess={handleGuestAuthSuccess}
       />

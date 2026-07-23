@@ -23,7 +23,7 @@ const MINUTES = Array.from({ length: 60 }, (_, i) => i);
 const PERIODS = ["AM", "PM"];
 
 /* ───── Custom 12-hour Time Picker ───── */
-const TimePicker12 = ({ selected, onChange, disabled, placeholder }) => {
+const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = false, openOnClick = false }) => {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const [manualInput, setManualInput] = useState("");
@@ -244,8 +244,10 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder }) => {
           onBlur={handleManualBlur}
           onKeyDown={handleManualKeyDown}
           onFocus={() => setIsTyping(true)}
+          onClick={() => !disabled && openOnClick && setOpen(true)}
           placeholder={placeholder || "HH:MM AM/PM"}
           disabled={disabled}
+          readOnly={openOnClick}
           className={styles.input}
           autoComplete="off"
         />
@@ -263,7 +265,10 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder }) => {
         </button>
       </div>
       {open && (
-        <div className={styles.timeDropdown}>
+        <div
+          className={styles.timeDropdown}
+          style={dropUp ? { top: "auto", bottom: "calc(100% + 4px)" } : undefined}
+        >
           {/* Hours */}
           <div className={styles.timeColumn} ref={hourListRef}>
             {HOURS.map((h) => (
@@ -338,6 +343,13 @@ const DateTimePicker = ({
   disabled = false,
   className = "",
   required = false,
+  // When true, dropdowns/calendar open upward (useful at the bottom of a screen)
+  dropUp = false,
+  // When true, clicking the input opens the picker and disables manual typing
+  openOnClick = false,
+  // When true, the calendar renders in a body-level portal (avoids clipping
+  // inside scrollable/overflow-hidden containers like modals)
+  portal = false,
   // Legacy prop support
   showTime,
 }) => {
@@ -362,6 +374,8 @@ const DateTimePicker = ({
           onChange={onChange}
           disabled={disabled}
           placeholder={placeholder || "Select time"}
+          dropUp={dropUp}
+          openOnClick={openOnClick}
         />
       </div>
     );
@@ -469,8 +483,10 @@ const DateTimePicker = ({
           value={inputText}
           onChange={handleManualChange}
           onBlur={handleManualBlur}
+          onClick={() => openOnClick && !disabled && datePickerRef.current?.setOpen(true)}
           placeholder={resolvedPlaceholder}
           disabled={disabled}
+          readOnly={openOnClick}
           className={`${styles.input} ${dateError ? styles.inputError : ""}`}
           autoComplete="off"
         />
@@ -514,9 +530,10 @@ const DateTimePicker = ({
           minDate={minDate}
           maxDate={maxDate}
           disabled={disabled}
-          popperPlacement="bottom-start"
+          popperPlacement={dropUp ? "top-start" : "bottom-start"}
           popperClassName={styles.popper}
           calendarClassName={styles.calendar}
+          {...(portal ? { portalId: "rdp-portal" } : {})}
         />
       </div>
     </div>

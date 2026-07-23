@@ -44,13 +44,13 @@ const GuestKundliAuthModal = ({
   const [verifying, setVerifying] = useState(false);
 
   // Build the kundli create payload from the AddProfileModal form values.
-  const buildKundliPayload = (data) => {
+  const buildKundliPayload = (data, relation = "self") => {
     const dateObj = new Date(data.birthDate);
     const timeObj = data.birthTime ? data.birthTime.split(":") : ["0", "0"];
     return {
       name: data.name,
       gender: data.identity.toLowerCase(),
-      relation: "self",
+      relation,
       day: dateObj.getDate(),
       month: dateObj.getMonth() + 1,
       year: dateObj.getFullYear(),
@@ -226,16 +226,24 @@ const GuestKundliAuthModal = ({
         localStorage.setItem("shubhtalk_welcome_back_name", backName);
         localStorage.setItem("shubhtalk_show_welcome_back", "true");
 
-        // Reuse the existing self kundli — no register/create calls.
+        // Existing account: their "self" kundli is already set, so create a NEW
+        // profile labeled "other" from the details entered here and use that
+        // (instead of reusing the existing self kundli).
         try {
-          const listResult = await fetchAllKundlis().unwrap();
-          const kundlis = listResult?.data || [];
-          createdProfile =
-            kundlis.find((k) => k.relation?.toLowerCase() === "self") ||
-            kundlis[0] ||
-            null;
-        } catch (fetchErr) {
-          console.error("Failed to fetch existing kundlis:", fetchErr);
+          const result = await createKundliWithRetry(buildKundliPayload(pendingKundli, "other"));
+          createdProfile = result?.data || null;
+        } catch (kundliErr) {
+          console.error("Guest 'other' kundli creation failed, falling back:", kundliErr);
+          try {
+            const listResult = await fetchAllKundlis().unwrap();
+            const kundlis = listResult?.data || [];
+            createdProfile =
+              kundlis.find((k) => k.relation?.toLowerCase() === "self") ||
+              kundlis[0] ||
+              null;
+          } catch (fetchErr) {
+            console.error("Failed to fetch existing kundlis:", fetchErr);
+          }
         }
       } else {
         // ── New user: register (creates profile + sets welcome-bonus flag) ──

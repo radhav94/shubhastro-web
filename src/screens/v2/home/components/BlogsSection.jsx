@@ -104,7 +104,7 @@ const BlogsSection = ({ blogData = [], title, showMore, gridRef, onScrollableCha
           >
             <div className={styles.blogImageWrapper}>
               <img
-                src={blog.imageUrl || blog.img || defaultBlogImg}
+                src={blog.image?.small || blog.img || defaultBlogImg}
                 alt={blog.title}
                 className={styles.blogImage}
                 onError={(e) => {
