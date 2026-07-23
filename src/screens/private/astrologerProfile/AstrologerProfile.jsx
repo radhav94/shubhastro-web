@@ -35,6 +35,7 @@ import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chat
 import StickyReview from "../home/components/call/StickyReview";
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
+import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useChat } from "../../../context/ChatContext";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
@@ -246,6 +247,7 @@ const AstrologerProfile = () => {
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showMobileConnectPopup, setShowMobileConnectPopup] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const { openGuestConnect, guestConnectModal } = useGuestConnectFlow();
 
   const { activeCall, setActiveCall, setOpenReview, setReviewData, lastSelectedKundli } = useCall();
   
@@ -391,8 +393,9 @@ const AstrologerProfile = () => {
   };
 
   const handleCallStart = async (astro, type, isEmergency = false) => {
+    // Guests use the AI Wow-style guest flow (details + OTP), then the call starts.
     if (!token) {
-      navigate("/login", { state: { from: location.pathname } });
+      openGuestConnect(astro || data, type);
       return;
     }
     
@@ -1791,6 +1794,9 @@ const AstrologerProfile = () => {
           </button>
         )}
       </div>
+
+      {/* Guest call/video flow (AI Wow-style details + OTP, then initiate call) */}
+      {guestConnectModal}
 
       {/* Mobile Connect Popup */}
       <ConnectAstrologerPopup

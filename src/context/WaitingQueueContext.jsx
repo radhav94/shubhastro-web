@@ -250,6 +250,17 @@ export const WaitingQueueProvider = ({ children }) => {
         return;
       }
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
+
+      // Guest call/video flow: auto-accept on the user's behalf (no accept popup).
+      const guestAutoAcceptCall = sessionStorage.getItem(GUEST_AUTO_ACCEPT_KEY);
+      if (guestAutoAcceptCall && roomId) {
+        console.log("[GlobalTwoWay] 🤖 Guest auto-accept — emitting call:user_accept", roomId);
+        stopIncomingSound();
+        voiceSocket.emit("call:user_accept", { roomId });
+        sessionStorage.removeItem(GUEST_AUTO_ACCEPT_KEY);
+        return;
+      }
+
       setCallApprovalData({ roomId, sessionId, astrologerId, astrologerDetail, type, isEmergency });
     };
 
