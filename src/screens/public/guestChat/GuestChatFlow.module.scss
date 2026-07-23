@@ -113,7 +113,7 @@
   flex: 1;
   min-width: 0;
   max-width: 440px;
-  padding: 14px;
+  padding: 12px;
   background: #fff7ef;
   border: 1px solid #f3e4d5;
 }
@@ -121,13 +121,13 @@
 .formCard {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 9px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
   min-width: 0;
 }
 
@@ -161,13 +161,13 @@
 
 /* Unify height/font of every field (own inputs + DateTimePicker + LocationSearch). */
 .formCard input:not([type="checkbox"]) {
-  height: 46px;
+  height: 42px;
   font-size: 14px;
 }
 
 .input {
   width: 100%;
-  height: 46px;
+  height: 42px;
   padding: 0 12px;
   border: 1px solid #ece3d8;
   border-radius: 10px;
@@ -211,7 +211,7 @@
 .mobileWrap {
   display: flex;
   align-items: center;
-  height: 46px;
+  height: 42px;
   border: 1px solid #ece3d8;
   border-radius: 10px;
   background: #fff;
@@ -259,8 +259,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 10px 4px;
+  gap: 3px;
+  padding: 8px 4px;
   border: 1px solid #ece3d8;
   border-radius: 12px;
   background: #fff;
@@ -312,9 +312,9 @@
 }
 
 .submitBtn {
-  margin-top: 4px;
+  margin-top: 2px;
   width: 100%;
-  padding: 13px;
+  padding: 12px;
   border: none;
   border-radius: 12px;
   background: linear-gradient(90deg, #f75801 0%, #d43400 100%);

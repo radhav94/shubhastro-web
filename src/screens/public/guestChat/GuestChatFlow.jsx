@@ -168,28 +168,8 @@ const GuestChatFlow = () => {
       mobileNumber: form.mobileNumber,
     };
     detailsRef.current = details;
-
-    // Replace any previous details summary so re-submitting (e.g. after closing
-    // the OTP popup) updates the same message instead of stacking duplicates.
-    const summary = `${details.name}, ${form.identity}, born ${formatDob(form.dob)}${
-      details.birthPlace ? ` in ${details.birthPlace}` : ""
-    }`;
-    setMessages((m) => [
-      ...m.filter((msg) => !msg.isSummary),
-      {
-        id: `u-summary-${Date.now()}`,
-        text: summary,
-        isSender: true,
-        time: nowTime(),
-        isSummary: true,
-      },
-    ]);
-
     await beginOtp(details);
   };
-
-  const formatDob = (d) =>
-    d ? `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}` : "";
 
   /* ------------------------------- OTP + auth ------------------------------- */
   const beginOtp = async (finalDetails) => {
