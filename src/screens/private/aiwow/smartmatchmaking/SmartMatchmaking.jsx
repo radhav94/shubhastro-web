@@ -20,11 +20,13 @@ import matchMakingImgBottom from '../../../../assets/images/match-making-bottom-
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import { trackEvent } from '../../../../utils/analytics';
+import { setSmartMatchmakingResult, clearSmartMatchmakingResult } from '../../../../redux/aiwow/aiwowSlice';
 // import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 
 const SmartMatchmaking = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const savedMatchmakingResult = useSelector((state) => state.aiwow.smartMatchmaking?.result);
   const [showSelectProfile, setShowSelectProfile] = useState(false);
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -35,7 +37,7 @@ const SmartMatchmaking = () => {
   const [primaryProfile, setPrimaryProfile] = useState(null);
   const [partnerProfile, setPartnerProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState(savedMatchmakingResult);
   const [error, setError] = useState(null);
 
 
@@ -311,6 +313,7 @@ const SmartMatchmaking = () => {
 
       if (apiResult.success) {
         setResult(apiResult.data);
+        dispatch(setSmartMatchmakingResult(apiResult.data));
         trackEvent("match_making_result_generated", {
           total_gunas: apiResult.data?.totalGunas ?? apiResult.data?.total_gunas,
           compatibility_score: apiResult.data?.compatibilityScore ?? apiResult.data?.compatibility_score,
@@ -332,6 +335,7 @@ const SmartMatchmaking = () => {
     if (result) {
       setResult(null);
       setError(null);
+      dispatch(clearSmartMatchmakingResult());
     } else {
       navigate('/ai-wow');
     }

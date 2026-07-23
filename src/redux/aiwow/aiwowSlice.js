@@ -29,6 +29,11 @@ const initialState = {
   // Chat modules
   cosmicChat: createChatModuleState(),
   talkToKundli: createChatModuleState(),
+
+  // Result-based modules (persisted for back-navigation)
+  dreamInterpreter: { result: null },
+  smartMatchmaking: { result: null },
+  muhuratCalendar: { result: null },
 };
 
 // Helper function to create generic reducers for image-based modules
@@ -188,6 +193,30 @@ const aiwowSlice = createSlice({
 
     // Clear all AI Wow data
     clearAllAiwowData: () => initialState,
+
+    // Dream Interpreter
+    setDreamInterpreterResult: (state, action) => {
+      state.dreamInterpreter.result = action.payload;
+    },
+    clearDreamInterpreterResult: (state) => {
+      state.dreamInterpreter.result = null;
+    },
+
+    // Smart Matchmaking
+    setSmartMatchmakingResult: (state, action) => {
+      state.smartMatchmaking.result = action.payload;
+    },
+    clearSmartMatchmakingResult: (state) => {
+      state.smartMatchmaking.result = null;
+    },
+
+    // Muhurat Calendar
+    setMuhuratCalendarResult: (state, action) => {
+      state.muhuratCalendar.result = action.payload;
+    },
+    clearMuhuratCalendarResult: (state) => {
+      state.muhuratCalendar.result = null;
+    },
   },
   extraReducers: (builder) => {
     // Listen to logout action from authSlice
@@ -255,6 +284,18 @@ export const {
   
   // Clear all
   clearAllAiwowData,
+
+  // Dream Interpreter
+  setDreamInterpreterResult,
+  clearDreamInterpreterResult,
+
+  // Smart Matchmaking
+  setSmartMatchmakingResult,
+  clearSmartMatchmakingResult,
+
+  // Muhurat Calendar
+  setMuhuratCalendarResult,
+  clearMuhuratCalendarResult,
 } = aiwowSlice.actions;
 
 export default aiwowSlice.reducer;
