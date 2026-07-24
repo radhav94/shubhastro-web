@@ -5,9 +5,17 @@ export const loginWithPhone = async (data) => {
   return await publicRequest.post("users/loginUser", data);
 };
 
-export const verifyOtp = async (data, config = {}) => {
-  return await publicRequest.post("users/verifyOtp", data, config);
-};
+let _verifyOtpInFlight = null;
+
+export const verifyOtp = async (data,config = {}) => {
+  // Prevent duplicate concurrent calls — return the same promise if one is already in flight
+  if (_verifyOtpInFlight) return _verifyOtpInFlight;
+  _verifyOtpInFlight = publicRequest.post("users/verifyOtp", data,config).finally(() => {
+    _verifyOtpInFlight = null;
+  });
+  return _verifyOtpInFlight;
+}
+
 
 export const logout = async (data) => {
   return await publicRequest.post("users/verifyOtp", data);
@@ -66,3 +74,4 @@ export const getLiveRoomMessages = async (roomId, limit = 50) => {
 export const getLiveRoomParticipants = async (roomId) => {
   return await privateRequest.get(`live-chat/room/${roomId}/participants`);
 };
+

@@ -48,11 +48,8 @@
   }
 }
 
-.switchBtn {
-  @media (min-width: 769px) {
-    display: none;
-  }
-}
+/* Flip button visibility is controlled in JS (only shown when the device has
+   more than one camera), so it correctly appears on tablets too. */
 
 .cameraWrapper {
   position: absolute;

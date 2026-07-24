@@ -177,6 +177,9 @@
   position: relative;
   margin: 60px 0;
   padding: 0 0 40px;
+  @media (width <= 767px) {
+    margin: 24px 0;
+  }
 }
 
 .timeline::before {
@@ -308,7 +311,7 @@
 
   /* Accordion behavior on mobile */
   .cardHeader {
-    padding: 14px 16px 10px;
+    padding: 14px 12px 10px;
     cursor: pointer;
     user-select: none;
 
@@ -329,7 +332,7 @@
   }
 
   .cardBodyOpen {
-    max-height: 600px;
+    max-height: fit-content;
     padding: 0 16px 16px;
   }
 
@@ -376,7 +379,8 @@
   }
 
   .cardHeader h3 {
-    font-size: 14px;
+    font-size: 12px;
+    text-align: left;
     flex-wrap: wrap;
   }
 
