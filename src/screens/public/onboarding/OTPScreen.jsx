@@ -256,18 +256,18 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
   return (
     <div className={styles.loginScreen}>
-      <div className={styles.loginBackground}>
-        {/* <img
+      {/* <div className={styles.loginBackground}>
+        <img
           src={onboardingBg}
           alt="Astrology"
           className={styles.backgroundImage}
-        /> */}
-        {/* <img
+        />
+        <img
           src={onboardingBgMobile}
           alt="Astrology"
           className={styles.backgroundImageMobile}
-        /> */}
-      </div>
+        />
+      </div> */}
 
       {/* Back Button - top left corner */}
       <div className={styles.otpBackButtonWrap}>

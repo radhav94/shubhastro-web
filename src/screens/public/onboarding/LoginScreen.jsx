@@ -67,7 +67,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   return (
     <div className={styles.newLoginPage}>
       {/* Main Content */}
-      <div>
+      {/* <div className={styles.loginWrapScreen}> */}
       <div className={styles.newLoginHero}>
         {/* Left Section */}
         <div className={styles.newLoginLeft}>
@@ -209,7 +209,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
           </div>
         </div>
         </div>
-      </div>
+      {/* </div> */}
 
       {/* Bottom Trust Bar */}
       <div className={styles.trustBar}>
