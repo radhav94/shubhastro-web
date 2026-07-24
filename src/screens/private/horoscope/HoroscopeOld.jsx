@@ -677,7 +677,11 @@ const HoroscopeOld = () => {
             ))}
           </div>
 
-          <div className="horoscope-content" ref={overviewRef}>
+          <div
+            className="horoscope-content"
+            ref={overviewRef}
+            key={`${activeTab}-${selectedPhase}-${activeCategory}-${selectedZodiac}-${(currentContent.title || '')}-${(currentContent.content || '').slice(0, 24)}`}
+          >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <h2 className="content-title">
                 {currentContent.title}
