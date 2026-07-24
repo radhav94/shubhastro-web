@@ -324,13 +324,13 @@ const EditProfileModal = ({
                     disabled={values.unknownBirthTime}
                   />
                   <ErrorMessage name="birthTime" component="div" className={styles.errorText} />
-                  <label className={styles.checkboxLabel}>
+                  <div className={styles.checkboxLabel}>
                     <Field
                       type="checkbox"
                       name="unknownBirthTime"
                     />
-                    Don't know the exact time of birth
-                  </label>
+                    <span>Don't know the exact time of birth</span>
+                  </div>
                 </div>
 
                 <div className={styles.formGroup}>
