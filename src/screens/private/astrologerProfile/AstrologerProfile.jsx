@@ -1584,7 +1584,7 @@ const AstrologerProfile = () => {
                 </svg>
                 <span className={styles.liveText}>Live Now</span>
               </div>
-              <button className={styles.joinLiveSidebarBtn} onClick={handleJoinLive}>
+              <button className={styles.joinLiveSidebarBtn} onClick={(e) => { e.stopPropagation(); handleJoinLive(); }}>
                 Join
               </button>
             </div>
