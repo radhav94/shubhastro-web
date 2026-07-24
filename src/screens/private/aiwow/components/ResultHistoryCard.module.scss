@@ -35,6 +35,10 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  @media (width <= 767px) {
+    width: 40px;
+    height: 40px;
+  }
 }
 
 .icon {
@@ -52,6 +56,9 @@
   font-size: 1rem;
   font-weight: 600;
   color: #1a1a1a;
+  @media (width <= 767px) {
+    font-size: 0.85rem;
+  }
 }
 
 /* Status badges */
@@ -60,6 +67,10 @@
   font-weight: 600;
   padding: 4px 14px;
   border-radius: 50px;
+  @media (width <= 360px) {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
 }
 
 .statusCompleted {
@@ -104,6 +115,9 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  @media (width <= 360px) {
+    font-size: 0.8rem;
+  }
 }
 
 /* Footer */
@@ -199,16 +213,20 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px 24px;
-  border-radius: 12px;
+  padding: 10px 20px;
+  border-radius: 50px;
   border: none;
   background: linear-gradient(135deg, #F75801 0%, #C93200 100%);
   color: #fff;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  @media (width <= 1180px) {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
 
   &:hover {
     opacity: 0.9;

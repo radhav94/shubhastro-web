@@ -64,6 +64,9 @@
 .sheetContent {
   padding: 0 24px 24px;
   position: relative;
+  @media (width <= 767px) {
+    padding: 0 16px 16px;
+  }
 }
 
 .sheetTitle {
@@ -125,6 +128,10 @@
   transition: 0.2s ease;
   flex-shrink: 0;
   border: 2px solid rgba(247, 88, 1, 0.2);
+  @media (width <= 767px) {
+    gap: 10px;
+    padding: 10px;
+  }
 
   &:hover {
     // background: #ebebeb;
@@ -170,7 +177,7 @@
 .profileName {
   font-size: 16px;
   font-weight: 600;
-  margin: 4px 0;
+  margin: 0;
   color: #000;
 }
 
@@ -364,9 +371,9 @@
     font-size: 22px;
   }
 
-  .profileItem {
-    padding: 20px;
-  }
+  // .profileItem {
+  //   padding: 20px;
+  // }
 
   .addProfileBtn {
     padding: 18px;

@@ -109,19 +109,35 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     }
   }, [historyData]);
 
-  const scrollToBottom = useCallback(() => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
-  }, []);
+  // Ref placed at the start of the last AI message (set via lastAiMsgRef)
+  const lastAiMsgRef = useRef(null);
+
+  const scrollToLatestMessage = useCallback(() => {
+    const doScroll = () => {
+      const lastMsg = messages[messages.length - 1];
+      const isLastFromAi = lastMsg && lastMsg.sender !== "user";
+
+      if (isLastFromAi && lastAiMsgRef.current) {
+        // AI response: scroll so the top of the message is visible
+        lastAiMsgRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (messagesEndRef.current) {
+        // User message or fallback: scroll to bottom so sent message is visible
+        const container = messagesEndRef.current.parentElement;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      }
+    };
+    setTimeout(doScroll, 150);
+  }, [messages]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages.length, scrollToBottom]);
+    scrollToLatestMessage();
+  }, [messages.length, scrollToLatestMessage]);
 
   useEffect(() => {
-    if (isOpen) scrollToBottom();
-  }, [isOpen, scrollToBottom]);
+    if (isOpen) scrollToLatestMessage();
+  }, [isOpen, scrollToLatestMessage]);
 
   // Track AI Pandit open
   useEffect(() => {
@@ -500,6 +516,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     sendText,
     followupQuestions,
     messagesEndRef,
+    lastAiMsgRef,
     roomId: roomIdRef.current,
   };
 }
