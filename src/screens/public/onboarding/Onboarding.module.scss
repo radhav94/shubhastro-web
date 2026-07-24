@@ -18,7 +18,11 @@
 
 .onboardingContainer {
   min-height: auto;
-  background: #FDEBDD;
+  // background: #FDEBDD;
+  // background: url(../../../assets/images/onboarding.png);
+  background: url(../../../assets/images/new-login-bg-2.jpeg);
+  background-size: cover;
+  background-repeat: no-repeat;
   position: relative;
   margin: 0 auto;
   max-width: 100%;
@@ -35,6 +39,10 @@
      max-width: 100%;
      width: 100%;
   }
+  // @media (width <= 767px) {
+  //   background: url(../../../assets/images/login-mobile-bg.png);
+  //   background-size: cover;
+  // }
 }
 
 // Loading Screen
@@ -220,9 +228,9 @@
   object-position: top;
   position: relative;
   z-index: 0;
-  @media (width <= 769px) {
-    display: none;
-  }
+  // @media (width <= 769px) {
+  //   display: none;
+  // }
 }
 .backgroundImageMobile {
   width: 100%;

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useNavigationType } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './DreamInterpreter.module.scss';
 import { Toast } from '../../../../component';
@@ -9,11 +9,16 @@ import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import { setDreamInterpreterResult, clearDreamInterpreterResult } from '../../../../redux/aiwow/aiwowSlice';
+import DownloadReportModal from '../components/DownloadReportModal';
+import { useAIWowDownload } from '../hooks/useAIWowDownload';
 
 const DreamInterpreter = () => {
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const dispatch = useDispatch();
   const savedDreamResult = useSelector((state) => state.aiwow.dreamInterpreter?.result);
+  const isBackNavigation = navigationType === 'POP';
+  const restoredResult = isBackNavigation ? savedDreamResult : null;
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
 
   useEffect(() => {
@@ -30,13 +35,30 @@ const DreamInterpreter = () => {
   const [lifePhase, setLifePhase] = useState('');
   const [challenges, setChallenges] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [interpretation, setInterpretation] = useState(savedDreamResult);
+  const [interpretation, setInterpretation] = useState(restoredResult);
   const [error, setError] = useState(null);
   const [showMorePsych, setShowMorePsych] = useState(false);
   const [showMoreAstro, setShowMoreAstro] = useState(false);
   const [showMorePersonalized, setShowMorePersonalized] = useState(false);
   const [showMoreSymbols, setShowMoreSymbols] = useState(false);
   const [showMoreSpiritual, setShowMoreSpiritual] = useState(false);
+  const [rawApiResult, setRawApiResult] = useState(() => {
+    if (restoredResult?._id || restoredResult?.dreamId) {
+      return { ...restoredResult, _id: restoredResult._id || restoredResult.dreamId };
+    }
+    return null;
+  });
+
+  const downloadResultData = useMemo(() => {
+    if (!rawApiResult) return null;
+    return { ...rawApiResult, featureName: 'Dream-Interpreter' };
+  }, [rawApiResult]);
+
+  const {
+    isDownloading, showDownloadModal, setShowDownloadModal,
+    downloadPrice, walletBalance,
+    handleDownloadClick, handleConfirmDownload,
+  } = useAIWowDownload({ resultData: downloadResultData });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,6 +83,7 @@ const DreamInterpreter = () => {
 
       const dreamData = {
         dreamDescription: dreamDescription.trim(),
+        kundliId: profile._id || profile.id || '',
         name: profile.name,
         gender: profile.identity?.toLowerCase() || 'male',
         day: profile.day,
@@ -100,6 +123,12 @@ const DreamInterpreter = () => {
         const interpretationData = result.data?.dream || result.data;
         setInterpretation(interpretationData);
         dispatch(setDreamInterpreterResult(interpretationData));
+        // API response: { success, message, dream: { _id, dreamId, ... } }
+        const apiData = result.data;
+        const dream = apiData?.dream || apiData;
+        setInterpretation(dream);
+        // Store with _id at top level for useAIWowDownload historyId extraction
+        setRawApiResult({ ...dream, _id: dream?._id || dream?.dreamId });
         setError(null);
       } else {
         // Set error state to show error UI
@@ -118,6 +147,7 @@ const DreamInterpreter = () => {
   const handleBack = () => {
     if (interpretation || error) {
       setInterpretation(null);
+      setRawApiResult(null);
       setError(null);
       setDreamDescription('');
       setTags('');
@@ -155,6 +185,16 @@ const DreamInterpreter = () => {
               <p className={styles.subtitle}>{profile.name}</p>
             )}
           </div>
+          {interpretation && (
+            <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="7 10 12 15 17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {isDownloading ? "Downloading..." : "Download"}
+            </button>
+          )}
         </div>
       </header>
 
@@ -782,6 +822,17 @@ const DreamInterpreter = () => {
         )}
       </div>
     </div>
+
+    <DownloadReportModal
+      isOpen={showDownloadModal}
+      onClose={() => setShowDownloadModal(false)}
+      onDownload={handleConfirmDownload}
+      featureName="Dream Interpreter Report"
+      downloadCost={downloadPrice}
+      walletBalance={walletBalance ?? 0}
+      isDownloading={isDownloading}
+      showLanguageSelection={false}
+    />
     </>
   );
 };
