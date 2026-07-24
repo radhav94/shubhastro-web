@@ -5,8 +5,15 @@ export const loginWithPhone = async (data) => {
   return await publicRequest.post("users/loginUser", data);
 };
 
+let _verifyOtpInFlight = null;
+
 export const verifyOtp = async (data) => {
-  return await publicRequest.post("users/verifyOtp", data);
+  // Prevent duplicate concurrent calls — return the same promise if one is already in flight
+  if (_verifyOtpInFlight) return _verifyOtpInFlight;
+  _verifyOtpInFlight = publicRequest.post("users/verifyOtp", data).finally(() => {
+    _verifyOtpInFlight = null;
+  });
+  return _verifyOtpInFlight;
 };
 
 export const logout = async (data) => {
