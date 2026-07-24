@@ -91,6 +91,13 @@ import { PersistGate } from "redux-persist/integration/react";
 
 import { AgoraProvider } from "./agora/agoraClient";  // <-- IMPORTANT
 
+// Disable browser scroll restoration so pull-to-refresh (iOS Chrome) and
+// back/forward navigation always start at the top. The app handles scroll
+// position via the ScrollToTop component on route changes.
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+
 // Dynamically adjust toast position based on visual viewport (keyboard open/close)
 if (window.visualViewport) {
   const updateToastPosition = () => {
