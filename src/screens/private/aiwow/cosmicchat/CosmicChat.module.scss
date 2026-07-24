@@ -122,6 +122,11 @@
   flex-direction: column;
   gap: 0.875rem;
   width: 100%;
+  min-height: 0;
+  // Clearance so the last message is never hidden behind the sticky input
+  // when scrolled to the bottom.
+  padding-bottom: 1.5rem;
+  scroll-padding-bottom: 1.5rem;
 }
 
 .emptyState {

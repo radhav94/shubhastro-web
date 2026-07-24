@@ -273,6 +273,9 @@ const PalmistryCamera = () => {
   };
 
   const submitImage = () => {
+    // New image → allow a fresh analysis (clear the reload guard from a
+    // previous attempt).
+    sessionStorage.removeItem('palmistryAnalysisStarted');
     dispatch(setPalmistryImage(capturedImage));
     navigate('/ai-wow/ai-palmistry-scanner/capture');
   };

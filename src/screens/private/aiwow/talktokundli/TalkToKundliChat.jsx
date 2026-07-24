@@ -31,6 +31,8 @@ const TalkToKundliChat = () => {
     "How will my financial situation be this year?"
   ]);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const scrollAreaRef = useRef(null);
   const inputRef = useRef(null);
 
   // Start session when profile is loaded
@@ -41,10 +43,27 @@ const TalkToKundliChat = () => {
   }, [hasToken, profile, profileLoading]);
 
   // Auto-scroll to show latest message above input
+  // Auto-scroll so the latest reply is fully in view above the input. Scroll
+  // the container to its true bottom after the new message lays out (double
+  // rAF) — a smooth scrollIntoView on a timeout can fire before the message
+  // renders, leaving it hidden behind the input on mobile.
+  const scrollToBottom = (behavior = 'auto') => {
+    // The chat has nested scroll containers (the outer wrapper AND the inner
+    // messages list). Scroll whichever one actually overflows so the latest
+    // message is always brought into view.
+    [scrollAreaRef.current, messagesContainerRef.current].forEach((el) => {
+      if (el && el.scrollHeight > el.clientHeight) {
+        el.scrollTo({ top: el.scrollHeight, behavior });
+      }
+    });
+    messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
+  };
+
   useEffect(() => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, 100);
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => scrollToBottom('smooth'));
+    });
+    return () => cancelAnimationFrame(raf);
   }, [messages, isLoading]);
 
   const startSession = async (profile) => {
@@ -102,10 +121,11 @@ const TalkToKundliChat = () => {
     }
   };
 
-  const sendMessage = async () => {
-    if (!inputMessage.trim() || !sessionId || isLoading) return;
+  const sendMessage = async (overrideText) => {
+    const raw = typeof overrideText === 'string' ? overrideText : inputMessage;
+    if (!raw.trim() || !sessionId || isLoading) return;
 
-    const messageToSend = inputMessage.trim();
+    const messageToSend = raw.trim();
     const userMessage = {
       id: Date.now(),
       type: 'user',
@@ -174,10 +194,12 @@ const TalkToKundliChat = () => {
   };
 
   const handleSuggestedQuestion = (question, e) => {
+    if (isLoading || !sessionId) return;
     // Use the actual displayed text from the button (respects Google Translate)
     const displayedText = e?.currentTarget?.innerText || question;
-    setInputMessage(displayedText);
-    inputRef.current?.focus();
+    // Send the suggested question directly instead of only filling the input.
+    setInputMessage('');
+    sendMessage(displayedText);
   };
 
   const handleBack = () => {
@@ -219,10 +241,10 @@ const TalkToKundliChat = () => {
         </div>
       </header>
       
-      <div className={styles.containerDiv}>
+      <div className={styles.containerDiv} ref={scrollAreaRef}>
         <div className={styles.heiT}>
         {/* Messages */}
-        <div className={styles.messagesContainer}>
+        <div className={styles.messagesContainer} ref={messagesContainerRef}>
           {messages.length === 0 && !isLoading && (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>💬</div>
