@@ -27,6 +27,9 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const [resendTimer, setResendTimer] = useState(20);
   const [loading, setLoading] = useState(false);
   const handleContinueRef = useRef(null);
+  // Holds the AbortController for the in-flight OTP verification so it can be
+  // cancelled if the user requests a new OTP mid-request.
+  const verifyAbortRef = useRef(null);
 
   // Web OTP API - auto-read OTP from SMS
   useEffect(() => {
@@ -70,7 +73,9 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           ...(fcmTokens && { fcmTokens, deviceType: "web" }),
         };
 
-        const response = await verifyOtp(payload);
+        const controller = new AbortController();
+        verifyAbortRef.current = controller;
+        const response = await verifyOtp(payload, { signal: controller.signal });
 
         if (response.data.success && response.data.statusCode === 200) {
           // Store tokens and user data
@@ -187,6 +192,17 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           toast.error(response.data.message || "Invalid OTP");
         }
       } catch (error) {
+        // The user tapped "Resend OTP" while this request was still in flight.
+        // The call was cancelled on purpose, so stop silently and let them
+        // verify the freshly sent OTP.
+        if (
+          error.code === "ERR_CANCELED" ||
+          error.name === "CanceledError" ||
+          error.name === "AbortError" ||
+          error.message === "canceled"
+        ) {
+          return;
+        }
         console.error("OTP verification error:", error);
         trackEvent("otp_verified_failed", { mobile_number: formData.phoneNumber, error_reason: error.response?.data?.message || "verify_error" });
         toast.error(
@@ -202,6 +218,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         }, 50);
       } finally {
         setLoading(false);
+        verifyAbortRef.current = null;
       }
     }
   };
@@ -227,6 +244,17 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
   const handleResend = async () => {
     if (resendTimer === 0) {
+      // Cancel any in-flight verification so the user can verify the freshly
+      // sent OTP instead of waiting on the stale request.
+      if (verifyAbortRef.current) {
+        verifyAbortRef.current.abort();
+        verifyAbortRef.current = null;
+      }
+      // Re-enable the Continue button and clear the old code immediately so the
+      // auto-submit effect can't re-fire with the previous OTP.
+      setLoading(false);
+      setOtp("");
+
       trackEvent("otp_resend_requested", { mobile_number: formData.phoneNumber });
       try {
         const payload = {
