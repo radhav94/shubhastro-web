@@ -13,7 +13,7 @@ const isEmergencySection = (sectionData) => {
 const AstrologerGridSection = memo(({ sectionData, styles, onConnect }) => {
   const navigate = useNavigate();
   const gridRef = useRef(null);
-  const [canScroll, setCanScroll] = useState(false);
+  const [scrollState, setScrollState] = useState({ canScrollLeft: false, canScrollRight: false });
   const astrologers = useMemo(() => sortContentByOrder(sectionData?.content || []), [sectionData?.content]);
 
   const scrollByCards = useCallback((direction) => {
@@ -99,7 +99,7 @@ const AstrologerGridSection = memo(({ sectionData, styles, onConnect }) => {
 
   return (
     <div className={styles.astrologerSliderWrapper} style={{ position: "relative" }}>
-      {canScroll && (
+      {scrollState.canScrollLeft && (
         <button
           type="button"
           className={`${styles.gridSliderBtn} ${styles.gridSliderBtnLeft}`}
@@ -137,11 +137,11 @@ const AstrologerGridSection = memo(({ sectionData, styles, onConnect }) => {
             onConnect={onConnect}
             gridRef={gridRef}
             hideSliderButtons
-            onScrollableChange={setCanScroll}
+            onScrollableChange={setScrollState}
           />
         </Suspense>
       </section>
-      {canScroll && (
+      {scrollState.canScrollRight && (
         <button
           type="button"
           className={`${styles.gridSliderBtn} ${styles.gridSliderBtnRight}`}
