@@ -57,6 +57,7 @@ const PanditAIBubble = () => {
     sendText,
     followupQuestions,
     messagesEndRef,
+    lastAiMsgRef,
     roomId,
   } = usePanditAI({ isOpen, lang });
 
@@ -331,16 +332,23 @@ const PanditAIBubble = () => {
                 <p>Ask Pandit AI anything about your life</p>
               </div>
             ) : (
-              Object.entries(messageGroups).map(([date, msgs], groupIndex) => (
-                <div key={`${date}-${groupIndex}`} className={styles.messageGroup}>
-                  <div className={styles.dateHeader}>
-                    <span className={styles.dateText}>{getDateLabel(date)}</span>
+              (() => {
+                // Find the last AI message to attach scroll ref
+                const allMsgs = Object.values(messageGroups).flat();
+                const lastAiId = [...allMsgs].reverse().find((m) => m.sender !== "user")?._id;
+                return Object.entries(messageGroups).map(([date, msgs], groupIndex) => (
+                  <div key={`${date}-${groupIndex}`} className={styles.messageGroup}>
+                    <div className={styles.dateHeader}>
+                      <span className={styles.dateText}>{getDateLabel(date)}</span>
+                    </div>
+                    {msgs.map((msg) => (
+                      <div key={msg._id} ref={msg._id === lastAiId ? lastAiMsgRef : undefined}>
+                        <MessageBubble msg={msg} />
+                      </div>
+                    ))}
                   </div>
-                  {msgs.map((msg) => (
-                    <MessageBubble key={msg._id} msg={msg} />
-                  ))}
-                </div>
-              ))
+                ));
+              })()
             )}
             <div ref={messagesEndRef} />
           </div>
