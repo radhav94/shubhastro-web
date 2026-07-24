@@ -15,8 +15,9 @@ import { privateRequestNew } from "../../../services/appServices/privateRequestN
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearGuestKundliProfiles } from "../../../utils/helper/cookies";
 import { trackEvent } from "../../../utils/analytics";
-import onboardingBg from "../../../assets/images/onboarding.png";
-import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
+// import onboardingBg from "../../../assets/images/onboarding.png";
+import onboardingBg from "../../../assets/images/new-login-bg-2.jpeg";
+// import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
 import LanguageSelector from "../../../component/LanguageSelector";
 import BackButton from "../../../component/UI/BackButton/BackButton";
 const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
@@ -256,16 +257,16 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   return (
     <div className={styles.loginScreen}>
       <div className={styles.loginBackground}>
-        <img
+        {/* <img
           src={onboardingBg}
           alt="Astrology"
           className={styles.backgroundImage}
-        />
-        <img
+        /> */}
+        {/* <img
           src={onboardingBgMobile}
           alt="Astrology"
           className={styles.backgroundImageMobile}
-        />
+        /> */}
       </div>
 
       {/* Back Button - top left corner */}
