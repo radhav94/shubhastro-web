@@ -145,11 +145,23 @@ const GuestChatFlow = () => {
       welcomeHandledRef.current = true;
       handleWelcomeClosed();
     };
-    // Existing user (welcome-back): initiate the chat request, then send them to
-    // the astrologers page (the request continues via the global waiting queue).
-    const onBackClosed = () => {
+    // Existing user (welcome-back): if balance is low send them to the recharge
+    // page; otherwise initiate the chat request and go to the astrologers page.
+    const onBackClosed = async () => {
       if (welcomeHandledRef.current) return;
       welcomeHandledRef.current = true;
+      const astro = astrologerRef.current;
+      if (astro?._id) {
+        try {
+          const result = await getBalance({ astrologerId: astro._id });
+          if (result?.data?.data?.status === false) {
+            navigate("/recharge", { replace: true });
+            return;
+          }
+        } catch (err) {
+          console.error("Guest balance check failed:", err);
+        }
+      }
       initiateChat();
       navigate("/astrologers", { replace: true });
     };
@@ -166,6 +178,12 @@ const GuestChatFlow = () => {
   const setField = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
+  };
+
+  // Open the DateTimePicker's calendar by triggering its (hidden) internal
+  // button, so the left calendar icon opens the picker while typing stays enabled.
+  const openPickerFromIcon = (e) => {
+    e.currentTarget.parentElement?.querySelector('button[tabindex="-1"]')?.click();
   };
 
   const validate = () => {
@@ -553,10 +571,12 @@ const GuestChatFlow = () => {
             Birth Date <span className={styles.req}>*</span>
           </label>
           <div className={styles.iconField}>
-            <IoCalendarOutline className={styles.leftIcon} />
+            <button type="button" className={styles.leftIconBtn} onClick={openPickerFromIcon} aria-label="Open calendar">
+              <IoCalendarOutline />
+            </button>
             <DateTimePicker
               mode="date"
-              openOnClick
+              portal
               selected={form.dob}
               onChange={(d) => setField("dob", d)}
               maxDate={new Date()}
