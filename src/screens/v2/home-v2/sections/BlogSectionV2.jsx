@@ -5,7 +5,7 @@ import BlogsSection from "../../home/components/BlogsSection";
 const BlogSectionV2 = memo(({ sectionData, styles }) => {
   const blogData = sectionData?.content || [];
   const gridRef = useRef(null);
-  const [canScroll, setCanScroll] = useState(false);
+  const [scrollState, setScrollState] = useState({ canScrollLeft: false, canScrollRight: false });
 
   const scrollByCards = useCallback((direction) => {
     const grid = gridRef.current;
@@ -18,7 +18,7 @@ const BlogSectionV2 = memo(({ sectionData, styles }) => {
 
   return (
     <div className={styles.astrologerSliderWrapper} style={{ position: "relative" }}>
-      {canScroll && (
+      {scrollState.canScrollLeft && (
         <button
           type="button"
           className={`${styles.gridSliderBtn} ${styles.gridSliderBtnLeft}`}
@@ -35,11 +35,11 @@ const BlogSectionV2 = memo(({ sectionData, styles }) => {
             title={sectionData?.display_title || sectionData?.title || "NEWS / BLOGS"}
             showMore={sectionData?.show_more !== false}
             gridRef={gridRef}
-            onScrollableChange={setCanScroll}
+            onScrollableChange={setScrollState}
           />
         </Suspense>
       </section>
-      {canScroll && (
+      {scrollState.canScrollRight && (
         <button
           type="button"
           className={`${styles.gridSliderBtn} ${styles.gridSliderBtnRight}`}

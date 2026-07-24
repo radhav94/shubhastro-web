@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useCallback, Suspense } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import useIsOverflowing from "../../../hooks/useIsOverflowing";
+import useHorizontalScrollState from "../../../hooks/useHorizontalScrollState";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
@@ -86,7 +86,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
       : [];
   }, [data]);
 
-  const canScroll = useIsOverflowing(scrollRef, [sessions]);
+  const { canScrollLeft, canScrollRight } = useHorizontalScrollState(scrollRef, [sessions]);
 
   if (isLoading || !sessions.length) return null;
 
@@ -143,7 +143,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
 
   return (
     <div className={styles.astrologerSliderWrapper} style={{ position: "relative" }}>
-      {canScroll && (
+      {canScrollLeft && (
         <button
           type="button"
           className={`${styles.gridSliderBtn} ${styles.gridSliderBtnLeft}`}
@@ -292,7 +292,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
         </Suspense>
       )}
       </section>
-      {canScroll && (
+      {canScrollRight && (
         <button
           type="button"
           className={`${styles.gridSliderBtn} ${styles.gridSliderBtnRight}`}

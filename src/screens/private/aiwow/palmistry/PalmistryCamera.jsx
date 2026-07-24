@@ -195,9 +195,13 @@ const PalmistryCamera = () => {
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         setIsFrontCamera(trackFacing !== 'environment');
         
-        // Start hand detection once video is playing
+        // Start hand detection once video is playing.
+        // Guard with optional chaining: this fires asynchronously and the
+        // component may have unmounted (e.g. quick back navigation), leaving
+        // videoRef.current null — calling .play() on null throws
+        // "null is not an object".
         videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play();
+          videoRef.current?.play();
         };
 
         videoRef.current.onplay = () => {
@@ -277,7 +281,12 @@ const PalmistryCamera = () => {
     // previous attempt).
     sessionStorage.removeItem('palmistryAnalysisStarted');
     dispatch(setPalmistryImage(capturedImage));
-    navigate('/ai-wow/ai-palmistry-scanner/capture');
+    // Replace (not push) so the live camera screen is removed from history.
+    // The analysis screen then replaces itself with the result, so pressing
+    // browser Back on the result page returns to the instructions screen
+    // instead of re-opening the camera (which would restart getUserMedia,
+    // auto-capture again, and trigger a fresh paid analysis in a loop).
+    navigate('/ai-wow/ai-palmistry-scanner/capture', { replace: true });
   };
 
   const proceedWithImage = () => {
