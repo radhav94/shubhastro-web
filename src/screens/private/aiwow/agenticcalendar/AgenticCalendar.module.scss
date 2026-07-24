@@ -772,13 +772,18 @@
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, box-shadow 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   margin: 24px auto 0 auto;
+  position: relative;
+  overflow: hidden;
+  min-height: 48px;
+  white-space: nowrap;
+  -webkit-transform: translateZ(0);
 
   @media (width <= 767px) {
     width: 100%;
