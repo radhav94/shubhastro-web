@@ -28,6 +28,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const [resendTimer, setResendTimer] = useState(20);
   const [loading, setLoading] = useState(false);
   const handleContinueRef = useRef(null);
+  const isSubmittingRef = useRef(false);
   // Holds the AbortController for the in-flight OTP verification so it can be
   // cancelled if the user requests a new OTP mid-request.
   const verifyAbortRef = useRef(null);
@@ -41,10 +42,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         .then((otpCredential) => {
           if (otpCredential?.code) {
             setOtp(otpCredential.code);
-            // Auto-submit after filling
-            setTimeout(() => {
-              handleContinueRef.current?.();
-            }, 300);
+            // Auto-submit is handled by the otp length useEffect below
           }
         })
         .catch(() => {});
@@ -62,6 +60,8 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const handleContinue = async () => {
     const otpValue = otp;
     if (otpValue.length === 6) {
+      if (isSubmittingRef.current) return;
+      isSubmittingRef.current = true;
       setLoading(true);
       trackEvent("otp_entered", { mobile_number: formData.phoneNumber });
       try {
@@ -219,6 +219,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         }, 50);
       } finally {
         setLoading(false);
+        isSubmittingRef.current = false;
         verifyAbortRef.current = null;
       }
     }
@@ -230,10 +231,12 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   // Auto-submit when all 6 digits are filled (debounced to prevent flickering)
   const autoSubmitTimerRef = useRef(null);
   useEffect(() => {
-    if (otp.length === 6 && !loading) {
+    if (otp.length === 6 && !loading && !isSubmittingRef.current) {
       // Small delay to let the UI render the last digit before submitting
       autoSubmitTimerRef.current = setTimeout(() => {
-        handleContinueRef.current?.();
+        if (!isSubmittingRef.current) {
+          handleContinueRef.current?.();
+        }
       }, 400);
     }
     return () => {
@@ -241,7 +244,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         clearTimeout(autoSubmitTimerRef.current);
       }
     };
-  }, [otp, loading]);
+  }, [otp]);
 
   const handleResend = async () => {
     if (resendTimer === 0) {
