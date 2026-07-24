@@ -23,22 +23,15 @@
   background: url(../../../assets/images/new-login-bg-2.jpeg);
   background-size: cover;
   background-repeat: no-repeat;
-  position: relative;
-  margin: 0 auto;
-  max-width: 100%;
-  padding:16px;
+  // padding:16px;
   height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  // border-radius: 12px;
-  // padding-top: 67px; // Space for fixed header
-  @media (width <= 768px) {
-     padding:0px;
-    //  background: #fff;
-     max-width: 100%;
-     width: 100%;
-  }
+  // @media (width <= 768px) {
+  //    max-width: 100%;
+  //    width: 100%;
+  // }
   // @media (width <= 767px) {
   //   background: url(../../../assets/images/login-mobile-bg.png);
   //   background-size: cover;
@@ -1672,65 +1665,57 @@
 /* ═══════════════════════════════════════════════════════
    NEW LOGIN PAGE — Redesigned with ₹250 Offer
    ═══════════════════════════════════════════════════════ */
+// .loginWrapScreen{
+//   width: 100%;
+//   overflow: hidden;
+// }
 .newLoginPage {
-  min-height: auto;
-  width: fit-content;
+  width: 900px;
+  height: auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  // background: linear-gradient(180deg, #FFF8F2 0%, #FFE8D5 50%, #FFF0E6 100%);
-  font-family: "Poppins", sans-serif;
   border-radius: 24px;
   background: url(../../../assets/images/login-new-mobile-bg.png);
   background-repeat: no-repeat;
   background-size: cover;
   box-shadow: 0px 0px 5px #0002;
-  overflow: hidden;
   padding: 10px 36px 36px 36px;
   gap: 24px;
   position: relative;
-  @media (width <= 767px) {
+  overflow: hidden;
+  @media (width <= 900px) {
     gap: 10px;
     padding: 16px;
     width: 94%;
-    background-size: auto;
   }
 }
 
 .newLoginHero {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 100px;
-  width: fit-content;
-  margin: 0 auto;
-  @media (width <= 1180px) {
+  width: 100%;
+  @media (max-width: 1180px) {
     gap: 24px;
+    justify-content: center;
   }
-  @media (width <= 900px) {
-    padding: 24px 16px;
-  }
-  @media (width <= 767px) {
-    padding: 0px;
+  @media (max-width: 820px) {
+    gap: 16px;
     width: 100%;
   }
 }
 
 .newLoginLeft {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 420px;
+  width: 420px;
+  max-width: 100%;
 
-  @media (max-width: 900px) {
-    max-width: 100%;
-    align-items: center;
-    text-align: center;
-  }
-  @media (width <= 767px) {
+  @media (width <= 900px) {
     width: 100%;
+    align-items: center;
   }
 }
 
@@ -1922,12 +1907,11 @@
   }
 
   input {
-    flex: 1;
+    width: 100%;
     border: none;
     outline: none;
     font-size: 16px;
     padding: 12px;
-    font-family: "Poppins", sans-serif;
     color: #1a1a1a;
     background: transparent;
 
@@ -2096,7 +2080,7 @@
     padding: 16px;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 767px) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
