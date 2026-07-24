@@ -450,9 +450,11 @@ const FaceReadingResult = () => {
                     .map(([key, value]) => (
                       value && (
                         <div key={key} className={styles.auraColorCard} style={{ position: 'relative' }}>
-                          <button
+                          <div
                             onClick={() => setExpandedGuidance(expandedGuidance === `aura-${key}` ? null : `aura-${key}`)}
                             className={styles.auraColorHeader}
+                            role="button"
+                            tabIndex={0}
                           >
                             <div className={styles.auraHeaderContent}>
                               <div 
@@ -465,15 +467,15 @@ const FaceReadingResult = () => {
                               </div>
                             </div>
                             <div className={styles.headerRight}>
+                              <span style={{ display: 'inline-flex', pointerEvents: 'auto', zIndex: 10 }} onClick={(e) => e.stopPropagation()}>
+                                <TTSButton text={`${key.charAt(0).toUpperCase() + key.slice(1)} Aura. ${value.color || 'Unknown'}. ${value.percentage || 0} percent. ${value.meaning || ''}`} />
+                              </span>
                               <div className={styles.auraPercentage}>{value.percentage || 0}%</div>
                               <span className={styles.guidanceArrow}>
                                 {expandedGuidance === `aura-${key}` ? '▲' : '▼'}
                               </span>
                             </div>
-                          </button>
-                          <span style={{ position: 'absolute', top: '12px', right: '100px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
-                            <TTSButton text={`${key.charAt(0).toUpperCase() + key.slice(1)} Aura. ${value.color || 'Unknown'}. ${value.percentage || 0} percent. ${value.meaning || ''}`} />
-                          </span>
+                          </div>
                           <div className={`${styles.guidanceContent} ${expandedGuidance === `aura-${key}` ? styles.expanded : ''}`}>
                             <p className={styles.auraMeaning}>{value.meaning || ''}</p>
                           </div>

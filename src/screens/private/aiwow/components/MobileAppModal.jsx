@@ -57,7 +57,7 @@ const MobileAppModal = ({ isOpen, onClose }) => {
           <p className={styles.downloadText}>Download ShubhTalk App</p>
           <div className={styles.storeButtons}>
             <a 
-              href="https://play.google.com/store/apps/details?id=com.shubhtalk" 
+              href="https://play.google.com/store/apps/details?id=com.pittieglobal.shubhastro&pcampaignid=web_share" 
               target="_blank" 
               rel="noopener noreferrer"
               className={styles.storeBtn}

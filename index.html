@@ -5,6 +5,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
   <meta name="theme-color" content="#F75801">
+  <script>
+    // iOS Safari/Chrome ignore `user-scalable=no`, so pinch/double-tap still
+    // zoom the whole page (e.g. when zooming a photo on the AI-Wow camera
+    // screens). Enforce the declared no-zoom intent by blocking the zoom
+    // gestures at the document level.
+    (function () {
+      ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (evt) {
+        document.addEventListener(evt, function (e) { e.preventDefault(); }, { passive: false });
+      });
+      var lastTouchEnd = 0;
+      document.addEventListener('touchend', function (e) {
+        var now = Date.now();
+        if (now - lastTouchEnd <= 300) { e.preventDefault(); }
+        lastTouchEnd = now;
+      }, { passive: false });
+    })();
+  </script>
   <meta name="robots" content="%VITE_ROBOTS_CONTENT%" />
   <meta name="googlebot" content="%VITE_ROBOTS_CONTENT%" />
   <meta name="copyright" content="shubhastro.ai" />
