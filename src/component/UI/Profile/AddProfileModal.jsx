@@ -63,6 +63,12 @@ const AddProfileModal = ({
   // Guest mode uses the "Add Kundli Details" bonus design.
   const isGuest = showMobileField;
 
+  // Open the DateTimePicker's calendar via its (hidden) internal button so the
+  // left calendar icon opens the picker while typing stays enabled.
+  const openPickerFromIcon = (e) => {
+    e.currentTarget.parentElement?.querySelector('button[tabindex="-1"]')?.click();
+  };
+
   // Lock background page scroll while the modal is open (mobile-safe: pin the
   // body in place and restore the scroll position on close).
   useEffect(() => {
@@ -322,10 +328,11 @@ const AddProfileModal = ({
                   <div className={styles.formGroup}>
                     <label>Birth Date <span className={styles.required}>*</span></label>
                     <div className={styles.iconField}>
-                      <IoCalendarOutline className={styles.leftIcon} />
+                      <button type="button" className={styles.leftIconBtn} onClick={openPickerFromIcon} aria-label="Open calendar">
+                        <IoCalendarOutline />
+                      </button>
                       <DateTimePicker
                         mode="date"
-                        openOnClick
                         portal
                         selected={values.birthDate ? new Date(values.birthDate) : null}
                         onChange={(date) => {

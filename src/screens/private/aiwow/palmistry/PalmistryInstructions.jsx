@@ -52,6 +52,9 @@ const PalmistryInstructions = () => {
       compressImage(file).then((dataUrl) => {
         // Guests must authenticate at the moment the photo is submitted.
         runOrAuth(() => {
+          // New image → allow a fresh analysis (clear the reload guard from a
+          // previous attempt).
+          sessionStorage.removeItem('palmistryAnalysisStarted');
           dispatch(setPalmistryImage(dataUrl));
           navigate('/ai-wow/ai-palmistry-scanner/capture');
         });
