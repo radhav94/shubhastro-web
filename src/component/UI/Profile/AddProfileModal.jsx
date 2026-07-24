@@ -378,10 +378,10 @@ const AddProfileModal = ({
                   </div>
                 </div>
 
-                <label className={styles.checkboxLabel}>
-                  <Field type="checkbox" name="unknownBirthTime" />
-                  Don't know the exact time of birth
-                </label>
+                <div className={styles.checkboxLabel}>
+                  <Field type="checkbox" name="unknownBirthTime" id="unknownBirthTime" />
+                  <span>Don't know the exact time of birth</span>
+                </div>
 
                 {/* Place of birth */}
                 <div className={styles.formGroup}>

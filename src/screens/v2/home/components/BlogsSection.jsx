@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PATH } from "../../../../utils/routes/Paths";
 import SectionHeader from "./SectionHeader";
-import useIsOverflowing from "../../../../hooks/useIsOverflowing";
+import useHorizontalScrollState from "../../../../hooks/useHorizontalScrollState";
 import styles from "../Home.module.scss";
 import { DefaultImages } from "../../../../utils/appImages";
 import defaultBlogImg from "../../../../assets/images/default_image_16x9_1920x1080.png";
@@ -25,10 +25,10 @@ const BlogsSection = ({ blogData = [], title, showMore, gridRef, onScrollableCha
   const navigate = useNavigate();
 
   // Report horizontal scrollability to a parent that renders external slider buttons.
-  const canScroll = useIsOverflowing(gridRef, [blogData]);
+  const { canScrollLeft, canScrollRight } = useHorizontalScrollState(gridRef, [blogData]);
   useEffect(() => {
-    onScrollableChange?.(canScroll);
-  }, [canScroll, onScrollableChange]);
+    onScrollableChange?.({ canScrollLeft, canScrollRight });
+  }, [canScrollLeft, canScrollRight, onScrollableChange]);
 
   if (!blogData || blogData.length === 0) return null;
 

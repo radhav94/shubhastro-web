@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useNavigate, useLocation, useNavigationType } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './AgenticCalendar.module.scss';
 import { Toast } from '../../../../component';
@@ -12,6 +12,8 @@ import TTSButton from '../../../../component/UI/TTSButton';
 import LocationSearch from '../../../../utils/location/locationSearchVedic';
 import useUserLocation from '../../../../utils/hooks/useUserLocation';
 import { setMuhuratCalendarResult, clearMuhuratCalendarResult } from '../../../../redux/aiwow/aiwowSlice';
+import DownloadReportModal from '../components/DownloadReportModal';
+import { useAIWowDownload } from '../hooks/useAIWowDownload';
 
 const DEFAULT_OCCASIONS = [
   'Marriage',
@@ -29,8 +31,11 @@ const DEFAULT_OCCASIONS = [
 const AgenticCalendar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const navigationType = useNavigationType();
   const dispatch = useDispatch();
   const savedMuhuratResult = useSelector((state) => state.aiwow.muhuratCalendar?.result);
+  const isBackNavigation = navigationType === 'POP' && !location.state?.occasions;
+  const restoredResult = isBackNavigation ? savedMuhuratResult : null;
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({ required: false, showToast: false });
   const userLocation = useUserLocation();
 
@@ -49,15 +54,32 @@ const AgenticCalendar = () => {
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
 
   const [isLoading, setIsLoading] = useState(false);
-  const [analysis, setAnalysis] = useState(savedMuhuratResult);
+  const [analysis, setAnalysis] = useState(restoredResult);
   const [expandedOccasion, setExpandedOccasion] = useState(() => {
-    if (savedMuhuratResult?.optimalTimings?.length > 0) return savedMuhuratResult.optimalTimings[0].eventName;
+    if (restoredResult?.optimalTimings?.length > 0) return restoredResult.optimalTimings[0].eventName;
     return null;
   });
-  const [locked, setLocked] = useState(!!savedMuhuratResult); // Lock selections after clicking Get Timing
+  const [locked, setLocked] = useState(!!restoredResult); // Lock selections after clicking Get Timing
   const resultsRef = useRef(null);
   const [locationValue, setLocationValue] = useState('');
   const [locationData, setLocationData] = useState(null);
+  const [rawApiResult, setRawApiResult] = useState(() => {
+    if (restoredResult?._id || restoredResult?.historyId) {
+      return { ...restoredResult, _id: restoredResult._id || restoredResult.historyId };
+    }
+    return null;
+  });
+
+  const downloadResultData = useMemo(() => {
+    if (!rawApiResult) return null;
+    return { ...rawApiResult, featureName: 'Agentic-Calendar' };
+  }, [rawApiResult]);
+
+  const {
+    isDownloading, showDownloadModal, setShowDownloadModal,
+    downloadPrice, walletBalance,
+    handleDownloadClick, handleConfirmDownload,
+  } = useAIWowDownload({ resultData: downloadResultData });
 
   const [navStateConsumed, setNavStateConsumed] = useState(false);
   const [autoSubmitPending, setAutoSubmitPending] = useState(false);
@@ -212,6 +234,7 @@ const AgenticCalendar = () => {
       if (result.success) {
         setAnalysis(result.data);
         dispatch(setMuhuratCalendarResult(result.data));
+        setRawApiResult(result.data);
         setExpandedOccasion(occasions[0]);
         setTimeout(() => {
           resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -310,6 +333,16 @@ const AgenticCalendar = () => {
             <h1 className={styles.title}>Muhurat Calendar</h1>
             {profile && <p className={styles.subtitle}>{profile.name}</p>}
           </div>
+          {analysis && (
+            <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="7 10 12 15 17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {isDownloading ? "Downloading..." : "Download"}
+            </button>
+          )}
         </div>
       </header>
 
@@ -429,6 +462,7 @@ const AgenticCalendar = () => {
               if (locked) {
                 setLocked(false);
                 setAnalysis(null);
+                setRawApiResult(null);
                 setExpandedOccasion(null);
                 dispatch(clearMuhuratCalendarResult());
               } else {
@@ -693,6 +727,17 @@ const AgenticCalendar = () => {
         </div>
       )}
     </div>
+
+    <DownloadReportModal
+      isOpen={showDownloadModal}
+      onClose={() => setShowDownloadModal(false)}
+      onDownload={handleConfirmDownload}
+      featureName="Agentic Calendar Report"
+      downloadCost={downloadPrice}
+      walletBalance={walletBalance ?? 0}
+      isDownloading={isDownloading}
+      showLanguageSelection={false}
+    />
     </>
   );
 };

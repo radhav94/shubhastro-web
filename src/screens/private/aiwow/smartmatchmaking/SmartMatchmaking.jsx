@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useNavigationType } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { ChevronDown } from 'lucide-react';
 import styles from './SmartMatchmaking.module.scss';
@@ -21,12 +21,17 @@ import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import { trackEvent } from '../../../../utils/analytics';
 import { setSmartMatchmakingResult, clearSmartMatchmakingResult } from '../../../../redux/aiwow/aiwowSlice';
+import DownloadReportModal from '../components/DownloadReportModal';
+import { useAIWowDownload } from '../hooks/useAIWowDownload';
 // import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 
 const SmartMatchmaking = () => {
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const dispatch = useDispatch();
   const savedMatchmakingResult = useSelector((state) => state.aiwow.smartMatchmaking?.result);
+  const isBackNavigation = navigationType === 'POP';
+  const restoredResult = isBackNavigation ? savedMatchmakingResult : null;
   const [showSelectProfile, setShowSelectProfile] = useState(false);
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
@@ -37,8 +42,25 @@ const SmartMatchmaking = () => {
   const [primaryProfile, setPrimaryProfile] = useState(null);
   const [partnerProfile, setPartnerProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState(savedMatchmakingResult);
+  const [result, setResult] = useState(restoredResult);
   const [error, setError] = useState(null);
+  const [rawApiResult, setRawApiResult] = useState(() => {
+    if (restoredResult?._id || restoredResult?.historyId) {
+      return { ...restoredResult, _id: restoredResult._id || restoredResult.historyId };
+    }
+    return null;
+  });
+
+  const downloadResultData = useMemo(() => {
+    if (!rawApiResult) return null;
+    return { ...rawApiResult, featureName: 'Smart-Matchmaking' };
+  }, [rawApiResult]);
+
+  const {
+    isDownloading, showDownloadModal, setShowDownloadModal,
+    downloadPrice, walletBalance,
+    handleDownloadClick, handleConfirmDownload,
+  } = useAIWowDownload({ resultData: downloadResultData });
 
 
    console.log(result,"56789")
@@ -314,6 +336,7 @@ const SmartMatchmaking = () => {
       if (apiResult.success) {
         setResult(apiResult.data);
         dispatch(setSmartMatchmakingResult(apiResult.data));
+        setRawApiResult(apiResult.data);
         trackEvent("match_making_result_generated", {
           total_gunas: apiResult.data?.totalGunas ?? apiResult.data?.total_gunas,
           compatibility_score: apiResult.data?.compatibilityScore ?? apiResult.data?.compatibility_score,
@@ -334,6 +357,7 @@ const SmartMatchmaking = () => {
   const handleBack = () => {
     if (result) {
       setResult(null);
+      setRawApiResult(null);
       setError(null);
       dispatch(clearSmartMatchmakingResult());
     } else {
@@ -356,6 +380,16 @@ const SmartMatchmaking = () => {
             </svg>
           </button>
           <h1 className={styles.title}>Smart Matchmaking</h1>
+          {result && (
+            <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="7 10 12 15 17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {isDownloading ? "Downloading..." : "Download"}
+            </button>
+          )}
         </div>
       </header>
 
@@ -837,6 +871,17 @@ const SmartMatchmaking = () => {
         />
       )}
     </div>
+
+    <DownloadReportModal
+      isOpen={showDownloadModal}
+      onClose={() => setShowDownloadModal(false)}
+      onDownload={handleConfirmDownload}
+      featureName="Smart Matchmaking Report"
+      downloadCost={downloadPrice}
+      walletBalance={walletBalance ?? 0}
+      isDownloading={isDownloading}
+      showLanguageSelection={false}
+    />
     </>
   );
 };

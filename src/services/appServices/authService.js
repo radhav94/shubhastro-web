@@ -5,8 +5,8 @@ export const loginWithPhone = async (data) => {
   return await publicRequest.post("users/loginUser", data);
 };
 
-export const verifyOtp = async (data) => {
-  return await publicRequest.post("users/verifyOtp", data);
+export const verifyOtp = async (data, config = {}) => {
+  return await publicRequest.post("users/verifyOtp", data, config);
 };
 
 export const logout = async (data) => {
