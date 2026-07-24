@@ -177,12 +177,6 @@ const TalkToKundliChat = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      // Use requestAnimationFrame to ensure focus happens after render
-      requestAnimationFrame(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      });
     }
   };
 
