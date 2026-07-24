@@ -29,7 +29,26 @@ const PalmistryCamera = () => {
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
   const [isFrontCamera, setIsFrontCamera] = useState(true);
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
   const captureAreaRef = useRef(null); // Reference to capture area div
+
+  // Show the flip button only when the device actually has more than one
+  // camera. (Previously it was hidden on any screen >= 769px, which wrongly
+  // hid it on tablets that do have front + rear cameras.)
+  const detectCameras = async () => {
+    try {
+      if (!navigator.mediaDevices?.enumerateDevices) return;
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const cams = devices.filter((d) => d.kind === 'videoinput');
+      setHasMultipleCameras(cams.length > 1);
+    } catch {
+      /* ignore — leave flip hidden if we can't detect */
+    }
+  };
+
+  useEffect(() => {
+    detectCameras();
+  }, []);
 
   // Calculate capture box bounds dynamically
   const getCaptureBoxBounds = () => {
@@ -194,7 +213,11 @@ const PalmistryCamera = () => {
         const videoTrack = mediaStream.getVideoTracks()[0];
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         setIsFrontCamera(trackFacing !== 'environment');
-        
+
+        // Re-check camera count now that permission is granted (device labels
+        // and full list are only reliably available after permission).
+        detectCameras();
+
         // Start hand detection once video is playing.
         // Guard with optional chaining: this fires asynchronously and the
         // component may have unmounted (e.g. quick back navigation), leaving
@@ -388,7 +411,7 @@ const PalmistryCamera = () => {
           </svg>
         </button>
         
-        {!capturedImage && (
+        {!capturedImage && hasMultipleCameras && (
           <button className={styles.switchBtn} onClick={switchCamera}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M17 8L21 12M21 12L17 16M21 12H9M7 16L3 12M3 12L7 8M3 12H15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

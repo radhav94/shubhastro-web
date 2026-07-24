@@ -7,6 +7,7 @@ import { setClothColorResult, clearClothColorData } from '../../../../redux/aiwo
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import BackButton from '../../../../component/UI/BackButton/BackButton';
+import { countFacesInImage } from '../../../../utils/helper/detectFaces';
 
 const ClothColorAnalysis = () => {
   const navigate = useNavigate();
@@ -52,7 +53,20 @@ const ClothColorAnalysis = () => {
 
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);
-    
+
+    // Reject images with more than one person — cloth colour analysis expects a
+    // single subject. (A photo with 0 detectable faces, e.g. torso-only, is
+    // allowed; detection failure fails open so we never wrongly block a user.)
+    const faceCount = await countFacesInImage(imageData);
+    if (faceCount > 1) {
+      if (isMountedRef.current) {
+        setIsAnalyzing(false);
+        setProgress(0);
+        setError({ message: 'Multiple people detected in the photo. Please use an image with only one person.' });
+      }
+      return;
+    }
+
     // Create AbortController to cancel request on unmount
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
