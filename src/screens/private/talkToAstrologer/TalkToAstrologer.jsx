@@ -725,7 +725,7 @@ const TalkToAstrologer = () => {
       setChatRoomId(data?.roomId);
       setActiveChatRoomId(data?.roomId);
       setWaitingList(data?.waitingTime || 2);
-      assignRoomId(data?.roomId, "chat", data?.waitingTime || 2);
+      assignRoomId(data?.roomId, "chat", data?.waitingTime || 2, "ringing", data?.recieverDetail?._id || data?.astrologerId);
       // Store astrologer details from socket data if available
       if (data?.recieverDetail) {
         activeCallAstroRef.current = data.recieverDetail;
@@ -736,7 +736,7 @@ const TalkToAstrologer = () => {
       setCallRoomId(data?.roomId);
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
-      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
+      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5, "ringing", data?.recieverDetail?._id || data?.astrologerId);
       // Store astrologer details from socket data if available
       if (data?.recieverDetail) {
         activeCallAstroRef.current = data.recieverDetail;

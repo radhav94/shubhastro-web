@@ -3,7 +3,8 @@ import GuestKundliAuthModal from "../../../component/UI/Profile/GuestKundliAuthM
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { useMediaPermission } from "../../../utils/hooks/useMediaPermission";
-import { GUEST_AUTO_ACCEPT_KEY } from "./guestChatConstants";
+import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
+import { GUEST_AUTO_ACCEPT_KEY, GUEST_FANOUT_RESOLVED_KEY } from "./guestChatConstants";
 
 /**
  * Guest flow for CALL / VIDEO — mirrors the AI Wow guest flow.
@@ -23,6 +24,7 @@ export const useGuestConnectFlow = () => {
   const [pending, setPending] = useState(null); // { astro, type }
   const { addPendingConnection } = useWaitingQueue();
   const { checkPermission } = useMediaPermission();
+  const [getBalance] = useGetBalanceMutation();
 
   const openGuestConnect = useCallback((astro, type) => {
     setPending({ astro, type: type === "video" ? "video" : "audio" });
@@ -53,24 +55,42 @@ export const useGuestConnectFlow = () => {
       voiceSocket.connect();
     }
 
-    // Auto-accept the astrologer's acceptance (consumed by WaitingQueueContext).
+    // Fresh fan-out: mark for auto-accept and clear any stale "resolved" marker.
+    // The first astrologer to accept is auto-accepted (consumed by
+    // WaitingQueueContext); the remaining requests are then withdrawn.
     sessionStorage.setItem(GUEST_AUTO_ACCEPT_KEY, astro._id);
+    sessionStorage.removeItem(GUEST_FANOUT_RESOLVED_KEY);
 
-    addPendingConnection({
-      id: `${astro._id}-${type}-${Date.now()}`,
-      astrologer: astro,
-      type,
-      roomId: null,
-      waitingTime: 5,
-    });
+    // Pull the similar online astrologers from the pre-session balance check so
+    // we can fan out the request (first-accept-wins). A failure here just means
+    // we connect to the selected astrologer only.
+    let similar = [];
+    try {
+      const result = await getBalance({ astrologerId: astro._id, type });
+      similar = (result?.data?.data?.similarOnlineAstrologers || []).filter(
+        (a) => a?._id && a._id !== astro._id && (a.isActiveType || []).includes(type)
+      );
+    } catch (err) {
+      console.error("Guest connect balance check failed:", err);
+    }
 
-    voiceSocket.emit("call:initiate", {
-      userId,
-      astrologerId: astro._id,
-      type,
-      isLive: false,
+    const targets = [astro, ...similar];
+    targets.forEach((t, i) => {
+      addPendingConnection({
+        id: `${t._id}-${type}-${Date.now()}-${i}`,
+        astrologer: t,
+        type,
+        roomId: null,
+        waitingTime: 5,
+      });
+      voiceSocket.emit("call:initiate", {
+        userId,
+        astrologerId: t._id,
+        type,
+        isLive: false,
+      });
     });
-  }, [pending, addPendingConnection, checkPermission]);
+  }, [pending, addPendingConnection, checkPermission, getBalance]);
 
   const guestConnectModal = (
     <GuestKundliAuthModal

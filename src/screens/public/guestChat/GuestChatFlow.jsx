@@ -25,7 +25,7 @@ import { getToken } from "../../../utils/token";
 import { capitalizeWords } from "../../../utils/capitalize";
 import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
-import { GUEST_AUTO_ACCEPT_KEY } from "./guestChatConstants";
+import { GUEST_AUTO_ACCEPT_KEY, GUEST_FANOUT_RESOLVED_KEY } from "./guestChatConstants";
 import { useGuestChatAuth } from "./useGuestChatAuth";
 import chat from "../../private/home/components/chats/ChatWindow.module.scss";
 import styles from "./GuestChatFlow.module.scss";
@@ -62,7 +62,7 @@ const GuestChatFlow = () => {
   const location = useLocation();
 
   const { setActiveChat, setChatSeconds } = useChat();
-  const { addPendingConnection, removePendingConnection } = useWaitingQueue();
+  const { addPendingConnection, removePendingConnection, cancelAll } = useWaitingQueue();
   const { sendOtp, resendOtp, verifyAndRegister, sendingOtp, verifying } = useGuestChatAuth();
   const [getBalance] = useGetBalanceMutation();
   const welcomeHandledRef = useRef(false);
@@ -90,6 +90,9 @@ const GuestChatFlow = () => {
   const confirmSourceRef = useRef(null); // "back" | "popstate"
   const roomIdRef = useRef(null);
   const messagesRef = useRef(null);
+  // Similar online astrologers returned by preSessionBalanceCheck. Used to fan
+  // out the chat request (first-accept-wins) so a guest connects quickly.
+  const similarAstrosRef = useRef([]);
   // Holds the hook-shaped details (name/identity/birthDate(YYYY-MM-DD)/...) once
   // the form is submitted, for OTP verify / register / resend.
   const detailsRef = useRef(null);
@@ -158,6 +161,7 @@ const GuestChatFlow = () => {
             navigate("/recharge", { replace: true });
             return;
           }
+          similarAstrosRef.current = result?.data?.data?.similarOnlineAstrologers || [];
         } catch (err) {
           console.error("Guest balance check failed:", err);
         }
@@ -272,6 +276,7 @@ const GuestChatFlow = () => {
         setPhase("recharge");
         return;
       }
+      similarAstrosRef.current = result?.data?.data?.similarOnlineAstrologers || [];
     } catch (err) {
       console.error("Guest balance check failed:", err);
     }
@@ -306,6 +311,9 @@ const GuestChatFlow = () => {
   };
 
   /* --------------------------- chat initiation ----------------------------- */
+  // Fan out the chat request to the selected astrologer AND the similar online
+  // astrologers from preSessionBalanceCheck (first-accept-wins). The global
+  // WaitingQueueContext auto-accepts the first acceptance and withdraws the rest.
   const initiateChat = (targetAstro) => {
     const astro = targetAstro || astrologerRef.current;
     const userId = localStorage.getItem("shubhtalk_customer_id");
@@ -319,36 +327,44 @@ const GuestChatFlow = () => {
       voiceSocket.connect();
     }
 
+    // Fresh fan-out: mark for auto-accept and clear any stale "resolved" marker.
     sessionStorage.setItem(GUEST_AUTO_ACCEPT_KEY, astro._id);
+    sessionStorage.removeItem(GUEST_FANOUT_RESOLVED_KEY);
 
-    addPendingConnection({
-      id: `${astro._id}-chat-${Date.now()}`,
-      astrologer: astro,
-      type: "chat",
-      roomId: null,
-      waitingTime: 2,
-    });
+    // Selected astrologer + chat-capable similar online astrologers (deduped).
+    const similar = (similarAstrosRef.current || []).filter(
+      (a) => a?._id && a._id !== astro._id && (a.isActiveType || []).includes("chat")
+    );
+    const targets = [astro, ...similar];
 
     setPhase("waiting");
-    voiceSocket.emit("chat:initiate", {
-      userId,
-      astrologerId: astro._id,
-      type: "chat",
-      isLive: false,
+    targets.forEach((t, i) => {
+      addPendingConnection({
+        id: `${t._id}-chat-${Date.now()}-${i}`,
+        astrologer: t,
+        type: "chat",
+        roomId: null,
+        waitingTime: 2,
+      });
+      voiceSocket.emit("chat:initiate", {
+        userId,
+        astrologerId: t._id,
+        type: "chat",
+        isLive: false,
+      });
     });
   };
 
   // True while a chat request is live (waiting for the astrologer).
   const isRequestPending = phase === "connecting" || phase === "waiting";
 
-  // Cancel the in-flight chat request and clean up.
+  // Cancel the in-flight chat request(s) and clean up. With fan-out there can be
+  // several pending requests, so withdraw them all.
   const cancelChatRequest = () => {
     sessionStorage.removeItem(GUEST_AUTO_ACCEPT_KEY);
-    if (roomIdRef.current) {
-      voiceSocket.emit("chat:cancel", { roomId: roomIdRef.current });
-      removePendingConnection(roomIdRef.current);
-      roomIdRef.current = null;
-    }
+    sessionStorage.removeItem(GUEST_FANOUT_RESOLVED_KEY);
+    cancelAll();
+    roomIdRef.current = null;
   };
 
   // In-app back button: confirm (via modal) before leaving while a request is pending.

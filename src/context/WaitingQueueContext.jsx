@@ -8,12 +8,36 @@ import { trackEvent } from "../utils/analytics";
 
 import { startIncomingSound, stopIncomingSound } from "../utils/incomingSound";
 import { claimRoom, releaseRoom } from "../utils/tabSession";
-import { GUEST_AUTO_ACCEPT_KEY } from "../screens/public/guestChat/guestChatConstants";
+import { GUEST_AUTO_ACCEPT_KEY, GUEST_FANOUT_RESOLVED_KEY, GUEST_FANOUT_RESOLVED_WINDOW_MS } from "../screens/public/guestChat/guestChatConstants";
 const WaitingQueueContext = createContext();
 
 // LocalStorage key for persistence
 const QUEUE_STORAGE_KEY = "shubhtalk_waiting_queue";
 const QUEUE_MAX_AGE = 30 * 60 * 1000; // 30 minutes
+
+// Returns true when a guest fan-out has just been resolved (i.e. one astrologer
+// already accepted and won) and we're still within the straggler window. Late
+// acceptances from the other fanned-out astrologers should be auto-rejected.
+// The flag is self-expiring: once the window elapses it's cleared so it can
+// never affect an unrelated, later session.
+const isGuestFanoutResolved = () => {
+  const raw = sessionStorage.getItem(GUEST_FANOUT_RESOLVED_KEY);
+  if (!raw) return false;
+  const resolvedAt = Number(raw);
+  if (!resolvedAt || Date.now() - resolvedAt >= GUEST_FANOUT_RESOLVED_WINDOW_MS) {
+    sessionStorage.removeItem(GUEST_FANOUT_RESOLVED_KEY);
+    return false;
+  }
+  return true;
+};
+
+// Drops the guest auto-accept handshake and any fan-out "resolved" marker. Called
+// when the pending queue is torn down by a user cancel so that a later, unrelated
+// request (e.g. a normal logged-in request) is never auto-accepted.
+const clearGuestFanoutFlags = () => {
+  sessionStorage.removeItem(GUEST_AUTO_ACCEPT_KEY);
+  sessionStorage.removeItem(GUEST_FANOUT_RESOLVED_KEY);
+};
 
 /**
  * Each pending connection in the queue:
@@ -83,16 +107,32 @@ export const WaitingQueueProvider = ({ children }) => {
     });
   }, [persist]);
 
-  // Assign roomId to a pending connection that doesn't have one yet
-  // Sets status to "ringing" by default when room is assigned (server created the room)
-  const assignRoomId = useCallback((roomId, type, waitingTime, status = "ringing") => {
+  // Assign roomId to a pending connection that doesn't have one yet.
+  // Sets status to "ringing" by default when room is assigned (server created the room).
+  //
+  // The same room event is handled by multiple listeners (page-level + this global
+  // provider), so this MUST be idempotent — otherwise a second call would assign an
+  // already-used roomId to a different pending entry. That previously caused two
+  // fanned-out entries to share a roomId, so cancelling one cancelled the other.
+  // When the room event identifies the astrologer (astrologerId), we match the exact
+  // pending entry; otherwise we fall back to the first pending of this type.
+  const assignRoomId = useCallback((roomId, type, waitingTime, status = "ringing", astrologerId = null) => {
     setPendingConnections((prev) => {
-      // Find the first pending connection of this type without a roomId
-      const idx = prev.findIndex((c) => {
-        const cType = c.type === "chat" ? "chat" : c.type;
-        const matchType = type === "chat" ? "chat" : type;
-        return cType === matchType && !c.roomId;
-      });
+      // Idempotent: this room is already assigned — don't assign it again.
+      if (prev.some((c) => c.roomId === roomId)) return prev;
+
+      const norm = (t) => (t === "chat" ? "chat" : t);
+      let idx = -1;
+      // Prefer the exact astrologer when the room event identifies it.
+      if (astrologerId) {
+        idx = prev.findIndex(
+          (c) => c.astrologer?._id === astrologerId && norm(c.type) === norm(type) && !c.roomId
+        );
+      }
+      // Fallback: first pending connection of this type without a roomId.
+      if (idx === -1) {
+        idx = prev.findIndex((c) => norm(c.type) === norm(type) && !c.roomId);
+      }
       if (idx === -1) return prev;
       const next = [...prev];
       next[idx] = { ...next[idx], roomId, id: roomId, waitingTime: waitingTime || next[idx].waitingTime, status };
@@ -132,8 +172,14 @@ export const WaitingQueueProvider = ({ children }) => {
         voiceSocket.emit(eventName, { roomId, canceledBy: "CUSTOMER" });
       }
       removePendingConnection(roomId);
+      // If that was the last pending request, drop the guest auto-accept handshake
+      // so a subsequent fresh request isn't auto-accepted.
+      const remaining = pendingConnectionsRef.current.filter((c) => c.roomId !== roomId);
+      if (remaining.length === 0) clearGuestFanoutFlags();
     } else if (astrologerId) {
       removePendingByAstrologer(astrologerId);
+      const remaining = pendingConnectionsRef.current.filter((c) => c.astrologer?._id !== astrologerId);
+      if (remaining.length === 0) clearGuestFanoutFlags();
     }
   }, [removePendingConnection, removePendingByAstrologer]);
 
@@ -177,6 +223,8 @@ export const WaitingQueueProvider = ({ children }) => {
     });
     setPendingConnections([]);
     persist([]);
+    // Everything withdrawn — drop the guest auto-accept handshake.
+    clearGuestFanoutFlags();
   }, [persist]);
 
   // Check if a specific astrologer+type is already in the queue
@@ -251,6 +299,16 @@ export const WaitingQueueProvider = ({ children }) => {
       }
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
 
+      // Guest fan-out straggler: another fanned-out astrologer already accepted
+      // first, so withdraw this late acceptance instead of showing a ring popup.
+      if (isGuestFanoutResolved() && roomId) {
+        console.log("[GlobalTwoWay] 🚫 Guest fan-out already resolved — rejecting straggler call", roomId);
+        stopIncomingSound();
+        voiceSocket.emit("call:user_reject", { roomId });
+        removePendingConnection(roomId);
+        return;
+      }
+
       // Guest call/video flow: auto-accept on the user's behalf (no accept popup).
       const guestAutoAcceptCall = sessionStorage.getItem(GUEST_AUTO_ACCEPT_KEY);
       if (guestAutoAcceptCall && roomId) {
@@ -258,6 +316,9 @@ export const WaitingQueueProvider = ({ children }) => {
         stopIncomingSound();
         voiceSocket.emit("call:user_accept", { roomId });
         sessionStorage.removeItem(GUEST_AUTO_ACCEPT_KEY);
+        // First-accept-wins: mark resolved and withdraw all other fan-out requests.
+        sessionStorage.setItem(GUEST_FANOUT_RESOLVED_KEY, String(Date.now()));
+        cancelAllExcept(roomId);
         return;
       }
 
@@ -273,6 +334,16 @@ export const WaitingQueueProvider = ({ children }) => {
       }
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
 
+      // Guest fan-out straggler: another fanned-out astrologer already accepted
+      // first, so withdraw this late acceptance instead of showing a ring popup.
+      if (isGuestFanoutResolved() && roomId) {
+        console.log("[GlobalTwoWay] 🚫 Guest fan-out already resolved — rejecting straggler chat", roomId);
+        stopIncomingSound();
+        voiceSocket.emit("chat:user_reject", { roomId });
+        removePendingConnection(roomId);
+        return;
+      }
+
       // Guest chat flow: auto-accept on the user's behalf (no accept popup).
       const guestAutoAccept = sessionStorage.getItem(GUEST_AUTO_ACCEPT_KEY);
       if (guestAutoAccept && roomId) {
@@ -280,6 +351,9 @@ export const WaitingQueueProvider = ({ children }) => {
         stopIncomingSound();
         voiceSocket.emit("chat:user_accept", { roomId });
         sessionStorage.removeItem(GUEST_AUTO_ACCEPT_KEY);
+        // First-accept-wins: mark resolved and withdraw all other fan-out requests.
+        sessionStorage.setItem(GUEST_FANOUT_RESOLVED_KEY, String(Date.now()));
+        cancelAllExcept(roomId);
         return;
       }
 
@@ -608,6 +682,9 @@ export const WaitingQueueProvider = ({ children }) => {
 
       console.log("[GlobalAccepted] ✅ chat:accepted — roomId:", roomId, "astrologerId:", astrologerId);
 
+      // A session has started — the guest fan-out is fully resolved.
+      sessionStorage.removeItem(GUEST_FANOUT_RESOLVED_KEY);
+
       // Clear approval data and remove from pending queue
       setChatApprovalData(null);
       releaseRoom(roomId);
@@ -662,6 +739,9 @@ export const WaitingQueueProvider = ({ children }) => {
         return;
       }
 
+      // A session has started — the guest fan-out is fully resolved.
+      sessionStorage.removeItem(GUEST_FANOUT_RESOLVED_KEY);
+
       // Look up pending connection BEFORE removing it — to preserve live origin info
       const connData = getConnectionByRoomId(roomId);
 
@@ -703,13 +783,13 @@ export const WaitingQueueProvider = ({ children }) => {
     // Global call:room / chat:room — assign roomId and set status to "ringing"
     const handleGlobalCallRoom = (data) => {
       if (data?.roomId) {
-        assignRoomId(data.roomId, data?.type || "audio", data?.waitingTime || 5, data?.status || "ringing");
+        assignRoomId(data.roomId, data?.type || "audio", data?.waitingTime || 5, data?.status || "ringing", data?.recieverDetail?._id || data?.astrologerId);
       }
     };
 
     const handleGlobalChatRoom = (data) => {
       if (data?.roomId) {
-        assignRoomId(data.roomId, "chat", data?.waitingTime || 2, data?.status || "ringing");
+        assignRoomId(data.roomId, "chat", data?.waitingTime || 2, data?.status || "ringing", data?.recieverDetail?._id || data?.astrologerId);
       }
     };
 
