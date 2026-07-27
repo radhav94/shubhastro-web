@@ -71,11 +71,14 @@ export const countFacesInImage = async (imageSrc, timeoutMs = 4000) => {
       const imgArea = (img.naturalWidth || img.width) * (img.naturalHeight || img.height);
       if (!imgArea) return detections.length;
 
-      // Keep only confident, reasonably-sized detections. Tiny specks are
-      // almost always noise (patterns, logos, shadows on clothing), not people.
-      const MIN_FACE_AREA_RATIO = 0.01; // face box must be >=1% of the image
+      // Keep only confident, reasonably-sized detections. Tiny/low-confidence
+      // specks are almost always noise (patterns, logos, shadows, background
+      // faces on posters), not the subject — counting them wrongly blocked
+      // legitimate single-person photos. Be conservative so we only ever block
+      // when there are clearly two real, prominent people.
+      const MIN_FACE_AREA_RATIO = 0.02; // face box must be >=2% of the image
       let faces = detections
-        .filter((d) => d.score >= 0.6)
+        .filter((d) => d.score >= 0.7)
         .map((d) => d.box)
         .filter((box) => (box.width * box.height) / imgArea >= MIN_FACE_AREA_RATIO);
 

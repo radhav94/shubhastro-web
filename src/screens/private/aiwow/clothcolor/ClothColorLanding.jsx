@@ -50,6 +50,8 @@ const ClothColorLanding = () => {
   };
 
   const handleCamera = () => {
+    // Persist the selected intention so the analyze API receives it.
+    dispatch(setClothColorFormData(formData));
     navigate('/ai-wow/clothes-colour-analysis/camera');
   };
 
@@ -65,6 +67,8 @@ const ClothColorLanding = () => {
         .then((dataUrl) => {
           // Guests must authenticate at the moment the photo is submitted.
           runOrAuth(() => {
+            // Persist the selected intention so the analyze API receives it.
+            dispatch(setClothColorFormData(formData));
             dispatch(setClothColorImage(dataUrl));
             navigate('/ai-wow/clothes-colour-analysis/capture');
           });
