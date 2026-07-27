@@ -522,10 +522,12 @@ const FaceReadingResult = () => {
                         </span>
                       </button>
                       <div className={`${styles.guidanceContent} ${expandedGuidance === `feature-${key}` ? styles.expanded : ''}`}>
-                        <p className={styles.featureShape}>
-                          <strong>Shape:</strong> {value.shape || value.shapeType || 'N/A'}
-                        </p>
-                        <p className={styles.featureInterpretation}>{value.interpretation || ''}</p>
+                        <div className={styles.dropdownInner}>
+                          <p className={styles.featureShape}>
+                            <strong>Shape:</strong> {value.shape || value.shapeType || 'N/A'}
+                          </p>
+                          <p className={styles.featureInterpretation}>{value.interpretation || ''}</p>
+                        </div>
                       </div>
                     </div>
                   )
@@ -554,15 +556,17 @@ const FaceReadingResult = () => {
                       </span>
                     </button>
                     <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-planet' ? styles.expanded : ''}`}>
-                      <p className={styles.cosmicPlanet}>{cosmicConnections.dominantPlanet.planet}</p>
-                      <p className={styles.cosmicText}>{cosmicConnections.dominantPlanet.influence}</p>
-                      {cosmicConnections.dominantPlanet.traits && (
-                        <div className={styles.chipContainer}>
-                          {cosmicConnections.dominantPlanet.traits.map((trait, index) => (
-                            <span key={index} className={styles.chip}>{trait}</span>
-                          ))}
-                        </div>
-                      )}
+                      <div className={styles.dropdownInner}>
+                        <p className={styles.cosmicPlanet}>{cosmicConnections.dominantPlanet.planet}</p>
+                        <p className={styles.cosmicText}>{cosmicConnections.dominantPlanet.influence}</p>
+                        {cosmicConnections.dominantPlanet.traits && (
+                          <div className={styles.chipContainer}>
+                            {cosmicConnections.dominantPlanet.traits.map((trait, index) => (
+                              <span key={index} className={styles.chip}>{trait}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -583,13 +587,15 @@ const FaceReadingResult = () => {
                       </span>
                     </button>
                     <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-zodiac' ? styles.expanded : ''}`}>
-                      <p className={styles.cosmicPlanet}>{cosmicConnections.zodiacAlignment.sign}</p>
-                      <p className={styles.cosmicText}>{cosmicConnections.zodiacAlignment.description}</p>
-                      {cosmicConnections.zodiacAlignment.compatibility && (
-                        <p className={styles.compatibility}>
-                          <strong>Compatible with:</strong> {cosmicConnections.zodiacAlignment.compatibility}
-                        </p>
-                      )}
+                      <div className={styles.dropdownInner}>
+                        <p className={styles.cosmicPlanet}>{cosmicConnections.zodiacAlignment.sign}</p>
+                        <p className={styles.cosmicText}>{cosmicConnections.zodiacAlignment.description}</p>
+                        {cosmicConnections.zodiacAlignment.compatibility && (
+                          <p className={styles.compatibility}>
+                            <strong>Compatible with:</strong> {cosmicConnections.zodiacAlignment.compatibility}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -610,16 +616,18 @@ const FaceReadingResult = () => {
                       </span>
                     </button>
                     <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-element' ? styles.expanded : ''}`}>
-                      <p className={styles.cosmicPlanet}>
-                        {cosmicConnections.elementalEnergy.element}
-                      </p>
-                      {cosmicConnections.elementalEnergy.characteristics && (
-                        <div className={styles.chipContainer}>
-                          {cosmicConnections.elementalEnergy.characteristics.map((char, index) => (
-                            <span key={index} className={styles.chip}>{char}</span>
-                          ))}
-                        </div>
-                      )}
+                      <div className={styles.dropdownInner}>
+                        <p className={styles.cosmicPlanet}>
+                          {cosmicConnections.elementalEnergy.element}
+                        </p>
+                        {cosmicConnections.elementalEnergy.characteristics && (
+                          <div className={styles.chipContainer}>
+                            {cosmicConnections.elementalEnergy.characteristics.map((char, index) => (
+                              <span key={index} className={styles.chip}>{char}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -640,23 +648,25 @@ const FaceReadingResult = () => {
                       </span>
                     </button>
                     <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-spiritual' ? styles.expanded : ''}`}>
-                      <p className={styles.cosmicText}>{cosmicConnections.spiritualPath.path}</p>
-                      {cosmicConnections.spiritualPath.guidance && (
-                        <>
-                          <p className={styles.cosmicSubtitle}>Guidance:</p>
-                          <p className={styles.cosmicText}>{cosmicConnections.spiritualPath.guidance}</p>
-                        </>
-                      )}
-                      {cosmicConnections.spiritualPath.practices && (
-                        <>
-                          <p className={styles.cosmicSubtitle}>Recommended Practices:</p>
-                          <ul className={styles.list}>
-                            {cosmicConnections.spiritualPath.practices.map((practice, index) => (
-                              <li key={index} className={styles.listItem}>{practice}</li>
-                            ))}
-                          </ul>
-                        </>
-                      )}
+                      <div className={styles.dropdownInner}>
+                        <p className={styles.cosmicText}>{cosmicConnections.spiritualPath.path}</p>
+                        {cosmicConnections.spiritualPath.guidance && (
+                          <>
+                            <p className={styles.cosmicSubtitle}>Guidance:</p>
+                            <p className={styles.cosmicText}>{cosmicConnections.spiritualPath.guidance}</p>
+                          </>
+                        )}
+                        {cosmicConnections.spiritualPath.practices && (
+                          <>
+                            <p className={styles.cosmicSubtitle}>Recommended Practices:</p>
+                            <ul className={styles.list}>
+                              {cosmicConnections.spiritualPath.practices.map((practice, index) => (
+                                <li key={index} className={styles.listItem}>{practice}</li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
