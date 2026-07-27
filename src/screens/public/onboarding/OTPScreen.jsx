@@ -81,6 +81,13 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer((prev) => prev - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendTimer]);
+
   const handleContinue = async () => {
     const otpValue = otp;
     if (otpValue.length === 6) {

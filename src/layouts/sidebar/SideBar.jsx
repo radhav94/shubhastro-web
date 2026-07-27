@@ -8,6 +8,7 @@ import { PATH } from "../../utils/routes/Paths";
 import { getUserFromStorage } from "../../utils/authStorage";
 import { logout } from "../../redux/auth/authSlice";
 import { clearSelectedKundli } from "../../redux/kundli/kundliSlice";
+import { clearAllCalculatorData } from "../../redux/calculator/calculatorSlice";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
 
 const SideBar = ({ open, onClose }) => {
@@ -38,7 +39,8 @@ const SideBar = ({ open, onClose }) => {
   const handleLogout = () => {
     // Dispatch Redux logout action
     dispatch(logout());
-     dispatch(clearSelectedKundli())
+     dispatch(clearSelectedKundli());
+     dispatch(clearAllCalculatorData());
     
     const role = localStorage.getItem("shubhtalk_role");
 
