@@ -67,6 +67,15 @@ const SignatureCamera = () => {
       }
       
       if (videoRef.current) {
+        // iOS Safari: React doesn't reliably set the `muted` DOM property from
+        // the JSX prop, and iOS blocks inline playback of an unmuted video —
+        // so play() rejects and the camera never shows. Set these imperatively.
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.setAttribute('muted', '');
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', '');
+
         // Detect actual camera facing mode from track
         const videoTrack = mediaStream.getVideoTracks()[0];
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
