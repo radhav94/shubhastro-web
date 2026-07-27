@@ -13,6 +13,19 @@ import BackButton from '../../../../component/UI/BackButton/BackButton';
 // screens so a fresh capture clears it.
 export const PALMISTRY_ANALYSIS_FLAG = 'palmistryAnalysisStarted';
 
+// True only when the current page view is an actual browser reload (F5 /
+// pull-to-refresh), not a normal SPA navigation or a React component re-mount.
+const isActualPageReload = () => {
+  try {
+    const navEntry = performance.getEntriesByType?.('navigation')?.[0];
+    if (navEntry && navEntry.type) return navEntry.type === 'reload';
+    // Legacy fallback
+    return performance.navigation && performance.navigation.type === 1;
+  } catch {
+    return false;
+  }
+};
+
 const PalmistryAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -82,8 +95,15 @@ const PalmistryAnalysis = () => {
       // retry screen instead of auto re-running. The flag is cleared on a new
       // capture or an explicit retry.
       if (sessionStorage.getItem(PALMISTRY_ANALYSIS_FLAG) === '1') {
-        setError({ message: "Your previous analysis didn't complete. Please try again." });
-        return;
+        // Only treat a set flag as an interrupted analysis on a genuine page
+        // reload. A React component re-mount (not a reload) would otherwise
+        // wrongly show this error even though the analysis is running/succeeded.
+        if (isActualPageReload()) {
+          setError({ message: "Your previous analysis didn't complete. Please try again." });
+          return;
+        }
+        // Stale flag from a re-mount — clear it and run the analysis normally.
+        sessionStorage.removeItem(PALMISTRY_ANALYSIS_FLAG);
       }
       sessionStorage.setItem(PALMISTRY_ANALYSIS_FLAG, '1');
       performAnalysis(palmImage, selectedHand);
