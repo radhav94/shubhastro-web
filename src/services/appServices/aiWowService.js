@@ -1110,8 +1110,11 @@ export const getDailyCosmicBriefing = async (zodiacSign, params) => {
       kundliId: params.kundliId
     }).toString();
 
+    // skipToast: the caller handles failures (e.g. resolving the correct sign
+    // and retrying), so suppress the global error toast for this request.
     const response = await privateGet(
-      `companion-suite/daily-horoscope/${zodiacSign}?${queryParams}`
+      `companion-suite/daily-horoscope/${zodiacSign}?${queryParams}`,
+      { skipToast: true }
     );
 
     return {

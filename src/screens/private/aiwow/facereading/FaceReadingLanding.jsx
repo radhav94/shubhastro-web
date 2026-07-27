@@ -171,6 +171,14 @@ const FaceReadingLanding = () => {
                   </p>
                 </div>
 
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleFileChange}
+                />
+
                 <div className={styles.buttonGroup}>
                   <button 
                     className={styles.uploadButton}

@@ -219,17 +219,28 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
                             }}
                           />
                         </div>
-                      ) : msg.type === "kundli" ? (
-                        <div
-                          className={styles.kundliLink}
-                          onClick={() => setIframeSrc(msg.message)}
-                        >
-                          <GrReactjs />
-                          {msg.kundliName
-                            ? `${msg.kundliName}'s Kundli`
-                            : "View Kundli"}
-                        </div>
-                      ) : msg.type === "audio" ? (
+                      ) : msg.type === "kundli" ? (() => {
+                        // Always resolve the kundli view from kundliId when
+                        // available. Some stored messages have a `message` that
+                        // isn't a kundli URL (e.g. an astrologer profile link),
+                        // which would open the wrong page and fail its API.
+                        const kundliLink = msg.kundliId
+                          ? `${window.location.origin}/kundli/${msg.kundliId}`
+                          : typeof msg.message === "string" && msg.message.includes("/kundli/")
+                            ? msg.message
+                            : null;
+                        return (
+                          <div
+                            className={styles.kundliLink}
+                            onClick={() => kundliLink && setIframeSrc(kundliLink)}
+                          >
+                            <GrReactjs />
+                            {msg.kundliName
+                              ? `${msg.kundliName}'s Kundli`
+                              : "View Kundli"}
+                          </div>
+                        );
+                      })() : msg.type === "audio" ? (
                         <div className={styles.audioMessage}>
                           <audio controls src={msg.message} preload="metadata" />
                         </div>
