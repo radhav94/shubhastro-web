@@ -352,6 +352,9 @@
   top: 20px;
   left: 20px;
   z-index: 10;
+  div>div{
+    padding: 0;
+  }
 }
 
 .header {
