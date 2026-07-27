@@ -87,13 +87,20 @@ const BusinessPathfinder = () => {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (overrideProfile = null) => {
     const token = localStorage.getItem('shubhtalk_customer_token');
     if (!token) {
-      pendingGuestActionRef.current = () => handleSubmit();
+      // Guest: remember the submit so it runs automatically once the user is
+      // logged in. Pass the freshly created profile through so we don't rely on
+      // the stale `profile` captured in this closure.
+      pendingGuestActionRef.current = (newProfile) => handleSubmit(newProfile);
       setShowGuestAuthModal(true);
       return;
     }
+
+    // Use the profile handed in by the guest-auth flow if provided, otherwise
+    // fall back to the currently selected profile.
+    const activeProfile = overrideProfile || profile;
 
     const category = showCustomInput ? formData.customCategory : formData.category;
     
@@ -117,7 +124,7 @@ const BusinessPathfinder = () => {
       Toast.error('Please select a business location');
       return;
     }
-    if (!profile) {
+    if (!activeProfile) {
       Toast.error('Please select a profile first');
       return;
     }
@@ -129,24 +136,24 @@ const BusinessPathfinder = () => {
     setIsSubmitting(true);
     try {
       const payload = {
-        kundliId: profile._id,
+        kundliId: activeProfile._id,
         businessCategory: category,
         businessInfo: formData.businessInfo || '',
         scale: formData.scale,
         partnership: formData.partnership,
         timeline: formData.timeline,
-        name: profile.name,
-        gender: profile.gender || 'male',
-        day: profile.day,
-        month: profile.month,
-        year: profile.year,
-        hour: profile.hour || 0,
-        min: profile.min || profile.minute || 0,
+        name: activeProfile.name,
+        gender: activeProfile.gender || 'male',
+        day: activeProfile.day,
+        month: activeProfile.month,
+        year: activeProfile.year,
+        hour: activeProfile.hour || 0,
+        min: activeProfile.min || activeProfile.minute || 0,
         second: 0,
-        place: formData.businessLocation || profile.place,
-        lat: formData.businessLat || String(profile.lat),
-        lon: formData.businessLon || String(profile.lon),
-        tzone: formData.businessTzone !== '' ? formData.businessTzone : (profile.tzone || 5.5),
+        place: formData.businessLocation || activeProfile.place,
+        lat: formData.businessLat || String(activeProfile.lat),
+        lon: formData.businessLon || String(activeProfile.lon),
+        tzone: formData.businessTzone !== '' ? formData.businessTzone : (activeProfile.tzone || 5.5),
       };
 
       const token = localStorage.getItem('shubhtalk_customer_token');
@@ -186,6 +193,11 @@ const BusinessPathfinder = () => {
 
   return (
     <>
+      {/* Fullscreen loader while the report is being generated (covers the
+          automatic submit after guest login, where the button-level loader
+          isn't visible to the user). */}
+      <PrimaryLoader isLoading={isSubmitting} message="Generating your report..." />
+
       {/* Header - outside container */}
       <div className={styles.pageHeader}>
         <div className={styles.pageHeaderInner}>
