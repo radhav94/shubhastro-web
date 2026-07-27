@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "./DateTimePicker.module.scss";
@@ -26,8 +26,28 @@ const PERIODS = ["AM", "PM"];
 const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = false, openOnClick = false }) => {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
+  const dropdownRef = useRef(null);
   const [manualInput, setManualInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  // Actual placement decided from available space. `dropUp` is only the initial
+  // hint; we always prefer opening below and flip up only when there isn't
+  // enough room below but there is above (mirrors the date picker's popper).
+  const [placeUp, setPlaceUp] = useState(dropUp);
+
+  // Decide placement once the dropdown is rendered (before paint, so no flash).
+  useLayoutEffect(() => {
+    if (!open) return;
+    const wrapper = wrapperRef.current;
+    const dropdown = dropdownRef.current;
+    if (!wrapper || !dropdown) return;
+    // The dropdown is absolutely positioned, so the wrapper rect equals the
+    // input row's box.
+    const rect = wrapper.getBoundingClientRect();
+    const dropdownHeight = dropdown.offsetHeight;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    setPlaceUp(spaceBelow < dropdownHeight + 8 && spaceAbove > spaceBelow);
+  }, [open]);
 
   // Derive display values from selected Date
   const hour = selected ? to12(selected.getHours()).hour : null;
@@ -266,8 +286,9 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
       </div>
       {open && (
         <div
+          ref={dropdownRef}
           className={styles.timeDropdown}
-          style={dropUp ? { top: "auto", bottom: "calc(100% + 4px)" } : undefined}
+          style={placeUp ? { top: "auto", bottom: "calc(100% + 4px)" } : undefined}
         >
           {/* Hours */}
           <div className={styles.timeColumn} ref={hourListRef}>

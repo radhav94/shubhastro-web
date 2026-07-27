@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DailyCosmicBriefing.module.scss';
 import { getDailyCosmicBriefing } from '../../../../services/appServices/aiWowService';
@@ -23,9 +23,15 @@ const DailyCosmicBriefing = () => {
   
   const [briefing, setBriefing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Tracks the profile id we've already fetched for, so a re-render that
+  // changes the profile object reference (same profile) doesn't re-hit the API.
+  const fetchedProfileIdRef = useRef(null);
 
   useEffect(() => {
     if (profile && !profileLoading) {
+      const profileId = profile._id || profile.id;
+      if (fetchedProfileIdRef.current === profileId) return;
+      fetchedProfileIdRef.current = profileId;
       fetchBriefing(profile);
     }
   }, [profile, profileLoading]);
@@ -132,10 +138,7 @@ const DailyCosmicBriefing = () => {
 
         {/* Mood & Lucky Items */}
         <div className={styles.quickInfo}>
-          <div className={styles.infoCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '4px', right: '4px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Mood. ${briefing.mood?.label}`} />
-            </span>
+          <div className={styles.infoCard}>
             <div className={styles.infoIcon}>😊</div>
             <div className={styles.infoContent}>
               <span className={styles.infoLabel}>Mood</span>
@@ -146,28 +149,31 @@ const DailyCosmicBriefing = () => {
                 {briefing.mood?.label}
               </span>
             </div>
+            <span className={styles.infoTts}>
+              <TTSButton text={`Mood. ${briefing.mood?.label}`} />
+            </span>
           </div>
 
-          <div className={styles.infoCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '4px', right: '4px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Lucky Color. ${briefing.luckyColor}`} />
-            </span>
+          <div className={styles.infoCard}>
             <div className={styles.infoIcon}>🎨</div>
             <div className={styles.infoContent}>
               <span className={styles.infoLabel}>Lucky Color</span>
               <span className={styles.infoValue}>{briefing.luckyColor}</span>
             </div>
+            <span className={styles.infoTts}>
+              <TTSButton text={`Lucky Color. ${briefing.luckyColor}`} />
+            </span>
           </div>
 
-          <div className={styles.infoCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '4px', right: '4px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Lucky Number. ${briefing.luckyNumber}`} />
-            </span>
+          <div className={styles.infoCard}>
             <div className={styles.infoIcon}>🔢</div>
             <div className={styles.infoContent}>
               <span className={styles.infoLabel}>Lucky Number</span>
               <span className={styles.infoValue}>{briefing.luckyNumber}</span>
             </div>
+            <span className={styles.infoTts}>
+              <TTSButton text={`Lucky Number. ${briefing.luckyNumber}`} />
+            </span>
           </div>
         </div>
 

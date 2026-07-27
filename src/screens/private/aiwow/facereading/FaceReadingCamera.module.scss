@@ -44,7 +44,8 @@
 }
 
 .switchBtn {
-  @media (min-width: 769px) {
+  @media (hover: hover) and (pointer: fine) {
+    // Hide only on devices with a mouse (true desktops), not tablets
     display: none;
   }
 }

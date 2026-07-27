@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useNavigationType } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { ChevronDown } from 'lucide-react';
@@ -38,6 +38,8 @@ const SmartMatchmaking = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState(null);
   const [profileToEdit, setProfileToEdit] = useState(null);
+  // Synchronous guard against a rapid double tap firing the analyze API twice.
+  const isSubmittingRef = useRef(false);
   const [selectingType, setSelectingType] = useState(null); // PRIMARY | PARTNER
   const [primaryProfile, setPrimaryProfile] = useState(null);
   const [partnerProfile, setPartnerProfile] = useState(null);
@@ -327,6 +329,9 @@ const SmartMatchmaking = () => {
       return;
     }
 
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+
     try {
       setIsLoading(true);
       setError(null);
@@ -350,6 +355,7 @@ const SmartMatchmaking = () => {
       console.error('Failed to analyze compatibility:', error);
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
+      isSubmittingRef.current = false;
       setIsLoading(false);
     }
   };

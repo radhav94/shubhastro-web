@@ -58,7 +58,32 @@ const RouteErrorBoundary = () => {
 
   const handleReload = () => {
     sessionStorage.removeItem('route-chunk-error-reload');
-    window.location.reload();
+
+    // Chunk/network load errors are resolved by re-fetching the same URL.
+    if (isChunkError) {
+      window.location.reload();
+      return;
+    }
+
+    // Many deep-linked pages (e.g. the AI-Wow capture/analysis screens) depend
+    // on in-memory Redux state that is wiped on a hard reload, so reloading the
+    // exact same URL just throws the same error again and "Try Again" appears
+    // to do nothing. Recover by navigating to the feature's stable entry page.
+    //
+    // We strip trailing flow steps (camera/capture/analysis/etc.) rather than
+    // popping a single segment: the analysis runs on the `capture` path, whose
+    // preceding step is the `camera` screen. Landing there would restart the
+    // webcam and could trigger a fresh (paid) analysis, so we skip past those
+    // steps entirely and land on the feature landing page.
+    const FLOW_STEPS = ['camera', 'capture', 'analysis', 'result', 'instructions'];
+    const path = window.location.pathname.replace(/\/+$/, '');
+    const segments = path.split('/').filter(Boolean);
+
+    while (segments.length > 1 && FLOW_STEPS.includes(segments[segments.length - 1])) {
+      segments.pop();
+    }
+
+    window.location.assign(segments.length ? '/' + segments.join('/') : '/');
   };
 
   const handleGoHome = () => {

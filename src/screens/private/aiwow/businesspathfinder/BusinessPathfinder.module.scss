@@ -284,6 +284,15 @@
   }
 }
 
+// "Add Custom" chip — dashed pill to distinguish it from category chips.
+.chipCustom {
+  border-style: dashed;
+  border-color: #f57c00;
+  color: #f57c00;
+  border-radius: 999px;
+  justify-content: center;
+}
+
 // Custom Input
 .customInputWrap {
   margin-top: 14px;
