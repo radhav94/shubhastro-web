@@ -74,6 +74,7 @@ import { registerUser, updateUserProfile } from "../../../services/appServices/a
 import { useLogoutUserMutation } from "../../../redux/api/userSession/userSessionApi";
 import { useSelector } from "react-redux";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
+import { clearAllCalculatorData } from "../../../redux/calculator/calculatorSlice";
 import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
 import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
 
@@ -1328,6 +1329,7 @@ const Profile = () => {
       // Dispatch Redux logout action
       dispatch(logout());
       dispatch(clearSelectedKundli());
+      dispatch(clearAllCalculatorData());
       // Clear all authentication related data from localStorage
       localStorage.clear();
       window.dispatchEvent(new Event("auth-change"));
@@ -1340,6 +1342,7 @@ const Profile = () => {
       // Still perform local logout
       dispatch(logout());
       dispatch(clearSelectedKundli());
+      dispatch(clearAllCalculatorData());
       localStorage.clear();
       window.dispatchEvent(new Event("auth-change"));
       Toast.success("Logged out successfully");

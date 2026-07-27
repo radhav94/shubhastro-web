@@ -20,6 +20,7 @@ import LanguageSelector from "./LanguageSelector";
 import { isShubhMallEnabled } from "../utils/featureConfig";
 import { trackEvent } from "../utils/analytics";
 import { logout } from "../redux/auth/authSlice";
+import { clearAllCalculatorData } from "../redux/calculator/calculatorSlice";
 import { useLogoutUserMutation } from "../redux/api/userSession/userSessionApi";
 import { privateRequestNew } from "../services/appServices/privateRequestNew";
 import { Toast } from "./index";
@@ -164,6 +165,7 @@ const TopHeader = () => {
 
     dispatch(logout());
     dispatch(clearSelectedKundli());
+    dispatch(clearAllCalculatorData());
     dispatch(privateRequestNew.util.resetApiState());
 
     ["shubhtalk_customer_token", "shubhtalk_customer_id", "shubhtalk_user", "selectedKundliProfile", "astro_wallet_balance"]
