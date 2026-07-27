@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useNavigationType } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './DreamInterpreter.module.scss';
@@ -20,6 +20,9 @@ const DreamInterpreter = () => {
   const isBackNavigation = navigationType === 'POP';
   const restoredResult = isBackNavigation ? savedDreamResult : null;
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  // Synchronous guard: blocks a rapid double tap from firing the API twice
+  // before isLoading re-renders and disables the button.
+  const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -77,6 +80,10 @@ const DreamInterpreter = () => {
       Toast.error('Please provide more details about your dream (at least 20 characters)');
       return;
     }
+
+    // Block a second concurrent submit (double tap).
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
 
     try {
       setIsLoading(true);
@@ -140,6 +147,7 @@ const DreamInterpreter = () => {
       setError('An unexpected error occurred. Please try again.');
       setInterpretation(null);
     } finally {
+      isSubmittingRef.current = false;
       setIsLoading(false);
     }
   };

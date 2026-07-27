@@ -240,7 +240,7 @@ const BusinessPathfinder = () => {
                 );
               })}
               <button
-                className={`${styles.chip} ${showCustomInput ? styles.chipActive : ''}`}
+                className={`${styles.chip} ${styles.chipCustom} ${showCustomInput ? styles.chipActive : ''}`}
                 onClick={() => handleCategorySelect('Add Custom')}
               >
                 Add Custom 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DailyCosmicBriefing.module.scss';
 import { getDailyCosmicBriefing } from '../../../../services/appServices/aiWowService';
@@ -23,9 +23,15 @@ const DailyCosmicBriefing = () => {
   
   const [briefing, setBriefing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Tracks the profile id we've already fetched for, so a re-render that
+  // changes the profile object reference (same profile) doesn't re-hit the API.
+  const fetchedProfileIdRef = useRef(null);
 
   useEffect(() => {
     if (profile && !profileLoading) {
+      const profileId = profile._id || profile.id;
+      if (fetchedProfileIdRef.current === profileId) return;
+      fetchedProfileIdRef.current = profileId;
       fetchBriefing(profile);
     }
   }, [profile, profileLoading]);
