@@ -65,7 +65,7 @@ const SunSignCalc = () => {
   };
 
   useEffect(() => {
-    if (selectedKundli) {
+    if (localStorage.getItem("shubhtalk_customer_token") && selectedKundli) {
       fillFromProfile(selectedKundli);
     }
   }, [selectedKundli]);
