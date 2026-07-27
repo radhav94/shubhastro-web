@@ -29,6 +29,37 @@ const SignatureAnalysis = () => {
   const abortControllerRef = React.useRef(null);
   const hasStartedRef = React.useRef(false);
 
+  // Turn the backend error into a clear, user-friendly message. Low-quality /
+  // unreadable signature photos should get a specific "retake a clearer photo"
+  // message instead of a generic "Something went wrong".
+  const buildSignatureError = (err) => {
+    const rawMsg = (typeof err === 'string' ? err : err?.message) || '';
+    const code = String(err?.code || '').toUpperCase();
+    const lower = rawMsg.toLowerCase();
+
+    const looksLowQuality =
+      /QUALITY|BLUR|DETECT|UNCLEAR|LOW_RES|NOT_FOUND/.test(code) ||
+      ['quality', 'blur', 'unclear', 'not clear', 'clearer', 'not detect',
+       'no signature', 'signature not', 'lighting', 'too dark', 'too small',
+       'low resolution', 'illegible'].some((k) => lower.includes(k));
+
+    if (looksLowQuality) {
+      return {
+        message:
+          "We couldn't read your signature clearly. Please retake a sharp, well-lit photo of your signature on plain paper.",
+        details: err?.details || null,
+      };
+    }
+
+    // Surface a meaningful (non-technical) backend message if we have one.
+    const isTechnical = /googleapis|GoogleGenerativeAI|INTERNAL|prepayment|Too Many Requests|Error fetching/i.test(rawMsg);
+    if (rawMsg && rawMsg.length <= 120 && !isTechnical) {
+      return { message: rawMsg, details: err?.details || null };
+    }
+
+    return { message: 'Something went wrong. Please try again.', details: err?.details || null };
+  };
+
   useEffect(() => {
     isMountedRef.current = true;
     return () => { isMountedRef.current = false; };
@@ -98,7 +129,7 @@ const SignatureAnalysis = () => {
         // dispatch(clearSignatureData());
         
         setProgress(0);
-        setError({ message: 'Something went wrong. Please try again.' });
+        setError(buildSignatureError(result.error));
       }
     } catch (error) {
       // Ignore abort errors - user navigated away

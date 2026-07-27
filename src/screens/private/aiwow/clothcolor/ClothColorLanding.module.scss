@@ -147,14 +147,24 @@
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  transition: all 0.2s;
+  // Only animate colour/shadow (not transform/layout) so the card never
+  // shifts under the finger and cause a mis-tap on a neighbouring option.
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
   text-align: left;
-  
-  &:hover {
-    border-color: #F75801;
-    background: rgba(247, 88, 1, 0.05);
-    box-shadow: 0 2px 8px rgba(247, 88, 1, 0.15);
-    transform: translateY(-2px);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+
+  // Hover effects only on devices that actually support hover (desktop).
+  // On touch devices :hover "sticks" after a tap, which left a second card
+  // looking selected and shifted it via translateY — causing the reported
+  // "another option also gets clicked" / sharp colour change.
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: #F75801;
+      background: rgba(247, 88, 1, 0.05);
+      box-shadow: 0 2px 8px rgba(247, 88, 1, 0.15);
+      transform: translateY(-2px);
+    }
   }
   
   &.selected {
