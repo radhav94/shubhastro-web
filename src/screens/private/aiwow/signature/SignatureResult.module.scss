@@ -274,19 +274,18 @@
   // }
 }
 .analysisCard,
-.traitsCard{
-  // padding: 0;
-  margin-bottom: 16px;
-  // background: rgba(255, 255, 255, 0.4);
-  // border: 1.5px solid #ffffff;
-  // backdrop-filter: blur(12px);
-}
+.traitsCard,
 .insightsCard,.leadershipCard,.communicationCard,.emotionalCard,.socialCard{
+  // All result cards share the same frosted card style + inset so the
+  // absolutely-positioned TTS button (top:8px/right:8px) aligns consistently
+  // across the stroke, letter and personality sections.
   background: rgba(255, 255, 255, 0.4);
   border: 1.5px solid #ffffff;
   backdrop-filter: blur(12px);
   padding: 16px;
   border-radius: 12px;
+  position: relative;
+  margin-bottom: 16px;
 }
 
 .analysisGrid {

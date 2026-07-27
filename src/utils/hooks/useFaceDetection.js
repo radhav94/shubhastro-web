@@ -6,6 +6,7 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
   const [faceDetected, setFaceDetected] = useState(false);
   const [faceInCircle, setFaceInCircle] = useState(false);
   const [isTooFar, setIsTooFar] = useState(false);
+  const [isPartialFace, setIsPartialFace] = useState(false);
   
   const detectionStartedRef = useRef(false);
   const rafRef = useRef(null);
@@ -90,6 +91,30 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
         const faceRatio = (box.width * box.height) / (video.videoWidth * video.videoHeight);
         setIsTooFar(faceRatio < 0.02);
 
+        // A partial face is one that is clipped by the video frame edges — e.g.
+        // only half the face is visible. Reject those so we never analyse a
+        // cropped/incomplete face. We use both the detection box and the
+        // outermost landmarks (jaw + eyebrows) to know the true face extent.
+        const pts = landmarks?.positions || [];
+        let minX = box.x, minY = box.y;
+        let maxX = box.x + box.width, maxY = box.y + box.height;
+        for (const p of pts) {
+          if (p.x < minX) minX = p.x;
+          if (p.y < minY) minY = p.y;
+          if (p.x > maxX) maxX = p.x;
+          if (p.y > maxY) maxY = p.y;
+        }
+        // Margin: if the face extent touches within ~1.5% of any frame edge,
+        // treat it as clipped/partial.
+        const marginX = video.videoWidth * 0.015;
+        const marginY = video.videoHeight * 0.015;
+        const clipped =
+          minX <= marginX ||
+          minY <= marginY ||
+          maxX >= video.videoWidth - marginX ||
+          maxY >= video.videoHeight - marginY;
+        setIsPartialFace(clipped);
+
         // Check if face is within the circle guide
         if (getCircleBounds) {
           const circleBounds = getCircleBounds();
@@ -101,12 +126,28 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
             const scaledCY = centerY * scaleY;
             const scaledR = radius * Math.min(scaleX, scaleY);
 
-            const faceCX = box.x + box.width / 2;
-            const faceCY = box.y + box.height / 2;
-            // Mirror face X coordinate since front camera video is CSS-mirrored
-            const mirroredFaceCX = video.videoWidth - faceCX;
-            const dist = Math.sqrt((mirroredFaceCX - scaledCX) ** 2 + (faceCY - scaledCY) ** 2);
-            const isInCircle = dist <= scaledR * 0.6;
+            // Mirror X coordinates since the front camera video is CSS-mirrored.
+            const mLeft = video.videoWidth - maxX;
+            const mRight = video.videoWidth - minX;
+            const top = minY;
+            const bottom = maxY;
+
+            // Require the WHOLE face (all four corners of its extent) to sit
+            // inside the guide circle — not just its centre. This blocks a face
+            // that is only partially inside the circle from being captured.
+            const corners = [
+              [mLeft, top],
+              [mRight, top],
+              [mLeft, bottom],
+              [mRight, bottom],
+            ];
+            let maxCornerDist = 0;
+            for (const [cx, cy] of corners) {
+              const d = Math.sqrt((cx - scaledCX) ** 2 + (cy - scaledCY) ** 2);
+              if (d > maxCornerDist) maxCornerDist = d;
+            }
+            const fullyInside = maxCornerDist <= scaledR * 0.98;
+            const isInCircle = fullyInside && !clipped;
             setFaceInCircle(isInCircle);
 
             if (isInCircle) {
@@ -124,6 +165,7 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
         setFaceDetected(false);
         setFaceInCircle(false);
         setIsTooFar(false);
+        setIsPartialFace(false);
         clearCanvas(canvas);
       }
     } catch (err) {
@@ -302,6 +344,7 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
     faceDetected,
     faceInCircle,
     isTooFar,
+    isPartialFace,
     startDetection,
     stopDetection
   };

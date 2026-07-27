@@ -67,22 +67,37 @@ const SignatureCamera = () => {
       }
       
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        setStream(mediaStream);
-        setError(null);
-
         // Detect actual camera facing mode from track
         const videoTrack = mediaStream.getVideoTracks()[0];
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         setIsFrontCamera(trackFacing !== 'environment');
-        
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play();
+
+        // iOS Safari: a freshly-assigned MediaStream can fire its metadata
+        // events before we attach handlers, and it often needs an explicit
+        // play() call (autoplay alone is unreliable). So we attach the
+        // handlers first, then set the source, and also try to play() from
+        // several triggers with the promise caught.
+        const tryPlay = () => {
+          const v = videoRef.current;
+          if (!v) return;
+          const p = v.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch((err) => console.warn('Signature camera play() failed:', err));
+          }
         };
 
+        videoRef.current.onloadedmetadata = tryPlay;
+        videoRef.current.oncanplay = tryPlay;
         videoRef.current.onplay = () => {
           startDetection();
         };
+
+        videoRef.current.srcObject = mediaStream;
+        setStream(mediaStream);
+        setError(null);
+
+        // Kick off playback immediately too, in case the events already fired.
+        tryPlay();
       }
     } catch (err) {
       console.error('Error accessing camera:', err);

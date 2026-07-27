@@ -143,6 +143,11 @@ const GemstoneCamera = () => {
   };
 
   const captureImage = () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) {
+      // Camera not ready yet — nothing to capture.
+      return;
+    }
     stopDetection();
     const canvas = cropCurrentFrameToCanvas();
     if (!canvas) return;
@@ -324,18 +329,18 @@ const GemstoneCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={`${styles.captureButton} ${(!detectionReady || !objectDetected) ? styles.disabled : ''}`} 
+            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={!detectionReady || !objectDetected}
+            disabled={!stream}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!detectionReady || !objectDetected) ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={(!detectionReady || !objectDetected) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={!stream ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={!stream ? "0.5" : "1"}/>
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!detectionReady ? 'Loading...' : (objectDetected ? 'Capture' : 'No Gemstone Detected')}
+              {!stream ? 'Loading...' : (objectDetected ? 'Capture' : 'Capture Gemstone')}
             </span>
           </button>
         ) : (

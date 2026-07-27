@@ -24,6 +24,19 @@ const GemstoneLanding = () => {
   const { data: aiwowData } = useGetAiWowPageDataQuery();
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'gemstone-authenticity')?.title || 'Gemstone Authenticity';
 
+  // Back should go to the previous in-app page when there is history to go
+  // back to; otherwise (deep link / history replaced) fall back to the AI-Wow
+  // hub so the button always does something. Plain navigate(-1) silently does
+  // nothing when there is no prior entry (the reported Android Chrome bug).
+  const handleBack = () => {
+    const idx = window.history.state?.idx;
+    if (typeof idx === 'number' && idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/ai-wow');
+    }
+  };
+
   // Guests must add a kundli + verify OTP before capturing/uploading a photo.
   const runOrAuth = (action) => {
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -92,7 +105,7 @@ const GemstoneLanding = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <button className={styles.backButton} onClick={handleBack}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

@@ -28,6 +28,7 @@ const FaceReadingCamera = () => {
     faceDetected,
     faceInCircle,
     isTooFar,
+    isPartialFace,
     startDetection,
     stopDetection
   } = useFaceDetection({ 
@@ -196,8 +197,9 @@ const FaceReadingCamera = () => {
     // Start camera with new mode will be handled by useEffect
   };
 
-  // Capture allowed only when face is detected, in circle, and not too far
-  const canCapture = faceDetected && faceInCircle && !isTooFar;
+  // Capture allowed only when the FULL face is detected, inside the circle,
+  // not too far, and not clipped by the frame edges (partial face).
+  const canCapture = faceDetected && faceInCircle && !isTooFar && !isPartialFace;
 
   // Draw the current video frame, cropped to the face circle, onto a canvas.
   const cropCurrentFrameToCanvas = () => {
@@ -409,6 +411,8 @@ const FaceReadingCamera = () => {
                     ? 'Move your face closer to the camera'
                     : isTooFar
                     ? 'Move your face closer to the camera'
+                    : isPartialFace
+                    ? 'Keep your full face inside the circle'
                     : !faceInCircle
                     ? 'Position your face within the circle'
                     : ''}
@@ -445,6 +449,7 @@ const FaceReadingCamera = () => {
               {!modelsLoaded ? 'Loading...' : 
                canCapture ? 'Capture' : 
                !faceDetected || isTooFar ? 'Move Closer' : 
+               isPartialFace ? 'Show Full Face' : 
                'Move Inside Circle'}
             </span>
           </button>
