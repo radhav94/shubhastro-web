@@ -12,6 +12,15 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
   const rafRef = useRef(null);
   const detectionStartedRef = useRef(false);
   const detectionHistoryRef = useRef([]); // Temporal smoothing
+  const lastRunRef = useRef(0); // Throttle timestamp
+
+  // How often the (CPU-heavy) pixel analysis actually runs. Running it every
+  // animation frame on a full-res frame freezes the camera on iOS Safari, so
+  // we throttle to a few times per second — plenty for detection feedback.
+  const DETECTION_INTERVAL_MS = 150;
+  // Downscale the analysis canvas: pixel heuristics don't need full 720p, and
+  // a smaller buffer keeps getImageData cheap on mobile.
+  const MAX_ANALYSIS_DIM = 320;
 
   useEffect(() => {
     // No models to load for basic detection
@@ -36,10 +45,19 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
       return;
     }
 
+    // Throttle the heavy work to DETECTION_INTERVAL_MS.
+    const now = performance.now();
+    if (now - lastRunRef.current < DETECTION_INTERVAL_MS) {
+      rafRef.current = requestAnimationFrame(detectLoop);
+      return;
+    }
+    lastRunRef.current = now;
+
     try {
-      // Set canvas dimensions
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      // Set canvas dimensions (downscaled for cheaper pixel analysis).
+      const scale = Math.min(1, MAX_ANALYSIS_DIM / Math.max(video.videoWidth, video.videoHeight));
+      canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
+      canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
 
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -249,6 +267,9 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
     let colorfulPixels = 0;
     let nonUniformPixels = 0;
     let sampledPixels = 0;
+    let hardEdgePixels = 0;   // very sharp neighbour transitions (screen/text)
+    let edgeSamples = 0;
+    let brightPixels = 0;     // very bright pixels (glowing screen / white UI)
 
     // Sample center-heavy grid (cloth is usually centered)
     const startX = Math.floor(width * 0.15);
@@ -275,6 +296,7 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
 
         textureScore += variance;
         brightnessValues.push(brightness);
+        if (brightness > 210) brightPixels++;
 
         // Saturation check (lowered for dark/plain fabrics)
         const saturation = max === 0 ? 0 : variance / max;
@@ -291,6 +313,18 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
           if (diff > 15) nonUniformPixels++;
         }
 
+        // Hard-edge check using immediate adjacent pixels (not the grid step),
+        // to catch the crisp, high-frequency edges of on-screen text/UI. Cloth
+        // has soft, gradual edges and produces very few of these.
+        const rightI = (y * width + (x + 1)) * 4;
+        const rb = (data[rightI] + data[rightI + 1] + data[rightI + 2]) / 3;
+        const downI = ((y + 1) * width + x) * 4;
+        const db = (data[downI] + data[downI + 1] + data[downI + 2]) / 3;
+        if (Math.abs(brightness - rb) > 70 || Math.abs(brightness - db) > 70) {
+          hardEdgePixels++;
+        }
+        edgeSamples++;
+
         sampledPixels++;
       }
     }
@@ -298,11 +332,55 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
     const avgTexture = textureScore / sampledPixels;
     const colorRatio = colorfulPixels / sampledPixels;
     const nonUniformRatio = nonUniformPixels / sampledPixels;
+    const hardEdgeRatio = edgeSamples ? hardEdgePixels / edgeSamples : 0;
+    const brightRatio = brightPixels / sampledPixels;
 
     // Calculate brightness variance (cloth has some variation vs blank wall)
     const avgBrightness = brightnessValues.reduce((a, b) => a + b, 0) / brightnessValues.length;
     const brightnessVariance = brightnessValues.reduce((sum, b) => sum + Math.pow(b - avgBrightness, 2), 0) / brightnessValues.length;
     const brightnessStdDev = Math.sqrt(brightnessVariance);
+
+    // ── Laptop/monitor bezel check ──────────────────────────────────────
+    // A screen (even one just showing a reflection/preview of a person) sits
+    // inside a dark rectangular bezel/frame: the outer border of the view is
+    // noticeably darker than the brighter interior panel. Fabric filling the
+    // frame doesn't show this dark-border / bright-center split. This catches
+    // screens whose content is smooth (few hard edges), e.g. a person's
+    // reflection, which the edge check alone would miss.
+    let borderSum = 0, borderCount = 0;
+    let innerSum = 0, innerCount = 0;
+    const bStep = 6;
+    for (let y = 0; y < height; y += bStep) {
+      for (let x = 0; x < width; x += bStep) {
+        const i = (y * width + x) * 4;
+        const br = (data[i] + data[i + 1] + data[i + 2]) / 3;
+        const inBorder =
+          x < width * 0.12 || x > width * 0.88 ||
+          y < height * 0.12 || y > height * 0.88;
+        const inInner =
+          x > width * 0.3 && x < width * 0.7 &&
+          y > height * 0.3 && y < height * 0.7;
+        if (inBorder) { borderSum += br; borderCount++; }
+        else if (inInner) { innerSum += br; innerCount++; }
+      }
+    }
+    const borderBrightness = borderCount ? borderSum / borderCount : 0;
+    const innerBrightness = innerCount ? innerSum / innerCount : 0;
+    // Dark bezel around a clearly brighter interior → a framed screen/monitor.
+    const looksLikeFramedScreen =
+      borderBrightness < 70 && innerBrightness > borderBrightness * 1.6;
+
+    // Screen rejection: a laptop/monitor shown to the camera displays UI/text
+    // with lots of crisp, high-contrast edges and/or large glowing bright
+    // areas, and/or sits inside a dark bezel. Fabric doesn't. Reject those so
+    // auto-capture ignores the screen (and any person reflected in it).
+    const looksLikeScreen =
+      hardEdgeRatio > 0.12 ||                        // dense sharp edges (text/UI)
+      (brightRatio > 0.35 && hardEdgeRatio > 0.06) || // bright glow + sharp edges
+      looksLikeFramedScreen;                          // dark bezel + bright panel
+    if (looksLikeScreen) {
+      return { detected: false, quality: 0 };
+    }
 
     // Final decision — more lenient for dark/plain fabrics
     // Path 1: Colorful cloth (original logic, slightly relaxed)

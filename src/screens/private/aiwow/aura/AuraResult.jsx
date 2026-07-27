@@ -42,15 +42,30 @@ const AuraResult = () => {
   const getColorName = (value) => {
     if (!value || typeof value !== 'string') return value;
     const raw = value.trim();
-    if (!raw.startsWith('#')) return raw; // already a name
 
-    let hex = raw.slice(1);
-    if (hex.length === 3) hex = hex.split('').map((c) => c + c).join('');
-    if (hex.length !== 6 || /[^0-9a-fA-F]/.test(hex)) return raw;
+    let r, g, b;
 
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
+    if (raw.startsWith('#')) {
+      let hex = raw.slice(1);
+      // Expand shorthand (#abc -> #aabbcc, #abcd -> #aabbccdd).
+      if (hex.length === 3 || hex.length === 4) {
+        hex = hex.split('').map((c) => c + c).join('');
+      }
+      // Accept 6-digit (RGB) and 8-digit (RGBA) — ignore the alpha channel.
+      if ((hex.length !== 6 && hex.length !== 8) || /[^0-9a-fA-F]/.test(hex)) {
+        return raw;
+      }
+      r = parseInt(hex.slice(0, 2), 16);
+      g = parseInt(hex.slice(2, 4), 16);
+      b = parseInt(hex.slice(4, 6), 16);
+    } else {
+      // Handle rgb()/rgba() strings too, so no raw code is ever shown.
+      const rgbMatch = raw.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+      if (!rgbMatch) return raw; // already a readable name
+      r = parseInt(rgbMatch[1], 10);
+      g = parseInt(rgbMatch[2], 10);
+      b = parseInt(rgbMatch[3], 10);
+    }
 
     let bestName = raw;
     let bestDist = Infinity;

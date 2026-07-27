@@ -67,6 +67,15 @@ const GemstoneCamera = () => {
       }
       
       if (videoRef.current) {
+        // iOS Safari: React doesn't reliably set the `muted` DOM property from
+        // the JSX prop, and iOS blocks inline playback of an unmuted video —
+        // so play() rejects and the camera never shows. Set these imperatively.
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.setAttribute('muted', '');
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', '');
+
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
@@ -76,10 +85,16 @@ const GemstoneCamera = () => {
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         // If facingMode is 'user' or undefined (desktop webcam), it's front-facing
         setIsFrontCamera(trackFacing !== 'environment');
-        
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play();
+
+        const tryPlay = () => {
+          const p = videoRef.current?.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch((e) => console.warn('Gemstone camera play() failed:', e));
+          }
         };
+        videoRef.current.onloadedmetadata = tryPlay;
+        videoRef.current.oncanplay = tryPlay;
+        tryPlay();
 
         videoRef.current.onplay = () => {
           startDetection();
@@ -143,6 +158,11 @@ const GemstoneCamera = () => {
   };
 
   const captureImage = () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) {
+      // Camera not ready yet — nothing to capture.
+      return;
+    }
     stopDetection();
     const canvas = cropCurrentFrameToCanvas();
     if (!canvas) return;
@@ -324,18 +344,18 @@ const GemstoneCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={`${styles.captureButton} ${(!detectionReady || !objectDetected) ? styles.disabled : ''}`} 
+            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={!detectionReady || !objectDetected}
+            disabled={!stream}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!detectionReady || !objectDetected) ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={(!detectionReady || !objectDetected) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={!stream ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={!stream ? "0.5" : "1"}/>
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!detectionReady ? 'Loading...' : (objectDetected ? 'Capture' : 'No Gemstone Detected')}
+              {!stream ? 'Loading...' : (objectDetected ? 'Capture' : 'Capture Gemstone')}
             </span>
           </button>
         ) : (

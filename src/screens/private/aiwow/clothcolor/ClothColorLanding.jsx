@@ -7,6 +7,7 @@ import VibrancyIcon from '../../../../assets/icons/vibrancy.png';
 import PatternIcon from '../../../../assets/icons/pattern.png';
 import StyleCaratIcon from '../../../../assets/icons/stylecarat.png';
 import TTSButton from '../../../../component/UI/TTSButton';
+import { Toast } from '../../../../component';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setClothColorFormData, setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
 import { compressImage } from '../../../../utils/helper/compressImage';
@@ -60,14 +61,21 @@ const ClothColorLanding = () => {
     const file = event.target.files?.[0];
     if (file) {
       trackEvent("shubh_ai_input_provided", { feature_name: "clothes-colour-analysis", input_type: "image" });
-      compressImage(file).then((dataUrl) => {
-        // Guests must authenticate at the moment the photo is submitted.
-        runOrAuth(() => {
-          dispatch(setClothColorImage(dataUrl));
-          navigate('/ai-wow/clothes-colour-analysis/capture');
+      compressImage(file)
+        .then((dataUrl) => {
+          // Guests must authenticate at the moment the photo is submitted.
+          runOrAuth(() => {
+            dispatch(setClothColorImage(dataUrl));
+            navigate('/ai-wow/clothes-colour-analysis/capture');
+          });
+        })
+        .catch((err) => {
+          console.error('Failed to process selected image:', err);
+          Toast.error('Could not read that image. Please try a different photo.');
         });
-      });
     }
+    // Reset so selecting the same file again re-triggers onChange (iOS Safari).
+    event.target.value = '';
   };
 
   const intentions = [
