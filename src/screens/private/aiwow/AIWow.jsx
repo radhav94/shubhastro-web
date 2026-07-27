@@ -255,7 +255,10 @@ const AIWow = () => {
       openSubscriptionModal("extended");
     } else if (reason === SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE) {
       toast.error("Insufficient wallet balance. Please recharge to continue.");
-      navigate("/recharge");
+      // Carry the current AI Wow page as the return URL so the user is brought
+      // back here (not the home page) after completing the recharge.
+      const returnUrl = window.location.pathname + window.location.search;
+      navigate(`/recharge?returnUrl=${encodeURIComponent(returnUrl)}`);
     } else {
       return false;
     }

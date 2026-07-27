@@ -1577,6 +1577,7 @@ const Profile = () => {
         <div className={styles.balanceMembershipItem}>
           <MembershipCard
                   hasSubscription={hasActiveSubscription}
+                  autoRenew={!!subData?.subscription?.autoRenew}
                   planName={subPlanName}
                   validTill={subValidTill}
                   remainingDays={subRemainingDays}
