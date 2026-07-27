@@ -355,10 +355,11 @@ const AddProfileModal = ({
                   <div className={styles.formGroup}>
                     <label>Birth Time <span className={styles.required}>*</span></label>
                     <div className={styles.iconField}>
-                      <IoTimeOutline className={styles.leftIcon} />
+                      <button type="button" className={styles.leftIconBtn} onClick={openPickerFromIcon} aria-label="Open time picker">
+                        <IoTimeOutline />
+                      </button>
                       <DateTimePicker
                         mode="time"
-                        openOnClick
                         dropUp
                         selected={values.birthTime ? (() => { const [h, m] = values.birthTime.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
                         onChange={(date) => {

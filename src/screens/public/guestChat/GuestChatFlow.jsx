@@ -607,10 +607,11 @@ const GuestChatFlow = () => {
             Birth Time <span className={styles.req}>*</span>
           </label>
           <div className={styles.iconField}>
-            <IoTimeOutline className={styles.leftIcon} />
+            <button type="button" className={styles.leftIconBtn} onClick={openPickerFromIcon} aria-label="Open time picker">
+              <IoTimeOutline />
+            </button>
             <DateTimePicker
               mode="time"
-              openOnClick
               disabled={form.unknownBirthTime}
               selected={form.time}
               onChange={(d) => setField("time", d)}
