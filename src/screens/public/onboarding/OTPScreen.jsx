@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
-import OtpInput from "react-otp-input";
 import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import {
@@ -20,15 +19,47 @@ import onboardingBg from "../../../assets/images/new-login-bg-2.jpeg";
 // import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
 import LanguageSelector from "../../../component/LanguageSelector";
 import BackButton from "../../../component/UI/BackButton/BackButton";
+
+// Isolated timer component — its state changes won't re-render the OTP inputs
+const ResendTimer = memo(({ onResend }) => {
+  const [timer, setTimer] = useState(20);
+
+  useEffect(() => {
+    if (timer > 0) {
+      const t = setTimeout(() => setTimer(timer - 1), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [timer]);
+
+  const handleClick = () => {
+    if (timer === 0) {
+      onResend();
+      setTimer(20);
+    }
+  };
+
+  return (
+    <div className={styles.resendContainer}>
+      <span className={styles.resendText}>Didn't get it?</span>
+      <button
+        className={styles.resendBtn}
+        onClick={handleClick}
+        disabled={timer > 0}
+      >
+        {timer > 0 ? `Resend in ${timer}s` : "Resend"}
+      </button>
+    </div>
+  );
+});
 const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
   const [otp, setOtp] = useState("");
-  const [resendTimer, setResendTimer] = useState(20);
   const [loading, setLoading] = useState(false);
   const handleContinueRef = useRef(null);
   const isSubmittingRef = useRef(false);
+  const inputRef = useRef(null);
   // Holds the AbortController for the in-flight OTP verification so it can be
   // cancelled if the user requests a new OTP mid-request.
   const verifyAbortRef = useRef(null);
@@ -50,12 +81,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     }
   }, []);
 
-  useEffect(() => {
-    if (resendTimer > 0) {
-      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [resendTimer]);
+
 
   const handleContinue = async () => {
     const otpValue = otp;
@@ -247,41 +273,34 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   }, [otp]);
 
   const handleResend = async () => {
-    if (resendTimer === 0) {
-      // Cancel any in-flight verification so the user can verify the freshly
-      // sent OTP instead of waiting on the stale request.
-      if (verifyAbortRef.current) {
-        verifyAbortRef.current.abort();
-        verifyAbortRef.current = null;
+    // Cancel any in-flight verification
+    if (verifyAbortRef.current) {
+      verifyAbortRef.current.abort();
+      verifyAbortRef.current = null;
+    }
+    setLoading(false);
+    setOtp("");
+
+    trackEvent("otp_resend_requested", { mobile_number: formData.phoneNumber });
+    try {
+      const payload = {
+        phoneNumber: `91${formData.phoneNumber}`,
+        type: "CUSTOMER",
+      };
+
+      const response = await loginWithPhone(payload);
+
+      if (response.data.success && response.data.statusCode === 200) {
+        toast.success("OTP resent successfully");
+      } else {
+        toast.error(response.data.message || "Failed to resend OTP");
       }
-      // Re-enable the Continue button and clear the old code immediately so the
-      // auto-submit effect can't re-fire with the previous OTP.
-      setLoading(false);
-      setOtp("");
-
-      trackEvent("otp_resend_requested", { mobile_number: formData.phoneNumber });
-      try {
-        const payload = {
-          phoneNumber: `91${formData.phoneNumber}`,
-          type: "CUSTOMER",
-        };
-
-        const response = await loginWithPhone(payload);
-
-        if (response.data.success && response.data.statusCode === 200) {
-          toast.success("OTP resent successfully");
-          setResendTimer(20);
-          setOtp("");
-        } else {
-          toast.error(response.data.message || "Failed to resend OTP");
-        }
-      } catch (error) {
-        console.error("Resend OTP error:", error);
-        toast.error(
-          error.response?.data?.message ||
-          "Failed to resend OTP. Please try again.",
-        );
-      }
+    } catch (error) {
+      console.error("Resend OTP error:", error);
+      toast.error(
+        error.response?.data?.message ||
+        "Failed to resend OTP. Please try again.",
+      );
     }
   };
 
@@ -315,65 +334,32 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           {formData.phoneNumber || "98989 98989"}. Enter it below to continue.
         </p>
 
-        <div className={styles.otpInputs}>
-          <OtpInput
+        <div className={styles.otpInputs} onClick={() => inputRef.current?.focus()}>
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div
+              key={i}
+              className={`${styles.otpBox} ${otp.length === i ? styles.otpBoxActive : ''} ${otp[i] ? styles.otpBoxFilled : ''}`}
+            >
+              {otp[i] || ''}
+            </div>
+          ))}
+          <input
+            ref={inputRef}
+            type="tel"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            className={styles.otpHiddenInput}
             value={otp}
-            onChange={(val) => {
-              // Only accept numeric digits (0-9)
-              const numericVal = val.replace(/[^0-9]/g, "");
-              setOtp(numericVal);
+            onChange={(e) => {
+              const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 6);
+              setOtp(val);
             }}
-            numInputs={6}
-            shouldAutoFocus
-            containerStyle={{ display: 'flex', gap: '12px', justifyContent: 'center' }}
-            inputStyle={styles.otpInput}
-            renderInput={(props, index) => (
-              <input
-                {...props}
-                type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                autoComplete="one-time-code"
-                onKeyDown={(e) => {
-                  // Block non-numeric keys except navigation keys
-                  if (
-                    !/^[0-9]$/.test(e.key) &&
-                    !["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key)
-                  ) {
-                    e.preventDefault();
-                  }
-                  if (props.onKeyDown) props.onKeyDown(e);
-                }}
-                onInput={(e) => {
-                  // Strip non-numeric characters at DOM level
-                  const value = e.target.value.replace(/[^0-9]/g, "");
-                  if (value !== e.target.value) {
-                    e.target.value = value;
-                  }
-                  // Handle Chrome autofill pasting full OTP into first input
-                  if (value.length > 1 && /^\d+$/.test(value)) {
-                    e.preventDefault();
-                    setOtp(value.slice(0, 6));
-                    return;
-                  }
-                  // Call original onInput if exists
-                  if (props.onInput) props.onInput(e);
-                }}
-              />
-            )}
+            maxLength={6}
+            autoFocus
           />
         </div>
 
-        <div className={styles.resendContainer}>
-          <span className={styles.resendText}>Didn't get it?</span>
-          <button
-            className={styles.resendBtn}
-            onClick={handleResend}
-            disabled={resendTimer > 0}
-          >
-            {resendTimer > 0 ? `Resend in ${resendTimer} seconds` : "Resend"}
-          </button>
-        </div>
+        <ResendTimer onResend={handleResend} />
         <button
           className={styles.otpprimaryBtn}
           onClick={handleContinue}

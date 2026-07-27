@@ -6,6 +6,7 @@ import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import { logout } from "../../../redux/auth/authSlice";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
+import { clearAllCalculatorData } from "../../../redux/calculator/calculatorSlice";
 import { useLogoutUserMutation } from "../../../redux/api/userSession/userSessionApi";
 import LoadingScreen from "./LoadingScreen";
 import WelcomeScreen from "./WelcomeScreen";
@@ -117,6 +118,7 @@ const Onboarding = () => {
     } finally {
       dispatch(logout());
       dispatch(clearSelectedKundli());
+      dispatch(clearAllCalculatorData());
       localStorage.clear();
       window.dispatchEvent(new Event("auth-change"));
       // Hard redirect so the onboarding state fully resets to the login screen

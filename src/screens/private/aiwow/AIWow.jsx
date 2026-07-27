@@ -89,6 +89,8 @@ const AIWow = () => {
     // Pass 1: deduplicate by featureId
     const byFeatureId = new Map();
     for (const item of rawHistoryList) {
+      // Exclude Daily Horoscope from result history
+      if (item.featureName?.toLowerCase() === "daily horoscope") continue;
       const key = item.featureId || item._id;
       const existing = byFeatureId.get(key);
       if (!existing || (item.pdfPath && !existing.pdfPath)) {
@@ -347,8 +349,12 @@ const AIWow = () => {
         document.body.appendChild(link);
         link.click();
         link.remove();
-        URL.revokeObjectURL(blobUrl);
-      toast.success("PDF downloaded!", { id: "pdf-download" });
+        // Delay toast to let iOS handle the download trigger without swallowing it
+        setTimeout(() => {
+          URL.revokeObjectURL(blobUrl);
+          toast.dismiss("pdf-download");
+          toast.success("Payment Successful! PDF downloaded.", { id: "pdf-download-success", duration: 3000 });
+        }, 600);
       // Mark this feature as free locally so ribbon updates
       setPaidToFreeIds(prev => ({ ...prev, [featureId]: true }));
       setDownloadModal({ open: false, featureId: null, featureName: "" });

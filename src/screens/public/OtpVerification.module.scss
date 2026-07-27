@@ -79,7 +79,7 @@ $disabled-text: #9e9e9e;
   border-radius: 8px;
   font-weight: 500;
   caret-color: $brand-orange;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
   &:focus {
     border-color: $brand-orange;

@@ -128,8 +128,12 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(blobUrl);
-      toast.success('PDF downloaded!', { id });
+      // Delay toast to let iOS handle the download trigger without swallowing it
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+        toast.dismiss(id);
+        toast.success('PDF downloaded!', { id: `${id}-success`, duration: 3000 });
+      }, 600);
     } catch {
       toast.error('Failed to download PDF', { id });
     } finally {
@@ -163,8 +167,12 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(blobUrl);
-      toast.success('PDF downloaded!', { id });
+      // Delay toast to let iOS handle the download trigger without swallowing it
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+        toast.dismiss(id);
+        toast.success('Payment Successful! PDF downloaded.', { id: `${id}-success`, duration: 3000 });
+      }, 600);
       setShowDownloadModal(false);
       setDownloadedPdfUrl(pdfUrl);
       refreshWallet();

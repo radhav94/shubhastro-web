@@ -272,9 +272,14 @@
   flex-direction: column;
   gap: 0.125rem;
   min-width: 0;
-  // Reserve space for the absolutely-positioned TTS button (top-right) so the
-  // label/value never run underneath and get clipped.
-  padding-right: 1.75rem;
+  flex: 1; // take remaining space, pushing the TTS button to the far right
+}
+
+// TTS button sits inline at the end of the card (no longer overlapping text).
+.infoTts {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .infoLabel {

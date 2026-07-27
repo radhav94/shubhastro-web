@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AstroVitals.module.scss';
 import { Toast } from '../../../../component';
@@ -12,6 +12,8 @@ const AstroVitals = () => {
   
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
+  // Synchronous guard against a rapid double tap firing the API twice.
+  const isSubmittingRef = useRef(false);
 
   // Form state
   const [heartRate, setHeartRate] = useState('');
@@ -92,6 +94,9 @@ const AstroVitals = () => {
       }
     }
 
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+
     try {
       setIsLoading(true);
 
@@ -144,6 +149,7 @@ const AstroVitals = () => {
       console.error('Failed to sync vitals:', error);
       Toast.error('An unexpected error occurred. Please try again.');
     } finally {
+      isSubmittingRef.current = false;
       setIsLoading(false);
     }
   };
