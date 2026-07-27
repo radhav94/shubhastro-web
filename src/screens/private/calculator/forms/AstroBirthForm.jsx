@@ -23,7 +23,7 @@ const AstroBirthForm = ({
 
   // Pre-fill from Redux selectedKundli on mount or when it changes
   useEffect(() => {
-    if (selectedKundli) {
+    if (localStorage.getItem("shubhtalk_customer_token") && selectedKundli) {
       fillFromProfile(selectedKundli);
     }
   }, [selectedKundli]);

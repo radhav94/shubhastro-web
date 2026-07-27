@@ -33,11 +33,16 @@ const ShaniSadeSati = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
 
+  const token = localStorage.getItem("shubhtalk_customer_token");
+
   useEffect(() => {
-    if (selectedKundli) {
+    // Only auto-fill from the selected profile for logged-in users. Guests
+    // should see an empty form (selectedKundli can persist in Redux from a
+    // previous session and would otherwise pre-fill their details).
+    if (token && selectedKundli) {
       fillFromProfile(selectedKundli);
     }
-  }, [selectedKundli]);
+  }, [selectedKundli, token]);
 
   const fillFromProfile = (profile) => {
     if (!profile) return;
@@ -46,8 +51,6 @@ const ShaniSadeSati = () => {
     setFormData({ name: profile.name || "", gender: (profile.gender || profile.identity || "").toLowerCase() || "", dob, tob, place: profile.place || "", lat: profile.lat || null, lng: profile.lon || null, isTimeUnknown: false });
     setErrors({});
   };
-
-  const token = localStorage.getItem("shubhtalk_customer_token");
   const { data: kundliData } = useGetAllKundlisQuery(undefined, { skip: !token });
   const profiles = kundliData?.data || [];
 
