@@ -14,8 +14,18 @@ const btnStyle = {
   cursor: "pointer",
   transition: "all 0.2s",
   flexShrink: 0,
-  minWidth: "30px",
-  minHeight: "30px",
+  width: "32px",
+  height: "32px",
+  minWidth: "32px",
+  minHeight: "32px",
+  // iOS Safari applies native button rendering that offsets the icon and
+  // breaks alignment — reset it so the icon stays perfectly centered.
+  WebkitAppearance: "none",
+  appearance: "none",
+  boxSizing: "border-box",
+  lineHeight: 0,
+  margin: 0,
+  verticalAlign: "middle",
 };
 
 const TTSButton = ({ text, size = 16 }) => {

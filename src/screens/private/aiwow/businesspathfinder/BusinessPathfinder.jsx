@@ -71,6 +71,10 @@ const BusinessPathfinder = () => {
   });
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Synchronous re-entry guard — `isSubmitting` state updates asynchronously,
+  // so a rapid double tap (or the guest re-invoke path) can fire the analyze
+  // API twice before the button disables. This ref blocks that immediately.
+  const isSubmittingRef = useRef(false);
 
   const handleCategorySelect = (cat) => {
     if (cat === 'Add Custom') {
@@ -117,6 +121,10 @@ const BusinessPathfinder = () => {
       Toast.error('Please select a profile first');
       return;
     }
+
+    // Block a second concurrent submit (double tap / re-invoke).
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
 
     setIsSubmitting(true);
     try {
@@ -169,6 +177,7 @@ const BusinessPathfinder = () => {
       console.error('Business Pathfinder error:', error);
       Toast.error('Something went wrong. Please try again.');
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };
