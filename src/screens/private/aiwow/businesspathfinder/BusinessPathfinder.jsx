@@ -95,8 +95,11 @@ const BusinessPathfinder = () => {
     }
 
     // Use the profile handed in by the guest-auth flow if provided, otherwise
-    // fall back to the currently selected profile.
-    const activeProfile = overrideProfile || profile;
+    // fall back to the currently selected profile. Guard against a non-profile
+    // argument (e.g. a click event when wired as onClick={handleSubmit}), which
+    // would otherwise strip kundliId/name/day/month/year from the payload.
+    const isProfile = overrideProfile && typeof overrideProfile === 'object' && overrideProfile._id;
+    const activeProfile = isProfile ? overrideProfile : profile;
 
     const category = showCustomInput ? formData.customCategory : formData.category;
     
@@ -387,7 +390,7 @@ const BusinessPathfinder = () => {
         <div className={styles.submitWrap}>
           <button
             className={styles.submitBtn}
-            onClick={handleSubmit}
+            onClick={() => handleSubmit()}
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Generating...' : 'Generate my report'}
