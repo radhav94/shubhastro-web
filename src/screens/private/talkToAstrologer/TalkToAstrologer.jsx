@@ -1531,7 +1531,8 @@ const TalkToAstrologer = () => {
         connectionType="chat"
       />
 
-      {showCTA && showRecommend && !recommendDismissed && (
+      {/* Recommend CTA temporarily hidden per request */}
+      {false && showCTA && showRecommend && !recommendDismissed && (
         <RecommendCTA
           mode={isChatMode ? "chat" : "call"}
           onClick={() => {
