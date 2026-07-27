@@ -30,7 +30,10 @@ const OtpVerification = () => {
   // Auto-submit when OTP is fully filled (e.g., SMS autofill on iOS)
   useEffect(() => {
     if (isOtpComplete && !isVerifying) {
-      handleVerifyOtp({ preventDefault: () => {} });
+      const timer = setTimeout(() => {
+        handleVerifyOtp({ preventDefault: () => {} });
+      }, 400);
+      return () => clearTimeout(timer);
     }
   }, [otp]);
 
@@ -201,7 +204,7 @@ const handleVerifyOtp = async (event) => {
       return;
     }
 
-    const timer = setTimeout(() => setCounter(counter - 1), 1000);
+    const timer = setTimeout(() => setCounter((prev) => prev - 1), 1000);
     return () => clearTimeout(timer);
   }, [counter, isTimerActive]);
 
