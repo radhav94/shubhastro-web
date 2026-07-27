@@ -207,6 +207,12 @@ const ClothColorCamera = () => {
   };
 
   const captureImage = () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) {
+      // Camera not ready yet — nothing to capture.
+      return;
+    }
+    stopDetection();
     const cropCanvas = cropCurrentFrameToCanvas();
     if (!cropCanvas) return;
     setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
@@ -386,9 +392,9 @@ const ClothColorCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={styles.captureButton} 
+            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={!objectDetected || !detectionReady}
+            disabled={!stream}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -397,7 +403,7 @@ const ClothColorCamera = () => {
               </svg>
             </div>
             <span className={styles.captureText}>
-              {objectDetected ? 'Capture' : 'No Cloth Detected'}
+              {!stream ? 'Loading...' : (objectDetected ? 'Capture' : 'Capture Cloth')}
             </span>
           </button>
         ) : (
