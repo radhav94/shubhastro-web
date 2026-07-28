@@ -89,8 +89,8 @@ const AIWow = () => {
     // Pass 1: deduplicate by featureId
     const byFeatureId = new Map();
     for (const item of rawHistoryList) {
-      // Exclude Daily Horoscope from result history
-      if (item.featureName?.toLowerCase() === "daily horoscope") continue;
+      // // Exclude Daily Horoscope from result history
+      // if (item.featureName?.toLowerCase() === "daily horoscope") continue;
       const key = item.featureId || item._id;
       const existing = byFeatureId.get(key);
       if (!existing || (item.pdfPath && !existing.pdfPath)) {
