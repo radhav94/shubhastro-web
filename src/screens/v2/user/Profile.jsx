@@ -2092,7 +2092,8 @@ const Profile = () => {
                         {/* Receipt Button - only for successful purchases (not admin credits) */}
                         <div className={styles.txnActionCell}>
                           {transaction?.billing?.user?.action === "credit" && 
-                           !(transaction.description || "").toLowerCase().includes("admin") && (
+                           !(transaction.description || "").toLowerCase().includes("admin") &&
+                           !(transaction.description || "").toLowerCase().includes("bonus") && (
                             <button
                               className={`${styles.receiptBtn} ${invoiceLoadingId === transaction._id ? styles.downloadLoading : ""}`}
                               disabled={invoiceLoadingId === transaction._id}
