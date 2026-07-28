@@ -59,7 +59,8 @@
   padding-top: 88px;
   max-width: 1440px;
   margin: 0 auto;
-  /* background: white; */
+  cursor: default;
+  user-select: text;
 }
 
 @media screen and (max-width: 768px) {
