@@ -135,6 +135,13 @@ const AIWow = () => {
     }
   }, [location.state]);
 
+  // Refetch history when results tab is active to pick up downloads done on result pages
+  useEffect(() => {
+    if (activeTab === "results" && kundliId) {
+      refetchHistory();
+    }
+  }, [activeTab, location.key]);
+
   // Reset page when profile changes
   useEffect(() => {
     setHistoryPage(1);
