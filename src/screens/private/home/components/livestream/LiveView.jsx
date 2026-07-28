@@ -293,9 +293,7 @@ const LiveView = (props) => {
     { astrologerId },
     { skip: !astrologerId }
   );
-  const isFollowing = followingData?.data?.some(
-    (item) => item.astrologerId === astrologerId && item.isFollowing === true
-  ) || false;
+  const isFollowing = followingData?.data?.isFollowing || false;
   const [followAstrologer, { isLoading: followLoading }] = useFollowAstrologerByIdMutation();
   const [unfollowAstrologer, { isLoading: unfollowLoading }] = useUnfollowAstrologerByIdMutation();
 
