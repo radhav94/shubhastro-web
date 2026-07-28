@@ -339,7 +339,6 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    pointer-events: none;
   }
   
   @media (min-width: 1024px) {
@@ -391,7 +390,6 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    pointer-events: none;
   }
   
   @media (min-width: 1024px) {
@@ -625,7 +623,7 @@
     &.connectOptionDisabled {
       opacity: 0.5;
       cursor: not-allowed;
-      pointer-events: none;
+
     }
   }
   
@@ -2325,7 +2323,7 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    pointer-events: none;
+
   }
 }
 
@@ -2352,7 +2350,7 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    pointer-events: none;
+
   }
 }
 
@@ -2462,7 +2460,6 @@
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    pointer-events: none;
   }
 }
 
@@ -2556,7 +2553,7 @@
   &:disabled {
     opacity: 0.4;
     cursor: not-allowed;
-    pointer-events: none;
+
   }
 }
 

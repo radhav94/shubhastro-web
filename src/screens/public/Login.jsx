@@ -169,8 +169,8 @@ const Login = () => {
 
         <div className={styles.byProceeding}>
           By proceeding, you agree to our
-          <Link to={PATH.privateRoutes.TERMSCONDITIONS.path}>T&C</Link> &{" "}
-          <Link to={PATH.privateRoutes.PRIVACY_POLICY.path}>
+          <Link to={PATH.privateRoutes.TERMS_CONDITIONS_VIEW.path}>T&C</Link> &{" "}
+          <Link to={PATH.privateRoutes.PRIVACY_SECURITY.path}>
             Privacy Policy
           </Link>
         </div>

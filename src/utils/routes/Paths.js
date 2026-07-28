@@ -116,6 +116,7 @@ import PalmistryInstructions from "../../screens/private/aiwow/palmistry/Palmist
 import PalmistryCamera from "../../screens/private/aiwow/palmistry/PalmistryCamera";
 import PalmistryAnalysis from "../../screens/private/aiwow/palmistry/PalmistryAnalysis";
 import PalmistryResult from "../../screens/private/aiwow/palmistry/PalmistryResult";
+import PalmistryHandSelection from "../../screens/private/aiwow/palmistry/PalmistryHandSelection";
 import FaceReadingLanding from "../../screens/private/aiwow/facereading/FaceReadingLanding";
 import FaceReadingCamera from "../../screens/private/aiwow/facereading/FaceReadingCamera";
 import FaceReadingAnalysis from "../../screens/private/aiwow/facereading/FaceReadingAnalysis";
@@ -685,6 +686,11 @@ export const PATH = {
     PALMISTRY_CAMERA: {
       path: ["/ai-wow/ai-palmistry-scanner/camera", "/ai-palmistry-scanner/camera"],
       element: PalmistryCamera,
+      header: false,
+    },
+    PALMISTRY_HAND_SELECTION: {
+      path: ["/ai-wow/ai-palmistry-scanner/hand-selection", "/ai-palmistry-scanner/hand-selection"],
+      element: PalmistryHandSelection,
       header: false,
     },
     PALMISTRY_ANALYSIS: {
