@@ -63,6 +63,13 @@ const DreamInterpreter = () => {
     handleDownloadClick, handleConfirmDownload,
   } = useAIWowDownload({ resultData: downloadResultData });
 
+  // Scroll to top when result/error is displayed
+  useEffect(() => {
+    if (interpretation || error) {
+      window.scrollTo(0, 0);
+    }
+  }, [interpretation, error]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
