@@ -43,6 +43,19 @@ const withTimeout = (promise, ms, fallback) =>
  * @param {number} [timeoutMs=4000] - max time before giving up (fail open)
  * @returns {Promise<number>}
  */
+// Intersection-over-union of two face boxes (for de-duplicating overlaps).
+const iou = (a, b) => {
+  const x1 = Math.max(a.x, b.x);
+  const y1 = Math.max(a.y, b.y);
+  const x2 = Math.min(a.x + a.width, b.x + b.width);
+  const y2 = Math.min(a.y + a.height, b.y + b.height);
+  const w = Math.max(0, x2 - x1);
+  const h = Math.max(0, y2 - y1);
+  const inter = w * h;
+  const union = a.width * a.height + b.width * b.height - inter;
+  return union > 0 ? inter / union : 0;
+};
+
 export const countFacesInImage = async (imageSrc, timeoutMs = 4000) => {
   const run = (async () => {
     try {
@@ -50,9 +63,33 @@ export const countFacesInImage = async (imageSrc, timeoutMs = 4000) => {
       const img = await loadImage(imageSrc);
       const detections = await faceapi.detectAllFaces(
         img,
-        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 })
+        // Higher score threshold to cut down false positives that made one
+        // person read as several.
+        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.6 })
       );
-      return detections.length;
+
+      const imgArea = (img.naturalWidth || img.width) * (img.naturalHeight || img.height);
+      if (!imgArea) return detections.length;
+
+      // Keep only confident, reasonably-sized detections. Tiny/low-confidence
+      // specks are almost always noise (patterns, logos, shadows, background
+      // faces on posters), not the subject — counting them wrongly blocked
+      // legitimate single-person photos. Be conservative so we only ever block
+      // when there are clearly two real, prominent people.
+      const MIN_FACE_AREA_RATIO = 0.02; // face box must be >=2% of the image
+      let faces = detections
+        .filter((d) => d.score >= 0.7)
+        .map((d) => d.box)
+        .filter((box) => (box.width * box.height) / imgArea >= MIN_FACE_AREA_RATIO);
+
+      // De-duplicate overlapping boxes (the detector can emit two boxes for the
+      // same face), so one person is never counted twice.
+      const unique = [];
+      for (const box of faces) {
+        if (!unique.some((u) => iou(u, box) > 0.3)) unique.push(box);
+      }
+
+      return unique.length;
     } catch (err) {
       console.warn("Face count detection failed:", err);
       return -1;

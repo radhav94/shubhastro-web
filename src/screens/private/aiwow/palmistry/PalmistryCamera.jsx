@@ -205,6 +205,15 @@ const PalmistryCamera = () => {
       }
       
       if (videoRef.current) {
+        // iOS Safari: React doesn't reliably set the `muted` DOM property from
+        // the JSX prop, and iOS blocks inline playback of an unmuted video —
+        // so play() rejects and the camera never shows. Set these imperatively.
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.setAttribute('muted', '');
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', '');
+
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
@@ -223,9 +232,15 @@ const PalmistryCamera = () => {
         // component may have unmounted (e.g. quick back navigation), leaving
         // videoRef.current null — calling .play() on null throws
         // "null is not an object".
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play();
+        const tryPlay = () => {
+          const p = videoRef.current?.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch((e) => console.warn('Palmistry camera play() failed:', e));
+          }
         };
+        videoRef.current.onloadedmetadata = tryPlay;
+        videoRef.current.oncanplay = tryPlay;
+        tryPlay();
 
         videoRef.current.onplay = () => {
           // Wait a bit for video to stabilize, then start detection

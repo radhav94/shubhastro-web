@@ -94,6 +94,15 @@ const AuraCamera = () => {
       }
       
       if (videoRef.current) {
+        // iOS Safari: React doesn't reliably set the `muted` DOM property from
+        // the JSX prop, and iOS blocks inline playback of an unmuted video —
+        // so play() rejects and the camera never shows. Set these imperatively.
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.setAttribute('muted', '');
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', '');
+
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
@@ -102,16 +111,25 @@ const AuraCamera = () => {
         const videoTrack = mediaStream.getVideoTracks()[0];
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         setIsFrontCamera(trackFacing !== 'environment');
-        
+
+        const tryPlay = () => {
+          const p = videoRef.current?.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch((e) => console.warn('Aura camera play() failed:', e));
+          }
+        };
         videoRef.current.onloadedmetadata = () => {
           console.log("Video metadata loaded");
-          videoRef.current.play();
+          tryPlay();
         };
+        videoRef.current.oncanplay = tryPlay;
 
         videoRef.current.onloadeddata = () => {
           console.log("Video ready");
           setVideoReady(true);
         };
+
+        tryPlay();
       }
     } catch (err) {
       console.error('Error accessing camera:', err);

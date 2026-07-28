@@ -93,6 +93,15 @@ const ClothColorCamera = () => {
       }
       
       if (videoRef.current) {
+        // iOS Safari: React doesn't reliably set the `muted` DOM property from
+        // the JSX prop, and iOS blocks inline playback of an unmuted video —
+        // so play() rejects and the camera never shows. Set these imperatively.
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.setAttribute('muted', '');
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', '');
+
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
@@ -102,12 +111,19 @@ const ClothColorCamera = () => {
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         setIsFrontCamera(trackFacing !== 'environment');
 
-        videoRef.current.onloadedmetadata = async () => {
-          await videoRef.current.play();
+        const tryPlay = async () => {
+          try {
+            await videoRef.current?.play();
+          } catch (e) {
+            console.warn('Cloth camera play() failed:', e);
+          }
           if (detectionReady) {
             startDetection();
           }
         };
+        videoRef.current.onloadedmetadata = tryPlay;
+        videoRef.current.oncanplay = () => { videoRef.current?.play?.().catch(() => {}); };
+        tryPlay();
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
@@ -191,6 +207,12 @@ const ClothColorCamera = () => {
   };
 
   const captureImage = () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) {
+      // Camera not ready yet — nothing to capture.
+      return;
+    }
+    stopDetection();
     const cropCanvas = cropCurrentFrameToCanvas();
     if (!cropCanvas) return;
     setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
@@ -370,9 +392,9 @@ const ClothColorCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={styles.captureButton} 
+            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={!objectDetected || !detectionReady}
+            disabled={!stream}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -381,7 +403,7 @@ const ClothColorCamera = () => {
               </svg>
             </div>
             <span className={styles.captureText}>
-              {objectDetected ? 'Capture' : 'No Cloth Detected'}
+              {!stream ? 'Loading...' : (objectDetected ? 'Capture' : 'Capture Cloth')}
             </span>
           </button>
         ) : (
