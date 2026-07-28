@@ -51,6 +51,7 @@
   padding: 24px;
   margin-bottom: 16px;
   text-align: center;
+  cursor: default;
 }
 
 .badge {
@@ -60,6 +61,8 @@
   font-weight: 600;
   font-size: 14px;
   margin-bottom: 14px;
+  cursor: default;
+  user-select: text;
 }
 
 .active { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
@@ -186,9 +189,7 @@
   padding: 16px;
   border-radius: 12px;
   border: 1.5px solid #fff;
-  transition: border-color 0.2s;
-
-  &:hover { border-color: #f75801; }
+  cursor: default;
 
   span {
     font-size: 11px;
@@ -231,9 +232,7 @@
   border: 1.5px solid #fff;
   padding: 14px 16px;
   border-radius: 12px;
-  transition: border-color 0.2s;
-
-  &:hover { border-color: #f75801; }
+  cursor: default;
 
   p { font-size: 14px; line-height: 1.55; color: #030303; margin: 0; }
 }
