@@ -215,6 +215,17 @@ const useTTS = () => {
     return () => window.removeEventListener("translationchange", handleLangChange);
   }, [stop]);
 
+  // Stop TTS when window is minimized or page loses visibility
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stop();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [stop]);
+
   useEffect(() => {
     return () => {
       // Abort any in-flight requests and stop audio on unmount
