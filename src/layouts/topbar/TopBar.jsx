@@ -150,7 +150,7 @@ const TopBar = () => {
     },
     {
       title: "Tarot",
-      path: PATH.privateRoutes.TAROT.path,
+      path: PATH.privateRoutes.TAROT_CARD_V2.path,
       children: [
         {
           title: "Yes/No Tarot",
