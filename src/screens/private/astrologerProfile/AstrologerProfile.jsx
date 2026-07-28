@@ -243,9 +243,7 @@ const AstrologerProfile = () => {
   );
 
   // Check if the current astrologer is in the following list
-  const isFollowing = followingData?.data?.some(
-    (item) => item.astrologerId === data?._id && item.isFollowing === true
-  ) || false;
+  const isFollowing = followingData?.data?.isFollowing || false;
 
   const [followAstrologer, { isLoading: followLoading }] =
     useFollowAstrologerByIdMutation();
