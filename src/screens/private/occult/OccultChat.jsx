@@ -23,7 +23,15 @@ const OccultChat = () => {
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const pendingGuestActionRef = useRef(null);
   const [selectedProfile, setSelectedProfileLocal] = useState(null);
+  const [guestGenerating, setGuestGenerating] = useState(false);
   const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
+
+  // Listen for guest generation trigger (survives component remount after auth)
+  useEffect(() => {
+    const handler = () => setGuestGenerating(true);
+    window.addEventListener("occult:generating", handler);
+    return () => window.removeEventListener("occult:generating", handler);
+  }, []);
 
   const token = localStorage.getItem("shubhtalk_customer_token");
   const { data: kundliData, isLoading: isLoadingProfiles } = useGetAllKundlisQuery(undefined, { skip: !token });
@@ -48,45 +56,51 @@ const OccultChat = () => {
     }
   }, [profiles.length]);
 
-  const handleGenerate = async () => {
-    if (!token) {
-      pendingGuestActionRef.current = () => handleGenerate();
-      setShowGuestAuthModal(true);
-      return;
-    }
-    if (!selectedProfile?._id) { Toast.error("Please select a Kundli profile first"); return; }
-
+  const doGenerate = async (profile) => {
+    if (!profile?._id) { Toast.error("Please select a Kundli profile first"); return; }
+    window.dispatchEvent(new Event("occult:generating"));
     try {
-      const body = selectedProfile._id?.startsWith("temp_")
+      const body = profile._id?.startsWith("temp_")
         ? {
             kundliDetails: {
-              name: selectedProfile.name,
-              gender: selectedProfile.gender,
-              day: Number(selectedProfile.day),
-              month: Number(selectedProfile.month),
-              year: Number(selectedProfile.year),
-              hour: Number(selectedProfile.hour),
-              min: Number(selectedProfile.min),
+              name: profile.name,
+              gender: profile.gender,
+              day: Number(profile.day),
+              month: Number(profile.month),
+              year: Number(profile.year),
+              hour: Number(profile.hour),
+              min: Number(profile.min),
               second: 0,
-              lat: String(selectedProfile.lat || "0"),
-              lon: String(selectedProfile.lon || "0"),
-              tzone: selectedProfile.tzone ?? 5.5,
-              place: selectedProfile.place,
+              lat: String(profile.lat || "0"),
+              lon: String(profile.lon || "0"),
+              tzone: profile.tzone ?? 5.5,
+              place: profile.place,
             },
           }
-        : { kundliId: selectedProfile._id };
+        : { kundliId: profile._id };
 
       const result = await getOccultDasha(body).unwrap();
       const historyId = result?.message?._id || result?._id;
       const data = result?.message?.message || result?.message || result;
       if (data) {
-        navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile: selectedProfile, historyId } });
+        navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile, historyId } });
       } else {
         Toast.error("Failed to generate reading");
       }
     } catch (err) {
       Toast.error(err?.data?.message || "Failed to generate Occult Dosha analysis");
+    } finally {
+      setGuestGenerating(false);
     }
+  };
+
+  const handleGenerate = async () => {
+    if (!token) {
+      pendingGuestActionRef.current = (profile) => doGenerate(profile);
+      setShowGuestAuthModal(true);
+      return;
+    }
+    doGenerate(selectedProfile);
   };
 
   const benefits = [
@@ -101,7 +115,7 @@ const OccultChat = () => {
     <>
       <BackButton />
     <div className={styles.container}>
-      {(isLoadingProfiles || isGenerating) && <PrimaryLoader />}
+      {(isLoadingProfiles || isGenerating || guestGenerating) && <PrimaryLoader />}
 
       {/* Hero Section - Two columns */}
       <div className={styles.heroRow}>
@@ -162,8 +176,8 @@ const OccultChat = () => {
               )}
             </>
           )}
-          <button className={styles.generateBtn} onClick={handleGenerate} disabled={token && (!selectedProfile || isGenerating)}>
-            {isGenerating ? "Analyzing..." : "Get Occult Reading"}
+          <button className={styles.generateBtn} onClick={handleGenerate} disabled={(token && (!selectedProfile || isGenerating)) || guestGenerating}>
+            {(isGenerating || guestGenerating) ? "Analyzing..." : "Get Occult Reading"}
           </button>
         </div>
         <img src={occultImg} alt="occult" />
