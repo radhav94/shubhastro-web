@@ -151,7 +151,7 @@ const SideBar = ({ open, onClose }) => {
     { title: "Compatibility", path: PATH.privateRoutes.COMPATIBILITY.path },
     {
       title: "Tarot",
-      path: PATH.privateRoutes.TAROT.path,
+      path: PATH.privateRoutes.TAROT_CARD_V2.path,
       children: [
         {
           title: "Yes/No Tarot",

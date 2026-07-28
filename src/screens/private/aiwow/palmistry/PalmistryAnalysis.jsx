@@ -67,7 +67,7 @@ const PalmistryAnalysis = () => {
     if (profileLoading) return; // Wait for profile to load
 
     if (!palmImage || !selectedHand) {
-      navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path[0]);
+      navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0]);
       return;
     }
 
@@ -225,7 +225,7 @@ const PalmistryAnalysis = () => {
     sessionStorage.removeItem(PALMISTRY_ANALYSIS_FLAG);
     setError(null);
     dispatch(clearPalmistryData());
-    navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path[0]);
+    navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0]);
   };
 
   const handleBack = () => {
