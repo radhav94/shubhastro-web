@@ -122,7 +122,7 @@ const CosmicChat = () => {
     }
   };
 
-  const sendMessage = async (overrideText) => {
+  const sendMessage = async (overrideText, refocusInput = true) => {
     const raw = typeof overrideText === 'string' ? overrideText : inputMessage;
     if (!raw.trim() || !sessionId || isLoading) return;
 
@@ -178,12 +178,17 @@ const CosmicChat = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      // Use requestAnimationFrame to ensure focus happens after render
-      requestAnimationFrame(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      });
+      // Only refocus the input when the message was typed by the user (keyboard
+      // already open). For a tapped suggested question the keyboard was closed,
+      // and refocusing would pop it open — shrinking the viewport and hiding
+      // the freshly-arrived answer, forcing the user to scroll manually.
+      if (refocusInput) {
+        requestAnimationFrame(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+        });
+      }
     }
   };
 
@@ -198,7 +203,9 @@ const CosmicChat = () => {
     // Send the suggested question directly instead of only filling the input.
     if (isLoading || !sessionId) return;
     setInputMessage('');
-    sendMessage(question);
+    // Don't refocus the input — that would open the mobile keyboard and hide
+    // the incoming answer.
+    sendMessage(question, false);
   };
 
   const handleBack = () => {
