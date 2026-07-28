@@ -404,7 +404,9 @@ const TopHeader = () => {
             {isLoggedIn && (
               <div className={styles.walletBadge}
                 onClick={() => requireAuth() && navigate(PATH.privateRoutes.RECHARGE.path)}
-                style={{ cursor: 'pointer' }}
+                role="button"
+                tabIndex={0}
+                aria-label="Wallet balance - tap to recharge"
               >
                 <img src={headerCoin} className={styles.coinImg} alt="coin icon" width="20" height="20" />
                 <span className={styles.walletAmount}>
