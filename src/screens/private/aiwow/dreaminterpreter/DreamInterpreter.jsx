@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate, useNavigationType } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import styles from './DreamInterpreter.module.scss';
 import { Toast } from '../../../../component';
 import { interpretDream } from '../../../../services/appServices/aiWowService';
@@ -8,11 +9,22 @@ import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
+import { setDreamInterpreterResult, clearDreamInterpreterResult } from '../../../../redux/aiwow/aiwowSlice';
+import DownloadReportModal from '../components/DownloadReportModal';
+import { useAIWowDownload } from '../hooks/useAIWowDownload';
 
 const DreamInterpreter = () => {
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
+  const dispatch = useDispatch();
+  const savedDreamResult = useSelector((state) => state.aiwow.dreamInterpreter?.result);
+  const isBackNavigation = navigationType === 'POP';
+  const restoredResult = isBackNavigation ? savedDreamResult : null;
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
   const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'dream-interpreter' });
+  // Synchronous guard: blocks a rapid double tap from firing the API twice
+  // before isLoading re-renders and disables the button.
+  const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -28,13 +40,37 @@ const DreamInterpreter = () => {
   const [lifePhase, setLifePhase] = useState('');
   const [challenges, setChallenges] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [interpretation, setInterpretation] = useState(null);
+  const [interpretation, setInterpretation] = useState(restoredResult);
   const [error, setError] = useState(null);
   const [showMorePsych, setShowMorePsych] = useState(false);
   const [showMoreAstro, setShowMoreAstro] = useState(false);
   const [showMorePersonalized, setShowMorePersonalized] = useState(false);
   const [showMoreSymbols, setShowMoreSymbols] = useState(false);
   const [showMoreSpiritual, setShowMoreSpiritual] = useState(false);
+  const [rawApiResult, setRawApiResult] = useState(() => {
+    if (restoredResult?._id || restoredResult?.dreamId) {
+      return { ...restoredResult, _id: restoredResult._id || restoredResult.dreamId };
+    }
+    return null;
+  });
+
+  const downloadResultData = useMemo(() => {
+    if (!rawApiResult) return null;
+    return { ...rawApiResult, featureName: 'Dream-Interpreter' };
+  }, [rawApiResult]);
+
+  const {
+    isDownloading, showDownloadModal, setShowDownloadModal,
+    downloadPrice, walletBalance,
+    handleDownloadClick, handleConfirmDownload,
+  } = useAIWowDownload({ resultData: downloadResultData });
+
+  // Scroll to top when result/error is displayed
+  useEffect(() => {
+    if (interpretation || error) {
+      window.scrollTo(0, 0);
+    }
+  }, [interpretation, error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,11 +90,16 @@ const DreamInterpreter = () => {
       return;
     }
 
+    // Block a second concurrent submit (double tap).
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+
     try {
       setIsLoading(true);
 
       const dreamData = {
         dreamDescription: dreamDescription.trim(),
+        kundliId: profile._id || profile.id || '',
         name: profile.name,
         gender: profile.identity?.toLowerCase() || 'male',
         day: profile.day,
@@ -103,7 +144,15 @@ const DreamInterpreter = () => {
 
       if (result.success) {
         // API returns data.dream object
-        setInterpretation(result.data?.dream || result.data);
+        const interpretationData = result.data?.dream || result.data;
+        setInterpretation(interpretationData);
+        dispatch(setDreamInterpreterResult(interpretationData));
+        // API response: { success, message, dream: { _id, dreamId, ... } }
+        const apiData = result.data;
+        const dream = apiData?.dream || apiData;
+        setInterpretation(dream);
+        // Store with _id at top level for useAIWowDownload historyId extraction
+        setRawApiResult({ ...dream, _id: dream?._id || dream?.dreamId });
         setError(null);
       } else {
         // Set error state to show error UI
@@ -115,6 +164,7 @@ const DreamInterpreter = () => {
       setError('An unexpected error occurred. Please try again.');
       setInterpretation(null);
     } finally {
+      isSubmittingRef.current = false;
       setIsLoading(false);
     }
   };
@@ -122,11 +172,13 @@ const DreamInterpreter = () => {
   const handleBack = () => {
     if (interpretation || error) {
       setInterpretation(null);
+      setRawApiResult(null);
       setError(null);
       setDreamDescription('');
       setTags('');
       setLifePhase('');
       setChallenges('');
+      dispatch(clearDreamInterpreterResult());
     } else {
       navigate('/ai-wow');
     }
@@ -158,6 +210,16 @@ const DreamInterpreter = () => {
               <p className={styles.subtitle}>{profile.name}</p>
             )}
           </div>
+          {interpretation && (
+            <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="7 10 12 15 17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {isDownloading ? "Downloading..." : "Download"}
+            </button>
+          )}
         </div>
       </header>
 
@@ -291,7 +353,7 @@ const DreamInterpreter = () => {
                   <h3 className={styles.cardTitle}>
                     {interpretation.summary.title || 'Dream Summary'}
                   </h3>
-                  <TTSButton text={`${interpretation.summary.title || 'Dream Summary'}. ${interpretation.summary.mainTheme || ''}${interpretation.summary.emotionalTone ? '. Emotional Tone: ' + interpretation.summary.emotionalTone : ''}${interpretation.summary.intensity ? '. Intensity: ' + interpretation.summary.intensity + ' percent' : ''}`} />
+                  <TTSButton text={`${interpretation.summary.title || 'Dream Summary'}. ${interpretation.summary.mainTheme || ''}${interpretation.summary.emotionalTone ? '. Emotional Tone: ' + interpretation.summary.emotionalTone : ''}${interpretation.summary.intensity ? '. Intensity: ' + interpretation.summary.intensity + ' percent' : ''}${interpretation.summary.lucidity ? '. Lucidity: ' + interpretation.summary.lucidity : ''}`} />
                 </div>
                 <div className={styles.contentWrapper}>
                   {interpretation.summary.mainTheme && (
@@ -786,6 +848,17 @@ const DreamInterpreter = () => {
       </div>
       {subscriptionModal}
     </div>
+
+    <DownloadReportModal
+      isOpen={showDownloadModal}
+      onClose={() => setShowDownloadModal(false)}
+      onDownload={handleConfirmDownload}
+      featureName="Dream Interpreter Report"
+      downloadCost={downloadPrice}
+      walletBalance={walletBalance ?? 0}
+      isDownloading={isDownloading}
+      showLanguageSelection={false}
+    />
     </>
   );
 };

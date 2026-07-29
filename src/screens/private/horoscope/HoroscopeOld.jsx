@@ -259,7 +259,7 @@ const HoroscopeOld = () => {
     } else {
       newPath = `/daily-horoscope/${profileSunSign}`;
     }
-    navigate(newPath, { replace: true });
+    navigate(newPath, { replace: true});
   }, [activeProfile?._id, profileSunSign, isAstroFetching]);
 
   // Update active tab when pathname changes
@@ -485,16 +485,16 @@ const HoroscopeOld = () => {
     // (e.g. "Physique" is daily-only) doesn't linger and show empty content.
     setActiveCategory('overview');
     
-    // Navigate to corresponding route
+    // Navigate to corresponding route (replace so back button goes to home, not through each tab)
     // Both "Today" and "Daily" go to daily-horoscope
     if (tab === 'Today' || tab === 'Daily') {
-      navigate(`/daily-horoscope/${selectedZodiac}`);
+      navigate(`/daily-horoscope/${selectedZodiac}`, { replace: true });
     } else if (tab === 'Tomorrow') {
-      navigate(`/tomorrow-horoscope/${selectedZodiac}`);
+      navigate(`/tomorrow-horoscope/${selectedZodiac}`, { replace: true });
     } else if (tab === 'This Week') {
-      navigate(`/weekly-horoscope/${selectedZodiac}`);
+      navigate(`/weekly-horoscope/${selectedZodiac}`, { replace: true });
     } else if (tab === 'This Year') {
-      navigate(`/yearly-horoscope/${selectedZodiac}`);
+      navigate(`/yearly-horoscope/${selectedZodiac}`, { replace: true });
     }
   };
 
@@ -582,7 +582,7 @@ const HoroscopeOld = () => {
             className="indian-horoscope-btn"
             onClick={() => {
               trackEvent('horoscope_type_switched', { from_type: 'western', to_type: 'indian' });
-              navigate('/daily-horoscope-indian');
+              navigate('/daily-horoscope-indian', { replace: true });
             }}
           >
             Indian
@@ -677,7 +677,11 @@ const HoroscopeOld = () => {
             ))}
           </div>
 
-          <div className="horoscope-content" ref={overviewRef}>
+          <div
+            className="horoscope-content"
+            ref={overviewRef}
+            key={`${activeTab}-${selectedPhase}-${activeCategory}-${selectedZodiac}-${(currentContent.title || '')}-${(currentContent.content || '').slice(0, 24)}`}
+          >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <h2 className="content-title">
                 {currentContent.title}

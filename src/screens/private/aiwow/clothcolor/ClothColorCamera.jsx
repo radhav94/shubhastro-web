@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './ClothColorCamera.module.scss';
 import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
+import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const ClothColorCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -100,6 +103,15 @@ const ClothColorCamera = () => {
       }
       
       if (videoRef.current) {
+        // iOS Safari: React doesn't reliably set the `muted` DOM property from
+        // the JSX prop, and iOS blocks inline playback of an unmuted video —
+        // so play() rejects and the camera never shows. Set these imperatively.
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.setAttribute('muted', '');
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', '');
+
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
@@ -109,12 +121,19 @@ const ClothColorCamera = () => {
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         setIsFrontCamera(trackFacing !== 'environment');
 
-        videoRef.current.onloadedmetadata = async () => {
-          await videoRef.current.play();
+        const tryPlay = async () => {
+          try {
+            await videoRef.current?.play();
+          } catch (e) {
+            console.warn('Cloth camera play() failed:', e);
+          }
           if (detectionReady) {
             startDetection();
           }
         };
+        videoRef.current.onloadedmetadata = tryPlay;
+        videoRef.current.oncanplay = () => { videoRef.current?.play?.().catch(() => {}); };
+        tryPlay();
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
@@ -162,60 +181,88 @@ const ClothColorCamera = () => {
     // Start camera with new mode will be handled by useEffect
   };
 
-  const captureImage = () => {
-    if (videoRef.current && canvasRef.current && captureAreaRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  // Draw the current video frame, cropped to the capture box, onto a canvas.
+  const cropCurrentFrameToCanvas = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !captureAreaRef.current || !video.videoWidth) return null;
 
-      // Calculate crop bounds from the capture area box
-      const videoRect = video.getBoundingClientRect();
-      const boxRect = captureAreaRef.current.getBoundingClientRect();
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      const bounds = {
-        left: (boxRect.left - videoRect.left) / videoRect.width,
-        right: (boxRect.right - videoRect.left) / videoRect.width,
-        top: (boxRect.top - videoRect.top) / videoRect.height,
-        bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
-      };
+    const videoRect = video.getBoundingClientRect();
+    const boxRect = captureAreaRef.current.getBoundingClientRect();
+    const bounds = {
+      left: (boxRect.left - videoRect.left) / videoRect.width,
+      right: (boxRect.right - videoRect.left) / videoRect.width,
+      top: (boxRect.top - videoRect.top) / videoRect.height,
+      bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
+    };
+    const boxX = bounds.left * canvas.width;
+    const boxY = bounds.top * canvas.height;
+    const boxWidth = (bounds.right - bounds.left) * canvas.width;
+    const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
 
-      const boxX = bounds.left * canvas.width;
-      const boxY = bounds.top * canvas.height;
-      const boxWidth = (bounds.right - bounds.left) * canvas.width;
-      const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
-
-      // Create cropped canvas
-      const cropCanvas = document.createElement('canvas');
-      cropCanvas.width = boxWidth;
-      cropCanvas.height = boxHeight;
-      const cropContext = cropCanvas.getContext('2d');
-      cropContext.drawImage(
-        canvas,
-        boxX, boxY, boxWidth, boxHeight,
-        0, 0, boxWidth, boxHeight
-      );
-
-      const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
-      setCapturedImage(croppedImage);
-      stopCamera();
-    }
+    const cropCanvas = document.createElement('canvas');
+    cropCanvas.width = boxWidth;
+    cropCanvas.height = boxHeight;
+    cropCanvas.getContext('2d').drawImage(
+      canvas,
+      boxX, boxY, boxWidth, boxHeight,
+      0, 0, boxWidth, boxHeight
+    );
+    return cropCanvas;
   };
+
+  const captureImage = () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) {
+      // Camera not ready yet — nothing to capture.
+      return;
+    }
+    stopDetection();
+    const cropCanvas = cropCurrentFrameToCanvas();
+    if (!cropCanvas) return;
+    setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
+    stopCamera();
+  };
+
+  // Auto-capture the sharpest frame once the cloth is steady in the frame.
+  const { autoCapturing } = useAutoCapture({
+    ready: detectionReady && objectDetected,
+    active: !capturedImage,
+    getFrameCanvas: cropCurrentFrameToCanvas,
+    onCapture: (dataUrl) => {
+      setCapturedImage(dataUrl);
+      stopCamera();
+    },
+  });
 
   const retakePhoto = () => {
     setCapturedImage(null);
     startCamera();
   };
 
+  const submitImage = () => {
+    dispatch(setClothColorImage(capturedImage));
+    navigate('/ai-wow/clothes-colour-analysis/capture');
+  };
+
   const proceedWithImage = () => {
-    if (capturedImage) {
-      dispatch(setClothColorImage(capturedImage));
-      navigate('/ai-wow/clothes-colour-analysis/capture');
+    if (!capturedImage) return;
+    // Guests must add a kundli + verify OTP at the moment the photo is submitted.
+    if (!localStorage.getItem("shubhtalk_customer_token")) {
+      setShowGuestAuthModal(true);
+      return;
     }
+    submitImage();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    submitImage();
   };
 
   const handleBack = () => {
@@ -277,6 +324,20 @@ const ClothColorCamera = () => {
     );
   }
 
+  // While the guest auth flow is open, hide the camera view entirely.
+  if (showGuestAuthModal) {
+    return (
+      <GuestKundliAuthModal
+        isOpen
+        onClose={() => {
+          setShowGuestAuthModal(false);
+          navigate('/ai-wow/clothes-colour-analysis/instructions');
+        }}
+        onSuccess={handleGuestAuthSuccess}
+      />
+    );
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -325,6 +386,11 @@ const ClothColorCamera = () => {
                 Position cloth in frame
               </div>
             )}
+            {objectDetected && autoCapturing && (
+              <div className={styles.detectionMessage}>
+                Hold steady… capturing
+              </div>
+            )}
           </>
         ) : (
           <img src={capturedImage} alt="Captured" className={styles.capturedImage} />
@@ -336,9 +402,9 @@ const ClothColorCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={styles.captureButton} 
+            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={!objectDetected || !detectionReady}
+            disabled={!stream}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -347,7 +413,7 @@ const ClothColorCamera = () => {
               </svg>
             </div>
             <span className={styles.captureText}>
-              {objectDetected ? 'Capture' : 'No Cloth Detected'}
+              {!stream ? 'Loading...' : (objectDetected ? 'Capture' : 'Capture Cloth')}
             </span>
           </button>
         ) : (

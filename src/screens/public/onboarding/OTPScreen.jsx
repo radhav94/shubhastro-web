@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
-import OtpInput from "react-otp-input";
 import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import {
@@ -15,18 +14,55 @@ import { privateRequestNew } from "../../../services/appServices/privateRequestN
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearGuestKundliProfiles } from "../../../utils/helper/cookies";
 import { trackEvent } from "../../../utils/analytics";
-import onboardingBg from "../../../assets/images/onboarding.png";
-import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
+// import onboardingBg from "../../../assets/images/onboarding.png";
+import onboardingBg from "../../../assets/images/new-login-bg-2.jpeg";
+// import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
 import LanguageSelector from "../../../component/LanguageSelector";
 import BackButton from "../../../component/UI/BackButton/BackButton";
+
+// Isolated timer component — its state changes won't re-render the OTP inputs
+const ResendTimer = memo(({ onResend }) => {
+  const [timer, setTimer] = useState(20);
+
+  useEffect(() => {
+    if (timer > 0) {
+      const t = setTimeout(() => setTimer(timer - 1), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [timer]);
+
+  const handleClick = () => {
+    if (timer === 0) {
+      onResend();
+      setTimer(20);
+    }
+  };
+
+  return (
+    <div className={styles.resendContainer}>
+      <span className={styles.resendText}>Didn't get it?</span>
+      <button
+        className={styles.resendBtn}
+        onClick={handleClick}
+        disabled={timer > 0}
+      >
+        {timer > 0 ? `Resend in ${timer}s` : "Resend"}
+      </button>
+    </div>
+  );
+});
 const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
   const [otp, setOtp] = useState("");
-  const [resendTimer, setResendTimer] = useState(20);
   const [loading, setLoading] = useState(false);
   const handleContinueRef = useRef(null);
+  const isSubmittingRef = useRef(false);
+  const inputRef = useRef(null);
+  // Holds the AbortController for the in-flight OTP verification so it can be
+  // cancelled if the user requests a new OTP mid-request.
+  const verifyAbortRef = useRef(null);
 
   // Web OTP API - auto-read OTP from SMS
   useEffect(() => {
@@ -37,10 +73,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         .then((otpCredential) => {
           if (otpCredential?.code) {
             setOtp(otpCredential.code);
-            // Auto-submit after filling
-            setTimeout(() => {
-              handleContinueRef.current?.();
-            }, 300);
+            // Auto-submit is handled by the otp length useEffect below
           }
         })
         .catch(() => {});
@@ -48,16 +81,13 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     }
   }, []);
 
-  useEffect(() => {
-    if (resendTimer > 0) {
-      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [resendTimer]);
+
 
   const handleContinue = async () => {
     const otpValue = otp;
     if (otpValue.length === 6) {
+      if (isSubmittingRef.current) return;
+      isSubmittingRef.current = true;
       setLoading(true);
       trackEvent("otp_entered", { mobile_number: formData.phoneNumber });
       try {
@@ -70,7 +100,9 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           ...(fcmTokens && { fcmTokens, deviceType: "web" }),
         };
 
-        const response = await verifyOtp(payload);
+        const controller = new AbortController();
+        verifyAbortRef.current = controller;
+        const response = await verifyOtp(payload, { signal: controller.signal });
 
         if (response.data.success && response.data.statusCode === 200) {
           // Store tokens and user data
@@ -187,6 +219,17 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           toast.error(response.data.message || "Invalid OTP");
         }
       } catch (error) {
+        // The user tapped "Resend OTP" while this request was still in flight.
+        // The call was cancelled on purpose, so stop silently and let them
+        // verify the freshly sent OTP.
+        if (
+          error.code === "ERR_CANCELED" ||
+          error.name === "CanceledError" ||
+          error.name === "AbortError" ||
+          error.message === "canceled"
+        ) {
+          return;
+        }
         console.error("OTP verification error:", error);
         trackEvent("otp_verified_failed", { mobile_number: formData.phoneNumber, error_reason: error.response?.data?.message || "verify_error" });
         toast.error(
@@ -202,6 +245,8 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         }, 50);
       } finally {
         setLoading(false);
+        isSubmittingRef.current = false;
+        verifyAbortRef.current = null;
       }
     }
   };
@@ -209,44 +254,59 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   // Keep ref updated for Web OTP auto-submit
   handleContinueRef.current = handleContinue;
 
-  // Auto-submit when all 6 digits are filled
+  // Auto-submit when all 6 digits are filled (debounced to prevent flickering)
+  const autoSubmitTimerRef = useRef(null);
   useEffect(() => {
-    if (otp.length === 6 && !loading) {
-      handleContinue();
+    if (otp.length === 6 && !loading && !isSubmittingRef.current) {
+      // Small delay to let the UI render the last digit before submitting
+      autoSubmitTimerRef.current = setTimeout(() => {
+        if (!isSubmittingRef.current) {
+          handleContinueRef.current?.();
+        }
+      }, 400);
     }
+    return () => {
+      if (autoSubmitTimerRef.current) {
+        clearTimeout(autoSubmitTimerRef.current);
+      }
+    };
   }, [otp]);
 
   const handleResend = async () => {
-    if (resendTimer === 0) {
-      trackEvent("otp_resend_requested", { mobile_number: formData.phoneNumber });
-      try {
-        const payload = {
-          phoneNumber: `91${formData.phoneNumber}`,
-          type: "CUSTOMER",
-        };
+    // Cancel any in-flight verification
+    if (verifyAbortRef.current) {
+      verifyAbortRef.current.abort();
+      verifyAbortRef.current = null;
+    }
+    setLoading(false);
+    setOtp("");
 
-        const response = await loginWithPhone(payload);
+    trackEvent("otp_resend_requested", { mobile_number: formData.phoneNumber });
+    try {
+      const payload = {
+        phoneNumber: `91${formData.phoneNumber}`,
+        type: "CUSTOMER",
+      };
 
-        if (response.data.success && response.data.statusCode === 200) {
-          toast.success("OTP resent successfully");
-          setResendTimer(20);
-          setOtp("");
-        } else {
-          toast.error(response.data.message || "Failed to resend OTP");
-        }
-      } catch (error) {
-        console.error("Resend OTP error:", error);
-        toast.error(
-          error.response?.data?.message ||
-          "Failed to resend OTP. Please try again.",
-        );
+      const response = await loginWithPhone(payload);
+
+      if (response.data.success && response.data.statusCode === 200) {
+        toast.success("OTP resent successfully");
+      } else {
+        toast.error(response.data.message || "Failed to resend OTP");
       }
+    } catch (error) {
+      console.error("Resend OTP error:", error);
+      toast.error(
+        error.response?.data?.message ||
+        "Failed to resend OTP. Please try again.",
+      );
     }
   };
 
   return (
     <div className={styles.loginScreen}>
-      <div className={styles.loginBackground}>
+      {/* <div className={styles.loginBackground}>
         <img
           src={onboardingBg}
           alt="Astrology"
@@ -257,7 +317,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           alt="Astrology"
           className={styles.backgroundImageMobile}
         />
-      </div>
+      </div> */}
 
       {/* Back Button - top left corner */}
       <div className={styles.otpBackButtonWrap}>
@@ -270,55 +330,36 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
       <div className={styles.loginContent}>
         <h1 className={styles.title}>Aligning your stars...</h1>
         <p className={styles.subtitle}>
-          We've sent a 6-digit code to your mobile +91{" "}
+          We've sent a 6-digit code to your mobile <br></br>+91{" "}
           {formData.phoneNumber || "98989 98989"}. Enter it below to continue.
         </p>
 
-        <div className={styles.otpInputs}>
-          <OtpInput
+        <div className={styles.otpInputs} onClick={() => inputRef.current?.focus()}>
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div
+              key={i}
+              className={`${styles.otpBox} ${otp.length === i ? styles.otpBoxActive : ''} ${otp[i] ? styles.otpBoxFilled : ''}`}
+            >
+              {otp[i] || ''}
+            </div>
+          ))}
+          <input
+            ref={inputRef}
+            type="tel"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            className={styles.otpHiddenInput}
             value={otp}
-            onChange={(val) => {
-              // Chrome autofill may paste full OTP into one input
-              // react-otp-input passes the full string through onChange
+            onChange={(e) => {
+              const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 6);
               setOtp(val);
             }}
-            numInputs={6}
-            shouldAutoFocus
-            containerStyle={{ display: 'flex', gap: '12px', justifyContent: 'center' }}
-            inputStyle={styles.otpInput}
-            renderInput={(props, index) => (
-              <input
-                {...props}
-                type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                autoComplete="one-time-code"
-                onInput={(e) => {
-                  // Handle Chrome autofill pasting full OTP into first input
-                  const value = e.target.value;
-                  if (value.length > 1 && /^\d+$/.test(value)) {
-                    e.preventDefault();
-                    setOtp(value.slice(0, 6));
-                    return;
-                  }
-                  // Call original onInput if exists
-                  if (props.onInput) props.onInput(e);
-                }}
-              />
-            )}
+            maxLength={6}
+            autoFocus
           />
         </div>
 
-        <div className={styles.resendContainer}>
-          <span className={styles.resendText}>Didn't get it?</span>
-          <button
-            className={styles.resendBtn}
-            onClick={handleResend}
-            disabled={resendTimer > 0}
-          >
-            {resendTimer > 0 ? `Resend in ${resendTimer} seconds` : "Resend"}
-          </button>
-        </div>
+        <ResendTimer onResend={handleResend} />
         <button
           className={styles.otpprimaryBtn}
           onClick={handleContinue}

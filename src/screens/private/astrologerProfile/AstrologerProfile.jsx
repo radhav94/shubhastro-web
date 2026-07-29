@@ -35,6 +35,7 @@ import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chat
 import StickyReview from "../home/components/call/StickyReview";
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
+import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useChat } from "../../../context/ChatContext";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
@@ -88,8 +89,15 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
       <div className={styles.buttonWrapper}>
         <button
           className={styles.chatBtn}
-          onClick={() => chatEnabled && onChat(astrologer)}
+          onClick={() => {
+            if (!chatEnabled) {
+              // Provide feedback instead of dead click
+              return;
+            }
+            onChat(astrologer);
+          }}
           disabled={!chatEnabled}
+          title={!chatEnabled ? "Chat is currently unavailable" : "Start chat"}
         >
           <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
         </button>
@@ -108,8 +116,14 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
       <div className={styles.buttonWrapper}>
         <button
           className={styles.callBtn}
-          onClick={() => callEnabled && onCall(astrologer, "audio")}
+          onClick={() => {
+            if (!callEnabled) {
+              return;
+            }
+            onCall(astrologer, "audio");
+          }}
           disabled={!callEnabled}
+          title={!callEnabled ? "Call is currently unavailable" : "Start call"}
         >
           <img src={AppIcons.CallMinutesIcon} alt="" /> Call
         </button>
@@ -229,9 +243,7 @@ const AstrologerProfile = () => {
   );
 
   // Check if the current astrologer is in the following list
-  const isFollowing = followingData?.data?.some(
-    (item) => item.astrologerId === data?._id && item.isFollowing === true
-  ) || false;
+  const isFollowing = followingData?.data?.isFollowing || false;
 
   const [followAstrologer, { isLoading: followLoading }] =
     useFollowAstrologerByIdMutation();
@@ -246,6 +258,7 @@ const AstrologerProfile = () => {
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showMobileConnectPopup, setShowMobileConnectPopup] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const { openGuestConnect, guestConnectModal } = useGuestConnectFlow();
 
   const { activeCall, setActiveCall, setOpenReview, setReviewData, lastSelectedKundli } = useCall();
   
@@ -374,8 +387,10 @@ const AstrologerProfile = () => {
   };
 
   const handleChatStart = async (astro, isEmergency = false) => {
+    // Guests start chat through the conversational guest flow rather than login.
     if (!token) {
-      navigate("/login", { state: { from: location.pathname } });
+      const targetAstro = astro || data;
+      navigate(`/guest-chat/${targetAstro?._id}`, { state: { astrologer: targetAstro } });
       return;
     }
     
@@ -389,8 +404,9 @@ const AstrologerProfile = () => {
   };
 
   const handleCallStart = async (astro, type, isEmergency = false) => {
+    // Guests use the AI Wow-style guest flow (details + OTP), then the call starts.
     if (!token) {
-      navigate("/login", { state: { from: location.pathname } });
+      openGuestConnect(astro || data, type);
       return;
     }
     
@@ -1584,7 +1600,7 @@ const AstrologerProfile = () => {
                 </svg>
                 <span className={styles.liveText}>Live Now</span>
               </div>
-              <button className={styles.joinLiveSidebarBtn} onClick={handleJoinLive}>
+              <button className={styles.joinLiveSidebarBtn} onClick={(e) => { e.stopPropagation(); handleJoinLive(); }}>
                 Join
               </button>
             </div>
@@ -1782,13 +1798,21 @@ const AstrologerProfile = () => {
         ) : (
           <button
             className={styles.mobileConnectBtn}
-            onClick={() => setShowMobileConnectPopup(true)}
-            disabled={!data?.isActive}
+            onClick={() => {
+              if (!data?.isActive) {
+                toast.error("This astrologer is currently offline. Please try again later.");
+                return;
+              }
+              setShowMobileConnectPopup(true);
+            }}
           >
-            Connect Now
+            {data?.isActive ? "Connect Now" : "Currently Offline"}
           </button>
         )}
       </div>
+
+      {/* Guest call/video flow (AI Wow-style details + OTP, then initiate call) */}
+      {guestConnectModal}
 
       {/* Mobile Connect Popup */}
       <ConnectAstrologerPopup

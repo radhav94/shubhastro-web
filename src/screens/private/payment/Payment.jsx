@@ -4,7 +4,6 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useGetAllPlansQuery } from "../../../redux/api/plansApi/plansApi";
 import { getToken } from "../../../utils/token";
 import { useWalletBalance } from "../wallet/useWalletBalance";
-import BackButton from "../../../component/UI/BackButton/BackButton";
 import { trackEvent } from "../../../utils/analytics";
 
 const RechargePack = ({ name, actualPrice, discountedPrice, offerPrice, Active }) => (
@@ -49,20 +48,31 @@ const Payment = () => {
 
   return (
     <div className={styles.rechargeWrapper}>
-      <BackButton />
       <div className={styles.rechargeTop}>
         <div className={styles.leftSide}>
           <div className={styles.walletBalance}>
-          <img
-            src="https://images.astroyogi.com/astroyogi/wallet_blc.png"
-            alt="Wallet"
-            width={45}
-            height={45}
-          />
-          Wallet Balance
-          <span className={styles.dangerColor}>
-            {isFetching ? "..." : balance !== null ? `₹ ${Math.round(balance)}` : "₹ 0"}
-          </span>
+            <button className={styles.localBackBtn} onClick={() => {
+              if (window.history.length > 1) navigate(-1);
+                else navigate("/", { replace: true });
+              }} aria-label="Go back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+            </button>
+
+            <div className={styles.titleWallet}>
+              <img
+                src="https://images.astroyogi.com/astroyogi/wallet_blc.png"
+                alt="Wallet"
+                width={45}
+                height={45}
+              />
+              Wallet Balance
+              <span className={styles.dangerColor}>
+                {isFetching ? "..." : balance !== null ? `₹ ${Math.round(balance)}` : "₹ 0"}
+              </span>
+            </div>
+
         </div>
 
         <div className={styles.rechargeHeader}>Add Money to Wallet</div>

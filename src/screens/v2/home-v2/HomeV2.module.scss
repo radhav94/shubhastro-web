@@ -688,14 +688,21 @@
     line-height: 1.4;
     height: 36px;
     @media (width <= 1024px) {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
+      height: 30px;
+    }
+    @media (width <= 820px) {
+      height: 36px;
     }
   }
   @media (width <= 1180px) {
     padding: 7px;
-    gap: 10px;
+    gap: 4px;
   }
   @media (width <= 1024px) {
+    gap: 4px;
+  }
+  @media (width <= 820px) {
     gap: 8px;
   }
   @media (max-width: 767px) {
@@ -888,6 +895,9 @@
   //   right: -40px;
   //   width: 56%;
   // }
+  @media (width <= 1180px) {
+    width: 78%;
+  }
 }
 
 /* ═══ Center col — bottom 2 feature cards row ═══ */
@@ -1083,7 +1093,7 @@
     height: 147px;
   }
   @media (width <= 1024px) {
-    height: 108px;
+    height: 130px;
   }
 }
 
@@ -2841,7 +2851,9 @@
   display: flex;
   gap: 16px;
   overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
+  padding: 4px 0;
 
   &::-webkit-scrollbar {
     display: none;
@@ -2858,10 +2870,12 @@
   border-radius: 16px;
   padding: 16px 16px 20px 16px;
   flex-shrink: 0;
-  width: fit-content;
+  min-width: 280px;
+  width: max-content;
   @media (width <= 390px) {
     gap: 10px;
     padding: 12px 12px 14px 12px;
+    min-width: 250px;
   }
   // width: 415px;
   // min-height: 162px;
@@ -2904,7 +2918,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 0;
+  min-width: 150px;
 }
 
 .sessionName {
@@ -3360,7 +3374,7 @@
 }
 
 .ctaAvatar {
-  width: fit-content;
+  width: auto;
   height: 65px;
   // border-radius: 50%;
   object-fit: cover;

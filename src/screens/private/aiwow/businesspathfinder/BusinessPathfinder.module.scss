@@ -1,7 +1,7 @@
 .container {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 16px 60px;
+  padding: 10px 16px 20px;
 }
 
 // Page Header - full width bar
@@ -133,14 +133,14 @@
 .banner {
   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   border-radius: 15px 15px 0 0;
-  padding: 28px 32px;
+  padding: 16px;
   margin-bottom: 0;
 
   h2 {
     font-size: 20px;
     font-weight: 600;
     color: #fff;
-    margin: 0 0 8px;
+    margin: 0;
 
     @media (max-width: 767px) {
       font-size: 17px;
@@ -163,10 +163,10 @@
 .formSection {
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  padding-top: 24px;
+  gap: 16px;
+  // padding-top: 24px;
   background-color: rgb(255 255 255 / 40%);
-    padding: 24px;
+    padding: 16px;
     border: 1px solid white;
 }
 
@@ -180,7 +180,8 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #F7A041 0%, #E88B1E 100%);
+  // background: linear-gradient(135deg, #F7A041 0%, #E88B1E 100%);
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   color: #fff;
   font-size: 14px;
   font-weight: 700;
@@ -198,7 +199,7 @@
 
 .stepTitle {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: #1a1a1a;
   margin: 0 0 4px;
 }
@@ -281,6 +282,15 @@
   svg {
     color: #D43400;
   }
+}
+
+// "Add Custom" chip — dashed pill to distinguish it from category chips.
+.chipCustom {
+  border-style: dashed;
+  border-color: #f57c00;
+  color: #f57c00;
+  border-radius: 999px;
+  justify-content: center;
 }
 
 // Custom Input
@@ -373,7 +383,7 @@
 // Mobile Responsive
 @media (max-width: 767px) {
   .banner {
-    padding: 20px 16px;
+    // padding: 20px 16px;
     border-radius: 12px 12px 0 0;
 
     h2 {
@@ -385,10 +395,10 @@
     }
   }
 
-  .formSection {
-    padding-top: 16px;
-    gap: 24px;
-  }
+  // .formSection {
+  //   padding-top: 16px;
+  //   gap: 24px;
+  // }
 
   .stepSection {
     gap: 10px;

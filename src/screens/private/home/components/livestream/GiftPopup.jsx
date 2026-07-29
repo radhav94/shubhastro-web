@@ -77,12 +77,17 @@ const GiftPopup = ({ show, onClose, giftList, astrologerId, astrologerName, sock
       <div className="gift-popup" onClick={(e) => e.stopPropagation()}>
         <div className="gift-header">
           <div className="gift-title">Send a Gift</div>
-          <div className="gift-wallet">
-            <span className="gift-wallet-amount">₹{balance ?? 0}</span>
-            <div className="gift-wallet-label">
-              <img src={walletIcon} alt="wallet" width="16" height="16" />
-              <span>Wallet</span>
+          <div className="gift-header-right">
+            <div className="gift-wallet">
+              <span className="gift-wallet-amount">₹{balance ?? 0}</span>
+              <div className="gift-wallet-label">
+                <img src={walletIcon} alt="wallet" width="16" height="16" />
+                <span>Wallet</span>
+              </div>
             </div>
+            <button className="gift-close-btn" onClick={handleClose} aria-label="Close">
+              ✕
+            </button>
           </div>
         </div>
 

@@ -4,12 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './PalmistryCamera.module.scss';
 import { useHandDetection } from '../../../../utils/hooks/useHandDetection';
+import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const PalmistryCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const selectedHand = useSelector((state) => state.aiwow.palmistry.selectedHand) || 'right';
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
 
   // Lock body scroll when camera is open (fullscreen on mobile)
   useEffect(() => {
@@ -36,7 +39,26 @@ const PalmistryCamera = () => {
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
   const [isFrontCamera, setIsFrontCamera] = useState(true);
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
   const captureAreaRef = useRef(null); // Reference to capture area div
+
+  // Show the flip button only when the device actually has more than one
+  // camera. (Previously it was hidden on any screen >= 769px, which wrongly
+  // hid it on tablets that do have front + rear cameras.)
+  const detectCameras = async () => {
+    try {
+      if (!navigator.mediaDevices?.enumerateDevices) return;
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const cams = devices.filter((d) => d.kind === 'videoinput');
+      setHasMultipleCameras(cams.length > 1);
+    } catch {
+      /* ignore — leave flip hidden if we can't detect */
+    }
+  };
+
+  useEffect(() => {
+    detectCameras();
+  }, []);
 
   // Calculate capture box bounds dynamically
   const getCaptureBoxBounds = () => {
@@ -94,6 +116,49 @@ const PalmistryCamera = () => {
   // Wrong hand: hand detected but it's not the selected hand
   const isWrongHand = handDetected && detectedHandSide !== null && detectedHandSide !== selectedHand;
 
+  // ─── Auto-capture (blur-safe) ────────────────────────────────────────────
+  // Fire automatically once a valid palm is steadily in frame; the shared hook
+  // picks the sharpest frame so we never save a blurry image.
+  const ready = handsLoaded && handDetected && isPalmOpen && isInBounds && !isWrongHand && !isTooFar;
+
+  // Draw the current video frame, cropped to the orange box, onto a canvas.
+  const cropCurrentFrameToCanvas = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !video.videoWidth) return null;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const bounds = getCaptureBoxBounds();
+    const boxX = bounds.left * canvas.width;
+    const boxY = bounds.top * canvas.height;
+    const boxWidth = (bounds.right - bounds.left) * canvas.width;
+    const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
+
+    const cropCanvas = document.createElement('canvas');
+    cropCanvas.width = boxWidth;
+    cropCanvas.height = boxHeight;
+    cropCanvas.getContext('2d').drawImage(
+      canvas,
+      boxX, boxY, boxWidth, boxHeight,
+      0, 0, boxWidth, boxHeight
+    );
+    return cropCanvas;
+  };
+
+  const { autoCapturing } = useAutoCapture({
+    ready,
+    active: !capturedImage,
+    getFrameCanvas: cropCurrentFrameToCanvas,
+    onCapture: (dataUrl) => {
+      setCapturedImage(dataUrl);
+      stopCamera();
+    },
+  });
+
   // Start detection when models are loaded and video is ready
   useEffect(() => {
     if (handsLoaded && videoRef.current && videoRef.current.readyState >= 2) {
@@ -150,6 +215,15 @@ const PalmistryCamera = () => {
       }
       
       if (videoRef.current) {
+        // iOS Safari: React doesn't reliably set the `muted` DOM property from
+        // the JSX prop, and iOS blocks inline playback of an unmuted video —
+        // so play() rejects and the camera never shows. Set these imperatively.
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.setAttribute('muted', '');
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', '');
+
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
@@ -158,11 +232,25 @@ const PalmistryCamera = () => {
         const videoTrack = mediaStream.getVideoTracks()[0];
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         setIsFrontCamera(trackFacing !== 'environment');
-        
-        // Start hand detection once video is playing
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play();
+
+        // Re-check camera count now that permission is granted (device labels
+        // and full list are only reliably available after permission).
+        detectCameras();
+
+        // Start hand detection once video is playing.
+        // Guard with optional chaining: this fires asynchronously and the
+        // component may have unmounted (e.g. quick back navigation), leaving
+        // videoRef.current null — calling .play() on null throws
+        // "null is not an object".
+        const tryPlay = () => {
+          const p = videoRef.current?.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch((e) => console.warn('Palmistry camera play() failed:', e));
+          }
         };
+        videoRef.current.onloadedmetadata = tryPlay;
+        videoRef.current.oncanplay = tryPlay;
+        tryPlay();
 
         videoRef.current.onplay = () => {
           // Wait a bit for video to stabilize, then start detection
@@ -213,46 +301,11 @@ const PalmistryCamera = () => {
   };
 
   const captureImage = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      // Get orange box bounds dynamically
-      const bounds = getCaptureBoxBounds();
-
-      // Calculate crop dimensions based on orange box bounds
-      const boxX = bounds.left * canvas.width;
-      const boxY = bounds.top * canvas.height;
-      const boxWidth = (bounds.right - bounds.left) * canvas.width;
-      const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
-
-      console.log('📸 Cropping to orange box:', { boxX, boxY, boxWidth, boxHeight });
-
-      // Create a new canvas for the cropped image (only orange box area)
-      const cropCanvas = document.createElement('canvas');
-      cropCanvas.width = boxWidth;
-      cropCanvas.height = boxHeight;
-      const cropContext = cropCanvas.getContext('2d');
-
-      // Draw only the orange box region
-      cropContext.drawImage(
-        canvas,
-        boxX, boxY, boxWidth, boxHeight,  // Source rectangle (from original canvas)
-        0, 0, boxWidth, boxHeight          // Destination rectangle (to crop canvas)
-      );
-
-      // Get the cropped image
-      const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
-
-      setCapturedImage(croppedImage);
-      stopCamera();
-    }
+    const cropCanvas = cropCurrentFrameToCanvas();
+    if (!cropCanvas) return;
+    const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
+    setCapturedImage(croppedImage);
+    stopCamera();
   };
 
   const switchCamera = () => {
@@ -267,15 +320,36 @@ const PalmistryCamera = () => {
   };
 
   const retakePhoto = () => {
-    setCapturedImage(null);
+    setCapturedImage(null); // clearing this re-activates auto-capture in the hook
     startCamera();
   };
 
+  const submitImage = () => {
+    // New image → allow a fresh analysis (clear the reload guard from a
+    // previous attempt).
+    sessionStorage.removeItem('palmistryAnalysisStarted');
+    dispatch(setPalmistryImage(capturedImage));
+    // Replace (not push) so the live camera screen is removed from history.
+    // The analysis screen then replaces itself with the result, so pressing
+    // browser Back on the result page returns to the instructions screen
+    // instead of re-opening the camera (which would restart getUserMedia,
+    // auto-capture again, and trigger a fresh paid analysis in a loop).
+    navigate('/ai-wow/ai-palmistry-scanner/capture', { replace: true });
+  };
+
   const proceedWithImage = () => {
-    if (capturedImage) {
-      dispatch(setPalmistryImage(capturedImage));
-      navigate('/ai-wow/ai-palmistry-scanner/capture');
+    if (!capturedImage) return;
+    // Guests must add a kundli + verify OTP at the moment the photo is submitted.
+    if (!localStorage.getItem("shubhtalk_customer_token")) {
+      setShowGuestAuthModal(true);
+      return;
     }
+    submitImage();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    submitImage();
   };
 
   const handleBack = () => {
@@ -338,6 +412,21 @@ const PalmistryCamera = () => {
     );
   }
 
+  // While the guest auth flow is open, hide the camera view entirely.
+  if (showGuestAuthModal) {
+    return createPortal(
+      <GuestKundliAuthModal
+        isOpen
+        onClose={() => {
+          setShowGuestAuthModal(false);
+          navigate('/ai-wow/ai-palmistry-scanner/instructions');
+        }}
+        onSuccess={handleGuestAuthSuccess}
+      />,
+      document.body
+    );
+  }
+
   return createPortal(
     <div className={styles.container}>
       <div className={styles.header}>
@@ -347,7 +436,7 @@ const PalmistryCamera = () => {
           </svg>
         </button>
         
-        {!capturedImage && (
+        {!capturedImage && hasMultipleCameras && (
           <button className={styles.switchBtn} onClick={switchCamera}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M17 8L21 12M21 12L17 16M21 12H9M7 16L3 12M3 12L7 8M3 12H15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -418,6 +507,11 @@ const PalmistryCamera = () => {
                     : !isInBounds ? 'Move your hand inside the box'
                     : ''}
                 </p>
+              </div>
+            )}
+            {ready && autoCapturing && handsLoaded && (
+              <div className={styles.handDetectionMessage}>
+                <p>Hold steady… capturing</p>
               </div>
             )}
           </>

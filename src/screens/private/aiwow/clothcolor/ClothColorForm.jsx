@@ -10,7 +10,12 @@ import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 const ClothColorForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  // Don't force a profile here — guests select their intention and continue;
+  // auth (the guest kundli flow) happens later at the photo capture/upload step.
+  const { isLoading: profileLoading } = useSelectedKundliProfile({
+    required: false,
+    showToast: false,
+  });
   
   const [formData, setFormData] = useState({
     intention: 'career_success',
@@ -110,9 +115,12 @@ const ClothColorForm = () => {
             </div>
           </div>
 
-          <button type="submit" className={styles.submitButton}>
-            Continue
-          </button>
+          <div className={styles.mobileBottomBar}>
+            <button type="submit" className={styles.submitButton}>
+              Continue
+            </button>
+          </div>
+          
         </form>
       </div>
     </div>

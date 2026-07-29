@@ -6,10 +6,13 @@ import styles from "./Onboarding.module.scss";
 import { PATH } from "../../../utils/routes/Paths";
 import { logout } from "../../../redux/auth/authSlice";
 import { loginWithPhone } from "../../../services/appServices/authService";
-import { AppImages } from "../../../utils/appImages";
-import LanguageSelector from "../../../component/LanguageSelector";
-import BackButton from "../../../component/UI/BackButton/BackButton";
 import { trackEvent } from "../../../utils/analytics";
+import rsBox from "../../../assets/images/rs-box.png";
+import loginMobile from "../../../assets/images/login-mobile.png";
+import bGuid from "../../../assets/images/b-guidence.png";
+import bAstrologer from "../../../assets/images/b-astrology.png";
+import bAccurate from "../../../assets/images/b-prediction.png";
+import bPrivate from "../../../assets/images/b-private.png";
 
 const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const navigate = useNavigate();
@@ -34,7 +37,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
           trackEvent("otp_sent", { mobile_number: phoneNumber, delivery_status: "success" });
           toast.success(response.data.message || "OTP sent successfully");
           updateFormData({ phoneNumber });
-          onNext(); // Go to OTP screen
+          onNext();
         } else {
           toast.error(response.data.message || "Failed to send OTP");
         }
@@ -51,7 +54,6 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   };
 
   const handleSkipAndProceed = () => {
-    // Clear any stale auth state so guest browsing doesn't trigger 401 redirects
     dispatch(logout());
     localStorage.removeItem("shubhtalk_redirect_after_login");
     localStorage.removeItem("astro_wallet_balance");
@@ -63,115 +65,190 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   };
 
   return (
-    <div className={styles.loginScreen}>
-      <div className={styles.loginBackground}>
-        <img
-          src={AppImages.OnboardingBg}
-          alt="Astrology"
-          className={styles.backgroundImage}
-        />
-        <img
-          src={AppImages.OnboardingBgMobile}
-          alt="Astrology"
-          className={styles.backgroundImageMobile}
-        />
-      </div>
-
-      <div className={styles.otpBackButtonWrap}>
-        <BackButton />
-      </div>
-      
-
-      {/* Language Translator - top right corner */}
-      {/* <LanguageSelector /> */}
-
-      <div className={styles.loginContent}>
-        <h1 className={styles.loginTitle}>Begin your journey</h1>
-        <p className={styles.loginSubtitle}>
-          Personal, private and guided by authentic astrologers.
-        </p>
-
-        <div className={styles.phoneInputContainer}>
-          <div className={styles.countryCode}>
-            <img
-              src="https://flagcdn.com/w40/in.png"
-              alt="India"
-              className={styles.flag}
-            />
-            <span>+91</span>
-            {/* we are hiding this as it is only for India
-            <span className={styles.dropdownIcon}>▼</span> */}
+    <div className={styles.newLoginPage}>
+      {/* Main Content */}
+      {/* <div className={styles.loginWrapScreen}> */}
+      <div className={styles.newLoginHero}>
+        {/* Left Section */}
+        <div className={styles.newLoginLeft}>
+          {/* Online counter */}
+          <div className={styles.onlineCounter}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#F75801" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="9" cy="7" r="4" stroke="#F75801" strokeWidth="2"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="#F75801" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#F75801" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+            <span><b>10K+</b> Astrologers Online</span>
           </div>
-          <input
-            type="tel"
-            value={phoneNumber}
-            autoFocus
-            onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && phoneNumber.length >= 10 && !loading) {
-                handleGetOTP();
-              }
-            }}
-            placeholder="Enter your Number"
-            className={styles.phoneInput}
-            maxLength={10}
-            inputMode="numeric"
-          />
+
+          {/* Offer Section */}
+          <div className={styles.offerSection}>
+            <div className={styles.giftBox}>
+              <img
+                src={rsBox}
+                alt="Gift"
+                loading="eager"
+              />
+            </div>
+            <div className={styles.offerText}>
+              <h1>
+                <span className={styles.rupeeSymbol}>₹</span>250
+              </h1>
+              <p className={styles.rechargeLabel}>RECHARGE</p>
+              <p className={styles.forNewSignups}>FOR NEW SIGN UPS</p>
+            </div>
+          </div>
+
+          {/* Feature Badges */}
+          <div className={styles.featureBadges}>
+            <div className={styles.topLineStart}>
+              <b className={styles.bLeft}></b>
+              <span className={styles.starIcon}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20" viewBox="0 0 21 20" fill="none">
+                  <path d="M14.25 6.75C12.056 4.55601 10.5 0 10.5 0C10.5 0 9.43472 4.25385 7.5 6.5C5.24008 9.1237 0 10 0 10C0 10 4.74008 10.8763 7 13.5C8.93472 15.7461 10.5 20 10.5 20C10.5 20 12.056 15.694 14.25 13.5C16.444 11.306 20.5 10 20.5 10C20.5 10 16.444 8.94398 14.25 6.75Z" fill="#F99A46"/>
+                </svg>
+              </span>
+              <b className={styles.bRight}></b>
+            </div>
+            <div className={styles.featureBadge}>
+              <div className={styles.badgeIcon}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#F75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <div>
+                <strong>Enjoy AI</strong>
+                <span>Features</span>
+              </div>
+            </div>
+            <div className={styles.featureBadge}>
+              <div className={styles.badgeIcon}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="11" width="18" height="11" rx="2" stroke="#F75801" strokeWidth="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#F75801" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div>
+                <strong>Private</strong>
+                <span>Sessions</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Phone Input */}
+          <div className={styles.newPhoneInput}>
+            <div className={styles.newCountryCode}>
+              <img src="https://flagcdn.com/w40/in.png" alt="India" />
+              <span>+91</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M6 9l6 6 6-6" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <input
+              type="tel"
+              value={phoneNumber}
+              autoFocus
+              onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && phoneNumber.length >= 10 && !loading) {
+                  handleGetOTP();
+                }
+              }}
+              placeholder="Enter mobile number"
+              maxLength={10}
+              inputMode="numeric"
+            />
+          </div>
+
+          {/* CTA Button */}
+          <button
+            className={styles.newClaimBtn}
+            onClick={handleGetOTP}
+            disabled={phoneNumber.length < 10 || loading}
+          >
+            {loading ? "Sending..." : "Claim ₹250 Now"}
+            {!loading && (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </button>
+
+          {/* Security note */}
+          <p className={styles.securityNote}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M22 4L12 14.01l-3-3" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            100% Secure | Your number is safe with us
+          </p>
+
+          {/* Skip */}
+          <button className={styles.newSkipLink} onClick={handleSkipAndProceed}>
+            Skip
+          </button>
+
+          {/* Terms */}
+          <p className={styles.newTerms}>
+            By submitting, you agree to our{" "}
+            <Link to={PATH.privateRoutes.TERMS_CONDITIONS_VIEW.path}>
+              Terms & Conditions
+            </Link>
+          </p>
         </div>
 
-        <button
-          className={styles.primaryBtn}
-          onClick={handleGetOTP}
-          disabled={phoneNumber.length < 10 || loading}
-        >
-          {loading ? "Sending..." : "Get OTP"}
-        </button>
-
-        {/* <div className={styles.divider}>
-          <span>OR</span>
-        </div> */}
-
-
-        {/* Hiding the Google button for now
-        <button className={styles.socialBtn}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              fill="#4285F4"
+        {/* Right Section - Phone Mockup */}
+        <div className={styles.newLoginRight}>
+          <div className={styles.phoneMockup}>
+            <img
+              src={loginMobile}
+              alt="ShubhAstro App"
+              loading="eager"
             />
-            <path
-              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              fill="#34A853"
-            />
-            <path
-              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              fill="#FBBC05"
-            />
-            <path
-              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              fill="#EA4335"
-            />
-          </svg>
-          Sign in with Google
-        </button> */}
+          </div>
+        </div>
+        </div>
+      {/* </div> */}
 
-        {/* <button className={styles.socialBtn}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-          </svg>
-          Sign in with Apple
-        </button> */}
-
-        <button className={styles.skipLink} onClick={handleSkipAndProceed}>
-          Skip and Proceed
-        </button>
-
-        <p className={styles.terms}>
-          By submitting, you agree to our{" "}
-          <Link to={PATH.privateRoutes.TERMS_CONDITIONS_VIEW.path} className={styles.termsLink}>
-            Terms & Conditions
-          </Link>
-        </p>
+      {/* Bottom Trust Bar */}
+      <div className={styles.trustBar}>
+        <div className={styles.trustItem}>
+          <div className={styles.trustIcon}>
+            <img src={bGuid} alt="" />
+          </div>
+          <div>
+            <strong>Personalized</strong>
+            <span>Guidance</span>
+          </div>
+        </div>
+        <div className={styles.trustItem}>
+          <div className={styles.trustIcon}>
+            <img src={bAstrologer} alt="" />
+          </div>
+          <div>
+            <strong>Talk to Expert</strong>
+            <span>Astrologers</span>
+          </div>
+        </div>
+        <div className={styles.trustItem}>
+          <div className={styles.trustIcon}>
+            <img src={bAccurate} alt="" />
+          </div>
+          <div>
+            <strong>Accurate</strong>
+            <span>Predictions</span>
+          </div>
+        </div>
+        <div className={styles.trustItem}>
+          <div className={styles.trustIcon}>
+            <img src={bPrivate} alt="" />
+          </div>
+          <div>
+            <strong>100% Private</strong>
+            <span>& Secure</span>
+          </div>
+        </div>
       </div>
     </div>
   );

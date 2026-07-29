@@ -1,15 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import styles from './DailyCosmicBriefing.module.scss';
 import { getDailyCosmicBriefing } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
+import { useLazyGetSunSignQuery } from '../../../../redux/api/calculator/calcApi';
+import { setSelectedKundliProfile } from '../../../../redux/aiwow/aiwowSlice';
+import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
+
+const pad = (n) => String(n ?? 0).padStart(2, '0');
 
 const DailyCosmicBriefing = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  const [fetchSunSign] = useLazyGetSunSignQuery();
 
   useEffect(() => {
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -23,9 +31,15 @@ const DailyCosmicBriefing = () => {
   
   const [briefing, setBriefing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Tracks the profile id we've already fetched for, so a re-render that
+  // changes the profile object reference (same profile) doesn't re-hit the API.
+  const fetchedProfileIdRef = useRef(null);
 
   useEffect(() => {
     if (profile && !profileLoading) {
+      const profileId = profile._id || profile.id;
+      if (fetchedProfileIdRef.current === profileId) return;
+      fetchedProfileIdRef.current = profileId;
       fetchBriefing(profile);
     }
   }, [profile, profileLoading]);
@@ -50,12 +64,47 @@ const DailyCosmicBriefing = () => {
         tzone: profile.tzone || 5.5
       };
 
-      // Determine zodiac sign from profile or calculate
-      const zodiacSign = profile.sunSign || profile.sign || 'Aries';
+      // Resolves a valid western sun sign from the astrology API
+      // (find-sun-sign) and stores it back on the selected profile for reuse.
+      const resolveSunSignFromApi = async () => {
+        try {
+          const res = await fetchSunSign({
+            dob: `${profile.year}-${pad(profile.month)}-${pad(profile.day)}`,
+            tob: `${pad(profile.hour)}:${pad(profile.min ?? profile.minute)}`,
+            lat: profile.latitude || profile.lat,
+            lng: profile.longitude || profile.lon,
+          }).unwrap();
+          const sign = res?.response?.sun_sign || null;
+          if (sign && sign !== profile.sunSign) {
+            const updatedProfile = { ...profile, sunSign: sign };
+            dispatch(setSelectedKundliProfile(updatedProfile));
+            dispatch(setSelectedKundli(updatedProfile));
+            localStorage.setItem('selectedKundliProfile', JSON.stringify(updatedProfile));
+          }
+          return sign;
+        } catch (err) {
+          console.error('Failed to resolve sun sign from API:', err);
+          return null;
+        }
+      };
 
-      const result = await getDailyCosmicBriefing(zodiacSign, params);
+      // First attempt with the sign already on the profile (if any).
+      let zodiacSign = profile.sunSign || profile.sign;
+      let result = zodiacSign
+        ? await getDailyCosmicBriefing(zodiacSign, params)
+        : null;
 
-      if (result.success) {
+      // Only call find-sun-sign if the briefing failed (or we had no sign),
+      // then recall the briefing once with the corrected sign.
+      if (!result || !result.success) {
+        const apiSign = await resolveSunSignFromApi();
+        if (apiSign && apiSign !== zodiacSign) {
+          zodiacSign = apiSign;
+          result = await getDailyCosmicBriefing(zodiacSign, params);
+        }
+      }
+
+      if (result && result.success) {
         setBriefing(result.data);
       } else {
         setTimeout(() => {
@@ -132,10 +181,7 @@ const DailyCosmicBriefing = () => {
 
         {/* Mood & Lucky Items */}
         <div className={styles.quickInfo}>
-          <div className={styles.infoCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '4px', right: '4px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Mood. ${briefing.mood?.label}`} />
-            </span>
+          <div className={styles.infoCard}>
             <div className={styles.infoIcon}>😊</div>
             <div className={styles.infoContent}>
               <span className={styles.infoLabel}>Mood</span>
@@ -146,28 +192,31 @@ const DailyCosmicBriefing = () => {
                 {briefing.mood?.label}
               </span>
             </div>
+            <span className={styles.infoTts}>
+              <TTSButton text={`Mood. ${briefing.mood?.label}`} />
+            </span>
           </div>
 
-          <div className={styles.infoCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '4px', right: '4px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Lucky Color. ${briefing.luckyColor}`} />
-            </span>
+          <div className={styles.infoCard}>
             <div className={styles.infoIcon}>🎨</div>
             <div className={styles.infoContent}>
               <span className={styles.infoLabel}>Lucky Color</span>
               <span className={styles.infoValue}>{briefing.luckyColor}</span>
             </div>
+            <span className={styles.infoTts}>
+              <TTSButton text={`Lucky Color. ${briefing.luckyColor}`} />
+            </span>
           </div>
 
-          <div className={styles.infoCard} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '4px', right: '4px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Lucky Number. ${briefing.luckyNumber}`} />
-            </span>
+          <div className={styles.infoCard}>
             <div className={styles.infoIcon}>🔢</div>
             <div className={styles.infoContent}>
               <span className={styles.infoLabel}>Lucky Number</span>
               <span className={styles.infoValue}>{briefing.luckyNumber}</span>
             </div>
+            <span className={styles.infoTts}>
+              <TTSButton text={`Lucky Number. ${briefing.luckyNumber}`} />
+            </span>
           </div>
         </div>
 

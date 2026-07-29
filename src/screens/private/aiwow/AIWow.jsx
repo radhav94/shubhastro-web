@@ -8,19 +8,15 @@ import FeatureCard from "./components/FeatureCard";
 import MobileAppModal from "./components/MobileAppModal";
 import ResultHistoryCard from "./components/ResultHistoryCard";
 import DownloadReportModal from "./components/DownloadReportModal";
-import { ProfileManager } from "../../../component/UI/Profile";
+import { ProfileManager, GuestKundliAuthModal } from "../../../component/UI/Profile";
 import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
 import { useGetAiWowPageDataQuery, useGetAiHistoryQuery, useGetChargesQuery, useDownloadReportPdfMutation } from "../../../redux/api/aiwow/aiwowApi";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
-import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { PATH } from "../../../utils/routes/Paths";
 import { trackEvent } from "../../../utils/analytics";
-import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from "../../../utils/subscription/featureGating";
-import { useGetSubscriptionStatusQuery, useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscription/subscriptionApi";
-import SubscriptionModal from "../../../component/UI/modal/SubscriptionModal/SubscriptionModal";
 
 // Reusable Section Title with Divider (same as Explore page, auto-width)
 const SectionTitleWithDivider = ({ title, description, styles }) => (
@@ -45,12 +41,10 @@ const AIWow = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const requireAuth = useRequireAuth();
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingGuestActionRef = useRef(null);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  const [subscriptionModalVariant, setSubscriptionModalVariant] = useState("basic");
-  const [pendingServiceSlug, setPendingServiceSlug] = useState(null);
   const [activeTab, setActiveTab] = useState("aiwow");
   const [downloadModal, setDownloadModal] = useState({ open: false, featureId: null, featureName: "" });
   const [isDownloading, setIsDownloading] = useState(false);
@@ -60,16 +54,6 @@ const AIWow = () => {
 
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
   const [downloadReportPdf] = useDownloadReportPdfMutation();
-  const [triggerSubscriptionStatus] = useLazyGetSubscriptionStatusQuery();
-  const { data: subscriptionStatusData } = useGetSubscriptionStatusQuery(undefined, {
-    skip: !localStorage.getItem("shubhtalk_customer_token"),
-  });
-  const hasActiveSubscription = !!subscriptionStatusData?.data?.hasActiveSubscription;
-
-  // Charges only matter for non-subscribed users; subscribed users download
-  // directly with no popup, so skip the charges API for them.
-  const { data: chargesData } = useGetChargesQuery(undefined, { skip: hasActiveSubscription });
-  const charges = chargesData?.data || null;
 
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
   const headerSelectedKundli = useSelector((state) => state.kundli.selectedKundli);
@@ -86,6 +70,9 @@ const AIWow = () => {
 
   const { data: aiwowData } = useGetAiWowPageDataQuery();
 
+  // Charges data — fetched once, cached for 5 min by RTK Query
+  const { data: chargesData } = useGetChargesQuery();
+
   const kundliId = selectedProfile?._id || selectedProfile?.id || "";
   const { data: historyData, isLoading: isHistoryLoading, isFetching: isHistoryFetching, refetch: refetchHistory } = useGetAiHistoryQuery(
     { kundliId, page: historyPage, limit: 10 },
@@ -95,18 +82,42 @@ const AIWow = () => {
   const profiles = data?.data || [];
   const aiwowSections = aiwowData?.data?.list || [];
   const rawHistoryList = historyData?.data?.history || [];
+  const charges = chargesData?.data || null;
 
-  // Deduplicate history — same featureId means same analysis, keep the one with pdfPath (completed)
+  // Deduplicate history — same featureId OR same featureType within 2 min = same analysis
   const historyList = useMemo(() => {
-    const seen = new Map();
+    // Pass 1: deduplicate by featureId
+    const byFeatureId = new Map();
     for (const item of rawHistoryList) {
+      // // Exclude Daily Horoscope from result history
+      // if (item.featureName?.toLowerCase() === "daily horoscope") continue;
       const key = item.featureId || item._id;
-      const existing = seen.get(key);
+      const existing = byFeatureId.get(key);
       if (!existing || (item.pdfPath && !existing.pdfPath)) {
-        seen.set(key, item);
+        byFeatureId.set(key, item);
       }
     }
-    return Array.from(seen.values());
+    // Pass 2: sort by time desc, then collapse items of same featureType within 2 min
+    const sorted = Array.from(byFeatureId.values()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    const result = [];
+    for (const item of sorted) {
+      const time = new Date(item.createdAt).getTime();
+      const duplicate = result.find(
+        (r) => r.featureType === item.featureType && Math.abs(new Date(r.createdAt).getTime() - time) < 120000
+      );
+      if (duplicate) {
+        // Keep the one with pdfPath
+        if (item.pdfPath && !duplicate.pdfPath) {
+          const idx = result.indexOf(duplicate);
+          result[idx] = item;
+        }
+      } else {
+        result.push(item);
+      }
+    }
+    return result;
   }, [rawHistoryList]);
 
   // Check if more pages available
@@ -123,6 +134,13 @@ const AIWow = () => {
       setActiveTab(location.state.tab);
     }
   }, [location.state]);
+
+  // Refetch history when results tab is active to pick up downloads done on result pages
+  useEffect(() => {
+    if (activeTab === "results" && kundliId) {
+      refetchHistory();
+    }
+  }, [activeTab, location.key]);
 
   // Reset page when profile changes
   useEffect(() => {
@@ -152,14 +170,14 @@ const AIWow = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [activeTab, hasMoreHistory]);
 
-  // Download cost from charges (non-subscribed users only). Subscribed users
-  // download directly with no charge.
+  // Find download cost from charges data by matching featureName to slug in charges
   const getDownloadCost = (featureName) => {
-    if (hasActiveSubscription || !charges || !featureName) return 0;
-    const slug = featureName.trim().replace(/\s+/g, "-").toLowerCase() + "-report";
+    if (!charges || !featureName) return 0;
+    const slug = featureName.trim().replace(/\s+/g, "-") + "-report";
+    // charges is array of sections, each has a .list array with { slug, amount }
     for (const section of charges) {
       if (!Array.isArray(section?.list)) continue;
-      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug);
+      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug.toLowerCase());
       if (match) return match.amount ?? 0;
     }
     return 0;
@@ -220,89 +238,68 @@ const AIWow = () => {
     setShowProfileModal(false);
   };
 
-  const openSubscriptionModal = (mode = "basic") => {
-    setSubscriptionModalVariant(mode);
-    setShowSubscriptionModal(true);
+  // A guest has no auth token yet.
+  const isGuest = !token;
+
+  // Open the guest kundli+OTP flow, remembering the action to run afterwards.
+  const startGuestAuth = (action) => {
+    pendingGuestActionRef.current = typeof action === "function" ? action : null;
+    setShowGuestAuthModal(true);
   };
 
-  // Opens the actual feature (ar-vastu shows the app modal; others navigate).
-  const openService = (slug) => {
+  // After the guest logs in and their kundli is created, run the pending action.
+  const handleGuestAuthSuccess = (profile) => {
+    setShowGuestAuthModal(false);
+    if (profile?._id) {
+      dispatch(setSelectedKundliProfile(profile));
+      dispatch(setSelectedKundli(profile));
+      localStorage.setItem("selectedKundliProfile", JSON.stringify(profile));
+    }
+    const action = pendingGuestActionRef.current;
+    pendingGuestActionRef.current = null;
+    if (action) action(profile);
+  };
+
+  const navigateToFeature = (slug) => {
+    if (slug === "ar-vastu-scanner") {
+      setShowMobileAppModal(true);
+    } else {
+      // All AI WOW features live under the /ai-wow/ prefix
+      trackEvent("shubh_ai_feature_opened", { feature_name: slug });
+      navigate(`/ai-wow/${slug}`);
+    }
+  };
+
+  const handleClick = (slug) => {
+    // AR Vastu Scanner is an app-only feature — show its own modal directly,
+    // never the guest kundli popup or an auth gate.
     if (slug === "ar-vastu-scanner") {
       setShowMobileAppModal(true);
       return;
     }
-    trackEvent("shubh_ai_feature_opened", { feature_name: slug });
-    navigate(`/ai-wow/${slug}`);
-  };
-
-  // Free plan "Unlock Now" → close the modal and open the requested service.
-  const handleFreeUnlock = () => {
-    setShowSubscriptionModal(false);
-    if (pendingServiceSlug) openService(pendingServiceSlug);
-  };
-
-  const handleReportEntitlementError = (err) => {
-    const reason = getSubscriptionErrorReason(err);
-    if (!reason) return false;
-    toast.dismiss("pdf-download");
-    toast.dismiss("pdf-view");
-    if (reason === SUBSCRIPTION_REASON.PREMIUM_REQUIRED) {
-      openSubscriptionModal("basic");
-    } else if (
-      reason === SUBSCRIPTION_REASON.EXTENDED_PLAN_REQUIRED ||
-      reason === SUBSCRIPTION_REASON.EXTENDED_PLAN_EXHAUSTED
-    ) {
-      openSubscriptionModal("extended");
-    } else if (reason === SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE) {
-      toast.error("Insufficient wallet balance. Please recharge to continue.");
-      // Carry the current AI Wow page as the return URL so the user is brought
-      // back here (not the home page) after completing the recharge.
-      const returnUrl = window.location.pathname + window.location.search;
-      navigate(`/recharge?returnUrl=${encodeURIComponent(returnUrl)}`);
-    } else {
-      return false;
-    }
-    return true;
-  };
-
-  const handleClick = async (slug, isPaid) => {
-    // AR Vastu Scanner is mobile-app only — just show the app modal. No
-    // auth/profile/subscription gating for this informational popup.
-    if (slug === "ar-vastu-scanner") {
-      openService(slug);
-      return;
-    }
     // Allow guest users to view intro pages for these features
     const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
-    if (guestAccessSlugs.includes(slug)) {
-      openService(slug);
-      return;
-    }
-    if (!requireAuth()) return;
-    if (!selectedProfile) {
-      toast.error("Please select one Kundli to proceed.");
-      return;
-    }
-    // Paid features require an active subscription.
-    if (isPaid) {
-      try {
-        const res = await triggerSubscriptionStatus().unwrap();
-        if (!res?.data?.hasActiveSubscription) {
-          setPendingServiceSlug(slug);
-          openSubscriptionModal("basic");
-          return;
-        }
-      } catch {
-        setPendingServiceSlug(slug);
-        openSubscriptionModal("basic");
+    // All features require login
+    const freeAccessSlugs = [];
+    if (!freeAccessSlugs.includes(slug) && !guestAccessSlugs.includes(slug)) {
+      // Guests: collect kundli details + verify OTP instead of redirecting to login.
+      if (isGuest) {
+        startGuestAuth(() => navigateToFeature(slug));
+        return;
+      }
+      if (!selectedProfile) {
+        toast.error("Please select one Kundli to proceed.");
         return;
       }
     }
-    openService(slug);
+    navigateToFeature(slug);
   };
 
   const handleProfileClick = () => {
-    if (!requireAuth()) return null;
+    if (isGuest) {
+      startGuestAuth(() => setShowProfileModal(true));
+      return null;
+    }
     setShowProfileModal(true);
   };
 
@@ -318,24 +315,24 @@ const AIWow = () => {
     const pdfKey = `${item.featureType}PdfPath`;
     const existingPdfUrl = item.pdfPath || item[pdfKey];
     
-    if (existingPdfUrl || paidToFreeIds[item.featureId] || hasActiveSubscription) {
-      // Free / subscribed — directly download the PDF, no charge popup
+    if (existingPdfUrl || paidToFreeIds[item.featureId]) {
+      // Free — directly download existing PDF
       try {
         toast.loading("Downloading PDF...", { id: "pdf-download" });
         const url = existingPdfUrl || await fetchPdfUrl(item.featureId);
-        const res = await fetch(url);
-        const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = `${item.featureName || "ai-report"}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(blobUrl);
+          const res = await fetch(url);
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = blobUrl;
+          link.download = `${item.featureName || "ai-report"}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(blobUrl);
         toast.success("PDF downloaded!", { id: "pdf-download" });
-      } catch (err) {
-        if (!handleReportEntitlementError(err)) toast.error("Failed to download PDF", { id: "pdf-download" });
+      } catch {
+        toast.error("Failed to download PDF", { id: "pdf-download" });
       }
     } else {
       // Paid — open the download modal
@@ -350,17 +347,21 @@ const AIWow = () => {
     try {
       toast.loading("Downloading PDF...", { id: "pdf-download" });
       const pdfUrl = await fetchPdfUrl(featureId, language);
-      const res = await fetch(pdfUrl);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `${featureName || "ai-report"}-${language}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(blobUrl);
-      toast.success("PDF downloaded!", { id: "pdf-download" });
+        const res = await fetch(pdfUrl);
+        const blob = await res.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = `${featureName || "ai-report"}-${language}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        // Delay toast to let iOS handle the download trigger without swallowing it
+        setTimeout(() => {
+          URL.revokeObjectURL(blobUrl);
+          toast.dismiss("pdf-download");
+          toast.success("Payment Successful! PDF downloaded.", { id: "pdf-download-success", duration: 3000 });
+        }, 600);
       // Mark this feature as free locally so ribbon updates
       setPaidToFreeIds(prev => ({ ...prev, [featureId]: true }));
       setDownloadModal({ open: false, featureId: null, featureName: "" });
@@ -368,8 +369,8 @@ const AIWow = () => {
       // Reset to page 1 and refetch to get updated pdfPath (shows "Free" on reload)
       setHistoryPage(1);
       refetchHistory();
-    } catch (err) {
-      if (!handleReportEntitlementError(err)) toast.error("Failed to download PDF", { id: "pdf-download" });
+    } catch {
+      toast.error("Failed to download PDF", { id: "pdf-download" });
     } finally {
       setIsDownloading(false);
     }
@@ -381,13 +382,19 @@ const AIWow = () => {
       const pdfUrl = await fetchPdfUrl(featureId);
       window.open(pdfUrl, "_blank", "noopener,noreferrer");
       toast.success("PDF opened!", { id: "pdf-view" });
-    } catch (err) {
-      if (!handleReportEntitlementError(err)) toast.error("Failed to open PDF", { id: "pdf-view" });
+    } catch {
+      toast.error("Failed to open PDF", { id: "pdf-view" });
     }
   };
 
   const handleResultHistory = () =>{
-    if (!requireAuth()) return null;
+    if (isGuest) {
+      startGuestAuth(() => {
+        setActiveTab("results");
+        trackEvent("shubh_ai_past_reports_viewed", {});
+      });
+      return null;
+    }
     setActiveTab("results")
     trackEvent("shubh_ai_past_reports_viewed", {});
   }
@@ -491,8 +498,7 @@ const AIWow = () => {
                             title={feature.title}
                             description={feature.description}
                             icon={feature.icon}
-                            isPaid={feature.isPaid}
-                            onStartNow={() => handleClick(feature?.slug, feature?.isPaid)}
+                            onStartNow={() => handleClick(feature?.slug)}
                           />
                         ) : null
                       )}
@@ -557,16 +563,18 @@ const AIWow = () => {
           enabledOperations={{ list: true, add: true, edit: true, delete: true }}
         />
 
+        <GuestKundliAuthModal
+          isOpen={showGuestAuthModal}
+          onClose={() => {
+            setShowGuestAuthModal(false);
+            pendingGuestActionRef.current = null;
+          }}
+          onSuccess={handleGuestAuthSuccess}
+        />
+
         <MobileAppModal
           isOpen={showMobileAppModal}
           onClose={() => setShowMobileAppModal(false)}
-        />
-
-        <SubscriptionModal
-          isOpen={showSubscriptionModal}
-          onClose={() => setShowSubscriptionModal(false)}
-          onSelectPlan={handleFreeUnlock}
-          variant={subscriptionModalVariant}
         />
 
         <DownloadReportModal

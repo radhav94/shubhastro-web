@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './GemstoneCamera.module.scss';
 import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
+import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setGemstoneImage } from '../../../../redux/aiwow/aiwowSlice';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const GemstoneCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -30,6 +33,7 @@ const GemstoneCamera = () => {
   const {
     detectionReady,
     objectDetected,
+    detectionQuality,
     startDetection,
     stopDetection
   } = useObjectDetection({ videoRef, canvasRef: detectionCanvasRef, detectionType: 'gemstone' });
@@ -73,6 +77,15 @@ const GemstoneCamera = () => {
       }
       
       if (videoRef.current) {
+        // iOS Safari: React doesn't reliably set the `muted` DOM property from
+        // the JSX prop, and iOS blocks inline playback of an unmuted video —
+        // so play() rejects and the camera never shows. Set these imperatively.
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.setAttribute('muted', '');
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', '');
+
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
@@ -82,10 +95,16 @@ const GemstoneCamera = () => {
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         // If facingMode is 'user' or undefined (desktop webcam), it's front-facing
         setIsFrontCamera(trackFacing !== 'environment');
-        
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play();
+
+        const tryPlay = () => {
+          const p = videoRef.current?.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch((e) => console.warn('Gemstone camera play() failed:', e));
+          }
         };
+        videoRef.current.onloadedmetadata = tryPlay;
+        videoRef.current.oncanplay = tryPlay;
+        tryPlay();
 
         videoRef.current.onplay = () => {
           startDetection();
@@ -137,35 +156,68 @@ const GemstoneCamera = () => {
     // Start camera with new mode will be handled by useEffect
   };
 
-  const captureImage = () => {
-    stopDetection();
-    
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      const imageData = canvas.toDataURL('image/jpeg');
-      setCapturedImage(imageData);
-      stopCamera();
-    }
+  // Draw the current full video frame onto a canvas.
+  const cropCurrentFrameToCanvas = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !video.videoWidth) return null;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas;
   };
+
+  const captureImage = () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) {
+      // Camera not ready yet — nothing to capture.
+      return;
+    }
+    stopDetection();
+    const canvas = cropCurrentFrameToCanvas();
+    if (!canvas) return;
+    setCapturedImage(canvas.toDataURL('image/jpeg', 0.95));
+    stopCamera();
+  };
+
+  // Auto-capture the sharpest frame once the gemstone is steady in the frame.
+  // Gemstone detection is heuristic, so require a strong-quality, longer-held
+  // detection before auto-capturing to avoid firing on false positives.
+  const { autoCapturing } = useAutoCapture({
+    ready: detectionReady && objectDetected && detectionQuality >= 55,
+    active: !capturedImage,
+    getFrameCanvas: cropCurrentFrameToCanvas,
+    onCapture: (dataUrl) => {
+      stopDetection();
+      setCapturedImage(dataUrl);
+      stopCamera();
+    },
+    options: { minHoldMs: 1000 },
+  });
 
   const retakePhoto = () => {
     setCapturedImage(null);
     startCamera();
   };
 
+  const submitImage = () => {
+    dispatch(setGemstoneImage(capturedImage));
+    navigate('/ai-wow/gemstone-authenticity/capture');
+  };
+
   const proceedWithImage = () => {
-    if (capturedImage) {
-      dispatch(setGemstoneImage(capturedImage));
-      navigate('/ai-wow/gemstone-authenticity/capture');
+    if (!capturedImage) return;
+    // Guests must add a kundli + verify OTP at the moment the photo is submitted.
+    if (!localStorage.getItem("shubhtalk_customer_token")) {
+      setShowGuestAuthModal(true);
+      return;
     }
+    submitImage();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    submitImage();
   };
 
   const handleBack = () => {
@@ -227,6 +279,20 @@ const GemstoneCamera = () => {
     );
   }
 
+  // While the guest auth flow is open, hide the camera view entirely.
+  if (showGuestAuthModal) {
+    return (
+      <GuestKundliAuthModal
+        isOpen
+        onClose={() => {
+          setShowGuestAuthModal(false);
+          navigate('/ai-wow/gemstone-authenticity');
+        }}
+        onSuccess={handleGuestAuthSuccess}
+      />
+    );
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -272,6 +338,11 @@ const GemstoneCamera = () => {
                 <p>Position your gemstone in the center</p>
               </div>
             )}
+            {objectDetected && autoCapturing && detectionReady && (
+              <div className={styles.detectionMessage}>
+                <p>Hold steady… capturing</p>
+              </div>
+            )}
           </>
         ) : (
           <img src={capturedImage} alt="Captured" className={styles.capturedImage} />
@@ -283,18 +354,18 @@ const GemstoneCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={`${styles.captureButton} ${(!detectionReady || !objectDetected) ? styles.disabled : ''}`} 
+            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={!detectionReady || !objectDetected}
+            disabled={!stream}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!detectionReady || !objectDetected) ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={(!detectionReady || !objectDetected) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={!stream ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={!stream ? "0.5" : "1"}/>
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!detectionReady ? 'Loading...' : (objectDetected ? 'Capture' : 'No Gemstone Detected')}
+              {!stream ? 'Loading...' : (objectDetected ? 'Capture' : 'Capture Gemstone')}
             </span>
           </button>
         ) : (

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate, useNavigationType } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { ChevronDown } from 'lucide-react';
 import styles from './SmartMatchmaking.module.scss';
@@ -21,24 +21,50 @@ import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import { trackEvent } from '../../../../utils/analytics';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
+import { setSmartMatchmakingResult, clearSmartMatchmakingResult } from '../../../../redux/aiwow/aiwowSlice';
+import DownloadReportModal from '../components/DownloadReportModal';
+import { useAIWowDownload } from '../hooks/useAIWowDownload';
 // import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 
 const SmartMatchmaking = () => {
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const dispatch = useDispatch();
   const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'smart-matchmaking' });
+  const savedMatchmakingResult = useSelector((state) => state.aiwow.smartMatchmaking?.result);
+  const isBackNavigation = navigationType === 'POP';
+  const restoredResult = isBackNavigation ? savedMatchmakingResult : null;
   const [showSelectProfile, setShowSelectProfile] = useState(false);
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState(null);
   const [profileToEdit, setProfileToEdit] = useState(null);
+  // Synchronous guard against a rapid double tap firing the analyze API twice.
+  const isSubmittingRef = useRef(false);
   const [selectingType, setSelectingType] = useState(null); // PRIMARY | PARTNER
   const [primaryProfile, setPrimaryProfile] = useState(null);
   const [partnerProfile, setPartnerProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState(restoredResult);
   const [error, setError] = useState(null);
+  const [rawApiResult, setRawApiResult] = useState(() => {
+    if (restoredResult?._id || restoredResult?.historyId) {
+      return { ...restoredResult, _id: restoredResult._id || restoredResult.historyId };
+    }
+    return null;
+  });
+
+  const downloadResultData = useMemo(() => {
+    if (!rawApiResult) return null;
+    return { ...rawApiResult, featureName: 'Smart-Matchmaking' };
+  }, [rawApiResult]);
+
+  const {
+    isDownloading, showDownloadModal, setShowDownloadModal,
+    downloadPrice, walletBalance,
+    handleDownloadClick, handleConfirmDownload,
+  } = useAIWowDownload({ resultData: downloadResultData });
 
 
    console.log(result,"56789")
@@ -305,6 +331,9 @@ const SmartMatchmaking = () => {
       return;
     }
 
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+
     try {
       setIsLoading(true);
       setError(null);
@@ -320,6 +349,8 @@ const SmartMatchmaking = () => {
 
       if (apiResult.success) {
         setResult(apiResult.data);
+        dispatch(setSmartMatchmakingResult(apiResult.data));
+        setRawApiResult(apiResult.data);
         trackEvent("match_making_result_generated", {
           total_gunas: apiResult.data?.totalGunas ?? apiResult.data?.total_gunas,
           compatibility_score: apiResult.data?.compatibilityScore ?? apiResult.data?.compatibility_score,
@@ -333,6 +364,7 @@ const SmartMatchmaking = () => {
       console.error('Failed to analyze compatibility:', error);
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
+      isSubmittingRef.current = false;
       setIsLoading(false);
     }
   };
@@ -340,7 +372,9 @@ const SmartMatchmaking = () => {
   const handleBack = () => {
     if (result) {
       setResult(null);
+      setRawApiResult(null);
       setError(null);
+      dispatch(clearSmartMatchmakingResult());
     } else {
       navigate('/ai-wow');
     }
@@ -361,6 +395,16 @@ const SmartMatchmaking = () => {
             </svg>
           </button>
           <h1 className={styles.title}>Smart Matchmaking</h1>
+          {result && (
+            <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="7 10 12 15 17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 15V3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {isDownloading ? "Downloading..." : "Download"}
+            </button>
+          )}
         </div>
       </header>
 
@@ -843,6 +887,17 @@ const SmartMatchmaking = () => {
       )}
       {subscriptionModal}
     </div>
+
+    <DownloadReportModal
+      isOpen={showDownloadModal}
+      onClose={() => setShowDownloadModal(false)}
+      onDownload={handleConfirmDownload}
+      featureName="Smart Matchmaking Report"
+      downloadCost={downloadPrice}
+      walletBalance={walletBalance ?? 0}
+      isDownloading={isDownloading}
+      showLanguageSelection={false}
+    />
     </>
   );
 };

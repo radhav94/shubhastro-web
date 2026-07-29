@@ -1,9 +1,10 @@
 import styles from "./HomeV2.module.scss";
-import { useState, useMemo, useEffect, useCallback, lazy, Suspense, Fragment } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense, Fragment } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
 import { getUserFromStorage } from "../../../utils/authStorage";
+import { getToken } from "../../../utils/token";
 import { useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -13,8 +14,8 @@ import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscription/subscriptionApi";
 import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
+import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
-import WelcomeBonusModal from "../../../component/UI/modal/WelcomeBonusModal/WelcomeBonusModal";
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
@@ -25,6 +26,8 @@ import ProfileModals from "../../private/kundli/components/ProfileModals";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
 const SubscriptionModal = lazy(() => import("../../../component/UI/modal/SubscriptionModal/SubscriptionModal"));
+import { GuestKundliAuthModal } from "../../../component/UI/Profile";
+import HomeIntroPopup from "./HomeIntroPopup";
 const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));
 
 // Fallback images
@@ -46,7 +49,7 @@ const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
 
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
-const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick }) => {
+const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick, onLiveCommunityClick, onRequireGuestAuth }) => {
   // Sort sections by list_order to determine column placement
   // 1st by list_order → LEFT, 2nd → CENTER, 3rd → RIGHT
   // ai-services is special: it distributes across columns (laal kitaab left, occult/pandit center, community right)
@@ -80,7 +83,15 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
           <div className={styles.centerCard}>
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
-                <p className={styles.greeting} key={`greeting-${name}`}>Hello, {name}! 👋</p>
+                <p
+                  className={styles.greeting}
+                  key={`greeting-${name}`}
+                  onClick={name === "Guest" ? () => navigate("/login") : undefined}
+                  style={name === "Guest" ? { cursor: "pointer", textDecoration: "underline" } : undefined}
+                  role={name === "Guest" ? "button" : undefined}
+                >
+                  Hello, {name}! 👋 {name === "Guest" && <span style={{ fontSize: "12px", opacity: 0.8 }}>Sign in</span>}
+                </p>
                 <h1>
                   {section.title
                     ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></>
@@ -218,7 +229,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
           {renderSectionContent(rightSection)}
           {/* Live Community from ai-services — always in right column */}
           {aiServicesItems[3] && (
-            <div className={`${styles.liveCommunityCard} ${styles.desktopOnly}`} onClick={() => { const url = aiServicesItems[3]?.redirect_url || aiServicesItems[3]?.link; if (url) navigate(url); }} style={{ cursor: aiServicesItems[3]?.redirect_url || aiServicesItems[3]?.link ? 'pointer' : 'default' }}>
+            <div className={`${styles.liveCommunityCard} ${styles.desktopOnly}`} onClick={() => onLiveCommunityClick(aiServicesItems[3])} style={{ cursor: aiServicesItems[3]?.redirect_url || aiServicesItems[3]?.link ? 'pointer' : 'default' }}>
               <span className={styles.featureTag}>New</span>
               <h3 className={styles.liveCommunityTitle}>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title}</h3>
               {aiServicesItems[3]?.description && <p className={styles.liveCommunityDesc}>{aiServicesItems[3].description}</p>}
@@ -243,7 +254,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
 
       {/* Mobile AI Services grid */}
       {aiServicesItems.length > 0 && (
-        <AiServicesSection sectionData={aiServicesData} styles={styles} onlineCount={onlineCount} />
+        <AiServicesSection sectionData={aiServicesData} styles={styles} onlineCount={onlineCount} onRequireGuestAuth={onRequireGuestAuth} />
       )}
     </>
   );
@@ -291,7 +302,7 @@ const ThreeColGroupLayout = ({ sections, styles }) => {
 // ─── Standalone Renderers for Hero/ThreeCol types when ungrouped ──────────────
 
 const renderUngroupedHeroSection = (section, props) => {
-  const { styles, navigate, name, currentMahadasha, handleWowCardClick, onlineCount } = props;
+  const { styles, navigate, name, currentMahadasha, handleWowCardClick, onlineCount, onRequireGuestAuth } = props;
   const dt = section.display_type;
   const key = `ungrouped-${section.list_order}-${dt}`;
 
@@ -305,7 +316,7 @@ const renderUngroupedHeroSection = (section, props) => {
       return (
         <section key={key} className={styles.heroBanner} style={{ margin: '16px 0' }}>
           <div className={styles.heroContent}>
-            <p className={styles.greeting}>Hello, {name}! 👋</p>
+            <p className={styles.greeting} onClick={name === "Guest" ? () => navigate("/login") : undefined} style={name === "Guest" ? { cursor: "pointer", textDecoration: "underline" } : undefined} role={name === "Guest" ? "button" : undefined}>Hello, {name}! 👋 {name === "Guest" && <span style={{ fontSize: "12px", opacity: 0.8 }}>Sign in</span>}</p>
             <h1>{section.title ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></> : <>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></>}</h1>
             {currentMahadasha && <div className={styles.mahadashaTag}>🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong></div>}
           </div>
@@ -320,7 +331,7 @@ const renderUngroupedHeroSection = (section, props) => {
     case "ai-services": {
       const items = sortContentByOrder(section.content || []);
       if (!items.length) return null;
-      return <div key={key}><AiServicesSection sectionData={section} styles={styles} onlineCount={onlineCount} /></div>;
+      return <div key={key}><AiServicesSection sectionData={section} styles={styles} onlineCount={onlineCount} onRequireGuestAuth={onRequireGuestAuth} /></div>;
     }
     default:
       return null;
@@ -351,6 +362,7 @@ const renderUngroupedThreeColSection = (section, props) => {
 const HomeV2 = () => {
   const requireAuth = useRequireAuth();
   const navigate = useNavigate();
+  const { openGuestConnect, guestConnectModal } = useGuestConnectFlow();
   const user = getUserFromStorage();
   const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
   const name = selectedKundli?.name?.split(" ")[0] || user?.firstName || "Guest";
@@ -378,6 +390,8 @@ const HomeV2 = () => {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [pendingServiceItem, setPendingServiceItem] = useState(null);
   const [triggerSubscriptionStatus] = useLazyGetSubscriptionStatusQuery();
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingWowPathRef = useRef(null);
 
   // ─── Data Fetching ────────────────────────────────────────────────────────
   const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery();
@@ -413,7 +427,23 @@ const HomeV2 = () => {
       const target = item.redirect_url || item.slug;
       if (!target) return;
       if (item.is_internal === true || item.is_internal === "true") {
-        navigate(target.startsWith("/") ? target : `/${target}`);
+        const path = target.startsWith("/") ? target : `/${target}`;
+        // Guests: kundli-based features open the add-kundli guest flow instead
+        // of navigating to a page that would bounce them to login. This covers
+        // AI-Wow features and Kundli "free-report" deep links (e.g. Gemstone
+        // Remedy → /kundli?tab=free-report&subtab=remedies&section=gemstones).
+        // The plain Free Kundli generator stays public.
+        const token = localStorage.getItem("shubhtalk_customer_token");
+        const needsKundliAuth =
+          path.startsWith("/ai-wow") ||
+          path.startsWith("/aiwow") ||
+          path.includes("tab=free-report");
+        if (!token && needsKundliAuth) {
+          pendingWowPathRef.current = path;
+          setShowGuestAuthModal(true);
+          return;
+        }
+        navigate(path);
       } else if (item.redirect_url) {
         window.open(item.redirect_url, "_blank", "noopener,noreferrer");
       } else {
@@ -430,9 +460,42 @@ const HomeV2 = () => {
     const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
     if (guestAccessSlugs.includes(item.slug)) { navigate(path); return; }
     const token = localStorage.getItem("shubhtalk_customer_token");
-    if (!token) { localStorage.setItem("shubhtalk_redirect_after_login", path); window.location.href = "/login?skip=welcome"; return; }
+    if (!token) {
+      // Guests: open the add-kundli guest flow instead of redirecting to login.
+      pendingWowPathRef.current = path;
+      setShowGuestAuthModal(true);
+      return;
+    }
     navigate(path);
   }, [navigate]);
+
+  const handleGuestAuthSuccess = useCallback(() => {
+    setShowGuestAuthModal(false);
+    const path = pendingWowPathRef.current;
+    pendingWowPathRef.current = null;
+    if (path) navigate(path);
+  }, [navigate]);
+
+  // Live Community card: guests get the inline guest login popup (instead of
+  // being redirected to /login by the guarded live page) and are taken to the
+  // live page after registering.
+  const handleLiveCommunityClick = useCallback((item) => {
+    const url = item?.redirect_url || item?.link || "/live";
+    if (!url) return;
+    if (!getToken()) {
+      pendingWowPathRef.current = url;
+      setShowGuestAuthModal(true);
+      return;
+    }
+    navigate(url);
+  }, [navigate]);
+
+  // Opens the guest login popup for an auth-required destination (e.g. the
+  // mobile AI-services live card), navigating to `url` after registration.
+  const handleRequireGuestAuth = useCallback((url) => {
+    pendingWowPathRef.current = url;
+    setShowGuestAuthModal(true);
+  }, []);
 
   // Mahadasha
   const kundliProfile = useSelector(s => s.aiwow?.selectedKundliProfile);
@@ -457,6 +520,17 @@ const HomeV2 = () => {
   }, [selectedAstrologer, pendingConnectionType, handleChatStart, handleCallStart]);
 
   const handleConnectClick = useCallback(async (astrologer, connType, isEmergency = false) => {
+    // Guest flows (no login redirect):
+    //  - chat → conversational guest screen
+    //  - call/video → AI Wow-style guest modal, then initiate the call
+    if (!getToken()) {
+      if (connType === "chat") {
+        navigate(`/guest-chat/${astrologer._id}`, { state: { astrologer } });
+      } else {
+        openGuestConnect(astrologer, connType);
+      }
+      return;
+    }
     if (!requireAuth()) return;
     setSelectedAstrologer(astrologer);
     setAstrologerRef(astrologer);
@@ -466,7 +540,7 @@ const HomeV2 = () => {
       else result = await handleCallStart(astrologer, "audio", isEmergency);
       if (result?.emergencyAvailable) { setShowEmergencyModal(true); return; }
     } else { setPendingConnectionType(connType); hookSetOpenModal(prev => ({ ...prev, kundli: true })); }
-  }, [requireAuth, hasKundli, handleChatStart, handleCallStart, setAstrologerRef, hookSetOpenModal]);
+  }, [requireAuth, hasKundli, handleChatStart, handleCallStart, setAstrologerRef, hookSetOpenModal, navigate, openGuestConnect]);
 
   // ─── Memoized modal handlers ──────────────────────────────────────────────
   const handleEmergencyClose = useCallback(() => setShowEmergencyModal(false), []);
@@ -508,7 +582,7 @@ const HomeV2 = () => {
   const handleRechargeClose = useCallback(() => hookSetOpenModal((prev) => ({ ...prev, recharge: false })), [hookSetOpenModal]);
 
   // ─── Shared props for group renderers ─────────────────────────────────────
-  const heroProps = { styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick: handlePaidCardClick };
+  const heroProps = { styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick: handlePaidCardClick, onLiveCommunityClick: handleLiveCommunityClick, onRequireGuestAuth: handleRequireGuestAuth };
   const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id, astrologerMaleImg };
 
   // ─── Render ───────────────────────────────────────────────────────────────
@@ -526,7 +600,6 @@ const HomeV2 = () => {
   return (
     <>
       <SeoHelmet data={newHomeData?.data} />
-      <WelcomeBonusModal />
       <div className={styles.page}>
         {renderPlan.map((block, idx) => {
           switch (block.type) {
@@ -557,6 +630,13 @@ const HomeV2 = () => {
         <EmergencySessionModal isOpen={showEmergencyModal} onClose={handleEmergencyClose} astrologer={selectedAstrologer} onChatNow={handleEmergencyChatNow} onCallNow={handleEmergencyCallNow} />
         <MobileAppModal isOpen={showMobileAppModal} onClose={handleMobileAppClose} />
         <SubscriptionModal isOpen={showSubscriptionModal} onClose={() => setShowSubscriptionModal(false)} onSelectPlan={handleFreeUnlock} />
+        <GuestKundliAuthModal
+          isOpen={showGuestAuthModal}
+          onClose={() => { setShowGuestAuthModal(false); pendingWowPathRef.current = null; }}
+          onSuccess={handleGuestAuthSuccess}
+        />
+        {/* Guest call/video flow (AI Wow-style details + OTP, then initiate call) */}
+        {guestConnectModal}
       </Suspense>
       <RechargeModal
         isOpen={hookOpenModal.recharge}
@@ -566,6 +646,7 @@ const HomeV2 = () => {
       />
       <PanditAIBubble />
       <PanditAIVoiceBubble />
+      <HomeIntroPopup />
     </>
   );
 };

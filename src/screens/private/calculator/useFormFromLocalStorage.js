@@ -10,14 +10,18 @@ import { setCalculatorData, selectCalculatorData } from "../../../redux/calculat
 const useFormFromLocalStorage = (storageKey, initialState) => {
   const dispatch = useDispatch();
   const storedData = useSelector(selectCalculatorData(storageKey));
-  const [formData, setFormData] = useState(storedData || initialState);
+  // The calculator slice is persisted to localStorage, so a previously
+  // logged-in user's saved inputs would otherwise pre-fill the form for a
+  // guest. Only restore persisted data when the user is logged in.
+  const isLoggedIn = !!localStorage.getItem("shubhtalk_customer_token");
+  const [formData, setFormData] = useState(isLoggedIn && storedData ? storedData : initialState);
 
-  // Sync local state if Redux state changes externally
+  // Sync local state if Redux state changes externally (logged-in users only)
   useEffect(() => {
-    if (storedData) {
+    if (isLoggedIn && storedData) {
       setFormData(storedData);
     }
-  }, [storedData]);
+  }, [storedData, isLoggedIn]);
 
   return [formData, setFormData];
 };

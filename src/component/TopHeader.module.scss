@@ -334,7 +334,6 @@
   min-width: 1440px;
   margin: 0 auto;
   @media (width <= 1180px) {
-    padding: 2px 16px;
     display: none;
   }
   .headerNavLink{
@@ -587,15 +586,20 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  // background: linear-gradient(135deg, #8b6f47 0%, #6b4423 50%, #3e2415 100%);
   background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
   padding: 4px 8px 4px 4px;
   border-radius: 50px;
   color: #fff;
-  // cursor: pointer;
-  // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
   position: relative;
   overflow: hidden;
+  min-height: 32px;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2);
+  
+  &:active {
+    transform: scale(0.95);
+    transition: transform 0.1s;
+  }
 }
 
 .walletBadge::before,.walletBadge::after {

@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styles from "./LalKitab.module.scss";
 import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
 import { useGenerateLalKitabTevaMutation } from "../../../redux/api/lalKitab/lalKitabApi";
-import { ProfileManager } from "../../../component/UI/Profile";
+import { ProfileManager, GuestKundliAuthModal } from "../../../component/UI/Profile";
 import { Toast } from "../../../component";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
@@ -29,7 +29,17 @@ const LalKitab = () => {
   const requireAuth = useRequireAuth();
 
   const [showProfileManager, setShowProfileManager] = useState(false);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingGuestActionRef = useRef(null);
   const [selectedProfile, setSelectedProfileLocal] = useState(null);
+  const [guestGenerating, setGuestGenerating] = useState(false);
+
+  // Listen for guest generation trigger (survives component remount after auth)
+  useEffect(() => {
+    const handler = () => setGuestGenerating(true);
+    window.addEventListener("lalkitab:generating", handler);
+    return () => window.removeEventListener("lalkitab:generating", handler);
+  }, []);
 
   const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
 
@@ -64,24 +74,22 @@ const LalKitab = () => {
     }
   }, [profiles.length, selectedProfile]);
 
-  const handleGenerate = async () => {
-    if (!isLoggedIn) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/laal-kitab");
-      window.location.href = "/login?skip=welcome";
-      return;
-    }
-    if (!selectedProfile?._id) { Toast.error("Please select a Kundli profile first"); return; }
+  const doGenerate = async (profile) => {
+    if (!profile?._id) { Toast.error("Please select a Kundli profile first"); return; }
+    window.dispatchEvent(new Event("lalkitab:generating"));
 
     // Route the generate call through the subscription gate — shows the plans
     // popup on PREMIUM_REQUIRED (and the extended popup on EXTENDED), then
     // retries generation after purchase.
     const result = await runWithEntitlement(async () => {
       try {
-        return await generateTeva(String(selectedProfile._id)).unwrap();
+        return await generateTeva(String(profile._id)).unwrap();
       } catch (err) {
         return err?.data || { success: false, error: err };
       }
     });
+
+    setGuestGenerating(false);
 
     if (result?.blocked) return;
 
@@ -98,13 +106,22 @@ const LalKitab = () => {
     }
   };
 
+  const handleGenerate = async () => {
+    if (!isLoggedIn) {
+      pendingGuestActionRef.current = (profile) => doGenerate(profile);
+      setShowGuestAuthModal(true);
+      return;
+    }
+    doGenerate(selectedProfile);
+  };
+
   const infoText = "Laal Kitab is a unique system of astrology that provides simple yet powerful remedies for planetary afflictions. Unlike traditional Vedic astrology, Laal Kitab focuses on practical remedies that can be performed in daily life to mitigate negative planetary effects.";
 
   return (
     <>
       <BackButton />
     <div className={styles.page}>
-      {(isGenerating || isLoadingProfiles) && <PrimaryLoader />}
+      {(isGenerating || guestGenerating || isLoadingProfiles) && <PrimaryLoader />}
 
       {/* ── Hero Banner ── */}
       <div className={styles.hero}>
@@ -143,9 +160,9 @@ const LalKitab = () => {
             <button
               className={styles.generateBtn}
               onClick={handleGenerate}
-              disabled={!selectedProfile || isGenerating}
+              disabled={!selectedProfile || isGenerating || guestGenerating}
             >
-              {isGenerating ? (
+              {(isGenerating || guestGenerating) ? (
                 <>
                   <span className={styles.spinner} />
                   Generating your Teva...
@@ -168,11 +185,21 @@ const LalKitab = () => {
             <button
               className={styles.generateBtn}
               onClick={handleGenerate}
+              disabled={isGenerating || guestGenerating}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-              </svg>
-              Generate Laal Kitab 
+              {(isGenerating || guestGenerating) ? (
+                <>
+                  <span className={styles.spinner} />
+                  Generating your Teva...
+                </>
+              ) : (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                  </svg>
+                  Generate Laal Kitab 
+                </>
+              )}
             </button>
           </div>
           )}
@@ -217,6 +244,18 @@ const LalKitab = () => {
         selectedProfileId={selectedProfile?._id}
         title="Select Kundli"
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+      />
+
+      <GuestKundliAuthModal
+        isOpen={showGuestAuthModal}
+        onClose={() => { setShowGuestAuthModal(false); pendingGuestActionRef.current = null; }}
+        onSuccess={(profile) => {
+          setShowGuestAuthModal(false);
+          if (profile?._id) setSelectedProfile(profile);
+          const action = pendingGuestActionRef.current;
+          pendingGuestActionRef.current = null;
+          if (action) action(profile);
+        }}
       />
     </div>
     {subscriptionModal}

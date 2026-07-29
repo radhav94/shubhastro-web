@@ -5,21 +5,21 @@ import { Toast } from '../../../../component';
 import { startKundliChat, sendKundliChatMessage } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const TalkToKundliChat = () => {
   const navigate = useNavigate();
-  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  // Guests have no token yet — show the add-kundli guest flow instead of
+  // redirecting. Flips to true once the guest completes the flow.
+  const [hasToken, setHasToken] = useState(
+    () => !!localStorage.getItem("shubhtalk_customer_token")
+  );
+  // Don't force a profile/redirect for guests; the guest flow handles it.
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
+    required: hasToken,
+    showToast: hasToken,
+  });
 
-  useEffect(() => {
-    const token = localStorage.getItem("shubhtalk_customer_token");
-    if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/aiwow/talk-to-your-kundli");
-      window.location.href = "/login?skip=welcome";
-    }
-  }, []);
-
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
-  
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -31,25 +31,40 @@ const TalkToKundliChat = () => {
     "How will my financial situation be this year?"
   ]);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const scrollAreaRef = useRef(null);
   const inputRef = useRef(null);
 
   // Start session when profile is loaded
   useEffect(() => {
-    if (profile && !profileLoading) {
+    if (hasToken && profile && !profileLoading) {
       startSession(profile);
     }
-  }, [profile, profileLoading]);
+  }, [hasToken, profile, profileLoading]);
 
   // Auto-scroll to show latest message above input
-  useEffect(() => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, 100);
-  }, [messages, isLoading]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  // Auto-scroll so the latest reply is fully in view above the input. Scroll
+  // the container to its true bottom after the new message lays out (double
+  // rAF) — a smooth scrollIntoView on a timeout can fire before the message
+  // renders, leaving it hidden behind the input on mobile.
+  const scrollToBottom = (behavior = 'auto') => {
+    // The chat has nested scroll containers (the outer wrapper AND the inner
+    // messages list). Scroll whichever one actually overflows so the latest
+    // message is always brought into view.
+    [scrollAreaRef.current, messagesContainerRef.current].forEach((el) => {
+      if (el && el.scrollHeight > el.clientHeight) {
+        el.scrollTo({ top: el.scrollHeight, behavior });
+      }
+    });
+    messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
   };
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => scrollToBottom('smooth'));
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [messages, isLoading]);
 
   const startSession = async (profile) => {
     try {
@@ -106,10 +121,11 @@ const TalkToKundliChat = () => {
     }
   };
 
-  const sendMessage = async () => {
-    if (!inputMessage.trim() || !sessionId || isLoading) return;
+  const sendMessage = async (overrideText) => {
+    const raw = typeof overrideText === 'string' ? overrideText : inputMessage;
+    if (!raw.trim() || !sessionId || isLoading) return;
 
-    const messageToSend = inputMessage.trim();
+    const messageToSend = raw.trim();
     const userMessage = {
       id: Date.now(),
       type: 'user',
@@ -161,12 +177,6 @@ const TalkToKundliChat = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      // Use requestAnimationFrame to ensure focus happens after render
-      requestAnimationFrame(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      });
     }
   };
 
@@ -178,15 +188,29 @@ const TalkToKundliChat = () => {
   };
 
   const handleSuggestedQuestion = (question, e) => {
+    if (isLoading || !sessionId) return;
     // Use the actual displayed text from the button (respects Google Translate)
     const displayedText = e?.currentTarget?.innerText || question;
-    setInputMessage(displayedText);
-    inputRef.current?.focus();
+    // Send the suggested question directly instead of only filling the input.
+    setInputMessage('');
+    sendMessage(displayedText);
   };
 
   const handleBack = () => {
     navigate('/ai-wow');
   };
+
+  // Guest: open the add-kundli flow (kundli + OTP). On success the token and a
+  // self kundli exist, so we flip to the chat.
+  if (!hasToken) {
+    return (
+      <GuestKundliAuthModal
+        isOpen
+        onClose={() => navigate('/ai-wow')}
+        onSuccess={() => setHasToken(true)}
+      />
+    );
+  }
 
   if (profileLoading) {
     return <PrimaryLoader isLoading={true} />;
@@ -211,10 +235,10 @@ const TalkToKundliChat = () => {
         </div>
       </header>
       
-      <div className={styles.containerDiv}>
+      <div className={styles.containerDiv} ref={scrollAreaRef}>
         <div className={styles.heiT}>
         {/* Messages */}
-        <div className={styles.messagesContainer}>
+        <div className={styles.messagesContainer} ref={messagesContainerRef}>
           {messages.length === 0 && !isLoading && (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>💬</div>

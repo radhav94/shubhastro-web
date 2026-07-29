@@ -35,7 +35,7 @@ const MangalDosha = () => {
 
   // Pre-fill from Redux selectedKundli on mount
   useEffect(() => {
-    if (selectedKundli) {
+    if (localStorage.getItem("shubhtalk_customer_token") && selectedKundli) {
       fillFromProfile(selectedKundli);
     }
   }, [selectedKundli]);

@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect, memo, Suspense } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SectionHeader from "./SectionHeader";
 import NewAstrologerCard from "../../../../component/UI/cards/newAstrologerCard/NewAstrologerCard";
-import useIsOverflowing from "../../../../hooks/useIsOverflowing";
+import useHorizontalScrollState from "../../../../hooks/useHorizontalScrollState";
 import styles from "../Home.module.scss";
 import EmergencySessionModal from "../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 
@@ -10,12 +10,12 @@ const AstrologersSection = memo(({ title, astrologers, onConnect, gridRef, hideS
     const [emergencyAstrologer, setEmergencyAstrologer] = useState(null);
     const internalRef = useRef(null);
     const listRef = gridRef || internalRef;
-    const canScroll = useIsOverflowing(listRef, [astrologers]);
+    const { canScrollLeft, canScrollRight } = useHorizontalScrollState(listRef, [astrologers]);
 
     // Report scrollability to a parent that renders external slider buttons.
     useEffect(() => {
-        onScrollableChange?.(canScroll);
-    }, [canScroll, onScrollableChange]);
+        onScrollableChange?.({ canScrollLeft, canScrollRight });
+    }, [canScrollLeft, canScrollRight, onScrollableChange]);
 
     const handleEmergencyClick = useCallback((astrologer) => {
         setEmergencyAstrologer(astrologer);
@@ -38,7 +38,7 @@ const AstrologersSection = memo(({ title, astrologers, onConnect, gridRef, hideS
         <section className={styles.astrologersSection}>
             <SectionHeader title={title} />
             <div className={styles.gridWrapper}>
-                {!hideSliderButtons && canScroll && (
+                {!hideSliderButtons && canScrollLeft && (
                     <button
                         type="button"
                         className={`${styles.sliderBtn} ${styles.sliderBtnLeft}`}
@@ -58,7 +58,7 @@ const AstrologersSection = memo(({ title, astrologers, onConnect, gridRef, hideS
                         />
                     ))}
                 </div>
-                {!hideSliderButtons && canScroll && (
+                {!hideSliderButtons && canScrollRight && (
                     <button
                         type="button"
                         className={`${styles.sliderBtn} ${styles.sliderBtnRight}`}

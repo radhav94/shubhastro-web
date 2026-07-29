@@ -45,25 +45,25 @@ const AuraAnalysis = () => {
   }, []);
 
   useEffect(() => {
-    if (profileLoading) return;
+    // Only run analysis if we have both image and profile, and haven't started yet
+    if (auraImage && profile && !profileLoading && !isAnalyzing && !analysisComplete && !error) {
+      if (hasStartedRef.current) return;
+      // Validate image format
+      if (typeof auraImage !== 'string' || !auraImage.startsWith('data:image/')) {
+        console.error('Invalid image format in Redux state:', typeof auraImage);
+        Toast.error('Invalid image format. Please try again.');
+        dispatch(clearAuraData());
+        navigate(PATH.privateRoutes.AURA_LANDING.path[0]);
+        return;
+      }
 
-    // Redirect back to instructions if we don't have an image.
-    if (!auraImage) {
-      console.warn('No aura image found in Redux state, redirecting to instructions');
-      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0], { replace: true });
-      return;
+      hasStartedRef.current = true;
+      performAnalysis(auraImage);
+    } else if (!auraImage && !isAnalyzing && !analysisComplete && !error && !profileLoading) {
+      // Only redirect if we don't have an image and we're not in the middle of anything
+      console.warn('No aura image found in Redux state, redirecting to landing');
+      navigate(PATH.privateRoutes.AURA_LANDING.path[0], { replace: true });
     }
-
-    // Validate image format; bail out to instructions if invalid.
-    if (typeof auraImage !== 'string' || !auraImage.startsWith('data:image/')) {
-      console.error('Invalid image format in Redux state:', typeof auraImage);
-      Toast.error('Invalid image format. Please try again.');
-      dispatch(clearAuraData());
-      navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0]);
-      return;
-    }
-    // Note: analysis is no longer triggered automatically on mount.
-    // The user must explicitly click "Generate analysis".
   }, [auraImage, profile, profileLoading]); // Depend on profile and profileLoading
 
   const performAnalysis = async (imageData) => {
@@ -235,7 +235,7 @@ const AuraAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearAuraData());
-    navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0]);
+    navigate(PATH.privateRoutes.AURA_LANDING.path[0]);
   };
 
   const handleBack = () => {

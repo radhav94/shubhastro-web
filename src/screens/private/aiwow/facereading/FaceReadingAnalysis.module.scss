@@ -1,3 +1,4 @@
+/* FaceReadingAnalysis styles */
 @use '../../../../assets/variables/variables' as *;
 
 .container {
@@ -242,7 +243,7 @@
   border-radius: 50%;
 }
 
-.palmImage {
+.faceImage {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -312,14 +313,19 @@
 .sparkleIcon {
   // margin-bottom: 1rem;
   animation: rotate 3s linear infinite;
+  // Composite on its own GPU layer so the rotation doesn't repaint the
+  // backdrop-filtered card behind it (which caused the animation to lag).
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 @keyframes rotate {
   from {
-    transform: rotate(0deg);
+    transform: rotate(0deg) translateZ(0);
   }
   to {
-    transform: rotate(360deg);
+    transform: rotate(360deg) translateZ(0);
   }
 }
 

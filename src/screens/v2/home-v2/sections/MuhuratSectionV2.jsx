@@ -1,4 +1,5 @@
 import { memo, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/panchangApi";
 import useUserLocation from "../../../../utils/hooks/useUserLocation";
 import { IoLocationOutline } from "react-icons/io5";
@@ -24,6 +25,7 @@ const DEFAULT_MUHURATS = [
 ];
 
 const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
+  const navigate = useNavigate();
   const userLocation = useUserLocation();
 
   const panchangPayload = useMemo(() => {
@@ -74,7 +76,7 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
   return (
     <div className={styles.rightPanel}>
       <div className={styles.muhuratHeader}>
-        <h4>{sectionData?.display_title || sectionData?.title || "TODAY'S MUHARAT"}</h4>
+        <h4>{sectionData?.display_title || sectionData?.title || "TODAY'S MUHURAT"}</h4>
         {!userLocation.isDefault && userLocation.locationName && (
           <span className={styles.muhuratLocation}>
             <IoLocationOutline />
@@ -84,7 +86,14 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
       </div>
       <div className={styles.muhuratGrid}>
         {muhurats.map((m, i) => (
-          <div key={m.name} className={styles.muhuratItem}>
+          <div
+            key={m.name}
+            className={styles.muhuratItem}
+            onClick={() => navigate("/aiwow/muhurat-calendar")}
+            role="button"
+            tabIndex={0}
+            style={{ cursor: "pointer" }}
+          >
             <div className={styles.muhuratTop}>
               <div className={styles.muhuratIcon}>
                 <img src={MUHURAT_ICONS[i] || defaultSquareImg} alt={m.name} width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />

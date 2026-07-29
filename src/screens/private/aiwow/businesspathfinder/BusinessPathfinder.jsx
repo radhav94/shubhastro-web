@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './BusinessPathfinder.module.scss';
@@ -6,7 +6,7 @@ import { Toast } from '../../../../component';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { useGetBusinessPathfinderOptionsQuery } from '../../../../redux/api/aiwow/aiwowApi';
-import { ProfileManager } from '../../../../component/UI/Profile';
+import { ProfileManager, GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import { setSelectedKundliProfile } from '../../../../redux/aiwow/aiwowSlice';
 import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 import LocationSearch from '../../../../utils/location/locationSearchVedic';
@@ -17,11 +17,15 @@ import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 const BusinessPathfinder = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  const { profile: rawProfile, isLoading: profileLoading } = useSelectedKundliProfile({ required: false });
+  const token = localStorage.getItem('shubhtalk_customer_token');
+  const profile = token ? rawProfile : null;
   const { data: optionsData, isLoading: optionsLoading } = useGetBusinessPathfinderOptionsQuery();
   const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'business-pathfinder' });
   const userLocation = useUserLocation();
   const [showProfileSelector, setShowProfileSelector] = useState(false);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingGuestActionRef = useRef(null);
 
   // Track feature open (once on mount)
   useEffect(() => {
@@ -69,6 +73,10 @@ const BusinessPathfinder = () => {
   });
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Synchronous re-entry guard — `isSubmitting` state updates asynchronously,
+  // so a rapid double tap (or the guest re-invoke path) can fire the analyze
+  // API twice before the button disables. This ref blocks that immediately.
+  const isSubmittingRef = useRef(false);
 
   const handleCategorySelect = (cat) => {
     if (cat === 'Add Custom') {
@@ -81,7 +89,24 @@ const BusinessPathfinder = () => {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (overrideProfile = null) => {
+    const token = localStorage.getItem('shubhtalk_customer_token');
+    if (!token) {
+      // Guest: remember the submit so it runs automatically once the user is
+      // logged in. Pass the freshly created profile through so we don't rely on
+      // the stale `profile` captured in this closure.
+      pendingGuestActionRef.current = (newProfile) => handleSubmit(newProfile);
+      setShowGuestAuthModal(true);
+      return;
+    }
+
+    // Use the profile handed in by the guest-auth flow if provided, otherwise
+    // fall back to the currently selected profile. Guard against a non-profile
+    // argument (e.g. a click event when wired as onClick={handleSubmit}), which
+    // would otherwise strip kundliId/name/day/month/year from the payload.
+    const isProfile = overrideProfile && typeof overrideProfile === 'object' && overrideProfile._id;
+    const activeProfile = isProfile ? overrideProfile : profile;
+
     const category = showCustomInput ? formData.customCategory : formData.category;
     
     if (!category) {
@@ -104,32 +129,36 @@ const BusinessPathfinder = () => {
       Toast.error('Please select a business location');
       return;
     }
-    if (!profile) {
+    if (!activeProfile) {
       Toast.error('Please select a profile first');
       return;
     }
 
+    // Block a second concurrent submit (double tap / re-invoke).
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+
     setIsSubmitting(true);
     try {
       const payload = {
-        kundliId: profile._id,
+        kundliId: activeProfile._id,
         businessCategory: category,
         businessInfo: formData.businessInfo || '',
         scale: formData.scale,
         partnership: formData.partnership,
         timeline: formData.timeline,
-        name: profile.name,
-        gender: profile.gender || 'male',
-        day: profile.day,
-        month: profile.month,
-        year: profile.year,
-        hour: profile.hour || 0,
-        min: profile.min || profile.minute || 0,
+        name: activeProfile.name,
+        gender: activeProfile.gender || 'male',
+        day: activeProfile.day,
+        month: activeProfile.month,
+        year: activeProfile.year,
+        hour: activeProfile.hour || 0,
+        min: activeProfile.min || activeProfile.minute || 0,
         second: 0,
-        place: formData.businessLocation || profile.place,
-        lat: formData.businessLat || String(profile.lat),
-        lon: formData.businessLon || String(profile.lon),
-        tzone: formData.businessTzone !== '' ? formData.businessTzone : (profile.tzone || 5.5),
+        place: formData.businessLocation || activeProfile.place,
+        lat: formData.businessLat || String(activeProfile.lat),
+        lon: formData.businessLon || String(activeProfile.lon),
+        tzone: formData.businessTzone !== '' ? formData.businessTzone : (activeProfile.tzone || 5.5),
       };
 
       const token = localStorage.getItem('shubhtalk_customer_token');
@@ -167,6 +196,7 @@ const BusinessPathfinder = () => {
       console.error('Business Pathfinder error:', error);
       Toast.error('Something went wrong. Please try again.');
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -175,6 +205,11 @@ const BusinessPathfinder = () => {
 
   return (
     <>
+      {/* Fullscreen loader while the report is being generated (covers the
+          automatic submit after guest login, where the button-level loader
+          isn't visible to the user). */}
+      <PrimaryLoader isLoading={isSubmitting} message="Generating your report..." />
+
       {/* Header - outside container */}
       <div className={styles.pageHeader}>
         <div className={styles.pageHeaderInner}>
@@ -229,7 +264,7 @@ const BusinessPathfinder = () => {
                 );
               })}
               <button
-                className={`${styles.chip} ${showCustomInput ? styles.chipActive : ''}`}
+                className={`${styles.chip} ${styles.chipCustom} ${showCustomInput ? styles.chipActive : ''}`}
                 onClick={() => handleCategorySelect('Add Custom')}
               >
                 Add Custom 
@@ -373,7 +408,7 @@ const BusinessPathfinder = () => {
         <div className={styles.submitWrap}>
           <button
             className={styles.submitBtn}
-            onClick={handleSubmit}
+            onClick={() => handleSubmit()}
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Generating...' : 'Generate my report'}
@@ -392,6 +427,22 @@ const BusinessPathfinder = () => {
       enabledOperations={{ list: true, add: true, edit: true, delete: true }}
     />
     {subscriptionModal}
+
+    <GuestKundliAuthModal
+      isOpen={showGuestAuthModal}
+      onClose={() => { setShowGuestAuthModal(false); pendingGuestActionRef.current = null; }}
+      onSuccess={(newProfile) => {
+        setShowGuestAuthModal(false);
+        if (newProfile?._id) {
+          dispatch(setSelectedKundliProfile(newProfile));
+          dispatch(setSelectedKundli(newProfile));
+          localStorage.setItem('selectedKundliProfile', JSON.stringify(newProfile));
+        }
+        const action = pendingGuestActionRef.current;
+        pendingGuestActionRef.current = null;
+        if (action) action(newProfile);
+      }}
+    />
     </>
   );
 };

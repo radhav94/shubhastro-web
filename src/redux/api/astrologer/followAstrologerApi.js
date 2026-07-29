@@ -6,7 +6,7 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
     // CHECK IF FOLLOWING ASTROLOGER
     checkFollowingStatus: builder.query({
       query: ({ astrologerId }) => ({
-        url: `follows/following?astrologerId=${astrologerId}`,
+        url: `follows/follow-status?astrologerId=${astrologerId}`,
         method: "GET",
       }),
       providesTags: (_, __, { astrologerId }) => [

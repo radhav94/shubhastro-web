@@ -2556,17 +2556,17 @@
 .emailModalBtn {
   width: 100%;
   padding: 14px;
-  background: #f75801;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: 50px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
 
   &:hover {
-    background: #e04e00;
+    transform: translateY(-2px);
   }
 }
 

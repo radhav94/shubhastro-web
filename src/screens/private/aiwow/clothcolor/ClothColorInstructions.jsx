@@ -1,23 +1,45 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './ClothColorInstructions.module.scss';
 import { getAIWowInstructionImage } from '../../../../utils/appImages';
 import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
 import TTSButton from '../../../../component/UI/TTSButton';
+import { Toast } from '../../../../component';
 import { compressImage } from '../../../../utils/helper/compressImage';
 import { trackEvent } from '../../../../utils/analytics';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const ClothColorInstructions = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingActionRef = useRef(null);
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
   const gender = selectedProfile?.identity?.toLowerCase() || selectedProfile?.gender?.toLowerCase() || 'male';
 
   const { data: aiwowData } = useGetAiWowPageDataQuery();
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'clothes-colour-analysis')?.title || 'Colour Clothes Analysis';
+
+  // Guests must add a kundli + verify OTP before capturing/uploading a photo.
+  const runOrAuth = (action) => {
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      pendingActionRef.current = action;
+      setShowGuestAuthModal(true);
+      return;
+    }
+    action();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    if (action) action();
+  };
 
   const handleCamera = () => {
     navigate('/ai-wow/clothes-colour-analysis/camera');
@@ -31,15 +53,25 @@ const ClothColorInstructions = () => {
     const file = event.target.files?.[0];
     if (file) {
       trackEvent("shubh_ai_input_provided", { feature_name: "clothes-colour-analysis", input_type: "image" });
-      compressImage(file).then((dataUrl) => {
-        dispatch(setClothColorImage(dataUrl));
-        navigate('/ai-wow/clothes-colour-analysis/capture');
-      });
+      compressImage(file)
+        .then((dataUrl) => {
+          // Guests must authenticate at the moment the photo is submitted.
+          runOrAuth(() => {
+            dispatch(setClothColorImage(dataUrl));
+            navigate('/ai-wow/clothes-colour-analysis/capture');
+          });
+        })
+        .catch((err) => {
+          console.error('Failed to process selected image:', err);
+          Toast.error('Could not read that image. Please try a different photo.');
+        });
     }
+    // Reset so selecting the same file again re-triggers onChange (iOS Safari).
+    event.target.value = '';
   };
 
   return (
-
+    <>
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
@@ -144,6 +176,13 @@ const ClothColorInstructions = () => {
     </div>
     </div>
     </div>
+
+    <GuestKundliAuthModal
+      isOpen={showGuestAuthModal}
+      onClose={() => setShowGuestAuthModal(false)}
+      onSuccess={handleGuestAuthSuccess}
+    />
+    </>
   );
 };
 

@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styles from "./OccultChat.module.scss";
 import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
 import { useGetOccultDashaMutation } from "../../../redux/api/occult/occultApi";
-import { ProfileManager } from "../../../component/UI/Profile";
+import { ProfileManager, GuestKundliAuthModal } from "../../../component/UI/Profile";
 import { Toast } from "../../../component";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
@@ -21,8 +21,18 @@ const OccultChat = () => {
   const requireAuth = useRequireAuth();
 
   const [showProfileManager, setShowProfileManager] = useState(false);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const pendingGuestActionRef = useRef(null);
   const [selectedProfile, setSelectedProfileLocal] = useState(null);
+  const [guestGenerating, setGuestGenerating] = useState(false);
   const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
+
+  // Listen for guest generation trigger (survives component remount after auth)
+  useEffect(() => {
+    const handler = () => setGuestGenerating(true);
+    window.addEventListener("occult:generating", handler);
+    return () => window.removeEventListener("occult:generating", handler);
+  }, []);
 
   const token = localStorage.getItem("shubhtalk_customer_token");
   const { data: kundliData, isLoading: isLoadingProfiles } = useGetAllKundlisQuery(undefined, { skip: !token });
@@ -48,32 +58,28 @@ const OccultChat = () => {
     }
   }, [profiles.length]);
 
-  const handleGenerate = async () => {
-    if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/occult");
-      window.location.href = "/login?skip=welcome";
-      return;
-    }
-    if (!selectedProfile?._id) { Toast.error("Please select a Kundli profile first"); return; }
+  const doGenerate = async (profile) => {
+    if (!profile?._id) { Toast.error("Please select a Kundli profile first"); return; }
+    window.dispatchEvent(new Event("occult:generating"));
 
-    const body = selectedProfile._id?.startsWith("temp_")
+    const body = profile._id?.startsWith("temp_")
       ? {
           kundliDetails: {
-            name: selectedProfile.name,
-            gender: selectedProfile.gender,
-            day: Number(selectedProfile.day),
-            month: Number(selectedProfile.month),
-            year: Number(selectedProfile.year),
-            hour: Number(selectedProfile.hour),
-            min: Number(selectedProfile.min),
+            name: profile.name,
+            gender: profile.gender,
+            day: Number(profile.day),
+            month: Number(profile.month),
+            year: Number(profile.year),
+            hour: Number(profile.hour),
+            min: Number(profile.min),
             second: 0,
-            lat: String(selectedProfile.lat || "0"),
-            lon: String(selectedProfile.lon || "0"),
-            tzone: selectedProfile.tzone ?? 5.5,
-            place: selectedProfile.place,
+            lat: String(profile.lat || "0"),
+            lon: String(profile.lon || "0"),
+            tzone: profile.tzone ?? 5.5,
+            place: profile.place,
           },
         }
-      : { kundliId: selectedProfile._id };
+      : { kundliId: profile._id };
 
     // Route the generate call through the subscription gate. On PREMIUM_REQUIRED
     // it opens the plans popup (and retries after purchase); on EXTENDED it shows
@@ -85,6 +91,8 @@ const OccultChat = () => {
         return err?.data || { success: false, error: err };
       }
     });
+
+    setGuestGenerating(false);
 
     // Entitlement block handled by the gate (popup shown / user cancelled).
     if (result?.blocked) return;
@@ -98,10 +106,19 @@ const OccultChat = () => {
     const historyId = result?.message?._id || result?._id;
     const data = result?.message?.message || result?.message || result;
     if (data) {
-      navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile: selectedProfile, historyId } });
+      navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile, historyId } });
     } else {
       Toast.error("Failed to generate reading");
     }
+  };
+
+  const handleGenerate = async () => {
+    if (!token) {
+      pendingGuestActionRef.current = (profile) => doGenerate(profile);
+      setShowGuestAuthModal(true);
+      return;
+    }
+    doGenerate(selectedProfile);
   };
 
   const benefits = [
@@ -116,7 +133,7 @@ const OccultChat = () => {
     <>
       <BackButton />
     <div className={styles.container}>
-      {(isLoadingProfiles || isGenerating) && <PrimaryLoader />}
+      {(isLoadingProfiles || isGenerating || guestGenerating) && <PrimaryLoader />}
 
       {/* Hero Section - Two columns */}
       <div className={styles.heroRow}>
@@ -177,8 +194,8 @@ const OccultChat = () => {
               )}
             </>
           )}
-          <button className={styles.generateBtn} onClick={handleGenerate} disabled={token && (!selectedProfile || isGenerating)}>
-            {isGenerating ? "Analyzing..." : "Get Occult Reading"}
+          <button className={styles.generateBtn} onClick={handleGenerate} disabled={(token && (!selectedProfile || isGenerating)) || guestGenerating}>
+            {(isGenerating || guestGenerating) ? "Analyzing..." : "Get Occult Reading"}
           </button>
         </div>
         <img src={occultImg} alt="occult" />
@@ -231,6 +248,18 @@ const OccultChat = () => {
         selectedProfileId={selectedProfile?._id}
         title="Select Kundli"
         enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+      />
+
+      <GuestKundliAuthModal
+        isOpen={showGuestAuthModal}
+        onClose={() => { setShowGuestAuthModal(false); pendingGuestActionRef.current = null; }}
+        onSuccess={(profile) => {
+          setShowGuestAuthModal(false);
+          if (profile?._id) setSelectedProfile(profile);
+          const action = pendingGuestActionRef.current;
+          pendingGuestActionRef.current = null;
+          if (action) action(profile);
+        }}
       />
     </div>
     {subscriptionModal}

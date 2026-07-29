@@ -25,19 +25,62 @@ const AuraResult = () => {
   const [expandedRecommendations, setExpandedRecommendations] = useState(false);
   const [expandedMood, setExpandedMood] = useState(false);
 
-  // Helper to convert hex color codes to readable names for TTS
-  const getColorName = (hex) => {
-    if (!hex || !hex.startsWith('#')) return hex;
-    const colorMap = {
-      '#FFD700': 'Gold', '#FFA500': 'Orange', '#FF0000': 'Red',
-      '#800080': 'Purple', '#0000FF': 'Blue', '#00FF00': 'Green',
-      '#FFFF00': 'Yellow', '#FFC0CB': 'Pink', '#FFFFFF': 'White',
-      '#000000': 'Black', '#808080': 'Gray', '#4B0082': 'Indigo',
-      '#EE82EE': 'Violet', '#00FFFF': 'Cyan', '#FF00FF': 'Magenta',
-      '#C0C0C0': 'Silver', '#A52A2A': 'Brown', '#FF4500': 'Orange Red',
-      '#7FFFD4': 'Aquamarine', '#DC143C': 'Crimson',
-    };
-    return colorMap[hex.toUpperCase()] || hex;
+  // Named colour palette used to convert any hex code into a readable name.
+  const NAMED_COLORS = [
+    ['Red', 0xFF0000], ['Crimson', 0xDC143C], ['Orange Red', 0xFF4500],
+    ['Orange', 0xFFA500], ['Gold', 0xFFD700], ['Yellow', 0xFFFF00],
+    ['Lime', 0x00FF00], ['Green', 0x008000], ['Teal', 0x008080],
+    ['Aquamarine', 0x7FFFD4], ['Cyan', 0x00FFFF], ['Sky Blue', 0x87CEEB],
+    ['Blue', 0x0000FF], ['Royal Blue', 0x4169E1], ['Navy', 0x000080],
+    ['Indigo', 0x4B0082], ['Purple', 0x800080], ['Medium Purple', 0x9370DB],
+    ['Violet', 0xEE82EE], ['Magenta', 0xFF00FF], ['Pink', 0xFFC0CB],
+    ['Brown', 0xA52A2A], ['Beige', 0xF5F5DC], ['White', 0xFFFFFF],
+    ['Silver', 0xC0C0C0], ['Gray', 0x808080], ['Black', 0x000000],
+  ];
+
+  // Helper to convert hex color codes to readable names (for display + TTS).
+  // Maps any hex to the closest named colour so a raw code is never shown.
+  const getColorName = (value) => {
+    if (!value || typeof value !== 'string') return value;
+    const raw = value.trim();
+
+    let r, g, b;
+
+    if (raw.startsWith('#')) {
+      let hex = raw.slice(1);
+      // Expand shorthand (#abc -> #aabbcc, #abcd -> #aabbccdd).
+      if (hex.length === 3 || hex.length === 4) {
+        hex = hex.split('').map((c) => c + c).join('');
+      }
+      // Accept 6-digit (RGB) and 8-digit (RGBA) — ignore the alpha channel.
+      if ((hex.length !== 6 && hex.length !== 8) || /[^0-9a-fA-F]/.test(hex)) {
+        return raw;
+      }
+      r = parseInt(hex.slice(0, 2), 16);
+      g = parseInt(hex.slice(2, 4), 16);
+      b = parseInt(hex.slice(4, 6), 16);
+    } else {
+      // Handle rgb()/rgba() strings too, so no raw code is ever shown.
+      const rgbMatch = raw.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+      if (!rgbMatch) return raw; // already a readable name
+      r = parseInt(rgbMatch[1], 10);
+      g = parseInt(rgbMatch[2], 10);
+      b = parseInt(rgbMatch[3], 10);
+    }
+
+    let bestName = raw;
+    let bestDist = Infinity;
+    for (const [name, code] of NAMED_COLORS) {
+      const cr = (code >> 16) & 0xff;
+      const cg = (code >> 8) & 0xff;
+      const cb = code & 0xff;
+      const dist = (r - cr) ** 2 + (g - cg) ** 2 + (b - cb) ** 2;
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestName = name;
+      }
+    }
+    return bestName;
   };
   
   const analysisData = useSelector((state) => state.aiwow.aura.result);
@@ -282,7 +325,7 @@ const AuraResult = () => {
                         ></div>
                         <div className={styles.dominantInfo}>
                           <h4 className={styles.dominantColorName}>
-                            {dominantColor.color}
+                            {getColorName(dominantColor.color)}
                           </h4>
                           <p className={styles.dominantPercentage}>{dominantColor.percentage}%</p>
                         </div>

@@ -3,10 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './PalmistryAnalysis.module.scss';
 import { analyzePalm } from '../../../../services/appServices/aiWowService';
-import { setPalmistryResult, setPalmistryResultId, clearPalmistryData, setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
+import { setPalmistryResult, setPalmistryResultId, clearPalmistryData, setPalmistryImage, setPalmistrySelectedHand } from '../../../../redux/aiwow/aiwowSlice';
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
+
+// Session flag: set while an analysis is in progress / not yet successful, so a
+// page reload doesn't auto re-analyze a failed image. Shared with the capture
+// screens so a fresh capture clears it.
+export const PALMISTRY_ANALYSIS_FLAG = 'palmistryAnalysisStarted';
 
 const PalmistryAnalysis = () => {
   const navigate = useNavigate();
@@ -31,6 +36,26 @@ const PalmistryAnalysis = () => {
   const isMountedRef = React.useRef(true);
   const abortControllerRef = React.useRef(null);
   const hasStartedRef = React.useRef(false);
+  // Ensures we only auto-retry with the opposite hand once, to avoid a loop
+  // when the image isn't a valid palm at all.
+  const handSwapAttemptedRef = React.useRef(false);
+
+  // The backend AI rejects the image when the detected palm side doesn't match
+  // the selected hand (e.g. "please upload your left hand"). Hand-side detection
+  // is unreliable (mirroring), so instead of blocking the user we transparently
+  // re-run the analysis for the opposite hand.
+  const isHandMismatchError = (err) => {
+    const msg = (typeof err === 'string' ? err : err?.message || '').toLowerCase();
+    if (!msg.includes('hand') && !msg.includes('palm')) return false;
+    return (
+      msg.includes('left') ||
+      msg.includes('right') ||
+      msg.includes('upload') ||
+      msg.includes('other') ||
+      msg.includes('different') ||
+      msg.includes('match')
+    );
+  };
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -43,7 +68,7 @@ const PalmistryAnalysis = () => {
     if (profileLoading) return; // Wait for profile to load
 
     if (!palmImage || !selectedHand) {
-      navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path[0]);
+      navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0]);
       return;
     }
     // Note: analysis is no longer triggered automatically on mount.
@@ -93,6 +118,8 @@ const PalmistryAnalysis = () => {
       }
 
       if (result.success) {
+        // Analysis succeeded — clear the reload guard.
+        sessionStorage.removeItem(PALMISTRY_ANALYSIS_FLAG);
         const resultId = result.data?.id || result.data?._id;
         
         if (resultId) {
@@ -130,7 +157,19 @@ const PalmistryAnalysis = () => {
       } else {
         // DON'T clear data on error - keep image and hand selection for retry
         // dispatch(clearPalmistryData());
-        
+
+        // Hand-side mismatch: the backend thinks this is the other hand.
+        // Auto-retry once with the opposite hand so the user isn't blocked,
+        // and update the stored selection so the result shows the right label.
+        if (isHandMismatchError(result.error) && !handSwapAttemptedRef.current) {
+          handSwapAttemptedRef.current = true;
+          const otherHand = hand === 'left' ? 'right' : 'left';
+          dispatch(setPalmistrySelectedHand(otherHand));
+          setProgress(0);
+          await performAnalysis(imageData, otherHand);
+          return;
+        }
+
         setProgress(0);
         // Don't show Toast here - interceptor already showed it
         // Show generic error to users
@@ -195,14 +234,15 @@ const PalmistryAnalysis = () => {
 
   const handleRetry = () => {
     // Clear error and data, then navigate back to start over
+    sessionStorage.removeItem(PALMISTRY_ANALYSIS_FLAG);
     setError(null);
     dispatch(clearPalmistryData());
-    navigate(PATH.privateRoutes.PALMISTRY_HAND_SELECTION.path[0]);
+    navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0]);
   };
 
   const handleBack = () => {
     dispatch(clearPalmistryData());
-    navigate('/ai-wow/ai-palmistry-scanner/hand-selection', { replace: true });
+    navigate('/ai-wow/ai-palmistry-scanner', { replace: true });
   };
 
   return (

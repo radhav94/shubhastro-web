@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useCallback, Suspense } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import useIsOverflowing from "../../../hooks/useIsOverflowing";
+import useHorizontalScrollState from "../../../hooks/useHorizontalScrollState";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
@@ -62,8 +62,22 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
   const scrollByCards = useCallback((direction) => {
     const grid = scrollRef.current;
     if (!grid) return;
-    const amount = Math.max(grid.clientWidth * 0.8, 240);
-    grid.scrollBy({ left: direction === "left" ? -amount : amount, behavior: "smooth" });
+    const { scrollLeft, scrollWidth, clientWidth } = grid;
+
+    if (direction === "right") {
+      // Don't scroll if already at the end
+      if (scrollLeft + clientWidth >= scrollWidth - 4) return;
+      // Clamp so we never scroll past the last card
+      const maxScrollRight = scrollWidth - clientWidth - scrollLeft;
+      const amount = Math.min(Math.max(clientWidth * 0.8, 240), maxScrollRight);
+      grid.scrollTo({ left: scrollLeft + amount, behavior: "smooth" });
+    } else {
+      // Don't scroll if already at the start
+      if (scrollLeft <= 4) return;
+      // Clamp so we never scroll before the first card
+      const amount = Math.min(Math.max(clientWidth * 0.8, 240), scrollLeft);
+      grid.scrollTo({ left: scrollLeft - amount, behavior: "smooth" });
+    }
   }, []);
 
   const sessions = useMemo(() => {
@@ -72,7 +86,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
       : [];
   }, [data]);
 
-  const canScroll = useIsOverflowing(scrollRef, [sessions]);
+  const { canScrollLeft, canScrollRight } = useHorizontalScrollState(scrollRef, [sessions]);
 
   if (isLoading || !sessions.length) return null;
 
@@ -129,7 +143,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
 
   return (
     <div className={styles.astrologerSliderWrapper} style={{ position: "relative" }}>
-      {canScroll && (
+      {canScrollLeft && (
         <button
           type="button"
           className={`${styles.gridSliderBtn} ${styles.gridSliderBtnLeft}`}
@@ -278,7 +292,7 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
         </Suspense>
       )}
       </section>
-      {canScroll && (
+      {canScrollRight && (
         <button
           type="button"
           className={`${styles.gridSliderBtn} ${styles.gridSliderBtnRight}`}

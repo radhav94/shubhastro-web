@@ -273,7 +273,7 @@ const HoroscopeNew = () => {
     } else {
       newPath = `/daily-horoscope-indian/${profileSunSign}`;
     }
-    navigate(newPath, { replace: true });
+    navigate(newPath, { replace: true});
   }, [activeProfile?._id, profileSunSign, isAstroFetching]);
 
   // Update active tab when pathname changes
@@ -588,15 +588,15 @@ const HoroscopeNew = () => {
     setCameFromOverview(false);
     setSelectedPhase('phase_1');
     
-    // Navigate to corresponding route
+    // Navigate to corresponding route (replace so back button goes to home, not through each tab)
     if (tab === 'Today') {
-      navigate(`/daily-horoscope-indian/${selectedZodiac}`);
+      navigate(`/daily-horoscope-indian/${selectedZodiac}`, { replace: true });
     } else if (tab === 'Tomorrow') {
-      navigate(`/tomorrow-horoscope-indian/${selectedZodiac}`);
+      navigate(`/tomorrow-horoscope-indian/${selectedZodiac}`, { replace: true });
     } else if (tab === 'This Week') {
-      navigate(`/weekly-horoscope-indian/${selectedZodiac}`);
+      navigate(`/weekly-horoscope-indian/${selectedZodiac}`, { replace: true });
     } else if (tab === 'This Year') {
-      navigate(`/yearly-horoscope-indian/${selectedZodiac}`);
+      navigate(`/yearly-horoscope-indian/${selectedZodiac}`, { replace: true });
     }
   };
 
@@ -679,7 +679,13 @@ const HoroscopeNew = () => {
       {/* Page Header with Back Button */}
       <div className="horoscope-page-header">
         <div className='horoscope-page-header-inner'>
-          <button className="horoscope-back-btn" onClick={() => navigate(-1)}>
+          <button className="horoscope-back-btn" onClick={() => {
+            if (location.key !== 'default') {
+              navigate(-1);
+            } else {
+              navigate('/');
+            }
+          }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -689,7 +695,7 @@ const HoroscopeNew = () => {
             className="horoscope-western-btn"
             onClick={() => {
               trackEvent('horoscope_type_switched', { from_type: 'indian', to_type: 'western' });
-              navigate('/daily-horoscope');
+              navigate('/daily-horoscope', { replace: true });
             }}
           >
             Western
@@ -859,7 +865,11 @@ const HoroscopeNew = () => {
           </div>
           )}
 
-          <div className="horoscope-content" ref={overviewRef}>
+          <div
+            className="horoscope-content"
+            ref={overviewRef}
+            key={`${activeTab}-${activeSignTab}-${dailySubTab}-${tomorrowSubTab}-${weeklySubTab}-${selectedPhase}-${selectedNakshatra}-${activeCategory}-${selectedZodiac}-${(currentContent.title || '')}-${(currentContent.content || '').slice(0, 24)}`}
+          >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <h2 className="content-title">
                 {currentContent.title}

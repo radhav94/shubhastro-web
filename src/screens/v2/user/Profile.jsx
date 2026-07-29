@@ -77,6 +77,7 @@ import { registerUser, updateUserProfile } from "../../../services/appServices/a
 import { useLogoutUserMutation } from "../../../redux/api/userSession/userSessionApi";
 import { useSelector } from "react-redux";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
+import { clearAllCalculatorData } from "../../../redux/calculator/calculatorSlice";
 import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
 import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
 
@@ -513,6 +514,17 @@ const Profile = () => {
 
   // Helper: Get primary profile (prioritize Redux selectedKundli, then 'self' relation, otherwise first profile)
   const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
+
+  // Clear stale selectedKundli if the profile no longer exists in the fetched list
+  useEffect(() => {
+    if (selectedKundli?._id && savedKundlis.length > 0) {
+      const exists = savedKundlis.some(p => p._id === selectedKundli._id);
+      if (!exists) {
+        dispatch(clearSelectedKundli());
+      }
+    }
+  }, [savedKundlis, selectedKundli, dispatch]);
+
   const primaryProfile = (() => {
     if (selectedKundli?._id) {
       const found = savedKundlis.find(p => p._id === selectedKundli._id);
@@ -1352,6 +1364,11 @@ const Profile = () => {
       Toast.success("Profile deleted successfully");
       trackEvent("profile_deleted", { deleted_profile_id: profileToDelete });
 
+      // Clear selected kundli if the deleted profile was the one selected
+      if (selectedKundli?._id === profileToDelete) {
+        dispatch(clearSelectedKundli());
+      }
+
       setShowDeleteModal(false);
       setProfileToDelete(null);
     } catch (err) {
@@ -1376,6 +1393,7 @@ const Profile = () => {
       // Dispatch Redux logout action
       dispatch(logout());
       dispatch(clearSelectedKundli());
+      dispatch(clearAllCalculatorData());
       // Clear all authentication related data from localStorage
       localStorage.clear();
       window.dispatchEvent(new Event("auth-change"));
@@ -1388,6 +1406,7 @@ const Profile = () => {
       // Still perform local logout
       dispatch(logout());
       dispatch(clearSelectedKundli());
+      dispatch(clearAllCalculatorData());
       localStorage.clear();
       window.dispatchEvent(new Event("auth-change"));
       Toast.success("Logged out successfully");
@@ -1828,6 +1847,7 @@ const Profile = () => {
                                         order.type === "chat"
                                           ? "Chat"
                                           : "Call",
+                                      from: "profile",
                                       // NOTE: Previously routed video to separate "Video" tab
                                       // tab:
                                       //   order.type === "chat"
@@ -2156,7 +2176,8 @@ const Profile = () => {
                         {/* Receipt Button - only for successful purchases (not admin credits) */}
                         <div className={styles.txnActionCell}>
                           {transaction?.billing?.user?.action === "credit" && 
-                           !(transaction.description || "").toLowerCase().includes("admin") && (
+                           !(transaction.description || "").toLowerCase().includes("admin") &&
+                           !(transaction.description || "").toLowerCase().includes("bonus") && (
                             <button
                               className={`${styles.receiptBtn} ${invoiceLoadingId === transaction._id ? styles.downloadLoading : ""}`}
                               disabled={invoiceLoadingId === transaction._id}

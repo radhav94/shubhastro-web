@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useGetChargesQuery, useDownloadReportPdfMutation, useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
@@ -109,6 +109,15 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
 
   const historyId = useMemo(() => extractHistoryId(resultData), [resultData]);
 
+  // Reset cached PDF URL when the underlying result changes (e.g. profile switch)
+  const prevHistoryIdRef = useRef(historyId);
+  useEffect(() => {
+    if (prevHistoryIdRef.current !== historyId) {
+      setDownloadedPdfUrl(null);
+      prevHistoryIdRef.current = historyId;
+    }
+  }, [historyId]);
+
   const historyItem = useMemo(
     () => historyData?.data?.history?.find((h) => h._id === historyId || h.featureId === historyId) || null,
     [historyData, historyId]
@@ -157,8 +166,12 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(blobUrl);
-      toast.success('PDF downloaded!', { id });
+      // Delay toast to let iOS handle the download trigger without swallowing it
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+        toast.dismiss(id);
+        toast.success('PDF downloaded!', { id: `${id}-success`, duration: 3000 });
+      }, 600);
     } catch {
       toast.error('Failed to download PDF', { id });
     } finally {
@@ -204,8 +217,15 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
         document.body.appendChild(link);
         link.click();
         link.remove();
-        URL.revokeObjectURL(blobUrl);
-        toast.success('PDF downloaded!', { id });
+        // Delay toast/URL revoke to let iOS handle the download trigger without swallowing it
+        setTimeout(() => {
+          URL.revokeObjectURL(blobUrl);
+          toast.dismiss(id);
+          toast.success(
+            downloadPrice > 0 ? 'Payment Successful! PDF downloaded.' : 'PDF downloaded!',
+            { id: `${id}-success`, duration: 3000 }
+          );
+        }, 600);
         setShowDownloadModal(false);
         setDownloadedPdfUrl(pdfUrl);
         refreshWallet();

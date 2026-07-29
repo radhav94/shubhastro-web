@@ -548,12 +548,15 @@
 .lineDetailList {
   margin: 0;
   padding-left: 1.25rem;
+  list-style-type: disc;
+  list-style-position: outside;
   
   li {
     font-size: 0.875rem;
     color: #4b5563;
     line-height: 1.5;
     margin-bottom: 0.25rem;
+    list-style-type: disc;
 
     &::marker {
       color: #F75801;

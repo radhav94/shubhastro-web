@@ -145,6 +145,7 @@ export const calcApi = calculatorApi.injectEndpoints({
 export const {
   useGetAtmakarakaQuery,
   useGetSunSignQuery,
+  useLazyGetSunSignQuery,
   useGetRisingSignQuery,
   useGetRashiCalQuery,
   useGetDashaPeriodsQuery,

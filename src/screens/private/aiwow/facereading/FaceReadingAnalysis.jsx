@@ -39,7 +39,7 @@ const FaceReadingAnalysis = () => {
     if (profileLoading) return;
 
     if (!faceImage) {
-      navigate(PATH.privateRoutes.FACE_READING_INSTRUCTIONS.path[0]);
+      navigate(PATH.privateRoutes.FACE_READING_LANDING.path[0]);
       return;
     }
     // Note: analysis is no longer triggered automatically on mount.
@@ -163,7 +163,7 @@ const FaceReadingAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearFaceReadingData());
-    navigate(PATH.privateRoutes.FACE_READING_INSTRUCTIONS.path[0]);
+    navigate(PATH.privateRoutes.FACE_READING_LANDING.path[0]);
   };
 
   const handleBack = () => {

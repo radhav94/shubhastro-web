@@ -2,7 +2,7 @@
   margin-top: 100px;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  // height: 100vh;
   // background: #f8f8f8;
   overflow: hidden;
 
@@ -90,7 +90,8 @@
   padding: 62px 16px 80px 16px;
 
   @media (width <= 1180px) {
-    padding: 16px 16px 80px 16px;
+    padding: 24px 16px 80px 16px;
+    height: fit-content;
     min-width: auto;
   }
 
@@ -390,7 +391,7 @@
 .endChatBtn {
   width: 100%;
   padding: 14px;
-  border-radius: 12px;
+  border-radius: 50px;
   background: linear-gradient(135deg, #f75801, #d43400);
   color: #fff;
   font-size: 15px;

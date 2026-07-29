@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './SignatureCamera.module.scss';
 import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
+import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const SignatureCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -74,22 +77,46 @@ const SignatureCamera = () => {
       }
       
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        setStream(mediaStream);
-        setError(null);
+        // iOS Safari: React doesn't reliably set the `muted` DOM property from
+        // the JSX prop, and iOS blocks inline playback of an unmuted video —
+        // so play() rejects and the camera never shows. Set these imperatively.
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.setAttribute('muted', '');
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', '');
 
         // Detect actual camera facing mode from track
         const videoTrack = mediaStream.getVideoTracks()[0];
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         setIsFrontCamera(trackFacing !== 'environment');
-        
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play();
+
+        // iOS Safari: a freshly-assigned MediaStream can fire its metadata
+        // events before we attach handlers, and it often needs an explicit
+        // play() call (autoplay alone is unreliable). So we attach the
+        // handlers first, then set the source, and also try to play() from
+        // several triggers with the promise caught.
+        const tryPlay = () => {
+          const v = videoRef.current;
+          if (!v) return;
+          const p = v.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch((err) => console.warn('Signature camera play() failed:', err));
+          }
         };
 
+        videoRef.current.onloadedmetadata = tryPlay;
+        videoRef.current.oncanplay = tryPlay;
         videoRef.current.onplay = () => {
           startDetection();
         };
+
+        videoRef.current.srcObject = mediaStream;
+        setStream(mediaStream);
+        setError(null);
+
+        // Kick off playback immediately too, in case the events already fired.
+        tryPlay();
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
@@ -137,59 +164,65 @@ const SignatureCamera = () => {
     // Start camera with new mode will be handled by useEffect
   };
 
-  const captureImage = async () => {
-    stopDetection();
-    
-    if (videoRef.current && canvasRef.current && captureAreaRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      // Calculate capture box bounds based on the visible capture area
-      const videoRect = video.getBoundingClientRect();
-      const boxRect = captureAreaRef.current.getBoundingClientRect();
-      
-      // Calculate bounds as percentage of video dimensions
-      const bounds = {
-        left: (boxRect.left - videoRect.left) / videoRect.width,
-        right: (boxRect.right - videoRect.left) / videoRect.width,
-        top: (boxRect.top - videoRect.top) / videoRect.height,
-        bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
-      };
-      
-      // Calculate crop dimensions based on capture box bounds
-      const boxX = bounds.left * canvas.width;
-      const boxY = bounds.top * canvas.height;
-      const boxWidth = (bounds.right - bounds.left) * canvas.width;
-      const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
-      
-      console.log('📸 Cropping to capture box:', { boxX, boxY, boxWidth, boxHeight });
-      
-      // Create a new canvas for the cropped image (only capture box area)
-      const cropCanvas = document.createElement('canvas');
-      cropCanvas.width = boxWidth;
-      cropCanvas.height = boxHeight;
-      const cropContext = cropCanvas.getContext('2d');
-      
-      // Draw only the capture box region
-      cropContext.drawImage(
-        canvas,
-        boxX, boxY, boxWidth, boxHeight,  // Source rectangle (from original canvas)
-        0, 0, boxWidth, boxHeight          // Destination rectangle (to crop canvas)
-      );
-      
-      // Get the cropped image
-      const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
-      
-      setCapturedImage(croppedImage);
-      stopCamera();
-    }
+  // Draw the current video frame, cropped to the capture box, onto a canvas.
+  const cropCurrentFrameToCanvas = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !captureAreaRef.current || !video.videoWidth) return null;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const videoRect = video.getBoundingClientRect();
+    const boxRect = captureAreaRef.current.getBoundingClientRect();
+    const bounds = {
+      left: (boxRect.left - videoRect.left) / videoRect.width,
+      right: (boxRect.right - videoRect.left) / videoRect.width,
+      top: (boxRect.top - videoRect.top) / videoRect.height,
+      bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
+    };
+    const boxX = bounds.left * canvas.width;
+    const boxY = bounds.top * canvas.height;
+    const boxWidth = (bounds.right - bounds.left) * canvas.width;
+    const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
+
+    const cropCanvas = document.createElement('canvas');
+    cropCanvas.width = boxWidth;
+    cropCanvas.height = boxHeight;
+    cropCanvas.getContext('2d').drawImage(
+      canvas,
+      boxX, boxY, boxWidth, boxHeight,
+      0, 0, boxWidth, boxHeight
+    );
+    return cropCanvas;
   };
+
+  const captureImage = () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) {
+      // Camera not ready yet — nothing to capture.
+      return;
+    }
+    stopDetection();
+    const cropCanvas = cropCurrentFrameToCanvas();
+    if (!cropCanvas) return;
+    setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
+    stopCamera();
+  };
+
+  // Auto-capture the sharpest frame once the signature is steady in the frame.
+  const { autoCapturing } = useAutoCapture({
+    ready: detectionReady && objectDetected,
+    active: !capturedImage,
+    getFrameCanvas: cropCurrentFrameToCanvas,
+    onCapture: (dataUrl) => {
+      stopDetection();
+      setCapturedImage(dataUrl);
+      stopCamera();
+    },
+  });
 
   // Helper function to find signature bounding box using edge detection
   const findSignatureBounds = (imageData) => {
@@ -236,11 +269,24 @@ const SignatureCamera = () => {
     startCamera();
   };
 
+  const submitImage = () => {
+    dispatch(setSignatureImage(capturedImage));
+    navigate('/ai-wow/signature-analysis/capture');
+  };
+
   const proceedWithImage = () => {
-    if (capturedImage) {
-      dispatch(setSignatureImage(capturedImage));
-      navigate('/ai-wow/signature-analysis/capture');
+    if (!capturedImage) return;
+    // Guests must add a kundli + verify OTP at the moment the photo is submitted.
+    if (!localStorage.getItem("shubhtalk_customer_token")) {
+      setShowGuestAuthModal(true);
+      return;
     }
+    submitImage();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    submitImage();
   };
 
   const handleBack = () => {
@@ -302,6 +348,20 @@ const SignatureCamera = () => {
     );
   }
 
+  // While the guest auth flow is open, hide the camera view entirely.
+  if (showGuestAuthModal) {
+    return (
+      <GuestKundliAuthModal
+        isOpen
+        onClose={() => {
+          setShowGuestAuthModal(false);
+          navigate('/ai-wow/signature-analysis');
+        }}
+        onSuccess={handleGuestAuthSuccess}
+      />
+    );
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -350,6 +410,11 @@ const SignatureCamera = () => {
                 <p>Position your signature within the frame</p>
               </div>
             )}
+            {objectDetected && autoCapturing && detectionReady && (
+              <div className={styles.detectionMessage}>
+                <p>Hold steady… capturing</p>
+              </div>
+            )}
           </>
         ) : (
           <img src={capturedImage} alt="Captured" className={styles.capturedImage} />
@@ -361,18 +426,18 @@ const SignatureCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={`${styles.captureButton} ${(!detectionReady || !objectDetected) ? styles.disabled : ''}`} 
+            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={!detectionReady || !objectDetected}
+            disabled={!stream}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!detectionReady || !objectDetected) ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={(!detectionReady || !objectDetected) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={!stream ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={!stream ? "0.5" : "1"}/>
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!detectionReady ? 'Loading...' : (objectDetected ? 'Capture' : 'No Signature Detected')}
+              {!stream ? 'Loading...' : (objectDetected ? 'Capture' : 'Capture Signature')}
             </span>
           </button>
         ) : (

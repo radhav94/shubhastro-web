@@ -3,17 +3,23 @@ import { useNavigate } from "react-router-dom";
 import { sortContentByOrder } from "../sectionRendererV2";
 import SectionTitle from "./shared/SectionTitle";
 import useRequireAuth from "../../../../utils/hooks/useRequireAuth";
+import { getToken } from "../../../../utils/token";
 
 const COMMUNITY_AVATARS_FALLBACK = [];
 
-// Routes that require authentication
-const AUTH_REQUIRED_PATHS = [];
+// Routes that require authentication. Guests hitting one of these get the guest
+// login popup (via onRequireGuestAuth) instead of being redirected to /login.
+const AUTH_REQUIRED_PATHS = ["/live"];
 
 /**
  * Mobile-only AI Services 2×2 grid.
  * Desktop rendering is handled inline in HomeV2's hero section.
+ *
+ * @param {(url: string) => void} [onRequireGuestAuth] - called when a guest taps
+ *   an auth-required card; the parent opens the inline guest login popup and
+ *   navigates to `url` on success.
  */
-const AiServicesSection = memo(({ sectionData, styles, onlineCount }) => {
+const AiServicesSection = memo(({ sectionData, styles, onlineCount, onRequireGuestAuth }) => {
   const navigate = useNavigate();
   const requireAuth = useRequireAuth();
   const items = sortContentByOrder(sectionData?.content || []);
@@ -22,11 +28,19 @@ const AiServicesSection = memo(({ sectionData, styles, onlineCount }) => {
     const url = item?.redirect_url || item?.link;
     if (url) {
       if (AUTH_REQUIRED_PATHS.some(path => url.startsWith(path))) {
-        if (!requireAuth()) return;
+        // Guest: prefer the inline guest login popup if the parent provides it,
+        // otherwise fall back to the standard login redirect.
+        if (!getToken()) {
+          if (onRequireGuestAuth) {
+            onRequireGuestAuth(url);
+            return;
+          }
+          if (!requireAuth()) return;
+        }
       }
       navigate(url);
     }
-  }, [navigate, requireAuth]);
+  }, [navigate, requireAuth, onRequireGuestAuth]);
 
   if (!items.length) return null;
 

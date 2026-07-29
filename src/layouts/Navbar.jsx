@@ -32,11 +32,11 @@ const Navbar = () => {
     { title: "Match Making", path: PATH.privateRoutes.MATCHMAKING.path },
     {
       title: "Tarot",
-      path: PATH.privateRoutes.TAROT.path,
+      path: PATH.privateRoutes.TAROT_CARD_V2.path,
       children: [
         {
           title: "Shuffle Tarot",
-          path: PATH.privateRoutes.TAROT.path,
+          path: PATH.privateRoutes.TAROT_CARD_V2.path,
         },
         {
           title: "Yes/No Tarot",

@@ -1,9 +1,60 @@
 .rechargeWrapper {
   max-width: 1440px;
-  margin: 0 auto 24px auto;
+  margin: 0 auto 16px auto;
   padding: 10px 16px 0;
 }
 
+.localBackBtn {
+  background: rgb(255, 244, 236);
+  border: 1px solid #D43400;
+  color: #D43400;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  // position: relative;
+  // left: 0;
+
+  &:hover {
+    background: #FFF4EC;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(247, 88, 1, 0.12);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 767px) {
+    height: 36px;
+    width: 36px;
+  }
+}
+.titleWallet{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  padding-right: 40px;
+  @media (width <= 767px) {
+    padding-right: 0px;    
+  }
+  @media (width <= 380px) {
+    font-size: 16px;
+    gap: 10px;
+  }
+}
 .rechargeTop {
   display: flex;
   justify-content: center;
@@ -30,9 +81,11 @@
     .walletBalance {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
       font-weight: 600;
       font-size: 22px;
+      width: 100%;
       @media (width <= 767px) {
         font-size: 17px;
         img{
@@ -46,11 +99,12 @@
     }
 
     .rechargeHeader {
-      margin: 18px 0 20px;
+      margin: 5px 0 20px;
       font-weight: 500;
       font-size: 18px;
       @media (width <= 767px) {
-        margin: 10px 0 0px 0px;
+        margin: 5px 0 16px 0px;
+        font-size: 16px;
       }
     }
 
@@ -105,11 +159,11 @@
       }
 
       .price {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 600;
         color: #030303;
         @media (width <= 767px) {
-          font-size: 18px;
+          font-size: 16px;
         }
       }
 
@@ -125,7 +179,7 @@
       }
 
       &:hover {
-        transform: translateY(-5px);
+        transform: translateY(-2px);
       }
 
       &.active {

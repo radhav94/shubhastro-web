@@ -32,6 +32,8 @@ const CosmicChat = () => {
     "How do planetary transits affect my life?"
   ]);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const scrollAreaRef = useRef(null);
   const inputRef = useRef(null);
 
   // Start session when profile is loaded
@@ -41,16 +43,28 @@ const CosmicChat = () => {
     }
   }, [profile, profileLoading]);
 
-  // Auto-scroll to show latest message above input
-  useEffect(() => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, 100);
-  }, [messages, isLoading]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  // Auto-scroll so the latest (often long) reply is fully in view above the
+  // input. Use the scroll container directly and wait for the reply to lay out
+  // (double rAF) — a smooth scrollIntoView on a timeout can fire before the new
+  // message has rendered, leaving it partly hidden behind the input on mobile.
+  const scrollToBottom = (behavior = 'auto') => {
+    // The chat has nested scroll containers (the outer wrapper AND the inner
+    // messages list). Scroll whichever one actually overflows so the latest
+    // message is always brought into view.
+    [scrollAreaRef.current, messagesContainerRef.current].forEach((el) => {
+      if (el && el.scrollHeight > el.clientHeight) {
+        el.scrollTo({ top: el.scrollHeight, behavior });
+      }
+    });
+    messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
   };
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => scrollToBottom('smooth'));
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [messages, isLoading]);
 
   const startSession = async (profile) => {
     try {
@@ -108,10 +122,11 @@ const CosmicChat = () => {
     }
   };
 
-  const sendMessage = async () => {
-    if (!inputMessage.trim() || !sessionId || isLoading) return;
+  const sendMessage = async (overrideText, refocusInput = true) => {
+    const raw = typeof overrideText === 'string' ? overrideText : inputMessage;
+    if (!raw.trim() || !sessionId || isLoading) return;
 
-    const messageToSend = inputMessage.trim();
+    const messageToSend = raw.trim();
     const userMessage = {
       id: Date.now(),
       type: 'user',
@@ -163,12 +178,17 @@ const CosmicChat = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      // Use requestAnimationFrame to ensure focus happens after render
-      requestAnimationFrame(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      });
+      // Only refocus the input when the message was typed by the user (keyboard
+      // already open). For a tapped suggested question the keyboard was closed,
+      // and refocusing would pop it open — shrinking the viewport and hiding
+      // the freshly-arrived answer, forcing the user to scroll manually.
+      if (refocusInput) {
+        requestAnimationFrame(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+        });
+      }
     }
   };
 
@@ -180,8 +200,12 @@ const CosmicChat = () => {
   };
 
   const handleSuggestedQuestion = (question) => {
-    setInputMessage(question);
-    inputRef.current?.focus();
+    // Send the suggested question directly instead of only filling the input.
+    if (isLoading || !sessionId) return;
+    setInputMessage('');
+    // Don't refocus the input — that would open the mobile keyboard and hide
+    // the incoming answer.
+    sendMessage(question, false);
   };
 
   const handleBack = () => {
@@ -213,9 +237,9 @@ const CosmicChat = () => {
       </header>
 
       {/* Messages */}
-      <div className={styles.containerDiv}>
+      <div className={styles.containerDiv} ref={scrollAreaRef}>
         <div className={styles.heiT}>
-          <div className={styles.messagesContainer}>
+          <div className={styles.messagesContainer} ref={messagesContainerRef}>
           {messages.length === 0 && !isLoading && (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>✨</div>

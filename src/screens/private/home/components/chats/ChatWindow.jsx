@@ -325,7 +325,15 @@ const ChatWindow = () => {
     }));
 
 
-    return [...historyMsgs, ...socket].sort(
+    // A message can arrive both over the socket (live echo) and from the history
+    // API (once persisted), which would render it twice. Drop socket messages
+    // that already exist in history, matched by type + text + sender + minute.
+    const msgKey = (m) =>
+      `${m.type || "message"}|${m.text}|${m.isSender ? 1 : 0}|${dayjs(m.dateTime).format("YYYY-MM-DD HH:mm")}`;
+    const historyKeys = new Set(historyMsgs.map(msgKey));
+    const dedupedSocket = socket.filter((m) => !historyKeys.has(msgKey(m)));
+
+    return [...historyMsgs, ...dedupedSocket].sort(
       (a, b) => new Date(a.dateTime) - new Date(b.dateTime)
     );
   }, [history, messages, isUserSide]);

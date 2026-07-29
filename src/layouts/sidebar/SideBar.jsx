@@ -8,6 +8,7 @@ import { PATH } from "../../utils/routes/Paths";
 import { getUserFromStorage } from "../../utils/authStorage";
 import { logout } from "../../redux/auth/authSlice";
 import { clearSelectedKundli } from "../../redux/kundli/kundliSlice";
+import { clearAllCalculatorData } from "../../redux/calculator/calculatorSlice";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
 
 const SideBar = ({ open, onClose }) => {
@@ -38,7 +39,8 @@ const SideBar = ({ open, onClose }) => {
   const handleLogout = () => {
     // Dispatch Redux logout action
     dispatch(logout());
-     dispatch(clearSelectedKundli())
+     dispatch(clearSelectedKundli());
+     dispatch(clearAllCalculatorData());
     
     const role = localStorage.getItem("shubhtalk_role");
 
@@ -149,7 +151,7 @@ const SideBar = ({ open, onClose }) => {
     { title: "Compatibility", path: PATH.privateRoutes.COMPATIBILITY.path },
     {
       title: "Tarot",
-      path: PATH.privateRoutes.TAROT.path,
+      path: PATH.privateRoutes.TAROT_CARD_V2.path,
       children: [
         {
           title: "Yes/No Tarot",

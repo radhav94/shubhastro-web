@@ -10,6 +10,59 @@ import { useAIWowDownload } from '../hooks/useAIWowDownload';
 import { PATH } from '../../../../utils/routes/Paths';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
+// Aura colour names from the API aren't always valid CSS colours (e.g.
+// "Red-Orange"), which would render as transparent/black. Map them to hex.
+const AURA_COLOR_MAP = {
+  red: '#E53935',
+  'red-orange': '#FF4500',
+  orange: '#FB8C00',
+  'orange-red': '#FF4500',
+  'orange-yellow': '#FFB300',
+  amber: '#FFB300',
+  gold: '#FFC107',
+  golden: '#FFC107',
+  yellow: '#FDD835',
+  'yellow-green': '#9CCC65',
+  lime: '#C0CA33',
+  green: '#2E9E4F',
+  'blue-green': '#009688',
+  teal: '#009688',
+  cyan: '#00ACC1',
+  'light-blue': '#4FC3F7',
+  'sky-blue': '#4FC3F7',
+  blue: '#1E62D0',
+  'royal-blue': '#3949AB',
+  indigo: '#3F51B5',
+  violet: '#8E24AA',
+  purple: '#8E24AA',
+  'blue-violet': '#7B1FA2',
+  magenta: '#D81B60',
+  pink: '#EC407A',
+  rose: '#EC407A',
+  brown: '#8D6E63',
+  white: '#E0E0E0',
+  silver: '#BDBDBD',
+  gray: '#9E9E9E',
+  grey: '#9E9E9E',
+  black: '#212121',
+};
+
+const resolveAuraColor = (name) => {
+  if (!name) return '#ccc';
+  const key = String(name).trim().toLowerCase();
+  if (AURA_COLOR_MAP[key]) return AURA_COLOR_MAP[key];
+  // Normalise separators (spaces / underscores → hyphen) and retry.
+  const norm = key.replace(/[_\s]+/g, '-');
+  if (AURA_COLOR_MAP[norm]) return AURA_COLOR_MAP[norm];
+  // A single word (e.g. "green") is likely a valid CSS colour — use as-is.
+  if (/^[a-z]+$/.test(key)) return key;
+  // Compound name (e.g. "x-y") — fall back to the first recognised part.
+  for (const part of norm.split('-')) {
+    if (AURA_COLOR_MAP[part]) return AURA_COLOR_MAP[part];
+  }
+  return '#ccc';
+};
+
 const FaceReadingResult = () => {
   const navigate = useNavigate();
   const handleBack = () => navigate('/ai-wow/astro-face-reading', { replace: true });
@@ -31,7 +84,7 @@ const FaceReadingResult = () => {
     const cleanData = data ? (() => { const { pdfPath: _p, ...d } = data; return d; })() : undefined;
     const result = cleanData !== undefined ? { ...rest, data: cleanData } : rest;
     if (result.featureName) return result;
-    return { ...result, featureName: 'astro-face-reading' };
+    return { ...result, featureName: 'face-analysis' };
   }, [reduxResult]);
 
   const {
@@ -97,7 +150,7 @@ const FaceReadingResult = () => {
       .map(([key, value]) => ({
         label: value.color || key.charAt(0).toUpperCase() + key.slice(1), // Use actual color name
         value: value.percentage,
-        color: value.color?.toLowerCase() || '#ccc'
+        color: resolveAuraColor(value.color)
       }));
   }, [analysisData]);
 
@@ -399,14 +452,16 @@ const FaceReadingResult = () => {
                     .map(([key, value]) => (
                       value && (
                         <div key={key} className={styles.auraColorCard} style={{ position: 'relative' }}>
-                          <button
+                          <div
                             onClick={() => setExpandedGuidance(expandedGuidance === `aura-${key}` ? null : `aura-${key}`)}
                             className={styles.auraColorHeader}
+                            role="button"
+                            tabIndex={0}
                           >
                             <div className={styles.auraHeaderContent}>
                               <div 
                                 className={styles.colorCircle} 
-                                style={{ backgroundColor: value.color?.toLowerCase() || '#ccc' }}
+                                style={{ backgroundColor: resolveAuraColor(value.color) }}
                               ></div>
                               <div className={styles.auraInfo}>
                                 <h3 className={styles.auraColor}>{value.color || 'Unknown'}</h3>
@@ -414,15 +469,15 @@ const FaceReadingResult = () => {
                               </div>
                             </div>
                             <div className={styles.headerRight}>
+                              <span style={{ display: 'inline-flex', pointerEvents: 'auto', zIndex: 10 }} onClick={(e) => e.stopPropagation()}>
+                                <TTSButton text={`${key.charAt(0).toUpperCase() + key.slice(1)} Aura. ${value.color || 'Unknown'}. ${value.percentage || 0} percent. ${value.meaning || ''}`} />
+                              </span>
                               <div className={styles.auraPercentage}>{value.percentage || 0}%</div>
                               <span className={styles.guidanceArrow}>
                                 {expandedGuidance === `aura-${key}` ? '▲' : '▼'}
                               </span>
                             </div>
-                          </button>
-                          <span style={{ position: 'absolute', top: '12px', right: '100px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }} onClick={(e) => e.stopPropagation()}>
-                            <TTSButton text={`${key.charAt(0).toUpperCase() + key.slice(1)} Aura. ${value.color || 'Unknown'}. ${value.percentage || 0} percent. ${value.meaning || ''}`} />
-                          </span>
+                          </div>
                           <div className={`${styles.guidanceContent} ${expandedGuidance === `aura-${key}` ? styles.expanded : ''}`}>
                             <p className={styles.auraMeaning}>{value.meaning || ''}</p>
                           </div>
@@ -469,10 +524,12 @@ const FaceReadingResult = () => {
                         </span>
                       </button>
                       <div className={`${styles.guidanceContent} ${expandedGuidance === `feature-${key}` ? styles.expanded : ''}`}>
-                        <p className={styles.featureShape}>
-                          <strong>Shape:</strong> {value.shape || value.shapeType || 'N/A'}
-                        </p>
-                        <p className={styles.featureInterpretation}>{value.interpretation || ''}</p>
+                        <div className={styles.dropdownInner}>
+                          <p className={styles.featureShape}>
+                            <strong>Shape:</strong> {value.shape || value.shapeType || 'N/A'}
+                          </p>
+                          <p className={styles.featureInterpretation}>{value.interpretation || ''}</p>
+                        </div>
                       </div>
                     </div>
                   )
@@ -501,15 +558,17 @@ const FaceReadingResult = () => {
                       </span>
                     </button>
                     <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-planet' ? styles.expanded : ''}`}>
-                      <p className={styles.cosmicPlanet}>{cosmicConnections.dominantPlanet.planet}</p>
-                      <p className={styles.cosmicText}>{cosmicConnections.dominantPlanet.influence}</p>
-                      {cosmicConnections.dominantPlanet.traits && (
-                        <div className={styles.chipContainer}>
-                          {cosmicConnections.dominantPlanet.traits.map((trait, index) => (
-                            <span key={index} className={styles.chip}>{trait}</span>
-                          ))}
-                        </div>
-                      )}
+                      <div className={styles.dropdownInner}>
+                        <p className={styles.cosmicPlanet}>{cosmicConnections.dominantPlanet.planet}</p>
+                        <p className={styles.cosmicText}>{cosmicConnections.dominantPlanet.influence}</p>
+                        {cosmicConnections.dominantPlanet.traits && (
+                          <div className={styles.chipContainer}>
+                            {cosmicConnections.dominantPlanet.traits.map((trait, index) => (
+                              <span key={index} className={styles.chip}>{trait}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -530,13 +589,15 @@ const FaceReadingResult = () => {
                       </span>
                     </button>
                     <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-zodiac' ? styles.expanded : ''}`}>
-                      <p className={styles.cosmicPlanet}>{cosmicConnections.zodiacAlignment.sign}</p>
-                      <p className={styles.cosmicText}>{cosmicConnections.zodiacAlignment.description}</p>
-                      {cosmicConnections.zodiacAlignment.compatibility && (
-                        <p className={styles.compatibility}>
-                          <strong>Compatible with:</strong> {cosmicConnections.zodiacAlignment.compatibility}
-                        </p>
-                      )}
+                      <div className={styles.dropdownInner}>
+                        <p className={styles.cosmicPlanet}>{cosmicConnections.zodiacAlignment.sign}</p>
+                        <p className={styles.cosmicText}>{cosmicConnections.zodiacAlignment.description}</p>
+                        {cosmicConnections.zodiacAlignment.compatibility && (
+                          <p className={styles.compatibility}>
+                            <strong>Compatible with:</strong> {cosmicConnections.zodiacAlignment.compatibility}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -557,16 +618,18 @@ const FaceReadingResult = () => {
                       </span>
                     </button>
                     <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-element' ? styles.expanded : ''}`}>
-                      <p className={styles.cosmicPlanet}>
-                        {cosmicConnections.elementalEnergy.element}
-                      </p>
-                      {cosmicConnections.elementalEnergy.characteristics && (
-                        <div className={styles.chipContainer}>
-                          {cosmicConnections.elementalEnergy.characteristics.map((char, index) => (
-                            <span key={index} className={styles.chip}>{char}</span>
-                          ))}
-                        </div>
-                      )}
+                      <div className={styles.dropdownInner}>
+                        <p className={styles.cosmicPlanet}>
+                          {cosmicConnections.elementalEnergy.element}
+                        </p>
+                        {cosmicConnections.elementalEnergy.characteristics && (
+                          <div className={styles.chipContainer}>
+                            {cosmicConnections.elementalEnergy.characteristics.map((char, index) => (
+                              <span key={index} className={styles.chip}>{char}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -587,23 +650,25 @@ const FaceReadingResult = () => {
                       </span>
                     </button>
                     <div className={`${styles.cosmicDropdown} ${expandedGuidance === 'cosmic-spiritual' ? styles.expanded : ''}`}>
-                      <p className={styles.cosmicText}>{cosmicConnections.spiritualPath.path}</p>
-                      {cosmicConnections.spiritualPath.guidance && (
-                        <>
-                          <p className={styles.cosmicSubtitle}>Guidance:</p>
-                          <p className={styles.cosmicText}>{cosmicConnections.spiritualPath.guidance}</p>
-                        </>
-                      )}
-                      {cosmicConnections.spiritualPath.practices && (
-                        <>
-                          <p className={styles.cosmicSubtitle}>Recommended Practices:</p>
-                          <ul className={styles.list}>
-                            {cosmicConnections.spiritualPath.practices.map((practice, index) => (
-                              <li key={index} className={styles.listItem}>{practice}</li>
-                            ))}
-                          </ul>
-                        </>
-                      )}
+                      <div className={styles.dropdownInner}>
+                        <p className={styles.cosmicText}>{cosmicConnections.spiritualPath.path}</p>
+                        {cosmicConnections.spiritualPath.guidance && (
+                          <>
+                            <p className={styles.cosmicSubtitle}>Guidance:</p>
+                            <p className={styles.cosmicText}>{cosmicConnections.spiritualPath.guidance}</p>
+                          </>
+                        )}
+                        {cosmicConnections.spiritualPath.practices && (
+                          <>
+                            <p className={styles.cosmicSubtitle}>Recommended Practices:</p>
+                            <ul className={styles.list}>
+                              {cosmicConnections.spiritualPath.practices.map((practice, index) => (
+                                <li key={index} className={styles.listItem}>{practice}</li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}

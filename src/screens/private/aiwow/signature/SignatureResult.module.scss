@@ -138,9 +138,13 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   
-  &:hover {
-    color: #E54D00;
+  @media (hover: hover) {
+    &:hover {
+      color: #E54D00;
+    }
   }
   
   &.active {
@@ -270,19 +274,18 @@
   // }
 }
 .analysisCard,
-.traitsCard{
-  // padding: 0;
-  margin-bottom: 16px;
-  // background: rgba(255, 255, 255, 0.4);
-  // border: 1.5px solid #ffffff;
-  // backdrop-filter: blur(12px);
-}
+.traitsCard,
 .insightsCard,.leadershipCard,.communicationCard,.emotionalCard,.socialCard{
+  // All result cards share the same frosted card style + inset so the
+  // absolutely-positioned TTS button (top:8px/right:8px) aligns consistently
+  // across the stroke, letter and personality sections.
   background: rgba(255, 255, 255, 0.4);
   border: 1.5px solid #ffffff;
   backdrop-filter: blur(12px);
   padding: 16px;
   border-radius: 12px;
+  position: relative;
+  margin-bottom: 16px;
 }
 
 .analysisGrid {
@@ -332,7 +335,7 @@
 
 .cardTitle {
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 700;
   color: #1f2937;
   margin: 0 0 12px 0;
   
@@ -473,7 +476,7 @@
   font-size: 14px;
   line-height: 1.6;
   color: #030303;
-  margin: 12px 0 0 0;
+  margin: 0px 0 0 0;
 }
 
 .characteristicsTags,

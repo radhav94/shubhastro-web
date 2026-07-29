@@ -12,6 +12,8 @@ import { geoApi } from "../api/geoApi";
 import { astroTarotApi } from "../api/tarot/astroTarotApi";
 import { clearForm } from "../kundliform/formSlice";
 import { logout } from "../auth/authSlice";
+import { clearAllCalculatorData } from "../calculator/calculatorSlice";
+import { clearSelectedKundli } from "../kundli/kundliSlice";
 
 export const clearFormAndCache = () => (dispatch) => {
   // 1️⃣ Clear form slice
@@ -19,6 +21,10 @@ export const clearFormAndCache = () => (dispatch) => {
   
   // 2️⃣ Dispatch logout action to update auth state
   dispatch(logout());
+
+  // Clear calculator and kundli state so no stale data leaks across accounts
+  dispatch(clearAllCalculatorData());
+  dispatch(clearSelectedKundli());
   
   const role = localStorage.getItem("shubhtalk_role");
 

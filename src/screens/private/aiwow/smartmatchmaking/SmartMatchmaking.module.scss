@@ -71,6 +71,40 @@
   margin: 0;
 }
 
+.downloadButton {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(90deg, #E54D00 0%, #D43400 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(212, 52, 0, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  @media (width <= 767px) {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+}
+
 .matchMaking {
   width: 100%;
   display: flex;
@@ -105,11 +139,11 @@
   }
 
   h2 {
-    font-size: 38px;
+    font-size: 28px;
     margin-bottom: 5px;
     
     @media (width <= 767px) {
-      font-size: 24px;
+      font-size: 22px;
     }
   }
 
@@ -543,13 +577,12 @@
 }
 
 .compatibilityLevel {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.4rem;
+  font-weight: 600;
   color: #1f2937;
   margin: 0 0 0.5rem 0;
-
-  @media (min-width: 768px) {
-    font-size: 1.75rem;
+  @media (width <= 767px) {
+    font-size: 1.2rem;
   }
 }
 
@@ -676,6 +709,9 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: #374151;
+  @media (width <= 360px) {
+    font-size: 0.7rem;
+  }
 }
 
 .categoryValue {
@@ -739,11 +775,15 @@
   justify-content: space-evenly;
   align-items: center;
   text-align: center;
-  padding: 0.5rem 0.25rem;
+  padding: 1rem 0.25rem;
   background: rgba(255, 255, 255, 0.4);
   border: 1.5px solid #fff;
   backdrop-filter: blur(12px);
   border-radius: 0.5rem;
+  @media (width <= 767px) {
+    padding: 0.5rem 0.25rem;
+    justify-content: space-between;
+  }
 }
 
 .ashtakootLabel {
@@ -753,6 +793,7 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
   margin-bottom: 0.125rem;
+  text-align: left;
 }
 
 .ashtakootValue {

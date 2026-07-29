@@ -20,6 +20,7 @@ import LanguageSelector from "./LanguageSelector";
 import { isShubhMallEnabled } from "../utils/featureConfig";
 import { trackEvent } from "../utils/analytics";
 import { logout } from "../redux/auth/authSlice";
+import { clearAllCalculatorData } from "../redux/calculator/calculatorSlice";
 import { useLogoutUserMutation } from "../redux/api/userSession/userSessionApi";
 import { privateRequestNew } from "../services/appServices/privateRequestNew";
 import { Toast } from "./index";
@@ -164,6 +165,7 @@ const TopHeader = () => {
 
     dispatch(logout());
     dispatch(clearSelectedKundli());
+    dispatch(clearAllCalculatorData());
     dispatch(privateRequestNew.util.resetApiState());
 
     ["shubhtalk_customer_token", "shubhtalk_customer_id", "shubhtalk_user", "selectedKundliProfile", "astro_wallet_balance"]
@@ -402,7 +404,9 @@ const TopHeader = () => {
             {isLoggedIn && (
               <div className={styles.walletBadge}
                 onClick={() => requireAuth() && navigate(PATH.privateRoutes.RECHARGE.path)}
-                style={{ cursor: 'pointer' }}
+                role="button"
+                tabIndex={0}
+                aria-label="Wallet balance - tap to recharge"
               >
                 <img src={headerCoin} className={styles.coinImg} alt="coin icon" width="20" height="20" />
                 <span className={styles.walletAmount}>
@@ -448,6 +452,13 @@ const TopHeader = () => {
                     onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen(false); navigate("/profile"); }}
                   >
                     My Account
+                  </div>
+                  <div className={styles.profileDropdownDivider} />
+                   <div
+                    className={styles.profileDropdownItem}
+                    onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen(false); navigate("/ai-wow", { state: { tab: "results" } }); }}
+                  >
+                    Manage Reports
                   </div>
                   <div className={styles.profileDropdownDivider} />
                   <div

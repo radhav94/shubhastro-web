@@ -161,8 +161,9 @@ const useSelectedKundliProfile = (options = {}) => {
         }
       }
 
-      // If not in store, try localStorage
-      const { profile: storedProfile, error: storageError } = getProfileFromLocalStorage();
+      // If not in store, try localStorage (only for logged-in users)
+      const userToken = localStorage.getItem("shubhtalk_customer_token") || localStorage.getItem("shubhtalk_astro_token");
+      const { profile: storedProfile, error: storageError } = userToken ? getProfileFromLocalStorage() : { profile: null, error: null };
       
       if (storedProfile) {
         // Restore to Redux store

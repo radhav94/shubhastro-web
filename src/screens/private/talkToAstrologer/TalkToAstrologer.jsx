@@ -47,6 +47,7 @@ import NewAstrologerDetailsCard from "../../../component/UI/cards/newAstrologerC
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import AstrologerRingModal from "../../../component/UI/modal/AstrologerRingModal/AstrologerRingModal";
+import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -63,6 +64,7 @@ const TalkToAstrologer = () => {
   const dispatch = useDispatch();
   const { category: categoryFromParams } = useParams();
   const requireAuth = useRequireAuth();
+  const { openGuestConnect, guestConnectModal } = useGuestConnectFlow();
   const [isRecommendModalOpen, setIsRecommendModalOpen] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
   const [showRecommend, setShowRecommend] = useState(true);
@@ -520,6 +522,18 @@ const TalkToAstrologer = () => {
   // Handle connect button click - reused from Home page
   // Receives connectionType (chat or audio) from NewAstrologerCard
   const handleConnectClick = async (astrologer, connectionType, isEmergency = false) => {
+    // Guest flows (no login redirect):
+    //  - chat  → conversational guest screen
+    //  - call/video → AI Wow-style guest modal, then initiate the call
+    if (!getToken()) {
+      if (connectionType === "chat") {
+        navigate(`/guest-chat/${astrologer._id}`, { state: { astrologer } });
+      } else {
+        openGuestConnect(astrologer, connectionType);
+      }
+      return;
+    }
+
     if (!requireAuth()) return;
 
     // if (WaitingList || callWaitingList) {
@@ -711,7 +725,7 @@ const TalkToAstrologer = () => {
       setChatRoomId(data?.roomId);
       setActiveChatRoomId(data?.roomId);
       setWaitingList(data?.waitingTime || 2);
-      assignRoomId(data?.roomId, "chat", data?.waitingTime || 2);
+      assignRoomId(data?.roomId, "chat", data?.waitingTime || 2, "ringing", data?.recieverDetail?._id || data?.astrologerId);
       // Store astrologer details from socket data if available
       if (data?.recieverDetail) {
         activeCallAstroRef.current = data.recieverDetail;
@@ -722,7 +736,7 @@ const TalkToAstrologer = () => {
       setCallRoomId(data?.roomId);
       setActiveCallRoomId(data?.roomId);
       setCallWaitingList(data?.waitingTime || 5);
-      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
+      assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5, "ringing", data?.recieverDetail?._id || data?.astrologerId);
       // Store astrologer details from socket data if available
       if (data?.recieverDetail) {
         activeCallAstroRef.current = data.recieverDetail;
@@ -1123,12 +1137,22 @@ const TalkToAstrologer = () => {
 
   return (
     <div className={styles.mainContainer}>
-      <BackButton />
       <div className={styles.pageHeader}>
+
+        <button className={styles.localBackBtn} onClick={() => {
+          if (window.history.length > 1) navigate(-1);
+          else navigate("/", { replace: true });
+          }} aria-label="Go back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+
         <h1 className={styles.pageTitle}>
           Chat With Best <span className={styles.highlight}>Astrologers</span>{" "}
           Online
         </h1>
+        
       </div>
 
       <FilterChips
@@ -1327,14 +1351,6 @@ const TalkToAstrologer = () => {
             </div>
           </>
         ))}
-
-        {isFetching && (
-          <div className={styles.loaderWrapper}>
-            <PrimaryLoader isLoading={true} fullscreen={false} />
-          </div>
-        )}
-
-        
       </div>
 
       {!isFetching && allAstrologers.length === 0 && isFiltered && (
@@ -1515,7 +1531,8 @@ const TalkToAstrologer = () => {
         connectionType="chat"
       />
 
-      {showCTA && showRecommend && !recommendDismissed && (
+      {/* Recommend CTA temporarily hidden per request */}
+      {false && showCTA && showRecommend && !recommendDismissed && (
         <RecommendCTA
           mode={isChatMode ? "chat" : "call"}
           onClick={() => {
@@ -1577,6 +1594,9 @@ const TalkToAstrologer = () => {
           variant="toast"
         />
       ))}
+
+      {/* Guest call/video flow (AI Wow-style details + OTP, then initiate call) */}
+      {guestConnectModal}
     </div>
   );
 };

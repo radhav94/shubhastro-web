@@ -43,6 +43,7 @@ const ServiceCards = () => {
 
   const slugRoutes = {
     "free-kundli": PATH.privateRoutes.KUNDLI.path,
+    "generate-my-kundli": PATH.privateRoutes.KUNDLI.path,
     "kundli-matching": PATH.privateRoutes.MATCHMAKING.path,
     numerology: PATH.privateRoutes.NUMEROLOGY.path,
     "talk-to-astrologer": PATH.privateRoutes.Chat_With_ASTROLOGER.path,

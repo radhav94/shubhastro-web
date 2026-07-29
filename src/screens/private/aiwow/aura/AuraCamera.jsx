@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './AuraCamera.module.scss';
 import { useFaceDetection } from '../../../../utils/hooks/useFaceDetection';
+import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setAuraImage } from '../../../../redux/aiwow/aiwowSlice';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const AuraCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -101,6 +104,15 @@ const AuraCamera = () => {
       }
       
       if (videoRef.current) {
+        // iOS Safari: React doesn't reliably set the `muted` DOM property from
+        // the JSX prop, and iOS blocks inline playback of an unmuted video —
+        // so play() rejects and the camera never shows. Set these imperatively.
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.setAttribute('muted', '');
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', '');
+
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
@@ -109,16 +121,25 @@ const AuraCamera = () => {
         const videoTrack = mediaStream.getVideoTracks()[0];
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         setIsFrontCamera(trackFacing !== 'environment');
-        
+
+        const tryPlay = () => {
+          const p = videoRef.current?.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch((e) => console.warn('Aura camera play() failed:', e));
+          }
+        };
         videoRef.current.onloadedmetadata = () => {
           console.log("Video metadata loaded");
-          videoRef.current.play();
+          tryPlay();
         };
+        videoRef.current.oncanplay = tryPlay;
 
         videoRef.current.onloadeddata = () => {
           console.log("Video ready");
           setVideoReady(true);
         };
+
+        tryPlay();
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
@@ -163,60 +184,82 @@ const AuraCamera = () => {
     setFacingMode(nextMode);
   };
 
-  const captureImage = () => {
-    if (videoRef.current && canvasRef.current && captureAreaRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      // Draw full frame first
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  // Draw the current video frame, cropped to the capture box, onto a canvas.
+  const cropCurrentFrameToCanvas = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !captureAreaRef.current || !video.videoWidth) return null;
 
-      // Calculate crop bounds from the capture area box
-      const videoRect = video.getBoundingClientRect();
-      const boxRect = captureAreaRef.current.getBoundingClientRect();
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      const bounds = {
-        left: (boxRect.left - videoRect.left) / videoRect.width,
-        right: (boxRect.right - videoRect.left) / videoRect.width,
-        top: (boxRect.top - videoRect.top) / videoRect.height,
-        bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
-      };
+    const videoRect = video.getBoundingClientRect();
+    const boxRect = captureAreaRef.current.getBoundingClientRect();
+    const bounds = {
+      left: (boxRect.left - videoRect.left) / videoRect.width,
+      right: (boxRect.right - videoRect.left) / videoRect.width,
+      top: (boxRect.top - videoRect.top) / videoRect.height,
+      bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
+    };
+    const boxX = bounds.left * canvas.width;
+    const boxY = bounds.top * canvas.height;
+    const boxWidth = (bounds.right - bounds.left) * canvas.width;
+    const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
 
-      const boxX = bounds.left * canvas.width;
-      const boxY = bounds.top * canvas.height;
-      const boxWidth = (bounds.right - bounds.left) * canvas.width;
-      const boxHeight = (bounds.bottom - bounds.top) * canvas.height;
-
-      // Create cropped canvas
-      const cropCanvas = document.createElement('canvas');
-      cropCanvas.width = boxWidth;
-      cropCanvas.height = boxHeight;
-      const cropContext = cropCanvas.getContext('2d');
-      cropContext.drawImage(
-        canvas,
-        boxX, boxY, boxWidth, boxHeight,
-        0, 0, boxWidth, boxHeight
-      );
-
-      const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
-      setCapturedImage(croppedImage);
-      stopCamera();
-    }
+    const cropCanvas = document.createElement('canvas');
+    cropCanvas.width = boxWidth;
+    cropCanvas.height = boxHeight;
+    cropCanvas.getContext('2d').drawImage(
+      canvas,
+      boxX, boxY, boxWidth, boxHeight,
+      0, 0, boxWidth, boxHeight
+    );
+    return cropCanvas;
   };
+
+  const captureImage = () => {
+    const cropCanvas = cropCurrentFrameToCanvas();
+    if (!cropCanvas) return;
+    setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
+    stopCamera();
+  };
+
+  // Auto-capture the sharpest frame once a face is steady in the frame.
+  const { autoCapturing } = useAutoCapture({
+    ready: modelsLoaded && videoReady && faceDetected,
+    active: !capturedImage,
+    getFrameCanvas: cropCurrentFrameToCanvas,
+    onCapture: (dataUrl) => {
+      setCapturedImage(dataUrl);
+      stopCamera();
+    },
+  });
 
   const retakePhoto = () => {
     setCapturedImage(null);
     startCamera();
   };
 
+  const submitImage = () => {
+    dispatch(setAuraImage(capturedImage));
+    navigate('/ai-wow/aura-photography/capture');
+  };
+
   const proceedWithImage = () => {
-    if (capturedImage) {
-      dispatch(setAuraImage(capturedImage));
-      navigate('/ai-wow/aura-photography/capture');
+    if (!capturedImage) return;
+    // Guests must add a kundli + verify OTP at the moment the photo is submitted.
+    if (!localStorage.getItem("shubhtalk_customer_token")) {
+      setShowGuestAuthModal(true);
+      return;
     }
+    submitImage();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    submitImage();
   };
 
   const handleBack = () => {
@@ -252,6 +295,20 @@ const AuraCamera = () => {
           </div>
         </div>
       </div>
+    );
+  }
+
+  // While the guest auth flow is open, hide the camera view entirely.
+  if (showGuestAuthModal) {
+    return (
+      <GuestKundliAuthModal
+        isOpen
+        onClose={() => {
+          setShowGuestAuthModal(false);
+          navigate('/ai-wow/aura-photography/instructions');
+        }}
+        onSuccess={handleGuestAuthSuccess}
+      />
     );
   }
 
@@ -305,6 +362,11 @@ const AuraCamera = () => {
             {!faceDetected && modelsLoaded && (
               <div className={styles.faceDetectionMessage}>
                 <p>Position your face within the frame</p>
+              </div>
+            )}
+            {faceDetected && autoCapturing && modelsLoaded && (
+              <div className={styles.faceDetectionMessage}>
+                <p>Hold steady… capturing</p>
               </div>
             )}
           </>

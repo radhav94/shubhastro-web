@@ -139,13 +139,15 @@ const SignatureResult = () => {
           <span className={styles.label}>Legibility Score:</span>
           <span className={styles.value}>{resultData.style.legibility?.score}%</span>
         </div> */}
+        <span className={styles.label}>Legibility Score:</span>
         <p className={styles.description}>{resultData.style.legibility?.description}</p>
         
         {/* <div className={styles.infoRow}>
           <span className={styles.label}>Uniqueness Score:</span>
           <span className={styles.value}>{resultData.style.uniqueness?.score}%</span>
         </div> */}
-        <p className={styles.description}>{resultData.style.uniqueness?.description}</p>
+          <span className={styles.label}>Uniqueness Score:</span>
+           <p className={styles.description}>{resultData.style.uniqueness?.description}</p>
         
         <div className={styles.infoRow}>
           <span className={styles.label}>Formality:</span>

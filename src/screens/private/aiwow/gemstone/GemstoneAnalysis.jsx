@@ -39,7 +39,7 @@ const GemstoneAnalysis = () => {
     if (profileLoading) return;
 
     if (!gemstoneImage) {
-      navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path[0]);
+      navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0]);
       return;
     }
     // Note: analysis is no longer triggered automatically on mount.
@@ -161,7 +161,7 @@ const GemstoneAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearGemstoneData());
-    navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path[0]);
+    navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0]);
   };
 
   const handleBack = () => {

@@ -75,9 +75,14 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
       if (results.multiHandedness && results.multiHandedness.length > 0) {
         const label = results.multiHandedness[0].label;
         const rawSide = label.toLowerCase();
-        handSide = isFrontCamera
-          ? (rawSide === "right" ? "left" : "right")
-          : rawSide;
+        // MediaPipe reports handedness assuming a mirrored (selfie) input image.
+        // getUserMedia delivers UN-mirrored pixels for BOTH front and rear
+        // cameras (the front preview is only mirrored via CSS, not in the pixel
+        // data). So the reported side must be swapped in both cases to get the
+        // real anatomical hand. Previously the swap was applied for the front
+        // camera only, which made the rear camera report e.g. a right hand as
+        // "left" and blocked users from proceeding.
+        handSide = rawSide === "right" ? "left" : "right";
       }
 
       // Check hand size — too far if ratio < 0.05 (hand visible but tiny)

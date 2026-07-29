@@ -17,6 +17,8 @@ import StickyWaitingQueue from "../component/UI/waitingQueue/StickyWaitingQueue"
 
 import NoInternet, { useOnlineStatus } from "../component/NoInternet/NoInternet";
 import { useAiwowCleanup } from "../utils/hooks/useAiwowCleanup";
+import WelcomeBonusModal from "../component/UI/modal/WelcomeBonusModal/WelcomeBonusModal";
+import WelcomeBackModal from "../component/UI/modal/WelcomeBonusModal/WelcomeBackModal";
 
 
 
@@ -217,6 +219,9 @@ const HomeLayout = () => {
 
   const isOnboardingPage = location.pathname === "/login";
   const isLivePage = location.pathname.startsWith("/live") && !location.pathname.startsWith("/live-chat-policy");
+  // On the guest chat screen the waiting state is shown inline, so suppress the
+  // global sticky waiting popup there (it reappears once the user navigates away).
+  const isGuestChatPage = location.pathname.startsWith("/guest-chat");
   
   const showTopHeader = showRouteTopHeader && !isOnboardingPage && !isLivePage && !isWebview;
 
@@ -293,6 +298,12 @@ const HomeLayout = () => {
         </div>
       )}
 
+      {/* Welcome bonus popup — shown on any screen right after registration */}
+      <WelcomeBonusModal />
+
+      {/* Welcome-back popup — shown to returning users after they log in */}
+      <WelcomeBackModal />
+
       {/* ✅ FLOATING CALL UI (IMPORTANT LINE) */}
       <VideoCallContainer />
 
@@ -300,7 +311,7 @@ const HomeLayout = () => {
 
       <StickyChatFooter />
       <StickyCallFooter />
-      {!isLivePage && <StickyWaitingQueue />}
+      {!isLivePage && !isGuestChatPage && <StickyWaitingQueue />}
       <StickyReview />
     </div>
   );

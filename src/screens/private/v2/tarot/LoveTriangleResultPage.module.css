@@ -327,6 +327,12 @@
   align-items: center;
   transition: all 0.3s ease;
 }
+@media (width <= 1180px) {
+  .traitCapsule {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+}
 
 .traitCapsule:hover {
   background: rgba(255, 182, 193, 0.7);

@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './FaceReadingCamera.module.scss';
 import { useFaceDetection } from '../../../../utils/hooks/useFaceDetection';
+import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const FaceReadingCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const detectionCanvasRef = useRef(null);
@@ -35,6 +38,7 @@ const FaceReadingCamera = () => {
     faceDetected,
     faceInCircle,
     isTooFar,
+    isPartialFace,
     startDetection,
     stopDetection
   } = useFaceDetection({ 
@@ -134,6 +138,15 @@ const FaceReadingCamera = () => {
       }
       
       if (videoRef.current) {
+        // iOS Safari: React doesn't reliably set the `muted` DOM property from
+        // the JSX prop, and iOS blocks inline playback of an unmuted video —
+        // so play() rejects and the camera never shows. Set these imperatively.
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.setAttribute('muted', '');
+        videoRef.current.setAttribute('playsinline', '');
+        videoRef.current.setAttribute('webkit-playsinline', '');
+
         videoRef.current.srcObject = mediaStream;
         setStream(mediaStream);
         setError(null);
@@ -142,17 +155,26 @@ const FaceReadingCamera = () => {
         const videoTrack = mediaStream.getVideoTracks()[0];
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         setIsFrontCamera(trackFacing !== 'environment');
-        
+
+        const tryPlay = () => {
+          const p = videoRef.current?.play();
+          if (p && typeof p.catch === 'function') {
+            p.catch((e) => console.warn('Face reading camera play() failed:', e));
+          }
+        };
         // Set video ready when data is loaded
         videoRef.current.onloadedmetadata = () => {
           console.log("Video metadata loaded");
-          videoRef.current.play();
+          tryPlay();
         };
-        
+        videoRef.current.oncanplay = tryPlay;
+
         videoRef.current.onloadeddata = () => {
           console.log("Video ready");
           setVideoReady(true);
         };
+
+        tryPlay();
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
@@ -203,79 +225,92 @@ const FaceReadingCamera = () => {
     // Start camera with new mode will be handled by useEffect
   };
 
-  // Capture allowed only when face is detected, in circle, and not too far
-  const canCapture = faceDetected && faceInCircle && !isTooFar;
+  // Capture allowed only when the FULL face is detected, inside the circle,
+  // not too far, and not clipped by the frame edges (partial face).
+  const canCapture = faceDetected && faceInCircle && !isTooFar && !isPartialFace;
+
+  // Draw the current video frame, cropped to the face circle, onto a canvas.
+  const cropCurrentFrameToCanvas = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !video.videoWidth) return null;
+
+    const circleBounds = getCircleBounds();
+    if (!circleBounds) return null;
+
+    const { centerX, centerY, radius } = circleBounds;
+    const scaleX = video.videoWidth / video.offsetWidth;
+    const scaleY = video.videoHeight / video.offsetHeight;
+    const scaledCenterX = centerX * scaleX;
+    const scaledCenterY = centerY * scaleY;
+    const scaledRadius = radius * Math.min(scaleX, scaleY);
+    const diameter = scaledRadius * 2;
+
+    canvas.width = diameter;
+    canvas.height = diameter;
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.save();
+    context.beginPath();
+    context.arc(diameter / 2, diameter / 2, scaledRadius, 0, Math.PI * 2);
+    context.closePath();
+    context.clip();
+    context.drawImage(
+      video,
+      scaledCenterX - scaledRadius,
+      scaledCenterY - scaledRadius,
+      diameter,
+      diameter,
+      0,
+      0,
+      diameter,
+      diameter
+    );
+    context.restore();
+    return canvas;
+  };
 
   const captureImage = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      // Get circle bounds
-      const circleBounds = getCircleBounds();
-      if (!circleBounds) return;
-      
-      const { centerX, centerY, radius } = circleBounds;
-      
-      // Scale to video dimensions for high quality
-      const scaleX = video.videoWidth / video.offsetWidth;
-      const scaleY = video.videoHeight / video.offsetHeight;
-      
-      const scaledCenterX = centerX * scaleX;
-      const scaledCenterY = centerY * scaleY;
-      const scaledRadius = radius * Math.min(scaleX, scaleY);
-      
-      // Set canvas to circle diameter for square output (easier for processing)
-      const diameter = scaledRadius * 2;
-      canvas.width = diameter;
-      canvas.height = diameter;
-      
-      const context = canvas.getContext('2d');
-      
-      // Clear canvas
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Create circular clipping path
-      context.save();
-      context.beginPath();
-      context.arc(diameter / 2, diameter / 2, scaledRadius, 0, Math.PI * 2);
-      context.closePath();
-      context.clip();
-      
-      // Draw the circular portion of the video
-      // Source: area from video that corresponds to the circle
-      // Destination: centered in canvas
-      context.drawImage(
-        video,
-        scaledCenterX - scaledRadius, // source x
-        scaledCenterY - scaledRadius, // source y
-        diameter, // source width
-        diameter, // source height
-        0, // destination x
-        0, // destination y
-        diameter, // destination width
-        diameter  // destination height
-      );
-      
-      context.restore();
-      
-      // Convert to high quality JPEG (0.95 quality)
-      const imageData = canvas.toDataURL('image/jpeg', 0.95);
-      setCapturedImage(imageData);
-      stopCamera();
-    }
+    const canvas = cropCurrentFrameToCanvas();
+    if (!canvas) return;
+    setCapturedImage(canvas.toDataURL('image/jpeg', 0.95));
+    stopCamera();
   };
+
+  // Auto-capture the sharpest frame once a valid face is steady in the circle.
+  const { autoCapturing } = useAutoCapture({
+    ready: modelsLoaded && videoReady && canCapture,
+    active: !capturedImage,
+    getFrameCanvas: cropCurrentFrameToCanvas,
+    onCapture: (dataUrl) => {
+      setCapturedImage(dataUrl);
+      stopCamera();
+    },
+  });
 
   const retakePhoto = () => {
     setCapturedImage(null);
     startCamera();
   };
 
+  const submitImage = () => {
+    dispatch(setFaceReadingImage(capturedImage));
+    navigate('/ai-wow/astro-face-reading/capture');
+  };
+
   const proceedWithImage = () => {
-    if (capturedImage) {
-      dispatch(setFaceReadingImage(capturedImage));
-      navigate('/ai-wow/astro-face-reading/capture');
+    if (!capturedImage) return;
+    // Guests must add a kundli + verify OTP at the moment the photo is submitted.
+    if (!localStorage.getItem("shubhtalk_customer_token")) {
+      setShowGuestAuthModal(true);
+      return;
     }
+    submitImage();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    submitImage();
   };
 
   const handleBack = () => {
@@ -328,6 +363,20 @@ const FaceReadingCamera = () => {
           </div>
         </div>
       </div>
+    );
+  }
+
+  // While the guest auth flow is open, hide the camera view entirely.
+  if (showGuestAuthModal) {
+    return (
+      <GuestKundliAuthModal
+        isOpen
+        onClose={() => {
+          setShowGuestAuthModal(false);
+          navigate('/ai-wow/astro-face-reading');
+        }}
+        onSuccess={handleGuestAuthSuccess}
+      />
     );
   }
 
@@ -390,10 +439,17 @@ const FaceReadingCamera = () => {
                     ? 'Move your face closer to the camera'
                     : isTooFar
                     ? 'Move your face closer to the camera'
+                    : isPartialFace
+                    ? 'Keep your full face inside the circle'
                     : !faceInCircle
                     ? 'Position your face within the circle'
                     : ''}
                 </p>
+              </div>
+            )}
+            {canCapture && autoCapturing && modelsLoaded && (
+              <div className={styles.faceDetectionMessage}>
+                <p>Hold steady… capturing</p>
               </div>
             )}
           </>
@@ -421,6 +477,7 @@ const FaceReadingCamera = () => {
               {!modelsLoaded ? 'Loading...' : 
                canCapture ? 'Capture' : 
                !faceDetected || isTooFar ? 'Move Closer' : 
+               isPartialFace ? 'Show Full Face' : 
                'Move Inside Circle'}
             </span>
           </button>
