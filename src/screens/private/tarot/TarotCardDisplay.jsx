@@ -26,7 +26,7 @@ const TarotCardDisplay = ({ data }) => {
     <div className={styles.container}>
       <h2 className={styles.title}>Let the Cards Guide You</h2>
       <p className={styles.subTitle}>
-        Discover insights into love, career and life through tarot readings and expert consultations.
+        Discover insights into love, career and life through tarot readings. Select a card below to reveal your reading.
       </p>
 
       <div className={styles.grid}>

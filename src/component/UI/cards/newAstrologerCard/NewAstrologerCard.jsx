@@ -155,8 +155,12 @@ const NewAstrologerCard = memo(({
             <div className={styles.buttonWrapper}>
               <button
                 className={styles.chatBtn}
-                onClick={() => chatEnabled && onConnect(astrologer, "chat")}
+                onClick={() => {
+                  if (!chatEnabled) return;
+                  onConnect(astrologer, "chat");
+                }}
                 disabled={!chatEnabled}
+                title={!chatEnabled ? "Chat unavailable" : "Start chat"}
               >
                 <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
               </button>
@@ -179,8 +183,12 @@ const NewAstrologerCard = memo(({
             <div className={styles.buttonWrapper}>
               <button
                 className={styles.callBtn}
-                onClick={() => callEnabled && onConnect(astrologer, "audio")}
+                onClick={() => {
+                  if (!callEnabled) return;
+                  onConnect(astrologer, "audio");
+                }}
                 disabled={!callEnabled}
+                title={!callEnabled ? "Call unavailable" : "Start call"}
               >
                 <img src={AppIcons.CallMinutesIcon} alt="" /> Call
               </button>

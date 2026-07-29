@@ -89,8 +89,15 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
       <div className={styles.buttonWrapper}>
         <button
           className={styles.chatBtn}
-          onClick={() => chatEnabled && onChat(astrologer)}
+          onClick={() => {
+            if (!chatEnabled) {
+              // Provide feedback instead of dead click
+              return;
+            }
+            onChat(astrologer);
+          }}
           disabled={!chatEnabled}
+          title={!chatEnabled ? "Chat is currently unavailable" : "Start chat"}
         >
           <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
         </button>
@@ -109,8 +116,14 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
       <div className={styles.buttonWrapper}>
         <button
           className={styles.callBtn}
-          onClick={() => callEnabled && onCall(astrologer, "audio")}
+          onClick={() => {
+            if (!callEnabled) {
+              return;
+            }
+            onCall(astrologer, "audio");
+          }}
           disabled={!callEnabled}
+          title={!callEnabled ? "Call is currently unavailable" : "Start call"}
         >
           <img src={AppIcons.CallMinutesIcon} alt="" /> Call
         </button>
@@ -230,9 +243,7 @@ const AstrologerProfile = () => {
   );
 
   // Check if the current astrologer is in the following list
-  const isFollowing = followingData?.data?.some(
-    (item) => item.astrologerId === data?._id && item.isFollowing === true
-  ) || false;
+  const isFollowing = followingData?.data?.isFollowing || false;
 
   const [followAstrologer, { isLoading: followLoading }] =
     useFollowAstrologerByIdMutation();
@@ -1787,10 +1798,15 @@ const AstrologerProfile = () => {
         ) : (
           <button
             className={styles.mobileConnectBtn}
-            onClick={() => setShowMobileConnectPopup(true)}
-            disabled={!data?.isActive}
+            onClick={() => {
+              if (!data?.isActive) {
+                toast.error("This astrologer is currently offline. Please try again later.");
+                return;
+              }
+              setShowMobileConnectPopup(true);
+            }}
           >
-            Connect Now
+            {data?.isActive ? "Connect Now" : "Currently Offline"}
           </button>
         )}
       </div>

@@ -4,8 +4,15 @@ import { sortContentByOrder } from "../sectionRendererV2";
 import defaultSquareImg from "../../../../assets/images/default_image_square_500x500.png"
 const SLUG_PATHS = {
   "free-kundli": "/kundli",
+  "generate-my-kundli": "/kundli",
+  "kundli": "/kundli",
   "talk-to-astrologer": "/astrologers",
+  "talk-to-an-astrologer": "/astrologers",
+  "astrologers": "/astrologers",
   "daily-horoscope": "/daily-horoscope",
+  "explore-horoscope": "/daily-horoscope",
+  "explore-daily-horoscope": "/daily-horoscope",
+  "horoscope": "/daily-horoscope",
 };
 
 const ComplementaryServicesSection = memo(({ sectionData, styles }) => {
@@ -19,7 +26,7 @@ const ComplementaryServicesSection = memo(({ sectionData, styles }) => {
         <Link
           key={card.ID || card.slug || card.title}
           className={styles.qCard}
-          to={SLUG_PATHS[card.slug] || "/"}
+          to={SLUG_PATHS[card.slug] || `/${card.slug}` || "/"}
         >
           <div className={styles.qText}>
             <h3>{card.title}</h3>

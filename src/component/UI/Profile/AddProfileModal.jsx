@@ -21,6 +21,30 @@ import { relationOption } from "../../../utils/constanats/appData";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
 import giftImg from "../../../assets/images/welcome-bonus-icon.webp";
 
+/**
+ * Auto-scrolls to the first field with a validation error after form submission.
+ * Prevents rage clicks caused by users not seeing error messages below the fold.
+ */
+const ScrollToError = ({ errors, submitCount }) => {
+  useEffect(() => {
+    if (submitCount === 0) return;
+    const errorKeys = Object.keys(errors);
+    if (errorKeys.length === 0) return;
+
+    // Find the first field with an error and scroll to it
+    const firstErrorField = document.querySelector(
+      `[name="${errorKeys[0]}"], [data-field="${errorKeys[0]}"]`
+    );
+    if (firstErrorField) {
+      firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+      // Focus the field so the user knows exactly what needs fixing
+      if (firstErrorField.focus) firstErrorField.focus();
+    }
+  }, [errors, submitCount]);
+
+  return null;
+};
+
 const AddProfileModal = ({
   isOpen,
   onClose,
@@ -256,10 +280,13 @@ const AddProfileModal = ({
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
             enableReinitialize
+            validateOnBlur={true}
+            validateOnChange={false}
           >
-            {({ values, setFieldValue }) => (
+            {({ values, setFieldValue, errors, submitCount }) => (
               <Form className={styles.profileForm}>
-                {/* Name */}
+                {/* Scroll to first error on failed submit */}
+                <ScrollToError errors={errors} submitCount={submitCount} />
                 <div className={styles.formGroup}>
                   <label>Name <span className={styles.required}>*</span></label>
                   <div className={styles.iconField}>

@@ -6,7 +6,7 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
     // CHECK IF FOLLOWING ASTROLOGER
     checkFollowingStatus: builder.query({
       query: ({ astrologerId }) => ({
-        url: `follows/following?astrologerId=${astrologerId}`,
+        url: `follows/follow-status?astrologerId=${astrologerId}`,
         method: "GET",
       }),
       providesTags: (_, __, { astrologerId }) => [
@@ -28,31 +28,11 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         { type: "Following", id: astrologerId },
         "FollowedAstrologers",
       ],
-      async onQueryStarted({ astrologerId }, { dispatch, queryFulfilled }) {
-        // Optimistic update — immediately show "Following" in the UI
-        const patchResult = dispatch(
-          privateRequestNew.util.updateQueryData(
-            'checkFollowingStatus',
-            { astrologerId },
-            (draft) => {
-              if (draft?.data) {
-                const existing = draft.data.find((item) => item.astrologerId === astrologerId);
-                if (existing) {
-                  existing.isFollowing = true;
-                } else {
-                  draft.data.push({ astrologerId, isFollowing: true });
-                }
-              }
-            }
-          )
-        );
+      async onQueryStarted({ astrologerId }, { queryFulfilled }) {
         try {
           await queryFulfilled;
           trackEvent("astrologer_followed", { astrologer_id: astrologerId });
-        } catch {
-          // Revert optimistic update on failure
-          patchResult.undo();
-        }
+        } catch { /* don't track failed attempts */ }
       },
     }),
 
@@ -70,29 +50,11 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
         { type: "Following", id: astrologerId },
         "FollowedAstrologers",
       ],
-      async onQueryStarted({ astrologerId }, { dispatch, queryFulfilled }) {
-        // Optimistic update — immediately show "Follow" in the UI
-        const patchResult = dispatch(
-          privateRequestNew.util.updateQueryData(
-            'checkFollowingStatus',
-            { astrologerId },
-            (draft) => {
-              if (draft?.data) {
-                const existing = draft.data.find((item) => item.astrologerId === astrologerId);
-                if (existing) {
-                  existing.isFollowing = false;
-                }
-              }
-            }
-          )
-        );
+      async onQueryStarted({ astrologerId }, { queryFulfilled }) {
         try {
           await queryFulfilled;
           trackEvent("astrologer_unfollowed", { astrologer_id: astrologerId });
-        } catch {
-          // Revert optimistic update on failure
-          patchResult.undo();
-        }
+        } catch { /* don't track failed attempts */ }
       },
     }),
   }),

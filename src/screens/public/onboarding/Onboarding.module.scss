@@ -1738,6 +1738,9 @@
     padding: 16px;
     width: 94%;
   }
+  @media (height <= 641px) {
+    padding: 10px 16px 10px 16px;
+  }
 }
 
 .newLoginHero {
@@ -1765,6 +1768,10 @@
   @media (width <= 900px) {
     width: 100%;
     align-items: center;
+  }
+
+  @media (height <= 641px) {
+    gap: 10px;
   }
 }
 
@@ -2104,6 +2111,9 @@
 .phoneMockup {
   width: 360px;
   height: auto;
+  @media (height: 641px) {
+    width: 330px;
+  }
 
   img {
     width: 100%;
@@ -2133,6 +2143,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
+  }
+
+  @media (height: 641px) {
+    padding: 10px 0;
   }
 }
 

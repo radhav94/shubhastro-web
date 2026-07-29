@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useGetChargesQuery, useDownloadReportPdfMutation, useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
@@ -81,6 +81,15 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
   );
 
   const historyId = useMemo(() => extractHistoryId(resultData), [resultData]);
+
+  // Reset cached PDF URL when the underlying result changes (e.g. profile switch)
+  const prevHistoryIdRef = useRef(historyId);
+  useEffect(() => {
+    if (prevHistoryIdRef.current !== historyId) {
+      setDownloadedPdfUrl(null);
+      prevHistoryIdRef.current = historyId;
+    }
+  }, [historyId]);
 
   const historyItem = useMemo(
     () => historyData?.data?.history?.find((h) => h._id === historyId || h.featureId === historyId) || null,
@@ -171,7 +180,10 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
       setTimeout(() => {
         URL.revokeObjectURL(blobUrl);
         toast.dismiss(id);
-        toast.success('Payment Successful! PDF downloaded.', { id: `${id}-success`, duration: 3000 });
+        toast.success(
+          downloadPrice > 0 ? 'Payment Successful! PDF downloaded.' : 'PDF downloaded!',
+          { id: `${id}-success`, duration: 3000 }
+        );
       }, 600);
       setShowDownloadModal(false);
       setDownloadedPdfUrl(pdfUrl);
@@ -186,7 +198,7 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
     } finally {
       setIsDownloading(false);
     }
-  }, [historyId, id, fileName, downloadReportPdf, refreshWallet]);
+  }, [historyId, id, fileName, downloadReportPdf, refreshWallet, downloadPrice, featureName]);
 
   return {
     // State

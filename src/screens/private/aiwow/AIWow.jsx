@@ -89,8 +89,8 @@ const AIWow = () => {
     // Pass 1: deduplicate by featureId
     const byFeatureId = new Map();
     for (const item of rawHistoryList) {
-      // Exclude Daily Horoscope from result history
-      if (item.featureName?.toLowerCase() === "daily horoscope") continue;
+      // // Exclude Daily Horoscope from result history
+      // if (item.featureName?.toLowerCase() === "daily horoscope") continue;
       const key = item.featureId || item._id;
       const existing = byFeatureId.get(key);
       if (!existing || (item.pdfPath && !existing.pdfPath)) {
@@ -134,6 +134,13 @@ const AIWow = () => {
       setActiveTab(location.state.tab);
     }
   }, [location.state]);
+
+  // Refetch history when results tab is active to pick up downloads done on result pages
+  useEffect(() => {
+    if (activeTab === "results" && kundliId) {
+      refetchHistory();
+    }
+  }, [activeTab, location.key]);
 
   // Reset page when profile changes
   useEffect(() => {

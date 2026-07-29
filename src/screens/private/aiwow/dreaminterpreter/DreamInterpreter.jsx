@@ -63,6 +63,13 @@ const DreamInterpreter = () => {
     handleDownloadClick, handleConfirmDownload,
   } = useAIWowDownload({ resultData: downloadResultData });
 
+  // Scroll to top when result/error is displayed
+  useEffect(() => {
+    if (interpretation || error) {
+      window.scrollTo(0, 0);
+    }
+  }, [interpretation, error]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -336,7 +343,7 @@ const DreamInterpreter = () => {
                   <h3 className={styles.cardTitle}>
                     {interpretation.summary.title || 'Dream Summary'}
                   </h3>
-                  <TTSButton text={`${interpretation.summary.title || 'Dream Summary'}. ${interpretation.summary.mainTheme || ''}${interpretation.summary.emotionalTone ? '. Emotional Tone: ' + interpretation.summary.emotionalTone : ''}${interpretation.summary.intensity ? '. Intensity: ' + interpretation.summary.intensity + ' percent' : ''}`} />
+                  <TTSButton text={`${interpretation.summary.title || 'Dream Summary'}. ${interpretation.summary.mainTheme || ''}${interpretation.summary.emotionalTone ? '. Emotional Tone: ' + interpretation.summary.emotionalTone : ''}${interpretation.summary.intensity ? '. Intensity: ' + interpretation.summary.intensity + ' percent' : ''}${interpretation.summary.lucidity ? '. Lucidity: ' + interpretation.summary.lucidity : ''}`} />
                 </div>
                 <div className={styles.contentWrapper}>
                   {interpretation.summary.mainTheme && (
