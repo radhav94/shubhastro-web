@@ -165,12 +165,15 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
     
     let limitedDigits;
     if (isDeleting) {
-      // When deleting from a complete value (4 digits + AM/PM), remove last digit
+      // Deleting a character while all 4 time digits are still present means the
+      // user is removing the trailing period/space (e.g. "02:30 AM" -> "02:30 A"
+      // -> "02:30 " -> "02:30"), not a time digit. Preserve what remains without
+      // stripping a digit or re-appending AM/PM.
       if (prevDigits.length === 4 && digits.length === 4) {
-        limitedDigits = digits.slice(0, 3);
-      } else {
-        limitedDigits = digits.slice(0, 4);
+        setManualInput(raw.toUpperCase());
+        return;
       }
+      limitedDigits = digits.slice(0, 4);
     } else {
       limitedDigits = digits.slice(0, 4);
     }
@@ -208,9 +211,19 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
       formatted += limitedDigits[i];
     }
     
-    // Once 4 digits are entered (HH:MM), append a space to prompt AM/PM typing
+    // Once 4 digits are entered (HH:MM), auto-append a period so AM/PM is
+    // always visible instead of waiting for the user to type A/P. Preserve the
+    // currently selected period when editing, otherwise default to AM. The
+    // user can still toggle it via the 'a'/'p' keys or the dropdown.
     if (limitedDigits.length === 4) {
-      formatted += " ";
+      const p = period ?? "AM";
+      formatted += ` ${p}`;
+      setManualInput(formatted);
+      const parsed = parseManualTime(formatted);
+      if (parsed) {
+        onChange(buildDate(parsed.hour, parsed.minute, parsed.period));
+      }
+      return;
     }
     
     setManualInput(formatted);
