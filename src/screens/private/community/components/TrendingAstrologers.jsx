@@ -1,5 +1,42 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../Community.module.scss";
+
+const AstrologerAvatar = ({ astrologer, name }) => {
+  const [imgError, setImgError] = useState(false);
+
+  const getInitials = (firstName) => {
+    return (firstName || "?")[0]?.toUpperCase() || "?";
+  };
+
+  if (astrologer.profileImgUrl && !imgError) {
+    return (
+      <img
+        src={astrologer.profileImgUrl}
+        alt={name}
+        className={styles.trendingAvatar}
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+
+  return (
+    <div
+      className={styles.trendingAvatar}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(135deg, #f97316, #ea580c)",
+        color: "#fff",
+        fontWeight: 600,
+        fontSize: 14,
+      }}
+    >
+      {getInitials(astrologer.firstName)}
+    </div>
+  );
+};
 
 const TrendingAstrologers = ({
   title = "Trending Astrologers",
@@ -14,10 +51,6 @@ const TrendingAstrologers = ({
     navigate(`/astrologer/${astrologer._id}`);
   };
 
-  const getInitials = (firstName) => {
-    return (firstName || "?")[0]?.toUpperCase() || "?";
-  };
-
   return (
     <aside className={styles.trendingSidebar}>
       <h3 className={styles.trendingTitle}>{title}</h3>
@@ -26,17 +59,7 @@ const TrendingAstrologers = ({
           const name = `${astrologer.firstName} ${astrologer.lastName || ""}`;
           return (
             <li key={astrologer._id || astrologer.astrologerID} className={styles.trendingItem}>
-              {astrologer.profileImgUrl ? (
-                <img
-                  src={astrologer.profileImgUrl}
-                  alt={name}
-                  className={styles.trendingAvatar}
-                />
-              ) : (
-                <div className={styles.trendingAvatar} style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #f97316, #ea580c)", color: "#fff", fontWeight: 600, fontSize: 14 }}>
-                  {getInitials(astrologer.firstName)}
-                </div>
-              )}
+              <AstrologerAvatar astrologer={astrologer} name={name} />
               <div className={styles.trendingInfo}>
                 <span className={styles.trendingName}>{name}</span>
                 <span className={styles.trendingExp}>
