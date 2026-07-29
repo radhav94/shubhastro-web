@@ -223,7 +223,7 @@ const GuestDetailsForm = ({
               disabled={form.unknownBirthTime}
               selected={form.time}
               onChange={(d) => setField("time", d)}
-              placeholder="HH:MM"
+              placeholder="HH:MM AM/PM"
             />
           </div>
           {errors.time && <span className={styles.err}>{errors.time}</span>}
