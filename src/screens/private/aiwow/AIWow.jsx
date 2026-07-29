@@ -278,7 +278,7 @@ const AIWow = () => {
       return;
     }
     // Allow guest users to view intro pages for these features
-    const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
+    const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography", "dream-interpreter"];
     // All features require login
     const freeAccessSlugs = [];
     if (!freeAccessSlugs.includes(slug) && !guestAccessSlugs.includes(slug)) {
