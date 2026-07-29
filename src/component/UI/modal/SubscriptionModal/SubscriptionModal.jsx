@@ -214,6 +214,11 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
               <p className={styles.successWelcome}>Payment Successful!</p>
               <h2 className={styles.successTitle}>Subscription Activated</h2>
               {successPlan?.title && <p className={styles.successPlanName}>{successPlan.title}</p>}
+              {successPlan?.priceValue > 0 && (
+                <p className={styles.successDeducted}>
+                  ₹{successPlan.priceValue} has been deducted from wallet towards subscription
+                </p>
+              )}
               <div className={styles.successBadge}>
                 <span aria-hidden="true">✦</span> Premium features unlocked
               </div>

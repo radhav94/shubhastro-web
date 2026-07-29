@@ -554,3 +554,13 @@
     transform: scale(0.98);
   }
 }
+
+/* Wallet deduction line on the success popup */
+.successDeducted {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #16a34a;
+  margin: 0 0 12px;
+  max-width: 320px;
+}

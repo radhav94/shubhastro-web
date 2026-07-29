@@ -165,7 +165,12 @@ const Profile = () => {
   //   : "Guest User";
   const userId = localStorage.getItem("shubhtalk_customer_id");
 
-  const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !userId });
+  const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, {
+    skip: !userId,
+    // Report generation consumes quota on the backend, so always pull a fresh
+    // status when the account page mounts instead of showing stale cached data.
+    refetchOnMountOrArgChange: true,
+  });
   const [cancelSubscription, { isLoading: isCancellingSubscription }] = useCancelSubscriptionMutation();
   const activeSubscriptionId = subscriptionStatus?.data?.subscription?._id;
   const subData = subscriptionStatus?.data;
