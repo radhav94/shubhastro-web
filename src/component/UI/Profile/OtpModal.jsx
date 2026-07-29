@@ -89,12 +89,27 @@ const OtpModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [otp]);
 
-  // Reset state whenever the modal opens
+  // Reset state whenever the modal opens + lock body scroll
   useEffect(() => {
     if (isOpen) {
       setOtp("");
+      // Lock body scroll to prevent iOS from scrolling page behind modal
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${window.scrollY}px`;
       setTimeout(() => inputRef.current?.focus(), 100);
     }
+    return () => {
+      if (isOpen) {
+        const scrollY = document.body.style.top;
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.top = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    };
   }, [isOpen]);
 
   const handleResend = async () => {
