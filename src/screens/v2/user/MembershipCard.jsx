@@ -7,6 +7,7 @@ import crown from "../../../assets/images/crown.webp";
 // Cancel Subscription option). Non-subscriber shows an "Unlock Premium" upsell.
 const MembershipCard = ({
   hasSubscription = false,
+  autoRenew = false,
   planName,
   validTill,
   remainingDays,
@@ -86,35 +87,39 @@ const MembershipCard = ({
         )}
       </div>
 
-      <div className={styles.manageWrap} ref={menuRef}>
-        <button
-          type="button"
-          className={styles.manageBtn}
-          onClick={() => setMenuOpen((open) => !open)}
-          aria-haspopup="menu"
-          aria-expanded={menuOpen}
-        >
-          Manage
-          <ChevronDown
-            size={16}
-            className={`${styles.manageChevron} ${menuOpen ? styles.manageChevronOpen : ""}`}
-          />
-        </button>
+      {/* Once auto-renewal is cancelled there's nothing left to manage, so hide
+          the dropdown (its only action is Cancel Subscription). */}
+      {autoRenew && (
+        <div className={styles.manageWrap} ref={menuRef}>
+          <button
+            type="button"
+            className={styles.manageBtn}
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+          >
+            Manage
+            <ChevronDown
+              size={16}
+              className={`${styles.manageChevron} ${menuOpen ? styles.manageChevronOpen : ""}`}
+            />
+          </button>
 
-        {menuOpen && (
-          <div className={styles.manageMenu} role="menu">
-            <button
-              type="button"
-              className={styles.cancelMenuItem}
-              onClick={handleCancelClick}
-              disabled={isCancelling}
-              role="menuitem"
-            >
-              {isCancelling ? "Cancelling..." : "Cancel Subscription"}
-            </button>
-          </div>
-        )}
-      </div>
+          {menuOpen && (
+            <div className={styles.manageMenu} role="menu">
+              <button
+                type="button"
+                className={styles.cancelMenuItem}
+                onClick={handleCancelClick}
+                disabled={isCancelling}
+                role="menuitem"
+              >
+                {isCancelling ? "Cancelling..." : "Cancel Subscription"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
