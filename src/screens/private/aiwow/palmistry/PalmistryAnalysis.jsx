@@ -158,6 +158,21 @@ const PalmistryAnalysis = () => {
         // DON'T clear data on error - keep image and hand selection for retry
         // dispatch(clearPalmistryData());
 
+        const errorCode = typeof result.error === 'object' ? result.error?.code : null;
+
+        // INVALID_PALM_IMAGE means the photo itself isn't a usable palm (blurry,
+        // fingers not visible, etc.) — this is NOT a hand-side mismatch, so never
+        // auto-retry with the other hand. Surface the backend's guidance so the
+        // user can retake the picture.
+        if (errorCode === 'INVALID_PALM_IMAGE') {
+          setProgress(0);
+          const invalidMsg = (typeof result.error === 'object' && result.error?.message)
+            ? result.error.message
+            : 'Please upload a clear image of your palm with all fingers visible.';
+          setError({ message: invalidMsg });
+          return;
+        }
+
         // Hand-side mismatch: the backend thinks this is the other hand.
         // Auto-retry once with the opposite hand so the user isn't blocked,
         // and update the stored selection so the result shows the right label.

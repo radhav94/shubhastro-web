@@ -548,6 +548,12 @@ const HomeV2 = () => {
   const handleEmergencyCallNow = useCallback((a) => handleConnectClick(a, "audio", true), [handleConnectClick]);
   const handleMobileAppClose = useCallback(() => setShowMobileAppModal(false), []);
   const handlePaidCardClick = useCallback(async (item) => {
+    // AR Vastu Scanner is an app-only feature — show its modal directly, with no
+    // login or subscription gating.
+    if (item?.slug === "ar-vastu-scanner") {
+      setShowMobileAppModal(true);
+      return;
+    }
     // Guests can open the intro pages for these features without logging in.
     const guestAccessSlugs = ["ai-palmistry-scanner", "astro-face-reading", "signature-analysis", "clothes-colour-analysis", "gemstone-authenticity", "aura-photography"];
     if (guestAccessSlugs.includes(item?.slug)) {
