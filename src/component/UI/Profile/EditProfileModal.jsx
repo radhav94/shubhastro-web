@@ -29,6 +29,11 @@ const EditProfileModal = ({
     timezone: 5.5,
   });
 
+  // Track whether the user has started editing (to prevent reinitialize from overwriting)
+  const [isEditing, setIsEditing] = useState(false);
+  // Track whether the DateTimePicker has an invalid date input
+  const [dateInputError, setDateInputError] = useState("");
+
   // Check if a "Self" profile exists (excluding the current profile being edited)
   const hasSelfProfile = savedKundlis.some(
     (profile) => 
@@ -105,10 +110,17 @@ const EditProfileModal = ({
         longitude: initialData.longitude || null,
         timezone: initialData.timezone ?? 5.5,
       });
+      setIsEditing(false);
+      setDateInputError("");
     }
   }, [initialData, isOpen]);
 
   const handleSubmit = async (values) => {
+    // Block submission if the date input has an error (incomplete/invalid year)
+    if (dateInputError) {
+      return;
+    }
+
     if (!values.latitude || !values.longitude) {
       Toast.error("Please select a valid location from the dropdown");
       return;
@@ -148,6 +160,8 @@ const EditProfileModal = ({
   };
 
   const handleClose = () => {
+    setIsEditing(false);
+    setDateInputError("");
     onClose();
   };
 
@@ -169,10 +183,10 @@ const EditProfileModal = ({
             initialValues={formData}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
-            enableReinitialize
+            enableReinitialize={!isEditing}
           >
             {({ values, setFieldValue }) => (
-              <Form className={styles.profileForm}>
+              <Form className={styles.profileForm} onChange={() => setIsEditing(true)}>
                 <div className={styles.formGroup}>
                   <label>Name <span className={styles.required}>*</span></label>
                   <Field
@@ -291,18 +305,32 @@ const EditProfileModal = ({
                     mode="date"
                     selected={values.birthDate ? new Date(values.birthDate) : null}
                     onChange={(date) => {
+                      setIsEditing(true);
                       if (date) {
                         const yyyy = date.getFullYear();
                         const mm = String(date.getMonth() + 1).padStart(2, "0");
                         const dd = String(date.getDate()).padStart(2, "0");
                         setFieldValue("birthDate", `${yyyy}-${mm}-${dd}`);
+                        setDateInputError("");
                       } else {
                         setFieldValue("birthDate", "");
                       }
                     }}
+                    onRawChange={(rawText) => {
+                      setIsEditing(true);
+                      if (!rawText) {
+                        setFieldValue("birthDate", "");
+                        setDateInputError("");
+                      }
+                    }}
+                    onError={(err) => setDateInputError(err)}
                     placeholder="DD/MM/YYYY"
                   />
-                  <ErrorMessage name="birthDate" component="div" className={styles.errorText} />
+                  {dateInputError ? (
+                    <div className={styles.errorText}>{dateInputError}</div>
+                  ) : (
+                    <ErrorMessage name="birthDate" component="div" className={styles.errorText} />
+                  )}
                 </div>
 
                 <div className={styles.formGroup}>
