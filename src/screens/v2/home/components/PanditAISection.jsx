@@ -1,21 +1,13 @@
 import { ArrowRight, Sparkles } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import styles from "../Home.module.scss";
-import { Toast } from "../../../../component";
 
 const PanditAISection = ({ data }) => {
-  const navigate = useNavigate();
-  const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
-
   const panditTitle = data?.title || "Pandit AI";
 
   const handleClick = () => {
-    if (!userIdLocal) {
-      Toast.error("Please login to continue");
-      navigate("/login");
-      return;
-    }
-    // Open the PanditAI bubble
+    // Open the Pandit AI bubble. Guests are handled inside the bubble, which
+    // shows the inline login/registration form as a message (no redirect to
+    // the login screen) and starts the chat after successful registration.
     window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }));
   };
 

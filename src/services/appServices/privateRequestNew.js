@@ -7,6 +7,22 @@ import { navigateToLogin } from "../../utils/navigationHelper";
 let unAuthorizedCount = 0;
 const BASE_URL = "/main";
 
+// Endpoints whose error toasts are temporarily silenced at runtime. Used by
+// flows that handle certain failures themselves (e.g. the guest login/kundli
+// flow, where an existing user's kundli-create can fail harmlessly and is
+// recovered by falling back to their existing kundlis).
+const toastSilencedEndpoints = new Set();
+
+/**
+ * Silence (or restore) the global error toast for a specific RTK Query endpoint.
+ * @param {string} endpoint - endpoint name (e.g. "createKundli")
+ * @param {boolean} silenced
+ */
+export const setApiErrorToastSilenced = (endpoint, silenced) => {
+  if (silenced) toastSilencedEndpoints.add(endpoint);
+  else toastSilencedEndpoints.delete(endpoint);
+};
+
 // Endpoints that should be accessible without authentication (no login redirect on 401)
 const PUBLIC_ENDPOINTS = ["getAstrologerById", "getAstrologers", "getRecommendedAstrologers"];
 
@@ -121,7 +137,7 @@ export const privateRequestNew = createApi({
 
     const result = await rawBaseQuery(args, api, extraOptions);
 
-    if (result.error) {
+    if (result.error && !toastSilencedEndpoints.has(api.endpoint)) {
       handleApiError(result.error, api.endpoint);
     }
 
