@@ -47,7 +47,7 @@ const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
 
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
-const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount }) => {
+const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onLiveCommunityClick, onRequireGuestAuth }) => {
   // Sort sections by list_order to determine column placement
   // 1st by list_order → LEFT, 2nd → CENTER, 3rd → RIGHT
   // ai-services is special: it distributes across columns (laal kitaab left, occult/pandit center, community right)
@@ -206,7 +206,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
           {renderSectionContent(rightSection)}
           {/* Live Community from ai-services — always in right column */}
           {aiServicesItems[3] && (
-            <div className={`${styles.liveCommunityCard} ${styles.desktopOnly}`} onClick={() => { const url = aiServicesItems[3]?.redirect_url || aiServicesItems[3]?.link; if (url) navigate(url); }} style={{ cursor: aiServicesItems[3]?.redirect_url || aiServicesItems[3]?.link ? 'pointer' : 'default' }}>
+            <div className={`${styles.liveCommunityCard} ${styles.desktopOnly}`} onClick={() => onLiveCommunityClick(aiServicesItems[3])} style={{ cursor: aiServicesItems[3]?.redirect_url || aiServicesItems[3]?.link ? 'pointer' : 'default' }}>
               <span className={styles.featureTag}>New</span>
               <h3 className={styles.liveCommunityTitle}>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title}</h3>
               {aiServicesItems[3]?.description && <p className={styles.liveCommunityDesc}>{aiServicesItems[3].description}</p>}
@@ -231,7 +231,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
 
       {/* Mobile AI Services grid */}
       {aiServicesItems.length > 0 && (
-        <AiServicesSection sectionData={aiServicesData} styles={styles} onlineCount={onlineCount} />
+        <AiServicesSection sectionData={aiServicesData} styles={styles} onlineCount={onlineCount} onRequireGuestAuth={onRequireGuestAuth} />
       )}
     </>
   );
@@ -279,7 +279,7 @@ const ThreeColGroupLayout = ({ sections, styles }) => {
 // ─── Standalone Renderers for Hero/ThreeCol types when ungrouped ──────────────
 
 const renderUngroupedHeroSection = (section, props) => {
-  const { styles, navigate, name, currentMahadasha, handleWowCardClick, onlineCount } = props;
+  const { styles, navigate, name, currentMahadasha, handleWowCardClick, onlineCount, onRequireGuestAuth } = props;
   const dt = section.display_type;
   const key = `ungrouped-${section.list_order}-${dt}`;
 
@@ -308,7 +308,7 @@ const renderUngroupedHeroSection = (section, props) => {
     case "ai-services": {
       const items = sortContentByOrder(section.content || []);
       if (!items.length) return null;
-      return <div key={key}><AiServicesSection sectionData={section} styles={styles} onlineCount={onlineCount} /></div>;
+      return <div key={key}><AiServicesSection sectionData={section} styles={styles} onlineCount={onlineCount} onRequireGuestAuth={onRequireGuestAuth} /></div>;
     }
     default:
       return null;
@@ -450,6 +450,27 @@ const HomeV2 = () => {
     if (path) navigate(path);
   }, [navigate]);
 
+  // Live Community card: guests get the inline guest login popup (instead of
+  // being redirected to /login by the guarded live page) and are taken to the
+  // live page after registering.
+  const handleLiveCommunityClick = useCallback((item) => {
+    const url = item?.redirect_url || item?.link || "/live";
+    if (!url) return;
+    if (!getToken()) {
+      pendingWowPathRef.current = url;
+      setShowGuestAuthModal(true);
+      return;
+    }
+    navigate(url);
+  }, [navigate]);
+
+  // Opens the guest login popup for an auth-required destination (e.g. the
+  // mobile AI-services live card), navigating to `url` after registration.
+  const handleRequireGuestAuth = useCallback((url) => {
+    pendingWowPathRef.current = url;
+    setShowGuestAuthModal(true);
+  }, []);
+
   // Mahadasha
   const kundliProfile = useSelector(s => s.aiwow?.selectedKundliProfile);
   const kundliParams = useMemo(() => {
@@ -503,7 +524,7 @@ const HomeV2 = () => {
   const handleRechargeClose = useCallback(() => hookSetOpenModal((prev) => ({ ...prev, recharge: false })), [hookSetOpenModal]);
 
   // ─── Shared props for group renderers ─────────────────────────────────────
-  const heroProps = { styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount };
+  const heroProps = { styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onLiveCommunityClick: handleLiveCommunityClick, onRequireGuestAuth: handleRequireGuestAuth };
   const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id, astrologerMaleImg };
 
   // ─── Render ───────────────────────────────────────────────────────────────

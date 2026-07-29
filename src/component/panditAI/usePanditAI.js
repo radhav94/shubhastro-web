@@ -84,10 +84,11 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     }
   }, []);
 
-  // Fetch previous chat history
+  // Fetch previous chat history. Skip for guests (no userId) — firing this
+  // unauthenticated would 401 and redirect them to the login screen.
   const { data: historyData, isLoading: historyLoading } = useGetChatHistoryQuery(
     { userId: PANDIT_AI_ID },
-    { skip: !isOpen, refetchOnMountOrArgChange: true }
+    { skip: !isOpen || !userIdLocal, refetchOnMountOrArgChange: true }
   );
 
   // Load history into messages once

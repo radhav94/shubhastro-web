@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import AddProfileModal from "./AddProfileModal";
+import GuestDetailsForm from "./GuestDetailsForm";
 import OtpModal from "./OtpModal";
 import { Toast } from "../../index";
 import * as AuthServices from "../../../services/appServices/authService";
@@ -11,7 +12,7 @@ import { loginSuccess } from "../../../redux/auth/authSlice";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { useCreateKundliMutation, useLazyGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
-import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
+import { privateRequestNew, setApiErrorToastSilenced } from "../../../services/appServices/privateRequestNew";
 import { trackEvent } from "../../../utils/analytics";
 
 /**
@@ -32,6 +33,9 @@ const GuestKundliAuthModal = ({
   onClose,
   onSuccess,
   title = "Add Kundli Details",
+  // When true, the kundli/OTP forms render inline (as a message inside the
+  // Pandit AI chat) instead of as a full-screen overlay.
+  inline = false,
 }) => {
   const dispatch = useDispatch();
   const [createKundli] = useCreateKundliMutation();
@@ -70,7 +74,12 @@ const GuestKundliAuthModal = ({
     typeof err?.status === "number" ? err.status : err?.originalStatus;
 
   // Creates the kundli, retrying once if the server responds with a 500.
+  // The global error toast is silenced for this call: during guest login a
+  // create can fail harmlessly (e.g. an existing user already has kundlis) and
+  // we recover by falling back to their existing kundli — the user shouldn't
+  // see an error like "Please Delete One Kundli from Existing One".
   const createKundliWithRetry = async (payload) => {
+    setApiErrorToastSilenced("createKundli", true);
     try {
       return await createKundli(payload).unwrap();
     } catch (err) {
@@ -79,6 +88,8 @@ const GuestKundliAuthModal = ({
         return await createKundli(payload).unwrap();
       }
       throw err;
+    } finally {
+      setApiErrorToastSilenced("createKundli", false);
     }
   };
 
@@ -370,20 +381,41 @@ const GuestKundliAuthModal = ({
     Toast.success("OTP resent successfully");
   };
 
+  // Inline submit wrapper: handleKundliSubmit rethrows so AddProfileModal's
+  // Formik can keep the form open on error. GuestDetailsForm doesn't need that,
+  // so swallow the (already-toasted) error to avoid an unhandled rejection.
+  const handleInlineSubmit = async (details) => {
+    try {
+      await handleKundliSubmit(details);
+    } catch {
+      /* error toast already shown in handleKundliSubmit */
+    }
+  };
+
+  const showKundliStep =
+    isOpen && step === "kundli" && !localStorage.getItem("shubhtalk_customer_token");
+
   return (
     <>
-      <AddProfileModal
-        isOpen={isOpen && step === "kundli" && !localStorage.getItem("shubhtalk_customer_token")}
-        onClose={handleClose}
-        onSubmit={handleKundliSubmit}
-        isLoading={sendingOtp}
-        title={title}
-        submitButtonText="Continue"
-        showMobileField
-        hideRelation
-        showProfileListing={false}
-        closeOnOverlayClick={false}
-      />
+      {inline ? (
+        showKundliStep && (
+          <GuestDetailsForm submitting={sendingOtp} onSubmit={handleInlineSubmit} />
+        )
+      ) : (
+        <AddProfileModal
+          isOpen={showKundliStep}
+          onClose={handleClose}
+          onSubmit={handleKundliSubmit}
+          isLoading={sendingOtp}
+          title={title}
+          submitButtonText="Continue"
+          showMobileField
+          hideRelation
+          showProfileListing={false}
+          closeOnOverlayClick={false}
+          inline={inline}
+        />
+      )}
 
       <OtpModal
         isOpen={isOpen && step === "otp"}
@@ -393,6 +425,7 @@ const GuestKundliAuthModal = ({
         onClose={handleClose}
         isVerifying={verifying}
         closeOnOverlayClick={false}
+        inline={inline}
       />
     </>
   );

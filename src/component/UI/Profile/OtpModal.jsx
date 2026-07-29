@@ -22,6 +22,9 @@ const OtpModal = ({
   onClose,
   isVerifying = false,
   closeOnOverlayClick = true,
+  // When true, renders inline (as a normal block/message) instead of a fixed
+  // full-screen overlay — used to embed it inside the Pandit AI chat.
+  inline = false,
 }) => {
   const [otp, setOtp] = useState("");
   const [counter, setCounter] = useState(60);
@@ -86,8 +89,8 @@ const OtpModal = ({
 
   return (
     <div
-      className={styles.modalOverlay}
-      onClick={closeOnOverlayClick ? onClose : undefined}
+      className={`${styles.modalOverlay} ${inline ? styles.inline : ""}`}
+      onClick={closeOnOverlayClick && !inline ? onClose : undefined}
     >
       <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeBtn} onClick={onClose} aria-label="Close">

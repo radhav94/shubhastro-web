@@ -18,6 +18,8 @@ import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
 import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
 import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
+import { GuestKundliAuthModal } from "../../../component/UI/Profile";
+import { getToken } from "../../../utils/token";
 
 // Left card images
 import kundliImg from "../../../assets/images/home-hero-kundli.png";
@@ -72,6 +74,18 @@ const HomeNew = () => {
   }, [aiSuitesData]);
 
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
+  // Guest login popup for "Join Live" when the user isn't logged in.
+  const [showLiveGuestAuth, setShowLiveGuestAuth] = useState(false);
+
+  // Join the live community. Logged-in users go straight to /live; guests get
+  // the inline guest login popup and are taken to /live after registering.
+  const handleJoinLive = () => {
+    if (getToken()) {
+      navigate("/live");
+    } else {
+      setShowLiveGuestAuth(true);
+    }
+  };
 
   const handleWowCardClick = (item) => {
     if (!item.slug) return;
@@ -390,7 +404,7 @@ const HomeNew = () => {
           </div>
 
           {/* Live Community */}
-          <div className={`${styles.featureCard} ${styles.liveCommunity}`} onClick={() => navigate('/live')} style={{ cursor: 'pointer', ...(aiServicesItems[3]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[3].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}) }}>
+          <div className={`${styles.featureCard} ${styles.liveCommunity}`} onClick={handleJoinLive} style={{ cursor: 'pointer', ...(aiServicesItems[3]?.image_url_web ? { backgroundImage: `url(${aiServicesItems[3].image_url_web})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}) }}>
             <span className={styles.featureTag}>New</span>
             <div className={styles.fcTop}>
               <h3>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title || "ShubhAstro Live Community"}</h3>
@@ -634,6 +648,14 @@ const HomeNew = () => {
       <PanditAIBubble />
       <PanditAIVoiceBubble />
       <MobileAppModal isOpen={showMobileAppModal} onClose={() => setShowMobileAppModal(false)} />
+      <GuestKundliAuthModal
+        isOpen={showLiveGuestAuth}
+        onClose={() => setShowLiveGuestAuth(false)}
+        onSuccess={() => {
+          setShowLiveGuestAuth(false);
+          navigate("/live");
+        }}
+      />
     </>
   );
 };

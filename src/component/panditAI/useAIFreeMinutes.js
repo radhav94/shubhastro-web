@@ -42,6 +42,11 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
 
   useEffect(() => {
     if (!isOpen) return;
+    // Guests (no logged-in customer) have no wallet. Calling the authenticated
+    // wallet-balance endpoint would 401 and trigger the global login redirect,
+    // kicking the guest out of the inline registration form. Skip it until they
+    // finish registering.
+    if (!localStorage.getItem("shubhtalk_customer_id")) return;
     getWalletBalance().then((res) => {
       if (res?.data?.data !== undefined && !isNaN(res.data.data)) {
         setWalletBalance(Number(res.data.data));
