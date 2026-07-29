@@ -25,6 +25,7 @@ const YourPosts = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces
   const [openComments, setOpenComments] = useState({});
   const [likeState, setLikeState] = useState({});
   const [shareState, setShareState] = useState({});
+  const [commentCountState, setCommentCountState] = useState({});
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletePostId, setDeletePostId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -38,6 +39,27 @@ const YourPosts = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces
     setOpenComments((prev) => {
       if (prev[postId]) return {};
       return { [postId]: true };
+    });
+  };
+
+  const getCommentCount = (post) => {
+    if (commentCountState[post._id] !== undefined) {
+      return commentCountState[post._id];
+    }
+    return post.commentsCount || 0;
+  };
+
+  const handleCommentAdded = (postId) => {
+    setCommentCountState((prev) => {
+      const current = prev[postId] !== undefined ? prev[postId] : (posts.find((p) => p._id === postId)?.commentsCount || 0);
+      return { ...prev, [postId]: current + 1 };
+    });
+  };
+
+  const handleCommentDeleted = (postId) => {
+    setCommentCountState((prev) => {
+      const current = prev[postId] !== undefined ? prev[postId] : (posts.find((p) => p._id === postId)?.commentsCount || 0);
+      return { ...prev, [postId]: Math.max(0, current - 1) };
     });
   };
 
@@ -286,7 +308,7 @@ const YourPosts = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces
                       </button>
                       <button className={styles.actionItem} onClick={() => toggleComments(post._id)}>
                         <FiMessageCircle size={18} />
-                        <span>{formatCount(post.commentsCount)}</span>
+                        <span>{formatCount(getCommentCount(post))}</span>
                       </button>
                       <button className={styles.actionItem} onClick={() => handleShare(post._id)}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D43400" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -318,7 +340,11 @@ const YourPosts = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces
 
                     {/* Comment Section */}
                     {openComments[post._id] && (
-                      <CommentSection postId={post._id} />
+                      <CommentSection
+                        postId={post._id}
+                        onCommentAdded={() => handleCommentAdded(post._id)}
+                        onCommentDeleted={() => handleCommentDeleted(post._id)}
+                      />
                     )}
                   </article>
                 );

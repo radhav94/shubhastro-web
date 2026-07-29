@@ -77,7 +77,7 @@ const CommentItem = forwardRef(({ comment, currentUserId, onDelete }, ref) => {
 
 CommentItem.displayName = "CommentItem";
 
-const CommentSection = ({ postId }) => {
+const CommentSection = ({ postId, onCommentAdded, onCommentDeleted }) => {
   const [commentText, setCommentText] = useState("");
   const [deletedIds, setDeletedIds] = useState([]);
   const [refetchKey, setRefetchKey] = useState(0);
@@ -121,6 +121,7 @@ const CommentSection = ({ postId }) => {
     try {
       await deleteComment(deleteCommentId).unwrap();
       setDeletedIds((prev) => [...prev, deleteCommentId]);
+      onCommentDeleted?.();
       Toast.success("Comment deleted");
     } catch (error) {
       Toast.error(error?.data?.message || "Failed to delete comment");
@@ -143,6 +144,7 @@ const CommentSection = ({ postId }) => {
       trackEvent("community_post_commented", { post_id: postId });
       setCommentText("");
       setRefetchKey((k) => k + 1);
+      onCommentAdded?.();
       setTimeout(() => {
         if (commentsListRef.current) {
           commentsListRef.current.scrollTop = commentsListRef.current.scrollHeight;
