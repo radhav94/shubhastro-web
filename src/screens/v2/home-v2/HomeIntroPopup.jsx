@@ -21,6 +21,18 @@ const isWithinDateRange = (startDate, endDate) => {
   }
 };
 
+// Helper: Extract route path from URL
+// Example: "https://www.shubhastro.ai/kundli/abc" → "/kundli/abc"
+const extractPathFromUrl = (url) => {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.pathname || "/";
+  } catch {
+    // If URL parsing fails, return the URL as-is (might be a relative path)
+    return url || "/";
+  }
+};
+
 const HomeIntroPopup = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -78,8 +90,10 @@ const HomeIntroPopup = () => {
   const handleBannerClick = () => {
     markSeen();
     setIsOpen(false);
-    if (isInternal) {
-      navigate("/kundli");
+    if (isInternal && popupLink) {
+      // Extract path from URL and navigate to it
+      const path = extractPathFromUrl(popupLink);
+      navigate(path);
     } else if (popupLink) {
       window.location.href = popupLink;
     }
@@ -88,8 +102,10 @@ const HomeIntroPopup = () => {
   const handleGenerateKundli = () => {
     markSeen();
     setIsOpen(false);
-    if (isInternal) {
-      navigate("/kundli");
+    if (isInternal && popupLink) {
+      // Extract path from URL and navigate to it
+      const path = extractPathFromUrl(popupLink);
+      navigate(path);
     } else if (popupLink) {
       window.location.href = popupLink;
     } else {
