@@ -62,7 +62,19 @@ const PanditAIVoiceBubble = () => {
     const handleOpen = (e) => {
       const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
       if (!userIdLocal) {
-        navigate("/login");
+        // Guests can't start a voice session directly. Instead of bouncing
+        // them to the login page, hand off to the Pandit AI text chat which
+        // opens the inline guest kundli-details/registration form (same UX as
+        // the text bubble). After successful registration the chat starts and
+        // they can switch to voice.
+        //
+        // Defer the dispatch to the next tick: the text bubble also listens for
+        // "panditai-voice:open" and closes itself for mutual exclusion. Firing
+        // "panditai:ask" now would race with that close handler. Waiting for the
+        // current event to finish guarantees the guest form opens and stays open.
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }));
+        }, 0);
         return;
       }
       const incomingRoomId = e.detail?.roomId || null;
@@ -82,7 +94,7 @@ const PanditAIVoiceBubble = () => {
     };
     window.addEventListener("panditai-voice:open", handleOpen);
     return () => window.removeEventListener("panditai-voice:open", handleOpen);
-  }, [navigate]);
+  }, []);
 
   // Close voice popup when chat popup opens (mutual exclusion)
   useEffect(() => {

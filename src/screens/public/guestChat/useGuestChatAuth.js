@@ -11,7 +11,7 @@ import {
   useCreateKundliMutation,
   useLazyGetAllKundlisQuery,
 } from "../../../services/appServices/kundliServicesNew";
-import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
+import { privateRequestNew, setApiErrorToastSilenced } from "../../../services/appServices/privateRequestNew";
 import { trackEvent } from "../../../utils/analytics";
 
 /**
@@ -55,7 +55,12 @@ export const useGuestChatAuth = () => {
   const getErrorStatus = (err) =>
     typeof err?.status === "number" ? err.status : err?.originalStatus;
 
+  // Silence the global error toast for this call: during guest login a create
+  // can fail harmlessly (e.g. an existing user already has kundlis) and we
+  // recover by falling back to their existing kundli, so the user shouldn't see
+  // an error like "Please Delete One Kundli from Existing One".
   const createKundliWithRetry = async (payload) => {
+    setApiErrorToastSilenced("createKundli", true);
     try {
       return await createKundli(payload).unwrap();
     } catch (err) {
@@ -63,6 +68,8 @@ export const useGuestChatAuth = () => {
         return await createKundli(payload).unwrap();
       }
       throw err;
+    } finally {
+      setApiErrorToastSilenced("createKundli", false);
     }
   };
 
