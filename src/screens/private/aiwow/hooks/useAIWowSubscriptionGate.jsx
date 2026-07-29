@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
-import { useGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
+import { subscriptionApi, useGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
 import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from '../../../../utils/subscription/featureGating';
 import { trackEvent } from '../../../../utils/analytics';
 
@@ -36,6 +37,7 @@ export const extractExtendedPlans = (result) => {
  *   // render {subscriptionModal} somewhere in JSX
  */
 export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => {
+  const dispatch = useDispatch();
   const customerToken = typeof window !== 'undefined' ? localStorage.getItem('shubhtalk_customer_token') : null;
   const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken });
   const hasActiveSubscription = !!subscriptionStatus?.data?.hasActiveSubscription;
@@ -98,7 +100,15 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
       const reason = result?.success === false ? getSubscriptionErrorReason(result) : null;
 
       // Success OR a non-entitlement failure — let the caller handle it.
-      if (!reason) return result;
+      if (!reason) {
+        // A successful generation consumes a quota/generation on the backend.
+        // Invalidate the cached subscription status so the "generations left"
+        // shown on My Account refreshes without a manual page reload.
+        if (result?.success !== false) {
+          dispatch(subscriptionApi.util.invalidateTags(['SubscriptionStatus']));
+        }
+        return result;
+      }
 
       if (reason === SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE) {
         toast.error('Insufficient wallet balance. Please recharge to continue.', { id: gId });
@@ -122,7 +132,7 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
       trackEvent('shubh_ai_extended_plan_purchased', { feature_name: featureName, reason });
     }
     return { blocked: true, reason: 'RETRY_LIMIT' };
-  }, [featureName, openSubscriptionModal, waitForModalOutcome]);
+  }, [featureName, openSubscriptionModal, waitForModalOutcome, dispatch]);
 
   const subscriptionModal = (
     <SubscriptionModal
