@@ -68,6 +68,9 @@ const AddProfileModal = ({
   closeOnOverlayClick = true,
   // Hides the relation dropdown (relation is assumed "self")
   hideRelation = false,
+  // When true, the form renders inline (as a normal block/message) instead of
+  // a fixed full-screen overlay — used to embed it inside the Pandit AI chat.
+  inline = false,
 }) => {
   const [showListing, setShowListing] = useState(false);
   const [formData, setFormData] = useState({
@@ -240,8 +243,8 @@ const AddProfileModal = ({
 
   return (
     <div
-      className={styles.modalOverlay}
-      onClick={closeOnOverlayClick ? handleClose : undefined}
+      className={`${styles.modalOverlay} ${inline ? styles.inline : ""}`}
+      onClick={closeOnOverlayClick && !inline ? handleClose : undefined}
     >
       <div className={styles.sideSheet} onClick={(e) => e.stopPropagation()}>
         <div className={styles.sheetHeader}>
@@ -398,7 +401,7 @@ const AddProfileModal = ({
                             setFieldValue("birthTime", "");
                           }
                         }}
-                        placeholder="HH:MM"
+                        placeholder="HH:MM AM/PM"
                         disabled={values.unknownBirthTime}
                       />
                     </div>

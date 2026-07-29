@@ -9,9 +9,13 @@ import {
   IoWallet,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import dayjs from "dayjs";
 import styles from "./PanditAIBubble.module.scss";
 import usePanditAI, { setPanditAIVoiceHandover } from "./usePanditAI";
+import { GuestKundliAuthModal } from "../UI/Profile";
+import { setSelectedKundli } from "../../redux/kundli/kundliSlice";
+import { setSelectedKundliProfile } from "../../redux/aiwow/aiwowSlice";
 import useAIFreeMinutes from "./useAIFreeMinutes";
 import useSpeechToText from "./useSpeechToText";
 import { transliterateToLatin } from "./translateText";
@@ -37,10 +41,23 @@ MessageBubble.displayName = "MessageBubble";
 
 const PanditAIBubble = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(() => sessionStorage.getItem("panditai_open") === "true");
   const [text, setText] = useState("");
   const [interimText, setInterimText] = useState("");
   const [initialBilling, setInitialBilling] = useState(null);
+  // Guest flow: show the kundli details + OTP form inline (as a message) inside
+  // the chat, keeping the normal header and input footer.
+  // On a page refresh the chat reopens from persisted state, but this React
+  // state would reset to false and hide the form. Re-derive it: if the chat is
+  // (re)opening and there's no logged-in customer, we're still in guest mode.
+  const [guestMode, setGuestMode] = useState(
+    () =>
+      sessionStorage.getItem("panditai_open") === "true" &&
+      !localStorage.getItem("shubhtalk_customer_id")
+  );
+  // Holds a query (from the "Ask Pandit AI" card) to send once a guest logs in.
+  const pendingQueryRef = useRef(null);
   const inputRef = useRef(null);
   const lang = "en-IN";
 
@@ -48,6 +65,13 @@ const PanditAIBubble = () => {
   useEffect(() => {
     sessionStorage.setItem("panditai_open", isOpen ? "true" : "false");
   }, [isOpen]);
+
+  // The chat/billing hooks should only activate once the guest flow is done.
+  // While `guestMode` is true the details form is showing; login completes
+  // mid-flow (before the welcome-bonus/back popup closes), so gating on
+  // `!guestMode` ensures the chat session starts only after that popup is
+  // dismissed (guestMode flips to false in handleGuestAuthSuccess).
+  const chatActive = isOpen && !guestMode;
 
   const {
     messages,
@@ -59,7 +83,7 @@ const PanditAIBubble = () => {
     messagesEndRef,
     lastAiMsgRef,
     roomId,
-  } = usePanditAI({ isOpen, lang });
+  } = usePanditAI({ isOpen: chatActive, lang });
 
   const {
     remainingPaidTime: hookRemainingPaidTime,
@@ -70,7 +94,7 @@ const PanditAIBubble = () => {
     walletBalance: hookWalletBalance,
     ratePerMinute: hookRatePerMinute,
     sessionEndedLowBalance,
-  } = useAIFreeMinutes({ isOpen, roomId });
+  } = useAIFreeMinutes({ isOpen: chatActive, roomId });
 
   // Seed billing/free-minutes from a voice→text handover so the badge shows
   // instantly while the chat:reconnect round-trips.
@@ -114,6 +138,14 @@ const PanditAIBubble = () => {
   useEffect(() => {
     const handleOpenAndSend = (e) => {
       const query = e.detail?.query;
+      // Guests: open the chat and show the details form as an inline message;
+      // remember the query to send after they finish the guest flow.
+      if (!localStorage.getItem("shubhtalk_customer_id")) {
+        if (query?.trim()) pendingQueryRef.current = query.trim();
+        setGuestMode(true);
+        setIsOpen(true);
+        return;
+      }
       setIsOpen(true);
       if (query?.trim()) {
         sendText(query.trim());
@@ -217,12 +249,34 @@ const PanditAIBubble = () => {
 
   const handleOpen = useCallback(() => {
     const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
+    // Guest: open the chat and show the kundli-details form as an inline
+    // message (header + input footer stay as-is) instead of redirecting to login.
     if (!userIdLocal) {
-      navigate("/login");
-      return;
+      setGuestMode(true);
     }
     setIsOpen(true);
-  }, [navigate]);
+  }, []);
+
+  // After a guest completes the auth flow, select their new profile and let the
+  // chat initialize (sending any pending query captured from the "Ask" card).
+  const handleGuestAuthSuccess = useCallback(
+    (profile) => {
+      setGuestMode(false);
+      if (profile?._id) {
+        dispatch(setSelectedKundli(profile));
+        dispatch(setSelectedKundliProfile(profile));
+        localStorage.setItem("selectedKundliProfile", JSON.stringify(profile));
+      }
+      setIsOpen(true);
+      const pending = pendingQueryRef.current;
+      pendingQueryRef.current = null;
+      if (pending) {
+        // sendText queues the message until the chat session is accepted.
+        sendText(pending);
+      }
+    },
+    [dispatch, sendText]
+  );
 
   const handleInputChange = useCallback((e) => setText(e.target.value), []);
 
@@ -315,7 +369,31 @@ const PanditAIBubble = () => {
           </div>
 
           <div className={styles.messagesArea}>
-            {isLoading ? (
+            {guestMode && (
+              <>
+                <div className={`${styles.msgRow} ${styles.aiRow}`}>
+                  <div className={`${styles.msgBubble} ${styles.aiBubble}`}>
+                    <p className={styles.msgText}>
+                      Namaste! Please share a few birth details so I can personalize your reading.
+                    </p>
+                  </div>
+                </div>
+                <div className={`${styles.msgRow} ${styles.aiRow}`}>
+                  <div style={{ width: "100%" }}>
+                    <GuestKundliAuthModal
+                      inline
+                      isOpen={guestMode}
+                      onClose={() => {
+                        setGuestMode(false);
+                        pendingQueryRef.current = null;
+                      }}
+                      onSuccess={handleGuestAuthSuccess}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+            {!guestMode && isLoading ? (
               <div className={styles.skeleton}>
                 {[1, 2, 3].map((i) => (
                   <div
@@ -325,12 +403,14 @@ const PanditAIBubble = () => {
                 ))}
               </div>
             ) : messages.length === 0 ? (
+              guestMode ? null : (
               <div className={styles.emptyState}>
                 <span className={styles.emptyIcon}>
                   <IoChatbubbleEllipses size={34} />
                 </span>
                 <p>Ask Pandit AI anything about your life</p>
               </div>
+              )
             ) : (
               (() => {
                 // Find the last AI message to attach scroll ref
@@ -367,6 +447,7 @@ const PanditAIBubble = () => {
             </div>
           )}
 
+          {!guestMode && (
           <div className={styles.inputBar}>
             {!sessionEndedLowBalance && (
             <div className={styles.inputWrapper}>
@@ -437,9 +518,11 @@ const PanditAIBubble = () => {
               </div>
             )}
           </div>
+          )}
         </div>
         </>
       )}
+
     </>,
     document.body
   );
