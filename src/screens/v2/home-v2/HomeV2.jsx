@@ -81,7 +81,15 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
           <div className={styles.centerCard}>
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
-                <p className={styles.greeting} key={`greeting-${name}`}>Hello, {name}! 👋</p>
+                <p
+                  className={styles.greeting}
+                  key={`greeting-${name}`}
+                  onClick={name === "Guest" ? () => navigate("/login") : undefined}
+                  style={name === "Guest" ? { cursor: "pointer", textDecoration: "underline" } : undefined}
+                  role={name === "Guest" ? "button" : undefined}
+                >
+                  Hello, {name}! 👋 {name === "Guest" && <span style={{ fontSize: "12px", opacity: 0.8 }}>Sign in</span>}
+                </p>
                 <h1>
                   {section.title
                     ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></>
@@ -285,7 +293,7 @@ const renderUngroupedHeroSection = (section, props) => {
       return (
         <section key={key} className={styles.heroBanner} style={{ margin: '16px 0' }}>
           <div className={styles.heroContent}>
-            <p className={styles.greeting}>Hello, {name}! 👋</p>
+            <p className={styles.greeting} onClick={name === "Guest" ? () => navigate("/login") : undefined} style={name === "Guest" ? { cursor: "pointer", textDecoration: "underline" } : undefined} role={name === "Guest" ? "button" : undefined}>Hello, {name}! 👋 {name === "Guest" && <span style={{ fontSize: "12px", opacity: 0.8 }}>Sign in</span>}</p>
             <h1>{section.title ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></> : <>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></>}</h1>
             {currentMahadasha && <div className={styles.mahadashaTag}>🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong></div>}
           </div>
