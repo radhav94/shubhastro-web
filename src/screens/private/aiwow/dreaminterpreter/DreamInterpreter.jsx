@@ -170,7 +170,7 @@ const DreamInterpreter = () => {
       setChallenges('');
       dispatch(clearDreamInterpreterResult());
     } else {
-      navigate('/ai-wow');
+      navigate(-1);
     }
   };
 
