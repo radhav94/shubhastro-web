@@ -401,7 +401,7 @@ const AddProfileModal = ({
                             setFieldValue("birthTime", "");
                           }
                         }}
-                        placeholder="HH:MM"
+                        placeholder="HH:MM AM/PM"
                         disabled={values.unknownBirthTime}
                       />
                     </div>

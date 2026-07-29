@@ -165,12 +165,15 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
     
     let limitedDigits;
     if (isDeleting) {
-      // When deleting from a complete value (4 digits + AM/PM), remove last digit
+      // Deleting a character while all 4 time digits are still present means the
+      // user is removing the trailing period/space (e.g. "02:30 AM" -> "02:30 A"
+      // -> "02:30 " -> "02:30"), not a time digit. Preserve what remains without
+      // stripping a digit or re-appending AM/PM.
       if (prevDigits.length === 4 && digits.length === 4) {
-        limitedDigits = digits.slice(0, 3);
-      } else {
-        limitedDigits = digits.slice(0, 4);
+        setManualInput(raw.toUpperCase());
+        return;
       }
+      limitedDigits = digits.slice(0, 4);
     } else {
       limitedDigits = digits.slice(0, 4);
     }
@@ -208,9 +211,19 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
       formatted += limitedDigits[i];
     }
     
-    // Once 4 digits are entered (HH:MM), append a space to prompt AM/PM typing
+    // Once 4 digits are entered (HH:MM), auto-append a period so AM/PM is
+    // always visible instead of waiting for the user to type A/P. Preserve the
+    // currently selected period when editing, otherwise default to AM. The
+    // user can still toggle it via the 'a'/'p' keys or the dropdown.
     if (limitedDigits.length === 4) {
-      formatted += " ";
+      const p = period ?? "AM";
+      formatted += ` ${p}`;
+      setManualInput(formatted);
+      const parsed = parseManualTime(formatted);
+      if (parsed) {
+        onChange(buildDate(parsed.hour, parsed.minute, parsed.period));
+      }
+      return;
     }
     
     setManualInput(formatted);
@@ -373,6 +386,10 @@ const DateTimePicker = ({
   portal = false,
   // Legacy prop support
   showTime,
+  // Callback fired when the raw input text changes (including invalid values)
+  onRawChange,
+  // Callback fired with error string (or empty string when valid)
+  onError,
 }) => {
   // Resolve mode from legacy showTime prop
   const resolvedMode = showTime ? "datetime" : mode;
@@ -418,11 +435,16 @@ const DateTimePicker = ({
 
   const [inputText, setInputText] = useState(selected ? formatDateDisplay(selected) : "");
   const [dateError, setDateError] = useState("");
+  // Track whether user is manually editing to prevent useEffect from overwriting
+  const [isManuallyEditing, setIsManuallyEditing] = useState(false);
 
   // Sync inputText when selected prop changes (picker or parent update)
+  // Only sync if the user is NOT currently manually editing
   useEffect(() => {
-    setInputText(selected ? formatDateDisplay(selected) : "");
-    setDateError("");
+    if (!isManuallyEditing) {
+      setInputText(selected ? formatDateDisplay(selected) : "");
+      setDateError("");
+    }
   }, [selected]);
 
   // Parse DD/MM/YYYY string to Date
@@ -447,6 +469,7 @@ const DateTimePicker = ({
 
   const handleManualChange = (e) => {
     const val = e.target.value;
+    setIsManuallyEditing(true);
     // Auto-insert slashes for DD/MM/YYYY format
     const digits = val.replace(/[^0-9]/g, "");
     let formatted = "";
@@ -455,34 +478,53 @@ const DateTimePicker = ({
       formatted += digits[i];
     }
     setInputText(formatted);
+    onRawChange?.(formatted);
     // Check validity once full date is entered (DD/MM/YYYY = 10 chars)
     if (formatted.length === 10) {
       const parsed = parseManualDate(formatted);
       if (parsed) {
         setDateError("");
+        onError?.("");
         onChange(parsed);
+        // Valid date submitted — allow future syncs from selected prop
+        setIsManuallyEditing(false);
       } else {
         setDateError("Invalid date");
+        onError?.("Invalid date");
       }
+    } else if (formatted.length > 0) {
+      // Partial input — show error for incomplete dates
+      setDateError("Invalid date");
+      onError?.("Invalid date");
     } else {
       setDateError("");
+      onError?.("");
     }
   };
 
   const handleManualBlur = () => {
-    // On blur, if text doesn't parse to a valid date, show error or revert
+    // On blur, if text doesn't parse to a valid date, show error but keep user's input
     if (inputText.length === 0) {
       setDateError("");
+      onError?.("");
+      // Do NOT reset isManuallyEditing here — let the parent decide via prop changes
+      // This prevents the useEffect from restoring the old date when user clears the field
       return;
     }
     const parsed = parseManualDate(inputText);
-    if (!parsed) {
+    if (parsed) {
+      setIsManuallyEditing(false);
+    } else {
       setDateError("Invalid date");
+      onError?.("Invalid date");
+      // Keep isManuallyEditing true so the useEffect doesn't overwrite
     }
   };
 
   const handlePickerChange = (date) => {
+    setIsManuallyEditing(false);
     onChange(date);
+    onError?.("");
     // inputText will sync via the useEffect above
   };
 
@@ -531,7 +573,7 @@ const DateTimePicker = ({
           </svg>
         </button>
       </div>
-      {dateError && <p className={styles.dateError}>{dateError}</p>}
+      {dateError && !onError && <p className={styles.dateError}>{dateError}</p>}
 
       {/* Hidden DatePicker for calendar popup */}
       <div className={styles.hiddenPicker}>
