@@ -46,6 +46,8 @@ const handleApiError = (error, endpoint) => {
     "PREMIUM_REQUIRED",
     "EXTENDED_PLAN_REQUIRED",
     "EXTENDED_PLAN_EXHAUSTED",
+    // Handled by the UI: it shows a recharge toast and redirects to /recharge.
+    "INSUFFICIENT_WALLET_BALANCE",
   ];
   if (entitlementReason && SILENT_ENTITLEMENT_REASONS.includes(entitlementReason)) return;
   // Real message from the server, if any. Used to avoid showing the unhelpful

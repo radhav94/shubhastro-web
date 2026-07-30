@@ -95,7 +95,10 @@ const FaceReadingAnalysis = () => {
         leavingRef.current = true;
         hasStartedRef.current = false;
         dispatch(clearFaceReadingData());
-        navigate(PATH.privateRoutes.FACE_READING_LANDING.path[0], { replace: true });
+        // The gate already routed to /recharge — don't override that redirect.
+        if (!result.redirectedToRecharge) {
+          navigate(PATH.privateRoutes.FACE_READING_LANDING.path[0], { replace: true });
+        }
         return;
       }
 

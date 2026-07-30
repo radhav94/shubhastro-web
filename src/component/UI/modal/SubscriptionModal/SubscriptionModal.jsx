@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
 import styles from "./SubscriptionModal.module.scss";
 import { useGetSubscriptionPlansQuery, usePurchaseWalletSubscriptionMutation, useGetSubscriptionStatusQuery } from "../../../../redux/api/subscription/subscriptionApi";
+import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from "../../../../utils/subscription/featureGating";
 import shubhLogoMobile from "../../../../assets/images/mobile-shubh-astro-logo.svg";
 import welcomeBg from "../../../../assets/images/welcome-bonus-bg.webp";
 import welcomeBgMobile from "../../../../assets/images/welcome-bonus-bg-mobile.webp";
@@ -40,7 +41,49 @@ const CrossIcon = () => (
   </svg>
 );
 
-const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant = "basic", plans }) => {
+const getPurchaseFailureReason = (res) => {
+  const explicitReason = getSubscriptionErrorReason(res);
+  if (explicitReason) return explicitReason;
+
+  const bodies = [
+    res,
+    res?.data,
+    res?.error,
+    res?.error?.data,
+    res?.data?.data,
+    res?.data?.error,
+    res?.error?.data?.data,
+    res?.error?.data?.error,
+  ];
+
+  for (const body of bodies) {
+    if (!body || typeof body !== "object") continue;
+    const candidates = [
+      body.reason,
+      body.code,
+      body.message,
+      body.error,
+      body.error?.code,
+      body.error?.reason,
+      body.error?.message,
+      body.data?.reason,
+      body.data?.message,
+    ];
+
+    if (
+      candidates.some((candidate) =>
+        typeof candidate === "string" &&
+        /insufficient|low\s+wallet|low\s+balance|wallet\s+balance/i.test(candidate)
+      )
+    ) {
+      return SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE;
+    }
+  }
+
+  return null;
+};
+
+const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsufficientBalance, variant = "basic", plans }) => {
   const isExtended = variant === "extended";
 
   // Extended plans are returned inline by the generate/report response. When the
@@ -151,6 +194,21 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
       ? { "--modal-w": "min(420px, 100%)" }
       : { "--modal-w": `min(${columns * 300 + (columns - 1) * 20 + 76 - peek}px, 100%)` };
 
+  const redirectToRecharge = () => {
+    const returnUrl = window.location.pathname + window.location.search;
+    const rechargeUrl = `/recharge?returnUrl=${encodeURIComponent(returnUrl)}`;
+    navigate(rechargeUrl);
+
+    // Some AI-Wow flows close/unmount the parent modal immediately after the
+    // low-balance callback. Keep a browser-level fallback so the user still
+    // lands on recharge if the SPA navigation is interrupted.
+    window.setTimeout(() => {
+      if (window.location.pathname !== "/recharge") {
+        window.location.assign(rechargeUrl);
+      }
+    }, 50);
+  };
+
   const handleSelect = async (card) => {
     // Free plan is not a purchasable subscription.
     if (!card?.plan?.code || card.plan.price === 0) {
@@ -162,19 +220,25 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant
     try {
       const res = await purchaseWallet({ planCode: card.plan.code, device: "web", country: "IN" });
       const body = res?.data || res?.error?.data;
-      const reason = body?.data?.reason || body?.reason;
+      // The insufficient-balance reason can live in a few shapes depending on
+      // the endpoint: data.reason, top-level reason, or error.code.
+      const reason = getPurchaseFailureReason(res) || body?.data?.reason || body?.reason || body?.error?.code || body?.error?.reason;
       if (body?.success === true) {
         setSuccessPlan(card);
         setFlow("success");
         // Plan was paid from the wallet — refresh the wallet balance everywhere.
         window.dispatchEvent(new Event("walletBalanceUpdated"));
         if (onPurchased) onPurchased(card.plan);
-      } else if (reason === "INSUFFICIENT_WALLET_BALANCE") {
+      } else if (reason === SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE) {
         setFlow("idle");
         toast.error("Insufficient wallet balance. Please recharge to continue.");
-        if (onClose) onClose();
-        const returnUrl = window.location.pathname + window.location.search;
-        navigate(`/recharge?returnUrl=${encodeURIComponent(returnUrl)}`);
+        // Notify the parent first so it can close the modal and suppress its own
+        // post-close "go back" navigation (which would otherwise clobber the
+        // redirect below). Then perform the redirect here — a single, reliable
+        // hop that doesn't depend on the parent wiring.
+        if (onInsufficientBalance) onInsufficientBalance();
+        else if (onClose) onClose();
+        redirectToRecharge();
       } else if (reason === "AI_WOW_PREMIUM_FLOW_DISABLED") {
         setFlow("idle");
         toast.error("Subscriptions aren't available right now.");

@@ -126,7 +126,10 @@ const SignatureAnalysis = () => {
         leavingRef.current = true;
         hasStartedRef.current = false;
         dispatch(clearSignatureData());
-        navigate(PATH.privateRoutes.SIGNATURE_LANDING.path[0], { replace: true });
+        // The gate already routed to /recharge — don't override that redirect.
+        if (!result.redirectedToRecharge) {
+          navigate(PATH.privateRoutes.SIGNATURE_LANDING.path[0], { replace: true });
+        }
         return;
       }
 

@@ -95,7 +95,10 @@ const GemstoneAnalysis = () => {
         leavingRef.current = true;
         hasStartedRef.current = false;
         dispatch(clearGemstoneData());
-        navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0], { replace: true });
+        // The gate already routed to /recharge — don't override that redirect.
+        if (!result.redirectedToRecharge) {
+          navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0], { replace: true });
+        }
         return;
       }
 
