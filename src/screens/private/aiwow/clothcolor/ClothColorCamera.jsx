@@ -238,6 +238,9 @@ const ClothColorCamera = () => {
       setCapturedImage(dataUrl);
       stopCamera();
     },
+    // Give the user time to frame the clothing before auto-capturing, and
+    // require it to stay steady a bit longer, so capture doesn't fire too fast.
+    options: { startDelayMs: 3000, minHoldMs: 1200, maxWaitMs: 6000 },
   });
 
   const retakePhoto = () => {

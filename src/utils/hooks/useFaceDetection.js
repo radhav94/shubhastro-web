@@ -126,28 +126,27 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
             const scaledCY = centerY * scaleY;
             const scaledR = radius * Math.min(scaleX, scaleY);
 
-            // Mirror X coordinates since the front camera video is CSS-mirrored.
-            const mLeft = video.videoWidth - maxX;
-            const mRight = video.videoWidth - minX;
-            const top = minY;
-            const bottom = maxY;
+            // Use the detection box (not the landmark-extended extent) for the
+            // circle checks — mirror X since the front camera video is
+            // CSS-mirrored.
+            const bLeft = video.videoWidth - (box.x + box.width);
+            const bRight = video.videoWidth - box.x;
+            const bTop = box.y;
+            const bBottom = box.y + box.height;
 
-            // Require the WHOLE face (all four corners of its extent) to sit
-            // inside the guide circle — not just its centre. This blocks a face
-            // that is only partially inside the circle from being captured.
-            const corners = [
-              [mLeft, top],
-              [mRight, top],
-              [mLeft, bottom],
-              [mRight, bottom],
-            ];
-            let maxCornerDist = 0;
-            for (const [cx, cy] of corners) {
-              const d = Math.sqrt((cx - scaledCX) ** 2 + (cy - scaledCY) ** 2);
-              if (d > maxCornerDist) maxCornerDist = d;
-            }
-            const fullyInside = maxCornerDist <= scaledR * 0.98;
-            const isInCircle = fullyInside && !clipped;
+            const faceCX = (bLeft + bRight) / 2;
+            const faceCY = (bTop + bBottom) / 2;
+            const centreDist = Math.sqrt((faceCX - scaledCX) ** 2 + (faceCY - scaledCY) ** 2);
+
+            // Accept when the face is reasonably centred in the guide circle.
+            // (A face that fills the circle has a detection box whose corners
+            // fall just outside the circle radius, so we must NOT require the
+            // box corners to be inside — that wrongly rejected well-placed
+            // faces. Off-centre / half-in profile faces have a centre far from
+            // the circle centre and are rejected here; cut-off faces are
+            // rejected by the frame-edge `clipped` check.)
+            const centreInside = centreDist <= scaledR * 0.6;
+            const isInCircle = centreInside && !clipped;
             setFaceInCircle(isInCircle);
 
             if (isInCircle) {

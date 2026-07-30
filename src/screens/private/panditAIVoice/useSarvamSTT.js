@@ -11,6 +11,9 @@ const MAX_RECORDING_DURATION = 30000; // Max 30s recording
  */
 export default function useSarvamSTT({ onResult, onEnd }) {
   const [isListening, setIsListening] = useState(false);
+  // True while the recorded audio is being sent to the server for transcription
+  // (the window between recording stop and the transcript coming back).
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const [isSupported] = useState(
     typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia
   );
@@ -138,6 +141,7 @@ export default function useSarvamSTT({ onResult, onEnd }) {
         }
 
         // Send to Sarvam STT
+        setIsTranscribing(true);
         try {
           abortRef.current = new AbortController();
           const result = await speechToText(audioBlob, {
@@ -154,6 +158,8 @@ export default function useSarvamSTT({ onResult, onEnd }) {
             console.error("[SarvamSTT] Transcription error:", err);
           }
           onEndRef.current?.({ transcript: "", language_code: "" });
+        } finally {
+          setIsTranscribing(false);
         }
       };
 
@@ -169,5 +175,5 @@ export default function useSarvamSTT({ onResult, onEnd }) {
     stopRecording();
   }, [stopRecording]);
 
-  return { isListening, isSupported, startListening, stopListening };
+  return { isListening, isTranscribing, isSupported, startListening, stopListening };
 }

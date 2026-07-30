@@ -12,6 +12,7 @@ import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 import { setDreamInterpreterResult, clearDreamInterpreterResult } from '../../../../redux/aiwow/aiwowSlice';
 import DownloadReportModal from '../components/DownloadReportModal';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
+import GuestKundliAuthModal from '../../../../component/UI/Profile/GuestKundliAuthModal';
 
 const DreamInterpreter = () => {
   const navigate = useNavigate();
@@ -20,21 +21,13 @@ const DreamInterpreter = () => {
   const savedDreamResult = useSelector((state) => state.aiwow.dreamInterpreter?.result);
   const isBackNavigation = navigationType === 'POP';
   const restoredResult = isBackNavigation ? savedDreamResult : null;
-  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  const isGuest = !localStorage.getItem("shubhtalk_customer_token");
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile({ required: !isGuest, showToast: !isGuest });
   const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'dream-interpreter' });
   // Synchronous guard: blocks a rapid double tap from firing the API twice
   // before isLoading re-renders and disables the button.
   const isSubmittingRef = useRef(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem("shubhtalk_customer_token");
-    if (!token) {
-      localStorage.setItem("shubhtalk_redirect_after_login", "/aiwow/dream-interpreter");
-      window.location.href = "/login?skip=welcome";
-    }
-  }, []);
-
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;  
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);  
   const [dreamDescription, setDreamDescription] = useState('');
   const [tags, setTags] = useState('');
   const [lifePhase, setLifePhase] = useState('');
@@ -75,11 +68,6 @@ const DreamInterpreter = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!profile) {
-      Toast.error('Profile not available');
-      return;
-    }
-
     if (!dreamDescription.trim()) {
       Toast.error('Please describe your dream');
       return;
@@ -87,6 +75,18 @@ const DreamInterpreter = () => {
 
     if (dreamDescription.trim().length < 20) {
       Toast.error('Please provide more details about your dream (at least 20 characters)');
+      return;
+    }
+
+    // Guest user: show kundli auth modal before interpreting
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    if (!token) {
+      setShowGuestAuthModal(true);
+      return;
+    }
+
+    if (!profile) {
+      Toast.error('Profile not available');
       return;
     }
 
@@ -143,15 +143,10 @@ const DreamInterpreter = () => {
       }
 
       if (result.success) {
-        // API returns data.dream object
-        const interpretationData = result.data?.dream || result.data;
-        setInterpretation(interpretationData);
-        dispatch(setDreamInterpreterResult(interpretationData));
-        // API response: { success, message, dream: { _id, dreamId, ... } }
         const apiData = result.data;
         const dream = apiData?.dream || apiData;
         setInterpretation(dream);
-        // Store with _id at top level for useAIWowDownload historyId extraction
+        dispatch(setDreamInterpreterResult(dream));
         setRawApiResult({ ...dream, _id: dream?._id || dream?.dreamId });
         setError(null);
       } else {
@@ -180,7 +175,7 @@ const DreamInterpreter = () => {
       setChallenges('');
       dispatch(clearDreamInterpreterResult());
     } else {
-      navigate('/ai-wow');
+      navigate(-1);
     }
   };
 
@@ -189,7 +184,79 @@ const DreamInterpreter = () => {
     setInterpretation(null);
   };
 
-  if (profileLoading) {
+  const handleGuestAuthSuccess = (createdProfile) => {
+    setShowGuestAuthModal(false);
+    // Use the profile returned from the modal to submit immediately
+    submitDreamWithProfile(createdProfile);
+  };
+
+  const submitDreamWithProfile = async (profileToUse) => {
+    if (!profileToUse) {
+      Toast.error('Profile not available');
+      return;
+    }
+
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+
+    try {
+      setIsLoading(true);
+
+      const dreamData = {
+        dreamDescription: dreamDescription.trim(),
+        kundliId: profileToUse._id || profileToUse.id || '',
+        name: profileToUse.name,
+        gender: profileToUse.identity?.toLowerCase() || profileToUse.gender?.toLowerCase() || 'male',
+        day: profileToUse.day,
+        month: profileToUse.month,
+        year: profileToUse.year,
+        hour: profileToUse.hour || 0,
+        min: profileToUse.minute || profileToUse.min || 0,
+        second: 0,
+        place: profileToUse.place,
+        lat: profileToUse.lat || 0,
+        lon: profileToUse.lon || 0,
+        tzone: profileToUse.tzone || 5.5
+      };
+
+      if (tags.trim()) {
+        dreamData.tags = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+      }
+
+      if (lifePhase.trim() || challenges.trim()) {
+        dreamData.userContext = {};
+        if (lifePhase.trim()) {
+          dreamData.userContext.lifePhase = lifePhase.trim();
+        }
+        if (challenges.trim()) {
+          dreamData.userContext.currentChallenges = challenges.split(',').map(c => c.trim()).filter(c => c);
+        }
+      }
+
+      const result = await interpretDream(dreamData);
+
+      if (result.success) {
+        const apiData = result.data;
+        const dream = apiData?.dream || apiData;
+        setInterpretation(dream);
+        dispatch(setDreamInterpreterResult(dream));
+        setRawApiResult({ ...dream, _id: dream?._id || dream?.dreamId });
+        setError(null);
+      } else {
+        setError(result.error || 'Failed to interpret dream');
+        setInterpretation(null);
+      }
+    } catch (err) {
+      console.error('Failed to interpret dream:', err);
+      setError('An unexpected error occurred. Please try again.');
+      setInterpretation(null);
+    } finally {
+      isSubmittingRef.current = false;
+      setIsLoading(false);
+    }
+  };
+
+  if (!isGuest && profileLoading) {
     return <PrimaryLoader isLoading={true} />;
   }
 
@@ -858,6 +925,13 @@ const DreamInterpreter = () => {
       walletBalance={walletBalance ?? 0}
       isDownloading={isDownloading}
       showLanguageSelection={false}
+    />
+
+    <GuestKundliAuthModal
+      isOpen={showGuestAuthModal}
+      onClose={() => setShowGuestAuthModal(false)}
+      onSuccess={handleGuestAuthSuccess}
+      title="Add Kundli Details"
     />
     </>
   );
