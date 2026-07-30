@@ -21,7 +21,7 @@
   right: 0;
   z-index: 100;
   @media screen and (width <= 1180px) {
-    top: 53px;
+    top: 52px;
   }
 }
 
@@ -180,6 +180,10 @@
   align-items: baseline;
   gap: 12px;
   margin-bottom: 14px;
+  @media (width <= 767px) {
+    flex-direction: column;
+    gap: 0;
+  }
 }
 
 .occasionTitle {

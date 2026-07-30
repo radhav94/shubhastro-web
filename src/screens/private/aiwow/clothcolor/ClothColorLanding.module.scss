@@ -209,6 +209,10 @@
     padding: 1rem;
     margin-bottom: 1.5rem;
   }
+  @media (max-width: 767px) {
+    padding: 0rem;
+    background: rgba(255, 255, 255, 0);
+  }
 }
 
 .instructionsTitle {
@@ -233,12 +237,12 @@
   gap: 16px;
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
   }
   @media (max-width: 767px) {
     flex-direction: column;
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
   }
 }
 
@@ -331,10 +335,10 @@
 .buttonGroup {
   display: flex;
   gap: 1rem;
-  flex-direction: column;
-  @media (min-width: 768px) {
-    flex-direction: row;
-  }
+  // flex-direction: column;
+  // @media (min-width: 768px) {
+  //   flex-direction: row;
+  // }
 }
 
 .uploadButton,
