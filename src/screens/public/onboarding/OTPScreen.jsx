@@ -64,6 +64,21 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   // cancelled if the user requests a new OTP mid-request.
   const verifyAbortRef = useRef(null);
 
+  // Prevent iOS Safari from scrolling page when keyboard opens
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = '0px';
+
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+    };
+  }, []);
+
   // Web OTP API - auto-read OTP from SMS
   useEffect(() => {
     if ("OTPCredential" in window) {
