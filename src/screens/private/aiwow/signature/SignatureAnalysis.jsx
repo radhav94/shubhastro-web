@@ -29,6 +29,10 @@ const SignatureAnalysis = () => {
   const isMountedRef = React.useRef(true);
   const abortControllerRef = React.useRef(null);
   const hasStartedRef = React.useRef(false);
+  // Set when an entitlement block sends the user back to the landing step, so
+  // the `finally` below doesn't briefly flip back to the pre-analysis checklist
+  // while the route change is in flight.
+  const leavingRef = React.useRef(false);
 
   // Turn the backend error into a clear, user-friendly message. Low-quality /
   // unreadable signature photos should get a specific "retake a clearer photo"
@@ -73,8 +77,14 @@ const SignatureAnalysis = () => {
       navigate(PATH.privateRoutes.SIGNATURE_LANDING.path[0]);
       return;
     }
-    // Note: analysis is no longer triggered automatically on mount.
-    // The user must explicitly click "Generate analysis".
+
+    // Auto-start analysis as soon as the image and profile are ready so the
+    // user isn't shown an extra confirmation screen after capture/upload.
+    if (profile && !hasStartedRef.current && !isAnalyzing && !analysisComplete) {
+      hasStartedRef.current = true;
+      setError(null);
+      performAnalysis(signatureImage);
+    }
   }, [signatureImage, profile, profileLoading]);
 
   const performAnalysis = async (imageData) => {
@@ -108,14 +118,15 @@ const SignatureAnalysis = () => {
       }
 
       // Entitlement block handled by the gate (plans popup / recharge toast).
-      // Do NOT show the "Analysis Failed" screen — just return to the previous
-      // (pre-analysis) screen so the user can try again.
+      // Once the user closes the subscription modal, start fresh from the first
+      // step (landing screen). We intentionally do NOT flip back to the
+      // pre-analysis checklist here — that would flash "this screen" before the
+      // route changes. Clearing the data + navigating unmounts us straight away.
       if (result.blocked) {
-        setProgress(0);
-        setIsAnalyzing(false);
-        setAnalysisComplete(false);
-        setError(null);
+        leavingRef.current = true;
         hasStartedRef.current = false;
+        dispatch(clearSignatureData());
+        navigate(PATH.privateRoutes.SIGNATURE_LANDING.path[0], { replace: true });
         return;
       }
 
@@ -161,7 +172,9 @@ const SignatureAnalysis = () => {
       setProgress(0);
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
-      if (isMountedRef.current) {
+      // Skip when we're navigating away after an entitlement block — flipping
+      // isAnalyzing back to false would flash the pre-analysis checklist.
+      if (isMountedRef.current && !leavingRef.current) {
         setIsAnalyzing(false);
       }
     }

@@ -132,21 +132,28 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
             const top = minY;
             const bottom = maxY;
 
-            // Require the WHOLE face (all four corners of its extent) to sit
-            // inside the guide circle — not just its centre. This blocks a face
-            // that is only partially inside the circle from being captured.
-            const corners = [
-              [mLeft, top],
-              [mRight, top],
-              [mLeft, bottom],
-              [mRight, bottom],
+            // Require the WHOLE face to sit inside the guide circle — not just
+            // its centre. A face is roughly elliptical, so checking the four
+            // corners of its bounding rectangle is wrong: when the face fills
+            // the circle, those corners fall in the empty regions OUTSIDE the
+            // circle and capture never enables. Instead check the four extreme
+            // edge points (top / bottom / left / right of the face extent),
+            // which trace the actual face bounds and fit inside the circle when
+            // the face is correctly positioned.
+            const faceCX = (mLeft + mRight) / 2;
+            const faceCY = (top + bottom) / 2;
+            const edgePoints = [
+              [faceCX, top],
+              [faceCX, bottom],
+              [mLeft, faceCY],
+              [mRight, faceCY],
             ];
-            let maxCornerDist = 0;
-            for (const [cx, cy] of corners) {
-              const d = Math.sqrt((cx - scaledCX) ** 2 + (cy - scaledCY) ** 2);
-              if (d > maxCornerDist) maxCornerDist = d;
+            let maxEdgeDist = 0;
+            for (const [ex, ey] of edgePoints) {
+              const d = Math.sqrt((ex - scaledCX) ** 2 + (ey - scaledCY) ** 2);
+              if (d > maxEdgeDist) maxEdgeDist = d;
             }
-            const fullyInside = maxCornerDist <= scaledR * 0.98;
+            const fullyInside = maxEdgeDist <= scaledR * 0.98;
             const isInCircle = fullyInside && !clipped;
             setFaceInCircle(isInCircle);
 

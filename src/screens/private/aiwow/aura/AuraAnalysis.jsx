@@ -30,6 +30,10 @@ const AuraAnalysis = () => {
   const isMountedRef = React.useRef(true); // Track if component is mounted
   const abortControllerRef = React.useRef(null); // Store abort controller
   const hasStartedRef = React.useRef(false);
+  // Set when an entitlement block sends the user back to the landing step, so
+  // the `finally` below doesn't briefly flip back to the pre-analysis checklist
+  // while the route change is in flight.
+  const leavingRef = React.useRef(false);
 
   useEffect(() => {
     // Set mounted flag
@@ -116,15 +120,15 @@ const AuraAnalysis = () => {
       }
 
       // Entitlement block handled by the gate (plans popup / recharge toast).
-      // Reset progress and show a retry state so the user can continue after
-      // choosing a plan.
-      // Do NOT show the "Analysis Failed" screen — just return to the previous
-      // (pre-analysis) screen so the user can try again.
+      // Once the user closes the subscription modal, start fresh from the first
+      // step (landing screen). We intentionally do NOT flip back to the
+      // pre-analysis checklist here — that would flash "this screen" before the
+      // route changes. Clearing the data + navigating unmounts us straight away.
       if (result.blocked) {
-        setProgress(0);
-        setAnalysisComplete(false);
-        setError(null);
+        leavingRef.current = true;
         hasStartedRef.current = false;
+        dispatch(clearAuraData());
+        navigate(PATH.privateRoutes.AURA_LANDING.path[0], { replace: true });
         return;
       }
 
@@ -204,7 +208,9 @@ const AuraAnalysis = () => {
       // Don't show Toast here - interceptor already showed it
       setError({ message: errorMessage });
     } finally {
-      if (isMountedRef.current) {
+      // Skip when we're navigating away after an entitlement block — flipping
+      // isAnalyzing back to false would flash the pre-analysis checklist.
+      if (isMountedRef.current && !leavingRef.current) {
         setIsAnalyzing(false);
       }
     }
