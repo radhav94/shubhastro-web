@@ -4,11 +4,16 @@ import styles from './TalkToKundliChat.module.scss';
 import { Toast } from '../../../../component';
 import { startKundliChat, sendKundliChatMessage } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const TalkToKundliChat = () => {
   const navigate = useNavigate();
+  // Chat generation is gated by subscription/quota on the backend. Wrap the
+  // start call so an entitlement block opens the plans popup instead of
+  // silently bouncing the user back to the suite.
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'talk-to-your-kundli' });
   // Guests have no token yet — show the add-kundli guest flow instead of
   // redirecting. Flips to true once the guest completes the flow.
   const [hasToken, setHasToken] = useState(
@@ -83,7 +88,13 @@ const TalkToKundliChat = () => {
         ascendant: profile.ascendant || ''
       };
 
-      const result = await startKundliChat(kundliData);
+      const result = await runWithEntitlement(() => startKundliChat(kundliData));
+
+      // User closed the plans popup without purchasing — go back to the suite.
+      if (result.blocked) {
+        navigate('/ai-wow', { replace: true });
+        return;
+      }
 
       if (result.success) {
         const sessionData = result.data;
@@ -218,6 +229,7 @@ const TalkToKundliChat = () => {
 
   return (
     <div className={`${styles.container} notranslate`} translate="no">
+      {subscriptionModal}
       {/* Header */}
       <header className={styles.headerWrap}>
         <div className={styles.header}>

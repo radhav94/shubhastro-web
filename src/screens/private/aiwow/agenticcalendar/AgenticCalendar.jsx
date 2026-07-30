@@ -5,6 +5,7 @@ import styles from './AgenticCalendar.module.scss';
 import { Toast } from '../../../../component';
 import { analyzeCalendarEvents } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { FiMapPin, FiCalendar, FiChevronLeft, FiChevronRight, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 import { PATH } from '../../../../utils/routes/Paths';
@@ -38,6 +39,10 @@ const AgenticCalendar = () => {
   const restoredResult = isBackNavigation ? savedMuhuratResult : null;
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({ required: false, showToast: false });
   const userLocation = useUserLocation();
+  // Timing generation is gated by subscription/quota on the backend. Wrap the
+  // analyze call so an entitlement block opens the plans popup instead of just
+  // showing a generic error toast.
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'muhurat-calendar' });
 
   // State from MuhuratSection navigation
   const navState = location.state || {};
@@ -224,13 +229,21 @@ const AgenticCalendar = () => {
         toDate = fromDate;
       }
 
-      const result = await analyzeCalendarEvents(occasions, {
+      const result = await runWithEntitlement(() => analyzeCalendarEvents(occasions, {
         fromDate,
         toDate,
         kundliId: profile?._id,
         lat: locationData?.lat,
         lng: locationData?.lng,
-      });
+      }));
+
+      // User closed the plans popup without purchasing — unlock so they can
+      // adjust their selection and try again.
+      if (result?.blocked) {
+        setLocked(false);
+        return;
+      }
+
       if (result.success) {
         setAnalysis(result.data);
         dispatch(setMuhuratCalendarResult(result.data));
@@ -320,6 +333,7 @@ const AgenticCalendar = () => {
 
   return (
     <>
+    {subscriptionModal}
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.headerWrap}>
