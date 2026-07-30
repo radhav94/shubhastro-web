@@ -57,6 +57,7 @@ const GemstoneResult = () => {
     isAlreadyDownloaded, downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload,
     showSubscriptionModal, setShowSubscriptionModal, subscriptionModalVariant, extendedPlans,
+    handleSubscriptionInsufficientBalance,
   } = useAIWowDownload({ resultData: downloadResultData });
 
   useEffect(() => {
@@ -738,6 +739,7 @@ const GemstoneResult = () => {
         onClose={() => setShowSubscriptionModal(false)}
         variant={subscriptionModalVariant}
         plans={subscriptionModalVariant === 'extended' ? extendedPlans : undefined}
+        onInsufficientBalance={handleSubscriptionInsufficientBalance}
       />
     </div>
     </>

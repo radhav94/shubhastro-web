@@ -39,6 +39,7 @@ const ClothColorResult = () => {
     isAlreadyDownloaded, downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload,
     showSubscriptionModal, setShowSubscriptionModal, subscriptionModalVariant, extendedPlans,
+    handleSubscriptionInsufficientBalance,
   } = useAIWowDownload({ resultData: downloadResultData });
 
   useEffect(() => {
@@ -446,6 +447,7 @@ const ClothColorResult = () => {
         onClose={() => setShowSubscriptionModal(false)}
         variant={subscriptionModalVariant}
         plans={subscriptionModalVariant === 'extended' ? extendedPlans : undefined}
+        onInsufficientBalance={handleSubscriptionInsufficientBalance}
       />
     </div>
     </>

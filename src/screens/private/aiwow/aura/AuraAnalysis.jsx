@@ -128,7 +128,10 @@ const AuraAnalysis = () => {
         leavingRef.current = true;
         hasStartedRef.current = false;
         dispatch(clearAuraData());
-        navigate(PATH.privateRoutes.AURA_LANDING.path[0], { replace: true });
+        // The gate already routed to /recharge — don't override that redirect.
+        if (!result.redirectedToRecharge) {
+          navigate(PATH.privateRoutes.AURA_LANDING.path[0], { replace: true });
+        }
         return;
       }
 
