@@ -8,7 +8,6 @@ import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 import BackButton from '../../../../component/UI/BackButton/BackButton';
-import { countFacesInImage } from '../../../../utils/helper/detectFaces';
 
 // Session flag: set while an analysis is in progress / not yet successful, so a
 // page reload doesn't auto re-analyze the same image (which would trigger a
@@ -66,19 +65,6 @@ const ClothColorAnalysis = () => {
 
   const performAnalysis = async (imageData) => {
     setIsAnalyzing(true);
-
-    // Reject images with more than one person — cloth colour analysis expects a
-    // single subject. (A photo with 0 detectable faces, e.g. torso-only, is
-    // allowed; detection failure fails open so we never wrongly block a user.)
-    const faceCount = await countFacesInImage(imageData);
-    if (faceCount > 1) {
-      if (isMountedRef.current) {
-        setIsAnalyzing(false);
-        setProgress(0);
-        setError({ message: 'Multiple people detected in the photo. Please use an image with only one person.' });
-      }
-      return;
-    }
 
     // Create AbortController to cancel request on unmount
     const abortController = new AbortController();
@@ -141,9 +127,14 @@ const ClothColorAnalysis = () => {
       } else {
         // DON'T clear data on error - keep image and form data for retry
         // dispatch(clearClothColorData());
-        
+
         setProgress(0);
-        setError({ message: 'Something went wrong. Please try again.' });
+        // Surface the actual API error message (e.g. inappropriate image)
+        // instead of a generic fallback, so the user knows what to fix.
+        setError({
+          message: result.error?.message || 'Something went wrong. Please try again.',
+          details: result.error?.details || null,
+        });
       }
     } catch (error) {
       // Ignore abort errors - user navigated away

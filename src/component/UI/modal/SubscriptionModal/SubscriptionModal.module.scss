@@ -16,9 +16,9 @@
 }
 
 .modal {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(90deg, #fefefee6, #fff8ece6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-radius: 16px;
   width: var(--modal-w, fit-content);
   max-width: min(1360px, 100%);
@@ -59,7 +59,7 @@
 }
 
 .header {
-  margin-bottom: 19px;
+  margin-bottom: 5px;
   padding-right: 32px;
 }
 
@@ -68,12 +68,12 @@
   align-items: center;
   gap: 8px;
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 600;
   color: #080808;
   margin: 0;
 
   @media (max-width: 768px) {
-    font-size: 18px;
+    font-size: 16px;
   }
 }
 
@@ -104,7 +104,7 @@
     justify-content: flex-start;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 2px 0 4px;
+    padding: 20px 0 4px;
     scroll-snap-type: x proximity;
     scroll-behavior: smooth;
 

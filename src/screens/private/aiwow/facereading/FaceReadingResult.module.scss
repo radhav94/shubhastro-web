@@ -24,7 +24,7 @@
   right: 0;
   z-index: 10;
   @media screen and (width <= 1180px) {
-    top: 53px;
+    top: 52px;
   }
 }
 .header {
@@ -36,6 +36,7 @@
   margin: 0 auto;
   @media (width <= 767px) {
     padding:6px 16px;
+    gap: 0.5rem;
   }
 }
 .backButton {
