@@ -1,22 +1,26 @@
 /**
- * Compresses an image file if it exceeds 1MB.
- * Resizes to ~1000px height and iteratively reduces quality if needed.
+ * Normalises an image file to a JPEG data URL, resizing/compressing if large.
  *
- * Robustness: this always resolves with a usable data URL. If anything in the
- * canvas/compression path fails (e.g. iPad Safari failing to decode a large or
- * HEIC-derived photo, or a canvas memory limit), we fall back to reading the
- * original file as a data URL instead of leaving the promise hanging forever
- * (which made Cloth Colour Analysis silently "fail after upload" on iOS/iPad).
+ * Why always re-encode: iOS gallery/device photos are frequently HEIC/HEIF (or
+ * other formats). If we returned the raw file data URL as-is, that HEIC blob
+ * was sent to the analysis APIs, which can't process it — so uploads "failed"
+ * on iOS while camera captures (already JPEG) worked. Routing every upload
+ * through a canvas re-encode guarantees a JPEG the backend can read.
+ *
+ * Robustness: this always resolves with a usable data URL. If the canvas path
+ * can't run (e.g. the browser can't decode the source, or a canvas memory
+ * limit), we fall back to reading the original file as a data URL instead of
+ * hanging forever.
  *
  * @param {File} file - The image file to compress
- * @returns {Promise<string>} - Base64 data URL
+ * @returns {Promise<string>} - Base64 data URL (JPEG when re-encoding succeeds)
  */
 export const compressImage = (file) => {
   return new Promise((resolve, reject) => {
     const maxSize = 1 * 1024 * 1024; // 1MB
 
-    // Read the original file as a data URL (used directly for small files and
-    // as a fallback when compression can't run).
+    // Read the original file as a data URL — used only as a fallback when the
+    // canvas re-encode can't run.
     const readOriginal = () => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result);
@@ -24,17 +28,9 @@ export const compressImage = (file) => {
       reader.readAsDataURL(file);
     };
 
-    // If already under 1MB, no processing needed.
-    if (file.size <= maxSize) {
-      readOriginal();
-      return;
-    }
-
     const img = new Image();
     const url = URL.createObjectURL(file);
 
-    // Safety net: if the image never loads (decode failure / stuck), fall back
-    // to the original file so the flow is never blocked.
     let settled = false;
     const finish = (value) => {
       if (settled) return;
@@ -47,6 +43,7 @@ export const compressImage = (file) => {
       readOriginal();
     };
 
+    // If the image never loads (decode failure / stuck), fall back.
     const loadTimeout = setTimeout(failToOriginal, 8000);
 
     img.onload = () => {
@@ -56,7 +53,7 @@ export const compressImage = (file) => {
         const canvas = document.createElement('canvas');
         let { width, height } = img;
 
-        // Resize to ~1000px height
+        // Resize to ~1000px height for large images (keeps payload small).
         const targetHeight = 1000;
         if (height > targetHeight) {
           const ratio = targetHeight / height;
@@ -69,11 +66,11 @@ export const compressImage = (file) => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        // First try at 100% quality after resize
-        let result = canvas.toDataURL('image/jpeg', 1.0);
+        // Always export as JPEG so the backend never receives HEIC/other.
+        let result = canvas.toDataURL('image/jpeg', 0.92);
 
-        // If still over 1MB, reduce quality iteratively
-        let quality = 0.9;
+        // If still over 1MB, reduce quality iteratively.
+        let quality = 0.85;
         while (result.length * 0.75 > maxSize && quality > 0.1) {
           result = canvas.toDataURL('image/jpeg', quality);
           quality -= 0.1;
@@ -81,15 +78,14 @@ export const compressImage = (file) => {
 
         // Guard against a broken/empty canvas export (can happen on iOS Safari
         // when the source is too large for the canvas): fall back to original.
-        if (!result || !result.startsWith('data:image')) {
+        if (!result || !result.startsWith('data:image/jpeg')) {
           failToOriginal();
           return;
         }
 
-        console.log(`[Image Compress] Original: ${(file.size / 1024 / 1024).toFixed(2)} MB → After: ${(result.length * 0.75 / 1024 / 1024).toFixed(2)} MB`);
         finish(result);
       } catch (err) {
-        console.warn('[Image Compress] Canvas compression failed, using original:', err);
+        console.warn('[Image Compress] Canvas re-encode failed, using original:', err);
         failToOriginal();
       }
     };
