@@ -130,22 +130,14 @@ const SignatureResult = () => {
 
       <div className={styles.styleCard} style={{ position: 'relative' }}>
         <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-          <TTSButton text={`Overall Style. Legibility Score: ${resultData.style.legibility?.score} percent. ${resultData.style.legibility?.description || ''}. Uniqueness Score: ${resultData.style.uniqueness?.score} percent. ${resultData.style.uniqueness?.description || ''}. Formality: ${resultData.style.formality || ''}. Complexity: ${resultData.style.complexity || ''}${resultData.style.characteristics?.length > 0 ? '. Key Characteristics: ' + resultData.style.characteristics.join(', ') : ''}`} />
+          <TTSButton text={`Overall Style. Legibility Score. ${resultData.style.legibility?.description || ''}. Uniqueness Score. ${resultData.style.uniqueness?.description || ''}. Formality: ${resultData.style.formality || ''}. Complexity: ${resultData.style.complexity || ''}${resultData.style.characteristics?.length > 0 ? '. Characteristics: ' + resultData.style.characteristics.join(', ') : ''}`} />
         </span>
         <h3 className={styles.cardTitle}>Overall Style</h3>
-        {/* <div className={styles.infoRow}>
-          <span className={styles.label}>Legibility Score:</span>
-          <span className={styles.value}>{resultData.style.legibility?.score}%</span>
-        </div> */}
         <span className={styles.label}>Legibility Score:</span>
         <p className={styles.description}>{resultData.style.legibility?.description}</p>
         
-        {/* <div className={styles.infoRow}>
-          <span className={styles.label}>Uniqueness Score:</span>
-          <span className={styles.value}>{resultData.style.uniqueness?.score}%</span>
-        </div> */}
-          <span className={styles.label}>Uniqueness Score:</span>
-           <p className={styles.description}>{resultData.style.uniqueness?.description}</p>
+        <span className={styles.label}>Uniqueness Score:</span>
+        <p className={styles.description}>{resultData.style.uniqueness?.description}</p>
         
         <div className={styles.infoRow}>
           <span className={styles.label}>Formality:</span>
