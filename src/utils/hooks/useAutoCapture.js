@@ -24,6 +24,7 @@ import { useEffect, useRef, useState } from "react";
  */
 export const useAutoCapture = ({ ready, active, getFrameCanvas, onCapture, options = {} }) => {
   const {
+    startDelayMs = 0,   // grace period before auto-capture engages (time to aim)
     minHoldMs = 500,
     maxWaitMs = 2500,
     goodSharpness = 100,
@@ -94,6 +95,22 @@ export const useAutoCapture = ({ ready, active, getFrameCanvas, onCapture, optio
   };
 
   const runAutoCapture = async () => {
+    // Give the user time to aim before we begin measuring/capturing. We keep
+    // waiting in short slices so we can bail early if the subject leaves frame
+    // or the camera goes inactive.
+    if (startDelayMs > 0) {
+      const graceEnd = Date.now() + startDelayMs;
+      while (Date.now() < graceEnd) {
+        if (!mountedRef.current) return;
+        if (!readyRef.current || !activeRef.current) {
+          runningRef.current = false;
+          if (mountedRef.current) setAutoCapturing(false);
+          return;
+        }
+        await sleep(120);
+      }
+    }
+
     const start = Date.now();
     let best = null; // { sharp, dataUrl }
 

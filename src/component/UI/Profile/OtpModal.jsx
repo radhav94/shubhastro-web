@@ -1,18 +1,55 @@
-import { useEffect, useState } from "react";
-import OtpInput from "react-otp-input";
+import { useEffect, useState, useRef, memo } from "react";
 import styles from "./OtpModal.module.scss";
+
+// Isolated timer to prevent re-rendering the OTP inputs every second
+const ResendCountdown = memo(({ isOpen, onResend }) => {
+  const [counter, setCounter] = useState(60);
+  const [isActive, setIsActive] = useState(true);
+
+  useEffect(() => {
+    if (isOpen) {
+      setCounter(60);
+      setIsActive(true);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !isActive || counter <= 0) {
+      if (isActive && counter <= 0) setIsActive(false);
+      return;
+    }
+    const timer = setTimeout(() => setCounter(counter - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [counter, isActive, isOpen]);
+
+  const handleResend = async () => {
+    if (isActive) return;
+    try {
+      await onResend?.();
+      setIsActive(true);
+      setCounter(60);
+    } catch { /* parent surfaces the error */ }
+  };
+
+  return (
+    <div className={styles.resendRow}>
+      {isActive ? (
+        <span className={styles.timer}>
+          Resend OTP in {Math.floor(counter / 60)}:{String(counter % 60).padStart(2, "0")}
+        </span>
+      ) : (
+        <button type="button" className={styles.resendBtn} onClick={handleResend}>
+          Resend OTP
+        </button>
+      )}
+    </div>
+  );
+});
 
 /**
  * Lightweight OTP verification popup.
  *
  * Presentational only — the parent owns the verify/resend network calls.
- *
- * @param {boolean} isOpen
- * @param {string} phoneNumber - full phone number (e.g. "919876543210"); shown to the user
- * @param {(otp: string) => Promise<boolean>} onVerify - resolve true on success, false/throw on failure
- * @param {() => Promise<void>} onResend
- * @param {() => void} onClose
- * @param {boolean} isVerifying - controlled loading state from the parent
  */
 const OtpModal = ({
   isOpen,
@@ -27,12 +64,10 @@ const OtpModal = ({
   inline = false,
 }) => {
   const [otp, setOtp] = useState("");
-  const [counter, setCounter] = useState(60);
-  const [isTimerActive, setIsTimerActive] = useState(true);
+  const inputRef = useRef(null);
 
   const isOtpComplete = otp.length === 6;
 
-  // Display the number without the leading "91" country code when present.
   const displayNumber =
     typeof phoneNumber === "string" && phoneNumber.startsWith("91")
       ? phoneNumber.slice(2)
@@ -43,46 +78,47 @@ const OtpModal = ({
     const success = await onVerify(otp);
     if (!success) {
       setOtp("");
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   };
 
-  // Auto-submit once the OTP is fully entered (SMS autofill).
+  // Auto-submit once the OTP is fully entered
   useEffect(() => {
     if (isOtpComplete && !isVerifying) {
-      verify();
+      // Small delay to show the last digit before submitting
+      const timer = setTimeout(() => verify(), 300);
+      return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [otp]);
 
-  // Reset state whenever the modal opens.
+  // Reset state whenever the modal opens + lock body scroll
   useEffect(() => {
     if (isOpen) {
       setOtp("");
-      setCounter(60);
-      setIsTimerActive(true);
+      // Lock body scroll to prevent iOS from scrolling page behind modal
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${window.scrollY}px`;
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
+    return () => {
+      if (isOpen) {
+        const scrollY = document.body.style.top;
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.top = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    };
   }, [isOpen]);
 
-  // Countdown timer.
-  useEffect(() => {
-    if (!isOpen || !isTimerActive || counter <= 0) {
-      if (isTimerActive && counter <= 0) setIsTimerActive(false);
-      return;
-    }
-    const timer = setTimeout(() => setCounter(counter - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [counter, isTimerActive, isOpen]);
-
   const handleResend = async () => {
-    if (isTimerActive) return;
-    try {
-      await onResend?.();
-      setOtp("");
-      setIsTimerActive(true);
-      setCounter(60);
-    } catch {
-      /* parent surfaces the error */
-    }
+    await onResend?.();
+    setOtp("");
+    setTimeout(() => inputRef.current?.focus(), 50);
   };
 
   if (!isOpen) return null;
@@ -110,16 +146,31 @@ const OtpModal = ({
             verify();
           }}
         >
-          <div className={styles.otpInputContainer}>
-            <OtpInput
+          <div
+            className={styles.otpInputContainer}
+            onClick={() => inputRef.current?.focus()}
+          >
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div
+                key={i}
+                className={`${styles.otpBox} ${otp.length === i ? styles.otpBoxActive : ""} ${otp[i] ? styles.otpBoxFilled : ""}`}
+              >
+                {otp[i] || ""}
+              </div>
+            ))}
+            <input
+              ref={inputRef}
+              type="tel"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              className={styles.otpHiddenInput}
               value={otp}
-              onChange={setOtp}
-              numInputs={6}
-              inputType="tel"
-              shouldAutoFocus
-              renderInput={(props) => (
-                <input {...props} className={styles.otpInput} />
-              )}
+              onChange={(e) => {
+                const val = e.target.value.replace(/[^0-9]/g, "").slice(0, 6);
+                setOtp(val);
+              }}
+              maxLength={6}
+              autoFocus
             />
           </div>
 
@@ -132,22 +183,7 @@ const OtpModal = ({
           </button>
         </form>
 
-        <div className={styles.resendRow}>
-          {isTimerActive ? (
-            <span className={styles.timer}>
-              Resend OTP in {Math.floor(counter / 60)}:
-              {String(counter % 60).padStart(2, "0")}
-            </span>
-          ) : (
-            <button
-              type="button"
-              className={styles.resendBtn}
-              onClick={handleResend}
-            >
-              Resend OTP
-            </button>
-          )}
-        </div>
+        <ResendCountdown isOpen={isOpen} onResend={handleResend} />
       </div>
     </div>
   );

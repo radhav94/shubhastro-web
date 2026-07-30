@@ -521,8 +521,14 @@ const AgenticCalendar = () => {
                           <TTSButton text={`${name}. ${timings.map(t => {
                             let text = '';
                             if (t.bestDate) text += new Date(t.bestDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) + '. ';
-                            if (t.bestTimeRange) text += 'Best Time: ' + t.bestTimeRange + '. ';
-                            if (t.alternateTimeRange) text += 'Alternate: ' + t.alternateTimeRange + '. ';
+                            if (t.bestTimeRange) {
+                              const label = isSlotPassed(t.bestTimeRange, t.bestDate) ? 'Passed' : 'Best Time';
+                              text += label + ': ' + t.bestTimeRange + '. ';
+                            }
+                            if (t.alternateTimeRange) {
+                              const label = isSlotPassed(t.alternateTimeRange, t.bestDate) ? 'Passed' : 'Alternate';
+                              text += label + ': ' + t.alternateTimeRange + '. ';
+                            }
                             if (t.reason) text += t.reason;
                             return text;
                           }).join('. ')}`} />
