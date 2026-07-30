@@ -3,9 +3,12 @@ import styles from './FeatureCard.module.scss';
 import { getAIWowIcon } from '../../../../utils/appImages';
 import TTSButton from '../../../../component/UI/TTSButton';
 import defaultSquareImg from "../../../../assets/images/default_image_square_500x500.png"
+// Note: `isPaid` prop is intentionally not destructured while the paid ribbon is hidden.
 const FeatureCard = ({ badge, badgeType, title, description, icon, onStartNow, largeIcon }) => {
   return (
     <div className={styles.card} onClick={onStartNow}>
+      {/* Paid ribbon hidden temporarily */}
+      {/* {isPaid && <span className={styles.paidRibbon}>Paid</span>} */}
       <div className={styles.iconWrapper}>
         <div className={styles.iconBackground}>
           <img src={icon || defaultSquareImg} alt={title} className={styles.icon} />

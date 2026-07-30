@@ -8,6 +8,7 @@ import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliP
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 import { setDreamInterpreterResult, clearDreamInterpreterResult } from '../../../../redux/aiwow/aiwowSlice';
 import DownloadReportModal from '../components/DownloadReportModal';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
@@ -22,6 +23,7 @@ const DreamInterpreter = () => {
   const restoredResult = isBackNavigation ? savedDreamResult : null;
   const isGuest = !localStorage.getItem("shubhtalk_customer_token");
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({ required: !isGuest, showToast: !isGuest });
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'dream-interpreter' });
   // Synchronous guard: blocks a rapid double tap from firing the API twice
   // before isLoading re-renders and disables the button.
   const isSubmittingRef = useRef(false);
@@ -130,7 +132,15 @@ const DreamInterpreter = () => {
         }
       }
 
-      const result = await interpretDream(dreamData);
+      const result = await runWithEntitlement(() => interpretDream(dreamData));
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      if (result.blocked) {
+        setIsLoading(false);
+        setError('Choose a plan to continue with your report.');
+        setInterpretation(null);
+        return;
+      }
 
       if (result.success) {
         const apiData = result.data;
@@ -903,6 +913,7 @@ const DreamInterpreter = () => {
           </div>
         )}
       </div>
+      {subscriptionModal}
     </div>
 
     <DownloadReportModal

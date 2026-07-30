@@ -5,10 +5,12 @@ import { Toast } from '../../../../component';
 import { analyzeKarmicDebt } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const KarmicDebtTracker = () => {
   const navigate = useNavigate();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'karmic-debt' });
   
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
@@ -42,7 +44,13 @@ const KarmicDebtTracker = () => {
         tzone: profile.tzone || 5.5
       };
 
-      const result = await analyzeKarmicDebt(data);
+      const result = await runWithEntitlement(() => analyzeKarmicDebt(data));
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      if (result.blocked) {
+        setIsLoading(false);
+        return;
+      }
 
       if (result.success) {
         setAnalysis(result.data);
@@ -317,6 +325,7 @@ const KarmicDebtTracker = () => {
           </div>
         )}
       </div>
+      {subscriptionModal}
     </div>
   );
 };

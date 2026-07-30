@@ -9,6 +9,7 @@ import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import DownloadReportModal from '../components/DownloadReportModal';
+import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
@@ -78,6 +79,7 @@ const PalmistryResult = () => {
     isDownloading, showDownloadModal, setShowDownloadModal,
     isAlreadyDownloaded, downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload, handleDirectDownload,
+    showSubscriptionModal, setShowSubscriptionModal, subscriptionModalVariant, extendedPlans,
   } = useAIWowDownload({ resultData: downloadResultData });
 
   const toggleLine = (lineName) => {
@@ -1004,6 +1006,12 @@ const PalmistryResult = () => {
         walletBalance={walletBalance ?? 0}
         isDownloading={isDownloading}
         showLanguageSelection={false}
+      />
+      <SubscriptionModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        variant={subscriptionModalVariant}
+        plans={subscriptionModalVariant === 'extended' ? extendedPlans : undefined}
       />
     </div>
     </>

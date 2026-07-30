@@ -12,6 +12,7 @@ import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import TTSButton from "../../../component/UI/TTSButton";
 import BackButton from "../../../component/UI/BackButton/BackButton";
 import laalKitaabImg from "../../../assets/images/laalkitabNewImg.png";
+import useAIWowSubscriptionGate from "../aiwow/hooks/useAIWowSubscriptionGate";
 
 const features = [
   { icon: "🏠", title: "Houses Analysis",   desc: "Detailed analysis of all 12 houses with planetary positions" },
@@ -60,6 +61,7 @@ const LalKitab = () => {
   const profiles = kundliData?.data || [];
 
   const [generateTeva, { isLoading: isGenerating }] = useGenerateLalKitabTevaMutation();
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: "lal-kitab" });
 
   useEffect(() => {
     if (profiles.length > 0 && !selectedProfile) {
@@ -75,18 +77,32 @@ const LalKitab = () => {
   const doGenerate = async (profile) => {
     if (!profile?._id) { Toast.error("Please select a Kundli profile first"); return; }
     window.dispatchEvent(new Event("lalkitab:generating"));
-    try {
-      const result = await generateTeva(String(profile._id)).unwrap();
-      const lalKitabId = (result?.data || result)?._id;
-      if (lalKitabId) {
-        navigate(`/laal-kitab/${lalKitabId}`, { state: { tevaData: result?.data || result } });
-      } else {
-        Toast.error("Failed to generate Laal Kitab");
+
+    // Route the generate call through the subscription gate — shows the plans
+    // popup on PREMIUM_REQUIRED (and the extended popup on EXTENDED), then
+    // retries generation after purchase.
+    const result = await runWithEntitlement(async () => {
+      try {
+        return await generateTeva(String(profile._id)).unwrap();
+      } catch (err) {
+        return err?.data || { success: false, error: err };
       }
-    } catch (err) {
-      Toast.error(err?.data?.message || "Failed to generate Laal Kitab Teva");
-    } finally {
-      setGuestGenerating(false);
+    });
+
+    setGuestGenerating(false);
+
+    if (result?.blocked) return;
+
+    if (result?.success === false) {
+      Toast.error(result?.error?.message || result?.message || "Failed to generate Laal Kitab Teva");
+      return;
+    }
+
+    const lalKitabId = (result?.data || result)?._id;
+    if (lalKitabId) {
+      navigate(`/laal-kitab/${lalKitabId}`, { state: { tevaData: result?.data || result } });
+    } else {
+      Toast.error("Failed to generate Laal Kitab");
     }
   };
 
@@ -242,6 +258,7 @@ const LalKitab = () => {
         }}
       />
     </div>
+    {subscriptionModal}
     </>
   );
 };

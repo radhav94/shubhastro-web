@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 
 /**
  * Voice recorder — uses native MediaRecorder.pause()/resume()
@@ -134,6 +134,23 @@ export const useVoiceRecorder = () => {
       }
     }),
   []);
+
+  // Release the mic if the component unmounts mid-recording (e.g. navigation or
+  // the browser Back button, which skip stopRecording).
+  useEffect(() => () => {
+    clearInterval(timerRef.current);
+    try {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+      }
+    } catch {
+      // ignore
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+  }, []);
 
   return {
     recording,

@@ -7,6 +7,7 @@ import TTSButton from '../../../../component/UI/TTSButton';
 import DownloadReportModal from '../components/DownloadReportModal';
 import { useWalletBalance } from '../../../private/wallet/useWalletBalance';
 import { useGetChargesQuery, useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
+import { useGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
 import remedyMortarImg from '../../../../assets/images/remedy-mortar.png';
 import { trackEvent } from '../../../../utils/analytics';
 
@@ -25,7 +26,14 @@ const BusinessPathfinderResult = () => {
     () => !!downloadedKey && localStorage.getItem(downloadedKey) === 'true'
   );
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
-  const { data: chargesData } = useGetChargesQuery();
+
+  const customerToken = typeof window !== 'undefined' ? localStorage.getItem('shubhtalk_customer_token') : null;
+  const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken });
+  const hasActiveSubscription = !!subscriptionStatus?.data?.hasActiveSubscription;
+
+  // Charges only matter for non-subscribed users; subscribed users download
+  // directly with no popup, so skip the charges API for them.
+  const { data: chargesData } = useGetChargesQuery(undefined, { skip: hasActiveSubscription });
   const charges = chargesData?.data || null;
 
   // Derive "already downloaded" from AI history so it persists across refresh.
@@ -48,8 +56,7 @@ const BusinessPathfinderResult = () => {
     return candidates.some((p) => typeof p === 'string' && p.startsWith('http'));
   }, [downloadedThisSession, historyItem, result]);
 
-  // Find the Business Pathfinder download charge from the charges API.
-  // Response shape: { data: [{ title, list: [{ slug, title, amount }] }] }
+  // Business Pathfinder download charge from the charges API (non-subscribed only).
   const getChargeAmount = () => {
     if (!Array.isArray(charges)) return null;
     for (const section of charges) {
@@ -66,12 +73,17 @@ const BusinessPathfinderResult = () => {
   };
 
   const getDownloadCost = () => {
-    if (isAlreadyDownloaded) return 0;
+    if (isAlreadyDownloaded || hasActiveSubscription) return 0;
     const amount = getChargeAmount();
     return amount ?? 10;
   };
 
   const handleDownloadClick = () => {
+    // Subscribed users download directly — no charge popup.
+    if (hasActiveSubscription) {
+      handleConfirmDownload();
+      return;
+    }
     refreshWallet();
     setDownloadModalOpen(true);
   };

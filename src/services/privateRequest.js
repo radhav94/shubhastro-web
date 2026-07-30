@@ -4,6 +4,7 @@ import { getToken } from "../utils/utlis";
 import { refreshTokenAndReload } from "../utils/tokenRefresh";
 import { attachSecureTransport } from "../utils/security/secureAxios";
 import { BACKEND_PROXY } from "../utils/apiConfig";
+import { getSubscriptionErrorReason } from "../utils/subscription/featureGating";
 
 let unAuthorizedCount = 0;
 const privateRequest = axios.create({
@@ -53,6 +54,13 @@ const clearToken = () => {
 const responseErrorHandler = (error) => {
   // Allow callers to suppress toast by passing { skipToast: true } in config
   if (error.config?.skipToast) {
+    return Promise.reject(error);
+  }
+
+  // Subscription/entitlement blocks (PREMIUM_REQUIRED, EXTENDED_PLAN_REQUIRED,
+  // EXTENDED_PLAN_EXHAUSTED, INSUFFICIENT_WALLET_BALANCE) are handled by the UI
+  // (plans popup / extended auto-purchase). Never surface them as error toasts.
+  if (getSubscriptionErrorReason(error)) {
     return Promise.reject(error);
   }
 

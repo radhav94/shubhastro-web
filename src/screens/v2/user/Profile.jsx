@@ -46,6 +46,7 @@ import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrolo
 import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
 import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
+import SubscriptionModal from "../../../component/UI/modal/SubscriptionModal/SubscriptionModal";
 import { useGetFollowedAstrologersQuery } from "../../../redux/api/astrologer/followedAstrologersApi";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
@@ -56,6 +57,8 @@ import { PANDIT_AI_ID } from "../../../component/panditAI/usePanditAI";
 import { logout, updateRegistrationStatus, setEmail } from "../../../redux/auth/authSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import styles from "./Profile.module.scss";
+import MembershipCard from "./MembershipCard";
+import { useGetSubscriptionStatusQuery, useCancelSubscriptionMutation } from "../../../redux/api/subscription/subscriptionApi";
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import emailIconSet from "../../../assets/images/icon_set (1).png";
 import { Toast } from "../../../component/index";
@@ -163,6 +166,53 @@ const Profile = () => {
   //   : "Guest User";
   const userId = localStorage.getItem("shubhtalk_customer_id");
 
+  const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, {
+    skip: !userId,
+    // Report generation consumes quota on the backend, so always pull a fresh
+    // status when the account page mounts instead of showing stale cached data.
+    refetchOnMountOrArgChange: true,
+  });
+  const [cancelSubscription, { isLoading: isCancellingSubscription }] = useCancelSubscriptionMutation();
+  const activeSubscriptionId = subscriptionStatus?.data?.subscription?._id;
+  const subData = subscriptionStatus?.data;
+  const hasActiveSubscription = !!subData?.hasActiveSubscription;
+  const subPlanName = subData?.plan?.name || subData?.subscription?.planName || subData?.subscription?.planCode || "Premium";
+  const subEndDate = subData?.subscription?.subscriptionEndDate || subData?.subscription?.endDate || null;
+  const subValidTill = subEndDate ? dayjs(subEndDate).format("DD MMM YYYY") : null;
+  const subRemainingDays = subEndDate
+    ? Math.max(0, dayjs(subEndDate).startOf("day").diff(dayjs().startOf("day"), "day"))
+    : null;
+  const subQuota = subData?.quota || null;
+  const extQuota = subData?.extendedQuota || null;
+  // Total generations = basic plan quota + any extended pack quota (combined).
+  // Basic plan is always the primary; extended packs add on top of it.
+  const combinedQuotaTotal = (Number(subQuota?.monthlyQuota) || 0) + (Number(extQuota?.monthlyQuota) || 0);
+  const combinedQuotaUsed = (Number(subQuota?.usedQuota) || 0) + (Number(extQuota?.usedQuota) || 0);
+
+  const handleCancelSubscription = () => {
+    if (!activeSubscriptionId) {
+      Toast.error("No active subscription to cancel.");
+      return;
+    }
+    setShowCancelConfirm(true);
+  };
+
+  const handleConfirmCancelSubscription = async () => {
+    try {
+      const res = await cancelSubscription({ subscriptionId: activeSubscriptionId });
+      const body = res?.data || res?.error?.data;
+      if (body?.success) {
+        Toast.success(body?.message || "Subscription cancelled");
+      } else {
+        Toast.error(body?.message || "Failed to cancel subscription");
+      }
+    } catch {
+      Toast.error("Failed to cancel subscription");
+    } finally {
+      setShowCancelConfirm(false);
+    }
+  };
+
   // Connect popup state
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
@@ -232,6 +282,8 @@ const Profile = () => {
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEmailEditModal, setShowEmailEditModal] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [editEmailValue, setEditEmailValue] = useState("");
   const [emailError, setEmailError] = useState("");
   const [profileToEdit, setProfileToEdit] = useState(null);
@@ -489,6 +541,18 @@ const Profile = () => {
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   };
+
+  const subStartDate = subData?.subscription?.subscriptionStartDate || null;
+  const subscriptionDetails = hasActiveSubscription
+    ? [
+        { label: "Status", value: capitalizeWords(subData?.subscription?.status || "active") },
+        { label: "Started", value: subStartDate ? dayjs(subStartDate).format("DD MMM YYYY") : "-" },
+        { label: "Amount", value: `₹${subData?.subscription?.planAmount ?? subData?.plan?.price ?? 0}` },
+        { label: "Payment", value: capitalizeWords(subData?.subscription?.paymentGateway || "wallet") },
+        { label: "Reports left", value: subQuota ? `${subQuota.remainingQuota} of ${subQuota.monthlyQuota}` : "-" },
+        { label: "Extra report", value: `₹${subData?.subscription?.overagePrice ?? subQuota?.overagePrice ?? 0} each` },
+      ]
+    : [];
 
     // Get user name with fallback to first Kundli name
  
@@ -1484,51 +1548,71 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Balance Card */}
-      <div
-        className={styles.balanceCard}
-        style={{ backgroundImage: `url(${profileWallet})` }}
-      >
-        <div className={styles.balanceLeft}>
-          <div className={styles.balanceHeader}>
-            <div className={styles.coinIcon}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  fill="#FFD700"
-                  stroke="#FFA500"
-                  strokeWidth="2"
-                />
-                <circle cx="12" cy="12" r="6" fill="#FFA500" />
-                <text
-                  x="12"
-                  y="16"
-                  textAnchor="middle"
-                  fill="#FFF"
-                  fontSize="10"
-                  fontWeight="bold"
-                >
-                  ₹
-                </text>
-              </svg>
+      <div className={styles.balanceMembershipRow}>
+        <div className={styles.balanceMembershipItem}>
+          {/* Balance Card */}
+          <div
+            className={styles.balanceCard}
+            style={{ backgroundImage: `url(${profileWallet})` }}
+          >
+            <div className={styles.balanceLeft}>
+              <div className={styles.balanceHeader}>
+                <div className={styles.coinIcon}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      fill="#FFD700"
+                      stroke="#FFA500"
+                      strokeWidth="2"
+                    />
+                    <circle cx="12" cy="12" r="6" fill="#FFA500" />
+                    <text
+                      x="12"
+                      y="16"
+                      textAnchor="middle"
+                      fill="#FFF"
+                      fontSize="10"
+                      fontWeight="bold"
+                    >
+                      ₹
+                    </text>
+                  </svg>
+                </div>
+                {/* <Sparkles size={16} fill="#FFF" color="#FFF" /> */}
+                <span className={styles.balanceLabel}>Balance</span>
+              </div>
+              <div className={styles.balanceAmount}>
+                ₹{Number(balance || 0).toLocaleString("en-IN")}
+              </div>
             </div>
-            {/* <Sparkles size={16} fill="#FFF" color="#FFF" /> */}
-            <span className={styles.balanceLabel}>Balance</span>
-          </div>
-          <div className={styles.balanceAmount}>
-            ₹{Number(balance || 0).toLocaleString("en-IN")}
+
+            <button
+              className={styles.addMinutesButton}
+              onClick={() => navigate("/recharge")}
+            >
+              Recharge Wallet
+              <ChevronLeft size={20} style={{ transform: "rotate(180deg)" }} />
+            </button>
           </div>
         </div>
 
-        <button
-          className={styles.addMinutesButton}
-          onClick={() => navigate("/recharge")}
-        >
-          Recharge Wallet
-          <ChevronLeft size={20} style={{ transform: "rotate(180deg)" }} />
-        </button>
+        <div className={styles.balanceMembershipItem}>
+          <MembershipCard
+                  hasSubscription={hasActiveSubscription}
+                  autoRenew={!!subData?.subscription?.autoRenew}
+                  planName={subPlanName}
+                  validTill={subValidTill}
+                  remainingDays={subRemainingDays}
+                  quotaUsed={combinedQuotaUsed}
+                  quotaTotal={combinedQuotaTotal}
+                  details={subscriptionDetails}
+                  onCancel={handleCancelSubscription}
+                  isCancelling={isCancellingSubscription}
+                  onSubscribe={() => setShowSubscriptionModal(true)}
+                />
+        </div>
       </div>
 
       {/* Email & Following Row */}
@@ -2412,6 +2496,21 @@ const Profile = () => {
           activeAstroRef.current = astro;
           handleCallStart(astro, "audio", true);
         }}
+      />
+
+      <SubscriptionModal isOpen={showSubscriptionModal} onClose={() => setShowSubscriptionModal(false)} />
+
+      <DeleteConfirmationModal
+        isOpen={showCancelConfirm}
+        onClose={() => setShowCancelConfirm(false)}
+        onConfirm={handleConfirmCancelSubscription}
+        isLoading={isCancellingSubscription}
+        tone="primary"
+        title="Are you sure want to cancel?"
+        message="You'll lose access to premium AI features and your remaining report quota once your subscription ends."
+        confirmText="Yes, Cancel"
+        loadingText="Cancelling..."
+        cancelText="No, Keep it"
       />
 
       {/* Recharge Modal for insufficient balance */}

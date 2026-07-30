@@ -30,6 +30,15 @@ const ChatInput = ({
   const canvasRef = useRef(null);
   const inputBoxRef = useRef(null);
 
+  // Release the camera if the component unmounts while it's still open
+  // (e.g. navigation or the browser Back button, which skip handleCameraClose).
+  useEffect(() => () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
   const { openFileSelector } = useFileSelector();
   const { recording, paused, seconds, startRecording, stopRecording, pauseRecording, resumeRecording } = useVoiceRecorder();
 

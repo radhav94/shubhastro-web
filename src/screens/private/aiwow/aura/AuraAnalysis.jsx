@@ -3,19 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './AuraAnalysis.module.scss';
 import { analyzeAura } from '../../../../services/appServices/aiWowService';
-import { setAuraResult, clearAuraData } from '../../../../redux/aiwow/aiwowSlice';
+import { setAuraResult, clearAuraData, setAuraImage } from '../../../../redux/aiwow/aiwowSlice';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
-import BackButton from '../../../../component/UI/BackButton/BackButton';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const AuraAnalysis = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const auraImage = useSelector((state) => state.aiwow.aura.image);
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'aura-photography' });
   
   // Use the hook to get selected Kundli profile with error handling
-  const { profile, isLoading: profileLoading, error: profileError } = useSelectedKundliProfile({
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
     required: true,
     showToast: true,
     redirectPath: PATH.privateRoutes.AIWOW?.path || '/ai-wow',
@@ -96,8 +97,10 @@ const AuraAnalysis = () => {
         });
       }, 200);
 
-      // Pass only image data and abort signal to API
-      const result = await analyzeAura(imageData, abortController.signal);
+      // Pass the generate call through the entitlement gate. It auto-purchases
+      // the extended pack (and retries) or opens the plans popup when the
+      // backend blocks generation on subscription/quota.
+      const result = await runWithEntitlement(() => analyzeAura(imageData, abortController.signal));
 
       clearInterval(progressInterval);
 
@@ -110,6 +113,19 @@ const AuraAnalysis = () => {
       // Validate API response structure
       if (!result || typeof result !== 'object') {
         throw new Error('Invalid API response format');
+      }
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      // Reset progress and show a retry state so the user can continue after
+      // choosing a plan.
+      // Do NOT show the "Analysis Failed" screen — just return to the previous
+      // (pre-analysis) screen so the user can try again.
+      if (result.blocked) {
+        setProgress(0);
+        setAnalysisComplete(false);
+        setError(null);
+        hasStartedRef.current = false;
+        return;
       }
 
       if (result.success) {
@@ -194,6 +210,20 @@ const AuraAnalysis = () => {
     }
   };
 
+  const handleGenerateAnalysis = () => {
+    if (isAnalyzing || analysisComplete) return;
+    if (!auraImage || !profile) return;
+    hasStartedRef.current = true;
+    setError(null);
+    performAnalysis(auraImage);
+  };
+
+  const handleRetakePicture = () => {
+    // Clear only the captured image and go back to the instructions screen.
+    dispatch(setAuraImage(null));
+    navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0]);
+  };
+
   const handleShowResult = () => {
     if (analysisComplete && !isNavigating) {
       setIsNavigating(true);
@@ -208,15 +238,29 @@ const AuraAnalysis = () => {
     navigate(PATH.privateRoutes.AURA_LANDING.path[0]);
   };
 
+  const handleBack = () => {
+    dispatch(clearAuraData());
+    navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0], { replace: true });
+  };
+
   return (
     <div className={styles.container}>
-      <BackButton disabled={isAnalyzing} />
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={handleBack} disabled={isAnalyzing}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.headerTitle}>AI Powered Aura Photography</h1>
+        </div>
+      </header>
       <div className={styles.content}>
+        <h2 className={styles.pageTitle}>
+          {error ? 'Analysis Failed' : 'Analysing your aura'}
+        </h2>
+        <div className={styles.middleContent}>
         <div className={styles.leftSection}>
-          <h2 className={styles.title}>
-            {error ? 'Analysis Failed' : 'Analysing your aura'}
-          </h2>
-
           <div className={styles.imageWrapper}>
             {auraImage ? (
               <img 
@@ -236,38 +280,98 @@ const AuraAnalysis = () => {
 
         <div className={styles.rightSection}>
         {!error ? (
-          <>
-            <div className={styles.progressSection}>
-              <div className={styles.progressBar}>
-                <div 
-                  className={styles.progressFill} 
-                  style={{ width: `${progress}%` }}
-                ></div>
+          !isAnalyzing && !analysisComplete ? (
+            <>
+              <div className={styles.checklistSection}>
+                <div className={styles.checkItem}>
+                  <div className={styles.checkIcon}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className={styles.checkTitle}>Good Lighting</h3>
+                    <p className={styles.checkDescription}>Ensure your room is well-lit for accurate aura capture</p>
+                  </div>
+                </div>
+
+                <div className={styles.checkItem}>
+                  <div className={styles.checkIcon}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className={styles.checkTitle}>Neutral Background</h3>
+                    <p className={styles.checkDescription}>Stand against a plain background for best results</p>
+                  </div>
+                </div>
+
+                <div className={styles.checkItem}>
+                  <div className={styles.checkIcon}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className={styles.checkTitle}>Camera Permission</h3>
+                    <p className={styles.checkDescription}>Allow camera access when prompted</p>
+                  </div>
+                </div>
               </div>
-              {/* <div className={styles.progressBar}>
-                <div 
-                  className={styles.progressFill} 
-                  style={{ width: `${Math.max(0, progress - 20)}%` }}
-                ></div>
-              </div> */}
-            </div>
 
-            <div className={styles.messageSection}>
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
-                <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
-              </svg>
-              <h3 className={styles.message}>Hold tight as we are analysing your aura</h3>
-            </div>
+              <div className={styles.disclaimer}>
+                <h4 className={styles.disclaimerTitle}>Disclaimer</h4>
+                <p className={styles.disclaimerText}>
+                  This aura analysis is for informational and spiritual guidance purposes only. The analysis combines AI technology with astrological principles to provide insights about your energy field and emotional state.
+                </p>
+              </div>
 
-            <button 
-              className={styles.resultButton}
-              onClick={handleShowResult}
-              disabled={!analysisComplete || isNavigating}
-              style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6, cursor: (!analysisComplete || isNavigating) ? 'not-allowed' : 'pointer' }}
-            >
-              {analysisComplete ? 'View Result' : 'Analysing...'}
-            </button>
-          </>
+              <div className={styles.actionButtons}>
+                <button
+                  className={styles.retakeButton}
+                  onClick={handleRetakePicture}
+                >
+                  Retake picture
+                </button>
+                <button
+                  className={styles.resultButton}
+                  onClick={handleGenerateAnalysis}
+                  disabled={!profile || profileLoading}
+                  style={{ opacity: (!profile || profileLoading) ? 0.6 : 1, cursor: (!profile || profileLoading) ? 'not-allowed' : 'pointer' }}
+                >
+                  Generate analysis
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.progressSection}>
+                <div className={styles.progressBar}>
+                  <div 
+                    className={styles.progressFill} 
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className={styles.messageSection}>
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
+                  <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
+                </svg>
+                <h3 className={styles.message}>Hold tight as we are analysing your aura</h3>
+              </div>
+
+              <button 
+                className={styles.resultButton}
+                onClick={handleShowResult}
+                disabled={!analysisComplete || isNavigating}
+                style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6, cursor: (!analysisComplete || isNavigating) ? 'not-allowed' : 'pointer' }}
+              >
+                {analysisComplete ? 'View Result' : 'Analysing...'}
+              </button>
+            </>
+          )
         ) : (
           <div className={styles.errorSection}>
             <div className={styles.errorIcon}>
@@ -316,7 +420,9 @@ const AuraAnalysis = () => {
           </div>
         )}
         </div>
+        </div>
       </div>
+      {subscriptionModal}
     </div>
   );
 };

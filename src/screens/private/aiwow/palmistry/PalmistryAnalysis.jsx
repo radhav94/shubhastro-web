@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './PalmistryAnalysis.module.scss';
 import { analyzePalm } from '../../../../services/appServices/aiWowService';
-import { setPalmistryResult, setPalmistryResultId, clearPalmistryData, setPalmistrySelectedHand } from '../../../../redux/aiwow/aiwowSlice';
+import { setPalmistryResult, setPalmistryResultId, clearPalmistryData, setPalmistryImage, setPalmistrySelectedHand } from '../../../../redux/aiwow/aiwowSlice';
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
-import BackButton from '../../../../component/UI/BackButton/BackButton';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 // Session flag: set while an analysis is in progress / not yet successful, so a
 // page reload doesn't auto re-analyze a failed image. Shared with the capture
@@ -18,6 +18,7 @@ const PalmistryAnalysis = () => {
   const dispatch = useDispatch();
   const palmImage = useSelector((state) => state.aiwow.palmistry.image);
   const selectedHand = useSelector((state) => state.aiwow.palmistry.selectedHand);
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'palmistry' });
 
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
     required: true,
@@ -70,12 +71,8 @@ const PalmistryAnalysis = () => {
       navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0]);
       return;
     }
-
-    if (profile && !isAnalyzing && !analysisComplete && !error) {
-      if (hasStartedRef.current) return;
-      hasStartedRef.current = true;
-      performAnalysis(palmImage, selectedHand);
-    }
+    // Note: analysis is no longer triggered automatically on mount.
+    // The user must explicitly click "Generate analysis".
   }, [palmImage, selectedHand, profile, profileLoading]);
 
   const performAnalysis = async (imageData, hand) => {
@@ -98,13 +95,25 @@ const PalmistryAnalysis = () => {
       }, 200);
 
       // Call the API with hand parameter and abort signal
-      const result = await analyzePalm(imageData, hand, abortController.signal);
+      const result = await runWithEntitlement(() => analyzePalm(imageData, hand, abortController.signal));
 
       clearInterval(progressInterval);
 
       // Check if component is still mounted before processing result
       if (!isMountedRef.current) {
         console.log('Component unmounted - ignoring API result');
+        return;
+      }
+
+      // Entitlement block handled by the gate (plans popup / recharge toast).
+      // Do NOT show the "Analysis Failed" screen — just return to the previous
+      // (pre-analysis) screen so the user can try again.
+      if (result.blocked) {
+        setProgress(0);
+        setIsAnalyzing(false);
+        setAnalysisComplete(false);
+        setError(null);
+        hasStartedRef.current = false;
         return;
       }
 
@@ -148,6 +157,21 @@ const PalmistryAnalysis = () => {
       } else {
         // DON'T clear data on error - keep image and hand selection for retry
         // dispatch(clearPalmistryData());
+
+        const errorCode = typeof result.error === 'object' ? result.error?.code : null;
+
+        // INVALID_PALM_IMAGE means the photo itself isn't a usable palm (blurry,
+        // fingers not visible, etc.) — this is NOT a hand-side mismatch, so never
+        // auto-retry with the other hand. Surface the backend's guidance so the
+        // user can retake the picture.
+        if (errorCode === 'INVALID_PALM_IMAGE') {
+          setProgress(0);
+          const invalidMsg = (typeof result.error === 'object' && result.error?.message)
+            ? result.error.message
+            : 'Please upload a clear image of your palm with all fingers visible.';
+          setError({ message: invalidMsg });
+          return;
+        }
 
         // Hand-side mismatch: the backend thinks this is the other hand.
         // Auto-retry once with the opposite hand so the user isn't blocked,
@@ -201,6 +225,21 @@ const PalmistryAnalysis = () => {
     }
   };
 
+  const handleGenerateAnalysis = () => {
+    if (isAnalyzing || analysisComplete) return;
+    if (!palmImage || !selectedHand || !profile) return;
+    hasStartedRef.current = true;
+    setError(null);
+    performAnalysis(palmImage, selectedHand);
+  };
+
+  const handleRetakePicture = () => {
+    // Clear only the captured image and go back to the instructions screen.
+    // Keep the selected hand so hand selection is skipped.
+    dispatch(setPalmistryImage(null));
+    navigate('/ai-wow/ai-palmistry-scanner/instructions');
+  };
+
   const handleShowResult = () => {
     if (analysisComplete && !isNavigating) {
       setIsNavigating(true);
@@ -223,12 +262,22 @@ const PalmistryAnalysis = () => {
 
   return (
     <div className={styles.container}>
-      <BackButton onClick={handleBack} disabled={isAnalyzing} />
+      <header className={styles.headerWrap}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={handleBack} disabled={isAnalyzing}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <h1 className={styles.headerTitle}>Palmistry Scanner</h1>
+        </div>
+      </header>
       <div className={styles.content}>
+        <h2 className={styles.pageTitle}>
+          {error ? 'Analysis Failed' : 'Analysing Palm'}
+        </h2>
+        <div className={styles.middleContent}>
         <div className={styles.leftSection}>
-          <h2 className={styles.title}>
-            {error ? 'Analysis Failed' : 'Analysing Palm'}
-          </h2>
           <div className={styles.imagesWrapper}>
             <div className={styles.imageWrapper}>
               {palmImage ? (
@@ -255,38 +304,98 @@ const PalmistryAnalysis = () => {
 
         <div className={styles.rightSection}>
         {!error ? (
-          <>
-            <div className={styles.progressSection}>
-              <div className={styles.progressBar}>
-                <div 
-                  className={styles.progressFill} 
-                  style={{ width: `${progress}%` }}
-                ></div>
+          !isAnalyzing && !analysisComplete ? (
+            <>
+              <div className={styles.checklistSection}>
+                <div className={styles.checkItem}>
+                  <div className={styles.checkIcon}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className={styles.checkTitle}>Clear Background</h3>
+                    <p className={styles.checkDescription}>Use a neutral background to avoid distractions in the photo</p>
+                  </div>
+                </div>
+
+                <div className={styles.checkItem}>
+                  <div className={styles.checkIcon}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className={styles.checkTitle}>Focus on Your Palm</h3>
+                    <p className={styles.checkDescription}>Make sure your palm is centered and clearly visible in the frame</p>
+                  </div>
+                </div>
+
+                <div className={styles.checkItem}>
+                  <div className={styles.checkIcon}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className={styles.checkTitle}>Steady Hands</h3>
+                    <p className={styles.checkDescription}>Keep your hands steady to avoid blurriness for better detail</p>
+                  </div>
+                </div>
               </div>
-              {/* <div className={styles.progressBar}>
-                <div 
-                  className={styles.progressFill} 
-                  style={{ width: `${Math.max(0, progress - 20)}%` }}
-                ></div>
-              </div> */}
-            </div>
 
-            <div className={styles.messageSection}>
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
-                <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
-              </svg>
-              <h3 className={styles.message}>Hold tight as we are analysing your palm</h3>
-            </div>
+              <div className={styles.disclaimer}>
+                <h4 className={styles.disclaimerTitle}>Disclaimer</h4>
+                <p className={styles.disclaimerText}>
+                  This palm reading is for informational purposes only and not a substitute for professional advice. Analysis is based on AI interpretation.
+                </p>
+              </div>
 
-            <button 
-              className={styles.resultButton}
-              onClick={handleShowResult}
-              disabled={!analysisComplete || isNavigating}
-              style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6, cursor: (!analysisComplete || isNavigating) ? 'not-allowed' : 'pointer' }}
-            >
-              {analysisComplete ? 'View Result' : 'Analysing...'}
-            </button>
-          </>
+              <div className={styles.actionButtons}>
+                <button
+                  className={styles.retakeButton}
+                  onClick={handleRetakePicture}
+                >
+                  Retake picture
+                </button>
+                <button
+                  className={styles.resultButton}
+                  onClick={handleGenerateAnalysis}
+                  disabled={!profile || profileLoading}
+                  style={{ opacity: (!profile || profileLoading) ? 0.6 : 1, cursor: (!profile || profileLoading) ? 'not-allowed' : 'pointer' }}
+                >
+                  Generate analysis
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.progressSection}>
+                <div className={styles.progressBar}>
+                  <div 
+                    className={styles.progressFill} 
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className={styles.messageSection}>
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className={styles.sparkleIcon}>
+                  <path d="M20 5L22.5 15L30 17.5L22.5 20L20 30L17.5 20L10 17.5L17.5 15L20 5Z" fill="#1f2937"/>
+                </svg>
+                <h3 className={styles.message}>Hold tight as we are analysing your palm</h3>
+              </div>
+
+              <button 
+                className={styles.resultButton}
+                onClick={handleShowResult}
+                disabled={!analysisComplete || isNavigating}
+                style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6, cursor: (!analysisComplete || isNavigating) ? 'not-allowed' : 'pointer' }}
+              >
+                {analysisComplete ? 'View Result' : 'Analysing...'}
+              </button>
+            </>
+          )
         ) : (
           <div className={styles.errorSection}>
             <div className={styles.errorIcon}>
@@ -335,7 +444,9 @@ const PalmistryAnalysis = () => {
           </div>
         )}
         </div>
+        </div>
       </div>
+      {subscriptionModal}
     </div>
   );
 };

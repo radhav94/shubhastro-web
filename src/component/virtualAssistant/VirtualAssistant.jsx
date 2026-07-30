@@ -119,7 +119,9 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
 
   // Camera helpers
   useEffect(() => {
-    if (!cameraOpen) return;
+    // Gate on `isOpen` too: the widget hides its chat window (without unmounting
+    // this component) when closed, so we must release the camera on close as well.
+    if (!cameraOpen || !isOpen) return undefined;
     let active = true;
     const startStream = async () => {
       if (streamRef.current) { streamRef.current.getTracks().forEach((t) => t.stop()); streamRef.current = null; }
@@ -131,8 +133,38 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
       } catch { if (active) setCameraOpen(false); }
     };
     startStream();
-    return () => { active = false; };
-  }, [cameraOpen, facingMode]);
+    return () => {
+      active = false;
+      // Release the camera on teardown (camera closed, facing switch, widget
+      // closed, unmount, or browser Back) so it never stays on.
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+    };
+  }, [cameraOpen, facingMode, isOpen]);
+
+  // Reset camera state when the widget is closed so it never lingers on.
+  useEffect(() => {
+    if (!isOpen) {
+      setCameraOpen(false);
+      setAttachMenuOpen(false);
+    }
+  }, [isOpen]);
+
+  // Stop the camera on browser Back/forward navigation, in case this widget
+  // stays mounted across the route change.
+  useEffect(() => {
+    const handlePopState = () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+      setCameraOpen(false);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   const stopStream = () => { if (streamRef.current) { streamRef.current.getTracks().forEach((t) => t.stop()); streamRef.current = null; } if (videoRef.current) videoRef.current.srcObject = null; };
   const handleCapture = () => { const v = videoRef.current, c = canvasRef.current; if (!v || !c) return; c.width = v.videoWidth; c.height = v.videoHeight; c.getContext("2d").drawImage(v, 0, 0); c.toBlob((blob) => { const url = URL.createObjectURL(blob); stopStream(); setCameraOpen(false); setCameraPreview({ url, blob }); }, "image/jpeg", 0.92); };

@@ -13,6 +13,7 @@ import { PATH } from "../../../utils/routes/Paths";
 import BackButton from "../../../component/UI/BackButton/BackButton";
 import aiImage from "../../../assets/images/Ai Image.png";
 import occultImg from "../../../assets/images/occult-img.svg";
+import useAIWowSubscriptionGate from "../aiwow/hooks/useAIWowSubscriptionGate";
 
 const OccultChat = () => {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ const OccultChat = () => {
   const { data: kundliData, isLoading: isLoadingProfiles } = useGetAllKundlisQuery(undefined, { skip: !token });
   const profiles = kundliData?.data || [];
   const [getOccultDasha, { isLoading: isGenerating }] = useGetOccultDashaMutation();
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: "occult-dosha" });
 
   const setSelectedProfile = (profile) => {
     setSelectedProfileLocal(profile);
@@ -59,38 +61,54 @@ const OccultChat = () => {
   const doGenerate = async (profile) => {
     if (!profile?._id) { Toast.error("Please select a Kundli profile first"); return; }
     window.dispatchEvent(new Event("occult:generating"));
-    try {
-      const body = profile._id?.startsWith("temp_")
-        ? {
-            kundliDetails: {
-              name: profile.name,
-              gender: profile.gender,
-              day: Number(profile.day),
-              month: Number(profile.month),
-              year: Number(profile.year),
-              hour: Number(profile.hour),
-              min: Number(profile.min),
-              second: 0,
-              lat: String(profile.lat || "0"),
-              lon: String(profile.lon || "0"),
-              tzone: profile.tzone ?? 5.5,
-              place: profile.place,
-            },
-          }
-        : { kundliId: profile._id };
 
-      const result = await getOccultDasha(body).unwrap();
-      const historyId = result?.message?._id || result?._id;
-      const data = result?.message?.message || result?.message || result;
-      if (data) {
-        navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile, historyId } });
-      } else {
-        Toast.error("Failed to generate reading");
+    const body = profile._id?.startsWith("temp_")
+      ? {
+          kundliDetails: {
+            name: profile.name,
+            gender: profile.gender,
+            day: Number(profile.day),
+            month: Number(profile.month),
+            year: Number(profile.year),
+            hour: Number(profile.hour),
+            min: Number(profile.min),
+            second: 0,
+            lat: String(profile.lat || "0"),
+            lon: String(profile.lon || "0"),
+            tzone: profile.tzone ?? 5.5,
+            place: profile.place,
+          },
+        }
+      : { kundliId: profile._id };
+
+    // Route the generate call through the subscription gate. On PREMIUM_REQUIRED
+    // it opens the plans popup (and retries after purchase); on EXTENDED it shows
+    // the extended plans popup.
+    const result = await runWithEntitlement(async () => {
+      try {
+        return await getOccultDasha(body).unwrap();
+      } catch (err) {
+        return err?.data || { success: false, error: err };
       }
-    } catch (err) {
-      Toast.error(err?.data?.message || "Failed to generate Occult Dosha analysis");
-    } finally {
-      setGuestGenerating(false);
+    });
+
+    setGuestGenerating(false);
+
+    // Entitlement block handled by the gate (popup shown / user cancelled).
+    if (result?.blocked) return;
+
+    // Genuine (non-entitlement) failure.
+    if (result?.success === false) {
+      Toast.error(result?.error?.message || result?.message || "Failed to generate Occult Dosha analysis");
+      return;
+    }
+
+    const historyId = result?.message?._id || result?._id;
+    const data = result?.message?.message || result?.message || result;
+    if (data) {
+      navigate(PATH.privateRoutes.OCCULT_RESULT.path, { state: { result: data, profile, historyId } });
+    } else {
+      Toast.error("Failed to generate reading");
     }
   };
 
@@ -244,6 +262,7 @@ const OccultChat = () => {
         }}
       />
     </div>
+    {subscriptionModal}
     </>
   );
 };

@@ -12,6 +12,7 @@ import { setSelectedKundli } from '../../../../redux/kundli/kundliSlice';
 import LocationSearch from '../../../../utils/location/locationSearchVedic';
 import useUserLocation from '../../../../utils/hooks/useUserLocation';
 import { trackEvent } from '../../../../utils/analytics';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const BusinessPathfinder = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const BusinessPathfinder = () => {
   const token = localStorage.getItem('shubhtalk_customer_token');
   const profile = token ? rawProfile : null;
   const { data: optionsData, isLoading: optionsLoading } = useGetBusinessPathfinderOptionsQuery();
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'business-pathfinder' });
   const userLocation = useUserLocation();
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
@@ -162,16 +164,23 @@ const BusinessPathfinder = () => {
       const token = localStorage.getItem('shubhtalk_customer_token');
       const BASE_URL = import.meta.env.VITE_APP_API_BASE_URL;
       
-      const response = await fetch(`${BASE_URL}/api/wow-suite/business-pathfinder/analyze`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
+      // Route generation through the subscription gate — shows the plans popup
+      // on PREMIUM_REQUIRED (and the extended popup on EXTENDED), then retries
+      // after purchase.
+      const result = await runWithEntitlement(async () => {
+        const response = await fetch(`${BASE_URL}/api/wow-suite/business-pathfinder/analyze`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+        return await response.json();
       });
 
-      const result = await response.json();
+      // Entitlement block handled by the gate (popup shown / user cancelled).
+      if (result?.blocked) return;
 
       if (result.success) {
         Toast.success('Report generated successfully!');
@@ -417,6 +426,7 @@ const BusinessPathfinder = () => {
       title="Select Profile"
       enabledOperations={{ list: true, add: true, edit: true, delete: true }}
     />
+    {subscriptionModal}
 
     <GuestKundliAuthModal
       isOpen={showGuestAuthModal}
