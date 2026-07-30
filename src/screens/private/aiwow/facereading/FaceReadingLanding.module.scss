@@ -90,7 +90,7 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
 
   @media (max-width: 768px) {
-    padding: 1.5rem;
+    padding: 1rem;
     margin-bottom: 2rem;
     border-radius: 1rem;
   }
@@ -108,6 +108,7 @@
 
   @media (max-width: 768px) {
     font-size: 1.25rem;
+    margin: 0 0 1rem 0;
   }
 }
 
@@ -266,11 +267,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
   margin-top: auto;
-  padding-bottom: 1rem;
-
-  @media (width <= 360px) {
-    padding: 16px 16px 2rem 16px;
-  }
+  // padding-bottom: 1rem;
 }
 
 .uploadButton {
@@ -287,6 +284,10 @@
 
   @media (width <= 767px) {
     padding: 0.8rem;
+  }
+  @media (width <= 413px) {
+    padding: 0.5rem;
+    font-size: 14px;
   }
 
   &:hover {

@@ -58,6 +58,15 @@ const responseErrorHandler = (error) => {
     return Promise.reject(error);
   }
 
+  // AI-Wow feature suites render their own in-screen error UI (with a "Try
+  // Again" button). Suppress the interceptor's global "Something went wrong"
+  // toast for these so it doesn't linger and re-appear after the user taps
+  // Try Again — the screen's own error handling is the single source of truth.
+  const reqUrl = error.config?.url || '';
+  if (/(?:wow-suite|action-suite|companion-suite)\//i.test(reqUrl)) {
+    return Promise.reject(error);
+  }
+
   if (error.response) {
     const { status, data, message } = error.response;
     

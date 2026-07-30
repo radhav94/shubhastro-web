@@ -18,6 +18,7 @@ import { setSelectedKundli } from "../../redux/kundli/kundliSlice";
 import { setSelectedKundliProfile } from "../../redux/aiwow/aiwowSlice";
 import useAIFreeMinutes from "./useAIFreeMinutes";
 import useSpeechToText from "./useSpeechToText";
+import useSarvamSTT from "../../screens/private/panditAIVoice/useSarvamSTT";
 import { transliterateToLatin } from "./translateText";
 import AIRechargeBanner from "./AIRechargeBanner";
 import AISessionStatus from "./AISessionStatus";
@@ -45,6 +46,13 @@ const PanditAIBubble = () => {
   const [isOpen, setIsOpen] = useState(() => sessionStorage.getItem("panditai_open") === "true");
   const [text, setText] = useState("");
   const [interimText, setInterimText] = useState("");
+  // True while a captured speech segment is still being transliterated to
+  // English (async network call). Used to keep Send disabled until the real
+  // text has landed, so the "..." placeholder is never sent.
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  // Counts in-flight transliterations so overlapping speech segments don't
+  // clear the flag prematurely.
+  const transcribeCountRef = useRef(0);
   const [initialBilling, setInitialBilling] = useState(null);
   // Guest flow: show the kundli details + OTP form inline (as a message) inside
   // the chat, keeping the normal header and input footer.
@@ -184,9 +192,16 @@ const PanditAIBubble = () => {
 
   const handleSpeechResult = useCallback(async (transcript) => {
     setInterimText("");
-    // Transliterate non-Latin text (e.g., Devanagari) to English letters
-    const romanized = await transliterateToLatin(transcript);
-    setText((prev) => (prev ? `${prev} ${romanized}` : romanized));
+    transcribeCountRef.current += 1;
+    setIsTranscribing(true);
+    try {
+      // Transliterate non-Latin text (e.g., Devanagari) to English letters
+      const romanized = await transliterateToLatin(transcript);
+      setText((prev) => (prev ? `${prev} ${romanized}` : romanized));
+    } finally {
+      transcribeCountRef.current = Math.max(0, transcribeCountRef.current - 1);
+      if (transcribeCountRef.current === 0) setIsTranscribing(false);
+    }
     setTimeout(() => inputRef.current?.focus(), 0);
   }, []);
 
@@ -209,18 +224,61 @@ const PanditAIBubble = () => {
     }, 500);
   }, [sendText]);
 
-  const { isListening, isSupported, startListening, stopListening } =
-    useSpeechToText({ onResult: handleSpeechResult, onInterim: handleInterim, onEnd: handleAutoEnd });
+  // Server-based STT (records audio, transcribes on the backend) returns the
+  // final transcript in one shot after recording stops — no interim results.
+  const handleSarvamResult = useCallback(
+    async (transcript) => {
+      const spoken = (transcript || "").trim();
+      if (!spoken) return;
+      await handleSpeechResult(spoken);
+    },
+    [handleSpeechResult]
+  );
+
+  const handleSarvamEnd = useCallback(() => {
+    setInterimText("");
+  }, []);
+
+  // Web Speech API — real-time interim results, but unsupported on most mobile
+  // browsers / in-app WebViews.
+  const webStt = useSpeechToText({
+    onResult: handleSpeechResult,
+    onInterim: handleInterim,
+    onEnd: handleAutoEnd,
+  });
+  // Recorder + server STT fallback — works wherever getUserMedia does (mobile),
+  // so the mic stays available when the Web Speech API is missing.
+  const sarvamStt = useSarvamSTT({ onResult: handleSarvamResult, onEnd: handleSarvamEnd });
+
+  const useWebStt = webStt.isSupported;
+  const activeStt = useWebStt ? webStt : sarvamStt;
+  const { isListening, startListening, stopListening } = activeStt;
+  // Mic shows if either engine is available.
+  const isSupported = webStt.isSupported || sarvamStt.isSupported;
+  // Combined "busy" signal: local transliteration (both paths) plus the
+  // server transcription window of the fallback engine.
+  const sttTranscribing = isTranscribing || (!useWebStt && sarvamStt.isTranscribing);
+
+  // Show the "..." placeholder while the fallback engine transcribes on the
+  // server (the Web Speech path drives interim text via its own callbacks).
+  useEffect(() => {
+    if (useWebStt) return;
+    setInterimText(sarvamStt.isTranscribing ? "..." : "");
+  }, [useWebStt, sarvamStt.isTranscribing]);
 
   const handleSend = useCallback(() => {
-    const outgoing = `${text}${text && interimText ? " " : ""}${interimText}`.trim();
+    // Block sending while speech-to-text is still in progress so the "..."
+    // placeholder / partial transcription is never sent.
+    if (isListening || sttTranscribing) return;
+    // Send only the confirmed text — never the interim "..." placeholder.
+    const outgoing = text.trim();
     if (outgoing) {
       stopListening();
       setInterimText("");
       sendText(outgoing);
       setText("");
     }
-  }, [text, interimText, sendText, stopListening]);
+  }, [text, sendText, stopListening, isListening, sttTranscribing]);
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -285,6 +343,11 @@ const PanditAIBubble = () => {
   const displayValue = interimText
     ? `${text}${text ? " " : ""}${interimText}`
     : text;
+
+  // Send is allowed only when there is confirmed text and speech-to-text is
+  // fully done — not while recording (isListening) or transliterating
+  // (isTranscribing). This prevents sending the "..." placeholder.
+  const canSend = !!text.trim() && !isListening && !sttTranscribing;
 
   return createPortal(
     <>
@@ -495,7 +558,7 @@ const PanditAIBubble = () => {
               <button
                 className={styles.sendBtn}
                 onClick={handleSend}
-                disabled={!displayValue.trim()}
+                disabled={!canSend}
                 aria-label="Send message"
                 type="button"
               >
