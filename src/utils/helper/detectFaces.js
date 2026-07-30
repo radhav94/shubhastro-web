@@ -63,22 +63,23 @@ export const countFacesInImage = async (imageSrc, timeoutMs = 4000) => {
       const img = await loadImage(imageSrc);
       const detections = await faceapi.detectAllFaces(
         img,
-        // Higher score threshold to cut down false positives that made one
-        // person read as several.
-        new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.6 })
+        // Use a higher input size so smaller/background faces are still found,
+        // and a moderate score threshold. False duplicates are removed below by
+        // de-duplication, so we don't need an overly strict threshold here.
+        new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.45 })
       );
 
       const imgArea = (img.naturalWidth || img.width) * (img.naturalHeight || img.height);
       if (!imgArea) return detections.length;
 
-      // Keep only confident, reasonably-sized detections. Tiny/low-confidence
-      // specks are almost always noise (patterns, logos, shadows, background
-      // faces on posters), not the subject — counting them wrongly blocked
-      // legitimate single-person photos. Be conservative so we only ever block
-      // when there are clearly two real, prominent people.
-      const MIN_FACE_AREA_RATIO = 0.02; // face box must be >=2% of the image
+      // Keep confident, real-sized detections. The threshold is kept moderate
+      // so a genuine second person (e.g. someone in the background) is still
+      // counted, while the size filter + de-duplication below drop tiny specks
+      // and duplicate boxes on the same face (which previously made ONE person
+      // read as several).
+      const MIN_FACE_AREA_RATIO = 0.005; // face box must be >=0.5% of the image
       let faces = detections
-        .filter((d) => d.score >= 0.7)
+        .filter((d) => d.score >= 0.55)
         .map((d) => d.box)
         .filter((box) => (box.width * box.height) / imgArea >= MIN_FACE_AREA_RATIO);
 
@@ -86,7 +87,7 @@ export const countFacesInImage = async (imageSrc, timeoutMs = 4000) => {
       // same face), so one person is never counted twice.
       const unique = [];
       for (const box of faces) {
-        if (!unique.some((u) => iou(u, box) > 0.3)) unique.push(box);
+        if (!unique.some((u) => iou(u, box) > 0.4)) unique.push(box);
       }
 
       return unique.length;
