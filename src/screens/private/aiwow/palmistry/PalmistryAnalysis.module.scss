@@ -1,8 +1,9 @@
+/* PalmistryAnalysis styles */
 @use '../../../../assets/variables/variables' as *;
 
 .container {
   position: relative;
-  min-height: 100vh;
+  // min-height: 100vh;
   // background: #f5f5f5;
   padding-top: 95px;
   @media screen and (width <= 1180px) {
@@ -15,12 +16,11 @@
   backdrop-filter: blur(12px);
   border-bottom: 1px solid #fff;
   position: fixed;
-  top: 88px;
   left: 0;
   right: 0;
   z-index: 100;
   @media screen and (width <= 768px) {
-    top: 53px;
+    top: 52px;
   }
 }
 
@@ -71,19 +71,19 @@
 
 .content {
   flex: 1;
-  padding: 1rem;
+  padding: 1rem 1rem 2rem 1rem;
   max-width: 1440px;
   margin: 0 auto;
   width: 100%;
 }
 
 .pageTitle {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin: 3rem 0 1rem 0;
+  margin: 3.5rem 0 1rem 0;
   color: #333;
-  @media (min-width: 768px) {
-    font-size: 1.75rem;
+  @media (width <= 768px) {
+    font-size: 1.2rem;
   }
 }
 
@@ -101,9 +101,9 @@
     flex-direction: column;
     padding: 16px;
   }
-  @media (width <= 767px) {
-    margin-bottom: 100px;
-  }
+  // @media (width <= 767px) {
+  //   margin-bottom: 100px;
+  // }
 }
 
 .topBar {
