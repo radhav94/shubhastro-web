@@ -187,11 +187,13 @@ const CosmicChat = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      // Only refocus the input when the message was typed by the user (keyboard
-      // already open). For a tapped suggested question the keyboard was closed,
-      // and refocusing would pop it open — shrinking the viewport and hiding
-      // the freshly-arrived answer, forcing the user to scroll manually.
-      if (refocusInput) {
+      // Refocus the input (keeps the keyboard up) only on non-touch/desktop.
+      // On mobile, auto-focusing after a reply pops the on-screen keyboard,
+      // which shrinks the viewport and hides the freshly-arrived answer — so we
+      // never auto-focus on touch devices.
+      const isTouchDevice = typeof window !== 'undefined' &&
+        (('ontouchstart' in window) || navigator.maxTouchPoints > 0);
+      if (refocusInput && !isTouchDevice) {
         requestAnimationFrame(() => {
           if (inputRef.current) {
             inputRef.current.focus();
