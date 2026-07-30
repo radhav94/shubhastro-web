@@ -138,9 +138,14 @@ const ClothColorAnalysis = () => {
       } else {
         // DON'T clear data on error - keep image and form data for retry
         // dispatch(clearClothColorData());
-        
+
         setProgress(0);
-        setError({ message: 'Something went wrong. Please try again.' });
+        // Surface the actual API error message (e.g. inappropriate image)
+        // instead of a generic fallback, so the user knows what to fix.
+        setError({
+          message: result.error?.message || 'Something went wrong. Please try again.',
+          details: result.error?.details || null,
+        });
       }
     } catch (error) {
       // Ignore abort errors - user navigated away

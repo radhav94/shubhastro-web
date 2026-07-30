@@ -6,6 +6,8 @@ import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
 import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
+import { countFacesInImage } from '../../../../utils/helper/detectFaces';
+import { Toast } from '../../../../component';
 
 const ClothColorCamera = () => {
   const navigate = useNavigate();
@@ -27,6 +29,7 @@ const ClothColorCamera = () => {
   }, []);
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
+  const [checking, setChecking] = useState(false); // verifying single-person at capture
   const [facingMode, setFacingMode] = useState('user');
   const [isFrontCamera, setIsFrontCamera] = useState(true);
   const captureAreaRef = useRef(null);
@@ -216,27 +219,49 @@ const ClothColorCamera = () => {
     return cropCanvas;
   };
 
+  // Reject the capture at the moment it's taken if more than one person is in
+  // frame — so the user gets immediate feedback instead of paying/waiting for
+  // the analysis to fail. Detection failing (‑1) fails open (allowed).
+  const finalizeCapture = async (dataUrl) => {
+    if (!dataUrl) return;
+    setChecking(true);
+    let faces = -1;
+    try {
+      faces = await countFacesInImage(dataUrl);
+    } catch {
+      faces = -1;
+    }
+    setChecking(false);
+    if (faces > 1) {
+      Toast.error('Multiple people detected. Please capture only one person in the frame.');
+      // Stay on the camera and resume detection so they can retry.
+      startDetection();
+      return;
+    }
+    setCapturedImage(dataUrl);
+    stopCamera();
+  };
+
   const captureImage = () => {
     const video = videoRef.current;
     if (!video || !video.videoWidth) {
       // Camera not ready yet — nothing to capture.
       return;
     }
+    if (checking) return;
     stopDetection();
     const cropCanvas = cropCurrentFrameToCanvas();
     if (!cropCanvas) return;
-    setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
-    stopCamera();
+    finalizeCapture(cropCanvas.toDataURL('image/jpeg', 0.95));
   };
 
   // Auto-capture the sharpest frame once the cloth is steady in the frame.
   const { autoCapturing } = useAutoCapture({
-    ready: detectionReady && objectDetected,
+    ready: detectionReady && objectDetected && !checking,
     active: !capturedImage,
     getFrameCanvas: cropCurrentFrameToCanvas,
     onCapture: (dataUrl) => {
-      setCapturedImage(dataUrl);
-      stopCamera();
+      finalizeCapture(dataUrl);
     },
     // Give the user time to frame the clothing before auto-capturing, and
     // require it to stay steady a bit longer, so capture doesn't fire too fast.
@@ -405,9 +430,9 @@ const ClothColorCamera = () => {
       <div className={styles.controls}>
         {!capturedImage ? (
           <button 
-            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`} 
+            className={`${styles.captureButton} ${(!stream || checking) ? styles.disabled : ''}`} 
             onClick={captureImage}
-            disabled={!stream}
+            disabled={!stream || checking}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
@@ -416,7 +441,7 @@ const ClothColorCamera = () => {
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!stream ? 'Loading...' : (objectDetected ? 'Capture' : 'Capture Cloth')}
+              {!stream ? 'Loading...' : checking ? 'Checking…' : (objectDetected ? 'Capture' : 'Capture Cloth')}
             </span>
           </button>
         ) : (
