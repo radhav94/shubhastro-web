@@ -560,7 +560,14 @@ const HomeV2 = () => {
       handleWowCardClick(item);
       return;
     }
-    // Require login before checking subscription (opens login flow if needed).
+    // Guests: open the add-kundli guest flow (collect kundli + verify OTP)
+    // instead of bouncing to /login. handleWowCardClick shows the
+    // GuestKundliAuthModal and navigates to the feature after auth.
+    if (!getToken()) {
+      handleWowCardClick(item);
+      return;
+    }
+    // Logged-in users: check subscription before opening the paid feature.
     if (!requireAuth()) return;
     // Remember which service was requested so "Unlock Now" (free plan) can open it.
     setPendingServiceItem(item);

@@ -446,6 +446,7 @@ const ClothColorResult = () => {
         isOpen={showSubscriptionModal}
         onClose={() => setShowSubscriptionModal(false)}
         variant={subscriptionModalVariant}
+        featureName="clothes-colour-analysis"
         plans={subscriptionModalVariant === 'extended' ? extendedPlans : undefined}
         onInsufficientBalance={handleSubscriptionInsufficientBalance}
       />
