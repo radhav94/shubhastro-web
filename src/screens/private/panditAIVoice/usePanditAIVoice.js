@@ -10,6 +10,13 @@ import toast from "../../../component/toast";
 
 export const PANDIT_AI_ID = "6928390dc00d56953b586c04";
 
+// A valid, silent WAV used to "unlock" audio playback on iOS Safari. iOS only
+// allows programmatic audio.play() after an element has been played once inside
+// a real user gesture. We prime a single reusable element with this clip on the
+// user's tap, then reuse that same element for TTS playback.
+const SILENT_WAV =
+  "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+
 // Map language codes from backend response to Sarvam TTS language codes
 const LANG_CODE_TO_SARVAM = {
   en: SARVAM_LANGUAGES.ENGLISH,
@@ -61,6 +68,9 @@ export default function usePanditAIVoice({ enabled = true, sharedRoomId = null }
   const roomIdRef = useRef(sharedRoomId || sessionStorage.getItem("panditai_voice_roomId") || null);
   const initiatedRef = useRef(false);
   const audioRef = useRef(null);
+  // A single, reusable audio element that we unlock on a user gesture so iOS
+  // Safari lets us play TTS audio that arrives later over the socket.
+  const unlockedAudioRef = useRef(null);
   const abortRef = useRef(null);
   const pendingMessageRef = useRef(null);
   const sendTextRef = useRef(null);
@@ -327,19 +337,23 @@ export default function usePanditAIVoice({ enabled = true, sharedRoomId = null }
 
         const audioBlob = base64ToBlob(audioBase64, "audio/wav");
         const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
+        // Reuse the element unlocked during the user's tap so iOS Safari allows
+        // this programmatic playback. Fall back to a fresh element otherwise.
+        const audio = unlockedAudioRef.current || new Audio();
+        audio.playsInline = true;
+        audio.src = audioUrl;
         audioRef.current = audio;
 
         audio.onended = () => {
           setStatus("idle");
           URL.revokeObjectURL(audioUrl);
-          audioRef.current = null;
+          if (audioRef.current === audio) audioRef.current = null;
         };
 
         audio.onerror = () => {
           setStatus("idle");
           URL.revokeObjectURL(audioUrl);
-          audioRef.current = null;
+          if (audioRef.current === audio) audioRef.current = null;
         };
 
         setStatus("speaking");
@@ -474,8 +488,42 @@ export default function usePanditAIVoice({ enabled = true, sharedRoomId = null }
     onEnd: handleSTTEnd,
   });
 
+  // Unlock audio playback for iOS Safari. Must be called from within a user
+  // gesture (e.g. the tap that starts/stops the mic). It primes a single
+  // reusable <audio> element by playing a silent clip; that element is then
+  // reused for TTS playback so iOS won't block the later play() call.
+  const ensureAudioUnlocked = useCallback(() => {
+    try {
+      if (!unlockedAudioRef.current) {
+        const a = new Audio();
+        a.playsInline = true;
+        a.setAttribute("playsinline", "");
+        a.preload = "auto";
+        unlockedAudioRef.current = a;
+      }
+      const a = unlockedAudioRef.current;
+      if (a._unlocked) return;
+      a.src = SILENT_WAV;
+      const p = a.play();
+      if (p && typeof p.then === "function") {
+        p.then(() => {
+          a.pause();
+          a.currentTime = 0;
+          a._unlocked = true;
+        }).catch(() => {
+          /* Priming failed (rare) — playback will fall back to a new Audio(). */
+        });
+      }
+    } catch {
+      /* no-op */
+    }
+  }, []);
+
   // Toggle mic
   const toggleListening = useCallback(() => {
+    // Runs inside the user's tap — unlock audio so iOS allows TTS playback.
+    ensureAudioUnlocked();
+
     if (status === "speaking") {
       // Stop current audio playback
       if (audioRef.current) {
@@ -497,7 +545,7 @@ export default function usePanditAIVoice({ enabled = true, sharedRoomId = null }
       startListening();
       setStatus("listening");
     }
-  }, [isListening, status, startListening, stopListening]);
+  }, [isListening, status, startListening, stopListening, ensureAudioUnlocked]);
 
   // Update status when listening state changes
   useEffect(() => {
