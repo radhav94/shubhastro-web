@@ -13,6 +13,7 @@ import { requestFCMToken } from "../../../services/firebase";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearGuestKundliProfiles } from "../../../utils/helper/cookies";
+import { getDeviceInfo, getDeviceType } from "../../../utils/deviceInfo";
 import { trackEvent } from "../../../utils/analytics";
 // import onboardingBg from "../../../assets/images/onboarding.png";
 import onboardingBg from "../../../assets/images/new-login-bg-2.jpeg";
@@ -112,7 +113,8 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           otp: otpValue,
           phoneNumber: `91${formData.phoneNumber}`,
           type: "CUSTOMER",
-          ...(fcmTokens && { fcmTokens, deviceType: "web" }),
+          deviceInfo: getDeviceInfo(),
+          ...(fcmTokens && { fcmTokens, deviceType: getDeviceType() }),
         };
 
         const controller = new AbortController();
@@ -189,6 +191,11 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
           // Show backend success message
           toast.success(response.data.message || "User verified successfully");
+
+          // Handle max device limit
+          if (userData.max_device_reached && userData.activeDevices?.length) {
+            sessionStorage.setItem("shubhtalk_device_limit_reached", JSON.stringify(userData.activeDevices));
+          }
 
           // Check if user is already registered
           if (userData.isRegister) {

@@ -1,4 +1,4 @@
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import styles from "./HomeLayout.module.scss";
 import TopHeader from "../component/TopHeader";
 import { Outlet, useMatches, useLocation, Link } from "react-router-dom";
@@ -19,6 +19,26 @@ import NoInternet, { useOnlineStatus } from "../component/NoInternet/NoInternet"
 import { useAiwowCleanup } from "../utils/hooks/useAiwowCleanup";
 import WelcomeBonusModal from "../component/UI/modal/WelcomeBonusModal/WelcomeBonusModal";
 import WelcomeBackModal from "../component/UI/modal/WelcomeBonusModal/WelcomeBackModal";
+import DeviceLimitModal from "../component/UI/modal/DeviceLimitModal/DeviceLimitModal";
+
+// Wrapper that checks sessionStorage for device limit flag
+const DeviceLimitModalWrapper = () => {
+  const [devices, setDevices] = useState(null);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem("shubhtalk_device_limit_reached");
+    if (stored) {
+      try {
+        setDevices(JSON.parse(stored));
+      } catch { /* ignore */ }
+      sessionStorage.removeItem("shubhtalk_device_limit_reached");
+    }
+  }, []);
+
+  const handleClose = useCallback(() => setDevices(null), []);
+
+  return <DeviceLimitModal isOpen={!!devices} onClose={handleClose} devices={devices || []} />;
+};
 
 
 
@@ -303,6 +323,9 @@ const HomeLayout = () => {
 
       {/* Welcome-back popup — shown to returning users after they log in */}
       <WelcomeBackModal />
+
+      {/* Device limit popup — shown when max_device_reached is true */}
+      <DeviceLimitModalWrapper />
 
       {/* ✅ FLOATING CALL UI (IMPORTANT LINE) */}
       <VideoCallContainer />

@@ -13,6 +13,7 @@ import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { useCreateKundliMutation, useLazyGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
 import { privateRequestNew, setApiErrorToastSilenced } from "../../../services/appServices/privateRequestNew";
+import { getDeviceInfo, getDeviceType } from "../../../utils/deviceInfo";
 import { trackEvent } from "../../../utils/analytics";
 
 /**
@@ -189,7 +190,8 @@ const GuestKundliAuthModal = ({
         phoneNumber,
         type: "CUSTOMER",
         otp: String(otp),
-        ...(fcmTokens && { fcmTokens, deviceType: "web" }),
+        deviceInfo: getDeviceInfo(),
+        ...(fcmTokens && { fcmTokens, deviceType: getDeviceType() }),
       };
 
       const response = await AuthServices.verifyOtp(payload);
