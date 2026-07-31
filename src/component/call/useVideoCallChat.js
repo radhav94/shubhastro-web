@@ -65,11 +65,11 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
         sendViaSocket(`Hi ${astrologerName || ""}`, "message");
       }, 500);
 
-      // Send Kundli link
+      // Send Kundli. Send the bare kundliId as the message (origin-independent);
+      // the kundliId also travels in the payload. Renderers rebuild the link
+      // from the current origin.
       setTimeout(() => {
-        const baseUrl = window.location.origin;
-        const kundliLink = `${baseUrl}/kundli/${kundliId}`;
-        sendViaSocket(kundliLink, "kundli");
+        sendViaSocket(kundliId, "kundli");
       }, 1000);
     };
 

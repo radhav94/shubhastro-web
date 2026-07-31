@@ -27,7 +27,9 @@ export const setApiErrorToastSilenced = (endpoint, silenced) => {
 const PUBLIC_ENDPOINTS = ["getAstrologerById", "getAstrologers", "getRecommendedAstrologers"];
 
 // Endpoints that should not show toast errors (silent failures)
-const SILENT_ENDPOINTS = ["getStaticPageBySlug"];
+// getKundliById: a missing/deleted shared kundli returns 404; the Kundli view
+// handles that inline ("Kundli not available"), so suppress the generic toast.
+const SILENT_ENDPOINTS = ["getStaticPageBySlug", "getKundliById"];
 
 // ERROR HANDLER
 const handleApiError = (error, endpoint) => {

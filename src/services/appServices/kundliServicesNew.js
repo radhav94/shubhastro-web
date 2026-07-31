@@ -88,6 +88,18 @@ export const kundliApi = privateRequestNew.injectEndpoints({
       },
     }),
 
+    // Fetch a single kundli by id. Works for shared kundlis that don't belong
+    // to the current user (e.g. a kundli shared in chat), which the
+    // owner-scoped `kundlis/all` list can't resolve.
+    getKundliById: builder.query({
+      query: (kundliId) => ({
+        url: "kundlis/kundli",
+        method: "GET",
+        params: { kundliId },
+      }),
+      providesTags: (result, error, kundliId) => [{ type: "Kundlis", id: kundliId }],
+    }),
+
     createKundli: builder.mutation({
       query: (body) => ({
         url: "kundlis/create",
@@ -142,6 +154,8 @@ export const kundliApi = privateRequestNew.injectEndpoints({
 export const {
   useGetAllKundlisQuery,
   useLazyGetAllKundlisQuery,
+  useGetKundliByIdQuery,
+  useLazyGetKundliByIdQuery,
   useCreateKundliMutation,
   useDeleteKundliMutation,
   useEditKundliMutation,

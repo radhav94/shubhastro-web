@@ -18,6 +18,7 @@ import { GrReactjs } from "react-icons/gr";
 import IframeModal from "../../screens/private/home/components/chats/IframeModal";
 import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 import AudioMessageWrapper from "../../screens/private/home/components/chats/AudioMessageWrapper";
+import { buildKundliLink } from "../../utils/helper/kundliMessage";
 import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
 
 const formatDate = (date) => dayjs(date).format("DD MMMM YYYY");
@@ -226,9 +227,9 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
       Toast.error("Kundli not selected properly");
       return;
     }
-    const kundliLink = `${window.location.origin}/kundli/${kundli._id}`;
-    // Pass kundli._id as third arg so the socket payload uses the selected kundli's ID (not session default)
-    sendChatMessage(kundliLink, "kundli", kundli._id);
+    // Send the bare kundliId as the message (origin-independent). Pass it as the
+    // third arg too so the socket payload uses the selected kundli's id.
+    sendChatMessage(kundli._id, "kundli", kundli._id);
   };
 
   // NEW: handle attach menu option selection (aligned with ChatInput.jsx)
@@ -419,12 +420,9 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
         );
       } else if (msg.type === "kundli") {
         isSpecialMessage = true;
-        // Build kundli link: prefer kundliId, fall back to msg.text (which contains the full URL)
-        const kundliLink = msg.kundliId
-          ? `${window.location.origin}/kundli/${msg.kundliId}`
-          : msg.text && msg.text.includes("/kundli/")
-            ? msg.text
-            : null;
+        // Resolve from kundliId, falling back to parsing the message text
+        // (bare id or full URL).
+        const kundliLink = buildKundliLink(msg.kundliId, msg.text ?? msg.message);
         content = (
           <div className={styles.KundliMessage}>
             <span
