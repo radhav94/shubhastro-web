@@ -1,5 +1,6 @@
 import { io } from "socket.io-client";
 import { markInitiated, claimRoom } from "../utils/tabSession";
+import { getGuestId } from "../utils/guestId";
 import Toast from "../component/toast";
 
 export const voiceSocket = io("/", {
@@ -11,6 +12,18 @@ export const voiceSocket = io("/", {
   reconnectionDelayMax: 5000,
   timeout: 20000,
   path: "/main/socket.io",
+  auth: (cb) => {
+    const role = localStorage.getItem("shubhtalk_role");
+    const token = role === "ASTROLOGER"
+      ? localStorage.getItem("shubhtalk_astro_token")
+      : localStorage.getItem("shubhtalk_customer_token");
+    if (token) {
+      cb({ token });
+    } else {
+      // Guest user — no token, self-declare with persistent UUID
+      cb({ userId: getGuestId(), role: "GUEST" });
+    }
+  },
 });
 
 /* ================= 🔍 CALL EVENT LOGGER ================= */
