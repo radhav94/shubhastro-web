@@ -22,18 +22,9 @@ const LivePlayerPage = () => {
   const [autoStartIndex, setAutoStartIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Redirect guest users to login
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate("/login?skip=welcome", {
-        state: { from: location.pathname },
-        replace: true,
-      });
-    }
-  }, [isLoggedIn, navigate, location.pathname]);
+  // Guests are allowed to view live streams — no login redirect needed
 
   useEffect(() => {
-    if (!isLoggedIn) return;
     setIsLoading(true);
     const savedSession = restoreViewerSession();
 
@@ -93,11 +84,7 @@ const LivePlayerPage = () => {
     }).catch(() => {
       setIsLoading(false);
     });
-  }, [channelId, isLoggedIn]);
-
-  if (!isLoggedIn) {
-    return null;
-  }
+  }, [channelId]);
 
   if (isLoading) {
     return null;

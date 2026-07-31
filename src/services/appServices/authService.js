@@ -26,10 +26,22 @@ export const registerUser = async (data, config = {}) => {
 };
 
 export const getAstrologerLiveList = async (data) => {
-  return await privateRequest.get("users/live-users", data);
+  const token = localStorage.getItem("shubhtalk_customer_token") || localStorage.getItem("shubhtalk_astro_token");
+  if (token) {
+    return await privateRequest.get("users/live-users", data);
+  }
+  return await publicRequest.get("users/live-users", data);
 };
 
-export const getViewerToken = async (channel) => {
+export const getViewerToken = async (channel, { guestId } = {}) => {
+  if (guestId) {
+    // Guest user — no auth header, pass guestId in body
+    return await publicRequest.post(
+      "users/live/token/viewer",
+      { channel, guestId },
+      { skipToast: true }
+    );
+  }
   return await privateRequest.post(
     `users/live/token/viewer?channel=${channel}`,
     {},
