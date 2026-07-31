@@ -22,6 +22,7 @@ import {
 } from "../../../redux/api/kundli/kundliApi";
 import {
   useGetAllKundlisQuery,
+  useGetKundliByIdQuery,
   useCreateKundliMutation,
   useDeleteKundliMutation,
   useLazyGetKundliPdfQuery,
@@ -208,6 +209,34 @@ const Kundali = () => {
   // Check if we're in direct kundli view mode (with ID in URL)
   const isDirectKundliView = !!kundliId;
 
+  // In direct view, fetch the kundli by id. This resolves shared kundlis that
+  // don't belong to the current user (e.g. one shared in chat), which the
+  // owner-scoped list (`kundlis/all`) can never contain. It also lets us tell
+  // "deleted / unavailable" (error/empty response) apart from "still loading".
+  const {
+    data: singleKundliData,
+    isFetching: isFetchingSingle,
+    isError: isSingleKundliError,
+  } = useGetKundliByIdQuery(kundliId, { skip: !kundliId });
+
+  // The endpoint returns `data` as either the kundli object or an array
+  // (it's `[]` when not found), so handle both shapes.
+  const fetchedKundli = (() => {
+    const raw = singleKundliData?.data;
+    if (Array.isArray(raw)) return raw.find((k) => k?._id === kundliId) || null;
+    return raw?._id ? raw : null;
+  })();
+
+  // Direct view finished loading but the kundli couldn't be resolved from the
+  // user's own list or the by-id fetch → it's been deleted or is unavailable.
+  const kundliUnavailable =
+    isDirectKundliView &&
+    !isFetching &&
+    !isFetchingSingle &&
+    !fetchedKundli &&
+    !profiles.some((p) => p._id === kundliId) &&
+    (isSingleKundliError || singleKundliData !== undefined);
+
   // Auto-select profile based on kundliId or first profile
   const selectedProfileRef = useRef(selectedProfile);
   selectedProfileRef.current = selectedProfile;
@@ -217,21 +246,22 @@ const Kundali = () => {
 
   useEffect(() => {
     const currentProfiles = profilesRef.current;
-    // If kundliId is present in URL, try to find and select that profile
-    if (kundliId && currentProfiles.length && !isFetching) {
-      const matchedProfile = currentProfiles.find(p => p._id === kundliId);
+    // If kundliId is present in URL, resolve it from the user's own list first,
+    // then fall back to the kundli fetched by id (handles shared kundlis that
+    // aren't in the current user's list).
+    if (kundliId) {
+      const matchedProfile =
+        currentProfiles.find((p) => p._id === kundliId) || fetchedKundli;
       if (matchedProfile && selectedProfileRef.current?._id !== matchedProfile._id) {
         setSelectedProfile(matchedProfile);
-      } else if (!matchedProfile && !selectedProfileRef.current) {
-        Toast.error("Kundli profile not found");
       }
-    } 
+    }
     // Otherwise, auto-select first profile if available
-    else if (!kundliId && currentProfiles.length && !selectedProfileRef.current && !isFetching) {
+    else if (currentProfiles.length && !selectedProfileRef.current && !isFetching) {
       setSelectedProfile(currentProfiles[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kundliId, profiles.length, isFetching]);
+  }, [kundliId, profiles.length, isFetching, fetchedKundli]);
 
   // Sync with header profile selection (same pattern as AIWow)
   useEffect(() => {
@@ -809,6 +839,38 @@ const Kundali = () => {
       {!selectedProfile && !isDirectKundliView && <KundliInfoContent />}
 
       <PrimaryLoader isLoading={planetLoading || astroLoading} />
+
+      {/* Direct view: still resolving the kundli by id */}
+      {isDirectKundliView && !selectedProfile && !kundliUnavailable && (
+        <PrimaryLoader
+          isLoading={true}
+          fullscreen={false}
+          message="Loading Kundli..."
+        />
+      )}
+
+      {/* Direct view: the kundli was deleted or is no longer available */}
+      {kundliUnavailable && !selectedProfile && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+            padding: "48px 24px",
+            textAlign: "center",
+            color: "#6b7280",
+          }}
+        >
+          <h3 style={{ margin: 0, fontSize: "18px", color: "#374151" }}>
+            Kundli not available
+          </h3>
+          <p style={{ margin: 0, fontSize: "14px" }}>
+            This kundli may have been deleted or is no longer accessible.
+          </p>
+        </div>
+      )}
 
       {/* Show tabs only when profile is selected and data is loaded */}
       {selectedProfile && (

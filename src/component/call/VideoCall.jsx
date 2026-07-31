@@ -1084,12 +1084,11 @@ const VideoCalling = ({ callData }) => {
 
     setSelectedProfile(profile);
 
-    const baseUrl = window.location.origin;
-    const kundliLink = `${baseUrl}/kundli/${profile._id}`;
-
-    // Send via chat using the sendMessage function from VideoCallChat
+    // Send the bare kundliId (origin-independent) and pass it as the kundliId
+    // override so the payload references the picked profile, not the session
+    // default. Renderers rebuild the link from the current origin.
     if (sendChatMessageRef.current) {
-      sendChatMessageRef.current(kundliLink, "kundli");
+      sendChatMessageRef.current(profile._id, "kundli", profile._id);
     }
 
     setShowProfileModal(false);
