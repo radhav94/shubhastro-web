@@ -193,13 +193,14 @@ export default function useVirtualAssistant({ astrologerId, isOpen }) {
       if (!kundliId || sending) return;
       setSending(true);
 
-      const kundliLink = `${window.location.origin}/kundli/${kundliId}`;
+      // Send the bare kundliId as the message (origin-independent); the kundliId
+      // also travels as its own field. Renderers rebuild the link from origin.
       const tempId = `temp-${Date.now()}`;
       const optimistic = {
         _id: tempId,
         sender: "user",
         type: "kundli",
-        message: kundliLink,
+        message: kundliId,
         kundliName: kundliName || "Kundli",
         kundliId,
         createdAt: new Date().toISOString(),
@@ -213,7 +214,7 @@ export default function useVirtualAssistant({ astrologerId, isOpen }) {
           astrologerId,
           type: "kundli",
           sender: "user",
-          message: kundliLink,
+          message: kundliId,
           kundliId,
           kundliName: kundliName || "Kundli",
         }).unwrap();

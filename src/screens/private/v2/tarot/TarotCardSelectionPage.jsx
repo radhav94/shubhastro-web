@@ -51,7 +51,7 @@ const TarotCardSelectionPage = () => {
         const t2 = setTimeout(() => {
           setIsShuffling(false)
           setAnimationReady(true)
-          toast.success("Cards shuffled! Pick your card 🔮")
+          // toast.success("Cards shuffled! Pick your card 🔮")
         }, 50)
         return () => clearTimeout(t2)
       }, 500)

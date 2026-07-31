@@ -1,10 +1,11 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
 import { subscriptionApi, useGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
 import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from '../../../../utils/subscription/featureGating';
 import { trackEvent } from '../../../../utils/analytics';
+import { SUBSCRIPTION_EVENTS, trackSubscriptionEvent } from '../../../../utils/subscriptionAnalytics';
 
 /**
  * Extract the extended plan(s) returned inline in a generate/report response.
@@ -42,6 +43,25 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
   const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken });
   const hasActiveSubscription = !!subscriptionStatus?.data?.hasActiveSubscription;
 
+  // #7 SUBSCRIPTION_STATUS_CHECKED — fire when the status API resolves. Deduped
+  // per distinct (has_active_subscription, remaining_quota) so re-renders /
+  // cache reads don't spam the event.
+  const statusFiredRef = useRef(null);
+  useEffect(() => {
+    if (!subscriptionStatus?.data) return;
+    const remainingQuota =
+      subscriptionStatus.data.remainingQuota ??
+      subscriptionStatus.data.subscription?.remainingQuota ??
+      null;
+    const signature = `${hasActiveSubscription}|${remainingQuota}`;
+    if (statusFiredRef.current === signature) return;
+    statusFiredRef.current = signature;
+    trackSubscriptionEvent(SUBSCRIPTION_EVENTS.STATUS_CHECKED, {
+      has_active_subscription: hasActiveSubscription,
+      remaining_quota: remainingQuota,
+    });
+  }, [subscriptionStatus, hasActiveSubscription]);
+
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscriptionModalVariant, setSubscriptionModalVariant] = useState('basic');
   const [extendedPlans, setExtendedPlans] = useState(null);
@@ -73,6 +93,20 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
     const resolve = modalResolveRef.current;
     modalResolveRef.current = null;
     if (resolve) resolve(outcome);
+  }, []);
+
+  // The user tried to buy a plan from the modal but had insufficient wallet
+  // balance. Close the modal, route to recharge (with a return URL), and
+  // resolve the pending flow as 'recharge' so callers skip their own navigation.
+  const handleModalInsufficientBalance = useCallback(() => {
+    // The SubscriptionModal performs the /recharge navigation itself. Here we
+    // just close the popup and resolve the pending flow as 'recharge' so the
+    // caller skips its own "go back" navigation (which would clobber it).
+    setShowSubscriptionModal(false);
+    purchasedRef.current = false;
+    const resolve = modalResolveRef.current;
+    modalResolveRef.current = null;
+    if (resolve) resolve('recharge');
   }, []);
 
   // On a successful purchase, just mark it as purchased. The success modal stays
@@ -110,14 +144,12 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
         return result;
       }
 
-      if (reason === SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE) {
-        toast.error('Insufficient wallet balance. Please recharge to continue.', { id: gId });
-        return { blocked: true, reason };
-      }
-
-      // Open the relevant popup (extended plans come inline in the response).
+      // Always show the plans popup first. We do NOT redirect to recharge here —
+      // the balance is only checked when the user actually picks a plan. If that
+      // purchase fails with insufficient balance, the modal's
+      // `onInsufficientBalance` handler routes the user to recharge.
       toast.dismiss(gId);
-      if (reason === SUBSCRIPTION_REASON.PREMIUM_REQUIRED) {
+      if (reason === SUBSCRIPTION_REASON.PREMIUM_REQUIRED || reason === SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE) {
         openSubscriptionModal('basic');
       } else {
         openSubscriptionModal('extended', extractExtendedPlans(result));
@@ -125,6 +157,10 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
 
       // Wait for the user. On purchase, loop to retry generation; otherwise stop.
       const outcome = await waitForModalOutcome();
+      if (outcome === 'recharge') {
+        trackEvent('shubh_ai_payment_failed', { feature_name: featureName, reason: SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE });
+        return { blocked: true, reason: SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE, redirectedToRecharge: true };
+      }
       if (outcome !== 'purchased') {
         trackEvent('shubh_ai_payment_failed', { feature_name: featureName, reason });
         return { blocked: true, reason };
@@ -138,9 +174,11 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
     <SubscriptionModal
       isOpen={showSubscriptionModal}
       variant={subscriptionModalVariant}
+      featureName={featureName}
       plans={subscriptionModalVariant === 'extended' ? extendedPlans : undefined}
       onClose={handleModalClose}
       onPurchased={handleModalPurchased}
+      onInsufficientBalance={handleModalInsufficientBalance}
       onSelectPlan={handleModalClose}
     />
   );

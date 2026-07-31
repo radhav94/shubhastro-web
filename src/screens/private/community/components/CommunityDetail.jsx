@@ -245,9 +245,9 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
   return (
     <div className={styles.feedLayout}>
       <div className={styles.feedMain}>
-        {/* Breadcrumb */}
+        {/* Community Name */}
         <div className={styles.breadcrumb}>
-          <span>Home</span> / <span>Community</span> / <span>{spaceData?.name || communityId}</span>
+          <span>{spaceData?.name || communityId}</span>
         </div>
 
         {/* Community Header Card */}

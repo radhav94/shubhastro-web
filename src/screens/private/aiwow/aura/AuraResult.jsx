@@ -100,6 +100,7 @@ const AuraResult = () => {
     isAlreadyDownloaded, downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload,
     showSubscriptionModal, setShowSubscriptionModal, subscriptionModalVariant, extendedPlans,
+    handleSubscriptionInsufficientBalance,
   } = useAIWowDownload({ resultData: downloadResultData });
 
   useEffect(() => {
@@ -671,7 +672,9 @@ const AuraResult = () => {
         isOpen={showSubscriptionModal}
         onClose={() => setShowSubscriptionModal(false)}
         variant={subscriptionModalVariant}
+        featureName="aura-photography"
         plans={subscriptionModalVariant === 'extended' ? extendedPlans : undefined}
+        onInsufficientBalance={handleSubscriptionInsufficientBalance}
       />
     </div>
     </>

@@ -4,6 +4,8 @@ import { useDispatch } from 'react-redux';
 import styles from './DailyCosmicBriefing.module.scss';
 import { getDailyCosmicBriefing } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
+import { getSubscriptionErrorReason } from '../../../../utils/subscription/featureGating';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
@@ -18,6 +20,10 @@ const DailyCosmicBriefing = () => {
   const dispatch = useDispatch();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
   const [fetchSunSign] = useLazyGetSunSignQuery();
+  // The briefing is gated by subscription/quota on the backend. Wrap the fetch
+  // so an entitlement block opens the plans popup instead of silently bouncing
+  // the user back to the suite.
+  const { runWithEntitlement, subscriptionModal, showSubscriptionModal } = useAIWowSubscriptionGate({ featureName: 'daily-cosmic-briefing' });
 
   useEffect(() => {
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -27,8 +33,6 @@ const DailyCosmicBriefing = () => {
     }
   }, []);
 
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
-  
   const [briefing, setBriefing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   // Tracks the profile id we've already fetched for, so a re-render that
@@ -88,20 +92,39 @@ const DailyCosmicBriefing = () => {
         }
       };
 
-      // First attempt with the sign already on the profile (if any).
-      let zodiacSign = profile.sunSign || profile.sign;
-      let result = zodiacSign
-        ? await getDailyCosmicBriefing(zodiacSign, params)
-        : null;
+      // Runs the briefing fetch with a sun-sign fallback. Wrapped by the
+      // entitlement gate so a subscription block opens the plans popup (and
+      // retries on purchase). If the first call is blocked on entitlement we
+      // return immediately — no point resolving the sun sign for a paid call.
+      const generateBriefing = async () => {
+        let zodiacSign = profile.sunSign || profile.sign;
+        let result = zodiacSign
+          ? await getDailyCosmicBriefing(zodiacSign, params)
+          : null;
 
-      // Only call find-sun-sign if the briefing failed (or we had no sign),
-      // then recall the briefing once with the corrected sign.
-      if (!result || !result.success) {
-        const apiSign = await resolveSunSignFromApi();
-        if (apiSign && apiSign !== zodiacSign) {
-          zodiacSign = apiSign;
-          result = await getDailyCosmicBriefing(zodiacSign, params);
+        if (result && !result.success && getSubscriptionErrorReason(result)) {
+          return result;
         }
+
+        // Only call find-sun-sign if the briefing failed (or we had no sign),
+        // then recall the briefing once with the corrected sign.
+        if (!result || !result.success) {
+          const apiSign = await resolveSunSignFromApi();
+          if (apiSign && apiSign !== zodiacSign) {
+            zodiacSign = apiSign;
+            result = await getDailyCosmicBriefing(zodiacSign, params);
+          }
+        }
+        return result;
+      };
+
+      const result = await runWithEntitlement(generateBriefing);
+
+      // User closed the plans popup without purchasing — go back to the suite.
+      // If the gate already routed to /recharge, don't override that redirect.
+      if (result?.blocked) {
+        if (!result.redirectedToRecharge) navigate('/ai-wow', { replace: true });
+        return;
       }
 
       if (result && result.success) {
@@ -131,16 +154,29 @@ const DailyCosmicBriefing = () => {
     return '#ef4444'; // red
   };
 
+  // Guests are redirected to login by the effect above; render nothing until
+  // then. Placed after all hooks so hook order stays consistent.
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
+
   if (profileLoading || isLoading) {
-    return <PrimaryLoader isLoading={true} />;
+    // Keep the subscription modal mounted here: the entitlement block happens
+    // while isLoading is still true, so the popup must be able to render.
+    // Hide the loader while the modal is open so the spinner doesn't overlay it.
+    return (
+      <>
+        {subscriptionModal}
+        {!showSubscriptionModal && <PrimaryLoader isLoading={true} />}
+      </>
+    );
   }
 
   if (!briefing) {
-    return null;
+    return <>{subscriptionModal}</>;
   }
 
   return (
     <>
+    {subscriptionModal}
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.headerWrap}>

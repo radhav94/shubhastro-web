@@ -846,14 +846,15 @@ const LiveView = (props) => {
   const handleKundliSelect = (kundli) => {
     setShowKundliModal(false);
     if (!kundli?._id || !activeCall?.roomId) return;
-    const kundliLink = `${window.location.origin}/kundli/${kundli._id}`;
+    // Send the bare kundliId as the message (origin-independent); the kundliId
+    // also travels as its own field. Renderers rebuild the link from origin.
     voiceSocket.emit("chat:message", {
       sender: "user",
       kundliId: kundli._id,
       roomId: activeCall.roomId,
       userId: activeCall.userId || userIdLocal,
       astrologerId: activeCall.astrologerId,
-      message: kundliLink,
+      message: kundli._id,
       type: "kundli",
     });
     Toast.success("Kundali sent successfully.", { position: "top-center" });

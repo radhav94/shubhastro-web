@@ -3,6 +3,10 @@ import { ChevronDown } from "lucide-react";
 import styles from "./MembershipCard.module.scss";
 import crown from "../../../assets/images/crown.webp";
 
+// Temporarily hides the "Manage" dropdown on the active-subscriber card.
+// Set back to `true` to restore the Manage / Cancel Subscription control.
+const MANAGE_BUTTON_ENABLED = false;
+
 // Active-subscriber card shows plan/validity/quota + a Manage dropdown (with a
 // Cancel Subscription option). Non-subscriber shows an "Unlock Premium" upsell.
 const MembershipCard = ({
@@ -89,7 +93,8 @@ const MembershipCard = ({
 
       {/* Once auto-renewal is cancelled there's nothing left to manage, so hide
           the dropdown (its only action is Cancel Subscription). */}
-      {autoRenew && (
+      {/* Manage button temporarily disabled (flip MANAGE_BUTTON_ENABLED to re-enable). */}
+      {MANAGE_BUTTON_ENABLED && autoRenew && (
         <div className={styles.manageWrap} ref={menuRef}>
           <button
             type="button"

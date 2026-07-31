@@ -315,7 +315,7 @@ const AIWow = () => {
     const pdfKey = `${item.featureType}PdfPath`;
     const existingPdfUrl = item.pdfPath || item[pdfKey];
     
-    if (existingPdfUrl || paidToFreeIds[item.featureId]) {
+    if (existingPdfUrl || paidToFreeIds[item._id]) {
       // Free — directly download existing PDF
       try {
         toast.loading("Downloading PDF...", { id: "pdf-download" });
@@ -337,12 +337,12 @@ const AIWow = () => {
     } else {
       // Paid — open the download modal
       refreshWallet();
-      setDownloadModal({ open: true, featureId: item.featureId, featureName: item.featureName });
+      setDownloadModal({ open: true, featureId: item.featureId, id: item._id, featureName: item.featureName });
     }
   };
 
   const handleConfirmDownload = async (language) => {
-    const { featureId, featureName } = downloadModal;
+    const { featureId, id, featureName } = downloadModal;
     setIsDownloading(true);
     try {
       toast.loading("Downloading PDF...", { id: "pdf-download" });
@@ -362,9 +362,11 @@ const AIWow = () => {
           toast.dismiss("pdf-download");
           toast.success("Payment Successful! PDF downloaded.", { id: "pdf-download-success", duration: 3000 });
         }, 600);
-      // Mark this feature as free locally so ribbon updates
-      setPaidToFreeIds(prev => ({ ...prev, [featureId]: true }));
-      setDownloadModal({ open: false, featureId: null, featureName: "" });
+      // Mark ONLY this history entry as free locally so its ribbon updates.
+      // (Keyed by the unique entry id, not featureId — otherwise other selected
+      // categories that share the same feature would all wrongly show "Free".)
+      setPaidToFreeIds(prev => ({ ...prev, [id]: true }));
+      setDownloadModal({ open: false, featureId: null, id: null, featureName: "" });
       refreshWallet();
       // Reset to page 1 and refetch to get updated pdfPath (shows "Free" on reload)
       setHistoryPage(1);
@@ -536,7 +538,7 @@ const AIWow = () => {
                             })
                           : "",
                         summary: item.summary || "",
-                        isPaid: !item.pdfPath && !item[`${item.featureType}PdfPath`] && !paidToFreeIds[item.featureId],
+                        isPaid: !item.pdfPath && !item[`${item.featureType}PdfPath`] && !paidToFreeIds[item._id],
                         price: null,
                         charges,
                         onViewResult: () => handleViewResultPdf(item.featureId),

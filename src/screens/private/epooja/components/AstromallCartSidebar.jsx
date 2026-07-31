@@ -7,6 +7,7 @@ import { useGetCartQuery, useUpdateCartItemMutation, useRemoveCartItemMutation }
 import Toast from "../../../../component/toast";
 import { DefaultImages } from "../../../../utils/appImages";
 import ProductImage from "../../../../component/UI/ProductImage";
+import { BACKEND_PROXY } from "../../../../utils/apiConfig";
 
 const DEFAULT_IMG = DefaultImages.AstromallProductDefault;
 
@@ -90,7 +91,7 @@ const getVariantAttrs = (item) => {
 // Fetch product detail to enrich variant info
 const fetchProductDetail = async (idOrSlug) => {
   try {
-    const BASE_URL = "/main";
+    const BASE_URL = BACKEND_PROXY;
     const role = localStorage.getItem("shubhtalk_role");
     const token = role === "ASTROLOGER" ? localStorage.getItem("shubhtalk_astro_token") : localStorage.getItem("shubhtalk_customer_token");
     const res = await fetch(`${BASE_URL}/api/mall/products/${idOrSlug}`, {

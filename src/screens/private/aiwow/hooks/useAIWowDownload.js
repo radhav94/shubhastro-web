@@ -87,9 +87,10 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
   const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken });
   const hasActiveSubscription = !!subscriptionStatus?.data?.hasActiveSubscription;
 
-  // Charges are only relevant for users WITHOUT a subscription. Subscribed users
-  // download directly (no charge popup), so skip the charges API entirely.
-  const { data: chargesData } = useGetChargesQuery(undefined, { skip: hasActiveSubscription });
+  // Always fetch charges: every AI-Wow report download shows the payment popup
+  // and charges on the first download (even for subscribers), per product
+  // requirement. Re-downloading the same generated report stays free.
+  const { data: chargesData } = useGetChargesQuery(undefined);
 
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscriptionModalVariant, setSubscriptionModalVariant] = useState('basic');
@@ -98,6 +99,9 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
     setSubscriptionModalVariant(mode);
     setExtendedPlans(Array.isArray(plans) && plans.length > 0 ? plans : null);
     setShowSubscriptionModal(true);
+  }, []);
+  const handleSubscriptionInsufficientBalance = useCallback(() => {
+    setShowSubscriptionModal(false);
   }, []);
 
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
@@ -138,15 +142,15 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
   // Resolve featureName dynamically from resultData or history item
   const featureName = resultData?.featureName || resultData?.data?.featureName || historyItem?.featureName || 'ai-report';
 
-  // Download cost — subscribed users pay nothing (direct download, no popup).
-  // Non-subscribed users see the charge popup with the price from the charges API.
+  // Download cost — an already-downloaded report (same generation) is free;
+  // otherwise show the charge from the charges API. The first download of every
+  // freshly generated report is charged, regardless of subscription.
   const downloadPrice = useMemo(() => {
     if (isAlreadyDownloaded) return 0;
-    if (hasActiveSubscription) return 0; // covered by subscription — no wallet charge
     const charges = chargesData?.data;
     if (!charges) return null;
     return findChargeAmount(charges, featureName);
-  }, [isAlreadyDownloaded, hasActiveSubscription, chargesData, featureName]);
+  }, [isAlreadyDownloaded, chargesData, featureName]);
 
   const id = toastId || `${featureName.replace(/\s+/g, '-').toLowerCase()}-pdf`;
   const fileName = useMemo(() => {
@@ -251,14 +255,13 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
   }, [historyId, id, fileName, downloadReportPdf, refreshWallet, downloadPrice, openSubscriptionModal, featureName]);
 
   const handleDownloadClick = useCallback(() => {
-    if (hasActiveSubscription) {
-      handleConfirmDownload('en');
-      return;
-    }
+    // Always show the payment popup so the first download of every generated
+    // report is confirmed/charged (re-downloading the same report is free via
+    // downloadPrice === 0). No subscription shortcut.
     refreshWallet();
     trackEvent('shubh_ai_payment_initiated', { feature_name: featureName, price: downloadPrice });
     setShowDownloadModal(true);
-  }, [hasActiveSubscription, handleConfirmDownload, refreshWallet, downloadPrice, featureName]);
+  }, [refreshWallet, downloadPrice, featureName]);
 
   return {
     // State
@@ -274,6 +277,7 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
     setShowSubscriptionModal,
     subscriptionModalVariant,
     extendedPlans,
+    handleSubscriptionInsufficientBalance,
 
     // Handlers
     handleDownloadClick,

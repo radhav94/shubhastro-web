@@ -6,6 +6,7 @@ import { FiFile } from "react-icons/fi";
 import { GrReactjs } from "react-icons/gr";
 import AudioMessageWrapper from "../../../home/components/chats/AudioMessageWrapper";
 import IframeModal from "../../../home/components/chats/IframeModal";
+import { buildKundliLink } from "../../../../../utils/helper/kundliMessage";
 import styles from "./ChatWindow.module.scss";
 
 // Constants
@@ -171,9 +172,9 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
         }
 
         case MESSAGE_TYPES.KUNDLI: {
-          const kundliLink = message?.kundliId
-            ? `${window.location.origin}/kundli/${message.kundliId}`
-            : null;
+          // Resolve from kundliId, falling back to parsing the message text
+          // (bare id or full URL).
+          const kundliLink = buildKundliLink(message?.kundliId, content);
           return (
             <button
               type="button"

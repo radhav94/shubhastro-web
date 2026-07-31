@@ -90,6 +90,22 @@ export const analyzeFace = async (imageData, signal = null) => {
     // Extract error details from response
     const errorData = error.response?.data;
     
+    // 402 Payment Required is an entitlement block. Preserve the real reason
+    // from the body (e.g. EXTENDED_PLAN_REQUIRED, so the plans popup still
+    // shows) and only fall back to INSUFFICIENT_WALLET_BALANCE when the body
+    // carries no reason. Keep `data` so inline plans survive for the popup.
+    if (error.response?.status === 402) {
+      return {
+        success: false,
+        error: {
+          code: errorData?.error?.code || errorData?.data?.reason || errorData?.reason || 'INSUFFICIENT_WALLET_BALANCE',
+          message: errorData?.message || errorData?.error?.message || 'Insufficient wallet balance',
+          details: errorData?.error?.details || null
+        },
+        data: errorData?.data ?? null,
+      };
+    }
+
     // Return full error structure if available
     if (errorData?.error) {
       return {
@@ -151,14 +167,17 @@ export const analyzeFace = async (imageData, signal = null) => {
       };
     }
     
-    // Generic error handling
+    // Generic error handling. Preserve any structured `data` (and surface a
+    // known reason like INSUFFICIENT_WALLET_BALANCE) so the entitlement gate can
+    // detect it and route the user to recharge instead of showing a dead-end error.
     return {
       success: false,
       error: {
-        code: 'UNKNOWN_ERROR',
+        code: errorData?.error?.code || errorData?.data?.reason || errorData?.reason || 'UNKNOWN_ERROR',
         message: errorData?.message || error.message || 'Analysis failed',
         details: null
-      }
+      },
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -218,6 +237,22 @@ export const analyzePalm = async (imageData, hand = 'right', signal = null) => {
     // Extract error details from response
     const errorData = error.response?.data;
     
+    // 402 Payment Required is an entitlement block. Preserve the real reason
+    // from the body (e.g. EXTENDED_PLAN_REQUIRED, so the plans popup still
+    // shows) and only fall back to INSUFFICIENT_WALLET_BALANCE when the body
+    // carries no reason. Keep `data` so inline plans survive for the popup.
+    if (error.response?.status === 402) {
+      return {
+        success: false,
+        error: {
+          code: errorData?.error?.code || errorData?.data?.reason || errorData?.reason || 'INSUFFICIENT_WALLET_BALANCE',
+          message: errorData?.message || errorData?.error?.message || 'Insufficient wallet balance',
+          details: errorData?.error?.details || null
+        },
+        data: errorData?.data ?? null,
+      };
+    }
+
     // Return full error structure if available
     if (errorData?.error) {
       return {
@@ -279,14 +314,17 @@ export const analyzePalm = async (imageData, hand = 'right', signal = null) => {
       };
     }
     
-    // Generic error handling
+    // Generic error handling. Preserve any structured `data` (and surface a
+    // known reason like INSUFFICIENT_WALLET_BALANCE) so the entitlement gate can
+    // detect it and route the user to recharge instead of showing a dead-end error.
     return {
       success: false,
       error: {
-        code: 'UNKNOWN_ERROR',
+        code: errorData?.error?.code || errorData?.data?.reason || errorData?.reason || 'UNKNOWN_ERROR',
         message: errorData?.message || error.message || 'Analysis failed',
         details: null
-      }
+      },
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -342,6 +380,22 @@ export const analyzeSignature = async (imageData, signal = null) => {
     // Extract error details from response
     const errorData = error.response?.data;
     
+    // 402 Payment Required is an entitlement block. Preserve the real reason
+    // from the body (e.g. EXTENDED_PLAN_REQUIRED, so the plans popup still
+    // shows) and only fall back to INSUFFICIENT_WALLET_BALANCE when the body
+    // carries no reason. Keep `data` so inline plans survive for the popup.
+    if (error.response?.status === 402) {
+      return {
+        success: false,
+        error: {
+          code: errorData?.error?.code || errorData?.data?.reason || errorData?.reason || 'INSUFFICIENT_WALLET_BALANCE',
+          message: errorData?.message || errorData?.error?.message || 'Insufficient wallet balance',
+          details: errorData?.error?.details || null
+        },
+        data: errorData?.data ?? null,
+      };
+    }
+
     // Return full error structure if available
     if (errorData?.error) {
       return {
@@ -403,14 +457,17 @@ export const analyzeSignature = async (imageData, signal = null) => {
       };
     }
     
-    // Generic error handling
+    // Generic error handling. Preserve any structured `data` (and surface a
+    // known reason like INSUFFICIENT_WALLET_BALANCE) so the entitlement gate can
+    // detect it and route the user to recharge instead of showing a dead-end error.
     return {
       success: false,
       error: {
-        code: 'UNKNOWN_ERROR',
+        code: errorData?.error?.code || errorData?.data?.reason || errorData?.reason || 'UNKNOWN_ERROR',
         message: errorData?.message || error.message || 'Analysis failed',
         details: null
-      }
+      },
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -477,6 +534,22 @@ export const analyzeClothColor = async (imageData, intentionData, signal = null)
     // Extract error details from response
     const errorData = error.response?.data;
     
+    // 402 Payment Required is an entitlement block. Preserve the real reason
+    // from the body (e.g. EXTENDED_PLAN_REQUIRED, so the plans popup still
+    // shows) and only fall back to INSUFFICIENT_WALLET_BALANCE when the body
+    // carries no reason. Keep `data` so inline plans survive for the popup.
+    if (error.response?.status === 402) {
+      return {
+        success: false,
+        error: {
+          code: errorData?.error?.code || errorData?.data?.reason || errorData?.reason || 'INSUFFICIENT_WALLET_BALANCE',
+          message: errorData?.message || errorData?.error?.message || 'Insufficient wallet balance',
+          details: errorData?.error?.details || null
+        },
+        data: errorData?.data ?? null,
+      };
+    }
+
     // Return full error structure if available
     if (errorData?.error) {
       return {
@@ -538,14 +611,17 @@ export const analyzeClothColor = async (imageData, intentionData, signal = null)
       };
     }
     
-    // Generic error handling
+    // Generic error handling. Preserve any structured `data` (and surface a
+    // known reason like INSUFFICIENT_WALLET_BALANCE) so the entitlement gate can
+    // detect it and route the user to recharge instead of showing a dead-end error.
     return {
       success: false,
       error: {
-        code: 'UNKNOWN_ERROR',
+        code: errorData?.error?.code || errorData?.data?.reason || errorData?.reason || 'UNKNOWN_ERROR',
         message: errorData?.message || error.message || 'Analysis failed',
         details: null
-      }
+      },
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -651,6 +727,22 @@ export const analyzeAura = async (imageData, signal = null) => {
     // Extract error details from response
     const errorData = error.response?.data;
     
+    // 402 Payment Required is an entitlement block. Preserve the real reason
+    // from the body (e.g. EXTENDED_PLAN_REQUIRED, so the plans popup still
+    // shows) and only fall back to INSUFFICIENT_WALLET_BALANCE when the body
+    // carries no reason. Keep `data` so inline plans survive for the popup.
+    if (error.response?.status === 402) {
+      return {
+        success: false,
+        error: {
+          code: errorData?.error?.code || errorData?.data?.reason || errorData?.reason || 'INSUFFICIENT_WALLET_BALANCE',
+          message: errorData?.message || errorData?.error?.message || 'Insufficient wallet balance',
+          details: errorData?.error?.details || null
+        },
+        data: errorData?.data ?? null,
+      };
+    }
+
     // Return full error structure if available
     if (errorData?.error) {
       return {
@@ -712,14 +804,17 @@ export const analyzeAura = async (imageData, signal = null) => {
       };
     }
     
-    // Generic error handling
+    // Generic error handling. Preserve any structured `data` (and surface a
+    // known reason like INSUFFICIENT_WALLET_BALANCE) so the entitlement gate can
+    // detect it and route the user to recharge instead of showing a dead-end error.
     return {
       success: false,
       error: {
-        code: 'UNKNOWN_ERROR',
+        code: errorData?.error?.code || errorData?.data?.reason || errorData?.reason || 'UNKNOWN_ERROR',
         message: errorData?.message || error.message || 'Analysis failed',
         details: null
-      }
+      },
+      data: errorData?.data ?? null,
     };
   }
 };
@@ -775,6 +870,22 @@ export const analyzeGemstone = async (imageData, signal = null) => {
     // Extract error details from response
     const errorData = error.response?.data;
     
+    // 402 Payment Required is an entitlement block. Preserve the real reason
+    // from the body (e.g. EXTENDED_PLAN_REQUIRED, so the plans popup still
+    // shows) and only fall back to INSUFFICIENT_WALLET_BALANCE when the body
+    // carries no reason. Keep `data` so inline plans survive for the popup.
+    if (error.response?.status === 402) {
+      return {
+        success: false,
+        error: {
+          code: errorData?.error?.code || errorData?.data?.reason || errorData?.reason || 'INSUFFICIENT_WALLET_BALANCE',
+          message: errorData?.message || errorData?.error?.message || 'Insufficient wallet balance',
+          details: errorData?.error?.details || null
+        },
+        data: errorData?.data ?? null,
+      };
+    }
+
     // Return full error structure if available
     if (errorData?.error) {
       return {
@@ -836,14 +947,17 @@ export const analyzeGemstone = async (imageData, signal = null) => {
       };
     }
     
-    // Generic error handling
+    // Generic error handling. Preserve any structured `data` (and surface a
+    // known reason like INSUFFICIENT_WALLET_BALANCE) so the entitlement gate can
+    // detect it and route the user to recharge instead of showing a dead-end error.
     return {
       success: false,
       error: {
-        code: 'UNKNOWN_ERROR',
+        code: errorData?.error?.code || errorData?.data?.reason || errorData?.reason || 'UNKNOWN_ERROR',
         message: errorData?.message || error.message || 'Analysis failed',
         details: null
-      }
+      },
+      data: errorData?.data ?? null,
     };
   }
 };

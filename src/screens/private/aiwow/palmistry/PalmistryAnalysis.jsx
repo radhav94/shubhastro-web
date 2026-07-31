@@ -36,6 +36,10 @@ const PalmistryAnalysis = () => {
   const isMountedRef = React.useRef(true);
   const abortControllerRef = React.useRef(null);
   const hasStartedRef = React.useRef(false);
+  // Set when an entitlement block sends the user back to the landing step, so
+  // the `finally` below doesn't briefly flip back to the pre-analysis checklist
+  // while the route change is in flight.
+  const leavingRef = React.useRef(false);
   // Ensures we only auto-retry with the opposite hand once, to avoid a loop
   // when the image isn't a valid palm at all.
   const handSwapAttemptedRef = React.useRef(false);
@@ -71,8 +75,23 @@ const PalmistryAnalysis = () => {
       navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0]);
       return;
     }
-    // Note: analysis is no longer triggered automatically on mount.
-    // The user must explicitly click "Generate analysis".
+
+    // Auto-start analysis as soon as the image, hand and profile are ready so
+    // the user isn't shown an extra confirmation screen after capture/upload.
+    // The session flag guards against a page reload re-triggering a paid
+    // analysis; capture screens clear it on a fresh capture.
+    if (
+      profile &&
+      !hasStartedRef.current &&
+      !isAnalyzing &&
+      !analysisComplete &&
+      !sessionStorage.getItem(PALMISTRY_ANALYSIS_FLAG)
+    ) {
+      hasStartedRef.current = true;
+      sessionStorage.setItem(PALMISTRY_ANALYSIS_FLAG, '1');
+      setError(null);
+      performAnalysis(palmImage, selectedHand);
+    }
   }, [palmImage, selectedHand, profile, profileLoading]);
 
   const performAnalysis = async (imageData, hand) => {
@@ -106,14 +125,19 @@ const PalmistryAnalysis = () => {
       }
 
       // Entitlement block handled by the gate (plans popup / recharge toast).
-      // Do NOT show the "Analysis Failed" screen — just return to the previous
-      // (pre-analysis) screen so the user can try again.
+      // Once the user closes the subscription modal, start fresh from the first
+      // step (landing screen). We intentionally do NOT flip back to the
+      // pre-analysis checklist here — that would flash "this screen" before the
+      // route changes. Clearing the data + navigating unmounts us straight away.
       if (result.blocked) {
-        setProgress(0);
-        setIsAnalyzing(false);
-        setAnalysisComplete(false);
-        setError(null);
+        leavingRef.current = true;
         hasStartedRef.current = false;
+        sessionStorage.removeItem(PALMISTRY_ANALYSIS_FLAG);
+        dispatch(clearPalmistryData());
+        // The gate already routed to /recharge — don't override that redirect.
+        if (!result.redirectedToRecharge) {
+          navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0], { replace: true });
+        }
         return;
       }
 
@@ -219,7 +243,9 @@ const PalmistryAnalysis = () => {
       // Don't show Toast here - interceptor already showed it
       setError({ message: 'An unexpected error occurred. Please try again.' });
     } finally {
-      if (isMountedRef.current) {
+      // Skip when we're navigating away after an entitlement block — flipping
+      // isAnalyzing back to false would flash the pre-analysis checklist.
+      if (isMountedRef.current && !leavingRef.current) {
         setIsAnalyzing(false);
       }
     }

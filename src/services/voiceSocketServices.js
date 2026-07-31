@@ -1,8 +1,9 @@
 import { io } from "socket.io-client";
+import { SOCKET_URL, SOCKET_PATH } from "../utils/apiConfig";
 import { markInitiated, claimRoom } from "../utils/tabSession";
 import Toast from "../component/toast";
 
-export const voiceSocket = io("/", {
+export const voiceSocket = io(SOCKET_URL, {
   transports: ["websocket"],
   autoConnect: false,
   reconnection: true,
@@ -10,7 +11,7 @@ export const voiceSocket = io("/", {
   reconnectionDelay: 5000,
   reconnectionDelayMax: 5000,
   timeout: 20000,
-  path: "/main/socket.io",
+  path: SOCKET_PATH,
 });
 
 /* ================= 🔍 CALL EVENT LOGGER ================= */

@@ -4,12 +4,17 @@ import styles from './CosmicChat.module.scss';
 import { Toast } from '../../../../component';
 import { startCosmicChat, sendCosmicChatMessage } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
+import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 // Footer removed - route has footer: false, chat input is fixed at bottom
 
 const CosmicChat = () => {
   const navigate = useNavigate();
   const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  // Chat generation is gated by subscription/quota on the backend. Wrap the
+  // start call so an entitlement block opens the plans popup instead of
+  // silently bouncing the user back to the suite.
+  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'cosmic-chat' });
 
   useEffect(() => {
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -19,8 +24,6 @@ const CosmicChat = () => {
     }
   }, []);
 
-  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
-  
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -85,7 +88,14 @@ const CosmicChat = () => {
         tzone: profile.tzone || 5.5
       };
 
-      const result = await startCosmicChat(kundliData);
+      const result = await runWithEntitlement(() => startCosmicChat(kundliData));
+
+      // User closed the plans popup without purchasing — go back to the suite.
+      // If the gate already routed to /recharge, don't override that redirect.
+      if (result.blocked) {
+        if (!result.redirectedToRecharge) navigate('/ai-wow', { replace: true });
+        return;
+      }
 
       if (result.success) {
         const sessionData = result.data;
@@ -178,11 +188,13 @@ const CosmicChat = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
-      // Only refocus the input when the message was typed by the user (keyboard
-      // already open). For a tapped suggested question the keyboard was closed,
-      // and refocusing would pop it open — shrinking the viewport and hiding
-      // the freshly-arrived answer, forcing the user to scroll manually.
-      if (refocusInput) {
+      // Refocus the input (keeps the keyboard up) only on non-touch/desktop.
+      // On mobile, auto-focusing after a reply pops the on-screen keyboard,
+      // which shrinks the viewport and hides the freshly-arrived answer — so we
+      // never auto-focus on touch devices.
+      const isTouchDevice = typeof window !== 'undefined' &&
+        (('ontouchstart' in window) || navigator.maxTouchPoints > 0);
+      if (refocusInput && !isTouchDevice) {
         requestAnimationFrame(() => {
           if (inputRef.current) {
             inputRef.current.focus();
@@ -212,12 +224,17 @@ const CosmicChat = () => {
     navigate('/ai-wow');
   };
 
+  // Guests are redirected to login by the effect above; render nothing until
+  // then. Placed after all hooks so hook order stays consistent.
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
+
   if (profileLoading) {
     return <PrimaryLoader isLoading={true} />;
   }
 
   return (
     <>
+    {subscriptionModal}
     <div className={styles.container}>
       {/* Header */}
       <header className={styles.headerWrap}>

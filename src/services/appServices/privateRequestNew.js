@@ -1,11 +1,13 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createSecureBaseQuery } from "../../utils/security/secureBaseQuery";
 import Toast from "../../component/toast";
 import { getToken } from "../../utils/utlis";
 import { refreshTokenAndReload } from "../../utils/tokenRefresh";
 import { navigateToLogin } from "../../utils/navigationHelper";
+import { BACKEND_PROXY } from "../../utils/apiConfig";
 
 let unAuthorizedCount = 0;
-const BASE_URL = "/main";
+const BASE_URL = BACKEND_PROXY;
 
 // Endpoints whose error toasts are temporarily silenced at runtime. Used by
 // flows that handle certain failures themselves (e.g. the guest login/kundli
@@ -27,7 +29,9 @@ export const setApiErrorToastSilenced = (endpoint, silenced) => {
 const PUBLIC_ENDPOINTS = ["getAstrologerById", "getAstrologers", "getRecommendedAstrologers"];
 
 // Endpoints that should not show toast errors (silent failures)
-const SILENT_ENDPOINTS = ["getStaticPageBySlug"];
+// getKundliById: a missing/deleted shared kundli returns 404; the Kundli view
+// handles that inline ("Kundli not available"), so suppress the generic toast.
+const SILENT_ENDPOINTS = ["getStaticPageBySlug", "getKundliById"];
 
 // ERROR HANDLER
 const handleApiError = (error, endpoint) => {
@@ -44,6 +48,8 @@ const handleApiError = (error, endpoint) => {
     "PREMIUM_REQUIRED",
     "EXTENDED_PLAN_REQUIRED",
     "EXTENDED_PLAN_EXHAUSTED",
+    // Handled by the UI: it shows a recharge toast and redirects to /recharge.
+    "INSUFFICIENT_WALLET_BALANCE",
   ];
   if (entitlementReason && SILENT_ENTITLEMENT_REASONS.includes(entitlementReason)) return;
   // Real message from the server, if any. Used to avoid showing the unhelpful
@@ -120,7 +126,7 @@ export const privateRequestNew = createApi({
   reducerPath: "privateRequestNew",
 
   baseQuery: async (args, api, extraOptions) => {
-    const rawBaseQuery = fetchBaseQuery({
+    const rawBaseQuery = createSecureBaseQuery({
       baseUrl: `${BASE_URL}/api/`,
       prepareHeaders: (headers, { endpoint }) => {
         const role = localStorage.getItem("shubhtalk_role");
@@ -162,7 +168,7 @@ export const localReuqqestApi = createApi({
   reducerPath: "localReuqqestApi",
 
   baseQuery: async (args, api, extraOptions) => {
-    const rawBaseQuery = fetchBaseQuery({
+    const rawBaseQuery = createSecureBaseQuery({
       baseUrl: "http://192.168.12.114:3000/",
       prepareHeaders: (headers) => {
         const role = localStorage.getItem("shubhtalk_role");
