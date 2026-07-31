@@ -1,6 +1,5 @@
 import axios from "axios";
 import { Toast } from "../../component";
-import { ASTROLOGY_PROXY } from "../../utils/apiConfig";
 
 const userId = import.meta.env.VITE_VEDIC_API_USER_ID;
 const apiKey = import.meta.env.VITE_VEDIC_API_KEY;
@@ -8,7 +7,7 @@ const apiKey = import.meta.env.VITE_VEDIC_API_KEY;
 const auth = `Basic ${btoa(userId + ":" + apiKey)}`;
 
 const astrologyApiInstance = axios.create({
-  baseURL: `${ASTROLOGY_PROXY}/v1/`,
+  baseURL: "/vedic/v1/",
   headers: {
     Authorization: auth,
     "Content-Type": "application/json",

@@ -6,7 +6,6 @@ import { useGetCartQuery, useRemoveCartItemMutation, useCreateMallOrderMutation,
 import Toast from "../../../../component/toast";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 import AddressPopup from "../components/AddressPopup";
-import { BACKEND_PROXY } from "../../../../utils/apiConfig";
 
 import phonepeLogo from "../../../../assets/icons/upi/phonepe.svg";
 import credLogo from "../../../../assets/icons/upi/cred.svg";
@@ -96,7 +95,7 @@ const getCheckoutVariantAttrs = (item, enrichedVariants = {}) => {
 
 const fetchCheckoutProductDetail = async (idOrSlug) => {
   try {
-    const BASE_URL = BACKEND_PROXY;
+    const BASE_URL = "/main";
     const role = localStorage.getItem("shubhtalk_role");
     const token = role === "ASTROLOGER" ? localStorage.getItem("shubhtalk_astro_token") : localStorage.getItem("shubhtalk_customer_token");
     const res = await fetch(`${BASE_URL}/api/mall/products/${idOrSlug}`, {

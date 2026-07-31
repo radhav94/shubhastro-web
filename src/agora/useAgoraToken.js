@@ -1,8 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
-import { BACKEND_PROXY } from "../utils/apiConfig";
 
-const BACKEND = BACKEND_PROXY;
+const BACKEND = "/main";
 
 export const useAgoraToken = () => {
   const [loading, setLoading] = useState(false);

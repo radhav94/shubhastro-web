@@ -1,5 +1,4 @@
 import { privateRequestNew } from "../../../../services/appServices/privateRequestNew";
-import { BACKEND_PROXY } from "../../../../utils/apiConfig";
 
 export const epoojaBookingApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
@@ -43,7 +42,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     getProductReviews: builder.query({
       queryFn: async ({ productId, page = 1, limit = 10 }) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -68,7 +67,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     getCart: builder.query({
       queryFn: async () => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -98,7 +97,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     addToCart: builder.mutation({
       queryFn: async ({ productId, quantity = 1, variantId, skuCode }) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -137,7 +136,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     updateCartItem: builder.mutation({
       queryFn: async ({ productId, variantId, quantity }) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -172,7 +171,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     removeCartItem: builder.mutation({
       queryFn: async ({ productId, variantId }) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -203,7 +202,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     createProductReview: builder.mutation({
       queryFn: async ({ productId, rating, title, comment }) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -232,7 +231,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     updateProductReview: builder.mutation({
       queryFn: async ({ reviewId, rating, title, comment }) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -261,7 +260,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     deleteProductReview: builder.mutation({
       queryFn: async ({ reviewId }) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -289,7 +288,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     getAddresses: builder.query({
       queryFn: async () => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -314,7 +313,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     addAddress: builder.mutation({
       queryFn: async (body) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -343,7 +342,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     updateAddress: builder.mutation({
       queryFn: async ({ addressId, ...body }) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -372,7 +371,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     deleteAddress: builder.mutation({
       queryFn: async ({ addressId }) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -398,7 +397,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     getProducts: builder.query({
       queryFn: async (params = {}) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -428,7 +427,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     getProductCategories: builder.query({
       queryFn: async () => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -452,7 +451,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     createMallOrder: builder.mutation({
       queryFn: async (body) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -490,7 +489,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     updateMallOrder: builder.mutation({
       queryFn: async ({ orderId, ...body }) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")
@@ -544,7 +543,7 @@ export const epoojaBookingApi = privateRequestNew.injectEndpoints({
     validateCoupon: builder.mutation({
       queryFn: async ({ code, cart_total }) => {
         try {
-          const BASE_URL = BACKEND_PROXY;
+          const BASE_URL = "/main";
           const role = localStorage.getItem("shubhtalk_role");
           const token = role === "ASTROLOGER"
             ? localStorage.getItem("shubhtalk_astro_token")

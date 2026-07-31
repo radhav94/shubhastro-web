@@ -13,9 +13,7 @@
     "start-prod": "env-cmd -e prod -- vite",
     "build-prod": "env-cmd -e prod -- vite build && SITE_URL=https://shubhastro.ai node scripts/generate-sitemap.js",
     "generate-sitemap": "node scripts/generate-sitemap.js",
-    "preview": "vite preview",
-    "gateway": "npm --prefix secure-gateway start",
-    "gateway:install": "npm --prefix secure-gateway install"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@mediapipe/camera_utils": "^0.3.1675466862",

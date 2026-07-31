@@ -1,8 +1,7 @@
 import axios from "axios";
-import { PYTHON_PROXY } from "../../utils/apiConfig";
 
 const AshtakVargaApiInstance = axios.create({
-  baseURL: `${PYTHON_PROXY}/api/astrology/`,
+  baseURL: "/chart/api/astrology/",
   headers: {
     "Content-Type": "application/json",
   },

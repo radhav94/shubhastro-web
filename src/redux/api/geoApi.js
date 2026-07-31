@@ -1,12 +1,10 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { createSecureBaseQuery } from "../../utils/security/secureBaseQuery";
-import { BACKEND_PROXY } from "../../utils/apiConfig";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const BASE_URL = BACKEND_PROXY;
+const BASE_URL = "/main";
 
 export const geoApi = createApi({
   reducerPath: "geoApi",
-  baseQuery: createSecureBaseQuery({
+  baseQuery: fetchBaseQuery({
     baseUrl: BASE_URL,
   }),
   endpoints: (builder) => ({

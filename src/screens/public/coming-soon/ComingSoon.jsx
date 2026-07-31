@@ -21,10 +21,9 @@ import {
 } from "react-icons/io5";
 import ShubhAstroLogo from "../../../assets/images/ShubhAstrologo.svg";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
-import { BACKEND_PROXY } from "../../../utils/apiConfig";
 import styles from "./ComingSoon.module.scss";
 
-const API_URL = `${BACKEND_PROXY}/api/landing-leads/submit`;
+const API_URL = "/main/api/landing-leads/submit";
 
 const initialValues = {
   fullName: "",

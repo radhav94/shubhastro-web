@@ -1,16 +1,13 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { createSecureBaseQuery } from "../../../utils/security/secureBaseQuery";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
-import { BACKEND_PROXY } from "../../../utils/apiConfig";
 
-// Payment-critical endpoints must go through the same-origin secure gateway
-// (like every other backend call). Hitting the backend cross-origin here
-// triggered a CORS preflight on the custom x-sgw-sid header, which the upstream
-// rejects — so orders/update failed before any response was received.
+// Direct API base for payment-critical endpoints (bypasses /main proxy)
+const DIRECT_API_BASE = import.meta.env.VITE_APP_API_BASE_URL;
+
 const paymentDirectApi = createApi({
   reducerPath: "paymentDirectApi",
-  baseQuery: createSecureBaseQuery({
-    baseUrl: `${BACKEND_PROXY}/api/`,
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${DIRECT_API_BASE}/api/`,
     prepareHeaders: (headers) => {
       const role = localStorage.getItem("shubhtalk_role");
       let token = null;
@@ -31,7 +28,7 @@ const paymentDirectApi = createApi({
     },
   }),
   endpoints: (builder) => ({
-    // Update order status after payment — routed via the same-origin gateway
+    // Update order status after payment — calls backend directly
     verifyPayment: builder.mutation({
       query: (payload) => ({
         url: "orders/update",
