@@ -19,6 +19,7 @@ import {
   clearViewerSession,
 } from "../../../../../utils/liveSessionStorage";
 import { trackEvent } from "../../../../../utils/analytics";
+import { getGuestId, isGuestUser } from "../../../../../utils/guestId";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const MAX_RETRIES = 3;
@@ -115,7 +116,8 @@ export const useLiveStreaming = (client, ROLE, channel, rejoinKey = 0, { onChann
           if (!tokenData?.token) {
             clearViewerSession();
             try {
-              const res = await getViewerToken(channel);
+              const guestOpts = isGuestUser() ? { guestId: getGuestId() } : {};
+              const res = await getViewerToken(channel, guestOpts);
               // Check for "channel not found or stream ended" response
               if (res?.data?.success === false) {
                 console.warn("Channel not found or stream ended:", channel);
