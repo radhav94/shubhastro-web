@@ -64,6 +64,7 @@ import emailIconSet from "../../../assets/images/icon_set (1).png";
 import { Toast } from "../../../component/index";
 import StickyReview from "../../private/home/components/call/StickyReview";
 import { trackEvent } from "../../../utils/analytics";
+import { SUBSCRIPTION_EVENTS, trackSubscriptionEvent } from "../../../utils/subscriptionAnalytics";
 import MallHistoryContent from "../../private/shubhAstroMallHistory/MallHistoryContent";
 import { isShubhMallEnabled } from "../../../utils/featureConfig";
 import {
@@ -202,6 +203,10 @@ const Profile = () => {
       const res = await cancelSubscription({ subscriptionId: activeSubscriptionId });
       const body = res?.data || res?.error?.data;
       if (body?.success) {
+        // #10 SUBSCRIPTION_CANCELLED
+        trackSubscriptionEvent(SUBSCRIPTION_EVENTS.CANCELLED, {
+          subscription_id: activeSubscriptionId,
+        });
         Toast.success(body?.message || "Subscription cancelled");
       } else {
         Toast.error(body?.message || "Failed to cancel subscription");

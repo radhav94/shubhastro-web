@@ -672,6 +672,7 @@ const AuraResult = () => {
         isOpen={showSubscriptionModal}
         onClose={() => setShowSubscriptionModal(false)}
         variant={subscriptionModalVariant}
+        featureName="aura-photography"
         plans={subscriptionModalVariant === 'extended' ? extendedPlans : undefined}
         onInsufficientBalance={handleSubscriptionInsufficientBalance}
       />

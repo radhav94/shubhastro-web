@@ -1,10 +1,11 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
 import { subscriptionApi, useGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
 import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from '../../../../utils/subscription/featureGating';
 import { trackEvent } from '../../../../utils/analytics';
+import { SUBSCRIPTION_EVENTS, trackSubscriptionEvent } from '../../../../utils/subscriptionAnalytics';
 
 /**
  * Extract the extended plan(s) returned inline in a generate/report response.
@@ -41,6 +42,25 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
   const customerToken = typeof window !== 'undefined' ? localStorage.getItem('shubhtalk_customer_token') : null;
   const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken });
   const hasActiveSubscription = !!subscriptionStatus?.data?.hasActiveSubscription;
+
+  // #7 SUBSCRIPTION_STATUS_CHECKED — fire when the status API resolves. Deduped
+  // per distinct (has_active_subscription, remaining_quota) so re-renders /
+  // cache reads don't spam the event.
+  const statusFiredRef = useRef(null);
+  useEffect(() => {
+    if (!subscriptionStatus?.data) return;
+    const remainingQuota =
+      subscriptionStatus.data.remainingQuota ??
+      subscriptionStatus.data.subscription?.remainingQuota ??
+      null;
+    const signature = `${hasActiveSubscription}|${remainingQuota}`;
+    if (statusFiredRef.current === signature) return;
+    statusFiredRef.current = signature;
+    trackSubscriptionEvent(SUBSCRIPTION_EVENTS.STATUS_CHECKED, {
+      has_active_subscription: hasActiveSubscription,
+      remaining_quota: remainingQuota,
+    });
+  }, [subscriptionStatus, hasActiveSubscription]);
 
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscriptionModalVariant, setSubscriptionModalVariant] = useState('basic');
@@ -154,6 +174,7 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
     <SubscriptionModal
       isOpen={showSubscriptionModal}
       variant={subscriptionModalVariant}
+      featureName={featureName}
       plans={subscriptionModalVariant === 'extended' ? extendedPlans : undefined}
       onClose={handleModalClose}
       onPurchased={handleModalPurchased}
