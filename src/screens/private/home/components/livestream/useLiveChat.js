@@ -2,8 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { io } from "socket.io-client";
 import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
 import Toast from "../../../../../component/toast";
-
-const SOCKET_URL = undefined; // Uses relative path via socket.io path option
+import { SOCKET_URL, SOCKET_PATH } from "../../../../../utils/apiConfig";
 
 export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onStreamEnded, onSessionStarted, onSessionEnded, onRoomNotFound, onBlocked, onUserBlocked, onReportSubmitted }) => {
   const socketRef = useRef(null);
@@ -55,9 +54,9 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
       ? { token }
       : { userId, role: "GUEST" };
 
-    const socket = io("/", {
+    const socket = io(SOCKET_URL, {
       transports: ["websocket"],
-      path: "/main/socket.io",
+      path: SOCKET_PATH,
       query: { role: token ? "CUSTOMER" : "GUEST", userId },
       auth: authPayload,
     });

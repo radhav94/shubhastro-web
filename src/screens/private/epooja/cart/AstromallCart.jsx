@@ -12,6 +12,7 @@ import AstromallCartSidebar from "../components/AstromallCartSidebar";
 import AddressPopup from "../components/AddressPopup";
 import { DefaultImages } from "../../../../utils/appImages";
 import ProductImage from "../../../../component/UI/ProductImage";
+import { BACKEND_PROXY } from "../../../../utils/apiConfig";
 
 import phonepeLogo from "../../../../assets/icons/upi/phonepe.svg";
 import credLogo from "../../../../assets/icons/upi/cred.svg";
@@ -129,7 +130,7 @@ const formatAttrValue = (val) => {
 // Fetch fresh product detail from API
 const fetchProductDetail = async (productIdOrSlug) => {
   try {
-    const BASE_URL = "/main";
+    const BASE_URL = BACKEND_PROXY;
     const role = localStorage.getItem("shubhtalk_role");
     const token = role === "ASTROLOGER" ? localStorage.getItem("shubhtalk_astro_token") : localStorage.getItem("shubhtalk_customer_token");
     const res = await fetch(`${BASE_URL}/api/mall/products/${productIdOrSlug}`, {
