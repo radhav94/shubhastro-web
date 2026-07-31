@@ -5,6 +5,7 @@ import { IoClose } from "react-icons/io5";
 import styles from "./SubscriptionModal.module.scss";
 import { useGetSubscriptionPlansQuery, usePurchaseWalletSubscriptionMutation, useGetSubscriptionStatusQuery } from "../../../../redux/api/subscription/subscriptionApi";
 import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from "../../../../utils/subscription/featureGating";
+import { SUBSCRIPTION_EVENTS, trackSubscriptionEvent } from "../../../../utils/subscriptionAnalytics";
 import shubhLogoMobile from "../../../../assets/images/mobile-shubh-astro-logo.svg";
 import welcomeBg from "../../../../assets/images/welcome-bonus-bg.webp";
 import welcomeBgMobile from "../../../../assets/images/welcome-bonus-bg-mobile.webp";
@@ -83,7 +84,7 @@ const getPurchaseFailureReason = (res) => {
   return null;
 };
 
-const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsufficientBalance, variant = "basic", plans }) => {
+const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsufficientBalance, variant = "basic", plans, featureName = "" }) => {
   const isExtended = variant === "extended";
 
   // Extended plans are returned inline by the generate/report response. When the
@@ -130,6 +131,41 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
       setPendingCode(null);
     }
   }, [isOpen]);
+
+  // #1 SUBSCRIPTION_PAYWALL_SHOWN — fire once each time the dialog opens.
+  const purchasedForDismissRef = useRef(false);
+  useEffect(() => {
+    if (isOpen) {
+      purchasedForDismissRef.current = false;
+      trackSubscriptionEvent(SUBSCRIPTION_EVENTS.PAYWALL_SHOWN, {
+        feature_key: featureName || undefined,
+        plan_type: variant,
+      });
+    }
+  }, [isOpen, featureName, variant]);
+
+  // #2 SUBSCRIPTION_PLANS_LOADED — fire once per open when plans are available
+  // (either fetched from the API or provided inline for the extended flow).
+  const plansLoadedFiredRef = useRef(false);
+  useEffect(() => {
+    if (!isOpen) {
+      plansLoadedFiredRef.current = false;
+      return;
+    }
+    if (plansLoadedFiredRef.current) return;
+    const inline = Array.isArray(plans) && plans.length > 0 ? plans : null;
+    const fetched = Array.isArray(data?.data) ? data.data : null;
+    const ready = inline || (!isLoading && !isFetching && fetched);
+    if (!ready) return;
+    const count = inline
+      ? inline.length
+      : fetched.filter((p) => p.status === "active").length;
+    plansLoadedFiredRef.current = true;
+    trackSubscriptionEvent(SUBSCRIPTION_EVENTS.PLANS_LOADED, {
+      plans_count: count,
+      plan_type: variant,
+    });
+  }, [isOpen, plans, data, isLoading, isFetching, variant]);
 
   if (!isOpen) return null;
 
@@ -212,9 +248,20 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
   const handleSelect = async (card) => {
     // Free plan is not a purchasable subscription.
     if (!card?.plan?.code || card.plan.price === 0) {
+      // #8 SUBSCRIPTION_FREE_PLAN_SELECTED
+      trackSubscriptionEvent(SUBSCRIPTION_EVENTS.FREE_PLAN_SELECTED, {
+        feature_key: featureName || undefined,
+      });
       if (onSelectPlan) onSelectPlan(card.plan);
       return;
     }
+    // #3 SUBSCRIPTION_PLAN_SELECTED
+    trackSubscriptionEvent(SUBSCRIPTION_EVENTS.PLAN_SELECTED, {
+      plan_code: card.plan.code,
+      plan_name: card.plan.name,
+      plan_price: card.priceValue,
+      plan_type: variant,
+    });
     setPendingCode(card.id);
     setFlow("processing");
     try {
@@ -224,12 +271,22 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
       // the endpoint: data.reason, top-level reason, or error.code.
       const reason = getPurchaseFailureReason(res) || body?.data?.reason || body?.reason || body?.error?.code || body?.error?.reason;
       if (body?.success === true) {
+        // #4 SUBSCRIPTION_PURCHASE_SUCCESS
+        trackSubscriptionEvent(SUBSCRIPTION_EVENTS.PURCHASE_SUCCESS, {
+          plan_code: card.plan.code,
+          amount: card.priceValue,
+        });
+        purchasedForDismissRef.current = true;
         setSuccessPlan(card);
         setFlow("success");
         // Plan was paid from the wallet — refresh the wallet balance everywhere.
         window.dispatchEvent(new Event("walletBalanceUpdated"));
         if (onPurchased) onPurchased(card.plan);
       } else if (reason === SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE) {
+        // #9 SUBSCRIPTION_INSUFFICIENT_BALANCE
+        trackSubscriptionEvent(SUBSCRIPTION_EVENTS.INSUFFICIENT_BALANCE, {
+          plan_code: card.plan.code,
+        });
         setFlow("idle");
         toast.error("Insufficient wallet balance. Please recharge to continue.");
         // Notify the parent first so it can close the modal and suppress its own
@@ -240,13 +297,28 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
         else if (onClose) onClose();
         redirectToRecharge();
       } else if (reason === "AI_WOW_PREMIUM_FLOW_DISABLED") {
+        // #5 SUBSCRIPTION_PURCHASE_FAILED
+        trackSubscriptionEvent(SUBSCRIPTION_EVENTS.PURCHASE_FAILED, {
+          plan_code: card.plan.code,
+          error_reason: "AI_WOW_PREMIUM_FLOW_DISABLED",
+        });
         setFlow("idle");
         toast.error("Subscriptions aren't available right now.");
       } else {
+        // #5 SUBSCRIPTION_PURCHASE_FAILED
+        trackSubscriptionEvent(SUBSCRIPTION_EVENTS.PURCHASE_FAILED, {
+          plan_code: card.plan.code,
+          error_reason: reason || body?.message || "purchase_failed",
+        });
         setFlow("idle");
         toast.error(body?.message || "Purchase failed. Please try again.");
       }
-    } catch {
+    } catch (err) {
+      // #5 SUBSCRIPTION_PURCHASE_FAILED
+      trackSubscriptionEvent(SUBSCRIPTION_EVENTS.PURCHASE_FAILED, {
+        plan_code: card.plan.code,
+        error_reason: err?.message || "exception",
+      });
       setFlow("idle");
       toast.error("Purchase failed. Please try again.");
     } finally {
@@ -254,10 +326,22 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
     }
   };
 
+  // #6 SUBSCRIPTION_PAYWALL_DISMISSED — user closed the dialog without a
+  // successful purchase. Wrap onClose so it fires only on a real dismissal.
+  const handleDismiss = () => {
+    if (!purchasedForDismissRef.current && flow !== "success") {
+      trackSubscriptionEvent(SUBSCRIPTION_EVENTS.PAYWALL_DISMISSED, {
+        feature_key: featureName || undefined,
+        plan_type: variant,
+      });
+    }
+    if (onClose) onClose();
+  };
+
   return (
     <div className={styles.overlay}>
       <div className={styles.modal} style={modalStyle} role="dialog" aria-modal="true" aria-label="Choose Your Subscription">
-        <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+        <button className={styles.closeBtn} onClick={handleDismiss} aria-label="Close">
           <IoClose size={22} />
         </button>
 
