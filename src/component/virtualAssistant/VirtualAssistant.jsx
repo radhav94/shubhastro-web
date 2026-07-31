@@ -20,6 +20,7 @@ import IframeModal from "../../screens/private/home/components/chats/IframeModal
 import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
 import { useFileSelector } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
 import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
+import { buildKundliLink } from "../../utils/helper/kundliMessage";
 import PdfIcon from "../../assets/chat/PDF.svg";
 import DocIcon from "../../assets/chat/DOC.svg";
 import XlsIcon from "../../assets/chat/XLS.svg";
@@ -253,14 +254,10 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
                         </div>
                       ) : msg.type === "kundli" ? (() => {
                         // Always resolve the kundli view from kundliId when
-                        // available. Some stored messages have a `message` that
-                        // isn't a kundli URL (e.g. an astrologer profile link),
-                        // which would open the wrong page and fail its API.
-                        const kundliLink = msg.kundliId
-                          ? `${window.location.origin}/kundli/${msg.kundliId}`
-                          : typeof msg.message === "string" && msg.message.includes("/kundli/")
-                            ? msg.message
-                            : null;
+                        // available, falling back to parsing the message text
+                        // (bare id or a full /kundli/<id> URL). Non-kundli text
+                        // (e.g. an astrologer profile link) resolves to null.
+                        const kundliLink = buildKundliLink(msg.kundliId, msg.message);
                         return (
                           <div
                             className={styles.kundliLink}

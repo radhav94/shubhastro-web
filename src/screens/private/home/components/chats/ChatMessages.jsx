@@ -12,6 +12,7 @@ import XlsIcon from "../../../../../assets/chat/XLS.svg";
 import IframeModal from "./IframeModal";
 import dayjs from "dayjs";
 import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
+import { buildKundliLink } from "../../../../../utils/helper/kundliMessage";
 import LinkPreview from "./LinkPreview";
 import { detectURL } from "../../../../../utils/helper/linkPreview";
 import { getAttachmentDisplayName } from "../../../../../utils/helper/getAttachmentDisplayName";
@@ -181,10 +182,9 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
 
     // Kundli messages
     if (msg?.type === "kundli") {
-      const kundliLink = msg.kundliId
-        ? `${window.location.origin}/kundli/${msg.kundliId}`
-        : null;
-        // console.log(kundliLink,"78909876789")
+      // Resolve from kundliId, falling back to parsing the message text
+      // (some messages store a bare id, others a full URL).
+      const kundliLink = buildKundliLink(msg.kundliId, msg.message ?? msg.text);
       return (
         <div
           onClick={() => kundliLink && setIframeSrc(kundliLink)}
