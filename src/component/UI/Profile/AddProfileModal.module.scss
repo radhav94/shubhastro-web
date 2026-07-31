@@ -217,8 +217,8 @@
   .leftIconBtn {
     position: absolute;
     left: 11px;
-    top: 8px;
-    // transform: translateY(-50%);
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
     justify-content: center;
