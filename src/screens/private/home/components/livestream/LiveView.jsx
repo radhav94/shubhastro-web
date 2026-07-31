@@ -291,7 +291,7 @@ const LiveView = (props) => {
 
   const { data: followingData } = useCheckFollowingStatusQuery(
     { astrologerId },
-    { skip: !astrologerId || props.isGuest }
+    { skip: !astrologerId }
   );
   const isFollowing = followingData?.data?.isFollowing || false;
   const [followAstrologer, { isLoading: followLoading }] = useFollowAstrologerByIdMutation();
@@ -1269,7 +1269,6 @@ const LiveView = (props) => {
             {/* Follow button - right side of top bar */}
             {!isHost && (
               <div className="top-bar-right">
-                {!props.isGuest && (
                 <button
                   className={`follow-btn ${isFollowing ? "following" : ""}`}
                   onClick={handleFollow}
@@ -1281,7 +1280,6 @@ const LiveView = (props) => {
                     ? "Following"
                     : "+ Follow"}
                 </button>
-                )}
                 {/* {isHostMuted && !localPrivateCall && remoteUsers.length > 0 && !roomEnded && (
                   <div className="mute-indicator">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1563,7 +1561,7 @@ const LiveView = (props) => {
                 </button>
               </div>
               
-              {!isHost && !props.isGuest && !isCallForCurrentAstrologer && !pendingConnections.some((c) => c.astrologer?._id === astrologerId) && (
+              {!isHost && !isCallForCurrentAstrologer && !pendingConnections.some((c) => c.astrologer?._id === astrologerId) && (
                 <button 
                   className="call-price-btn"
                   onClick={handleDirectVoiceCall}
@@ -1774,7 +1772,7 @@ const LiveView = (props) => {
             </div>
 
             {/* Send Gift */}
-            {!isHost && !props.isGuest && (
+            {!isHost && (
               <button className="icon-btn" onClick={() => setShowGifts(true)}>
                 <div className="icon-circle">
                   <img src={AppImages.LiveGift} alt="Send gift" width="28" height="28" />
