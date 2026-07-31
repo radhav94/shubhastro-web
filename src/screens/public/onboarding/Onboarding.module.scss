@@ -527,7 +527,7 @@
   }
 }
 .otpprimaryBtnPer{
-  margin: 16px auto 16px auto;
+  margin: 20px auto 20px auto;
   @media (width <= 767px) {
     // position: fixed;
     left: 0;
@@ -537,7 +537,7 @@
   }
 }
 .otpprimaryBtn{
-  margin: 0px auto 16px auto;
+  margin: 0px auto 0px auto;
 }
 // Guidance Screen
 .guidanceScreen {
@@ -556,7 +556,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-top: 16px;
+  margin-top: 24px;
   @media (width <= 820px) {
     grid-template-columns: repeat(3, 1fr);
   }
