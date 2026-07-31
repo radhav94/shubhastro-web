@@ -2,15 +2,21 @@ import axios from "axios";
 import { Toast } from "../component";
 import { getToken } from "../utils/utlis";
 import { refreshTokenAndReload } from "../utils/tokenRefresh";
+import { attachSecureTransport } from "../utils/security/secureAxios";
+import { BACKEND_PROXY } from "../utils/apiConfig";
 import { getSubscriptionErrorReason } from "../utils/subscription/featureGating";
 
 let unAuthorizedCount = 0;
 const privateRequest = axios.create({
-  baseURL: "/main/api/",
+  baseURL: `${BACKEND_PROXY}/api/`,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+// Attach secure gateway session header + response decryption FIRST so envelopes are
+// decrypted before the error handler below inspects response bodies.
+attachSecureTransport(privateRequest);
 
 privateRequest.interceptors.request.use(
   (config) => {

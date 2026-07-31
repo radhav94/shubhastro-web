@@ -1,9 +1,10 @@
 import { io } from "socket.io-client";
+import { SOCKET_URL, SOCKET_PATH } from "../utils/apiConfig";
 import { markInitiated, claimRoom } from "../utils/tabSession";
 import { getGuestId } from "../utils/guestId";
 import Toast from "../component/toast";
 
-export const voiceSocket = io("/", {
+export const voiceSocket = io(SOCKET_URL, {
   transports: ["websocket"],
   autoConnect: false,
   reconnection: true,
@@ -11,7 +12,7 @@ export const voiceSocket = io("/", {
   reconnectionDelay: 5000,
   reconnectionDelayMax: 5000,
   timeout: 20000,
-  path: "/main/socket.io",
+  path: SOCKET_PATH,
   auth: (cb) => {
     const role = localStorage.getItem("shubhtalk_role");
     const token = role === "ASTROLOGER"
@@ -20,7 +21,6 @@ export const voiceSocket = io("/", {
     if (token) {
       cb({ token });
     } else {
-      // Guest user — no token, self-declare with persistent UUID
       cb({ userId: getGuestId(), role: "GUEST" });
     }
   },
