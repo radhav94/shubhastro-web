@@ -12,7 +12,7 @@ import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const ClothColorResult = () => {
   const navigate = useNavigate();
-  const handleBack = () => navigate('/ai-wow/clothes-colour-analysis', { replace: true });
+  const handleBack = () => navigate(-1);
   const [activeTab, setActiveTab] = useState('recommended');
   const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);

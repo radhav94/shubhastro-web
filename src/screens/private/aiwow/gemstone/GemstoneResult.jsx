@@ -12,7 +12,7 @@ import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const GemstoneResult = () => {
   const navigate = useNavigate();
-  const handleBack = () => navigate('/ai-wow/gemstone-authenticity', { replace: true });
+  const handleBack = () => navigate(-1);
   const [gemstones, setGemstones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedGemstoneIndex, setSelectedGemstoneIndex] = useState(0);
