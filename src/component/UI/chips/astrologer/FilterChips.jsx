@@ -128,6 +128,7 @@ const FilterChips = ({
     if (selectedType && selectedType !== "All") {
       setActive(selectedType);
       setEexperties(selectedType);
+      setActiveChips([selectedType]); // IMPORTANT: Also update activeChips so deselect logic works correctly
       setPage(1);
       pageRef.current = 1;
       setHasMore(true);
@@ -140,6 +141,20 @@ const FilterChips = ({
         ignoreSearch: true,
         append: false,
       });
+    } else if (!selectedType || selectedType === "All") {
+      // When selectedType becomes undefined/empty (user clicked to unselect)
+      // Immediately clear the active state instead of waiting for parent re-render
+      setActive("all");
+      setActiveChips([]);
+      setEexperties("");
+      setSelectedSkills([]);
+      setSelectedGender("");
+      setSelectedSort("");
+      setSearchText("");
+      setPage(1);
+      pageRef.current = 1;
+      setHasMore(true);
+      isFilterActiveRef.current = false;
     }
   }, [selectedType, astroFilterTab]);
 
