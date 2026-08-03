@@ -209,7 +209,7 @@ const TalkToKundliChat = () => {
   };
 
   const handleBack = () => {
-    navigate('/ai-wow');
+    navigate(-1);
   };
 
   // Guest: open the add-kundli flow (kundli + OTP). On success the token and a

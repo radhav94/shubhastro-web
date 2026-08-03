@@ -221,7 +221,7 @@ const CosmicChat = () => {
   };
 
   const handleBack = () => {
-    navigate('/ai-wow');
+    navigate(-1);
   };
 
   // Guests are redirected to login by the effect above; render nothing until
