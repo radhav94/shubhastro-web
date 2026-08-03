@@ -127,11 +127,11 @@ const OrderInfoCard = ({
 
   const formatDuration = (val) => {
     if (!val && val !== 0) return "0 Min 0 Secs";
-    // Backend sends duration in minutes (e.g. 1 = 1 min, 2.5 = 2 min 30 sec)
-    const totalSeconds = Math.round(val * 60);
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    return `${mins} Min ${secs} Secs`;
+    // Backend sends duration in seconds (same as callHistory's totalDuration)
+    const totalSecs = Math.round(val);
+    const mins = Math.floor(totalSecs / 60);
+    const secs = totalSecs % 60;
+    return `${mins} Min ${secs} Sec`;
   };
 
   // ---- CALL CARD LAYOUT ----
