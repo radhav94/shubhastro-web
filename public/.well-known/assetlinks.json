@@ -7,5 +7,15 @@
       "sha256_cert_fingerprints":
         ["05:90:5A:15:FB:67:51:59:82:FA:CB:72:25:01:A6:D6:4C:11:A9:F1:47:32:AE:14:08:67:41:8E:4D:C1:99:41"]
     }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.pittieglobal.astrologerlitedev",
+      "sha256_cert_fingerprints": [
+        "15:20:6D:AF:54:5B:DD:94:29:EF:48:07:26:8B:70:05:EB:03:48:9B:0A:39:25:0B:21:DB:48:CB:00:B5:94:F1"
+      ]
+    }
   }
 ]
