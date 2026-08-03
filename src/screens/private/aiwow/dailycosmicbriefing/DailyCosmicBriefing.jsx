@@ -145,7 +145,7 @@ const DailyCosmicBriefing = () => {
   };
 
   const handleBack = () => {
-    navigate('/ai-wow');
+    navigate(-1);
   };
 
   const getMoodColor = (level) => {
