@@ -9,6 +9,7 @@ import {
 } from "../../../../utils/appImages";
 import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySessionModal";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 const NewAstrologerDetailsCard = ({
   astrologer,
@@ -72,7 +73,7 @@ const NewAstrologerDetailsCard = ({
       <div className={styles.detailsInfo}>
         <Link to={`/astrologer/${astrologer?._id}`} className={styles.detailsNameLink}>
           <h3 className={styles.detailsName}>
-            {astrologer?.firstName} {astrologer?.lastName}
+            {getAstrologerDisplayName(astrologer)}
           </h3>
         </Link>
 

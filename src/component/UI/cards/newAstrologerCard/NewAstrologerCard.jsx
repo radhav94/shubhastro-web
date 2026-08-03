@@ -4,6 +4,7 @@ import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { AppIcons, getAstrologerDefaultImage } from "../../../../utils/appImages";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 const NewAstrologerCard = memo(({ 
   astrologer, 
@@ -97,7 +98,7 @@ const NewAstrologerCard = memo(({
           />
         </div>
         <h3 className={styles.astrologerName}>
-          {astrologer.firstName} {astrologer.lastName}
+          {getAstrologerDisplayName(astrologer)}
         </h3>
         {astrologer.experience && (
           <div className={styles.experienceRow}>

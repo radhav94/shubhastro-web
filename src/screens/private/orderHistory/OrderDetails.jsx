@@ -21,6 +21,7 @@ import { useChat } from "../../../context/ChatContext";
 import { useCall } from "../../../context/CallContext";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
+import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
 
 const OrderDetails = () => {
   const { astrologerId } = useParams();
@@ -233,7 +234,7 @@ const OrderDetails = () => {
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
         navigate(`/chat-to-astrologer/${astroId}`, {
-          state: { userId: uid, astrologerId: astroId, fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(), roomId, isUserSide: true, experience: astro?.experience, profileImgUrl: astro?.profileImgUrl },
+          state: { userId: uid, astrologerId: astroId, fullName: getAstrologerDisplayName(astro), roomId, isUserSide: true, experience: astro?.experience, profileImgUrl: astro?.profileImgUrl },
         });
       } catch (e) {
         Toast.error("Failed to start chat");
@@ -322,7 +323,7 @@ const OrderDetails = () => {
   const astrologer = astrologerData?.data;
 
   const astrologerInfo = astrologer ? {
-    name: `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
+    name: getAstrologerDisplayName(astrologer),
     experience: astrologer.experience ? `${astrologer.experience} Years` : "N/A",
     image: astrologer.profileImgUrl || astrologer.profileImgUrl || "https://via.placeholder.com/40",
     isOnline: astrologer.isActive || false,
@@ -361,7 +362,7 @@ const OrderDetails = () => {
 
     setReviewData({
       astrologerID: astrologer.astrologer_ID || astrologer._id,
-      fullName: `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
+      fullName: getAstrologerDisplayName(astrologer),
       profileImage: astrologer.profileImgUrl || astrologer.imageUrl ,
       roomId,
     });

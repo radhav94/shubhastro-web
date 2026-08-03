@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useCall } from "../../../../../context/CallContext";
 import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 
 function formatWait(conn) {
   if (!conn || conn.confidence === undefined) return null;
@@ -34,7 +35,7 @@ export const FooterWaiting = () => {
     }
   }, [setCallApproval, setWaitingList, removePendingConnection])
 
-  const astrologerName = lastRequestedAstro?.firstName;
+  const astrologerName = getAstrologerDisplayName(lastRequestedAstro);
 
   const handleCancel = () => {
     voiceSocket.emit("call:cancel", {roomId: activeCallRoomId, canceledBy: "CUSTOMER"});

@@ -7,6 +7,7 @@ import PrimaryText from "../../../../../component/PrimaryText";
 import PrimaryButton from "../../../../../component/PrimaryButton";
 import { MdCallEnd, MdVolumeUp, MdVolumeOff, MdMicOff, MdMic } from "react-icons/md";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 
 const AstrologerCallUI = ({ astrologer, onEndCall }) => {
   const [isMuted, setIsMuted] = useState(false);
@@ -85,7 +86,7 @@ const AstrologerCallUI = ({ astrologer, onEndCall }) => {
 
           <div className={styles.nameBlock}>
             <PrimaryText size_18 isExtraBold>
-              {astrologer?.firstName} {astrologer?.lastName}
+              {getAstrologerDisplayName(astrologer)}
             </PrimaryText>
             <PrimaryText size_12 color={appColors.greyMedium}>
               {astrologer?.specialties?.length

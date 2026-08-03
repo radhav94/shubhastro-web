@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../Community.module.scss";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 const AstrologerAvatar = ({ astrologer, name }) => {
   const [imgError, setImgError] = useState(false);
@@ -56,7 +57,7 @@ const TrendingAstrologers = ({
       <h3 className={styles.trendingTitle}>{title}</h3>
       <ul className={styles.trendingList}>
         {astrologers.map((astrologer) => {
-          const name = `${astrologer.firstName} ${astrologer.lastName || ""}`;
+          const name = getAstrologerDisplayName(astrologer);
           return (
             <li key={astrologer._id || astrologer.astrologerID} className={styles.trendingItem}>
               <AstrologerAvatar astrologer={astrologer} name={name} />

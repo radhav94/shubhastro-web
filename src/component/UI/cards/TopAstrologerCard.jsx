@@ -3,6 +3,7 @@ import { FaStar } from "react-icons/fa";
 import { PiBookOpenTextLight } from "react-icons/pi";
 import { Link } from "react-router-dom";
 import { getAstrologerDefaultImage } from "../../../utils/appImages";
+import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
 
 const TopAstrologerCard = ({ data, onConnect }) => {
   // Handle rating - use rating field or default to 4.5
@@ -40,7 +41,7 @@ const TopAstrologerCard = ({ data, onConnect }) => {
         </div>
 
         <h3 className={styles.name}>
-          {data?.firstName} {data?.lastName}
+          {getAstrologerDisplayName(data)}
         </h3>
 
         {experience > 0 && (
