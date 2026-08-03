@@ -331,8 +331,18 @@
 }
 
 .guidanceArrow {
-  font-size: 0.875rem;
-  color: #030303;
+  // Clear, tappable expand/collapse indicator so users know the card opens.
+  font-size: 0.8rem;
+  color: #F75801;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(247, 88, 1, 0.12);
+  border: 1px solid rgba(247, 88, 1, 0.35);
   transition: transform 0.2s;
 
   @media (min-width: 768px) {
@@ -786,8 +796,18 @@
 }
 
 .cosmicArrow {
-  font-size: 0.875rem;
-  color: #030303;
+  // Clear, tappable expand/collapse indicator (matches .guidanceArrow).
+  font-size: 0.8rem;
+  color: #F75801;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(247, 88, 1, 0.12);
+  border: 1px solid rgba(247, 88, 1, 0.35);
   transition: transform 0.2s;
 
   // Desktop: hide arrow
