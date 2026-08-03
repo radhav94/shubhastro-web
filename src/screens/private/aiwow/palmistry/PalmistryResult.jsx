@@ -40,7 +40,17 @@ const LineDropdown = ({ title, subtitle, children, isOpen, onToggle, ttsText }) 
 const PalmistryResult = () => {
   const navigate = useNavigate();
   const { resultId } = useParams();
-  const handleBack = () => navigate('/ai-wow/ai-palmistry-scanner', { replace: true });
+  const handleBack = () => {
+    // The palmistry flow pushes Landing → Instructions, then replaces forward
+    // (Camera → Analysis → Result). So from Result, going back 2 steps in
+    // history lands on the original Landing entry, avoiding a duplicate.
+    // If there's not enough history (e.g. direct URL access), fall back to navigating directly.
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate('/ai-wow/ai-palmistry-scanner', { replace: true });
+    }
+  };
   const [activeTab, setActiveTab] = useState('overview');
   const [resultData, setResultData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
