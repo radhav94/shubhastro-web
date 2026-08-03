@@ -65,7 +65,7 @@ const resolveAuraColor = (name) => {
 
 const FaceReadingResult = () => {
   const navigate = useNavigate();
-  const handleBack = () => navigate('/ai-wow/astro-face-reading', { replace: true });
+  const handleBack = () => navigate(-1);
   const [activeTab, setActiveTab] = useState('overall');
   const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(true);
