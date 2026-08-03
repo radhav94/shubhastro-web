@@ -445,7 +445,7 @@ const PalmistryCamera = () => {
         )}
       </div>
 
-      <div className={styles.cameraWrapper}>
+      <div className={`${styles.cameraWrapper} ${capturedImage ? styles.cameraWrapperCaptured : ''}`}>
         {!capturedImage ? (
           <>
             <video
@@ -530,7 +530,7 @@ const PalmistryCamera = () => {
 
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-      <div className={styles.controls}>
+      <div className={`${styles.controls} ${capturedImage ? styles.controlsCaptured : ''}`}>
         {!capturedImage ? (
           <button 
             className={`${styles.captureButton} ${(!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar) && handsLoaded ? styles.disabled : ''}`} 

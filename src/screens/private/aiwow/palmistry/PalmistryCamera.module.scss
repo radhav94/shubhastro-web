@@ -66,6 +66,27 @@
   overflow: hidden;
 }
 
+/* When a photo has been captured, stop the image area above the action bar so
+   the Retake / Use Photo buttons don't overlap the captured photo on mobile. */
+.cameraWrapperCaptured {
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  background: #000;
+
+  @media (min-width: 768px) {
+    bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Keep the hand label inside the visible photo area rather than -60px below
+     the wrapper (which would collide with the action bar). */
+  .palmLabel {
+    bottom: 12px;
+
+    @media (min-width: 768px) {
+      bottom: 16px;
+    }
+  }
+}
+
 .video {
   position: absolute;
   top: 0;
@@ -311,6 +332,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* Solid bar under the captured image so the buttons sit in their own space
+   instead of floating over the photo. */
+.controlsCaptured {
+  background: #000;
+  padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
 }
 
 .captureButton {
