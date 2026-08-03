@@ -278,6 +278,12 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 0.8rem;
   }
+
+  // Mobile: one card per row for a cleaner, roomier layout.
+  @media (width <= 767px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
 }
 
 .guidanceCard {
@@ -297,8 +303,14 @@
   width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  // Align to the top so the title + arrow sit next to the top-right TTS
+  // speaker (cards stretch to equal grid heights, so centering would leave the
+  // arrow floating in the middle, disconnected from the speaker).
+  align-items: flex-start;
   padding: 0.8rem;
+  // Reserve room on the right so the expand arrow never sits under the
+  // absolutely-positioned TTS speaker button (32px @ right:8px = 40px).
+  padding-right: 3rem;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -318,7 +330,6 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 26px;
 }
 
 .auraHeaderContent {
@@ -777,8 +788,10 @@
   width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 0.8rem;
+  // Reserve room on the right so the arrow clears the absolute TTS button.
+  padding-right: 3rem;
   background: transparent;
   border: none;
   cursor: pointer;
