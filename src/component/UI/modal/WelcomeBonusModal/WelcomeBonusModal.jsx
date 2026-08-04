@@ -73,7 +73,7 @@ const WelcomeBonusModal = () => {
           <h2 className={styles.title}>A Little Gift From Us</h2>
           <p className={styles.amount}>₹{amount}</p>
           <div className={styles.badge}>
-            <span>₹</span> Welcome bonus added to your wallet
+            Welcome bonus added to your wallet
           </div>
           <p className={styles.desc}>
             Use it to talk to expert astrologers & begin your cosmic journey.
