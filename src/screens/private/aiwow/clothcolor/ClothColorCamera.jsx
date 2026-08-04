@@ -250,7 +250,7 @@ const ClothColorCamera = () => {
 
   const submitImage = () => {
     dispatch(setClothColorImage(capturedImage));
-    navigate('/ai-wow/clothes-colour-analysis/capture');
+    navigate('/ai-wow/clothes-colour-analysis/capture', { replace: true });
   };
 
   const proceedWithImage = () => {
@@ -293,7 +293,7 @@ const ClothColorCamera = () => {
     }
     
     // Navigate after stopping camera
-    navigate(-1);
+    navigate('/ai-wow/clothes-colour-analysis', { replace: true });
   };
 
   if (error) {
@@ -334,7 +334,7 @@ const ClothColorCamera = () => {
         isOpen
         onClose={() => {
           setShowGuestAuthModal(false);
-          navigate('/ai-wow/clothes-colour-analysis/instructions');
+          navigate('/ai-wow/clothes-colour-analysis', { replace: true });
         }}
         onSuccess={handleGuestAuthSuccess}
       />

@@ -43,7 +43,7 @@ const GemstoneAnalysis = () => {
     if (profileLoading) return;
 
     if (!gemstoneImage) {
-      navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0]);
+      navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0], { replace: true });
       return;
     }
 
@@ -161,9 +161,9 @@ const GemstoneAnalysis = () => {
   };
 
   const handleRetakePicture = () => {
-    // Clear only the captured image and go back to the instructions screen.
+    // Clear only the captured image and go back to the landing screen.
     dispatch(setGemstoneImage(null));
-    navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path[0]);
+    navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0], { replace: true });
   };
 
   const handleShowResult = () => {
@@ -177,12 +177,12 @@ const GemstoneAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearGemstoneData());
-    navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0]);
+    navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0], { replace: true });
   };
 
   const handleBack = () => {
     dispatch(clearGemstoneData());
-    navigate(PATH.privateRoutes.GEMSTONE_INSTRUCTIONS.path[0], { replace: true });
+    navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0], { replace: true });
   };
 
   return (

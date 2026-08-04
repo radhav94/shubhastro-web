@@ -295,7 +295,7 @@ const FaceReadingCamera = () => {
 
   const submitImage = () => {
     dispatch(setFaceReadingImage(capturedImage));
-    navigate('/ai-wow/astro-face-reading/capture');
+    navigate('/ai-wow/astro-face-reading/capture', { replace: true });
   };
 
   const proceedWithImage = () => {
@@ -332,7 +332,7 @@ const FaceReadingCamera = () => {
     setVideoActive(false);
     
     // 4️⃣ Navigate immediately
-    navigate(-1);
+    navigate('/ai-wow/astro-face-reading', { replace: true });
   };
 
   if (error) {

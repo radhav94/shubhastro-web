@@ -44,8 +44,12 @@ const FaceReadingLanding = () => {
     if (action) action();
   };
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   const handleCamera = () => {
-    navigate('/ai-wow/astro-face-reading/camera');
+    navigate('/ai-wow/astro-face-reading/camera', { replace: true });
   };
 
   const handleUpload = () => {
@@ -60,7 +64,7 @@ const FaceReadingLanding = () => {
         // Guests must authenticate at the moment the photo is submitted.
         runOrAuth(() => {
           dispatch(setFaceReadingImage(dataUrl));
-          navigate('/ai-wow/astro-face-reading/capture');
+          navigate('/ai-wow/astro-face-reading/capture', { replace: true });
         });
       });
     }
@@ -94,7 +98,7 @@ const FaceReadingLanding = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <button className={styles.backButton} onClick={handleBack}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

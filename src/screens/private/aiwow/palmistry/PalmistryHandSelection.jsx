@@ -15,7 +15,7 @@ const PalmistryHandSelection = () => {
   const handleProceed = () => {
     if (selectedHand) {
       dispatch(setPalmistrySelectedHand(selectedHand));
-      navigate('/ai-wow/ai-palmistry-scanner/instructions');
+      navigate('/ai-wow/ai-palmistry-scanner/instructions', { replace: true });
     }
   };
 

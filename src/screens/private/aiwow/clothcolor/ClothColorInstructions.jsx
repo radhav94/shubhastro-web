@@ -42,7 +42,7 @@ const ClothColorInstructions = () => {
   };
 
   const handleCamera = () => {
-    navigate('/ai-wow/clothes-colour-analysis/camera');
+    navigate('/ai-wow/clothes-colour-analysis/camera', { replace: true });
   };
 
   const handleUpload = () => {
@@ -58,7 +58,7 @@ const ClothColorInstructions = () => {
           // Guests must authenticate at the moment the photo is submitted.
           runOrAuth(() => {
             dispatch(setClothColorImage(dataUrl));
-            navigate('/ai-wow/clothes-colour-analysis/capture');
+            navigate('/ai-wow/clothes-colour-analysis/capture', { replace: true });
           });
         })
         .catch((err) => {

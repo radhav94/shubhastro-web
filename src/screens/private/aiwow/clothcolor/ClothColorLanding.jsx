@@ -52,7 +52,7 @@ const ClothColorLanding = () => {
   const handleCamera = () => {
     // Persist the selected intention so the analyze API receives it.
     dispatch(setClothColorFormData(formData));
-    navigate('/ai-wow/clothes-colour-analysis/camera');
+    navigate('/ai-wow/clothes-colour-analysis/camera', { replace: true });
   };
 
   const handleUpload = () => {
@@ -70,7 +70,7 @@ const ClothColorLanding = () => {
             // Persist the selected intention so the analyze API receives it.
             dispatch(setClothColorFormData(formData));
             dispatch(setClothColorImage(dataUrl));
-            navigate('/ai-wow/clothes-colour-analysis/capture');
+            navigate('/ai-wow/clothes-colour-analysis/capture', { replace: true });
           });
         })
         .catch((err) => {

@@ -43,7 +43,7 @@ const FaceReadingAnalysis = () => {
     if (profileLoading) return;
 
     if (!faceImage) {
-      navigate(PATH.privateRoutes.FACE_READING_LANDING.path[0]);
+      navigate(PATH.privateRoutes.FACE_READING_LANDING.path[0], { replace: true });
       return;
     }
 
@@ -163,9 +163,9 @@ const FaceReadingAnalysis = () => {
   };
 
   const handleRetakePicture = () => {
-    // Clear only the captured image and go back to the instructions screen.
+    // Clear only the captured image and go back to the landing screen.
     dispatch(setFaceReadingImage(null));
-    navigate(PATH.privateRoutes.FACE_READING_INSTRUCTIONS.path[0]);
+    navigate(PATH.privateRoutes.FACE_READING_LANDING.path[0], { replace: true });
   };
 
   const handleShowResult = () => {
@@ -179,12 +179,12 @@ const FaceReadingAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearFaceReadingData());
-    navigate(PATH.privateRoutes.FACE_READING_LANDING.path[0]);
+    navigate(PATH.privateRoutes.FACE_READING_LANDING.path[0], { replace: true });
   };
 
   const handleBack = () => {
     dispatch(clearFaceReadingData());
-    navigate(PATH.privateRoutes.FACE_READING_INSTRUCTIONS.path[0], { replace: true });
+    navigate(PATH.privateRoutes.FACE_READING_LANDING.path[0], { replace: true });
   };
 
   return (

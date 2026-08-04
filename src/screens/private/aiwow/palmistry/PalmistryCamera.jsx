@@ -457,7 +457,7 @@ const PalmistryCamera = () => {
     }
     
     // Navigate after stopping camera
-    navigate(-1);
+    navigate('/ai-wow/ai-palmistry-scanner', { replace: true });
   };
 
   if (error) {
@@ -499,7 +499,7 @@ const PalmistryCamera = () => {
         isOpen
         onClose={() => {
           setShowGuestAuthModal(false);
-          navigate('/ai-wow/ai-palmistry-scanner/instructions');
+          navigate('/ai-wow/ai-palmistry-scanner', { replace: true });
         }}
         onSuccess={handleGuestAuthSuccess}
       />,
