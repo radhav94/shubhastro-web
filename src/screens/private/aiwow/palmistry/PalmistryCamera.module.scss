@@ -356,9 +356,37 @@
     transform: scale(0.95);
   }
 
+  // Visually de-emphasised while hand detection is unhappy, but still tappable —
+  // the tap surfaces guidance instead of being swallowed. Do not add
+  // `pointer-events: none` or the HTML `disabled` attribute here.
   &.disabled {
-    cursor: not-allowed;
     opacity: 0.6;
+  }
+}
+
+// Stacks the shutter above the upload escape hatch (.controls is a flex row).
+.captureStack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// Escape hatch shown under the shutter when detection is blocking capture.
+.uploadFallbackBtn {
+  margin-top: 0.75rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  padding: 0.5rem 1.125rem;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, transform 0.1s;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(0.97);
   }
 }
 

@@ -295,7 +295,7 @@ const PalmistryAnalysis = () => {
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
-          <h1 className={styles.headerTitle}>Palmistry Scanner</h1>
+          <h1 className={styles.headerTitle}>AI Palmistry Scanner</h1>
         </div>
       </header>
       <div className={styles.content}>

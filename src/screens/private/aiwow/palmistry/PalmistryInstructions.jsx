@@ -17,7 +17,7 @@ const PalmistryInstructions = () => {
   const pendingActionRef = useRef(null);
 
   const { data: aiwowData } = useGetAiWowPageDataQuery();
-  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'ai-palmistry-scanner')?.title || 'Palmistry Scanner';
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'ai-palmistry-scanner')?.title || 'AI Palmistry Scanner';
 
   // Guests must add a kundli + verify OTP before capturing/uploading a photo.
   const runOrAuth = (action) => {
