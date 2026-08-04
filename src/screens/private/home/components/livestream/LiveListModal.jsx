@@ -14,24 +14,25 @@ const LiveListModal = ({ show, onClose, lives = [] }) => {
 
   if (!show) return null;
 
-  // Step 1: Collect all unique slugs from all astrologers
-  const slugSet = new Set();
+  // Step 1: Collect all unique slugs and their titles from all astrologers
+  const slugMap = new Map(); // slug -> title
   lives.forEach((live) => {
     const expertise = live.astrologer?.expertise || [];
     expertise.forEach((exp) => {
       const slug = exp.slug || exp.title?.toLowerCase().replace(/\s+/g, "-") || null;
-      if (slug) slugSet.add(slug);
+      if (slug && !slugMap.has(slug)) {
+        slugMap.set(slug, exp.title || slugToTitle(slug));
+      }
     });
   });
 
   // Astrologers with no expertise go under "Other"
   const hasNoExpertise = lives.some((l) => !l.astrologer?.expertise?.length);
-  if (hasNoExpertise) slugSet.add("other");
+  if (hasNoExpertise) slugMap.set("other", "Other");
 
   // Step 2: For each slug, find all astrologers that have that slug
   const grouped = {};
-  slugSet.forEach((slug) => {
-    const title = slug === "other" ? "Other" : slugToTitle(slug);
+  slugMap.forEach((title, slug) => {
     grouped[title] = lives.filter((live) => {
       if (slug === "other") return !live.astrologer?.expertise?.length;
       return live.astrologer?.expertise?.some(
