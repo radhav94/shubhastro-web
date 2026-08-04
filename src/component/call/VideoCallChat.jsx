@@ -1002,6 +1002,7 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
           onClick={() => setImagePreview(null)}
           role="dialog"
           aria-modal="true"
+          aria-label="Image preview"
         >
           <button
             className={styles.imagePreviewClose}

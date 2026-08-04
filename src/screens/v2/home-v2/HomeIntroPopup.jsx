@@ -116,8 +116,17 @@ const HomeIntroPopup = () => {
   if (!isOpen) return null;
 
   return (
-    <div className={styles.overlay} onClick={handleClose} role="dialog" aria-modal="true">
-      <div className={styles.card} onClick={(e) => e.stopPropagation()}>
+    // The dialog role belongs on the card, not the click-to-dismiss backdrop —
+    // the backdrop is presentation only. aria-labelledby points at the visible
+    // heading so the dialog's purpose is announced on open.
+    <div className={styles.overlay} onClick={handleClose}>
+      <div
+        className={styles.card}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="home-intro-popup-title"
+      >
         <button className={styles.closeBtn} onClick={handleClose} aria-label="Close">
           <X size={20} />
         </button>
@@ -132,7 +141,7 @@ const HomeIntroPopup = () => {
         </button>
 
         <div className={styles.textBlock}>
-          <h2 className={styles.title}>Unlock Your Free Kundli</h2>
+          <h2 id="home-intro-popup-title" className={styles.title}>Unlock Your Free Kundli</h2>
           <p className={styles.subtitle}>
             Get your personalised birth chart with detailed insights on career,
             love, health and more — instantly and absolutely free.

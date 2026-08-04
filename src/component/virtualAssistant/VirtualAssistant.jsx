@@ -591,6 +591,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
           onClick={() => setImagePreview(null)}
           role="dialog"
           aria-modal="true"
+          aria-label="Image preview"
         >
           <button
             className={styles.imageModalClose}
