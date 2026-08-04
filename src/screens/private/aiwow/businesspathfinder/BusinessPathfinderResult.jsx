@@ -376,7 +376,7 @@ const BusinessPathfinderResult = () => {
             </div>
           </div>
           <div className={styles.downloadRight}>
-            <span className={styles.downloadPrice}>{getDownloadCost() === 0 ? 'Free' : `₹${getDownloadCost()}`}</span>
+            <span className={styles.downloadPrice}>{downloadedThisSession ? 'Free' : `₹${getChargeAmount() ?? 10}`}</span>
             <button className={styles.downloadBtn} onClick={handleDownloadClick}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>

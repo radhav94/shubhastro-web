@@ -1818,7 +1818,6 @@ const Profile = () => {
                 <div
                   key={orderHistoryTab}
                   className={styles.orderList}
-                  ref={orderListRef}
                 >
                   {/* Loading overlay for page transitions */}
                   {(orderHistoryTab === "call"
@@ -2020,7 +2019,7 @@ const Profile = () => {
                       onPageChange={(newPage) => {
                         if (isCall) setCallHistoryPage(newPage);
                         else setChatHistoryPage(newPage);
-                        if (newPage === totalPages && orderListRef.current) {
+                        if (orderListRef.current) {
                           orderListRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
                         }
                       }}
