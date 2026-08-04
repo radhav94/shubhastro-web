@@ -21,23 +21,72 @@ import WelcomeBonusModal from "../component/UI/modal/WelcomeBonusModal/WelcomeBo
 import WelcomeBackModal from "../component/UI/modal/WelcomeBonusModal/WelcomeBackModal";
 import DeviceLimitModal from "../component/UI/modal/DeviceLimitModal/DeviceLimitModal";
 
-// Wrapper that checks sessionStorage for device limit flag
+// Wrapper that checks localStorage for device limit flag
+// Persists across page refreshes for non-logged-in users
 const DeviceLimitModalWrapper = () => {
   const [devices, setDevices] = useState(null);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("shubhtalk_device_limit_reached");
+    console.log("🔄 DeviceLimitModalWrapper: Checking device limit storage");
+    
+    // Check localStorage FIRST (persists across refresh)
+    const stored = localStorage.getItem("shubhtalk_device_limit_reached");
     if (stored) {
       try {
-        setDevices(JSON.parse(stored));
-      } catch { /* ignore */ }
-      sessionStorage.removeItem("shubhtalk_device_limit_reached");
+        const data = JSON.parse(stored);
+        console.log("✅ Found in localStorage:", data.length, "devices");
+        setDevices(data);
+        return;
+      } catch (e) {
+        console.error("❌ Error parsing localStorage:", e);
+      }
+    }
+    
+    // Check sessionStorage (set immediately after OTP)
+    const sessionStored = sessionStorage.getItem("shubhtalk_device_limit_reached");
+    if (sessionStored) {
+      try {
+        const data = JSON.parse(sessionStored);
+        console.log("✅ Found in sessionStorage:", data.length, "devices");
+        setDevices(data);
+        // Persist to localStorage for page refresh
+        localStorage.setItem("shubhtalk_device_limit_reached", sessionStored);
+        return;
+      } catch (e) {
+        console.error("❌ Error parsing sessionStorage:", e);
+      }
+    }
+    
+    console.log("ℹ️ No device limit found in either storage");
+  }, []);
+
+  const handleClose = useCallback(() => {
+    console.log("🔕 DeviceLimitModalWrapper: Closing modal");
+    setDevices(null);
+    // Clear localStorage when user dismisses popup (only if max_device_reached became false)
+    localStorage.removeItem("shubhtalk_device_limit_reached");
+  }, []);
+
+  const handleDeviceUpdated = useCallback((updatedDevices) => {
+    if (updatedDevices && updatedDevices.length > 0) {
+      console.log("📋 DeviceLimitModalWrapper: Updating devices, count:", updatedDevices.length);
+      setDevices(updatedDevices);
+      localStorage.setItem("shubhtalk_device_limit_reached", JSON.stringify(updatedDevices));
+    } else {
+      console.log("✅ DeviceLimitModalWrapper: All devices removed, closing modal");
+      setDevices(null);
+      localStorage.removeItem("shubhtalk_device_limit_reached");
     }
   }, []);
 
-  const handleClose = useCallback(() => setDevices(null), []);
-
-  return <DeviceLimitModal isOpen={!!devices} onClose={handleClose} devices={devices || []} />;
+  return (
+    <DeviceLimitModal 
+      isOpen={!!devices} 
+      onClose={handleClose} 
+      onDeviceUpdated={handleDeviceUpdated}
+      devices={devices || []} 
+    />
+  );
 };
 
 

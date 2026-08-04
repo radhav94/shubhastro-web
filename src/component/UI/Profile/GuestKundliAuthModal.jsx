@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import AddProfileModal from "./AddProfileModal";
 import GuestDetailsForm from "./GuestDetailsForm";
 import OtpModal from "./OtpModal";
+import DeviceLimitModal from "../modal/DeviceLimitModal/DeviceLimitModal";
 import { Toast } from "../../index";
 import * as AuthServices from "../../../services/appServices/authService";
 import { saveUserToStorage } from "../../../utils/authStorage";
@@ -47,6 +48,8 @@ const GuestKundliAuthModal = ({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [sendingOtp, setSendingOtp] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [deviceLimitDevices, setDeviceLimitDevices] = useState(null);
+  const [isDeviceLimitOpen, setIsDeviceLimitOpen] = useState(false);
 
   // Build the kundli create payload from the AddProfileModal form values.
   const buildKundliPayload = (data, relation = "self") => {
@@ -146,6 +149,8 @@ const GuestKundliAuthModal = ({
     setPhoneNumber("");
     setSendingOtp(false);
     setVerifying(false);
+    setIsDeviceLimitOpen(false);
+    setDeviceLimitDevices(null);
   };
 
   const handleClose = () => {
@@ -203,6 +208,35 @@ const GuestKundliAuthModal = ({
 
       const userData = response?.data?.data || {};
       const { accessToken, refreshToken, _id } = userData;
+
+      // ── Check for device limit reached ──
+      console.log("🔍 Guest OTP verification - Checking device limit");
+      console.log("  max_device_reached:", userData.max_device_reached);
+      console.log("  activeDevices:", userData.activeDevices?.length, "devices");
+      
+      if (userData.max_device_reached && userData.activeDevices?.length) {
+        console.log("📱 Guest device limit detected! Showing popup");
+        const deviceData = JSON.stringify(userData.activeDevices);
+        localStorage.setItem("shubhtalk_device_limit_reached", deviceData);
+        sessionStorage.setItem("shubhtalk_device_limit_reached", deviceData);
+        
+        // Persist user data for login after device limit resolved
+        saveUserToStorage(userData);
+        localStorage.setItem("shubhtalk_role", "CUSTOMER");
+        localStorage.setItem("shubhtalk_customer_token", accessToken);
+        localStorage.setItem("shubhtalk_customer_id", _id);
+        if (accessToken) localStorage.setItem("accessToken", accessToken);
+        if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+        
+        // Show device limit modal and wait for user to resolve it
+        setDeviceLimitDevices(userData.activeDevices);
+        setIsDeviceLimitOpen(true);
+        
+        // Return true to close OTP modal, but we stay in this component
+        // until user handles the device limit
+        setStep("done");
+        return true;
+      }
 
       // ── Persist the token so background API calls are authorized ──
       saveUserToStorage(userData);
@@ -428,6 +462,36 @@ const GuestKundliAuthModal = ({
         isVerifying={verifying}
         closeOnOverlayClick={false}
         inline={inline}
+      />
+
+      <DeviceLimitModal
+        isOpen={isDeviceLimitOpen}
+        onClose={() => {
+          console.log("🔕 Guest device limit modal closed");
+          setIsDeviceLimitOpen(false);
+          localStorage.removeItem("shubhtalk_device_limit_reached");
+          sessionStorage.removeItem("shubhtalk_device_limit_reached");
+          // Close the entire guest auth modal
+          handleClose();
+        }}
+        onDeviceUpdated={(updatedDevices) => {
+          console.log("📋 Guest device limit - devices updated, count:", updatedDevices?.length);
+          if (updatedDevices && updatedDevices.length > 0) {
+            // Device limit still active - keep showing
+            setDeviceLimitDevices(updatedDevices);
+            localStorage.setItem("shubhtalk_device_limit_reached", JSON.stringify(updatedDevices));
+          } else {
+            // Device limit resolved - close popup and proceed
+            console.log("✅ Guest device limit resolved, proceeding with login");
+            setIsDeviceLimitOpen(false);
+            localStorage.removeItem("shubhtalk_device_limit_reached");
+            sessionStorage.removeItem("shubhtalk_device_limit_reached");
+            
+            // Trigger login success callback to close modal and show result
+            onSuccess?.(pendingKundli);
+          }
+        }}
+        devices={deviceLimitDevices || []}
       />
     </>
   );

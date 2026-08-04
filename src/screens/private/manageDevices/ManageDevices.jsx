@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import styles from "./ManageDevices.module.scss";
 import { useGetActiveSessionsQuery, useLogoutDeviceMutation } from "../../../redux/api/device/deviceApi";
+import { logout } from "../../../redux/auth/authSlice";
 import Toast from "../../../component/toast";
 import BackButton from "../../../component/UI/BackButton/BackButton";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
@@ -9,6 +11,7 @@ import { IoPhonePortraitOutline, IoLaptopOutline, IoTabletPortraitOutline } from
 
 const ManageDevices = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { data, isLoading, refetch } = useGetActiveSessionsQuery();
   const [logoutDevice] = useLogoutDeviceMutation();
   const [removingId, setRemovingId] = useState(null);
@@ -19,8 +22,29 @@ const ManageDevices = () => {
     console.log('device_id :>> ', device_id);
     setRemovingId(device_id);
     try {
-      await logoutDevice({ device_id }).unwrap();
+      const response = await logoutDevice({ device_id }).unwrap();
       Toast.success("Device logged out successfully");
+      
+      // Check if device being logged out is the current device
+      const deviceBeingRemoved = devices.find(d => d.device_id === device_id);
+      const isCurrentDeviceRemoved = deviceBeingRemoved?.currentDevice;
+      
+      // If it's the current device, perform full logout
+      if (isCurrentDeviceRemoved) {
+        // Dispatch Redux logout action to update state
+        dispatch(logout());
+        
+        // Clear all storage and logout
+        localStorage.clear();
+        sessionStorage.clear();
+        window.dispatchEvent(new Event("auth-change"));
+        
+        // Redirect to login immediately (no delay)
+        window.location.href = "/login";
+        return;
+      }
+      
+      // Otherwise, just refetch the device list
       refetch();
     } catch {
       Toast.error("Failed to logout device");
@@ -83,15 +107,14 @@ const ManageDevices = () => {
                 </span>
                 {device.date && <span className={styles.deviceDate}>Last active: {formatDate(device.date)}</span>}
               </div>
-              {!device.currentDevice && (
-                <button
-                  className={styles.logoutBtn}
-                  onClick={() => handleLogout(device.device_id)}
-                  disabled={removingId === device.device_id}
-                >
-                  {removingId === device.device_id ? "..." : "Logout"}
-                </button>
-              )}
+              <button
+                className={styles.logoutBtn}
+                onClick={() => handleLogout(device.device_id)}
+                disabled={removingId === device.device_id}
+                title={device.currentDevice ? "Logging out this device will completely logout" : ""}
+              >
+                {removingId === device.device_id ? "..." : "Logout"}
+              </button>
             </div>
           ))}
         </div>
