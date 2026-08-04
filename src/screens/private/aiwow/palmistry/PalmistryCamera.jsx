@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,6 +7,19 @@ import { useHandDetection } from '../../../../utils/hooks/useHandDetection';
 import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
+import { compressImage } from '../../../../utils/helper/compressImage';
+import toast from '../../../../component/toast';
+
+const DEFAULT_CAPTURE_BOUNDS = { left: 0.15, right: 0.85, top: 0.10, bottom: 0.90 };
+
+/**
+ * How long the capture button may sit blocked by hand detection before we let the
+ * user shoot anyway. MediaPipe struggles with dark skin tones, low light, busy
+ * backgrounds and low-end cameras, and when it does the guidance never clears —
+ * leaving the primary action permanently inert. Clarity records that as a stream
+ * of dead clicks, and the user simply leaves.
+ */
+const MANUAL_OVERRIDE_AFTER_MS = 8000;
 
 const PalmistryCamera = () => {
   const navigate = useNavigate();
@@ -41,6 +54,7 @@ const PalmistryCamera = () => {
   const [isFrontCamera, setIsFrontCamera] = useState(true);
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
   const captureAreaRef = useRef(null); // Reference to capture area div
+  const fileInputRef = useRef(null);
 
   // Show the flip button only when the device actually has more than one
   // camera. (Previously it was hidden on any screen >= 769px, which wrongly
@@ -60,42 +74,45 @@ const PalmistryCamera = () => {
     detectCameras();
   }, []);
 
-  // Calculate capture box bounds dynamically
-  const getCaptureBoxBounds = () => {
-    if (!captureAreaRef.current || !videoRef.current) {
-      // Return default bounds if refs not ready
-      return {
-        left: 0.15,
-        right: 0.85,
-        top: 0.10,
-        bottom: 0.90
-      };
-    }
+  // Capture box bounds, as a fraction of the video element's box.
+  //
+  // The detection loop asks for these once per animation frame. Measuring with
+  // getBoundingClientRect() on every call forced a synchronous layout ~60x a
+  // second on top of the MediaPipe inference, which made the preview stutter on
+  // mobile. Measure only when the geometry can actually have changed (mount,
+  // resize, orientation change, camera flip) and serve a cached value otherwise.
+  const boundsRef = useRef(DEFAULT_CAPTURE_BOUNDS);
+
+  const measureCaptureBox = useCallback(() => {
+    if (!captureAreaRef.current || !videoRef.current) return;
 
     try {
       const videoRect = videoRef.current.getBoundingClientRect();
       const boxRect = captureAreaRef.current.getBoundingClientRect();
+      if (!videoRect.width || !videoRect.height) return;
 
-      // Calculate bounds as percentage of video dimensions
-      const bounds = {
+      boundsRef.current = {
         left: (boxRect.left - videoRect.left) / videoRect.width,
         right: (boxRect.right - videoRect.left) / videoRect.width,
         top: (boxRect.top - videoRect.top) / videoRect.height,
         bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
       };
-
-      console.log('📐 Orange Box Bounds:', bounds);
-      return bounds;
-    } catch (error) {
-      console.error('Error calculating bounds:', error);
-      return {
-        left: 0.15,
-        right: 0.85,
-        top: 0.10,
-        bottom: 0.90
-      };
+    } catch {
+      boundsRef.current = DEFAULT_CAPTURE_BOUNDS;
     }
-  };
+  }, []);
+
+  const getCaptureBoxBounds = useCallback(() => boundsRef.current, []);
+
+  useEffect(() => {
+    measureCaptureBox();
+    window.addEventListener('resize', measureCaptureBox);
+    window.addEventListener('orientationchange', measureCaptureBox);
+    return () => {
+      window.removeEventListener('resize', measureCaptureBox);
+      window.removeEventListener('orientationchange', measureCaptureBox);
+    };
+  }, [measureCaptureBox]);
 
   const {
     handsLoaded,
@@ -104,6 +121,7 @@ const PalmistryCamera = () => {
     isInBounds,
     detectedHandSide,
     isTooFar,
+    isTooClose,
     startDetection,
     stopDetection
   } = useHandDetection({ 
@@ -116,10 +134,41 @@ const PalmistryCamera = () => {
   // Wrong hand: hand detected but it's not the selected hand
   const isWrongHand = handDetected && detectedHandSide !== null && detectedHandSide !== selectedHand;
 
+  // True while hand detection is not satisfied and therefore blocking capture.
+  const isBlocked =
+    handsLoaded &&
+    (!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar || isTooClose);
+
+  // Guidance for the current blocked state. Derived in one place so the button
+  // label, the on-screen banner and the tap toast can never contradict.
+  const blockReason = !handsLoaded
+    ? null
+    : isWrongHand
+      ? `Wrong hand — please show your ${selectedHand} hand`
+      : isTooClose
+        ? 'Move your hand a little further away'
+        : isTooFar || !handDetected
+          ? `Move your ${selectedHand} hand closer to the camera`
+          : !isPalmOpen
+            ? 'Open your palm fully'
+            : !isInBounds
+              ? 'Move your hand inside the box'
+              : null;
+
+  // Escape hatch: once detection has blocked capture for long enough, allow a
+  // manual shot rather than trapping the user behind an inert button.
+  const [manualCaptureAllowed, setManualCaptureAllowed] = useState(false);
+
+  useEffect(() => {
+    if (!isBlocked || manualCaptureAllowed || capturedImage) return;
+    const timer = setTimeout(() => setManualCaptureAllowed(true), MANUAL_OVERRIDE_AFTER_MS);
+    return () => clearTimeout(timer);
+  }, [isBlocked, manualCaptureAllowed, capturedImage]);
+
   // ─── Auto-capture (blur-safe) ────────────────────────────────────────────
   // Fire automatically once a valid palm is steadily in frame; the shared hook
   // picks the sharpest frame so we never save a blurry image.
-  const ready = handsLoaded && handDetected && isPalmOpen && isInBounds && !isWrongHand && !isTooFar;
+  const ready = handsLoaded && !isBlocked;
 
   // Draw the current video frame, cropped to the orange box, onto a canvas.
   const cropCurrentFrameToCanvas = () => {
@@ -302,10 +351,40 @@ const PalmistryCamera = () => {
 
   const captureImage = () => {
     const cropCanvas = cropCurrentFrameToCanvas();
-    if (!cropCanvas) return;
+    if (!cropCanvas) {
+      toast.error('Could not read the camera frame. Please try again.');
+      return;
+    }
     const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
     setCapturedImage(croppedImage);
     stopCamera();
+  };
+
+  // Every tap on the shutter gets a response: either a photo, or an explanation
+  // of what to change. Nothing is silently ignored.
+  const handleCaptureTap = () => {
+    if (!isBlocked || manualCaptureAllowed) {
+      captureImage();
+      return;
+    }
+    toast.error(blockReason || 'Hold your palm inside the box to capture');
+  };
+
+  const handleUploadInstead = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    // Reset the input so picking the same file twice still fires onChange.
+    event.target.value = '';
+    compressImage(file)
+      .then((dataUrl) => {
+        stopCamera();
+        setCapturedImage(dataUrl);
+      })
+      .catch(() => toast.error('Could not read that image. Please try another one.'));
   };
 
   const switchCamera = () => {
@@ -321,6 +400,7 @@ const PalmistryCamera = () => {
 
   const retakePhoto = () => {
     setCapturedImage(null); // clearing this re-activates auto-capture in the hook
+    setManualCaptureAllowed(false); // give detection a fair chance again
     startCamera();
   };
 
@@ -496,17 +576,9 @@ const PalmistryCamera = () => {
                 <span>Palm</span>
               </div>
             </div>
-            {(!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar) && handsLoaded && (
+            {isBlocked && blockReason && (
               <div className={`${styles.handDetectionMessage} ${isWrongHand ? styles.wrongHandMessage : ''}`}>
-                <p>
-                  {isWrongHand
-                    ? `Wrong hand! Please show your ${selectedHand} hand`
-                    : isTooFar ? `Move your ${selectedHand} hand closer to the camera`
-                    : !handDetected ? `Move your ${selectedHand} hand closer to the camera`
-                    : !isPalmOpen ? 'Open your palm fully'
-                    : !isInBounds ? 'Move your hand inside the box'
-                    : ''}
-                </p>
+                <p>{blockReason}</p>
               </div>
             )}
             {ready && autoCapturing && handsLoaded && (
@@ -532,27 +604,59 @@ const PalmistryCamera = () => {
 
       <div className={`${styles.controls} ${capturedImage ? styles.controlsCaptured : ''}`}>
         {!capturedImage ? (
-          <button 
-            className={`${styles.captureButton} ${(!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar) && handsLoaded ? styles.disabled : ''}`} 
-            onClick={captureImage}
-            disabled={(!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar) && handsLoaded}
-          >
-            <div className={styles.captureIcon}>
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar) && handsLoaded ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={(!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar) && handsLoaded ? "0.5" : "1"}/>
-              </svg>
-            </div>
-            <span className={styles.captureText}>
-              {!handsLoaded ? 'Loading...' :
-               isWrongHand ? `Use ${selectedHand} hand` :
-               isTooFar ? 'Move Hand Closer' :
-               (handDetected && isPalmOpen && isInBounds ? 'Capture' : 
-                !handDetected ? 'Move Hand Closer' :
-                !isPalmOpen ? 'Open Palm' :
-                'Move Inside Box')}
-            </span>
-          </button>
+          // Deliberately never `disabled`. A disabled button swallows the tap
+          // entirely, so a user whose palm won't validate gets no feedback at all
+          // (this showed up in Clarity as dozens of dead clicks in one session).
+          // Tapping while blocked now explains why, and after a grace period it
+          // captures anyway.
+          <div className={styles.captureStack}>
+            <button
+              className={`${styles.captureButton} ${isBlocked && !manualCaptureAllowed ? styles.disabled : ''}`}
+              onClick={handleCaptureTap}
+              aria-label={isBlocked ? blockReason || 'Capture palm photo' : 'Capture palm photo'}
+            >
+              <div className={styles.captureIcon}>
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                  <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={isBlocked && !manualCaptureAllowed ? '0.5' : '1'}/>
+                  <circle cx="20" cy="20" r="14" fill="white" opacity={isBlocked && !manualCaptureAllowed ? '0.5' : '1'}/>
+                </svg>
+              </div>
+              <span className={styles.captureText}>
+                {!handsLoaded
+                  ? 'Loading…'
+                  : !isBlocked
+                    ? 'Capture'
+                    : manualCaptureAllowed
+                      ? 'Capture anyway'
+                      : isWrongHand
+                        ? `Use ${selectedHand} hand`
+                        : isTooClose
+                          ? 'Move Hand Back'
+                          : isTooFar || !handDetected
+                            ? 'Move Hand Closer'
+                            : !isPalmOpen
+                              ? 'Open Palm'
+                              : 'Move Inside Box'}
+              </span>
+            </button>
+
+            {/* Detection can fail outright on low-end cameras or poor light.
+                Keep the upload route visible here so the user doesn't have to
+                find their way back to the instructions screen to escape. */}
+            {isBlocked && (
+              <button className={styles.uploadFallbackBtn} onClick={handleUploadInstead}>
+                Upload a photo instead
+              </button>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+          </div>
         ) : (
           <div className={styles.actionButtons}>
             <button className={styles.retakeButton} onClick={retakePhoto}>

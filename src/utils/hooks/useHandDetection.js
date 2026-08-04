@@ -1,6 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { Hands } from "@mediapipe/hands";
 
+/**
+ * Accepted hand-bounding-box area as a fraction of the whole video frame.
+ * Below the minimum the hand is too far to read; above the maximum it overflows
+ * the capture box. Both the validity check and the on-screen guidance derive
+ * from these, so they can never disagree.
+ */
+const VALID_RATIO_MIN = 0.1;
+const VALID_RATIO_MAX = 0.7;
+
+/** Share of the 21 hand landmarks that must sit inside the capture box. */
+const REQUIRED_LANDMARKS_INSIDE = 0.95;
+
 export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isFrontCamera = true }) => {
   const [handsLoaded, setHandsLoaded] = useState(false);
   const [handDetected, setHandDetected] = useState(false);
@@ -8,6 +20,7 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
   const [isInBounds, setIsInBounds] = useState(false);
   const [detectedHandSide, setDetectedHandSide] = useState(null);
   const [isTooFar, setIsTooFar] = useState(false);
+  const [isTooClose, setIsTooClose] = useState(false);
   
   const handsRef = useRef(null);
   const rafRef = useRef(null);
@@ -68,6 +81,7 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
     let inBounds = false;
     let handSide = null;
     let tooFar = false;
+    let tooClose = false;
 
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
       const landmarks = results.multiHandLandmarks[0];
@@ -85,9 +99,15 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
         handSide = rawSide === "right" ? "left" : "right";
       }
 
-      // Check hand size — too far if ratio < 0.05 (hand visible but tiny)
+      // Hand size relative to the frame. validateHand accepts 0.1–0.7, so
+      // anything below that band is too far and anything above it is too close.
+      // These have to line up with VALID_RATIO_MIN/MAX or the UI ends up telling
+      // the user to "move closer" when the hand is already filling the frame —
+      // which is unfixable from the user's side and just produces dead taps on
+      // the capture button.
       const { valid, ratio } = validateHand(landmarks, canvas.width, canvas.height);
-      tooFar = ratio > 0 && ratio < 0.05;
+      tooFar = ratio > 0 && ratio < VALID_RATIO_MIN;
+      tooClose = ratio > VALID_RATIO_MAX;
       isValid = valid;
 
       palmOpen = isPalmOpenCheck(landmarks);
@@ -100,6 +120,7 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
     setIsInBounds(inBounds);
     setDetectedHandSide(isValid ? handSide : null);
     setIsTooFar(tooFar);
+    setIsTooClose(tooClose);
   };
 
   /* ------------------ CHECK HAND IN BOUNDS ------------------ */
@@ -113,7 +134,6 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
     const captureBoxBounds = getCaptureBoxBounds();
     
     if (!captureBoxBounds) {
-      console.log('⚠️ No capture box bounds returned');
       return false;
     }
     
@@ -123,42 +143,20 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
     const boxTop = captureBoxBounds.top * height;
     const boxBottom = captureBoxBounds.bottom * height;
     
-    // Check if ALL hand landmarks are within bounds (very strict checking)
+    // NOTE: this runs once per animation frame. It used to console.log a freshly
+    // built object on every call, which on mid-range mobile is enough to make the
+    // camera preview stutter — keep this loop allocation-free and silent.
     let landmarksInside = 0;
-    let landmarksOutside = 0;
-    
-    landmarks.forEach((landmark, index) => {
+
+    for (const landmark of landmarks) {
       const x = landmark.x * width;
       const y = landmark.y * height;
-      
-      const isInside = x >= boxLeft && x <= boxRight && y >= boxTop && y <= boxBottom;
-      
-      if (isInside) {
+      if (x >= boxLeft && x <= boxRight && y >= boxTop && y <= boxBottom) {
         landmarksInside++;
-      } else {
-        landmarksOutside++;
       }
-    });
-    
-    // Calculate percentage
-    const percentageInside = landmarksInside / landmarks.length;
-    const isInBounds = percentageInside >= 0.95; // 95% must be inside (very strict)
-    
-    console.log('🖐️ Hand Detection:', {
-      total: landmarks.length,
-      inside: landmarksInside,
-      outside: landmarksOutside,
-      percentage: (percentageInside * 100).toFixed(1) + '%',
-      isInBounds: isInBounds,
-      boxBounds: { 
-        left: boxLeft.toFixed(0), 
-        right: boxRight.toFixed(0), 
-        top: boxTop.toFixed(0), 
-        bottom: boxBottom.toFixed(0) 
-      }
-    });
-    
-    return isInBounds;
+    }
+
+    return landmarksInside / landmarks.length >= REQUIRED_LANDMARKS_INSIDE;
   };
 
   /* ------------------ PALM OPEN CHECK ------------------ */
@@ -187,7 +185,7 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
     const handWidth = Math.max(...xs) - Math.min(...xs);
     const handHeight = Math.max(...ys) - Math.min(...ys);
     const ratio = (handWidth * handHeight) / (width * height);
-    return { valid: ratio > 0.1 && ratio < 0.7, ratio };
+    return { valid: ratio > VALID_RATIO_MIN && ratio < VALID_RATIO_MAX, ratio };
   };
 
   /* ------------------ DRAW HAND ------------------ */
@@ -273,6 +271,7 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
     setIsInBounds(false);
     setDetectedHandSide(null);
     setIsTooFar(false);
+    setIsTooClose(false);
     
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext('2d');
@@ -287,6 +286,7 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
     isInBounds,
     detectedHandSide,
     isTooFar,
+    isTooClose,
     startDetection,
     stopDetection
   };

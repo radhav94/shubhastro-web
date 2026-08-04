@@ -13,7 +13,7 @@ const PalmistryLanding = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { data: aiwowData } = useGetAiWowPageDataQuery();
-  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'ai-palmistry-scanner')?.title || 'Palmistry Scanner';
+  const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'ai-palmistry-scanner')?.title || 'AI Palmistry Scanner';
   
   const [selectedHand, setSelectedHand] = useState(null);
 

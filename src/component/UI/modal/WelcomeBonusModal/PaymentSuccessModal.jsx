@@ -33,7 +33,7 @@ const PaymentSuccessModal = ({ isOpen, onClose, amount, redirectTo = "/" }) => {
           <h2 className={styles.title}>Your Wallet is Topped Up</h2>
           <p className={styles.amount}>₹{amount}</p>
           <div className={styles.badge}>
-            <span>₹</span> Amount added to your wallet
+             Amount added to your wallet
           </div>
           <p className={styles.desc}>
             You're all set! Connect with astrologers and continue your journey.
