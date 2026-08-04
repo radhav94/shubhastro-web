@@ -271,7 +271,7 @@ const SignatureCamera = () => {
 
   const submitImage = () => {
     dispatch(setSignatureImage(capturedImage));
-    navigate('/ai-wow/signature-analysis/capture');
+    navigate('/ai-wow/signature-analysis/capture', { replace: true });
   };
 
   const proceedWithImage = () => {
@@ -314,7 +314,7 @@ const SignatureCamera = () => {
     }
     
     // Navigate after stopping camera
-    navigate(-1);
+    navigate('/ai-wow/signature-analysis', { replace: true });
   };
 
   if (error) {
@@ -355,7 +355,7 @@ const SignatureCamera = () => {
         isOpen
         onClose={() => {
           setShowGuestAuthModal(false);
-          navigate('/ai-wow/signature-analysis');
+          navigate('/ai-wow/signature-analysis', { replace: true });
         }}
         onSuccess={handleGuestAuthSuccess}
       />

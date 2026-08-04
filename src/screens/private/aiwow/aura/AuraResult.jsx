@@ -15,7 +15,7 @@ const AuraResult = () => {
   const navigate = useNavigate();
   const { data: aiwowData } = useGetAiWowPageDataQuery();
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'aura-photography')?.title || 'Aura Analysis';
-  const handleBack = () => navigate(-1);
+  const handleBack = () => navigate(PATH.privateRoutes.AURA_LANDING.path[0], { replace: true });
   const [activeTab, setActiveTab] = useState('overall');
   const [loading, setLoading] = useState(true);
   const [validationError, setValidationError] = useState(null);

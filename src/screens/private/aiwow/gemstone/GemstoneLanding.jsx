@@ -24,17 +24,8 @@ const GemstoneLanding = () => {
   const { data: aiwowData } = useGetAiWowPageDataQuery();
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'gemstone-authenticity')?.title || 'Gemstone Authenticity';
 
-  // Back should go to the previous in-app page when there is history to go
-  // back to; otherwise (deep link / history replaced) fall back to the AI-Wow
-  // hub so the button always does something. Plain navigate(-1) silently does
-  // nothing when there is no prior entry (the reported Android Chrome bug).
   const handleBack = () => {
-    const idx = window.history.state?.idx;
-    if (typeof idx === 'number' && idx > 0) {
-      navigate(-1);
-    } else {
-      navigate('/ai-wow');
-    }
+    navigate(-1);
   };
 
   // Guests must add a kundli + verify OTP before capturing/uploading a photo.
@@ -56,7 +47,7 @@ const GemstoneLanding = () => {
   };
 
   const handleCamera = () => {
-    navigate('/ai-wow/gemstone-authenticity/camera');
+    navigate('/ai-wow/gemstone-authenticity/camera', { replace: true });
   };
 
   const handleUpload = () => {
@@ -71,7 +62,7 @@ const GemstoneLanding = () => {
         // Guests must authenticate at the moment the photo is submitted.
         runOrAuth(() => {
           dispatch(setGemstoneImage(dataUrl));
-          navigate('/ai-wow/gemstone-authenticity/capture');
+          navigate('/ai-wow/gemstone-authenticity/capture', { replace: true });
         });
       });
     }

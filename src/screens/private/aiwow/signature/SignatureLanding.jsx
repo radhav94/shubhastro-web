@@ -43,7 +43,7 @@ const SignatureLanding = () => {
   };
 
   const handleCamera = () => {
-    navigate('/ai-wow/signature-analysis/camera');
+    navigate('/ai-wow/signature-analysis/camera', { replace: true });
   };
 
   const handleUpload = () => {
@@ -58,7 +58,7 @@ const SignatureLanding = () => {
         // Guests must authenticate at the moment the photo is submitted.
         runOrAuth(() => {
           dispatch(setSignatureImage(dataUrl));
-          navigate('/ai-wow/signature-analysis/capture');
+          navigate('/ai-wow/signature-analysis/capture', { replace: true });
         });
       });
     }

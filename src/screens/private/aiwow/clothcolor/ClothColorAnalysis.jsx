@@ -50,7 +50,7 @@ const ClothColorAnalysis = () => {
     if (profileLoading) return;
 
     if (!clothImage) {
-      navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path[0]);
+      navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path[0], { replace: true });
       return;
     }
 
@@ -174,9 +174,9 @@ const ClothColorAnalysis = () => {
   };
 
   const handleRetakePicture = () => {
-    // Clear only the captured image and go back to the instructions screen.
+    // Clear only the captured image and go back to the landing screen.
     dispatch(setClothColorImage(null));
-    navigate(PATH.privateRoutes.CLOTH_COLOR_INSTRUCTIONS.path[0]);
+    navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path[0], { replace: true });
   };
 
   const handleShowResult = () => {
@@ -190,12 +190,12 @@ const ClothColorAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearClothColorData());
-    navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path[0]);
+    navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path[0], { replace: true });
   };
 
   const handleBack = () => {
     dispatch(clearClothColorData());
-    navigate(PATH.privateRoutes.CLOTH_COLOR_INSTRUCTIONS.path[0], { replace: true });
+    navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path[0], { replace: true });
   };
 
   return (

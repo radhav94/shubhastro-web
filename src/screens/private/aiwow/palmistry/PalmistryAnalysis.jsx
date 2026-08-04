@@ -72,7 +72,7 @@ const PalmistryAnalysis = () => {
     if (profileLoading) return; // Wait for profile to load
 
     if (!palmImage || !selectedHand) {
-      navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0]);
+      navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0], { replace: true });
       return;
     }
 
@@ -263,7 +263,7 @@ const PalmistryAnalysis = () => {
     // Clear only the captured image and go back to the instructions screen.
     // Keep the selected hand so hand selection is skipped.
     dispatch(setPalmistryImage(null));
-    navigate('/ai-wow/ai-palmistry-scanner/instructions');
+    navigate('/ai-wow/ai-palmistry-scanner', { replace: true });
   };
 
   const handleShowResult = () => {
@@ -278,7 +278,7 @@ const PalmistryAnalysis = () => {
     sessionStorage.removeItem(PALMISTRY_ANALYSIS_FLAG);
     setError(null);
     dispatch(clearPalmistryData());
-    navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0]);
+    navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0], { replace: true });
   };
 
   const handleBack = () => {

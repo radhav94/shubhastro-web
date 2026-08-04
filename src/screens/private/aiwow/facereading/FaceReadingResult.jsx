@@ -65,7 +65,7 @@ const resolveAuraColor = (name) => {
 
 const FaceReadingResult = () => {
   const navigate = useNavigate();
-  const handleBack = () => navigate(-1);
+  const handleBack = () => navigate(PATH.privateRoutes.FACE_READING_LANDING.path[0], { replace: true });
   const [activeTab, setActiveTab] = useState('overall');
   const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(true);

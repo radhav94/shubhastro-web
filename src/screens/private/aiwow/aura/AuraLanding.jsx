@@ -44,7 +44,7 @@ const AuraLanding = () => {
   };
 
   const handleCamera = () => {
-    navigate('/ai-wow/aura-photography/camera');
+    navigate('/ai-wow/aura-photography/camera', { replace: true });
   };
 
   const handleUpload = () => {
@@ -59,7 +59,7 @@ const AuraLanding = () => {
         // Guests must authenticate at the moment the photo is submitted.
         runOrAuth(() => {
           dispatch(setAuraImage(dataUrl));
-          navigate('/ai-wow/aura-photography/capture');
+          navigate('/ai-wow/aura-photography/capture', { replace: true });
         });
       });
     }
