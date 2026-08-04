@@ -15,6 +15,7 @@ import useUserLocation from '../../../../utils/hooks/useUserLocation';
 import { setMuhuratCalendarResult, clearMuhuratCalendarResult } from '../../../../redux/aiwow/aiwowSlice';
 import DownloadReportModal from '../components/DownloadReportModal';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
+import toast from '../../../../component/toast';
 
 const DEFAULT_OCCASIONS = [
   'Marriage',
@@ -383,39 +384,46 @@ const AgenticCalendar = () => {
             <p className={styles.hint}>Select one or more occasions to view Muhurat</p>
           </div>
           <div className={styles.chipsWrap}>
-            {[...allOccasions]
-              .sort((a, b) => {
-                const aS = selectedOccasions.includes(a);
-                const bS = selectedOccasions.includes(b);
-                if (aS && !bS) return -1;
-                if (!aS && bS) return 1;
-                return 0;
-              })
-              .map((occasion) => {
-                const isSelected = selectedOccasions.includes(occasion);
-                const isCustom = customOccasions.includes(occasion);
-                return (
-                  <button
-                    key={occasion}
-                    className={`${styles.chip} ${isSelected ? styles.chipSelected : ''} ${locked ? styles.chipDisabled : ''}`}
-                    onClick={() => !isSelected && !locked && toggleOccasion(occasion)}
-                    disabled={locked}
-                  >
-                    {occasion}
-                    {isSelected && isCustom && <span className={styles.customBadge}>Custom</span>}
-                    {isSelected && !locked && (
-                      <span
-                        className={styles.chipClose}
-                        onClick={(e) => { e.stopPropagation(); handleRemoveChip(occasion); }}
-                        role="button"
-                        aria-label={`Remove ${occasion}`}
-                      >
-                        ✕
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+            {/* Stable render order — sorting selected chips to the front made the
+                whole row shift under the user's cursor on every tap, so the next
+                tap hit the wrong chip. Selection is already clear from
+                .chipSelected. */}
+            {allOccasions.map((occasion) => {
+              const isSelected = selectedOccasions.includes(occasion);
+              const isCustom = customOccasions.includes(occasion);
+              return (
+                <button
+                  key={occasion}
+                  className={`${styles.chip} ${isSelected ? styles.chipSelected : ''} ${locked ? styles.chipDisabled : ''}`}
+                  // A second tap has to deselect. `!isSelected && ...` meant
+                  // tapping an already-selected chip did nothing.
+                  onClick={() => !locked && toggleOccasion(occasion)}
+                  disabled={locked}
+                  aria-pressed={isSelected}
+                >
+                  {occasion}
+                  {isSelected && isCustom && <span className={styles.customBadge}>Custom</span>}
+                  {isSelected && !locked && (
+                    <span
+                      className={styles.chipClose}
+                      onClick={(e) => { e.stopPropagation(); handleRemoveChip(occasion); }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Remove ${occasion}`}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleRemoveChip(occasion);
+                        }
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
+                </button>
+              );
+            })}
             <button className={`${styles.addCustomChip} ${locked ? styles.chipDisabled : ''}`} onClick={() => { if (!locked) setShowCustomModal(true); }} disabled={locked}>
               + Add Custom
             </button>
@@ -468,10 +476,15 @@ const AgenticCalendar = () => {
             />
           </div>
 
-          {/* Get Timing Button */}
+          {/* Get Timing Button
+              Only `isLoading` disables this — the spinner and "Analyzing..." label
+              already explain that state. The incomplete-form cases stay clickable
+              so the tap can say what is missing instead of being swallowed. */}
           <button
-            className={styles.getTimingsBtn}
-            disabled={selectedOccasions.length === 0 || isLoading || !locationData}
+            className={`${styles.getTimingsBtn} ${
+              !locked && (selectedOccasions.length === 0 || !locationData) ? styles.getTimingsBtnIncomplete : ''
+            }`}
+            disabled={isLoading}
             onClick={() => {
               if (locked) {
                 setLocked(false);
@@ -479,9 +492,17 @@ const AgenticCalendar = () => {
                 setRawApiResult(null);
                 setExpandedOccasion(null);
                 dispatch(clearMuhuratCalendarResult());
-              } else {
-                handleGetTimings();
+                return;
               }
+              if (selectedOccasions.length === 0) {
+                toast.error('Select at least one occasion to get timings');
+                return;
+              }
+              if (!locationData) {
+                toast.error('Enter your location and pick it from the suggestions');
+                return;
+              }
+              handleGetTimings();
             }}
           >
             {isLoading ? (

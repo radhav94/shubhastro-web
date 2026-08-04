@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FiChevronRight, FiMapPin, FiCalendar, FiChevronLeft } from "react-icons/fi";
 import styles from "../Home.module.scss";
+import toast from "../../../../component/toast";
 
 const OCCASIONS = [
   'Marriage',
@@ -131,39 +132,45 @@ const PlanEventsBanner = () => {
       <div className={styles.occasionsWrapper}>
         <h4 className={styles.occasionsTitle}>Select Occasions</h4>
         <div className={styles.occasionsScroll}>
-          {[...allOccasions]
-            .sort((a, b) => {
-              const aSelected = selectedOccasions.includes(a);
-              const bSelected = selectedOccasions.includes(b);
-              if (aSelected && !bSelected) return -1;
-              if (!aSelected && bSelected) return 1;
-              return 0;
-            })
-            .map((occasion) => {
-              const isSelected = selectedOccasions.includes(occasion);
-              return (
-                <button
-                  key={occasion}
-                  className={`${styles.occasionChip} ${isSelected ? styles.selected : ""}`}
-                  onClick={() => !isSelected && toggleOccasion(occasion)}
-                >
-                  {occasion}
-                  {isSelected && (
-                    <span
-                      className={styles.chipClose}
-                      onClick={(e) => {
+          {/* Stable render order — sorting selected chips to the front shifted the
+              row under the user's cursor on every tap. Selection is already clear
+              from .selected. */}
+          {allOccasions.map((occasion) => {
+            const isSelected = selectedOccasions.includes(occasion);
+            return (
+              <button
+                key={occasion}
+                className={`${styles.occasionChip} ${isSelected ? styles.selected : ""}`}
+                // A second tap has to deselect, otherwise tapping a selected chip
+                // is a dead click.
+                onClick={() => toggleOccasion(occasion)}
+                aria-pressed={isSelected}
+              >
+                {occasion}
+                {isSelected && (
+                  <span
+                    className={styles.chipClose}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveChip(occasion);
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Remove ${occasion}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
                         e.stopPropagation();
                         handleRemoveChip(occasion);
-                      }}
-                      role="button"
-                      aria-label={`Remove ${occasion}`}
-                    >
-                      ✕
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                      }
+                    }}
+                  >
+                    ✕
+                  </span>
+                )}
+              </button>
+            );
+          })}
           <button
             className={styles.addCustomChip}
             onClick={() => setShowCustomModal(true)}
@@ -201,11 +208,17 @@ const PlanEventsBanner = () => {
           </button>
         </div>
 
-        {/* Get Muhurat Button */}
+        {/* Get Muhurat Button
+            Not `disabled` — a swallowed tap gives the user nothing to act on. */}
         <button
-          className={styles.getMuhuratBtn}
-          disabled={selectedOccasions.length === 0}
-          onClick={handleGetMuhurat}
+          className={`${styles.getMuhuratBtn} ${selectedOccasions.length === 0 ? styles.getMuhuratBtnIncomplete : ''}`}
+          onClick={() => {
+            if (selectedOccasions.length === 0) {
+              toast.error("Select at least one occasion to view Muhurat");
+              return;
+            }
+            handleGetMuhurat();
+          }}
         >
           Get Muhurat
         </button>

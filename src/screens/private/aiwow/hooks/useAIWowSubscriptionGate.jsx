@@ -115,6 +115,22 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
     purchasedRef.current = true;
   }, []);
 
+  // The user picked a zero-price plan. SubscriptionModal runs no purchase for
+  // these, so nothing about the user's entitlement changes and retrying the
+  // generate call would just be blocked again.
+  //
+  // This used to be wired straight to `handleModalClose`, which closed the popup
+  // and resolved the pending flow as 'cancelled' — so the tap produced no
+  // report, no navigation and no message at all. Resolve it distinctly instead
+  // so the caller can explain what happened.
+  const handleModalFreePlanSelected = useCallback(() => {
+    setShowSubscriptionModal(false);
+    purchasedRef.current = false;
+    const resolve = modalResolveRef.current;
+    modalResolveRef.current = null;
+    if (resolve) resolve('free-plan');
+  }, []);
+
   /**
    * Runs a generate call and handles entitlement blocks. When blocked, it opens
    * the plans popup and waits for the user; on purchase it retries generation.
@@ -161,6 +177,13 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
         trackEvent('shubh_ai_payment_failed', { feature_name: featureName, reason: SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE });
         return { blocked: true, reason: SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE, redirectedToRecharge: true };
       }
+      if (outcome === 'free-plan') {
+        // Don't retry — the free plan grants nothing new. Say so rather than
+        // closing the popup and appearing to do nothing.
+        toast.error('That plan does not include this report. Pick a paid plan to continue.');
+        trackEvent('shubh_ai_payment_failed', { feature_name: featureName, reason });
+        return { blocked: true, reason };
+      }
       if (outcome !== 'purchased') {
         trackEvent('shubh_ai_payment_failed', { feature_name: featureName, reason });
         return { blocked: true, reason };
@@ -169,6 +192,7 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
     }
     return { blocked: true, reason: 'RETRY_LIMIT' };
   }, [featureName, openSubscriptionModal, waitForModalOutcome, dispatch]);
+
 
   const subscriptionModal = (
     <SubscriptionModal
@@ -179,7 +203,7 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
       onClose={handleModalClose}
       onPurchased={handleModalPurchased}
       onInsufficientBalance={handleModalInsufficientBalance}
-      onSelectPlan={handleModalClose}
+      onSelectPlan={handleModalFreePlanSelected}
     />
   );
 

@@ -2429,10 +2429,15 @@
     background: linear-gradient(90deg, #E54D00 0%, #C22F00 100%);
   }
 
+  // Dimmed while the form is incomplete, but still tappable — the tap explains
+  // what is missing. Do not add `pointer-events: none` or the HTML `disabled`
+  // attribute here, or the tap becomes a dead click with no feedback.
+  &.calCtaIncomplete {
+    opacity: 0.5;
+  }
+
   &:disabled {
     border-color: #d1d5db;
-    // color: #9ca3af;
-    // background: #f3f4f6;
     cursor: not-allowed;
     opacity: 0.5;
   }

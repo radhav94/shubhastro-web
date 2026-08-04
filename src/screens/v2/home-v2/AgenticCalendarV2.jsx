@@ -6,6 +6,7 @@ import { FiChevronRight, FiCalendar, FiChevronLeft } from "react-icons/fi";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import useUserLocation from "../../../utils/hooks/useUserLocation";
 import { GuestKundliAuthModal } from "../../../component/UI/Profile";
+import toast from "../../../component/toast";
 
 const OCCASIONS = [
   'Marriage', 'Job Interview', 'Business Launch', 'House Purchase',
@@ -85,13 +86,33 @@ const AgenticCalendarV2 = ({ styles }) => {
     }
   };
 
+  // `locationData` is only populated by picking a Google Places suggestion, so a
+  // user who typed a city and never tapped the dropdown has a filled-looking
+  // field but no coordinates. Fall back to the detected location instead of
+  // silently blocking them.
+  const effectiveLocation =
+    locationData ||
+    (userLocation.loaded && !userLocation.isDefault
+      ? { address: userLocation.locationName, lat: userLocation.lat, lng: userLocation.lon }
+      : null);
+
+  const isCtaIncomplete = selectedOccasions.length === 0 || !effectiveLocation;
+
   const handleGetMuhurat = () => {
+    if (selectedOccasions.length === 0) {
+      toast.error("Select at least one occasion to view Muhurat");
+      return;
+    }
+    if (!effectiveLocation) {
+      toast.error("Enter your location and pick it from the suggestions");
+      return;
+    }
     const state = {
       occasions: selectedOccasions,
       period: selectedPeriod,
       customDate: customFromDate ? customFromDate.toISOString() : null,
       customToDate: customToDate ? customToDate.toISOString() : null,
-      location: locationData,
+      location: effectiveLocation,
     };
     const go = () => navigate("/ai-wow/muhurat-calendar", { state });
     if (!isLoggedIn) { openGuestAuth(go); return; }
@@ -122,30 +143,44 @@ const AgenticCalendarV2 = ({ styles }) => {
         <div className={styles.calOccasions}>
           <p className={styles.calLabel}>Select Occasions</p>
           <div className={styles.calChips}>
-            {[...allOccasions]
-              .sort((a, b) => {
-                const aS = selectedOccasions.includes(a);
-                const bS = selectedOccasions.includes(b);
-                return aS === bS ? 0 : aS ? -1 : 1;
-              })
-              .map(occasion => {
-                const isSelected = selectedOccasions.includes(occasion);
-                return (
-                  <button
-                    key={occasion}
-                    className={isSelected ? styles.calChipActive : styles.calChip}
-                    onClick={() => !isSelected && toggleOccasion(occasion)}
-                  >
-                    {occasion}
-                    {isSelected && (
-                      <span
-                        className={styles.calChipX}
-                        onClick={e => { e.stopPropagation(); handleRemoveChip(occasion); }}
-                      >✕</span>
-                    )}
-                  </button>
-                );
-              })}
+            {/* Render order is deliberately stable. This list used to be sorted
+                with the selected occasions first, so tapping a chip made it jump
+                to the front and shifted every other chip under the user's
+                cursor — the next tap then landed on the wrong chip or on dead
+                space. That reads as rage clicking in Clarity. Selection is
+                already obvious from .calChipActive; it does not need reordering. */}
+            {allOccasions.map(occasion => {
+              const isSelected = selectedOccasions.includes(occasion);
+              return (
+                <button
+                  key={occasion}
+                  className={isSelected ? styles.calChipActive : styles.calChip}
+                  // Tapping a selected chip must also deselect it. Previously the
+                  // handler was `!isSelected && toggleOccasion(...)`, so a second
+                  // tap did nothing at all and only the small ✕ worked.
+                  onClick={() => toggleOccasion(occasion)}
+                  aria-pressed={isSelected}
+                >
+                  {occasion}
+                  {isSelected && (
+                    <span
+                      className={styles.calChipX}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Remove ${occasion}`}
+                      onClick={e => { e.stopPropagation(); handleRemoveChip(occasion); }}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleRemoveChip(occasion);
+                        }
+                      }}
+                    >✕</span>
+                  )}
+                </button>
+              );
+            })}
             <button className={styles.calChipAdd} onClick={() => setShowCustomModal(true)}>
               + Add Custom
             </button>
@@ -199,9 +234,11 @@ const AgenticCalendarV2 = ({ styles }) => {
               }}
             />
             {/* CTA */}
+          {/* Intentionally not `disabled`. A disabled button swallows the tap, so
+              a user who has picked occasions but whose location never resolved
+              got no feedback whatsoever. The tap now says what is missing. */}
           <button
-            className={styles.calCta}
-            disabled={selectedOccasions.length === 0 || !locationData}
+            className={`${styles.calCta} ${isCtaIncomplete ? styles.calCtaIncomplete : ''}`}
             onClick={handleGetMuhurat}
           >
             View Muhurat

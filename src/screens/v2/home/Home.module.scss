@@ -5700,6 +5700,12 @@
     opacity: 0.4;
     cursor: not-allowed;
   }
+
+  /* Dimmed while no occasion is picked, but still tappable so the tap can
+     explain what is missing. Do not add `pointer-events: none` here. */
+  &.getMuhuratBtnIncomplete {
+    opacity: 0.5;
+  }
 }
 
 .sessionEmergencyWrapper {

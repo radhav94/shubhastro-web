@@ -428,21 +428,29 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
                   {pendingCode === plan.id ? "Processing..." : plan.cta}
                 </button>
 
-                <div className={styles.divider} />
+                {/* buildFeatures() returns [] when the plan carries no
+                    metadata.highlights. Render the whole block only when there
+                    is something to list — otherwise the heading sat above an
+                    empty list, promising details that never appeared. */}
+                {plan.features.length > 0 && (
+                  <>
+                    <div className={styles.divider} />
 
-                <p className={styles.includedTitle}>What&apos;s included ?</p>
+                    <p className={styles.includedTitle}>What&apos;s included ?</p>
 
-                <ul className={styles.featureList}>
-                  {plan.features.map((feature, idx) => (
-                    <li
-                      key={idx}
-                      className={`${styles.featureItem} ${feature.included ? "" : styles.featureExcluded}`}
-                    >
-                      {feature.included ? <CheckIcon /> : <CrossIcon />}
-                      <span>{feature.label}</span>
-                    </li>
-                  ))}
-                </ul>
+                    <ul className={styles.featureList}>
+                      {plan.features.map((feature, idx) => (
+                        <li
+                          key={idx}
+                          className={`${styles.featureItem} ${feature.included ? "" : styles.featureExcluded}`}
+                        >
+                          {feature.included ? <CheckIcon /> : <CrossIcon />}
+                          <span>{feature.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
               </div>
             ))}
           </div>

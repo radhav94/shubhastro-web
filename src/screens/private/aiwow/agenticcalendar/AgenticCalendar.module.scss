@@ -802,6 +802,13 @@
     opacity: 0.4;
     cursor: not-allowed;
   }
+
+  /* Dimmed while occasions or location are missing, but still tappable so the
+     tap can explain what is needed. Do not add `pointer-events: none` or the
+     HTML `disabled` attribute for this state. */
+  &.getTimingsBtnIncomplete {
+    opacity: 0.5;
+  }
 }
 
 /* Consult With Expert Astrologer Button */

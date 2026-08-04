@@ -34,11 +34,22 @@ const LalKitab = () => {
   const [selectedProfile, setSelectedProfileLocal] = useState(null);
   const [guestGenerating, setGuestGenerating] = useState(false);
 
-  // Listen for guest generation trigger (survives component remount after auth)
+  // Listen for guest generation trigger (survives component remount after auth).
+  //
+  // There must be a matching "done" event. Previously only the start event
+  // existed, so an instance that received it but did not own the awaited
+  // generate call had no way to clear the flag — it sat permanently showing
+  // "Generating your Teva..." with the button disabled, and every further click
+  // was a dead click until a full page reload.
   useEffect(() => {
-    const handler = () => setGuestGenerating(true);
-    window.addEventListener("lalkitab:generating", handler);
-    return () => window.removeEventListener("lalkitab:generating", handler);
+    const start = () => setGuestGenerating(true);
+    const done = () => setGuestGenerating(false);
+    window.addEventListener("lalkitab:generating", start);
+    window.addEventListener("lalkitab:generated", done);
+    return () => {
+      window.removeEventListener("lalkitab:generating", start);
+      window.removeEventListener("lalkitab:generated", done);
+    };
   }, []);
 
   const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
@@ -78,31 +89,39 @@ const LalKitab = () => {
     if (!profile?._id) { Toast.error("Please select a Kundli profile first"); return; }
     window.dispatchEvent(new Event("lalkitab:generating"));
 
-    // Route the generate call through the subscription gate — shows the plans
-    // popup on PREMIUM_REQUIRED (and the extended popup on EXTENDED), then
-    // retries generation after purchase.
-    const result = await runWithEntitlement(async () => {
-      try {
-        return await generateTeva(String(profile._id)).unwrap();
-      } catch (err) {
-        return err?.data || { success: false, error: err };
+    // try/finally is load-bearing: if anything inside throws, the "generating"
+    // flag has to be cleared or the button stays disabled forever.
+    try {
+      // Route the generate call through the subscription gate — shows the plans
+      // popup on PREMIUM_REQUIRED (and the extended popup on EXTENDED), then
+      // retries generation after purchase.
+      const result = await runWithEntitlement(async () => {
+        try {
+          return await generateTeva(String(profile._id)).unwrap();
+        } catch (err) {
+          return err?.data || { success: false, error: err };
+        }
+      });
+
+      if (result?.blocked) return;
+
+      if (result?.success === false) {
+        Toast.error(result?.error?.message || result?.message || "Failed to generate Laal Kitab Teva");
+        return;
       }
-    });
 
-    setGuestGenerating(false);
-
-    if (result?.blocked) return;
-
-    if (result?.success === false) {
-      Toast.error(result?.error?.message || result?.message || "Failed to generate Laal Kitab Teva");
-      return;
-    }
-
-    const lalKitabId = (result?.data || result)?._id;
-    if (lalKitabId) {
-      navigate(`/laal-kitab/${lalKitabId}`, { state: { tevaData: result?.data || result } });
-    } else {
-      Toast.error("Failed to generate Laal Kitab");
+      const lalKitabId = (result?.data || result)?._id;
+      if (lalKitabId) {
+        navigate(`/laal-kitab/${lalKitabId}`, { state: { tevaData: result?.data || result } });
+      } else {
+        Toast.error("Failed to generate Laal Kitab");
+      }
+    } catch (err) {
+      console.error("Laal Kitab generation failed:", err);
+      Toast.error("Something went wrong. Please try again.");
+    } finally {
+      setGuestGenerating(false);
+      window.dispatchEvent(new Event("lalkitab:generated"));
     }
   };
 
@@ -110,6 +129,14 @@ const LalKitab = () => {
     if (!isLoggedIn) {
       pendingGuestActionRef.current = (profile) => doGenerate(profile);
       setShowGuestAuthModal(true);
+      return;
+    }
+    // A logged-in user with no saved kundli has no profile selected. Open the
+    // picker rather than leaving the button inert — it used to be `disabled`,
+    // which swallowed the tap and left the user with nothing to act on.
+    if (!selectedProfile) {
+      Toast.error("Select a Kundli profile to generate your Laal Kitab");
+      setShowProfileManager(true);
       return;
     }
     doGenerate(selectedProfile);
@@ -157,10 +184,14 @@ const LalKitab = () => {
               </button>
             )}
 
+            {/* Only disabled while a generation is genuinely in flight — the
+                spinner and "Generating your Teva..." label explain that state.
+                The missing-profile case is handled in handleGenerate so the tap
+                gets a response instead of being swallowed. */}
             <button
               className={styles.generateBtn}
               onClick={handleGenerate}
-              disabled={!selectedProfile || isGenerating || guestGenerating}
+              disabled={isGenerating || guestGenerating}
             >
               {(isGenerating || guestGenerating) ? (
                 <>
