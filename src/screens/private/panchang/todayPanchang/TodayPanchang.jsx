@@ -87,7 +87,10 @@ const TodayPanchang = () => {
   });
   
   const { data, isLoading, isSuccess } = useFetchAdvancePanchangQuery(payload);
-  const panchangData = data?.response;
+  // The upstream returns `response` as a plain string on failures (e.g. "Invalid
+  // date"), so only treat it as panchang data when it is actually an object.
+  const panchangData =
+    data?.response && typeof data.response === "object" ? data.response : null;
 
   // Tab state: "birth" or "overall"
   const [panchangTab, setPanchangTab] = useState("birth");
@@ -303,7 +306,7 @@ const TodayPanchang = () => {
 
     {
       key: "Ayanamsa",
-      value: `${panchangData?.ayanamsa?.name}`,
+      value: panchangData?.ayanamsa?.name,
       icon: <GiStonePath />,
     },
     {
@@ -480,27 +483,23 @@ const TodayPanchang = () => {
   ];
 
   // -------------------- MUHURAT DETAILS --------------------
+  // The API returns these kaal windows as a single "HH:MM:SS to HH:MM:SS"
+  // string, but the field is missing whenever the upstream responds with an
+  // error payload. Split defensively so a partial response cannot crash the page.
+  const splitKaal = (range) => {
+    const [start = "", end = ""] = String(range ?? "").split("to");
+    return { start: start.trim() || "-", end: end.trim() || "-" };
+  };
+
   const muhuratData = {
     abhijit: {
       title: "Abhijit Muhurat",
-      start: panchangData?.advanced_details?.abhijit_muhurta?.start,
-      end: panchangData?.advanced_details?.abhijit_muhurta?.end,
+      start: panchangData?.advanced_details?.abhijit_muhurta?.start || "-",
+      end: panchangData?.advanced_details?.abhijit_muhurta?.end || "-",
     },
-    rahukaal: {
-      title: "Rahu Kaal",
-      start: panchangData?.rahukaal.split("to")[0],
-      end: panchangData?.rahukaal.split("to")[1],
-    },
-    gulika: {
-      title: "Gulika Kaal",
-      start: panchangData?.gulika.split("to")[0],
-      end: panchangData?.gulika.split("to")[1],
-    },
-    yamakanta: {
-      title: "Yamakanta Kaal",
-      start: panchangData?.yamakanta.split("to")[0],
-      end: panchangData?.yamakanta.split("to")[1],
-    },
+    rahukaal: { title: "Rahu Kaal", ...splitKaal(panchangData?.rahukaal) },
+    gulika: { title: "Gulika Kaal", ...splitKaal(panchangData?.gulika) },
+    yamakanta: { title: "Yamakanta Kaal", ...splitKaal(panchangData?.yamakanta) },
   };
 
   // -------------------------
