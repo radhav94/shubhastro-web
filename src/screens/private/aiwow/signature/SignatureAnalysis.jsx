@@ -74,7 +74,7 @@ const SignatureAnalysis = () => {
     if (profileLoading) return;
 
     if (!signatureImage) {
-      navigate(PATH.privateRoutes.SIGNATURE_LANDING.path[0]);
+      navigate(PATH.privateRoutes.SIGNATURE_LANDING.path[0], { replace: true });
       return;
     }
 
@@ -192,9 +192,9 @@ const SignatureAnalysis = () => {
   };
 
   const handleRetakePicture = () => {
-    // Clear only the captured image and go back to the instructions screen.
+    // Clear only the captured image and go back to the landing screen.
     dispatch(setSignatureImage(null));
-    navigate(PATH.privateRoutes.SIGNATURE_INSTRUCTIONS.path[0]);
+    navigate(PATH.privateRoutes.SIGNATURE_LANDING.path[0], { replace: true });
   };
 
   const handleShowResult = () => {
@@ -208,12 +208,12 @@ const SignatureAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearSignatureData());
-    navigate(PATH.privateRoutes.SIGNATURE_LANDING.path[0]);
+    navigate(PATH.privateRoutes.SIGNATURE_LANDING.path[0], { replace: true });
   };
 
   const handleBack = () => {
     dispatch(clearSignatureData());
-    navigate(PATH.privateRoutes.SIGNATURE_INSTRUCTIONS.path[0], { replace: true });
+    navigate(PATH.privateRoutes.SIGNATURE_LANDING.path[0], { replace: true });
   };
 
   return (

@@ -57,7 +57,7 @@ const AuraAnalysis = () => {
         console.error('Invalid image format in Redux state:', typeof auraImage);
         Toast.error('Invalid image format. Please try again.');
         dispatch(clearAuraData());
-        navigate(PATH.privateRoutes.AURA_LANDING.path[0]);
+        navigate(PATH.privateRoutes.AURA_LANDING.path[0], { replace: true });
         return;
       }
 
@@ -74,7 +74,7 @@ const AuraAnalysis = () => {
     // Double-check profile is available before API call
     if (!profile) {
       Toast.error('Profile not available. Please select a profile.');
-      navigate(PATH.privateRoutes.AIWOW?.path || '/ai-wow');
+      navigate(PATH.privateRoutes.AIWOW?.path || '/ai-wow', { replace: true });
       return;
     }
 
@@ -228,9 +228,9 @@ const AuraAnalysis = () => {
   };
 
   const handleRetakePicture = () => {
-    // Clear only the captured image and go back to the instructions screen.
+    // Clear only the captured image and go back to the landing screen.
     dispatch(setAuraImage(null));
-    navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0]);
+    navigate(PATH.privateRoutes.AURA_LANDING.path[0], { replace: true });
   };
 
   const handleShowResult = () => {
@@ -244,12 +244,12 @@ const AuraAnalysis = () => {
     // Clear error and data, then navigate back to start over
     setError(null);
     dispatch(clearAuraData());
-    navigate(PATH.privateRoutes.AURA_LANDING.path[0]);
+    navigate(PATH.privateRoutes.AURA_LANDING.path[0], { replace: true });
   };
 
   const handleBack = () => {
     dispatch(clearAuraData());
-    navigate(PATH.privateRoutes.AURA_INSTRUCTIONS.path[0], { replace: true });
+    navigate(PATH.privateRoutes.AURA_LANDING.path[0], { replace: true });
   };
 
   return (

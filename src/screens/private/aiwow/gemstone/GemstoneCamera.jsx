@@ -202,7 +202,7 @@ const GemstoneCamera = () => {
 
   const submitImage = () => {
     dispatch(setGemstoneImage(capturedImage));
-    navigate('/ai-wow/gemstone-authenticity/capture');
+    navigate('/ai-wow/gemstone-authenticity/capture', { replace: true });
   };
 
   const proceedWithImage = () => {
@@ -245,7 +245,7 @@ const GemstoneCamera = () => {
     }
     
     // Navigate after stopping camera
-    navigate(-1);
+    navigate('/ai-wow/gemstone-authenticity', { replace: true });
   };
 
   if (error) {

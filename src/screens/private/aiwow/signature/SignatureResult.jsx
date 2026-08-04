@@ -12,7 +12,7 @@ import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 const SignatureResult = () => {
   const navigate = useNavigate();
-  const handleBack = () => navigate(-1);
+  const handleBack = () => navigate(PATH.privateRoutes.SIGNATURE_LANDING.path[0], { replace: true });
   const [activeTab, setActiveTab] = useState('overview');
   const [resultData, setResultData] = useState(null);
   const [loading, setLoading] = useState(true);

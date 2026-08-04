@@ -244,7 +244,7 @@ const AuraCamera = () => {
 
   const submitImage = () => {
     dispatch(setAuraImage(capturedImage));
-    navigate('/ai-wow/aura-photography/capture');
+    navigate('/ai-wow/aura-photography/capture', { replace: true });
   };
 
   const proceedWithImage = () => {
@@ -264,7 +264,7 @@ const AuraCamera = () => {
 
   const handleBack = () => {
     stopCamera();
-    navigate(-1);
+    navigate('/ai-wow/aura-photography', { replace: true });
   };
 
   if (error) {
@@ -305,7 +305,7 @@ const AuraCamera = () => {
         isOpen
         onClose={() => {
           setShowGuestAuthModal(false);
-          navigate('/ai-wow/aura-photography/instructions');
+          navigate('/ai-wow/aura-photography', { replace: true });
         }}
         onSuccess={handleGuestAuthSuccess}
       />

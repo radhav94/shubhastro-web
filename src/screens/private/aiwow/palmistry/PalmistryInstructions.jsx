@@ -38,7 +38,7 @@ const PalmistryInstructions = () => {
   };
 
   const handleCamera = () => {
-    navigate('/ai-wow/ai-palmistry-scanner/camera');
+    navigate('/ai-wow/ai-palmistry-scanner/camera', { replace: true });
   };
 
   const handleUpload = () => {
@@ -56,7 +56,7 @@ const PalmistryInstructions = () => {
           // previous attempt).
           sessionStorage.removeItem('palmistryAnalysisStarted');
           dispatch(setPalmistryImage(dataUrl));
-          navigate('/ai-wow/ai-palmistry-scanner/capture');
+          navigate('/ai-wow/ai-palmistry-scanner/capture', { replace: true });
         });
       });
     }
@@ -67,7 +67,7 @@ const PalmistryInstructions = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <button className={styles.backButton} onClick={() => navigate('/ai-wow/ai-palmistry-scanner', { replace: true })}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
