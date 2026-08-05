@@ -336,7 +336,8 @@
     transform: translateY(-1px);
   }
 
-  &:disabled {
+  &:disabled,
+  &.unavailable {
     opacity: 0.5;
     cursor: not-allowed;
   }
@@ -387,7 +388,8 @@
     filter: brightness(0) invert(1);
   }
 
-  &:disabled {
+  &:disabled,
+  &.unavailable {
     opacity: 0.5;
     cursor: not-allowed;
   }

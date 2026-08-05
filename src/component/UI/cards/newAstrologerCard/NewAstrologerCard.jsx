@@ -4,6 +4,8 @@ import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { AppIcons, getAstrologerDefaultImage } from "../../../../utils/appImages";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
+import toast from "../../../toast";
+import { unavailableReason } from "../../../../utils/helper/astrologerAvailability";
 
 const NewAstrologerCard = memo(({ 
   astrologer, 
@@ -19,8 +21,25 @@ const NewAstrologerCard = memo(({
   const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;
   const callPrice = Number(astrologer?.price?.audioRate?.amount) || 0;
   // When the astrologer is live streaming, chat and call are not available.
-  const chatEnabled = isOnline && !isLive && (activeTypes.includes("all") || activeTypes.includes("chat")) && chatPrice > 0;
-  const callEnabled = isOnline && !isLive && (activeTypes.includes("all") || activeTypes.includes("audio")) && callPrice > 0;
+  const chatTypeActive = activeTypes.includes("all") || activeTypes.includes("chat");
+  const callTypeActive = activeTypes.includes("all") || activeTypes.includes("audio");
+  const chatEnabled = isOnline && !isLive && chatTypeActive && chatPrice > 0;
+  const callEnabled = isOnline && !isLive && callTypeActive && callPrice > 0;
+
+  const chatReason = unavailableReason({
+    label: "Chat",
+    isOnline,
+    isLive,
+    isTypeActive: chatTypeActive,
+    hasPrice: chatPrice > 0,
+  });
+  const callReason = unavailableReason({
+    label: "Call",
+    isOnline,
+    isLive,
+    isTypeActive: callTypeActive,
+    hasPrice: callPrice > 0,
+  });
 
   const hasEmergency = astrologer?.isEmergencyAvailable && (
     astrologer?.emergencyPrice?.chatRate?.amount > 0 || 
@@ -154,13 +173,16 @@ const NewAstrologerCard = memo(({
             {(chatEnabled || !callEnabled) && (
             <div className={styles.buttonWrapper}>
               <button
-                className={styles.chatBtn}
+                className={`${styles.chatBtn} ${!chatEnabled ? styles.unavailable : ""}`.trim()}
                 onClick={() => {
-                  if (!chatEnabled) return;
+                  if (!chatEnabled) {
+                    toast.info(chatReason);
+                    return;
+                  }
                   onConnect(astrologer, "chat");
                 }}
-                disabled={!chatEnabled}
-                title={!chatEnabled ? "Chat unavailable" : "Start chat"}
+                aria-disabled={!chatEnabled}
+                title={!chatEnabled ? chatReason : "Start chat"}
               >
                 <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
               </button>
@@ -182,13 +204,16 @@ const NewAstrologerCard = memo(({
             {(callEnabled || !chatEnabled) && (
             <div className={styles.buttonWrapper}>
               <button
-                className={styles.callBtn}
+                className={`${styles.callBtn} ${!callEnabled ? styles.unavailable : ""}`.trim()}
                 onClick={() => {
-                  if (!callEnabled) return;
+                  if (!callEnabled) {
+                    toast.info(callReason);
+                    return;
+                  }
                   onConnect(astrologer, "audio");
                 }}
-                disabled={!callEnabled}
-                title={!callEnabled ? "Call unavailable" : "Start call"}
+                aria-disabled={!callEnabled}
+                title={!callEnabled ? callReason : "Start call"}
               >
                 <img src={AppIcons.CallMinutesIcon} alt="" /> Call
               </button>

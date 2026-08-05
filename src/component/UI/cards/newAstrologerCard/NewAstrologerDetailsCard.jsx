@@ -9,6 +9,8 @@ import {
 } from "../../../../utils/appImages";
 import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySessionModal";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
+import { getAstrologerAvailability } from "../../../../utils/helper/astrologerAvailability";
+import toast from "../../../toast";
 
 const NewAstrologerDetailsCard = ({
   astrologer,
@@ -20,12 +22,9 @@ const NewAstrologerDetailsCard = ({
   const isOnline = astrologer?.isActive === true;
   const { isLive, roomId: liveRoomId } = useAstrologerLiveStatus(astrologer?._id, astrologer?.astrologerLiveStatus);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
-  const activeTypes = astrologer?.isActiveType || [];
-  const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;
-  const callPrice = Number(astrologer?.price?.audioRate?.amount) || 0;
   // When the astrologer is live streaming, chat and call are not available.
-  const chatEnabled = isOnline && !isLive && (activeTypes.includes("all") || activeTypes.includes("chat")) && chatPrice > 0;
-  const callEnabled = isOnline && !isLive && (activeTypes.includes("all") || activeTypes.includes("audio")) && callPrice > 0;
+  const { chatPrice, callPrice, chatEnabled, callEnabled, chatReason, callReason } =
+    getAstrologerAvailability(astrologer, isLive);
   const hasEmergency = astrologer?.isEmergencyAvailable && (
     astrologer?.emergencyPrice?.chatRate?.amount > 0 ||
     astrologer?.emergencyPrice?.audioRate?.amount > 0
@@ -140,9 +139,16 @@ const NewAstrologerDetailsCard = ({
               {(chatEnabled || !callEnabled) && (
               <div className={styles.detailsButtonWrapper}>
                 <button
-                  className={styles.detailsChatBtn}
-                  onClick={() => chatEnabled && onConnect(astrologer, "chat")}
-                  disabled={!chatEnabled}
+                  className={`${styles.detailsChatBtn} ${!chatEnabled ? styles.unavailable : ""}`.trim()}
+                  onClick={() => {
+                    if (!chatEnabled) {
+                      toast.info(chatReason);
+                      return;
+                    }
+                    onConnect(astrologer, "chat");
+                  }}
+                  aria-disabled={!chatEnabled}
+                  title={!chatEnabled ? chatReason : "Start chat"}
                 >
                   <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
                 </button>
@@ -164,9 +170,16 @@ const NewAstrologerDetailsCard = ({
               {(callEnabled || !chatEnabled) && (
               <div className={styles.detailsButtonWrapper}>
                 <button
-                  className={styles.detailsCallBtn}
-                  onClick={() => callEnabled && onConnect(astrologer, "audio")}
-                  disabled={!callEnabled}
+                  className={`${styles.detailsCallBtn} ${!callEnabled ? styles.unavailable : ""}`.trim()}
+                  onClick={() => {
+                    if (!callEnabled) {
+                      toast.info(callReason);
+                      return;
+                    }
+                    onConnect(astrologer, "audio");
+                  }}
+                  aria-disabled={!callEnabled}
+                  title={!callEnabled ? callReason : "Start call"}
                 >
                   <img src={AppIcons.CallMinutesIcon} alt="" /> Call
                 </button>

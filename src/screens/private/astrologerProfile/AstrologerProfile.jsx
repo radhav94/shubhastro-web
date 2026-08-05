@@ -18,6 +18,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import { ErrorText, PrimaryText } from "../../../component";
 import toast from "../../../component/toast";
+import { unavailableReason } from "../../../utils/helper/astrologerAvailability";
 import {
   useFollowAstrologerByIdMutation,
   useUnfollowAstrologerByIdMutation,
@@ -79,25 +80,43 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
   const activeTypes = astrologer?.isActiveType || [];
   const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;
   const callPrice = Number(astrologer?.price?.audioRate?.amount) || 0;
-  const chatEnabled =
-    isOnline && !isLive && (activeTypes.includes("all") || activeTypes.includes("chat")) && chatPrice > 0;
-  const callEnabled =
-    isOnline && !isLive && (activeTypes.includes("all") || activeTypes.includes("audio")) && callPrice > 0;
+  const chatTypeActive = activeTypes.includes("all") || activeTypes.includes("chat");
+  const callTypeActive = activeTypes.includes("all") || activeTypes.includes("audio");
+  const chatEnabled = isOnline && !isLive && chatTypeActive && chatPrice > 0;
+  const callEnabled = isOnline && !isLive && callTypeActive && callPrice > 0;
+
+  // Never render these `disabled`: a disabled button swallows the tap and the
+  // `title` tooltip does not exist on touch devices, so the user gets no
+  // response at all. See utils/helper/astrologerAvailability.
+  const chatReason = unavailableReason({
+    label: "Chat",
+    isOnline,
+    isLive,
+    isTypeActive: chatTypeActive,
+    hasPrice: chatPrice > 0,
+  });
+  const callReason = unavailableReason({
+    label: "Call",
+    isOnline,
+    isLive,
+    isTypeActive: callTypeActive,
+    hasPrice: callPrice > 0,
+  });
 
   return (
     <div className={styles.actionButtons}>
       <div className={styles.buttonWrapper}>
         <button
-          className={styles.chatBtn}
+          className={`${styles.chatBtn} ${!chatEnabled ? styles.unavailable : ""}`.trim()}
           onClick={() => {
             if (!chatEnabled) {
-              // Provide feedback instead of dead click
+              toast.info(chatReason);
               return;
             }
             onChat(astrologer);
           }}
-          disabled={!chatEnabled}
-          title={!chatEnabled ? "Chat is currently unavailable" : "Start chat"}
+          aria-disabled={!chatEnabled}
+          title={!chatEnabled ? chatReason : "Start chat"}
         >
           <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
         </button>
@@ -115,15 +134,16 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
       </div>
       <div className={styles.buttonWrapper}>
         <button
-          className={styles.callBtn}
+          className={`${styles.callBtn} ${!callEnabled ? styles.unavailable : ""}`.trim()}
           onClick={() => {
             if (!callEnabled) {
+              toast.info(callReason);
               return;
             }
             onCall(astrologer, "audio");
           }}
-          disabled={!callEnabled}
-          title={!callEnabled ? "Call is currently unavailable" : "Start call"}
+          aria-disabled={!callEnabled}
+          title={!callEnabled ? callReason : "Start call"}
         >
           <img src={AppIcons.CallMinutesIcon} alt="" /> Call
         </button>
