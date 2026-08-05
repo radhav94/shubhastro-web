@@ -38,6 +38,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
   const [isSending, setIsSending] = useState(false);
   const [facingMode, setFacingMode] = useState("environment");
   const fileRef = useRef(null);
+  const inputRef = useRef(null);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const canvasRef = useRef(null);
@@ -64,11 +65,13 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
       sendImage(previewFile);
       setPreview(null);
       setPreviewFile(null);
+      setTimeout(() => inputRef.current?.focus(), 0);
       return;
     }
     if (text.trim()) {
       sendText(text);
       setText("");
+      setTimeout(() => inputRef.current?.focus(), 0);
     }
   }, [text, previewFile, sendText, sendImage]);
 
@@ -152,6 +155,20 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
       setAttachMenuOpen(false);
     }
   }, [isOpen]);
+
+  // Focus the text input when the chat window opens
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  }, [isOpen]);
+
+  // Refocus input after sending completes (input was disabled during send)
+  useEffect(() => {
+    if (isOpen && !sending) {
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  }, [sending, isOpen]);
 
   // Stop the camera on browser Back/forward navigation, in case this widget
   // stays mounted across the route change.
@@ -504,7 +521,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
             </button>
             <canvas ref={canvasRef} style={{ display: "none" }} />
             <input
-              autoFocus
+              ref={inputRef}
               className={styles.textInput}
               value={text}
               onChange={(e) => setText(e.target.value)}
