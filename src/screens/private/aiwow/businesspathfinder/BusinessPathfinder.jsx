@@ -21,7 +21,7 @@ const BusinessPathfinder = () => {
   const token = localStorage.getItem('shubhtalk_customer_token');
   const profile = token ? rawProfile : null;
   const { data: optionsData, isLoading: optionsLoading } = useGetBusinessPathfinderOptionsQuery();
-  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'business-pathfinder' });
+  const { runWithEntitlement, subscriptionModal, showSubscriptionModal } = useAIWowSubscriptionGate({ featureName: 'business-pathfinder' });
   const userLocation = useUserLocation();
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
@@ -208,7 +208,7 @@ const BusinessPathfinder = () => {
       {/* Fullscreen loader while the report is being generated (covers the
           automatic submit after guest login, where the button-level loader
           isn't visible to the user). */}
-      <PrimaryLoader isLoading={isSubmitting} message="Generating your report..." />
+      <PrimaryLoader isLoading={isSubmitting && !showSubscriptionModal} message="Generating your report..." />
 
       {/* Header - outside container */}
       <div className={styles.pageHeader}>
