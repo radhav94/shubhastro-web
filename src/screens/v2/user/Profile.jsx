@@ -2179,7 +2179,7 @@ const Profile = () => {
 
                         {/* Receipt Button - only for successful purchases (not admin credits) */}
                         <div className={styles.txnActionCell}>
-                          {transaction?.billing?.user?.action === "credit" && 
+                          {transaction?.billing?.user?.action === "credit" && transaction?.type !== "refunded" &&
                            !(transaction.description || "").toLowerCase().includes("admin") &&
                            !(transaction.description || "").toLowerCase().includes("bonus") && (
                             <button
