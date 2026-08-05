@@ -25,7 +25,11 @@ import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, Astr
 import ProfileModals from "../../private/kundli/components/ProfileModals";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
-const SubscriptionModal = lazy(() => import("../../../component/UI/modal/SubscriptionModal/SubscriptionModal"));
+// Statically imported on purpose. Eight other modules (the AI-Wow result
+// screens, useAIWowSubscriptionGate and the user Profile screen) import this
+// statically, so it lands in the main chunk regardless — a lazy() here bought
+// no split and only made Vite warn about the mixed import.
+import SubscriptionModal from "../../../component/UI/modal/SubscriptionModal/SubscriptionModal";
 import { GuestKundliAuthModal } from "../../../component/UI/Profile";
 import HomeIntroPopup from "./HomeIntroPopup";
 const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));

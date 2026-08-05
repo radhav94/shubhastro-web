@@ -1,8 +1,17 @@
+import { lazy } from "react";
 import NotFound from "../../screens/private/NotFound/NotFound";
 import ComingSoon from "../../screens/public/coming-soon/ComingSoon";
 
-import VideoCalling from "../../component/call/VideoCall";
-import AgoraVoiceCalling from "../../component/call/VoiceCall";
+// Route-level code splitting for the Agora call screens.
+//
+// VideoCallContainer already lazy-imports these same two modules. Importing
+// them statically here defeated that split entirely (Vite warns: "dynamic
+// import will not move module into another chunk"), pulling the Agora RTC SDK
+// into the main bundle for every visitor, including those who never place a
+// call. Route elements are rendered inside the app-level <Suspense> in App.jsx,
+// so lazy components are safe here.
+const VideoCalling = lazy(() => import("../../component/call/VideoCall"));
+const AgoraVoiceCalling = lazy(() => import("../../component/call/VoiceCall"));
 import Onboarding from "../../screens/public/onboarding/Onboarding";
 import Register from "../../screens/public/Register";
 import ForgotPassword from "../../screens/public/ForgotPassword";
