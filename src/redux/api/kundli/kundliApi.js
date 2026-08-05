@@ -21,6 +21,39 @@ export const kundliApi = baseApi.injectEndpoints({
   }),
 });
 
+/**
+ * Response handler for the SVG chart endpoints.
+ *
+ * The backend serves these as `application/json` whose body is a JSON *string*
+ * containing the SVG markup. Because the content type is JSON, the secure
+ * gateway encrypts the body into an `{ enc, iv, data }` envelope.
+ *
+ * These endpoints previously used `responseHandler: "text"`, which returned the
+ * envelope as a raw string. `secureBaseQuery` only decrypts values where
+ * `typeof value === "object"`, so a string body slipped past decryption
+ * untouched — `sanitizeSvg` then found no `<svg>` element in the ciphertext,
+ * returned "", and every chart was silently dropped from the render.
+ *
+ * Parsing the body instead covers both deployments:
+ *   - through the gateway: yields the envelope object, which secureBaseQuery
+ *     decrypts back into the SVG string,
+ *   - direct to the backend: yields the JSON string, i.e. the SVG markup itself.
+ *
+ * A non-JSON body (an upstream serving `image/svg+xml` directly) falls through
+ * to raw text.
+ */
+const svgResponseHandler = async (response) => {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+};
+
+/** Chart endpoints must hand `sanitizeSvg` a string, whatever the transport did. */
+const toSvgString = (response) => (typeof response === "string" ? response : "");
+
 export const kundliVedicApi = vedicApi.injectEndpoints({
   endpoints: (builder) => ({
     getAstroDetails: builder.query({
@@ -60,10 +93,10 @@ export const kundliVedicApi = vedicApi.injectEndpoints({
           size: 300,
           show_degree: true,
         },
-        responseHandler: "text", //  THIS FIXES PARSING ERROR
+        responseHandler: svgResponseHandler,
       }),
 
-      transformResponse: (responseText) => responseText, //  return raw SVG
+      transformResponse: toSvgString,
     }),
     getAshtakvargaChart: builder.query({
       query: ({ chartType, params }) => ({
@@ -83,10 +116,10 @@ export const kundliVedicApi = vedicApi.injectEndpoints({
           lang: params.lang || "en",
           format: "svg", //  IMPORTANT (use svg not base64)
         },
-        responseHandler: "text", //  THIS FIXES PARSING ERROR
+        responseHandler: svgResponseHandler,
       }),
 
-      transformResponse: (responseText) => responseText, //  return raw SVG
+      transformResponse: toSvgString,
     }),
 
     getPlanets: builder.query({
