@@ -13,24 +13,41 @@ const VALID_RATIO_MAX = 0.7;
 /** Share of the 21 hand landmarks that must sit inside the capture box. */
 const REQUIRED_LANDMARKS_INSIDE = 0.95;
 
-export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isFrontCamera = true }) => {
+/**
+ * MediaPipe streams its WASM runtime and model from a CDN on the first send().
+ * In embedded in-app browsers (Facebook / Instagram WebViews) that fetch can be
+ * blocked outright, and the failure surfaces asynchronously from the Emscripten
+ * glue rather than as a rejected promise. When that happens we must declare
+ * detection unavailable instead of leaving the capture button permanently
+ * blocked behind guidance the user can never satisfy.
+ */
+const MAX_SEND_FAILURES = 3;
+const FIRST_RESULT_TIMEOUT_MS = 10000;
+
+export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds }) => {
   const [handsLoaded, setHandsLoaded] = useState(false);
+  const [detectionUnavailable, setDetectionUnavailable] = useState(false);
   const [handDetected, setHandDetected] = useState(false);
   const [isPalmOpen, setIsPalmOpen] = useState(false);
   const [isInBounds, setIsInBounds] = useState(false);
   const [detectedHandSide, setDetectedHandSide] = useState(null);
   const [isTooFar, setIsTooFar] = useState(false);
   const [isTooClose, setIsTooClose] = useState(false);
-  
+
   const handsRef = useRef(null);
   const rafRef = useRef(null);
   const detectionStartedRef = useRef(false);
+  const sendFailuresRef = useRef(0);
+  const resultsSeenRef = useRef(false);
+  const watchdogRef = useRef(null);
 
   /* ------------------ LOAD MEDIAPIPE HANDS ------------------ */
   useEffect(() => {
+    let hands = null;
+
     const loadHands = async () => {
       try {
-        const hands = new Hands({
+        hands = new Hands({
           locateFile: (file) => {
             return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
           }
@@ -45,11 +62,13 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
 
         hands.onResults(onResults);
         handsRef.current = hands;
-        
-        console.log('Hand detection loaded successfully');
+
         setHandsLoaded(true);
       } catch (err) {
         console.error('Error loading hand detection:', err);
+        // Construction failed, so detection can never run. Say so rather than
+        // reporting "loaded" and blocking capture forever.
+        setDetectionUnavailable(true);
       }
     };
 
@@ -59,11 +78,32 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
+      if (watchdogRef.current) {
+        clearTimeout(watchdogRef.current);
+      }
+      // Release the WASM instance and its worker. Without this, navigating in
+      // and out of the camera screen leaks a full MediaPipe graph per visit,
+      // which is enough to OOM low-end Android devices.
+      detectionStartedRef.current = false;
+      handsRef.current = null;
+      try {
+        hands?.close();
+      } catch {
+        /* already torn down */
+      }
     };
   }, []);
 
   /* ------------------ DETECTION RESULTS ------------------ */
   const onResults = (results) => {
+    // Inference is alive — clear the failure budget and the startup watchdog.
+    resultsSeenRef.current = true;
+    sendFailuresRef.current = 0;
+    if (watchdogRef.current) {
+      clearTimeout(watchdogRef.current);
+      watchdogRef.current = null;
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -242,6 +282,14 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
       }
     } catch (err) {
       console.error('Hand detection error:', err);
+      sendFailuresRef.current += 1;
+      if (sendFailuresRef.current >= MAX_SEND_FAILURES) {
+        // The graph is not going to recover (typically a blocked CDN fetch for
+        // the WASM runtime). Stop burning frames and hand control back to the UI.
+        detectionStartedRef.current = false;
+        setDetectionUnavailable(true);
+        return;
+      }
     }
 
     if (detectionStartedRef.current) {
@@ -251,13 +299,26 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
 
   /* ------------------ START/STOP DETECTION ------------------ */
   const startDetection = () => {
-    if (!handsLoaded || !videoRef.current || detectionStartedRef.current) {
-      console.log('Cannot start detection - hands loaded:', handsLoaded);
-      return;
+    // Gate on the ref, not the `handsLoaded` state: this is also called from
+    // the video element's onplay handler, whose closure can predate the model
+    // finishing load. Reading state there would bail out and detection would
+    // never start.
+    if (!handsRef.current || !videoRef.current || detectionStartedRef.current) return;
+
+    detectionStartedRef.current = true;
+
+    // If inference never produces a single result, treat detection as
+    // unavailable so the capture button stops blocking.
+    if (!resultsSeenRef.current && !watchdogRef.current) {
+      watchdogRef.current = setTimeout(() => {
+        watchdogRef.current = null;
+        if (!resultsSeenRef.current) {
+          detectionStartedRef.current = false;
+          setDetectionUnavailable(true);
+        }
+      }, FIRST_RESULT_TIMEOUT_MS);
     }
 
-    console.log('Starting hand detection...');
-    detectionStartedRef.current = true;
     detectLoop();
   };
 
@@ -265,6 +326,10 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
     detectionStartedRef.current = false;
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
+    }
+    if (watchdogRef.current) {
+      clearTimeout(watchdogRef.current);
+      watchdogRef.current = null;
     }
     setHandDetected(false);
     setIsPalmOpen(false);
@@ -281,6 +346,7 @@ export const useHandDetection = ({ videoRef, canvasRef, getCaptureBoxBounds, isF
 
   return {
     handsLoaded,
+    detectionUnavailable,
     handDetected,
     isPalmOpen,
     isInBounds,

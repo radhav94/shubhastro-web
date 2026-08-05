@@ -116,6 +116,7 @@ const PalmistryCamera = () => {
 
   const {
     handsLoaded,
+    detectionUnavailable,
     handDetected,
     isPalmOpen,
     isInBounds,
@@ -128,20 +129,22 @@ const PalmistryCamera = () => {
     videoRef, 
     canvasRef: detectionCanvasRef,
     getCaptureBoxBounds,
-    isFrontCamera,
   });
 
   // Wrong hand: hand detected but it's not the selected hand
   const isWrongHand = handDetected && detectedHandSide !== null && detectedHandSide !== selectedHand;
 
   // True while hand detection is not satisfied and therefore blocking capture.
+  // When detection could not run at all (blocked WASM/CDN in an in-app browser)
+  // we never block: guidance we cannot compute must not gate the shutter.
   const isBlocked =
     handsLoaded &&
+    !detectionUnavailable &&
     (!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar || isTooClose);
 
   // Guidance for the current blocked state. Derived in one place so the button
   // label, the on-screen banner and the tap toast can never contradict.
-  const blockReason = !handsLoaded
+  const blockReason = !handsLoaded || detectionUnavailable
     ? null
     : isWrongHand
       ? `Wrong hand — please show your ${selectedHand} hand`
@@ -208,29 +211,36 @@ const PalmistryCamera = () => {
     },
   });
 
-  // Start detection when models are loaded and video is ready
+  // Start detection once the model finishes loading, for a video that is
+  // already playing. (The reverse order — video becoming ready after the model
+  // — is handled by the `onplay` handler in startCamera.)
   useEffect(() => {
-    if (handsLoaded && videoRef.current && videoRef.current.readyState >= 2) {
-      console.log('Hands loaded, starting detection for existing video');
-      setTimeout(() => {
-        startDetection();
-      }, 300);
-    }
+    if (!handsLoaded) return;
+    const timer = setTimeout(() => startDetection(), 300);
+    return () => clearTimeout(timer);
   }, [handsLoaded]);
 
+  // Camera lifecycle is keyed on facingMode ONLY.
+  //
+  // `handsLoaded` used to be a dependency here, which meant the moment the
+  // MediaPipe model finished loading this effect tore the camera down and
+  // re-acquired it. Two getUserMedia calls within the first second is exactly
+  // what Android WebViews (Facebook / Instagram in-app browsers) reject with
+  // NotReadableError / TrackStartError, because the device has not been
+  // released yet — the user grants camera permission and then immediately hits
+  // a camera error. Detection start is handled by the effect above and by
+  // `onplay`, so the camera does not need to restart for it.
   useEffect(() => {
-    console.log('[PalmistryCamera] facingMode changed to:', facingMode);
     // Small delay to let old camera tracks fully release on mobile
     const timer = setTimeout(() => {
       startCamera();
     }, 200);
-    
+
     return () => {
       clearTimeout(timer);
-      console.log('PalmistryCamera unmounting, stopping camera');
       stopCamera();
     };
-  }, [facingMode, handsLoaded]);
+  }, [facingMode]);
 
   const startCamera = async () => {
     try {
@@ -302,12 +312,13 @@ const PalmistryCamera = () => {
         tryPlay();
 
         videoRef.current.onplay = () => {
-          // Wait a bit for video to stabilize, then start detection
-          if (handsLoaded) {
-            setTimeout(() => {
-              startDetection();
-            }, 300);
-          }
+          // Wait a bit for video to stabilize, then start detection.
+          // startDetection() no-ops until the model is ready, so it is safe to
+          // call unconditionally — and unlike a `handsLoaded` check, it cannot
+          // be defeated by this handler's closure being older than the load.
+          setTimeout(() => {
+            startDetection();
+          }, 300);
         };
       }
     } catch (err) {
@@ -622,7 +633,7 @@ const PalmistryCamera = () => {
                 </svg>
               </div>
               <span className={styles.captureText}>
-                {!handsLoaded
+                {!handsLoaded && !detectionUnavailable
                   ? 'Loading…'
                   : !isBlocked
                     ? 'Capture'
@@ -643,7 +654,7 @@ const PalmistryCamera = () => {
             {/* Detection can fail outright on low-end cameras or poor light.
                 Keep the upload route visible here so the user doesn't have to
                 find their way back to the instructions screen to escape. */}
-            {isBlocked && (
+            {(isBlocked || detectionUnavailable) && (
               <button className={styles.uploadFallbackBtn} onClick={handleUploadInstead}>
                 Upload a photo instead
               </button>
