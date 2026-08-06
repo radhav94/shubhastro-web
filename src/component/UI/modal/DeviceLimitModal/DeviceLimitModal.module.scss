@@ -10,7 +10,7 @@
 }
 
 .modal {
-  background: #fff;
+  background: linear-gradient(90deg, rgba(254, 254, 254, 0.9), rgba(255, 248, 236, 0.9));
   border-radius: 16px;
   padding: 24px;
   max-width: 400px;
@@ -37,6 +37,8 @@
   flex-direction: column;
   gap: 12px;
   margin-bottom: 20px;
+  max-height: 50dvh;
+  overflow: auto;
 }
 
 .deviceItem {
@@ -47,6 +49,7 @@
   background: #f8f9fa;
   border-radius: 10px;
   gap: 12px;
+  border: 1px solid #f75801;
 }
 
 .deviceInfo {
