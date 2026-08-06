@@ -1401,7 +1401,7 @@ const LiveView = (props) => {
           {!isHost && liveListCtx && <div className="live-counter"></div>}
 
           {/* Video */}
-          <div className="reel-container">
+          <div className={`reel-container ${!isHost ? 'audience-view' : ''}`}>
             {/* HOST VIDEO */}
             {isHost && isConnected && (
               <LocalUser

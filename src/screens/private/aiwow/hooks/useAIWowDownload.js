@@ -20,7 +20,7 @@ const extractHistoryId = (result) =>
  * Finds the matching download charge from the charges API response by feature.
  * Response shape: { data: [{ title, list: [{ title, slug, amount, ... }] }] }
  */
-const findChargeAmount = (charges, featureName) => {
+export const findChargeAmount = (charges, featureName) => {
   if (!Array.isArray(charges) || !featureName) return null;
   const normalized = featureName.trim().toLowerCase();
   const exactSlug = normalized.replace(/\s+/g, '-') + '-report';

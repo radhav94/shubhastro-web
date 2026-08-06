@@ -17,6 +17,7 @@ import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { PATH } from "../../../utils/routes/Paths";
 import { trackEvent } from "../../../utils/analytics";
+import { findChargeAmount } from "./hooks/useAIWowDownload";
 
 // Reusable Section Title with Divider (same as Explore page, auto-width)
 const SectionTitleWithDivider = ({ title, description, styles }) => (
@@ -170,17 +171,17 @@ const AIWow = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [activeTab, hasMoreHistory]);
 
-  // Find download cost from charges data by matching featureName to slug in charges
+  // Find download cost from charges data by matching featureName.
+  // Use the shared `findChargeAmount` (same logic the result screens use) so the
+  // history-page modal shows the SAME price the server actually charges.
+  // Previously this only did an exact slug match and read `match.amount`,
+  // returning 0 on any miss (e.g. amount stored under `pdfDownloadCharge`, or a
+  // slightly different slug) — that wrongly showed "Free" in the modal while the
+  // backend still debited the wallet. Returning `null` when unresolved makes the
+  // modal show "Loading..." (and block download) instead of a false "Free".
   const getDownloadCost = (featureName) => {
-    if (!charges || !featureName) return 0;
-    const slug = featureName.trim().replace(/\s+/g, "-") + "-report";
-    // charges is array of sections, each has a .list array with { slug, amount }
-    for (const section of charges) {
-      if (!Array.isArray(section?.list)) continue;
-      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug.toLowerCase());
-      if (match) return match.amount ?? 0;
-    }
-    return 0;
+    if (!charges || !featureName) return null;
+    return findChargeAmount(charges, featureName);
   };
 
   useEffect(() => {

@@ -6,10 +6,12 @@ import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
 import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setGemstoneImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
+import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
 
 const GemstoneCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  usePreventPinchZoom(); // block pinch/gesture zoom while the camera is open
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -184,7 +186,11 @@ const GemstoneCamera = () => {
   // Gemstone detection is heuristic, so require a strong-quality, longer-held
   // detection before auto-capturing to avoid firing on false positives.
   const { autoCapturing } = useAutoCapture({
-    ready: detectionReady && objectDetected && detectionQuality >= 55,
+    // `detectionQuality` for a gemstone rarely exceeds ~40 even on a valid
+    // detection, so gating on >=55 meant auto-capture never fired. `objectDetected`
+    // is already temporally smoothed (stable over multiple frames), and the hold
+    // time below guards against false positives — that's sufficient.
+    ready: detectionReady && objectDetected,
     active: !capturedImage,
     getFrameCanvas: cropCurrentFrameToCanvas,
     onCapture: (dataUrl) => {

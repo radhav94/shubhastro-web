@@ -1458,8 +1458,11 @@ const VideoCalling = ({ callData }) => {
 
             {/* Video Area */}
             <div className={styles.videoWrapper}>
-              {/* Remote Video Container - Always rendered */}
-              <div ref={remoteVideoRef} className={styles.remoteVideoArea} style={{ transform: 'scaleX(-1)' }}/>
+              {/* Remote Video Container - Always rendered.
+                  The remote person must NOT be mirrored — mirroring swaps
+                  left/right so when the astrologer moves left they appear to
+                  move right. Only the local self-view is mirrored (below). */}
+              <div ref={remoteVideoRef} className={styles.remoteVideoArea} />
 
               {/* Avatar Overlay - Separate layer */}
               {!remoteVideoEnabled && (

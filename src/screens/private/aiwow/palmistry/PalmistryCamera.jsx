@@ -7,6 +7,7 @@ import { useHandDetection } from '../../../../utils/hooks/useHandDetection';
 import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
+import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
 import { compressImage } from '../../../../utils/helper/compressImage';
 import toast from '../../../../component/toast';
 
@@ -25,6 +26,7 @@ const PalmistryCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const selectedHand = useSelector((state) => state.aiwow.palmistry.selectedHand) || 'right';
+  usePreventPinchZoom(); // block pinch/gesture zoom while the camera is open
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
 
   // Lock body scroll when camera is open (fullscreen on mobile)
