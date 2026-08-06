@@ -147,7 +147,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  // margin-bottom: 16px;
 
   .avatarImage {
     position: relative;
@@ -466,10 +466,9 @@
   transition: all 0.2s ease;
   border-radius: 50px;
   border: 1px solid var(--primary-900k, #E56329);
-  background: var(--surface, #FEFEFE);
+  background: rgba(0, 0, 0, 0.5);
   border-radius: 50px;
   border: 1px solid var(--base-white, #FEFEFE);
-  background: #fff1;
   backdrop-filter: blur(10px);
 }
 
@@ -641,7 +640,7 @@
   text-align: center;
   padding: 5px 16px;
   margin: 0 auto 10px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   border-radius: 20px;
   width: fit-content;
@@ -1086,7 +1085,12 @@
 /* ===============================
    📱 SMALL MOBILE (≤480px)
    =============================== */
-
+@media (min-height: 600px) and (max-height: 700px) {
+  .avatarImage {
+    width: 150px!important;
+    height: 150px!important;
+  }
+}
 @media (max-width: 480px) {
 
   .avatarImage {
