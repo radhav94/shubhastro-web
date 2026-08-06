@@ -80,15 +80,18 @@ const ManageDevices = () => {
 
   return (
     <>
-      <BackButton />
+      
       <div className={styles.container}>
         {isLoading && <PrimaryLoader />}
 
         <div className={styles.header}>
-          <h1 className={styles.title}>Manage Devices</h1>
-          <p className={styles.subtitle}>
-            You can be logged in on up to 2 devices. Remove devices you no longer use.
-          </p>
+          <BackButton />
+          <div>
+            <h1 className={styles.title}>Manage Devices</h1>
+            <p className={styles.subtitle}>
+              You can be logged in on up to 2 devices. Remove devices you no longer use.
+            </p>
+          </div>
         </div>
 
         <div className={styles.deviceList}>
