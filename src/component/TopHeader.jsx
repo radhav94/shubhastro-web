@@ -185,6 +185,14 @@ const TopHeader = () => {
     trackEvent("profile_switched", { switched_to_profile_id: profile._id });
   };
 
+  // The badge is only rendered for logged-in users, so `requireAuth()` returning
+  // falsy here means the session expired. Send the user somewhere instead of
+  // swallowing the tap.
+  const handleWalletClick = () => {
+    if (!requireAuth()) return;
+    navigate(PATH.privateRoutes.RECHARGE.path);
+  };
+
   const formatAmount = (amount) => {
     // Handle non-numeric values
     if (typeof amount !== "number") {
@@ -403,7 +411,13 @@ const TopHeader = () => {
 
             {isLoggedIn && (
               <div className={styles.walletBadge}
-                onClick={() => requireAuth() && navigate(PATH.privateRoutes.RECHARGE.path)}
+                onClick={handleWalletClick}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleWalletClick();
+                  }
+                }}
                 role="button"
                 tabIndex={0}
                 aria-label="Wallet balance - tap to recharge"

@@ -288,7 +288,10 @@ const AIWow = () => {
         return;
       }
       if (!selectedProfile) {
+        // A toast alone left the tile looking unresponsive. Open the Kundli
+        // picker as well so the tap leads somewhere the user can act on.
         toast.error("Please select one Kundli to proceed.");
+        setShowProfileModal(true);
         return;
       }
     }
