@@ -174,15 +174,19 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
     const centerBrightness = centerBrightnessSum / centerCount;
     const bgBrightness = bgCount ? bgBrightnessSum / bgCount : centerBrightness;
 
-    const hasSparkle = specularRatio > 0.004 && specularRatio < 0.45;
+    const hasSparkle = specularRatio > 0.002 && specularRatio < 0.5;
     // Object should be noticeably brighter than the background (stands out).
-    const standsOut = centerBrightness > bgBrightness * 1.12;
+    const standsOut = centerBrightness > bgBrightness * 1.05;
 
+    // Relaxed: the earlier thresholds (colorRatio>0.25 && brightRatio>0.35 &&
+    // sparkle && standsOut, all required) were so strict that a real gemstone
+    // usually failed to register, so auto-capture never triggered. Require a
+    // colourful+bright centre plus EITHER sparkle OR clear contrast from the
+    // background.
     const detected =
-      colorRatio > 0.25 &&
-      brightRatio > 0.35 &&
-      hasSparkle &&
-      standsOut;
+      colorRatio > 0.15 &&
+      brightRatio > 0.25 &&
+      (hasSparkle || standsOut);
 
     const quality = detected
       ? Math.min(100, Math.round((colorRatio + brightRatio + specularRatio * 6) * 40))

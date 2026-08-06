@@ -6,10 +6,12 @@ import { useFaceDetection } from '../../../../utils/hooks/useFaceDetection';
 import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
+import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
 
 const FaceReadingCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  usePreventPinchZoom(); // block pinch/gesture zoom while the camera is open
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
