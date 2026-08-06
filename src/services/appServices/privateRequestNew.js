@@ -69,6 +69,16 @@ const handleApiError = (error, endpoint) => {
         console.warn("[401] skipped — public endpoint:", endpoint);
         break;
       }
+
+      // Handle DEVICE_KICKED — user was logged out from this device remotely
+      if (data?.code === "DEVICE_KICKED") {
+        localStorage.clear();
+        sessionStorage.clear();
+        sessionStorage.setItem("shubhtalk_device_kicked", data?.message || "Session expired. You have been logged out from this device.");
+        navigateToLogin(window.location.pathname);
+        break;
+      }
+
       // Handle a single 401 per tick (multiple queries can fail together).
       if (unAuthorizedCount) {
         console.warn("[401] already handling — skipping:", endpoint);

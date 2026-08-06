@@ -8,6 +8,7 @@ import { logout } from "../../../redux/auth/authSlice";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearAllCalculatorData } from "../../../redux/calculator/calculatorSlice";
 import { useLogoutUserMutation } from "../../../redux/api/userSession/userSessionApi";
+import DeviceLimitModal from "../../../component/UI/modal/DeviceLimitModal/DeviceLimitModal";
 import LoadingScreen from "./LoadingScreen";
 import WelcomeScreen from "./WelcomeScreen";
 import GuidanceScreen from "./GuidanceScreen";
@@ -26,6 +27,8 @@ const Onboarding = () => {
   const skipGuidance = searchParams.get("skip") === "welcome" || isPersonalizeFlow;
 
   const [currentStep, setCurrentStep] = useState(isPersonalizeFlow ? 3 : 1);
+  const [deviceLimitDevices, setDeviceLimitDevices] = useState(null);
+  const [isDeviceLimitOpen, setIsDeviceLimitOpen] = useState(false);
 
   const [formData, setFormData] = useState(() => {
     let phoneNumber = "";
@@ -73,6 +76,41 @@ const Onboarding = () => {
     }
     // If there IS a redirect path, let the OTPScreen handle it after login
   }, []); // Run only once on mount
+
+  // Check for device limit after OTP login
+  useEffect(() => {
+    const stored = localStorage.getItem("shubhtalk_device_limit_reached");
+    const sessionStored = sessionStorage.getItem("shubhtalk_device_limit_reached");
+    
+    console.log("🔍 Onboarding mount - Checking device limit");
+    console.log("  📦 localStorage:", stored ? `${JSON.parse(stored).length} devices` : "null");
+    console.log("  📦 sessionStorage:", sessionStored ? `${JSON.parse(sessionStored).length} devices` : "null");
+    
+    if (stored) {
+      try {
+        const devices = JSON.parse(stored);
+        console.log("✅ Device limit found in localStorage, showing popup, devices:", devices);
+        setDeviceLimitDevices(devices);
+        setIsDeviceLimitOpen(true);
+      } catch (error) {
+        console.error("❌ Error parsing device limit data:", error);
+      }
+    } else if (sessionStored) {
+      try {
+        const devices = JSON.parse(sessionStored);
+        console.log("✅ Device limit found in sessionStorage, showing popup, devices:", devices);
+        setDeviceLimitDevices(devices);
+        setIsDeviceLimitOpen(true);
+        // Copy to localStorage for persistence
+        localStorage.setItem("shubhtalk_device_limit_reached", sessionStored);
+        sessionStorage.removeItem("shubhtalk_device_limit_reached");
+      } catch (error) {
+        console.error("❌ Error parsing sessionStorage device limit data:", error);
+      }
+    } else {
+      console.log("ℹ️ No device limit found in storage");
+    }
+  }, []);
 
   const handleStepChange = (step) => {
     // When guidance is skipped, don't allow navigating to step index 2 (GuidanceScreen)
@@ -211,6 +249,23 @@ const Onboarding = () => {
   return (
     <>
       <div className={styles.onboardingContainer}>{screens[currentStep]}</div>
+      <DeviceLimitModal 
+        isOpen={isDeviceLimitOpen}
+        onClose={() => {
+          setIsDeviceLimitOpen(false);
+          localStorage.removeItem("shubhtalk_device_limit_reached");
+        }}
+        onDeviceUpdated={(updatedDevices) => {
+          if (updatedDevices && updatedDevices.length > 0) {
+            setDeviceLimitDevices(updatedDevices);
+            localStorage.setItem("shubhtalk_device_limit_reached", JSON.stringify(updatedDevices));
+          } else {
+            setIsDeviceLimitOpen(false);
+            localStorage.removeItem("shubhtalk_device_limit_reached");
+          }
+        }}
+        devices={deviceLimitDevices || []}
+      />
     </>
   );
 };

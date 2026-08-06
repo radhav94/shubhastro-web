@@ -214,6 +214,7 @@ import CustomerSupport from "../../screens/v2/user/CustomerSupport";
 import RecentTickets from "../../screens/v2/user/RecentTickets";
 import TicketDetails from "../../screens/v2/user/TicketDetails";
 import PrivacySecurity from "../../screens/v2/user/PrivacySecurity";
+import ManageDevices from "../../screens/private/manageDevices/ManageDevices";
 import TermsConditionsView from "../../screens/v2/user/TermsConditionsView";
 import AppLicense from "../../screens/v2/user/AppLicense";
 import FollowedAstrologers from "../../screens/v2/user/FollowedAstrologers";
@@ -1248,6 +1249,12 @@ export const PATH = {
     PRIVACY_SECURITY: {
       path: "/privacy",
       element: PrivacySecurity,
+      header: false,
+      footer: false,
+    },
+    MANAGE_DEVICES: {
+      path: "/manage-devices",
+      element: ManageDevices,
       header: false,
       footer: false,
     },

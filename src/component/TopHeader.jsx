@@ -449,6 +449,13 @@ const TopHeader = () => {
                   <div className={styles.profileDropdownDivider} />
                   <div
                     className={styles.profileDropdownItem}
+                    onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen(false); navigate("/manage-devices"); }}
+                  >
+                    Manage Devices
+                  </div>
+                  <div className={styles.profileDropdownDivider} />
+                  <div
+                    className={styles.profileDropdownItem}
                     onClick={(e) => { e.stopPropagation(); setProfileDropdownOpen(false); navigate("/profile"); }}
                   >
                     My Account
