@@ -105,6 +105,15 @@
   object-fit: cover;
 }
 
+/* Audience view: mirror the broadcaster's video so the host's movements match
+   the direction shown to viewers. The host's own self-preview (on the
+   astrologer app) is mirrored/selfie-style, so the raw feed looks left/right
+   reversed to the audience — mirror it here to keep the facing side consistent.
+   Only applied for audience (RemoteUser); the host LocalUser is untouched. */
+.reel-container.audience-view video {
+  transform: scaleX(-1);
+}
+
 /* Close button for live stream */
 .close-live-btn {
   position: absolute;

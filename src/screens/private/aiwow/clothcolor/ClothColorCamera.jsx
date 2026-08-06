@@ -6,10 +6,12 @@ import { useObjectDetection } from '../../../../utils/hooks/useObjectDetection';
 import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
+import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
 
 const ClothColorCamera = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  usePreventPinchZoom(); // block pinch/gesture zoom while the camera is open
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
