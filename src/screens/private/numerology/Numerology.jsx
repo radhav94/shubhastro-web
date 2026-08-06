@@ -277,7 +277,9 @@ const NumerologyWeb = () => {
 
     return {
       name: data?.name,
-      gender: data?.identity.toLowerCase(),
+      // `data?.identity.toLowerCase()` threw when `identity` was absent — the
+      // optional chain guarded `data`, not the property being called.
+      gender: data?.identity?.toLowerCase(),
       day: dateObj.getDate(),
       month: dateObj.getMonth() + 1,
       year: dateObj.getFullYear(),

@@ -20,6 +20,15 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const [phoneNumber, setPhoneNumber] = useState(formData.phoneNumber || "");
   const [loading, setLoading] = useState(false);
 
+  // Show device kicked message if redirected from interceptor
+  useState(() => {
+    const msg = sessionStorage.getItem("shubhtalk_device_kicked");
+    if (msg) {
+      sessionStorage.removeItem("shubhtalk_device_kicked");
+      setTimeout(() => toast.error(msg), 300);
+    }
+  });
+
   const handleGetOTP = async () => {
     if (phoneNumber.length >= 10) {
       setLoading(true);

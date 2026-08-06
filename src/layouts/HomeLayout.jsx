@@ -1,4 +1,4 @@
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import styles from "./HomeLayout.module.scss";
 import TopHeader from "../component/TopHeader";
 import { Outlet, useMatches, useLocation, Link } from "react-router-dom";
@@ -19,6 +19,75 @@ import NoInternet, { useOnlineStatus } from "../component/NoInternet/NoInternet"
 import { useAiwowCleanup } from "../utils/hooks/useAiwowCleanup";
 import WelcomeBonusModal from "../component/UI/modal/WelcomeBonusModal/WelcomeBonusModal";
 import WelcomeBackModal from "../component/UI/modal/WelcomeBonusModal/WelcomeBackModal";
+import DeviceLimitModal from "../component/UI/modal/DeviceLimitModal/DeviceLimitModal";
+
+// Wrapper that checks localStorage for device limit flag
+// Persists across page refreshes for non-logged-in users
+const DeviceLimitModalWrapper = () => {
+  const [devices, setDevices] = useState(null);
+
+  useEffect(() => {
+    console.log("🔄 DeviceLimitModalWrapper: Checking device limit storage");
+    
+    // Check localStorage FIRST (persists across refresh)
+    const stored = localStorage.getItem("shubhtalk_device_limit_reached");
+    if (stored) {
+      try {
+        const data = JSON.parse(stored);
+        console.log("✅ Found in localStorage:", data.length, "devices");
+        setDevices(data);
+        return;
+      } catch (e) {
+        console.error("❌ Error parsing localStorage:", e);
+      }
+    }
+    
+    // Check sessionStorage (set immediately after OTP)
+    const sessionStored = sessionStorage.getItem("shubhtalk_device_limit_reached");
+    if (sessionStored) {
+      try {
+        const data = JSON.parse(sessionStored);
+        console.log("✅ Found in sessionStorage:", data.length, "devices");
+        setDevices(data);
+        // Persist to localStorage for page refresh
+        localStorage.setItem("shubhtalk_device_limit_reached", sessionStored);
+        return;
+      } catch (e) {
+        console.error("❌ Error parsing sessionStorage:", e);
+      }
+    }
+    
+    console.log("ℹ️ No device limit found in either storage");
+  }, []);
+
+  const handleClose = useCallback(() => {
+    console.log("🔕 DeviceLimitModalWrapper: Closing modal");
+    setDevices(null);
+    // Clear localStorage when user dismisses popup (only if max_device_reached became false)
+    localStorage.removeItem("shubhtalk_device_limit_reached");
+  }, []);
+
+  const handleDeviceUpdated = useCallback((updatedDevices) => {
+    if (updatedDevices && updatedDevices.length > 0) {
+      console.log("📋 DeviceLimitModalWrapper: Updating devices, count:", updatedDevices.length);
+      setDevices(updatedDevices);
+      localStorage.setItem("shubhtalk_device_limit_reached", JSON.stringify(updatedDevices));
+    } else {
+      console.log("✅ DeviceLimitModalWrapper: All devices removed, closing modal");
+      setDevices(null);
+      localStorage.removeItem("shubhtalk_device_limit_reached");
+    }
+  }, []);
+
+  return (
+    <DeviceLimitModal 
+      isOpen={!!devices} 
+      onClose={handleClose} 
+      onDeviceUpdated={handleDeviceUpdated}
+      devices={devices || []} 
+    />
+  );
+};
 
 
 
@@ -303,6 +372,9 @@ const HomeLayout = () => {
 
       {/* Welcome-back popup — shown to returning users after they log in */}
       <WelcomeBackModal />
+
+      {/* Device limit popup — shown when max_device_reached is true */}
+      <DeviceLimitModalWrapper />
 
       {/* ✅ FLOATING CALL UI (IMPORTANT LINE) */}
       <VideoCallContainer />

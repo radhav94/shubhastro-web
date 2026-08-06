@@ -2,6 +2,7 @@ import axios from "axios";
 import { Toast } from "../component";
 import { getToken } from "../utils/utlis";
 import { refreshTokenAndReload } from "../utils/tokenRefresh";
+import { navigateToLogin } from "../utils/navigationHelper";
 import { attachSecureTransport } from "../utils/security/secureAxios";
 import { BACKEND_PROXY } from "../utils/apiConfig";
 import { getSubscriptionErrorReason } from "../utils/subscription/featureGating";
@@ -113,6 +114,15 @@ const responseErrorHandler = (error) => {
 
     switch (status) {
       case 401:
+        // Handle DEVICE_KICKED — user was logged out from this device remotely
+        if (data?.code === "DEVICE_KICKED") {
+          localStorage.clear();
+          sessionStorage.clear();
+          sessionStorage.setItem("shubhtalk_device_kicked", data.message || "Session expired. You have been logged out from this device.");
+          navigateToLogin(window.location.pathname);
+          break;
+        }
+
         if (!unAuthorizedCount) {
           // Don't refresh for guest users (no token means they're browsing without login)
           const role = localStorage.getItem("shubhtalk_role");

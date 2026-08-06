@@ -13,6 +13,7 @@ import { requestFCMToken } from "../../../services/firebase";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearGuestKundliProfiles } from "../../../utils/helper/cookies";
+import { getDeviceInfo, getDeviceType } from "../../../utils/deviceInfo";
 import { trackEvent } from "../../../utils/analytics";
 // import onboardingBg from "../../../assets/images/onboarding.png";
 import onboardingBg from "../../../assets/images/new-login-bg-2.jpeg";
@@ -112,7 +113,8 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           otp: otpValue,
           phoneNumber: `91${formData.phoneNumber}`,
           type: "CUSTOMER",
-          ...(fcmTokens && { fcmTokens, deviceType: "web" }),
+          deviceInfo: getDeviceInfo(),
+          ...(fcmTokens && { fcmTokens, deviceType: getDeviceType() }),
         };
 
         const controller = new AbortController();
@@ -190,6 +192,27 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           // Show backend success message
           toast.success(response.data.message || "User verified successfully");
 
+          // Handle max device limit
+          console.log("🔍 Checking device limit from backend response...");
+          console.log("  max_device_reached:", userData.max_device_reached);
+          console.log("  activeDevices:", userData.activeDevices?.length, "devices");
+          console.log("  Full activeDevices data:", userData.activeDevices);
+          
+          if (userData.max_device_reached && userData.activeDevices?.length) {
+            // Store in both session and localStorage
+            // sessionStorage for immediate popup on login
+            // localStorage for persistence across page refresh
+            const deviceData = JSON.stringify(userData.activeDevices);
+            console.log("📱 Device limit detected! Storing devices:", userData.activeDevices);
+            sessionStorage.setItem("shubhtalk_device_limit_reached", deviceData);
+            localStorage.setItem("shubhtalk_device_limit_reached", deviceData);
+          } else {
+            console.log("ℹ️ No device limit. max_device_reached:", userData.max_device_reached, "activeDevices:", userData.activeDevices?.length);
+            // Clear any previous device limit data
+            localStorage.removeItem("shubhtalk_device_limit_reached");
+            sessionStorage.removeItem("shubhtalk_device_limit_reached");
+          }
+
           // Check if user is already registered
           if (userData.isRegister) {
             trackEvent("login_success", { user_id: userData._id });
@@ -197,14 +220,26 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
             const redirectPath = localStorage.getItem(
               "shubhtalk_redirect_after_login",
             );
+            
+            // Also check if redirected from device logout
+            const logoutRedirectPath = sessionStorage.getItem("shubhtalk_redirect_after_logout");
+            
             console.log("🔍 OTPScreen - Checking redirect path after login");
             console.log("📍 Redirect path from localStorage:", redirectPath);
+            console.log("📍 Logout redirect path from sessionStorage:", logoutRedirectPath);
             console.log(
               "📍 Current window location:",
               window.location.pathname,
             );
 
-            if (redirectPath && redirectPath !== "/login") {
+            if (logoutRedirectPath && logoutRedirectPath !== "/login") {
+              // User was logged out and had a page to return to
+              console.log("✅ Redirecting to page after device logout:", logoutRedirectPath);
+              sessionStorage.removeItem("shubhtalk_redirect_after_logout");
+              setTimeout(() => {
+                navigate(logoutRedirectPath);
+              }, 500);
+            } else if (redirectPath && redirectPath !== "/login") {
               // Clear the redirect path
               localStorage.removeItem("shubhtalk_redirect_after_login");
               console.log("✅ Redirecting to saved path:", redirectPath);
@@ -225,9 +260,21 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
             }
           } else {
             // New user, proceed to personalization
-            console.log("👤 New user, proceeding to personalization");
-            trackEvent("profile_creation_started", { user_id: userData._id });
-            onNext();
+            // But first, check if device limit is reached
+            if (userData.max_device_reached) {
+              // Device limit reached, skip personalization and go to home
+              // where the device limit popup will show
+              console.log("📱 New user but device limit reached, skipping personalization");
+              trackEvent("login_skipped_personalization_device_limit", { user_id: userData._id });
+              setTimeout(() => {
+                navigate(PATH.privateRoutes.HOME.path || "/", { replace: true });
+              }, 500);
+            } else {
+              // No device limit, proceed to personalization
+              console.log("👤 New user, proceeding to personalization");
+              trackEvent("profile_creation_started", { user_id: userData._id });
+              onNext();
+            }
           }
         } else {
           trackEvent("otp_verified_failed", { mobile_number: formData.phoneNumber, error_reason: response.data.message || "invalid_otp" });
