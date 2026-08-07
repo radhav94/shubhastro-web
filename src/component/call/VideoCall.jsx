@@ -153,6 +153,12 @@ const VideoCalling = ({ callData }) => {
     speakerOnRef.current = speakerOn;
   }, [speakerOn]);
 
+  // Signal active call to suppress duplicate notifications from ChatContext & FCM
+  useEffect(() => {
+    window.__shubhtalk_call_active = true;
+    return () => { window.__shubhtalk_call_active = false; };
+  }, []);
+
   // Default avatar URL
   const DEFAULT_AVATAR = getAstrologerDefaultImage();
 
