@@ -26,6 +26,29 @@ const clearSessionAndRedirectToLogin = () => {
  *                                       the registration (personalize) flow.
  *   - 401 ("Invalid access token")    → session is invalid → log out & go login.
  */
+/**
+ * Sends the user to the registration (personalize) flow.
+ *
+ * This is a full page replace that can fire mid-journey — notably right after a
+ * guest verifies their OTP, if their profile isn't resolvable yet. Landing on an
+ * onboarding form with no explanation, having just submitted the same details,
+ * reads as the app losing their progress. Leave a reason behind so the
+ * destination can say what happened.
+ */
+const PERSONALIZE_REASON_KEY = "shubhtalk_personalize_reason";
+
+const redirectToPersonalize = () => {
+  try {
+    sessionStorage.setItem(
+      PERSONALIZE_REASON_KEY,
+      "Just one more step — we need to finish setting up your profile before you can chat."
+    );
+  } catch {
+    /* sessionStorage unavailable — the redirect still needs to happen */
+  }
+  setTimeout(() => window.location.replace("/login?step=personalize"), 0);
+};
+
 const checkSelfKundliAndRedirect = async (data) => {
   const profiles = data?.data || [];
   const hasSelf = profiles.length > 0;
@@ -41,7 +64,7 @@ const checkSelfKundliAndRedirect = async (data) => {
   // Without an id we can't verify status via the API — fall back to the
   // registration flow (previous behavior).
   if (userId == null) {
-    setTimeout(() => window.location.replace("/login?step=personalize"), 0);
+    redirectToPersonalize();
     return;
   }
 
@@ -62,7 +85,7 @@ const checkSelfKundliAndRedirect = async (data) => {
 
     // 404 / NOT_FOUND → no profile → user is not registered → go register.
     if (status === 404 || errorCode === "NOT_FOUND") {
-      setTimeout(() => window.location.replace("/login?step=personalize"), 0);
+      redirectToPersonalize();
       return;
     }
 

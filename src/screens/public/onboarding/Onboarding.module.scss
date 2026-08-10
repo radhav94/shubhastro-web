@@ -526,6 +526,21 @@
     cursor: not-allowed;
   }
 }
+
+/*
+ * Required details still missing. Looks like the `:disabled` state but carries no
+ * `disabled` attribute, so the tap reaches the handler and can name the blocker.
+ * A disabled CTA on a scrolled mobile form absorbs the tap and says nothing.
+ */
+.otpprimaryBtnBlocked {
+  opacity: 0.5;
+
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 .otpprimaryBtnPer{
   margin: 20px auto 20px auto;
   @media (width <= 767px) {

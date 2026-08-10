@@ -25,7 +25,13 @@ import { getToken } from "../../../utils/token";
 import { capitalizeWords } from "../../../utils/capitalize";
 import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
-import { GUEST_AUTO_ACCEPT_KEY, GUEST_FANOUT_RESOLVED_KEY } from "./guestChatConstants";
+import {
+  GUEST_AUTO_ACCEPT_KEY,
+  GUEST_FANOUT_RESOLVED_KEY,
+  loadGuestDraft,
+  saveGuestDraft,
+  clearGuestDraft,
+} from "./guestChatConstants";
 import { useGuestChatAuth } from "./useGuestChatAuth";
 import { trackEvent } from "../../../utils/analytics";
 import chat from "../../private/home/components/chats/ChatWindow.module.scss";
@@ -48,57 +54,9 @@ const INITIAL_FORM = {
 // scroll to and announce when submit is blocked.
 const FIELD_ORDER = ["name", "mobileNumber", "identity", "dob", "time", "birthPlace"];
 
-/*
- * Draft persistence.
- *
- * This form asks a guest for six things before anything happens, and it lives on
- * a route they can leave with a single back gesture. Without a draft, any detour
- * (tapping back to compare astrologers, an accidental swipe, the OTP step
- * failing) meant retyping everything — so the cheapest response was to abandon.
- * Kept in sessionStorage: it should survive navigation within the visit but not
- * outlive the browser session, since it holds personal details.
- */
-const DRAFT_KEY = "guest_chat_form_draft";
-const DRAFT_DATE_FIELDS = ["dob", "time"];
-
 // Extra balance checks before accepting that a just-registered guest is unfunded.
 const BALANCE_RECHECK_ATTEMPTS = 2;
 const BALANCE_RECHECK_DELAY_MS = 1200;
-
-const loadDraft = () => {
-  try {
-    const raw = sessionStorage.getItem(DRAFT_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-
-    // Dates round-trip through JSON as ISO strings — revive them.
-    DRAFT_DATE_FIELDS.forEach((key) => {
-      if (parsed[key]) {
-        const revived = new Date(parsed[key]);
-        parsed[key] = Number.isNaN(revived.getTime()) ? null : revived;
-      }
-    });
-    return parsed;
-  } catch {
-    return null;
-  }
-};
-
-const saveDraft = (form) => {
-  try {
-    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(form));
-  } catch {
-    /* sessionStorage unavailable (private mode / quota) — non-critical */
-  }
-};
-
-const clearDraft = () => {
-  try {
-    sessionStorage.removeItem(DRAFT_KEY);
-  } catch {
-    /* ignore */
-  }
-};
 
 const nowTime = () =>
   new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }).toUpperCase();
@@ -139,7 +97,7 @@ const GuestChatFlow = () => {
 
   const [phase, setPhase] = useState("collecting"); // collecting | otp | connecting | waiting
   const [messages, setMessages] = useState([]);
-  const [form, setForm] = useState(() => ({ ...INITIAL_FORM, ...(loadDraft() || {}) }));
+  const [form, setForm] = useState(() => ({ ...INITIAL_FORM, ...(loadGuestDraft() || {}) }));
   const [errors, setErrors] = useState({});
   // Persistent failure message shown directly under the submit button. A toast
   // alone renders top-right and is easy to miss on a phone while the user is
@@ -247,7 +205,7 @@ const GuestChatFlow = () => {
   // Keep the draft in step with the form so a detour or a back gesture doesn't
   // cost the user everything they typed.
   useEffect(() => {
-    saveDraft(form);
+    saveGuestDraft(form);
   }, [form]);
 
   const setField = (key, value) => {
@@ -407,8 +365,11 @@ const GuestChatFlow = () => {
       Toast.error(result.message || "OTP verification failed");
       return false;
     }
-    // Signed up successfully — the draft has served its purpose.
-    clearDraft();
+    // NOTE: the draft is deliberately NOT cleared here. OTP success is not the
+    // end of the road — if the profile/kundli can't be resolved, the app hard
+    // redirects to /login?step=personalize, and the draft is what prefills those
+    // onboarding screens instead of asking for the same six answers again. It is
+    // cleared once the chat actually starts.
 
     // The welcome popup (bonus/back) is now shown; the balance check + chat
     // initiation happen once it's closed (see the welcome-closed listener).
@@ -465,6 +426,8 @@ const GuestChatFlow = () => {
     }
     // Balance OK: initiate the chat request and move to the astrologers page
     // (the request continues in the background via the global waiting queue).
+    // This is the real end of the funnel, so the draft can go now.
+    clearGuestDraft();
     initiateChat();
     navigate("/astrologers", { replace: true });
   };
