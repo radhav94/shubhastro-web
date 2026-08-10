@@ -14,10 +14,14 @@ const GiftSection = ({ astrologer }) => {
   const { data, isLoading } = useGetAllGiftsQuery();
   const [sendGift, { isLoading: isSending }] = useSendGiftMutation();
   const [selected, setSelected] = useState(null);
-  const [disableSend, setDisableSend] = useState(false);
   const [isRechargeOpen, setIsRechargeOpen] = useState(false);
   const gifts = (data?.data || []).filter(g => g.status === true);
   const { balance, refreshWallet } = useWalletBalance();
+
+  // Derived, not stored. As state synced from a `[selected]`-only effect this
+  // went stale after a recharge: the balance updated but the flag didn't, so the
+  // send button stayed greyed out until the user re-picked a gift.
+  const disableSend = !!selected && Number(selected.price) > Number(balance);
 
   // Track gift catalog view once gifts are loaded
   useEffect(() => {
@@ -28,7 +32,25 @@ const GiftSection = ({ astrologer }) => {
   }, [gifts.length]);
 
   const handleSend = async () => {
-    if (!selected || !astrologer) return;
+    if (isSending) return;
+
+    // Every blocker below used to be expressed only as a `disabled` attribute,
+    // which on a touch device swallows the tap and explains nothing. Keep the
+    // button live and name the blocker instead.
+    if (!selected) {
+      toast.info("Pick a gift first, then tap send.");
+      return;
+    }
+    if (!astrologer) {
+      toast.error("Astrologer details are still loading. Please try again.");
+      return;
+    }
+    if (disableSend) {
+      toast.info(
+        `This gift costs ₹${selected.price} but your balance is ₹${balance}. Recharge to send it.`
+      );
+      return;
+    }
 
     try {
       await sendGift({
@@ -42,6 +64,9 @@ const GiftSection = ({ astrologer }) => {
       toast.success("Gift sent successfully");
     } catch (error) {
       console.error("Error sending gift:", error);
+      toast.error(
+        error?.data?.message || "Couldn't send the gift. Please try again."
+      );
     }
   };
 
@@ -53,11 +78,7 @@ const GiftSection = ({ astrologer }) => {
     window.dispatchEvent(new Event("walletBalanceUpdated"));
   };
 
-  useEffect(() => {
-    if (selected && selected?.price > balance) {
-      setDisableSend(true);
-    } else setDisableSend(false);
-  }, [selected]);
+
 
   if (isLoading) return <p>loading...</p>;
 
@@ -75,20 +96,21 @@ const GiftSection = ({ astrologer }) => {
 
       <div className={styles.giftGrid}>
         {gifts?.map((gift) => (
-          <div
+          <button
             key={gift?.ID}
+            type="button"
             className={`${styles.giftItem} ${
               selected?.ID === gift?.ID ? styles.selected : ""
             }`}
             onClick={() => setSelected(gift)}
+            aria-pressed={selected?.ID === gift?.ID}
           >
             <div className={styles.emoji}>
-              {" "}
-              <img src={gift?.giftImg} />{" "}
+              <img src={gift?.giftImg} alt="" />
             </div>
             <p className={styles.name}>{gift.giftName}</p>
             <p className={styles.amount}>₹ {gift?.price}</p>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -101,9 +123,20 @@ const GiftSection = ({ astrologer }) => {
           Recharge
         </button>
         <button
-          className={styles.sendBtn}
-          disabled={!selected || disableSend || isSending}
+          type="button"
+          className={`${styles.sendBtn} ${
+            !selected || disableSend ? styles.sendBtnBlocked : ""
+          }`.trim()}
           onClick={handleSend}
+          aria-disabled={!selected || disableSend}
+          aria-busy={isSending}
+          title={
+            !selected
+              ? "Select a gift first"
+              : disableSend
+                ? "Not enough balance for this gift"
+                : "Send gift"
+          }
         >
           {isSending
             ? "Sending..."

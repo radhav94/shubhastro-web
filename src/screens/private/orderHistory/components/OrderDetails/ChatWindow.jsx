@@ -7,6 +7,7 @@ import { GrReactjs } from "react-icons/gr";
 import AudioMessageWrapper from "../../../home/components/chats/AudioMessageWrapper";
 import IframeModal from "../../../home/components/chats/IframeModal";
 import { buildKundliLink } from "../../../../../utils/helper/kundliMessage";
+import toast from "../../../../../component/toast";
 import styles from "./ChatWindow.module.scss";
 
 // Constants
@@ -178,7 +179,14 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
           return (
             <button
               type="button"
-              onClick={() => kundliLink && handleKundliClick(kundliLink)}
+              onClick={() => {
+                // Without a resolvable link this used to do nothing at all.
+                if (!kundliLink) {
+                  toast.error("This kundli is no longer available to view.");
+                  return;
+                }
+                handleKundliClick(kundliLink);
+              }}
               className={styles.kundliLink}
               aria-label="View Kundli"
             >

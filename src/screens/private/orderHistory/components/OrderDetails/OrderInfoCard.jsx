@@ -5,6 +5,10 @@ import { playAudio, stopAudio } from "../../../talkToAstrologer/voiceChat/audioC
 import styles from "./OrderInfoCard.module.scss";
 import RatingStars from "./RatingStars";
 import ProgressBar from "./ProgressBar";
+import toast from "../../../../../component/toast";
+
+const LIVE_BLOCKED_REASON =
+  "This astrologer is in a live session right now. Join the live stream or try again once it ends.";
 
 const OrderInfoCard = ({
   orderId,
@@ -28,6 +32,18 @@ const OrderInfoCard = ({
   const mediaRef = useRef(null);
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
+
+  // "Consult Again" previously passed `onClick={isLive ? undefined : ...}`, so
+  // while the astrologer was live the button absorbed the tap and did nothing
+  // at all. Explain the blocker instead of going silent.
+  const handleConsultAgainClick = (e) => {
+    e.stopPropagation();
+    if (isLive) {
+      toast.info(LIVE_BLOCKED_REASON);
+      return;
+    }
+    onConsultAgain?.();
+  };
   const videoHlsRef = useRef(null);
 
   // Attach HLS to a media element
@@ -220,13 +236,15 @@ const OrderInfoCard = ({
                 </button>
               )}
             </div>
-            <div
+            <button
+              type="button"
               className={`${styles.consultAgain} ${isLive ? styles.consultAgainDisabled : ""}`.trim()}
-              onClick={isLive ? undefined : onConsultAgain}
+              onClick={handleConsultAgainClick}
               aria-disabled={isLive}
+              title={isLive ? LIVE_BLOCKED_REASON : "Consult again"}
             >
               Consult Again
-            </div>
+            </button>
           </div>
         </div>
       </div>
@@ -279,7 +297,15 @@ const OrderInfoCard = ({
               </button>
             )}
           </div>
-          <div className={styles.consultAgain} onClick={onConsultAgain}>Consult Again</div>
+          <button
+            type="button"
+            className={`${styles.consultAgain} ${isLive ? styles.consultAgainDisabled : ""}`.trim()}
+            onClick={handleConsultAgainClick}
+            aria-disabled={isLive}
+            title={isLive ? LIVE_BLOCKED_REASON : "Consult again"}
+          >
+            Consult Again
+          </button>
         </div>
       </div>
 

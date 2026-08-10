@@ -156,6 +156,8 @@
   
 }
 
+// Rendered as a <button> (was a bare <div onClick>) so it is focusable and
+// announced as an action.
 .consultAgain {
   flex: 1;
   text-align: center;
@@ -164,17 +166,29 @@
   color: #030303;
   cursor: pointer;
   white-space: nowrap;
-  padding-left: 12px;
+  padding: 0 0 0 12px;
+  border: none;
   border-left: 1px solid #ffffff;
+  background: transparent;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
 
   &:hover {
     color: #030303;
   }
+
+  &:focus-visible {
+    outline: 2px solid #f97316;
+    outline-offset: 2px;
+  }
 }
 
+// Blocked while the astrologer is live. Deliberately still tappable so the tap
+// can be answered with an explanation rather than nothing.
 .consultAgainDisabled {
   color: #9ca3af;
-  cursor: not-allowed;
 
   &:hover {
     color: #9ca3af;
