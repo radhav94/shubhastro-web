@@ -91,9 +91,9 @@ import { PersistGate } from "redux-persist/integration/react";
 
 import { AgoraProvider } from "./agora/agoraClient";  // <-- IMPORTANT
 
-// Disable browser scroll restoration so pull-to-refresh (iOS Chrome) and
-// back/forward navigation always start at the top. The app handles scroll
-// position via the ScrollToTop component on route changes.
+// Disable browser scroll restoration so pull-to-refresh (iOS Chrome) behaves.
+// Scroll position is owned by the ScrollToTop component instead: new
+// navigations start at the top, back/forward restore the previous offset.
 if ("scrollRestoration" in history) {
   history.scrollRestoration = "manual";
 }

@@ -88,6 +88,10 @@ const GuestChatFlow = () => {
   const [messages, setMessages] = useState([]);
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
+  // Persistent failure message shown directly under the submit button. A toast
+  // alone renders top-right and is easy to miss on a phone while the user is
+  // looking at the button they just tapped, which leads to repeat taps.
+  const [submitError, setSubmitError] = useState("");
 
   const [confirmLeave, setConfirmLeave] = useState(false);
   const leaveActionRef = useRef(null); // fn to run when the user confirms leaving
@@ -213,6 +217,7 @@ const GuestChatFlow = () => {
   };
 
   const handleSubmit = async () => {
+    setSubmitError("");
     const e = validate();
     setErrors(e);
     if (Object.keys(e).length) {
@@ -249,17 +254,22 @@ const GuestChatFlow = () => {
 
   /* ------------------------------- OTP + auth ------------------------------- */
   const beginOtp = async (finalDetails) => {
+    const fail = (message) => {
+      Toast.error(message);
+      setSubmitError(message);
+      setPhase("collecting");
+    };
+
     try {
       const sent = await sendOtp(finalDetails.mobileNumber);
       if (sent) {
+        setSubmitError("");
         setPhase("otp");
       } else {
-        Toast.error("Failed to send OTP. Please try again.");
-        setPhase("collecting");
+        fail("Failed to send OTP. Please try again.");
       }
     } catch (error) {
-      Toast.error(error?.response?.data?.message || "Failed to send OTP");
-      setPhase("collecting");
+      fail(error?.response?.data?.message || "Failed to send OTP. Please try again.");
     }
   };
 
@@ -677,10 +687,22 @@ const GuestChatFlow = () => {
         {errors.birthPlace && <span className={styles.err}>{errors.birthPlace}</span>}
       </div>
 
-      <button type="button" className={styles.submitBtn} onClick={handleSubmit} disabled={sendingOtp}>
+      <button
+        type="button"
+        className={styles.submitBtn}
+        onClick={handleSubmit}
+        disabled={sendingOtp}
+        aria-busy={sendingOtp}
+      >
         <IoSparkles size={18} />
         {sendingOtp ? "Sending OTP..." : "Continue & Get ₹250 Bonus"}
       </button>
+
+      {submitError && (
+        <span className={styles.submitErr} role="alert">
+          {submitError}
+        </span>
+      )}
 
       <div className={styles.secureRow}>
         <IoShieldCheckmarkOutline size={14} />

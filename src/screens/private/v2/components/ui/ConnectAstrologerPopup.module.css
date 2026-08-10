@@ -89,7 +89,12 @@
   margin-bottom: 16px;
 }
 
+/*
+ * Rendered as a <button> (was a bare <div onClick>) so the options are
+ * focusable and keyboard-operable.
+ */
 .optionCard {
+  width: 100%;
   background: #FFF8E1;
   border-radius: 16px;
   padding: 24px 16px;
@@ -101,6 +106,17 @@
   transition: all 0.3s ease;
   border: 1.5px solid #ffffff;
   box-shadow: 0px 0px 6px rgb(247 88 1 / 19%);
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.optionCard:focus-visible {
+  outline: 2px solid #F75801;
+  outline-offset: 2px;
 }
 
 .optionCard:hover {
@@ -113,10 +129,14 @@
   transform: translateY(-2px);
 }
 
+/*
+ * No `pointer-events: none` and no `disabled` attribute: the tap must reach the
+ * handler so it can explain why the option is unavailable. Blocking the tap is
+ * what turned this into a dead click — the user taps a clearly visible option
+ * and the page does not react in any way.
+ */
 .optionCard.disabled {
   opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 
 .optionCard.disabled:hover {
