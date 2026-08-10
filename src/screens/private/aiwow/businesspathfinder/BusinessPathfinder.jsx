@@ -409,9 +409,9 @@ const BusinessPathfinder = () => {
           <button
             className={styles.submitBtn}
             onClick={() => handleSubmit()}
-            disabled={isSubmitting}
+            disabled={isSubmitting && !showSubscriptionModal}
           >
-            {isSubmitting ? 'Generating...' : 'Generate my report'}
+            {isSubmitting && !showSubscriptionModal ? 'Generating...' : 'Generate my report'}
           </button>
         </div>
       </div>
@@ -438,9 +438,11 @@ const BusinessPathfinder = () => {
           dispatch(setSelectedKundli(newProfile));
           localStorage.setItem('selectedKundliProfile', JSON.stringify(newProfile));
         }
-        const action = pendingGuestActionRef.current;
+        // Do NOT auto-run the report after registration. The user taps
+        // "Generate my report" again — that click runs the subscription check
+        // (plans popup → buy → analyze). This stops the report from
+        // auto-generating the moment the welcome-bonus popup closes.
         pendingGuestActionRef.current = null;
-        if (action) action(newProfile);
       }}
     />
     </>

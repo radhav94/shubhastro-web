@@ -72,7 +72,7 @@ const LalKitab = () => {
   const profiles = kundliData?.data || [];
 
   const [generateTeva, { isLoading: isGenerating }] = useGenerateLalKitabTevaMutation();
-  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: "lal-kitab" });
+  const { runWithEntitlement, subscriptionModal, showSubscriptionModal } = useAIWowSubscriptionGate({ featureName: "lal-kitab" });
 
   useEffect(() => {
     if (profiles.length > 0 && !selectedProfile) {
@@ -148,7 +148,9 @@ const LalKitab = () => {
     <>
       <BackButton />
     <div className={styles.page}>
-      {(isGenerating || guestGenerating || isLoadingProfiles) && <PrimaryLoader />}
+      {/* Hide the fullscreen loader while the subscription/plans popup is open,
+          otherwise it covers the popup and the CTA looks stuck "Generating...". */}
+      {(isGenerating || guestGenerating || isLoadingProfiles) && !showSubscriptionModal && <PrimaryLoader />}
 
       {/* ── Hero Banner ── */}
       <div className={styles.hero}>
@@ -191,9 +193,9 @@ const LalKitab = () => {
             <button
               className={styles.generateBtn}
               onClick={handleGenerate}
-              disabled={isGenerating || guestGenerating}
+              disabled={(isGenerating || guestGenerating) && !showSubscriptionModal}
             >
-              {(isGenerating || guestGenerating) ? (
+              {((isGenerating || guestGenerating) && !showSubscriptionModal) ? (
                 <>
                   <span className={styles.spinner} />
                   Generating your Teva...
@@ -216,9 +218,9 @@ const LalKitab = () => {
             <button
               className={styles.generateBtn}
               onClick={handleGenerate}
-              disabled={isGenerating || guestGenerating}
+              disabled={(isGenerating || guestGenerating) && !showSubscriptionModal}
             >
-              {(isGenerating || guestGenerating) ? (
+              {((isGenerating || guestGenerating) && !showSubscriptionModal) ? (
                 <>
                   <span className={styles.spinner} />
                   Generating your Teva...
@@ -283,9 +285,11 @@ const LalKitab = () => {
         onSuccess={(profile) => {
           setShowGuestAuthModal(false);
           if (profile?._id) setSelectedProfile(profile);
-          const action = pendingGuestActionRef.current;
+          // Do NOT auto-run generation after registration. The user taps
+          // "Generate Laal Kitab" again — that click runs the subscription
+          // check (plans popup → buy → analyze). Prevents auto-generating the
+          // moment the welcome-bonus popup closes.
           pendingGuestActionRef.current = null;
-          if (action) action(profile);
         }}
       />
     </div>

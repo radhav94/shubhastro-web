@@ -184,76 +184,15 @@ const DreamInterpreter = () => {
     setInterpretation(null);
   };
 
-  const handleGuestAuthSuccess = (createdProfile) => {
+  const handleGuestAuthSuccess = () => {
     setShowGuestAuthModal(false);
-    // Use the profile returned from the modal to submit immediately
-    submitDreamWithProfile(createdProfile);
-  };
-
-  const submitDreamWithProfile = async (profileToUse) => {
-    if (!profileToUse) {
-      Toast.error('Profile not available');
-      return;
-    }
-
-    if (isSubmittingRef.current) return;
-    isSubmittingRef.current = true;
-
-    try {
-      setIsLoading(true);
-
-      const dreamData = {
-        dreamDescription: dreamDescription.trim(),
-        kundliId: profileToUse._id || profileToUse.id || '',
-        name: profileToUse.name,
-        gender: profileToUse.identity?.toLowerCase() || profileToUse.gender?.toLowerCase() || 'male',
-        day: profileToUse.day,
-        month: profileToUse.month,
-        year: profileToUse.year,
-        hour: profileToUse.hour || 0,
-        min: profileToUse.minute || profileToUse.min || 0,
-        second: 0,
-        place: profileToUse.place,
-        lat: profileToUse.lat || 0,
-        lon: profileToUse.lon || 0,
-        tzone: profileToUse.tzone || 5.5
-      };
-
-      if (tags.trim()) {
-        dreamData.tags = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-      }
-
-      if (lifePhase.trim() || challenges.trim()) {
-        dreamData.userContext = {};
-        if (lifePhase.trim()) {
-          dreamData.userContext.lifePhase = lifePhase.trim();
-        }
-        if (challenges.trim()) {
-          dreamData.userContext.currentChallenges = challenges.split(',').map(c => c.trim()).filter(c => c);
-        }
-      }
-
-      const result = await interpretDream(dreamData);
-
-      if (result.success) {
-        const apiData = result.data;
-        const dream = apiData?.dream || apiData;
-        setInterpretation(dream);
-        dispatch(setDreamInterpreterResult(dream));
-        setRawApiResult({ ...dream, _id: dream?._id || dream?.dreamId });
-        setError(null);
-      } else {
-        setError(result.error || 'Failed to interpret dream');
-        setInterpretation(null);
-      }
-    } catch (err) {
-      console.error('Failed to interpret dream:', err);
-      setError('An unexpected error occurred. Please try again.');
-      setInterpretation(null);
-    } finally {
-      isSubmittingRef.current = false;
-      setIsLoading(false);
-    }
+    // Do NOT auto-submit after registration. The newly created profile is
+    // already selected by the auth modal; the user taps the submit button
+    // again, which runs the subscription check via handleSubmit →
+    // runWithEntitlement (plans popup → buy → analyze). This prevents the
+    // interpretation from auto-generating the moment the welcome popup closes,
+    // and ensures the subscription gate is always applied (the old direct
+    // interpretDream call bypassed it).
   };
 
   if (!isGuest && profileLoading) {
