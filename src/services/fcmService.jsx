@@ -60,6 +60,9 @@ export const initializeFCM = async () => {
 
   // Listen for foreground messages
   onForegroundMessage((payload) => {
+    // Suppress push notification toast during active calls (call components handle their own notifications)
+    if (window.__shubhtalk_call_active) return;
+
     playNotificationSound();
     const { title, body, image } = payload.notification || {};
 
