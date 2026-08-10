@@ -59,7 +59,16 @@ const NewAstrologerDetailsCard = ({
         </div>
       )}
 
-      <Link to={`/astrologer/${astrologer._id}`} className={styles.detailsImageLink}></Link>
+      {/*
+        Full-card tap target. Kept as an empty overlay anchor so the action
+        buttons stay on top, but it needs an accessible name — without one it is
+        an anonymous link to assistive tech and to tap heuristics.
+      */}
+      <Link
+        to={`/astrologer/${astrologer._id}`}
+        className={styles.detailsImageLink}
+        aria-label={`View ${getAstrologerDisplayName(astrologer)}'s profile`}
+      ></Link>
         <div className={styles.detailsImageWrapper}>
           <img
             src={imageUrl}

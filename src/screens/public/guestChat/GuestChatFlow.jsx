@@ -43,6 +43,10 @@ const INITIAL_FORM = {
   mobileNumber: "",
 };
 
+// Visual top-to-bottom order of the form fields. Used to decide which error to
+// scroll to and announce when submit is blocked.
+const FIELD_ORDER = ["name", "mobileNumber", "identity", "dob", "time", "birthPlace"];
+
 const nowTime = () =>
   new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }).toUpperCase();
 
@@ -96,6 +100,10 @@ const GuestChatFlow = () => {
   // Holds the hook-shaped details (name/identity/birthDate(YYYY-MM-DD)/...) once
   // the form is submitted, for OTP verify / register / resend.
   const detailsRef = useRef(null);
+
+  // Field wrappers, keyed by field name, so a blocked submit can scroll the
+  // first invalid field into view instead of failing silently off-screen.
+  const fieldRefs = useRef({});
 
   const pushMessage = (text, isSender, extra = {}) =>
     setMessages((m) => [
@@ -207,7 +215,21 @@ const GuestChatFlow = () => {
   const handleSubmit = async () => {
     const e = validate();
     setErrors(e);
-    if (Object.keys(e).length) return;
+    if (Object.keys(e).length) {
+      // The form is taller than a phone viewport, so the invalid field is
+      // usually off-screen — most often "pick a location from the dropdown"
+      // after the user typed a place without selecting a suggestion. Inline
+      // <span> errors alone make the button look broken and invite rage taps.
+      // Bring the first problem into view, focus it, and say it out loud once.
+      const firstInvalid = FIELD_ORDER.find((key) => e[key]);
+      const node = firstInvalid && fieldRefs.current[firstInvalid];
+      if (node) {
+        node.scrollIntoView({ behavior: "smooth", block: "center" });
+        node.querySelector("input, button")?.focus({ preventScroll: true });
+      }
+      if (firstInvalid) Toast.error(e[firstInvalid]);
+      return;
+    }
 
     const details = {
       name: form.name.trim(),
@@ -519,7 +541,7 @@ const GuestChatFlow = () => {
   const renderFormBubble = () => (
     <div className={styles.formCard}>
       {/* Name */}
-      <div className={styles.field}>
+      <div className={styles.field} ref={(el) => (fieldRefs.current.name = el)}>
         <label className={styles.label}>
           Name <span className={styles.req}>*</span>
         </label>
@@ -536,7 +558,7 @@ const GuestChatFlow = () => {
       </div>
 
       {/* Mobile number */}
-      <div className={styles.field}>
+      <div className={styles.field} ref={(el) => (fieldRefs.current.mobileNumber = el)}>
         <label className={styles.label}>
           Mobile Number <span className={styles.req}>*</span>
         </label>
@@ -560,7 +582,7 @@ const GuestChatFlow = () => {
       </div>
 
       {/* Identity */}
-      <div className={styles.field}>
+      <div className={styles.field} ref={(el) => (fieldRefs.current.identity = el)}>
         <label className={styles.label}>
           Identity <span className={styles.req}>*</span>
         </label>
@@ -582,7 +604,7 @@ const GuestChatFlow = () => {
 
       {/* Birth date + time on one row */}
       <div className={styles.row2}>
-        <div className={styles.field}>
+        <div className={styles.field} ref={(el) => (fieldRefs.current.dob = el)}>
           <label className={styles.label}>
             Birth Date <span className={styles.req}>*</span>
           </label>
@@ -602,7 +624,7 @@ const GuestChatFlow = () => {
           {errors.dob && <span className={styles.err}>{errors.dob}</span>}
         </div>
 
-        <div className={styles.field}>
+        <div className={styles.field} ref={(el) => (fieldRefs.current.time = el)}>
           <label className={styles.label}>
             Birth Time <span className={styles.req}>*</span>
           </label>
@@ -632,7 +654,7 @@ const GuestChatFlow = () => {
       </label>
 
       {/* Place of birth */}
-      <div className={styles.field}>
+      <div className={styles.field} ref={(el) => (fieldRefs.current.birthPlace = el)}>
         <label className={styles.label}>
           Place of Birth <span className={styles.req}>*</span>
         </label>

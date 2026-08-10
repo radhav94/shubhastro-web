@@ -6,6 +6,7 @@ import { useCall } from "../../../context/CallContext";
 import { useChat } from "../../../context/ChatContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import { stopIncomingSound } from "../../../utils/incomingSound";
+import toast from "../../toast";
 import styles from "./StickyWaitingQueue.module.scss";
 
 /**
@@ -76,8 +77,19 @@ const StickyWaitingQueue = () => {
     cancelPendingConnection(conn.roomId, conn.type, conn.astrologer?._id);
   };
 
+  // Queue entries are created with `roomId: null` and only receive one when the
+  // server emits chat:room / call:room. Every action below needs that roomId, so
+  // until it lands the buttons used to be silent no-ops — the user taps Cancel
+  // or Join during the "connecting…" window and nothing happens at all. Now the
+  // buttons are visibly not-ready and a tap explains the wait.
+  const isReady = (conn) => Boolean(conn.roomId);
+
+  const notReady = () => {
+    toast.info("Still connecting to the astrologer — one moment.");
+  };
+
   const handleAccept = (conn) => {
-    if (!conn.roomId) return;
+    if (!isReady(conn)) return notReady();
     stopIncomingSound();
     const eventName = conn.type === "chat" ? "chat:user_accept" : "call:user_accept";
     voiceSocket.emit(eventName, { roomId: conn.roomId });
@@ -87,9 +99,12 @@ const StickyWaitingQueue = () => {
   };
 
   const handleUnhold = (conn) => {
-    if (!conn.roomId) return;
+    if (!isReady(conn)) return notReady();
     const userId = localStorage.getItem("shubhtalk_customer_id");
-    if (!userId) return;
+    if (!userId) {
+      toast.error("Your session expired. Please log in again to rejoin.");
+      return;
+    }
     const unholdEvent = conn.type === "chat" ? "chat:unhold" : "call:unhold";
     voiceSocket.emit(unholdEvent, { roomId: conn.roomId });
     removePendingConnection(conn.roomId);
@@ -122,7 +137,7 @@ const StickyWaitingQueue = () => {
   };
 
   const handleHoldCancel = (conn) => {
-    if (!conn.roomId) return;
+    if (!isReady(conn)) return notReady();
     const eventName = conn.type === "chat" ? "chat:hold_cancel" : "call:hold_cancel";
     voiceSocket.emit(eventName, { roomId: conn.roomId });
     removePendingConnection(conn.roomId);
@@ -165,6 +180,8 @@ const StickyWaitingQueue = () => {
               const isAccepted = status === "astrologer_accepted";
               const isOnHold = status === "on_hold";
               const profileImg = getProfileImage(conn);
+              // Accept / rejoin / hold-cancel all need the server-assigned roomId.
+              const ready = isReady(conn);
 
               return (
                 <div key={conn.roomId || conn.astrologer?._id} className={`${styles.item} ${isAccepted ? styles.itemAccepted : ""} ${isOnHold ? styles.itemOnHold : ""}`}>
@@ -215,10 +232,18 @@ const StickyWaitingQueue = () => {
                     {/* On hold / Missed — Rejoin + Cancel */}
                     {isOnHold && (
                       <>
-                        <button className={styles.rejoinBtn} onClick={() => handleUnhold(conn)}>
+                        <button
+                          className={`${styles.rejoinBtn} ${!ready ? styles.notReady : ""}`.trim()}
+                          onClick={() => handleUnhold(conn)}
+                          aria-disabled={!ready}
+                        >
                           <RotateCcw size={12} /> Rejoin
                         </button>
-                        <button className={styles.cancelBtn} onClick={() => handleHoldCancel(conn)}>
+                        <button
+                          className={`${styles.cancelBtn} ${!ready ? styles.notReady : ""}`.trim()}
+                          onClick={() => handleHoldCancel(conn)}
+                          aria-disabled={!ready}
+                        >
                           <X size={12} /> Cancel
                         </button>
                       </>
@@ -226,7 +251,11 @@ const StickyWaitingQueue = () => {
 
                     {/* Accepted — Join Call/Chat */}
                     {isAccepted && (
-                      <button className={styles.joinCallBtn} onClick={() => handleAccept(conn)}>
+                      <button
+                        className={`${styles.joinCallBtn} ${!ready ? styles.notReady : ""}`.trim()}
+                        onClick={() => handleAccept(conn)}
+                        aria-disabled={!ready}
+                      >
                         {conn.type === "chat" ? "Join Chat" : "Join Call"}
                       </button>
                     )}

@@ -133,6 +133,11 @@
   color: #000;
   justify-content: center;
   backdrop-filter: blur(12px);
+  // Rendered as a <button> (was a bare <div onClick>) so the chips are
+  // focusable, keyboard-operable and announced with their pressed state.
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
 
   @media (width <= 767px) {
     padding: 6px 12px;
@@ -142,6 +147,11 @@
   &:hover {
     background: #fff9e5;
     border-color: orangered;
+  }
+
+  &:focus-visible {
+    outline: 2px solid orangered;
+    outline-offset: 2px;
   }
 
   .chipIcon {
