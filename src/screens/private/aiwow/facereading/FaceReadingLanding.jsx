@@ -13,12 +13,16 @@ import { compressImage } from '../../../../utils/helper/compressImage';
 import { trackEvent } from '../../../../utils/analytics';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
+import toast from '../../../../component/toast';
 
 const FaceReadingLanding = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  // True while the picked photo is being decoded/re-encoded, so the button can
+  // show progress instead of looking idle.
+  const [isPreparing, setIsPreparing] = useState(false);
   const pendingActionRef = useRef(null);
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
   const gender = selectedProfile?.identity?.toLowerCase() || selectedProfile?.gender?.toLowerCase() || 'male';
@@ -53,21 +57,43 @@ const FaceReadingLanding = () => {
   };
 
   const handleUpload = () => {
+    if (isPreparing) {
+      toast.info('Still preparing your photo — one moment.');
+      return;
+    }
     fileInputRef.current?.click();
   };
 
   const handleFileChange = (event) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      trackEvent("shubh_ai_input_provided", { feature_name: "astro-face-reading", input_type: "image" });
-      compressImage(file).then((dataUrl) => {
+    const input = event.target;
+    const file = input.files?.[0];
+
+    // Clear the input straight away. Without this, picking the SAME photo again
+    // fires no `change` event, so if the first attempt went nowhere the user's
+    // retry did nothing at all — a dead end that looks exactly like a dead click.
+    input.value = '';
+
+    if (!file) return;
+
+    trackEvent("shubh_ai_input_provided", { feature_name: "astro-face-reading", input_type: "image" });
+
+    // compressImage re-encodes via canvas and waits up to 8s for a decode before
+    // falling back. On a slow in-app WebView with a large iPhone HEIC that is a
+    // long, completely unlit wait, which is what drives repeat taps.
+    setIsPreparing(true);
+    compressImage(file)
+      .then((dataUrl) => {
         // Guests must authenticate at the moment the photo is submitted.
         runOrAuth(() => {
           dispatch(setFaceReadingImage(dataUrl));
           navigate('/ai-wow/astro-face-reading/capture', { replace: true });
         });
-      });
-    }
+      })
+      .catch((err) => {
+        console.error('[FaceReading] Could not prepare the uploaded photo:', err);
+        toast.error("Couldn't read that photo. Please try a different one.");
+      })
+      .finally(() => setIsPreparing(false));
   };
 
   const features = [
@@ -184,11 +210,13 @@ const FaceReadingLanding = () => {
                 />
 
                 <div className={styles.buttonGroup}>
-                  <button 
+                  <button
+                    type="button"
                     className={styles.uploadButton}
                     onClick={handleUpload}
+                    aria-busy={isPreparing}
                   >
-                    Upload Photo
+                    {isPreparing ? 'Preparing photo…' : 'Upload Photo'}
                   </button>
                   <button 
                     className={styles.cameraButton}

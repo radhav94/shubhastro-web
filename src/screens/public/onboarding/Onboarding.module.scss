@@ -2045,6 +2045,21 @@
   }
 }
 
+/*
+ * Number not yet complete. Looks like the old `:disabled` state but carries no
+ * `disabled` attribute, so the tap still reaches the handler and can say which
+ * digits are missing. A disabled CTA here silently absorbed the tap at the last
+ * step of the signup funnel.
+ */
+.newClaimBtnIncomplete {
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.5;
+    transform: none;
+  }
+}
+
 .securityNote {
   display: flex;
   align-items: center;

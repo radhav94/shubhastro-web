@@ -27,6 +27,7 @@ import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 import { GUEST_AUTO_ACCEPT_KEY, GUEST_FANOUT_RESOLVED_KEY } from "./guestChatConstants";
 import { useGuestChatAuth } from "./useGuestChatAuth";
+import { trackEvent } from "../../../utils/analytics";
 import chat from "../../private/home/components/chats/ChatWindow.module.scss";
 import styles from "./GuestChatFlow.module.scss";
 
@@ -46,6 +47,58 @@ const INITIAL_FORM = {
 // Visual top-to-bottom order of the form fields. Used to decide which error to
 // scroll to and announce when submit is blocked.
 const FIELD_ORDER = ["name", "mobileNumber", "identity", "dob", "time", "birthPlace"];
+
+/*
+ * Draft persistence.
+ *
+ * This form asks a guest for six things before anything happens, and it lives on
+ * a route they can leave with a single back gesture. Without a draft, any detour
+ * (tapping back to compare astrologers, an accidental swipe, the OTP step
+ * failing) meant retyping everything — so the cheapest response was to abandon.
+ * Kept in sessionStorage: it should survive navigation within the visit but not
+ * outlive the browser session, since it holds personal details.
+ */
+const DRAFT_KEY = "guest_chat_form_draft";
+const DRAFT_DATE_FIELDS = ["dob", "time"];
+
+// Extra balance checks before accepting that a just-registered guest is unfunded.
+const BALANCE_RECHECK_ATTEMPTS = 2;
+const BALANCE_RECHECK_DELAY_MS = 1200;
+
+const loadDraft = () => {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+
+    // Dates round-trip through JSON as ISO strings — revive them.
+    DRAFT_DATE_FIELDS.forEach((key) => {
+      if (parsed[key]) {
+        const revived = new Date(parsed[key]);
+        parsed[key] = Number.isNaN(revived.getTime()) ? null : revived;
+      }
+    });
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const saveDraft = (form) => {
+  try {
+    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+  } catch {
+    /* sessionStorage unavailable (private mode / quota) — non-critical */
+  }
+};
+
+const clearDraft = () => {
+  try {
+    sessionStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* ignore */
+  }
+};
 
 const nowTime = () =>
   new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }).toUpperCase();
@@ -86,7 +139,7 @@ const GuestChatFlow = () => {
 
   const [phase, setPhase] = useState("collecting"); // collecting | otp | connecting | waiting
   const [messages, setMessages] = useState([]);
-  const [form, setForm] = useState(INITIAL_FORM);
+  const [form, setForm] = useState(() => ({ ...INITIAL_FORM, ...(loadDraft() || {}) }));
   const [errors, setErrors] = useState({});
   // Persistent failure message shown directly under the submit button. A toast
   // alone renders top-right and is easy to miss on a phone while the user is
@@ -191,6 +244,12 @@ const GuestChatFlow = () => {
   }, []);
 
   /* ------------------------------- form logic ------------------------------- */
+  // Keep the draft in step with the form so a detour or a back gesture doesn't
+  // cost the user everything they typed.
+  useEffect(() => {
+    saveDraft(form);
+  }, [form]);
+
   const setField = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
@@ -198,22 +257,71 @@ const GuestChatFlow = () => {
 
   // Open the DateTimePicker's calendar by triggering its (hidden) internal
   // button, so the left calendar icon opens the picker while typing stays enabled.
+  //
+  // Every failure path here used to be silent: the icon looks tappable but the
+  // tap produces nothing if the inner button is missing (markup changed) or
+  // `disabled` — which is exactly the case for Birth Time once "don't know the
+  // exact time" is ticked, since DateTimePicker forwards `disabled` to it.
   const openPickerFromIcon = (e) => {
-    e.currentTarget.parentElement?.querySelector('button[tabindex="-1"]')?.click();
+    const inner = e.currentTarget.parentElement?.querySelector('button[tabindex="-1"]');
+
+    if (!inner) {
+      Toast.error("Couldn't open the picker. Please type the value instead.");
+      return;
+    }
+    if (inner.disabled) {
+      Toast.info("Birth time is marked as unknown — untick that to pick a time.");
+      return;
+    }
+    inner.click();
   };
 
-  const validate = () => {
+  // One rule per field so the same logic can run on blur (immediate, next to the
+  // field) and on submit. Previously validation existed only as a single
+  // submit-time pass, so a guest filled six fields, tapped the CTA and only then
+  // discovered the problem — usually a birth place typed but never picked from
+  // the suggestions, which is invisible until you try to continue.
+  const validateField = (key, f = form) => {
+    switch (key) {
+      case "name":
+        if (!f.name.trim()) return "Please enter your name";
+        if (!/^[A-Za-z\s]+$/.test(f.name.trim()))
+          return "Name can only contain letters and spaces";
+        return undefined;
+      case "mobileNumber":
+        if (!/^[6-9]\d{9}$/.test(f.mobileNumber || ""))
+          return "Enter a valid 10-digit mobile number";
+        return undefined;
+      case "identity":
+        return f.identity ? undefined : "Please select your gender";
+      case "dob":
+        return f.dob ? undefined : "Please select your date of birth";
+      case "time":
+        if (f.unknownBirthTime) return undefined;
+        return f.time ? undefined : "Please select your birth time";
+      case "birthPlace":
+        if (!f.birthPlace.trim()) return "Please select your place of birth";
+        if (!f.latitude || !f.longitude)
+          return "Tap a city from the suggestions so we can use the right timezone";
+        return undefined;
+      default:
+        return undefined;
+    }
+  };
+
+  const validate = (f = form) => {
     const e = {};
-    if (!form.name.trim()) e.name = "Please enter your name";
-    else if (!/^[A-Za-z\s]+$/.test(form.name.trim()))
-      e.name = "Name can only contain letters and spaces";
-    if (!form.identity) e.identity = "Please select your gender";
-    if (!form.dob) e.dob = "Please select your date of birth";
-    if (!form.unknownBirthTime && !form.time) e.time = "Please select your birth time";
-    if (!form.birthPlace.trim()) e.birthPlace = "Please select your place of birth";
-    else if (!form.latitude || !form.longitude) e.birthPlace = "Please pick a location from the dropdown";
-    if (!/^[6-9]\d{9}$/.test(form.mobileNumber || "")) e.mobileNumber = "Enter a valid 10-digit mobile number";
+    FIELD_ORDER.forEach((key) => {
+      const message = validateField(key, f);
+      if (message) e[key] = message;
+    });
     return e;
+  };
+
+  // Surface a problem the moment the user leaves the field.
+  const handleBlur = (key) => {
+    const message = validateField(key);
+    setErrors((e) => ({ ...e, [key]: message }));
   };
 
   const handleSubmit = async () => {
@@ -233,6 +341,16 @@ const GuestChatFlow = () => {
         node.querySelector("input, button")?.focus({ preventScroll: true });
       }
       if (firstInvalid) Toast.error(e[firstInvalid]);
+
+      // Recorded so it's possible to tell, from analytics alone, whether repeat
+      // taps on this button are validation or a failing OTP send — and which
+      // field trips people up. Session recordings can't distinguish the two.
+      trackEvent("guest_chat_signup_blocked", {
+        blocker: "validation",
+        field: firstInvalid,
+        error_reason: firstInvalid ? e[firstInvalid] : "unknown",
+        invalid_field_count: Object.keys(e).length,
+      });
       return;
     }
 
@@ -254,10 +372,14 @@ const GuestChatFlow = () => {
 
   /* ------------------------------- OTP + auth ------------------------------- */
   const beginOtp = async (finalDetails) => {
-    const fail = (message) => {
+    const fail = (message, errorReason) => {
       Toast.error(message);
       setSubmitError(message);
       setPhase("collecting");
+      trackEvent("guest_chat_signup_blocked", {
+        blocker: "otp_send_failed",
+        error_reason: errorReason || message,
+      });
     };
 
     try {
@@ -265,11 +387,17 @@ const GuestChatFlow = () => {
       if (sent) {
         setSubmitError("");
         setPhase("otp");
+        trackEvent("otp_sent", { delivery_status: "success", source: "guest_chat" });
       } else {
-        fail("Failed to send OTP. Please try again.");
+        fail("Failed to send OTP. Please try again.", "non_2xx_response");
       }
     } catch (error) {
-      fail(error?.response?.data?.message || "Failed to send OTP. Please try again.");
+      fail(
+        error?.response?.data?.message || "Failed to send OTP. Please try again.",
+        error?.response?.status
+          ? `http_${error.response.status}`
+          : error?.message || "request_threw"
+      );
     }
   };
 
@@ -279,6 +407,9 @@ const GuestChatFlow = () => {
       Toast.error(result.message || "OTP verification failed");
       return false;
     }
+    // Signed up successfully — the draft has served its purpose.
+    clearDraft();
+
     // The welcome popup (bonus/back) is now shown; the balance check + chat
     // initiation happen once it's closed (see the welcome-closed listener).
     welcomeHandledRef.current = false;
@@ -303,8 +434,28 @@ const GuestChatFlow = () => {
       return;
     }
     try {
-      const result = await getBalance({ astrologerId: astro._id });
+      // The welcome bonus is credited server-side during registration, and this
+      // check runs seconds later. If the credit lands even slightly after it, a
+      // funded guest gets a recharge wall immediately after being told ₹250 was
+      // added to their wallet — and that ends the visit. Re-check a couple of
+      // times before believing a zero balance. Costs a short pause only in the
+      // genuinely-unfunded case, and rescues the race.
+      let result = await getBalance({ astrologerId: astro._id });
+
+      for (
+        let attempt = 0;
+        attempt < BALANCE_RECHECK_ATTEMPTS && result?.data?.data?.status === false;
+        attempt += 1
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, BALANCE_RECHECK_DELAY_MS));
+        result = await getBalance({ astrologerId: astro._id });
+      }
+
       if (result?.data?.data?.status === false) {
+        trackEvent("guest_chat_signup_blocked", {
+          blocker: "insufficient_balance_after_signup",
+          error_reason: "balance_check_false_after_retries",
+        });
         setPhase("recharge");
         return;
       }
@@ -561,7 +712,9 @@ const GuestChatFlow = () => {
             className={styles.input}
             value={form.name}
             onChange={(e) => setField("name", e.target.value)}
+            onBlur={() => handleBlur("name")}
             placeholder="Enter your name"
+            autoComplete="name"
           />
         </div>
         {errors.name && <span className={styles.err}>{errors.name}</span>}
@@ -585,7 +738,9 @@ const GuestChatFlow = () => {
             maxLength={10}
             value={form.mobileNumber}
             onChange={(e) => setField("mobileNumber", e.target.value.replace(/[^0-9]/g, "").slice(0, 10))}
+            onBlur={() => handleBlur("mobileNumber")}
             placeholder="Enter mobile number"
+            autoComplete="tel-national"
           />
         </div>
         {errors.mobileNumber && <span className={styles.err}>{errors.mobileNumber}</span>}
@@ -673,18 +828,29 @@ const GuestChatFlow = () => {
           <LocationSearch
             value={form.birthPlace}
             onChange={(e) => setField("birthPlace", e.target.value)}
-            onPlaceSelect={(place) =>
+            onPlaceSelect={(place) => {
               setForm((f) => ({
                 ...f,
                 birthPlace: place.address,
                 latitude: place.lat,
                 longitude: place.lng,
                 timezone: place.timezone ?? 5.5,
-              }))
-            }
+              }));
+              setErrors((e) => ({ ...e, birthPlace: undefined }));
+            }}
           />
         </div>
-        {errors.birthPlace && <span className={styles.err}>{errors.birthPlace}</span>}
+        {errors.birthPlace ? (
+          <span className={styles.err}>{errors.birthPlace}</span>
+        ) : (
+          // Stated up front, because typing a city without choosing a suggestion
+          // leaves no coordinates and is the most common reason this form blocks.
+          <span className={styles.hint}>
+            {form.latitude && form.longitude
+              ? "Location confirmed"
+              : "Start typing, then tap your city from the list"}
+          </span>
+        )}
       </div>
 
       <button

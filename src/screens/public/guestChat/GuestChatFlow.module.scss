@@ -367,6 +367,13 @@
   margin-top: 6px;
 }
 
+/* Quiet guidance shown in place of an error, so a requirement is known before
+   the user hits it rather than after. */
+.hint {
+  color: #6b7280;
+  font-size: 11px;
+}
+
 .secureRow {
   display: flex;
   align-items: center;

@@ -7,6 +7,7 @@ import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
+import toast from '../../../../component/toast';
 
 const FaceReadingCamera = () => {
   const navigate = useNavigate();
@@ -272,9 +273,39 @@ const FaceReadingCamera = () => {
     return canvas;
   };
 
+  // Why the shutter can't fire right now, phrased for the user.
+  const captureBlockedReason = () => {
+    if (!modelsLoaded) return 'Still loading the face model — give it a moment.';
+    if (!videoReady) return 'Camera is still starting up — give it a moment.';
+    if (!faceDetected || isTooFar) return 'Move your face closer to the camera.';
+    if (isPartialFace) return 'Keep your full face inside the circle.';
+    if (!faceInCircle) return 'Position your face within the circle.';
+    return null;
+  };
+
   const captureImage = () => {
+    // Two silent paths used to meet here, and the shutter is the most-tapped
+    // control on the screen:
+    //
+    //  1. `disabled={!canCapture && modelsLoaded}` — once the model had loaded
+    //     but the face wasn't framed yet, the browser swallowed every tap.
+    //  2. While the model was still loading the button was ENABLED and labelled
+    //     "Loading...", so taps ran this function and hit the bare
+    //     `if (!canvas) return`. On a slow in-app WebView that window is long.
+    //
+    // Either way the user taps the shutter and the screen does not react, which
+    // reads as a dead click and invites retry after retry.
+    const reason = captureBlockedReason();
+    if (reason) {
+      toast.info(reason);
+      return;
+    }
+
     const canvas = cropCurrentFrameToCanvas();
-    if (!canvas) return;
+    if (!canvas) {
+      toast.error("Couldn't read the camera frame. Please try again.");
+      return;
+    }
     setCapturedImage(canvas.toDataURL('image/jpeg', 0.95));
     stopCamera();
   };
@@ -464,15 +495,16 @@ const FaceReadingCamera = () => {
 
       <div className={styles.controls}>
         {!capturedImage ? (
-          <button 
-            className={`${styles.captureButton} ${(!canCapture && modelsLoaded) ? styles.disabled : ''}`} 
+          <button
+            type="button"
+            className={`${styles.captureButton} ${!canCapture ? styles.disabled : ''}`}
             onClick={captureImage}
-            disabled={!canCapture && modelsLoaded}
+            aria-disabled={!canCapture}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!canCapture && modelsLoaded) ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={(!canCapture && modelsLoaded) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={!canCapture ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={!canCapture ? "0.5" : "1"}/>
               </svg>
             </div>
             <span className={styles.captureText}>
