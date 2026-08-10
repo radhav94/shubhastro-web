@@ -67,7 +67,7 @@ const GiftSection = ({ astrologer }) => {
         <div className={styles.subHeader}>
           <IoGiftOutline size={18} />
           <h3>
-            Send Gift to {astrologer?.firstName + " " + astrologer?.lastName}
+            Send Gift to {astrologer?.userName ? astrologer.userName : `${astrologer?.firstName || ""} ${astrologer?.lastName || ""}`.trim()}
           </h3>
         </div>
         <div className={styles.priceTag}> ₹ {balance}</div>

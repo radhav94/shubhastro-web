@@ -3,12 +3,13 @@ import { PiBookOpenTextLight } from "react-icons/pi";
 import styles from "./RecommendedAstrologerCard.module.scss";
 import { useNavigate } from "react-router-dom";
 import { getAstrologerDefaultImage } from "../../../utils/appImages";
+import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
 
 const RecommendedAstrologerCard = ({ data, onConnect }) => {
   const navigate = useNavigate();
-  const { firstName, lastName, imageUrl, aadharCardImgUrl, panCardImgUrl, rating, experience } = data;
+  const { imageUrl, aadharCardImgUrl, panCardImgUrl, rating, experience } = data;
 
-  const fullName = `${firstName || ""} ${lastName || ""}`.trim();
+  const fullName = getAstrologerDisplayName(data);
   const displayExperience = experience ? `${experience} years exp.` : "";
   
   // Try multiple image fields with fallback to gender-based default

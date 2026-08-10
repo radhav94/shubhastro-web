@@ -6,6 +6,7 @@ import { AppIcons, getAstrologerDefaultImage } from "../../../../utils/appImages
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 import toast from "../../../toast";
 import { unavailableReason } from "../../../../utils/helper/astrologerAvailability";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 const NewAstrologerCard = memo(({ 
   astrologer, 
@@ -116,7 +117,7 @@ const NewAstrologerCard = memo(({
           />
         </div>
         <h3 className={styles.astrologerName}>
-          {astrologer.firstName} {astrologer.lastName}
+          {getAstrologerDisplayName(astrologer)}
         </h3>
         {astrologer.experience && (
           <div className={styles.experienceRow}>

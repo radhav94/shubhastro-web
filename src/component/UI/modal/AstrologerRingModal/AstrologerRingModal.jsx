@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Phone, PhoneOff, MessageSquare, X } from "lucide-react";
 import styles from "./AstrologerRingModal.module.scss";
 import { getAstrologerDefaultImage } from "../../../../utils/appImages";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 const RING_TIMEOUT = 60; // seconds
 
@@ -27,7 +28,7 @@ const AstrologerRingModal = ({ data, onAccept, onReject, onDismiss, onTimeout, v
   const type = data?.type || "audio";
   const isEmergency = data?.isEmergency || false;
 
-  const name = `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim() || "Astrologer";
+  const name = getAstrologerDisplayName(astrologer) || "Astrologer";
   const imageUrl = astrologer.profileImgUrl || astrologer.imageUrl || getAstrologerDefaultImage(astrologer.gender);
 
   // Start countdown

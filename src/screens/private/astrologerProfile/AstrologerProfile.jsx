@@ -19,6 +19,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ErrorText, PrimaryText } from "../../../component";
 import toast from "../../../component/toast";
 import { unavailableReason } from "../../../utils/helper/astrologerAvailability";
+import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
 import {
   useFollowAstrologerByIdMutation,
   useUnfollowAstrologerByIdMutation,
@@ -375,8 +376,8 @@ const AstrologerProfile = () => {
 
   const handleShare = async () => {
     const shareData = {
-      title: `${data?.firstName} ${data?.lastName || ""} - Astrologer`,
-      text: `Check out ${data?.firstName}'s profile on ShubhTalk`,
+      title: `${getAstrologerDisplayName(data)} - Astrologer`,
+      text: `Check out ${getAstrologerDisplayName(data)}'s profile on ShubhTalk`,
       url: window.location.href,
     };
 
@@ -483,7 +484,7 @@ const AstrologerProfile = () => {
     console.log(data,"123")
     setReviewData({
       astrologerID: data?.astrologer_ID,
-      fullName: `${data?.firstName || ""} ${data?.lastName || ""}`.trim(),
+      fullName: getAstrologerDisplayName(data),
       profileImage: data?.profileImgUrl || data?.imageUrl ,
       roomId: lastRoomId,
     });
@@ -492,8 +493,7 @@ const AstrologerProfile = () => {
 
   const handleSetReminder = () => {
     try {
-      const astrologerName =
-        `${displayData.firstName} ${displayData.lastName}`.trim();
+      const astrologerName = getAstrologerDisplayName(displayData);
 
       // Find the next available day from weekly schedule
       const nextAvailable = displayData.weeklySchedule.find((item) => item.time);
@@ -614,7 +614,7 @@ const AstrologerProfile = () => {
         setActiveChat({
           roomId,
           chatRoomId: roomId,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           userId: userId,
           astrologerId: astrologerId,
@@ -632,7 +632,7 @@ const AstrologerProfile = () => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+            fullName: getAstrologerDisplayName(astro),
             roomId,
             isUserSide: true,
             kundliId,
@@ -700,7 +700,7 @@ const AstrologerProfile = () => {
           channelName,
           chatRoomId,
           agoraToken: token,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           callType: type,
           userId: userIdLocal,
@@ -893,6 +893,11 @@ const AstrologerProfile = () => {
 
   // Fallback data - only used when API data is missing
   const displayData = {
+    // `userName` is the astrologer's public alias and takes priority in
+    // getAstrologerDisplayName(). It has to be carried through here, otherwise
+    // every getAstrologerDisplayName(displayData) call silently falls back to
+    // firstName + lastName.
+    userName: data?.userName || "",
     firstName: data?.firstName || "Astrologer",
     lastName: data?.lastName || "",
     imageUrl:
@@ -1156,7 +1161,7 @@ const AstrologerProfile = () => {
                         </span>
                       </div>
                       <h3 className={styles.astrologerNames}>
-                        {astrologer.firstName} {astrologer.lastName}
+                        {getAstrologerDisplayName(astrologer)}
                       </h3>
                       {astrologer.experience && (
                         <div className={styles.experienceRow}>
@@ -1198,7 +1203,7 @@ const AstrologerProfile = () => {
               <div className={styles.profileImageWrapper}>
                 <img
                   src={displayData.imageUrl}
-                  alt={displayData.firstName}
+                  alt={getAstrologerDisplayName(displayData)}
                   className={styles.profileImage}
                   onError={(e) => {
                     e.target.src = getAstrologerDefaultImage(data?.gender);
@@ -1207,7 +1212,7 @@ const AstrologerProfile = () => {
               </div>
               <div className={styles.profileInfo}>
                 <h1 className={styles.astrologerName}>
-                  {displayData.firstName} {displayData.lastName}
+                  {getAstrologerDisplayName(displayData)}
                 </h1>
                 <p className={styles.expertise}>
                   {displayData.expertise.join(" • ")}
@@ -1443,7 +1448,7 @@ const AstrologerProfile = () => {
             {/* Astrologer voice intro */}
             {data?.voiceNoteUrl && (
               <AudioIntro
-                name={displayData.firstName}
+                name={getAstrologerDisplayName(displayData)}
                 src={data.voiceNoteUrl}
                 isNew
               />
@@ -1904,13 +1909,13 @@ const AstrologerProfile = () => {
         isOpen={isGiftModalOpen}
         onClose={() => setIsGiftModalOpen(false)}
         astrologerId={data?._id}
-        astrologerName={`${data?.firstName || ""} ${data?.lastName || ""}`}
+        astrologerName={getAstrologerDisplayName(data)}
       />
 
       {/* Virtual Assistant Chat */}
       <VirtualAssistant
         astrologerId={data?._id}
-        astrologerName={`${data?.firstName || ""} ${data?.lastName || ""}`.trim()}
+        astrologerName={getAstrologerDisplayName(data)}
         astrologerImage={data?.profileImgUrl || data?.imageUrl}
         isOpen={isVAOpen}
         setIsOpen={setIsVAOpen}
