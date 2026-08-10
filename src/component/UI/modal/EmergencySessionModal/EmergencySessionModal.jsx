@@ -2,6 +2,7 @@ import { X, MessageSquare, Phone, Video } from "lucide-react";
 import { createPortal } from "react-dom";
 import styles from "./EmergencySessionModal.module.scss";
 import { getAstrologerDefaultImage } from "../../../../utils/appImages";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 const EmergencySessionModal = ({
   isOpen,
@@ -13,7 +14,7 @@ const EmergencySessionModal = ({
 }) => {
   if (!isOpen || !astrologer) return null;
 
-  const name = `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim() || "Astrologer";
+  const name = getAstrologerDisplayName(astrologer) || "Astrologer";
   const imageUrl = astrologer.profileImgUrl || astrologer.imageUrl || getAstrologerDefaultImage(astrologer.gender);
   const emergencyPrice = astrologer.emergencyPrice || {};
   const chatRate = emergencyPrice.chatRate?.amount || 0;
