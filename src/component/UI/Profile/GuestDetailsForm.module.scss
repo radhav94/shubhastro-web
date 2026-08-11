@@ -124,6 +124,8 @@
     border-color: #f75801;
   }
 
+  // Fixed +91 prefix rendered as a <button> purely so a tap can be answered.
+  // Intentionally has no chevron and no pointer cursor: it is not a picker.
   .flagBox {
     display: flex;
     align-items: center;
@@ -133,8 +135,14 @@
     white-space: nowrap;
     color: #2b1d12;
     font-size: 14px;
+    border: none;
     border-right: 1px solid #ece3d8;
     background: #fbf6f0;
+    font-family: inherit;
+    cursor: default;
+    appearance: none;
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .flag {

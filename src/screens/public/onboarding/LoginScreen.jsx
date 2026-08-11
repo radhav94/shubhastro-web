@@ -179,13 +179,21 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
           {/* Phone Input */}
           <div className={styles.newPhoneInput}>
-            <div className={styles.newCountryCode}>
+            {/*
+              Fixed +91. The chevron that used to sit here advertised a country
+              picker that does not exist — validation is Indian-format only and
+              the backend prefixes "91" — so non-Indian visitors clicked it
+              repeatedly and left. Explain on tap rather than imply a choice.
+            */}
+            <button
+              type="button"
+              className={styles.newCountryCode}
+              onClick={() => toast("We currently support Indian (+91) mobile numbers only.", { icon: "ℹ️" })}
+              title="Indian (+91) numbers only"
+            >
               <img src="https://flagcdn.com/w40/in.png" alt="India" />
               <span>+91</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path d="M6 9l6 6 6-6" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
+            </button>
             <input
               ref={phoneInputRef}
               type="tel"
