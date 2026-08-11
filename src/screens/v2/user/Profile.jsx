@@ -81,6 +81,7 @@ import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearAllCalculatorData } from "../../../redux/calculator/calculatorSlice";
 import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
 import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
+import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
 
 // "Consult Again" button that disables in real time when the astrologer is live.
 // Uses useAstrologerLiveStatus so it reacts to the live socket event even when
@@ -817,13 +818,13 @@ const Profile = () => {
         setActiveChat({
           roomId,
           chatRoomId: roomId,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           userId: userId,
           astrologerId: astrologerId,
           astrologerID: astro?.astrologer_ID,
           kundliId,
-          astrologerName: astro?.firstName || "",
+          astrologerName: getAstrologerDisplayName(astro),
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
           profileImgUrl: astro?.profileImgUrl,
@@ -835,11 +836,11 @@ const Profile = () => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+            fullName: getAstrologerDisplayName(astro),
             roomId,
             isUserSide: true,
             kundliId,
-            astrologerName: astro?.firstName || "",
+            astrologerName: getAstrologerDisplayName(astro),
             astroID: astro?.astrologer_ID,
             experience: astro?.experience,
             profileImgUrl: astro?.profileImgUrl,
@@ -907,7 +908,7 @@ const Profile = () => {
           channelName,
           chatRoomId,
           agoraToken: token,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           callType: type,
           userId: userId,
@@ -1055,7 +1056,7 @@ const Profile = () => {
   const handleRateConsultation = (astrologer, roomId) => {
     setReviewData({
       astrologerID: astrologer.astrologer_ID || astrologer._id,
-      fullName: astrologer.name || `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
+      fullName: astrologer.name || getAstrologerDisplayName(astrologer),
       profileImage: astrologer.image || astrologer.profileImgUrl || astrologer.imageUrl,
       roomId,
     });

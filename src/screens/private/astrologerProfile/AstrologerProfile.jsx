@@ -398,11 +398,11 @@ const AstrologerProfile = () => {
       if (!isFollowing) {
         await followAstrologer({ astrologerId: data._id }).unwrap();
         toast.success(
-          `We will notify you when ${data?.firstName || ""} goes live or posts an update!`,
+          `We will notify you when ${getAstrologerDisplayName(data)} goes live or posts an update!`,
         );
       } else {
         await unfollowAstrologer({ astrologerId: data._id }).unwrap();
-        toast.success(`You unfollowed ${data?.firstName}`);
+        toast.success(`You unfollowed ${getAstrologerDisplayName(data)}`);
       }
     } catch (err) {
       console.log("Follow/Unfollow error:", err);
@@ -655,7 +655,7 @@ const AstrologerProfile = () => {
           astrologerId: astrologerId,
           astrologerID: astro?.astrologer_ID || data?.astrologer?.astrologer_ID,
           kundliId,
-          astrologerName: data?.astrologer?.firstName || "",
+          astrologerName: getAstrologerDisplayName(data?.astrologer),
           experience: data?.astrologer?.experience || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
@@ -671,7 +671,7 @@ const AstrologerProfile = () => {
             roomId,
             isUserSide: true,
             kundliId,
-            astrologerName: data?.astrologer?.firstName || "",
+            astrologerName: getAstrologerDisplayName(data?.astrologer),
             astroID: data?.astrologer?.astrologer_ID,
             experience: astro?.experience || data?.astrologer?.experience,
             profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
@@ -1948,7 +1948,7 @@ const AstrologerProfile = () => {
           callRoomId={connectionType === "chat" ? chatRoomId : callRoomId}
           resetCallState={resetCallState}
           connectionType={connectionType}
-          astrologerName={`${data?.firstName || ""} ${data?.lastName || ""}`.trim()}
+          astrologerName={getAstrologerDisplayName(data)}
         />
       )} */}
 

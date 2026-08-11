@@ -6,6 +6,7 @@ import { useCall } from "../../../../context/CallContext";
 import { useWaitingQueue } from "../../../../context/WaitingQueueContext";
 import { Toast } from "../../../../component";
 import { isPanditAIChatActive, isPanditAIEvent } from "../../../../component/panditAI/usePanditAI";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 export const useAstrologerConnection = (externalAstroRef = null, selectedKundli) => {
   const navigate = useNavigate();
@@ -178,7 +179,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
       try {
         if (!roomId) throw new Error("Room ID missing");
 
-        const astroName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
+        const astroName = getAstrologerDisplayName(astro);
 
         setActiveChat({
           roomId,
@@ -189,7 +190,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           astrologerId: astrologerId,
           astrologerID: astro?.astrologer_ID,
           kundliId,
-          astrologerName: astro?.firstName || "",
+          astrologerName: getAstrologerDisplayName(astro),
           experience: astro?.experience || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
@@ -206,7 +207,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
             roomId,
             isUserSide: true,
             kundliId,
-            astrologerName: astro?.firstName || "",
+            astrologerName: getAstrologerDisplayName(astro),
             astroID: astro?.astrologer_ID,
             experience: astro?.experience,
             profileImgUrl: astro?.profileImgUrl,
@@ -279,7 +280,7 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
           return;
         }
 
-        const astroName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
+        const astroName = getAstrologerDisplayName(astro);
 
         const callPayload = {
           roomId,

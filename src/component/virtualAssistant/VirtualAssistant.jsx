@@ -157,11 +157,24 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
     }
   }, [isOpen]);
 
-  // Focus the text input when the chat window opens
+  // Focus the text input when the chat window opens. A single setTimeout(0)
+  // fired before the entrance animation / initial auto-scroll settled, so the
+  // caret never landed in the box. Retry across a couple of frames + a short
+  // delay so focus reliably lands once the input is painted and interactive.
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 0);
-    }
+    if (!isOpen) return;
+    const focusInput = () => {
+      const el = inputRef.current;
+      if (el && !el.disabled) el.focus();
+    };
+    const raf = requestAnimationFrame(focusInput);
+    const t1 = setTimeout(focusInput, 150);
+    const t2 = setTimeout(focusInput, 350);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [isOpen]);
 
   // Refocus input after sending completes (input was disabled during send)
@@ -533,6 +546,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
             <canvas ref={canvasRef} style={{ display: "none" }} />
             <input
               ref={inputRef}
+              autoFocus
               className={styles.textInput}
               value={text}
               onChange={(e) => setText(e.target.value)}
