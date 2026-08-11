@@ -114,10 +114,20 @@ const NewAstrologerCard = memo(({
 
       <Link to={`/astrologer/${astrologer?._id}`} className={styles.cardLink}>
         <div className={styles.astrologerImageWrapper}>
+          {/* These photos are the single biggest payload on the homepage — the
+              CDN serves the originals (896x902, 1433x1433 …) for a box that
+              renders around 100x115, and there is no resized variant to ask
+              for. Until the upload pipeline emits thumbnails, at least keep the
+              off-screen ones out of the initial load and the decode off the
+              main thread. `.astrologerImg` is width/height 100% inside a sized
+              parent, so no width/height attributes are needed — the box already
+              reserves the space. */}
           <img
             src={astrologer.profileImgUrl || getAstrologerDefaultImage(astrologer.gender)}
             alt={astrologer.firstName}
             className={styles.astrologerImg}
+            loading="lazy"
+            decoding="async"
             onError={(e) => {
               e.target.src = getAstrologerDefaultImage(astrologer.gender);
             }}
