@@ -62,6 +62,25 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: 'hidden',
     minify: 'esbuild',
+    /*
+     * Explicit syntax floor.
+     *
+     * Vite 6+ defaults `build.target` to 'baseline-widely-available'
+     * (chrome107 / edge107 / firefox104 / safari16), and this project declares
+     * no browserslist — so ES2021+ syntax from dependencies was emitted
+     * untouched. Two shipped examples: `||=` from the Agora RTC SDK and `??=`
+     * from RTK Query's cache internals.
+     *
+     * Logical assignment is a *parse-time* feature. An engine that lacks it
+     * doesn't fail gracefully on one function — it rejects the whole chunk with
+     * "Unexpected token '='", so the app never boots and the visitor sees a
+     * blank page. That is unrecoverable and invisible to feature detection.
+     *
+     * This list restores Vite's pre-6 default. firefox78 predates logical
+     * assignment (added in 79), so esbuild lowers it for every chunk while
+     * leaving ES2020 syntax such as optional chaining native.
+     */
+    target: ['es2020', 'chrome87', 'edge88', 'firefox78', 'safari14'],
     rollupOptions: {
       output: {
         manualChunks(id) {
