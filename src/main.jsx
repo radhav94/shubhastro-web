@@ -34,21 +34,31 @@ if (typeof Node !== 'undefined') {
  * This is a customer-facing app — astrologer tokens/data from the
  * astrologer dashboard should never persist here.
  */
+// Wrapped because this runs at module scope, before React mounts: an unhandled
+// throw here aborts evaluation of the whole bundle and the user gets a blank
+// page. Browsers that block site data throw on the mere *read* of
+// `window.localStorage`. index.html installs an in-memory fallback first, so
+// this should never throw — but a boot-critical side effect should not depend on
+// that shim having succeeded.
 (() => {
-  const role = localStorage.getItem('shubhtalk_role');
-  if (role === 'ASTROLOGER') {
-    // Clear all localStorage
-    localStorage.clear();
-    // Clear all sessionStorage
-    sessionStorage.clear();
-    // Clear all cookies
-    document.cookie.split(';').forEach((c) => {
-      const name = c.split('=')[0].trim();
-      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-    });
+  try {
+    const role = localStorage.getItem('shubhtalk_role');
+    if (role === 'ASTROLOGER') {
+      // Clear all localStorage
+      localStorage.clear();
+      // Clear all sessionStorage
+      sessionStorage.clear();
+      // Clear all cookies
+      document.cookie.split(';').forEach((c) => {
+        const name = c.split('=')[0].trim();
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+      });
+    }
+    // Always remove stale onboarding session data
+    sessionStorage.removeItem('onboardingSession');
+  } catch (err) {
+    console.warn('[boot] storage unavailable during startup guard:', err);
   }
-  // Always remove stale onboarding session data
-  sessionStorage.removeItem('onboardingSession');
 })()
 
 // import { StrictMode } from "react";
