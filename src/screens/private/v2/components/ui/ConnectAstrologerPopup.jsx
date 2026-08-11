@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { MessageSquare, Phone, Video, X } from "lucide-react";
 import Toast from "../../../../../component/toast";
 import { unavailableReason } from "../../../../../utils/helper/astrologerAvailability";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 import styles from "./ConnectAstrologerPopup.module.css";
 
 const ConnectAstrologerPopup = ({
@@ -149,7 +150,7 @@ const ConnectAstrologerPopup = ({
 
         <div className={styles.header}>
           <h2 className={styles.title}>
-            {isEmergency ? "Emergency Connect" : "Connect with"} {astrologer?.firstName || "Astrologer"}
+            {isEmergency ? "Emergency Connect" : "Connect with"} {getAstrologerDisplayName(astrologer) || "Astrologer"}
           </h2>
           <button className={styles.closeButton} onClick={onClose}>
             <X size={24} />

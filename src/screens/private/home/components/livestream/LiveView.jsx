@@ -12,6 +12,7 @@ import LiveListModal from "./LiveListModal";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { useReelScroll } from "./useReelScroll";
 import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -650,7 +651,7 @@ const LiveView = (props) => {
       liveRoomDetails: {
         roomId: props.channel,
         hostId: astrologerId,
-        hostName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "",
+        hostName: getAstrologerDisplayName(astrologer) || astrologer?.astrologerName || astrologer?.hostName || "",
         channel: props.channel,
       },
     });
@@ -750,7 +751,7 @@ const LiveView = (props) => {
       liveRoomDetails: {
         roomId: props.channel,
         hostId: astrologerId,
-        hostName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "",
+        hostName: getAstrologerDisplayName(astrologer) || astrologer?.astrologerName || astrologer?.hostName || "",
         channel: props.channel,
       },
     });

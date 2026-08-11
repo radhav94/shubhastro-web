@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { IoClose } from "react-icons/io5";
 import { getAstrologerDefaultImage } from "../../../../../utils/appImages";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 import "./styles/liveListModal.scss";
 
 // Convert slug to readable title: "face-reading" → "Face Reading"
@@ -75,7 +76,7 @@ const LiveListModal = ({ show, onClose, lives = [] }) => {
                   {items.map((live) => {
                     const astro = live.astrologer || {};
                     const img = (astro.profileImgUrl && astro.profileImgUrl.length > 5) ? astro.profileImgUrl : (live.astrologerProfileIcon || null);
-                    const name = `${astro.firstName || ""} ${astro.lastName || ""}`.trim() || "Astrologer";
+                    const name = getAstrologerDisplayName(astro) || "Astrologer";
                     const defaultImg = getAstrologerDefaultImage(astro.gender || "male");
                     return (
                       <div key={live.channel} className={`llm-card ${live.isOnPrivateCall ? "llm-busy" : ""}`} onClick={() => handleSelect(live.channel)}>
