@@ -254,7 +254,7 @@ const EditProfileModal = ({
                       </svg>
                       Female
                     </button>
-                    <button
+                    {/* <button
                       type="button"
                       className={values.identity === "Others" ? styles.active : ""}
                       onClick={() => setFieldValue("identity", "Others")}
@@ -276,7 +276,7 @@ const EditProfileModal = ({
                         </g>
                       </svg>
                       Others
-                    </button>
+                    </button> */}
                   </div>
                 </div>
 
