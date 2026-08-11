@@ -269,9 +269,19 @@
   </style>
 
   <!-- Google Tag Manager -->
+  <!--
+    `j.crossOrigin` so exceptions thrown inside GTM (or any tag it loads)
+    report a real message and stack instead of the browser's opaque
+    "Script error.". GTM is the biggest suspect for masked errors because it
+    executes arbitrary container-configured tags.
+    Verified safe: a GET to https://www.googletagmanager.com/gtm.js?id=GTM-T5DTGXHW
+    with an Origin header returns `access-control-allow-origin` for this origin.
+    Do NOT copy this onto a script whose origin omits that header — the request
+    would fail CORS and the script would not load at all.
+  -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.crossOrigin='anonymous';j.src=
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','dataLayer','GTM-T5DTGXHW');</script>
   <!-- End Google Tag Manager -->
@@ -302,7 +312,12 @@
       if (host !== "shubhastro.ai" && host !== "www.shubhastro.ai") return;
       (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        // `crossOrigin` so exceptions thrown inside Clarity's own script report
+        // a real message and stack rather than "Script error.".
+        // Verified: GET https://www.clarity.ms/tag/xeickgmcun with an Origin
+        // header returns `Access-Control-Allow-Origin: *`. (An earlier HEAD
+        // probe returned 405, which is why this was left off previously.)
+        t=l.createElement(r);t.async=1;t.crossOrigin="anonymous";t.src="https://www.clarity.ms/tag/"+i;
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
       })(window, document, "clarity", "script", "xeickgmcun");
     })();
@@ -341,6 +356,14 @@
   <!-- Meta Pixel Code (production only) -->
   <script>
   (function () {
+    // NOTE: deliberately NO `crossOrigin` here, unlike the GTM and Clarity
+    // snippets above. A GET to https://connect.facebook.net/en_US/fbevents.js
+    // with an Origin header returns 200 with `timing-allow-origin: *` but NO
+    // `access-control-allow-origin`. Adding crossOrigin would make the request
+    // fail CORS, the pixel would never load, and ad attribution/conversion
+    // tracking would silently break. The cost is that any exception thrown
+    // inside fbevents.js stays masked as "Script error." — that is Meta's
+    // limitation, not something we can fix from here.
     var host = location.hostname;
     if (host !== "shubhastro.ai" && host !== "www.shubhastro.ai") return;
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?

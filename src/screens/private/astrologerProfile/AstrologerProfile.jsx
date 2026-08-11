@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import styles from "./AstrologerProfile.module.scss";
 import { FaPlay, FaStar, FaStarHalfAlt, FaRegStar, FaChevronRight } from "react-icons/fa";
 import { Radio } from "lucide-react";
@@ -167,6 +167,9 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
 const AstrologerProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  // Same Figma-exported star icon as NewAstrologerCard, which this page also
+  // renders — both hardcoded `id="clip0_4961_937"`, so they collided.
+  const starClipId = `astroProfileStarClip-${useId()}`;
 
   const {
     data: astrologerData,
@@ -1168,7 +1171,7 @@ const AstrologerProfile = () => {
                             viewBox="0 0 12 13"
                             fill="none"
                           >
-                            <g clipPath="url(#clip0_4961_937)">
+                            <g clipPath={`url(#${starClipId})`}>
                               <path
                                 d="M5.94187 1.3447C6.09954 0.919606 6.69621 0.919606 6.85438 1.3447L7.87429 4.2327C7.90988 4.32678 7.97253 4.40762 8.05399 4.46454C8.13545 4.52146 8.23188 4.55179 8.33055 4.55152H10.837C11.3001 4.55152 11.5021 5.14081 11.138 5.42941L9.35441 7.06984C9.27451 7.13262 9.21612 7.21967 9.18762 7.31848C9.15912 7.41729 9.16196 7.52279 9.19575 7.61984L9.84712 10.4419C10.0058 10.8952 9.49237 11.2845 9.10411 11.0055L6.68143 9.43404C6.59847 9.37443 6.49953 9.34245 6.39812 9.34245C6.29672 9.34245 6.19778 9.37443 6.11481 9.43404L3.69214 11.0055C3.30437 11.2845 2.79047 10.8947 2.94912 10.4419L3.60049 7.61984C3.63428 7.52279 3.63713 7.41729 3.60863 7.31848C3.58012 7.21967 3.52173 7.13262 3.44184 7.06984L1.65821 5.42941C1.2936 5.14081 1.4966 4.55152 1.95877 4.55152H4.46521C4.56389 4.55186 4.66035 4.52156 4.74182 4.46463C4.82329 4.4077 4.88594 4.32682 4.92146 4.2327L5.94138 1.3447H5.94187Z"
                                 fill="#FFB246"
@@ -1179,7 +1182,7 @@ const AstrologerProfile = () => {
                               />
                             </g>
                             <defs>
-                              <clipPath id="clip0_4961_937">
+                              <clipPath id={starClipId}>
                                 <rect
                                   width="11.8251"
                                   height="12.0879"
