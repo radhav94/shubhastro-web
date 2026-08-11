@@ -86,17 +86,28 @@ import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
 // Uses useAstrologerLiveStatus so it reacts to the live socket event even when
 // the live status arrives after the initial render (the list data alone doesn't
 // update reactively for socket-driven live changes).
+const CONSULT_LIVE_BLOCKED_REASON =
+  "This astrologer is in a live session right now. Join the live stream or try again once it ends.";
+
 const ConsultAgainButton = ({ astrologer, seedLiveStatus, onConsultAgain }) => {
   const { isLive } = useAstrologerLiveStatus(astrologer?._id, seedLiveStatus);
   return (
+    // Blocked-while-live was previously expressed twice over, both silently:
+    // `disabled` meant the browser swallowed the tap, and the handler also
+    // returned early without a word. The user got no response at all. Stay
+    // tappable and explain — same treatment as the order-history button.
     <button
-      className={styles.consultAgainButton}
+      className={`${styles.consultAgainButton} ${isLive ? styles.consultAgainBlocked : ""}`.trim()}
       onClick={(e) => {
         e.stopPropagation();
-        if (isLive) return;
+        if (isLive) {
+          Toast.info(CONSULT_LIVE_BLOCKED_REASON);
+          return;
+        }
         onConsultAgain(astrologer);
       }}
-      disabled={isLive}
+      aria-disabled={isLive}
+      title={isLive ? CONSULT_LIVE_BLOCKED_REASON : "Consult again"}
     >
       Consult Again
     </button>
