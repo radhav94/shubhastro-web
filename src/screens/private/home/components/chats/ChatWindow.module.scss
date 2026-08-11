@@ -722,6 +722,14 @@ $floating-button-gap: 14px;
 
 /* Kundli Link */
 .kundliLink {
+  /* Rendered as a <button> so the tap always registers. Strip the UA button
+     chrome so it still reads as the inline link it looks like. */
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  text-align: left;
   display: flex;
   align-items: center;
   gap: 6px;

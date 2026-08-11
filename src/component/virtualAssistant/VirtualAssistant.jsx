@@ -21,6 +21,7 @@ import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSele
 import { useFileSelector } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
 import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
 import { buildKundliLink } from "../../utils/helper/kundliMessage";
+import Toast from "../toast";
 import PdfIcon from "../../assets/chat/PDF.svg";
 import DocIcon from "../../assets/chat/DOC.svg";
 import XlsIcon from "../../assets/chat/XLS.svg";
@@ -276,15 +277,25 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
                         // (e.g. an astrologer profile link) resolves to null.
                         const kundliLink = buildKundliLink(msg.kundliId, msg.message);
                         return (
-                          <div
+                          // A <button>, not a div: this is an action. And when the
+                          // link can't be resolved the tap used to do nothing at
+                          // all — say so instead.
+                          <button
+                            type="button"
                             className={styles.kundliLink}
-                            onClick={() => kundliLink && setIframeSrc(kundliLink)}
+                            onClick={() => {
+                              if (!kundliLink) {
+                                Toast.error("This kundli is no longer available to view.");
+                                return;
+                              }
+                              setIframeSrc(kundliLink);
+                            }}
                           >
                             <GrReactjs />
                             {msg.kundliName
                               ? `${msg.kundliName}'s Kundli`
                               : "View Kundli"}
-                          </div>
+                          </button>
                         );
                       })() : msg.type === "audio" ? (
                         <div className={styles.audioMessage}>
