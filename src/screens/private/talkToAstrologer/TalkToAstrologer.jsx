@@ -48,6 +48,7 @@ import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import AstrologerRingModal from "../../../component/UI/modal/AstrologerRingModal/AstrologerRingModal";
 import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
+import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -889,7 +890,7 @@ const TalkToAstrologer = () => {
           channelName: agoraChannel,
           chatRoomId,
           agoraToken: token,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           callType: type,
           userId: userIdLocal,
@@ -928,13 +929,13 @@ const TalkToAstrologer = () => {
         setActiveChat({
           roomId,
           chatRoomId,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
           astrologerID: astro?.astrologer_ID || data?.astrologer?.astrologer_ID,
           kundliId,
-          astrologerName: data?.astrologer?.firstName || "",
+          astrologerName: getAstrologerDisplayName(data?.astrologer),
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
           profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
@@ -945,11 +946,11 @@ const TalkToAstrologer = () => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+            fullName: getAstrologerDisplayName(astro),
             roomId,
             isUserSide: true,
             kundliId,
-            astrologerName: data?.astrologer?.firstName || "",
+            astrologerName: getAstrologerDisplayName(data?.astrologer),
             astroID: data?.astrologer?.astrologer_ID,
             experience: data?.astrologer?.experience,
             profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,

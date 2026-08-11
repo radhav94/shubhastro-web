@@ -23,6 +23,7 @@ import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrolo
 import { getAstrologerDefaultImage } from "../../../utils/appImages";
 import { getToken } from "../../../utils/token";
 import { capitalizeWords } from "../../../utils/capitalize";
+import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
 import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 import {
@@ -91,7 +92,7 @@ const GuestChatFlow = () => {
   const astrologerRef = useRef(astrologer);
   astrologerRef.current = astrologer;
 
-  const astroName = `${astrologer?.firstName || ""} ${astrologer?.lastName || ""}`.trim() || "Astrologer";
+  const astroName = getAstrologerDisplayName(astrologer) || "Astrologer";
   const astroImg = astrologer?.profileImgUrl || getAstrologerDefaultImage(astrologer?.gender);
   const [imgError, setImgError] = useState(false);
 
@@ -570,7 +571,7 @@ const GuestChatFlow = () => {
       const astro = data?.astrologer || astrologerRef.current || {};
       const targetId = accAstroId || astro?._id;
       const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
-      const fullName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
+      const fullName = getAstrologerDisplayName(astro);
 
       setActiveChat({
         roomId,
@@ -580,7 +581,7 @@ const GuestChatFlow = () => {
         userId: userIdLocal,
         astrologerId: targetId,
         astrologerID: astro?.astrologer_ID,
-        astrologerName: astro?.firstName || "",
+        astrologerName: getAstrologerDisplayName(astro),
         remainingTime: data?.remainingTime,
         isEmergency: data?.isEmergency || false,
         profileImgUrl: astro?.profileImgUrl,
@@ -595,7 +596,7 @@ const GuestChatFlow = () => {
           fullName,
           roomId,
           isUserSide: true,
-          astrologerName: astro?.firstName || "",
+          astrologerName: getAstrologerDisplayName(astro),
           astroID: astro?.astrologer_ID,
           experience: astro?.experience,
           profileImgUrl: astro?.profileImgUrl,

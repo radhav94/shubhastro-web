@@ -8,6 +8,7 @@ import {
   useUnfollowAstrologerByIdMutation,
 } from "../../../redux/api/astrologer/followAstrologerApi";
 import styles from "./FollowedAstrologers.module.scss";
+import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
 
 const SORT_OPTIONS = [
   { label: "Default", value: "" },
@@ -217,7 +218,7 @@ const FollowedAstrologers = () => {
           <div className={styles.list}>
             {allAstrologers.map((item) => {
               const astro = item.astrologer || {};
-              const name = astro.fullName || astro.firstName || "Astrologer";
+              const name = astro.fullName || getAstrologerDisplayName(astro) || "Astrologer";
               const id = item.astrologerId || astro._id;
               const image = astro.profileImgUrl;
               const isFollowing = item.isFollowing !== false;

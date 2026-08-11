@@ -1166,9 +1166,10 @@ $floating-button-gap: 14px;
   color: $bg-footer;
   font-weight: 300;
   font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* No overflow/ellipsis clipping — on iOS Safari `overflow: hidden` +
+     `text-overflow: ellipsis` on a textarea placeholder trims the placeholder
+     text (e.g. after sending a message it reappears cut off). The placeholder
+     is short and single-line, so it doesn't need truncation. */
 }
 
 .inputIcons {

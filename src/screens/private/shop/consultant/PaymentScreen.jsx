@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
 import styles from "./Payment.module.scss";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 const PaymentScreen = () => {
   const location = useLocation();
@@ -28,8 +29,8 @@ const PaymentScreen = () => {
 
         <tbody>
           <tr>
-            <td>{astrologer.firstName} Consultation</td>
-            <td>{astrologer.firstName}</td>
+            <td>{getAstrologerDisplayName(astrologer)} Consultation</td>
+            <td>{getAstrologerDisplayName(astrologer)}</td>
             <td>₹ {amount}</td>
           </tr>
 

@@ -46,6 +46,14 @@ export default function useChat({
   const selectedKundliRef = useRef(selectedKundli);
   selectedKundliRef.current = selectedKundli;
 
+  // In-memory guard so the initial greeting + kundli auto-share runs at most
+  // once per mount. The `onConnected` handler fires synchronously on every
+  // effect re-run (deps like activeChat / highlight text change often) and the
+  // sessionStorage key is keyed by roomId — which can flip (temp → real) mid
+  // connect, bypassing that guard and sending the kundli twice. This ref does
+  // not depend on roomId, so the auto-share can only happen once.
+  const initSentRef = useRef(false);
+
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }).toUpperCase();
 
@@ -105,7 +113,8 @@ export default function useChat({
           const alreadySent = sessionStorage.getItem(sentKey);
 
           //Send msg first time only
-          if (!refreshKey && !alreadySent) {
+          if (!refreshKey && !alreadySent && !initSentRef.current) {
+            initSentRef.current = true;
             sessionStorage.setItem(sentKey, "true");
 
             // Check if there's an AI initial query stored
