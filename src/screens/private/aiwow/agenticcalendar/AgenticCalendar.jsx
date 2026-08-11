@@ -151,8 +151,36 @@ const AgenticCalendar = () => {
 
   const allOccasions = [...DEFAULT_OCCASIONS, ...customOccasions];
 
+  // Drop the lock and the result it belongs to. Same reset the "Modify
+  // Selections" button performs.
+  const unlockSelections = () => {
+    setLocked(false);
+    setAnalysis(null);
+    setRawApiResult(null);
+    setExpandedOccasion(null);
+    dispatch(clearMuhuratCalendarResult());
+  };
+
+  // `locked` is a *mode* (a result is on screen), not an in-flight state, so
+  // the inputs must stay tappable. Arriving from the home page auto-submits and
+  // therefore locks immediately, which left every chip inert with nothing but
+  // a relabelled button to hint that "Modify Selections" had to be pressed
+  // first. A tap on a frozen chip is an unambiguous request to change the
+  // selection, so unlock and apply it.
+  // Returns false when the caller must not proceed.
+  const beginEdit = () => {
+    if (!locked) return true;
+    if (isLoading) {
+      Toast.error('Still finding your timings — one moment.');
+      return false;
+    }
+    unlockSelections();
+    Toast.success('Selections unlocked. Adjust them, then tap Get Timing Recommendations.');
+    return true;
+  };
+
   const toggleOccasion = (occasion) => {
-    if (locked) return;
+    if (!beginEdit()) return;
     clearNavState();
     setSelectedOccasions((prev) =>
       prev.includes(occasion) ? prev.filter((o) => o !== occasion) : [...prev, occasion]
@@ -160,7 +188,7 @@ const AgenticCalendar = () => {
   };
 
   const handleRemoveChip = (occasion) => {
-    if (locked) return;
+    if (!beginEdit()) return;
     clearNavState();
     setSelectedOccasions((prev) => prev.filter((o) => o !== occasion));
     if (customOccasions.includes(occasion)) {
@@ -254,10 +282,16 @@ const AgenticCalendar = () => {
           resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
       } else {
+        // Unlock: staying locked with no result leaves the form frozen around
+        // a selection that produced nothing, so the only way forward is a
+        // reload.
+        setLocked(false);
         Toast.error(result.error || 'Failed to analyze events');
       }
     } catch (err) {
       console.error(err);
+      setLocked(false);
+      Toast.error('Could not fetch your timings. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -397,8 +431,9 @@ const AgenticCalendar = () => {
                   className={`${styles.chip} ${isSelected ? styles.chipSelected : ''} ${locked ? styles.chipDisabled : ''}`}
                   // A second tap has to deselect. `!isSelected && ...` meant
                   // tapping an already-selected chip did nothing.
-                  onClick={() => !locked && toggleOccasion(occasion)}
-                  disabled={locked}
+                  // No `disabled` while locked either — toggleOccasion unlocks.
+                  onClick={() => toggleOccasion(occasion)}
+                  aria-disabled={locked}
                   aria-pressed={isSelected}
                 >
                   {occasion}
@@ -424,7 +459,11 @@ const AgenticCalendar = () => {
                 </button>
               );
             })}
-            <button className={`${styles.addCustomChip} ${locked ? styles.chipDisabled : ''}`} onClick={() => { if (!locked) setShowCustomModal(true); }} disabled={locked}>
+            <button
+              className={`${styles.addCustomChip} ${locked ? styles.chipDisabled : ''}`}
+              onClick={() => { if (!beginEdit()) return; setShowCustomModal(true); }}
+              aria-disabled={locked}
+            >
               + Add Custom
             </button>
           </div>
@@ -436,16 +475,17 @@ const AgenticCalendar = () => {
               <button
                 key={p}
                 className={`${styles.periodChip} ${selectedPeriod === p ? styles.periodActive : ''} ${locked ? styles.periodDisabled : ''}`}
-                onClick={() => { if (locked) return; clearNavState(); setSelectedPeriod(p); setCustomFromDate(null); setCustomToDate(null); }}
-                disabled={locked}
+                onClick={() => { if (!beginEdit()) return; clearNavState(); setSelectedPeriod(p); setCustomFromDate(null); setCustomToDate(null); }}
+                aria-disabled={locked}
+                aria-pressed={selectedPeriod === p}
               >
                 {p}
               </button>
             ))}
             <button
               className={`${styles.dateChip} ${customFromDate ? styles.periodActive : ''} ${locked ? styles.periodDisabled : ''}`}
-              onClick={() => { if (locked) return; setShowDatePicker(true); }}
-              disabled={locked}
+              onClick={() => { if (!beginEdit()) return; setShowDatePicker(true); }}
+              aria-disabled={locked}
             >
               <FiCalendar size={14} />
               {customFromDate
@@ -474,6 +514,18 @@ const AgenticCalendar = () => {
               }}
               disabled={locked}
             />
+            {/* A disabled <input> swallows the tap and does not even bubble a
+                click, so while locked an overlay catches it and unlocks the
+                form. Cheaper and safer than making the shared LocationSearch
+                aware of this screen's lock. */}
+            {locked && (
+              <button
+                type="button"
+                className={styles.locationUnlockOverlay}
+                aria-label="Change location"
+                onClick={() => beginEdit()}
+              />
+            )}
           </div>
 
           {/* Get Timing Button
@@ -487,11 +539,7 @@ const AgenticCalendar = () => {
             disabled={isLoading}
             onClick={() => {
               if (locked) {
-                setLocked(false);
-                setAnalysis(null);
-                setRawApiResult(null);
-                setExpandedOccasion(null);
-                dispatch(clearMuhuratCalendarResult());
+                unlockSelections();
                 return;
               }
               if (selectedOccasions.length === 0) {

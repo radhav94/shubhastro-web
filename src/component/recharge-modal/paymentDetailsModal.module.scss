@@ -200,19 +200,24 @@
   justify-content: center;
   gap: 8px;
 
-  &:hover:not(:disabled) {
+  &:hover:not(:disabled):not([aria-disabled='true']) {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
   }
 
-  &:active:not(:disabled) { transform: translateY(0); }
+  &:active:not(:disabled):not([aria-disabled='true']) { transform: translateY(0); }
 
-  &:disabled {
+  /* `:disabled` still applies while a payment is genuinely in flight.
+     `aria-disabled` covers "gateway not ready", which stays tappable so the
+     tap can explain itself. */
+  &:disabled,
+  &[aria-disabled='true'] {
     background: #e5e7eb;
     color: #9ca3af;
-    cursor: not-allowed;
     transform: none;
   }
+
+  &:disabled { cursor: not-allowed; }
 }
 
 .spinner {
