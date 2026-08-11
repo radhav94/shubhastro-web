@@ -12,8 +12,15 @@ import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscription/subscriptionApi";
-import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
-import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
+// Both bubbles are `position: fixed` launchers, so they are always in the
+// viewport and always compete to be the LCP element — Lighthouse reported the
+// Pandit AI bubble as LCP. Their SCSS also pulls ~108KB of decorative
+// background SVG (AiPanditBg.svg + wire-bg.svg) into the critical path, and a
+// CSS background can never be discovered from the initial HTML nor given
+// fetchpriority. Loading them after first paint takes them out of the LCP race
+// entirely so real content wins it.
+const PanditAIBubble = lazy(() => import("../../../component/panditAI/PanditAIBubble"));
+const PanditAIVoiceBubble = lazy(() => import("../../../component/panditAI/PanditAIVoiceBubble"));
 import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 
@@ -409,6 +416,20 @@ const HomeV2 = () => {
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const pendingWowPathRef = useRef(null);
 
+  // Mount the floating Pandit AI launchers only once the browser is idle, so
+  // they are absent from the DOM while the LCP candidate is being decided.
+  const [showFloatingBubbles, setShowFloatingBubbles] = useState(false);
+  useEffect(() => {
+    const reveal = () => setShowFloatingBubbles(true);
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(reveal, { timeout: 2500 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    // Safari has no requestIdleCallback.
+    const timer = setTimeout(reveal, 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
   // ─── Data Fetching ────────────────────────────────────────────────────────
   const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery();
   const homeList = newHomeData?.data?.list;
@@ -673,8 +694,12 @@ const HomeV2 = () => {
         astrologer={hookSelectedAstrologer}
         connectionType={pendingConnectionType || "chat"}
       />
-      <PanditAIBubble />
-      <PanditAIVoiceBubble />
+      {showFloatingBubbles && (
+        <Suspense fallback={null}>
+          <PanditAIBubble />
+          <PanditAIVoiceBubble />
+        </Suspense>
+      )}
       <HomeIntroPopup />
     </>
   );
