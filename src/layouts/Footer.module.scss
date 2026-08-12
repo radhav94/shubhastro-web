@@ -290,6 +290,23 @@ $font-primary:     "Poppins", sans-serif;
           color: $color-link-hover;
           padding-left: 4px;
         }
+
+        /*
+          The entry for the page you're already on. Nested here deliberately:
+          a bare `.v2_activeLink` (0,1,0) would lose to `.v2_column ul li a`
+          (0,1,3), so the colour would never apply. Also drops the hover shift,
+          since there is nowhere to go.
+        */
+        &.v2_activeLink {
+          color: $color-accent;
+          font-weight: 600;
+          cursor: default;
+
+          &:hover {
+            color: $color-accent;
+            padding-left: 0;
+          }
+        }
       }
     }
   }

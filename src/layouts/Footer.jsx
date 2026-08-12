@@ -6,7 +6,7 @@ import {
   IoLogoInstagram,
 } from "react-icons/io5";
 import { FaYoutube, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useState, useCallback } from "react";
 import { isShubhMallEnabled } from "../utils/featureConfig";
 import { Toast } from "../component";
@@ -72,11 +72,29 @@ const Footer = () => {
     setOpenSection((prev) => (prev === section ? null : section));
   }, []);
 
+  /*
+    NavLink rather than Link so the entry for the page you are already on is
+    marked. The header already does this (TopHeader uses NavLink + styles.active
+    throughout) but the footer did not, and the footer is where the Blog entry
+    lives — the header's Blog NavLink is commented out. With no "you are here"
+    signal, visitors already on /blog clicked "Blog" again, which navigates to
+    the same URL and changes nothing visible: a dead click.
+
+    `end` so a parent path isn't marked active for its children — /blog should
+    not stay highlighted while reading /blog/<slug>.
+  */
   const renderLinks = (links) => (
     <ul>
       {links.map((link, index) => (
         <li key={`${link.href}-${index}`}>
-          <Link to={link.href} state={link.state}>{link.text}</Link>
+          <NavLink
+            to={link.href}
+            state={link.state}
+            end
+            className={({ isActive }) => (isActive ? styles.v2_activeLink : undefined)}
+          >
+            {link.text}
+          </NavLink>
         </li>
       ))}
     </ul>

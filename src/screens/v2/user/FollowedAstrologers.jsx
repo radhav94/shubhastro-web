@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, Search, ArrowUpDown, UserPlus } from "lucide-react";
 import dayjs from "dayjs";
 import { useLazyGetFollowedAstrologersQuery } from "../../../redux/api/astrologer/followedAstrologersApi";
@@ -8,7 +8,10 @@ import {
   useUnfollowAstrologerByIdMutation,
 } from "../../../redux/api/astrologer/followAstrologerApi";
 import styles from "./FollowedAstrologers.module.scss";
-import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
+import {
+  getAstrologerDisplayName,
+  getAstrologerProfilePath,
+} from "../../../utils/helper/string.utils";
 
 const SORT_OPTIONS = [
   { label: "Default", value: "" },
@@ -226,34 +229,50 @@ const FollowedAstrologers = () => {
 
               return (
                 <div key={id} className={styles.card}>
-                  {image ? (
-                    <img
-                      src={image}
-                      alt={name}
-                      className={styles.avatar}
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                        if (e.target.nextSibling) {
-                          e.target.nextSibling.style.display = "flex";
-                        }
-                      }}
-                    />
-                  ) : null}
-                  <div
-                    className={styles.avatarInitials}
-                    style={image ? { display: "none" } : {}}
+                  {/*
+                    The avatar and name open the astrologer, as they do in every
+                    other astrologer list in the app (NewAstrologerCard,
+                    TopAstrologerCard, SessionCard all wrap in this same Link).
+                    Previously the only interactive element in the row was the
+                    Follow button, so tapping the astrologer you follow did
+                    nothing at all — a dead click on the most obvious target in
+                    the list. The Link deliberately wraps only the avatar and
+                    text so it can't swallow taps meant for Follow/Unfollow.
+                  */}
+                  <Link
+                    to={getAstrologerProfilePath(astro, id)}
+                    className={styles.cardLink}
+                    aria-label={`View ${name}'s profile`}
                   >
-                    {getInitials(name)}
-                  </div>
+                    {image ? (
+                      <img
+                        src={image}
+                        alt={name}
+                        className={styles.avatar}
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                          if (e.target.nextSibling) {
+                            e.target.nextSibling.style.display = "flex";
+                          }
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className={styles.avatarInitials}
+                      style={image ? { display: "none" } : {}}
+                    >
+                      {getInitials(name)}
+                    </div>
 
-                  <div className={styles.info}>
-                    <p className={styles.name}>{name}</p>
-                    {since && (
-                      <p className={styles.since}>
-                        Following since {dayjs(since).format("DD MMM, YYYY")}
-                      </p>
-                    )}
-                  </div>
+                    <div className={styles.info}>
+                      <p className={styles.name}>{name}</p>
+                      {since && (
+                        <p className={styles.since}>
+                          Following since {dayjs(since).format("DD MMM, YYYY")}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
 
                   {isFollowing ? (
                     <button
