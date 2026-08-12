@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import styles from "./BlogHeader.module.scss";
 import { BlogCard } from "../../../../component";
 import Pagination from "../../../../component/pagination/Pagination";
@@ -7,8 +6,23 @@ import { useGetBlogQuery, useGetBlogCategoriesQuery } from "../../../../services
 import { PATH } from "../../../../utils/routes/Paths";
 
 const BlogHeader = () => {
-  const [page, setPage] = useState(1);
-  const [activeCategory, setActiveCategory] = useState(""); // "" = All Blogs
+  // Category and page live in the URL, not component state.
+  //
+  // As local state they caused two problems. The "Blog" nav link points at
+  // /blog, so tapping it while already on /blog re-navigated without remounting
+  // this component — the filter and page survived and nothing visibly changed,
+  // which is a dead click on a link that looks like the way back to the full
+  // list. And because a real route change *does* remount, reading an article and
+  // pressing Back silently threw the reader's category and page away.
+  //
+  // In the URL, both are fixed at once: /blog with no query genuinely means
+  // "All Blogs, page 1", and back/forward restore whatever the reader had.
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeCategory = searchParams.get("category") || ""; // "" = All Blogs
+
+  const pageParam = Number(searchParams.get("page"));
+  const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
 
   const { data: categoriesData } = useGetBlogCategoriesQuery();
   const { data, isLoading } = useGetBlogQuery({ page, limit: 12, category: activeCategory });
@@ -25,14 +39,24 @@ const BlogHeader = () => {
   const rangeStart = total === 0 ? 0 : (currentPage - 1) * limit + 1;
   const rangeEnd = Math.min(currentPage * limit, total);
 
+  // Defaults are represented by the absence of a param rather than
+  // `?category=&page=1`, so the canonical "everything" view stays a clean /blog.
   const handleCategoryChange = (slug) => {
-    setActiveCategory(slug);
-    setPage(1);
+    const next = new URLSearchParams(searchParams);
+    if (slug) next.set("category", slug);
+    else next.delete("category");
+    next.delete("page"); // a different filter starts from the first page
+    setSearchParams(next);
   };
 
   const handlePageChange = (newPage) => {
-    setPage(newPage);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const next = new URLSearchParams(searchParams);
+    if (newPage > 1) next.set("page", String(newPage));
+    else next.delete("page");
+    setSearchParams(next);
+    // Scrolling is deliberately not done here: this is a route change, so
+    // ScrollToTop already takes the page to the top. Doing it here too meant two
+    // scroll mechanisms competing for the same frame.
   };
 
   return (
