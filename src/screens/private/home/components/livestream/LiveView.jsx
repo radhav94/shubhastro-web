@@ -94,7 +94,10 @@ const LiveView = (props) => {
     getAstrologerLiveList()
       .then((res) => {
         const all = res.data?.data || [];
-        setLiveListData(all.filter((l) => l.astrologer && l.astrologer.firstName));
+        // Keep any live entry that has a resolvable name — previously this
+        // required `firstName`, which dropped astrologers that only have a
+        // userName.
+        setLiveListData(all.filter((l) => l.astrologer && getAstrologerDisplayName(l.astrologer)));
       })
       .catch(() => {});
   }, [props.liveListRefreshKey]);
@@ -659,7 +662,14 @@ const LiveView = (props) => {
     // Add to waiting queue
     addPendingConnection({
       id: `${astrologerId}-audio-${Date.now()}`,
-      astrologer: { ...astrologer, _id: astrologerId, firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "" },
+      // Carry userName through so the waiting-queue popup can show the
+      // username (its display helper is userName-first).
+      astrologer: {
+        ...astrologer,
+        _id: astrologerId,
+        userName: astrologer?.userName || astrologer?.astrologerName || astrologer?.hostName || "",
+        firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "",
+      },
       type: "audio",
       roomId: null,
       waitingTime: 5,
@@ -759,7 +769,13 @@ const LiveView = (props) => {
     // Add to waiting queue
     addPendingConnection({
       id: `${astrologerId}-${type}-${Date.now()}`,
-      astrologer: { ...astrologer, _id: astrologerId, firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "" },
+      // Carry userName through so the waiting-queue popup shows the username.
+      astrologer: {
+        ...astrologer,
+        _id: astrologerId,
+        userName: astrologer?.userName || astrologer?.astrologerName || astrologer?.hostName || "",
+        firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "",
+      },
       type,
       roomId: null,
       waitingTime: 5,
@@ -1222,7 +1238,9 @@ const LiveView = (props) => {
               />
               <div className="host-text">
                 <div className="host-name host-name-truncate">
-                  {astrologer?.astrologerName || "Astrologer"}
+                  {/* Prefer the full astrologer record (it carries userName);
+                      fall back to the resolved name from the live list. */}
+                  {getAstrologerDisplayName(fullAstro) || astrologer?.astrologerName || "Astrologer"}
                 </div>
                 <div className="host-duration">
                   {isCallForCurrentAstrologer

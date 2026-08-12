@@ -5,6 +5,7 @@ import InteractiveLiveStreaming from "./InteractiveLiveStreaming";
 import { LiveListProvider } from "../../../../../context/LiveListContext";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { restoreViewerSession, clearViewerSession } from "../../../../../utils/liveSessionStorage";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 
 const LivePlayerPage = () => {
   const { channelId } = useParams();
@@ -107,9 +108,11 @@ const LivePlayerPage = () => {
     <LiveListProvider
       lives={lives.map((l) => ({
         channel: l.channel,
-        astrologerName: `${l.astrologer?.firstName || ""} ${
-          l.astrologer?.lastName || ""
-        }`.trim(),
+        // userName-first display name (helper falls back to firstName + lastName).
+        astrologerName: getAstrologerDisplayName(l.astrologer),
+        // Keep the raw userName too so downstream consumers that rebuild an
+        // astrologer object don't lose it.
+        userName: l.astrologer?.userName || "",
         astrologerId: l.astrologer?._id,
         rating: l.astrologer?.rating,
         expertise: l.astrologer?.expertise,
