@@ -260,6 +260,19 @@
       font-family: 'Poppins', 'Poppins Fallback', sans-serif;
     }
 
+    /*
+      This rule is the background for every route. Without this override, only
+      HomeV2 got the mobile artwork — its `body.home-v2-page` selector outranks
+      the bare `body` above on specificity and carries its own media query — so
+      every other page fell through to the desktop image on phones.
+      Same 767px breakpoint used throughout the SCSS.
+    */
+    @media (max-width: 767px) {
+      body {
+        background-image: url('https://assets.shubhastro.ai/main-body-bg-new-mobile.png');
+      }
+    }
+
     /* Astrologer card — global background */
     /* [class*="astrologerCard"],
     [class*="detailsCard"],

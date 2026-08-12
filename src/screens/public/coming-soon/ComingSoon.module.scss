@@ -12,6 +12,10 @@
   font-family: "Poppins", sans-serif;
   position: relative;
 
+  @media (max-width: 767px) {
+    background-image: url("https://assets.shubhastro.ai/main-body-bg-new-mobile.png");
+  }
+
   &::before { display: none; }
   &::after  { display: none; }
 }

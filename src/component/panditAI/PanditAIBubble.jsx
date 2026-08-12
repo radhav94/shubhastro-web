@@ -22,7 +22,11 @@ import useSarvamSTT from "../../screens/private/panditAIVoice/useSarvamSTT";
 import { transliterateToLatin } from "./translateText";
 import AIRechargeBanner from "./AIRechargeBanner";
 import AISessionStatus from "./AISessionStatus";
-import panditAiIcon from "../../assets/images/AiPandit.png";
+
+// Served from the CDN rather than bundled, so it isn't emitted into /assets and
+// isn't re-downloaded per deploy hash. The CDN copy is also the optimised one
+// (4,275 bytes vs 17,728 for the local file).
+const panditAiIcon = "https://assets.shubhastro.ai/images/AiPandit.png";
 
 // Memoized message bubble to avoid re-rendering the entire list on new messages
 const MessageBubble = memo(({ msg }) => {
