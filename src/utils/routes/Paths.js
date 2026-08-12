@@ -1088,6 +1088,17 @@ export const PATH = {
       element: ChatWindow,
       footer: false,
     },
+    // Canonical astrologer profile URL: /astrologer/<username-slug>/<id>
+    // The username is a human-readable slug for SEO/sharing; the id is what the
+    // screen actually uses to fetch the astrologer.
+    PROFILE_ASTROLOGER_WITH_NAME: {
+      path: "/astrologer/:username/:id",
+      element: AstrologerProfile,
+      header: true,
+      footer: true,
+    },
+    // Legacy URL kept so old/shared links (and any astrologer without a
+    // username) still resolve.
     PROFILE_ASTROLOGER: {
       path: "/astrologer/:id",
       element: AstrologerProfile,

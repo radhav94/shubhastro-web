@@ -11,7 +11,7 @@ import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySe
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 import { getAstrologerAvailability } from "../../../../utils/helper/astrologerAvailability";
 import toast from "../../../toast";
-import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
+import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
 
 const NewAstrologerDetailsCard = ({
   astrologer,
@@ -65,7 +65,7 @@ const NewAstrologerDetailsCard = ({
         an anonymous link to assistive tech and to tap heuristics.
       */}
       <Link
-        to={`/astrologer/${astrologer._id}`}
+        to={getAstrologerProfilePath(astrologer)}
         className={styles.detailsImageLink}
         aria-label={`View ${getAstrologerDisplayName(astrologer)}'s profile`}
       ></Link>
@@ -79,7 +79,7 @@ const NewAstrologerDetailsCard = ({
         </div>
 
       <div className={styles.detailsInfo}>
-        <Link to={`/astrologer/${astrologer?._id}`} className={styles.detailsNameLink}>
+        <Link to={getAstrologerProfilePath(astrologer)} className={styles.detailsNameLink}>
           <h3 className={styles.detailsName}>
             {getAstrologerDisplayName(astrologer)}
           </h3>

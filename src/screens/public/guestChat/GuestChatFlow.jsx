@@ -23,7 +23,10 @@ import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrolo
 import { getAstrologerDefaultImage } from "../../../utils/appImages";
 import { getToken } from "../../../utils/token";
 import { capitalizeWords } from "../../../utils/capitalize";
-import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
+import {
+  getAstrologerDisplayName,
+  getAstrologerProfilePath,
+} from "../../../utils/helper/string.utils";
 import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 import {
@@ -139,7 +142,15 @@ const GuestChatFlow = () => {
   // once registered mid-flow). Send them out and replace history.
   useEffect(() => {
     if (getToken()) {
-      navigate(astrologerId ? `/astrologer/${astrologerId}` : "/astrologers", { replace: true });
+      navigate(
+        astrologerId
+          ? getAstrologerProfilePath(
+              astrologer || astrologerRef.current || astrologerId,
+              astrologerId
+            )
+          : "/astrologers",
+        { replace: true }
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -608,7 +619,15 @@ const GuestChatFlow = () => {
       sessionStorage.removeItem(GUEST_AUTO_ACCEPT_KEY);
       if (roomIdRef.current) removePendingConnection(roomIdRef.current);
       Toast.error("Astrologer is currently unavailable. Please try again.");
-      navigate(astrologerId ? `/astrologer/${astrologerId}` : "/astrologers", { replace: true });
+      navigate(
+        astrologerId
+          ? getAstrologerProfilePath(
+              astrologerRef.current || astrologerId,
+              astrologerId
+            )
+          : "/astrologers",
+        { replace: true }
+      );
     };
 
     const handleError = (err) => {
@@ -645,7 +664,15 @@ const GuestChatFlow = () => {
       confirmSourceRef.current = "popstate";
       leaveActionRef.current = () => {
         cancelChatRequest();
-        navigate(astrologerId ? `/astrologer/${astrologerId}` : "/astrologers", { replace: true });
+        navigate(
+          astrologerId
+            ? getAstrologerProfilePath(
+                astrologerRef.current || astrologerId,
+                astrologerId
+              )
+            : "/astrologers",
+          { replace: true }
+        );
       };
       setConfirmLeave(true);
     };

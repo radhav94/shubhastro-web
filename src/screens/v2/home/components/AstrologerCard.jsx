@@ -2,13 +2,13 @@ import { BookOpen } from "lucide-react";
 import styles from "../Home.module.scss";
 import { Link } from "react-router-dom";
 import { AppIcons, getAstrologerDefaultImage } from "../../../../utils/appImages";
-import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
+import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
 
 const AstrologerCard = ({ astrologer, onConnect }) => {
   
   return (
     <div className={styles.astrologerCard}>
-      <Link to={`/astrologer/${astrologer?._id}`} className={styles.cardLink}>
+      <Link to={getAstrologerProfilePath(astrologer)} className={styles.cardLink}>
         <div className={styles.astrologerImageWrapper}>
           <img
             src={astrologer.profileImgUrl || getAstrologerDefaultImage(astrologer.gender)}
