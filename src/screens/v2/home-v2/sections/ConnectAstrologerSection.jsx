@@ -60,7 +60,20 @@ const ConnectAstrologerSection = memo(({ sectionData, styles }) => {
               <img key={i} src={av} alt="" className={styles.ctaAvatar} loading="lazy" />
             ))}
             <span className={styles.ctaAvatarCount}>50+</span> */}
-            <img src={profilsImg} alt="" className={styles.ctaAvatar} loading="lazy" />
+            {/* Intrinsic size of profilsImg.png (359x103). The CSS sizes this
+                with `height: 65px; width: auto`, so without these attributes
+                the browser has no aspect ratio to work from and reserves zero
+                width until the bytes arrive — then the row snaps to ~227px
+                wide and shoves the "50+ ... Online" label sideways. With them
+                the aspect ratio is known up front and the space is reserved. */}
+            <img
+              src={profilsImg}
+              alt=""
+              className={styles.ctaAvatar}
+              width="359"
+              height="103"
+              loading="lazy"
+            />
           </div>
           <span className={styles.ctaOnline}>
             <span className={styles.ctaOnlineDot} />

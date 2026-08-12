@@ -740,6 +740,23 @@ const VideoCalling = ({ callData }) => {
   /* ================= SOCKET ================= */
   useEffect(() => {
     const handleCallEnded = (data) => {
+      // `call:ended` is a socket-wide event, but this component only owns one
+      // room. Without this guard an event belonging to a *different* room — a
+      // previous session, or the other leg of a chat→video upgrade — tears down
+      // the live call and shows "Video session ended." on a call that is fine.
+      //
+      // Deliberately backwards compatible: only ignore when the payload names a
+      // different room. If the server omits `roomId`, behaviour is unchanged, so
+      // this cannot swallow a legitimate end event.
+      if (data?.roomId && socketRoomId && data.roomId !== socketRoomId) {
+        console.log(
+          "[VideoCall] Ignoring call:ended for another room —",
+          data.roomId,
+          "(ours:", socketRoomId, ")"
+        );
+        return;
+      }
+
       if (data?.endedBy === "SYSTEM") {
         if (isDowngradingToAudio.current || cleanupRef.current || endCallRef.current) {
           return;

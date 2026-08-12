@@ -262,6 +262,12 @@
 
   &:focus-within { border-color: #f75801; }
 
+  /*
+   * Fixed +91 prefix. Rendered as a <button> only so a tap can explain that
+   * other country codes aren't supported — it deliberately carries no chevron,
+   * because the previous version looked like a picker and produced rage clicks
+   * from non-Indian users. Styled to read as a static prefix, not a control.
+   */
   .flagBox {
     display: flex;
     align-items: center;
@@ -271,8 +277,14 @@
     white-space: nowrap;
     color: #2b1d12;
     font-size: 14px;
+    border: none;
     border-right: 1px solid #ece3d8;
     background: #fbf6f0;
+    font-family: inherit;
+    cursor: default;
+    appearance: none;
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .flag { font-size: 16px; }

@@ -7,6 +7,7 @@ import PaymentSuccessModal from '../UI/modal/WelcomeBonusModal/PaymentSuccessMod
 import { useRechargePlans } from './useRechargePlans';
 import { useWalletBalance } from '../../screens/private/wallet/useWalletBalance';
 import { AppIcons } from '../../utils/appImages';
+import Toast from '../toast';
 import styles from './rechargeModal.module.scss';
 
 /**
@@ -27,6 +28,7 @@ const RechargeModal = ({
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [successAmount, setSuccessAmount] = useState(null);
   const isMountedRef = useRef(true);
+  const plansContainerRef = useRef(null);
 
   const { plans, isLoading, error, refetch } = useRechargePlans(!isOpen);
   const { balance, isFetching: isBalanceFetching, refreshWallet } = useWalletBalance();
@@ -66,7 +68,14 @@ const RechargeModal = ({
 
   /** "Add Money" button → open second popup */
   const handleAddMoney = useCallback(() => {
-    if (!selectedPlan) return;
+    // Not gated by `disabled`: a disabled button fires no click, so tapping it
+    // with no plan chosen was silent. Say what is missing and point at it —
+    // the plans grid can be scrolled out of view behind the footer.
+    if (!selectedPlan) {
+      Toast.error('Choose an amount above to continue');
+      plansContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
     setShowPaymentDetails(true);
   }, [selectedPlan]);
 
@@ -203,7 +212,7 @@ const RechargeModal = ({
 
               {/* Plans Grid */}
               {!isLoading && !error && plans.length > 0 && (
-                <div className={styles.plansContainer} role="radiogroup" aria-label="Available recharge plans">
+                <div className={styles.plansContainer} ref={plansContainerRef} role="radiogroup" aria-label="Available recharge plans">
                   {plans.map((plan) => (
                     <PlanCard
                       key={plan._id || plan.plan_id}
@@ -224,7 +233,7 @@ const RechargeModal = ({
                   type="button"
                   className={styles.payButton}
                   onClick={handleAddMoney}
-                  disabled={!selectedPlan}
+                  aria-disabled={!selectedPlan}
                   aria-label={selectedPlan ? 'Proceed to payment details' : 'Select a plan to continue'}
                 >
                   {selectedPlan ? (

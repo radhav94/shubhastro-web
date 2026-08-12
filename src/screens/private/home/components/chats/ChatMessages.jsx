@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./ChatWindow.module.scss";
-import { PrimaryText } from "../../../../../component";
+import { PrimaryText, Toast } from "../../../../../component";
 import AudioMessageWrapper from "./AudioMessageWrapper";
 import { GrReactjs } from "react-icons/gr";
 import { IoCheckmarkDone } from "react-icons/io5";
@@ -186,13 +186,22 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
       // (some messages store a bare id, others a full URL).
       const kundliLink = buildKundliLink(msg.kundliId, msg.message ?? msg.text);
       return (
-        <div
-          onClick={() => kundliLink && setIframeSrc(kundliLink)}
+        // A <button>, not a div: this is an action. And when the link can't be
+        // resolved the tap used to do nothing at all — say so instead.
+        <button
+          type="button"
+          onClick={() => {
+            if (!kundliLink) {
+              Toast.error("This kundli is no longer available to view.");
+              return;
+            }
+            setIframeSrc(kundliLink);
+          }}
           className={styles.kundliLink}
         >
           <GrReactjs />
           {msg.kundliName ? `${msg.kundliName}'s Kundli` : "View Kundli"}
-        </div>
+        </button>
       );
     }
 

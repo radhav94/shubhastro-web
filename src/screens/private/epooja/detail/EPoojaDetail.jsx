@@ -687,12 +687,36 @@ const EPoojaDetail = () => {
                       {dim.values.map((val) => {
                         const isSelected = selectedAttrs[dim.name] === val;
                         const isAvailable = isTypeDim ? true : available.has(val);
+                        // Availability is relative to the *other* attributes
+                        // already picked, so name them — otherwise a greyed
+                        // option looks permanently out of stock.
+                        const blockingSelections = attrDimensions
+                          .filter((d) => d.name !== dim.name && selectedAttrs[d.name])
+                          .map(
+                            (d) =>
+                              `${formatAttrValue(d.name)} “${formatAttrValue(selectedAttrs[d.name])}”`
+                          );
                         return (
+                          // Stays tappable (no `disabled` attribute) so an
+                          // unavailable option can explain itself. A disabled
+                          // button fires no click at all, and there is no
+                          // hover tooltip on touch.
                           <button
                             key={val}
+                            type="button"
                             className={`${styles.attrBtn} ${isSelected ? styles.attrBtnActive : ""} ${!isAvailable ? styles.attrBtnDisabled : ""}`}
-                            onClick={() => isAvailable && handleAttrSelect(dim.name, val)}
-                            disabled={!isAvailable}
+                            aria-disabled={!isAvailable}
+                            onClick={() => {
+                              if (!isAvailable) {
+                                Toast.error(
+                                  blockingSelections.length
+                                    ? `“${formatAttrValue(val)}” isn't available with ${blockingSelections.join(" and ")}. Change that first.`
+                                    : `“${formatAttrValue(val)}” is out of stock right now.`
+                                );
+                                return;
+                              }
+                              handleAttrSelect(dim.name, val);
+                            }}
                           >
                             {formatAttrValue(val)}
                           </button>

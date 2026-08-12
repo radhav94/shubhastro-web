@@ -7,7 +7,6 @@ import {
   IoCalendarOutline,
   IoTimeOutline,
   IoLocationOutline,
-  IoChevronDown,
   IoSparkles,
   IoShieldCheckmarkOutline,
 } from "react-icons/io5";
@@ -717,11 +716,20 @@ const GuestChatFlow = () => {
           Mobile Number <span className={styles.req}>*</span>
         </label>
         <div className={styles.mobileWrap}>
-          <span className={styles.flagBox}>
+          {/*
+            Fixed +91 — validation is Indian-format only and the backend prefixes
+            "91". A chevron here promised a country picker that does not exist,
+            which non-Indian users tapped repeatedly. Explain on tap instead.
+          */}
+          <button
+            type="button"
+            className={styles.flagBox}
+            onClick={() => Toast.info("We currently support Indian (+91) mobile numbers only.")}
+            title="Indian (+91) numbers only"
+          >
             <span className={styles.flag}>🇮🇳</span>
             +91
-            <IoChevronDown size={12} />
-          </span>
+          </button>
           <input
             className={styles.input}
             type="tel"

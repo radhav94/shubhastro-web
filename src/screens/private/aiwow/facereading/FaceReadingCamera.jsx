@@ -33,6 +33,30 @@ const FaceReadingCamera = () => {
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
   const [isFrontCamera, setIsFrontCamera] = useState(true);
+  // Show the flip button only when the device actually has more than one
+  // camera — same approach as PalmistryCamera. It used to render
+  // unconditionally, but the constraint is `facingMode: { ideal }`, a
+  // preference rather than a requirement, so on a desktop with one webcam
+  // "switch" tore the stream down and re-acquired the very same device: the
+  // feed blinked and came back identical, and face detection reset in the
+  // meantime so the shutter dropped back to "not ready" too. A control that
+  // cannot change anything, which is what repeated clicking looks like.
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
+
+  const detectCameras = async () => {
+    try {
+      if (!navigator.mediaDevices?.enumerateDevices) return;
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const cams = devices.filter((d) => d.kind === 'videoinput');
+      setHasMultipleCameras(cams.length > 1);
+    } catch {
+      /* ignore — leave flip hidden if we can't detect */
+    }
+  };
+
+  useEffect(() => {
+    detectCameras();
+  }, []);
   const [videoActive, setVideoActive] = useState(true);
   const [videoReady, setVideoReady] = useState(false); // ⭐ Track video ready state
 
@@ -158,6 +182,11 @@ const FaceReadingCamera = () => {
         const videoTrack = mediaStream.getVideoTracks()[0];
         const trackFacing = videoTrack?.getSettings?.()?.facingMode;
         setIsFrontCamera(trackFacing !== 'environment');
+
+        // Re-check now that permission has been granted: before the user
+        // allows camera access, browsers blank or collapse the device list, so
+        // the count taken on mount can be wrong.
+        detectCameras();
 
         const tryPlay = () => {
           const p = videoRef.current?.play();
@@ -422,8 +451,10 @@ const FaceReadingCamera = () => {
           </svg>
         </button>
         
-        {!capturedImage && (
-          <button className={styles.switchBtn} onClick={switchCamera}>
+        {/* Only offered when a second camera actually exists. With one webcam
+            this button could never change anything. */}
+        {!capturedImage && hasMultipleCameras && (
+          <button className={styles.switchBtn} onClick={switchCamera} aria-label="Switch camera">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M17 8L21 12M21 12L17 16M21 12H9M7 16L3 12M3 12L7 8M3 12H15" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

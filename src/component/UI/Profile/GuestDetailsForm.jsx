@@ -4,13 +4,13 @@ import {
   IoCalendarOutline,
   IoTimeOutline,
   IoLocationOutline,
-  IoChevronDown,
   IoSparkles,
   IoShieldCheckmarkOutline,
 } from "react-icons/io5";
 import { FaMars, FaVenus, FaTransgenderAlt } from "react-icons/fa";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
+import Toast from "../../toast";
 import styles from "./GuestDetailsForm.module.scss";
 
 /**
@@ -133,11 +133,19 @@ const GuestDetailsForm = ({
           Mobile Number <span className={styles.req}>*</span>
         </label>
         <div className={styles.mobileWrap}>
-          <span className={styles.flagBox}>
+          {/*
+            Fixed +91. No chevron: it advertised a country picker that does not
+            exist, which non-Indian users tapped repeatedly before giving up.
+          */}
+          <button
+            type="button"
+            className={styles.flagBox}
+            onClick={() => Toast.info("We currently support Indian (+91) mobile numbers only.")}
+            title="Indian (+91) numbers only"
+          >
             <span className={styles.flag}>🇮🇳</span>
             +91
-            <IoChevronDown size={12} />
-          </span>
+          </button>
           <input
             className={styles.input}
             type="tel"

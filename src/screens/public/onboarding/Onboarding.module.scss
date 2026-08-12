@@ -1996,13 +1996,26 @@
   }
 }
 
+/*
+ * Fixed +91 prefix. Rendered as a <button> only so a tap can be answered — it
+ * deliberately carries no chevron, because the previous version looked like a
+ * country picker and drew repeated clicks from non-Indian visitors. Styled to
+ * read as a static prefix rather than a control.
+ */
 .newCountryCode {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
+  border: none;
   border-right: 1px solid #e5e7eb;
   flex-shrink: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: default;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
 
   img {
     width: 24px;
