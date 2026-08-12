@@ -19,7 +19,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ErrorText, PrimaryText } from "../../../component";
 import toast from "../../../component/toast";
 import { unavailableReason } from "../../../utils/helper/astrologerAvailability";
-import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
+import {
+  getAstrologerDisplayName,
+  getAstrologerProfilePath,
+} from "../../../utils/helper/string.utils";
 import {
   useFollowAstrologerByIdMutation,
   useUnfollowAstrologerByIdMutation,
@@ -194,7 +197,9 @@ const AstrologerProfile = () => {
   const handleJoinLive = () => {
     if (liveRoomId) {
       trackEvent("live_stream_joined", { astrologer_id: id, stream_id: liveRoomId });
-      navigate(`/live/${liveRoomId}`, { state: { from: `/astrologer/${id}` } });
+      navigate(`/live/${liveRoomId}`, {
+        state: { from: getAstrologerProfilePath(data, id) },
+      });
     }
   };
 
@@ -1143,7 +1148,7 @@ const AstrologerProfile = () => {
                     initialStatus={astrologer?.astrologerLiveStatus}
                   />
                   <Link
-                    to={`/astrologer/${astrologer?._id}`}
+                    to={getAstrologerProfilePath(astrologer)}
                     className={styles.cardLink}
                   >
                     <div className={styles.astrologerImageWrapper}>

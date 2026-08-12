@@ -7,6 +7,7 @@ import { useChat } from "../../../context/ChatContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import { stopIncomingSound } from "../../../utils/incomingSound";
 import toast from "../../toast";
+import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
 import styles from "./StickyWaitingQueue.module.scss";
 
 /**
@@ -118,7 +119,7 @@ const StickyWaitingQueue = () => {
         liveRoomDetails: {
           roomId: conn.liveChannelId,
           hostId: conn.astrologer?._id,
-          hostName: conn.astrologer?.firstName || conn.astrologer?.astrologerName || "",
+          hostName: getAstrologerDisplayName(conn.astrologer) || conn.astrologer?.astrologerName || "",
           channel: conn.liveChannelId,
         },
       }),
@@ -175,7 +176,9 @@ const StickyWaitingQueue = () => {
       {expanded && (
         <div className={styles.list} ref={listRef}>
             {pendingConnections.map((conn) => {
-              const name = `${conn.astrologer?.firstName || conn.astrologer?.astrologerName || ""} ${conn.astrologer?.lastName || ""}`.trim() || "Astrologer";
+              // userName-first (falls back to firstName + lastName inside the helper),
+              // then the flattened astrologerName some payloads carry.
+              const name = getAstrologerDisplayName(conn.astrologer) || conn.astrologer?.astrologerName || "Astrologer";
               const status = conn.status || "waiting";
               const isAccepted = status === "astrologer_accepted";
               const isOnHold = status === "on_hold";

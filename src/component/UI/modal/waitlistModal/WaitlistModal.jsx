@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 import styles from "./WaitlistModal.module.scss";
 
 /**
@@ -104,7 +105,9 @@ const WaitlistModal = ({
         {/* Request list */}
         <div className={styles.list}>
           {pendingRequests.map((req) => {
-            const name = req.astrologer?.firstName || req.astrologer?.astrologerName || req.astrologer?.hostName || "Astrologer";
+            // userName-first (helper falls back to firstName + lastName), then the
+            // flattened names some live/socket payloads carry.
+            const name = getAstrologerDisplayName(req.astrologer) || req.astrologer?.astrologerName || req.astrologer?.hostName || "Astrologer";
             const initial = name.charAt(0).toUpperCase();
             const isAccepted = req.status === "astrologer_accepted";
             const isOnHold = req.status === "on_hold";

@@ -6,7 +6,7 @@ import { AppIcons, getAstrologerDefaultImage } from "../../../../utils/appImages
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 import toast from "../../../toast";
 import { unavailableReason } from "../../../../utils/helper/astrologerAvailability";
-import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
+import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
 
 const NewAstrologerCard = memo(({ 
   astrologer, 
@@ -112,7 +112,7 @@ const NewAstrologerCard = memo(({
             <span className={styles.ratingText}>{astrologer.rating ? Number(astrologer.rating).toFixed(1) : '0.0'}</span>
           </div>
 
-      <Link to={`/astrologer/${astrologer?._id}`} className={styles.cardLink}>
+      <Link to={getAstrologerProfilePath(astrologer)} className={styles.cardLink}>
         <div className={styles.astrologerImageWrapper}>
           {/* These photos are the single biggest payload on the homepage — the
               CDN serves the originals (896x902, 1433x1433 …) for a box that

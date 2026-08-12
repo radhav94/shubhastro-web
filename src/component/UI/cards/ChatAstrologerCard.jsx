@@ -3,7 +3,7 @@ import { FaStar } from "react-icons/fa";
 import { PiBookOpenTextLight } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
 import { getAstrologerDefaultImage } from "../../../utils/appImages";
-import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
+import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../utils/helper/string.utils";
 
 const ChatAstrologerCard = ({ data, onConnect }) => {
   const navigate = useNavigate();
@@ -57,7 +57,7 @@ const ChatAstrologerCard = ({ data, onConnect }) => {
           src={imageUrl}
           alt={`${data?.firstName} ${data?.lastName}`}
           onClick={() =>
-            navigate(`/astrologer/${data?._id}`)
+            navigate(getAstrologerProfilePath(data))
           }
           className={styles.astrologerImage}
           onError={(e) => {
@@ -74,7 +74,7 @@ const ChatAstrologerCard = ({ data, onConnect }) => {
         <h3
           className={styles.name}
           onClick={() =>
-            navigate(`/astrologer/${data?._id}`)
+            navigate(getAstrologerProfilePath(data))
           }
           style={{ cursor: "pointer" }}
         >

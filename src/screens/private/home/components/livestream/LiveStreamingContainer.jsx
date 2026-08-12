@@ -85,6 +85,10 @@ const LiveStreamingContainer = ({ client }) => {
         ...saved,
         astrologer: {
           _id: currentLive.astrologerId,
+          // Preserve the username so name rendering stays userName-first.
+          // `astrologerName` is already the resolved display name, so use it as
+          // the fallback rather than splitting it into first/last.
+          userName: currentLive.userName || currentLive.astrologerName || "",
           firstName: currentLive.astrologerName?.split(" ")[0] || "",
           lastName: currentLive.astrologerName?.split(" ").slice(1).join(" ") || "",
           rating: currentLive.rating,
@@ -159,8 +163,13 @@ const LiveStreamingContainer = ({ client }) => {
       if (wasWatchingThis) {
         // Show modal first, defer removeLive until modal closes/auto-dismisses
         // Use profileImage from socket event, fallback to currentLive's imageUrl
-        const resolvedImage = profileImage || liveList?.getCurrentLive()?.imageUrl || null;
-        setEndedInfo({ hostName, profileImage: resolvedImage, gender, roomId });
+        const currentLiveEntry = liveList?.getCurrentLive();
+        const resolvedImage = profileImage || currentLiveEntry?.imageUrl || null;
+        // Prefer the locally resolved display name (userName-first) over the
+        // socket payload's hostName, which carries the astrologer's real
+        // first + last name.
+        const resolvedHostName = currentLiveEntry?.astrologerName || hostName;
+        setEndedInfo({ hostName: resolvedHostName, profileImage: resolvedImage, gender, roomId });
         if (endedTimerRef.current) clearTimeout(endedTimerRef.current);
         endedTimerRef.current = setTimeout(() => {
           setEndedInfo((prev) => {

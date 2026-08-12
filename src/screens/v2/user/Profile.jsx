@@ -81,7 +81,10 @@ import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearAllCalculatorData } from "../../../redux/calculator/calculatorSlice";
 import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
 import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
-import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
+import {
+  getAstrologerDisplayName,
+  getAstrologerProfilePath,
+} from "../../../utils/helper/string.utils";
 
 // "Consult Again" button that disables in real time when the astrologer is live.
 // Uses useAstrologerLiveStatus so it reacts to the live socket event even when
@@ -1884,7 +1887,9 @@ const Profile = () => {
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       navigate(
-                                        `/astrologer/${order.astrologer._id}`,
+                                        getAstrologerProfilePath(
+                                          order.astrologer,
+                                        ),
                                       );
                                     }}
                                     style={{ cursor: "pointer" }}
@@ -1910,7 +1915,9 @@ const Profile = () => {
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         navigate(
-                                          `/astrologer/${order.astrologer._id}`,
+                                          getAstrologerProfilePath(
+                                            order.astrologer,
+                                          ),
                                         );
                                       }}
                                       style={{ cursor: "pointer" }}
