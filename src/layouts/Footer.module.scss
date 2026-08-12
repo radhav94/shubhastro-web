@@ -396,6 +396,13 @@ $font-primary:     "Poppins", sans-serif;
   background: #000;
   transition: border-color 0.2s, box-shadow 0.2s;
   width: fit-content;
+  // The App Store variant renders as a <button> while the iOS app is unreleased,
+  // so reset the UA defaults that would otherwise make it differ from the <a>.
+  border: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
 
   &:hover {
     border-color: $color-accent;
