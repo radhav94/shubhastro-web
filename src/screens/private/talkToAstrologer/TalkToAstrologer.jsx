@@ -356,7 +356,17 @@ const TalkToAstrologer = () => {
     setAllAstrologers([]);
     setHasMore(true);
     setIsFiltered(false);
-    trackEvent("astrologer_list_viewed", { filter_applied: false });
+    // A category URL (/astrologers/marriage-relationships) IS a filtered view —
+    // the filter is just applied a moment later, by the child that receives
+    // `selectedType`. Reporting filter_applied:false here made every paid
+    // category landing look unfiltered in analytics, which is precisely the
+    // dimension those campaigns are measured on.
+    trackEvent("astrologer_list_viewed", {
+      filter_applied: Boolean(categoryFromParams),
+      filter_value: categoryFromParams || undefined,
+      filter_source: categoryFromParams ? "url_category" : "none",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // MERGE API DATA - only for normal (non-filtered) mode
