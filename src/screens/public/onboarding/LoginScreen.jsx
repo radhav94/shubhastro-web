@@ -94,6 +94,15 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
     }
   };
 
+  // The desktop-only phone mockup is a 360x540 screenshot of the app's own UI
+  // sitting next to the form. It reads as live interface, so taps land on it and
+  // nothing happens. Everything it depicts is behind the sign-in, so answer the
+  // tap by pointing at the one control that unlocks it.
+  const handleMockupClick = () => {
+    toast("Enter your mobile number to open this.", { icon: "ℹ️" });
+    phoneInputRef.current?.focus();
+  };
+
   const handleSkipAndProceed = () => {
     dispatch(logout());
     localStorage.removeItem("shubhtalk_redirect_after_login");
@@ -120,7 +129,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
               <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="#F75801" strokeWidth="2" strokeLinecap="round"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#F75801" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-            <span><b>10K+</b> Astrologers Online</span>
+            <span><b>1K+</b> Astrologers Online</span>
           </div>
 
           {/* Offer Section */}
@@ -253,13 +262,18 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
         {/* Right Section - Phone Mockup */}
         <div className={styles.newLoginRight}>
-          <div className={styles.phoneMockup}>
+          <button
+            type="button"
+            className={styles.phoneMockup}
+            onClick={handleMockupClick}
+            aria-label="Enter your mobile number to open the app"
+          >
             <img
               src={loginMobile}
               alt="ShubhAstro App"
               loading="eager"
             />
-          </div>
+          </button>
         </div>
         </div>
       {/* </div> */}

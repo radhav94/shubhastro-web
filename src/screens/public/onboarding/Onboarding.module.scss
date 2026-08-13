@@ -2148,11 +2148,26 @@
   }
 }
 
+// Rendered as a <button> so the tap it already attracts gets answered. Button
+// chrome is stripped; only the cursor and focus ring are added.
 .phoneMockup {
   width: 360px;
   height: auto;
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
   @media (height: 641px) {
     width: 330px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 4px;
+    border-radius: 12px;
   }
 
   img {
@@ -2160,6 +2175,7 @@
     height: auto;
     object-fit: contain;
     filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));
+    display: block;
   }
 }
 
