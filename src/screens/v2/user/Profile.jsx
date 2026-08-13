@@ -1059,7 +1059,9 @@ const Profile = () => {
   const handleRateConsultation = (astrologer, roomId) => {
     setReviewData({
       astrologerID: astrologer.astrologer_ID || astrologer._id,
-      fullName: astrologer.name || getAstrologerDisplayName(astrologer),
+      // userName-first — only fall back to the plain `name` field when the
+      // helper can't resolve a username / first+last name.
+      fullName: getAstrologerDisplayName(astrologer) || astrologer.name,
       profileImage: astrologer.image || astrologer.profileImgUrl || astrologer.imageUrl,
       roomId,
     });
@@ -1922,7 +1924,9 @@ const Profile = () => {
                                       }}
                                       style={{ cursor: "pointer" }}
                                     >
-                                      {order.astrologer.name}
+                                      {/* userName-first, else the plain name */}
+                                      {getAstrologerDisplayName(order.astrologer) ||
+                                        order.astrologer.name}
                                     </h5>
                                     <div className={styles.orderMeta}>
                                       <span className={styles.orderDate}>
@@ -2165,7 +2169,11 @@ const Profile = () => {
                           <div className={styles.txnDetails}>
                             <h4 className={styles.txnTitle}>
                               {transaction.description || "Transaction with"}{" "}
-                              {transaction?.displayProfile?.name}
+                              {/* userName-first: show the astrologer's username when
+                                  available, else fall back to their real name. */}
+                              {transaction?.displayProfile?.userName ||
+                                getAstrologerDisplayName(transaction?.displayProfile) ||
+                                transaction?.displayProfile?.name}
                             </h4>
                             <span className={styles.txnMeta}>
                               {dayjs(transaction.createdAt).format("DD MMM, YYYY • hh:mm A")} • TXN #{transaction._id?.slice(-4)}

@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import { AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
 import { getWorstNetworkQuality } from "../../agora/networkQuality";
+import { getAstrologerDisplayName } from "../../utils/helper/string.utils";
 import { trackEvent } from "../../utils/analytics";
 import {
   IoMic,
@@ -875,9 +876,10 @@ const AgoraVoiceCalling = ({ callData }) => {
     return null;
   }, [selectedKundli, activeCall?.kundliId, lastSelectedKundli, profiles]);
 
+  // userName-first — used by the in-call chat greeting/header.
   const astrologerName = useMemo(() => {
     if (!lastRequestedAstro) return callerName || "";
-    return `${lastRequestedAstro.firstName || ""} ${lastRequestedAstro.lastName || ""}`.trim();
+    return getAstrologerDisplayName(lastRequestedAstro) || callerName || "";
   }, [lastRequestedAstro, callerName]);
 
   const chatData = useMemo(() => ({
