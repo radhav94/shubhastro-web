@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './PalmistryHandSelection.module.scss';
 import { setPalmistrySelectedHand } from '../../../../redux/aiwow/aiwowSlice';
+import { Toast } from '../../../../component';
 const PalmistryHandSelection = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -13,10 +14,13 @@ const PalmistryHandSelection = () => {
   };
 
   const handleProceed = () => {
-    if (selectedHand) {
-      dispatch(setPalmistrySelectedHand(selectedHand));
-      navigate('/ai-wow/ai-palmistry-scanner/instructions', { replace: true });
+    // See PalmistryLanding: same double gate, same silent "Continue".
+    if (!selectedHand) {
+      Toast.info('Choose your left or right hand first.');
+      return;
     }
+    dispatch(setPalmistrySelectedHand(selectedHand));
+    navigate('/ai-wow/ai-palmistry-scanner/instructions', { replace: true });
   };
 
   return (
@@ -110,7 +114,7 @@ const PalmistryHandSelection = () => {
         <button 
           className={`${styles.proceedButton} ${!selectedHand ? styles.disabled : ''}`}
           onClick={handleProceed}
-          disabled={!selectedHand}
+          aria-disabled={!selectedHand}
         >
           Continue
         </button>
