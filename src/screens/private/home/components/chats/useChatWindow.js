@@ -125,8 +125,10 @@ export default function useChat({
               sendMessage(aiInitialQuery);
               localStorage.removeItem("aiInitialQuery");
             } else {
-              // Regular greeting message
-              sendMessage(`Hi ${fullName || astrologerName || ""}`);
+              // Regular greeting message. Prefer `astrologerName` — it is the
+              // userName-first display name. `fullName` carries the
+              // astrologer's real first + last name, so it's only a fallback.
+              sendMessage(`Hi ${astrologerName || fullName || ""}`);
             }
 
             // Find the kundli profile to send — use header-selected profile from Redux store

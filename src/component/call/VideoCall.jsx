@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import { AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
 import { getWorstNetworkQuality } from "../../agora/networkQuality";
+import { getAstrologerDisplayName } from "../../utils/helper/string.utils";
 import {
   IoMic,
   IoMicOff,
@@ -1175,10 +1176,12 @@ const VideoCalling = ({ callData }) => {
   };
 
   // Memoize chat data to prevent unnecessary re-renders
+  // userName-first — the in-call chat greeting and header use this, so it must
+  // show the astrologer's username (falls back to first + last name).
   const astrologerName = useMemo(() => {
-    if (!lastRequestedAstro) return "";
-    return `${lastRequestedAstro.firstName || ""} ${lastRequestedAstro.lastName || ""}`.trim();
-  }, [lastRequestedAstro]);
+    if (!lastRequestedAstro) return activeCall?.callerName || "";
+    return getAstrologerDisplayName(lastRequestedAstro) || activeCall?.callerName || "";
+  }, [lastRequestedAstro, activeCall?.callerName]);
 
   // Get kundliId with fallback logic
   const effectiveKundliId = useMemo(() => {

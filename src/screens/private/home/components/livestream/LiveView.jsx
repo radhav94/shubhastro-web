@@ -1053,7 +1053,9 @@ const LiveView = (props) => {
           channelName,
           chatRoomId,
           agoraToken,
-          callerName: astro.astrologerName || astro.firstName || "Astrologer",
+          // userName-first (fullAstro carries userName; the live-list entry only
+          // has the real first + last name).
+          callerName: resolvedHostUserName || getAstrologerDisplayName(astro) || astro.astrologerName || "Astrologer",
           isUserSide: true,
           callType: type, // "audio" or "video"
           userId: userIdLocal,
