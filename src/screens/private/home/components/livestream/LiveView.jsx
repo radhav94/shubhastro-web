@@ -1343,7 +1343,7 @@ const LiveView = (props) => {
                     try {
                       const res = await getAstrologerLiveList();
                       const all = res.data?.data || [];
-                      const valid = all.filter((l) => l.astrologer && l.astrologer.firstName);
+                      const valid = all.filter((l) => l.astrologer && getAstrologerDisplayName(l.astrologer));
                       setLiveListData(valid);
                       setShowLiveList(true);
                       scrollDisabledRef.current = true;
@@ -1664,7 +1664,7 @@ const LiveView = (props) => {
             onClose={() => setShowGifts(false)}
             giftList={giftList?.data}
             astrologerId={astrologer?._id || astrologer?.astrologerId}
-            astrologerName={astrologer?.firstName || astrologer?.name}
+            astrologerName={resolvedHostUserName || astrologer?.name}
             socketRef={props.socketRef}
             roomId={props.channel}
             userId={userIdLocal}
