@@ -199,7 +199,7 @@ const LiveView = (props) => {
     setWaitingList,
   } = useCall();
 
-  const { pendingConnections, addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, isInQueue, getConnectionByRoomId } = useWaitingQueue();
+  const { pendingConnections, addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, cancelPendingConnection, isInQueue, getConnectionByRoomId } = useWaitingQueue();
 
   // Auto-minimize call if user is on live stream (handles page refresh)
   useEffect(() => {
@@ -321,7 +321,7 @@ const LiveView = (props) => {
     try {
       if (!isFollowing) {
         await followAstrologer({ astrologerId }).unwrap();
-        Toast.success(`You are now following ${astrologer?.astrologerName || "this astrologer"}`);
+        Toast.success(`You are now following ${getAstrologerDisplayName(fullAstro) || astrologer?.astrologerName || "this astrologer"}`);
 
         // Emit follow message to live stream chat
         if (props.socketRef?.current?.connected && props.channel && userIdLocal) {
@@ -343,7 +343,7 @@ const LiveView = (props) => {
         }
       } else {
         await unfollowAstrologer({ astrologerId }).unwrap();
-        Toast.success(`Unfollowed ${astrologer?.astrologerName || "this astrologer"}`);
+        Toast.success(`Unfollowed ${getAstrologerDisplayName(fullAstro) || astrologer?.astrologerName || "this astrologer"}`);
       }
     } catch (err) {
       console.error("Follow/Unfollow error:", err);
@@ -507,6 +507,31 @@ const LiveView = (props) => {
   }, [displayMessages.length]);
 
   const isHost = ROLE === "host";
+
+  // Host display name — userName-first. `fullAstro` (fetched by id) carries
+  // `userName`; the live-list entry and socket payloads only have the real
+  // first + last name, so they're just fallbacks.
+  const hostDisplayName =
+    getAstrologerDisplayName(fullAstro) || astrologer?.astrologerName || "Astrologer";
+
+  // Same value but without the "Astrologer" placeholder — used when seeding the
+  // `userName` field of objects we hand to the waiting-queue / waitlist popups.
+  const resolvedHostUserName =
+    getAstrologerDisplayName(fullAstro) ||
+    astrologer?.userName ||
+    astrologer?.astrologerName ||
+    astrologer?.hostName ||
+    "";
+
+  // Report it up so the parent can use the username in the "has left" modal
+  // (that modal's socket payload only provides the real name).
+  const onHostNameResolved = props.onHostNameResolved;
+  useEffect(() => {
+    if (hostDisplayName && hostDisplayName !== "Astrologer") {
+      onHostNameResolved?.(hostDisplayName);
+    }
+  }, [hostDisplayName, onHostNameResolved]);
+
   const safeRemoteUsers = remoteUsers.filter((u) => u);
   // Connected to a live channel (joined Agora, room not ended / host not gone).
   // This is independent of whether a publisher (video) is present yet — matches
@@ -639,7 +664,7 @@ const LiveView = (props) => {
     }
 
     // 7. Store astrologer info and emit call:initiate via socket
-    setLastRequestedAstro({ ...astrologer, profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl });
+    setLastRequestedAstro({ ...astrologer, userName: resolvedHostUserName, profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl });
     setLastCallType("audio");
     setPendingCallType("audio");
     astrologerRef.current = astrologer;
@@ -654,7 +679,7 @@ const LiveView = (props) => {
       liveRoomDetails: {
         roomId: props.channel,
         hostId: astrologerId,
-        hostName: getAstrologerDisplayName(astrologer) || astrologer?.astrologerName || astrologer?.hostName || "",
+        hostName: resolvedHostUserName,
         channel: props.channel,
       },
     });
@@ -662,12 +687,14 @@ const LiveView = (props) => {
     // Add to waiting queue
     addPendingConnection({
       id: `${astrologerId}-audio-${Date.now()}`,
-      // Carry userName through so the waiting-queue popup can show the
-      // username (its display helper is userName-first).
+      // Carry the resolved userName-first name through so the waiting-queue /
+      // waitlist popups show the username. `hostDisplayName` comes from the
+      // full astrologer record (which has userName); the live-list entry only
+      // has the real first + last name.
       astrologer: {
         ...astrologer,
         _id: astrologerId,
-        userName: astrologer?.userName || astrologer?.astrologerName || astrologer?.hostName || "",
+        userName: resolvedHostUserName,
         firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "",
       },
       type: "audio",
@@ -742,7 +769,7 @@ const LiveView = (props) => {
     }
 
     // Store astrologer info in context and ref
-    setLastRequestedAstro({ ...astrologer, profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl });
+    setLastRequestedAstro({ ...astrologer, userName: resolvedHostUserName, profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl });
     setPendingCallType(type);
     astrologerRef.current = astrologer;
     callingChannelRef.current = props.channel;
@@ -761,7 +788,7 @@ const LiveView = (props) => {
       liveRoomDetails: {
         roomId: props.channel,
         hostId: astrologerId,
-        hostName: getAstrologerDisplayName(astrologer) || astrologer?.astrologerName || astrologer?.hostName || "",
+        hostName: resolvedHostUserName,
         channel: props.channel,
       },
     });
@@ -769,11 +796,12 @@ const LiveView = (props) => {
     // Add to waiting queue
     addPendingConnection({
       id: `${astrologerId}-${type}-${Date.now()}`,
-      // Carry userName through so the waiting-queue popup shows the username.
+      // Carry the resolved userName-first name through (see the audio-call
+      // handler above for why the live-list entry isn't enough).
       astrologer: {
         ...astrologer,
         _id: astrologerId,
-        userName: astrologer?.userName || astrologer?.astrologerName || astrologer?.hostName || "",
+        userName: resolvedHostUserName,
         firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "",
       },
       type,
@@ -1230,7 +1258,7 @@ const LiveView = (props) => {
                   astrologer?.imageUrl ||
                   getAstrologerDefaultImage(fullAstro?.gender || astrologer?.gender)
                 }
-                alt={astrologer?.astrologerName || "Astrologer"}
+                alt={hostDisplayName}
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = getAstrologerDefaultImage(fullAstro?.gender || astrologer?.gender);
@@ -1238,9 +1266,7 @@ const LiveView = (props) => {
               />
               <div className="host-text">
                 <div className="host-name host-name-truncate">
-                  {/* Prefer the full astrologer record (it carries userName);
-                      fall back to the resolved name from the live list. */}
-                  {getAstrologerDisplayName(fullAstro) || astrologer?.astrologerName || "Astrologer"}
+                  {hostDisplayName}
                 </div>
                 <div className="host-duration">
                   {isCallForCurrentAstrologer
@@ -1747,7 +1773,7 @@ const LiveView = (props) => {
                       liveRoomDetails: {
                         roomId: props.channel,
                         hostId: conn?.astrologer?._id || astrologerId,
-                        hostName: conn?.astrologer?.firstName || conn?.astrologer?.astrologerName || "",
+                        hostName: getAstrologerDisplayName(conn?.astrologer) || conn?.astrologer?.astrologerName || resolvedHostUserName,
                         channel: props.channel,
                       },
                     });
@@ -1765,9 +1791,14 @@ const LiveView = (props) => {
                   }}
                   onCancel={(roomId, type) => {
                     if (!roomId) return;
-                    const event = type === "chat" ? "chat:cancel" : "call:cancel";
-                    voiceSocket.emit(event, { roomId, canceledBy: "CUSTOMER" });
-                    removePendingConnection(roomId);
+                    // Delegate to the queue context so the correct socket event
+                    // is emitted for the request's current status:
+                    //   on_hold (missed call)   -> chat/call:hold_cancel
+                    //   astrologer_accepted     -> chat/call:user_reject
+                    //   ringing / waiting       -> chat/call:cancel
+                    // Previously this always emitted the plain cancel event,
+                    // which was wrong once the request went on hold.
+                    cancelPendingConnection(roomId, type);
                   }}
                   onCancelAll={() => { resetCallState(); }}
                   onScrollToAstrologer={(astrologerId) => {
