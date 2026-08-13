@@ -232,7 +232,22 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" /></noscript>
 
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" fetchpriority="high" />
+  <!--
+    Body background preload, split by viewport.
+
+    Both files were previously covered by a single unconditional preload of the
+    desktop artwork. The stylesheet below swaps to the -mobile file at 767px, so
+    on a phone the 476 KB desktop PNG was downloaded at high priority and then
+    never painted — measured 1142ms -> 6161ms on a 4 Mbps profile, holding a
+    high-priority slot against the entry bundle for five seconds while the
+    97 KB mobile file was fetched separately.
+
+    The `media` attribute is honoured for rel=preload, so each viewport now
+    fetches only the file its stylesheet will actually use. Breakpoint matches
+    the 767px used in the inline CSS below and throughout the SCSS.
+  -->
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" fetchpriority="high" media="(min-width: 768px)" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" fetchpriority="high" media="(max-width: 767px)" />
   <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/ai-suite.png" fetchpriority="high" />
 
   <style>
