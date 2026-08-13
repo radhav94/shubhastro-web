@@ -129,7 +129,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
               <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="#F75801" strokeWidth="2" strokeLinecap="round"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#F75801" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-            <span><b>1K+</b> Astrologers Online</span>
+            <span><b>10K+</b> Astrologers Online</span>
           </div>
 
           {/* Offer Section */}

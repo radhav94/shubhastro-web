@@ -56,7 +56,7 @@ const COMMUNITY_AVATARS = [
   new URL("../../../assets/images/community-avatar-4.png", import.meta.url).href,
   new URL("../../../assets/images/community-avatar-5.png", import.meta.url).href,
 ];
-const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
+const heroBg = "https://assets.shubhastro.ai/images/ai-suite.png";
 
 /**
  * "Sign in" affordance inside the guest greeting.
@@ -636,15 +636,23 @@ const HomeV2 = () => {
   const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id, astrologerMaleImg };
 
   // ─── Render ───────────────────────────────────────────────────────────────
+  /*
+   * This branch renders nothing visible until the CMS list arrives, which is why
+   * the homepage LCP breakdown is ~98% "element render delay": the hero image
+   * itself resolves in ~40 ms (it is preloaded in index.html with
+   * fetchpriority=high) and then waits for JS execute + the homepage API before
+   * React can commit the element that displays it.
+   *
+   * A 0x0 overflow:hidden copy of the hero image used to sit here, labelled as an
+   * LCP preload. It could not have that effect: LCP only considers elements with
+   * a non-zero painted area, and a production trace confirmed it — the first LCP
+   * candidate for this URL appeared at 1672 ms (the real 230x230 hero), not at
+   * first paint when the hidden copy was already in the DOM. Its only real effect
+   * was warming the cache, which the index.html preload of the identical URL
+   * already does, so it has been removed rather than left as a false mitigation.
+   */
   if (isHomeLoading || !renderPlan.length) {
-    return (
-      <div className={styles.page} style={{ minHeight: "100vh" }}>
-        {/* Hidden LCP image for browser preload — visible only to paint engine */}
-        <div style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }} aria-hidden="true">
-          <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
-        </div>
-      </div>
-    );
+    return <div className={styles.page} style={{ minHeight: "100vh" }} />;
   }
 
   return (

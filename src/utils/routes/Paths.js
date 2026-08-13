@@ -119,42 +119,50 @@ import HoroscopeOld from "../../screens/private/horoscope/HoroscopeOld";
 import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
 import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
 
-import AIWow from "../../screens/private/aiwow/AIWow";
-import PalmistryLanding from "../../screens/private/aiwow/palmistry/PalmistryLanding";
-import PalmistryInstructions from "../../screens/private/aiwow/palmistry/PalmistryInstructions";
-import PalmistryCamera from "../../screens/private/aiwow/palmistry/PalmistryCamera";
-import PalmistryAnalysis from "../../screens/private/aiwow/palmistry/PalmistryAnalysis";
-import PalmistryResult from "../../screens/private/aiwow/palmistry/PalmistryResult";
-import PalmistryHandSelection from "../../screens/private/aiwow/palmistry/PalmistryHandSelection";
-import FaceReadingLanding from "../../screens/private/aiwow/facereading/FaceReadingLanding";
-import FaceReadingCamera from "../../screens/private/aiwow/facereading/FaceReadingCamera";
-import FaceReadingAnalysis from "../../screens/private/aiwow/facereading/FaceReadingAnalysis";
-import FaceReadingResult from "../../screens/private/aiwow/facereading/FaceReadingResult";
-import SignatureLanding from "../../screens/private/aiwow/signature/SignatureLanding";
-import SignatureCamera from "../../screens/private/aiwow/signature/SignatureCamera";
-import SignatureAnalysis from "../../screens/private/aiwow/signature/SignatureAnalysis";
-import SignatureResult from "../../screens/private/aiwow/signature/SignatureResult";
-import GemstoneLanding from "../../screens/private/aiwow/gemstone/GemstoneLanding";
-import GemstoneCamera from "../../screens/private/aiwow/gemstone/GemstoneCamera";
-import GemstoneAnalysis from "../../screens/private/aiwow/gemstone/GemstoneAnalysis";
-import GemstoneResult from "../../screens/private/aiwow/gemstone/GemstoneResult";
-import ClothColorLanding from "../../screens/private/aiwow/clothcolor/ClothColorLanding";
-import ClothColorInstructions from "../../screens/private/aiwow/clothcolor/ClothColorInstructions";
-import ClothColorCamera from "../../screens/private/aiwow/clothcolor/ClothColorCamera";
-import ClothColorAnalysis from "../../screens/private/aiwow/clothcolor/ClothColorAnalysis";
-import ClothColorResult from "../../screens/private/aiwow/clothcolor/ClothColorResult";
-import TalkToKundliChat from "../../screens/private/aiwow/talktokundli/TalkToKundliChat";
-import CosmicChat from "../../screens/private/aiwow/cosmicchat/CosmicChat";
-import DailyCosmicBriefing from "../../screens/private/aiwow/dailycosmicbriefing/DailyCosmicBriefing";
-import DreamInterpreter from "../../screens/private/aiwow/dreaminterpreter/DreamInterpreter";
-import AgenticCalendar from "../../screens/private/aiwow/agenticcalendar/AgenticCalendar";
-import BusinessPathfinder from "../../screens/private/aiwow/businesspathfinder/BusinessPathfinder";
-import BusinessPathfinderResult from "../../screens/private/aiwow/businesspathfinder/BusinessPathfinderResult";
-import SmartMatchmaking from "../../screens/private/aiwow/smartmatchmaking/SmartMatchmaking";
-import AuraLanding from "../../screens/private/aiwow/aura/AuraLanding";
-import AuraCamera from "../../screens/private/aiwow/aura/AuraCamera";
-import AuraAnalysis from "../../screens/private/aiwow/aura/AuraAnalysis";
-import AuraResult from "../../screens/private/aiwow/aura/AuraResult";
+// Route-level code splitting for the AI Wow suite (36 screens, ~1.5 MB of
+// source — the largest feature group in the app). None of it is needed to
+// render the homepage or any other route, but static imports pulled all of it,
+// JS and every .module.scss, into the single entry bundle that every first-time
+// visitor blocks on. Measured on production: the entry stylesheet was 473 KB
+// gzipped and render-blocking, so FCP tracked its arrival almost exactly
+// (13.3 s on a 1.6 Mbps link). These render inside the <Suspense> boundaries in
+// App.jsx and HomeLayout.jsx, so lazy is safe here.
+const AIWow = lazy(() => import("../../screens/private/aiwow/AIWow"));
+const PalmistryLanding = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryLanding"));
+const PalmistryInstructions = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryInstructions"));
+const PalmistryCamera = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryCamera"));
+const PalmistryAnalysis = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryAnalysis"));
+const PalmistryResult = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryResult"));
+const PalmistryHandSelection = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryHandSelection"));
+const FaceReadingLanding = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingLanding"));
+const FaceReadingCamera = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingCamera"));
+const FaceReadingAnalysis = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingAnalysis"));
+const FaceReadingResult = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingResult"));
+const SignatureLanding = lazy(() => import("../../screens/private/aiwow/signature/SignatureLanding"));
+const SignatureCamera = lazy(() => import("../../screens/private/aiwow/signature/SignatureCamera"));
+const SignatureAnalysis = lazy(() => import("../../screens/private/aiwow/signature/SignatureAnalysis"));
+const SignatureResult = lazy(() => import("../../screens/private/aiwow/signature/SignatureResult"));
+const GemstoneLanding = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneLanding"));
+const GemstoneCamera = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneCamera"));
+const GemstoneAnalysis = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneAnalysis"));
+const GemstoneResult = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneResult"));
+const ClothColorLanding = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorLanding"));
+const ClothColorInstructions = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorInstructions"));
+const ClothColorCamera = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorCamera"));
+const ClothColorAnalysis = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorAnalysis"));
+const ClothColorResult = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorResult"));
+const TalkToKundliChat = lazy(() => import("../../screens/private/aiwow/talktokundli/TalkToKundliChat"));
+const CosmicChat = lazy(() => import("../../screens/private/aiwow/cosmicchat/CosmicChat"));
+const DailyCosmicBriefing = lazy(() => import("../../screens/private/aiwow/dailycosmicbriefing/DailyCosmicBriefing"));
+const DreamInterpreter = lazy(() => import("../../screens/private/aiwow/dreaminterpreter/DreamInterpreter"));
+const AgenticCalendar = lazy(() => import("../../screens/private/aiwow/agenticcalendar/AgenticCalendar"));
+const BusinessPathfinder = lazy(() => import("../../screens/private/aiwow/businesspathfinder/BusinessPathfinder"));
+const BusinessPathfinderResult = lazy(() => import("../../screens/private/aiwow/businesspathfinder/BusinessPathfinderResult"));
+const SmartMatchmaking = lazy(() => import("../../screens/private/aiwow/smartmatchmaking/SmartMatchmaking"));
+const AuraLanding = lazy(() => import("../../screens/private/aiwow/aura/AuraLanding"));
+const AuraCamera = lazy(() => import("../../screens/private/aiwow/aura/AuraCamera"));
+const AuraAnalysis = lazy(() => import("../../screens/private/aiwow/aura/AuraAnalysis"));
+const AuraResult = lazy(() => import("../../screens/private/aiwow/aura/AuraResult"));
 
 import SingleCallHistory from "../../screens/private/orderHistory/components/Call/SingleCallHistory";
 import SingleChatHistory from "../../screens/private/orderHistory/components/Chat/SingleChatHistory";

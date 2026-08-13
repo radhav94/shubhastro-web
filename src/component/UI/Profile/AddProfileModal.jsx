@@ -256,7 +256,7 @@ const AddProfileModal = ({
             <div className={styles.guestHeader}>
               <span className={styles.onlineBadge}>
                 <IoPeople className={styles.badgeIcon} />
-                <b>10K+</b> Astrologers Online
+                <b>1K+</b> Astrologers Online
               </span>
               <div className={styles.headerRow}>
                 <div className={styles.headerText}>
