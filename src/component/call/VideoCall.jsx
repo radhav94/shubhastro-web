@@ -679,7 +679,7 @@ const VideoCalling = ({ callData }) => {
       setReviewData({
         astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
         fullName: currentCall?.callerName || callerName,
-        profileImage: currentCall?.profileImgUrl || currentCall?.astrologerImage,
+        profileImage: currentCall?.profileImgUrl || currentCall?.astrologerImage || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || chatLastRequestedAstro?.profileImgUrl,
         roomId,
         gender: lastRequestedAstro?.gender || chatLastRequestedAstro?.gender || activeCall?.gender,
       });
@@ -791,7 +791,7 @@ const VideoCalling = ({ callData }) => {
         setReviewData({
           astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
           fullName: currentCall?.callerName || callerName,
-          profileImage: currentCall?.profileImgUrl || currentCall?.astrologerImage,
+          profileImage: currentCall?.profileImgUrl || currentCall?.astrologerImage || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || chatLastRequestedAstro?.profileImgUrl,
           roomId,
           gender: lastRequestedAstro?.gender || chatLastRequestedAstro?.gender || activeCall?.gender,
         });

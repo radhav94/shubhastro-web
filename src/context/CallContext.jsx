@@ -550,6 +550,9 @@ export const CallProvider = ({ children }) => {
         astrologerId: astroId,
         astrologerID: astro?.astrologer_ID,
         remainingTime,
+        // Needed by the post-call review popup (avatar + default-image gender).
+        profileImgUrl: astro?.profileImgUrl || astro?.imageUrl,
+        gender: astro?.gender,
         origin: "live",
         liveChannel: pending.liveChannel,
       });
