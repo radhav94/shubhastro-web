@@ -1063,6 +1063,12 @@ const LiveView = (props) => {
           astrologerID: fullAstro?.astrologer_ID || astro?.astrologer_ID || astroId,
           remainingTime,
           experience: fullAstro?.experience || astro?.experience,
+          // Carry the avatar + gender through — the post-call review popup reads
+          // these off activeCall, and without them it fell back to a generic
+          // placeholder image.
+          profileImgUrl:
+            fullAstro?.profileImgUrl || astro?.profileImgUrl || astro?.imageUrl,
+          gender: fullAstro?.gender || astro?.gender,
           origin: "live",
           liveChannel,
         });
