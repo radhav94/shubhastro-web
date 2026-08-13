@@ -212,14 +212,20 @@
   }
 }
 .logoHeader{
+  // display is explicit because this is an <a>, which is inline by default;
+  // width: fit-content and the img's width: 100% both need a block box.
+  display: block;
   width: fit-content;
   height: auto;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
   @media screen and (width <= 767px) {
     display: none;    
   }
   img{
     width: 100%;
+    display: block;
   }
 }
 .logoHeaderMobile{
@@ -227,11 +233,14 @@
   height: 40px;
   display: none;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
   @media screen and (width <= 767px) {
     display: block;    
   }
   img{
     width: 100%;
+    display: block;
   }
 }
 
