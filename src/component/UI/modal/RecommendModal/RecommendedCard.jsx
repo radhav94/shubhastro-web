@@ -2,11 +2,12 @@ import styles from "./recommendedCard.module.scss";
 import { FaStar } from "react-icons/fa";
 import { PiBookOpenTextLight } from "react-icons/pi";
 import { getAstrologerDefaultImage } from "../../../../utils/appImages";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall, mode }) => {
   const rating = astro?.rating || 0;
   const experience = parseInt(astro?.experience) || 0;
-  const fullName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
+  const fullName = getAstrologerDisplayName(astro);
 
   // Get languages
   const languages =
@@ -42,7 +43,7 @@ const RecommendedCard = ({ astro, onChat, onAudioCall, onVideoCall, mode }) => {
           <span>{rating.toFixed(1)}</span>
         </div>
 
-        <h4>{fullName || astro?.firstName}</h4>
+        <h4>{fullName || "Astrologer"}</h4>
 
         {experience > 0 && (
           <div className={styles.experience}>

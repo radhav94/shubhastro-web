@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useRef, useEffect, useCallback } from "react";
 import { voiceSocket, registerCallSession, clearCallSession } from "../services/voiceSocketServices";
 import { trackEvent } from "../utils/analytics";
+import { getAstrologerDisplayName } from "../utils/helper/string.utils";
 
 const CallContext = createContext();
 
@@ -540,7 +541,9 @@ export const CallProvider = ({ children }) => {
         roomId,
         channelName,
         agoraToken,
-        callerName: astro.astrologerName || astro.firstName || "Astrologer",
+        // userName-first. `astrologerName` can be the live-list value (real
+        // first + last name), so the helper takes priority.
+        callerName: getAstrologerDisplayName(astro) || astro.astrologerName || "Astrologer",
         isUserSide: true,
         callType: type,
         userId: userIdLocal,

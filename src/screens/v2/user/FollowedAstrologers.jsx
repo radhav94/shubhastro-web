@@ -221,7 +221,9 @@ const FollowedAstrologers = () => {
           <div className={styles.list}>
             {allAstrologers.map((item) => {
               const astro = item.astrologer || {};
-              const name = astro.fullName || getAstrologerDisplayName(astro) || "Astrologer";
+              // userName-first — `fullName` from this API is the astrologer's
+              // real first + last name, so it's only a fallback.
+              const name = getAstrologerDisplayName(astro) || astro.fullName || "Astrologer";
               const id = item.astrologerId || astro._id;
               const image = astro.profileImgUrl;
               const isFollowing = item.isFollowing !== false;
