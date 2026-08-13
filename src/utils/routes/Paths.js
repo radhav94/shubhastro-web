@@ -23,7 +23,10 @@ import Numerology from "../../screens/private/numerology/Numerology";
 import FreeReadings from "../../screens/private/readings/Readings";
 import AstroLive from "../../screens/private/astroLive/AstroLive";
 import Video from "../../screens/private/video/Video";
-import Blog from "../../screens/private/blog/Blog";
+// Route-level code split: /blog is only reachable by navigation, so it does not
+// belong in the entry bundle every visitor blocks on. Rendered inside the
+// <Suspense> boundaries in App.jsx and HomeLayout.jsx, so lazy is safe here.
+const Blog = lazy(() => import("../../screens/private/blog/Blog"));
 import SessionDetails from "../../screens/private/sessionDetails/SessionDetails";
 import Shop from "../../screens/private/shop/Shop";
 import TalkToAstrologer from "../../screens/private/talkToAstrologer/TalkToAstrologer";
