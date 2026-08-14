@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
-import { subscriptionApi, useGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
+import { subscriptionApi, useGetSubscriptionStatusQuery, useLazyGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
 import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from '../../../../utils/subscription/featureGating';
 import { trackEvent } from '../../../../utils/analytics';
 import { SUBSCRIPTION_EVENTS, trackSubscriptionEvent } from '../../../../utils/subscriptionAnalytics';
@@ -42,6 +42,10 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
   const customerToken = typeof window !== 'undefined' ? localStorage.getItem('shubhtalk_customer_token') : null;
   const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken });
   const hasActiveSubscription = !!subscriptionStatus?.data?.hasActiveSubscription;
+  // Lazy fetch so we can read a FRESH subscription status on demand — needed
+  // right after a guest registers (the cached query is still skipped/stale at
+  // that moment, so we must fetch with the newly-available token).
+  const [triggerSubStatus] = useLazyGetSubscriptionStatusQuery();
 
   // #7 SUBSCRIPTION_STATUS_CHECKED — fire when the status API resolves. Deduped
   // per distinct (has_active_subscription, remaining_quota) so re-renders /
@@ -144,6 +148,40 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
    */
   const runWithEntitlement = useCallback(async (generateFn) => {
     const gId = `${String(featureName).replace(/\s+/g, '-').toLowerCase()}-generate`;
+
+    // ── Proactive subscription check (BEFORE any generation runs) ──────────
+    // Product rule: a report may only be generated when the user has an active
+    // subscription. This is critical for the guest flow — after a guest fills
+    // the form and registers we must NOT auto-fire the analyze API. Instead,
+    // check the (freshly fetched) subscription status first; if there's no
+    // active plan, show the plans popup and only proceed once the user has
+    // purchased. On cancel we stop without ever calling the generate API.
+    try {
+      const statusRes = await triggerSubStatus(undefined, false).unwrap();
+      const activePlan = !!statusRes?.data?.hasActiveSubscription;
+      if (!activePlan) {
+        trackSubscriptionEvent(SUBSCRIPTION_EVENTS.STATUS_CHECKED, {
+          has_active_subscription: false,
+          remaining_quota:
+            statusRes?.data?.remainingQuota ??
+            statusRes?.data?.subscription?.remainingQuota ??
+            null,
+        });
+        toast.dismiss(gId);
+        openSubscriptionModal('basic');
+        const outcome = await waitForModalOutcome();
+        if (outcome !== 'purchased') {
+          trackEvent('shubh_ai_payment_failed', { feature_name: featureName, reason: SUBSCRIPTION_REASON.PREMIUM_REQUIRED });
+          return { blocked: true, reason: SUBSCRIPTION_REASON.PREMIUM_REQUIRED };
+        }
+        // Purchased — refresh cached status, then fall through to generate.
+        dispatch(subscriptionApi.util.invalidateTags(['SubscriptionStatus']));
+      }
+    } catch {
+      // Status check failed (network etc.) — fall back to the server-side
+      // entitlement gate in the loop below rather than blocking the user.
+    }
+
     // Cap retries to avoid any pathological loop if the backend keeps blocking.
     for (let attempt = 0; attempt < 4; attempt += 1) {
       const result = await generateFn();
@@ -191,7 +229,7 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
       trackEvent('shubh_ai_extended_plan_purchased', { feature_name: featureName, reason });
     }
     return { blocked: true, reason: 'RETRY_LIMIT' };
-  }, [featureName, openSubscriptionModal, waitForModalOutcome, dispatch]);
+  }, [featureName, openSubscriptionModal, waitForModalOutcome, dispatch, triggerSubStatus]);
 
 
   const subscriptionModal = (

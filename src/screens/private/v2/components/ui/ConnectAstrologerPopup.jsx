@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { MessageSquare, Phone, Video, X } from "lucide-react";
+import Toast from "../../../../../component/toast";
+import { unavailableReason } from "../../../../../utils/helper/astrologerAvailability";
 import styles from "./ConnectAstrologerPopup.module.css";
 
 const ConnectAstrologerPopup = ({
@@ -64,12 +66,59 @@ const ConnectAstrologerPopup = ({
   const isCallAvailable = pricing ? (pricing.audioRate?.amount > 0 && isTypeActive("audio")) : true;
   const isVideoAvailable = pricing ? (pricing.videoCallRate?.amount > 0 && isTypeActive("video")) : true;
 
-  const handleConnect = async (type) => {
-    if (!astrologer) return;
+  // Why an option can't be used, phrased for the user. The two gates here are
+  // "astrologer isn't taking this session type" and "no rate configured", so
+  // online/live are not part of the decision at this point.
+  const reasonFor = (label, type, rate) =>
+    unavailableReason({
+      label,
+      isOnline: true,
+      isLive: false,
+      isTypeActive: isTypeActive(type),
+      hasPrice: (rate?.amount || 0) > 0,
+    });
 
-    if (type === "chat" && !isChatAvailable) return;
-    if (type === "call" && !isCallAvailable) return;
-    if (type === "video" && !isVideoAvailable) return;
+  const options = [
+    {
+      key: "chat",
+      title: "Chat",
+      Icon: MessageSquare,
+      rate: pricing?.chatRate,
+      available: isChatAvailable,
+      reason: reasonFor("Chat", "chat", pricing?.chatRate),
+    },
+    {
+      key: "call",
+      title: "Call",
+      Icon: Phone,
+      rate: pricing?.audioRate,
+      available: isCallAvailable,
+      reason: reasonFor("Call", "audio", pricing?.audioRate),
+    },
+    {
+      key: "video",
+      title: "Video call",
+      Icon: Video,
+      rate: pricing?.videoCallRate,
+      available: isVideoAvailable,
+      reason: reasonFor("Video call", "video", pricing?.videoCallRate),
+    },
+  ];
+
+  const handleConnect = async (type) => {
+    if (!astrologer) {
+      Toast.error("Astrologer details are still loading. Please try again.");
+      return;
+    }
+
+    // Unavailable options stay tappable and say why. They used to be dimmed
+    // with `pointer-events: none`, so the tap hit nothing and the user got no
+    // response at all — a dead click on the primary connect surface.
+    const option = options.find((o) => o.key === type);
+    if (option && !option.available) {
+      Toast.info(option.reason);
+      return;
+    }
 
     let result = false;
 
@@ -108,41 +157,24 @@ const ConnectAstrologerPopup = ({
         </div>
 
         <div className={styles.optionsGrid}>
-          {/* Chat Option */}
-          <div
-            className={`${styles.optionCard} ${!isChatAvailable ? styles.disabled : ''}`}
-            onClick={() => handleConnect("chat")}
-          >
-            <div className={styles.iconCircle}>
-              <MessageSquare size={32} strokeWidth={2} />
-            </div>
-            <h3 className={styles.optionTitle}>Chat</h3>
-            <p className={styles.optionPrice}>₹{pricing?.chatRate?.amount || 0}/{pricing?.chatRate?.unit || 'minute'}</p>
-          </div>
-
-          {/* Call Option */}
-          <div
-            className={`${styles.optionCard} ${!isCallAvailable ? styles.disabled : ''}`}
-            onClick={() => handleConnect("call")}
-          >
-            <div className={styles.iconCircle}>
-              <Phone size={32} strokeWidth={2} />
-            </div>
-            <h3 className={styles.optionTitle}>Call</h3>
-            <p className={styles.optionPrice}>₹{pricing?.audioRate?.amount || 0}/{pricing?.audioRate?.unit || 'minute'}</p>
-          </div>
-
-          {/* Video Call Option */}
-          <div
-            className={`${styles.optionCard} ${!isVideoAvailable ? styles.disabled : ''}`}
-            onClick={() => handleConnect("video")}
-          >
-            <div className={styles.iconCircle}>
-              <Video size={32} strokeWidth={2} />
-            </div>
-            <h3 className={styles.optionTitle}>Video call</h3>
-            <p className={styles.optionPrice}>₹{pricing?.videoCallRate?.amount || 0}/{pricing?.videoCallRate?.unit || 'minute'}</p>
-          </div>
+          {options.map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              className={`${styles.optionCard} ${!option.available ? styles.disabled : ''}`}
+              onClick={() => handleConnect(option.key)}
+              aria-disabled={!option.available}
+              title={option.available ? `Start ${option.title.toLowerCase()}` : option.reason}
+            >
+              <div className={styles.iconCircle}>
+                <option.Icon size={32} strokeWidth={2} />
+              </div>
+              <h3 className={styles.optionTitle}>{option.title}</h3>
+              <p className={styles.optionPrice}>
+                ₹{option.rate?.amount || 0}/{option.rate?.unit || 'minute'}
+              </p>
+            </button>
+          ))}
         </div>
       </div>
     </div>

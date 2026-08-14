@@ -23,7 +23,16 @@ let activeToastId = null;
 let lastToastMessage = null;
 let lastToastTime = 0;
 
-const DEDUP_INTERVAL = 2000; // 2 seconds
+/*
+ * Collapse only same-tick bursts of an identical message (e.g. several socket
+ * handlers reporting one failure). This used to be 2000ms, which silently
+ * swallowed deliberate repeat taps: a user tapping an unavailable Chat button
+ * four times got one toast, so taps 2-4 changed nothing on screen and they kept
+ * hammering — exactly what Clarity reports as a rage click. Stacking is not a
+ * risk here because every show dismisses the previous toast first, so the only
+ * thing a long window bought us was the missing acknowledgement.
+ */
+const DEDUP_INTERVAL = 350;
 
 const showToast = (fn, msg, opts) => {
   const message = ensureString(msg);
@@ -34,6 +43,8 @@ const showToast = (fn, msg, opts) => {
     return activeToastId;
   }
 
+  // Dismiss + recreate rather than update in place, so the enter animation
+  // replays and a repeat tap is visibly acknowledged.
   rht.dismiss(activeToastId);
   lastToastMessage = message;
   lastToastTime = now;

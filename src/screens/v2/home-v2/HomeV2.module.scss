@@ -395,6 +395,32 @@
   color: #030303;
 }
 
+/*
+ * Sign-in affordance for guests. Padded well beyond its text so a thumb aimed
+ * near it still lands on the control — the previous version was a 12px inline
+ * span, small enough that near-misses hit the paragraph's padding and did
+ * nothing at all.
+ */
+.guestSignInLink {
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  background: transparent;
+  border: none;
+  padding: 8px 10px;
+  margin: -8px -4px;
+  font: inherit;
+  font-weight: 600;
+  color: #f75801;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}
+
 .heroBanner h1, .heroBanner .heroH1 {
   font-size: 1.8rem;
   font-weight: 600;

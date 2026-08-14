@@ -365,10 +365,50 @@ const BirthDetailsScreen = ({
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            className={styles.otpprimaryBtn}
-            disabled={!values.birthDate || !values.birthPlace || !values.latitude || Object.keys(errors).length > 0 || registering}
+          {/*
+            Never `disabled` for a validation reason. This is the last gate before
+            a profile exists, and the most common blocker is a birth place typed
+            without picking a suggestion (so `latitude` is null) — which is easy
+            to miss further up a scrolled mobile form. A disabled button absorbs
+            the tap and explains nothing; this one stays live and names the
+            blocker. `registering` is handled inside the handler instead.
+          */}
+          <button
+            type="submit"
+            className={`${styles.otpprimaryBtn} ${
+              !values.birthDate || !values.birthPlace || !values.latitude ? styles.otpprimaryBtnBlocked : ""
+            }`.trim()}
+            aria-disabled={!values.birthDate || !values.birthPlace || !values.latitude}
+            aria-busy={registering}
+            onClick={(e) => {
+              if (registering) {
+                e.preventDefault();
+                return;
+              }
+              if (!values.birthDate) {
+                e.preventDefault();
+                toast.error("Please select your date of birth.");
+                return;
+              }
+              if (!values.birthPlace) {
+                e.preventDefault();
+                toast.error("Please enter your place of birth.");
+                return;
+              }
+              if (!values.latitude) {
+                e.preventDefault();
+                setFieldTouched("birthPlace", true, true);
+                toast.error("Tap your city from the suggestions so we can use the right timezone.");
+                return;
+              }
+              // Any remaining schema error (e.g. a malformed time) would make
+              // Formik refuse to submit without a word. Say it out loud instead.
+              const remaining = Object.keys(errors);
+              if (remaining.length > 0) {
+                e.preventDefault();
+                toast.error(errors[remaining[0]] || "Please check the details above.");
+              }
+            }}
           >
             {registering ? "Saving..." : "Next"}
           </button>

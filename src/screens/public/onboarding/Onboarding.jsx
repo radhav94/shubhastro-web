@@ -16,6 +16,7 @@ import BirthDetailsScreen from "./BirthDetailsScreen";
 import PersonalizeScreen from "./PersonalizeScreen";
 import OTPScreen from "./OTPScreen";
 import LoginScreen from "./LoginScreen";
+import { draftToOnboardingFormData } from "../guestChat/guestChatConstants";
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ const Onboarding = () => {
       } catch { /* ignore */ }
     }
 
-    return {
+    const base = {
       guidance: [],
       name: "",
       email: "",
@@ -54,6 +55,22 @@ const Onboarding = () => {
       phoneNumber,
       otp: "",
     };
+
+    // Users reach `?step=personalize` via a hard redirect from the profile
+    // self-check, not by choosing to — including guests who just filled in the
+    // chat details form and verified an OTP. Landing them on a blank
+    // Personalize + BirthDetails pair asks for the same name, gender, birth
+    // date, time and place all over again, which is where they give up. Reuse
+    // what they already told us and let them just confirm.
+    if (isPersonalizeFlow) {
+      const carried = draftToOnboardingFormData();
+      if (carried) {
+        // Anything already known from the account wins over the draft.
+        return { ...base, ...carried, phoneNumber: phoneNumber || carried.phoneNumber || "" };
+      }
+    }
+
+    return base;
   });
 
   // Redirect already-logged-in users to home (unless coming from kundli self-check)
@@ -111,6 +128,19 @@ const Onboarding = () => {
       console.log("ℹ️ No device limit found in storage");
     }
   }, []);
+
+  // Arriving here can be involuntary: the profile self-check does a full page
+  // replace to `?step=personalize`. Say why, so a user who was midway through
+  // starting a chat understands this is the last step rather than a reset.
+  useEffect(() => {
+    if (!isPersonalizeFlow) return;
+    let reason = null;
+    try {
+      reason = sessionStorage.getItem("shubhtalk_personalize_reason");
+      if (reason) sessionStorage.removeItem("shubhtalk_personalize_reason");
+    } catch { /* ignore */ }
+    if (reason) setTimeout(() => toast(reason, { icon: "ℹ️" }), 300);
+  }, [isPersonalizeFlow]);
 
   const handleStepChange = (step) => {
     // When guidance is skipped, don't allow navigating to step index 2 (GuidanceScreen)

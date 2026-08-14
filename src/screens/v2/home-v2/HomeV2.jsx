@@ -51,6 +51,22 @@ const COMMUNITY_AVATARS = [
 ];
 const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
 
+/**
+ * "Sign in" affordance inside the guest greeting.
+ *
+ * This used to be an onClick + underline on the whole `<p>`, with the hint as a
+ * 12px inline span. The handler worked, but the actual target was a short run of
+ * small text inside a paragraph — so a near-miss landed on the surrounding
+ * padding and did nothing, which is how it shows up as a dead click on the one
+ * element a guest reaches for to sign in. As a real button it gets a padded hit
+ * area, keyboard access and a proper accessible name.
+ */
+const GuestSignInLink = ({ onClick }) => (
+  <button type="button" className={styles.guestSignInLink} onClick={onClick}>
+    Sign in
+  </button>
+);
+
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
 const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick, onLiveCommunityClick, onRequireGuestAuth }) => {
@@ -87,14 +103,8 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
           <div className={styles.centerCard}>
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
-                <p
-                  className={styles.greeting}
-                  key={`greeting-${name}`}
-                  onClick={name === "Guest" ? () => navigate("/login") : undefined}
-                  style={name === "Guest" ? { cursor: "pointer", textDecoration: "underline" } : undefined}
-                  role={name === "Guest" ? "button" : undefined}
-                >
-                  Hello, {name}! 👋 {name === "Guest" && <span style={{ fontSize: "12px", opacity: 0.8 }}>Sign in</span>}
+                <p className={styles.greeting} key={`greeting-${name}`}>
+                  Hello, {name}! 👋 {name === "Guest" && <GuestSignInLink onClick={() => navigate("/login")} />}
                 </p>
                 <h1>
                   {section.title
@@ -320,7 +330,9 @@ const renderUngroupedHeroSection = (section, props) => {
       return (
         <section key={key} className={styles.heroBanner} style={{ margin: '16px 0' }}>
           <div className={styles.heroContent}>
-            <p className={styles.greeting} onClick={name === "Guest" ? () => navigate("/login") : undefined} style={name === "Guest" ? { cursor: "pointer", textDecoration: "underline" } : undefined} role={name === "Guest" ? "button" : undefined}>Hello, {name}! 👋 {name === "Guest" && <span style={{ fontSize: "12px", opacity: 0.8 }}>Sign in</span>}</p>
+            <p className={styles.greeting}>
+              Hello, {name}! 👋 {name === "Guest" && <GuestSignInLink onClick={() => navigate("/login")} />}
+            </p>
             <h1>{section.title ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></> : <>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></>}</h1>
             {currentMahadasha && <div className={styles.mahadashaTag}>🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong></div>}
           </div>

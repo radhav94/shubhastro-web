@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
@@ -19,6 +19,9 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const dispatch = useDispatch();
   const [phoneNumber, setPhoneNumber] = useState(formData.phoneNumber || "");
   const [loading, setLoading] = useState(false);
+  // Focused when the CTA is tapped with an incomplete number, so the fix is
+  // one keystroke away rather than a hunt back up the page.
+  const phoneInputRef = useRef(null);
 
   // Show device kicked message if redirected from interceptor
   useState(() => {
@@ -30,35 +33,64 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   });
 
   const handleGetOTP = async () => {
-    if (phoneNumber.length >= 10) {
-      setLoading(true);
-      trackEvent("mobile_number_entered", { mobile_number: phoneNumber, country_code: "91" });
-      trackEvent("otp_requested", { mobile_number: phoneNumber });
-      try {
-        const payload = {
-          phoneNumber: `91${phoneNumber}`,
-          type: "CUSTOMER",
-        };
+    if (loading) return;
 
-        const response = await loginWithPhone(payload);
+    // This was doubly silent: the button carried `disabled={phoneNumber.length < 10}`
+    // so the browser swallowed the tap, and this function also wrapped its whole
+    // body in the same check. Tapping the offer CTA with a partial number did
+    // nothing whatsoever — at the final step of the signup funnel. Say what's
+    // missing and put the cursor back in the field.
+    if (phoneNumber.length < 10) {
+      trackEvent("login_blocked", {
+        blocker: "incomplete_mobile_number",
+        digits_entered: phoneNumber.length,
+      });
+      toast.error(
+        phoneNumber.length === 0
+          ? "Enter your 10-digit mobile number to claim the bonus."
+          : `Please enter all 10 digits — ${10 - phoneNumber.length} to go.`
+      );
+      phoneInputRef.current?.focus();
+      return;
+    }
 
-        if (response.data.success && response.data.statusCode === 200) {
-          trackEvent("otp_sent", { mobile_number: phoneNumber, delivery_status: "success" });
-          toast.success(response.data.message || "OTP sent successfully");
-          updateFormData({ phoneNumber });
-          onNext();
-        } else {
-          toast.error(response.data.message || "Failed to send OTP");
-        }
-      } catch (error) {
-        console.error("Login error:", error);
-        toast.error(
-          error.response?.data?.message ||
-            "Failed to send OTP. Please try again.",
-        );
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    trackEvent("mobile_number_entered", { mobile_number: phoneNumber, country_code: "91" });
+    trackEvent("otp_requested", { mobile_number: phoneNumber });
+    try {
+      const payload = {
+        phoneNumber: `91${phoneNumber}`,
+        type: "CUSTOMER",
+      };
+
+      const response = await loginWithPhone(payload);
+
+      if (response.data.success && response.data.statusCode === 200) {
+        trackEvent("otp_sent", { mobile_number: phoneNumber, delivery_status: "success" });
+        toast.success(response.data.message || "OTP sent successfully");
+        updateFormData({ phoneNumber });
+        onNext();
+      } else {
+        trackEvent("login_blocked", {
+          blocker: "otp_send_failed",
+          error_reason: response.data.message || "non_200_response",
+        });
+        toast.error(response.data.message || "Failed to send OTP");
       }
+    } catch (error) {
+      console.error("Login error:", error);
+      trackEvent("login_blocked", {
+        blocker: "otp_send_failed",
+        error_reason: error.response?.status
+          ? `http_${error.response.status}`
+          : error.message || "request_threw",
+      });
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to send OTP. Please try again.",
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -155,9 +187,11 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
               </svg>
             </div>
             <input
+              ref={phoneInputRef}
               type="tel"
               value={phoneNumber}
               autoFocus
+              autoComplete="tel-national"
               onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && phoneNumber.length >= 10 && !loading) {
@@ -172,9 +206,11 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
           {/* CTA Button */}
           <button
-            className={styles.newClaimBtn}
+            type="button"
+            className={`${styles.newClaimBtn} ${phoneNumber.length < 10 ? styles.newClaimBtnIncomplete : ""}`.trim()}
             onClick={handleGetOTP}
-            disabled={phoneNumber.length < 10 || loading}
+            aria-disabled={phoneNumber.length < 10}
+            aria-busy={loading}
           >
             {loading ? "Sending..." : "Claim ₹250 Now"}
             {!loading && (

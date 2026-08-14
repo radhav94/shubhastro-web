@@ -195,6 +195,41 @@ const AstrologerProfile = () => {
     }
   };
 
+  // Availability for the three connect tiles (Chat / Audio / Video).
+  //
+  // These tiles used to be `<div onClick={cond && handler}>`: when the
+  // astrologer was offline, not accepting that session type, or had no rate
+  // configured, the tap was swallowed and nothing at all happened — no toast,
+  // no modal. `.connectOptionDisabled` only dimmed them and set a `cursor`,
+  // which is meaningless on touch. That is a dead click, and it is what mobile
+  // users hit after tapping through from a category listing.
+  const connectTiles = useMemo(() => {
+    const activeTypes = data?.isActiveType || [];
+    const isOnline = data?.isActive === true;
+
+    const build = (label, typeKey, rateKey) => {
+      const price = Number(data?.price?.[rateKey]?.amount) || 0;
+      const isTypeActive = activeTypes.includes("all") || activeTypes.includes(typeKey);
+      return {
+        price,
+        enabled: isOnline && !isLive && isTypeActive && price > 0,
+        reason: unavailableReason({
+          label,
+          isOnline,
+          isLive,
+          isTypeActive,
+          hasPrice: price > 0,
+        }),
+      };
+    };
+
+    return {
+      chat: build("Chat", "chat", "chatRate"),
+      audio: build("Call", "audio", "audioRate"),
+      video: build("Video call", "video", "videoCallRate"),
+    };
+  }, [data?.isActive, data?.isActiveType, data?.price, isLive]);
+
   // Fetch top astrologers for left sidebar (desktop only)
   const { data: topAstrologersData } = useGetAstrologersQuery({
     page: 1,
@@ -1690,13 +1725,18 @@ const AstrologerProfile = () => {
               </div>
             ) : (
               <div className={styles.connectOptions}>
-                <div
-                  className={`${styles.connectOption} ${(!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) || !data?.price?.chatRate?.amount) ? styles.connectOptionDisabled : ""}`}
-                  onClick={() =>
-                    data?.isActive &&
-                    (data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) &&
-                    data?.price?.chatRate?.amount && handleChatStart(data)
-                  }
+                <button
+                  type="button"
+                  className={`${styles.connectOption} ${!connectTiles.chat.enabled ? styles.connectOptionDisabled : ""}`}
+                  onClick={() => {
+                    if (!connectTiles.chat.enabled) {
+                      toast.info(connectTiles.chat.reason);
+                      return;
+                    }
+                    handleChatStart(data);
+                  }}
+                  aria-disabled={!connectTiles.chat.enabled}
+                  title={!connectTiles.chat.enabled ? connectTiles.chat.reason : "Start chat"}
                 >
                   <div className={styles.optionIcon}>
                     <BiMessageDetail />
@@ -1710,16 +1750,20 @@ const AstrologerProfile = () => {
                       )}
                     </span>
                   </div>
-                </div>
+                </button>
 
-                <div
-                  className={`${styles.connectOption} ${(!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) || !data?.price?.audioRate?.amount) ? styles.connectOptionDisabled : ""}`}
-                  onClick={() =>
-                    data?.isActive &&
-                    (data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) &&
-                    data?.price?.audioRate?.amount &&
-                    handleCallStart(data, "audio")
-                  }
+                <button
+                  type="button"
+                  className={`${styles.connectOption} ${!connectTiles.audio.enabled ? styles.connectOptionDisabled : ""}`}
+                  onClick={() => {
+                    if (!connectTiles.audio.enabled) {
+                      toast.info(connectTiles.audio.reason);
+                      return;
+                    }
+                    handleCallStart(data, "audio");
+                  }}
+                  aria-disabled={!connectTiles.audio.enabled}
+                  title={!connectTiles.audio.enabled ? connectTiles.audio.reason : "Start audio call"}
                 >
                   <div className={styles.optionIcon}>
                     <BiPhone />
@@ -1733,16 +1777,20 @@ const AstrologerProfile = () => {
                       )}
                     </span>
                   </div>
-                </div>
+                </button>
 
-                <div
-                  className={`${styles.connectOption} ${(!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("video")) || !data?.price?.videoCallRate?.amount) ? styles.connectOptionDisabled : ""}`}
-                  onClick={() =>
-                    data?.isActive &&
-                    (data?.isActiveType?.includes("all") || data?.isActiveType?.includes("video")) &&
-                    data?.price?.videoCallRate?.amount &&
-                    handleCallStart(data, "video")
-                  }
+                <button
+                  type="button"
+                  className={`${styles.connectOption} ${!connectTiles.video.enabled ? styles.connectOptionDisabled : ""}`}
+                  onClick={() => {
+                    if (!connectTiles.video.enabled) {
+                      toast.info(connectTiles.video.reason);
+                      return;
+                    }
+                    handleCallStart(data, "video");
+                  }}
+                  aria-disabled={!connectTiles.video.enabled}
+                  title={!connectTiles.video.enabled ? connectTiles.video.reason : "Start video call"}
                 >
                   <div className={styles.optionIcon}>
                     <BiVideo />
@@ -1756,7 +1804,7 @@ const AstrologerProfile = () => {
                       )}
                     </span>
                   </div>
-                </div>
+                </button>
               </div>
             )}
           </div>}

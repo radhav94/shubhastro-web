@@ -526,6 +526,21 @@
     cursor: not-allowed;
   }
 }
+
+/*
+ * Required details still missing. Looks like the `:disabled` state but carries no
+ * `disabled` attribute, so the tap reaches the handler and can name the blocker.
+ * A disabled CTA on a scrolled mobile form absorbs the tap and says nothing.
+ */
+.otpprimaryBtnBlocked {
+  opacity: 0.5;
+
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 .otpprimaryBtnPer{
   margin: 20px auto 20px auto;
   @media (width <= 767px) {
@@ -2042,6 +2057,21 @@
   @media (max-width: 480px) {
     font-size: 16px;
     padding: 12px 20px;
+  }
+}
+
+/*
+ * Number not yet complete. Looks like the old `:disabled` state but carries no
+ * `disabled` attribute, so the tap still reaches the handler and can say which
+ * digits are missing. A disabled CTA here silently absorbed the tap at the last
+ * step of the signup funnel.
+ */
+.newClaimBtnIncomplete {
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.5;
+    transform: none;
   }
 }
 

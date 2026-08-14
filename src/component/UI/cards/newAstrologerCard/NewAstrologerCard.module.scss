@@ -771,7 +771,12 @@
   gap: 12px;
   margin-top: auto;
   width: 100%;
-  
+  // Must sit above .detailsImageLink (the full-card overlay anchor, z-index 1),
+  // otherwise the overlay can intercept Chat/Call taps and the buttons read as
+  // dead while the card silently navigates to the profile instead.
+  position: relative;
+  z-index: 2;
+
   @media screen and (width <= 767px) {
     gap: 8px;
   }

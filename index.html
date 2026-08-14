@@ -6,6 +6,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
   <meta name="theme-color" content="#F75801">
   <script>
+    // Storage safety net. MUST stay the first script on the page.
+    //
+    // When a browser blocks site data, merely READING `window.localStorage`
+    // throws "Access is denied for this document" — it does not return null.
+    // The app touches localStorage in ~560 places, including a module-scope IIFE
+    // in main.jsx that runs before React mounts, so a single throw there aborts
+    // evaluation of the bundle and the user gets a blank page. That shows up in
+    // analytics as a sub-10-second, zero-click bounce.
+    //
+    // Rather than guard 560 call sites, swap in an in-memory implementation when
+    // the real one is unavailable. The app then runs normally for the visit;
+    // nothing persists across reloads, which is the correct outcome for someone
+    // who has blocked storage anyway.
+    //
+    // This has to live in index.html because ES module imports are evaluated
+    // before the importing module's body — so no code inside the bundle can be
+    // guaranteed to run first.
+    (function () {
+      function createMemoryStorage() {
+        var data = Object.create(null);
+        return {
+          getItem: function (key) {
+            var k = String(key);
+            return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null;
+          },
+          setItem: function (key, value) { data[String(key)] = String(value); },
+          removeItem: function (key) { delete data[String(key)]; },
+          clear: function () { data = Object.create(null); },
+          key: function (i) { var keys = Object.keys(data); return i in keys ? keys[i] : null; },
+          get length() { return Object.keys(data).length; }
+        };
+      }
+
+      function isUsable(name) {
+        try {
+          // The property read itself is what throws when access is denied.
+          var store = window[name];
+          if (!store) return false;
+          // Safari private mode and zero-quota contexts expose the object but
+          // reject writes, so probe before trusting it.
+          var probe = '__storage_probe__';
+          store.setItem(probe, '1');
+          store.removeItem(probe);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      ['localStorage', 'sessionStorage'].forEach(function (name) {
+        if (isUsable(name)) return;
+        try {
+          Object.defineProperty(window, name, {
+            value: createMemoryStorage(),
+            configurable: true
+          });
+          if (window.console && console.warn) {
+            console.warn('[storage] ' + name + ' unavailable — using in-memory fallback for this visit.');
+          }
+        } catch (e) {
+          /* Nothing more we can do; individual call sites will still throw. */
+        }
+      });
+    })();
+  </script>
+  <script>
     // iOS Safari/Chrome ignore `user-scalable=no`, so pinch/double-tap still
     // zoom the whole page (e.g. when zooming a photo on the AI-Wow camera
     // screens). Enforce the declared no-zoom intent by blocking the zoom
