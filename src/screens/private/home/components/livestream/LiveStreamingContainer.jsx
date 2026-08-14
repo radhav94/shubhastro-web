@@ -85,6 +85,10 @@ const LiveStreamingContainer = ({ client }) => {
         ...saved,
         astrologer: {
           _id: currentLive.astrologerId,
+          // Preserve the username so name rendering stays userName-first.
+          // `astrologerName` is already the resolved display name, so use it as
+          // the fallback rather than splitting it into first/last.
+          userName: currentLive.userName || currentLive.astrologerName || "",
           firstName: currentLive.astrologerName?.split(" ")[0] || "",
           lastName: currentLive.astrologerName?.split(" ").slice(1).join(" ") || "",
           rating: currentLive.rating,
@@ -112,6 +116,12 @@ const LiveStreamingContainer = ({ client }) => {
   // Keep live state in a ref so the callback always reads fresh values
   const liveRef = useRef(live);
   useEffect(() => { liveRef.current = live; }, [live]);
+
+  // Display name resolved by LiveView from the FULL astrologer record (which
+  // carries `userName`). The live-list API and the `live:astrologer_status`
+  // socket payload only provide the real first + last name, so we use this to
+  // show the username in the "has left" modal.
+  const resolvedHostNameRef = useRef("");
 
   // Keep channel in a ref so handleAstrologerStatus always reads the current channel
   const channelRef = useRef(channel);
@@ -159,8 +169,14 @@ const LiveStreamingContainer = ({ client }) => {
       if (wasWatchingThis) {
         // Show modal first, defer removeLive until modal closes/auto-dismisses
         // Use profileImage from socket event, fallback to currentLive's imageUrl
-        const resolvedImage = profileImage || liveList?.getCurrentLive()?.imageUrl || null;
-        setEndedInfo({ hostName, profileImage: resolvedImage, gender, roomId });
+        const currentLiveEntry = liveList?.getCurrentLive();
+        const resolvedImage = profileImage || currentLiveEntry?.imageUrl || null;
+        // Prefer the username-based name resolved from the full astrologer
+        // record, then the live-list entry, and only then the socket payload's
+        // hostName (which carries the astrologer's real first + last name).
+        const resolvedHostName =
+          resolvedHostNameRef.current || currentLiveEntry?.astrologerName || hostName;
+        setEndedInfo({ hostName: resolvedHostName, profileImage: resolvedImage, gender, roomId });
         if (endedTimerRef.current) clearTimeout(endedTimerRef.current);
         endedTimerRef.current = setTimeout(() => {
           setEndedInfo((prev) => {
@@ -228,7 +244,7 @@ const LiveStreamingContainer = ({ client }) => {
       if (prev) return prev;
       const currentAstro = liveList?.getCurrentLive();
       return {
-        hostName: currentAstro?.astrologerName || "Astrologer",
+        hostName: resolvedHostNameRef.current || currentAstro?.astrologerName || "Astrologer",
         profileImage: currentAstro?.imageUrl || null,
         gender: currentAstro?.gender || null,
         roomId: targetRoom,
@@ -341,6 +357,7 @@ const LiveStreamingContainer = ({ client }) => {
       privateCallInfo={privateCallInfo}
       giftPopupOpenRef={giftPopupOpenRef}
       liveListRefreshKey={liveListRefreshKey}
+      onHostNameResolved={(name) => { resolvedHostNameRef.current = name || ""; }}
 />
 
     {/* 🔥 LIVE NAVIGATION CONTROLS */}

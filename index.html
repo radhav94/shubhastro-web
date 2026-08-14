@@ -72,6 +72,93 @@
     })();
   </script>
   <script>
+    // Global error reporting. Registered early (right after the storage shim) so
+    // it also sees failures during bundle parse/evaluation, not just runtime.
+    //
+    // Two gaps this closes:
+    //
+    // 1. Opacity. When a script from another origin throws without CORS headers,
+    //    the browser hands us the string "Script error." with no file, line or
+    //    stack. Analytics then shows an unactionable "script error" that is
+    //    indistinguishable from a real app bug. Our own bundle is same-origin
+    //    and carries `crossorigin`, so anything masked like this is third-party
+    //    (tag manager, analytics, Agora, Maps) — worth labelling as such rather
+    //    than chasing.
+    //
+    // 2. Unhandled promise rejections were not observed at all. A rejected
+    //    promise with no .catch() previously vanished silently.
+    //
+    // Reports go to Clarity (so they attach to the session recording) and to
+    // dataLayer. Deliberately does not swallow anything: the browser still logs.
+    (function () {
+      var MAX_REPORTS = 10;
+      var sent = 0;
+      var seen = {};
+
+      function report(kind, message, source, extra) {
+        try {
+          message = String(message || 'unknown').slice(0, 300);
+
+          // A cross-origin throw is stripped to this exact shape. Naming it
+          // stops it being mistaken for an app-level failure.
+          var masked = (message === 'Script error.' || message === 'Script error') && !source;
+          var key = kind + '|' + message + '|' + (source || '');
+          if (seen[key]) return;
+          seen[key] = true;
+          if (sent >= MAX_REPORTS) return;
+          sent++;
+
+          if (typeof window.clarity === 'function') {
+            window.clarity('set', 'jsErrorKind', masked ? 'cross_origin_masked' : kind);
+            window.clarity('set', 'jsErrorMessage', message);
+          }
+
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({
+            event: 'js_error',
+            error_kind: kind,
+            error_masked: masked,
+            error_message: message,
+            error_source: source || '(unavailable)',
+            error_detail: extra || ''
+          });
+        } catch (e) {
+          /* reporting must never itself break the page */
+        }
+      }
+
+      window.addEventListener('error', function (e) {
+        // Resource load failures (img/script/link) surface here too, with the
+        // element as target and no message — report them separately.
+        if (e && e.target && e.target !== window && e.target.tagName) {
+          report(
+            'resource_error',
+            e.target.tagName.toLowerCase() + ' failed to load',
+            e.target.currentSrc || e.target.src || e.target.href || ''
+          );
+          return;
+        }
+        report(
+          'uncaught_error',
+          e && e.message,
+          e && e.filename ? e.filename + ':' + e.lineno + ':' + e.colno : '',
+          e && e.error && e.error.stack ? String(e.error.stack).slice(0, 500) : ''
+        );
+      }, true);
+
+      window.addEventListener('unhandledrejection', function (e) {
+        var r = e && e.reason;
+        var msg = r && r.message ? r.message : String(r);
+        report(
+          'unhandled_rejection',
+          msg,
+          '',
+          r && r.stack ? String(r.stack).slice(0, 500) : ''
+        );
+      });
+    })();
+  </script>
+  <script>
     // iOS Safari/Chrome ignore `user-scalable=no`, so pinch/double-tap still
     // zoom the whole page (e.g. when zooming a photo on the AI-Wow camera
     // screens). Enforce the declared no-zoom intent by blocking the zoom
@@ -98,7 +185,6 @@
   <link rel="icon" type="image/svg+xml" href="/images/mobile-shubh-astro-logo.svg" />
   <link rel="shortcut icon" href="/images/mobile-shubh-astro-logo.svg" />
   <link rel="apple-touch-icon" href="/images/mobile-shubh-astro-logo.svg" />
-  <link rel="manifest" href="/site.webmanifest" />
 
   <!-- Mobile -->
   <meta name="mobile-web-app-capable" content="yes" />
@@ -146,8 +232,23 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" /></noscript>
 
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/1778659648-1576013064.png" fetchpriority="high" />
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/1778659743-240854750.png" fetchpriority="high" />
+  <!--
+    Body background preload, split by viewport.
+
+    Both files were previously covered by a single unconditional preload of the
+    desktop artwork. The stylesheet below swaps to the -mobile file at 767px, so
+    on a phone the 476 KB desktop PNG was downloaded at high priority and then
+    never painted — measured 1142ms -> 6161ms on a 4 Mbps profile, holding a
+    high-priority slot against the entry bundle for five seconds while the
+    97 KB mobile file was fetched separately.
+
+    The `media` attribute is honoured for rel=preload, so each viewport now
+    fetches only the file its stylesheet will actually use. Breakpoint matches
+    the 767px used in the inline CSS below and throughout the SCSS.
+  -->
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" fetchpriority="high" media="(min-width: 768px)" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" fetchpriority="high" media="(max-width: 767px)" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/ai-suite.png" fetchpriority="high" />
 
   <style>
     /* Size-adjusted fallback to reduce CLS from font swap */
@@ -162,7 +263,7 @@
 
     body {
       background-color: #ebecf2;
-      background-image: url('/src/assets/images/main-body-bg-new.png');
+      background-image: url('https://assets.shubhastro.ai/main-body-bg-new.png');
       background-repeat: repeat-y;
       background-attachment: fixed;
       background-size: 100% 100%;
@@ -171,6 +272,19 @@
       padding: 0;
       min-height: 100dvh!important;
       font-family: 'Poppins', 'Poppins Fallback', sans-serif;
+    }
+
+    /*
+      This rule is the background for every route. Without this override, only
+      HomeV2 got the mobile artwork — its `body.home-v2-page` selector outranks
+      the bare `body` above on specificity and carries its own media query — so
+      every other page fell through to the desktop image on phones.
+      Same 767px breakpoint used throughout the SCSS.
+    */
+    @media (max-width: 767px) {
+      body {
+        background-image: url('https://assets.shubhastro.ai/main-body-bg-new-mobile.png');
+      }
     }
 
     /* Astrologer card — global background */
@@ -182,15 +296,32 @@
   </style>
 
   <!-- Google Tag Manager -->
+  <!--
+    `j.crossOrigin` so exceptions thrown inside GTM (or any tag it loads)
+    report a real message and stack instead of the browser's opaque
+    "Script error.". GTM is the biggest suspect for masked errors because it
+    executes arbitrary container-configured tags.
+    Verified safe: a GET to https://www.googletagmanager.com/gtm.js?id=GTM-T5DTGXHW
+    with an Origin header returns `access-control-allow-origin` for this origin.
+    Do NOT copy this onto a script whose origin omits that header — the request
+    would fail CORS and the script would not load at all.
+  -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.crossOrigin='anonymous';j.src=
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','dataLayer','GTM-T5DTGXHW');</script>
   <!-- End Google Tag Manager -->
 
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MQBQTN9GSH"></script>
+  <!--
+    `crossorigin` so exceptions thrown inside gtag report a real message and
+    stack instead of the browser's opaque "Script error.". Safe here because
+    googletagmanager.com serves `access-control-allow-origin: *` (verified);
+    adding this to an origin that does NOT send that header would stop the
+    script loading at all, so it is applied only where confirmed.
+  -->
+  <script async crossorigin="anonymous" src="https://www.googletagmanager.com/gtag/js?id=G-MQBQTN9GSH"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -208,7 +339,12 @@
       if (host !== "shubhastro.ai" && host !== "www.shubhastro.ai") return;
       (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        // `crossOrigin` so exceptions thrown inside Clarity's own script report
+        // a real message and stack rather than "Script error.".
+        // Verified: GET https://www.clarity.ms/tag/xeickgmcun with an Origin
+        // header returns `Access-Control-Allow-Origin: *`. (An earlier HEAD
+        // probe returned 405, which is why this was left off previously.)
+        t=l.createElement(r);t.async=1;t.crossOrigin="anonymous";t.src="https://www.clarity.ms/tag/"+i;
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
       })(window, document, "clarity", "script", "xeickgmcun");
     })();
@@ -247,6 +383,14 @@
   <!-- Meta Pixel Code (production only) -->
   <script>
   (function () {
+    // NOTE: deliberately NO `crossOrigin` here, unlike the GTM and Clarity
+    // snippets above. A GET to https://connect.facebook.net/en_US/fbevents.js
+    // with an Origin header returns 200 with `timing-allow-origin: *` but NO
+    // `access-control-allow-origin`. Adding crossOrigin would make the request
+    // fail CORS, the pixel would never load, and ad attribution/conversion
+    // tracking would silently break. The cost is that any exception thrown
+    // inside fbevents.js stays masked as "Script error." — that is Meta's
+    // limitation, not something we can fix from here.
     var host = location.hostname;
     if (host !== "shubhastro.ai" && host !== "www.shubhastro.ai") return;
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?

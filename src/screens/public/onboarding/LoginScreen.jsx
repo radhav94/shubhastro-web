@@ -94,6 +94,15 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
     }
   };
 
+  // The desktop-only phone mockup is a 360x540 screenshot of the app's own UI
+  // sitting next to the form. It reads as live interface, so taps land on it and
+  // nothing happens. Everything it depicts is behind the sign-in, so answer the
+  // tap by pointing at the one control that unlocks it.
+  const handleMockupClick = () => {
+    toast("Enter your mobile number to open this.", { icon: "ℹ️" });
+    phoneInputRef.current?.focus();
+  };
+
   const handleSkipAndProceed = () => {
     dispatch(logout());
     localStorage.removeItem("shubhtalk_redirect_after_login");
@@ -179,13 +188,21 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
           {/* Phone Input */}
           <div className={styles.newPhoneInput}>
-            <div className={styles.newCountryCode}>
+            {/*
+              Fixed +91. The chevron that used to sit here advertised a country
+              picker that does not exist — validation is Indian-format only and
+              the backend prefixes "91" — so non-Indian visitors clicked it
+              repeatedly and left. Explain on tap rather than imply a choice.
+            */}
+            <button
+              type="button"
+              className={styles.newCountryCode}
+              onClick={() => toast("We currently support Indian (+91) mobile numbers only.", { icon: "ℹ️" })}
+              title="Indian (+91) numbers only"
+            >
               <img src="https://flagcdn.com/w40/in.png" alt="India" />
               <span>+91</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path d="M6 9l6 6 6-6" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
+            </button>
             <input
               ref={phoneInputRef}
               type="tel"
@@ -245,13 +262,18 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
         {/* Right Section - Phone Mockup */}
         <div className={styles.newLoginRight}>
-          <div className={styles.phoneMockup}>
+          <button
+            type="button"
+            className={styles.phoneMockup}
+            onClick={handleMockupClick}
+            aria-label="Enter your mobile number to open the app"
+          >
             <img
               src={loginMobile}
               alt="ShubhAstro App"
               loading="eager"
             />
-          </div>
+          </button>
         </div>
         </div>
       {/* </div> */}

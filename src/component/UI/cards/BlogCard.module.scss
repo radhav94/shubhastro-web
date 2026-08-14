@@ -162,7 +162,11 @@ $color-text-secondary: #6c757d;
   position: relative;
   margin-left: auto;
   flex-shrink: 0;
-  &:hover .shareIconSocial {
+
+  /* Hover is a convenience for mouse users only. The tray must not depend on
+     it: touch devices have no hover, which made share unreachable there. */
+  &:hover .shareIconSocial,
+  &.shareOpen .shareIconSocial {
     display: flex;
   }
 }
@@ -188,9 +192,14 @@ $color-text-secondary: #6c757d;
   gap: 6px;
   z-index: 10;
 
-  span.socialIconWrapper {
+  /* Not element-qualified: these are <button>s now, not <span>s, so a
+     `span.socialIconWrapper` selector would silently stop matching. */
+  .socialIconWrapper {
     width: 30px;
     height: 30px;
+    padding: 0;
+    border: none;
+    font: inherit;
     background: #fff;
     border-radius: 50%;
     display: flex;

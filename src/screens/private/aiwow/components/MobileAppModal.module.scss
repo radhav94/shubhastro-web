@@ -238,6 +238,13 @@
   transition: all 0.2s;
   min-width: 180px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  // The App Store variant renders as a <button> while the iOS app is unreleased,
+  // so reset the UA defaults that would otherwise make it differ from the <a>.
+  border: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
 
   &:hover {
     background: #1a1a1a;

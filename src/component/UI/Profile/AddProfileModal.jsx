@@ -6,7 +6,6 @@ import {
   IoCalendarOutline,
   IoTimeOutline,
   IoLocationOutline,
-  IoChevronDown,
   IoSparkles,
   IoShieldCheckmarkOutline,
   IoPeople,
@@ -257,7 +256,7 @@ const AddProfileModal = ({
             <div className={styles.guestHeader}>
               <span className={styles.onlineBadge}>
                 <IoPeople className={styles.badgeIcon} />
-                <b>10K+</b> Astrologers Online
+                <b>1K+</b> Astrologers Online
               </span>
               <div className={styles.headerRow}>
                 <div className={styles.headerText}>
@@ -301,11 +300,23 @@ const AddProfileModal = ({
                   <div className={styles.formGroup}>
                     <label>Mobile Number <span className={styles.required}>*</span></label>
                     <div className={styles.mobileWrap}>
-                      <span className={styles.flagBox}>
+                      {/*
+                        The country code is fixed at +91: validation is
+                        /^[6-9]\d{9}$/ and the backend prefixes "91" on submit.
+                        This used to render a chevron-down next to it, which
+                        promises a picker that does not exist — non-Indian users
+                        tapped it repeatedly and left. No chevron now, and a tap
+                        gets an answer instead of silence.
+                      */}
+                      <button
+                        type="button"
+                        className={styles.flagBox}
+                        onClick={() => Toast.info("We currently support Indian (+91) mobile numbers only.")}
+                        title="Indian (+91) numbers only"
+                      >
                         <span className={styles.flag}>🇮🇳</span>
                         +91
-                        <IoChevronDown size={12} />
-                      </span>
+                      </button>
                       <Field
                         type="tel"
                         name="mobileNumber"

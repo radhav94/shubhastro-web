@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../Community.module.scss";
-import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
+import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
 
 const AstrologerAvatar = ({ astrologer, name }) => {
   const [imgError, setImgError] = useState(false);
@@ -49,7 +49,7 @@ const TrendingAstrologers = ({
   if (!astrologers.length) return null;
 
   const handleConnect = (astrologer) => {
-    navigate(`/astrologer/${astrologer._id}`);
+    navigate(getAstrologerProfilePath(astrologer));
   };
 
   return (

@@ -10,6 +10,8 @@ import toast from "../../../../../component/toast";
 const LIVE_BLOCKED_REASON =
   "This astrologer is in a live session right now. Join the live stream or try again once it ends.";
 
+const NO_RECORDING_REASON = "No recording saved for this session.";
+
 const OrderInfoCard = ({
   orderId,
   date,
@@ -88,8 +90,16 @@ const OrderInfoCard = ({
     return () => { if (hls) hls.destroy(); videoHlsRef.current = null; };
   }, [showVideoModal, recordingUrl]);
 
+  const hasRecording = Boolean(recordingUrl);
+
   const handleCardClick = useCallback(() => {
-    if (!recordingUrl) return;
+    // Was a bare `if (!recordingUrl) return`, so a card with no recording still
+    // rendered a play triangle with cursor: pointer and answered every tap with
+    // nothing. Say why instead.
+    if (!recordingUrl) {
+      toast.info(NO_RECORDING_REASON);
+      return;
+    }
     if (type === "video") {
       setShowVideoModal(true);
     } else {
@@ -110,6 +120,18 @@ const OrderInfoCard = ({
       if (isPlaying) { stopAudio(media); } else { playAudio(media); }
     }
   }, [isPlaying, type, recordingUrl]);
+
+  // role="button" without keyboard handling is a link to nowhere for keyboard
+  // and screen-reader users, so mirror the native button contract.
+  const handleCardKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleCardClick();
+      }
+    },
+    [handleCardClick]
+  );
 
   const closeVideoModal = useCallback(() => {
     const video = videoRef.current;
@@ -164,8 +186,26 @@ const OrderInfoCard = ({
             </div>
           )}
 
-          <div className={styles.cardContent}>
-            <div className={styles.waveformIcon} onClick={handleCardClick}>
+          {/* The whole row is the play target, not just the 90x90 icon. The
+              video layout below already worked this way, so tapping the date,
+              duration or amount on a call recording used to do nothing at all
+              even though the row reads as an audio player. */}
+          <div
+            className={`${styles.cardContent} ${styles.cardContentPlayable}`}
+            onClick={handleCardClick}
+            onKeyDown={handleCardKeyDown}
+            role="button"
+            tabIndex={0}
+            aria-disabled={!hasRecording}
+            aria-label={
+              hasRecording
+                ? `${isPlaying ? "Pause" : "Play"} call recording`
+                : NO_RECORDING_REASON
+            }
+          >
+            <div
+              className={`${styles.waveformIcon} ${hasRecording ? "" : styles.waveformIconEmpty}`.trim()}
+            >
               {isPlaying ? (
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" >
                   <rect width="3" height="20" x="4" y="10" fill="#111827" rx="1.5">
@@ -210,7 +250,11 @@ const OrderInfoCard = ({
             </div>
           </div>
 
-          <ProgressBar
+          {/* Only render the scrubber when there is something to scrub. With no
+              recording the media element has no duration, so the draggable
+              thumb moved nothing. */}
+          {hasRecording && (
+            <ProgressBar
               progress={progress}
               onSeek={(percentage) => {
                 const media = mediaRef.current;
@@ -221,6 +265,7 @@ const OrderInfoCard = ({
                 setProgress(percentage);
               }}
             />
+          )}
           <audio ref={mediaRef} preload="auto" style={{ display: "none" }} />
 
           <div className={styles.ratingSection}>
@@ -260,7 +305,15 @@ const OrderInfoCard = ({
             <h3 className={styles.orderId}>#{String(orderId).slice(-4)}</h3>
           </div>
         )}
-        <div className={styles.cardContent} onClick={handleCardClick} role="button">
+        <div
+          className={`${styles.cardContent} ${styles.cardContentPlayable}`}
+          onClick={handleCardClick}
+          onKeyDown={handleCardKeyDown}
+          role="button"
+          tabIndex={0}
+          aria-disabled={!hasRecording}
+          aria-label={hasRecording ? "Play video recording" : NO_RECORDING_REASON}
+        >
           <img
             src={astrologerImage || "https://via.placeholder.com/100"}
             alt={astrologerName || "Astrologer"}

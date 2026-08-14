@@ -23,6 +23,7 @@ import ConnectAstrologerPopup from "../../../v2/components/ui/ConnectAstrologerP
 import EmergencySessionModal from "../../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import ProfileModals from "../../../kundli/components/ProfileModals";
 import { useProfileManager } from "../../../kundli/hooks/useProfileManager";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 
 const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
   const dispatch = useDispatch();
@@ -220,7 +221,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           channelName,
           chatRoomId,
           agoraToken: token,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           callType: type,
           userId: userIdLocal,
@@ -255,13 +256,13 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
         setActiveChat({
           roomId,
           chatRoomId,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
           astrologerID: astro?.astrologer_ID || data?.astrologer?.astrologer_ID,
           kundliId,
-          astrologerName: data?.astrologer?.firstName || "",
+          astrologerName: getAstrologerDisplayName(data?.astrologer),
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
           profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
@@ -272,11 +273,11 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+            fullName: getAstrologerDisplayName(astro),
             roomId,
             isUserSide: true,
             kundliId,
-            astrologerName: data?.astrologer?.firstName || "",
+            astrologerName: getAstrologerDisplayName(data?.astrologer),
             astroID: data?.astrologer?.astrologer_ID,
             experience: data?.astrologer?.experience,
             profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,

@@ -297,16 +297,20 @@ const TopHeader = () => {
               </svg>
             </div>
 
-            <div className={styles.logoHeader} onClick={() => navigate("/")}>
+            {/* Real anchors, not click-handled divs: the logo advertises itself as
+                clickable (cursor: pointer) so it must also support middle-click,
+                Cmd/Ctrl-click, keyboard Enter and "open in new tab". */}
+            <Link to="/" className={styles.logoHeader} aria-label="ShubhAstro home">
               <img src={ShubhTalkLogo} alt="Shubh Talk Logo" width="150" height="32" />
-            </div>
+            </Link>
 
-            <div
+            <Link
+              to="/"
               className={styles.logoHeaderMobile}
-              onClick={() => navigate("/")}
+              aria-label="ShubhAstro home"
             >
               <img src={ShubhTalkLogoMobile} alt="Shubh Talk Logo" width="32" height="32" />
-            </div>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}

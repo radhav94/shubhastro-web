@@ -81,22 +81,37 @@ import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearAllCalculatorData } from "../../../redux/calculator/calculatorSlice";
 import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
 import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
+import {
+  getAstrologerDisplayName,
+  getAstrologerProfilePath,
+} from "../../../utils/helper/string.utils";
 
 // "Consult Again" button that disables in real time when the astrologer is live.
 // Uses useAstrologerLiveStatus so it reacts to the live socket event even when
 // the live status arrives after the initial render (the list data alone doesn't
 // update reactively for socket-driven live changes).
+const CONSULT_LIVE_BLOCKED_REASON =
+  "This astrologer is in a live session right now. Join the live stream or try again once it ends.";
+
 const ConsultAgainButton = ({ astrologer, seedLiveStatus, onConsultAgain }) => {
   const { isLive } = useAstrologerLiveStatus(astrologer?._id, seedLiveStatus);
   return (
+    // Blocked-while-live was previously expressed twice over, both silently:
+    // `disabled` meant the browser swallowed the tap, and the handler also
+    // returned early without a word. The user got no response at all. Stay
+    // tappable and explain — same treatment as the order-history button.
     <button
-      className={styles.consultAgainButton}
+      className={`${styles.consultAgainButton} ${isLive ? styles.consultAgainBlocked : ""}`.trim()}
       onClick={(e) => {
         e.stopPropagation();
-        if (isLive) return;
+        if (isLive) {
+          Toast.info(CONSULT_LIVE_BLOCKED_REASON);
+          return;
+        }
         onConsultAgain(astrologer);
       }}
-      disabled={isLive}
+      aria-disabled={isLive}
+      title={isLive ? CONSULT_LIVE_BLOCKED_REASON : "Consult again"}
     >
       Consult Again
     </button>
@@ -806,13 +821,13 @@ const Profile = () => {
         setActiveChat({
           roomId,
           chatRoomId: roomId,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           userId: userId,
           astrologerId: astrologerId,
           astrologerID: astro?.astrologer_ID,
           kundliId,
-          astrologerName: astro?.firstName || "",
+          astrologerName: getAstrologerDisplayName(astro),
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
           profileImgUrl: astro?.profileImgUrl,
@@ -824,11 +839,11 @@ const Profile = () => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+            fullName: getAstrologerDisplayName(astro),
             roomId,
             isUserSide: true,
             kundliId,
-            astrologerName: astro?.firstName || "",
+            astrologerName: getAstrologerDisplayName(astro),
             astroID: astro?.astrologer_ID,
             experience: astro?.experience,
             profileImgUrl: astro?.profileImgUrl,
@@ -896,7 +911,7 @@ const Profile = () => {
           channelName,
           chatRoomId,
           agoraToken: token,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           callType: type,
           userId: userId,
@@ -1044,7 +1059,9 @@ const Profile = () => {
   const handleRateConsultation = (astrologer, roomId) => {
     setReviewData({
       astrologerID: astrologer.astrologer_ID || astrologer._id,
-      fullName: astrologer.name || `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
+      // userName-first — only fall back to the plain `name` field when the
+      // helper can't resolve a username / first+last name.
+      fullName: getAstrologerDisplayName(astrologer) || astrologer.name,
       profileImage: astrologer.image || astrologer.profileImgUrl || astrologer.imageUrl,
       roomId,
     });
@@ -1872,7 +1889,9 @@ const Profile = () => {
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       navigate(
-                                        `/astrologer/${order.astrologer._id}`,
+                                        getAstrologerProfilePath(
+                                          order.astrologer,
+                                        ),
                                       );
                                     }}
                                     style={{ cursor: "pointer" }}
@@ -1898,12 +1917,16 @@ const Profile = () => {
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         navigate(
-                                          `/astrologer/${order.astrologer._id}`,
+                                          getAstrologerProfilePath(
+                                            order.astrologer,
+                                          ),
                                         );
                                       }}
                                       style={{ cursor: "pointer" }}
                                     >
-                                      {order.astrologer.name}
+                                      {/* userName-first, else the plain name */}
+                                      {getAstrologerDisplayName(order.astrologer) ||
+                                        order.astrologer.name}
                                     </h5>
                                     <div className={styles.orderMeta}>
                                       <span className={styles.orderDate}>
@@ -2146,7 +2169,11 @@ const Profile = () => {
                           <div className={styles.txnDetails}>
                             <h4 className={styles.txnTitle}>
                               {transaction.description || "Transaction with"}{" "}
-                              {transaction?.displayProfile?.name}
+                              {/* userName-first: show the astrologer's username when
+                                  available, else fall back to their real name. */}
+                              {transaction?.displayProfile?.userName ||
+                                getAstrologerDisplayName(transaction?.displayProfile) ||
+                                transaction?.displayProfile?.name}
                             </h4>
                             <span className={styles.txnMeta}>
                               {dayjs(transaction.createdAt).format("DD MMM, YYYY • hh:mm A")} • TXN #{transaction._id?.slice(-4)}

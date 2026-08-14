@@ -225,9 +225,9 @@ const OrderDetails = () => {
         if (!roomId) throw new Error("Room ID missing");
         setActiveChat({
           roomId, chatRoomId: roomId,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true, userId: uid, astrologerId: astroId,
-          astrologerName: astro?.firstName || "",
+          astrologerName: getAstrologerDisplayName(astro),
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
           profileImgUrl: astro?.profileImgUrl,
@@ -251,7 +251,7 @@ const OrderDetails = () => {
         const chatRoomId = res?.data?.data;
         setActiveCall({
           roomId, channelName, chatRoomId, agoraToken: token,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true, callType: type, userId, astrologerId: astro._id,
           astrologerID: astro?.astrologer_ID, remainingTime,
           experience: astro?.experience,

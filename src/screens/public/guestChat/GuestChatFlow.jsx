@@ -7,7 +7,6 @@ import {
   IoCalendarOutline,
   IoTimeOutline,
   IoLocationOutline,
-  IoChevronDown,
   IoSparkles,
   IoShieldCheckmarkOutline,
 } from "react-icons/io5";
@@ -23,6 +22,10 @@ import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrolo
 import { getAstrologerDefaultImage } from "../../../utils/appImages";
 import { getToken } from "../../../utils/token";
 import { capitalizeWords } from "../../../utils/capitalize";
+import {
+  getAstrologerDisplayName,
+  getAstrologerProfilePath,
+} from "../../../utils/helper/string.utils";
 import { useGetBalanceMutation } from "../../../redux/api/wallet/walletApi";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 import {
@@ -91,7 +94,7 @@ const GuestChatFlow = () => {
   const astrologerRef = useRef(astrologer);
   astrologerRef.current = astrologer;
 
-  const astroName = `${astrologer?.firstName || ""} ${astrologer?.lastName || ""}`.trim() || "Astrologer";
+  const astroName = getAstrologerDisplayName(astrologer) || "Astrologer";
   const astroImg = astrologer?.profileImgUrl || getAstrologerDefaultImage(astrologer?.gender);
   const [imgError, setImgError] = useState(false);
 
@@ -138,7 +141,15 @@ const GuestChatFlow = () => {
   // once registered mid-flow). Send them out and replace history.
   useEffect(() => {
     if (getToken()) {
-      navigate(astrologerId ? `/astrologer/${astrologerId}` : "/astrologers", { replace: true });
+      navigate(
+        astrologerId
+          ? getAstrologerProfilePath(
+              astrologer || astrologerRef.current || astrologerId,
+              astrologerId
+            )
+          : "/astrologers",
+        { replace: true }
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -570,7 +581,7 @@ const GuestChatFlow = () => {
       const astro = data?.astrologer || astrologerRef.current || {};
       const targetId = accAstroId || astro?._id;
       const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
-      const fullName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
+      const fullName = getAstrologerDisplayName(astro);
 
       setActiveChat({
         roomId,
@@ -580,7 +591,7 @@ const GuestChatFlow = () => {
         userId: userIdLocal,
         astrologerId: targetId,
         astrologerID: astro?.astrologer_ID,
-        astrologerName: astro?.firstName || "",
+        astrologerName: getAstrologerDisplayName(astro),
         remainingTime: data?.remainingTime,
         isEmergency: data?.isEmergency || false,
         profileImgUrl: astro?.profileImgUrl,
@@ -595,7 +606,7 @@ const GuestChatFlow = () => {
           fullName,
           roomId,
           isUserSide: true,
-          astrologerName: astro?.firstName || "",
+          astrologerName: getAstrologerDisplayName(astro),
           astroID: astro?.astrologer_ID,
           experience: astro?.experience,
           profileImgUrl: astro?.profileImgUrl,
@@ -607,7 +618,15 @@ const GuestChatFlow = () => {
       sessionStorage.removeItem(GUEST_AUTO_ACCEPT_KEY);
       if (roomIdRef.current) removePendingConnection(roomIdRef.current);
       Toast.error("Astrologer is currently unavailable. Please try again.");
-      navigate(astrologerId ? `/astrologer/${astrologerId}` : "/astrologers", { replace: true });
+      navigate(
+        astrologerId
+          ? getAstrologerProfilePath(
+              astrologerRef.current || astrologerId,
+              astrologerId
+            )
+          : "/astrologers",
+        { replace: true }
+      );
     };
 
     const handleError = (err) => {
@@ -644,7 +663,15 @@ const GuestChatFlow = () => {
       confirmSourceRef.current = "popstate";
       leaveActionRef.current = () => {
         cancelChatRequest();
-        navigate(astrologerId ? `/astrologer/${astrologerId}` : "/astrologers", { replace: true });
+        navigate(
+          astrologerId
+            ? getAstrologerProfilePath(
+                astrologerRef.current || astrologerId,
+                astrologerId
+              )
+            : "/astrologers",
+          { replace: true }
+        );
       };
       setConfirmLeave(true);
     };
@@ -689,11 +716,20 @@ const GuestChatFlow = () => {
           Mobile Number <span className={styles.req}>*</span>
         </label>
         <div className={styles.mobileWrap}>
-          <span className={styles.flagBox}>
+          {/*
+            Fixed +91 — validation is Indian-format only and the backend prefixes
+            "91". A chevron here promised a country picker that does not exist,
+            which non-Indian users tapped repeatedly. Explain on tap instead.
+          */}
+          <button
+            type="button"
+            className={styles.flagBox}
+            onClick={() => Toast.info("We currently support Indian (+91) mobile numbers only.")}
+            title="Indian (+91) numbers only"
+          >
             <span className={styles.flag}>🇮🇳</span>
             +91
-            <IoChevronDown size={12} />
-          </span>
+          </button>
           <input
             className={styles.input}
             type="tel"

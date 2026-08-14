@@ -6,7 +6,9 @@ import { Loader2, MousePointerClick, Radio, Volume2 } from "lucide-react";
 import styles from "./PanditAIVoiceBubble.module.scss";
 import usePanditAIVoice from "../../screens/private/panditAIVoice/usePanditAIVoice";
 import useAIFreeMinutes from "./useAIFreeMinutes";
-import panditAiIcon from "../../assets/images/AiPandit.png";
+
+// CDN-hosted — see PanditAIBubble for why this is a constant, not an import.
+const panditAiIcon = "https://assets.shubhastro.ai/images/AiPandit.png";
 
 const PanditAIVoiceBubble = () => {
   const navigate = useNavigate();

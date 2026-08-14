@@ -5,6 +5,7 @@ import { PrimaryButton, PrimaryText } from "../../../../component";
 import { IoMdClose } from "react-icons/io";
 
 import { getWidth } from "../../../../utils/theme";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 const RechargeAlertModel = ({
   isOpen,
@@ -30,7 +31,7 @@ const RechargeAlertModel = ({
           </PrimaryText> */}
           <PrimaryText isCenter className=" pt-4">
             Minimum balance of 5 minutes (₹ 135) is required to start chat with
-            {` ${astrologer?.firstName}`}.
+            {` ${getAstrologerDisplayName(astrologer) || "Astrologer"}`}.
           </PrimaryText>
           <PrimaryButton
             className=" mt-2"

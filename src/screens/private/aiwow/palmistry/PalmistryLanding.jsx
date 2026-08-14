@@ -8,6 +8,7 @@ import CakeIcon from '../../../../assets/icons/Cake.png';
 import LoveIcon from '../../../../assets/icons/loveIcon.png';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import { setPalmistrySelectedHand } from '../../../../redux/aiwow/aiwowSlice';
+import { Toast } from '../../../../component';
 
 const PalmistryLanding = () => {
   const navigate = useNavigate();
@@ -22,10 +23,16 @@ const PalmistryLanding = () => {
   };
 
   const handleStartAnalysis = () => {
-    if (selectedHand) {
-      dispatch(setPalmistrySelectedHand(selectedHand));
-      navigate('/ai-wow/ai-palmistry-scanner/instructions', { replace: true });
+    // Was gated twice — `disabled={!selectedHand}` on the button AND a bare
+    // early return here — so tapping "Start Palm Analysis" without having
+    // picked a hand produced nothing at all and said nothing. The button now
+    // stays tappable and names the missing step.
+    if (!selectedHand) {
+      Toast.info('Choose your left or right hand first.');
+      return;
     }
+    dispatch(setPalmistrySelectedHand(selectedHand));
+    navigate('/ai-wow/ai-palmistry-scanner/instructions', { replace: true });
   };
 
   const features = [
@@ -144,7 +151,7 @@ const PalmistryLanding = () => {
           <button 
             className={`${styles.startButton} ${!selectedHand ? styles.disabled : ''}`}
             onClick={handleStartAnalysis}
-            disabled={!selectedHand}
+            aria-disabled={!selectedHand}
           >
             <span>⚡</span> Start Palm Analysis
           </button>

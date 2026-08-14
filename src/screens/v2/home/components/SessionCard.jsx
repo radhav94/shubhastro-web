@@ -9,6 +9,7 @@ import {
 import EmergencySessionModal from "../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import { useGetAstrologerByIdQuery } from "../../../../redux/api/astrologer/astrologerApi";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
+import { getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
 
 const SessionCard = ({ session, onCallAgain, isLoading }) => {
   const navigate = useNavigate();
@@ -93,7 +94,7 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
       )}
       {session._id ? (
         <Link
-          to={`/astrologer/${session._id}`}
+          to={getAstrologerProfilePath(fullAstrologer || session, session._id)}
           className={styles.sessionCardLink}
         >
           <div className={styles.sessionImageWrapper}>
@@ -134,7 +135,7 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
       <div className={styles.sessionInfo}>
         {session._id ? (
           <Link
-            to={`/astrologer/${session._id}`}
+            to={getAstrologerProfilePath(fullAstrologer || session, session._id)}
             className={styles.sessionNameLink}
           >
             <h3 className={styles.sessionName}>{session.astrologerName}</h3>

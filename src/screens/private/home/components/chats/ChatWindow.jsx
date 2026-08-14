@@ -15,6 +15,7 @@ import FloatingActions from "./FloatingActions";
 import useChatSocket from "./useChatSocket";
 import Feedback from "./Feedback";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 import { useAddAstrologerReviewMutation } from "../../../../../redux/api/review/reviewApi";
 import { trackEvent } from "../../../../../utils/analytics";
 import { Toast } from "../../../../../component";
@@ -93,7 +94,16 @@ const ChatWindow = () => {
   const roomId = stateRoomId || activeChat?.roomId;
   const fullName = stateFullName || activeChat?.fullName || activeChat?.callerName;
   const kundliId = stateKundliId || activeChat?.kundliId;
-  const astrologerName = stateAstrologerName || activeChat?.astrologerName || astrologerProfileData?.data?.astrologerName || astrologerProfileData?.data?.firstName || "";
+  // userName-first. The profile API (keyed on this chat's astrologerId) is the
+  // authoritative source for `userName`, so prefer it — navigation state /
+  // activeChat can carry an older name captured at connect time (e.g. from the
+  // live flow, which only had the real first + last name).
+  const astrologerName =
+    getAstrologerDisplayName(astrologerProfileData?.data) ||
+    stateAstrologerName ||
+    activeChat?.astrologerName ||
+    astrologerProfileData?.data?.astrologerName ||
+    "";
   const refreshKey = stateRefreshKey;
   const astroID = stateAstroID || activeChat?.astrologerID;
   const experience = stateExperience || activeChat?.experience || astrologerProfileData?.data?.experience || "";

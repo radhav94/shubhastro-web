@@ -1,5 +1,5 @@
 import styles from "./HomeNew.module.scss";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, lazy, Suspense } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getUserFromStorage } from "../../../utils/authStorage";
@@ -14,8 +14,10 @@ import ProfileModals from "../../private/kundli/components/ProfileModals";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 import AstrologersSection from "../home/components/AstrologersSection";
 import BlogsSection from "../home/components/BlogsSection";
-import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
-import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
+// Deferred: these fixed-position launchers otherwise compete to be the LCP
+// element and drag ~108KB of decorative background SVG into the critical path.
+const PanditAIBubble = lazy(() => import("../../../component/panditAI/PanditAIBubble"));
+const PanditAIVoiceBubble = lazy(() => import("../../../component/panditAI/PanditAIVoiceBubble"));
 import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { GuestKundliAuthModal } from "../../../component/UI/Profile";
@@ -27,7 +29,7 @@ import astrologerImg from "../../../assets/images/home-hero-astrologer.png";
 import horoscopeImg from "../../../assets/images/home-hero-horoscope.png";
 
 // Hero BG
-const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
+const heroBg = "https://assets.shubhastro.ai/images/ai-suite.png";
 
 // WOW icons
 import vastuIcon from "../../../assets/aiwow/wow-vastu.svg";
@@ -56,6 +58,20 @@ const HomeNew = () => {
   useEffect(() => {
     document.body.classList.add('home-new-page');
     return () => document.body.classList.remove('home-new-page');
+  }, []);
+
+  // Mount the floating Pandit AI launchers only once the browser is idle, so
+  // they are absent from the DOM while the LCP candidate is being decided.
+  const [showFloatingBubbles, setShowFloatingBubbles] = useState(false);
+  useEffect(() => {
+    const reveal = () => setShowFloatingBubbles(true);
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(reveal, { timeout: 2500 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    // Safari has no requestIdleCallback.
+    const timer = setTimeout(reveal, 1200);
+    return () => clearTimeout(timer);
   }, []);
 
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
@@ -645,8 +661,12 @@ const HomeNew = () => {
         onChatNow={(a) => handleConnectClick(a, "chat", true)}
         onCallNow={(a) => handleConnectClick(a, "audio", true)}
       />
-      <PanditAIBubble />
-      <PanditAIVoiceBubble />
+      {showFloatingBubbles && (
+        <Suspense fallback={null}>
+          <PanditAIBubble />
+          <PanditAIVoiceBubble />
+        </Suspense>
+      )}
       <MobileAppModal isOpen={showMobileAppModal} onClose={() => setShowMobileAppModal(false)} />
       <GuestKundliAuthModal
         isOpen={showLiveGuestAuth}

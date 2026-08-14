@@ -2,6 +2,7 @@ import { useState } from "react";
 import { PrimaryText } from "../../../index";
 import NewRechargeModal from "../../../recharge-modal/RechargeModal";
 import PaymentSuccessModal from "../WelcomeBonusModal/PaymentSuccessModal";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 import styles from "./RechargeModal.module.scss";
 
 const RechargeModal = ({
@@ -25,7 +26,8 @@ const RechargeModal = ({
         : astrologer?.price?.audioRate?.amount;
 
   const minBalance = (rate || 1) * 5;
-  const astrologerName = astrologer?.firstName || "Astrologer";
+  // userName-first (helper falls back to firstName + lastName).
+  const astrologerName = getAstrologerDisplayName(astrologer) || "Astrologer";
 
   const handleRecharge = () => {
     setShowPlansModal(true);
