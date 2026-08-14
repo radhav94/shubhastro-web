@@ -73,6 +73,15 @@
   white-space: nowrap;
   text-transform: capitalize;
 
+  // Only the `.live` variant is a real button. The online/offline pill is a
+  // plain <div> sitting above the card's link (z-index 2 vs 1), so a tap on it
+  // was swallowed and did nothing — a dead click on the most eye-catching part
+  // of the card. Let those taps fall through to the card link instead.
+  &.online,
+  &.offline {
+    pointer-events: none;
+  }
+
   &.online {
     color: #16a34a;
     background: #f0fdf4;
@@ -746,6 +755,13 @@
   position: relative;
   z-index: 1;
   &::-webkit-scrollbar { display: none; }
+
+  // Painted above the full-card overlay anchor, so clicks on this strip hit an
+  // inert row. Pointer devices can't drag-scroll it anyway, so let their clicks
+  // through to the card link; touch keeps the swipe.
+  @media (hover: hover) and (pointer: fine) {
+    pointer-events: none;
+  }
 }
 
 .detailsLanguageBadge {
