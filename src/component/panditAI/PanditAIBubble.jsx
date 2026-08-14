@@ -7,6 +7,7 @@ import {
   IoMic,
   IoStopCircle,
   IoWallet,
+  IoRefresh,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -29,13 +30,30 @@ import AISessionStatus from "./AISessionStatus";
 const panditAiIcon = "https://assets.shubhastro.ai/images/AiPandit.png";
 
 // Memoized message bubble to avoid re-rendering the entire list on new messages
-const MessageBubble = memo(({ msg }) => {
+const MessageBubble = memo(({ msg, onRetry }) => {
   const isUser = msg.sender === "user";
+  // Failed AI replies used to be plain text with nothing to tap, which is what
+  // drove the rage clicks seen in Clarity. Offer an explicit retry instead.
+  const showRetry = !isUser && msg.isError && typeof onRetry === "function";
   return (
     <div className={`${styles.msgRow} ${isUser ? styles.userRow : styles.aiRow}`}>
-      <div className={`${styles.msgBubble} ${isUser ? styles.userBubble : styles.aiBubble}`}>
+      <div
+        className={`${styles.msgBubble} ${isUser ? styles.userBubble : styles.aiBubble} ${
+          msg.isError ? styles.failedBubble : ""
+        }`}
+      >
         <p className={styles.msgText}>{msg.text}</p>
         <div className={styles.msgMeta}>
+          {showRetry && (
+            <button
+              type="button"
+              className={styles.retryBtn}
+              onClick={() => onRetry(msg._id)}
+            >
+              <IoRefresh size={13} />
+              Try again
+            </button>
+          )}
           <span className={styles.msgTime}>{msg.time}</span>
         </div>
       </div>
@@ -91,6 +109,7 @@ const PanditAIBubble = () => {
     sending,
     chatDisabled,
     sendText,
+    retryQuestion,
     followupQuestions,
     messagesEndRef,
     lastAiMsgRef,
@@ -490,7 +509,7 @@ const PanditAIBubble = () => {
                     </div>
                     {msgs.map((msg) => (
                       <div key={msg._id} ref={msg._id === lastAiId ? lastAiMsgRef : undefined}>
-                        <MessageBubble msg={msg} />
+                        <MessageBubble msg={msg} onRetry={retryQuestion} />
                       </div>
                     ))}
                   </div>
