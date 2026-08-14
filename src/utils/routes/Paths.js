@@ -48,63 +48,74 @@ import Yesterday from "../../screens/private/horoscope/yesterdayhoroscope/Yester
 import MatchMaking from "../../screens/private/matchmaking/MatchMakingV2";
 import MatchDetails from "../../screens/private/matchmaking/details/MatchDetailsV2";
 import About from "../../screens/public/static-pages/About";
-import Disclaimer from "../../screens/public/static-pages/Disclaimer";
-import PricingPolicy from "../../screens/public/static-pages/PricingPolicy";
-import PrivacyPolicy from "../../screens/public/static-pages/PrivacyPolicy";
-import RefundPolicy from "../../screens/public/static-pages/RefundPolicy";
-import AiUsePolicy from "../../screens/public/static-pages/AiUsePolicy";
-import AstrologerOnboardingAgreement from "../../screens/public/static-pages/AstrologerOnboardingAgreement";
-import LiveChatPolicy from "../../screens/public/static-pages/LiveChatPolicy";
-import UserAgreement from "../../screens/public/static-pages/UserAgreement";
-import TermsConditions from "../../screens/public/static-pages/TermsConditions";
-import OnboardingGuide from "../../screens/public/static-pages/OnboardingGuide";
+// Removed ten unused static-page imports: Disclaimer, PricingPolicy,
+// PrivacyPolicy, RefundPolicy, AiUsePolicy, AstrologerOnboardingAgreement,
+// LiveChatPolicy, UserAgreement, TermsConditions and OnboardingGuide.
+//
+// Their route entries are commented out further down this file — these pages are
+// served through CmsPageWrapper now — but the imports were left behind, so all
+// ten screens and their stylesheets were still being bundled into the entry
+// chunk with no route able to render them. The commented route blocks are kept
+// as-is; restoring one means restoring its import too (preferably as lazy()).
 import Notification from "../../screens/private/notification/Notification";
 import WalletTranscations from "../../screens/private/wallet/WalletTranscations";
 import AstrologerProfile from "../../screens/private/astrologerProfile/AstrologerProfile";
 import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
 
-import AgeCalc from "../../screens/private/calculator/ageCalculator/AgeCalc";
-import AgeReport from "../../screens/private/calculator/ageCalculator/AgeReport";
-import AtmakarakaCalculator from "../../screens/private/calculator/Atmakaraka/AtmakarakaCalculator";
-import AtmakarakaReport from "../../screens/private/calculator/Atmakaraka/Report";
-import BirthCalc from "../../screens/private/calculator/birthCalc/BirthCalc";
-import BirthReport from "../../screens/private/calculator/birthCalc/BirthReport";
-import DashaCalc from "../../screens/private/calculator/dasha/DashaCalc";
-import DashaReport from "../../screens/private/calculator/dasha/DashaReport";
-import DestinyCalc from "../../screens/private/calculator/destiny/DestinyCalc";
-import DestinyReport from "../../screens/private/calculator/destiny/DestinyReport";
-import FlamesCalc from "../../screens/private/calculator/flames/FlamesCalc";
-import FlamesReport from "../../screens/private/calculator/flames/FlamesReport";
-import Friendship from "../../screens/private/calculator/friendship/Friendship";
-import FriendshipReport from "../../screens/private/calculator/friendship/FriendshipReport";
-import KaalSarpCalc from "../../screens/private/calculator/kaalsarp/KaalSarpCalc";
-import KaalSarpReport from "../../screens/private/calculator/kaalsarp/KaalSarpReport";
-import LoveCalc from "../../screens/private/calculator/love/LoveCalc";
-import LoveReport from "../../screens/private/calculator/love/LoveReport";
-import MangalDosha from "../../screens/private/calculator/mangaldosha/MangalDosha";
-import MangalReport from "../../screens/private/calculator/mangaldosha/MangalReport";
-import MobileCalc from "../../screens/private/calculator/mobileNumber/MobileCalc";
-import MobileReport from "../../screens/private/calculator/mobileNumber/MobileReport";
-import NumerologyCalc from "../../screens/private/calculator/numerology/NumerologyCalc";
-import NumerologyReport from "../../screens/private/calculator/numerology/NumerologyReport";
-import RashiCalc from "../../screens/private/calculator/rashi/RashiCalc";
-import RashiReport from "../../screens/private/calculator/rashi/RashiReport";
-import RisingSign from "../../screens/private/calculator/risingsign/RisingSign";
-import RisingSignReport from "../../screens/private/calculator/risingsign/RisingSignReport";
-import MulankCalc from "../../screens/private/calculator/mulank/MulankCalc";
-import MulankReport from "../../screens/private/calculator/mulank/MulankReport";
-import NameCompatibilityCalc from "../../screens/private/calculator/nameCompatibility/NameCompatibilityCalc";
-import NameCompatibilityReport from "../../screens/private/calculator/nameCompatibility/NameCompatibilityReport";
-import LoShuCalc from "../../screens/private/calculator/loshu/LoShuCalc";
-import LoShuReport from "../../screens/private/calculator/loshu/LoShuReport";
-import LuckyNameCalc from "../../screens/private/calculator/luckyName/LuckyNameCalc";
-import LuckyNameReport from "../../screens/private/calculator/luckyName/LuckyNameReport";
-import ShaniReport from "../../screens/private/calculator/shanisadesati/ShaniReport";
-import ShaniSadeSati from "../../screens/private/calculator/shanisadesati/ShaniSadeSati";
-import SunSignCalc from "../../screens/private/calculator/sunsign/SunSignCalc";
-import SunSignReport from "../../screens/private/calculator/sunsign/SunSignReport";
-import VehicleCalc from "../../screens/private/calculator/vehicleNumber/VehicleCalc";
-import VehicleReport from "../../screens/private/calculator/vehicleNumber/VehicleReport";
+// Route-level code splitting for the calculator suite (42 screens: 21 input
+// forms and their 21 result screens).
+//
+// Every one of these is reachable only by navigation — none renders on the
+// homepage or any landing route — yet static imports pulled all 42 modules and
+// their .module.scss files into the entry bundle that every first-time visitor
+// blocks on. Each identifier was verified to appear exactly twice in this file
+// (this import plus one live `element:` entry) and to have no importer anywhere
+// else in src, so nothing else can pull them back into the entry chunk.
+//
+// Rendered inside the <Suspense> boundaries in App.jsx and HomeLayout.jsx, so
+// lazy is safe here.
+const AgeCalc = lazy(() => import("../../screens/private/calculator/ageCalculator/AgeCalc"));
+const AgeReport = lazy(() => import("../../screens/private/calculator/ageCalculator/AgeReport"));
+const AtmakarakaCalculator = lazy(() => import("../../screens/private/calculator/Atmakaraka/AtmakarakaCalculator"));
+const AtmakarakaReport = lazy(() => import("../../screens/private/calculator/Atmakaraka/Report"));
+const BirthCalc = lazy(() => import("../../screens/private/calculator/birthCalc/BirthCalc"));
+const BirthReport = lazy(() => import("../../screens/private/calculator/birthCalc/BirthReport"));
+const DashaCalc = lazy(() => import("../../screens/private/calculator/dasha/DashaCalc"));
+const DashaReport = lazy(() => import("../../screens/private/calculator/dasha/DashaReport"));
+const DestinyCalc = lazy(() => import("../../screens/private/calculator/destiny/DestinyCalc"));
+const DestinyReport = lazy(() => import("../../screens/private/calculator/destiny/DestinyReport"));
+const FlamesCalc = lazy(() => import("../../screens/private/calculator/flames/FlamesCalc"));
+const FlamesReport = lazy(() => import("../../screens/private/calculator/flames/FlamesReport"));
+const Friendship = lazy(() => import("../../screens/private/calculator/friendship/Friendship"));
+const FriendshipReport = lazy(() => import("../../screens/private/calculator/friendship/FriendshipReport"));
+const KaalSarpCalc = lazy(() => import("../../screens/private/calculator/kaalsarp/KaalSarpCalc"));
+const KaalSarpReport = lazy(() => import("../../screens/private/calculator/kaalsarp/KaalSarpReport"));
+const LoveCalc = lazy(() => import("../../screens/private/calculator/love/LoveCalc"));
+const LoveReport = lazy(() => import("../../screens/private/calculator/love/LoveReport"));
+const MangalDosha = lazy(() => import("../../screens/private/calculator/mangaldosha/MangalDosha"));
+const MangalReport = lazy(() => import("../../screens/private/calculator/mangaldosha/MangalReport"));
+const MobileCalc = lazy(() => import("../../screens/private/calculator/mobileNumber/MobileCalc"));
+const MobileReport = lazy(() => import("../../screens/private/calculator/mobileNumber/MobileReport"));
+const NumerologyCalc = lazy(() => import("../../screens/private/calculator/numerology/NumerologyCalc"));
+const NumerologyReport = lazy(() => import("../../screens/private/calculator/numerology/NumerologyReport"));
+const RashiCalc = lazy(() => import("../../screens/private/calculator/rashi/RashiCalc"));
+const RashiReport = lazy(() => import("../../screens/private/calculator/rashi/RashiReport"));
+const RisingSign = lazy(() => import("../../screens/private/calculator/risingsign/RisingSign"));
+const RisingSignReport = lazy(() => import("../../screens/private/calculator/risingsign/RisingSignReport"));
+const MulankCalc = lazy(() => import("../../screens/private/calculator/mulank/MulankCalc"));
+const MulankReport = lazy(() => import("../../screens/private/calculator/mulank/MulankReport"));
+const NameCompatibilityCalc = lazy(() => import("../../screens/private/calculator/nameCompatibility/NameCompatibilityCalc"));
+const NameCompatibilityReport = lazy(() => import("../../screens/private/calculator/nameCompatibility/NameCompatibilityReport"));
+const LoShuCalc = lazy(() => import("../../screens/private/calculator/loshu/LoShuCalc"));
+const LoShuReport = lazy(() => import("../../screens/private/calculator/loshu/LoShuReport"));
+const LuckyNameCalc = lazy(() => import("../../screens/private/calculator/luckyName/LuckyNameCalc"));
+const LuckyNameReport = lazy(() => import("../../screens/private/calculator/luckyName/LuckyNameReport"));
+const ShaniReport = lazy(() => import("../../screens/private/calculator/shanisadesati/ShaniReport"));
+const ShaniSadeSati = lazy(() => import("../../screens/private/calculator/shanisadesati/ShaniSadeSati"));
+const SunSignCalc = lazy(() => import("../../screens/private/calculator/sunsign/SunSignCalc"));
+const SunSignReport = lazy(() => import("../../screens/private/calculator/sunsign/SunSignReport"));
+const VehicleCalc = lazy(() => import("../../screens/private/calculator/vehicleNumber/VehicleCalc"));
+const VehicleReport = lazy(() => import("../../screens/private/calculator/vehicleNumber/VehicleReport"));
 
 import CompatibilityLanding from "../../screens/private/compatibility/CompatibilityLanding";
 import CompatibilityResult from "../../screens/private/compatibility/CompatibilityResult";
@@ -113,8 +124,15 @@ import SelectPartner from "../../screens/private/compatibility/SelectPartner";
 import AstrologersDashboard from "../../screens/private/home/components/astrologers/AstrologersDashboard";
 import ChatList from "../../screens/private/home/components/astrologers/atrologerchat/ChatList";
 import ChatWindow from "../../screens/private/home/components/chats/ChatWindow";
-import InteractiveLiveStreaming from "../../screens/private/home/components/livestream/InteractiveLiveStreaming";
-import LivePlayerPage from "../../screens/private/home/components/livestream/LivePlayerPage";
+// Route-level code splitting for the two live streaming screens.
+//
+// These are the remaining static importers of agora-rtc-react (LivePlayerPage
+// renders InteractiveLiveStreaming, which builds its own AgoraRTCProvider), so
+// leaving them static kept the ~1.2 MB Agora SDK in the entry bundle for every
+// visitor even after the dead root-level provider import was removed from
+// main.jsx. Only viewers of a live session need it.
+const InteractiveLiveStreaming = lazy(() => import("../../screens/private/home/components/livestream/InteractiveLiveStreaming"));
+const LivePlayerPage = lazy(() => import("../../screens/private/home/components/livestream/LivePlayerPage"));
 
 import HoroscopeNew from "../../screens/private/horoscope/Horoscope";
 import HoroscopeOld from "../../screens/private/horoscope/HoroscopeOld";
@@ -170,7 +188,11 @@ const AuraResult = lazy(() => import("../../screens/private/aiwow/aura/AuraResul
 import SingleCallHistory from "../../screens/private/orderHistory/components/Call/SingleCallHistory";
 import SingleChatHistory from "../../screens/private/orderHistory/components/Chat/SingleChatHistory";
 import OrderHistory from "../../screens/private/orderHistory/OrderHistory";
-import OrderDetails from "../../screens/private/orderHistory/OrderDetails";
+// Route-level code split: OrderDetails renders OrderInfoCard, the only module in
+// the app that imports hls.js. Attribution put hls.js at 514 KB — 11% of the
+// entry chunk — shipped to every visitor so that one order-history screen can
+// play a call recording. Now it loads with the screen that needs it.
+const OrderDetails = lazy(() => import("../../screens/private/orderHistory/OrderDetails"));
 
 import MallOrderDetail from "../../screens/private/shubhAstroMallHistory/MallOrderDetail";
 
@@ -183,16 +205,37 @@ import PlayScreen from "../../screens/private/shop/detail/playscreen/PlayScreen"
 import ProductDetail from "../../screens/private/shop/detail/ProductDetail";
 import ProductList from "../../screens/private/shop/product/ProductList";
 
-import EPooja from "../../screens/private/epooja/EPooja";
-import EPoojaDetail from "../../screens/private/epooja/detail/EPoojaDetail";
-import EPoojaBooking from "../../screens/private/epooja/booking/EPoojaBooking";
-import BookingSuccess from "../../screens/private/epooja/booking/BookingSuccess";
-import EPoojaPayment from "../../screens/private/epooja/payment/EPoojaPayment";
-import EPoojaCheckout from "../../screens/private/epooja/checkout/EPoojaCheckout";
-import AstromallCart from "../../screens/private/epooja/cart/AstromallCart";
-import CategoryProducts from "../../screens/private/epooja/category/CategoryProducts";
-import AllCategories from "../../screens/private/epooja/category/AllCategories";
-import PurposeProducts from "../../screens/private/epooja/purpose/PurposeProducts";
+/*
+ * ShubhMall / E-Pooja screens — commented out while the feature is off.
+ *
+ * VITE_SHUBH_MALL_ENABLED is "false" in all three environments in .env-cmdrc
+ * (dev, stage and prod), and App.jsx already drops every route whose path
+ * matches isShubhMallRoute() before registering it. All eleven route entries
+ * below were covered by SHUBH_MALL_PATHS, so none of these screens has been
+ * reachable — yet the static imports still bundled all ten of them, plus their
+ * stylesheets, into the entry chunk that every visitor blocks on.
+ *
+ * Paths.js was the only importer of any of them, and no code outside this file
+ * references the route keys (E_POOJA, ASTROMALL_CART, ASTROMALL_CATEGORY,
+ * ASTROMALL_ALL_CATEGORIES, ASTROMALL_PURPOSE and friends), so removing them
+ * from the build changes no behaviour at the current flag value.
+ *
+ * TO RE-ENABLE: uncomment these ten imports and the matching route block
+ * further down (search "ShubhMall / E-Pooja routes"), then set
+ * VITE_SHUBH_MALL_ENABLED to "true" for the target environment. Prefer
+ * restoring them as lazy(() => import(...)) rather than static imports so the
+ * feature ships as its own chunk instead of re-entering the entry bundle.
+ */
+// import EPooja from "../../screens/private/epooja/EPooja";
+// import EPoojaDetail from "../../screens/private/epooja/detail/EPoojaDetail";
+// import EPoojaBooking from "../../screens/private/epooja/booking/EPoojaBooking";
+// import BookingSuccess from "../../screens/private/epooja/booking/BookingSuccess";
+// import EPoojaPayment from "../../screens/private/epooja/payment/EPoojaPayment";
+// import EPoojaCheckout from "../../screens/private/epooja/checkout/EPoojaCheckout";
+// import AstromallCart from "../../screens/private/epooja/cart/AstromallCart";
+// import CategoryProducts from "../../screens/private/epooja/category/CategoryProducts";
+// import AllCategories from "../../screens/private/epooja/category/AllCategories";
+// import PurposeProducts from "../../screens/private/epooja/purpose/PurposeProducts";
 
 import BuisnessBreakupTarot from "../../screens/private/tarot/buisnessBreakupTarot/BuisnessBreakupTarot";
 import CareerSelectTarot from "../../screens/private/tarot/careerSelectTarot/CareerSelectTarot";
@@ -1030,51 +1073,57 @@ export const PATH = {
       element: PaymentScreen,
     },
 
-    // E-Pooja Booking
-    E_POOJA: {
-      path: "/shubh-mall",
-      element: EPooja,
-    },
-    ASTROMALL_CART: {
-      path: "/viewcart",
-      element: AstromallCart,
-    },
-    ASTROMALL_CART_PAYMENT: {
-      path: "/shubh-mall/cart/payment",
-      element: EPoojaPayment,
-    },
-    ASTROMALL_CART_CHECKOUT: {
-      path: "/checkout",
-      element: EPoojaCheckout,
-    },
-    E_POOJA_DETAIL: {
-      path: "/product-details/:slug",
-      element: EPoojaDetail,
-    },
-    E_POOJA_BOOKING: {
-      path: "/shubh-mall/:slug/book",
-      element: EPoojaBooking,
-    },
-    E_POOJA_PAYMENT: {
-      path: "/shubh-mall/:slug/payment",
-      element: EPoojaPayment,
-    },
-    E_POOJA_BOOKING_SUCCESS: {
-      path: "/booking-success",
-      element: BookingSuccess,
-    },
-    ASTROMALL_CATEGORY: {
-      path: "/category/:slug",
-      element: CategoryProducts,
-    },
-    ASTROMALL_ALL_CATEGORIES: {
-      path: "/categories",
-      element: AllCategories,
-    },
-    ASTROMALL_PURPOSE: {
-      path: "/purpose/:slug",
-      element: PurposeProducts,
-    },
+    // ShubhMall / E-Pooja routes — commented out with their imports at the top
+    // of this file while VITE_SHUBH_MALL_ENABLED is "false". App.jsx filtered
+    // every one of these out at runtime anyway (all eleven paths match
+    // SHUBH_MALL_PATHS in src/utils/featureConfig.js), so they were unreachable
+    // while still costing every visitor their code and CSS in the entry bundle.
+    //
+    // Uncomment this block together with the imports to restore the feature.
+    // E_POOJA: {
+    //   path: "/shubh-mall",
+    //   element: EPooja,
+    // },
+    // ASTROMALL_CART: {
+    //   path: "/viewcart",
+    //   element: AstromallCart,
+    // },
+    // ASTROMALL_CART_PAYMENT: {
+    //   path: "/shubh-mall/cart/payment",
+    //   element: EPoojaPayment,
+    // },
+    // ASTROMALL_CART_CHECKOUT: {
+    //   path: "/checkout",
+    //   element: EPoojaCheckout,
+    // },
+    // E_POOJA_DETAIL: {
+    //   path: "/product-details/:slug",
+    //   element: EPoojaDetail,
+    // },
+    // E_POOJA_BOOKING: {
+    //   path: "/shubh-mall/:slug/book",
+    //   element: EPoojaBooking,
+    // },
+    // E_POOJA_PAYMENT: {
+    //   path: "/shubh-mall/:slug/payment",
+    //   element: EPoojaPayment,
+    // },
+    // E_POOJA_BOOKING_SUCCESS: {
+    //   path: "/booking-success",
+    //   element: BookingSuccess,
+    // },
+    // ASTROMALL_CATEGORY: {
+    //   path: "/category/:slug",
+    //   element: CategoryProducts,
+    // },
+    // ASTROMALL_ALL_CATEGORIES: {
+    //   path: "/categories",
+    //   element: AllCategories,
+    // },
+    // ASTROMALL_PURPOSE: {
+    //   path: "/purpose/:slug",
+    //   element: PurposeProducts,
+    // },
 
     RECHARGE: {
       path: "/recharge",
