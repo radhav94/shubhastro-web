@@ -32,6 +32,33 @@ const LANGUAGE_META = {
   "pa-IN": { code: "pa", locale: "pa-IN", name: "Punjabi" },
 };
 
+// The AI service answers with a generic fallback when it fails to produce a
+// reading (e.g. "I couldn't process that request. Please try again."). Those
+// replies arrive on the normal message channel, so match them here to render a
+// retry affordance instead of a dead-end bubble.
+const AI_FAILURE_PATTERN =
+  /(couldn'?t|could ?not|unable to|can'?t)\s+(process|understand|generate|complete|answer)|something went wrong|try (again|asking again)\s*(later)?\.?$/i;
+
+const isFailureReply = (data, text) =>
+  data?.isError === true ||
+  data?.error === true ||
+  (!!text && text.length < 220 && AI_FAILURE_PATTERN.test(text));
+
+// How long to wait for a reply before offering a retry instead of an endless
+// "Typing..." indicator.
+const RESPONSE_TIMEOUT_MS = 45000;
+
+const makeAiErrorMessage = (text) => ({
+  _id: `err-${Date.now()}-${Math.random()}`,
+  text,
+  sender: "ai",
+  isError: true,
+  createdAt: new Date().toISOString(),
+  time: new Date()
+    .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })
+    .toUpperCase(),
+});
+
 const getLanguageMeta = (language) =>
   LANGUAGE_META[language] || {
     code: language?.split("-")?.[0] || DEFAULT_LANGUAGE.code,
@@ -68,6 +95,33 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   const historyLoadedRef = useRef(false);
   const pendingMessageRef = useRef(null);
   const sendTextRef = useRef(null);
+  // Last question the user actually asked, so a failed reply can be retried
+  // without making them retype it.
+  const lastQuestionRef = useRef(null);
+  const responseTimerRef = useRef(null);
+
+  const clearResponseTimer = useCallback(() => {
+    if (responseTimerRef.current) {
+      clearTimeout(responseTimerRef.current);
+      responseTimerRef.current = null;
+    }
+  }, []);
+
+  const startResponseTimer = useCallback(() => {
+    clearResponseTimer();
+    responseTimerRef.current = setTimeout(() => {
+      responseTimerRef.current = null;
+      setSending(false);
+      setMessages((prev) => [
+        ...prev,
+        makeAiErrorMessage(
+          "That took longer than usual and I didn't get a reply. Please try again."
+        ),
+      ]);
+    }, RESPONSE_TIMEOUT_MS);
+  }, [clearResponseTimer]);
+
+  useEffect(() => clearResponseTimer, [clearResponseTimer]);
 
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
   const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
@@ -337,7 +391,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         const pending = pendingMessageRef.current;
         if (pending) {
           pendingMessageRef.current = null;
-          sendTextRef.current?.(pending);
+          sendTextRef.current?.(pending.text, { silent: pending.echoed });
         } else {
           // Send default "Hi" message with kundli id when chat is accepted with no pending input
           sendTextRef.current?.("Hi", { kundliId: selectedKundli?._id || null, silent: true });
@@ -353,6 +407,14 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         panditAIRoomId = data.roomId;
         panditAIChatActive = true;
         chatEndedRef.current = false;
+        // A message typed before the room was ready is queued in sendText. On
+        // this path "chat:accepted" never fires, so flush it here or it would
+        // be dropped silently and the user would think the app ignored them.
+        const pending = pendingMessageRef.current;
+        if (pending) {
+          pendingMessageRef.current = null;
+          sendTextRef.current?.(pending.text, { silent: pending.echoed });
+        }
       }
     };
 
@@ -368,10 +430,16 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       // Skip user's own messages — already added optimistically
       if (data.sender === "user") return;
 
+      clearResponseTimer();
+
+      const text = data.message || data.response;
+      const failed = isFailureReply(data, text);
+
       const msg = {
         _id: `msg-${Date.now()}-${Math.random()}`,
-        text: data.message || data.response,
+        text,
         sender: "ai",
+        isError: failed,
         createdAt: new Date().toISOString(),
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
@@ -381,11 +449,15 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       };
       setMessages((prev) => [...prev, msg]);
       setSending(false);
-      trackEvent("ai_pandit_response_received", { mode: "text" });
+      trackEvent(
+        failed ? "ai_pandit_response_failed" : "ai_pandit_response_received",
+        { mode: "text" }
+      );
     };
 
     const handleError = (err) => {
       console.error("[PanditAI] Socket error:", err);
+      clearResponseTimer();
       // CONTENT_BLOCKED — remove the user's message (unsend it)
       if (err?.code === "CONTENT_BLOCKED") {
         setMessages((prev) => prev.slice(0, -1));
@@ -395,6 +467,15 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       panditAIRoomId = null;
       panditAIChatActive = false;
       setSending(false);
+      // Give the user something to act on instead of a silent stall.
+      if (!err?.message?.toLowerCase?.().includes("insufficient balance")) {
+        setMessages((prev) => [
+          ...prev,
+          makeAiErrorMessage(
+            "I couldn't reach my readings just now. Please try again."
+          ),
+        ]);
+      }
     };
 
     const handleRejected = () => {
@@ -405,6 +486,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     const handleChatEnded = (data) => {
       if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
       chatEndedRef.current = true;
+      clearResponseTimer();
       setRoomId(null);
       panditAIRoomId = null;
       panditAIChatActive = false;
@@ -460,12 +542,38 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
 
       const currentRoomId = roomIdRef.current;
       if (!currentRoomId) {
-        if (trimmedText) pendingMessageRef.current = trimmedText;
+        if (trimmedText) {
+          // `echoed` records whether the bubble is already on screen, so the
+          // flush below doesn't render the same question twice.
+          pendingMessageRef.current = { text: trimmedText, echoed: !options.silent };
+          lastQuestionRef.current = trimmedText;
+          // Echo the question and show the typing state while the session is
+          // still being set up — otherwise the tap looks like it did nothing.
+          if (!options.silent) {
+            setMessages((prev) => [
+              ...prev,
+              {
+                _id: `user-${Date.now()}`,
+                text: trimmedText,
+                sender: "user",
+                createdAt: new Date().toISOString(),
+                time: new Date()
+                  .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })
+                  .toUpperCase(),
+              },
+            ]);
+            setSending(true);
+            startResponseTimer();
+          }
+        }
         return;
       }
 
       setSending(true);
+      startResponseTimer();
       const selectedLanguage = getLanguageMeta(lang);
+
+      if (trimmedText) lastQuestionRef.current = trimmedText;
 
       if (trimmedText && !options.silent) {
         const userMsg = {
@@ -503,11 +611,26 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         setSending(false);
       }
     },
-    [lang, userIdLocal, selectedKundli]
+    [lang, userIdLocal, selectedKundli, startResponseTimer]
   );
 
   // Keep ref in sync so socket handlers can call latest sendText
   sendTextRef.current = sendText;
+
+  // Re-ask the last question after a failed reply. The user's bubble is still
+  // on screen, so send silently and drop the error bubble being retried.
+  const retryQuestion = useCallback(
+    (errorMessageId) => {
+      const question = lastQuestionRef.current;
+      if (!question) return;
+      setMessages((prev) =>
+        errorMessageId ? prev.filter((m) => m._id !== errorMessageId) : prev
+      );
+      trackEvent("ai_pandit_question_retried", { mode: "text" });
+      sendText(question, { silent: true });
+    },
+    [sendText]
+  );
 
   return {
     messages,
@@ -515,6 +638,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     sending,
     chatDisabled,
     sendText,
+    retryQuestion,
     followupQuestions,
     messagesEndRef,
     lastAiMsgRef,
