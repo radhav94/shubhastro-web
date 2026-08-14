@@ -99,7 +99,25 @@ import { Provider } from "react-redux";
 import { store, persistor } from "./store/store.js";
 import { PersistGate } from "redux-persist/integration/react";
 
-import { AgoraProvider } from "./agora/agoraClient";  // <-- IMPORTANT
+/*
+ * The `AgoraProvider` import that used to sit here was removed.
+ *
+ * Its JSX usage below has been commented out for some time, so the provider was
+ * never in the tree — but the import still cost every visitor the whole
+ * agora-rtc-react SDK. src/agora/agoraClient.jsx calls AgoraRTC.createClient()
+ * at module top level, and that side effect makes the module unshakeable: the
+ * bundler must keep it even though nothing reads either of its exports.
+ *
+ * Attributing the entry chunk's emitted bytes through its source map put
+ * agora-rtc-react at 1,235 KB — 27% of the chunk — making it the single largest
+ * occupant, all to construct one `mode: "rtc"` client that nothing consumed.
+ *
+ * Nothing depended on a root-level provider: the live streaming screen
+ * (InteractiveLiveStreaming.jsx) builds its own `mode: "live"` client and wraps
+ * its own subtree in AgoraRTCProvider, and VideoCall/VoiceCall import
+ * agora-rtc-sdk-ng directly. If a root provider is ever genuinely needed,
+ * re-add it behind lazy() + Suspense rather than as a static import.
+ */
 
 // Disable browser scroll restoration so pull-to-refresh (iOS Chrome) behaves.
 // Scroll position is owned by the ScrollToTop component instead: new
