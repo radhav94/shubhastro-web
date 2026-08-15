@@ -163,10 +163,12 @@ const Kundali = () => {
     }
   }, [requiresAuth, token, searchParams]);
 
-  // Block render while redirecting to login
-  if (requiresAuth && !token) {
-    return null;
-  }
+  // Whether we're mid-redirect to login. The render is suppressed at the bottom
+  // of this component, not here: returning early at this point skipped every
+  // hook below it, so the hook count changed between renders whenever
+  // `requiresAuth` flipped (e.g. leaving the remedies subtab) and React threw
+  // "rendered fewer hooks than expected".
+  const isRedirectingToLogin = requiresAuth && !token;
 
   // Temporary profiles for non-logged-in users (persisted in cookies so they
   // survive page navigation and reloads)
@@ -208,6 +210,27 @@ const Kundali = () => {
 
   // Check if we're in direct kundli view mode (with ID in URL)
   const isDirectKundliView = !!kundliId;
+
+  // A guest arriving on /kundli has nothing to look at until they enter birth
+  // details, and the only route to that form was Select Profile → Add New
+  // Profile. Open the "Add Kundli Details" popup (ProfileManager routes guests
+  // straight to GuestKundliAuthModal) as soon as they land instead.
+  //
+  // Skipped for /kundli/:id — a shared kundli is readable without an account,
+  // so interrupting it with a signup form would be hostile. The ref keeps this
+  // to one prompt per visit: once dismissed, it doesn't come back while the
+  // reader stays on the page.
+  const guestPromptShownRef = useRef(false);
+
+  useEffect(() => {
+    if (isLoggedIn || isDirectKundliView) return;
+    if (guestPromptShownRef.current) return;
+    // Already has a guest profile (from the cookie) or a selection → nothing to ask for.
+    if (tempProfiles.length > 0 || selectedProfile) return;
+
+    guestPromptShownRef.current = true;
+    setShowSelectProfile(true);
+  }, [isLoggedIn, isDirectKundliView, tempProfiles.length, selectedProfile]);
 
   // In direct view, fetch the kundli by id. This resolves shared kundlis that
   // don't belong to the current user (e.g. one shared in chat), which the
@@ -818,6 +841,10 @@ const Kundali = () => {
       longitude: selectedProfile.lon,
     };
   };
+
+  // Redirect to login is in flight (see the effect near the top) — render
+  // nothing meanwhile. Safe here because every hook has already run.
+  if (isRedirectingToLogin) return null;
 
   return (
     <div className={!isDirectKundliView ? styles.directKundli : ""}>

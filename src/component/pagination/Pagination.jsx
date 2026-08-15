@@ -3,34 +3,36 @@ import styles from "./Pagination.module.scss";
 const Pagination = ({ pagination, onPageChange }) => {
   const { page, totalPages, hasNextPage, hasPrevPage } = pagination;
 
-  const getPages = () => {
+  // Page numbers that get their own button.
+  const getShownPages = () => {
     // Few enough pages: show them all
     if (totalPages <= 5) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
-
-    const pages = [];
-
-    if (page <= 3) {
-      // Near the start: show first 4 pages + ... + last
-      for (let i = 1; i <= 4; i++) pages.push(i);
-      pages.push("...");
-      pages.push(totalPages);
-    } else if (page >= totalPages - 2) {
-      // Near the end: show first + ... + last 4 pages
-      pages.push(1);
-      pages.push("...");
-      for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
-    } else {
-      // Middle: show first + ... + current window + ... + last
-      pages.push(1);
-      pages.push("...");
-      for (let i = page - 1; i <= page + 1; i++) pages.push(i);
-      pages.push("...");
-      pages.push(totalPages);
+    // Near the start: first 4 + last
+    if (page <= 3) return [1, 2, 3, 4, totalPages];
+    // Near the end: first + last 4
+    if (page >= totalPages - 2) {
+      return [1, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
     }
+    // Middle: first + current window + last
+    return [1, page - 1, page, page + 1, totalPages];
+  };
 
-    return pages;
+  // The ellipsis is styled exactly like a page button (same circle, same size),
+  // so readers click it. It used to be an inert <span> — a dead click. Each gap
+  // now jumps to the middle of the range it hides.
+  const getItems = () => {
+    const shown = getShownPages();
+    const items = [];
+    shown.forEach((value, index) => {
+      const prev = shown[index - 1];
+      if (prev !== undefined && value - prev > 1) {
+        items.push({ type: "gap", target: Math.floor((prev + value) / 2) });
+      }
+      items.push({ type: "page", value });
+    });
+    return items;
   };
 
   if (!totalPages || totalPages <= 1) return null;
@@ -50,18 +52,31 @@ const Pagination = ({ pagination, onPageChange }) => {
       </button>
 
       {/* Page Numbers */}
-      {getPages().map((item, index) =>
-        item === "..." ? (
-          <span key={`dots-${index}`} className={styles.dots}>
+      {getItems().map((item, index) =>
+        item.type === "gap" ? (
+          <button
+            key={`gap-${index}`}
+            type="button"
+            className={styles.dots}
+            onClick={() => onPageChange(item.target)}
+            aria-label={`Jump to page ${item.target}`}
+            title={`Jump to page ${item.target}`}
+          >
             ...
-          </span>
+          </button>
         ) : (
           <button
-            key={item}
-            className={`${styles.pageBtn} ${page === item ? styles.active : ''}`}
-            onClick={() => item !== page && onPageChange(item)}
+            key={item.value}
+            type="button"
+            className={`${styles.pageBtn} ${page === item.value ? styles.active : ''}`}
+            // The current page has nothing to navigate to; disabling it keeps it
+            // from reading as a live control.
+            disabled={page === item.value}
+            aria-current={page === item.value ? "page" : undefined}
+            aria-label={`Go to page ${item.value}`}
+            onClick={() => onPageChange(item.value)}
           >
-            {item}
+            {item.value}
           </button>
         )
       )}
