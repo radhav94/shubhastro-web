@@ -2,7 +2,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styles from './FaceReadingResult.module.scss';
-import { Toast, PieChart } from '../../../../component';
+import { Toast } from '../../../../component';
+// Direct import, not via the component barrel: PieChart pulls in chart.js/auto,
+// which is side-effectful and would land in the entry chunk if re-exported.
+import PieChart from '../../../../component/UI/charts/PieChart';
 import TTSButton from '../../../../component/UI/TTSButton';
 import DownloadReportModal from '../components/DownloadReportModal';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';

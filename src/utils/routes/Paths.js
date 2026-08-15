@@ -203,7 +203,11 @@ import ConsultantList from "../../screens/private/shop/consultant/ConsultantList
 import PaymentScreen from "../../screens/private/shop/consultant/PaymentScreen";
 import PlayScreen from "../../screens/private/shop/detail/playscreen/PlayScreen";
 import ProductDetail from "../../screens/private/shop/detail/ProductDetail";
-import ProductList from "../../screens/private/shop/product/ProductList";
+// Lazy: ProductList is the only importer of shop/data/productData.js, a ~305 KB
+// hardcoded catalogue (~186 KB in-bundle). Imported statically it sat in the
+// entry chunk, so every visitor downloaded the shop catalogue to see the
+// homepage. Route elements render inside HomeLayout's Suspense boundary.
+const ProductList = lazy(() => import("../../screens/private/shop/product/ProductList"));
 
 /*
  * ShubhMall / E-Pooja screens — commented out while the feature is off.
