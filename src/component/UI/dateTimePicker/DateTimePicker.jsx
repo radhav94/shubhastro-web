@@ -2,6 +2,28 @@ import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "./DateTimePicker.module.scss";
+import Toast from "../../toast";
+
+/*
+ * A natively `disabled` input fires no events at all, so tapping one does
+ * literally nothing — no focus, no message, no cursor hint on touch. Clarity
+ * records those taps as dead clicks, and the user is left guessing why the
+ * field won't open (most often: "Don't know the exact time of birth" is ticked).
+ *
+ * When a caller supplies `disabledReason`, the field stays tappable and
+ * read-only, is marked `aria-disabled` for assistive tech, and explains itself
+ * on tap. Same rule the astrologer Chat/Call buttons follow. Without a reason
+ * the old native-disabled behaviour is kept, so existing callers are unchanged.
+ */
+const blockedTap = (disabled, disabledReason) => {
+  const blocked = disabled && !!disabledReason;
+  return {
+    blocked,
+    // Only hand the native attribute to the DOM when there's nothing to explain.
+    nativeDisabled: disabled && !disabledReason,
+    explain: () => Toast.info(disabledReason),
+  };
+};
 
 /* ───── 12-hour helpers ───── */
 const to12 = (h24) => {
@@ -23,7 +45,7 @@ const MINUTES = Array.from({ length: 60 }, (_, i) => i);
 const PERIODS = ["AM", "PM"];
 
 /* ───── Custom 12-hour Time Picker ───── */
-const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = false, openOnClick = false }) => {
+const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholder, dropUp = false, openOnClick = false }) => {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -267,6 +289,8 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
     }
   };
 
+  const timeBlock = blockedTap(disabled, disabledReason);
+
   return (
     <div className={styles.timePickerWrapper} ref={wrapperRef}>
       <div className={styles.dateInputRow}>
@@ -277,18 +301,26 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
           onBlur={handleManualBlur}
           onKeyDown={handleManualKeyDown}
           onFocus={() => setIsTyping(true)}
-          onClick={() => !disabled && openOnClick && setOpen(true)}
+          onClick={() => {
+            if (timeBlock.blocked) return timeBlock.explain();
+            if (!disabled && openOnClick) setOpen(true);
+          }}
           placeholder={placeholder || "HH:MM AM/PM"}
-          disabled={disabled}
-          readOnly={openOnClick}
+          disabled={timeBlock.nativeDisabled}
+          aria-disabled={disabled || undefined}
+          readOnly={openOnClick || timeBlock.blocked}
           className={styles.input}
           autoComplete="off"
         />
         <button
           type="button"
           className={styles.calendarBtn}
-          disabled={disabled}
-          onClick={() => !disabled && setOpen((o) => !o)}
+          disabled={timeBlock.nativeDisabled}
+          aria-disabled={disabled || undefined}
+          onClick={() => {
+            if (timeBlock.blocked) return timeBlock.explain();
+            if (!disabled) setOpen((o) => !o);
+          }}
           tabIndex={-1}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -362,6 +394,9 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
  * @param {Date} minDate - Minimum selectable date
  * @param {Date} maxDate - Maximum selectable date
  * @param {boolean} disabled - Disable the input
+ * @param {string} disabledReason - Why the field is disabled. When given, the
+ *   field stays tappable and shows this message instead of silently swallowing
+ *   the tap (a natively disabled input fires no events, which reads as broken).
  * @param {string} className - Additional wrapper class
  * @param {boolean} required - Show required indicator
  */
@@ -375,6 +410,7 @@ const DateTimePicker = ({
   minDate,
   maxDate,
   disabled = false,
+  disabledReason,
   className = "",
   required = false,
   // When true, dropdowns/calendar open upward (useful at the bottom of a screen)
@@ -411,6 +447,7 @@ const DateTimePicker = ({
           selected={selected}
           onChange={onChange}
           disabled={disabled}
+          disabledReason={disabledReason}
           placeholder={placeholder || "Select time"}
           dropUp={dropUp}
           openOnClick={openOnClick}
@@ -531,6 +568,8 @@ const DateTimePicker = ({
   // Ref for the DatePicker to open programmatically
   const datePickerRef = useRef(null);
 
+  const dateBlock = blockedTap(disabled, disabledReason);
+
   return (
     <div className={`${styles.wrapper} ${className}`}>
       {label && (
@@ -546,23 +585,34 @@ const DateTimePicker = ({
           value={inputText}
           onChange={handleManualChange}
           onBlur={handleManualBlur}
-          onClick={() => openOnClick && !disabled && datePickerRef.current?.setOpen(true)}
+          onClick={() => {
+            if (dateBlock.blocked) return dateBlock.explain();
+            if (openOnClick && !disabled) datePickerRef.current?.setOpen(true);
+          }}
           placeholder={resolvedPlaceholder}
-          disabled={disabled}
-          readOnly={openOnClick}
+          disabled={dateBlock.nativeDisabled}
+          aria-disabled={disabled || undefined}
+          readOnly={openOnClick || dateBlock.blocked}
           className={`${styles.input} ${dateError ? styles.inputError : ""}`}
           autoComplete="off"
         />
         {/* Invisible overlay covering right 1/3 of input to open calendar */}
         <div
           className={styles.calendarOverlay}
-          onClick={() => !disabled && datePickerRef.current?.setOpen(true)}
+          onClick={() => {
+            if (dateBlock.blocked) return dateBlock.explain();
+            if (!disabled) datePickerRef.current?.setOpen(true);
+          }}
         />
         <button
           type="button"
           className={styles.calendarBtn}
-          disabled={disabled}
-          onClick={() => datePickerRef.current?.setOpen(true)}
+          disabled={dateBlock.nativeDisabled}
+          aria-disabled={disabled || undefined}
+          onClick={() => {
+            if (dateBlock.blocked) return dateBlock.explain();
+            if (!disabled) datePickerRef.current?.setOpen(true);
+          }}
           tabIndex={-1}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

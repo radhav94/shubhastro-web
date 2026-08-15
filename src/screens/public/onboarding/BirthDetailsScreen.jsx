@@ -310,6 +310,7 @@ const BirthDetailsScreen = ({
                 }}
                 placeholder="Select time"
                 disabled={values.unknownBirthTime}
+                disabledReason="Uncheck “Don’t know the exact time of birth” to pick a time"
               />
               <div className={styles.checkboxContainer}>
                 <label className={styles.checkboxLabel}>
