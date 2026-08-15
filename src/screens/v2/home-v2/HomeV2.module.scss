@@ -4654,16 +4654,16 @@
 .gridSliderBtnLeft {
   left: -19px;
 
-  @media (width <= 767px) {
-    left: -14px;
+  @media (width <= 1180px) {
+    left: -10px;
   }
 }
 
 .gridSliderBtnRight {
   right: -19px;
 
-  @media (width <= 767px) {
-    right: -14px;
+  @media (width <= 1180px) {
+    right: -10px;
   }
 }
 

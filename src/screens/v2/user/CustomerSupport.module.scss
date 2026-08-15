@@ -90,13 +90,13 @@
   padding: 62px 16px 80px 16px;
 
   @media (width <= 1180px) {
-    padding: 24px 16px 80px 16px;
+    padding: 62px 16px 80px 16px;
     height: fit-content;
     min-width: auto;
   }
 
   @media (width <= 768px) {
-    padding: 72px 16px 80px 16px;
+    padding: 62px 16px 80px 16px;
   }
 
   &::-webkit-scrollbar {

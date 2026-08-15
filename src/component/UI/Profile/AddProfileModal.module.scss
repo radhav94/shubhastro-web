@@ -43,7 +43,7 @@
   display: flex;
   flex-direction: column;
   animation: slideUp 0.3s ease-out;
-  overflow: hidden;
+  overflow: auto;
 }
 
 @keyframes slideUp {
@@ -147,7 +147,7 @@
 
 .sheetContent {
   padding: 2px 16px 14px;
-  overflow-y: auto;
+  // overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   flex: 1;
