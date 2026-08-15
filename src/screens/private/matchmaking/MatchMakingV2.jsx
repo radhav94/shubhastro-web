@@ -403,12 +403,34 @@ const MatchMaking = () => {
     }
   };
 
+  /*
+    True when both slots are filled with the same gender. handleSelectProfile
+    allows this state to be committed, so the UI has to account for it rather
+    than pretend it cannot happen.
+  */
+  const sameGenderSelected =
+    !!primaryProfile &&
+    !!partnerProfile &&
+    primaryProfile.gender?.toLowerCase() === partnerProfile.gender?.toLowerCase();
+
   /* -------------------- PROCEED -------------------- */
   const handleProceed = async (e) => {
     e?.preventDefault();
 
+    if (isMatchLoading) {
+      Toast.error("Already checking this match. One moment.");
+      return;
+    }
+
     if (!primaryProfile || !partnerProfile) {
       Toast.error("Please select both profiles");
+      return;
+    }
+
+    // Was previously enforced only by the button's `disabled` prop, which meant
+    // the tap was swallowed along with the explanation.
+    if (sameGenderSelected) {
+      Toast.error("Matchmaking requires one male and one female profile");
       return;
     }
 
@@ -683,15 +705,35 @@ const MatchMaking = () => {
               </div>
             </div>
 
+            {/*
+              Persistent, inline reason. handleSelectProfile commits a
+              same-gender pick and only toasts about it — once that toast fades
+              the screen shows two filled slots and a dimmed button with no
+              explanation anywhere, so the user has nothing to act on.
+            */}
+            {sameGenderSelected && (
+              <p className={styles.matchBlockedHint} role="alert">
+                Matchmaking compares one male and one female chart. Change one of
+                the profiles above to continue.
+              </p>
+            )}
+
+            {/*
+              Never `disabled`: a disabled button dispatches no click event, so
+              every retry after the toast faded produced nothing at all. It stays
+              live and handleProceed names the blocker.
+            */}
             <button
-              className={styles.matchMakingBtn}
+              className={`${styles.matchMakingBtn} ${
+                isMatchLoading || !primaryProfile || !partnerProfile || sameGenderSelected
+                  ? styles.blocked
+                  : ""
+              }`.trim()}
               onClick={handleProceed}
-              disabled={
-                isMatchLoading ||
-                !primaryProfile ||
-                !partnerProfile ||
-                (primaryProfile?.gender?.toLowerCase() === partnerProfile?.gender?.toLowerCase())
+              aria-disabled={
+                isMatchLoading || !primaryProfile || !partnerProfile || sameGenderSelected
               }
+              aria-busy={isMatchLoading}
             >
               {isMatchLoading ? "Loading..." : "Proceed Ahead"}
             </button>

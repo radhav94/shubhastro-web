@@ -101,7 +101,32 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
   const handleContinue = async () => {
     const otpValue = otp;
-    if (otpValue.length === 6) {
+
+    /*
+      Say what is missing, and put the keyboard back. The OTP boxes are divs over
+      a hidden input, so on mobile a lost focus means no keyboard and no way to
+      finish the code — refocusing here is the actual recovery action.
+
+      This branch used to not exist: `if (length === 6)` with no else, behind a
+      `disabled` button. An incomplete code meant the tap was swallowed and
+      nothing was said, which is where this flow was being abandoned.
+    */
+    if (otpValue.length !== 6) {
+      toast.error(
+        otpValue.length === 0
+          ? "Enter the 6-digit code we sent you"
+          : `Enter all 6 digits — ${6 - otpValue.length} to go`
+      );
+      inputRef.current?.focus();
+      return;
+    }
+
+    if (loading || isSubmittingRef.current) {
+      toast.error("Verifying your code. One moment.");
+      return;
+    }
+
+    {
       if (isSubmittingRef.current) return;
       isSubmittingRef.current = true;
       setLoading(true);
@@ -422,10 +447,19 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         </div>
 
         <ResendTimer onResend={handleResend} />
+        {/*
+          Never `disabled`. Unlike the resend button — whose label counts down
+          and so explains itself — this one still read "Continue" while refusing
+          to fire, so an incomplete or mis-autofilled code produced a tap that
+          did nothing and explained nothing. handleContinue names the blocker.
+        */}
         <button
-          className={styles.otpprimaryBtn}
+          className={`${styles.otpprimaryBtn} ${
+            otp.length !== 6 || loading ? styles.otpprimaryBtnBlocked : ""
+          }`.trim()}
           onClick={handleContinue}
-          disabled={otp.length !== 6 || loading}
+          aria-disabled={otp.length !== 6 || loading}
+          aria-busy={loading}
         >
           {loading ? "Verifying..." : "Continue"}
         </button>

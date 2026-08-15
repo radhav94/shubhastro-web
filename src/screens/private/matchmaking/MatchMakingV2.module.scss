@@ -88,6 +88,21 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     transform: translateY(-1px);
   }
+  /*
+    Dimmed but still clickable — the button is deliberately never `disabled`,
+    because a disabled button fires no click and the blocker went unexplained.
+    Keep the pointer cursor: it does respond, with a message.
+  */
+  &.blocked{
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+
+    &:hover{
+      transform: none;
+      box-shadow: none;
+    }
+  }
   &:disabled{
     cursor: not-allowed;
     opacity: 0.6;
@@ -95,6 +110,14 @@
     box-shadow: none;
   }
 }
+
+.matchBlockedHint{
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #D43400;
+}
+
 .bottomImg{
   width: 40vw;
   height: auto;
