@@ -33,23 +33,35 @@ const ResendTimer = memo(({ onResend }) => {
   }, [timer]);
 
   const handleClick = () => {
-    if (timer === 0) {
-      onResend();
-      setTimer(20);
+    // Not gated by `disabled`: taps during the countdown used to do nothing at
+    // all. Say when the code can be requested instead.
+    if (timer > 0) {
+      toast.error(`You can request a new code in ${timer}s`);
+      return;
     }
+    onResend();
+    setTimer(20);
   };
 
+  /*
+    The whole row is one button. "Didn't get it?" used to be a bare <span> on the
+    left while the Resend button sat on the far right (the row is
+    justify-content: space-between), so the prompt people actually reach for was
+    inert and the control was a screen-width away. Both texts now share one hit
+    area and keep their original styling.
+  */
   return (
-    <div className={styles.resendContainer}>
-      <span className={styles.resendText}>Didn't get it?</span>
-      <button
-        className={styles.resendBtn}
-        onClick={handleClick}
-        disabled={timer > 0}
-      >
+    <button
+      type="button"
+      className={styles.resendContainer}
+      onClick={handleClick}
+      aria-disabled={timer > 0}
+    >
+      <span className={styles.resendText}>Didn&apos;t get it?</span>
+      <span className={styles.resendBtn}>
         {timer > 0 ? `Resend in ${timer}s` : "Resend"}
-      </button>
-    </div>
+      </span>
+    </button>
   );
 });
 const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
