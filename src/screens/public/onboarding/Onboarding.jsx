@@ -143,8 +143,14 @@ const Onboarding = () => {
   }, [isPersonalizeFlow]);
 
   const handleStepChange = (step) => {
-    // When guidance is skipped, don't allow navigating to step index 2 (GuidanceScreen)
-    if (skipGuidance && step >= 2) return;
+    // When guidance is skipped, don't allow navigating to step index 2
+    // (GuidanceScreen). The dots only render `totalSteps` of them, so this is
+    // currently unreachable — but every other branch here explains itself, and a
+    // silent return is how a control ends up looking broken if that changes.
+    if (skipGuidance && step >= 2) {
+      toast.error("That step isn't part of this signup.");
+      return;
+    }
 
     if (step > 0 && (!formData.name || formData.name.trim().length < 3)) {
       toast.error("Please complete your name in the first step");

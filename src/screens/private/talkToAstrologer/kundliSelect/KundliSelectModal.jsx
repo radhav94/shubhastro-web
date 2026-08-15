@@ -485,6 +485,7 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
                     }}
                     placeholder="Select time"
                     disabled={form.unknownBirthTime}
+                    disabledReason="Uncheck “Don’t know the exact time of birth” to pick a time"
                   />
                   <label className={styles.checkboxLabel}>
                     <input

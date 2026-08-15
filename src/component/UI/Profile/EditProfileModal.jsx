@@ -350,6 +350,7 @@ const EditProfileModal = ({
                     }}
                     placeholder="HH:MM AM/PM"
                     disabled={values.unknownBirthTime}
+                    disabledReason="Uncheck “Don’t know the exact time of birth” to pick a time"
                   />
                   <ErrorMessage name="birthTime" component="div" className={styles.errorText} />
                   <div className={styles.checkboxLabel}>

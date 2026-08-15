@@ -414,6 +414,7 @@ const AddProfileModal = ({
                         }}
                         placeholder="HH:MM AM/PM"
                         disabled={values.unknownBirthTime}
+                        disabledReason="Uncheck “Don’t know the exact time of birth” to pick a time"
                       />
                     </div>
                     <ErrorMessage name="birthTime" component="div" className={styles.errorText} />

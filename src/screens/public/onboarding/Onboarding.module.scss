@@ -399,6 +399,12 @@
 
 .dotActive,
 .dotInactive {
+  // Rendered as <button> so the steps are reachable by keyboard and announced,
+  // which they were not as bare <span>s. Strip the UA button chrome.
+  appearance: none;
+  padding: 0;
+  border: none;
+  font: inherit;
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -408,6 +414,22 @@
   &:hover {
     transform: scale(1.2);
     opacity: 0.8;
+  }
+
+  // The current step's dot is a position indicator, not a control. It has to
+  // stop *looking* tappable, or the tap it invites goes nowhere.
+  &:disabled {
+    cursor: default;
+
+    &:hover {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
   }
 }
 

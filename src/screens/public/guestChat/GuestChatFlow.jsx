@@ -799,6 +799,7 @@ const GuestChatFlow = () => {
             <DateTimePicker
               mode="time"
               disabled={form.unknownBirthTime}
+              disabledReason="Uncheck “Don’t know the exact time of birth” to pick a time"
               selected={form.time}
               onChange={(d) => setField("time", d)}
               placeholder="HH:MM AM/PM"

@@ -255,12 +255,22 @@ $desktop: 1024px;
       color: white;
     }
 
-    &:hover:not(:disabled) {
+    /*
+      Dimmed but still clickable. This button is never `disabled`: a disabled
+      button dispatches no click, so tapping the only CTA on the page did
+      nothing at all while the gateway script loaded. It now stays live and the
+      handler names the blocker.
+    */
+    &.blocked {
+      opacity: 0.65;
+    }
+
+    &:hover:not(.blocked) {
       background: linear-gradient(135deg, #4178d4 0%, #2d4373 100%);
       border-color: transparent;
     }
 
-    &:active:not(:disabled) {
+    &:active:not(.blocked) {
       background: linear-gradient(135deg, #3a6bc2 0%, #253559 100%);
     }
   }

@@ -367,7 +367,19 @@ const Kundali = () => {
   }, [searchParams, selectedProfile, setSearchParams]);
 
   const payload = useSelector((state) => state?.form?.kundliPayload);
-  const params = buildVedicParam(payload);
+
+  /*
+    The `form` slice is whitelisted in redux-persist against localStorage, so
+    `kundliPayload` survives across visits and is never cleared on logout. A
+    guest landing here therefore rehydrated a stale payload from some earlier
+    session, which fired both Vedic chart requests for a chart nobody asked for
+    — and the fullscreen loader they drive blurred out the "Add Kundli Details"
+    form until they resolved.
+
+    Chart data is only meaningful once a profile is actually selected, so gate
+    the requests on that rather than on whatever happens to be in storage.
+  */
+  const params = selectedProfile ? buildVedicParam(payload) : null;
 
   const {
     data: fullData,
@@ -865,7 +877,20 @@ const Kundali = () => {
       {/* Show informational content only when no profile is selected and not in direct view */}
       {!selectedProfile && !isDirectKundliView && <KundliInfoContent />}
 
-      <PrimaryLoader isLoading={planetLoading || astroLoading} />
+      {/*
+        Fullscreen: this covers the viewport at z-index 999999 with a 5px
+        backdrop blur, so it sits *above* any open modal. Never show it while a
+        profile dialog is up, or it blurs out and blocks the very form the user
+        is being asked to fill in.
+      */}
+      <PrimaryLoader
+        isLoading={
+          (planetLoading || astroLoading) &&
+          !showSelectProfile &&
+          !showAddProfile &&
+          !showEditProfile
+        }
+      />
 
       {/* Direct view: still resolving the kundli by id */}
       {isDirectKundliView && !selectedProfile && !kundliUnavailable && (

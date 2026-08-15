@@ -269,14 +269,20 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
             <div className={styles.header}>
               <div className={styles.progressDots}>
                 {Array.from({ length: totalSteps }).map((_, index) => (
-                  <span
+                  /* Current-step dot is an indicator, not a control — see
+                     BirthDetailsScreen for the dead click this caused.
+                     type="button" keeps it from submitting the Formik form. */
+                  <button
                     key={index}
+                    type="button"
                     className={
                       index === currentStep ? styles.dotActive : styles.dotInactive
                     }
-                    onClick={() => onStepChange && onStepChange(index)}
-                    style={{ cursor: onStepChange ? 'pointer' : 'default' }}
-                  ></span>
+                    disabled={!onStepChange || index === currentStep}
+                    aria-current={index === currentStep ? "step" : undefined}
+                    aria-label={`Step ${index + 1} of ${totalSteps}`}
+                    onClick={() => onStepChange?.(index)}
+                  />
                 ))}
               </div>
 
