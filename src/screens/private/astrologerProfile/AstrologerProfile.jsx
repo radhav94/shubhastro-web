@@ -50,7 +50,7 @@ import { ProfileManager } from "../../../component/UI/Profile";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { Link } from "react-router-dom";
 import { BookOpen } from "lucide-react";
-import { AppIcons, getAstrologerDefaultImage } from "../../../utils/appImages";
+import { AppIcons, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../utils/appImages";
 import AstrologerLiveBadge from "../../../component/UI/astrologerLiveBadge/AstrologerLiveBadge";
 import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
 import AudioIntro from "./AudioIntro";
@@ -555,7 +555,7 @@ const AstrologerProfile = () => {
     setReviewData({
       astrologerID: data?.astrologer_ID,
       fullName: getAstrologerDisplayName(data),
-      profileImage: data?.profileImgUrl || data?.imageUrl,
+      profileImage: getAstrologerImageUrl(data),
       roomId,
     });
     setOpenReview(true);
@@ -970,9 +970,11 @@ const AstrologerProfile = () => {
     userName: data?.userName || "",
     firstName: data?.firstName || "Astrologer",
     lastName: data?.lastName || "",
-    imageUrl:
-      data?.profileImgUrl ||
-      getAstrologerDefaultImage(data?.gender),
+    // The hero image on this page renders at roughly 130x160, so prefer the
+    // pre-resized `large` derivative (500x624) over the unresized original.
+    // Larger than the cards' `medium` because this is the page's biggest image
+    // and is often viewed on a desktop at 2x.
+    imageUrl: getAstrologerImageUrl(data, "medium"),
     specialities:
       data?.specialties?.length > 0
         ? data.specialties.map((s) => (typeof s === "object" ? s.title || s.name : s))
@@ -1180,11 +1182,7 @@ const AstrologerProfile = () => {
                   >
                     <div className={styles.astrologerImageWrapper}>
                       <img
-                        src={
-                          astrologer.imageUrl ||
-                          astrologer?.profileImgUrl ||
-                          getAstrologerDefaultImage(astrologer.gender)
-                        }
+                        src={getAstrologerImageUrl(astrologer, "small")}
                         alt={astrologer.firstName}
                         className={styles.astrologerImg}
                         onError={(e) => {
@@ -1999,7 +1997,7 @@ const AstrologerProfile = () => {
       <VirtualAssistant
         astrologerId={data?._id}
         astrologerName={getAstrologerDisplayName(data)}
-        astrologerImage={data?.profileImgUrl || data?.imageUrl}
+        astrologerImage={getAstrologerImageUrl(data)}
         isOpen={isVAOpen}
         setIsOpen={setIsVAOpen}
         onConnect={() => handleChatStart(data)}

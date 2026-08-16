@@ -19,7 +19,7 @@ import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useChat } from "../../../context/ChatContext";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { useGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
-import { getAstrologerDefaultImage } from "../../../utils/appImages";
+import { getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../utils/appImages";
 import { getToken } from "../../../utils/token";
 import { capitalizeWords } from "../../../utils/capitalize";
 import {
@@ -95,7 +95,9 @@ const GuestChatFlow = () => {
   astrologerRef.current = astrologer;
 
   const astroName = getAstrologerDisplayName(astrologer) || "Astrologer";
-  const astroImg = astrologer?.profileImgUrl || getAstrologerDefaultImage(astrologer?.gender);
+  // `small` (100x125): the guest-chat header and message avatars render at
+  // roughly 28-40px, so the smallest derivative is the right one.
+  const astroImg = getAstrologerImageUrl(astrologer, "small");
   const [imgError, setImgError] = useState(false);
 
   const [phase, setPhase] = useState("collecting"); // collecting | otp | connecting | waiting

@@ -1,8 +1,53 @@
 import { useNavigate } from "react-router-dom";
 import { IoClose } from "react-icons/io5";
-import { getAstrologerDefaultImage } from "../../../../../utils/appImages";
+import { getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../../utils/appImages";
 import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
+import { useGetAstrologerByIdQuery } from "../../../../../redux/api/astrologer/astrologerApi";
 import "./styles/liveListModal.scss";
+
+// Avatar for one live astrologer. .llm-avatar is 64px, so the `small` 100x125
+// derivative rather than the unresized original (896x902 and 1433x1433 have both
+// been observed).
+//
+// The `users/live-users` response nests an astrologer object but its projection
+// omits `profileImages`, and the derivative filenames are not derivable from the
+// original (only the first path segment is shared; the second is random per
+// size), so the variant has to be fetched. Cost is contained: LiveListModal
+// early-returns on `!show`, so nothing here mounts until the user opens the
+// sheet, RTK Query dedupes by astrologer, and the currently-watched host is
+// already cached by LiveView's own query.
+//
+// `flatUrl` paints immediately so there is no blank circle while the query is in
+// flight, and it keeps the previous precedence exactly: profileImgUrl only when
+// it looks like a real URL, then the live entry's astrologerProfileIcon.
+const LiveAstroAvatar = ({ astro, flatUrl, name, defaultImg }) => {
+  const { data } = useGetAstrologerByIdQuery(
+    { id: astro?._id },
+    { skip: !astro?._id }
+  );
+
+  const src = getAstrologerImageUrl(
+    {
+      profileImages: data?.data?.profileImages || astro?.profileImages,
+      profileImgUrl: data?.data?.profileImgUrl || flatUrl,
+      gender: data?.data?.gender || astro?.gender || "male",
+    },
+    "small"
+  );
+
+  return (
+    <img
+      src={src}
+      alt={name}
+      className="llm-avatar"
+      width={64}
+      height={64}
+      loading="lazy"
+      decoding="async"
+      onError={(e) => { e.currentTarget.src = defaultImg; }}
+    />
+  );
+};
 
 // Convert slug to readable title: "face-reading" → "Face Reading"
 const slugToTitle = (slug) => {
@@ -75,13 +120,16 @@ const LiveListModal = ({ show, onClose, lives = [] }) => {
                 <div className="llm-scroll-row">
                   {items.map((live) => {
                     const astro = live.astrologer || {};
-                    const img = (astro.profileImgUrl && astro.profileImgUrl.length > 5) ? astro.profileImgUrl : (live.astrologerProfileIcon || null);
                     const name = getAstrologerDisplayName(astro) || "Astrologer";
                     const defaultImg = getAstrologerDefaultImage(astro.gender || "male");
+                    const flatUrl =
+                      astro.profileImgUrl && astro.profileImgUrl.length > 5
+                        ? astro.profileImgUrl
+                        : live.astrologerProfileIcon;
                     return (
                       <div key={live.channel} className={`llm-card ${live.isOnPrivateCall ? "llm-busy" : ""}`} onClick={() => handleSelect(live.channel)}>
                         <div className="llm-avatar-wrap">
-                          <img src={img || defaultImg} alt={name} className="llm-avatar" onError={(e) => { e.target.src = defaultImg; }} />
+                          <LiveAstroAvatar astro={astro} flatUrl={flatUrl} name={name} defaultImg={defaultImg} />
                           {live.isOnPrivateCall && <span className="llm-busy-dot" />}
                         </div>
                         <span className="llm-name">{name.split(" ")[0]}</span>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "../Community.module.scss";
 import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
 
+import { getAstrologerImageUrl } from "../../../../utils/appImages";
 const AstrologerAvatar = ({ astrologer, name }) => {
   const [imgError, setImgError] = useState(false);
 
@@ -13,7 +14,7 @@ const AstrologerAvatar = ({ astrologer, name }) => {
   if (astrologer.profileImgUrl && !imgError) {
     return (
       <img
-        src={astrologer.profileImgUrl}
+        src={getAstrologerImageUrl(astrologer)}
         alt={name}
         className={styles.trendingAvatar}
         onError={() => setImgError(true)}

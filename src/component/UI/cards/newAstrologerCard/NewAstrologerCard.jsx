@@ -2,7 +2,7 @@ import { memo, useId } from "react";
 import { BookOpen } from "lucide-react";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
-import { AppIcons, getAstrologerDefaultImage } from "../../../../utils/appImages";
+import { AppIcons, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../utils/appImages";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 import toast from "../../../toast";
 import { unavailableReason } from "../../../../utils/helper/astrologerAvailability";
@@ -134,7 +134,7 @@ const NewAstrologerCard = memo(({
               even start until layout has run. Callers should set it only on the
               first card or two. */}
           <img
-            src={astrologer.profileImgUrl || getAstrologerDefaultImage(astrologer.gender)}
+            src={getAstrologerImageUrl(astrologer)}
             alt={astrologer.firstName}
             className={styles.astrologerImg}
             loading={priority ? "eager" : "lazy"}

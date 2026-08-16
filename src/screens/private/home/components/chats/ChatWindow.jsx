@@ -42,6 +42,7 @@ import { useChat as useChatContext } from "../../../../../context/ChatContext";
 import RechargeModal from "../../../../../component/recharge-modal/RechargeModal";
 import useAstrologerAvailability from "../../../../../utils/hooks/useAstrologerAvailability";
 
+import { getAstrologerImageUrl } from "../../../../../utils/appImages";
 const ChatWindow = () => {
   const messagesRef = useRef(null);
   const chatPageRef = useRef(null);
@@ -116,9 +117,15 @@ const ChatWindow = () => {
     }
   }, [activeChat?.astrologerID]);
 
-  // Resolve profileImgUrl: prefer fresh API data; only use fallbacks while API is loading
+  // Resolve profileImgUrl: prefer fresh API data; only use fallbacks while API is loading.
+  //
+  // The chat avatars render at roughly 28-40px, so ask for the `small` (100x125)
+  // derivative rather than the unresized original that `profileImgUrl` points at.
+  // getAstrologerImageUrl falls back to profileImgUrl on its own, which also
+  // covers the fallback branch below — navigation state, activeChat and the
+  // query param all carry only the bare URL.
   const profileImgUrl = astrologerProfileData
-    ? (astrologerProfileData?.data?.profileImgUrl || "")
+    ? (getAstrologerImageUrl(astrologerProfileData?.data, "small") || "")
     : (stateProfileImgUrl || activeChat?.profileImgUrl || (() => {
         try {
           const params = new URLSearchParams(window.location.search);

@@ -83,6 +83,47 @@ export const getAstrologerDefaultImage = (gender) => {
   return DefaultImages.AstrologerMaleDefaultImg;
 };
 
+/**
+ * Resolve an astrologer's profile image, preferring a pre-resized variant and
+ * always returning something paintable.
+ *
+ * The API returns a `profileImages` map of derivatives:
+ *
+ *   { original, small (100x125), medium (250x312), large (500x624), xlarge (750x936) }
+ *
+ * `profileImgUrl` is the legacy single field and points at the unresized
+ * original — 896x902 and 1433x1433 have both been observed — which cards then
+ * paint into boxes around 100x115. Preferring a sized variant cuts the bytes by
+ * roughly an order of magnitude for the same rendered result.
+ *
+ * Resolution order, each step skipped when null/absent/blank:
+ *   1. profileImages[size]
+ *   2. profileImgUrl   (legacy, and the only field carried by socket payloads,
+ *                       the call/chat contexts and the ChatWindow query param)
+ *   3. imageUrl        (older shape still present on some list responses)
+ *   4. gendered default placeholder
+ *
+ * Lives here rather than in helper/string.utils.js on purpose: the gendered
+ * default comes from the DefaultImages registry above, and string.utils has 47
+ * importers, many of which only want slugifyName and have no business pulling in
+ * the asset registry.
+ *
+ * @param {object} astrologer - astrologer-shaped object
+ * @param {"small"|"medium"|"large"|"xlarge"|"original"} [size="medium"]
+ * @returns {string} always a usable image URL
+ */
+export const getAstrologerImageUrl = (astrologer, size = "medium") => {
+  const usable = (value) =>
+    typeof value === "string" && value.trim() ? value : undefined;
+
+  return (
+    usable(astrologer?.profileImages?.[size]) ??
+    usable(astrologer?.profileImgUrl) ??
+    usable(astrologer?.imageUrl) ??
+    getAstrologerDefaultImage(astrologer?.gender)
+  );
+};
+
 
 export const AppIcons = {
   Logo,

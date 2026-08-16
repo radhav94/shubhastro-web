@@ -38,7 +38,8 @@ import RechargeModal from "../recharge-modal/RechargeModal";
 import { PATH } from "../../utils/routes/Paths";
 import ChatNotificationBanner from "../UI/ChatNotificationBanner/ChatNotificationBanner";
 import { capitalizeWords } from "../../utils/capitalize";
-import { getAstrologerDefaultImage } from "../../utils/appImages";
+import { getAstrologerDefaultImage, getAstrologerImageUrl } from "../../utils/appImages";
+import { useGetAstrologerByIdQuery } from "../../redux/api/astrologer/astrologerApi";
 import VideocamIcon from "../../assets/chat/Videocam.svg";
 import CallIcon from "../../assets/chat/Call.svg";
 import SuggestedRemedyPanel from "./SuggestedRemedyPanel";
@@ -65,9 +66,56 @@ const VideoCalling = ({ callData }) => {
     enabled: !!activeCall && activeCall.callType === "video",
   });
 
+  // Fetch the astrologer for the pre-resized `profileImages` variants. Nothing
+  // plumbed through CallContext / the socket payload carries them — only
+  // `profileImgUrl`, the unresized original. RTK Query dedupes with the same
+  // query elsewhere, so this is usually already cached.
+  const { data: astrologerFullData } = useGetAstrologerByIdQuery(
+    { id: activeCall?.astrologerId },
+    { skip: !activeCall?.astrologerId }
+  );
+
   if (!activeCall || activeCall.callType !== "video") return null;
 
   const { roomId, sessionRoomId, channelName, agoraToken, isUserSide, callerName } = callData;
+
+  // Astrologer-shaped object for getAstrologerImageUrl. `profileImgUrl` /
+  // `imageUrl` preserve the precedence the avatars used before, so nothing
+  // regresses while the query is in flight or when derivatives are missing.
+  const astroForImage = {
+    // `lastRequestedAstro` is the whole astrologer object from the card that
+    // started the call (see useAstrologerConnect), so it usually already has
+    // `profileImages` — covers the window before the query resolves. On a
+    // refresh-resume the query is the only source.
+    profileImages:
+      astrologerFullData?.data?.profileImages ||
+      lastRequestedAstro?.profileImages ||
+      chatLastRequestedAstro?.profileImages,
+    profileImgUrl: activeCall?.profileImgUrl || lastRequestedAstro?.profileImgUrl,
+    imageUrl: lastRequestedAstro?.imageUrl,
+    gender:
+      activeCall?.gender ||
+      lastRequestedAstro?.gender ||
+      chatLastRequestedAstro?.gender,
+  };
+
+  // Review avatar (FeedbackModal renders at 44px). `currentCall` is read from
+  // activeCallRef at end-of-call — same astrologer, so the fetched derivatives
+  // still apply.
+  const resolveReviewImage = (currentCall) =>
+    getAstrologerImageUrl(
+      {
+        profileImages: astroForImage.profileImages,
+        profileImgUrl:
+          currentCall?.profileImgUrl ||
+          currentCall?.astrologerImage ||
+          lastRequestedAstro?.profileImgUrl ||
+          lastRequestedAstro?.imageUrl ||
+          chatLastRequestedAstro?.profileImgUrl,
+        gender: astroForImage.gender,
+      },
+      "small"
+    );
 
   // For Agora: use channelName if provided by server, otherwise roomId
   const agoraChannelName = channelName || roomId;
@@ -679,7 +727,7 @@ const VideoCalling = ({ callData }) => {
       setReviewData({
         astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
         fullName: currentCall?.callerName || callerName,
-        profileImage: currentCall?.profileImgUrl || currentCall?.astrologerImage || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || chatLastRequestedAstro?.profileImgUrl,
+        profileImage: resolveReviewImage(currentCall),
         roomId,
         gender: lastRequestedAstro?.gender || chatLastRequestedAstro?.gender || activeCall?.gender,
       });
@@ -791,7 +839,7 @@ const VideoCalling = ({ callData }) => {
         setReviewData({
           astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
           fullName: currentCall?.callerName || callerName,
-          profileImage: currentCall?.profileImgUrl || currentCall?.astrologerImage || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl || chatLastRequestedAstro?.profileImgUrl,
+          profileImage: resolveReviewImage(currentCall),
           roomId,
           gender: lastRequestedAstro?.gender || chatLastRequestedAstro?.gender || activeCall?.gender,
         });
@@ -1255,16 +1303,12 @@ const VideoCalling = ({ callData }) => {
           {/* Avatar Overlay — astrologer camera off */}
           {!remoteVideoEnabled && (
             <div className={styles.avatarOverlayMini}>
+              {/* .avatarImageMini is 45-50px — `small` (100x125) covers 2x */}
               <img
-                src={
-                  activeCall?.profileImgUrl ||
-                  lastRequestedAstro?.profileImgUrl ||
-                  lastRequestedAstro?.imageUrl ||
-                  getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender)
-                }
+                src={getAstrologerImageUrl(astroForImage, "small")}
                 alt={callerName}
                 className={styles.avatarImageMini}
-                onError={(e) => { e.currentTarget.src = getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender); }}
+                onError={(e) => { e.currentTarget.src = getAstrologerDefaultImage(astroForImage.gender); }}
               />
             </div>
           )}
@@ -1337,16 +1381,14 @@ const VideoCalling = ({ callData }) => {
                 <IoArrowBack size={24} />
               </button>
 
+              {/* 40px header thumbnail */}
               <img
-                src={
-                  activeCall?.profileImgUrl ||
-                  lastRequestedAstro?.profileImgUrl ||
-                  lastRequestedAstro?.imageUrl ||
-                  getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender)
-                }
+                src={getAstrologerImageUrl(astroForImage, "small")}
                 alt={callerName}
+                width={40}
+                height={40}
                 onError={(e) => {
-                  e.currentTarget.src = getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender);
+                  e.currentTarget.src = getAstrologerDefaultImage(astroForImage.gender);
                 }}
                 style={{ width: 40, height: 40, borderRadius: "50%", objectFit: "cover", marginLeft: 12, marginRight: 0, flexShrink: 0 }}
               />
@@ -1498,17 +1540,14 @@ const VideoCalling = ({ callData }) => {
                     <span className={styles.ripple}></span>
                     <span className={styles.ripple}></span>
                     <span className={styles.ripple}></span>
+                    {/* .avatarImage is 160-200px, so `large` (500x624) rather
+                        than `medium` (250x312), which would be soft at 2-3x */}
                     <img
-                      src={
-                        activeCall?.profileImgUrl ||
-                        lastRequestedAstro?.profileImgUrl ||
-                        lastRequestedAstro?.imageUrl ||
-                        getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender)
-                      }
+                      src={getAstrologerImageUrl(astroForImage, "medium")}
                       alt={callerName}
                       className={styles.avatarImage}
                       onError={(e) => {
-                        e.currentTarget.src = getAstrologerDefaultImage(activeCall?.gender || lastRequestedAstro?.gender || chatLastRequestedAstro?.gender);
+                        e.currentTarget.src = getAstrologerDefaultImage(astroForImage.gender);
                       }}
                     />
                   </div>

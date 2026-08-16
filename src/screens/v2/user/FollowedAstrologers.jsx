@@ -8,6 +8,7 @@ import {
   useUnfollowAstrologerByIdMutation,
 } from "../../../redux/api/astrologer/followAstrologerApi";
 import styles from "./FollowedAstrologers.module.scss";
+import { getAstrologerImageUrl } from "../../../utils/appImages";
 import {
   getAstrologerDisplayName,
   getAstrologerProfilePath,
@@ -225,7 +226,7 @@ const FollowedAstrologers = () => {
               // real first + last name, so it's only a fallback.
               const name = getAstrologerDisplayName(astro) || astro.fullName || "Astrologer";
               const id = item.astrologerId || astro._id;
-              const image = astro.profileImgUrl;
+              const image = getAstrologerImageUrl(astro);
               const isFollowing = item.isFollowing !== false;
               const since = item.followedAt;
 

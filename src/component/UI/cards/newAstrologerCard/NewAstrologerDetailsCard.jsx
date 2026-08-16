@@ -4,8 +4,9 @@ import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import {
   AppIcons,
-  getAstrologerDefaultImage,
   appSvgs,
+  getAstrologerDefaultImage,
+  getAstrologerImageUrl,
 } from "../../../../utils/appImages";
 import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySessionModal";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
@@ -38,7 +39,7 @@ const NewAstrologerDetailsCard = ({
   const emergencyMinRate = emergencyChatRate > 0 && emergencyCallRate > 0
     ? Math.min(emergencyChatRate, emergencyCallRate)
     : emergencyChatRate || emergencyCallRate;
-  const imageUrl = astrologer?.profileImgUrl || getAstrologerDefaultImage(astrologer?.gender);
+  const imageUrl = getAstrologerImageUrl(astrologer);
 
   return (
     <div

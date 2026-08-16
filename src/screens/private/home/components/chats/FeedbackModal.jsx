@@ -1,7 +1,11 @@
 import { useState } from "react";
 import styles from "./Feedback.module.scss";
 import { ChevronRight, CircleX } from "lucide-react";
-import { AppIcons, getAstrologerDefaultImage } from "../../../../../utils/appImages";
+import {
+  AppIcons,
+  getAstrologerDefaultImage,
+  getAstrologerImageUrl,
+} from "../../../../../utils/appImages";
 
 const FeedbackModal = ({
   open,
@@ -49,12 +53,26 @@ const FeedbackModal = ({
         </button>
 
         <div className={styles.astrologerRow}>
+          {/* Resolution goes through getAstrologerImageUrl rather than
+              `profileImgUrl || getAstrologerDefaultImage(gender)` so every
+              avatar in the app shares one code path. Behaviour is the same here
+              with one fix: `||` accepts a blank or whitespace-only string as a
+              valid src (yielding a broken image), the helper treats it as absent
+              and falls through to the gendered default.
+
+              This modal takes a plain URL, not an astrologer object, and every
+              caller already hands over the correctly sized variant — ChatWindow
+              and the call screens resolve `small` (this avatar is 44px) before
+              passing it. The helper passes such a URL straight through. */}
           <img
             className={styles.astrologerAvatar}
-            src={profileImgUrl || getAstrologerDefaultImage(gender)}
+            src={getAstrologerImageUrl({ profileImgUrl, gender }, "small")}
             alt={ratedUserName || "Astrologer"}
+            width={44}
+            height={44}
+            decoding="async"
             onError={(e) => {
-              e.target.src = getAstrologerDefaultImage(gender);
+              e.currentTarget.src = getAstrologerDefaultImage(gender);
             }}
           />
           <span className={styles.astrologerName}>{ratedUserName || "Astrologer"}</span>

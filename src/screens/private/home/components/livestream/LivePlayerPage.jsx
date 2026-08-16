@@ -5,6 +5,7 @@ import { LiveListProvider } from "../../../../../context/LiveListContext";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { restoreViewerSession, clearViewerSession } from "../../../../../utils/liveSessionStorage";
 import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
+import { getAstrologerImageUrl } from "../../../../../utils/appImages";
 
 // Lazy, because this module carries the Agora RTC SDK — a 1,226 kB chunk.
 //
@@ -135,7 +136,14 @@ const LivePlayerPage = () => {
         astrologerId: l.astrologer?._id,
         rating: l.astrologer?.rating,
         expertise: l.astrologer?.expertise,
-        imageUrl: l.astrologer?.profileImgUrl || l.astrologer?.imageUrl,
+        // Resolved once here so every downstream consumer of the live list
+        // (LiveStreamingContainer's stream-ended card, LiveListContext readers)
+        // gets a sized variant instead of the unresized original. The largest
+        // surface that reads this is 60px, so `small` (100x125).
+        //
+        // Falls back through profileImgUrl -> imageUrl -> gendered default, so
+        // this is unchanged when the live-list projection omits profileImages.
+        imageUrl: getAstrologerImageUrl(l.astrologer, "small"),
         audioCallRate: l.astrologer?.price?.audioRate?.amount,
         videoCallRate: l.astrologer?.price?.videoCallRate?.amount,
         uid: l.uid,
