@@ -257,7 +257,9 @@ const CosmicChat = () => {
       <div className={styles.containerDiv} ref={scrollAreaRef}>
         <div className={styles.heiT}>
           <div className={styles.messagesContainer} ref={messagesContainerRef}>
-          {messages.length === 0 && !isLoading && (
+          {/* Stays visible for the whole session start, including while
+              isLoading — see the matching note in TalkToKundliChat. */}
+          {messages.length === 0 && (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>✨</div>
               <p>Connecting to cosmic energies...</p>
@@ -283,7 +285,9 @@ const CosmicChat = () => {
           </div>
         ))}
 
-        {isLoading && (
+        {/* Only once there is something to reply to — see the matching note in
+            TalkToKundliChat. */}
+        {isLoading && messages.length > 0 && (
           <div className={`${styles.messageWrapper} ${styles.aiMessage}`}>
             <div className={styles.messageBubble}>
               <div className={styles.typingIndicator}>

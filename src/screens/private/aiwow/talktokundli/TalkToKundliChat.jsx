@@ -252,7 +252,12 @@ const TalkToKundliChat = () => {
         <div className={styles.heiT}>
         {/* Messages */}
         <div className={styles.messagesContainer} ref={messagesContainerRef}>
-          {messages.length === 0 && !isLoading && (
+          {/* Stays visible for the whole session start, including while
+              isLoading. It used to be hidden as soon as startSession() set
+              isLoading, so this text flashed for one frame and was replaced by an
+              empty message bubble containing the typing dots — a "the AI is
+              replying" affordance shown before any conversation existed. */}
+          {messages.length === 0 && (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>💬</div>
               <p>Starting your personalized chat session...</p>
@@ -278,7 +283,10 @@ const TalkToKundliChat = () => {
             </div>
           ))}
 
-          {isLoading && (
+          {/* Only once there is something to reply to. The typing dots mean "the
+              AI is composing a response"; during session start there is no
+              conversation yet, so the empty state above covers that instead. */}
+          {isLoading && messages.length > 0 && (
             <div className={`${styles.messageWrapper} ${styles.aiMessage}`}>
               <div className={styles.messageBubble}>
                 <div className={styles.typingIndicator}>
