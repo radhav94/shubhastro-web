@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, Plus, Minus } from "lucide-react";
 import styles from "./FAQ.module.scss";
@@ -8,6 +8,44 @@ const FAQ = () => {
   const location = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("Account and Profile");
   const [expandedQuestion, setExpandedQuestion] = useState(null);
+
+  // Both controls on this page changed state somewhere the user couldn't see,
+  // which is what Clarity logs as a dead click.
+  //
+  // 1. The answer expands *below* the question. Tap a question low on the screen
+  //    and the answer opens off-screen — the only visible change near your
+  //    finger is the 20px Plus turning into a Minus. Worse, the accordion is
+  //    single-open, so opening one collapses another: if the collapsed one was
+  //    above, everything shifts up and the row you just tapped moves out from
+  //    under your finger.
+  // 2. The category row is `flex-wrap: nowrap; overflow-x: auto`, so pills past
+  //    the right edge are clipped. "Chat and Call with Astrologer" is the second
+  //    pill and its label is long enough to be cut off — tapping a clipped pill
+  //    highlights a part you can't see, and because selecting a category also
+  //    resets `expandedQuestion`, the list below gets *shorter* rather than
+  //    obviously changing.
+  const itemRefs = useRef({});
+  const pillRefs = useRef({});
+
+  useEffect(() => {
+    if (expandedQuestion == null) return;
+    // rAF so the answer is in the DOM and has height before we measure.
+    const id = requestAnimationFrame(() => {
+      itemRefs.current[expandedQuestion]?.scrollIntoView({
+        block: "nearest",
+        behavior: "smooth",
+      });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [expandedQuestion]);
+
+  useEffect(() => {
+    pillRefs.current[selectedCategory]?.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+      behavior: "smooth",
+    });
+  }, [selectedCategory]);
 
   const fromTab = location.state?.fromTab;
   const isWebview = new URLSearchParams(location.search).get("type") === "webview";
@@ -312,9 +350,11 @@ const FAQ = () => {
           {categories.map((category) => (
             <button
               key={category.id}
+              ref={(el) => { pillRefs.current[category.label] = el; }}
               className={`${styles.categoryPill} ${
                 selectedCategory === category.label ? styles.active : ""
               }`}
+              aria-pressed={selectedCategory === category.label}
               onClick={() => {
                 setSelectedCategory(category.label);
                 setExpandedQuestion(null);
@@ -328,10 +368,16 @@ const FAQ = () => {
         {/* FAQ List */}
         <div className={styles.faqList}>
           {faqData[selectedCategory]?.map((faq) => (
-            <div key={faq.id} className={styles.faqItem}>
+            <div
+              key={faq.id}
+              className={styles.faqItem}
+              ref={(el) => { itemRefs.current[faq.id] = el; }}
+            >
               <button
                 className={styles.faqQuestion}
                 onClick={() => toggleQuestion(faq.id)}
+                aria-expanded={expandedQuestion === faq.id}
+                aria-controls={`faq-answer-${faq.id}`}
               >
                 <span className={styles.questionText}>{faq.question}</span>
                 <span className={styles.iconWrapper}>
@@ -343,7 +389,7 @@ const FAQ = () => {
                 </span>
               </button>
               {expandedQuestion === faq.id && (
-                <div className={styles.faqAnswer}>
+                <div className={styles.faqAnswer} id={`faq-answer-${faq.id}`} role="region">
                   <p>{faq.answer}</p>
                 </div>
               )}

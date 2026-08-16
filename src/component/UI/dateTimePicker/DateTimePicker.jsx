@@ -1,8 +1,11 @@
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, lazy, Suspense } from "react";
 import styles from "./DateTimePicker.module.scss";
 import Toast from "../../toast";
+
+// react-datepicker (+ date-fns) is ~157 kB raw and was sitting in the entry
+// chunk on every route. It only backs the hidden calendar popup, so it loads on
+// first tap instead. See LazyCalendar.jsx.
+const LazyCalendar = lazy(() => import("./LazyCalendar"));
 
 /*
  * A natively `disabled` input fires no events at all, so tapping one does
@@ -433,6 +436,18 @@ const DateTimePicker = ({
   const isTimeOnly = resolvedMode === "time";
   const isDateTime = resolvedMode === "datetime";
 
+  // Declared above the `isTimeOnly` early return on purpose. Every date-mode
+  // hook below that return is already a conditional-hook violation (this
+  // component calls a different number of hooks depending on `mode`); these two
+  // sit up here so the lazy-calendar change doesn't add to it.
+  //
+  // The calendar chunk is only mounted once the user asks for it, so the picker
+  // library isn't downloaded by visitors who never open a date field.
+  const [calendarMounted, setCalendarMounted] = useState(false);
+  // A tap can land before the chunk resolves. Remember it and open on arrival
+  // rather than dropping it — a swallowed tap here would read as a dead click.
+  const pendingOpenRef = useRef(false);
+
   // For time-only mode, use our custom 12-hour picker
   if (isTimeOnly) {
     return (
@@ -570,6 +585,23 @@ const DateTimePicker = ({
 
   const dateBlock = blockedTap(disabled, disabledReason);
 
+  const openCalendar = () => {
+    if (dateBlock.blocked) return dateBlock.explain();
+    if (disabled) return;
+    if (datePickerRef.current) {
+      datePickerRef.current.setOpen(true);
+      return;
+    }
+    pendingOpenRef.current = true;
+    setCalendarMounted(true);
+  };
+
+  const handleCalendarReady = () => {
+    if (!pendingOpenRef.current) return;
+    pendingOpenRef.current = false;
+    datePickerRef.current?.setOpen(true);
+  };
+
   return (
     <div className={`${styles.wrapper} ${className}`}>
       {label && (
@@ -587,7 +619,7 @@ const DateTimePicker = ({
           onBlur={handleManualBlur}
           onClick={() => {
             if (dateBlock.blocked) return dateBlock.explain();
-            if (openOnClick && !disabled) datePickerRef.current?.setOpen(true);
+            if (openOnClick) openCalendar();
           }}
           placeholder={resolvedPlaceholder}
           disabled={dateBlock.nativeDisabled}
@@ -599,20 +631,14 @@ const DateTimePicker = ({
         {/* Invisible overlay covering right 1/3 of input to open calendar */}
         <div
           className={styles.calendarOverlay}
-          onClick={() => {
-            if (dateBlock.blocked) return dateBlock.explain();
-            if (!disabled) datePickerRef.current?.setOpen(true);
-          }}
+          onClick={openCalendar}
         />
         <button
           type="button"
           className={styles.calendarBtn}
           disabled={dateBlock.nativeDisabled}
           aria-disabled={disabled || undefined}
-          onClick={() => {
-            if (dateBlock.blocked) return dateBlock.explain();
-            if (!disabled) datePickerRef.current?.setOpen(true);
-          }}
+          onClick={openCalendar}
           tabIndex={-1}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -625,29 +651,30 @@ const DateTimePicker = ({
       </div>
       {dateError && !onError && <p className={styles.dateError}>{dateError}</p>}
 
-      {/* Hidden DatePicker for calendar popup */}
+      {/* Hidden DatePicker for the calendar popup — mounted on first request so
+          react-datepicker stays out of the entry bundle. fallback={null} because
+          this subtree is visually hidden anyway; the field above is already
+          rendered, so there is nothing to hold space for and no layout shift. */}
       <div className={styles.hiddenPicker}>
-        <DatePicker
-          ref={datePickerRef}
-          selected={selected}
-          onChange={handlePickerChange}
-          showMonthDropdown
-          showYearDropdown
-          dropdownMode="select"
-          scrollableYearDropdown
-          yearDropdownItemNumber={100}
-          showTimeSelect={isDateTime}
-          timeFormat="hh:mm aa"
-          timeIntervals={15}
-          dateFormat={resolvedFormat}
-          minDate={minDate}
-          maxDate={maxDate}
-          disabled={disabled}
-          popperPlacement={dropUp ? "top-start" : "bottom-start"}
-          popperClassName={styles.popper}
-          calendarClassName={styles.calendar}
-          {...(portal ? { portalId: "rdp-portal" } : {})}
-        />
+        {calendarMounted && (
+          <Suspense fallback={null}>
+            <LazyCalendar
+              ref={datePickerRef}
+              selected={selected}
+              onChange={handlePickerChange}
+              isDateTime={isDateTime}
+              dateFormat={resolvedFormat}
+              minDate={minDate}
+              maxDate={maxDate}
+              disabled={disabled}
+              dropUp={dropUp}
+              portal={portal}
+              popperClassName={styles.popper}
+              calendarClassName={styles.calendar}
+              onReady={handleCalendarReady}
+            />
+          </Suspense>
+        )}
       </div>
     </div>
   );
