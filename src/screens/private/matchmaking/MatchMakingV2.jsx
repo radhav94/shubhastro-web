@@ -242,9 +242,21 @@ const MatchMaking = () => {
   });
 
   /* -------------------- SELECT PROFILE -------------------- */
+  // Single entry point for both slots, shared by the label and the control so
+  // the two can't drift apart.
+  const openProfilePicker = (type) => {
+    setSelectingType(type);
+    setShowSelectProfile(true);
+  };
+
   const handleSelectProfile = (profile) => {
     if (selectingType === "PRIMARY") {
-      if (profile._id === partnerProfile?._id) return; // prevent selecting same as partner
+      // Was a bare `return` — tapping the profile already used in the other slot
+      // closed nothing and said nothing, so the row looked broken. Name it.
+      if (profile._id === partnerProfile?._id) {
+        Toast.error("That profile is already set as the partner. Pick a different one.");
+        return;
+      }
       setPrimaryProfile(profile);
       setSelectedProfile(profile);
       // dispatch(setSelectedKundli(profile));
@@ -255,7 +267,11 @@ const MatchMaking = () => {
     }
 
     if (selectingType === "PARTNER") {
-      if (profile._id === primaryProfile?._id) return; // prevent selecting same as primary
+      // Same as the primary branch — explain instead of going silent.
+      if (profile._id === primaryProfile?._id) {
+        Toast.error("That profile is already set as the primary. Pick a different one.");
+        return;
+      }
       setPartnerProfile(profile);
       // Check if both are same gender
       if (primaryProfile && primaryProfile.gender?.toLowerCase() === profile.gender?.toLowerCase()) {
@@ -671,38 +687,60 @@ const MatchMaking = () => {
           </div>
 
           <div className={styles.matchMakingInputs}>
+            {/*
+              Both slots: the <label> used to be inert — no htmlFor, no handler —
+              while the control below it was a <div onClick>. The label sits
+              directly above the field and reads like the thing to press, so a
+              tap on "Select Primary Profile" did nothing at all. `htmlFor`
+              alone is not enough here because label-to-<button> click
+              forwarding is inconsistent across browsers, so the label carries
+              the handler too.
+
+              The control is a real <button type="button"> so it is keyboard
+              reachable and announces that it opens a dialog.
+            */}
             <div className={styles.matchInput}>
-              <label className="block font-medium mb-2">
+              <label
+                className={`block font-medium mb-2 ${styles.matchInputLabel}`}
+                htmlFor="matchmaking-primary-profile"
+                onClick={() => openProfilePicker("PRIMARY")}
+              >
                 Select Primary Profile
               </label>
-              <div
-                onClick={() => {
-                  setSelectingType("PRIMARY");
-                  setShowSelectProfile(true);
-                }}
-                className="flex items-center justify-between border rounded-xl px-4 py-3 bg-white"
+              <button
+                id="matchmaking-primary-profile"
+                type="button"
+                onClick={() => openProfilePicker("PRIMARY")}
+                aria-haspopup="dialog"
+                aria-expanded={showSelectProfile && selectingType === "PRIMARY"}
+                className={`w-full text-left flex items-center justify-between border rounded-xl px-4 py-3 bg-white ${styles.matchInputControl}`}
               >
                 <span>{primaryProfile?.name || "Select Profile"}</span>
                 <ChevronDown className="w-4 h-4 text-orange-500" />
-              </div>
+              </button>
             </div>
 
             <div className={styles.matchInput}>
-              <label className="block font-medium mb-2">
+              <label
+                className={`block font-medium mb-2 ${styles.matchInputLabel}`}
+                htmlFor="matchmaking-partner-profile"
+                onClick={() => openProfilePicker("PARTNER")}
+              >
                 Select Partner’s Profile
               </label>
-              <div
-                onClick={() => {
-                  setSelectingType("PARTNER");
-                  setShowSelectProfile(true);
-                }}
-                className="flex items-center justify-between border rounded-xl px-4 py-3 bg-white"
-                >
+              <button
+                id="matchmaking-partner-profile"
+                type="button"
+                onClick={() => openProfilePicker("PARTNER")}
+                aria-haspopup="dialog"
+                aria-expanded={showSelectProfile && selectingType === "PARTNER"}
+                className={`w-full text-left flex items-center justify-between border rounded-xl px-4 py-3 bg-white ${styles.matchInputControl}`}
+              >
                 <span className={partnerProfile ? "" : "text-gray-400"}>
                   {partnerProfile?.name || "Add Profile"}
                 </span>
                 <ChevronDown className="w-4 h-4 text-orange-500" />
-              </div>
+              </button>
             </div>
 
             {/*

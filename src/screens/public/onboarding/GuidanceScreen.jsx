@@ -318,10 +318,20 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
               </div>
             </div>
 
+            {/*
+              Busy guard rather than a validation gate, but still not `disabled`:
+              a tap during the save was swallowed with no event at all. The label
+              already reads "Saving...", so preventDefault is enough here — no
+              toast needed. Matches BirthDetailsScreen's `registering` handling.
+            */}
             <button 
               type="submit"
               className={styles.otpprimaryBtn}
-              disabled={loading}
+              aria-disabled={loading}
+              aria-busy={loading}
+              onClick={(e) => {
+                if (loading) e.preventDefault();
+              }}
             >
               {loading ? "Saving..." : "Next"}
             </button>

@@ -44,6 +44,26 @@
     border: none;
   }
 }
+// The label is a real click target now (it opens the profile picker, same as the
+// control below it), so it needs to look like one.
+.matchInputLabel {
+  cursor: pointer;
+}
+
+// The profile slot was a <div>; it's a <button> now for keyboard access and so
+// analytics register it as interactive. Reset the UA button styling that the
+// Tailwind classes on the element don't cover, and keep a visible focus ring.
+.matchInputControl {
+  appearance: none;
+  font: inherit;
+  color: inherit;
+
+  &:focus-visible {
+    outline: 2px solid #f97316;
+    outline-offset: 2px;
+  }
+}
+
 .matchInput{
   flex-shrink: 0;
   width: 270px;
