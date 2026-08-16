@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import styles from "./Payment.module.scss";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useGetAllPlansQuery } from "../../../redux/api/plansApi/plansApi";
@@ -6,7 +6,18 @@ import { getToken } from "../../../utils/token";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { trackEvent } from "../../../utils/analytics";
 
-const RechargePack = ({ name, actualPrice, discountedPrice, offerPrice, Active }) => (
+/*
+ * `Active` drives the `.active` box-shadow in Payment.module.scss, but no caller
+ * ever passed it: the only usage is `<RechargePack {...pack} />` spreading a
+ * plan object from useGetAllPlansQuery, and the plans API has no `Active` field.
+ * So the selected state was dead CSS and a tap produced no visual change at all.
+ *
+ * That matters because /recharge/payment is a lazy route (see Paths.js), so
+ * tapping an amount fires a chunk fetch and *then* navigates. With no pressed
+ * state and no spinner, the gap between tap and navigation looked like nothing
+ * happening — which is what Clarity logged as a dead click on the ₹20 option.
+ */
+const RechargePack = ({ actualPrice, discountedPrice, Active }) => (
   <div className={styles.rechargeAmountWrapper}>
     <div className={`${styles.rechargeAmount} ${Active ? styles.active : ""}`}>
       <div className={styles.price}>₹ {actualPrice}</div>
@@ -33,8 +44,13 @@ const Payment = () => {
   // Use the wallet balance hook
   const { balance, isFetching, refreshWallet } = useWalletBalance();
 
-  const { data } = useGetAllPlansQuery();
+  const { data, isLoading: isPlansLoading, isError: isPlansError, refetch: refetchPlans } =
+    useGetAllPlansQuery();
   const allPlans = data?.data ?? [];
+
+  // Which amount the user just tapped. Gives the card an immediate pressed state
+  // while the lazy /recharge/payment chunk loads, so the tap is acknowledged.
+  const [pendingPlanId, setPendingPlanId] = useState(null);
 
   // Refresh wallet balance when component mounts
   useEffect(() => {
@@ -79,19 +95,47 @@ const Payment = () => {
 
         <div className={styles.rechargeHeader}>Add Money to Wallet</div>
 
-        <div className={styles.rechargeFlex}>
-          {allPlans?.map((pack) => (
-            <Link
-              to="/recharge/payment"
-              state={{ planId: pack?._id, returnUrl }}
-              key={pack._id}
-              className={styles.linkWrapper}
-              onClick={() => trackEvent("recharge_amount_selected", { amount: pack?.actualPrice, is_preset: true })}
-            >
-              <RechargePack {...pack} />
-            </Link>
-          ))}
-        </div>
+        {/*
+          The grid previously rendered nothing at all while the plans request was
+          in flight and nothing when it failed or came back empty — so the page
+          showed the "Add Money to Wallet" heading above blank space, and a tap
+          where the amounts were about to appear went nowhere. Both states are
+          explicit now, and the error state offers a retry instead of dead-ending.
+        */}
+        {isPlansLoading ? (
+          <div className={styles.plansStatus} role="status">Loading amounts…</div>
+        ) : isPlansError ? (
+          <div className={styles.plansStatus} role="alert">
+            Couldn&apos;t load the recharge amounts.{" "}
+            <button type="button" className={styles.plansRetry} onClick={refetchPlans}>
+              Try again
+            </button>
+          </div>
+        ) : allPlans.length === 0 ? (
+          <div className={styles.plansStatus} role="status">
+            No recharge amounts are available right now. Please try again shortly.
+          </div>
+        ) : (
+          <div className={styles.rechargeFlex}>
+            {allPlans?.map((pack) => (
+              <Link
+                to="/recharge/payment"
+                state={{ planId: pack?._id, returnUrl }}
+                key={pack._id}
+                className={styles.linkWrapper}
+                aria-busy={pendingPlanId === pack._id}
+                onClick={() => {
+                  // Paint the pressed state before the lazy route chunk starts
+                  // loading, so the tap is visibly acknowledged either way.
+                  setPendingPlanId(pack._id);
+                  trackEvent("recharge_amount_selected", { amount: pack?.actualPrice, is_preset: true });
+                }}
+              >
+                <RechargePack {...pack} Active={pendingPlanId === pack._id} />
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
     </div>

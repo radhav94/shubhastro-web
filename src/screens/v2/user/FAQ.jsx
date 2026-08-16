@@ -87,7 +87,21 @@ const FAQ = () => {
       {
         id: 5,
         question: "Can I delete my account?",
-        answer: "Yes, you can request account deletion as per ShubhAstro.ai's policy.",
+        // Was: "Yes, you can request account deletion as per ShubhAstro.ai's
+        // policy." — which confirms it's possible but names no route, so the
+        // answer is a dead end. A Clarity session showed a visitor tapping this
+        // question repeatedly and then spending 11 minutes hunting through the
+        // Privacy Policy and Community Guidelines for the actual steps.
+        //
+        // It has to be self-sufficient rather than pointing at the in-app
+        // control, because this page is opened in the app's webview
+        // (?type=webview) and PrivacySecurity.jsx hides the "Delete Account"
+        // item under `!isWebview` — so in the context where this FAQ is most
+        // read, that control does not exist. The FAQ's own "Contact Support"
+        // button is hidden there too. The email is the documented rights
+        // channel from UserAgreement.jsx ("we will respond within 30 days").
+        answer:
+          "Yes. Email privacy@shubhastro.com from your registered address with your registered mobile number and we'll process the deletion, along with your associated data, within 30 days. If you're signed in on the web, you can also go to Profile → Privacy & Security → Delete Account.",
       },
     ],
     "Chat and Call with Astrologer": [

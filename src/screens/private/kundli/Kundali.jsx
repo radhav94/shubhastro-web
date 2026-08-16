@@ -44,6 +44,7 @@ import {
   removeCookie,
 } from "../../../utils/helper/cookies";
 import { trackEvent } from "../../../utils/analytics";
+import { downloadFile, toastDownloadOutcome } from "../../../utils/helper/downloadFile";
 
 // Cookie key for persisting guest (non-logged-in) kundli profiles across pages
 const GUEST_KUNDLI_COOKIE = "guestKundliProfiles";
@@ -407,7 +408,10 @@ const Kundali = () => {
 
   // Function to handle PDF download
   const handlePdfDownload = async (selectedLanguage) => {
-    if (isDownloadingPdf) return;
+    if (isDownloadingPdf) {
+      Toast.error("Your report is still being prepared. Please wait a moment.");
+      return;
+    }
 
     // Use passed language or fallback to Google Translate cookie
     const lang = selectedLanguage || (() => {
@@ -432,23 +436,13 @@ const Kundali = () => {
         }).unwrap();
         
         if (result?.success && result?.data) {
-          try {
-            const response = await fetch(result.data);
-            if (!response.ok) throw new Error("Fetch failed");
-            const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = blobUrl;
-            link.download = `Kundli_Report_${selectedProfile?.name || "report"}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            URL.revokeObjectURL(blobUrl);
-            Toast.success("PDF downloaded!");
+          const outcome = await downloadFile(
+            result.data,
+            `Kundli_Report_${selectedProfile?.name || "report"}.pdf`
+          );
+          toastDownloadOutcome(outcome, "PDF");
+          if (outcome !== "failed") {
             trackEvent("kundli_downloaded", { profile_id: selectedProfile._id });
-          } catch (fetchError) {
-            console.error("Failed to fetch PDF as blob:", fetchError);
-            Toast.error("Failed to download PDF");
           }
         } else {
           Toast.error("Failed to load PDF");
@@ -1038,21 +1032,13 @@ const Kundali = () => {
           if (existing) {
             // Free — download existing PDF directly
             setShowDownloadModal(false);
-            try {
-              const res = await fetch(existing.file_url);
-              const blob = await res.blob();
-              const blobUrl = URL.createObjectURL(blob);
-              const link = document.createElement("a");
-              link.href = blobUrl;
-              link.download = `Kundli_Report_${selectedProfile?.name || "report"}_${language}.pdf`;
-              document.body.appendChild(link);
-              link.click();
-              link.remove();
-              URL.revokeObjectURL(blobUrl);
-              Toast.success("PDF downloaded!");
+            const outcome = await downloadFile(
+              existing.file_url,
+              `Kundli_Report_${selectedProfile?.name || "report"}_${language}.pdf`
+            );
+            toastDownloadOutcome(outcome, "PDF");
+            if (outcome !== "failed") {
               trackEvent("kundli_downloaded", { profile_id: selectedProfile?._id });
-            } catch {
-              Toast.error("Failed to download PDF");
             }
           } else {
             // Paid — keep modal open, show downloading state
