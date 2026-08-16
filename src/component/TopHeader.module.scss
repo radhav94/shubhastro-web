@@ -377,6 +377,28 @@
   border-bottom: 1px solid transparent;
   cursor: pointer;
 }
+
+// The Calculators triggers (desktop dropdown and mobile drawer accordion) carry
+// .headerNavLink on a <button> now — they were a <span> and a <div> with onClick,
+// so neither was focusable or operable by keyboard. Neutralise the UA button
+// styling that .headerNavLink does not already override, so they stay visually
+// identical to the sibling nav links.
+button.headerNavLink {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  font-family: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}
 .quickNavText{
   margin-right: 10px;
   display: flex;
@@ -837,7 +859,18 @@
   display: flex;
   flex-direction: column;
 
+  // The trigger's layout used to come from an inline style on the <div>. It lives
+  // here now that it is a <button>, and matches the padding of the sibling
+  // drawer anchors (.mobileDrawer a) instead of .headerNavLink's larger desktop
+  // padding, so the row lines up with its neighbours.
   .headerNavLink {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+    padding: 10px 16px 10px 12px;
+    font-size: 14px;
     font-weight: 600;
   }
 }
@@ -847,18 +880,27 @@
   flex-direction: column;
   padding-left: 12px;
   // background: #fafafa;
-}
 
-.mobileCalcLink {
-  padding: 8px 16px;
-  font-size: 13px;
-  color: #2c1b0e;
-  cursor: pointer;
-  transition: background 0.15s ease;
+  // Sub-links are real <a> elements now, which means `.mobileDrawer a` would
+  // otherwise win on specificity and size them like top-level rows. Nested here
+  // to keep the visual hierarchy.
+  .mobileCalcLink {
+    padding: 8px 16px;
+    font-size: 13px;
+    color: #2c1b0e;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
 
-  &:hover {
-    background: #fff3ed;
-    color: #F75801;
+    &:hover {
+      background: #fff3ed;
+      color: #F75801;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #f75801;
+      outline-offset: -2px;
+    }
   }
 }
 
