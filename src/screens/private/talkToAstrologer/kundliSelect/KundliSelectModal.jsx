@@ -273,8 +273,10 @@ const KundliSelectModal = ({ isOpen, onClose, onSelect }) => {
             </button>
             <h2 className={styles.sheetTitle}>Select Profile</h2>
 
+            {/* Inline: a fullscreen overlay would blur and cover the bottom
+                sheet it lives in. */}
             {isLoading ? (
-              <PrimaryLoader />
+              <PrimaryLoader fullscreen={false} />
             ) : kundlis.length > 0 ? (
               <>
                 <div className={styles.profileList}>

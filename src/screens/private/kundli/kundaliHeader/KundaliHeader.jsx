@@ -446,7 +446,7 @@ const KundaliHeader = () => {
               </button>
             </div>
           ) : isLoading ? (
-            <PrimaryLoader />
+            <PrimaryLoader fullscreen={false} />
           ) : savedKundlis.length > 0 ? (
             <div className={styles.kundliList}>
               {savedKundlis.map((kundli) => (

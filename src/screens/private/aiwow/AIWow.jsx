@@ -519,7 +519,7 @@ const AIWow = () => {
           {activeTab === "results" && (
             <div className={styles.resultsList}>
               {isHistoryLoading && historyPage === 1 ? (
-                <PrimaryLoader />
+                <PrimaryLoader fullscreen={false} />
               ) : historyList.length === 0 ? (
                 <div className={styles.resultsPlaceholder}>No history found</div>
               ) : (

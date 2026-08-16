@@ -486,7 +486,7 @@ const NumerologyWeb = () => {
       {/* NUMEROLOGY CARDS */}
       {isLoadingNumerology ? (
         <div className={styles.loadingContainer}>
-          <PrimaryLoader />
+          <PrimaryLoader fullscreen={false} />
         </div>
       ) : numerologyResponse ? (
         <section className={styles.numerologySection}>

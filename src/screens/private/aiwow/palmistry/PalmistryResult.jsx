@@ -181,7 +181,8 @@ const PalmistryResult = () => {
             <h1 className={styles.title}>{featureTitle}</h1>
           </div>
         </header>
-        <PrimaryLoader />
+        {/* Inline so the page header above stays visible and un-blurred. */}
+        <PrimaryLoader fullscreen={false} />
       </div>
     );
   }

@@ -1451,7 +1451,7 @@ const TalkToAstrologer = () => {
 
           {isLoadingRecommended ? (
             <div className={styles.loaderWrapper}>
-              <PrimaryLoader />
+              <PrimaryLoader fullscreen={false} />
             </div>
           ) : (
             <div className={styles.recommendedGrid}>

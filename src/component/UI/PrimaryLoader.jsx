@@ -17,7 +17,20 @@ import styles from "./PrimaryLoader.module.scss";
 import defaultLoadingGif from "../../assets/gif/LOADING-ANIMATION.gif";
 
 const PrimaryLoader = ({
-  isLoading,
+  // Defaults to true so that <PrimaryLoader /> shows a loader.
+  //
+  // It used to default to undefined, and the guard below returns null when
+  // falsy, so a bare <PrimaryLoader /> rendered *nothing*. 21 call sites did
+  // exactly that — every one of them inside a loading branch such as
+  // `isLoading ? <PrimaryLoader /> : ...` or `{isFetching && <PrimaryLoader />}`
+  // — so their loading states were silently blank. On CmsNotFoundPage (the
+  // catch-all that serves every CMS/SEO landing page) that meant an entirely
+  // empty page for the whole CMS round trip, which reads as "broken" and drives
+  // refreshes and repeat clicks.
+  //
+  // Callers that hide the loader pass isLoading explicitly, so they are
+  // unaffected.
+  isLoading = true,
   fullscreen = true,
   message = "",
   spinnerSrc,
