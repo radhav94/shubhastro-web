@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
@@ -9,10 +9,21 @@ import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearAllCalculatorData } from "../../../redux/calculator/calculatorSlice";
 import { useLogoutUserMutation } from "../../../redux/api/userSession/userSessionApi";
 import DeviceLimitModal from "../../../component/UI/modal/DeviceLimitModal/DeviceLimitModal";
+import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import LoadingScreen from "./LoadingScreen";
 import WelcomeScreen from "./WelcomeScreen";
 import GuidanceScreen from "./GuidanceScreen";
-import BirthDetailsScreen from "./BirthDetailsScreen";
+// Lazy: BirthDetailsScreen is the only onboarding step that renders
+// DateTimePicker, which pulls react-datepicker (107 kB) + date-fns (49 kB) —
+// together 15% of the entry chunk that every visitor parses on every page.
+// Onboarding is a static import (it backs /login), so that cost was paid app-wide
+// for a date field on one step.
+//
+// It is index 4 in the `screens` array below and `currentStep` starts at 1
+// (login) or 3 (personalize flow), so this step is never the initial render — it
+// is always reached after at least one interaction, by which time the chunk has
+// loaded.
+const BirthDetailsScreen = lazy(() => import("./BirthDetailsScreen"));
 import PersonalizeScreen from "./PersonalizeScreen";
 import OTPScreen from "./OTPScreen";
 import LoginScreen from "./LoginScreen";
@@ -284,7 +295,14 @@ const Onboarding = () => {
 
   return (
     <>
-      <div className={styles.onboardingContainer}>{screens[currentStep]}</div>
+      <div className={styles.onboardingContainer}>
+        {/* Boundary for the lazy BirthDetailsScreen. Inline rather than
+            fullscreen so the step swap doesn't flash a blurred overlay over the
+            onboarding card. */}
+        <Suspense fallback={<PrimaryLoader fullscreen={false} />}>
+          {screens[currentStep]}
+        </Suspense>
+      </div>
       <DeviceLimitModal 
         isOpen={isDeviceLimitOpen}
         onClose={() => {

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "./TopHeader.module.scss";
@@ -13,7 +13,14 @@ import { useWalletBalance } from "../screens/private/wallet/useWalletBalance";
 import { getToken } from "../utils/token";
 import { useGetAllKundlisQuery } from "../services/appServices/kundliServicesNew";
 import useRequireAuth from "../utils/hooks/useRequireAuth"; 
-import { ProfileManager } from "./UI/Profile";
+// Lazy: ProfileManager pulls AddProfileModal / EditProfileModal /
+// GuestDetailsForm, all of which render DateTimePicker and therefore
+// react-datepicker + date-fns. TopHeader is in the layout of every page, so that
+// whole tree was parsed on every load for a modal that starts closed and most
+// visitors never open. Mounted below only once kundliModalOpen flips true.
+const ProfileManager = lazy(() =>
+  import("./UI/Profile").then((m) => ({ default: m.ProfileManager })),
+);
 import { setSelectedKundli, clearSelectedKundli } from "../redux/kundli/kundliSlice";
 import { setSelectedKundliProfile } from "../redux/aiwow/aiwowSlice";
 import LanguageSelector from "./LanguageSelector";
@@ -776,20 +783,25 @@ const TopHeader = () => {
         </>
       )}
 
-      {/* Kundli Selection Modal */}
-      <ProfileManager
-        isOpen={kundliModalOpen}
-        onClose={() => setKundliModalOpen(false)}
-        title="Select Profile"
-        onProfileSelect={handleKundliSelect}
-        selectedProfileId={selectedKundli?._id}
-        enabledOperations={{
-          list: true,
-          add: true,
-          edit: true,
-          delete: true,
-        }}
-      />
+      {/* Kundli Selection Modal — only mounted once opened, so the lazy chunk is
+          fetched on the click rather than on every page load. */}
+      {kundliModalOpen && (
+        <Suspense fallback={null}>
+          <ProfileManager
+            isOpen={kundliModalOpen}
+            onClose={() => setKundliModalOpen(false)}
+            title="Select Profile"
+            onProfileSelect={handleKundliSelect}
+            selectedProfileId={selectedKundli?._id}
+            enabledOperations={{
+              list: true,
+              add: true,
+              edit: true,
+              delete: true,
+            }}
+          />
+        </Suspense>
+      )}
     </>
   );
 };
