@@ -1142,10 +1142,28 @@ const TalkToAstrologer = () => {
   }, [userIdLocal, isRecommendModalOpen]);
 
   //JSX
-  if (isFetching && page === 1 && allAstrologers.length === 0) {
-    return <PrimaryLoader isLoading={true} />;
-  }
-
+  //
+  // No early full-page return on first load.
+  //
+  // This used to be:
+  //
+  //   if (isFetching && page === 1 && allAstrologers.length === 0)
+  //     return <PrimaryLoader isLoading />;
+  //
+  // which replaced the entire screen with a fullscreen spinner until
+  // useGetAstrologersQuery resolved. Nothing real painted in the meantime — no
+  // heading, no filter chips — so LCP on this route was gated end to end on that
+  // API call, on top of the usual CSR floor (blank HTML -> entry JS -> route
+  // chunk -> React). /chat-to-astrologer is an ad and referral landing page, so
+  // that is a cold, uncached, first-paint path.
+  //
+  // The static shell below (back button, <h1>, FilterChips) depends on no
+  // network data, so it can paint as soon as the route chunk executes, which
+  // makes the <h1> the LCP element and decouples LCP from API latency. The
+  // in-list spinner at loadMoreRef already covers the loading state — the
+  // infinite-scroll observer is guarded on !isFetching and
+  // !initialLoadComplete.current, so the sentinel sitting in the viewport with an
+  // empty list cannot trigger a spurious page increment.
   return (
     <div className={styles.mainContainer}>
       <div className={styles.pageHeader}>
@@ -1232,7 +1250,7 @@ const TalkToAstrologer = () => {
           </div>
 
           <div className={styles.topAstrologersGrid}>
-            {topTenAstrologers.map((astro) => (
+            {topTenAstrologers.map((astro, topIndex) => (
               // REPLACED: TopAstrologerCard with NewAstrologerCard for consistency
               // <TopAstrologerCard
               //   key={astro._id}
@@ -1246,6 +1264,10 @@ const TalkToAstrologer = () => {
               <NewAstrologerCard
                 key={astro._id}
                 astrologer={astro}
+                // First two cards are above the fold in this horizontal rail and
+                // are the leading image LCP candidates on this route, so they
+                // load eagerly at high priority. The rest stay lazy.
+                priority={topIndex < 2}
                 onConnect={handleConnectClick}
                 onEmergencyClick={(astrologer) => {
                   setSelectedAstrologer(astrologer);
@@ -1357,6 +1379,7 @@ const TalkToAstrologer = () => {
               <NewAstrologerDetailsCard
                 key={astro._id}
                 astrologer={astro}
+                priority={index === 0}
                 onConnect={handleConnectClick}
               />
             </div>
