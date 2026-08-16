@@ -76,11 +76,23 @@ export default defineConfig({
      * "Unexpected token '='", so the app never boots and the visitor sees a
      * blank page. That is unrecoverable and invisible to feature detection.
      *
-     * This list restores Vite's pre-6 default. firefox78 predates logical
-     * assignment (added in 79), so esbuild lowers it for every chunk while
-     * leaving ES2020 syntax such as optional chaining native.
+     * The floor was previously ['es2020', 'chrome87', 'edge88', 'firefox78',
+     * 'safari14'], which lowered logical assignment but deliberately left
+     * ES2020 syntax native. That shipped 100 bare `??` operators in the entry
+     * chunk, and nullish coalescing is the same kind of parse-time cliff:
+     * Chrome 80 / Edge 80 / Firefox 72 / Safari 13.4 introduced it, and anything
+     * older rejects the entire chunk with "Unexpected token '?'". (V8 reports
+     * `??` as "Unexpected token '?'" and `?.` as "Unexpected token '.'", so that
+     * exact message pins it to nullish coalescing.) Observed in the wild on
+     * Chrome Mobile from Google organic search: error at 00:01, zero clicks,
+     * gone by 00:04 — a blank page.
+     *
+     * So the floor now sits one rung below `??`. safari13 and firefox71 predate
+     * it, which makes esbuild lower `??` (and optional chaining) across every
+     * chunk, dependencies included. Raising any of these back above
+     * chrome80/edge80/firefox72/safari13.4 reintroduces the blank page.
      */
-    target: ['es2020', 'chrome87', 'edge88', 'firefox78', 'safari14'],
+    target: ['es2019', 'chrome79', 'edge79', 'firefox71', 'safari13'],
     rollupOptions: {
       output: {
         manualChunks(id) {

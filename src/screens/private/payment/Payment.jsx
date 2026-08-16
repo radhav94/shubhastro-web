@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import styles from "./Payment.module.scss";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useGetAllPlansQuery } from "../../../redux/api/plansApi/plansApi";
 import { getToken } from "../../../utils/token";
 import { useWalletBalance } from "../wallet/useWalletBalance";
@@ -19,6 +19,7 @@ const RechargePack = ({ name, actualPrice, discountedPrice, offerPrice, Active }
 
 const Payment = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const token = getToken();
   
@@ -51,8 +52,9 @@ const Payment = () => {
       <div className={styles.rechargeTop}>
         <div className={styles.leftSide}>
           <div className={styles.walletBalance}>
+            {/* location.key, not window.history.length — see BackButton.jsx */}
             <button className={styles.localBackBtn} onClick={() => {
-              if (window.history.length > 1) navigate(-1);
+              if (location.key !== "default") navigate(-1);
                 else navigate("/", { replace: true });
               }} aria-label="Go back">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">

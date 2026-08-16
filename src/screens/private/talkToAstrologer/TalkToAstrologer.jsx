@@ -1168,8 +1168,12 @@ const TalkToAstrologer = () => {
     <div className={styles.mainContainer}>
       <div className={styles.pageHeader}>
 
+        {/* location.key, not window.history.length — see BackButton.jsx. This is
+            a Google Ads landing page, and the ad redirect chain makes
+            history.length > 1 true, so back used to walk the visitor off the
+            origin instead of into the app. */}
         <button className={styles.localBackBtn} onClick={() => {
-          if (window.history.length > 1) navigate(-1);
+          if (location.key !== "default") navigate(-1);
           else navigate("/", { replace: true });
           }} aria-label="Go back">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
