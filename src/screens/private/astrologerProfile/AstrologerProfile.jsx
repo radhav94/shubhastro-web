@@ -35,8 +35,9 @@ import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import { useTalkToAstrologer } from "../talkToAstrologer/useTalkToAstrologer";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { useGetAstrologerReviewsQuery, useLazyGetAstrologerReviewsQuery } from "../../../redux/api/review/reviewApi";
-import { useGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
-import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
+import { useLazyGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
+import { useLazyGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
+import useIsDesktop from "../../../utils/hooks/useIsDesktop";
 import StickyReview from "../home/components/call/StickyReview";
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -238,12 +239,16 @@ const AstrologerProfile = () => {
     };
   }, [data?.isActive, data?.isActiveType, data?.price, isLive]);
 
-  // Fetch top astrologers for left sidebar (desktop only)
-  const { data: topAstrologersData } = useGetAstrologersQuery({
-    page: 1,
-    limit: 10,
-    isActive: true,
-  });
+  // Fetch top astrologers for left sidebar — desktop only, and now actually
+  // skipped on mobile. `.leftSidebar` is `display: none !important` at <=1024px
+  // (AstrologerProfile.module.scss), so every phone and tablet load was fetching
+  // a 10-astrologer list that could never be rendered, in parallel with the
+  // astrologer request this page genuinely blocks on.
+  const isDesktop = useIsDesktop(1025);
+  const { data: topAstrologersData } = useGetAstrologersQuery(
+    { page: 1, limit: 10, isActive: true },
+    { skip: !isDesktop },
+  );
   const {
     data: reviewsData,
     isLoading: reviewsLoading,
@@ -290,20 +295,25 @@ const AstrologerProfile = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [fetchMoreReviews] = useLazyGetAstrologerReviewsQuery();
 
-    const { data: vaChatHistoryData } = useGetChatHistoryQuery(
-
-    { userId: data?._id },
-
-    { skip: !data?._id || !getToken() }
-
+  // These two are keyed on `id` (the URL param), not `data?._id`, which removes a
+  // whole round trip each.
+  //
+  // They used to wait for useGetAstrologerByIdQuery to resolve before they could
+  // even start, turning the page into a two-wave waterfall. But the values are
+  // identical: getAstrologerProfilePath() builds the URL as
+  // `/astrologer/<slug>/<astrologer._id>`, and useGetAstrologerByIdQuery fetches
+  // `astrologers/astrologer?astrologerId=<id>` — so the document it returns has
+  // `_id === id` by construction. Nothing was gained by waiting for it.
+  const { data: vaChatHistoryData } = useGetChatHistoryQuery(
+    { userId: id },
+    { skip: !id || !getToken() },
   );
 
   const hasChatHistory = (vaChatHistoryData?.data?.length || 0) > 0;
 
-
   const { data: followingData } = useCheckFollowingStatusQuery(
-    { astrologerId: data?._id },
-    { skip: !data?._id || !getToken() }
+    { astrologerId: id },
+    { skip: !id || !getToken() },
   );
 
   // Check if the current astrologer is in the following list
@@ -353,19 +363,19 @@ const AstrologerProfile = () => {
   const token = getToken();
   const { balance } = useWalletBalance();
 
-  // Fetch call & chat history to find last roomId for this astrologer
-  const { data: callHistoryData } = useGetCallHistoryQuery(
-    { userId: userIdLocal, page: 1, limit: 30 },
-    { skip: !userIdLocal },
-  );
-  const { data: chatHistoryData } = useGetUserChatMessagesQuery(
-    { userId: userIdLocal, page: 1, limit: 30 },
-    { skip: !userIdLocal },
-  );
+  // Call & chat history, fetched on demand rather than on mount.
+  //
+  // These were two eager queries pulling 30 records each on every page load, and
+  // their only consumer is `lastRoomId`, which in turn is only read inside
+  // handleOpenReviewModal — a click handler. So every visitor paid for two
+  // sizeable requests on the critical path to populate a field that most of them
+  // never reach. Now they run when the review modal is actually opened.
+  const [fetchCallHistory] = useLazyGetCallHistoryQuery();
+  const [fetchChatHistory] = useLazyGetUserChatMessagesQuery();
 
-  // Find the most recent roomId for this astrologer from call/chat history
-  const lastRoomId = useMemo(() => {
-    const astrologerId = data?._id;
+  // Most recent roomId for this astrologer, from call/chat history. Pure so it
+  // can run against freshly fetched payloads instead of render-time state.
+  const pickLastRoomId = (callHistoryData, chatHistoryData, astrologerId) => {
     if (!astrologerId) return null;
 
     const callEntry = callHistoryData?.data?.callHistory?.find(
@@ -384,7 +394,7 @@ const AstrologerProfile = () => {
       return callTime > chatTime ? callEntry.roomId : chatEntry.roomId;
     }
     return callEntry?.roomId || chatEntry?.roomId || null;
-  }, [data?._id, callHistoryData, chatHistoryData]);
+  };
   
   // Use the astrologer connect hook
   const {
@@ -519,17 +529,34 @@ const AstrologerProfile = () => {
 
 
 
-  const handleOpenReviewModal = () => {
+  const handleOpenReviewModal = async () => {
     if (!getToken()) {
       navigate("/login");
       return;
     }
-    console.log(data,"123")
+
+    // Resolve the roomId here rather than on every page load — see the note on
+    // fetchCallHistory. Cached by RTK Query, so reopening the modal is free.
+    // `roomId` is optional metadata on the review, so a failed lookup must not
+    // block the modal.
+    let roomId = null;
+    if (userIdLocal) {
+      try {
+        const [callRes, chatRes] = await Promise.all([
+          fetchCallHistory({ userId: userIdLocal, page: 1, limit: 30 }).unwrap(),
+          fetchChatHistory({ userId: userIdLocal, page: 1, limit: 30 }).unwrap(),
+        ]);
+        roomId = pickLastRoomId(callRes, chatRes, data?._id);
+      } catch {
+        roomId = null;
+      }
+    }
+
     setReviewData({
       astrologerID: data?.astrologer_ID,
       fullName: getAstrologerDisplayName(data),
-      profileImage: data?.profileImgUrl || data?.imageUrl ,
-      roomId: lastRoomId,
+      profileImage: data?.profileImgUrl || data?.imageUrl,
+      roomId,
     });
     setOpenReview(true);
   };

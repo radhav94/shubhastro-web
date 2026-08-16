@@ -56,5 +56,7 @@ export const chatHistory = privateRequestNew.injectEndpoints({
 
 export const {
   useGetUserChatMessagesQuery,
+  // Lazy variant — see the note on useLazyGetCallHistoryQuery.
+  useLazyGetUserChatMessagesQuery,
   useGetRoomChatMessagesQuery,
 } = chatHistory;

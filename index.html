@@ -111,6 +111,11 @@
           if (typeof window.clarity === 'function') {
             window.clarity('set', 'jsErrorKind', masked ? 'cross_origin_masked' : kind);
             window.clarity('set', 'jsErrorMessage', message);
+            // The source was going to dataLayer only, so a Clarity session showed
+            // e.g. "Unexpected token '{'" with no way to tell which file threw —
+            // ours or a third-party tag. Without it a syntax error is
+            // unattributable, which is the one case where the file matters most.
+            window.clarity('set', 'jsErrorSource', source || '(unavailable)');
           }
 
           window.dataLayer = window.dataLayer || [];
