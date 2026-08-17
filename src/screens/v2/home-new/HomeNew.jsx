@@ -170,7 +170,9 @@ const HomeNew = () => {
   const panchangPayload = useMemo(() => {
     const pad = (n) => String(n).padStart(2, "0");
     const now = new Date();
-    return { day: pad(now.getDate()), month: pad(now.getMonth() + 1), year: now.getFullYear(), hour: pad(now.getHours()), min: pad(now.getMinutes()), lat: 19.132, lon: 72.342, tzone: 5.5 };
+    // Time pinned to midday: muhurats are date-based, and using the live clock
+    // made the RTK Query cache key change every minute (VedicAstro quota).
+    return { day: pad(now.getDate()), month: pad(now.getMonth() + 1), year: now.getFullYear(), hour: "12", min: "00", lat: 19.132, lon: 72.342, tzone: 5.5 };
   }, []);
   const { data: panchangData } = useFetchAdvancePanchangQuery(panchangPayload);
   const panchangResponse = panchangData?.response;
