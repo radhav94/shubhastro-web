@@ -1,11 +1,48 @@
-import { useState, useMemo } from "react";
-import PrimaryText from "../../../../../../component/PrimaryText";
+import { useState, useMemo, useRef, useEffect, useId } from "react";
 import TTSButton from "../../../../../../component/UI/TTSButton";
 import styles from "./Planetary.module.scss";
 
 const PlanetaryCard = ({ planet }) => {
   const [showMore, setShowMore] = useState(false);
   const [showFullAffliction, setShowFullAffliction] = useState(false);
+
+  // Declared above the early return below: this component already trips
+  // rules-of-hooks with a useMemo after that return, and adding to the problem
+  // would make the real ordering harder to reason about.
+  const cardRef = useRef(null);
+  const expandedRef = useRef(null);
+  const isFirstRender = useRef(true);
+  const detailsId = useId();
+
+  /*
+   * The Show More button sits at the bottom of the card and the ~10 revealed
+   * sections are inserted *above* it. Expanding therefore pushed the button far
+   * down the document — several screens' worth of astrology prose on a phone —
+   * while the beginning of the new content ended up well above the viewport.
+   * The visible result of the tap was that the button left the finger and the
+   * page appeared to jump, with nothing obviously new where the user was
+   * looking. Same class as the FAQ accordion: put the state change on screen.
+   *
+   * Expanding scrolls to the top of the revealed content, which is what the tap
+   * was asking for. Collapsing scrolls back to the card so the reader is not
+   * dropped somewhere arbitrary once the prose disappears.
+   */
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const target = showMore ? expandedRef.current : cardRef.current;
+    if (!target) return;
+    // rAF so the newly rendered sections are laid out before measuring.
+    const frame = requestAnimationFrame(() => {
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: showMore ? "start" : "nearest",
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [showMore]);
 
   if (!planet || !planet.planet_considered) {
     return null;
@@ -64,7 +101,7 @@ const PlanetaryCard = ({ planet }) => {
   }, [planet]);
 
   return (
-    <div className={styles.card}>
+    <div className={styles.card} ref={cardRef}>
       {/* Title */}
       <div className={styles.cardHeader}>
         <h2 className={styles.cardTitle}>
@@ -92,10 +129,16 @@ const PlanetaryCard = ({ planet }) => {
           <div className={styles.sectionContent}>
             <span className={styles.afflictionText}>
               {showFullAffliction ? afflictionText : truncatedAffliction}
+              {/*
+                This toggle expands text in place, right next to the finger, so
+                it needs no scroll handling — only the missing semantics.
+              */}
               {shouldShowAfflictionToggle && (
-                <button 
+                <button
+                  type="button"
                   className={styles.inlineShowMore}
                   onClick={toggleAffliction}
+                  aria-expanded={showFullAffliction}
                 >
                   {showFullAffliction ? 'Show Less' : 'Show More'}
                 </button>
@@ -106,7 +149,7 @@ const PlanetaryCard = ({ planet }) => {
 
         {/* Additional Content - Hidden by default */}
         {showMore && (
-          <>
+          <div ref={expandedRef} id={detailsId} role="region" aria-label="More planetary details">
             {/* Mantra */}
             <div className={styles.section}>
               <h2 className={styles.sectionTitle}>
@@ -222,14 +265,17 @@ const PlanetaryCard = ({ planet }) => {
                 ))}
               </div>
             </div>
-          </>
+          </div>
         )}
 
         {/* Show More Button - Always at the bottom */}
         <div className={styles.showMoreContainer}>
-          <button 
-            className={styles.showMoreBtn} 
+          <button
+            type="button"
+            className={styles.showMoreBtn}
             onClick={toggleShowMore}
+            aria-expanded={showMore}
+            aria-controls={showMore ? detailsId : undefined}
           >
             {showMore ? 'Show Less' : 'Show More'}
           </button>

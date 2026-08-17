@@ -1201,7 +1201,29 @@ const TalkToAstrologer = () => {
       />
 
 
-      <PrimaryLoader isLoading={isFilterLoading} />
+      {/*
+        No loader here.
+        ==============
+        This used to be `<PrimaryLoader isLoading={isFilterLoading} />`, and
+        PrimaryLoader defaults to `fullscreen`, so it rendered a full-page
+        overlay. On a category URL such as /astrologers/love-relationships that
+        overlapped the in-list spinner further down and the page showed two
+        loaders at once:
+
+          - FilterChips auto-applies the category from the URL and calls
+            onFilterLoading(true) at the *start* of the request, so
+            isFilterLoading flips immediately on mount.
+          - isFiltered is only set once that request *resolves* (in
+            handleApplyFilters), and useGetAstrologersQuery is skipped on
+            `isFiltered` — so for the whole duration of the filter request the
+            base list query is still live and isFetching is also true.
+
+        Both flags describe one thing: the astrologer list is loading. It is now
+        rendered once, at loadMoreRef below, using the inline presentation.
+        Keeping it out of here also preserves the LCP work described above — a
+        fullscreen overlay would have covered the <h1> that this route relies on
+        as its LCP element.
+      */}
       {/* Top Astrologers Section - New Design */}
       {!showFilterAstrologer && topTenAstrologers.length > 0 && (
         <>
@@ -1391,14 +1413,21 @@ const TalkToAstrologer = () => {
         ))}
       </div>
 
-      {!isFetching && allAstrologers.length === 0 && isFiltered && (
+      {/* `isFilterLoading` is part of the guard so "No astrologers found."
+          cannot flash while a filter request is still in flight — isFetching is
+          already false by then, because the base query is skipped on isFiltered. */}
+      {!isFetching && !isFilterLoading && allAstrologers.length === 0 && isFiltered && (
           <div className={styles.emptyState}>
             <PrimaryText>No astrologers found.</PrimaryText>
           </div>
         )}
 
+      {/* The single loader for this list — covers both the base query and an
+          in-flight filter request. See the note where the overlay used to be. */}
       <div ref={loadMoreRef} className={styles.loaderWrapper}>
-        {isFetching && <PrimaryLoader isLoading={true} fullscreen={false} />}
+        {(isFetching || isFilterLoading) && (
+          <PrimaryLoader isLoading={true} fullscreen={false} />
+        )}
       </div>
 
       {!hasMore && allAstrologers.length > 0 && recommendedAstrologers.length > 0 && (
