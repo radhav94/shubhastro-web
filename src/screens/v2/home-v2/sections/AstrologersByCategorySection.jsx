@@ -9,7 +9,7 @@ const AstrologersByCategorySection = memo(({ sectionData, styles }) => {
   const categories = sortContentByOrder(sectionData?.content || []);
 
   const handleCategoryClick = useCallback((slug) => {
-    navigate("/chat-to-astrologer", { state: { selectedType: slug } });
+    navigate("/astrologers", { state: { selectedType: slug } });
   }, [navigate]);
 
   if (!categories.length) return null;
