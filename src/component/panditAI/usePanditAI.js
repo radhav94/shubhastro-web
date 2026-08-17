@@ -547,8 +547,17 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           // flush below doesn't render the same question twice.
           pendingMessageRef.current = { text: trimmedText, echoed: !options.silent };
           lastQuestionRef.current = trimmedText;
-          // Echo the question and show the typing state while the session is
-          // still being set up — otherwise the tap looks like it did nothing.
+
+          /*
+           * `silent` means "the user's bubble is already on screen, don't echo
+           * it again" — nothing more. It used to also skip the typing state and
+           * the response timer, which made Retry a dead click whenever the room
+           * had not come up: retryQuestion removes the error bubble and calls
+           * this with silent:true, so the error vanished and absolutely nothing
+           * replaced it. No typing dots, and no armed timer, so no second error
+           * could ever appear either — the chat sat there permanently idle.
+           * Echoing is conditional; showing that work is queued is not.
+           */
           if (!options.silent) {
             setMessages((prev) => [
               ...prev,
@@ -562,9 +571,9 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
                   .toUpperCase(),
               },
             ]);
-            setSending(true);
-            startResponseTimer();
           }
+          setSending(true);
+          startResponseTimer();
         }
         return;
       }
@@ -622,7 +631,14 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   const retryQuestion = useCallback(
     (errorMessageId) => {
       const question = lastQuestionRef.current;
-      if (!question) return;
+      // No remembered question — e.g. an error bubble restored from history in a
+      // fresh session, where lastQuestionRef was never populated. Leaving this
+      // as a bare return made "Try again" a dead button on exactly the surface
+      // it was added to rescue.
+      if (!question) {
+        toast.error("Please ask your question again.");
+        return;
+      }
       setMessages((prev) =>
         errorMessageId ? prev.filter((m) => m._id !== errorMessageId) : prev
       );

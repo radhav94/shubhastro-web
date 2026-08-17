@@ -44,6 +44,7 @@ import {
   removeCookie,
 } from "../../../utils/helper/cookies";
 import { trackEvent } from "../../../utils/analytics";
+import { downloadFile, toastDownloadOutcome } from "../../../utils/helper/downloadFile";
 
 // Cookie key for persisting guest (non-logged-in) kundli profiles across pages
 const GUEST_KUNDLI_COOKIE = "guestKundliProfiles";
@@ -367,7 +368,19 @@ const Kundali = () => {
   }, [searchParams, selectedProfile, setSearchParams]);
 
   const payload = useSelector((state) => state?.form?.kundliPayload);
-  const params = buildVedicParam(payload);
+
+  /*
+    The `form` slice is whitelisted in redux-persist against localStorage, so
+    `kundliPayload` survives across visits and is never cleared on logout. A
+    guest landing here therefore rehydrated a stale payload from some earlier
+    session, which fired both Vedic chart requests for a chart nobody asked for
+    — and the fullscreen loader they drive blurred out the "Add Kundli Details"
+    form until they resolved.
+
+    Chart data is only meaningful once a profile is actually selected, so gate
+    the requests on that rather than on whatever happens to be in storage.
+  */
+  const params = selectedProfile ? buildVedicParam(payload) : null;
 
   const {
     data: fullData,
@@ -395,7 +408,10 @@ const Kundali = () => {
 
   // Function to handle PDF download
   const handlePdfDownload = async (selectedLanguage) => {
-    if (isDownloadingPdf) return;
+    if (isDownloadingPdf) {
+      Toast.error("Your report is still being prepared. Please wait a moment.");
+      return;
+    }
 
     // Use passed language or fallback to Google Translate cookie
     const lang = selectedLanguage || (() => {
@@ -420,23 +436,13 @@ const Kundali = () => {
         }).unwrap();
         
         if (result?.success && result?.data) {
-          try {
-            const response = await fetch(result.data);
-            if (!response.ok) throw new Error("Fetch failed");
-            const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = blobUrl;
-            link.download = `Kundli_Report_${selectedProfile?.name || "report"}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            URL.revokeObjectURL(blobUrl);
-            Toast.success("PDF downloaded!");
+          const outcome = await downloadFile(
+            result.data,
+            `Kundli_Report_${selectedProfile?.name || "report"}.pdf`
+          );
+          toastDownloadOutcome(outcome, "PDF");
+          if (outcome !== "failed") {
             trackEvent("kundli_downloaded", { profile_id: selectedProfile._id });
-          } catch (fetchError) {
-            console.error("Failed to fetch PDF as blob:", fetchError);
-            Toast.error("Failed to download PDF");
           }
         } else {
           Toast.error("Failed to load PDF");
@@ -865,7 +871,20 @@ const Kundali = () => {
       {/* Show informational content only when no profile is selected and not in direct view */}
       {!selectedProfile && !isDirectKundliView && <KundliInfoContent />}
 
-      <PrimaryLoader isLoading={planetLoading || astroLoading} />
+      {/*
+        Fullscreen: this covers the viewport at z-index 999999 with a 5px
+        backdrop blur, so it sits *above* any open modal. Never show it while a
+        profile dialog is up, or it blurs out and blocks the very form the user
+        is being asked to fill in.
+      */}
+      <PrimaryLoader
+        isLoading={
+          (planetLoading || astroLoading) &&
+          !showSelectProfile &&
+          !showAddProfile &&
+          !showEditProfile
+        }
+      />
 
       {/* Direct view: still resolving the kundli by id */}
       {isDirectKundliView && !selectedProfile && !kundliUnavailable && (
@@ -1013,21 +1032,13 @@ const Kundali = () => {
           if (existing) {
             // Free — download existing PDF directly
             setShowDownloadModal(false);
-            try {
-              const res = await fetch(existing.file_url);
-              const blob = await res.blob();
-              const blobUrl = URL.createObjectURL(blob);
-              const link = document.createElement("a");
-              link.href = blobUrl;
-              link.download = `Kundli_Report_${selectedProfile?.name || "report"}_${language}.pdf`;
-              document.body.appendChild(link);
-              link.click();
-              link.remove();
-              URL.revokeObjectURL(blobUrl);
-              Toast.success("PDF downloaded!");
+            const outcome = await downloadFile(
+              existing.file_url,
+              `Kundli_Report_${selectedProfile?.name || "report"}_${language}.pdf`
+            );
+            toastDownloadOutcome(outcome, "PDF");
+            if (outcome !== "failed") {
               trackEvent("kundli_downloaded", { profile_id: selectedProfile?._id });
-            } catch {
-              Toast.error("Failed to download PDF");
             }
           } else {
             // Paid — keep modal open, show downloading state

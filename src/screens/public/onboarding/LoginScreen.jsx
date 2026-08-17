@@ -111,7 +111,18 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
     localStorage.removeItem("shubhtalk_customer_token");
     localStorage.removeItem("shubhtalk_customer_id");
     localStorage.removeItem("selectedKundliProfile");
-    navigate(PATH.privateRoutes.HOME.path || "/");
+
+    /*
+     * `replace`, not a push. /login is reached by a plain `navigate("/login")`
+     * from ~10 call sites, so it sits in the history stack; pushing the homepage
+     * on top of it left the dismissed login wall one Back press away, and a push
+     * also truncates the forward entries, so it stayed one Back press away for
+     * the rest of the session. Visitors skipped, pressed Back, landed on login,
+     * skipped again — the loop shows up as repeated "Skip" plus quick back
+     * clicks in session recordings. Replacing the entry means Skip consumes the
+     * login screen, and Back returns to whatever they were doing before it.
+     */
+    navigate(PATH.privateRoutes.HOME.path || "/", { replace: true });
   };
 
   return (

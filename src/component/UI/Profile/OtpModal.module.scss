@@ -173,9 +173,12 @@
   font-weight: 600;
   cursor: pointer;
 
-  &:disabled {
+  // Kept dimmed but tappable: `disabled` fires no click, so a tap with an
+  // incomplete code went unanswered on the last step of the signup funnel.
+  // `verify()` names what's missing instead.
+  &:disabled,
+  &[aria-disabled="true"] {
     opacity: 0.6;
-    cursor: not-allowed;
   }
 }
 

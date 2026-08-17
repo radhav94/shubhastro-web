@@ -2,7 +2,7 @@ import { memo, useId } from "react";
 import { BookOpen } from "lucide-react";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
-import { AppIcons, getAstrologerDefaultImage } from "../../../../utils/appImages";
+import { AppIcons, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../utils/appImages";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 import toast from "../../../toast";
 import { unavailableReason } from "../../../../utils/helper/astrologerAvailability";
@@ -13,7 +13,10 @@ const NewAstrologerCard = memo(({
   onConnect, 
   onEmergencyClick,
   className = "", 
-  style = {} 
+  style = {},
+  // Set on the first card(s) in a rail: loads the photo eagerly at high
+  // priority because it is above the fold and a likely LCP element.
+  priority = false,
 }) => {
   const navigate = useNavigate();
   // The rating star SVG was exported from Figma with a hardcoded
@@ -121,12 +124,21 @@ const NewAstrologerCard = memo(({
               off-screen ones out of the initial load and the decode off the
               main thread. `.astrologerImg` is width/height 100% inside a sized
               parent, so no width/height attributes are needed — the box already
-              reserves the space. */}
+              reserves the space.
+
+              `priority` opts the first card out of that. Blanket loading="lazy"
+              also deferred the first card in the rail, which is above the fold
+              and is the leading image LCP candidate on /astrologers and
+              /chat-to-astrologer — Lighthouse fails this directly ("LCP
+              resources should not use loading=lazy"), because the request cannot
+              even start until layout has run. Callers should set it only on the
+              first card or two. */}
           <img
-            src={astrologer.profileImgUrl || getAstrologerDefaultImage(astrologer.gender)}
+            src={getAstrologerImageUrl(astrologer)}
             alt={astrologer.firstName}
             className={styles.astrologerImg}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : undefined}
             decoding="async"
             onError={(e) => {
               e.target.src = getAstrologerDefaultImage(astrologer.gender);

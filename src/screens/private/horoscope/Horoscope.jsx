@@ -9,7 +9,6 @@ import {
   useFetchTomorrowNakshatraQuery,
   useFetchYearlyQuery,
   useFetchDailyMoonQuery,
-  useFetchDailySunQuery,
   useFetchDailyNakshatraQuery,
   useFetchWeeklyMoonQuery,
   useFetchWeeklySunQuery,
@@ -297,10 +296,9 @@ const HoroscopeNew = () => {
     skip: activeTab !== 'Today' || dailySubTab !== 'Moon'
   });
 
-  // Daily Sun (same as fetchDaily but using the new endpoint)
-  const { data: dailySunData, isLoading: dailySunLoading } = useFetchDailySunQuery(activeSignNumber, {
-    skip: activeTab !== 'Today' || dailySubTab !== 'Sun'
-  });
+  // NOTE: useFetchDailySunQuery used to be called here with the exact same skip
+  // condition as useFetchDailyQuery above, and its result was never read. It was
+  // doubling VedicAstro hits on the default (Today / Sun) horoscope tab.
 
   // Daily Nakshatra (uses nakshatra number, default to 1 if not known)
   const [selectedNakshatra, setSelectedNakshatra] = useState(1);
@@ -337,7 +335,7 @@ const HoroscopeNew = () => {
     skip: activeTab !== 'This Year'
   });
 
-  const isLoading = dailyLoading || dailyMoonLoading || dailySunLoading || dailyNakshatraLoading || tomorrowLoading || tomorrowMoonLoading || tomorrowNakshatraLoading || weeklyMoonLoading || weeklySunLoading || yearlyLoading;
+  const isLoading = dailyLoading || dailyMoonLoading || dailyNakshatraLoading || tomorrowLoading || tomorrowMoonLoading || tomorrowNakshatraLoading || weeklyMoonLoading || weeklySunLoading || yearlyLoading;
 
   // Get current data based on active tab and sub-tab
   // Moon APIs return a different structure - normalize it

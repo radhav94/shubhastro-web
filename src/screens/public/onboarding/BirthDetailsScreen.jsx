@@ -247,14 +247,27 @@ const BirthDetailsScreen = ({
           <div className={styles.header}>
             <div className={styles.progressDots}>
               {Array.from({ length: totalSteps }).map((_, index) => (
-                <span
+                /*
+                  The dot for the step you are already on used to call
+                  onStepChange(currentStep), which set the step to the screen
+                  already showing — a tap on the widest, most button-like element
+                  in the header that did nothing at all. It is a position
+                  indicator, not a control, so it is disabled.
+
+                  type="button" is required: these sit inside a Formik <Form>,
+                  and a default-type button would submit it.
+                */
+                <button
                   key={index}
+                  type="button"
                   className={
                     index === currentStep ? styles.dotActive : styles.dotInactive
                   }
-                  onClick={() => onStepChange && onStepChange(index)}
-                  style={{ cursor: onStepChange ? 'pointer' : 'default' }}
-                ></span>
+                  disabled={!onStepChange || index === currentStep}
+                  aria-current={index === currentStep ? "step" : undefined}
+                  aria-label={`Step ${index + 1} of ${totalSteps}`}
+                  onClick={() => onStepChange?.(index)}
+                />
               ))}
             </div>
 

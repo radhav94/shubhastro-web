@@ -2,10 +2,11 @@ import { Calendar, Star } from "lucide-react";
 import styles from "./EntityCards.module.scss";
 import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
+import { getAstrologerImageUrl } from "../../../../utils/appImages";
 const AstrologerCard = ({ item, onClick }) => (
   <div className={styles.card} onClick={() => onClick?.(item)}>
     <img
-      src={item.profileImgUrl}
+      src={getAstrologerImageUrl(item)}
       alt={getAstrologerDisplayName(item)}
       className={styles.cardImage}
     />

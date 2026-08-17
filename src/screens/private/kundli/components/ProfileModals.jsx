@@ -203,6 +203,7 @@ const ProfileModals = ({
                                         }}
                                         placeholder="Select time"
                                         disabled={formData.unknownBirthTime}
+                                        disabledReason="Uncheck “Don’t know the exact time of birth” to pick a time"
                                     />
                                     <label className={styles.checkboxLabel}>
                                         <input
@@ -340,6 +341,7 @@ const ProfileModals = ({
                                         }}
                                         placeholder="Select time"
                                         disabled={editFormData.unknownBirthTime}
+                                        disabledReason="Uncheck “Don’t know the exact time of birth” to pick a time"
                                     />
                                     <label className={styles.checkboxLabel}>
                                         <input

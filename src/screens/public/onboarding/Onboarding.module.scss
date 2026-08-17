@@ -399,6 +399,12 @@
 
 .dotActive,
 .dotInactive {
+  // Rendered as <button> so the steps are reachable by keyboard and announced,
+  // which they were not as bare <span>s. Strip the UA button chrome.
+  appearance: none;
+  padding: 0;
+  border: none;
+  font: inherit;
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -408,6 +414,22 @@
   &:hover {
     transform: scale(1.2);
     opacity: 0.8;
+  }
+
+  // The current step's dot is a position indicator, not a control. It has to
+  // stop *looking* tappable, or the tap it invites goes nowhere.
+  &:disabled {
+    cursor: default;
+
+    &:hover {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
   }
 }
 
@@ -907,12 +929,38 @@
   }
 }
 
+/*
+ * The whole row is a single <button>. "Didn't get it?" used to be an inert span
+ * on the left with the resend control on the far right, and this row is
+ * space-between — so the prompt users reach for did nothing and the actual
+ * control was a screen-width away.
+ */
 .resendContainer {
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  background: transparent;
+  border: none;
+  width: calc(100% - 20px);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   display: flex;
   gap: 8px;
   justify-content: space-between;
   align-items: center;
   margin: 0 10px 16px;
+  padding: 6px 0;
+
+  &:active .resendBtn {
+    opacity: 0.7;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
 }
 
 .resendText {
@@ -921,21 +969,10 @@
 }
 
 .resendBtn {
-  background: transparent;
-  border: none;
   color: #d43400;
   font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
   padding: 4px 8px;
-
-  &:disabled {
-    cursor: not-allowed;
-  }
-
-  &:active:not(:disabled) {
-    opacity: 0.7;
-  }
 }
 
 // Login Screen

@@ -30,7 +30,7 @@ const ChatList = () => {
 
         <div className={styles.loaderBox}>
           <div className={styles.loader}></div>
-          <PrimaryLoader />
+          <PrimaryLoader fullscreen={false} />
         </div>
       </div>
     );

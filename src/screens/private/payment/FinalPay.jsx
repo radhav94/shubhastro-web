@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./FinalPay.module.scss";
 import { FaCcMastercard } from "react-icons/fa";
 import { useGetPlanByIdQuery } from "../../../redux/api/plansApi/plansApi";
@@ -19,7 +19,14 @@ const FinalPay = () => {
     skip: !planId,
   });
 
-  const [paymentAttempted, setPaymentAttempted] = useState(false);
+  /*
+    In-flight latch as a ref released in `finally`, not a state flag cleared by
+    onFailure. initiatePayment has three early returns that toast and return
+    *without* ever calling onFailure (payment already processing, gateway not
+    loaded, Razorpay key unconfigured). With a state flag, any of those latched
+    the only button on this page permanently dead until a reload.
+  */
+  const submittingRef = useRef(false);
   const [successAmount, setSuccessAmount] = useState(null);
 
   const amount = data?.data?.actualPrice || 0;
@@ -38,7 +45,11 @@ const FinalPay = () => {
   useEffect(() => {
     if (!planId) {
       Toast.error("No plan selected. Please select a plan first.");
-      navigate("/payment");
+      // "/payment" is not a route — only "/payment/webhook" is — so this fell
+      // through to the "*" NotFound element. planId travels only in
+      // location.state, which is dropped on reload or a restored history entry,
+      // so reloading this screen reliably dumped the user on a 404.
+      navigate("/recharge", { replace: true });
     }
   }, [planId, navigate]);
 
@@ -51,14 +62,30 @@ const FinalPay = () => {
   useEffect(() => {
     if (planError) {
       Toast.error("Failed to load plan details. Please try again.");
-      navigate("/payment");
+      navigate("/recharge", { replace: true });
     }
   }, [planError, navigate]);
 
+  /*
+    Every blocker is checked here and named out loud, because the button is no
+    longer `disabled`. A disabled <button> dispatches no click event at all, so
+    tapping the single CTA on this screen was a literal dead click — and it
+    swallowed the very toast that would have explained the wait.
+  */
   const handlePayment = async () => {
-    // Prevent multiple payment attempts
-    if (paymentAttempted) {
+    if (submittingRef.current || isProcessing) {
       Toast.warning("Payment already initiated. Please complete or cancel the current payment.");
+      return;
+    }
+
+    // The gateway script loads over the network and can lag behind first paint,
+    // especially on mobile. Say so rather than absorbing the tap.
+    if (scriptError) {
+      Toast.error(scriptError);
+      return;
+    }
+    if (!isLoaded) {
+      Toast.error("The payment gateway is still loading. Please try again in a moment.");
       return;
     }
 
@@ -74,28 +101,29 @@ const FinalPay = () => {
       return;
     }
 
-    setPaymentAttempted(true);
+    submittingRef.current = true;
 
-    await initiatePayment({
-      planId: data?.data?._id || planId,
-      planData: data.data,
-      onSuccess: () => {
-        // Refresh wallet balance
-        refreshWallet();
-        
-        // Show payment success popup (actualPrice + bonus)
-        setSuccessAmount(amount + extra);
-      },
-      onFailure: (error) => {
-        console.error("Payment failed:", error);
-        setPaymentAttempted(false);
-        
-        // Don't show error toast if payment was cancelled
-        if (!error?.cancelled) {
-          // Error toast already shown by hook
-        }
-      },
-    });
+    try {
+      await initiatePayment({
+        planId: data?.data?._id || planId,
+        planData: data.data,
+        onSuccess: () => {
+          // Refresh wallet balance
+          refreshWallet();
+
+          // Show payment success popup (actualPrice + bonus)
+          setSuccessAmount(amount + extra);
+        },
+        onFailure: (error) => {
+          // Cancellation and gateway errors are already toasted by the hook.
+          console.error("Payment failed:", error);
+        },
+      });
+    } finally {
+      // Released whether the checkout opened, failed, or bailed out early. While
+      // the Razorpay sheet is genuinely open, `isProcessing` holds the guard.
+      submittingRef.current = false;
+    }
   };
 
   // Loading state
@@ -151,10 +179,13 @@ const FinalPay = () => {
       <p className={styles.chooseText}>Proceed to Payment</p>
 
       <div className={styles.payGrid}>
-        <button 
-          onClick={handlePayment} 
-          disabled={isProcessing || !isLoaded || !!scriptError || paymentAttempted}
-          className={styles.razorpayButton}
+        <button
+          onClick={handlePayment}
+          className={`${styles.razorpayButton} ${
+            isProcessing || !isLoaded || scriptError ? styles.blocked : ""
+          }`.trim()}
+          aria-disabled={isProcessing || !isLoaded || !!scriptError}
+          aria-busy={isProcessing}
           aria-label="Pay with Razorpay"
         >
           <FaCcMastercard size={36} aria-hidden="true" />

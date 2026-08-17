@@ -111,6 +111,11 @@
           if (typeof window.clarity === 'function') {
             window.clarity('set', 'jsErrorKind', masked ? 'cross_origin_masked' : kind);
             window.clarity('set', 'jsErrorMessage', message);
+            // The source was going to dataLayer only, so a Clarity session showed
+            // e.g. "Unexpected token '{'" with no way to tell which file threw —
+            // ours or a third-party tag. Without it a syntax error is
+            // unattributable, which is the one case where the file matters most.
+            window.clarity('set', 'jsErrorSource', source || '(unavailable)');
           }
 
           window.dataLayer = window.dataLayer || [];
@@ -222,7 +227,64 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://assets.shubhastro.ai" />
+  <!-- App API origin: on the LCP path of every route. crossorigin is required
+       for RTK Query's CORS fetches to reuse the connection. -->
+  <link rel="preconnect" href="%VITE_APP_API_BASE_URL%" crossorigin />
   <link rel="preconnect" href="https://www.googletagmanager.com" />
+
+  <!--
+    Homepage payload prefetch — starts /api/homepage during HTML parse.
+
+    The "/" landing's LCP element is the pageblocker banner in HomeIntroPopup,
+    and its URL is only known once this response arrives. That made the LCP path
+    four requests deep and strictly serial:
+
+        HTML -> entry JS -> React render -> /api/homepage -> banner image
+
+    so an 18 KB image waited on a ~276 KB (gzip) bundle plus an 87 KB API round
+    trip before it could even be discovered. Firing the request here removes the
+    bundle from in front of the API call; `src/services/appServices/homeServices.js`
+    adopts this in-flight promise inside the endpoint's queryFn, so it stays one
+    request rather than becoming two.
+
+    Deliberately narrow, because index.html is shared by every route:
+      - only on "/" — no other route reads this slug, and an unconditional
+        preload here is exactly the mistake that made every route fetch
+        ai-suite.png (see the note further down).
+      - only when logged out — the response can vary with the Authorization
+        header that RTK Query attaches, and this bare fetch sends none. Logged
+        out is also the only state that sees the popup, so nothing is lost.
+      - headers match what fetchBaseQuery sends, keeping it a simple CORS
+        request with no preflight.
+    Wrapped in try/catch and given a no-op rejection handler: a failure here must
+    never surface as an unhandled rejection or block the app, it just means the
+    endpoint requests normally.
+  -->
+  <script>
+    (function () {
+      try {
+        if (window.location.pathname !== "/") return;
+        if (
+          localStorage.getItem("shubhtalk_customer_token") ||
+          localStorage.getItem("shubhtalk_astro_token")
+        ) return;
+
+        var slug = "newcustomerlandingpage";
+        var promise = fetch(
+          "%VITE_APP_API_BASE_URL%/api/homepage?slug=" + slug,
+          { method: "GET", headers: { "Content-Type": "text/plain" } }
+        ).then(function (response) {
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return response.json();
+        });
+
+        promise.catch(function () {});
+        window.__homepagePrefetch__ = { slug: slug, promise: promise };
+      } catch (e) {
+        /* prefetch is best effort */
+      }
+    })();
+  </script>
   <!-- <link rel="dns-prefetch" href="https://translate.googleapis.com" /> -->
   <link rel="dns-prefetch" href="https://www.gstatic.com" />
   <link rel="dns-prefetch" href="https://firebaseinstallations.googleapis.com" />
@@ -245,10 +307,24 @@
     The `media` attribute is honoured for rel=preload, so each viewport now
     fetches only the file its stylesheet will actually use. Breakpoint matches
     the 767px used in the inline CSS below and throughout the SCSS.
+
+    fetchpriority is deliberately NOT set to "high" here. This artwork is a
+    decorative full-page backdrop, never the LCP element — on the homepage that
+    is the pageblocker banner inside HomeIntroPopup, which sits four serial hops
+    downstream (HTML -> entry JS -> React render -> /api/homepage -> image).
+    The desktop PNG is 476 KB; promoting it to "high" put it in direct
+    contention with the entry bundle, delaying every hop behind it. At the
+    default priority for rel=preload as=image it still starts during HTML parse,
+    it just stops outranking the script that unblocks the actual LCP element.
+    `background-color: #ebecf2` in the inline CSS below covers the gap, so the
+    later paint is a colour-to-artwork swap, not a flash of white.
   -->
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" fetchpriority="high" media="(min-width: 768px)" />
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" fetchpriority="high" media="(max-width: 767px)" />
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/ai-suite.png" fetchpriority="high" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" media="(min-width: 768px)" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" media="(max-width: 767px)" />
+  <!-- Removed: an unconditional high-priority preload of images/ai-suite.png.
+       It is the `heroBg` for HomeV2/HomeNew only, so every other route fetched
+       it at fetchpriority="high" and never painted it. index.html is shared by
+       all routes, so re-add it from the home route (not here) if needed. -->
 
   <style>
     /* Size-adjusted fallback to reduce CLS from font swap */
@@ -286,13 +362,6 @@
         background-image: url('https://assets.shubhastro.ai/main-body-bg-new-mobile.png');
       }
     }
-
-    /* Astrologer card — global background */
-    /* [class*="astrologerCard"],
-    [class*="detailsCard"],
-    [class*="detailsImageWrapper"] {
-      background: rgba(255, 255, 255, 0.4) !important;
-    } */
   </style>
 
   <!-- Google Tag Manager -->

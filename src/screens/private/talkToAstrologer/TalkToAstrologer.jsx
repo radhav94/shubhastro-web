@@ -1142,16 +1142,38 @@ const TalkToAstrologer = () => {
   }, [userIdLocal, isRecommendModalOpen]);
 
   //JSX
-  if (isFetching && page === 1 && allAstrologers.length === 0) {
-    return <PrimaryLoader isLoading={true} />;
-  }
-
+  //
+  // No early full-page return on first load.
+  //
+  // This used to be:
+  //
+  //   if (isFetching && page === 1 && allAstrologers.length === 0)
+  //     return <PrimaryLoader isLoading />;
+  //
+  // which replaced the entire screen with a fullscreen spinner until
+  // useGetAstrologersQuery resolved. Nothing real painted in the meantime — no
+  // heading, no filter chips — so LCP on this route was gated end to end on that
+  // API call, on top of the usual CSR floor (blank HTML -> entry JS -> route
+  // chunk -> React). /chat-to-astrologer is an ad and referral landing page, so
+  // that is a cold, uncached, first-paint path.
+  //
+  // The static shell below (back button, <h1>, FilterChips) depends on no
+  // network data, so it can paint as soon as the route chunk executes, which
+  // makes the <h1> the LCP element and decouples LCP from API latency. The
+  // in-list spinner at loadMoreRef already covers the loading state — the
+  // infinite-scroll observer is guarded on !isFetching and
+  // !initialLoadComplete.current, so the sentinel sitting in the viewport with an
+  // empty list cannot trigger a spurious page increment.
   return (
     <div className={styles.mainContainer}>
       <div className={styles.pageHeader}>
 
+        {/* location.key, not window.history.length — see BackButton.jsx. This is
+            a Google Ads landing page, and the ad redirect chain makes
+            history.length > 1 true, so back used to walk the visitor off the
+            origin instead of into the app. */}
         <button className={styles.localBackBtn} onClick={() => {
-          if (window.history.length > 1) navigate(-1);
+          if (location.key !== "default") navigate(-1);
           else navigate("/", { replace: true });
           }} aria-label="Go back">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -1179,7 +1201,29 @@ const TalkToAstrologer = () => {
       />
 
 
-      <PrimaryLoader isLoading={isFilterLoading} />
+      {/*
+        No loader here.
+        ==============
+        This used to be `<PrimaryLoader isLoading={isFilterLoading} />`, and
+        PrimaryLoader defaults to `fullscreen`, so it rendered a full-page
+        overlay. On a category URL such as /astrologers/love-relationships that
+        overlapped the in-list spinner further down and the page showed two
+        loaders at once:
+
+          - FilterChips auto-applies the category from the URL and calls
+            onFilterLoading(true) at the *start* of the request, so
+            isFilterLoading flips immediately on mount.
+          - isFiltered is only set once that request *resolves* (in
+            handleApplyFilters), and useGetAstrologersQuery is skipped on
+            `isFiltered` — so for the whole duration of the filter request the
+            base list query is still live and isFetching is also true.
+
+        Both flags describe one thing: the astrologer list is loading. It is now
+        rendered once, at loadMoreRef below, using the inline presentation.
+        Keeping it out of here also preserves the LCP work described above — a
+        fullscreen overlay would have covered the <h1> that this route relies on
+        as its LCP element.
+      */}
       {/* Top Astrologers Section - New Design */}
       {!showFilterAstrologer && topTenAstrologers.length > 0 && (
         <>
@@ -1232,7 +1276,7 @@ const TalkToAstrologer = () => {
           </div>
 
           <div className={styles.topAstrologersGrid}>
-            {topTenAstrologers.map((astro) => (
+            {topTenAstrologers.map((astro, topIndex) => (
               // REPLACED: TopAstrologerCard with NewAstrologerCard for consistency
               // <TopAstrologerCard
               //   key={astro._id}
@@ -1246,6 +1290,10 @@ const TalkToAstrologer = () => {
               <NewAstrologerCard
                 key={astro._id}
                 astrologer={astro}
+                // First two cards are above the fold in this horizontal rail and
+                // are the leading image LCP candidates on this route, so they
+                // load eagerly at high priority. The rest stay lazy.
+                priority={topIndex < 2}
                 onConnect={handleConnectClick}
                 onEmergencyClick={(astrologer) => {
                   setSelectedAstrologer(astrologer);
@@ -1357,6 +1405,7 @@ const TalkToAstrologer = () => {
               <NewAstrologerDetailsCard
                 key={astro._id}
                 astrologer={astro}
+                priority={index === 0}
                 onConnect={handleConnectClick}
               />
             </div>
@@ -1364,14 +1413,21 @@ const TalkToAstrologer = () => {
         ))}
       </div>
 
-      {!isFetching && allAstrologers.length === 0 && isFiltered && (
+      {/* `isFilterLoading` is part of the guard so "No astrologers found."
+          cannot flash while a filter request is still in flight — isFetching is
+          already false by then, because the base query is skipped on isFiltered. */}
+      {!isFetching && !isFilterLoading && allAstrologers.length === 0 && isFiltered && (
           <div className={styles.emptyState}>
             <PrimaryText>No astrologers found.</PrimaryText>
           </div>
         )}
 
+      {/* The single loader for this list — covers both the base query and an
+          in-flight filter request. See the note where the overlay used to be. */}
       <div ref={loadMoreRef} className={styles.loaderWrapper}>
-        {isFetching && <PrimaryLoader isLoading={true} fullscreen={false} />}
+        {(isFetching || isFilterLoading) && (
+          <PrimaryLoader isLoading={true} fullscreen={false} />
+        )}
       </div>
 
       {!hasMore && allAstrologers.length > 0 && recommendedAstrologers.length > 0 && (
@@ -1428,7 +1484,7 @@ const TalkToAstrologer = () => {
 
           {isLoadingRecommended ? (
             <div className={styles.loaderWrapper}>
-              <PrimaryLoader />
+              <PrimaryLoader fullscreen={false} />
             </div>
           ) : (
             <div className={styles.recommendedGrid}>

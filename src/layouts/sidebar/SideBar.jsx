@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import styles from "./SideBar.module.scss";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -14,7 +14,18 @@ import { isShubhMallEnabled } from "../../utils/featureConfig";
 const SideBar = ({ open, onClose }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [openIndex, setOpenIndex] = useState(null); // for accordion
+  // Accordion state. Keyed by "<group>-<index>" rather than a bare index:
+  // renderMenuItem is called from two separate maps (MENU_LIST and BOTTOM_MENU)
+  // that both start counting at 0, so a shared numeric index meant item 3 of one
+  // group and item 3 of the other were the same accordion slot. Nothing collides
+  // at today's data (BOTTOM_MENU has no children) but it broke the moment one
+  // was added.
+  const [openKey, setOpenKey] = useState(null);
+  // Measured pixel height of the open panel, so the max-height transition has a
+  // concrete target to animate to. See toggleDropdown.
+  const [openHeight, setOpenHeight] = useState(0);
+  const rowRefs = useRef(new Map());
+  const panelRefs = useRef(new Map());
   const user = getUserFromStorage();
 
   const role = localStorage.getItem("shubhtalk_role");
@@ -355,59 +366,118 @@ const SideBar = ({ open, onClose }) => {
     onClose();
   };
 
-  const toggleDropdown = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
+  const toggleDropdown = useCallback(
+    (key) => {
+      const next = openKey === key ? null : key;
+      setOpenKey(next);
+
+      if (!next) return;
+
+      // Give the max-height transition a real target. scrollHeight reports the
+      // full content height even while the panel is clamped to 0 by
+      // overflow: hidden.
+      const panel = panelRefs.current.get(next);
+      setOpenHeight(panel ? panel.scrollHeight : 0);
+
+      // Scroll the row we just expanded to the top of the menu.
+      //
+      // This is the actual dead-click fix. The submenu renders *below* the row
+      // that was tapped, inside .menuContainer — a flex: 1 / overflow-y: auto
+      // scroll container. "Calculators" is the last item in MENU_LIST with 20
+      // children, and BOTTOM_MENU plus the user menu sit under it, so on a phone
+      // (worse in an in-app browser, which eats viewport height with its own
+      // chrome) the row sits near the bottom and everything that appears on tap
+      // lands off-screen. The only on-screen change was the chevron flipping
+      // 18px, which is why Clarity logged the tap as dead and the visitor left
+      // ten seconds later.
+      requestAnimationFrame(() => {
+        rowRefs.current.get(next)?.scrollIntoView({
+          block: "start",
+          behavior: "smooth",
+        });
+      });
+    },
+    [openKey]
+  );
 
   const renderMenuItem = (item, index, isBottomMenu = false) => {
+    const group = isBottomMenu ? "bottom" : "main";
+    const key = `${group}-${index}`;
+
     if (!item.children) {
       return (
         <li key={index} className={styles.menuItem}>
-          <span
+          <button
+            type="button"
             className={`${styles.menuLink} ${
               isBottomMenu ? styles.bottomMenu : ""
             }`}
             onClick={() => handleClick(item.path, item.onClick)}
           >
             {typeof item.title === "string" ? item.title : item.title}
-          </span>
+          </button>
         </li>
       );
     }
 
+    const isOpen = openKey === key;
+    const panelId = `sidebar-submenu-${key}`;
+
     return (
       <li key={index} className={styles.menuItem}>
-        <div
+        <button
+          type="button"
+          ref={(el) => {
+            if (el) rowRefs.current.set(key, el);
+            else rowRefs.current.delete(key);
+          }}
           className={`${styles.parentRow} ${
             isBottomMenu ? styles.bottomMenu : ""
           }`}
-          onClick={() => toggleDropdown(index)}
+          onClick={() => toggleDropdown(key)}
+          aria-expanded={isOpen}
+          aria-controls={panelId}
         >
           <span>
             {typeof item.title === "string" ? item.title : item.title}
           </span>
-          {openIndex === index ? (
+          {isOpen ? (
             <FiChevronUp className={styles.chevron} />
           ) : (
             <FiChevronDown className={styles.chevron} />
           )}
-        </div>
+        </button>
 
         {/* Accordion Submenu */}
         <ul
-          className={`${styles.submenu} ${
-            openIndex === index ? styles.submenuOpen : ""
-          }`}
+          id={panelId}
+          ref={(el) => {
+            if (el) panelRefs.current.set(key, el);
+            else panelRefs.current.delete(key);
+          }}
+          className={styles.submenu}
+          // A percentage max-height used to drive this open, which resolved
+          // against an auto-height <li> and so was treated as `none` — it worked
+          // by accident and the transition never ran, because you cannot
+          // interpolate to `none`. An explicit measured height animates, and it
+          // cannot silently clamp to zero if .menuItem ever gains a height.
+          style={{ maxHeight: isOpen ? `${openHeight}px` : 0 }}
+          aria-hidden={!isOpen}
         >
           {item.children.map((child, idx) => (
-            <li
-              key={idx}
-              className={styles.submenuItem}
-              onClick={() => handleClick(child.path, child.onClick)}
-            >
-              {typeof child.title === "string"
-                ? child.title
-                : renderUserProfile(child.title)}
+            <li key={idx} className={styles.submenuItem}>
+              <button
+                type="button"
+                className={styles.submenuLink}
+                // Collapsed panels are only hidden by overflow, so their
+                // contents stay in the tab order without this.
+                tabIndex={isOpen ? 0 : -1}
+                onClick={() => handleClick(child.path, child.onClick)}
+              >
+                {typeof child.title === "string"
+                  ? child.title
+                  : renderUserProfile(child.title)}
+              </button>
             </li>
           ))}
         </ul>
@@ -453,7 +523,14 @@ const SideBar = ({ open, onClose }) => {
 
       <div className={`${styles.sidebar} ${open ? styles.open : ""}`}>
         <div className={styles.header}>
-          <FiX className={styles.closeIcon} onClick={onClose} />
+          <button
+            type="button"
+            className={styles.closeButton}
+            onClick={onClose}
+            aria-label="Close menu"
+          >
+            <FiX className={styles.closeIcon} />
+          </button>
           <span className={styles.title}>Menu</span>
         </div>
 
@@ -503,12 +580,13 @@ const SideBar = ({ open, onClose }) => {
           <ul className={styles.menuList}>
             {USER_MENU_ITEMS.map((item, index) => (
               <li key={index} className={styles.menuItem}>
-                <span
+                <button
+                  type="button"
                   className={styles.menuLink}
                   onClick={() => handleClick(item.path, item.onClick)}
                 >
                   {item.title}
-                </span>
+                </button>
               </li>
             ))}
           </ul>

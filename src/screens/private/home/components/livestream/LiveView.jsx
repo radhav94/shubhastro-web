@@ -35,7 +35,7 @@ import { PATH } from "../../../../../utils/routes/Paths";
 import { createPortal } from "react-dom";
 import { ChevronLeft } from "lucide-react";
 import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
-import { AppImages, getAstrologerDefaultImage } from "../../../../../utils/appImages";
+import { AppImages, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../../utils/appImages";
 import astrologerOfflineBg from "../../../../../assets/images/live-streaming-no-astro-background.webp";
 import {
   useCheckFollowingStatusQuery,
@@ -293,6 +293,21 @@ const LiveView = (props) => {
   );
   const fullAstro = astrologerFullData?.data;
 
+  // Astrologer-shaped object for getAstrologerImageUrl, shared by the host
+  // avatar and the end-of-call review payload.
+  //
+  // `fullAstro` is the only guaranteed source of the pre-resized `profileImages`
+  // map. The live-list `astrologer` object may carry it too depending on the
+  // endpoint's projection, so it is read as well and covers the window before
+  // the query resolves. profileImgUrl/imageUrl keep the precedence the avatar
+  // used before, so nothing regresses when derivatives are absent.
+  const hostImageSource = {
+    profileImages: fullAstro?.profileImages || astrologer?.profileImages,
+    profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl,
+    imageUrl: astrologer?.imageUrl,
+    gender: fullAstro?.gender || astrologer?.gender,
+  };
+
   const { data: followingData } = useCheckFollowingStatusQuery(
     { astrologerId },
     { skip: !astrologerId }
@@ -532,6 +547,20 @@ const LiveView = (props) => {
     }
   }, [hostDisplayName, onHostNameResolved]);
 
+  // Same idea for the avatar. The "has left" modal's socket payload carries a
+  // bare `profileImage` — the unresized original — and it has no access to
+  // `fullAstro`, so it can't reach the `profileImages` derivatives itself.
+  // Reporting the resolved URL up means the modal renders a sized variant with
+  // no extra request, and it's already in the parent's ref before the host
+  // leaves. That card is 60px, so `small`.
+  const onHostAvatarResolved = props.onHostAvatarResolved;
+  const resolvedHostAvatar = hostImageSource.profileImages
+    ? getAstrologerImageUrl(hostImageSource, "small")
+    : "";
+  useEffect(() => {
+    if (resolvedHostAvatar) onHostAvatarResolved?.(resolvedHostAvatar);
+  }, [resolvedHostAvatar, onHostAvatarResolved]);
+
   const safeRemoteUsers = remoteUsers.filter((u) => u);
   // Connected to a live channel (joined Agora, room not ended / host not gone).
   // This is independent of whether a publisher (video) is present yet — matches
@@ -664,7 +693,10 @@ const LiveView = (props) => {
     }
 
     // 7. Store astrologer info and emit call:initiate via socket
-    setLastRequestedAstro({ ...astrologer, userName: resolvedHostUserName, profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl });
+    // `profileImages` is forwarded so the call screens can use a sized variant
+    // for their avatars — they read it off lastRequestedAstro and otherwise fall
+    // back to the unresized original.
+    setLastRequestedAstro({ ...astrologer, userName: resolvedHostUserName, profileImages: hostImageSource.profileImages, profileImgUrl: hostImageSource.profileImgUrl });
     setLastCallType("audio");
     setPendingCallType("audio");
     astrologerRef.current = astrologer;
@@ -769,7 +801,8 @@ const LiveView = (props) => {
     }
 
     // Store astrologer info in context and ref
-    setLastRequestedAstro({ ...astrologer, userName: resolvedHostUserName, profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl });
+    // See the audio path above — forwards profileImages for the call screens.
+    setLastRequestedAstro({ ...astrologer, userName: resolvedHostUserName, profileImages: hostImageSource.profileImages, profileImgUrl: hostImageSource.profileImgUrl });
     setPendingCallType(type);
     astrologerRef.current = astrologer;
     callingChannelRef.current = props.channel;
@@ -856,7 +889,18 @@ const LiveView = (props) => {
       setReviewData({
         astrologerID: activeCall?.astrologerID || activeCall?.astrologerId,
         fullName: activeCall?.callerName || "Astrologer",
-        profileImage: fullAstro?.profileImgUrl || activeCall?.profileImgUrl || activeCall?.astrologerImage,
+        // FeedbackModal renders the avatar at 44px
+        profileImage: getAstrologerImageUrl(
+          {
+            profileImages: hostImageSource.profileImages,
+            profileImgUrl:
+              hostImageSource.profileImgUrl ||
+              activeCall?.profileImgUrl ||
+              activeCall?.astrologerImage,
+            gender: hostImageSource.gender,
+          },
+          "small"
+        ),
         roomId: activeCall.roomId,
       });
 
@@ -1258,18 +1302,21 @@ const LiveView = (props) => {
                 <ChevronLeft size={24} />
               </button>
               <div className="host-info">
+              {/* .host-avatar-img is 30px (40px on wider screens), so the
+                  `small` 100x125 derivative rather than `profileImgUrl`, which
+                  points at the unresized original. `fullAstro` comes from
+                  useGetAstrologerByIdQuery above, so the derivatives are
+                  available here; the live-list `astrologer` is kept as the
+                  pre-fetch fallback and preserves the previous precedence. */}
               <img
                 className="host-avatar-img"
-                src={
-                  fullAstro?.profileImgUrl ||
-                  astrologer?.profileImgUrl ||
-                  astrologer?.imageUrl ||
-                  getAstrologerDefaultImage(fullAstro?.gender || astrologer?.gender)
-                }
+                src={getAstrologerImageUrl(hostImageSource, "small")}
                 alt={hostDisplayName}
+                width={30}
+                height={30}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = getAstrologerDefaultImage(fullAstro?.gender || astrologer?.gender);
+                  e.target.src = getAstrologerDefaultImage(hostImageSource.gender);
                 }}
               />
               <div className="host-text">

@@ -85,6 +85,7 @@ import {
   getAstrologerDisplayName,
   getAstrologerProfilePath,
 } from "../../../utils/helper/string.utils";
+import { getAstrologerImageUrl, getAstrologerDefaultImage } from "../../../utils/appImages";
 
 // "Consult Again" button that disables in real time when the astrologer is live.
 // Uses useAstrologerLiveStatus so it reacts to the live socket event even when
@@ -124,6 +125,71 @@ const LiveDot = ({ astrologer, seedLiveStatus }) => {
   const { isLive } = useAstrologerLiveStatus(astrologer?._id, seedLiveStatus);
   if (!isLive) return null;
   return <span className={styles.orderLiveDot} title="Live now" aria-label="Astrologer is live" />;
+};
+
+const getAstrologerInitial = (name) =>
+  (name || "")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 1);
+
+// Order-history avatar (.astrologerAvatar is 60px, so the `small` 100x125
+// derivative).
+//
+// The call/chat history endpoints flatten the astrologer onto each row and
+// expose only `astrologerProfileImgUrl` — the unresized original (896x902 and
+// 1433x1433 have both been observed) for a 60px circle. The derivatives live on
+// the astrologer document, and their filenames are not derivable from the
+// original (only the first path segment is shared; the second is random per
+// size), so the sized variant has to be fetched.
+//
+// Resolving per row rather than in the list mapper because that needs a hook.
+// RTK Query dedupes by argument, so repeat rows for the same astrologer share
+// one request — the visible page is typically 3-5 unique astrologers, and any
+// astrologer already loaded elsewhere (profile page, chat, order detail) is a
+// cache hit. `order.astrologer._id` is the same id the card navigates to and
+// that the order detail page feeds into this query.
+//
+// `astrologer.image` (the flat original) paints immediately and is swapped for
+// the derivative when the query lands, so there's no blank avatar while waiting.
+const OrderAstrologerAvatar = ({ astrologer }) => {
+  const { data } = useGetAstrologerByIdQuery(
+    { id: astrologer?._id },
+    { skip: !astrologer?._id }
+  );
+
+  const fetched = data?.data;
+  const hasImage = !!(fetched?.profileImages || fetched?.profileImgUrl || astrologer?.image);
+
+  // Nothing to show at all — keep the initials circle rather than dropping in a
+  // gendered placeholder for an astrologer who simply has no photo.
+  if (!hasImage) {
+    return <span>{getAstrologerInitial(astrologer?.name)}</span>;
+  }
+
+  return (
+    <img
+      src={getAstrologerImageUrl(
+        {
+          profileImages: fetched?.profileImages,
+          profileImgUrl: fetched?.profileImgUrl || astrologer?.image,
+          gender: fetched?.gender,
+        },
+        "small"
+      )}
+      alt={astrologer?.name}
+      width={60}
+      height={60}
+      loading="lazy"
+      decoding="async"
+      // Covers a derivative that is listed but missing from S3.
+      onError={(e) => {
+        e.currentTarget.src = getAstrologerDefaultImage(fetched?.gender);
+      }}
+    />
+  );
 };
 
 const Profile = () => {
@@ -410,6 +476,24 @@ const Profile = () => {
     const secs = totalSecs % 60;
     return `${mins} Min ${secs} Sec`;
   };
+
+  // First-paint avatar for an order row. OrderAstrologerAvatar upgrades this to
+  // the sized derivative once the astrologer query lands; this is what shows in
+  // the meantime.
+  //
+  // Reads a derivatives map under both the row's `astrologer`-prefixed naming
+  // convention and the bare name, so if the history endpoints ever include it
+  // the first paint is already the 100x125 variant with no swap. Today they
+  // carry only `astrologerProfileImgUrl`, the unresized original.
+  //
+  // Returns "" when there is no image at all, which lets the avatar keep its
+  // initials circle instead of showing a placeholder photo.
+  const resolveHistoryAvatar = (row) => {
+    const profileImages = row?.astrologerProfileImages || row?.profileImages;
+    const profileImgUrl = row?.astrologerProfileImgUrl;
+    if (!profileImages && !profileImgUrl) return "";
+    return getAstrologerImageUrl({ profileImages, profileImgUrl }, "small");
+  };
   // Process order history data - current page call orders
   // Live status is only returned by the call-history endpoint (not chat/recordings),
   // so build a per-astrologer live map from it and reuse it on the chat tab.
@@ -429,7 +513,7 @@ const Profile = () => {
           sessionType: item?.type || "audio",
           astrologer: {
             name: item?.receiverName || "Unknown",
-            image: item?.astrologerProfileImgUrl || "",
+            image: resolveHistoryAvatar(item),
             _id: item?.receiverId,
             astrologer_ID: item?.astrologer_ID || item?.receiverAstrologerId,
             firstName: item?.receiverName?.split(" ")[0] || "Unknown",
@@ -464,7 +548,7 @@ const Profile = () => {
             name: room.astrologerFirstName
               ? `${room.astrologerFirstName} ${room.astrologerLastName || ""}`
               : "Unknown",
-            image: room.astrologerProfileImgUrl || "",
+            image: resolveHistoryAvatar(room),
             _id: room.astrologerId,
             astrologer_ID: room.astrologer_ID || room.astrologerAstrologerId,
             firstName: room.astrologerFirstName || "Unknown",
@@ -1896,16 +1980,9 @@ const Profile = () => {
                                     }}
                                     style={{ cursor: "pointer" }}
                                   >
-                                    {order.astrologer.image ? (
-                                      <img
-                                        src={order.astrologer.image}
-                                        alt={order.astrologer.name}
-                                      />
-                                    ) : (
-                                      <span>
-                                        {getInitials(order.astrologer.name)}
-                                      </span>
-                                    )}
+                                    <OrderAstrologerAvatar
+                                      astrologer={order.astrologer}
+                                    />
                                     <LiveDot
                                       astrologer={order.astrologer}
                                       seedLiveStatus={order.liveStatus}

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "./TopHeader.module.scss";
@@ -13,7 +13,14 @@ import { useWalletBalance } from "../screens/private/wallet/useWalletBalance";
 import { getToken } from "../utils/token";
 import { useGetAllKundlisQuery } from "../services/appServices/kundliServicesNew";
 import useRequireAuth from "../utils/hooks/useRequireAuth"; 
-import { ProfileManager } from "./UI/Profile";
+// Lazy: ProfileManager pulls AddProfileModal / EditProfileModal /
+// GuestDetailsForm, all of which render DateTimePicker and therefore
+// react-datepicker + date-fns. TopHeader is in the layout of every page, so that
+// whole tree was parsed on every load for a modal that starts closed and most
+// visitors never open. Mounted below only once kundliModalOpen flips true.
+const ProfileManager = lazy(() =>
+  import("./UI/Profile").then((m) => ({ default: m.ProfileManager })),
+);
 import { setSelectedKundli, clearSelectedKundli } from "../redux/kundli/kundliSlice";
 import { setSelectedKundliProfile } from "../redux/aiwow/aiwowSlice";
 import LanguageSelector from "./LanguageSelector";
@@ -776,20 +783,25 @@ const TopHeader = () => {
         </>
       )}
 
-      {/* Kundli Selection Modal */}
-      <ProfileManager
-        isOpen={kundliModalOpen}
-        onClose={() => setKundliModalOpen(false)}
-        title="Select Profile"
-        onProfileSelect={handleKundliSelect}
-        selectedProfileId={selectedKundli?._id}
-        enabledOperations={{
-          list: true,
-          add: true,
-          edit: true,
-          delete: true,
-        }}
-      />
+      {/* Kundli Selection Modal — only mounted once opened, so the lazy chunk is
+          fetched on the click rather than on every page load. */}
+      {kundliModalOpen && (
+        <Suspense fallback={null}>
+          <ProfileManager
+            isOpen={kundliModalOpen}
+            onClose={() => setKundliModalOpen(false)}
+            title="Select Profile"
+            onProfileSelect={handleKundliSelect}
+            selectedProfileId={selectedKundli?._id}
+            enabledOperations={{
+              list: true,
+              add: true,
+              edit: true,
+              delete: true,
+            }}
+          />
+        </Suspense>
+      )}
     </>
   );
 };
@@ -840,18 +852,21 @@ const CalculatorsDropdown = () => {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <span
+      <button
+        type="button"
         className={styles.headerNavLink}
         onClick={() => setOpen((p) => !p)}
-        style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}
+        aria-expanded={open}
+        aria-controls="calculators-dropdown"
+        style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}
       >
         Calculators
-        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none" aria-hidden="true">
           <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
         </svg>
-      </span>
+      </button>
       {open && (
-        <div className={styles.calcDropdownMenu}>
+        <div className={styles.calcDropdownMenu} id="calculators-dropdown">
           {CALCULATOR_LINKS.map((item) => (
             <Link
               key={item.path}
@@ -869,33 +884,59 @@ const CalculatorsDropdown = () => {
 };
 
 const MobileCalculatorsAccordion = ({ onClose, isExpanded, onToggle }) => {
-  const navigate = useNavigate();
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    if (!isExpanded) return;
+
+    // Reveal the panel we just opened.
+    //
+    // The 21 links render *below* the trigger, inside .mobileDrawer — which is
+    // the scroll container (height: 100%; overflow: auto). "Calculators" is the
+    // 12th row in the drawer, so on a phone it already sits at or below the
+    // fold; in an in-app browser it is worse, because Instagram's own chrome
+    // eats viewport height. Expanding therefore inserted ~600px of links
+    // entirely off-screen with no scroll, leaving a 10x6px chevron rotation as
+    // the only visible feedback. Clarity logged the tap as a dead click and the
+    // visitor left the page ten seconds later.
+    const frame = requestAnimationFrame(() => {
+      wrapRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [isExpanded]);
 
   return (
-    <div className={styles.mobileCalcAccordion}>
-      <div
+    <div className={styles.mobileCalcAccordion} ref={wrapRef}>
+      <button
+        type="button"
         className={styles.headerNavLink}
         onClick={onToggle}
-        style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+        aria-expanded={isExpanded}
+        aria-controls="mobile-calculators-panel"
       >
         Calculators
         <svg
-          xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none"
+          xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 14 8" fill="none" aria-hidden="true"
           style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
         >
           <path d="M2.08 0.355L6.794 5.069L11.508 0.355C11.982-0.118 12.747-0.118 13.221 0.355C13.695 0.829 13.695 1.595 13.221 2.068L7.645 7.645C7.171 8.118 6.405 8.118 5.932 7.645L0.355 2.068C-0.118 1.595-0.118 0.829 0.355 0.355C0.829-0.106 1.607-0.118 2.08 0.355Z" fill="#2c1b0e"/>
         </svg>
-      </div>
+      </button>
       {isExpanded && (
-        <div className={styles.mobileCalcLinks}>
+        <div className={styles.mobileCalcLinks} id="mobile-calculators-panel">
+          {/* Real anchors, matching the desktop CalculatorsDropdown. These were
+              <div onClick={navigate}>, so they were invisible to the keyboard,
+              to assistive tech and to crawlers, and could not be opened in a new
+              tab — on 21 indexable calculator pages. */}
           {CALCULATOR_LINKS.map((item) => (
-            <div
+            <Link
               key={item.path}
+              to={item.path}
               className={styles.mobileCalcLink}
-              onClick={() => { navigate(item.path); onClose(); }}
+              onClick={onClose}
             >
               {item.title}
-            </div>
+            </Link>
           ))}
         </div>
       )}

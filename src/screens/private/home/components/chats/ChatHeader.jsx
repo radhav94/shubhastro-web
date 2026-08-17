@@ -34,7 +34,20 @@ const ChatHeader = ({
   return (
     <div className={styles.header}>
       <div className={styles.headerLeft}>
-        <IoArrowBack className={styles.backIcon} onClick={onBack} />
+        {/*
+          A real <button>: this was an <svg> carrying the onClick. It is styled
+          as a 40px circle so it reads as a button, but it was unreachable by
+          keyboard, unannounced to screen readers, and taps on non-interactive
+          elements are the least reliable kind on iOS Safari.
+        */}
+        <button
+          type="button"
+          className={styles.backIcon}
+          onClick={onBack}
+          aria-label="Go back"
+        >
+          <IoArrowBack aria-hidden="true" />
+        </button>
 
         <img
           src={(!profileImgUrl || imgError) ? getAstrologerDefaultImage(gender) : profileImgUrl}

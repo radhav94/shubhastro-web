@@ -6,6 +6,7 @@ import styles from "./OrderInfoCard.module.scss";
 import RatingStars from "./RatingStars";
 import ProgressBar from "./ProgressBar";
 import toast from "../../../../../component/toast";
+import { getAstrologerDefaultImage } from "../../../../../utils/appImages";
 
 const LIVE_BLOCKED_REASON =
   "This astrologer is in a live session right now. Join the live stream or try again once it ends.";
@@ -22,6 +23,7 @@ const OrderInfoCard = ({
   type = "audio",
   astrologerName,
   astrologerImage,
+  astrologerGender,
   onConsultAgain,
   initialRating = null,
   roomId,
@@ -314,10 +316,21 @@ const OrderInfoCard = ({
           aria-disabled={!hasRecording}
           aria-label={hasRecording ? "Play video recording" : NO_RECORDING_REASON}
         >
+          {/* `astrologerImage` is resolved by getAstrologerImageUrl upstream, so
+              it is always a usable URL — the old via.placeholder.com fallback
+              was both unreachable and a third-party request. onError still
+              covers a listed-but-missing S3 derivative. */}
           <img
-            src={astrologerImage || "https://via.placeholder.com/100"}
+            src={astrologerImage}
             alt={astrologerName || "Astrologer"}
             className={styles.astrologerImage}
+            width={90}
+            height={90}
+            loading="lazy"
+            decoding="async"
+            onError={(e) => {
+              e.currentTarget.src = getAstrologerDefaultImage(astrologerGender);
+            }}
           />
           <div className={styles.infoSection}>
             <h3 className={styles.astrologerName}>{astrologerName || "Astrologer"}</h3>

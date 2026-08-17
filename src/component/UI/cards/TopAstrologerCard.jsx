@@ -2,7 +2,7 @@ import styles from "./TopAstrologerCard.module.scss";
 import { FaStar } from "react-icons/fa";
 import { PiBookOpenTextLight } from "react-icons/pi";
 import { Link } from "react-router-dom";
-import { getAstrologerDefaultImage } from "../../../utils/appImages";
+import { getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../utils/appImages";
 import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../utils/helper/string.utils";
 
 const TopAstrologerCard = ({ data, onConnect }) => {
@@ -12,11 +12,8 @@ const TopAstrologerCard = ({ data, onConnect }) => {
   // Handle experience - convert to number if string
   const experience = parseInt(data?.experience) || 0;
 
-  // Handle image - try multiple possible fields with gender-based fallback
-  const imageUrl =
-    data?.profileImgUrl ||
-    data?.imageUrl ||
-    getAstrologerDefaultImage(data?.gender);
+  // Sized variant, then profileImgUrl, then imageUrl, then the gendered default.
+  const imageUrl = getAstrologerImageUrl(data);
 
   return (
     <div className={styles.topAstrologerCard}>
