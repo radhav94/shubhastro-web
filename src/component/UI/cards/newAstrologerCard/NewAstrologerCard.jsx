@@ -133,8 +133,16 @@ const NewAstrologerCard = memo(({
               resources should not use loading=lazy"), because the request cannot
               even start until layout has run. Callers should set it only on the
               first card or two. */}
+          {/* "small" (100x125), not the helper's default "medium" (250x312):
+              .astrologerImageWrapper is 100x100, dropping to 90x90 under 767px,
+              so medium was ~6x the pixels this box ever paints. The homepage
+              rails now ship `profileImages` on each astrologer (top-rated,
+              our-astrologers and emergency all arrive as astrologer-grid
+              sections), so the sized derivative is available here; the helper
+              still falls back to profileImgUrl and then the gender default when
+              a record predates it. */}
           <img
-            src={getAstrologerImageUrl(astrologer)}
+            src={getAstrologerImageUrl(astrologer, "small")}
             alt={astrologer.firstName}
             className={styles.astrologerImg}
             loading={priority ? "eager" : "lazy"}

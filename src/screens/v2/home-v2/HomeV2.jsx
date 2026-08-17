@@ -45,7 +45,6 @@ const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));
 import kundliImg from "../../../assets/images/home-hero-kundli.png";
 import astrologerImg from "../../../assets/images/home-hero-astrologer.png";
 import horoscopeImg from "../../../assets/images/home-hero-horoscope.png";
-import astrologerMaleImg from "../../../assets/default-img/astrologer male_v.1.png";
 import defaultSquareImg from "../../../assets/images/default_image_square_500x500.png";
 
 // Community avatars — loaded lazily via URL (below-the-fold, decorative)
@@ -633,7 +632,7 @@ const HomeV2 = () => {
 
   // ─── Shared props for group renderers ─────────────────────────────────────
   const heroProps = { styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick: handlePaidCardClick, onLiveCommunityClick: handleLiveCommunityClick, onRequireGuestAuth: handleRequireGuestAuth };
-  const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id, astrologerMaleImg };
+  const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id };
 
   // ─── Render ───────────────────────────────────────────────────────────────
   /*

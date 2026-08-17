@@ -15,7 +15,10 @@ const EmergencySessionModal = ({
   if (!isOpen || !astrologer) return null;
 
   const name = getAstrologerDisplayName(astrologer) || "Astrologer";
-  const imageUrl = getAstrologerImageUrl(astrologer);
+  // .avatarWrap is 90x90, so "small" (100x125) is the right derivative rather
+  // than the helper's default "medium" (250x312). This modal opens from the
+  // homepage emergency-astrologers grid, whose records now carry profileImages.
+  const imageUrl = getAstrologerImageUrl(astrologer, "small");
   const emergencyPrice = astrologer.emergencyPrice || {};
   const chatRate = emergencyPrice.chatRate?.amount || 0;
   const audioRate = emergencyPrice.audioRate?.amount || 0;

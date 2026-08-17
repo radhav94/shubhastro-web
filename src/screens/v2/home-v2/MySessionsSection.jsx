@@ -6,6 +6,7 @@ import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect"
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { useLazyGetAstrologerByIdQuery } from "../../../redux/api/astrologer/astrologerApi";
 import { PANDIT_AI_ID } from "../../../component/panditAI/usePanditAI";
+import { getAstrologerImageUrl, getAstrologerDefaultImage } from "../../../utils/appImages";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 
 // Inject getAllUserSessions endpoint
@@ -38,7 +39,9 @@ const getSessionType = (sessiontype) => {
   return 'Session';
 };
 
-const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
+// astrologerMaleImg is no longer a prop: the avatar resolves its own fallback
+// through getAstrologerDefaultImage, which also honours gender.
+const MySessionsSection = ({ userId, navigate, styles }) => {
   const { data, isLoading } = useGetAllUserSessionsQuery(
     { page: 1, limit: 6 },
     { skip: !userId }
@@ -173,10 +176,31 @@ const MySessionsSection = ({ userId, navigate, styles, astrologerMaleImg }) => {
           <div key={session.roomId || idx} className={styles.sessionCard}>
             {/* Avatar */}
             <div className={styles.sessionAvatar}>
+              {/*
+                Routed through getAstrologerImageUrl at "small" (100x125) —
+                .sessionAvatar img is 110x110, dropping to 70x70 under 767px.
+
+                This was `session.profileImgUrl || astrologerMaleImg`, i.e. the
+                raw original upload with no sized derivative, so this rail never
+                picked up `profileImages` even where the payload carries it. The
+                helper prefers profileImages.small and falls back to
+                profileImgUrl, then imageUrl, then the gender default, so it is
+                correct whether or not sessions/getAllUserSessions has shipped
+                the field yet.
+
+                The fallback also stops being male-only: the old code used
+                astrologerMaleImg for every astrologer without an image,
+                including female ones.
+              */}
               <img
-                src={session.profileImgUrl || astrologerMaleImg}
+                src={getAstrologerImageUrl(session, "small")}
                 alt={session.astrologerName}
-                onError={e => { e.target.src = astrologerMaleImg; }}
+                loading="lazy"
+                decoding="async"
+                onError={e => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = getAstrologerDefaultImage(session.gender);
+                }}
               />
               <span className={styles.sessionOnlineDot} style={{ background: isLive ? '#e53e3e' : session.isActive ? '#22c55e' : '#9ca3af' }} />
             </div>

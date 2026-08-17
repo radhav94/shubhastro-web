@@ -173,7 +173,7 @@ function validateGroup(type, sections) {
  * or hero/three-col sections rendered individually when not adjacent.
  */
 export const renderStandaloneSection = (section, options = {}) => {
-  const { styles, onConnect, navigate, userId, astrologerMaleImg } = options;
+  const { styles, onConnect, navigate, userId } = options;
   const { display_type: displayType, list_order, slug } = section || {};
 
   if (!displayType) return null;
@@ -193,7 +193,7 @@ export const renderStandaloneSection = (section, options = {}) => {
     case "my-sessions":
       return (
         <Suspense key={key} fallback={null}>
-          <MySessionsSection userId={userId} navigate={navigate} styles={styles} astrologerMaleImg={astrologerMaleImg} />
+          <MySessionsSection userId={userId} navigate={navigate} styles={styles} />
         </Suspense>
       );
 
