@@ -22,28 +22,37 @@ const TarotCardDetailPage = () => {
     }
   }, [location.state, navigate])
 
+  // `navigate(-1)` does nothing on the first history entry — a shared link
+  // landing straight on a reading, or a refresh.
+  const goBack = () => (location.key !== 'default' ? navigate(-1) : navigate('/tarot'))
+
   const { card, cards, reading, isMultiCard, cardNames } = location.state || {}
 
   // State for tab selection (for multi-card readings)
   const [activeTab, setActiveTab] = useState(0)
 
-  // Show loader while redirecting
-  if (!location.state) {
-    return <PrimaryLoader isLoading={true} />
+  // The header and the tab strip are both `position: fixed`, so switching tabs
+  // keeps the scroll offset while the new panel renders from its top — which can
+  // be several screens above the viewport. Nothing changes near the finger, so
+  // the tap reads as dead. Go back to the top of the reading.
+  const handleTabChange = (index) => {
+    setActiveTab(index)
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
   }
 
   // Determine if this is a breakup reading
   const isRomanticBreakup = reading?.title === 'Romantic Breakup'
   const isBusinessBreakup = reading?.title === 'Business Breakup'
   const isBreakupReading = isMultiCard && (isRomanticBreakup || isBusinessBreakup)
-  
-  const currentCard = isBreakupReading ? cards[activeTab] : card
+
+  const currentCard = isBreakupReading ? cards?.[activeTab] : card
 
   // For breakup readings, use specific API hooks
   const { 
     data: romanticBreakupData, 
     isLoading: isLoadingRomantic, 
-    error: errorRomantic 
+    error: errorRomantic,
+    refetch: refetchRomantic
   } = useGetRomanticBreakupQuery(
     {
       card_cause: cardNames?.card_cause,
@@ -58,7 +67,8 @@ const TarotCardDetailPage = () => {
   const { 
     data: businessBreakupData, 
     isLoading: isLoadingBusiness, 
-    error: errorBusiness 
+    error: errorBusiness,
+    refetch: refetchBusiness
   } = useGetBusinessBreakupQuery(
     {
       card_cause: cardNames?.card_cause,
@@ -78,7 +88,8 @@ const TarotCardDetailPage = () => {
   const { 
     data: regularData, 
     isLoading: isLoadingRegular, 
-    error: errorRegular 
+    error: errorRegular,
+    refetch: refetchRegular
   } = useGetTarotCardDetailsQuery(
     {
       reading_endpoint: readingEndpoint,
@@ -91,24 +102,31 @@ const TarotCardDetailPage = () => {
   )
 
   // Determine which data to use
-  let data, isLoading, error
+  let data, isLoading, error, refetch
   if (isRomanticBreakup) {
     data = romanticBreakupData
     isLoading = isLoadingRomantic
     error = errorRomantic
+    refetch = refetchRomantic
   } else if (isBusinessBreakup) {
     data = businessBreakupData
     isLoading = isLoadingBusiness
     error = errorBusiness
+    refetch = refetchBusiness
   } else {
     data = regularData
     isLoading = isLoadingRegular
     error = errorRegular
+    refetch = refetchRegular
   }
 
-  console.log('Card details API response:', data)
-  console.log('Is breakup reading:', isBreakupReading)
-  console.log('Card names:', cardNames)
+  // Every hook above runs unconditionally. This early return used to sit above
+  // the three query hooks, so an instance that first rendered without navigation
+  // state ran two hooks and one with state ran five — the "Rendered more hooks
+  // than during the previous render" crash, and ESLint was flagging all three.
+  if (!location.state) {
+    return <PrimaryLoader isLoading={true} />
+  }
 
   if (isLoading) {
     return <PrimaryLoader isLoading={true} />
@@ -119,13 +137,18 @@ const TarotCardDetailPage = () => {
       <div className={styles.detailPage}>
         <div className={styles.headerWrap}>
           <div className={styles.header}>
-            <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <button type="button" className={styles.backButton} onClick={goBack} aria-label="Go back">
               <ChevronLeft size={24} />
             </button>
-            <h1 className={styles.title}>{reading.title}</h1>
+            <h1 className={styles.title}>{reading?.title}</h1>
           </div>
           <div className={styles.errorContainer}>
-            <p className={styles.errorText}>Failed to load card details. Please try again.</p>
+            <p className={styles.errorText}>Failed to load card details.</p>
+            {/* "Please try again" with nothing to press is a dead end: the only
+                control on the screen was Back. */}
+            <button type="button" className={styles.retryButton} onClick={() => refetch?.()}>
+              Try again
+            </button>
           </div>
         </div>
       </div>
@@ -170,25 +193,31 @@ const TarotCardDetailPage = () => {
     <div className={styles.detailPage}>
       <div className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <button type="button" className={styles.backButton} onClick={goBack} aria-label="Go back">
             <ChevronLeft size={24} />
           </button>
-          <h1 className={styles.title}>{reading.title}</h1>
+          <h1 className={styles.title}>{reading?.title}</h1>
         </div>
         </div>
       {/* Tabs for Breakup Readings */}
       {isBreakupReading && (
-        <div className={styles.tabsContainer}>
+        <div className={styles.tabsContainer} role="tablist" aria-label="Reading sections">
           <div className={styles.tabsContainerWrap}>
-            <button 
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 0}
               className={`${styles.tab} ${activeTab === 0 ? styles.activeTab : ''}`}
-              onClick={() => setActiveTab(0)}
+              onClick={() => handleTabChange(0)}
             >
               You
             </button>
-            <button 
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 1}
               className={`${styles.tab} ${activeTab === 1 ? styles.activeTab : ''}`}
-              onClick={() => setActiveTab(1)}
+              onClick={() => handleTabChange(1)}
             >
               Partner
             </button>

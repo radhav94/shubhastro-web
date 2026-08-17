@@ -19,7 +19,7 @@ const LoveTriangleResultPage = () => {
   const cardLover2 = selectedCards?.partner2?.id || "the-devil";
 
   // Fetch love triangle data from API
-  const { data, isLoading, error } = useGetLoveTriangleTarotQuery(
+  const { data, isLoading, error, refetch } = useGetLoveTriangleTarotQuery(
     {
       card_self: cardSelf,
       card_lover1: cardLover1,
@@ -31,96 +31,100 @@ const LoveTriangleResultPage = () => {
     },
   );
 
-  console.log("Love Triangle API response:", data);
-  console.log("Selected cards:", { cardSelf, cardLover1, cardLover2 });
-
   const tabs = [
     { id: "you", label: "You" },
     { id: "partner1", label: "Partner 1" },
     { id: "partner2", label: "Partner 2" },
   ];
 
+  // `navigate(-1)` is inert on the first history entry — a shared link landing
+  // straight on a result, or a refresh.
+  const goBack = () =>
+    location.key !== "default" ? navigate(-1) : navigate("/tarot");
+
+  // The header and tab strip stay put while the panel below re-renders from its
+  // top, which can be well above the viewport after scrolling — so a tab tap
+  // changed nothing near the finger.
+  const handleTabChange = (id) => {
+    setActiveTab(id);
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  };
+
   if (isLoading) {
     return <PrimaryLoader isLoading={true} />;
   }
 
-  if (error) {
+  const apiResponse = data?.response || {};
+
+  // Treat a malformed payload exactly like a failed request. Every field below
+  // used to be read straight off `apiResponse.self` / `.lover1` / `.lover2`
+  // (including `.card_image.artwork`), so a 200 that didn't carry those keys
+  // threw a TypeError mid-render and took the page down with it.
+  const hasReading = !!(apiResponse.self && apiResponse.lover1 && apiResponse.lover2);
+
+  if (error || !hasReading) {
     return (
       <div className={styles.resultPage}>
           <div className={styles.headerWrap}>
             <div className={styles.header}>
-            <button className={styles.backButton} onClick={() => navigate(-1)}>
+            <button type="button" className={styles.backButton} onClick={goBack} aria-label="Go back">
               <ChevronLeft size={24} />
             </button>
             <h1 className={styles.title}>{reading?.title || "Love Triangle"}</h1>
           </div>
           <div className={styles.errorContainer}>
-            <p className={styles.errorText}>
-              Failed to load reading. Please try again.
-            </p>
+            <p className={styles.errorText}>Failed to load reading.</p>
+            {/* "Please try again" with nothing to press is a dead end — the only
+                control on the screen was Back. */}
+            <button type="button" className={styles.retryButton} onClick={() => refetch()}>
+              Try again
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
-  const apiResponse = data?.response || {};
-  console.log("Processed API response:", apiResponse);
+  // Map API response to tabs. `description` has to resolve to a string: the
+  // fallbacks used to be `apiResponse.lover1` / `apiResponse.card_lover2`, i.e.
+  // objects, and rendering an object as a React child is its own crash.
+  const toCard = (source, titleFallback, nameFallback) => ({
+    name: source?.name || nameFallback,
+    title: source?.title || titleFallback || "",
+    description: source?.description || "No description available",
+    image: source?.card_image?.artwork || source?.card_image?.classic || "",
+    traits: source?.traits || [],
+  });
 
-  // Map API response to tabs
   const cardData = {
-    you: {
-      name: apiResponse?.self?.name || "Card Self",
-      title: apiResponse.card_self_title || "",
-      description:
-        apiResponse.self.description ||
-        apiResponse.card_self ||
-        "No description available",
-      image: apiResponse.self.card_image.artwork,
-      traits: apiResponse.self.traits || [],
-    },
-    partner1: {
-      name: apiResponse.lover1.name || "Card Lover 1",
-      title: apiResponse.lover1.title || "",
-      description:
-        apiResponse.lover1.description ||
-        apiResponse.lover1 ||
-        "No description available",
-      image: apiResponse.lover1.card_image.artwork,
-      traits: apiResponse.lover1.traits || [],
-    },
-    partner2: {
-      name: apiResponse.lover2.name || "Card Lover 2",
-      title: apiResponse.card_lover2_title || "",
-      description:
-        apiResponse.lover2.description ||
-        apiResponse.card_lover2 ||
-        "No description available",
-      image: apiResponse.lover2.card_image.artwork,
-      traits: apiResponse.lover2.traits || [],
-    },
+    you: toCard(apiResponse.self, apiResponse.card_self_title, "Card Self"),
+    partner1: toCard(apiResponse.lover1, apiResponse.card_lover1_title, "Card Lover 1"),
+    partner2: toCard(apiResponse.lover2, apiResponse.card_lover2_title, "Card Lover 2"),
   };
 
-  const currentCard = cardData[activeTab];
+  const currentCard = cardData[activeTab] || cardData.you;
 
   return (
     <div className={styles.resultPage}>
       <div className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <button type="button" className={styles.backButton} onClick={goBack} aria-label="Go back">
             <ChevronLeft size={24} />
           </button>
           <h1 className={styles.title}>{reading?.title || "Love Triangle"}</h1>
         </div>
       </div>
 
-      <div className={styles.tabsWrap}>
+      <div className={styles.tabsWrap} role="tablist" aria-label="Reading sections">
         <div className={styles.tabs}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
               className={`${styles.tab} ${activeTab === tab.id ? styles.activeTab : ""}`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
             >
               {tab.label}
             </button>
