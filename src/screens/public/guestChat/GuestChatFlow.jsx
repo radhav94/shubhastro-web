@@ -296,6 +296,11 @@ const GuestChatFlow = () => {
   };
 
   const handleSubmit = async () => {
+    if (sendingOtp) {
+      Toast.error("Sending your OTP — one moment.");
+      return;
+    }
+
     setSubmitError("");
     const e = validate();
     setErrors(e);
@@ -526,18 +531,36 @@ const GuestChatFlow = () => {
     roomIdRef.current = null;
   };
 
+  /*
+   * `navigate(-1)` only has somewhere to go if this app put an entry in the
+   * history stack. React Router stamps the first entry of a session with
+   * key "default", so that is the reliable test — `window.history.length` is
+   * not, because it counts cross-origin entries, and paid traffic arrives
+   * through a redirect chain (facebook.com -> l.facebook.com -> here) that
+   * makes the stack look deep while stepping back lands on an ad redirector.
+   * Guests reach this screen straight from a Chat tap, so the listing is the
+   * right fallback.
+   */
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
+    } else {
+      navigate("/astrologers", { replace: true });
+    }
+  };
+
   // In-app back button: confirm (via modal) before leaving while a request is pending.
   const handleBack = () => {
     if (isRequestPending) {
       confirmSourceRef.current = "back";
       leaveActionRef.current = () => {
         cancelChatRequest();
-        navigate(-1);
+        goBack();
       };
       setConfirmLeave(true);
       return;
     }
-    navigate(-1);
+    goBack();
   };
 
   const handleConfirmLeave = () => {
@@ -855,11 +878,16 @@ const GuestChatFlow = () => {
         )}
       </div>
 
+      {/*
+        aria-disabled rather than `disabled`: a disabled button fires no click,
+        so tapping during the OTP send produced no acknowledgement. handleSubmit
+        refuses the duplicate and says why.
+      */}
       <button
         type="button"
         className={styles.submitBtn}
         onClick={handleSubmit}
-        disabled={sendingOtp}
+        aria-disabled={sendingOtp}
         aria-busy={sendingOtp}
       >
         <IoSparkles size={18} />
@@ -885,7 +913,20 @@ const GuestChatFlow = () => {
         {/* Header — mirrors the real ChatHeader (without the in-session footer) */}
         <div className={chat.header}>
           <div className={chat.headerLeft}>
-            <IoArrowBack className={chat.backIcon} onClick={handleBack} />
+            {/*
+              A real <button>. This was an <svg> carrying the onClick: it is
+              styled as a 40px circle so it reads as a button, but it was
+              unreachable by keyboard, unannounced to screen readers, and taps on
+              non-interactive elements are the least reliable kind on iOS Safari.
+            */}
+            <button
+              type="button"
+              className={chat.backIcon}
+              onClick={handleBack}
+              aria-label="Go back"
+            >
+              <IoArrowBack aria-hidden="true" />
+            </button>
             <img
               src={imgError || !astrologer?.profileImgUrl ? getAstrologerDefaultImage(astrologer?.gender) : astroImg}
               className={chat.headerAvatar}

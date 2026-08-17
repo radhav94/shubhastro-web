@@ -295,6 +295,13 @@ $floating-button-gap: 14px;
     display: none;    
   }
 }
+// Applied to a <button>. It used to sit on the react-icons <svg> itself, which
+// is why the nested `svg` rule below never matched anything — there was no
+// descendant svg, only the element the class was on. Now that the markup has a
+// wrapper the rule does match, so it is pinned to currentColor to keep the
+// arrow the same colour it has always rendered ($text-black); the previous
+// #F75801 was never visible and switching to it now would be an unintended
+// restyle. flex centring also only does something useful on the wrapper.
 .backIcon {
   font-size: 24px;
   cursor: pointer;
@@ -310,7 +317,7 @@ $floating-button-gap: 14px;
   border: 1px solid $icon-color;
   padding: 6px;
   svg{
-    stroke: #F75801;
+    stroke: currentColor;
   }
 }
 
