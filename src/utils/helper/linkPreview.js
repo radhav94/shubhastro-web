@@ -86,3 +86,49 @@ export const extractDomain = (url) => {
     return url;
   }
 };
+
+/**
+ * Splits text into plain and URL segments so a renderer can turn the URLs into
+ * real links *in place*.
+ *
+ * Chat bubbles used to render the message text verbatim and then append a
+ * separate clickable preview below it. The URL therefore appeared twice, and the
+ * copy inside the sentence — the one a reader actually clicks — was inert text.
+ *
+ * Trailing punctuation is trimmed off the href because the regex is greedy up to
+ * whitespace, so "see https://x.com/a." would otherwise link to a 404.
+ *
+ * @param {string} text
+ * @returns {Array<{ type: 'text'|'url', value: string, href?: string }>}
+ */
+export const splitTextByURL = (text) => {
+  if (!text || typeof text !== 'string') return [];
+
+  const parts = [];
+  // A fresh regex per call: URL_REGEX is global and shared, so reusing it here
+  // would carry lastIndex across calls and drop matches at random.
+  const pattern = /(https?:\/\/[^\s]+)/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: 'text', value: text.slice(lastIndex, match.index) });
+    }
+
+    const raw = match[0];
+    const trailing = raw.match(/[.,;:!?)\]}'"]+$/)?.[0] || '';
+    const href = trailing ? raw.slice(0, -trailing.length) : raw;
+
+    parts.push({ type: 'url', value: href, href });
+    if (trailing) parts.push({ type: 'text', value: trailing });
+
+    lastIndex = pattern.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push({ type: 'text', value: text.slice(lastIndex) });
+  }
+
+  return parts;
+};

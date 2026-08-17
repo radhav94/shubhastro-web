@@ -14,7 +14,7 @@ import dayjs from "dayjs";
 import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
 import { buildKundliLink } from "../../../../../utils/helper/kundliMessage";
 import LinkPreview from "./LinkPreview";
-import { detectURL } from "../../../../../utils/helper/linkPreview";
+import { detectURL, splitTextByURL } from "../../../../../utils/helper/linkPreview";
 import { getAttachmentDisplayName } from "../../../../../utils/helper/getAttachmentDisplayName";
 
 const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, customerName, onScroll, isLoadingMore, onMessageAction }) => {
@@ -259,12 +259,30 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
     // Check for external URLs in text messages
     const detectedURL = detectURL(msg.text);
     if (detectedURL && msg.type !== "kundli") {
+      // Linkify in place: the message text used to be flat, with the only
+      // clickable copy of the URL sitting in the preview below it, so tapping
+      // the link inside the sentence did nothing.
+      const parts = splitTextByURL(msg.text);
       return (
         <>
-          {msg.text !== detectedURL && (
+          {msg.text.trim() !== detectedURL && (
             <div style={{ marginBottom: 8 }}>
               <PrimaryText size={14} color={"#4a4a4a"}>
-                {msg.text}
+                {parts.map((part, index) =>
+                  part.type === "url" ? (
+                    <a
+                      key={`${part.value}-${index}`}
+                      href={part.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "#d43400", textDecoration: "underline", wordBreak: "break-all" }}
+                    >
+                      {part.value}
+                    </a>
+                  ) : (
+                    <span key={`t-${index}`}>{part.value}</span>
+                  )
+                )}
               </PrimaryText>
             </div>
           )}

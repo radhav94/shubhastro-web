@@ -24,6 +24,7 @@ import useSarvamSTT from "../../screens/private/panditAIVoice/useSarvamSTT";
 import { transliterateToLatin } from "./translateText";
 import AIRechargeBanner from "./AIRechargeBanner";
 import AISessionStatus from "./AISessionStatus";
+import { splitTextByURL } from "../../utils/helper/linkPreview";
 
 // Served from the CDN rather than bundled, so it isn't emitted into /assets and
 // isn't re-downloaded per deploy hash. The CDN copy is also the optimised one
@@ -43,7 +44,29 @@ const MessageBubble = memo(({ msg, onRetry }) => {
           msg.isError ? styles.failedBubble : ""
         }`}
       >
-        <p className={styles.msgText}>{msg.text}</p>
+        {/*
+          Linkified rather than printed flat. Readings routinely reference a
+          page ("see your full kundli at https://…"), and as plain text that URL
+          was completely inert — clicking it, which is the obvious thing to do,
+          did nothing at all.
+        */}
+        <p className={styles.msgText}>
+          {splitTextByURL(msg.text).map((part, index) =>
+            part.type === "url" ? (
+              <a
+                key={`${part.value}-${index}`}
+                href={part.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.inlineLink}
+              >
+                {part.value}
+              </a>
+            ) : (
+              <span key={`t-${index}`}>{part.value}</span>
+            )
+          )}
+        </p>
         <div className={styles.msgMeta}>
           {showRetry && (
             <button
