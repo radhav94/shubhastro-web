@@ -26,15 +26,29 @@ const ProfileSelector = ({ selectedProfile, onSelectClick, onEditClick, isGuest,
                             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </button>
-                    <div className={styles.profileSelector}>
+                    {/*
+                      One real <button> spanning the whole bar. This used to be a
+                      <span onClick> holding just the name, inside a flex:1
+                      container that had no handler and `user-select: none` — so
+                      on a wide desktop header most of the visible "Select
+                      Profile" control was dead, and because the text couldn't
+                      even be selected there was no feedback that the click had
+                      missed. It is the only way into the birth-details form.
+                    */}
+                    <button
+                        type="button"
+                        className={styles.profileSelector}
+                        onClick={handleClick}
+                        aria-haspopup="dialog"
+                    >
                         <span className={styles.selectLabel}>{label}</span>
-                        <span className={styles.profileName} onClick={handleClick}>
+                        <span className={styles.profileName}>
                             {displayName}
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block', marginLeft: '4px', verticalAlign: 'middle' }}>
                                 <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                         </span>
-                    </div>
+                    </button>
                     {/* <button className={styles.editBtn} onClick={onEditClick} disabled={!selectedProfile}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

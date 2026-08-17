@@ -465,10 +465,18 @@ const AddProfileModal = ({
                   </div>
                 </div>
 
-                <div className={styles.checkboxLabel}>
+                {/*
+                  A real <label htmlFor>, not a div. The wrapper used to be a
+                  <div> and the SCSS put `pointer-events: none` on the text, so
+                  clicking the words did nothing at all — no toggle, no focus,
+                  not even a text selection. Only the 18px box responded, and
+                  this checkbox is what unlocks the required Birth Time field, so
+                  missing it leaves the form unsubmittable.
+                */}
+                <label className={styles.checkboxLabel} htmlFor="unknownBirthTime">
                   <Field type="checkbox" name="unknownBirthTime" id="unknownBirthTime" />
-                  <span>Don't know the exact time of birth</span>
-                </div>
+                  <span>Don&apos;t know the exact time of birth</span>
+                </label>
 
                 {/* Place of birth */}
                 <div className={styles.formGroup} data-field="birthPlace">

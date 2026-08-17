@@ -362,6 +362,8 @@
   gap: 8px;
   // margin-top: -4px;
   width: fit-content;
+  // It is a <label htmlFor> now, so the whole thing is the hit area.
+  cursor: pointer;
 
   input[type="checkbox"] {
     width: 18px;
@@ -376,8 +378,9 @@
     font-size: 13px;
     color: #2b1d12;
     user-select: none;
-    pointer-events: none;
     font-weight: 600;
+    // `pointer-events: none` used to be here, which made the label text
+    // completely inert — the one thing a reader is most likely to click.
   }
 }
 

@@ -101,12 +101,26 @@
   }
 }
 
+// A real <button> now, so the entire bar is the hit area rather than just the
+// name text. Reset the UA chrome so it looks identical.
 .profileSelector {
   flex: 1;
   text-align: center;
   user-select: none;
   padding: 4px 40px 4px 12px;
   border-radius: 8px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
 }
 
 .selectLabel {

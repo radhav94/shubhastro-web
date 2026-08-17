@@ -209,24 +209,45 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
       return;
     }
     
-    // Validate hour and minute as user types (only when adding, not deleting)
+    /*
+      Normalise the digits as the user types instead of rejecting them.
+
+      This used to `return` on anything out of range, which made the field look
+      frozen for the most ordinary input there is: a first digit of 2-9. Typing
+      "9" for 9 AM was silently discarded, so the only way to reach 9:30 was to
+      know to type "0930". Same for the minutes' tens digit — "9" for :09 was
+      dropped. Nothing appeared on screen and nothing explained why, which is
+      exactly the shape of a form people rage-click and abandon.
+
+      A leading digit that can't start a valid hour or minute is now treated as
+      the ones place and zero-padded (9 -> 09), which is how every other time
+      mask behaves. Genuinely impossible pairs still can't be built, because the
+      pad makes them valid before they're used.
+    */
     if (!isDeleting) {
-      if (limitedDigits.length >= 1) {
-        const firstDigit = parseInt(limitedDigits[0], 10);
-        if (firstDigit > 1) return;
+      // First digit 2-9 can only mean 02-09, so pad it.
+      if (limitedDigits.length === 1 && parseInt(limitedDigits[0], 10) > 1) {
+        limitedDigits = `0${limitedDigits}`;
       }
+
+      // "00" or "1x" beyond 12 is a real mistake — keep only the digit typed
+      // last, padded, so the user can carry on rather than hitting a wall.
       if (limitedDigits.length >= 2) {
         const h = parseInt(limitedDigits.slice(0, 2), 10);
-        if (h < 1 || h > 12) return;
+        if (h < 1 || h > 12) {
+          const lastDigit = limitedDigits[1];
+          limitedDigits = parseInt(lastDigit, 10) > 0
+            ? `0${lastDigit}${limitedDigits.slice(2)}`
+            : limitedDigits.slice(0, 1);
+        }
       }
-      if (limitedDigits.length >= 3) {
-        const thirdDigit = parseInt(limitedDigits[2], 10);
-        if (thirdDigit > 5) return;
+
+      // Minutes: a tens digit above 5 can only mean 0x.
+      if (limitedDigits.length === 3 && parseInt(limitedDigits[2], 10) > 5) {
+        limitedDigits = `${limitedDigits.slice(0, 2)}0${limitedDigits[2]}`;
       }
-      if (limitedDigits.length >= 4) {
-        const m = parseInt(limitedDigits.slice(2, 4), 10);
-        if (m > 59) return;
-      }
+
+      limitedDigits = limitedDigits.slice(0, 4);
     }
     
     // Build formatted string: HH:MM
@@ -628,10 +649,17 @@ const DateTimePicker = ({
           className={`${styles.input} ${dateError ? styles.inputError : ""}`}
           autoComplete="off"
         />
-        {/* Invisible overlay covering right 1/3 of input to open calendar */}
-        <div
+        {/* Invisible hit area over the right 1/3 of the input, so clicking near
+            the calendar icon opens the picker even while typing stays enabled.
+            A button rather than a div: same reason as everywhere else, though it
+            stays out of the tab order and hidden from assistive tech because the
+            real calendar button next to it does the same job. */}
+        <button
+          type="button"
           className={styles.calendarOverlay}
           onClick={openCalendar}
+          tabIndex={-1}
+          aria-hidden="true"
         />
         <button
           type="button"
