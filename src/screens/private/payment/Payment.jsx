@@ -5,6 +5,7 @@ import { useGetAllPlansQuery } from "../../../redux/api/plansApi/plansApi";
 import { getToken } from "../../../utils/token";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { trackEvent } from "../../../utils/analytics";
+import walletBlc from "../../../assets/images/wallet-icon.png";
 
 const RechargePack = ({ name, actualPrice, discountedPrice, offerPrice, Active }) => (
   <div className={styles.rechargeAmountWrapper}>
@@ -62,10 +63,10 @@ const Payment = () => {
 
             <div className={styles.titleWallet}>
               <img
-                src="https://images.astroyogi.com/astroyogi/wallet_blc.png"
+                src={walletBlc}
                 alt="Wallet"
-                width={45}
-                height={45}
+                width={30}
+                height={30}
               />
               Wallet Balance
               <span className={styles.dangerColor}>
