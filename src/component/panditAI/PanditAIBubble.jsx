@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import dayjs from "dayjs";
 import styles from "./PanditAIBubble.module.scss";
+import Toast from "../toast";
 import usePanditAI, { setPanditAIVoiceHandover } from "./usePanditAI";
 import { GuestKundliAuthModal } from "../UI/Profile";
 import { setSelectedKundli } from "../../redux/kundli/kundliSlice";
@@ -89,6 +90,9 @@ const PanditAIBubble = () => {
   // Holds a query (from the "Ask Pandit AI" card) to send once a guest logs in.
   const pendingQueryRef = useRef(null);
   const inputRef = useRef(null);
+  // Set when send is tapped while speech-to-text is still running, so the tap
+  // can be completed once the transcription settles instead of being dropped.
+  const pendingSendRef = useRef(false);
   const lang = "en-IN";
 
   // Persist open state for reconnect on refresh
@@ -289,19 +293,55 @@ const PanditAIBubble = () => {
     setInterimText(sarvamStt.isTranscribing ? "..." : "");
   }, [useWebStt, sarvamStt.isTranscribing]);
 
-  const handleSend = useCallback(() => {
-    // Block sending while speech-to-text is still in progress so the "..."
-    // placeholder / partial transcription is never sent.
-    if (isListening || sttTranscribing) return;
+  // Performs the actual send. Callers must have already confirmed that
+  // speech-to-text is finished, so `text` holds only transcribed text.
+  const flushSend = useCallback(() => {
     // Send only the confirmed text — never the interim "..." placeholder.
     const outgoing = text.trim();
-    if (outgoing) {
-      stopListening();
-      setInterimText("");
-      sendText(outgoing);
-      setText("");
+    if (!outgoing) return false;
+    stopListening();
+    setInterimText("");
+    sendText(outgoing);
+    setText("");
+    return true;
+  }, [text, sendText, stopListening]);
+
+  const handleSend = useCallback(() => {
+    /*
+     * Tapping send is the natural way to finish dictating, but the button was
+     * `disabled={!canSend}` and canSend excludes `isListening` — so mid-recording
+     * the tap hit a disabled button and this function returned silently too.
+     * Nothing happened and nothing explained why; the only way forward was to
+     * spot that the mic had turned into a separate stop button.
+     *
+     * Now the tap is honoured: stop recording, and send as soon as the
+     * transcription lands. Recording it as a pending intent (rather than sending
+     * immediately) still respects the original constraint that the interim "..."
+     * placeholder must never be sent.
+     */
+    if (isListening || sttTranscribing) {
+      pendingSendRef.current = true;
+      if (isListening) stopListening();
+      return;
     }
-  }, [text, sendText, stopListening, isListening, sttTranscribing]);
+
+    if (!flushSend()) {
+      Toast.error("Type your question first, or tap the mic to dictate it.");
+      inputRef.current?.focus();
+    }
+  }, [isListening, sttTranscribing, stopListening, flushSend]);
+
+  // Completes a send that was requested while speech-to-text was still running.
+  useEffect(() => {
+    if (!pendingSendRef.current) return;
+    if (isListening || sttTranscribing) return;
+    pendingSendRef.current = false;
+    if (!flushSend()) {
+      // Transcription produced nothing usable — say so rather than leaving the
+      // tap unanswered, which is the whole point of honouring it.
+      Toast.error("Didn't catch that. Please try again.");
+    }
+  }, [isListening, sttTranscribing, flushSend]);
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -314,13 +354,23 @@ const PanditAIBubble = () => {
   );
 
   const handleMicClick = useCallback(() => {
-    if (isListening) {
-      stopListening();
-      setInterimText("");
-    } else {
+    // Stopping is always allowed. Starting is not, and the button used to be
+    // `disabled` for those cases, so the tap vanished without explanation.
+    if (!isListening) {
+      if (chatDisabled) {
+        Toast.error("Reconnecting to Pandit AI — one moment.");
+        return;
+      }
+      if (isLoading) {
+        Toast.error("Pandit AI is still replying. Please wait for the answer.");
+        return;
+      }
       startListening();
+      return;
     }
-  }, [isListening, startListening, stopListening]);
+    stopListening();
+    setInterimText("");
+  }, [isListening, startListening, stopListening, isLoading, chatDisabled]);
 
   const handleClose = useCallback(() => {
     stopListening();
@@ -361,7 +411,16 @@ const PanditAIBubble = () => {
 
   const handleInputChange = useCallback((e) => setText(e.target.value), []);
 
-  const placeholder = isListening ? "Listening..." : "Ask Pandit AI...";
+  // The field is disabled while `isLoading`, but the placeholder used to keep
+  // inviting a question ("Ask Pandit AI...") throughout — so a locked input read
+  // as a broken one. Each blocked state now names itself.
+  const placeholder = isListening
+    ? "Listening..."
+    : sttTranscribing
+    ? "Transcribing..."
+    : isLoading
+    ? "Pandit AI is replying..."
+    : "Ask Pandit AI...";
 
   const displayValue = interimText
     ? `${text}${text ? " " : ""}${interimText}`
@@ -551,7 +610,7 @@ const PanditAIBubble = () => {
                 <button
                   className={`${styles.micBtn} ${isListening ? styles.micActive : ""}`}
                   onClick={handleMicClick}
-                  disabled={isLoading || chatDisabled}
+                  aria-disabled={isLoading || chatDisabled}
                   aria-label={isListening ? "Stop recording" : "Start voice input"}
                   type="button"
                 >
@@ -578,10 +637,16 @@ const PanditAIBubble = () => {
                 </svg>
               </button>
 
+              {/*
+                aria-disabled, not `disabled`: this button has to stay tappable
+                while dictation is in flight so handleSend can wrap the recording
+                up and send it. A disabled button fires no click at all.
+              */}
               <button
                 className={styles.sendBtn}
                 onClick={handleSend}
-                disabled={!canSend}
+                aria-disabled={!canSend}
+                aria-busy={sttTranscribing || undefined}
                 aria-label="Send message"
                 type="button"
               >

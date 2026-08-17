@@ -826,7 +826,10 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
     color: $accent;
   }
 
-  &:disabled {
+  // aria-disabled, not `disabled` — the button stays tappable so it can explain
+  // why voice input isn't available right now instead of ignoring the tap.
+  &:disabled,
+  &[aria-disabled="true"] {
     cursor: not-allowed;
     opacity: 0.55;
   }
@@ -905,11 +908,14 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   color: #fff;
   box-shadow: 0 10px 20px rgba(241, 90, 36, 0.28);
 
-  &:hover:not(:disabled) {
+  &:hover:not(:disabled):not([aria-disabled="true"]) {
     transform: translateY(-2px) scale(1.02);
   }
 
-  &:disabled {
+  // aria-disabled, not `disabled` — send has to keep receiving taps so a tap
+  // made mid-dictation can finish the recording and submit it.
+  &:disabled,
+  &[aria-disabled="true"] {
     cursor: not-allowed;
     opacity: 0.42;
     box-shadow: none;
