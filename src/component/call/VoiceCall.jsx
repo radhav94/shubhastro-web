@@ -114,6 +114,13 @@ const AgoraVoiceCalling = ({ callData }) => {
       chatLastRequestedAstro?.gender,
   };
 
+  // Avatar for the in-call "New message" toast. Derived from the same source as
+  // the call UI avatars so it never falls back to a placeholder while the real
+  // image is available. Kept as plain values so the notification callback can
+  // depend on them and refresh once the astrologer query resolves.
+  const notificationAstroImage = getAstrologerImageUrl(astroForImage, "small");
+  const notificationAstroGender = astroForImage.gender || null;
+
   // Review avatar (FeedbackModal renders at 44px). `currentCall` is read from
   // activeCallRef at end-of-call, which is the same astrologer, so the fetched
   // derivatives still apply.
@@ -235,8 +242,11 @@ const AgoraVoiceCalling = ({ callData }) => {
     } else {
       messageText = data.message || data.response || "New message";
     }
-    const astroImage = astrologerImage || lastRequestedAstro?.imageUrl || lastRequestedAstro?.aadharCardImgUrl || lastRequestedAstro?.panCardImgUrl || null;
-    const astroGender = lastRequestedAstro?.gender || null;
+    // Use the same resolved avatar the call UI uses. The old chain missed
+    // `profileImgUrl` / `profileImages` (the fields the astrologer API actually
+    // returns), so the toast fell back to a placeholder.
+    const astroImage = notificationAstroImage;
+    const astroGender = notificationAstroGender;
     setChatNotification({
       senderName: callerName || "Astrologer",
       message: messageText,
@@ -251,7 +261,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     notificationTimerRef.current = setTimeout(() => {
       setChatNotification(null);
     }, 4000);
-  }, [callerName, astrologerImage, lastRequestedAstro]);
+  }, [callerName, notificationAstroImage, notificationAstroGender]);
 
   useEffect(() => {
     voiceSocket.on("message:recieved", showChatNotification);
