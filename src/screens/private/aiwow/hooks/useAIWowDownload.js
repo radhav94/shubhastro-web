@@ -275,13 +275,25 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
   }, [historyId, id, fileName, downloadReportPdf, refreshWallet, downloadPrice, openSubscriptionModal, featureName]);
 
   const handleDownloadClick = useCallback(() => {
+    /*
+     * In-flight guard. This used to rely entirely on callers setting
+     * `disabled={isDownloading}` on their button, which is not a safe place for
+     * it on a path that can charge the wallet: any caller that renders the
+     * button live could re-open the confirm modal mid-download and be charged
+     * twice. Enforced here so the guarantee does not depend on the caller.
+     */
+    if (isDownloading) {
+      toast.error('Your report is still downloading. Please wait.');
+      return;
+    }
+
     // Always show the payment popup so the first download of every generated
     // report is confirmed/charged (re-downloading the same report is free via
     // downloadPrice === 0). No subscription shortcut.
     refreshWallet();
     trackEvent('shubh_ai_payment_initiated', { feature_name: featureName, price: downloadPrice });
     setShowDownloadModal(true);
-  }, [refreshWallet, downloadPrice, featureName]);
+  }, [isDownloading, refreshWallet, downloadPrice, featureName]);
 
   return {
     // State
