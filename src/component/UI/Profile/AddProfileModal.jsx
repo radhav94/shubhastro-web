@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import {
@@ -20,26 +20,60 @@ import { relationOption } from "../../../utils/constanats/appData";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
 import giftImg from "../../../assets/images/welcome-bonus-icon.webp";
 
+// Visual top-to-bottom order of every field the schema can reject. Yup returns
+// a plain object and its key order is not the page order, so picking
+// Object.keys(errors)[0] could scroll past a problem higher up.
+const FIELD_ORDER = [
+  "name",
+  "mobileNumber",
+  "relation",
+  "birthDate",
+  "birthTime",
+  "birthPlace",
+];
+
 /**
  * Auto-scrolls to the first field with a validation error after form submission.
  * Prevents rage clicks caused by users not seeing error messages below the fold.
+ *
+ * Three of the six fields — birthDate, birthTime and birthPlace — are rendered
+ * by DateTimePicker and LocationSearch, neither of which emits a `name`
+ * attribute, so the original `[name="..."]` lookup silently found nothing for
+ * exactly the fields most likely to fail (a typed-but-unselected birth place is
+ * the single most common one). Those wrappers now carry `data-field`, which
+ * this selector has always accepted.
  */
 const ScrollToError = ({ errors, submitCount }) => {
+  // Formik hands back a fresh `errors` object on every validation pass, and
+  // validateOnBlur is on — so keying the effect on `errors` would re-run it
+  // (and re-toast) each time a field is blurred. Only a new submit attempt
+  // should trigger this, so submitCount is the sole dependency and the latest
+  // errors are read through a ref.
+  const errorsRef = useRef(errors);
+  errorsRef.current = errors;
+
   useEffect(() => {
     if (submitCount === 0) return;
-    const errorKeys = Object.keys(errors);
-    if (errorKeys.length === 0) return;
 
-    // Find the first field with an error and scroll to it
-    const firstErrorField = document.querySelector(
-      `[name="${errorKeys[0]}"], [data-field="${errorKeys[0]}"]`
+    const currentErrors = errorsRef.current;
+    const firstInvalid = FIELD_ORDER.find((key) => currentErrors[key]);
+    if (!firstInvalid) return;
+
+    const target = document.querySelector(
+      `[name="${firstInvalid}"], [data-field="${firstInvalid}"]`
     );
-    if (firstErrorField) {
-      firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
-      // Focus the field so the user knows exactly what needs fixing
-      if (firstErrorField.focus) firstErrorField.focus();
-    }
-  }, [errors, submitCount]);
+    if (!target) return;
+
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    // A data-field wrapper isn't focusable itself, so reach for the control
+    // inside it; preventScroll keeps the smooth scroll above from being cut off.
+    const focusTarget = target.matches("input, select, textarea, button")
+      ? target
+      : target.querySelector("input, select, textarea, button");
+    focusTarget?.focus({ preventScroll: true });
+
+    Toast.error(currentErrors[firstInvalid]);
+  }, [submitCount]);
 
   return null;
 };
@@ -161,8 +195,18 @@ const AddProfileModal = ({
   });
 
   const handleSubmit = async (values) => {
+    // Passes Yup (birthPlace is a non-empty string) but has no coordinates, i.e.
+    // the user typed a place and never picked a suggestion. Yup can't see this,
+    // so there is no ErrorMessage for it — the toast is the only feedback, and
+    // the field it refers to is usually off-screen by the time the button is
+    // tapped. Point at it as well as naming it.
     if (!values.latitude || !values.longitude) {
       Toast.error("Please select a valid location from the dropdown");
+      const placeField = document.querySelector('[data-field="birthPlace"]');
+      if (placeField) {
+        placeField.scrollIntoView({ behavior: "smooth", block: "center" });
+        placeField.querySelector("input")?.focus({ preventScroll: true });
+      }
       return;
     }
 
@@ -366,7 +410,7 @@ const AddProfileModal = ({
 
                 {/* Birth date + time */}
                 <div className={styles.row2}>
-                  <div className={styles.formGroup}>
+                  <div className={styles.formGroup} data-field="birthDate">
                     <label>Birth Date <span className={styles.required}>*</span></label>
                     <div className={styles.iconField}>
                       <button type="button" className={styles.leftIconBtn} onClick={openPickerFromIcon} aria-label="Open calendar">
@@ -393,7 +437,7 @@ const AddProfileModal = ({
                     <ErrorMessage name="birthDate" component="div" className={styles.errorText} />
                   </div>
 
-                  <div className={styles.formGroup}>
+                  <div className={styles.formGroup} data-field="birthTime">
                     <label>Birth Time <span className={styles.required}>*</span></label>
                     <div className={styles.iconField}>
                       <button type="button" className={styles.leftIconBtn} onClick={openPickerFromIcon} aria-label="Open time picker">
@@ -427,7 +471,7 @@ const AddProfileModal = ({
                 </div>
 
                 {/* Place of birth */}
-                <div className={styles.formGroup}>
+                <div className={styles.formGroup} data-field="birthPlace">
                   <label>Place of Birth <span className={styles.required}>*</span></label>
                   <div className={styles.iconField}>
                     <IoLocationOutline className={styles.leftIcon} />
@@ -446,7 +490,23 @@ const AddProfileModal = ({
                   <ErrorMessage name="birthPlace" component="div" className={styles.errorText} />
                 </div>
 
-                <button type="submit" className={styles.submitBtn} disabled={isLoading}>
+                {/*
+                  aria-disabled rather than `disabled`, so a tap while the
+                  request is in flight is acknowledged instead of swallowed.
+                  The click handler blocks the duplicate submit.
+                */}
+                <button
+                  type="submit"
+                  className={styles.submitBtn}
+                  aria-disabled={isLoading}
+                  aria-busy={isLoading}
+                  onClick={(e) => {
+                    if (isLoading) {
+                      e.preventDefault();
+                      Toast.error("Saving your details — one moment.");
+                    }
+                  }}
+                >
                   {isGuest && <IoSparkles size={18} />}
                   {isLoading
                     ? "Please wait..."

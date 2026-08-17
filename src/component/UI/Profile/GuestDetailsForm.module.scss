@@ -240,9 +240,13 @@
   gap: 8px;
   box-shadow: 0 4px 12px rgba(247, 88, 1, 0.25);
 
-  &:disabled {
+  // The button is never `disabled` (a disabled button swallows the tap and
+  // reports nothing), so the in-flight look hangs off aria-disabled instead.
+  // `:disabled` is kept for any other consumer that still sets the attribute.
+  &:disabled,
+  &[aria-disabled="true"] {
     opacity: 0.6;
-    cursor: not-allowed;
+    cursor: progress;
   }
 }
 
