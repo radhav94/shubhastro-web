@@ -67,6 +67,28 @@ const FinalPay = () => {
   }, [planError, navigate]);
 
   /*
+    A settled-but-empty response is a dead end, not a no-op.
+
+    The query can resolve without rejecting and still carry no usable plan —
+    an unexpected payload shape, or a `{ success: false }` body. That combination
+    (not loading, no error, no data) fell through to `return null` below, which
+    rendered a completely blank page at /recharge/payment: no heading, no
+    message, no control, and no effect to move the user anywhere. Nothing was
+    broken enough to trip the planError branch above, so the visitor was left
+    looking at an empty screen at the last step of a recharge with no way
+    forward except leaving.
+
+    Treated the same as a load failure: say so and send them back to plan
+    selection, where they can retry.
+  */
+  useEffect(() => {
+    if (!planId || isPlanLoading || planError) return;
+    if (data?.data) return;
+    Toast.error("We couldn't load that plan. Please pick a recharge amount again.");
+    navigate("/recharge", { replace: true });
+  }, [planId, isPlanLoading, planError, data, navigate]);
+
+  /*
     Every blocker is checked here and named out loud, because the button is no
     longer `disabled`. A disabled <button> dispatches no click event at all, so
     tapping the single CTA on this screen was a literal dead click — and it
@@ -135,9 +157,27 @@ const FinalPay = () => {
     );
   }
 
-  // No plan data
+  /*
+    No plan data. The effect above is already redirecting, but effects run after
+    render, so returning `null` here would still paint an empty page for at least
+    one frame — and for the whole round trip if that redirect is ever prevented.
+    Render the reason and an explicit way out instead of nothing.
+  */
   if (!data?.data) {
-    return null;
+    return (
+      <div className={styles.container}>
+        <div className={styles.errorBox}>
+          <p>We couldn&apos;t load that plan.</p>
+          <button
+            type="button"
+            onClick={() => navigate("/recharge", { replace: true })}
+            className={styles.retryButton}
+          >
+            Choose a recharge amount
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (

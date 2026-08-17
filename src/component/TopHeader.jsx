@@ -36,6 +36,7 @@ import { useChat } from "../context/ChatContext";
 import { voiceSocket, clearCallSession, clearChatSession } from "../services/voiceSocketServices";
 const TopHeader = () => {
   const navigate = useNavigate();
+  const { pathname: currentPathname } = useLocation();
   const dispatch = useDispatch();
   const requireAuth = useRequireAuth();
   const [user, setUser] = useState(null);
@@ -158,6 +159,25 @@ const TopHeader = () => {
       .forEach((key) => sessionStorage.removeItem(key));
 
     if (voiceSocket.connected) voiceSocket.disconnect();
+  };
+
+  /*
+   * The logo is a <Link to="/">, which is inert when the current route is
+   * already "/" — no navigation, no repaint, nothing. Scroll to the top instead,
+   * which is the conventional behaviour for a site logo and gives the tap a
+   * visible result.
+   *
+   * Only plain left-clicks are intercepted: modified clicks (Cmd/Ctrl/Shift/Alt)
+   * and middle-clicks must keep their native "open in a new tab/window"
+   * behaviour, which is the reason this is an anchor rather than a handler in the
+   * first place.
+   */
+  const handleLogoClick = (e) => {
+    if (currentPathname !== "/") return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleLogout = async () => {
@@ -306,8 +326,20 @@ const TopHeader = () => {
 
             {/* Real anchors, not click-handled divs: the logo advertises itself as
                 clickable (cursor: pointer) so it must also support middle-click,
-                Cmd/Ctrl-click, keyboard Enter and "open in new tab". */}
-            <Link to="/" className={styles.logoHeader} aria-label="ShubhAstro home">
+                Cmd/Ctrl-click, keyboard Enter and "open in new tab".
+
+                handleLogoClick covers the one case where this Link does nothing:
+                clicking it while already on "/". React Router treats a Link to
+                the current path as a no-op, so on the homepage the most
+                prominent, most obviously clickable element in the header was
+                completely inert. Scrolling back to the top is what a site logo
+                is expected to do there, and it makes the click visible. */}
+            <Link
+              to="/"
+              className={styles.logoHeader}
+              aria-label="ShubhAstro home"
+              onClick={handleLogoClick}
+            >
               <img src={ShubhTalkLogo} alt="Shubh Talk Logo" width="150" height="32" />
             </Link>
 
@@ -315,6 +347,7 @@ const TopHeader = () => {
               to="/"
               className={styles.logoHeaderMobile}
               aria-label="ShubhAstro home"
+              onClick={handleLogoClick}
             >
               <img src={ShubhTalkLogoMobile} alt="Shubh Talk Logo" width="32" height="32" />
             </Link>
