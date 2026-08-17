@@ -7,6 +7,8 @@ import { PATH } from "../../../utils/routes/Paths";
 import { logout } from "../../../redux/auth/authSlice";
 import { loginWithPhone } from "../../../services/appServices/authService";
 import { trackEvent } from "../../../utils/analytics";
+import useTruecallerLogin from "./useTruecallerLogin";
+import { resolvePostLoginRedirect } from "../../../utils/auth/completeCustomerLogin";
 import rsBox from "../../../assets/images/rs-box.png";
 import loginMobile from "../../../assets/images/login-mobile.png";
 import bGuid from "../../../assets/images/b-guidence.png";
@@ -22,6 +24,30 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   // Focused when the CTA is tapped with an incomplete number, so the fix is
   // one keystroke away rather than a hunt back up the page.
   const phoneInputRef = useRef(null);
+
+  /*
+    Truecaller one-tap login. Only offered on Android browsers with a configured
+    partner key (Truecaller's mobile-web verification supports Android only), so
+    everywhere else this stays hidden and the OTP flow is the single path.
+  */
+  const {
+    isSupported: isTruecallerAvailable,
+    isBusy: truecallerBusy,
+    unsupportedReason: truecallerUnsupportedReason,
+    loginWithTruecaller,
+  } = useTruecallerLogin({
+    onLoggedIn: ({ isRegistered, deviceLimitReached }) => {
+      // Registered users go to their intended destination. New users continue
+      // into the onboarding wizard for profile setup — unless the device limit
+      // popup needs to show, which only renders on Home.
+      if (isRegistered || deviceLimitReached) {
+        navigate(resolvePostLoginRedirect(PATH.privateRoutes.HOME.path), { replace: true });
+      } else {
+        updateFormData({ isVerified: true });
+        onNext();
+      }
+    },
+  });
 
   // Show device kicked message if redirected from interceptor
   useState(() => {
@@ -247,6 +273,49 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
               </svg>
             )}
           </button>
+
+          {/* Truecaller one-tap — Android only, hidden elsewhere so the OTP
+              flow stays the single visible path on unsupported devices. */}
+          {isTruecallerAvailable && (
+            <>
+              <div className={styles.altLoginDivider}>
+                <span>or</span>
+              </div>
+              <button
+                type="button"
+                className={styles.truecallerBtn}
+                onClick={loginWithTruecaller}
+                disabled={truecallerBusy}
+                aria-busy={truecallerBusy}
+              >
+                <span className={styles.truecallerIcon} aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.24.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2z" />
+                  </svg>
+                </span>
+                {truecallerBusy ? "Verifying with Truecaller..." : "Continue with Truecaller"}
+              </button>
+            </>
+          )}
+
+          {/*
+            DEV only. The button has three independent gates (partner key, not
+            iOS, is Android) and failing any of them just removes it from the
+            DOM — which is impossible to diagnose on a phone, where there are no
+            devtools and a dev server started before the env was set looks
+            exactly like an unsupported device. Stripped from every production
+            build by the `import.meta.env.DEV` guard.
+          */}
+          {import.meta.env.DEV && !isTruecallerAvailable && (
+            <p className={styles.truecallerDevHint}>
+              Truecaller hidden — {truecallerUnsupportedReason}
+              {truecallerUnsupportedReason === "disabled"
+                ? " (set VITE_TRUECALLER_ENABLED to \"true\", then restart the dev server)"
+                : truecallerUnsupportedReason === "no_partner_key"
+                  ? " (set VITE_TRUECALLER_PARTNER_KEY, then restart the dev server)"
+                  : ` (UA: ${(navigator.userAgent || "").slice(0, 60)})`}
+            </p>
+          )}
 
           {/* Security note */}
           <p className={styles.securityNote}>
