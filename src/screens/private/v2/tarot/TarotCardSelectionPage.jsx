@@ -39,12 +39,21 @@ const TarotCardSelectionPage = () => {
   // No refetchOnMountOrArgChange: the endpoint returns the static deck, and the
   // actual draw is randomised client-side in pickRandomCard(). Forcing a refetch
   // burned one VedicAstro hit every time the user bounced back to this page.
-  const { data: shuffleData } = useGetTarotShuffleDataQuery({
+  const {
+    data: shuffleData,
+    isFetching: deckFetching,
+    isError: deckError,
+    refetch: refetchDeck,
+  } = useGetTarotShuffleDataQuery({
     shuffle_type: 'major',
     lang: 'en',
   })
 
   const allCards = shuffleData?.response || []
+  // The deck comes from a third-party API. If it never arrives the page still
+  // paints ten face-down cards under "Tap to pick", and every tap used to return
+  // silently — the whole screen was dead with no explanation and no way back in.
+  const deckUnavailable = !deckFetching && allCards.length === 0
 
   // Run shuffle animation on mount
   useEffect(() => {
@@ -82,18 +91,25 @@ const TarotCardSelectionPage = () => {
       recentPickedIds = [...recentPickedIds, picked.id].slice(-MAX_RECENT)
     }
 
-    console.log('--- TAROT PICK ---')
-    console.log('Excluded IDs:', excludeIds)
-    console.log('Pool size:', pool.length)
-    console.log('Picked:', picked?.id)
-    console.log('Recent IDs now:', [...recentPickedIds])
-
     return picked
   }
 
   const handleCardClick = (positionIndex) => {
-    if (isShuffling || !animationReady) return
-    if (allCards.length === 0) return
+    if (allCards.length === 0) {
+      // Nothing to draw from. Say so and offer the retry, rather than eating the
+      // tap on a card that looks ready to be picked.
+      if (deckFetching) {
+        toast.info('Shuffling the deck — one moment.')
+      } else {
+        toast.error('Could not load the deck. Reshuffling…')
+        refetchDeck()
+      }
+      return
+    }
+    if (isShuffling || !animationReady) {
+      toast.info('Still shuffling — the cards are almost ready.')
+      return
+    }
 
     if (isMultiCardReading) {
       // Check if this position is already selected
@@ -104,7 +120,12 @@ const TarotCardSelectionPage = () => {
         return
       }
 
-      if (selections.length >= maxCards) return
+      if (selections.length >= maxCards) {
+        toast.info(
+          `You've picked all ${maxCards} cards. Tap one of your chosen cards to swap it.`
+        )
+        return
+      }
 
       // Determine the next available slot (1-based)
       const usedSlots = selections.map((s) => s.slot)
@@ -127,7 +148,17 @@ const TarotCardSelectionPage = () => {
   }
 
   const handleShowReading = async () => {
-    if (selections.length !== maxCards) return
+    if (isLoading) {
+      toast.info('Opening your reading…')
+      return
+    }
+    if (selections.length !== maxCards) {
+      const remaining = maxCards - selections.length
+      toast.info(
+        `Pick ${remaining} more card${remaining === 1 ? '' : 's'} to see your reading.`
+      )
+      return
+    }
     setIsLoading(true)
     try {
       // Sort by slot to ensure correct order regardless of selection sequence
@@ -176,7 +207,16 @@ const TarotCardSelectionPage = () => {
     <div className={styles.selectionPage}>
       <div className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <button
+            type="button"
+            className={styles.backButton}
+            aria-label="Go back"
+            // `navigate(-1)` does nothing when this is the first entry in the
+            // history stack — an ad or shared link landing straight on a reading.
+            onClick={() =>
+              location.key !== 'default' ? navigate(-1) : navigate('/tarot')
+            }
+          >
             <ChevronLeft size={24} />
           </button>
         </div>
@@ -235,7 +275,20 @@ const TarotCardSelectionPage = () => {
           </div>
         )}
 
-        <p className={styles.tapText}>Tap to pick</p>
+        {deckUnavailable ? (
+          <div className={styles.deckError} role="alert">
+            <p>
+              {deckError
+                ? "The deck didn't load. Check your connection and reshuffle."
+                : 'The deck is empty right now. Try reshuffling.'}
+            </p>
+            <button type="button" className={styles.reshuffleButton} onClick={() => refetchDeck()}>
+              Reshuffle
+            </button>
+          </div>
+        ) : (
+          <p className={styles.tapText}>Tap to pick</p>
+        )}
 
         <div className={styles.cardsContainer} ref={containerRef}>
           {placeholders.map((posIndex) => {
@@ -274,11 +327,21 @@ const TarotCardSelectionPage = () => {
               : `translateX(${spread}px) translateY(${curveHeight + selectedLift}px) rotate(${angle}deg)`
 
             return (
-              <div
+              // A real button, not a div with onClick: these are the only
+              // controls on the screen, and in an in-app webview a div tap is
+              // the least reliable thing you can ship.
+              <button
+                type="button"
                 key={posIndex}
                 className={`${styles.card} ${isSelected ? styles.selectedCard : ''} ${isShuffling ? styles.shuffling : ''}`}
                 style={{ transform, zIndex: posIndex }}
                 onClick={() => handleCardClick(posIndex)}
+                aria-pressed={isMultiCardReading ? isSelected : undefined}
+                aria-label={
+                  isSelected
+                    ? `Card ${selections.find((s) => s.position === posIndex)?.slot} chosen, tap to unpick`
+                    : `Pick card ${posIndex + 1}`
+                }
               >
                 <div className={styles.cardBack}>
                   <img src="/images/black-back-card.jpg" alt="Tarot Card Back" />
@@ -288,15 +351,19 @@ const TarotCardSelectionPage = () => {
                     </div>
                   )}
                 </div>
-              </div>
+              </button>
             )
           })}
         </div>
 
         {isMultiCardReading && (
           <button
+            type="button"
             className={`${styles.showReadingButton} ${selections.length === maxCards ? '' : styles.disabled}`}
-            disabled={selections.length !== maxCards || isLoading}
+            // Dimmed until every card is picked, but never `disabled`: this is
+            // the one CTA on the screen, and a tap that does nothing reads as a
+            // broken reading. It says how many cards are still needed instead.
+            aria-disabled={selections.length !== maxCards || isLoading}
             onClick={handleShowReading}
           >
             {isLoading ? 'Loading...' : 'Show Reading'}

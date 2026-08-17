@@ -10,6 +10,7 @@ import { useGetChargesQuery, useGetAiHistoryQuery } from '../../../../redux/api/
 import { useGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
 import remedyMortarImg from '../../../../assets/images/remedy-mortar.png';
 import { trackEvent } from '../../../../utils/analytics';
+import { downloadFile, toastDownloadOutcome } from '../../../../utils/helper/downloadFile';
 
 const BusinessPathfinderResult = () => {
   const navigate = useNavigate();
@@ -17,6 +18,12 @@ const BusinessPathfinderResult = () => {
   const result = location.state?.result;
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  // `navigate(-1)` is inert on the first history entry, which is exactly what a
+  // refresh of this page produces — and a refresh also drops the report state,
+  // so the reader lands on the empty state with a back button that does nothing.
+  const goBack = () =>
+    location.key !== 'default' ? navigate(-1) : navigate('/ai-wow/business-pathfinder');
 
   const reportId = result?.historyId || result?._id || result?.id || null;
   const downloadedKey = reportId ? `bp_report_downloaded_${reportId}` : null;
@@ -89,6 +96,12 @@ const BusinessPathfinderResult = () => {
   };
 
   const handleConfirmDownload = async () => {
+    // This charges the wallet, so re-entry has to be blocked here rather than
+    // relying on a `disabled` attribute somewhere up the tree.
+    if (isDownloading) {
+      Toast.info('Preparing your PDF…');
+      return;
+    }
     if (!result?._id) {
       Toast.error('Something went wrong. Please try again.');
       return;
@@ -102,17 +115,17 @@ const BusinessPathfinderResult = () => {
       });
       const data = await res.json();
       if (data.success && data.data?.pdfUrl) {
-        const pdfRes = await fetch(data.data.pdfUrl);
-        const blob = await pdfRes.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = 'Business-Pathfinder-Report.pdf';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(blobUrl);
-        Toast.success('PDF downloaded!');
+        // In-app webviews (Instagram, Facebook) silently ignore a synthetic
+        // <a download> click. The wallet has already been charged by the call
+        // above, so an unconditional "PDF downloaded!" was claiming a file the
+        // user never received.
+        const outcome = await downloadFile(data.data.pdfUrl, 'Business-Pathfinder-Report.pdf');
+        if (outcome === 'failed') {
+          Toast.error("Your report is ready but the download didn't start. Tap Download again — you won't be charged twice.");
+        } else {
+          toastDownloadOutcome(outcome, 'PDF');
+        }
+        // Recorded either way: the report exists now, so the retry is free.
         setDownloadedThisSession(true);
         if (downloadedKey) localStorage.setItem(downloadedKey, 'true');
         refreshWallet();
@@ -135,7 +148,7 @@ const BusinessPathfinderResult = () => {
     return (
       <>
         <div className={styles.pageHeader}>
-          <button className={styles.backBtn} onClick={() => navigate(-1)}>
+          <button type="button" className={styles.backBtn} onClick={goBack} aria-label="Go back">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -182,7 +195,7 @@ const BusinessPathfinderResult = () => {
   return (
     <>
       <div className={styles.pageHeader}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>
+        <button type="button" className={styles.backBtn} onClick={goBack} aria-label="Go back">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>

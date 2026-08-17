@@ -1,7 +1,7 @@
 import styles from "./MatchMakingV2.module.scss";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { ChevronDown, Heart } from "lucide-react";
+import { AlertCircle, ChevronDown, Heart } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   useGetAllKundlisQuery,
@@ -429,6 +429,15 @@ const MatchMaking = () => {
     !!partnerProfile &&
     primaryProfile.gender?.toLowerCase() === partnerProfile.gender?.toLowerCase();
 
+  // "male" / "female" for the message. Falls back to a neutral phrase if the
+  // profile carries something unexpected.
+  const selectedGenderLabel = (() => {
+    const gender = primaryProfile?.gender?.toLowerCase();
+    if (gender === "male") return "male";
+    if (gender === "female") return "female";
+    return "the same gender";
+  })();
+
   /* -------------------- PROCEED -------------------- */
   const handleProceed = async (e) => {
     e?.preventDefault();
@@ -688,6 +697,14 @@ const MatchMaking = () => {
 
           <div className={styles.matchMakingInputs}>
             {/*
+              The two slots and the CTA sit on one row; the blocked message used
+              to be a flex item on that same row, so it was squeezed into
+              whatever width was left between the Partner field and the button
+              and broke mid-sentence. It now lives on its own full-width line
+              below the row (see .matchMakingRow).
+            */}
+            <div className={styles.matchMakingRow}>
+            {/*
               Both slots: the <label> used to be inert — no htmlFor, no handler —
               while the control below it was a <div onClick>. The label sits
               directly above the field and reads like the thing to press, so a
@@ -744,19 +761,6 @@ const MatchMaking = () => {
             </div>
 
             {/*
-              Persistent, inline reason. handleSelectProfile commits a
-              same-gender pick and only toasts about it — once that toast fades
-              the screen shows two filled slots and a dimmed button with no
-              explanation anywhere, so the user has nothing to act on.
-            */}
-            {sameGenderSelected && (
-              <p className={styles.matchBlockedHint} role="alert">
-                Matchmaking compares one male and one female chart. Change one of
-                the profiles above to continue.
-              </p>
-            )}
-
-            {/*
               Never `disabled`: a disabled button dispatches no click event, so
               every retry after the toast faded produced nothing at all. It stays
               live and handleProceed names the blocker.
@@ -775,6 +779,24 @@ const MatchMaking = () => {
             >
               {isMatchLoading ? "Loading..." : "Proceed Ahead"}
             </button>
+            </div>
+
+            {/*
+              Persistent, inline reason. handleSelectProfile commits a
+              same-gender pick and only toasts about it — once that toast fades
+              the screen shows two filled slots and a dimmed button with no
+              explanation anywhere, so the user has nothing to act on. Naming the
+              gender that was picked twice makes it obvious which slot to change.
+            */}
+            {sameGenderSelected && (
+              <p className={styles.matchBlockedHint} role="alert">
+                <AlertCircle className={styles.matchBlockedHintIcon} aria-hidden="true" />
+                <span>
+                  Both profiles are {selectedGenderLabel}. Matchmaking compares one
+                  male and one female chart — change either profile above to continue.
+                </span>
+              </p>
+            )}
           </div>
 
           <img className={styles.bottomImg} src={matchMakingImgBottom} alt="img" />

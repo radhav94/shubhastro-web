@@ -13,6 +13,7 @@ import { useGetSubscriptionStatusQuery } from "../../../../redux/api/subscriptio
 import { useWalletBalance } from "../../wallet/useWalletBalance";
 import { FiDownload } from "react-icons/fi";
 import DownloadReportModal from "../../aiwow/components/DownloadReportModal";
+import { downloadFile, toastDownloadOutcome } from "../../../../utils/helper/downloadFile";
 import ChartSection from "../components/ChartSection";
 import HousesGrid from "../components/HousesGrid";
 import PlanetDetailsAccordion from "../components/PlanetDetailsAccordion";
@@ -82,7 +83,6 @@ const LalKitabDetail = () => {
   const chartDebts = chartData?.data?.debts?.selfDebts ? chartData.data.debts : null;
   const tevaDebts = tevaData?.debts?.selfDebts ? tevaData.debts : null;
   const debts = apiDebts || chartDebts || tevaDebts || null;
-  console.log("[LalKitab Debts Debug]", { rawDebts, chartDataDebts: chartData?.data?.debts, tevaDataDebts: tevaData?.debts, resolvedDebts: debts });
   const chart = chartData?.data || (tevaData?.svgChart ? { chartUrl: tevaData.svgChart } : null);
 
   const summary = tevaData?.birthDetails || tevaData || chartData?.data?.summary || {};
@@ -145,23 +145,32 @@ const LalKitabDetail = () => {
   };
 
   const handleConfirmDownload = async () => {
+    // The `disabled` attribute is gone from the button, so this guard is now the
+    // thing preventing a second charge on a double tap.
+    if (isDownloading) {
+      toast.loading("Downloading PDF...", { id: "lalkitab-pdf" });
+      return;
+    }
     setIsDownloading(true);
     try {
       toast.loading("Downloading PDF...", { id: "lalkitab-pdf" });
       const result = await triggerGetPdf({ historyId: lalKitabId }).unwrap();
       const pdfUrl = result?.data?.pdfUrl;
       if (!pdfUrl) throw new Error("PDF URL not found");
-      const res = await fetch(pdfUrl);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = "lal-kitab-report.pdf";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(blobUrl);
-      toast.success("PDF downloaded!", { id: "lalkitab-pdf" });
+
+      // Instagram / Facebook webviews silently drop a synthetic <a download>
+      // click. The wallet is charged by the call above, so claiming success
+      // unconditionally meant paying for a PDF that never arrived.
+      const outcome = await downloadFile(pdfUrl, "lal-kitab-report.pdf");
+      toast.dismiss("lalkitab-pdf");
+
+      if (outcome === "failed") {
+        toast.error("Your report is ready but the download didn't start. Tap Download again — you won't be charged twice.");
+      } else {
+        toastDownloadOutcome(outcome, "PDF");
+      }
+
+      // Recorded either way: the report exists now, so the retry is free.
       setShowDownloadModal(false);
       setIsFreeReport(true);
       refreshWallet();
@@ -176,13 +185,26 @@ const LalKitabDetail = () => {
     <div className={styles.container}>
 
       <div className={styles.headerRow}>
-        <button className={styles.backButton} onClick={() => navigate(-1)}>
+        <button
+          type="button"
+          className={styles.backButton}
+          aria-label="Go back"
+          // `navigate(-1)` is inert on the first history entry — a shared or
+          // ad link that lands straight on a report.
+          onClick={() => (location.key !== "default" ? navigate(-1) : navigate("/laal-kitab"))}
+        >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
         <h1 className={styles.pageTitle}>Laal Kitab Teva</h1>
-        <button className={styles.downloadBtn} onClick={handleDownloadClick} disabled={isDownloading}>
+        <button
+          type="button"
+          className={styles.downloadBtn}
+          onClick={handleDownloadClick}
+          aria-disabled={isDownloading}
+          aria-busy={isDownloading}
+        >
           <div className={styles.downloadContent}>
             <FiDownload size={22} />
             <div className={styles.downloadText}>
@@ -194,12 +216,22 @@ const LalKitabDetail = () => {
 
       <SummaryHeader summary={summary} />
 
-      <div className={styles.tabWrapper}>
+      {/* The strip scrolls horizontally and the labels don't wrap, so on a phone
+          "Debts" and "Chart" sit partly off the right edge. Bring the chosen tab
+          fully into view — a half-visible tab that jumps back under the finger
+          is why these read as dead taps. */}
+      <div className={styles.tabWrapper} role="tablist" aria-label="Laal Kitab sections">
         {TABS.map((tab) => (
           <button
             key={tab.key}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.key}
             className={`${styles.tab} ${activeTab === tab.key ? styles.active : ""}`}
-            onClick={() => handleTabChange(tab.key)}
+            onClick={(e) => {
+              handleTabChange(tab.key);
+              e.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+            }}
           >
             {tab.label}
           </button>

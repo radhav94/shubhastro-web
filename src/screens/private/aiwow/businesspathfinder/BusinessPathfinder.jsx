@@ -72,6 +72,16 @@ const BusinessPathfinder = () => {
     businessTzone: '',
   });
   const [showCustomInput, setShowCustomInput] = useState(false);
+
+  // The submit button sits below six steps, so a toast naming a missing answer
+  // ("Please select a business scale") doesn't tell the reader where that answer
+  // lives — the step is usually several screens above the finger. Scroll to it.
+  const stepRefs = useRef({});
+  const focusStep = (key) => {
+    const node = stepRefs.current[key];
+    if (!node) return;
+    node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Synchronous re-entry guard — `isSubmitting` state updates asynchronously,
   // so a rapid double tap (or the guest re-invoke path) can fire the analyze
@@ -111,31 +121,40 @@ const BusinessPathfinder = () => {
     
     if (!category) {
       Toast.error('Please select or enter a business category');
+      focusStep('category');
       return;
     }
     if (!formData.scale) {
       Toast.error('Please select a business scale');
+      focusStep('scale');
       return;
     }
     if (!formData.partnership) {
       Toast.error('Please select partnership type');
+      focusStep('partnership');
       return;
     }
     if (!formData.timeline) {
       Toast.error('Please select a timeline');
+      focusStep('timeline');
       return;
     }
     if (!formData.businessLocation) {
       Toast.error('Please select a business location');
+      focusStep('location');
       return;
     }
     if (!activeProfile) {
       Toast.error('Please select a profile first');
+      setShowProfileSelector(true);
       return;
     }
 
     // Block a second concurrent submit (double tap / re-invoke).
-    if (isSubmittingRef.current) return;
+    if (isSubmittingRef.current) {
+      Toast.info('Generating your report — this takes a few seconds.');
+      return;
+    }
     isSubmittingRef.current = true;
 
     setIsSubmitting(true);
@@ -220,10 +239,13 @@ const BusinessPathfinder = () => {
         </button>
 
         {/* Profile Selector - centered in header */}
-        <div className={styles.headerProfile} onClick={() => setShowProfileSelector(true)}>
+        {/* A real button: this is the only way to change whose chart the report
+            is built from, and a div with onClick has no keyboard access and is
+            the least reliable tap target in an in-app webview. */}
+        <button type="button" className={styles.headerProfile} onClick={() => setShowProfileSelector(true)}>
           <span className={styles.profileLabel}>Select Profile</span>
           <span className={styles.profileName}>{profile?.name || 'Select Profile'} <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></span>
-        </div>
+        </button>
         </div>
       </div>
 
@@ -244,7 +266,7 @@ const BusinessPathfinder = () => {
       <div className={styles.formSection}>
 
         {/* 1. Business Category */}
-        <div className={styles.stepSection}>
+        <div className={styles.stepSection} ref={(el) => { stepRefs.current.category = el; }}>
           <div className={styles.stepNumber}>1</div>
           <div className={styles.stepContent}>
             <h3 className={styles.stepTitle}>Business Category</h3>
@@ -286,7 +308,7 @@ const BusinessPathfinder = () => {
         </div>
 
         {/* 2. Business Scale */}
-        <div className={styles.stepSection}>
+        <div className={styles.stepSection} ref={(el) => { stepRefs.current.scale = el; }}>
           <div className={styles.stepNumber}>2</div>
           <div className={styles.stepContent}>
             <h3 className={styles.stepTitle}>Business Scale</h3>
@@ -310,7 +332,7 @@ const BusinessPathfinder = () => {
         </div>
 
         {/* 3. Partnership */}
-        <div className={styles.stepSection}>
+        <div className={styles.stepSection} ref={(el) => { stepRefs.current.partnership = el; }}>
           <div className={styles.stepNumber}>3</div>
           <div className={styles.stepContent}>
             <h3 className={styles.stepTitle}>Partnership</h3>
@@ -334,7 +356,7 @@ const BusinessPathfinder = () => {
         </div>
 
         {/* 4. Timeline */}
-        <div className={styles.stepSection}>
+        <div className={styles.stepSection} ref={(el) => { stepRefs.current.timeline = el; }}>
           <div className={styles.stepNumber}>4</div>
           <div className={styles.stepContent}>
             <h3 className={styles.stepTitle}>Timeline</h3>
@@ -374,11 +396,11 @@ const BusinessPathfinder = () => {
         </div>
 
         {/* 6. Business Location */}
-        <div className={styles.stepSection}>
+        <div className={styles.stepSection} ref={(el) => { stepRefs.current.location = el; }}>
           <div className={styles.stepNumber}>6</div>
           <div className={styles.stepContent}>
             <h3 className={styles.stepTitle}>Business Location</h3>
-            <p className={styles.stepSubtitle}>Where are you planning to set up your business?</p>
+            <p className={styles.stepSubtitle}>Where are you planning to set up your business? (Optional)</p>
             <LocationSearch
               value={formData.businessLocation}
               placeholder="Enter your location"
@@ -407,9 +429,13 @@ const BusinessPathfinder = () => {
         {/* Submit Button */}
         <div className={styles.submitWrap}>
           <button
+            type="button"
             className={styles.submitBtn}
             onClick={() => handleSubmit()}
-            disabled={isSubmitting && !showSubscriptionModal}
+            // Never `disabled`: handleSubmit answers every blocked state,
+            // including a second tap while generation is already running.
+            aria-disabled={isSubmitting && !showSubscriptionModal}
+            aria-busy={isSubmitting && !showSubscriptionModal}
           >
             {isSubmitting && !showSubscriptionModal ? 'Generating...' : 'Generate my report'}
           </button>

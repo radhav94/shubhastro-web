@@ -26,10 +26,12 @@
     flex-direction: column;
   }
 }
+// The panel. It stacks two things: the row of controls, and any blocked message
+// underneath it. The controls' own flex row lives in .matchMakingRow so a
+// message can never be squeezed in between them.
 .matchMakingInputs{
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
   padding: 16px;
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(12px);
@@ -37,11 +39,19 @@
   border-radius: 12px;
   // box-shadow: 0 2px 5px rgba(0, 0, 0, 0.10);
   @media (width <= 767px) {
-    flex-direction: column;
     background: transparent;
     box-shadow: none;
     padding: 0px;
     border: none;
+  }
+}
+
+.matchMakingRow{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  @media (width <= 767px) {
+    flex-direction: column;
   }
 }
 // The label is a real click target now (it opens the profile picker, same as the
@@ -131,11 +141,39 @@
   }
 }
 
+/*
+  Full width, on its own line under the controls, and shaped like a message
+  rather than stray orange text. It used to be a flex item on the control row,
+  which gave it whatever width was left over — roughly 200px between the Partner
+  field and the CTA — so a two-line sentence broke mid-phrase and read as part of
+  the form rather than as the reason the button won't proceed.
+*/
 .matchBlockedHint{
-  margin: 12px 0 0;
-  font-size: 13px;
-  line-height: 1.4;
-  color: #D43400;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: left;
+  color: #B93000;
+  background: rgba(247, 88, 1, 0.09);
+  border: 1px solid rgba(247, 88, 1, 0.28);
+  border-radius: 10px;
+
+  @media (width <= 767px) {
+    margin: 12px 0;
+    font-size: 13px;
+  }
+}
+
+.matchBlockedHintIcon{
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
 }
 
 .bottomImg{
