@@ -24,10 +24,15 @@ const TarotCard = ({
   const [selectedIndexes, setSelectedIndexes] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(null);
 
-  const { data, isLoading } = useGetTarotShuffleDataQuery(
-    { shuffle_type: shuffleType, lang: "en", key: shuffleKey },
-    { refetchOnMountOrArgChange: true }
-  );
+  // The endpoint returns the static deck; the draw itself is randomised
+  // client-side in pickRandomCard(). `shuffleKey` still busts the cache when the
+  // parent genuinely wants a fresh deck, so a blanket refetchOnMountOrArgChange
+  // only wasted VedicAstro quota on every remount.
+  const { data, isLoading } = useGetTarotShuffleDataQuery({
+    shuffle_type: shuffleType,
+    lang: "en",
+    key: shuffleKey,
+  });
 
   const allCards = data?.response || [];
 

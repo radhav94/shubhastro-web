@@ -36,10 +36,13 @@ const TarotCardSelectionPage = () => {
   const selectedCards = selections.map((s) => s.card)
   const selectedPositions = selections.map((s) => s.position)
 
-  const { data: shuffleData } = useGetTarotShuffleDataQuery(
-    { shuffle_type: 'major', lang: 'en' },
-    { refetchOnMountOrArgChange: true }
-  )
+  // No refetchOnMountOrArgChange: the endpoint returns the static deck, and the
+  // actual draw is randomised client-side in pickRandomCard(). Forcing a refetch
+  // burned one VedicAstro hit every time the user bounced back to this page.
+  const { data: shuffleData } = useGetTarotShuffleDataQuery({
+    shuffle_type: 'major',
+    lang: 'en',
+  })
 
   const allCards = shuffleData?.response || []
 

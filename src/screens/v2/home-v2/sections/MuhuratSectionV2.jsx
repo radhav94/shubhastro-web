@@ -28,6 +28,10 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
   const navigate = useNavigate();
   const userLocation = useUserLocation();
 
+  // This section only renders date-based muhurats (Abhijit, Rahu Kaal, Gulika,
+  // Yamakanta), so the payload is pinned to midday. Using the live clock here
+  // made the cache key change every minute, which meant a fresh VedicAstro hit
+  // for practically every homepage view. Keep this day-stable.
   const panchangPayload = useMemo(() => {
     const now = new Date();
     const pad = (n) => String(n).padStart(2, "0");
@@ -35,8 +39,8 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
       day: pad(now.getDate()),
       month: pad(now.getMonth() + 1),
       year: now.getFullYear(),
-      hour: pad(now.getHours()),
-      min: pad(now.getMinutes()),
+      hour: "12",
+      min: "00",
       lat: userLocation.lat,
       lon: userLocation.lon,
       tzone: 5.5,

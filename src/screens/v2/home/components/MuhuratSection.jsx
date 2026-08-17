@@ -22,8 +22,10 @@ const MuhuratSection = () => {
       day: pad(now.getDate()),
       month: pad(now.getMonth() + 1),
       year: now.getFullYear(),
-      hour: pad(now.getHours()),
-      min: pad(now.getMinutes()),
+      // Muhurats are date-based; pin the time so the cache key is stable for the
+      // whole day instead of changing every minute (VedicAstro quota).
+      hour: "12",
+      min: "00",
       lat: userLocation.lat,
       lon: userLocation.lon,
       tzone: 5.5,
