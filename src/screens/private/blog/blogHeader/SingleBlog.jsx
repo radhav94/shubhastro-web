@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import SeoHelmet from "../../../../component/SeoHelmet";
@@ -12,6 +12,7 @@ import TTSButton from "../../../../component/UI/TTSButton";
 import { PATH } from "../../../../utils/routes/Paths";
 import { DefaultImages } from "../../../../utils/appImages";
 import defaultBlogImg from "../../../../assets/images/default_image_16x9_1920x1080.png";
+import { linkifyHtml } from "../../../../utils/helper/linkPreview";
 
 const SingleBlogDetails = () => {
   const { slug } = useParams();
@@ -20,6 +21,17 @@ const SingleBlogDetails = () => {
   const singleBLogData = data?.data;
   const [copied, setCopied] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+
+  /*
+    Article bodies are authored in the CMS and injected as-is. They regularly end
+    with a plain-text URL ("Visit https://www.shubhastro.ai/") which reads as a
+    link and isn't one, so readers click it and nothing happens. Wrap bare URLs
+    in real anchors before injecting; existing <a> tags are left untouched.
+  */
+  const blogBodyHtml = useMemo(
+    () => linkifyHtml(singleBLogData?.body || ""),
+    [singleBLogData?.body]
+  );
 
   // Fetch related blogs (matches by tags)
   const { data: relatedData } = useGetRelatedBlogsQuery(
@@ -176,7 +188,7 @@ const SingleBlogDetails = () => {
           {/* Blog Content */}
           <div
             className={styles.blogContent}
-            dangerouslySetInnerHTML={{ __html: singleBLogData.body }}
+            dangerouslySetInnerHTML={{ __html: blogBodyHtml }}
           ></div>
         </article>
 

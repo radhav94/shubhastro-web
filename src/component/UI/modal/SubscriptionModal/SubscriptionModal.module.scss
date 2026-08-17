@@ -267,6 +267,12 @@
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
   transition: opacity 0.15s, background 0.15s;
+
+  // Dimmed while any purchase is in flight, but still live — it answers with the
+  // reason instead of swallowing the tap, and it can't start a second debit.
+  &[aria-disabled="true"] {
+    opacity: 0.6;
+  }
 }
 
 .planCtaOutline {

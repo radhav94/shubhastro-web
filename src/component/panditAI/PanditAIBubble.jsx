@@ -601,13 +601,39 @@ const PanditAIBubble = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {followupQuestions.length > 0 && (
+          {/*
+            Gated on the same conditions as the input bar below. The chips used
+            to render regardless, so in guest mode (where the input is replaced
+            by the birth-details form) and after a low-balance session end (where
+            the input is removed) the chat still offered suggested questions that
+            could not actually be sent.
+
+            The in-flight guard matters because `sendText` opens with
+            `setFollowupQuestions([])` — the chip you just tapped disappears
+            immediately, the row unmounts and the layout closes up. Tapping the
+            same spot again a moment later lands on whatever moved into it, which
+            is exactly the "clicked a suggestion, then a dead click" pattern in
+            the session recordings.
+          */}
+          {!guestMode && !sessionEndedLowBalance && followupQuestions.length > 0 && (
             <div className={styles.followupSection}>
               {followupQuestions.map((q, idx) => (
                 <button
                   key={idx}
+                  type="button"
                   className={styles.followupBtn}
-                  onClick={() => sendText(q)}
+                  aria-disabled={sending || chatDisabled}
+                  onClick={() => {
+                    if (chatDisabled) {
+                      Toast.error("Still reconnecting. Please try again in a moment.");
+                      return;
+                    }
+                    if (sending) {
+                      Toast.info("Pandit AI is still replying — one moment.");
+                      return;
+                    }
+                    sendText(q);
+                  }}
                 >
                   {q}
                 </button>
