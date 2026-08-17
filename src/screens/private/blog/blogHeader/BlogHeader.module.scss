@@ -406,3 +406,11 @@ $font-primary: "Poppins", sans-serif;
     font-size: 14px;
   }
 }
+
+// The previous page stays on screen while the next one loads, dimmed and inert,
+// so the grid and the pagination below it never disappear mid-tap.
+.loadingPage {
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}

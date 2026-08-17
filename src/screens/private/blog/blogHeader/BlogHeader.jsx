@@ -1,7 +1,9 @@
+import { useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import styles from "./BlogHeader.module.scss";
 import { BlogCard } from "../../../../component";
 import Pagination from "../../../../component/pagination/Pagination";
+import toast from "../../../../component/toast";
 import { useGetBlogQuery, useGetBlogCategoriesQuery } from "../../../../services/appServices/blogService";
 import { PATH } from "../../../../utils/routes/Paths";
 
@@ -25,12 +27,23 @@ const BlogHeader = () => {
   const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
 
   const { data: categoriesData } = useGetBlogCategoriesQuery();
-  const { data, isLoading } = useGetBlogQuery({ page, limit: 12, category: activeCategory });
+  const { data, isLoading, isFetching } = useGetBlogQuery({ page, limit: 12, category: activeCategory });
+
+  // Every page or category change is a fresh cache entry, so RTK Query hands
+  // back `data: undefined` while it loads. Rendering that state meant the whole
+  // grid *and the pagination itself* were replaced by one line of "Loading
+  // blogs..." — the control the reader had just tapped vanished from under their
+  // finger, and the second tap landed on empty layout. Keep the outgoing page on
+  // screen, dimmed, until the next one arrives.
+  const lastLoadedRef = useRef(null);
+  if (data) lastLoadedRef.current = data;
+  const shown = data || lastLoadedRef.current;
 
   const categories = categoriesData?.data || [];
   const hasCategories = categories.length > 0;
-  const blogs = data?.data || [];
-  const pagination = data?.pagination;
+  const blogs = shown?.data || [];
+  const pagination = shown?.pagination;
+  const isStale = isFetching && !data;
 
   // Results count: "Showing X to Y of Z results"
   const total = pagination?.totalDocs ?? blogs.length;
@@ -41,22 +54,39 @@ const BlogHeader = () => {
 
   // Defaults are represented by the absence of a param rather than
   // `?category=&page=1`, so the canonical "everything" view stays a clean /blog.
+  //
+  // A tap that resolves to the URL we are already on is not navigation: it would
+  // push a duplicate history entry (so Back appears to do nothing) and change
+  // nothing on screen. Acknowledge it instead, and take the reader to the top of
+  // the list they asked to see.
+  const applyParams = (next, alreadyHereMessage) => {
+    if (next.toString() === searchParams.toString()) {
+      toast.info(alreadyHereMessage);
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+      return;
+    }
+    setSearchParams(next);
+  };
+
   const handleCategoryChange = (slug) => {
     const next = new URLSearchParams(searchParams);
     if (slug) next.set("category", slug);
     else next.delete("category");
     next.delete("page"); // a different filter starts from the first page
-    setSearchParams(next);
+    const label = slug
+      ? categories.find((cat) => cat.slug === slug)?.name || "this category"
+      : "all blogs";
+    applyParams(next, `Already showing ${label}.`);
   };
 
   const handlePageChange = (newPage) => {
     const next = new URLSearchParams(searchParams);
     if (newPage > 1) next.set("page", String(newPage));
     else next.delete("page");
-    setSearchParams(next);
-    // Scrolling is deliberately not done here: this is a route change, so
-    // ScrollToTop already takes the page to the top. Doing it here too meant two
-    // scroll mechanisms competing for the same frame.
+    applyParams(next, `You're already on page ${newPage}.`);
+    // Scrolling on a real page change is deliberately not done here: that is a
+    // route change, so ScrollToTop already takes the page to the top. Doing it
+    // here too meant two scroll mechanisms competing for the same frame.
   };
 
   return (
@@ -106,11 +136,14 @@ const BlogHeader = () => {
             <h2 className={styles.headerTitle}>ALL BLOGS</h2>
           </div>
 
-          {isLoading ? (
+          {isLoading && !shown ? (
             <p className={styles.emptyState}>Loading blogs...</p>
           ) : blogs.length > 0 ? (
             <>
-              <div className={styles.blogsContainer}>
+              <div
+                className={`${styles.blogsContainer} ${isStale ? styles.loadingPage : ""}`}
+                aria-busy={isStale}
+              >
                 {blogs.map((blog, index) => (
                   <Link
                     key={blog._id}

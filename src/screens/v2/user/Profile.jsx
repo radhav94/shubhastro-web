@@ -459,14 +459,25 @@ const Profile = () => {
     });
 
 
-  // Get pagination info
+  // Get pagination info.
+  //
+  // `hasPreviousPage` is not a field these endpoints return — everywhere else in
+  // the app the flag is read as `hasPrevPage` — so the Previous arrow used to be
+  // permanently inert here. Accept either name and fall back to the page number,
+  // which is the thing that actually decides whether a previous page exists.
   const callPagination = callHistoryData?.data?.pagination;
   const hasNextCallPage = callPagination?.hasNextPage || false;
-  const hasPrevCallPage = callPagination?.hasPreviousPage || false;
+  const hasPrevCallPage =
+    callPagination?.hasPrevPage ||
+    callPagination?.hasPreviousPage ||
+    callHistoryPage > 1;
 
   const chatPagination = chatHistoryData?.data?.pagination;
   const hasNextChatPage = chatPagination?.hasNextPage || false;
-  const hasPrevChatPage = chatPagination?.hasPreviousPage || false;
+  const hasPrevChatPage =
+    chatPagination?.hasPrevPage ||
+    chatPagination?.hasPreviousPage ||
+    chatHistoryPage > 1;
 
 
 
