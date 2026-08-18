@@ -18,8 +18,9 @@ const EXCLUDED_PATHS = [
   "/community",
   "/live",
   "/astrologers",
-  // Individual astrologer profiles: /astrologer/<slug>/<id>. The slug and id are
-  // per-astrologer, so no CMS static page can ever exist for them — this lookup
+  // Individual astrologer profiles: /astrologer/<userName>, or the fallback
+  // /astrologer/<slug>/<id>. Both are per-astrologer, so no CMS static page can
+  // ever exist for them — this lookup
   // returned a guaranteed 404 on every profile view (confirmed in a network
   // trace). "/astrologers" above does not cover this: the prefix check appends
   // a slash, so it never matches the singular "/astrologer/".
