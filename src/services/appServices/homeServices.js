@@ -5,6 +5,60 @@ import { isEncryptedEnvelope } from "../../utils/security/cryptoClient";
 export const DEFAULT_HOME_SLUG = "newcustomerlandingpage";
 
 /*
+ * How many CMS sections the landing page asks for per request.
+ *
+ * The full `newcustomerlandingpage` payload is ~87 KB and HomeV2 renders nothing
+ * until it lands, so every section — including the ones far below the fold —
+ * sits on the critical path. Requesting the first slice only shortens that wait;
+ * HomeV2 then pulls the rest once the browser is idle and appends them.
+ *
+ * Must stay in step with the inline prefetch in index.html, which sends the same
+ * pageNo/limit pair: `consumeHomepagePrefetch` refuses a handle whose limit does
+ * not match, so a drift here costs one wasted request rather than a wrong page.
+ *
+ * Sized to cover the whole hero family (complementary-services,
+ * ai-powered-astrology, muharat-widget, ai-services) in page 1 — those four are
+ * the top of the CMS order and hold the <h1> and the LCP candidate, so they must
+ * not arrive in a later page.
+ */
+export const HOME_SECTIONS_PAGE_SIZE = 5;
+
+/*
+ * Upper bound on the number of pages HomeV2 will walk. Only a stop-loss: a
+ * backend that ignores pageNo would otherwise be polled until it ran out of
+ * sections, which it never would.
+ */
+export const HOME_SECTIONS_MAX_PAGES = 12;
+
+/*
+ * Argument that opts a caller into the paginated first page.
+ *
+ * Pagination is opt-in rather than implied by the slug because other screens
+ * read the same slug expecting the complete list — /home-new picks sections out
+ * of it by slug ("blog", "discover-more", "popular-astrologers"), several of
+ * which fall outside page 1, and it has no follow-up fetch to recover them.
+ * Only HomeV2 knows how to page, so only HomeV2 asks for a page.
+ *
+ * A module-level constant so the reference is stable across renders.
+ */
+export const HOME_FIRST_PAGE_ARG = Object.freeze({
+  slug: DEFAULT_HOME_SLUG,
+  paginated: true,
+});
+
+/*
+ * Accepts either a bare slug string (every existing caller) or
+ * `{ slug, paginated }`. Both collapse to the same cache key — see the
+ * serializeQueryArgs note on the endpoint.
+ */
+const normalizeHomeArgs = (arg) => {
+  if (arg && typeof arg === "object") {
+    return { slug: arg.slug || DEFAULT_HOME_SLUG, paginated: arg.paginated === true };
+  }
+  return { slug: arg || DEFAULT_HOME_SLUG, paginated: false };
+};
+
+/*
  * Hands back the in-flight `/api/homepage` request started by the inline script
  * in index.html, or null when there isn't one.
  *
@@ -21,11 +75,16 @@ export const DEFAULT_HOME_SLUG = "newcustomerlandingpage";
  * later refetch — after a login, or an invalidation — always goes to the
  * network rather than replaying a stale payload.
  */
-const consumeHomepagePrefetch = (slug) => {
+const consumeHomepagePrefetch = (slug, limit) => {
   if (typeof window === "undefined") return null;
 
   const handle = window.__homepagePrefetch__;
   if (!handle || handle.slug !== slug) return null;
+  // The inline script requests page 1 at a fixed limit. If that limit ever
+  // diverges from HOME_SECTIONS_PAGE_SIZE (a stale cached index.html, or an edit
+  // to one file and not the other) the payload is not the page this endpoint is
+  // asking for, so leave it and request properly.
+  if (handle.limit !== limit) return null;
 
   delete window.__homepagePrefetch__;
   return handle.promise;
@@ -55,10 +114,11 @@ export const homeApi = privateRequestNew.injectEndpoints({
       // started can be adopted. Anything the prefetch didn't cover — a
       // different slug, a logged-in visitor, a rejected fetch — falls straight
       // through to the normal baseQuery, so behaviour is unchanged there.
-      async queryFn(slug, _api, _extraOptions, baseQuery) {
-        const resolvedSlug = slug || DEFAULT_HOME_SLUG;
+      async queryFn(arg, _api, _extraOptions, baseQuery) {
+        const { slug: resolvedSlug, paginated } = normalizeHomeArgs(arg);
+        const limit = paginated ? HOME_SECTIONS_PAGE_SIZE : undefined;
 
-        const prefetched = consumeHomepagePrefetch(resolvedSlug);
+        const prefetched = limit ? consumeHomepagePrefetch(resolvedSlug, limit) : null;
         if (prefetched) {
           try {
             const body = await prefetched;
@@ -80,7 +140,9 @@ export const homeApi = privateRequestNew.injectEndpoints({
         return baseQuery({
           url: "homepage",
           method: "GET",
-          params: { slug: resolvedSlug },
+          params: limit
+            ? { slug: resolvedSlug, pageNo: 1, limit }
+            : { slug: resolvedSlug },
         });
       },
       /*
@@ -93,11 +155,48 @@ export const homeApi = privateRequestNew.injectEndpoints({
        * start loading until the second copy finished. Normalising the key here
        * merges those two callers while keeping genuinely different slugs
        * (e.g. "complimentary-service") on their own cache entries.
+       *
+       * `paginated` is deliberately left out of the key for the same reason, so
+       * HomeV2's paginated request and HomeIntroPopup's plain one stay a single
+       * request. The first subscriber's argument is the one that runs, and on "/"
+       * that is HomeV2 (the popup mounts as its child). If that order ever
+       * inverted the page would fetch the full list — slower, but correct.
        */
       serializeQueryArgs: ({ queryArgs, endpointName }) =>
-        `${endpointName}(${queryArgs || DEFAULT_HOME_SLUG})`,
+        `${endpointName}(${normalizeHomeArgs(queryArgs).slug})`,
+    }),
+    /*
+     * Pages 2..n of the landing page's section list.
+     *
+     * Kept as its own endpoint rather than folding pageNo into
+     * getNewHomeDetails, because that endpoint deliberately normalises its cache
+     * key down to the slug alone (see the note above) so HomeV2 and
+     * HomeIntroPopup share one request. Adding a page to that key would either
+     * split them apart again or require merge/forceRefetch, and forceRefetch on
+     * a shared key refetches page 1 whenever a second subscriber mounts —
+     * throwing away everything already accumulated.
+     *
+     * A separate endpoint gives each page its own cache entry, leaves page 1 and
+     * its prefetch adoption untouched, and keeps `isLoading` on the blocking
+     * query tied to page 1 only, so later pages can never re-gate the render.
+     */
+    getNewHomeSections: builder.query({
+      query: ({ slug, pageNo, limit } = {}) => ({
+        url: "homepage",
+        method: "GET",
+        params: {
+          slug: slug || DEFAULT_HOME_SLUG,
+          pageNo: pageNo || 1,
+          limit: limit || HOME_SECTIONS_PAGE_SIZE,
+        },
+      }),
     }),
   }),
 });
 
-export const { useGetHomeDetailsQuery, useGetAiSuitesQuery, useGetNewHomeDetailsQuery } = homeApi;
+export const {
+  useGetHomeDetailsQuery,
+  useGetAiSuitesQuery,
+  useGetNewHomeDetailsQuery,
+  useLazyGetNewHomeSectionsQuery,
+} = homeApi;

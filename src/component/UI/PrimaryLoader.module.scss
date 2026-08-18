@@ -61,9 +61,22 @@
   // box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.2);
   // border: 1px solid rgba(255, 255, 255, 0.18);
   font-size: 16px;
+  // The box sizes itself to its widest child, which is the 100px spinner, so a
+  // two-word message wrapped ("Finding live / sessions…"). The message is now
+  // `white-space: nowrap`, which lets the box grow to fit it instead; this keeps
+  // it from growing past the viewport on a narrow phone.
+  max-width: 100%;
   img{
     width: 100px;
     height: auto;
+  }
+}
+
+// Narrow phones: the generous 3.5rem side padding leaves too little room for the
+// longest message ("Generating your report...") once it is on a single line.
+@media (max-width: 400px) {
+  .loaderBox {
+    padding: 2rem 1.25rem;
   }
 }
 
@@ -80,4 +93,8 @@
   font-weight: 500; // Medium weight is often cleaner than bold
   color: #555;
   animation: pulse 1.5s ease-in-out infinite;
+  // Every message is a short status phrase, and breaking one mid-phrase over two
+  // lines reads as a layout fault rather than a loading state.
+  white-space: nowrap;
+  text-align: center;
 }

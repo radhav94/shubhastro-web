@@ -282,6 +282,9 @@
         out is also the only state that sees the popup, so nothing is lost.
       - headers match what fetchBaseQuery sends, keeping it a simple CORS
         request with no preflight.
+      - page 1 only. HomeV2 fetches the remaining sections itself once the
+        browser is idle, so warming those here would compete with first paint
+        for exactly the resource this block exists to get out of the way.
     Wrapped in try/catch and given a no-op rejection handler: a failure here must
     never surface as an unhandled rejection or block the app, it just means the
     endpoint requests normally.
@@ -296,8 +299,13 @@
         ) return;
 
         var slug = "newcustomerlandingpage";
+        // Must match HOME_SECTIONS_PAGE_SIZE in
+        // src/services/appServices/homeServices.js — the endpoint compares this
+        // limit before adopting the promise, and ignores the prefetch if the two
+        // have drifted apart.
+        var limit = 5;
         var promise = fetch(
-          "%VITE_APP_API_BASE_URL%/api/homepage?slug=" + slug,
+          "%VITE_APP_API_BASE_URL%/api/homepage?slug=" + slug + "&pageNo=1&limit=" + limit,
           { method: "GET", headers: { "Content-Type": "text/plain" } }
         ).then(function (response) {
           if (!response.ok) throw new Error("HTTP " + response.status);
@@ -305,7 +313,7 @@
         });
 
         promise.catch(function () {});
-        window.__homepagePrefetch__ = { slug: slug, promise: promise };
+        window.__homepagePrefetch__ = { slug: slug, limit: limit, promise: promise };
       } catch (e) {
         /* prefetch is best effort */
       }
