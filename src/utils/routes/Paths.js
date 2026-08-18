@@ -771,11 +771,15 @@ export const PATH = {
       element: AIWow,
       header: false,
     },
+    // Entry screen: "Before you start" instructions, the left/right hand choice
+    // and the Upload / Use Camera actions are all on this one screen.
     PALMISTRY_LANDING: {
       path: ["/ai-wow/ai-palmistry-scanner", "/ai-palmistry-scanner"],
       element: PalmistryLanding,
       header: false,
     },
+    // Merged into PALMISTRY_LANDING; this element is now just a redirect there,
+    // kept so already-shared links and Back-stack entries still resolve.
     PALMISTRY_INSTRUCTIONS: {
       path: ["/ai-wow/ai-palmistry-scanner/instructions", "/ai-palmistry-scanner/instructions"],
       element: PalmistryInstructions,

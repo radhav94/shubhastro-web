@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './PalmistryLanding.module.scss';
@@ -7,32 +7,128 @@ import PalmMountIcon from '../../../../assets/icons/palmmount.png';
 import CakeIcon from '../../../../assets/icons/Cake.png';
 import LoveIcon from '../../../../assets/icons/loveIcon.png';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
-import { setPalmistrySelectedHand } from '../../../../redux/aiwow/aiwowSlice';
+import {
+  setPalmistryImage,
+  setPalmistrySelectedHand,
+} from '../../../../redux/aiwow/aiwowSlice';
 import { Toast } from '../../../../component';
+import TTSButton from '../../../../component/UI/TTSButton';
+import { getAIWowInstructionImage } from '../../../../utils/appImages';
+import { compressImage } from '../../../../utils/helper/compressImage';
+import { trackEvent } from '../../../../utils/analytics';
+import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
+const TTS_SCRIPT =
+  'Clear Background. Use a neutral background to avoid distractions in the photo. ' +
+  'Focus on Your Palm. Make sure your palm is centered and clearly visible in the frame. ' +
+  'Steady Hands. Keep your hands steady to avoid blurriness for better detail. ' +
+  'Disclaimer. This palm reading is for informational purposes only and not a substitute ' +
+  'for professional advice. Analysis is based on AI interpretation.';
+
+const CHECKLIST = [
+  {
+    title: 'Clear Background',
+    description: 'Use a neutral background to avoid distractions in the photo',
+  },
+  {
+    title: 'Focus on Your Palm',
+    description: 'Make sure your palm is centered and clearly visible in the frame',
+  },
+  {
+    title: 'Steady Hands',
+    description: 'Keep your hands steady to avoid blurriness for better detail',
+  },
+];
+
+/**
+ * Palmistry entry screen.
+ *
+ * The "Before you start" instructions used to live on a separate
+ * /ai-palmistry-scanner/instructions step, so picking a hand and reading the
+ * shot guidelines were two screens apart. Both are on this one screen now:
+ * instructions first, then the hand choice, then Upload / Use Camera — which
+ * only act once a hand is chosen, since the analysis needs it.
+ */
 const PalmistryLanding = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const fileInputRef = useRef(null);
+  const pendingActionRef = useRef(null);
   const { data: aiwowData } = useGetAiWowPageDataQuery();
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'ai-palmistry-scanner')?.title || 'AI Palmistry Scanner';
-  
+
   const [selectedHand, setSelectedHand] = useState(null);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
 
   const handleHandSelect = (hand) => {
     setSelectedHand(hand);
+    // Keep the store in step with the UI so the camera/analysis screens always
+    // read the hand that is actually highlighted here.
+    dispatch(setPalmistrySelectedHand(hand));
   };
 
-  const handleStartAnalysis = () => {
-    // Was gated twice — `disabled={!selectedHand}` on the button AND a bare
-    // early return here — so tapping "Start Palm Analysis" without having
-    // picked a hand produced nothing at all and said nothing. The button now
-    // stays tappable and names the missing step.
-    if (!selectedHand) {
-      Toast.info('Choose your left or right hand first.');
+  // Guests must add a kundli + verify OTP before a photo is submitted.
+  const runOrAuth = (action) => {
+    const token = localStorage.getItem('shubhtalk_customer_token');
+    if (!token) {
+      pendingActionRef.current = action;
+      setShowGuestAuthModal(true);
       return;
     }
-    dispatch(setPalmistrySelectedHand(selectedHand));
-    navigate('/ai-wow/ai-palmistry-scanner/instructions', { replace: true });
+    action();
+  };
+
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    if (action) action();
+  };
+
+  /**
+   * Upload and Use Camera stay tappable while no hand is picked (a hard
+   * `disabled` gave a dead tap with no explanation) — they just name the missing
+   * step instead.
+   */
+  const requireHand = () => {
+    if (!selectedHand) {
+      Toast.info('Choose your left or right hand first.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleCamera = () => {
+    if (!requireHand()) return;
+    navigate('/ai-wow/ai-palmistry-scanner/camera', { replace: true });
+  };
+
+  const handleUpload = () => {
+    if (!requireHand()) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      trackEvent('shubh_ai_input_provided', { feature_name: 'ai-palmistry-scanner', input_type: 'image' });
+      compressImage(file)
+        .then((dataUrl) => {
+          runOrAuth(() => {
+            // New image → allow a fresh analysis (clear the reload guard from a
+            // previous attempt).
+            sessionStorage.removeItem('palmistryAnalysisStarted');
+            dispatch(setPalmistryImage(dataUrl));
+            navigate('/ai-wow/ai-palmistry-scanner/capture', { replace: true });
+          });
+        })
+        .catch((err) => {
+          console.error('Failed to process selected image:', err);
+          Toast.error('Could not read that image. Please try a different photo.');
+        });
+    }
+    // Reset so re-picking the same file still fires onChange.
+    event.target.value = '';
   };
 
   const features = [
@@ -73,7 +169,54 @@ const PalmistryLanding = () => {
       </header>
 
       <div className={styles.content}>
-        {/* Hand Selection Section - At Top */}
+        {/* Instructions — above the hand choice, so the shot guidelines are read
+            before a photo is taken. */}
+        <h2 className={styles.sectionTitle}>Before you start</h2>
+
+        <div className={styles.instructionsCard}>
+          <div className={styles.imageWrapper}>
+            <img
+              src={getAIWowInstructionImage('palmistry')}
+              alt="Palm example"
+              className={styles.palmImage}
+            />
+            <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
+            <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
+            <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
+            <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
+          </div>
+
+          <div className={styles.instructionsBody}>
+            <span className={styles.ttsButton}>
+              <TTSButton text={TTS_SCRIPT} />
+            </span>
+
+            <div className={styles.checklistSection}>
+              {CHECKLIST.map((item) => (
+                <div key={item.title} className={styles.checkItem}>
+                  <div className={styles.checkIcon}>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className={styles.checkTitle}>{item.title}</h3>
+                    <p className={styles.checkDescription}>{item.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.disclaimer}>
+              <h4 className={styles.disclaimerTitle}>Disclaimer</h4>
+              <p className={styles.disclaimerText}>
+                This palm reading is for informational purposes only and not a substitute for professional advice. Analysis is based on AI interpretation.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Hand Selection + capture actions */}
         <div className={styles.handSelectionWrapper}>
           <div className={styles.handSelectionHeader}>
             <h2 className={styles.handSelectionTitle}>Which hand would you like to scan?</h2>
@@ -86,6 +229,7 @@ const PalmistryLanding = () => {
             <button
               className={`${styles.handCard} ${selectedHand === 'left' ? styles.selected : ''}`}
               onClick={() => handleHandSelect('left')}
+              aria-pressed={selectedHand === 'left'}
             >
               <div className={styles.handIcon}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none">
@@ -118,6 +262,7 @@ const PalmistryLanding = () => {
             <button
               className={`${styles.handCard} ${selectedHand === 'right' ? styles.selected : ''}`}
               onClick={() => handleHandSelect('right')}
+              aria-pressed={selectedHand === 'right'}
             >
               <div className={styles.handIcon}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none">
@@ -148,13 +293,34 @@ const PalmistryLanding = () => {
             </button>
           </div>
 
-          <button 
-            className={`${styles.startButton} ${!selectedHand ? styles.disabled : ''}`}
-            onClick={handleStartAnalysis}
-            aria-disabled={!selectedHand}
-          >
-            <span>⚡</span> Start Palm Analysis
-          </button>
+          {!selectedHand && (
+            <p className={styles.handHint}>Select a hand to enable upload or camera.</p>
+          )}
+
+          <div className={styles.buttonGroup}>
+            <button
+              className={`${styles.uploadButton} ${!selectedHand ? styles.inactive : ''}`}
+              onClick={handleUpload}
+              aria-disabled={!selectedHand}
+            >
+              Upload Photo
+            </button>
+            <button
+              className={`${styles.cameraButton} ${!selectedHand ? styles.inactive : ''}`}
+              onClick={handleCamera}
+              aria-disabled={!selectedHand}
+            >
+              Use Camera
+            </button>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
         </div>
 
         {/* Feature Cards Section - Below */}
@@ -182,6 +348,12 @@ const PalmistryLanding = () => {
         </p>
       </div>
     </div>
+
+    <GuestKundliAuthModal
+      isOpen={showGuestAuthModal}
+      onClose={() => setShowGuestAuthModal(false)}
+      onSuccess={handleGuestAuthSuccess}
+    />
     </>
   );
 };
