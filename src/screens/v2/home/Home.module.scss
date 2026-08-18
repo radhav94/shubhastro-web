@@ -4049,6 +4049,12 @@
   overflow: hidden;
   // box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   cursor: pointer;
+
+  /* News cards render as <a> now, so neutralise the link defaults. The grid is
+     flex, which blockifies the anchor, so the width above still applies. */
+  display: block;
+  text-decoration: none;
+  color: inherit;
   transition:
     transform 0.2s,
     box-shadow 0.2s;
@@ -4062,6 +4068,18 @@
 .blogCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* A news item with no article link. Kept clickable so the tap can explain
+   itself — never `disabled`, never `pointer-events: none` — but dimmed so it
+   does not read as identical to the cards that do open something. */
+.blogCardUnavailable {
+  opacity: 0.6;
+
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
 }
 
 .blogImageWrapper {

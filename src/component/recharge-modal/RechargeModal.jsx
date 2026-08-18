@@ -8,6 +8,7 @@ import { useRechargePlans } from './useRechargePlans';
 import { useWalletBalance } from '../../screens/private/wallet/useWalletBalance';
 import { AppIcons } from '../../utils/appImages';
 import Toast from '../toast';
+import { trackEvent } from '../../utils/analytics';
 import styles from './rechargeModal.module.scss';
 
 /**
@@ -48,7 +49,31 @@ const RechargeModal = ({
       setShowPaymentDetails(false);
       refetch();
       refreshWallet();
+
+      /*
+       * recharge_initiated for this modal.
+       *
+       * This component is the dominant way into a recharge — it is mounted from
+       * ~18 places (both home screens, Profile, VoiceCall, VideoCall, ChatWindow,
+       * LiveView, GuestChatFlow, GiftSection, AstrologerProfile, OrderDetails and
+       * more) — but it emitted no analytics at all, while still reaching
+       * recharge_payment_completed through useRazorpay. So completions were
+       * counted against initiations raised only by the /recharge screen, which
+       * inflated the conversion rate and could push it past 100%.
+       *
+       * Opening the modal *is* the "user taps Recharge" moment here: every mount
+       * site renders it in response to a recharge affordance.
+       *
+       * `balance` is deliberately not in the dep array — it changes when
+       * refreshWallet resolves, which would fire this a second time for one
+       * opening.
+       */
+      trackEvent("recharge_initiated", {
+        current_balance: balance ?? undefined,
+        source: "recharge_modal",
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, refetch, refreshWallet]);
 
   // Prevent body scroll
@@ -64,6 +89,18 @@ const RechargeModal = ({
   const handleSelectPlan = useCallback((plan) => {
     if (!plan) return;
     setSelectedPlan(plan);
+
+    /*
+     * Every amount here comes from the plans API — there is no free-text amount
+     * field in either recharge UI — so is_preset is true throughout. Kept
+     * explicit rather than dropped, so the property is already in place if a
+     * custom-amount input is added later.
+     */
+    trackEvent("recharge_amount_selected", {
+      amount: plan?.actualPrice ?? plan?.amount ?? plan?.price,
+      is_preset: true,
+      source: "recharge_modal",
+    });
   }, []);
 
   /** "Add Money" button → open second popup */

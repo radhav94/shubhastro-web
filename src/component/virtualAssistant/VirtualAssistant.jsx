@@ -18,7 +18,7 @@ import dayjs from "dayjs";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
 import IframeModal from "../../screens/private/home/components/chats/IframeModal";
 import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
-import { useFileSelector } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
+import { useFileSelector, FILE_SELECT_CANCELLED } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
 import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
 import { buildKundliLink } from "../../utils/helper/kundliMessage";
 import Toast from "../toast";
@@ -113,7 +113,15 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
         const file = new File([blob], name || `file_${Date.now()}`, { type: blob.type });
         sendFile(file);
       }
-    } catch { /* cancelled */ }
+    } catch (err) {
+      // Backing out of the picker is deliberate, so it stays quiet. Anything
+      // else used to be swallowed by the same bare catch, leaving the attach
+      // sheet closed and nothing to show for the tap.
+      if (err?.message !== FILE_SELECT_CANCELLED) {
+        console.error("Assistant attachment failed:", err);
+        Toast.error("Couldn't attach that file. Please try again.");
+      }
+    }
   };
 
   const handleKundliSelect = (kundli) => {

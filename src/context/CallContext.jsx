@@ -1,9 +1,8 @@
-import { createContext, useContext, useState, useRef, useEffect, useCallback } from "react";
+import { useContext, useState, useRef, useEffect, useCallback } from "react";
 import { voiceSocket, registerCallSession, clearCallSession } from "../services/voiceSocketServices";
 import { trackEvent } from "../utils/analytics";
 import { getAstrologerDisplayName } from "../utils/helper/string.utils";
-
-const CallContext = createContext();
+import { CallContext } from "./callContextInstance";
 
 // 🔑 LocalStorage keys for call persistence
 const CALL_STORAGE_KEY = "shubhtalk_active_call";

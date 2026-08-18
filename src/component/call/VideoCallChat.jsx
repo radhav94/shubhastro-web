@@ -9,7 +9,7 @@ import XlsIcon from "../../assets/chat/XLS.svg";
 import styles from "./VideoCallChat.module.scss";
 import { useGetChatHistoryQuery } from "../../redux/api/chatApi";
 import { useGetS3SignedUrlMutation } from "../../redux/api/s3SignedApi";
-import { useFileSelector } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
+import { useFileSelector, FILE_SELECT_CANCELLED } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
 import { Toast } from "../index";
 import dayjs from "dayjs";
 import { useVideoCallChat } from "./useVideoCallChat";
@@ -249,8 +249,14 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
       const { blob } = await openFileSelector(accept);
       const attachType = getAttachType(blob.type);
       await sendFiles(blob, attachType);
-    } catch {
-      console.log("File selection cancelled");
+    } catch (err) {
+      // sendFiles already reports its own upload failures. What reached this
+      // catch silently was everything the picker itself can fail on, which on
+      // the call screen meant the attach sheet closed and nothing followed.
+      if (err?.message !== FILE_SELECT_CANCELLED) {
+        console.error("Call chat attachment failed:", err);
+        Toast.error("Couldn't attach that file. Please try again.");
+      }
     }
   };
 

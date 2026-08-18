@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
+import { useContext, useState, useCallback, useRef, useEffect } from "react";
+import { WaitingQueueContext } from "./waitingQueueContextInstance";
 import { voiceSocket, clearChatSession } from "../services/voiceSocketServices";
 import { useCall } from "./CallContext";
 import { useChat } from "./ChatContext";
@@ -10,7 +11,6 @@ import { startIncomingSound, stopIncomingSound } from "../utils/incomingSound";
 import { claimRoom, releaseRoom } from "../utils/tabSession";
 import { GUEST_AUTO_ACCEPT_KEY, GUEST_FANOUT_RESOLVED_KEY, GUEST_FANOUT_RESOLVED_WINDOW_MS } from "../screens/public/guestChat/guestChatConstants";
 import { getAstrologerDisplayName } from "../utils/helper/string.utils";
-const WaitingQueueContext = createContext();
 
 // LocalStorage key for persistence
 const QUEUE_STORAGE_KEY = "shubhtalk_waiting_queue";

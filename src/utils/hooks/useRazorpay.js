@@ -25,6 +25,32 @@ const ERROR_MESSAGES = {
   ALREADY_PROCESSING: "Payment already in progress. Please wait.",
 };
 
+/*
+ * Analytics for the recharge funnel.
+ *
+ * Razorpay is the only gateway, and the specific instrument (UPI, card, net
+ * banking) is chosen inside Razorpay's own checkout, which we cannot observe
+ * from here — so every event in this file reports the gateway as the method.
+ */
+const PAYMENT_METHOD = "razorpay";
+
+/**
+ * Recharge amount in rupees, taken from the plan the user chose.
+ *
+ * The success and failure events used to read `response?.amount`, but Razorpay's
+ * handler payload contains only razorpay_payment_id / razorpay_order_id /
+ * razorpay_signature — never an amount — so `amount` was always undefined on
+ * every recharge_payment_completed. Mirrors the expression in
+ * validatePaymentInputs and the checkout description.
+ *
+ * @param {Record<string, unknown>} [planData]
+ * @returns {number|undefined}
+ */
+const getPlanAmount = (planData) => {
+  const amount = Number(planData?.actualPrice ?? planData?.totalPrice ?? 0);
+  return Number.isFinite(amount) && amount > 0 ? amount : undefined;
+};
+
 /**
  * Custom hook for Razorpay payment integration
  * Handles payment flow with comprehensive error handling and edge cases
@@ -253,7 +279,7 @@ export const useRazorpayPayment = () => {
   /**
    * Handle successful payment
    */
-  const handlePaymentSuccess = useCallback(async (response, backendOrderId, planId, _planData, onSuccess) => {
+  const handlePaymentSuccess = useCallback(async (response, backendOrderId, planId, planData, onSuccess) => {
     try {
       clearPaymentTimeout();
       orderStatusUpdatedRef.current = true; // Mark as updated to prevent failure handlers
@@ -262,17 +288,32 @@ export const useRazorpayPayment = () => {
       await updateOrderStatus(backendOrderId, planId, "completed");
 
       // Step 2: Refresh wallet balance
+      //
+      // The wallet is credited by the backend in step 1, so this refresh is also
+      // the authoritative post-recharge figure — it is what feeds `new_balance`
+      // on recharge_payment_completed. Unwrapped to read the payload; the shape
+      // is `{ data: <number> }`, same as useWalletBalance consumes.
+      let newBalance;
       try {
-        await getWalletBalance();
+        const walletResult = await getWalletBalance().unwrap();
+        const parsedBalance = Number(walletResult?.data);
+        if (Number.isFinite(parsedBalance)) newBalance = parsedBalance;
       } catch (refreshError) {
         console.error("[Razorpay] Failed to refresh wallet balance:", refreshError);
-        // Don't throw - wallet was credited by backend, just refresh failed
+        // Don't throw - wallet was credited by backend, just refresh failed.
+        // new_balance stays undefined rather than reporting a wrong number.
       }
 
       // Step 3: Show success message
       Toast.success("Payment successful! Wallet credited.");
-      trackEvent("payment_completed", { amount: response?.amount, transaction_id: response?.razorpay_payment_id, payment_method: "razorpay" });
-      trackEvent("recharge_payment_completed", { amount: response?.amount, payment_method: "razorpay" });
+
+      const amount = getPlanAmount(planData);
+      trackEvent("payment_completed", { amount, transaction_id: response?.razorpay_payment_id, payment_method: PAYMENT_METHOD });
+      trackEvent("recharge_payment_completed", {
+        amount,
+        payment_method: PAYMENT_METHOD,
+        new_balance: newBalance,
+      });
 
       // Step 4: Dispatch wallet update events
       window.dispatchEvent(new Event("wallet-updated"));
@@ -294,7 +335,10 @@ export const useRazorpayPayment = () => {
   /**
    * Handle payment failure
    */
-  const handlePaymentFailure = useCallback(async (error, backendOrderId, planId, onFailure) => {
+  // planData is threaded through purely so the failure events can report the
+  // amount the user was trying to add — without it recharge_payment_failed had
+  // no way to say how much the attempt was for.
+  const handlePaymentFailure = useCallback(async (error, backendOrderId, planId, planData, onFailure) => {
     clearPaymentTimeout();
     closeRazorpayModal(); // Close the Razorpay window immediately
     
@@ -321,8 +365,9 @@ export const useRazorpayPayment = () => {
     
     Toast.error(errorMessage);
 
-    trackEvent("payment_failed", { payment_method: "razorpay", error_code: error?.code, reason: errorMessage });
-    trackEvent("recharge_payment_failed", { payment_method: "razorpay", reason: errorMessage });
+    const amount = getPlanAmount(planData);
+    trackEvent("payment_failed", { amount, payment_method: PAYMENT_METHOD, error_code: error?.code, reason: errorMessage });
+    trackEvent("recharge_payment_failed", { amount, payment_method: PAYMENT_METHOD, reason: errorMessage });
 
     if (typeof onFailure === "function") {
       onFailure(error);
@@ -427,7 +472,7 @@ export const useRazorpayPayment = () => {
   /**
    * Open Razorpay checkout
    */
-  const openRazorpayCheckout = useCallback((options, backendOrderId, planId, onFailure) => {
+  const openRazorpayCheckout = useCallback((options, backendOrderId, planId, planData, onFailure) => {
     if (!window.Razorpay) {
       throw new Error(ERROR_MESSAGES.RAZORPAY_NOT_LOADED);
     }
@@ -445,7 +490,7 @@ export const useRazorpayPayment = () => {
           console.error("[Razorpay] Error closing modal on failure:", closeError);
         }
         
-        handlePaymentFailure(response.error, backendOrderId, planId, onFailure);
+        handlePaymentFailure(response.error, backendOrderId, planId, planData, onFailure);
       });
 
       // Set payment timeout
@@ -466,7 +511,17 @@ export const useRazorpayPayment = () => {
             console.error("[Razorpay] Failed to update order status after timeout:", err);
           });
         }
-        
+
+        // This branch marks the order as "failure" on the backend but used to
+        // emit nothing, so GA under-counted failures against the backend by
+        // however many checkouts were left open past the timeout. Reported with
+        // an explicit reason so timeouts stay separable from gateway declines.
+        trackEvent("recharge_payment_failed", {
+          amount: getPlanAmount(planData),
+          payment_method: PAYMENT_METHOD,
+          reason: ERROR_MESSAGES.TIMEOUT_ERROR,
+        });
+
         if (typeof onFailure === "function") {
           onFailure({ timeout: true });
         }
@@ -538,7 +593,7 @@ export const useRazorpayPayment = () => {
       );
 
       // Step 4: Open Razorpay checkout
-      openRazorpayCheckout(razorpayOptions, orderData.orderId, planId, onFailure);
+      openRazorpayCheckout(razorpayOptions, orderData.orderId, planId, planData, onFailure);
 
     } catch (error) {
       console.error("[Razorpay] Payment initiation failed:", error);
