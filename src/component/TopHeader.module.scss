@@ -99,9 +99,24 @@
   font-size: 26px;
   cursor: pointer;
   margin-right: 10px;
+
+  // <button> resets. The element used to be a bare div.
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+
   @media screen and (width <= 1180px) {
-    display: flex;
+    // The icon inside is 20x16. Without an explicit box the button was 20px
+    // wide, i.e. the primary navigation control on every phone-width page had
+    // less than half the 44px minimum. justify-content keeps the bars where they
+    // were rendering before, flush with the left padding of the header.
+    display: inline-flex;
     align-items: center;
+    justify-content: flex-start;
+    min-width: 44px;
+    min-height: 44px;
+    margin-right: 0;
   }
 }
 
@@ -268,6 +283,15 @@
   flex-direction: column;
   margin-top: 6px;
 }
+// Positioning context for .profileDropdown. It used to live on
+// .profileDetailMain, which also *was* the trigger and the menu's parent; the
+// menu is now a sibling of the trigger button, so the anchor moves out here.
+.profileDetailWrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
 .profileDetailMain{
   display: flex;
   align-items: center;
@@ -280,6 +304,34 @@
   max-width: 200px;
   cursor: pointer;
   position: relative;
+
+  // <button> resets — this was a div until the account menu was made keyboard
+  // reachable.
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+
+  // Tap target. The chip is 32px of avatar plus 2px of padding either side, so
+  // it measured 55x36 on a phone — under the 44px minimum vertically — and the
+  // 12px flex gap in .headerActions next to it belonged to no control at all,
+  // meaning a thumb that landed a few pixels short hit the bare header div and
+  // nothing happened. This pseudo-element grows the hit box without touching the
+  // visual size or the layout; -6px covers half the gap on each side.
+  @media (width <= 767px) {
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: inherit;
+    }
+  }
 }
 .namaste {
   font-size: 0.7rem;
@@ -972,9 +1024,28 @@ button.headerNavLink {
   white-space: nowrap;
   transition: background 0.15s ease;
 
+  // These rows are <button role="menuitem"> now, so they need the block layout
+  // and full width a div gave them for free. min-height keeps each row a
+  // comfortable target on a phone, where the whole menu is thumb-operated.
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  font-weight: 500;
+  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+
   &:hover {
     background: #fff3ed;
     color: #F75801;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: -2px;
   }
 }
 
@@ -1007,6 +1078,24 @@ button.headerNavLink {
   gap: 10px;
   padding-inline: 6px;
   margin-block: 14px;
+
+  // <button> resets — this row was a div with an inline cursor: pointer, so it
+  // was invisible to the keyboard even though it is the only route to the
+  // account screen from the mobile drawer.
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: -2px;
+  }
+
   .menuProfilePik{
     width: 35px;
     height: 35px;
@@ -1020,11 +1109,14 @@ button.headerNavLink {
     font-size: 20px;
     flex-shrink: 0;
   }
+  // The name used to be a <p> and the phone a bare <span>, which is how they
+  // were told apart. A <p> is not valid inside a <button>, so both are spans now
+  // and each carries its own class.
   .menuProfileNameMobile{
     display: flex;
     flex-direction: column;
     width: 70%;
-    p{
+    .menuProfileNameText{
       font-weight: 600;
       font-size: 1rem;
       display: -webkit-box;
@@ -1032,7 +1124,7 @@ button.headerNavLink {
       -webkit-line-clamp: 1;
       overflow: hidden;
     }
-    span{
+    .menuProfilePhoneText{
       font-size: 0.8rem;
       color: rgba(0, 0, 0, 0.6);
     }

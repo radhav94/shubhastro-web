@@ -1,4 +1,37 @@
 
+/*
+ * Every CTA in these cards is a pill button with its per-minute rate rendered as
+ * a <p> immediately below it, inside the same wrapper. The two read as a single
+ * control, but only the pill was clickable — a click on "₹68 min" hit an inert
+ * paragraph.
+ *
+ * On the details card it was worse than inert. .detailsActionButtons is
+ * z-index 2 so that the buttons clear the full-card profile anchor
+ * (.detailsImageLink, z-index 1), which means the rate text is painted above the
+ * card link too: the click could not even fall through to the profile. It landed
+ * on nothing at all. Same shape as the .detailsLanguages fix further down, which
+ * documents this exact hazard for the language strip.
+ *
+ * This grows the button's hit box to cover its whole wrapper — pill, gap and
+ * rate — without moving a pixel. It resolves against the wrapper, which must
+ * therefore be the nearest positioned ancestor, so the buttons must not create a
+ * containing block of their own. That is why their hover lift moves off
+ * `transform`: a transform on the button would re-anchor this overlay to the
+ * button mid-hover and shrink the target at exactly the moment the pointer is
+ * over it. A box-shadow gives the same affordance with no layout effect.
+ */
+@mixin cta-hit-area {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+}
+
+@mixin cta-hit-area-host {
+  position: relative;
+}
+
 @mixin line-clamp($lines: 3) {
   @if $lines != null {
     display: -webkit-box;
@@ -318,6 +351,7 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  @include cta-hit-area-host;
 }
 
 .chatBtn {
@@ -351,9 +385,14 @@
     img{display: none;}
   }
 
+  @include cta-hit-area;
+
   &:hover:not(:disabled):not(.unavailable) {
     background: #fff5ec;
-    transform: translateY(-1px);
+    // Was also transform: translateY(-1px). See cta-hit-area — a transform here
+    // makes the button the containing block for its own overlay, collapsing the
+    // hit area back to the pill at the moment the pointer arrives.
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.22);
   }
 
   &:disabled,
@@ -397,8 +436,10 @@
     img{display: none;}
   }
 
+  @include cta-hit-area;
+
+  // Transform dropped, box-shadow kept — see cta-hit-area.
   &:hover:not(:disabled):not(.unavailable) {
-    transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   }
 
@@ -426,9 +467,12 @@
   gap: 6px;
   transition: all 0.2s ease;
 
+  @include cta-hit-area;
+
+  // Transform dropped — see cta-hit-area.
   &:hover {
     background: #fff5f0;
-    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.22);
   }
 }
 
@@ -476,6 +520,7 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  @include cta-hit-area-host;
 }
 
 .emergencySingleBtn {
@@ -491,8 +536,10 @@
   cursor: pointer;
   transition: all 0.2s ease;
 
+  @include cta-hit-area;
+
+  // Transform dropped — see cta-hit-area.
   &:hover {
-    transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   }
 
@@ -500,7 +547,6 @@
     background: #e5e7eb;
     color: #9ca3af;
     cursor: not-allowed;
-    transform: none;
     box-shadow: none;
   }
 }
@@ -804,7 +850,8 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  
+  @include cta-hit-area-host;
+
   @media screen and (width <= 767px) {
     gap: 4px;
   }
@@ -842,9 +889,14 @@
     }
   }
 
+  @include cta-hit-area;
+
   &:hover:not(.unavailable) {
-    // background: #fff5ec;
-    transform: translateY(-1px);
+    // Was transform: translateY(-1px), which would make this button the
+    // containing block for its own hit-area overlay — see cta-hit-area. The
+    // background above is commented out, so without a replacement cue this
+    // button would have no hover feedback at all.
+    box-shadow: 0 2px 8px rgba(247, 88, 1, 0.25);
   }
 
   &:disabled,
@@ -890,8 +942,10 @@
     }
   }
 
+  @include cta-hit-area;
+
+  // Transform dropped, box-shadow kept — see cta-hit-area.
   &:hover:not(.unavailable) {
-    transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
   }
 

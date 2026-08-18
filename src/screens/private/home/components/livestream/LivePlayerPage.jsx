@@ -1,11 +1,13 @@
 import { useEffect, useState, lazy, Suspense } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { LiveListProvider } from "../../../../../context/LiveListContext";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { restoreViewerSession, clearViewerSession } from "../../../../../utils/liveSessionStorage";
 import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 import { getAstrologerImageUrl } from "../../../../../utils/appImages";
+import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
+import styles from "./LivePlayerPage.module.scss";
 
 // Lazy, because this module carries the Agora RTC SDK — a 1,226 kB chunk.
 //
@@ -38,18 +40,9 @@ const LivePlayerPage = () => {
   const [lives, setLives] = useState([]);
   const [autoStartIndex, setAutoStartIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
 
-  // Redirect guest users to login
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate("/login?skip=welcome", {
-        state: { from: location.pathname },
-        replace: true,
-      });
-    }
-  }, [isLoggedIn, navigate, location.pathname]);
-
-  useEffect(() => {
+  const loadLives = () => {
     if (!isLoggedIn) return;
     setIsLoading(true);
 
@@ -110,18 +103,124 @@ const LivePlayerPage = () => {
       }
 
       setLives(liveList);
+      setLoadFailed(false);
       setIsLoading(false);
     }).catch(() => {
+      // The failure used to be indistinguishable from "nobody is live": both
+      // ended with an empty list and a screen that explained neither.
+      setLoadFailed(true);
       setIsLoading(false);
     });
-  }, [channelId, isLoggedIn]);
+  };
 
+  useEffect(loadLives, [channelId, isLoggedIn]);
+
+  /*
+   * Every exit from this page used to be `return null`, i.e. a blank white page
+   * under the global header, and there were four of them in a row: the guest
+   * guard, the live-list fetch, and two lazy chunk boundaries sharing a
+   * `<Suspense fallback={null}>` (the Agora player is 1,256 kB and
+   * LiveStreamingContainer another 74 kB). On a cold visit from an ad that is
+   * seconds of nothing to look at, and any click landing in that window hits the
+   * page background — a dead click with nothing to attribute it to.
+   *
+   * Each state below now renders something, and every one of them offers a way
+   * out.
+   */
   if (!isLoggedIn) {
-    return null;
+    /*
+     * Previously a silent navigate to /login with `replace: true` behind a blank
+     * frame. Two problems beyond the blank: the visitor was moved without being
+     * told why, and `replace` dropped /live from the history, so Back from the
+     * login screen returned to the homepage rather than here — which is exactly
+     * the homepage/live bouncing this page produces in session recordings.
+     *
+     * Asking instead of redirecting keeps the history intact and makes the
+     * requirement legible. `from` is still handed to the login flow so a
+     * completed sign-in comes back to the stream.
+     */
+    return (
+      <div className={styles.gateWrap}>
+        <div className={styles.gateCard}>
+          <h1 className={styles.gateTitle}>Live sessions need an account</h1>
+          <p className={styles.gateText}>
+            Log in to watch astrologers live, ask questions in the chat and send gifts.
+          </p>
+          <div className={styles.gateActions}>
+            <button
+              type="button"
+              className={styles.gatePrimary}
+              onClick={() =>
+                navigate("/login?skip=welcome", { state: { from: location.pathname } })
+              }
+            >
+              Log in to watch
+            </button>
+            <Link to="/astrologers" className={styles.gateSecondary}>
+              Browse astrologers instead
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (isLoading) {
-    return null;
+    return (
+      <div className={styles.gateWrap}>
+        <PrimaryLoader fullscreen={false} message="Finding live sessions…" />
+      </div>
+    );
+  }
+
+  if (loadFailed) {
+    return (
+      <div className={styles.gateWrap}>
+        <div className={styles.gateCard}>
+          <h1 className={styles.gateTitle}>Couldn&apos;t load live sessions</h1>
+          <p className={styles.gateText}>
+            The list didn&apos;t come through. This is usually a connection hiccup.
+          </p>
+          <div className={styles.gateActions}>
+            <button type="button" className={styles.gatePrimary} onClick={loadLives}>
+              Try again
+            </button>
+            <Link to="/astrologers" className={styles.gateSecondary}>
+              Browse astrologers
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /*
+   * No streams at all. This case used to fall straight through to the player,
+   * which mounted the Agora client and LiveView with `channel: undefined` and
+   * tried to join nothing — so an empty list rendered as a stalled black player
+   * rather than as an answer. LiveStreamingContainer only ever guards
+   * `lives.length > 1` (for the up/down nav), never zero.
+   */
+  if (lives.length === 0) {
+    return (
+      <div className={styles.gateWrap}>
+        <div className={styles.gateCard}>
+          <h1 className={styles.gateTitle}>Nobody is live right now</h1>
+          <p className={styles.gateText}>
+            Live sessions run through the day. Check back shortly, or start a chat or
+            call with an astrologer who is online now.
+          </p>
+          <div className={styles.gateActions}>
+            <button type="button" className={styles.gatePrimary} onClick={loadLives}>
+              Check again
+            </button>
+            <Link to="/astrologers" className={styles.gateSecondary}>
+              See who&apos;s online
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -153,11 +252,19 @@ const LivePlayerPage = () => {
       }))}
       autoStartIndex={autoStartIndex}
     >
-      {/* Local boundary with a null fallback: matches what this page already
-          renders while isLoading, and keeps a suspend from bubbling up to
-          HomeLayout's <Suspense fallback={<CircleSpinner />}> and blanking the
-          whole layout. */}
-      <Suspense fallback={null}>
+      {/* Local boundary, so a suspend does not bubble to HomeLayout's
+          <Suspense fallback={<CircleSpinner />}> and blank the whole layout.
+          The fallback shows a loader rather than null: two lazy chunks resolve
+          behind this boundary (the Agora player at 1,256 kB, then
+          LiveStreamingContainer), and on a cold visit that was a blank page for
+          the duration of both downloads. */}
+      <Suspense
+        fallback={
+          <div className={styles.gateWrap}>
+            <PrimaryLoader fullscreen={false} message="Starting the live player…" />
+          </div>
+        }
+      >
         <InteractiveLiveStreaming />
       </Suspense>
     </LiveListProvider>

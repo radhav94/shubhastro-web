@@ -330,6 +330,55 @@
   text-align: center;
 }
 
+/*
+ * The listing had no rendered state for "request failed" or for "empty with no
+ * filter applied" — both were blank space under the filter chips.
+ */
+.listStateCard {
+  max-width: 460px;
+  margin: 32px auto;
+  padding: 28px 24px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid rgba(247, 88, 1, 0.18);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.listStateTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c1b0e;
+  margin: 0 0 8px;
+}
+
+.listStateText {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #5f5245;
+  margin: 0 0 20px;
+}
+
+.listStateBtn {
+  min-height: 46px;
+  padding: 12px 28px;
+  border: 0;
+  border-radius: 80px;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}
+
 @media (max-width: 768px) {
   .loaderWrapper {
     padding: 1.5rem 0;
