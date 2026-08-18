@@ -30,6 +30,7 @@
  */
 
 import { isTruecallerLoginEnabled } from "../featureConfig";
+import { tcLog } from "./truecallerLog";
 
 /** Partner (app) key from the Truecaller developer portal. */
 export const TRUECALLER_PARTNER_KEY = import.meta.env.VITE_TRUECALLER_PARTNER_KEY || "";
@@ -194,9 +195,22 @@ export const invokeTruecaller = (options) =>
   new Promise((resolve) => {
     const deepLink = buildTruecallerDeepLink(options);
 
+    // The key is a credential-ish value that ends up in a shareable log file, so
+    // only its shape is recorded — enough to separate "no key" from "wrong key".
+    tcLog("deeplink_build", {
+      partnerKeyPrefix: TRUECALLER_PARTNER_KEY.slice(0, 6),
+      partnerKeyLen: TRUECALLER_PARTNER_KEY.length,
+      privacyUrl: options?.privacyUrl || TRUECALLER_PRIVACY_URL,
+      termsUrl: options?.termsUrl || TRUECALLER_TERMS_URL,
+      ttl: String(options?.ttlMs ?? TRUECALLER_POLL_TIMEOUT_MS),
+      nonceLen: String(options?.requestNonce || "").length,
+      linkLen: deepLink.length,
+    });
+
     try {
       window.location = deepLink;
-    } catch {
+    } catch (err) {
+      tcLog("deeplink_threw", { message: String(err?.message || err) });
       resolve({ opened: false });
       return;
     }
@@ -204,6 +218,12 @@ export const invokeTruecaller = (options) =>
     setTimeout(() => {
       // Focus lost => the Truecaller sheet took over. Focus retained => nothing
       // handled the scheme, i.e. Truecaller is not installed.
-      resolve({ opened: !document.hasFocus() });
+      const opened = !document.hasFocus();
+      tcLog("deeplink_result", {
+        opened,
+        hasFocus: document.hasFocus(),
+        visibility: document.visibilityState,
+      });
+      resolve({ opened });
     }, 600);
   });

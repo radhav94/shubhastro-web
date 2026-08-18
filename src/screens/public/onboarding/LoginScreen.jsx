@@ -8,6 +8,8 @@ import { logout } from "../../../redux/auth/authSlice";
 import { loginWithPhone } from "../../../services/appServices/authService";
 import { trackEvent } from "../../../utils/analytics";
 import useTruecallerLogin from "./useTruecallerLogin";
+import TruecallerLogPanel from "./TruecallerLogPanel";
+import { isTruecallerLogViewerEnabled } from "../../../utils/truecaller/truecallerLog";
 import { resolvePostLoginRedirect } from "../../../utils/auth/completeCustomerLogin";
 import rsBox from "../../../assets/images/rs-box.png";
 import loginMobile from "../../../assets/images/login-mobile.png";
@@ -30,10 +32,15 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
     partner key (Truecaller's mobile-web verification supports Android only), so
     everywhere else this stays hidden and the OTP flow is the single path.
   */
+  // Read once on mount: the flag is persisted, and re-reading on every render
+  // would re-parse the query string for nothing.
+  const [truecallerLogViewer] = useState(isTruecallerLogViewerEnabled);
+
   const {
     isSupported: isTruecallerAvailable,
     isBusy: truecallerBusy,
     unsupportedReason: truecallerUnsupportedReason,
+    status: truecallerStatus,
     loginWithTruecaller,
   } = useTruecallerLogin({
     onLoggedIn: ({ isRegistered, deviceLimitReached }) => {
@@ -306,7 +313,7 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
             exactly like an unsupported device. Stripped from every production
             build by the `import.meta.env.DEV` guard.
           */}
-          {import.meta.env.DEV && !isTruecallerAvailable && (
+          {(import.meta.env.DEV || truecallerLogViewer) && !isTruecallerAvailable && (
             <p className={styles.truecallerDevHint}>
               Truecaller hidden — {truecallerUnsupportedReason}
               {truecallerUnsupportedReason === "disabled"
@@ -315,6 +322,20 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
                   ? " (set VITE_TRUECALLER_PARTNER_KEY, then restart the dev server)"
                   : ` (UA: ${(navigator.userAgent || "").slice(0, 60)})`}
             </p>
+          )}
+
+          {/*
+            Diagnostic log viewer. Off unless the tester opened `?tclog=1` once,
+            so it never shows for a real user. Needed because this flow only runs
+            on a deployed build on a physical Android phone — no devtools, and the
+            page may be frozen by the OS while the Truecaller app is in front.
+          */}
+          {truecallerLogViewer && (
+            <TruecallerLogPanel
+              isSupported={isTruecallerAvailable}
+              unsupportedReason={truecallerUnsupportedReason}
+              status={truecallerStatus}
+            />
           )}
 
           {/* Security note */}

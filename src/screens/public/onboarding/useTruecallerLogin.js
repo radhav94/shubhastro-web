@@ -17,6 +17,11 @@ import { getDeviceInfo, getDeviceType } from "../../../utils/deviceInfo";
 import { requestFCMToken } from "../../../services/firebase";
 import { completeCustomerLogin } from "../../../utils/auth/completeCustomerLogin";
 import { trackEvent } from "../../../utils/analytics";
+import {
+  attachTruecallerLifecycleLog,
+  startTruecallerRun,
+  tcLog,
+} from "../../../utils/truecaller/truecallerLog";
 
 /**
  * Drives the Truecaller mobile-web login.
@@ -53,8 +58,12 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
 
   useEffect(() => {
     cancelledRef.current = false;
+    // Records freeze/discard of the tab while the Truecaller app is in front —
+    // the failure mode that is indistinguishable from a backend timeout in the UI.
+    const detachLifecycleLog = attachTruecallerLifecycleLog();
     return () => {
       cancelledRef.current = true;
+      detachLifecycleLog();
       cleanup();
     };
   }, [cleanup]);
@@ -67,22 +76,39 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
   const pollForCompletion = useCallback(
     (requestId, startedAt) =>
       new Promise((resolve) => {
+        let attempt = 0;
         const tick = async () => {
           if (cancelledRef.current) {
+            tcLog("poll_cancelled", { attempt });
             resolve({ outcome: "cancelled" });
             return;
           }
 
           if (Date.now() - startedAt > TRUECALLER_POLL_TIMEOUT_MS) {
+            tcLog("poll_timeout", { attempt, elapsedMs: Date.now() - startedAt });
             resolve({ outcome: "timeout" });
             return;
           }
 
+          attempt += 1;
           try {
             const controller = new AbortController();
             abortRef.current = controller;
             const res = await getTruecallerStatus(requestId, { signal: controller.signal });
             const body = res?.data || {};
+
+            // The single most useful line in the file: what the status endpoint
+            // actually answered on this environment.
+            tcLog("poll_tick", {
+              attempt,
+              elapsedMs: Date.now() - startedAt,
+              httpStatus: res?.status,
+              bodyStatus: body?.status ?? null,
+              bodySuccess: body?.success ?? null,
+              bodyKeys: Object.keys(body || {}),
+              hasAccessToken: !!body?.data?.accessToken,
+              message: body?.message,
+            });
 
             if (body.status === "completed" && body.data?.accessToken) {
               resolve({ outcome: "completed", userData: body.data });
@@ -94,6 +120,23 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
             }
             // "pending" (or anything unrecognised) -> keep waiting.
           } catch (err) {
+            tcLog("poll_error", {
+              attempt,
+              elapsedMs: Date.now() - startedAt,
+              httpStatus: err?.response?.status ?? null,
+              code: err?.code || err?.name || null,
+              url: err?.config?.baseURL
+                ? `${err.config.baseURL}${err.config.url || ""}`
+                : err?.config?.url || null,
+              // The backend's own 404 body names the route it could not find,
+              // which is what distinguishes "not deployed" from a proxy problem.
+              serverMessage:
+                typeof err?.response?.data === "object"
+                  ? err.response.data?.message
+                  : String(err?.response?.data || "").slice(0, 200),
+              message: String(err?.message || err).slice(0, 200),
+            });
+
             // Cancelled by unmount/cleanup — stop quietly.
             if (
               err?.code === "ERR_CANCELED" ||
@@ -128,12 +171,25 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
   );
 
   const loginWithTruecaller = useCallback(async () => {
+    startTruecallerRun();
+    tcLog("login_click", {
+      isSupported,
+      reason: getTruecallerSupportReason(),
+      status,
+      href: window.location.href,
+      ua: (navigator.userAgent || "").slice(0, 120),
+    });
+
     if (!isSupported) {
       // Should not be reachable (button is hidden), but keep the flow honest.
+      tcLog("aborted_unsupported", { reason: getTruecallerSupportReason() });
       toast.error("Truecaller login isn't available on this device. Please use your mobile number.");
       return;
     }
-    if (status === "invoking" || status === "waiting") return;
+    if (status === "invoking" || status === "waiting") {
+      tcLog("aborted_busy", { status });
+      return;
+    }
 
     const requestId = generateRequestNonce();
     setStatus("invoking");
@@ -143,17 +199,32 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
       // Attach device/FCM details to the pending request so the session the
       // callback creates has them (the callback itself carries none).
       const fcmTokens = await requestFCMToken().catch(() => null);
+      tcLog("fcm_token", { obtained: !!fcmTokens });
       try {
-        await createTruecallerSession({
+        const sessionRes = await createTruecallerSession({
           requestId,
           type: "CUSTOMER",
           deviceInfo: getDeviceInfo(),
           deviceType: getDeviceType(),
           ...(fcmTokens ? { fcmTokens } : {}),
         });
-      } catch {
+        tcLog("session_create_ok", {
+          httpStatus: sessionRes?.status,
+          bodySuccess: sessionRes?.data?.success ?? null,
+          message: sessionRes?.data?.message,
+        });
+      } catch (err) {
         // Non-fatal: if the backend doesn't require pre-registration the status
         // endpoint is still the source of truth. Continue to the deep link.
+        // Logged anyway — a 404 here is the first sign the endpoints are missing.
+        tcLog("session_create_failed", {
+          httpStatus: err?.response?.status ?? null,
+          serverMessage:
+            typeof err?.response?.data === "object"
+              ? err.response.data?.message
+              : String(err?.response?.data || "").slice(0, 200),
+          message: String(err?.message || err).slice(0, 200),
+        });
       }
 
       // Policy links come from truecallerWeb.js (absolute public URLs — the
@@ -164,17 +235,30 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
       if (!opened) {
         // Deep link did nothing => Truecaller app isn't installed.
         setStatus("idle");
+        tcLog("app_not_installed", {});
         trackEvent("truecaller_login_unavailable", { reason: "app_not_installed" });
         toast.error("Truecaller app not found. Please continue with your mobile number.");
         return;
       }
 
       setStatus("waiting");
+      tcLog("poll_start", {
+        timeoutMs: TRUECALLER_POLL_TIMEOUT_MS,
+        intervalMs: TRUECALLER_POLL_INTERVAL_MS,
+      });
       const result = await pollForCompletion(requestId, Date.now());
+      tcLog("poll_end", { outcome: result.outcome, message: result.message });
       if (cancelledRef.current) return;
 
       if (result.outcome === "completed") {
         const { isRegistered, deviceLimitReached } = completeCustomerLogin(result.userData, dispatch);
+        // No tokens / phone / email in the log — presence and length only.
+        tcLog("login_complete", {
+          isRegistered,
+          deviceLimitReached,
+          hasUserId: !!result.userData?._id,
+          phoneLen: String(result.userData?.phoneNumber || "").length,
+        });
         setStatus("idle");
         toast.dismiss();
         toast.success("Logged in with Truecaller");
@@ -202,6 +286,12 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
       }
       // "cancelled" => component unmounted; say nothing.
     } catch (error) {
+      tcLog("login_threw", {
+        httpStatus: error?.response?.status ?? null,
+        name: error?.name,
+        message: String(error?.message || error).slice(0, 200),
+        stack: String(error?.stack || "").split("\n").slice(0, 3).join(" | "),
+      });
       if (cancelledRef.current) return;
       console.error("Truecaller login error:", error);
       setStatus("error");
