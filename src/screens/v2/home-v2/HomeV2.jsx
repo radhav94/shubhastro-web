@@ -1,11 +1,18 @@
 import styles from "./HomeV2.module.scss";
 import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense, Fragment } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { getToken } from "../../../utils/token";
-import { useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
+import {
+  homeApi,
+  useGetNewHomeDetailsQuery,
+  useLazyGetNewHomeSectionsQuery,
+  HOME_FIRST_PAGE_ARG,
+  HOME_SECTIONS_PAGE_SIZE,
+  HOME_SECTIONS_MAX_PAGES,
+} from "../../../services/appServices/homeServices";
 import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
@@ -38,6 +45,19 @@ import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
 // no split and only made Vite warn about the mixed import.
 import SubscriptionModal from "../../../component/UI/modal/SubscriptionModal/SubscriptionModal";
 import { GuestKundliAuthModal } from "../../../component/UI/Profile";
+
+/*
+ * Identity of a CMS section, used to drop anything already held while paging.
+ *
+ * `_id` is what the CMS sends; the display_type/list_order pair is a fallback for
+ * a payload that omits it. This matters for more than tidiness: if the backend
+ * ignores pageNo and returns the same full list for every page, the duplicates
+ * are what tells HomeV2 to stop paging instead of appending the whole list again.
+ */
+const sectionIdentity = (section) => {
+  if (!section) return null;
+  return section._id || `${section.display_type || ""}#${section.list_order ?? ""}`;
+};
 import HomeIntroPopup from "./HomeIntroPopup";
 const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));
 
@@ -430,10 +450,108 @@ const HomeV2 = () => {
   }, []);
 
   // ─── Data Fetching ────────────────────────────────────────────────────────
-  const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery();
-  const homeList = newHomeData?.data?.list;
+  const dispatch = useDispatch();
+  /*
+   * The CMS section list. Only the first HOME_SECTIONS_PAGE_SIZE sections are
+   * requested up front — enough for the hero group and everything above the fold
+   * — so the first render waits on a fraction of the ~87 KB payload. The effect
+   * below appends the remaining pages into this same cache entry after paint, so
+   * `homeSections` grows from page 1 to the full list.
+   */
+  const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery(HOME_FIRST_PAGE_ARG);
+  const homeSections = newHomeData?.data?.list;
 
-  const sortedSections = useMemo(() => sortSections(homeList), [homeList]);
+  const [fetchHomeSectionsPage] = useLazyGetNewHomeSectionsQuery();
+  /*
+   * Highest page already requested. Without it, a page that comes back empty or
+   * entirely duplicated would leave the section count unchanged and this effect
+   * would ask for the same page forever.
+   */
+  const requestedPageRef = useRef(1);
+
+  /*
+   * Pulls the next page and appends it into the page-1 cache entry, one page per
+   * run — appending grows `homeSections`, which re-runs this effect for the page
+   * after it, until a short page or a duplicate page stops the walk.
+   *
+   * The sections are written into the RTK cache rather than kept in component
+   * state on purpose. useAstrologerStatusSocket keeps astrologer cards live by
+   * walking the cache and patching matching records through updateQueryData; a
+   * private copy in component state is invisible to it, and because Immer
+   * produces new objects the copy would keep rendering the pre-patch data. That
+   * is not hypothetical here: all three astrologer-grid sections sit at
+   * list_order 6, 7 and 11, so every card on the homepage arrives in an appended
+   * page. Holding them outside the cache stopped chat/call availability from
+   * updating without a reload.
+   */
+  useEffect(() => {
+    const loadedCount = Array.isArray(homeSections) ? homeSections.length : 0;
+    if (loadedCount === 0) return;
+    /*
+     * A partial page means the server has nothing left — which is also what a
+     * server that ignores pageNo/limit returns on the first request, so that case
+     * stays a single request.
+     */
+    if (loadedCount % HOME_SECTIONS_PAGE_SIZE !== 0) return;
+
+    const nextPage = loadedCount / HOME_SECTIONS_PAGE_SIZE + 1;
+    if (nextPage > HOME_SECTIONS_MAX_PAGES) return;
+    if (nextPage <= requestedPageRef.current) return;
+    requestedPageRef.current = nextPage;
+
+    let cancelled = false;
+
+    const loadNextPage = async () => {
+      let list;
+      try {
+        // preferCacheValue: a lazy trigger refetches by default, which would
+        // re-request every page each time the visitor navigates back to "/".
+        const response = await fetchHomeSectionsPage({ pageNo: nextPage }, true).unwrap();
+        list = response?.data?.list;
+      } catch {
+        // Below-the-fold content is best effort. The visible page is already
+        // rendered, and the endpoint's own error handling has run.
+        return;
+      }
+      if (cancelled || !Array.isArray(list) || list.length === 0) return;
+
+      const held = new Set(homeSections.map(sectionIdentity));
+      const fresh = list.filter((section) => {
+        const id = sectionIdentity(section);
+        if (!id || held.has(id)) return false;
+        held.add(id);
+        return true;
+      });
+      if (fresh.length === 0) return;
+
+      dispatch(
+        homeApi.util.updateQueryData("getNewHomeDetails", HOME_FIRST_PAGE_ARG, (draft) => {
+          if (Array.isArray(draft?.data?.list)) draft.data.list.push(...fresh);
+        })
+      );
+    };
+
+    /*
+     * Deferred to idle so these requests never contend with the first paint or
+     * with the LCP image, which is the whole point of shrinking page 1.
+     */
+    let idleId;
+    let timerId;
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(loadNextPage, { timeout: 3000 });
+    } else {
+      // Safari has no requestIdleCallback.
+      timerId = setTimeout(loadNextPage, 800);
+    }
+
+    return () => {
+      cancelled = true;
+      if (idleId !== undefined) window.cancelIdleCallback?.(idleId);
+      if (timerId !== undefined) clearTimeout(timerId);
+    };
+  }, [homeSections, fetchHomeSectionsPage, dispatch]);
+
+  const sortedSections = useMemo(() => sortSections(homeSections), [homeSections]);
   const renderPlan = useMemo(() => buildRenderPlan(sortedSections), [sortedSections]);
 
   // Path resolver for an AI suite card based on its source
