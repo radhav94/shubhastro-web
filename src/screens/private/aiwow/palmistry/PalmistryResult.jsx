@@ -41,7 +41,8 @@ const PalmistryResult = () => {
   const navigate = useNavigate();
   const { resultId } = useParams();
   const handleBack = () => {
-    navigate('/ai-wow/ai-palmistry-scanner/instructions', { replace: true });
+    // Instructions + hand choice + capture actions all live on the entry screen now.
+    navigate('/ai-wow/ai-palmistry-scanner', { replace: true });
   };
   const [activeTab, setActiveTab] = useState('overview');
   // Horizontal strip (scrolls the chosen tab into view) and the non-sticky
