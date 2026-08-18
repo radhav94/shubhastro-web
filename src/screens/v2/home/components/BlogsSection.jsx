@@ -108,9 +108,13 @@ const BlogsSection = ({ blogData = [], title, showMore, gridRef, onScrollableCha
           const cardBody = (
             <>
             <div className={styles.blogImageWrapper}>
+              {/* alt="" — blog.title is the <h3> in .blogContent below, so
+                  repeating it here made a screen reader read the headline twice
+                  for every card. Empty rather than absent so the image is
+                  treated as decorative instead of falling back to its filename. */}
               <img
                 src={blog.image?.small || blog.img || defaultBlogImg}
-                alt={blog.title}
+                alt=""
                 className={styles.blogImage}
                 onError={(e) => {
                   e.target.onerror = null;

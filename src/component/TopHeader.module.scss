@@ -364,6 +364,23 @@
   align-items: center;
   padding: 0 1rem;
   justify-content: flex-start;
+
+  // flex: 1 stretches this <nav> across every pixel between the logo and the
+  // header actions, so on a desktop window the empty space to the right of the
+  // last link — often several hundred px wide — hit-tested as the nav itself.
+  // A click there did nothing and got recorded as a dead click labelled with
+  // the nav's whole text content ("TarotAstrologersShubh AIKundliLive").
+  // The stretch is still what pushes .headerActions to the right edge, so keep
+  // the box and make only the container's own empty area transparent to
+  // pointers. Restoring pointer-events on every direct child, rather than on
+  // .headerNavLink specifically, means a link added here later stays clickable
+  // without needing to know about this rule.
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+
   @media screen and (width <= 1180px) {
       display: none!important;
   }
@@ -428,6 +445,23 @@
   white-space: nowrap;
   border-bottom: 1px solid transparent;
   cursor: pointer;
+}
+
+// Each desktop nav link carries 0.4rem of horizontal margin, so neighbours are
+// separated by a 0.8rem dead gap, and the 3px top margin leaves a strip above
+// them that belongs to the nav. Aiming at a 13.6px label and missing by a few
+// pixels landed on the inert <nav> instead of the link. Expand the hit area
+// across those margins with a transparent overlay rather than converting the
+// margin into padding, so the hover/active underline keeps its current width.
+// Adjacent links each claim their own half of the gap and meet exactly, which
+// leaves nothing between them to miss.
+.headerNavigation .headerNavLink::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  right: -0.4rem;
+  bottom: -1px;
+  left: -0.4rem;
 }
 
 // The Calculators triggers (desktop dropdown and mobile drawer accordion) carry

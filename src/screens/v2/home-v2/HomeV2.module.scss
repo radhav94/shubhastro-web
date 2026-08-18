@@ -1217,7 +1217,9 @@
     gap: 0px;
   }
 
-  h5 {
+  // Muhurat name — an <h3> now (was <h5>, one rank below the widget's own
+  // heading once that became an <h2>). Size is unchanged.
+  h3 {
     font-size: 15px;
     font-weight: 500;
     color: #1a1a1a;
@@ -3003,7 +3005,11 @@
   margin-top: 8px;
 }
 
-/* Voice player pill — same size as Call Again button */
+/* Voice player pill — same size as Call Again button.
+   This is a <button> now (was a div with onClick wrapping a second button), so
+   it needs the UA styling neutralised. `border: none` and the background were
+   already here; appearance/font/cursor are the additions, plus a focus ring —
+   it is keyboard-reachable now, which it never was as a div. */
 .sessionPlayer {
   display: flex;
   align-items: center;
@@ -3015,12 +3021,26 @@
   border: none;
   flex: 1;
   height: 40px;
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+
   @media (width <= 767px) {
     padding: 0 12px;
     gap: 5px;
   }
 }
 
+/* The play glyph. A decorative <span> now, not a nested <button> — the
+   border/background resets below are inert on a span but left in place so the
+   rule still reads correctly if the element ever changes again. */
 .sessionPlayBtn {
   width: auto;
   height: auto;
@@ -3880,7 +3900,7 @@
   }
 
   // .sectionTitle { font-size: 14px; }
-  .muhuratItem h5 {
+  .muhuratItem h3 {
     font-size: 12px;
   }
 }
@@ -4344,7 +4364,9 @@
     padding: 16px 12px;
   }
 
-  h4 {
+  // "TODAY'S MUHURAT" — an <h2> now (was <h4>, which skipped a level in the
+  // page outline). Size is unchanged; only the tag moved.
+  h2 {
     font-size: 14px;
     font-weight: 600;
     color: #1a1a1a;

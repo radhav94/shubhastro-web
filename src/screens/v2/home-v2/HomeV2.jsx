@@ -205,7 +205,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
               <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title}</h3>
               {aiServicesItems[0]?.description && <p>{aiServicesItems[0].description}</p>}
               {aiServicesItems[0]?.action_btn && <button className={styles.featureCta}>{aiServicesItems[0].action_btn}</button>}
-              {(aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon) && <img src={aiServicesItems[0].image_url_web || aiServicesItems[0].icon} alt={aiServicesItems[0]?.title || ""} width="120" height="120" className={styles.laalKitaabImgLeft} loading="lazy" />}
+              {(aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon) && <img src={aiServicesItems[0].image_url_web || aiServicesItems[0].icon} alt="" width="120" height="120" className={styles.laalKitaabImgLeft} loading="lazy" />}
             </div>
           )}
         </div>
@@ -225,7 +225,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                     {aiServicesItems[1]?.description && <p>{aiServicesItems[1].description}</p>}
                   </div>
                   {aiServicesItems[1]?.action_btn && <button className={styles.fcCtaLight}>{aiServicesItems[1].action_btn}</button>}
-                  {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon) && <img src={aiServicesItems[1].image_url_web || aiServicesItems[1].icon} alt={aiServicesItems[1]?.title || ""} width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
+                  {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon) && <img src={aiServicesItems[1].image_url_web || aiServicesItems[1].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
                 </div>
               )}
               {aiServicesItems[2] && (
@@ -237,7 +237,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                     {aiServicesItems[2]?.description && <p>{aiServicesItems[2].description}</p>}
                   </div>
                   {aiServicesItems[2]?.action_btn && <button className={styles.panditTalkBtn}>{aiServicesItems[2].action_btn}</button>}
-                  {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon) && <img src={aiServicesItems[2].image_url_web || aiServicesItems[2].icon} alt={aiServicesItems[2]?.title || ""} width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
+                  {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon) && <img src={aiServicesItems[2].image_url_web || aiServicesItems[2].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
                 </div>
               )}
             </div>
@@ -259,7 +259,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   {aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon ? (
               <img
                 src={aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon}
-                alt={aiServicesItems[3]?.title || "ShubhAstro Live Community"}
+                alt=""
                 width="200"
                 height="200"
                 loading="lazy"
