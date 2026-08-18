@@ -66,10 +66,12 @@ const AiServicesSection = memo(({ sectionData, styles, onlineCount, onRequireGue
             {item.action_btn && (
               <button className={styles.fcCtaLight}>{item.action_btn}</button>
             )}
+            {/* alt="" on the card art — the <h3> above already carries the title,
+                so describing the image with it announced the title twice. */}
             {item.image_url_web || item.icon ? (
               <img
                 src={item.image_url_web || item.icon}
-                alt={item.title || ""}
+                alt=""
                 className={styles.mobileAiCardImg}
                 loading="lazy"
               />
