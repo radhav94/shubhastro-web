@@ -22,6 +22,7 @@ import { unavailableReason } from "../../../utils/helper/astrologerAvailability"
 import {
   getAstrologerDisplayName,
   getAstrologerProfilePath,
+  isObjectIdLike,
 } from "../../../utils/helper/string.utils";
 import {
   useFollowAstrologerByIdMutation,
@@ -169,7 +170,12 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
 };
 
 const AstrologerProfile = () => {
-  const { id } = useParams();
+  // The URL segment is EITHER the astrologer's `userName` handle
+  // (`/astrologer/anirudh`, the canonical form) or a raw ObjectId
+  // (`/astrologer/darpan-naik/69b2...`, the fallback for astrologers with no
+  // userName, plus every previously shared link). The lookup endpoint accepts
+  // both, so it's passed through untouched.
+  const { id: astrologerParam } = useParams();
   const navigate = useNavigate();
   // Same Figma-exported star icon as NewAstrologerCard, which this page also
   // renders — both hardcoded `id="clip0_4961_937"`, so they collided.
@@ -179,9 +185,17 @@ const AstrologerProfile = () => {
     data: astrologerData,
     isLoading,
     error,
-  } = useGetAstrologerByIdQuery({ id }, { skip: !id });
+  } = useGetAstrologerByIdQuery(
+    { id: astrologerParam },
+    { skip: !astrologerParam },
+  );
 
   const data = astrologerData?.data;
+
+  // The real ObjectId. Anything that talks to an id-only endpoint (chat
+  // history, follow status, live status, analytics) must use this, never the URL
+  // segment — that may be a userName handle, which those endpoints reject.
+  const id = data?._id || (isObjectIdLike(astrologerParam) ? astrologerParam : "");
 
   // Track astrologer profile view (fires when a new astrologer id is opened)
   useEffect(() => {
@@ -295,15 +309,10 @@ const AstrologerProfile = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [fetchMoreReviews] = useLazyGetAstrologerReviewsQuery();
 
-  // These two are keyed on `id` (the URL param), not `data?._id`, which removes a
-  // whole round trip each.
-  //
-  // They used to wait for useGetAstrologerByIdQuery to resolve before they could
-  // even start, turning the page into a two-wave waterfall. But the values are
-  // identical: getAstrologerProfilePath() builds the URL as
-  // `/astrologer/<slug>/<astrologer._id>`, and useGetAstrologerByIdQuery fetches
-  // `astrologers/astrologer?astrologerId=<id>` — so the document it returns has
-  // `_id === id` by construction. Nothing was gained by waiting for it.
+  // Both of these need the real ObjectId (`id`), so on a `/astrologer/<userName>`
+  // URL they wait one round trip for the profile fetch to resolve. On the older
+  // `/astrologer/<slug>/<objectId>` URLs `id` is available immediately from the
+  // URL, so they still fire in the first wave — no waterfall there.
   const { data: vaChatHistoryData } = useGetChatHistoryQuery(
     { userId: id },
     { skip: !id || !getToken() },
