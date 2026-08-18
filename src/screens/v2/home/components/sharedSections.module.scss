@@ -1,0 +1,435 @@
+/*
+ * Styles shared by the three components under `v2/home/components/` that the
+ * live homepage (HomeV2) still renders: AstrologersSection, BlogsSection and
+ * SectionHeader.
+ *
+ * These rules were extracted verbatim from `../Home.module.scss`. That file
+ * belongs to the old v2 Home screen, whose route is commented out in Paths.js -
+ * the screen is dead - but because CSS Modules are all-or-nothing per file,
+ * importing it for ~24 classes put all 329 of them (73 KB raw, ~19% of the
+ * render-blocking entry stylesheet) in front of every visitor. Lighthouse
+ * counted almost all of it as unused CSS.
+ *
+ * Keep this file limited to what those three components actually use. If one of
+ * them needs another class, copy that rule across rather than re-importing
+ * Home.module.scss.
+ */
+
+// Copied from Home.module.scss, where it is declared inline rather than in a
+// shared partial. `.blogTitle` below is the only consumer here.
+@mixin line-clamp($lines: 3) {
+  @if $lines != null {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  } @else {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
+  }
+}
+
+.dividerLine {
+  flex: 1;
+  height: 2px;
+  border-radius: 1px;
+  min-width: 40px;
+
+  svg {
+    display: none;
+  }
+
+  &:first-child {
+    background: linear-gradient(to right, transparent, rgba(42, 22, 27, 0.5));
+  }
+
+  &:last-child {
+    background: linear-gradient(to left, transparent, rgba(42, 22, 27, 0.5));
+  }
+}
+
+.dividerMoon {
+  font-size: clamp(12px, 3vw, 14px);
+  color: #160115;
+  flex-shrink: 0;
+  svg{
+    height: 10px;
+    width: 10px;
+  }
+}
+
+.astrologersSection {
+  margin-bottom: 24px;
+
+
+
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 20px;
+  width: fit-content;
+
+  margin-right: auto;
+  @media screen and (width <= 767px) {
+    margin-bottom: 12px;
+  }
+}
+
+.sectionTitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #160115;
+  text-transform: uppercase;
+  text-align: left;
+
+}
+
+.titleDivider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin: 6px auto 0 auto!important;
+  display: none!important;
+  svg path{
+    fill-opacity: 1;
+  }
+}
+
+.titleDivider .dividerMoon {
+  font-size: 16px;
+  color: #160115;
+}
+
+.astrologersGrid {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 16px 2px 4px;
+
+
+
+
+
+
+
+  @media (width <= 767px) {
+    padding: 4px 16px 0px 0px;
+  }
+}
+
+.astrologersGrid::-webkit-scrollbar {
+  display: none;
+}
+
+.gridWrapper {
+  position: relative;
+}
+
+.sliderBtn {
+  position: absolute;
+  top: 42%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  color: #d43400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  transition: background 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background: #fff4ec;
+  }
+
+  &:active {
+    transform: translateY(-50%) scale(0.94);
+  }
+
+  @media (width <= 767px) {
+    display: none;
+  }
+}
+
+.sliderBtnLeft {
+  left: 8px;
+}
+
+.sliderBtnRight {
+  right: 8px;
+}
+
+.sessionsHeader .titleDivider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+}
+
+.sessionsHeader .dividerMoon {
+  font-size: 16px;
+  color: #160115;
+  flex-shrink: 0;
+}
+
+.cosmicDivider .dividerMoon {
+  font-size: 14px;
+  color: #160115;
+}
+
+.discoverHeader .sectionHeader {
+
+  margin: 0;
+  text-align: left;
+}
+
+.discoverHeader .titleDivider {
+  margin: 0;
+}
+
+.viewAllBtn {
+  width: 40px;
+  height: 40px;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.viewAllBtn:hover {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.blogsSection {
+  margin-bottom: 24px;
+}
+
+.blogsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 16px;
+  padding-right: 16px;
+  @media screen and (width <= 767px) {
+    margin-bottom: 12px;
+  }
+}
+
+.blogsTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #160115;
+  text-transform: uppercase;
+  border-left: 4px solid #f75801;
+  padding-left: 5px;
+}
+
+.blogsHeader .titleDivider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+}
+
+.blogsHeader .dividerMoon {
+  font-size: 16px;
+  color: #160115;
+  flex-shrink: 0;
+}
+
+.blogsHeader .viewAllBtn {
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  background: none;
+  border: none;
+  border-radius: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #f75801;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.blogsGrid {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 16px 2px 4px;
+  @media (width <= 767px) {
+
+    padding: 0px 16px 0px 0px;
+  }
+}
+
+.blogsGrid::-webkit-scrollbar {
+  display: none;
+}
+
+.blogCard {
+
+  width: 190px;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+
+  cursor: pointer;
+
+  
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+    flex-shrink: 0;
+  @media screen and (width <= 767px) {
+
+    width: 145px;
+  }
+}
+
+.blogCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.blogCardUnavailable {
+  opacity: 0.6;
+
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+.blogImageWrapper {
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.blogImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blogContent {
+  padding: 16px;
+  background: #ffffff;
+}
+
+.blogTitle {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin: 0 0 10px 0;
+  line-height: 1.3;
+  @include line-clamp(2);
+  @media (width <= 767px) {
+    font-size: 12px;
+  }
+}
+
+.blogDate {
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  color: #666;
+}
+
+.sliderBtn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 2;
+  color: #424242;
+
+  &:hover {
+    background: #f5f5f5;
+    border-color: #ff6b35;
+    color: #ff6b35;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  @media screen and (width <= 767px) {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+.sessionsHeader .titleDivider {
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) {
+.astrologersSection {
+    margin-bottom: 32px;
+  }
+.sessionsHeader .titleDivider {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+.blogsHeader .titleDivider {
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) {
+.blogsSection {
+    margin-bottom: 32px;
+  }
+.blogsHeader .titleDivider {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+.blogsHeader .titleDivider {
+    width: 100%;
+  }
+}

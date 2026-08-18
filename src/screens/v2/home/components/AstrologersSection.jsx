@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import SectionHeader from "./SectionHeader";
 import NewAstrologerCard from "../../../../component/UI/cards/newAstrologerCard/NewAstrologerCard";
 import useHorizontalScrollState from "../../../../hooks/useHorizontalScrollState";
-import styles from "../Home.module.scss";
+import styles from "./sharedSections.module.scss";
 import EmergencySessionModal from "../../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
 
 const AstrologersSection = memo(({ title, astrologers, onConnect, gridRef, hideSliderButtons = false, onScrollableChange }) => {
