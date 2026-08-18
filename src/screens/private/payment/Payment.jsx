@@ -58,9 +58,23 @@ const Payment = () => {
     refreshWallet();
   }, [refreshWallet]);
 
-  // Track recharge flow start (once on mount)
+  /*
+   * Track recharge flow start, once per visit to this screen.
+   *
+   * `current_balance` is read at fire time rather than added to the dep array on
+   * purpose: useWalletBalance seeds from localStorage and then refreshes, so
+   * depending on it would emit the event a second time when the fresh figure
+   * lands. Balance is null only before the very first fetch of a session.
+   *
+   * Fires for logged-out visitors too, a beat before the token effect above
+   * redirects them to /login. Harmless, but it means this event is not a clean
+   * signal of a logged-in user starting a recharge.
+   */
   useEffect(() => {
-    trackEvent("recharge_initiated", {});
+    trackEvent("recharge_initiated", {
+      current_balance: balance ?? undefined,
+      source: "recharge_screen",
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

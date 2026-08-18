@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { useRazorpayPayment } from '../../utils/hooks/useRazorpay';
 import Toast from '../toast';
+import { trackEvent } from '../../utils/analytics';
 import styles from './paymentDetailsModal.module.scss';
 
 const GST_RATE = 0.18;
@@ -44,6 +45,25 @@ const PaymentDetailsModal = ({ isOpen, onClose, selectedPlan, onSuccess, onBack 
     }
 
     setPaymentLoading(true);
+
+    /*
+     * recharge_payment_method_selected.
+     *
+     * There is no in-app instrument picker: this screen offers a single "Pay
+     * with Razorpay" action, and UPI vs card vs net banking is chosen inside
+     * Razorpay's own checkout, which we cannot observe from the page. So this
+     * fires once, here, with the gateway as the method — committing to a payment
+     * route is the closest real equivalent of the spec's step.
+     *
+     * If per-instrument reporting is needed, it has to come from Razorpay's
+     * dashboard or a server-side webhook that reads `method` off the payment
+     * entity; the browser never sees it.
+     */
+    trackEvent("recharge_payment_method_selected", {
+      amount: rechargeAmount,
+      payment_method: "razorpay",
+      source: "recharge_modal",
+    });
 
     try {
       const planId = selectedPlan._id || selectedPlan.plan_id;

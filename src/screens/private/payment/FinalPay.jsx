@@ -8,6 +8,7 @@ import { useRazorpayPayment } from "../../../utils/hooks/useRazorpay";
 import Toast from "../../../component/toast";
 import BackButton from "../../../component/UI/BackButton/BackButton";
 import PaymentSuccessModal from "../../../component/UI/modal/WelcomeBonusModal/PaymentSuccessModal";
+import { trackEvent } from "../../../utils/analytics";
 
 const FinalPay = () => {
   const location = useLocation();
@@ -124,6 +125,15 @@ const FinalPay = () => {
     }
 
     submittingRef.current = true;
+
+    // Same single-gateway situation as the recharge modal: the instrument is
+    // chosen inside Razorpay's checkout, so committing to Razorpay here is the
+    // observable "method selected" step. See PaymentDetailsModal.handlePay.
+    trackEvent("recharge_payment_method_selected", {
+      amount,
+      payment_method: "razorpay",
+      source: "recharge_screen",
+    });
 
     try {
       await initiatePayment({
