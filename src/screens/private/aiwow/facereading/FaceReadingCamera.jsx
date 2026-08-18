@@ -8,6 +8,8 @@ import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
 import toast from '../../../../component/toast';
+import { compressImage } from '../../../../utils/helper/compressImage';
+import { isInAppBrowser } from '../../../../utils/deviceInfo';
 
 const FaceReadingCamera = () => {
   const navigate = useNavigate();
@@ -31,6 +33,9 @@ const FaceReadingCamera = () => {
   }, []);
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
+  // Gallery fallback used when the camera cannot be opened at all.
+  const uploadInputRef = useRef(null);
+  const [isPreparingUpload, setIsPreparingUpload] = useState(false);
   const [facingMode, setFacingMode] = useState('user');
   const [isFrontCamera, setIsFrontCamera] = useState(true);
   // Show the flip button only when the device actually has more than one
@@ -355,6 +360,62 @@ const FaceReadingCamera = () => {
     startCamera();
   };
 
+  /*
+   * Upload fallback for the camera-error screen.
+   *
+   * getUserMedia is unavailable or refused outright in embedded in-app browsers
+   * (Instagram, Facebook, Messenger), and there is no per-site camera setting in
+   * those apps for the user to change. The error screen offered only "Try Again"
+   * — which reloads into the identical refusal — and "Go Back". So the feature
+   * dead-ended for every visitor arriving from a social app, even though the
+   * landing screen one step back already accepts a photo from the gallery and
+   * reaches the same analysis.
+   *
+   * The picker is opened from a real tap on this screen rather than by bouncing
+   * back to the landing and auto-clicking its input: a programmatic .click()
+   * after a navigation has no user activation left and is blocked.
+   *
+   * The chosen photo is fed into `capturedImage`, so it lands on the existing
+   * confirm step and goes through the very same Continue / guest-auth / submit
+   * path as a camera capture. No duplicated submit logic.
+   */
+  const handleUploadClick = () => {
+    if (isPreparingUpload) {
+      toast.info('Still preparing your photo — one moment.');
+      return;
+    }
+    uploadInputRef.current?.click();
+  };
+
+  const handleUploadedFile = (event) => {
+    const input = event.target;
+    const file = input.files?.[0];
+
+    // Clear immediately: re-picking the SAME file fires no `change` event, so a
+    // second attempt after a failure would do nothing at all. Same reason the
+    // landing screen does this.
+    input.value = '';
+
+    if (!file) return;
+
+    // compressImage re-encodes through a canvas and waits for a decode, which is
+    // slow for a large iPhone photo inside a WebView. Keep the button busy so the
+    // wait is lit rather than silent.
+    setIsPreparingUpload(true);
+    compressImage(file)
+      .then((dataUrl) => {
+        setCapturedImage(dataUrl);
+        // Leave the error view — the confirm step renders from `capturedImage`
+        // and does not need a live stream.
+        setError(null);
+      })
+      .catch((err) => {
+        console.error('[FaceReading] Could not prepare the uploaded photo:', err);
+        toast.error("Couldn't read that photo. Please try a different one.");
+      })
+      .finally(() => setIsPreparingUpload(false));
+  };
+
   const submitImage = () => {
     dispatch(setFaceReadingImage(capturedImage));
     navigate('/ai-wow/astro-face-reading/capture', { replace: true });
@@ -415,14 +476,39 @@ const FaceReadingCamera = () => {
           </svg>
           <h3 className={styles.errorTitle}>Camera Access Required</h3>
           <p className={styles.errorText}>{error}</p>
+          {/* In an in-app browser the generic advice above is unactionable —
+              Instagram and Facebook expose no per-site camera permission, so
+              "allow it in your browser settings" points at a screen that does not
+              exist. Say what actually works here. */}
+          {isInAppBrowser() && (
+            <p className={styles.errorText}>
+              This is the Instagram/Facebook in-app browser, which blocks the
+              camera. Upload a photo instead, or open shubhastro.ai in Chrome or
+              Safari.
+            </p>
+          )}
           <div className={styles.errorButtons}>
-            <button className={styles.retryButton} onClick={() => window.location.reload()}>
+            <button
+              className={styles.retryButton}
+              onClick={handleUploadClick}
+              aria-busy={isPreparingUpload}
+            >
+              {isPreparingUpload ? 'Preparing photo…' : 'Upload a photo instead'}
+            </button>
+            <button className={styles.backButton} onClick={() => window.location.reload()}>
               Try Again
             </button>
             <button className={styles.backButton} onClick={handleBack}>
               Go Back
             </button>
           </div>
+          <input
+            ref={uploadInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleUploadedFile}
+            style={{ display: 'none' }}
+          />
         </div>
       </div>
     );

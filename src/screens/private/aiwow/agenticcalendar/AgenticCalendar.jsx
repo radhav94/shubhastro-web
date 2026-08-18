@@ -67,6 +67,8 @@ const AgenticCalendar = () => {
   });
   const [locked, setLocked] = useState(!!restoredResult); // Lock selections after clicking Get Timing
   const resultsRef = useRef(null);
+  const locationFieldRef = useRef(null);
+  const ctaRef = useRef(null);
   const [locationValue, setLocationValue] = useState('');
   const [locationData, setLocationData] = useState(null);
   const [rawApiResult, setRawApiResult] = useState(() => {
@@ -150,6 +152,82 @@ const AgenticCalendar = () => {
   };
 
   const allOccasions = [...DEFAULT_OCCASIONS, ...customOccasions];
+
+  // `locationData` is only populated by picking a suggestion from the dropdown,
+  // so a user who typed a city and never tapped a row has a filled-looking field
+  // and no coordinates. On desktop that is the default state: geolocation is
+  // usually denied or unavailable, `useUserLocation` then keeps `isDefault`
+  // true, the auto-fill effect above never runs and the field is simply empty.
+  // The CTA used to hard-block on `locationData` alone, which stopped a request
+  // that `analyzeCalendarEvents` is built to make without coordinates (it omits
+  // lat/lon from the payload when they are absent) and that the auto-submit path
+  // below already makes without them. Same fallback the home section uses.
+  const effectiveLocation =
+    locationData ||
+    (userLocation.loaded && !userLocation.isDefault
+      ? { address: userLocation.locationName, lat: userLocation.lat, lng: userLocation.lon }
+      : null);
+
+  // Timings are latitude/longitude dependent, so when there is genuinely no
+  // location to work from the block stays. A toast on its own left the user
+  // hunting for the cause though — the CTA sits below the field it complains
+  // about — so point at it as well. Moving focus and scrolling is also a visible
+  // response to the tap rather than a message that can be missed.
+  const focusLocationField = () => {
+    const input = locationFieldRef.current?.querySelector('input');
+    if (!input) return;
+    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    input.focus();
+  };
+
+  // The CTA's behaviour, shared with the banner below. Every branch either makes
+  // progress or says what is missing — nothing here can return silently.
+  const handlePrimaryCta = () => {
+    if (locked) {
+      unlockSelections();
+      return;
+    }
+    if (selectedOccasions.length === 0) {
+      toast.error('Select at least one occasion to get timings');
+      return;
+    }
+    if (!effectiveLocation) {
+      toast.error(
+        locationValue.trim()
+          ? 'Pick your location from the suggestions to confirm it'
+          : 'Enter your location to get accurate timings'
+      );
+      focusLocationField();
+      return;
+    }
+    handleGetTimings();
+  };
+
+  /*
+   * The orange hero reads "PLAN YOUR EVENTS / Get astrologically optimal timing
+   * recommendations…" — almost word for word the label on the real CTA, which
+   * sits below the occasion chips, the period row and the location field, i.e.
+   * frequently below the fold on a laptop. The visually identical banner on the
+   * home page IS a button (`planEventsBanner` has an onClick and navigates here),
+   * so a visitor who arrives via that banner has already been taught that this
+   * card is tappable. It was an inert <div>, which is where the repeated dead
+   * clicks on this screen come from.
+   *
+   * Clicking it now points at the control and, when the form is ready, just does
+   * the thing the copy promises. Every path produces something visible.
+   */
+  const handleBannerClick = () => {
+    ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Don't run the CTA while locked: there it means "Modify Selections", which
+    // discards the results the user is looking at. A hero click is not a request
+    // to throw those away.
+    if (locked) {
+      Toast.info('Your timings are below. Use Modify Selections to change them.');
+      return;
+    }
+    handlePrimaryCta();
+  };
 
   // Drop the lock and the result it belongs to. Same reset the "Modify
   // Selections" button performs.
@@ -262,8 +340,8 @@ const AgenticCalendar = () => {
         fromDate,
         toDate,
         kundliId: profile?._id,
-        lat: locationData?.lat,
-        lng: locationData?.lng,
+        lat: effectiveLocation?.lat,
+        lng: effectiveLocation?.lng,
       }));
 
       // User closed the plans popup without purchasing — unlock so they can
@@ -397,8 +475,28 @@ const AgenticCalendar = () => {
 
       <div className={styles.content}>
         {/* Plan Your Events Banner */}
-        <div className={styles.banner} style={{ position: 'relative' }}>
-          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+        <div
+          className={styles.banner}
+          style={{ position: 'relative' }}
+          role="button"
+          tabIndex={0}
+          aria-label="Get timing recommendations"
+          onClick={handleBannerClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleBannerClick();
+            }
+          }}
+        >
+          {/* role="button" rather than a real <button>: the banner contains an
+              <h2> and a <p>, and flow content is invalid inside a button. */}
+          <span
+            style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}
+            // The read-aloud control sits inside the banner, so without this a tap
+            // on it would also fire the banner's action.
+            onClick={(e) => e.stopPropagation()}
+          >
             <TTSButton text="Plan Your Events. Get astrologically optimal timing recommendations for your important life events" />
           </span>
           <h2 className={styles.bannerTitle}>PLAN YOUR EVENTS</h2>
@@ -497,7 +595,7 @@ const AgenticCalendar = () => {
           </div>
 
           {/* Location Field */}
-          <div className={styles.locationWrap}>
+          <div className={styles.locationWrap} ref={locationFieldRef}>
             <label className={styles.locationLabel}>
               Location
             </label>
@@ -534,24 +632,11 @@ const AgenticCalendar = () => {
               so the tap can say what is missing instead of being swallowed. */}
           <button
             className={`${styles.getTimingsBtn} ${
-              !locked && (selectedOccasions.length === 0 || !locationData) ? styles.getTimingsBtnIncomplete : ''
+              !locked && (selectedOccasions.length === 0 || !effectiveLocation) ? styles.getTimingsBtnIncomplete : ''
             }`}
+            ref={ctaRef}
             disabled={isLoading}
-            onClick={() => {
-              if (locked) {
-                unlockSelections();
-                return;
-              }
-              if (selectedOccasions.length === 0) {
-                toast.error('Select at least one occasion to get timings');
-                return;
-              }
-              if (!locationData) {
-                toast.error('Enter your location and pick it from the suggestions');
-                return;
-              }
-              handleGetTimings();
-            }}
+            onClick={handlePrimaryCta}
           >
             {isLoading ? (
               <>

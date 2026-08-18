@@ -24,18 +24,25 @@ const RouteErrorBoundary = () => {
     !!document.querySelector('.goog-te-banner-frame');
 
   // If Google Translate is active and it's NOT a chunk error, this is almost certainly
-  // a DOM conflict from Google Translate modifying React's tree. Redirect immediately.
-  if (hasGoogleTranslate && !isChunkError) {
-    const hasRecovered = sessionStorage.getItem('gtranslate-error-recovery');
-    if (!hasRecovered) {
-      sessionStorage.setItem('gtranslate-error-recovery', 'true');
-      window.location.href = '/';
-      // Return null to avoid rendering the error UI during redirect
-      return null;
-    }
-    // Already tried once, clear flag and show error page
-    sessionStorage.removeItem('gtranslate-error-recovery');
-  }
+  // a DOM conflict from Google Translate modifying React's tree, so recover by
+  // reloading the home page once.
+  //
+  // This used to run inline, with an early `return null` sitting ABOVE the two
+  // useEffect calls below. On the render where it fired, the hook count dropped
+  // and React threw "Rendered fewer hooks than expected" from inside the error
+  // boundary itself — replacing the page's real error with a second, unrelated
+  // one and losing the actual cause. The decision is computed here and acted on
+  // in an effect so the hook order never changes.
+  const isRecoveringFromTranslate =
+    hasGoogleTranslate &&
+    !isChunkError &&
+    !sessionStorage.getItem('gtranslate-error-recovery');
+
+  useEffect(() => {
+    if (!isRecoveringFromTranslate) return;
+    sessionStorage.setItem('gtranslate-error-recovery', 'true');
+    window.location.href = '/';
+  }, [isRecoveringFromTranslate]);
 
   // Handle chunk loading errors with auto-reload
   useEffect(() => {
@@ -51,10 +58,14 @@ const RouteErrorBoundary = () => {
     }
   }, [error, isChunkError]);
 
-  // Clear Google Translate recovery flag on successful render (user sees this page = recovery done)
+  // Clear the recovery flag once this page actually renders (user sees it =
+  // recovery done). Skipped while a recovery redirect is pending, otherwise this
+  // would wipe the flag that the effect above just set and the next error would
+  // redirect again, forever.
   useEffect(() => {
+    if (isRecoveringFromTranslate) return;
     sessionStorage.removeItem('gtranslate-error-recovery');
-  }, []);
+  }, [isRecoveringFromTranslate]);
 
   const handleReload = () => {
     sessionStorage.removeItem('route-chunk-error-reload');
@@ -91,6 +102,10 @@ const RouteErrorBoundary = () => {
     // Use hard navigation to avoid corrupted router state (e.g. after Google Translate interference)
     window.location.href = '/';
   };
+
+  // Nothing to show while the recovery redirect above is in flight. Safe here:
+  // every hook has already run, so the order is identical on every render.
+  if (isRecoveringFromTranslate) return null;
 
   // Determine error type and message
   let errorTitle = 'Something went wrong';
@@ -151,9 +166,16 @@ const RouteErrorBoundary = () => {
             </div>
           </div>
 
-          {process.env.NODE_ENV === 'development' && showDetails && (
+          {/* `process` does not exist in browser code under Vite — this relied on
+              Vite's compatibility define rather than the project's own idiom
+              (`import.meta.env.DEV`, used in App.jsx), and it was the file's one
+              no-undef error. Open by default: the message and stack are the whole
+              point of this panel, and having to notice and expand it meant the
+              cause of a crash was one click further away than the decorative
+              copy above it. */}
+          {import.meta.env.DEV && showDetails && (
             <div className={styles.devInfo}>
-              <details className={styles.errorAccordion}>
+              <details className={styles.errorAccordion} open>
                 <summary className={styles.accordionHeader}>
                   <span className={styles.devIcon}>🐛</span>
                   Developer Info (Development Mode)

@@ -131,6 +131,18 @@
   margin-bottom: 0;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+
+  /* The banner is a control now (see handleBannerClick). It was already being
+     clicked repeatedly while inert, because it is the same orange card that is
+     tappable on the home page and its subtitle repeats the CTA's wording. The
+     cursor and focus ring make that affordance honest instead of implied. */
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -4px;
+  }
+
   @media (width <= 767px) {
     padding:10px 16px;
   }
