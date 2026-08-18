@@ -79,10 +79,26 @@ export const TRUECALLER_TERMS_URL = `${POLICY_ORIGIN}/terms-and-conditions`;
 /**
  * How long we wait for the backend to receive Truecaller's callback before
  * giving up and telling the user to use OTP instead.
+ *
+ * Doubles as the deep link's `ttl`, so the consent sheet auto-dismisses at the
+ * same moment we stop listening — the user is never left with a live sheet whose
+ * result we would discard.
+ *
+ * Truecaller suggests ~15s (5 polls x 3s), but that only covers the callback
+ * arriving; our backend then has to fetch the profile and create the session
+ * before `status` flips to completed, so the window is kept wider.
  */
 export const TRUECALLER_POLL_TIMEOUT_MS = 45000;
-/** Gap between polls of the backend status endpoint. */
-export const TRUECALLER_POLL_INTERVAL_MS = 1500;
+/**
+ * Gap between polls of the backend status endpoint.
+ *
+ * 3s is the interval Truecaller recommends ("periodic polling with 5 polling
+ * cycles at an interval of 3 seconds each"). At 1.5s this made 30 round trips per
+ * login attempt — and each one is an encrypted gateway request — for no benefit,
+ * since the completion is gated on Truecaller's callback plus a profile fetch,
+ * not on how fast we ask.
+ */
+export const TRUECALLER_POLL_INTERVAL_MS = 3000;
 
 /**
  * Truecaller requires the nonce to be 8–64 chars. Uses crypto when available so

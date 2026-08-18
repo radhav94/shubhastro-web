@@ -200,6 +200,7 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
       // callback creates has them (the callback itself carries none).
       const fcmTokens = await requestFCMToken().catch(() => null);
       tcLog("fcm_token", { obtained: !!fcmTokens });
+      let sessionRouteMissing = false;
       try {
         const sessionRes = await createTruecallerSession({
           requestId,
@@ -214,17 +215,62 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
           message: sessionRes?.data?.message,
         });
       } catch (err) {
-        // Non-fatal: if the backend doesn't require pre-registration the status
-        // endpoint is still the source of truth. Continue to the deep link.
-        // Logged anyway — a 404 here is the first sign the endpoints are missing.
+        // Non-fatal on its own: pre-registration is optional in our contract, so
+        // a backend may implement only the status endpoint. Recorded either way —
+        // a 404 here is the first sign the endpoints are missing entirely.
+        const httpStatus = err?.response?.status ?? null;
+        sessionRouteMissing = httpStatus === 404 || httpStatus === 501;
         tcLog("session_create_failed", {
-          httpStatus: err?.response?.status ?? null,
+          httpStatus,
+          sessionRouteMissing,
           serverMessage:
             typeof err?.response?.data === "object"
               ? err.response.data?.message
               : String(err?.response?.data || "").slice(0, 200),
           message: String(err?.message || err).slice(0, 200),
         });
+      }
+
+      /*
+        Don't ask for a consent we cannot act on.
+
+        Opening the sheet commits the user to a decision, and Truecaller then
+        posts the access token to the callback URL — server side, out of our
+        reach. If `status` isn't deployed there is nowhere for that result to
+        surface, so the login dies *after* the user has already consented (the
+        dev log showed exactly that: sheet opened, then a 404 51ms later).
+
+        `session` 404ing is not proof on its own, since it is optional. So probe
+        `status` once — the endpoint that genuinely cannot be missing — and only
+        bail when that is absent too. One extra request, and only on the path
+        that was already broken.
+      */
+      if (sessionRouteMissing) {
+        let statusRouteMissing = false;
+        try {
+          const probe = await getTruecallerStatus(requestId);
+          tcLog("status_probe_ok", {
+            httpStatus: probe?.status,
+            bodyStatus: probe?.data?.status ?? null,
+          });
+        } catch (err) {
+          const httpStatus = err?.response?.status ?? null;
+          statusRouteMissing = httpStatus === 404 || httpStatus === 501;
+          tcLog("status_probe_failed", { httpStatus, statusRouteMissing });
+        }
+
+        if (statusRouteMissing) {
+          setStatus("idle");
+          tcLog("aborted_endpoints_missing", {});
+          trackEvent("truecaller_login_failed", { error_reason: "endpoints_missing" });
+          toast.error("Truecaller login isn't available yet. Please continue with your mobile number.");
+          if (import.meta.env.DEV) {
+            console.warn(
+              "[truecaller] users/truecaller/session AND users/truecaller/status both returned 404/501 — the backend endpoints are not deployed on this environment, so the consent sheet was not opened. See TRUECALLER_WEB_IMPLEMENTATION.md."
+            );
+          }
+          return;
+        }
       }
 
       // Policy links come from truecallerWeb.js (absolute public URLs — the
