@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './ClothColorLanding.module.scss';
 import AuraSpectrumIcon from '../../../../assets/icons/auraspectrum.png';
@@ -17,6 +17,7 @@ import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 
 const ClothColorLanding = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
@@ -150,7 +151,15 @@ const ClothColorLanding = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
+          {/* `navigate(-1)` is inert on the first history entry, and the camera
+              screen navigates here with `replace: true`, so the entry this page
+              occupies can well be the first one. */}
+          <button
+            type="button"
+            className={styles.backButton}
+            aria-label="Go back"
+            onClick={() => (location.key !== 'default' ? navigate(-1) : navigate('/ai-wow'))}
+          >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

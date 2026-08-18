@@ -39,6 +39,8 @@
   text-align: center;
 }
 
+// Rendered as a <button> (was a bare <div onClick>) so gifts are focusable and
+// expose their selected state.
 .giftItem {
   padding: 10px 5px;
   border-radius: 12px;
@@ -51,9 +53,20 @@
   align-items: center;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease, transform 0.3s ease;
+  background: transparent;
+  font: inherit;
+  text-align: center;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
 
   &:hover {
     background: #fafafa;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #00a884;
+    outline-offset: 2px;
   }
 }
 
@@ -141,6 +154,16 @@
     background: #c9c9c9;
     cursor: not-allowed;
   }
+}
+
+/*
+ * Send is blocked (no gift picked, or the gift costs more than the balance).
+ * Styled like the old `:disabled` state but WITHOUT the disabled attribute, so
+ * the tap still reaches the handler and can explain the blocker. A truly
+ * disabled button absorbs the tap silently, which reads as a dead click.
+ */
+.sendBtnBlocked {
+  background: #c9c9c9;
 }
 /* ===============================
    RESPONSIVE STYLES – GiftSection

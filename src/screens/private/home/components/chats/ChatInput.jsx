@@ -5,7 +5,7 @@ import ProfileManager from "../../../../../component/UI/Profile/ProfileManager";
 import { useChat } from "../../../../../context/ChatContext";
 import { useVoiceRecorder } from "../../../talkToAstrologer/voiceChat/useVoiceRecorder";
 import VoiceRecorderPopup from "../../../talkToAstrologer/voiceChat/VoiceRecorderPopup";
-import { useFileSelector } from "./filePicker/useFileSelector";
+import { useFileSelector, FILE_SELECT_CANCELLED } from "./filePicker/useFileSelector";
 
 const ChatInput = ({
   value,
@@ -182,6 +182,14 @@ const ChatInput = ({
       await sendFiles(file, { name: file.name, type: file.type, size: file.size });
       URL.revokeObjectURL(cameraPreview.url);
       setCameraPreview(null);
+    } catch (err) {
+      // sendFiles fetches a signed URL and PUTs to S3, and throws on either. It
+      // had try/finally with no catch, so a failed upload was an unhandled
+      // rejection: the preview stayed on screen with the photo still in it and
+      // nothing said why. Pressing Send again did the same thing again. The
+      // photo is deliberately kept so the retry costs nothing.
+      console.error("Camera photo upload failed:", err);
+      toast.error("Couldn't send that photo. Check your connection and tap Send again.");
     } finally {
       setIsSending(false);
     }
@@ -199,12 +207,42 @@ const ChatInput = ({
     setAttachMenuOpen(false);
     if (type === "kundali") { setKundliModalOpen(true); return; }
     if (type === "camera") { setCameraOpen(true); return; }
+
+    // The attach sheet closes on the way in and the upload happens with no
+    // visible state of its own, so without a latch a second tap starts a second
+    // signed-URL request and a second PUT for the same photo.
+    if (isSending) {
+      toast.info("Still sending your last attachment. One moment.");
+      return;
+    }
+
+    setIsSending(true);
     try {
       const accept = type === "photo" ? "image/*" : ".pdf,.doc,.docx,.xls,.xlsx";
       const { blob, name, size } = await openFileSelector(accept);
       await sendFiles(blob, { name, type: blob.type, size });
-    } catch {
-      console.log("File selection cancelled");
+    } catch (err) {
+      /*
+       * This was `catch { console.log("File selection cancelled") }`, which is
+       * only true for one of the two things that land here. sendFiles throws
+       * when the signed-URL call or the S3 PUT fails, so a photo that failed to
+       * upload produced a console line, no message in the transcript and no
+       * explanation — the attach sheet had already closed, so the whole
+       * interaction looked like a tap that did nothing.
+       *
+       * Backing out of the picker is deliberate and stays silent; everything
+       * else gets named.
+       */
+      if (err?.message !== FILE_SELECT_CANCELLED) {
+        console.error("Attachment send failed:", err);
+        toast.error(
+          type === "photo"
+            ? "Couldn't send that photo. Check your connection and try again."
+            : "Couldn't send that file. Check your connection and try again.",
+        );
+      }
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -330,7 +368,7 @@ const ChatInput = ({
               </svg>
             </button>
 
-            <button className={styles.sendButton} onClick={() => { onSend(); setTimeout(() => inputRef.current?.focus(), 0); }}>
+            <button className={styles.sendButton} onClick={() => { onSend(); setTimeout(() => { if (inputRef.current) { inputRef.current.style.height = 'auto'; inputRef.current.focus(); } }, 0); }}>
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="17" viewBox="0 0 20 17" fill="none">
                 <path d="M1.4 16.8849L18.85 9.40488C19.66 9.05488 19.66 7.91488 18.85 7.56488L1.4 0.0848801C0.74 -0.20512 0.00999999 0.28488 0.00999999 0.99488L0 5.60488C0 6.10488 0.37 6.53488 0.87 6.59488L15 8.48488L0.87 10.3649C0.37 10.4349 0 10.8649 0 11.3649L0.00999999 15.9749C0.00999999 16.6849 0.74 17.1749 1.4 16.8849Z" fill="#FEFEFE"/>
               </svg>

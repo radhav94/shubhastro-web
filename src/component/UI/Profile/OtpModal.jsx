@@ -1,4 +1,6 @@
 import { useEffect, useState, useRef, memo } from "react";
+import Toast from "../../toast";
+import { trackEvent } from "../../../utils/analytics";
 import styles from "./OtpModal.module.scss";
 
 // Isolated timer to prevent re-rendering the OTP inputs every second
@@ -73,8 +75,41 @@ const OtpModal = ({
       ? phoneNumber.slice(2)
       : phoneNumber;
 
-  const verify = async () => {
-    if (isVerifying || !isOtpComplete) return;
+  /**
+   * @param {boolean} [fromUser] true when a tap/submit triggered this, false for
+   *   the auto-submit effect. Only a real interaction deserves an explanation —
+   *   the effect fires on every keystroke and must stay silent.
+   */
+  const verify = async (fromUser = false) => {
+    /*
+     * This was doubly silent: the button carried
+     * `disabled={!isOtpComplete || isVerifying}` so the browser swallowed the
+     * tap, and this function repeated the same check. On the last step of the
+     * signup funnel, a visitor with 4 or 5 digits entered — easily produced by
+     * a partial iOS SMS autofill into the hidden input behind the six boxes —
+     * tapped "Verify & Continue" and got no response whatsoever.
+     */
+    if (isVerifying) {
+      if (fromUser) Toast.error("Checking your code — one moment.");
+      return;
+    }
+    if (!isOtpComplete) {
+      if (fromUser) {
+        const remaining = 6 - otp.length;
+        trackEvent("otp_verify_blocked", {
+          blocker: "incomplete_otp",
+          digits_entered: otp.length,
+        });
+        Toast.error(
+          otp.length === 0
+            ? "Enter the 6-digit code we sent you."
+            : `Please enter all 6 digits — ${remaining} to go.`
+        );
+        inputRef.current?.focus();
+      }
+      return;
+    }
+
     const success = await onVerify(otp);
     if (!success) {
       setOtp("");
@@ -143,7 +178,7 @@ const OtpModal = ({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            verify();
+            verify(true);
           }}
         >
           <div
@@ -174,10 +209,15 @@ const OtpModal = ({
             />
           </div>
 
+          {/*
+            Never `disabled` — the dimmed look is kept via aria-disabled so the
+            button still receives the tap and `verify` can say what's missing.
+          */}
           <button
             type="submit"
             className={styles.submitBtn}
-            disabled={!isOtpComplete || isVerifying}
+            aria-disabled={!isOtpComplete || isVerifying}
+            aria-busy={isVerifying}
           >
             {isVerifying ? "Verifying..." : "Verify & Continue"}
           </button>

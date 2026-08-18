@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./FilterChips.module.scss";
 import { useLazyFilterAstrologersQuery } from "../../../../redux/api/astrologer/astrologerApi";
+import Toast from "../../../toast";
 import { FaCheck } from "react-icons/fa";
 // NEW: Formik and Yup imports for search field validation
 import { Formik, Form, Field } from "formik";
@@ -306,6 +307,12 @@ const FilterChips = ({
       setShowFilterAstrologer(true);
     } catch (error) {
       console.error(error);
+      // A swallowed failure left the previous list on screen unchanged, so the
+      // chip tap looked like it did nothing. Say so, and only for the tap the
+      // user actually made (not background scroll-loading).
+      if (!append) {
+        Toast.error("Couldn't load astrologers for that filter. Please try again.");
+      }
     } finally {
       loadingMoreRef.current = false;
       onFilterLoading?.(false);
@@ -650,14 +657,16 @@ const FilterChips = ({
               const isActive = active === btn.slug || activeChips.includes(btn.slug);
             
               return (
-                <div
+                <button
                   key={btn.name}
+                  type="button"
                   ref={(el) => (chipRefs.current[btn.slug] = el)}
                   className={`${styles.chip} ${isActive ? styles.activeChip : ""}`}
                   onClick={() => handleClick(btn.slug)}
+                  aria-pressed={isActive}
                 >
                   <span>{btn.name}</span>
-                </div>
+                </button>
               );
             })
           )}

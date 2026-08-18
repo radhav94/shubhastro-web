@@ -43,7 +43,7 @@
   display: flex;
   flex-direction: column;
   animation: slideUp 0.3s ease-out;
-  overflow: hidden;
+  overflow: auto;
 }
 
 @keyframes slideUp {
@@ -147,7 +147,7 @@
 
 .sheetContent {
   padding: 2px 16px 14px;
-  overflow-y: auto;
+  // overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   flex: 1;
@@ -262,6 +262,12 @@
 
   &:focus-within { border-color: #f75801; }
 
+  /*
+   * Fixed +91 prefix. Rendered as a <button> only so a tap can explain that
+   * other country codes aren't supported — it deliberately carries no chevron,
+   * because the previous version looked like a picker and produced rage clicks
+   * from non-Indian users. Styled to read as a static prefix, not a control.
+   */
   .flagBox {
     display: flex;
     align-items: center;
@@ -271,8 +277,14 @@
     white-space: nowrap;
     color: #2b1d12;
     font-size: 14px;
+    border: none;
     border-right: 1px solid #ece3d8;
     background: #fbf6f0;
+    font-family: inherit;
+    cursor: default;
+    appearance: none;
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .flag { font-size: 16px; }
@@ -350,6 +362,8 @@
   gap: 8px;
   // margin-top: -4px;
   width: fit-content;
+  // It is a <label htmlFor> now, so the whole thing is the hit area.
+  cursor: pointer;
 
   input[type="checkbox"] {
     width: 18px;
@@ -364,8 +378,9 @@
     font-size: 13px;
     color: #2b1d12;
     user-select: none;
-    pointer-events: none;
     font-weight: 600;
+    // `pointer-events: none` used to be here, which made the label text
+    // completely inert — the one thing a reader is most likely to click.
   }
 }
 
@@ -387,7 +402,10 @@
   box-shadow: 0 8px 20px rgba(247, 88, 1, 0.3);
   transition: 0.2s ease;
 
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
+  // Never `disabled` in this component — a disabled button fires no click, so
+  // an in-flight tap went unanswered. The look now hangs off aria-disabled.
+  &:disabled,
+  &[aria-disabled="true"] { opacity: 0.6; cursor: progress; }
 }
 
 .secureRow {

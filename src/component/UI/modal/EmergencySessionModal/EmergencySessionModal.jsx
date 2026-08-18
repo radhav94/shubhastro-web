@@ -1,7 +1,8 @@
 import { X, MessageSquare, Phone, Video } from "lucide-react";
 import { createPortal } from "react-dom";
 import styles from "./EmergencySessionModal.module.scss";
-import { getAstrologerDefaultImage } from "../../../../utils/appImages";
+import { getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../utils/appImages";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 const EmergencySessionModal = ({
   isOpen,
@@ -13,8 +14,11 @@ const EmergencySessionModal = ({
 }) => {
   if (!isOpen || !astrologer) return null;
 
-  const name = `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim() || "Astrologer";
-  const imageUrl = astrologer.profileImgUrl || astrologer.imageUrl || getAstrologerDefaultImage(astrologer.gender);
+  const name = getAstrologerDisplayName(astrologer) || "Astrologer";
+  // .avatarWrap is 90x90, so "small" (100x125) is the right derivative rather
+  // than the helper's default "medium" (250x312). This modal opens from the
+  // homepage emergency-astrologers grid, whose records now carry profileImages.
+  const imageUrl = getAstrologerImageUrl(astrologer, "small");
   const emergencyPrice = astrologer.emergencyPrice || {};
   const chatRate = emergencyPrice.chatRate?.amount || 0;
   const audioRate = emergencyPrice.audioRate?.amount || 0;

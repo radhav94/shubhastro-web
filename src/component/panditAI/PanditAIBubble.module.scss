@@ -34,7 +34,7 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   // background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #1E2939 100%));
   background-color: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(8px);
-  background-image: url("../../assets/images/AiPanditBg.svg");
+  background-image: url("../../assets/images/AiPanditBg.png");
   background-repeat: no-repeat;
   background-size: contain;
   background-position: top right;
@@ -578,6 +578,22 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   white-space: pre-wrap;
 }
 
+// URLs inside a reading are real links now, so they have to look like it.
+.inlineLink {
+  color: #d43400;
+  text-decoration: underline;
+  word-break: break-all;
+
+  &:hover {
+    color: #f75801;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}
+
 .msgMeta {
   display: flex;
   align-items: center;
@@ -712,6 +728,12 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   &:active {
     transform: scale(0.96);
   }
+
+  // Dimmed while a reply is in flight or the socket is reconnecting, but still
+  // live: it answers with the reason rather than swallowing the tap.
+  &[aria-disabled="true"] {
+    opacity: 0.55;
+  }
 }
 
 /* ==================== INPUT BAR ==================== */
@@ -826,7 +848,10 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
     color: $accent;
   }
 
-  &:disabled {
+  // aria-disabled, not `disabled` — the button stays tappable so it can explain
+  // why voice input isn't available right now instead of ignoring the tap.
+  &:disabled,
+  &[aria-disabled="true"] {
     cursor: not-allowed;
     opacity: 0.55;
   }
@@ -905,11 +930,14 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   color: #fff;
   box-shadow: 0 10px 20px rgba(241, 90, 36, 0.28);
 
-  &:hover:not(:disabled) {
+  &:hover:not(:disabled):not([aria-disabled="true"]) {
     transform: translateY(-2px) scale(1.02);
   }
 
-  &:disabled {
+  // aria-disabled, not `disabled` — send has to keep receiving taps so a tap
+  // made mid-dictation can finish the recording and submit it.
+  &:disabled,
+  &[aria-disabled="true"] {
     cursor: not-allowed;
     opacity: 0.42;
     box-shadow: none;

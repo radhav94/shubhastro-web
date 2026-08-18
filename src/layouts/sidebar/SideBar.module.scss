@@ -42,9 +42,31 @@
   border-bottom: 1px solid #eee;
 }
 
+.closeButton {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  // 44px minimum touch target — this was a bare 24px icon.
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -10px;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #333;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}
+
 .closeIcon {
   font-size: 24px;
-  cursor: pointer;
   color: #333;
 }
 
@@ -101,15 +123,34 @@
   border-bottom: 1px solid #f0f0f0;
 }
 
+// Every row in this menu is a <button> now — they were <span>/<div>/<li> with
+// onClick, so none of them was focusable or operable by keyboard or screen
+// reader. These resets keep the previous appearance.
+%rowReset {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  width: 100%;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: -2px;
+  }
+}
+
 .menuLink {
+  @extend %rowReset;
   display: block;
   padding: 16px 20px;
   color: #333;
   text-decoration: none;
   font-size: 16px;
   text-align: justify;
-  cursor: pointer;
-  transition: background-color 0.2s;
 
   &:hover {
     background-color: #f5f5f5;
@@ -122,13 +163,14 @@
 }
 
 .parentRow {
+  @extend %rowReset;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   padding: 16px 20px;
   color: #333;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  text-align: left;
 
   &:hover {
     background-color: #f5f5f5;
@@ -141,27 +183,34 @@
 }
 
 .submenu {
+  // max-height is set inline from the panel's measured scrollHeight, so the
+  // transition has a concrete target. It used to be `max-height: 100%`, which
+  // resolves against an auto-height containing block and is therefore treated as
+  // `none` — open worked by accident and the animation never ran.
   max-height: 0;
   overflow: hidden;
   background-color: #f9f9f9;
+  list-style: none;
+  padding: 0;
+  margin: 0;
   transition: max-height 0.3s ease;
-
-  &.submenuOpen {
-    max-height: 100%; // Adjust based on your content
-  }
 }
 
 .submenuItem {
-  padding: 12px 20px 12px 40px;
-  color: #555;
-  font-size: 15px;
-  cursor: pointer;
-  text-align: justify;
   border-bottom: 1px solid #eee;
 
   &:last-child {
     border-bottom: none;
   }
+}
+
+.submenuLink {
+  @extend %rowReset;
+  display: block;
+  padding: 12px 20px 12px 40px;
+  color: #555;
+  font-size: 15px;
+  text-align: justify;
 
   &:hover {
     background-color: #f0f0f0;

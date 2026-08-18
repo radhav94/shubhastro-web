@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./ChatWindow.module.scss";
-import { PrimaryText } from "../../../../../component";
+import { PrimaryText, Toast } from "../../../../../component";
 import AudioMessageWrapper from "./AudioMessageWrapper";
 import { GrReactjs } from "react-icons/gr";
 import { IoCheckmarkDone } from "react-icons/io5";
@@ -14,7 +14,7 @@ import dayjs from "dayjs";
 import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
 import { buildKundliLink } from "../../../../../utils/helper/kundliMessage";
 import LinkPreview from "./LinkPreview";
-import { detectURL } from "../../../../../utils/helper/linkPreview";
+import { detectURL, splitTextByURL } from "../../../../../utils/helper/linkPreview";
 import { getAttachmentDisplayName } from "../../../../../utils/helper/getAttachmentDisplayName";
 
 const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, customerName, onScroll, isLoadingMore, onMessageAction }) => {
@@ -186,13 +186,22 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
       // (some messages store a bare id, others a full URL).
       const kundliLink = buildKundliLink(msg.kundliId, msg.message ?? msg.text);
       return (
-        <div
-          onClick={() => kundliLink && setIframeSrc(kundliLink)}
+        // A <button>, not a div: this is an action. And when the link can't be
+        // resolved the tap used to do nothing at all — say so instead.
+        <button
+          type="button"
+          onClick={() => {
+            if (!kundliLink) {
+              Toast.error("This kundli is no longer available to view.");
+              return;
+            }
+            setIframeSrc(kundliLink);
+          }}
           className={styles.kundliLink}
         >
           <GrReactjs />
           {msg.kundliName ? `${msg.kundliName}'s Kundli` : "View Kundli"}
-        </div>
+        </button>
       );
     }
 
@@ -250,12 +259,30 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
     // Check for external URLs in text messages
     const detectedURL = detectURL(msg.text);
     if (detectedURL && msg.type !== "kundli") {
+      // Linkify in place: the message text used to be flat, with the only
+      // clickable copy of the URL sitting in the preview below it, so tapping
+      // the link inside the sentence did nothing.
+      const parts = splitTextByURL(msg.text);
       return (
         <>
-          {msg.text !== detectedURL && (
+          {msg.text.trim() !== detectedURL && (
             <div style={{ marginBottom: 8 }}>
               <PrimaryText size={14} color={"#4a4a4a"}>
-                {msg.text}
+                {parts.map((part, index) =>
+                  part.type === "url" ? (
+                    <a
+                      key={`${part.value}-${index}`}
+                      href={part.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "#d43400", textDecoration: "underline", wordBreak: "break-all" }}
+                    >
+                      {part.value}
+                    </a>
+                  ) : (
+                    <span key={`t-${index}`}>{part.value}</span>
+                  )
+                )}
               </PrimaryText>
             </div>
           )}

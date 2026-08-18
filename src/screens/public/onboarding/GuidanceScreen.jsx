@@ -269,14 +269,20 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
             <div className={styles.header}>
               <div className={styles.progressDots}>
                 {Array.from({ length: totalSteps }).map((_, index) => (
-                  <span
+                  /* Current-step dot is an indicator, not a control — see
+                     BirthDetailsScreen for the dead click this caused.
+                     type="button" keeps it from submitting the Formik form. */
+                  <button
                     key={index}
+                    type="button"
                     className={
                       index === currentStep ? styles.dotActive : styles.dotInactive
                     }
-                    onClick={() => onStepChange && onStepChange(index)}
-                    style={{ cursor: onStepChange ? 'pointer' : 'default' }}
-                  ></span>
+                    disabled={!onStepChange || index === currentStep}
+                    aria-current={index === currentStep ? "step" : undefined}
+                    aria-label={`Step ${index + 1} of ${totalSteps}`}
+                    onClick={() => onStepChange?.(index)}
+                  />
                 ))}
               </div>
 
@@ -312,10 +318,20 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
               </div>
             </div>
 
+            {/*
+              Busy guard rather than a validation gate, but still not `disabled`:
+              a tap during the save was swallowed with no event at all. The label
+              already reads "Saving...", so preventDefault is enough here — no
+              toast needed. Matches BirthDetailsScreen's `registering` handling.
+            */}
             <button 
               type="submit"
               className={styles.otpprimaryBtn}
-              disabled={loading}
+              aria-disabled={loading}
+              aria-busy={loading}
+              onClick={(e) => {
+                if (loading) e.preventDefault();
+              }}
             >
               {loading ? "Saving..." : "Next"}
             </button>

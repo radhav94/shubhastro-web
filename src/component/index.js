@@ -42,5 +42,15 @@ export { default as EditProfileModal } from "../component/UI/Profile/EditProfile
 export { default as ProfileListingModal } from "../component/UI/Profile/ProfileListingModal";
 export { default as DeleteConfirmationModal } from "../component/UI/modal/deleteModal/DeleteConfirmationModal";
 
-//charts
-export { default as PieChart } from "../component/UI/charts/PieChart";
+/*
+  PieChart is deliberately NOT re-exported here.
+
+  It does `import { Chart } from 'chart.js/auto'`, which registers every
+  controller as a side effect and so cannot be tree-shaken. 26 files import this
+  barrel, several of them eagerly, so re-exporting PieChart pulled all ~196 KB
+  of chart.js into the entry chunk for every visitor — including the homepage,
+  which has no charts.
+
+  Its one consumer (FaceReadingResult) imports it directly from
+  ../component/UI/charts/PieChart, keeping chart.js in that lazy route's chunk.
+*/

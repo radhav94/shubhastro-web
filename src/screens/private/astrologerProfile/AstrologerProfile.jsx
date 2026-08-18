@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import styles from "./AstrologerProfile.module.scss";
 import { FaPlay, FaStar, FaStarHalfAlt, FaRegStar, FaChevronRight } from "react-icons/fa";
 import { Radio } from "lucide-react";
@@ -20,6 +20,11 @@ import { ErrorText, PrimaryText } from "../../../component";
 import toast from "../../../component/toast";
 import { unavailableReason } from "../../../utils/helper/astrologerAvailability";
 import {
+  getAstrologerDisplayName,
+  getAstrologerProfilePath,
+  isObjectIdLike,
+} from "../../../utils/helper/string.utils";
+import {
   useFollowAstrologerByIdMutation,
   useUnfollowAstrologerByIdMutation,
   useCheckFollowingStatusQuery,
@@ -31,8 +36,9 @@ import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import { useTalkToAstrologer } from "../talkToAstrologer/useTalkToAstrologer";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { useGetAstrologerReviewsQuery, useLazyGetAstrologerReviewsQuery } from "../../../redux/api/review/reviewApi";
-import { useGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
-import { useGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
+import { useLazyGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
+import { useLazyGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
+import useIsDesktop from "../../../utils/hooks/useIsDesktop";
 import StickyReview from "../home/components/call/StickyReview";
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
@@ -45,7 +51,7 @@ import { ProfileManager } from "../../../component/UI/Profile";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { Link } from "react-router-dom";
 import { BookOpen } from "lucide-react";
-import { AppIcons, getAstrologerDefaultImage } from "../../../utils/appImages";
+import { AppIcons, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../utils/appImages";
 import AstrologerLiveBadge from "../../../component/UI/astrologerLiveBadge/AstrologerLiveBadge";
 import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
 import AudioIntro from "./AudioIntro";
@@ -164,16 +170,32 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
 };
 
 const AstrologerProfile = () => {
-  const { id } = useParams();
+  // The URL segment is EITHER the astrologer's `userName` handle
+  // (`/astrologer/anirudh`, the canonical form) or a raw ObjectId
+  // (`/astrologer/darpan-naik/69b2...`, the fallback for astrologers with no
+  // userName, plus every previously shared link). The lookup endpoint accepts
+  // both, so it's passed through untouched.
+  const { id: astrologerParam } = useParams();
   const navigate = useNavigate();
+  // Same Figma-exported star icon as NewAstrologerCard, which this page also
+  // renders — both hardcoded `id="clip0_4961_937"`, so they collided.
+  const starClipId = `astroProfileStarClip-${useId()}`;
 
   const {
     data: astrologerData,
     isLoading,
     error,
-  } = useGetAstrologerByIdQuery({ id }, { skip: !id });
+  } = useGetAstrologerByIdQuery(
+    { id: astrologerParam },
+    { skip: !astrologerParam },
+  );
 
   const data = astrologerData?.data;
+
+  // The real ObjectId. Anything that talks to an id-only endpoint (chat
+  // history, follow status, live status, analytics) must use this, never the URL
+  // segment — that may be a userName handle, which those endpoints reject.
+  const id = data?._id || (isObjectIdLike(astrologerParam) ? astrologerParam : "");
 
   // Track astrologer profile view (fires when a new astrologer id is opened)
   useEffect(() => {
@@ -190,16 +212,57 @@ const AstrologerProfile = () => {
   const handleJoinLive = () => {
     if (liveRoomId) {
       trackEvent("live_stream_joined", { astrologer_id: id, stream_id: liveRoomId });
-      navigate(`/live/${liveRoomId}`, { state: { from: `/astrologer/${id}` } });
+      navigate(`/live/${liveRoomId}`, {
+        state: { from: getAstrologerProfilePath(data, id) },
+      });
     }
   };
 
-  // Fetch top astrologers for left sidebar (desktop only)
-  const { data: topAstrologersData } = useGetAstrologersQuery({
-    page: 1,
-    limit: 10,
-    isActive: true,
-  });
+  // Availability for the three connect tiles (Chat / Audio / Video).
+  //
+  // These tiles used to be `<div onClick={cond && handler}>`: when the
+  // astrologer was offline, not accepting that session type, or had no rate
+  // configured, the tap was swallowed and nothing at all happened — no toast,
+  // no modal. `.connectOptionDisabled` only dimmed them and set a `cursor`,
+  // which is meaningless on touch. That is a dead click, and it is what mobile
+  // users hit after tapping through from a category listing.
+  const connectTiles = useMemo(() => {
+    const activeTypes = data?.isActiveType || [];
+    const isOnline = data?.isActive === true;
+
+    const build = (label, typeKey, rateKey) => {
+      const price = Number(data?.price?.[rateKey]?.amount) || 0;
+      const isTypeActive = activeTypes.includes("all") || activeTypes.includes(typeKey);
+      return {
+        price,
+        enabled: isOnline && !isLive && isTypeActive && price > 0,
+        reason: unavailableReason({
+          label,
+          isOnline,
+          isLive,
+          isTypeActive,
+          hasPrice: price > 0,
+        }),
+      };
+    };
+
+    return {
+      chat: build("Chat", "chat", "chatRate"),
+      audio: build("Call", "audio", "audioRate"),
+      video: build("Video call", "video", "videoCallRate"),
+    };
+  }, [data?.isActive, data?.isActiveType, data?.price, isLive]);
+
+  // Fetch top astrologers for left sidebar — desktop only, and now actually
+  // skipped on mobile. `.leftSidebar` is `display: none !important` at <=1024px
+  // (AstrologerProfile.module.scss), so every phone and tablet load was fetching
+  // a 10-astrologer list that could never be rendered, in parallel with the
+  // astrologer request this page genuinely blocks on.
+  const isDesktop = useIsDesktop(1025);
+  const { data: topAstrologersData } = useGetAstrologersQuery(
+    { page: 1, limit: 10, isActive: true },
+    { skip: !isDesktop },
+  );
   const {
     data: reviewsData,
     isLoading: reviewsLoading,
@@ -246,20 +309,20 @@ const AstrologerProfile = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [fetchMoreReviews] = useLazyGetAstrologerReviewsQuery();
 
-    const { data: vaChatHistoryData } = useGetChatHistoryQuery(
-
-    { userId: data?._id },
-
-    { skip: !data?._id || !getToken() }
-
+  // Both of these need the real ObjectId (`id`), so on a `/astrologer/<userName>`
+  // URL they wait one round trip for the profile fetch to resolve. On the older
+  // `/astrologer/<slug>/<objectId>` URLs `id` is available immediately from the
+  // URL, so they still fire in the first wave — no waterfall there.
+  const { data: vaChatHistoryData } = useGetChatHistoryQuery(
+    { userId: id },
+    { skip: !id || !getToken() },
   );
 
   const hasChatHistory = (vaChatHistoryData?.data?.length || 0) > 0;
 
-
   const { data: followingData } = useCheckFollowingStatusQuery(
-    { astrologerId: data?._id },
-    { skip: !data?._id || !getToken() }
+    { astrologerId: id },
+    { skip: !id || !getToken() },
   );
 
   // Check if the current astrologer is in the following list
@@ -309,19 +372,19 @@ const AstrologerProfile = () => {
   const token = getToken();
   const { balance } = useWalletBalance();
 
-  // Fetch call & chat history to find last roomId for this astrologer
-  const { data: callHistoryData } = useGetCallHistoryQuery(
-    { userId: userIdLocal, page: 1, limit: 30 },
-    { skip: !userIdLocal },
-  );
-  const { data: chatHistoryData } = useGetUserChatMessagesQuery(
-    { userId: userIdLocal, page: 1, limit: 30 },
-    { skip: !userIdLocal },
-  );
+  // Call & chat history, fetched on demand rather than on mount.
+  //
+  // These were two eager queries pulling 30 records each on every page load, and
+  // their only consumer is `lastRoomId`, which in turn is only read inside
+  // handleOpenReviewModal — a click handler. So every visitor paid for two
+  // sizeable requests on the critical path to populate a field that most of them
+  // never reach. Now they run when the review modal is actually opened.
+  const [fetchCallHistory] = useLazyGetCallHistoryQuery();
+  const [fetchChatHistory] = useLazyGetUserChatMessagesQuery();
 
-  // Find the most recent roomId for this astrologer from call/chat history
-  const lastRoomId = useMemo(() => {
-    const astrologerId = data?._id;
+  // Most recent roomId for this astrologer, from call/chat history. Pure so it
+  // can run against freshly fetched payloads instead of render-time state.
+  const pickLastRoomId = (callHistoryData, chatHistoryData, astrologerId) => {
     if (!astrologerId) return null;
 
     const callEntry = callHistoryData?.data?.callHistory?.find(
@@ -340,7 +403,7 @@ const AstrologerProfile = () => {
       return callTime > chatTime ? callEntry.roomId : chatEntry.roomId;
     }
     return callEntry?.roomId || chatEntry?.roomId || null;
-  }, [data?._id, callHistoryData, chatHistoryData]);
+  };
   
   // Use the astrologer connect hook
   const {
@@ -362,11 +425,11 @@ const AstrologerProfile = () => {
       if (!isFollowing) {
         await followAstrologer({ astrologerId: data._id }).unwrap();
         toast.success(
-          `We will notify you when ${data?.firstName || ""} goes live or posts an update!`,
+          `We will notify you when ${getAstrologerDisplayName(data)} goes live or posts an update!`,
         );
       } else {
         await unfollowAstrologer({ astrologerId: data._id }).unwrap();
-        toast.success(`You unfollowed ${data?.firstName}`);
+        toast.success(`You unfollowed ${getAstrologerDisplayName(data)}`);
       }
     } catch (err) {
       console.log("Follow/Unfollow error:", err);
@@ -375,8 +438,8 @@ const AstrologerProfile = () => {
 
   const handleShare = async () => {
     const shareData = {
-      title: `${data?.firstName} ${data?.lastName || ""} - Astrologer`,
-      text: `Check out ${data?.firstName}'s profile on ShubhTalk`,
+      title: `${getAstrologerDisplayName(data)} - Astrologer`,
+      text: `Check out ${getAstrologerDisplayName(data)}'s profile on ShubhTalk`,
       url: window.location.href,
     };
 
@@ -475,25 +538,41 @@ const AstrologerProfile = () => {
 
 
 
-  const handleOpenReviewModal = () => {
+  const handleOpenReviewModal = async () => {
     if (!getToken()) {
       navigate("/login");
       return;
     }
-    console.log(data,"123")
+
+    // Resolve the roomId here rather than on every page load — see the note on
+    // fetchCallHistory. Cached by RTK Query, so reopening the modal is free.
+    // `roomId` is optional metadata on the review, so a failed lookup must not
+    // block the modal.
+    let roomId = null;
+    if (userIdLocal) {
+      try {
+        const [callRes, chatRes] = await Promise.all([
+          fetchCallHistory({ userId: userIdLocal, page: 1, limit: 30 }).unwrap(),
+          fetchChatHistory({ userId: userIdLocal, page: 1, limit: 30 }).unwrap(),
+        ]);
+        roomId = pickLastRoomId(callRes, chatRes, data?._id);
+      } catch {
+        roomId = null;
+      }
+    }
+
     setReviewData({
       astrologerID: data?.astrologer_ID,
-      fullName: `${data?.firstName || ""} ${data?.lastName || ""}`.trim(),
-      profileImage: data?.profileImgUrl || data?.imageUrl ,
-      roomId: lastRoomId,
+      fullName: getAstrologerDisplayName(data),
+      profileImage: getAstrologerImageUrl(data),
+      roomId,
     });
     setOpenReview(true);
   };
 
   const handleSetReminder = () => {
     try {
-      const astrologerName =
-        `${displayData.firstName} ${displayData.lastName}`.trim();
+      const astrologerName = getAstrologerDisplayName(displayData);
 
       // Find the next available day from weekly schedule
       const nextAvailable = displayData.weeklySchedule.find((item) => item.time);
@@ -614,13 +693,13 @@ const AstrologerProfile = () => {
         setActiveChat({
           roomId,
           chatRoomId: roomId,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           userId: userId,
           astrologerId: astrologerId,
           astrologerID: astro?.astrologer_ID || data?.astrologer?.astrologer_ID,
           kundliId,
-          astrologerName: data?.astrologer?.firstName || "",
+          astrologerName: getAstrologerDisplayName(data?.astrologer),
           experience: data?.astrologer?.experience || "",
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
@@ -632,11 +711,11 @@ const AstrologerProfile = () => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+            fullName: getAstrologerDisplayName(astro),
             roomId,
             isUserSide: true,
             kundliId,
-            astrologerName: data?.astrologer?.firstName || "",
+            astrologerName: getAstrologerDisplayName(data?.astrologer),
             astroID: data?.astrologer?.astrologer_ID,
             experience: astro?.experience || data?.astrologer?.experience,
             profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
@@ -700,7 +779,7 @@ const AstrologerProfile = () => {
           channelName,
           chatRoomId,
           agoraToken: token,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           callType: type,
           userId: userIdLocal,
@@ -893,11 +972,18 @@ const AstrologerProfile = () => {
 
   // Fallback data - only used when API data is missing
   const displayData = {
+    // `userName` is the astrologer's public alias and takes priority in
+    // getAstrologerDisplayName(). It has to be carried through here, otherwise
+    // every getAstrologerDisplayName(displayData) call silently falls back to
+    // firstName + lastName.
+    userName: data?.userName || "",
     firstName: data?.firstName || "Astrologer",
     lastName: data?.lastName || "",
-    imageUrl:
-      data?.profileImgUrl ||
-      getAstrologerDefaultImage(data?.gender),
+    // The hero image on this page renders at roughly 130x160, so prefer the
+    // pre-resized `large` derivative (500x624) over the unresized original.
+    // Larger than the cards' `medium` because this is the page's biggest image
+    // and is often viewed on a desktop at 2x.
+    imageUrl: getAstrologerImageUrl(data, "medium"),
     specialities:
       data?.specialties?.length > 0
         ? data.specialties.map((s) => (typeof s === "object" ? s.title || s.name : s))
@@ -1100,16 +1186,12 @@ const AstrologerProfile = () => {
                     initialStatus={astrologer?.astrologerLiveStatus}
                   />
                   <Link
-                    to={`/astrologer/${astrologer?._id}`}
+                    to={getAstrologerProfilePath(astrologer)}
                     className={styles.cardLink}
                   >
                     <div className={styles.astrologerImageWrapper}>
                       <img
-                        src={
-                          astrologer.imageUrl ||
-                          astrologer?.profileImgUrl ||
-                          getAstrologerDefaultImage(astrologer.gender)
-                        }
+                        src={getAstrologerImageUrl(astrologer, "small")}
                         alt={astrologer.firstName}
                         className={styles.astrologerImg}
                         onError={(e) => {
@@ -1128,7 +1210,7 @@ const AstrologerProfile = () => {
                             viewBox="0 0 12 13"
                             fill="none"
                           >
-                            <g clipPath="url(#clip0_4961_937)">
+                            <g clipPath={`url(#${starClipId})`}>
                               <path
                                 d="M5.94187 1.3447C6.09954 0.919606 6.69621 0.919606 6.85438 1.3447L7.87429 4.2327C7.90988 4.32678 7.97253 4.40762 8.05399 4.46454C8.13545 4.52146 8.23188 4.55179 8.33055 4.55152H10.837C11.3001 4.55152 11.5021 5.14081 11.138 5.42941L9.35441 7.06984C9.27451 7.13262 9.21612 7.21967 9.18762 7.31848C9.15912 7.41729 9.16196 7.52279 9.19575 7.61984L9.84712 10.4419C10.0058 10.8952 9.49237 11.2845 9.10411 11.0055L6.68143 9.43404C6.59847 9.37443 6.49953 9.34245 6.39812 9.34245C6.29672 9.34245 6.19778 9.37443 6.11481 9.43404L3.69214 11.0055C3.30437 11.2845 2.79047 10.8947 2.94912 10.4419L3.60049 7.61984C3.63428 7.52279 3.63713 7.41729 3.60863 7.31848C3.58012 7.21967 3.52173 7.13262 3.44184 7.06984L1.65821 5.42941C1.2936 5.14081 1.4966 4.55152 1.95877 4.55152H4.46521C4.56389 4.55186 4.66035 4.52156 4.74182 4.46463C4.82329 4.4077 4.88594 4.32682 4.92146 4.2327L5.94138 1.3447H5.94187Z"
                                 fill="#FFB246"
@@ -1139,7 +1221,7 @@ const AstrologerProfile = () => {
                               />
                             </g>
                             <defs>
-                              <clipPath id="clip0_4961_937">
+                              <clipPath id={starClipId}>
                                 <rect
                                   width="11.8251"
                                   height="12.0879"
@@ -1156,7 +1238,7 @@ const AstrologerProfile = () => {
                         </span>
                       </div>
                       <h3 className={styles.astrologerNames}>
-                        {astrologer.firstName} {astrologer.lastName}
+                        {getAstrologerDisplayName(astrologer)}
                       </h3>
                       {astrologer.experience && (
                         <div className={styles.experienceRow}>
@@ -1198,7 +1280,7 @@ const AstrologerProfile = () => {
               <div className={styles.profileImageWrapper}>
                 <img
                   src={displayData.imageUrl}
-                  alt={displayData.firstName}
+                  alt={getAstrologerDisplayName(displayData)}
                   className={styles.profileImage}
                   onError={(e) => {
                     e.target.src = getAstrologerDefaultImage(data?.gender);
@@ -1207,7 +1289,7 @@ const AstrologerProfile = () => {
               </div>
               <div className={styles.profileInfo}>
                 <h1 className={styles.astrologerName}>
-                  {displayData.firstName} {displayData.lastName}
+                  {getAstrologerDisplayName(displayData)}
                 </h1>
                 <p className={styles.expertise}>
                   {displayData.expertise.join(" • ")}
@@ -1443,7 +1525,7 @@ const AstrologerProfile = () => {
             {/* Astrologer voice intro */}
             {data?.voiceNoteUrl && (
               <AudioIntro
-                name={displayData.firstName}
+                name={getAstrologerDisplayName(displayData)}
                 src={data.voiceNoteUrl}
                 isNew
               />
@@ -1685,13 +1767,18 @@ const AstrologerProfile = () => {
               </div>
             ) : (
               <div className={styles.connectOptions}>
-                <div
-                  className={`${styles.connectOption} ${(!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) || !data?.price?.chatRate?.amount) ? styles.connectOptionDisabled : ""}`}
-                  onClick={() =>
-                    data?.isActive &&
-                    (data?.isActiveType?.includes("all") || data?.isActiveType?.includes("chat")) &&
-                    data?.price?.chatRate?.amount && handleChatStart(data)
-                  }
+                <button
+                  type="button"
+                  className={`${styles.connectOption} ${!connectTiles.chat.enabled ? styles.connectOptionDisabled : ""}`}
+                  onClick={() => {
+                    if (!connectTiles.chat.enabled) {
+                      toast.info(connectTiles.chat.reason);
+                      return;
+                    }
+                    handleChatStart(data);
+                  }}
+                  aria-disabled={!connectTiles.chat.enabled}
+                  title={!connectTiles.chat.enabled ? connectTiles.chat.reason : "Start chat"}
                 >
                   <div className={styles.optionIcon}>
                     <BiMessageDetail />
@@ -1705,16 +1792,20 @@ const AstrologerProfile = () => {
                       )}
                     </span>
                   </div>
-                </div>
+                </button>
 
-                <div
-                  className={`${styles.connectOption} ${(!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) || !data?.price?.audioRate?.amount) ? styles.connectOptionDisabled : ""}`}
-                  onClick={() =>
-                    data?.isActive &&
-                    (data?.isActiveType?.includes("all") || data?.isActiveType?.includes("audio")) &&
-                    data?.price?.audioRate?.amount &&
-                    handleCallStart(data, "audio")
-                  }
+                <button
+                  type="button"
+                  className={`${styles.connectOption} ${!connectTiles.audio.enabled ? styles.connectOptionDisabled : ""}`}
+                  onClick={() => {
+                    if (!connectTiles.audio.enabled) {
+                      toast.info(connectTiles.audio.reason);
+                      return;
+                    }
+                    handleCallStart(data, "audio");
+                  }}
+                  aria-disabled={!connectTiles.audio.enabled}
+                  title={!connectTiles.audio.enabled ? connectTiles.audio.reason : "Start audio call"}
                 >
                   <div className={styles.optionIcon}>
                     <BiPhone />
@@ -1728,16 +1819,20 @@ const AstrologerProfile = () => {
                       )}
                     </span>
                   </div>
-                </div>
+                </button>
 
-                <div
-                  className={`${styles.connectOption} ${(!data?.isActive || !(data?.isActiveType?.includes("all") || data?.isActiveType?.includes("video")) || !data?.price?.videoCallRate?.amount) ? styles.connectOptionDisabled : ""}`}
-                  onClick={() =>
-                    data?.isActive &&
-                    (data?.isActiveType?.includes("all") || data?.isActiveType?.includes("video")) &&
-                    data?.price?.videoCallRate?.amount &&
-                    handleCallStart(data, "video")
-                  }
+                <button
+                  type="button"
+                  className={`${styles.connectOption} ${!connectTiles.video.enabled ? styles.connectOptionDisabled : ""}`}
+                  onClick={() => {
+                    if (!connectTiles.video.enabled) {
+                      toast.info(connectTiles.video.reason);
+                      return;
+                    }
+                    handleCallStart(data, "video");
+                  }}
+                  aria-disabled={!connectTiles.video.enabled}
+                  title={!connectTiles.video.enabled ? connectTiles.video.reason : "Start video call"}
                 >
                   <div className={styles.optionIcon}>
                     <BiVideo />
@@ -1751,7 +1846,7 @@ const AstrologerProfile = () => {
                       )}
                     </span>
                   </div>
-                </div>
+                </button>
               </div>
             )}
           </div>}
@@ -1895,7 +1990,7 @@ const AstrologerProfile = () => {
           callRoomId={connectionType === "chat" ? chatRoomId : callRoomId}
           resetCallState={resetCallState}
           connectionType={connectionType}
-          astrologerName={`${data?.firstName || ""} ${data?.lastName || ""}`.trim()}
+          astrologerName={getAstrologerDisplayName(data)}
         />
       )} */}
 
@@ -1904,14 +1999,14 @@ const AstrologerProfile = () => {
         isOpen={isGiftModalOpen}
         onClose={() => setIsGiftModalOpen(false)}
         astrologerId={data?._id}
-        astrologerName={`${data?.firstName || ""} ${data?.lastName || ""}`}
+        astrologerName={getAstrologerDisplayName(data)}
       />
 
       {/* Virtual Assistant Chat */}
       <VirtualAssistant
         astrologerId={data?._id}
-        astrologerName={`${data?.firstName || ""} ${data?.lastName || ""}`.trim()}
-        astrologerImage={data?.profileImgUrl || data?.imageUrl}
+        astrologerName={getAstrologerDisplayName(data)}
+        astrologerImage={getAstrologerImageUrl(data)}
         isOpen={isVAOpen}
         setIsOpen={setIsVAOpen}
         onConnect={() => handleChatStart(data)}

@@ -350,7 +350,23 @@ const NumerologyWeb = () => {
 
   return (
     <div className={styles.page}>
-      {isLoading && <PrimaryLoader />}
+      {/*
+        fullscreen={false}.
+
+        PrimaryLoader defaults to fullscreen, and `.fullscreen` is
+        `position: fixed` over the whole viewport at `z-index: 999999`. The
+        global header is `.fixedTopHeader` at `z-index: 2001`, so the bare
+        loader painted a blurred sheet *over the header* for the duration of
+        the kundli-list fetch. Every tap in that window — the logo, the
+        hamburger, the nav links — landed on the overlay and did nothing.
+
+        This matches the loader further down this same file (the numerology
+        prediction one already passes fullscreen={false}) and the note on
+        PalmistryResult: "Inline so the page header above stays visible and
+        un-blurred". `.loaderWrapper` on its own is an in-flow flex box with no
+        positioning, so it cannot swallow clicks.
+      */}
+      {isLoading && <PrimaryLoader fullscreen={false} />}
 
       {/* Profile Header - Desktop Only */}
       <div className={styles.profileHeaderWrap}>
@@ -486,7 +502,7 @@ const NumerologyWeb = () => {
       {/* NUMEROLOGY CARDS */}
       {isLoadingNumerology ? (
         <div className={styles.loadingContainer}>
-          <PrimaryLoader />
+          <PrimaryLoader fullscreen={false} />
         </div>
       ) : numerologyResponse ? (
         <section className={styles.numerologySection}>

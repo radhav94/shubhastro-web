@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../Community.module.scss";
+import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
 
+import { getAstrologerImageUrl } from "../../../../utils/appImages";
 const AstrologerAvatar = ({ astrologer, name }) => {
   const [imgError, setImgError] = useState(false);
 
@@ -12,7 +14,7 @@ const AstrologerAvatar = ({ astrologer, name }) => {
   if (astrologer.profileImgUrl && !imgError) {
     return (
       <img
-        src={astrologer.profileImgUrl}
+        src={getAstrologerImageUrl(astrologer)}
         alt={name}
         className={styles.trendingAvatar}
         onError={() => setImgError(true)}
@@ -48,7 +50,7 @@ const TrendingAstrologers = ({
   if (!astrologers.length) return null;
 
   const handleConnect = (astrologer) => {
-    navigate(`/astrologer/${astrologer._id}`);
+    navigate(getAstrologerProfilePath(astrologer));
   };
 
   return (
@@ -56,7 +58,7 @@ const TrendingAstrologers = ({
       <h3 className={styles.trendingTitle}>{title}</h3>
       <ul className={styles.trendingList}>
         {astrologers.map((astrologer) => {
-          const name = `${astrologer.firstName} ${astrologer.lastName || ""}`;
+          const name = getAstrologerDisplayName(astrologer);
           return (
             <li key={astrologer._id || astrologer.astrologerID} className={styles.trendingItem}>
               <AstrologerAvatar astrologer={astrologer} name={name} />

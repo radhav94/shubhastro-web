@@ -99,9 +99,24 @@
   font-size: 26px;
   cursor: pointer;
   margin-right: 10px;
+
+  // <button> resets. The element used to be a bare div.
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+
   @media screen and (width <= 1180px) {
-    display: flex;
+    // The icon inside is 20x16. Without an explicit box the button was 20px
+    // wide, i.e. the primary navigation control on every phone-width page had
+    // less than half the 44px minimum. justify-content keeps the bars where they
+    // were rendering before, flush with the left padding of the header.
+    display: inline-flex;
     align-items: center;
+    justify-content: flex-start;
+    min-width: 44px;
+    min-height: 44px;
+    margin-right: 0;
   }
 }
 
@@ -123,7 +138,7 @@
   max-width: 320px;
   height: 100%;
   background: #fff;
-  background-image: url("../assets/images/main-body-bg-new-mobile.png");
+  background-image: url("https://assets.shubhastro.ai/main-body-bg-new-mobile.png");
   z-index: 100;
   // padding: 16px 0px 16px 16px;
   animation: slideIn 0.3s ease forwards;
@@ -212,14 +227,20 @@
   }
 }
 .logoHeader{
+  // display is explicit because this is an <a>, which is inline by default;
+  // width: fit-content and the img's width: 100% both need a block box.
+  display: block;
   width: fit-content;
   height: auto;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
   @media screen and (width <= 767px) {
     display: none;    
   }
   img{
     width: 100%;
+    display: block;
   }
 }
 .logoHeaderMobile{
@@ -227,11 +248,14 @@
   height: 40px;
   display: none;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
   @media screen and (width <= 767px) {
     display: block;    
   }
   img{
     width: 100%;
+    display: block;
   }
 }
 
@@ -259,6 +283,15 @@
   flex-direction: column;
   margin-top: 6px;
 }
+// Positioning context for .profileDropdown. It used to live on
+// .profileDetailMain, which also *was* the trigger and the menu's parent; the
+// menu is now a sibling of the trigger button, so the anchor moves out here.
+.profileDetailWrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
 .profileDetailMain{
   display: flex;
   align-items: center;
@@ -271,6 +304,34 @@
   max-width: 200px;
   cursor: pointer;
   position: relative;
+
+  // <button> resets — this was a div until the account menu was made keyboard
+  // reachable.
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+
+  // Tap target. The chip is 32px of avatar plus 2px of padding either side, so
+  // it measured 55x36 on a phone — under the 44px minimum vertically — and the
+  // 12px flex gap in .headerActions next to it belonged to no control at all,
+  // meaning a thumb that landed a few pixels short hit the bare header div and
+  // nothing happened. This pseudo-element grows the hit box without touching the
+  // visual size or the layout; -6px covers half the gap on each side.
+  @media (width <= 767px) {
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border-radius: inherit;
+    }
+  }
 }
 .namaste {
   font-size: 0.7rem;
@@ -303,6 +364,23 @@
   align-items: center;
   padding: 0 1rem;
   justify-content: flex-start;
+
+  // flex: 1 stretches this <nav> across every pixel between the logo and the
+  // header actions, so on a desktop window the empty space to the right of the
+  // last link — often several hundred px wide — hit-tested as the nav itself.
+  // A click there did nothing and got recorded as a dead click labelled with
+  // the nav's whole text content ("TarotAstrologersShubh AIKundliLive").
+  // The stretch is still what pushes .headerActions to the right edge, so keep
+  // the box and make only the container's own empty area transparent to
+  // pointers. Restoring pointer-events on every direct child, rather than on
+  // .headerNavLink specifically, means a link added here later stays clickable
+  // without needing to know about this rule.
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+
   @media screen and (width <= 1180px) {
       display: none!important;
   }
@@ -367,6 +445,45 @@
   white-space: nowrap;
   border-bottom: 1px solid transparent;
   cursor: pointer;
+}
+
+// Each desktop nav link carries 0.4rem of horizontal margin, so neighbours are
+// separated by a 0.8rem dead gap, and the 3px top margin leaves a strip above
+// them that belongs to the nav. Aiming at a 13.6px label and missing by a few
+// pixels landed on the inert <nav> instead of the link. Expand the hit area
+// across those margins with a transparent overlay rather than converting the
+// margin into padding, so the hover/active underline keeps its current width.
+// Adjacent links each claim their own half of the gap and meet exactly, which
+// leaves nothing between them to miss.
+.headerNavigation .headerNavLink::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  right: -0.4rem;
+  bottom: -1px;
+  left: -0.4rem;
+}
+
+// The Calculators triggers (desktop dropdown and mobile drawer accordion) carry
+// .headerNavLink on a <button> now — they were a <span> and a <div> with onClick,
+// so neither was focusable or operable by keyboard. Neutralise the UA button
+// styling that .headerNavLink does not already override, so they stay visually
+// identical to the sibling nav links.
+button.headerNavLink {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  font-family: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
 }
 .quickNavText{
   margin-right: 10px;
@@ -828,7 +945,18 @@
   display: flex;
   flex-direction: column;
 
+  // The trigger's layout used to come from an inline style on the <div>. It lives
+  // here now that it is a <button>, and matches the padding of the sibling
+  // drawer anchors (.mobileDrawer a) instead of .headerNavLink's larger desktop
+  // padding, so the row lines up with its neighbours.
   .headerNavLink {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+    padding: 10px 16px 10px 12px;
+    font-size: 14px;
     font-weight: 600;
   }
 }
@@ -838,18 +966,27 @@
   flex-direction: column;
   padding-left: 12px;
   // background: #fafafa;
-}
 
-.mobileCalcLink {
-  padding: 8px 16px;
-  font-size: 13px;
-  color: #2c1b0e;
-  cursor: pointer;
-  transition: background 0.15s ease;
+  // Sub-links are real <a> elements now, which means `.mobileDrawer a` would
+  // otherwise win on specificity and size them like top-level rows. Nested here
+  // to keep the visual hierarchy.
+  .mobileCalcLink {
+    padding: 8px 16px;
+    font-size: 13px;
+    color: #2c1b0e;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease;
 
-  &:hover {
-    background: #fff3ed;
-    color: #F75801;
+    &:hover {
+      background: #fff3ed;
+      color: #F75801;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #f75801;
+      outline-offset: -2px;
+    }
   }
 }
 
@@ -921,9 +1058,28 @@
   white-space: nowrap;
   transition: background 0.15s ease;
 
+  // These rows are <button role="menuitem"> now, so they need the block layout
+  // and full width a div gave them for free. min-height keeps each row a
+  // comfortable target on a phone, where the whole menu is thumb-operated.
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  font-weight: 500;
+  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+
   &:hover {
     background: #fff3ed;
     color: #F75801;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: -2px;
   }
 }
 
@@ -956,6 +1112,24 @@
   gap: 10px;
   padding-inline: 6px;
   margin-block: 14px;
+
+  // <button> resets — this row was a div with an inline cursor: pointer, so it
+  // was invisible to the keyboard even though it is the only route to the
+  // account screen from the mobile drawer.
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: -2px;
+  }
+
   .menuProfilePik{
     width: 35px;
     height: 35px;
@@ -969,11 +1143,14 @@
     font-size: 20px;
     flex-shrink: 0;
   }
+  // The name used to be a <p> and the phone a bare <span>, which is how they
+  // were told apart. A <p> is not valid inside a <button>, so both are spans now
+  // and each carries its own class.
   .menuProfileNameMobile{
     display: flex;
     flex-direction: column;
     width: 70%;
-    p{
+    .menuProfileNameText{
       font-weight: 600;
       font-size: 1rem;
       display: -webkit-box;
@@ -981,7 +1158,7 @@
       -webkit-line-clamp: 1;
       overflow: hidden;
     }
-    span{
+    .menuProfilePhoneText{
       font-size: 0.8rem;
       color: rgba(0, 0, 0, 0.6);
     }

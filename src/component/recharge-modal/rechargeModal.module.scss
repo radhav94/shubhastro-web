@@ -244,15 +244,16 @@
   justify-content: center;
   gap: 8px;
 
-  &:hover:not(:disabled) {
+  /* Keyed off aria-disabled, not :disabled. The button stays enabled with no
+     plan chosen so the tap can explain itself; only the look is dimmed. */
+  &:hover:not([aria-disabled='true']) {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
   }
-  &:active:not(:disabled) { transform: translateY(0); }
-  &:disabled {
+  &:active:not([aria-disabled='true']) { transform: translateY(0); }
+  &[aria-disabled='true'] {
     background: #e5e7eb;
     color: #9ca3af;
-    cursor: not-allowed;
     transform: none;
   }
 }

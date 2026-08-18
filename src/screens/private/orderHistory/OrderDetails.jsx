@@ -21,6 +21,8 @@ import { useChat } from "../../../context/ChatContext";
 import { useCall } from "../../../context/CallContext";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
+import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
+import { getAstrologerImageUrl } from "../../../utils/appImages";
 
 const OrderDetails = () => {
   const { astrologerId } = useParams();
@@ -224,16 +226,16 @@ const OrderDetails = () => {
         if (!roomId) throw new Error("Room ID missing");
         setActiveChat({
           roomId, chatRoomId: roomId,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true, userId: uid, astrologerId: astroId,
-          astrologerName: astro?.firstName || "",
+          astrologerName: getAstrologerDisplayName(astro),
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
           profileImgUrl: astro?.profileImgUrl,
         });
         setChatSeconds(Number(data?.remainingTime) * 60);
         navigate(`/chat-to-astrologer/${astroId}`, {
-          state: { userId: uid, astrologerId: astroId, fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(), roomId, isUserSide: true, experience: astro?.experience, profileImgUrl: astro?.profileImgUrl },
+          state: { userId: uid, astrologerId: astroId, fullName: getAstrologerDisplayName(astro), roomId, isUserSide: true, experience: astro?.experience, profileImgUrl: astro?.profileImgUrl },
         });
       } catch (e) {
         Toast.error("Failed to start chat");
@@ -250,7 +252,7 @@ const OrderDetails = () => {
         const chatRoomId = res?.data?.data;
         setActiveCall({
           roomId, channelName, chatRoomId, agoraToken: token,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true, callType: type, userId, astrologerId: astro._id,
           astrologerID: astro?.astrologer_ID, remainingTime,
           experience: astro?.experience,
@@ -322,9 +324,17 @@ const OrderDetails = () => {
   const astrologer = astrologerData?.data;
 
   const astrologerInfo = astrologer ? {
-    name: `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
+    name: getAstrologerDisplayName(astrologer),
     experience: astrologer.experience ? `${astrologer.experience} Years` : "N/A",
-    image: astrologer.profileImgUrl || astrologer.profileImgUrl || "https://via.placeholder.com/40",
+    // OrderInfoCard renders this at 90px (75px under 640px), so ask for the
+    // `medium` (250x312) derivative instead of `profileImgUrl`, which points at
+    // the unresized original. `astrologer` here is the full object from
+    // useGetAstrologerByIdQuery, so the derivatives are genuinely available.
+    //
+    // Replaces a `profileImgUrl || profileImgUrl` duplicate and a
+    // via.placeholder.com fallback — the helper ends on the bundled gendered
+    // default, so there's no third-party request when an astrologer has no image.
+    image: getAstrologerImageUrl(astrologer, "small"),
     isOnline: astrologer.isActive || false,
     astrologer_ID: astrologer.astrologer_ID,
   } : null;
@@ -361,8 +371,9 @@ const OrderDetails = () => {
 
     setReviewData({
       astrologerID: astrologer.astrologer_ID || astrologer._id,
-      fullName: `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
-      profileImage: astrologer.profileImgUrl || astrologer.imageUrl ,
+      fullName: getAstrologerDisplayName(astrologer),
+      // FeedbackModal renders the avatar at 44px
+      profileImage: getAstrologerImageUrl(astrologer, "small"),
       roomId,
     });
     setOpenReview(true);
@@ -415,6 +426,7 @@ const OrderDetails = () => {
                 type={rec.sessionType === "video" ? "video" : "audio"}
                 astrologerName={astrologerInfo.name}
                 astrologerImage={astrologerInfo.image}
+                astrologerGender={astrologer?.gender}
                 initialRating={rec.rating ?? null}
                 roomId={rec.roomId || rec.sessionId}
                 onRateConsultation={handleRateConsultation}
@@ -429,12 +441,38 @@ const OrderDetails = () => {
           return <PrimaryLoader />;
         }
         return (
-          <ChatWindow
-            chatSessions={processedData.chatSessions}
-            onLoadMore={loadMore}
-            hasMore={hasMore}
-            isLoading={isFetching}
-          />
+          <>
+            {/*
+              Readings frequently open with "without birth details I can only
+              give general guidance". The transcript is read-only, so that line
+              was the only thing on screen about it and readers click the message
+              itself trying to act on it — session recordings show minutes of
+              repeat clicks on exactly that text. `hasKundli` was already being
+              read from useAstrologerConnect here and never used; this is what it
+              was for.
+            */}
+            {!hasKundli && (
+              <div className={styles.birthDetailsPrompt} role="status">
+                <p className={styles.birthDetailsPromptText}>
+                  Readings stay general until we have your birth details. Add them
+                  once and every future consultation is personalised.
+                </p>
+                <button
+                  type="button"
+                  className={styles.birthDetailsPromptBtn}
+                  onClick={() => navigate("/kundli")}
+                >
+                  Add birth details
+                </button>
+              </div>
+            )}
+            <ChatWindow
+              chatSessions={processedData.chatSessions}
+              onLoadMore={loadMore}
+              hasMore={hasMore}
+              isLoading={isFetching}
+            />
+          </>
         );
       case "Remedies":
         return <RemediesTab astrologerId={astrologerId} />;

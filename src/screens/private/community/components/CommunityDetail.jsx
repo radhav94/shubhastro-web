@@ -19,6 +19,7 @@ import Toast from "../../../../component/toast";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import PostImageSlider from "./PostImageSlider";
 import { DeleteConfirmationModal } from "../../../../component";
+import { getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
 
 const CommunityDetail = ({ communityId, astrologers = [] }) => {
   const navigate = useNavigate();
@@ -378,7 +379,7 @@ const CommunityDetail = ({ communityId, astrologers = [] }) => {
                       {post.authorType?.toUpperCase() === "ASTROLOGER" && (
                         <button
                           className={styles.bookSessionBtn}
-                          onClick={() => navigate(`/astrologer/${post.authorId}`)}
+                          onClick={() => navigate(getAstrologerProfilePath(post.authorId))}
                         >
                           Book Session
                         </button>

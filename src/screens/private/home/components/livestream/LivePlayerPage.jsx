@@ -1,31 +1,46 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
-import InteractiveLiveStreaming from "./InteractiveLiveStreaming";
+import { useEffect, useState, lazy, Suspense } from "react";
+import { useParams, Link } from "react-router-dom";
 import { LiveListProvider } from "../../../../../context/LiveListContext";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { restoreViewerSession, clearViewerSession } from "../../../../../utils/liveSessionStorage";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
+import { getAstrologerImageUrl } from "../../../../../utils/appImages";
+import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
+import styles from "./LivePlayerPage.module.scss";
+
+// Lazy, because this module carries the Agora RTC SDK — a 1,226 kB chunk.
+//
+// It used to be a static import, which meant the chunk was part of *this* module
+// and therefore downloaded before any of the code below could run. That is the
+// worst case on /live, which is a paid Google Ads landing page: a visitor fetched
+// the entry bundle and then ~1.2 MB of video SDK before this page could decide
+// whether it had anything to play at all — including the "nobody is live" and
+// load-failure cases, where the SDK is never used.
+//
+// Splitting it means those exits cost only this small module. Real viewers do not
+// pay an extra round trip either: the import is kicked off alongside the
+// live-list request, so it is usually resolved by the time it renders.
+const importInteractiveLiveStreaming = () => import("./InteractiveLiveStreaming");
+const InteractiveLiveStreaming = lazy(importInteractiveLiveStreaming);
 
 const LivePlayerPage = () => {
   const { channelId } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
-  // The persisted redux `auth.isLoggedIn` can be stale (false) even when a
-  // valid customer token exists in localStorage (redux-persist rehydrates an
-  // old value over the token-derived initial state). The rest of the live
-  // module authenticates off the token, so treat a present token as logged in
-  // to avoid a false live -> login -> home redirect.
-  const reduxLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const hasCustomerToken = !!localStorage.getItem("shubhtalk_customer_token");
-  const isLoggedIn = reduxLoggedIn || hasCustomerToken;
   const [lives, setLives] = useState([]);
   const [autoStartIndex, setAutoStartIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
 
-  // Guests are allowed to view live streams — no login redirect needed
-
-  useEffect(() => {
+  // Guests may watch live streams, so there is no login gate here. Kept as a
+  // named function (rather than inlined in the effect) so the "Try again" /
+  // "Check again" buttons in the failure and empty states can re-run it.
+  const loadLives = () => {
     setIsLoading(true);
+
+    // Start fetching the Agora chunk alongside the live list rather than after
+    // it, so splitting the player out does not add a round trip for viewers who
+    // will actually reach it.
+    importInteractiveLiveStreaming();
+
     const savedSession = restoreViewerSession();
 
     getAstrologerLiveList().then((res) => {
@@ -41,8 +56,6 @@ const LivePlayerPage = () => {
           map[item.channel] = item;
         }
       });
-
-      console.log("mappppp", map);
 
       let liveList = Object.values(map).filter((l) => l.astrologer);
 
@@ -80,27 +93,109 @@ const LivePlayerPage = () => {
       }
 
       setLives(liveList);
+      setLoadFailed(false);
       setIsLoading(false);
     }).catch(() => {
+      // The failure used to be indistinguishable from "nobody is live": both
+      // ended with an empty list and a screen that explained neither.
+      setLoadFailed(true);
       setIsLoading(false);
     });
-  }, [channelId]);
+  };
+
+  useEffect(loadLives, [channelId]);
+
+  /*
+   * Every exit from this page used to be `return null`, i.e. a blank white page
+   * under the global header, and there were three of them in a row: the
+   * live-list fetch and two lazy chunk boundaries sharing a
+   * `<Suspense fallback={null}>` (the Agora player is 1,256 kB and
+   * LiveStreamingContainer another 74 kB). On a cold visit from an ad that is
+   * seconds of nothing to look at, and any click landing in that window hits the
+   * page background — a dead click with nothing to attribute it to.
+   *
+   * Each state below now renders something, and every one of them offers a way
+   * out.
+   */
 
   if (isLoading) {
-    return null;
+    return (
+      <div className={styles.gateWrap}>
+        <PrimaryLoader fullscreen={false} message="Finding live sessions…" />
+      </div>
+    );
+  }
+
+  if (loadFailed) {
+    return (
+      <div className={styles.gateWrap}>
+        <div className={styles.gateCard}>
+          <h1 className={styles.gateTitle}>Couldn&apos;t load live sessions</h1>
+          <p className={styles.gateText}>
+            The list didn&apos;t come through. This is usually a connection hiccup.
+          </p>
+          <div className={styles.gateActions}>
+            <button type="button" className={styles.gatePrimary} onClick={loadLives}>
+              Try again
+            </button>
+            <Link to="/astrologers" className={styles.gateSecondary}>
+              Browse astrologers
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /*
+   * No streams at all. This case used to fall straight through to the player,
+   * which mounted the Agora client and LiveView with `channel: undefined` and
+   * tried to join nothing — so an empty list rendered as a stalled black player
+   * rather than as an answer. LiveStreamingContainer only ever guards
+   * `lives.length > 1` (for the up/down nav), never zero.
+   */
+  if (lives.length === 0) {
+    return (
+      <div className={styles.gateWrap}>
+        <div className={styles.gateCard}>
+          <h1 className={styles.gateTitle}>Nobody is live right now</h1>
+          <p className={styles.gateText}>
+            Live sessions run through the day. Check back shortly, or start a chat or
+            call with an astrologer who is online now.
+          </p>
+          <div className={styles.gateActions}>
+            <button type="button" className={styles.gatePrimary} onClick={loadLives}>
+              Check again
+            </button>
+            <Link to="/astrologers" className={styles.gateSecondary}>
+              See who&apos;s online
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <LiveListProvider
       lives={lives.map((l) => ({
         channel: l.channel,
-        astrologerName: `${l.astrologer?.firstName || ""} ${
-          l.astrologer?.lastName || ""
-        }`.trim(),
+        // userName-first display name (helper falls back to firstName + lastName).
+        astrologerName: getAstrologerDisplayName(l.astrologer),
+        // Keep the raw userName too so downstream consumers that rebuild an
+        // astrologer object don't lose it.
+        userName: l.astrologer?.userName || "",
         astrologerId: l.astrologer?._id,
         rating: l.astrologer?.rating,
         expertise: l.astrologer?.expertise,
-        imageUrl: l.astrologer?.profileImgUrl || l.astrologer?.imageUrl,
+        // Resolved once here so every downstream consumer of the live list
+        // (LiveStreamingContainer's stream-ended card, LiveListContext readers)
+        // gets a sized variant instead of the unresized original. The largest
+        // surface that reads this is 60px, so `small` (100x125).
+        //
+        // Falls back through profileImgUrl -> imageUrl -> gendered default, so
+        // this is unchanged when the live-list projection omits profileImages.
+        imageUrl: getAstrologerImageUrl(l.astrologer, "small"),
         audioCallRate: l.astrologer?.price?.audioRate?.amount,
         videoCallRate: l.astrologer?.price?.videoCallRate?.amount,
         uid: l.uid,
@@ -110,7 +205,21 @@ const LivePlayerPage = () => {
       }))}
       autoStartIndex={autoStartIndex}
     >
-      <InteractiveLiveStreaming />
+      {/* Local boundary, so a suspend does not bubble to HomeLayout's
+          <Suspense fallback={<CircleSpinner />}> and blank the whole layout.
+          The fallback shows a loader rather than null: two lazy chunks resolve
+          behind this boundary (the Agora player at 1,256 kB, then
+          LiveStreamingContainer), and on a cold visit that was a blank page for
+          the duration of both downloads. */}
+      <Suspense
+        fallback={
+          <div className={styles.gateWrap}>
+            <PrimaryLoader fullscreen={false} message="Starting the live player…" />
+          </div>
+        }
+      >
+        <InteractiveLiveStreaming />
+      </Suspense>
     </LiveListProvider>
   );
 };

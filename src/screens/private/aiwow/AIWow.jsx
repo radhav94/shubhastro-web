@@ -17,6 +17,7 @@ import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { PATH } from "../../../utils/routes/Paths";
 import { trackEvent } from "../../../utils/analytics";
+import { downloadFile } from "../../../utils/helper/downloadFile";
 import { findChargeAmount } from "./hooks/useAIWowDownload";
 
 // Reusable Section Title with Divider (same as Explore page, auto-width)
@@ -289,7 +290,10 @@ const AIWow = () => {
         return;
       }
       if (!selectedProfile) {
+        // A toast alone left the tile looking unresponsive. Open the Kundli
+        // picker as well so the tap leads somewhere the user can act on.
         toast.error("Please select one Kundli to proceed.");
+        setShowProfileModal(true);
         return;
       }
     }
@@ -321,17 +325,19 @@ const AIWow = () => {
       try {
         toast.loading("Downloading PDF...", { id: "pdf-download" });
         const url = existingPdfUrl || await fetchPdfUrl(item.featureId);
-          const res = await fetch(url);
-          const blob = await res.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = blobUrl;
-          link.download = `${item.featureName || "ai-report"}.pdf`;
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          URL.revokeObjectURL(blobUrl);
-        toast.success("PDF downloaded!", { id: "pdf-download" });
+        // In-app webviews (Instagram, Facebook, WeChat) ignore a synthetic
+        // <a download> click, and this reported success regardless.
+        const outcome = await downloadFile(url, `${item.featureName || "ai-report"}.pdf`);
+        if (outcome === "downloaded") {
+          toast.success("PDF downloaded!", { id: "pdf-download" });
+        } else if (outcome === "opened") {
+          toast.success("PDF opened in a new tab. Use your browser menu to save it.", {
+            id: "pdf-download",
+            duration: 5000,
+          });
+        } else {
+          toast.error("Failed to download PDF", { id: "pdf-download" });
+        }
       } catch {
         toast.error("Failed to download PDF", { id: "pdf-download" });
       }
@@ -348,20 +354,23 @@ const AIWow = () => {
     try {
       toast.loading("Downloading PDF...", { id: "pdf-download" });
       const pdfUrl = await fetchPdfUrl(featureId, language);
-        const res = await fetch(pdfUrl);
-        const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = `${featureName || "ai-report"}-${language}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+      /*
+       * The wallet is already charged at this point, so the old unconditional
+       * "Payment Successful! PDF downloaded." meant an in-app-webview visitor
+       * paid and got nothing. This entry is marked free below, so a failed
+       * delivery can honestly point at a free retry.
+       */
+      const outcome = await downloadFile(pdfUrl, `${featureName || "ai-report"}-${language}.pdf`);
         // Delay toast to let iOS handle the download trigger without swallowing it
         setTimeout(() => {
-          URL.revokeObjectURL(blobUrl);
           toast.dismiss("pdf-download");
-          toast.success("Payment Successful! PDF downloaded.", { id: "pdf-download-success", duration: 3000 });
+          if (outcome === "downloaded") {
+            toast.success("Payment Successful! PDF downloaded.", { id: "pdf-download-success", duration: 3000 });
+          } else if (outcome === "opened") {
+            toast.success("PDF opened in a new tab. Use your browser menu to save it.", { id: "pdf-download-success", duration: 5000 });
+          } else {
+            toast.error("Your report is ready but the download did not start. Tap download again — it is free now.", { id: "pdf-download-success", duration: 6000 });
+          }
         }, 600);
       // Mark ONLY this history entry as free locally so its ribbon updates.
       // (Keyed by the unique entry id, not featureId — otherwise other selected
@@ -516,7 +525,7 @@ const AIWow = () => {
           {activeTab === "results" && (
             <div className={styles.resultsList}>
               {isHistoryLoading && historyPage === 1 ? (
-                <PrimaryLoader />
+                <PrimaryLoader fullscreen={false} />
               ) : historyList.length === 0 ? (
                 <div className={styles.resultsPlaceholder}>No history found</div>
               ) : (

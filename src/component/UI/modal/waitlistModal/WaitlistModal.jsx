@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 import styles from "./WaitlistModal.module.scss";
 
 /**
@@ -49,12 +50,28 @@ const WaitlistModal = ({
   onCancelAll,
   onScrollToAstrologer,
 }) => {
-  // Auto-show when any request gets accepted
+  // Auto-show ONLY when a NEW request gets accepted — not on every render while
+  // an acceptance persists. Previously `onShow` fired on every render as long as
+  // any accepted request existed, so closing (X) immediately re-opened the modal
+  // on the next render. We remember which accepted roomIds have already
+  // triggered a show, so a manual close stays closed until a fresh acceptance.
+  const shownAcceptedRef = useRef(new Set());
   useEffect(() => {
-    const hasAccepted = pendingRequests.some(
-      (r) => r.status === "astrologer_accepted"
-    );
-    if (hasAccepted && onShow) onShow();
+    const acceptedIds = pendingRequests
+      .filter((r) => r.status === "astrologer_accepted")
+      .map((r) => r.roomId);
+
+    const hasNew = acceptedIds.some((id) => !shownAcceptedRef.current.has(id));
+    if (hasNew) {
+      acceptedIds.forEach((id) => shownAcceptedRef.current.add(id));
+      if (onShow) onShow();
+    }
+
+    // Forget accepted ids that are no longer pending, so if the same astrologer
+    // re-accepts later it can pop the modal again.
+    shownAcceptedRef.current.forEach((id) => {
+      if (!acceptedIds.includes(id)) shownAcceptedRef.current.delete(id);
+    });
   }, [pendingRequests, onShow]);
 
   if (!show || pendingRequests.length === 0) return null;
@@ -88,7 +105,9 @@ const WaitlistModal = ({
         {/* Request list */}
         <div className={styles.list}>
           {pendingRequests.map((req) => {
-            const name = req.astrologer?.firstName || req.astrologer?.astrologerName || req.astrologer?.hostName || "Astrologer";
+            // userName-first (helper falls back to firstName + lastName), then the
+            // flattened names some live/socket payloads carry.
+            const name = getAstrologerDisplayName(req.astrologer) || req.astrologer?.astrologerName || req.astrologer?.hostName || "Astrologer";
             const initial = name.charAt(0).toUpperCase();
             const isAccepted = req.status === "astrologer_accepted";
             const isOnHold = req.status === "on_hold";

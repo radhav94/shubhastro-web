@@ -273,6 +273,15 @@
   }
 }
 
+/*
+ * Action not yet actionable — the server has not assigned a roomId, so the
+ * button cannot do its job. It stays tappable (a tap explains the wait) but
+ * looks pending, so the user is not invited to hammer it.
+ */
+.notReady {
+  opacity: 0.55;
+}
+
 /* Decline button */
 .declineBtn {
   display: flex;

@@ -1085,10 +1085,13 @@
 /* ===============================
    📱 SMALL MOBILE (≤480px)
    =============================== */
-@media (min-height: 600px) and (max-height: 700px) {
+@media (min-height: 550px) and (max-height: 700px) {
   .avatarImage {
     width: 150px!important;
     height: 150px!important;
+  }
+  .controlGrid{
+    margin: 0 auto 0px!important;
   }
 }
 @media (max-width: 480px) {
@@ -1249,7 +1252,7 @@
   }
 
   .avatarName {
-    font-size: 26px;
+    font-size: 22px;
   }
 
   .avatarStatus {

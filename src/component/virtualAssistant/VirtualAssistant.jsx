@@ -18,9 +18,10 @@ import dayjs from "dayjs";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
 import IframeModal from "../../screens/private/home/components/chats/IframeModal";
 import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
-import { useFileSelector } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
+import { useFileSelector, FILE_SELECT_CANCELLED } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
 import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
 import { buildKundliLink } from "../../utils/helper/kundliMessage";
+import Toast from "../toast";
 import PdfIcon from "../../assets/chat/PDF.svg";
 import DocIcon from "../../assets/chat/DOC.svg";
 import XlsIcon from "../../assets/chat/XLS.svg";
@@ -42,6 +43,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const canvasRef = useRef(null);
+  const chatWindowRef = useRef(null);
   const navigate = useNavigate();
   const { openFileSelector } = useFileSelector();
 
@@ -112,7 +114,15 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
         const file = new File([blob], name || `file_${Date.now()}`, { type: blob.type });
         sendFile(file);
       }
-    } catch { /* cancelled */ }
+    } catch (err) {
+      // Backing out of the picker is deliberate, so it stays quiet. Anything
+      // else used to be swallowed by the same bare catch, leaving the attach
+      // sheet closed and nothing to show for the tap.
+      if (err?.message !== FILE_SELECT_CANCELLED) {
+        console.error("Assistant attachment failed:", err);
+        Toast.error("Couldn't attach that file. Please try again.");
+      }
+    }
   };
 
   const handleKundliSelect = (kundli) => {
@@ -156,11 +166,24 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
     }
   }, [isOpen]);
 
-  // Focus the text input when the chat window opens
+  // Focus the text input when the chat window opens. A single setTimeout(0)
+  // fired before the entrance animation / initial auto-scroll settled, so the
+  // caret never landed in the box. Retry across a couple of frames + a short
+  // delay so focus reliably lands once the input is painted and interactive.
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 0);
-    }
+    if (!isOpen) return;
+    const focusInput = () => {
+      const el = inputRef.current;
+      if (el && !el.disabled) el.focus();
+    };
+    const raf = requestAnimationFrame(focusInput);
+    const t1 = setTimeout(focusInput, 150);
+    const t2 = setTimeout(focusInput, 350);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [isOpen]);
 
   // Refocus input after sending completes (input was disabled during send)
@@ -169,6 +192,36 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
       setTimeout(() => inputRef.current?.focus(), 0);
     }
   }, [sending, isOpen]);
+
+  // Keep the scroll inside the panel. `overscroll-behavior: contain` on the
+  // message list covers "list reached its end", but a wheel over the header,
+  // the input bar, or a list too short to scroll still reached the document —
+  // so the page behind the assistant scrolled away under it.
+  //
+  // Has to be a native non-passive listener: React registers `wheel` passively,
+  // so preventDefault() from an onWheel prop is ignored.
+  useEffect(() => {
+    const el = chatWindowRef.current;
+    if (!isOpen || !el) return undefined;
+
+    const handleWheel = (event) => {
+      // Walk up to the panel root looking for an inner scroller that can still
+      // move. If there is one, let it scroll — overscroll-behavior handles the
+      // edges. Otherwise nothing in here consumes the wheel, so swallow it.
+      for (let node = event.target; node && node !== el; node = node.parentElement) {
+        if (
+          node.scrollHeight > node.clientHeight &&
+          /(auto|scroll)/.test(getComputedStyle(node).overflowY)
+        ) {
+          return;
+        }
+      }
+      event.preventDefault();
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, [isOpen]);
 
   // Stop the camera on browser Back/forward navigation, in case this widget
   // stays mounted across the route change.
@@ -195,7 +248,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
     <>
       {/* Chat Window */}
       {isOpen && (
-        <div className={styles.chatWindow}>
+        <div className={styles.chatWindow} ref={chatWindowRef}>
           {/* Header */}
           <div className={styles.header}>
             <div className={styles.headerInfo}>
@@ -276,15 +329,25 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
                         // (e.g. an astrologer profile link) resolves to null.
                         const kundliLink = buildKundliLink(msg.kundliId, msg.message);
                         return (
-                          <div
+                          // A <button>, not a div: this is an action. And when the
+                          // link can't be resolved the tap used to do nothing at
+                          // all — say so instead.
+                          <button
+                            type="button"
                             className={styles.kundliLink}
-                            onClick={() => kundliLink && setIframeSrc(kundliLink)}
+                            onClick={() => {
+                              if (!kundliLink) {
+                                Toast.error("This kundli is no longer available to view.");
+                                return;
+                              }
+                              setIframeSrc(kundliLink);
+                            }}
                           >
                             <GrReactjs />
                             {msg.kundliName
                               ? `${msg.kundliName}'s Kundli`
                               : "View Kundli"}
-                          </div>
+                          </button>
                         );
                       })() : msg.type === "audio" ? (
                         <div className={styles.audioMessage}>
@@ -522,6 +585,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
             <canvas ref={canvasRef} style={{ display: "none" }} />
             <input
               ref={inputRef}
+              autoFocus
               className={styles.textInput}
               value={text}
               onChange={(e) => setText(e.target.value)}

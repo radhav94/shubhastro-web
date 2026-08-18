@@ -38,7 +38,7 @@ const OccultChat = () => {
   const { data: kundliData, isLoading: isLoadingProfiles } = useGetAllKundlisQuery(undefined, { skip: !token });
   const profiles = kundliData?.data || [];
   const [getOccultDasha, { isLoading: isGenerating }] = useGetOccultDashaMutation();
-  const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: "occult-dosha" });
+  const { runWithEntitlement, subscriptionModal, showSubscriptionModal } = useAIWowSubscriptionGate({ featureName: "occult-dosha" });
 
   const setSelectedProfile = (profile) => {
     setSelectedProfileLocal(profile);
@@ -133,7 +133,9 @@ const OccultChat = () => {
     <>
       <BackButton />
     <div className={styles.container}>
-      {(isLoadingProfiles || isGenerating || guestGenerating) && <PrimaryLoader />}
+      {/* Hide the fullscreen loader while the subscription/plans popup is open,
+          otherwise it covers the popup and the CTA looks stuck on "Analyzing...". */}
+      {(isLoadingProfiles || isGenerating || guestGenerating) && !showSubscriptionModal && <PrimaryLoader />}
 
       {/* Hero Section - Two columns */}
       <div className={styles.heroRow}>
@@ -194,8 +196,8 @@ const OccultChat = () => {
               )}
             </>
           )}
-          <button className={styles.generateBtn} onClick={handleGenerate} disabled={(token && (!selectedProfile || isGenerating)) || guestGenerating}>
-            {(isGenerating || guestGenerating) ? "Analyzing..." : "Get Occult Reading"}
+          <button className={styles.generateBtn} onClick={handleGenerate} disabled={((token && (!selectedProfile || isGenerating)) || guestGenerating) && !showSubscriptionModal}>
+            {((isGenerating || guestGenerating) && !showSubscriptionModal) ? "Analyzing..." : "Get Occult Reading"}
           </button>
         </div>
         <img src={occultImg} alt="occult" />
@@ -256,9 +258,11 @@ const OccultChat = () => {
         onSuccess={(profile) => {
           setShowGuestAuthModal(false);
           if (profile?._id) setSelectedProfile(profile);
-          const action = pendingGuestActionRef.current;
+          // Do NOT auto-run the analysis after registration. The user must click
+          // the button again — that click runs the subscription check (plans
+          // popup → buy → analyze). Prevents the report auto-generating the
+          // moment the welcome-bonus popup closes.
           pendingGuestActionRef.current = null;
-          if (action) action(profile);
         }}
       />
     </div>

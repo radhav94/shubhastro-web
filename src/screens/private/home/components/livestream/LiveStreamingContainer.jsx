@@ -17,7 +17,7 @@ import {
   saveViewerSession,
 } from "../../../../../utils/liveSessionStorage";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
-import { getAstrologerDefaultImage } from "../../../../../utils/appImages";
+import { getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../../utils/appImages";
 import { useCall } from "../../../../../context/CallContext";
 import { getGuestId, isGuestUser } from "../../../../../utils/guestId";
 import { toast as rht } from "react-hot-toast";
@@ -86,6 +86,10 @@ const LiveStreamingContainer = ({ client }) => {
         ...saved,
         astrologer: {
           _id: currentLive.astrologerId,
+          // Preserve the username so name rendering stays userName-first.
+          // `astrologerName` is already the resolved display name, so use it as
+          // the fallback rather than splitting it into first/last.
+          userName: currentLive.userName || currentLive.astrologerName || "",
           firstName: currentLive.astrologerName?.split(" ")[0] || "",
           lastName: currentLive.astrologerName?.split(" ").slice(1).join(" ") || "",
           rating: currentLive.rating,
@@ -117,6 +121,16 @@ const LiveStreamingContainer = ({ client }) => {
   // Keep live state in a ref so the callback always reads fresh values
   const liveRef = useRef(live);
   useEffect(() => { liveRef.current = live; }, [live]);
+
+  // Display name resolved by LiveView from the FULL astrologer record (which
+  // carries `userName`). The live-list API and the `live:astrologer_status`
+  // socket payload only provide the real first + last name, so we use this to
+  // show the username in the "has left" modal.
+  const resolvedHostNameRef = useRef("");
+  // Sized avatar reported up by LiveView, which has the full astrologer record
+  // and therefore the `profileImages` derivatives. The socket payload only
+  // carries the unresized original.
+  const resolvedHostAvatarRef = useRef("");
 
   // Keep channel in a ref so handleAstrologerStatus always reads the current channel
   const channelRef = useRef(channel);
@@ -163,9 +177,25 @@ const LiveStreamingContainer = ({ client }) => {
 
       if (wasWatchingThis) {
         // Show modal first, defer removeLive until modal closes/auto-dismisses
-        // Use profileImage from socket event, fallback to currentLive's imageUrl
-        const resolvedImage = profileImage || liveList?.getCurrentLive()?.imageUrl || null;
-        setEndedInfo({ hostName, profileImage: resolvedImage, gender, roomId });
+        //
+        // Avatar precedence, most-to-least resolved. The socket's `profileImage`
+        // used to win, which meant this always painted the unresized original
+        // (896x902 and 1433x1433 observed) into a 60px circle. It's now the last
+        // resort: LiveView reports a sized variant up from the full astrologer
+        // record, and the live-list entry's imageUrl is resolved in
+        // LivePlayerPage. All three point at the same astrologer.
+        const currentLiveEntry = liveList?.getCurrentLive();
+        const resolvedImage =
+          resolvedHostAvatarRef.current ||
+          currentLiveEntry?.imageUrl ||
+          profileImage ||
+          null;
+        // Prefer the username-based name resolved from the full astrologer
+        // record, then the live-list entry, and only then the socket payload's
+        // hostName (which carries the astrologer's real first + last name).
+        const resolvedHostName =
+          resolvedHostNameRef.current || currentLiveEntry?.astrologerName || hostName;
+        setEndedInfo({ hostName: resolvedHostName, profileImage: resolvedImage, gender, roomId });
         if (endedTimerRef.current) clearTimeout(endedTimerRef.current);
         endedTimerRef.current = setTimeout(() => {
           setEndedInfo((prev) => {
@@ -233,8 +263,10 @@ const LiveStreamingContainer = ({ client }) => {
       if (prev) return prev;
       const currentAstro = liveList?.getCurrentLive();
       return {
-        hostName: currentAstro?.astrologerName || "Astrologer",
-        profileImage: currentAstro?.imageUrl || null,
+        hostName: resolvedHostNameRef.current || currentAstro?.astrologerName || "Astrologer",
+        // Same precedence as handleAstrologerStatus — prefer the sized variant
+        // LiveView reported up over the live-list entry's URL.
+        profileImage: resolvedHostAvatarRef.current || currentAstro?.imageUrl || null,
         gender: currentAstro?.gender || null,
         roomId: targetRoom,
       };
@@ -347,6 +379,8 @@ const LiveStreamingContainer = ({ client }) => {
       giftPopupOpenRef={giftPopupOpenRef}
       liveListRefreshKey={liveListRefreshKey}
       isGuest={isGuest}
+      onHostNameResolved={(name) => { resolvedHostNameRef.current = name || ""; }}
+      onHostAvatarResolved={(url) => { resolvedHostAvatarRef.current = url || ""; }}
 />
 
     {/* 🔥 LIVE NAVIGATION CONTROLS */}
@@ -375,11 +409,17 @@ const LiveStreamingContainer = ({ client }) => {
       <div onClick={dismissEnded} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999999 }}>
         <div onClick={(e) => e.stopPropagation()} style={{ background: "#fff", borderRadius: 16, padding: "32px 28px", maxWidth: 340, width: "85vw", textAlign: "center", position: "relative", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
           <button onClick={dismissEnded} style={{ position: "absolute", top: 12, right: 14, background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#999", lineHeight: 1 }}>✕</button>
-          {endedInfo.profileImage ? (
-            <img src={endedInfo.profileImage} alt="" style={{ width: 60, height: 60, borderRadius: "50%", objectFit: "cover", border: "2px solid #f75801", margin: "0 auto 14px", display: "block" }} />
-          ) : (
-            <img src={getAstrologerDefaultImage(endedInfo.gender)} alt="" style={{ width: 60, height: 60, borderRadius: "50%", objectFit: "cover", border: "2px solid #f75801", margin: "0 auto 14px", display: "block" }} />
-          )}
+          {/* One element instead of two identical branches — getAstrologerImageUrl
+              already falls back to the gendered default, and onError now covers
+              a derivative that is listed but missing from S3. */}
+          <img
+            src={getAstrologerImageUrl({ profileImgUrl: endedInfo.profileImage, gender: endedInfo.gender }, "small")}
+            alt=""
+            width={60}
+            height={60}
+            onError={(e) => { e.currentTarget.src = getAstrologerDefaultImage(endedInfo.gender); }}
+            style={{ width: 60, height: 60, borderRadius: "50%", objectFit: "cover", border: "2px solid #f75801", margin: "0 auto 14px", display: "block" }}
+          />
           <h3 style={{ fontSize: 17, fontWeight: 600, color: "#1a1a1a", margin: "0 0 6px" }}>{endedInfo.hostName || "Astrologer"} has left</h3>
           <p style={{ fontSize: 14, color: "#888", margin: "0 0 18px" }}>The live session has ended</p>
           <button onClick={dismissEnded} style={{ background: "linear-gradient(90deg, #F75801, #D43400)", color: "#fff", border: "none", borderRadius: 10, padding: "10px 32px", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>OK</button>

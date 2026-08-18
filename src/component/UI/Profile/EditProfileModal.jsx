@@ -254,7 +254,7 @@ const EditProfileModal = ({
                       </svg>
                       Female
                     </button>
-                    <button
+                    {/* <button
                       type="button"
                       className={values.identity === "Others" ? styles.active : ""}
                       onClick={() => setFieldValue("identity", "Others")}
@@ -276,7 +276,7 @@ const EditProfileModal = ({
                         </g>
                       </svg>
                       Others
-                    </button>
+                    </button> */}
                   </div>
                 </div>
 
@@ -350,6 +350,7 @@ const EditProfileModal = ({
                     }}
                     placeholder="HH:MM AM/PM"
                     disabled={values.unknownBirthTime}
+                    disabledReason="Uncheck “Don’t know the exact time of birth” to pick a time"
                   />
                   <ErrorMessage name="birthTime" component="div" className={styles.errorText} />
                   <div className={styles.checkboxLabel}>

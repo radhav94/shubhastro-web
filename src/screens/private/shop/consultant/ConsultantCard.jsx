@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Divider, PrimaryText } from "../../../../component";
 import { AppIcons, DefaultImages } from "../../../../utils/appImages";
-import { GetString } from "../../../../utils/helper/string.utils";
+import { GetString, getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 import { appColors } from "../../../../utils/theme";
 import styles from "./ConsultantCard.module.scss";
 
@@ -41,7 +41,7 @@ const ConsultantCard = ({ data }) => {
         <div className={styles.info}>
           <div className={styles.infoHeader}>
             <PrimaryText size_14 isExtraBold color={appColors.tri}>
-              {data?.firstName} {data?.lastName}
+              {getAstrologerDisplayName(data)}
             </PrimaryText>
           </div>
 

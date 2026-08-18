@@ -428,6 +428,22 @@
   white-space: nowrap;
 }
 
+// URLs inside the message text are real links now, so they have to look like it.
+.inlineLink {
+  color: #d43400;
+  text-decoration: underline;
+  word-break: break-all;
+
+  &:hover {
+    color: #f75801;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}
+
 .sentBubble .linkPreview {
   background: rgba(247, 88, 1, 0.08);
 }

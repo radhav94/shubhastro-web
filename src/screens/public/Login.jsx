@@ -41,7 +41,23 @@ const Login = () => {
 
   const handleSendOtp = async (event) => {
     event.preventDefault();
-    if (!isMobileNumberValid) return;
+
+    // Doubly silent before: the button was `disabled={!isMobileNumberValid}` so
+    // the browser swallowed the tap, and this guard returned without a word.
+    // Same defect as the onboarding LoginScreen CTA — this is the other entry
+    // point into the same funnel.
+    if (!isMobileNumberValid) {
+      trackEvent("login_blocked", {
+        blocker: "incomplete_mobile_number",
+        digits_entered: mobileNumber.length,
+      });
+      Toast.error(
+        mobileNumber.length === 0
+          ? "Please enter your 10-digit mobile number."
+          : `Please enter all 10 digits — ${Math.max(0, 10 - mobileNumber.length)} to go.`
+      );
+      return;
+    }
 
     const type = selectedRole === "USER" ? "CUSTOMER" : "ASTROLOGER";
 
@@ -155,12 +171,16 @@ const Login = () => {
               </div>
             </div>
 
+            {/*
+              Kept tappable on purpose — `handleSendOtp` explains what's missing.
+              `.sendOtpDisable` still supplies the dimmed look.
+            */}
             <button
               type="submit"
               className={`${styles.sendOtpButton} ${
                 !isMobileNumberValid ? styles.sendOtpDisable : ""
               }`}
-              disabled={!isMobileNumberValid}
+              aria-disabled={!isMobileNumberValid}
             >
               Send OTP
             </button>

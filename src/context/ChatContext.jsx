@@ -461,8 +461,10 @@ export const ChatProvider = ({ children }) => {
       const isOnChatPage = window.location.pathname.includes("/chat-to-astrologer");
       const isOnLivePage = window.location.pathname.startsWith("/live");
 
-      // Don't show if user is already on the chat page
+      // Don't show if user is already on the chat page or in an active call
+      // (call components have their own in-call notification banner)
       if (isOnChatPage) return;
+      if (window.__shubhtalk_call_active) return;
 
       const astroInfo = lastAstrologerInfoRef.current;
       const senderName = astroInfo?.name || "Astrologer";

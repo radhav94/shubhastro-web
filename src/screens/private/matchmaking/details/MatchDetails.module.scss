@@ -201,3 +201,59 @@
     margin-block: 5px 15px;
   }
 }
+
+/*
+  Shown when the match can't be calculated: a failed request, a 200 with no
+  payload, or navigation state lost to a refresh. All three used to render a
+  blank page (or a loader that never resolved) with the reason living only in a
+  toast that faded after three seconds.
+*/
+.matchErrorCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 520px;
+  margin: 40px auto;
+  padding: 24px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(247, 88, 1, 0.28);
+  border-radius: 14px;
+}
+
+.matchErrorText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #B93000;
+}
+
+.matchErrorActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.matchErrorRetry {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 50px;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.matchErrorSecondary {
+  padding: 10px 24px;
+  border: 1px solid #D43400;
+  border-radius: 50px;
+  background: transparent;
+  color: #D43400;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}

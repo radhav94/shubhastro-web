@@ -396,6 +396,11 @@ const PalmistryCamera = () => {
       .then((dataUrl) => {
         stopCamera();
         setCapturedImage(dataUrl);
+        // Required now that this is also reachable from the camera-error screen.
+        // That branch returns before the preview renders, so leaving `error` set
+        // would keep the error UI on screen with the photo accepted but
+        // invisible — the tap would look like it did nothing.
+        setError(null);
       })
       .catch(() => toast.error('Could not read that image. Please try another one.'));
   };
@@ -491,14 +496,37 @@ const PalmistryCamera = () => {
           </svg>
           <h3 className={styles.errorTitle}>Camera Access Required</h3>
           <p className={styles.errorText}>{error}</p>
+          {/*
+            The gallery fallback already existed, but only inside the live camera
+            view (gated on isBlocked || detectionUnavailable). When the camera
+            cannot start at all this branch returns first, so that view never
+            renders and the fallback was unreachable — leaving "Try Again", which
+            reloads into the same refusal, as the only move. That is the state
+            iOS Safari lands in when camera permission was previously denied for
+            the site, and it is what the recordings show: repeated attempts, then
+            navigating away.
+
+            Same handler and the same hidden input as the in-camera button, so an
+            uploaded palm goes through the identical confirm and submit path.
+          */}
           <div className={styles.errorButtons}>
-            <button className={styles.retryButton} onClick={() => window.location.reload()}>
+            <button className={styles.retryButton} onClick={handleUploadInstead}>
+              Upload a photo instead
+            </button>
+            <button className={styles.backButton} onClick={() => window.location.reload()}>
               Try Again
             </button>
             <button className={styles.backButton} onClick={handleBack}>
               Go Back
             </button>
           </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+          />
         </div>
       </div>,
       document.body

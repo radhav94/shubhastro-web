@@ -399,6 +399,12 @@
 
 .dotActive,
 .dotInactive {
+  // Rendered as <button> so the steps are reachable by keyboard and announced,
+  // which they were not as bare <span>s. Strip the UA button chrome.
+  appearance: none;
+  padding: 0;
+  border: none;
+  font: inherit;
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -408,6 +414,22 @@
   &:hover {
     transform: scale(1.2);
     opacity: 0.8;
+  }
+
+  // The current step's dot is a position indicator, not a control. It has to
+  // stop *looking* tappable, or the tap it invites goes nowhere.
+  &:disabled {
+    cursor: default;
+
+    &:hover {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
   }
 }
 
@@ -526,6 +548,21 @@
     cursor: not-allowed;
   }
 }
+
+/*
+ * Required details still missing. Looks like the `:disabled` state but carries no
+ * `disabled` attribute, so the tap reaches the handler and can name the blocker.
+ * A disabled CTA on a scrolled mobile form absorbs the tap and says nothing.
+ */
+.otpprimaryBtnBlocked {
+  opacity: 0.5;
+
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 .otpprimaryBtnPer{
   margin: 20px auto 20px auto;
   @media (width <= 767px) {
@@ -892,12 +929,38 @@
   }
 }
 
+/*
+ * The whole row is a single <button>. "Didn't get it?" used to be an inert span
+ * on the left with the resend control on the far right, and this row is
+ * space-between — so the prompt users reach for did nothing and the actual
+ * control was a screen-width away.
+ */
 .resendContainer {
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  background: transparent;
+  border: none;
+  width: calc(100% - 20px);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   display: flex;
   gap: 8px;
   justify-content: space-between;
   align-items: center;
   margin: 0 10px 16px;
+  padding: 6px 0;
+
+  &:active .resendBtn {
+    opacity: 0.7;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
 }
 
 .resendText {
@@ -906,21 +969,10 @@
 }
 
 .resendBtn {
-  background: transparent;
-  border: none;
   color: #d43400;
   font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
   padding: 4px 8px;
-
-  &:disabled {
-    cursor: not-allowed;
-  }
-
-  &:active:not(:disabled) {
-    opacity: 0.7;
-  }
 }
 
 // Login Screen
@@ -1981,13 +2033,26 @@
   }
 }
 
+/*
+ * Fixed +91 prefix. Rendered as a <button> only so a tap can be answered — it
+ * deliberately carries no chevron, because the previous version looked like a
+ * country picker and drew repeated clicks from non-Indian visitors. Styled to
+ * read as a static prefix rather than a control.
+ */
 .newCountryCode {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
+  border: none;
   border-right: 1px solid #e5e7eb;
   flex-shrink: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: default;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
 
   img {
     width: 24px;
@@ -2042,6 +2107,21 @@
   @media (max-width: 480px) {
     font-size: 16px;
     padding: 12px 20px;
+  }
+}
+
+/*
+ * Number not yet complete. Looks like the old `:disabled` state but carries no
+ * `disabled` attribute, so the tap still reaches the handler and can say which
+ * digits are missing. A disabled CTA here silently absorbed the tap at the last
+ * step of the signup funnel.
+ */
+.newClaimBtnIncomplete {
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.5;
+    transform: none;
   }
 }
 
@@ -2105,11 +2185,26 @@
   }
 }
 
+// Rendered as a <button> so the tap it already attracts gets answered. Button
+// chrome is stripped; only the cursor and focus ring are added.
 .phoneMockup {
   width: 360px;
   height: auto;
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
   @media (height: 641px) {
     width: 330px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 4px;
+    border-radius: 12px;
   }
 
   img {
@@ -2117,6 +2212,7 @@
     height: auto;
     object-fit: contain;
     filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));
+    display: block;
   }
 }
 

@@ -2,6 +2,7 @@ import { ChevronLeft, Camera, Calendar, Clock, MapPin, ChevronDown } from 'lucid
 import { useNavigate, useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import styles from './AddProfile.module.scss'
+import Toast from '../../../component/toast'
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -128,7 +129,15 @@ const EditProfile = () => {
               placeholder="12:01 PM"
               value={formData.birthTime}
               onChange={(e) => handleInputChange("birthTime", e.target.value)}
-              disabled={formData.unknownBirthTime}
+              // A natively disabled input fires no events, so tapping it did
+              // nothing at all. Keep it tappable and say why it's locked.
+              readOnly={formData.unknownBirthTime}
+              aria-disabled={formData.unknownBirthTime || undefined}
+              onClick={() => {
+                if (formData.unknownBirthTime) {
+                  Toast.info("Uncheck “Don’t know the exact time of birth” to pick a time");
+                }
+              }}
             />
             <Clock size={20} className={styles.inputIcon} />
           </div>

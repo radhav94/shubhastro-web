@@ -4,13 +4,17 @@ import PrimaryText from "../../PrimaryText";
 import styles from "./LiveAstroCard.module.scss";
 import PrimaryButton from "../../PrimaryButton";
 import { GrFormNext } from "react-icons/gr";
-import { GetString } from "../../../utils/helper/string.utils";
+import { GetString, getAstrologerDisplayName } from "../../../utils/helper/string.utils";
 import { appColors } from "../../../utils/theme";
 import toast from "../../toast";
 
 const LiveAstroCard = ({ data, onWatchNow, upComing }) => {
   // Construct display values directly from API data
-  const name = `${data.FirstName} ${data.LastName}`;
+  const name = getAstrologerDisplayName({
+    userName: data.userName,
+    firstName: data.FirstName,
+    lastName: data.LastName,
+  });
 
   const category = data.AstroCategoryNameDltd;
   const status = data.IsLiveCall ? "live" : "offline";

@@ -273,6 +273,22 @@
   gap: 0.75rem;
 }
 
+/*
+  The avatar + name are wrapped in a Link so the row opens the astrologer.
+  It takes over the flex behaviour the avatar/info previously had as direct
+  children of .card, so the row layout is unchanged: the link grows to fill the
+  space left by the Follow button, keeping that button hard right as before.
+*/
+.cardLink {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
 .avatar {
   width: 48px;
   height: 48px;

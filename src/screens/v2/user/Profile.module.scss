@@ -1316,6 +1316,18 @@
     color: #666;
   }
 
+  // Blocked while the astrologer is live. Keeps the dimmed look of the old
+  // `:disabled` state but without the attribute, so the tap still reaches the
+  // handler and can explain itself instead of being swallowed. Nested (rather
+  // than a sibling rule) so it outranks the base colour regardless of order.
+  &.consultAgainBlocked {
+    color: #9ca3af;
+
+    &:hover {
+      color: #9ca3af;
+    }
+  }
+
   &:disabled {
     color: #9ca3af;
     cursor: not-allowed;

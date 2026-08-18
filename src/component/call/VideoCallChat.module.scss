@@ -206,13 +206,22 @@
   gap: 0.5rem;
 }
 
-.KundliMessage > span {
+/* Rendered as a <button> so the tap always registers. UA button chrome is
+   stripped so it still reads as the inline link it looks like. */
+.KundliMessage > button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   text-decoration: underline;
   font-weight: 600;
   cursor: pointer;
   display: flex !important;
-  align-items: anchor-center;
-  gap: 6;
+  align-items: center;
+  gap: 6px;
 }
 
 .imageAttachment {
@@ -730,7 +739,13 @@
   color: inherit;
 }
 
+/* Rendered as a <button> so the tap always registers. It already carries its
+   own background/border, so only the UA layout and font defaults need undoing. */
 .productItem {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
   display: flex;
   gap: 10px;
   padding: 10px;

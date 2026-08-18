@@ -209,8 +209,19 @@ const AddProfile = () => {
               type="time"
               className={styles.input}
               value={formData.birthTime}
-              onChange={(e) => handleInputChange('birthTime', e.target.value)}
-              disabled={formData.unknownTime}
+              onChange={(e) => {
+                if (formData.unknownTime) return;
+                handleInputChange('birthTime', e.target.value);
+              }}
+              // A natively disabled input fires no events, so tapping it did
+              // nothing at all. Keep it tappable and say why it's locked.
+              readOnly={formData.unknownTime}
+              aria-disabled={formData.unknownTime || undefined}
+              onClick={() => {
+                if (formData.unknownTime) {
+                  Toast.info('Uncheck “Don’t know the exact time of birth” to pick a time');
+                }
+              }}
             />
             <Clock size={20} className={styles.inputIcon} />
           </div>

@@ -124,11 +124,21 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
   const [flow, setFlow] = useState("idle"); // "idle" | "processing" | "success"
   const [successPlan, setSuccessPlan] = useState(null);
 
+  /*
+    Synchronous re-entry latch for handleSelect. `pendingCode` only disabled the
+    button of the plan being purchased, so while one `purchaseWallet` call was in
+    flight a tap on a *different* plan fired a second one — two wallet debits
+    from a single visit to the paywall. State updates are async, so a ref is what
+    actually closes the window between the two clicks.
+  */
+  const purchasingRef = useRef(false);
+
   useEffect(() => {
     if (!isOpen) {
       setFlow("idle");
       setSuccessPlan(null);
       setPendingCode(null);
+      purchasingRef.current = false;
     }
   }, [isOpen]);
 
@@ -246,6 +256,11 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
   };
 
   const handleSelect = async (card) => {
+    if (purchasingRef.current) {
+      toast.error("Your purchase is still going through — one moment.");
+      return;
+    }
+
     // Free plan is not a purchasable subscription.
     if (!card?.plan?.code || card.plan.price === 0) {
       // #8 SUBSCRIPTION_FREE_PLAN_SELECTED
@@ -262,6 +277,7 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
       plan_price: card.priceValue,
       plan_type: variant,
     });
+    purchasingRef.current = true;
     setPendingCode(card.id);
     setFlow("processing");
     try {
@@ -322,6 +338,7 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
       setFlow("idle");
       toast.error("Purchase failed. Please try again.");
     } finally {
+      purchasingRef.current = false;
       setPendingCode(null);
     }
   };
@@ -419,11 +436,18 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
                   {plan.priceValue > 0 && <span className={styles.planPrice}>{plan.price}</span>}
                 </div>
 
+                {/*
+                  Never `disabled`: every plan stays clickable and handleSelect
+                  names the blocker. While one purchase is in flight the other
+                  plans are dimmed too — they used to look fully available even
+                  though tapping one would have started a second debit.
+                */}
                 <button
                   type="button"
                   className={`${styles.planCta} ${plan.highlighted ? styles.planCtaFilled : styles.planCtaOutline}`}
                   onClick={() => handleSelect(plan)}
-                  disabled={pendingCode === plan.id}
+                  aria-disabled={pendingCode !== null}
+                  aria-busy={pendingCode === plan.id}
                 >
                   {pendingCode === plan.id ? "Processing..." : plan.cta}
                 </button>

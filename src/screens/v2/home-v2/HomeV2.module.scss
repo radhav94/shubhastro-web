@@ -395,6 +395,32 @@
   color: #030303;
 }
 
+/*
+ * Sign-in affordance for guests. Padded well beyond its text so a thumb aimed
+ * near it still lands on the control — the previous version was a 12px inline
+ * span, small enough that near-misses hit the paragraph's padding and did
+ * nothing at all.
+ */
+.guestSignInLink {
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  background: transparent;
+  border: none;
+  padding: 8px 10px;
+  margin: -8px -4px;
+  font: inherit;
+  font-weight: 600;
+  color: #f75801;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}
+
 .heroBanner h1, .heroBanner .heroH1 {
   font-size: 1.8rem;
   font-weight: 600;
@@ -1191,7 +1217,9 @@
     gap: 0px;
   }
 
-  h5 {
+  // Muhurat name — an <h3> now (was <h5>, one rank below the widget's own
+  // heading once that became an <h2>). Size is unchanged.
+  h3 {
     font-size: 15px;
     font-weight: 500;
     color: #1a1a1a;
@@ -2576,7 +2604,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-image:url("../../../assets/images/liveSessionBackBg.svg");
+  background-image:url("../../../assets/images/liveSessionBackBg.png");
   background-size: cover;
   background-repeat: no-repeat;
   background-position: top;
@@ -2977,7 +3005,11 @@
   margin-top: 8px;
 }
 
-/* Voice player pill — same size as Call Again button */
+/* Voice player pill — same size as Call Again button.
+   This is a <button> now (was a div with onClick wrapping a second button), so
+   it needs the UA styling neutralised. `border: none` and the background were
+   already here; appearance/font/cursor are the additions, plus a focus ring —
+   it is keyboard-reachable now, which it never was as a div. */
 .sessionPlayer {
   display: flex;
   align-items: center;
@@ -2989,12 +3021,26 @@
   border: none;
   flex: 1;
   height: 40px;
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+
   @media (width <= 767px) {
     padding: 0 12px;
     gap: 5px;
   }
 }
 
+/* The play glyph. A decorative <span> now, not a nested <button> — the
+   border/background resets below are inert on a span but left in place so the
+   rule still reads correctly if the element ever changes again. */
 .sessionPlayBtn {
   width: auto;
   height: auto;
@@ -3252,7 +3298,7 @@
 .ctaBanner {
   width: 100%;
   background-color: rgba(255, 255, 255, 0.4);
-  background-image: url("../../../assets/images/dont-wait-top-bg.svg"),url("../../../assets/images/dont-wait-bottom-bg.svg");
+  background-image: url("../../../assets/images/dont-wait-top-bg.png"),url("../../../assets/images/dont-wait-bottom-bg.png");
   background-repeat: no-repeat,no-repeat;
   background-position: top right, bottom left;
   border-radius: 16px;
@@ -3854,7 +3900,7 @@
   }
 
   // .sectionTitle { font-size: 14px; }
-  .muhuratItem h5 {
+  .muhuratItem h3 {
     font-size: 12px;
   }
 }
@@ -4318,7 +4364,9 @@
     padding: 16px 12px;
   }
 
-  h4 {
+  // "TODAY'S MUHURAT" — an <h2> now (was <h4>, which skipped a level in the
+  // page outline). Size is unchanged; only the tag moved.
+  h2 {
     font-size: 14px;
     font-weight: 600;
     color: #1a1a1a;
@@ -4568,14 +4616,14 @@
 /* ═══ HomeV2 body background ═══ */
 :global(body.home-v2-page) {
   // background-image: url("https://assets.shubhastro.ai/images/1778659648-1576013064.png") !important;
-  background-image: url("../../../assets/images/main-body-bg-new.png");
+  background-image: url("https://assets.shubhastro.ai/main-body-bg-new.png");
   background-attachment: fixed;
   // background-color: #ebecf2 !important;
   position: relative !important;
   background-repeat: repeat-y;
   background-size: cover;
   @media (width <= 767px) {
-    background-image: url("../../../assets/images/main-body-bg-new-mobile.png");
+    background-image: url("https://assets.shubhastro.ai/main-body-bg-new-mobile.png");
   }
 }
 
@@ -4628,16 +4676,16 @@
 .gridSliderBtnLeft {
   left: -19px;
 
-  @media (width <= 767px) {
-    left: -14px;
+  @media (width <= 1180px) {
+    left: -10px;
   }
 }
 
 .gridSliderBtnRight {
   right: -19px;
 
-  @media (width <= 767px) {
-    right: -14px;
+  @media (width <= 1180px) {
+    right: -10px;
   }
 }
 

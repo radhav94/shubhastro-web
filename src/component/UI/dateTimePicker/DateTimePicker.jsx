@@ -1,7 +1,32 @@
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, lazy, Suspense } from "react";
 import styles from "./DateTimePicker.module.scss";
+import Toast from "../../toast";
+
+// react-datepicker (+ date-fns) is ~157 kB raw and was sitting in the entry
+// chunk on every route. It only backs the hidden calendar popup, so it loads on
+// first tap instead. See LazyCalendar.jsx.
+const LazyCalendar = lazy(() => import("./LazyCalendar"));
+
+/*
+ * A natively `disabled` input fires no events at all, so tapping one does
+ * literally nothing — no focus, no message, no cursor hint on touch. Clarity
+ * records those taps as dead clicks, and the user is left guessing why the
+ * field won't open (most often: "Don't know the exact time of birth" is ticked).
+ *
+ * When a caller supplies `disabledReason`, the field stays tappable and
+ * read-only, is marked `aria-disabled` for assistive tech, and explains itself
+ * on tap. Same rule the astrologer Chat/Call buttons follow. Without a reason
+ * the old native-disabled behaviour is kept, so existing callers are unchanged.
+ */
+const blockedTap = (disabled, disabledReason) => {
+  const blocked = disabled && !!disabledReason;
+  return {
+    blocked,
+    // Only hand the native attribute to the DOM when there's nothing to explain.
+    nativeDisabled: disabled && !disabledReason,
+    explain: () => Toast.info(disabledReason),
+  };
+};
 
 /* ───── 12-hour helpers ───── */
 const to12 = (h24) => {
@@ -23,7 +48,7 @@ const MINUTES = Array.from({ length: 60 }, (_, i) => i);
 const PERIODS = ["AM", "PM"];
 
 /* ───── Custom 12-hour Time Picker ───── */
-const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = false, openOnClick = false }) => {
+const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholder, dropUp = false, openOnClick = false }) => {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -75,15 +100,34 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
     return () => clearTimeout(t);
   }, [open]);
 
-  // Close on outside click
+  /*
+   * Close on outside interaction.
+   *
+   * This listened for `mousedown` only. mousedown is a compatibility event that
+   * touch browsers synthesise late, and iOS Safari does not fire it at all for
+   * taps it interprets itself — so on a phone the dropdown could stay stuck open
+   * over the rest of the form, and taps aimed at the fields underneath hit it
+   * instead. LocationSearch, which sits in the same guest-details form, already
+   * listens for touchstart and Escape; this is the same fix so the two behave
+   * alike.
+   */
   useEffect(() => {
-    if (!open) return;
+    if (!open) return undefined;
     const handler = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target))
         setOpen(false);
     };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler, { passive: true });
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [open]);
 
   // Sync manualInput with displayValue when not typing
@@ -184,24 +228,45 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
       return;
     }
     
-    // Validate hour and minute as user types (only when adding, not deleting)
+    /*
+      Normalise the digits as the user types instead of rejecting them.
+
+      This used to `return` on anything out of range, which made the field look
+      frozen for the most ordinary input there is: a first digit of 2-9. Typing
+      "9" for 9 AM was silently discarded, so the only way to reach 9:30 was to
+      know to type "0930". Same for the minutes' tens digit — "9" for :09 was
+      dropped. Nothing appeared on screen and nothing explained why, which is
+      exactly the shape of a form people rage-click and abandon.
+
+      A leading digit that can't start a valid hour or minute is now treated as
+      the ones place and zero-padded (9 -> 09), which is how every other time
+      mask behaves. Genuinely impossible pairs still can't be built, because the
+      pad makes them valid before they're used.
+    */
     if (!isDeleting) {
-      if (limitedDigits.length >= 1) {
-        const firstDigit = parseInt(limitedDigits[0], 10);
-        if (firstDigit > 1) return;
+      // First digit 2-9 can only mean 02-09, so pad it.
+      if (limitedDigits.length === 1 && parseInt(limitedDigits[0], 10) > 1) {
+        limitedDigits = `0${limitedDigits}`;
       }
+
+      // "00" or "1x" beyond 12 is a real mistake — keep only the digit typed
+      // last, padded, so the user can carry on rather than hitting a wall.
       if (limitedDigits.length >= 2) {
         const h = parseInt(limitedDigits.slice(0, 2), 10);
-        if (h < 1 || h > 12) return;
+        if (h < 1 || h > 12) {
+          const lastDigit = limitedDigits[1];
+          limitedDigits = parseInt(lastDigit, 10) > 0
+            ? `0${lastDigit}${limitedDigits.slice(2)}`
+            : limitedDigits.slice(0, 1);
+        }
       }
-      if (limitedDigits.length >= 3) {
-        const thirdDigit = parseInt(limitedDigits[2], 10);
-        if (thirdDigit > 5) return;
+
+      // Minutes: a tens digit above 5 can only mean 0x.
+      if (limitedDigits.length === 3 && parseInt(limitedDigits[2], 10) > 5) {
+        limitedDigits = `${limitedDigits.slice(0, 2)}0${limitedDigits[2]}`;
       }
-      if (limitedDigits.length >= 4) {
-        const m = parseInt(limitedDigits.slice(2, 4), 10);
-        if (m > 59) return;
-      }
+
+      limitedDigits = limitedDigits.slice(0, 4);
     }
     
     // Build formatted string: HH:MM
@@ -267,6 +332,8 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
     }
   };
 
+  const timeBlock = blockedTap(disabled, disabledReason);
+
   return (
     <div className={styles.timePickerWrapper} ref={wrapperRef}>
       <div className={styles.dateInputRow}>
@@ -277,18 +344,26 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
           onBlur={handleManualBlur}
           onKeyDown={handleManualKeyDown}
           onFocus={() => setIsTyping(true)}
-          onClick={() => !disabled && openOnClick && setOpen(true)}
+          onClick={() => {
+            if (timeBlock.blocked) return timeBlock.explain();
+            if (!disabled && openOnClick) setOpen(true);
+          }}
           placeholder={placeholder || "HH:MM AM/PM"}
-          disabled={disabled}
-          readOnly={openOnClick}
+          disabled={timeBlock.nativeDisabled}
+          aria-disabled={disabled || undefined}
+          readOnly={openOnClick || timeBlock.blocked}
           className={styles.input}
           autoComplete="off"
         />
         <button
           type="button"
           className={styles.calendarBtn}
-          disabled={disabled}
-          onClick={() => !disabled && setOpen((o) => !o)}
+          disabled={timeBlock.nativeDisabled}
+          aria-disabled={disabled || undefined}
+          onClick={() => {
+            if (timeBlock.blocked) return timeBlock.explain();
+            if (!disabled) setOpen((o) => !o);
+          }}
           tabIndex={-1}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -362,6 +437,9 @@ const TimePicker12 = ({ selected, onChange, disabled, placeholder, dropUp = fals
  * @param {Date} minDate - Minimum selectable date
  * @param {Date} maxDate - Maximum selectable date
  * @param {boolean} disabled - Disable the input
+ * @param {string} disabledReason - Why the field is disabled. When given, the
+ *   field stays tappable and shows this message instead of silently swallowing
+ *   the tap (a natively disabled input fires no events, which reads as broken).
  * @param {string} className - Additional wrapper class
  * @param {boolean} required - Show required indicator
  */
@@ -375,6 +453,7 @@ const DateTimePicker = ({
   minDate,
   maxDate,
   disabled = false,
+  disabledReason,
   className = "",
   required = false,
   // When true, dropdowns/calendar open upward (useful at the bottom of a screen)
@@ -397,6 +476,18 @@ const DateTimePicker = ({
   const isTimeOnly = resolvedMode === "time";
   const isDateTime = resolvedMode === "datetime";
 
+  // Declared above the `isTimeOnly` early return on purpose. Every date-mode
+  // hook below that return is already a conditional-hook violation (this
+  // component calls a different number of hooks depending on `mode`); these two
+  // sit up here so the lazy-calendar change doesn't add to it.
+  //
+  // The calendar chunk is only mounted once the user asks for it, so the picker
+  // library isn't downloaded by visitors who never open a date field.
+  const [calendarMounted, setCalendarMounted] = useState(false);
+  // A tap can land before the chunk resolves. Remember it and open on arrival
+  // rather than dropping it — a swallowed tap here would read as a dead click.
+  const pendingOpenRef = useRef(false);
+
   // For time-only mode, use our custom 12-hour picker
   if (isTimeOnly) {
     return (
@@ -411,6 +502,7 @@ const DateTimePicker = ({
           selected={selected}
           onChange={onChange}
           disabled={disabled}
+          disabledReason={disabledReason}
           placeholder={placeholder || "Select time"}
           dropUp={dropUp}
           openOnClick={openOnClick}
@@ -531,6 +623,25 @@ const DateTimePicker = ({
   // Ref for the DatePicker to open programmatically
   const datePickerRef = useRef(null);
 
+  const dateBlock = blockedTap(disabled, disabledReason);
+
+  const openCalendar = () => {
+    if (dateBlock.blocked) return dateBlock.explain();
+    if (disabled) return;
+    if (datePickerRef.current) {
+      datePickerRef.current.setOpen(true);
+      return;
+    }
+    pendingOpenRef.current = true;
+    setCalendarMounted(true);
+  };
+
+  const handleCalendarReady = () => {
+    if (!pendingOpenRef.current) return;
+    pendingOpenRef.current = false;
+    datePickerRef.current?.setOpen(true);
+  };
+
   return (
     <div className={`${styles.wrapper} ${className}`}>
       {label && (
@@ -543,26 +654,44 @@ const DateTimePicker = ({
       <div className={styles.dateInputRow}>
         <input
           type="text"
+          // The mask takes digits only and inserts the slashes itself, so a phone
+          // should offer the number pad. As plain type="text" iOS opened the
+          // QWERTY keyboard and the user had to find the "123" key before they
+          // could type a single character of their birth date. type stays "text"
+          // rather than "number" so the slashes and the mask still work.
+          inputMode="numeric"
           value={inputText}
           onChange={handleManualChange}
           onBlur={handleManualBlur}
-          onClick={() => openOnClick && !disabled && datePickerRef.current?.setOpen(true)}
+          onClick={() => {
+            if (dateBlock.blocked) return dateBlock.explain();
+            if (openOnClick) openCalendar();
+          }}
           placeholder={resolvedPlaceholder}
-          disabled={disabled}
-          readOnly={openOnClick}
+          disabled={dateBlock.nativeDisabled}
+          aria-disabled={disabled || undefined}
+          readOnly={openOnClick || dateBlock.blocked}
           className={`${styles.input} ${dateError ? styles.inputError : ""}`}
           autoComplete="off"
         />
-        {/* Invisible overlay covering right 1/3 of input to open calendar */}
-        <div
+        {/* Invisible hit area over the right 1/3 of the input, so clicking near
+            the calendar icon opens the picker even while typing stays enabled.
+            A button rather than a div: same reason as everywhere else, though it
+            stays out of the tab order and hidden from assistive tech because the
+            real calendar button next to it does the same job. */}
+        <button
+          type="button"
           className={styles.calendarOverlay}
-          onClick={() => !disabled && datePickerRef.current?.setOpen(true)}
+          onClick={openCalendar}
+          tabIndex={-1}
+          aria-hidden="true"
         />
         <button
           type="button"
           className={styles.calendarBtn}
-          disabled={disabled}
-          onClick={() => datePickerRef.current?.setOpen(true)}
+          disabled={dateBlock.nativeDisabled}
+          aria-disabled={disabled || undefined}
+          onClick={openCalendar}
           tabIndex={-1}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -575,29 +704,30 @@ const DateTimePicker = ({
       </div>
       {dateError && !onError && <p className={styles.dateError}>{dateError}</p>}
 
-      {/* Hidden DatePicker for calendar popup */}
+      {/* Hidden DatePicker for the calendar popup — mounted on first request so
+          react-datepicker stays out of the entry bundle. fallback={null} because
+          this subtree is visually hidden anyway; the field above is already
+          rendered, so there is nothing to hold space for and no layout shift. */}
       <div className={styles.hiddenPicker}>
-        <DatePicker
-          ref={datePickerRef}
-          selected={selected}
-          onChange={handlePickerChange}
-          showMonthDropdown
-          showYearDropdown
-          dropdownMode="select"
-          scrollableYearDropdown
-          yearDropdownItemNumber={100}
-          showTimeSelect={isDateTime}
-          timeFormat="hh:mm aa"
-          timeIntervals={15}
-          dateFormat={resolvedFormat}
-          minDate={minDate}
-          maxDate={maxDate}
-          disabled={disabled}
-          popperPlacement={dropUp ? "top-start" : "bottom-start"}
-          popperClassName={styles.popper}
-          calendarClassName={styles.calendar}
-          {...(portal ? { portalId: "rdp-portal" } : {})}
-        />
+        {calendarMounted && (
+          <Suspense fallback={null}>
+            <LazyCalendar
+              ref={datePickerRef}
+              selected={selected}
+              onChange={handlePickerChange}
+              isDateTime={isDateTime}
+              dateFormat={resolvedFormat}
+              minDate={minDate}
+              maxDate={maxDate}
+              disabled={disabled}
+              dropUp={dropUp}
+              portal={portal}
+              popperClassName={styles.popper}
+              calendarClassName={styles.calendar}
+              onReady={handleCalendarReady}
+            />
+          </Suspense>
+        )}
       </div>
     </div>
   );

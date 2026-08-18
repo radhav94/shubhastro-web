@@ -1,0 +1,92 @@
+/*
+ * States for /live that used to render `return null` — a blank white page under
+ * the global header for the guest guard, the live-list fetch, the two lazy chunk
+ * boundaries and an empty live list.
+ */
+
+.gateWrap {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.gateCard {
+  width: 100%;
+  max-width: 460px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid rgba(247, 88, 1, 0.18);
+  border-radius: 16px;
+  padding: 32px 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.gateTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c1b0e;
+  margin: 0 0 10px;
+
+  @media (width <= 767px) {
+    font-size: 18px;
+  }
+}
+
+.gateText {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #5f5245;
+  margin: 0 0 22px;
+}
+
+.gateActions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+// Both actions are full-height targets rather than inline text, because on a
+// phone this card is the only thing on the screen and these are the only two
+// ways off it.
+.gatePrimary {
+  min-height: 46px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 80px;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}
+
+.gateSecondary {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border: 1px solid rgba(247, 88, 1, 0.45);
+  border-radius: 80px;
+  background: #fff;
+  color: #d43400;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}

@@ -131,6 +131,18 @@
   margin-bottom: 0;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+
+  /* The banner is a control now (see handleBannerClick). It was already being
+     clicked repeatedly while inert, because it is the same orange card that is
+     tappable on the home page and its subtitle repeats the CTA's wording. The
+     cursor and focus ring make that affordance honest instead of implied. */
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -4px;
+  }
+
   @media (width <= 767px) {
     padding:10px 16px;
   }
@@ -310,6 +322,18 @@
   }
 }
 
+/* Sits over the disabled location input so a tap can unlock the form instead of
+   being swallowed. Invisible on purpose — the greyed input is the affordance. */
+.locationUnlockOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
 .locationLabel {
   font-family: 'Poppins', sans-serif;
   font-size: 15px;
@@ -361,16 +385,15 @@
 }
 
 /* Disabled states when results are showing */
+/* Dimmed while the form is locked to a result, but deliberately NOT
+   `pointer-events: none`: the tap has to reach the handler so it can unlock the
+   form. `pointer-events: none` here made every chip a dead click. */
 .chipDisabled {
   opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 
 .periodDisabled {
   opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 
 /* Loading */

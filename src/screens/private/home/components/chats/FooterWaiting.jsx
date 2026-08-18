@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useChat } from "../../../../../context/ChatContext";
 import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 
 
 export const FooterWaiting = () => {
@@ -25,7 +26,7 @@ export const FooterWaiting = () => {
     }
   }, [setChatApproval, setWaitingList, removePendingConnection])
 
-  const astrologerName = lastRequestedAstro?.firstName
+  const astrologerName = getAstrologerDisplayName(lastRequestedAstro)
 
   const handleCancel = () => {
     voiceSocket.emit("chat:cancel", {roomId : activeChatRoomId, canceledBy : "CUSTOMER"});

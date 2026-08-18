@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import GuestKundliAuthModal from "../../../component/UI/Profile/GuestKundliAuthModal";
+import Toast from "../../../component/toast";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { useMediaPermission } from "../../../utils/hooks/useMediaPermission";
@@ -40,13 +41,22 @@ export const useGuestConnectFlow = () => {
     setOpen(false);
     const target = pending;
     setPending(null);
-    if (!target?.astro?._id) return;
+    // The guest just finished registering + OTP, so bailing out silently here
+    // strands them on the listing page with no idea the call never started.
+    if (!target?.astro?._id) {
+      Toast.error("Lost track of the astrologer. Please tap Call again.");
+      return;
+    }
 
     const { astro, type } = target;
     const userId = localStorage.getItem("shubhtalk_customer_id");
-    if (!userId) return;
+    if (!userId) {
+      Toast.error("We couldn't finish signing you in. Please try again.");
+      return;
+    }
 
     // Ensure mic (and camera for video) permission before starting the call.
+    // checkPermission surfaces its own prompt/denial UI, so stay quiet here.
     const ok = await checkPermission(type === "video" ? "both" : "microphone");
     if (!ok) return;
 

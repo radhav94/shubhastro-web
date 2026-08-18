@@ -634,7 +634,8 @@ const Explore = () => {
             </button>
           </div>
         </div>
-        <PrimaryLoader />
+        {/* Inline so the header above stays visible and un-blurred. */}
+        <PrimaryLoader fullscreen={false} />
       </div>
     );
   }

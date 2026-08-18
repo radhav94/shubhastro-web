@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { useRazorpayPayment } from '../../utils/hooks/useRazorpay';
+import Toast from '../toast';
+import { trackEvent } from '../../utils/analytics';
 import styles from './paymentDetailsModal.module.scss';
 
 const GST_RATE = 0.18;
@@ -27,7 +29,41 @@ const PaymentDetailsModal = ({ isOpen, onClose, selectedPlan, onSuccess, onBack 
 
   const handlePay = useCallback(async () => {
     if (paymentLoading || isProcessing || !selectedPlan) return;
+
+    // The gateway not being ready used to be folded into `disabled`, which made
+    // this the final step of a recharge with a permanently dead button. Checked
+    // here rather than inside initiatePayment: that guard returns without
+    // calling onFailure, so setting paymentLoading first would strand the
+    // button on "Processing..." forever.
+    if (scriptError) {
+      Toast.error('Payment gateway could not load. Check your connection, then reload the page and try again.');
+      return;
+    }
+    if (!isLoaded) {
+      Toast.error('Payment gateway is still loading. Please try again in a moment.');
+      return;
+    }
+
     setPaymentLoading(true);
+
+    /*
+     * recharge_payment_method_selected.
+     *
+     * There is no in-app instrument picker: this screen offers a single "Pay
+     * with Razorpay" action, and UPI vs card vs net banking is chosen inside
+     * Razorpay's own checkout, which we cannot observe from the page. So this
+     * fires once, here, with the gateway as the method — committing to a payment
+     * route is the closest real equivalent of the spec's step.
+     *
+     * If per-instrument reporting is needed, it has to come from Razorpay's
+     * dashboard or a server-side webhook that reads `method` off the payment
+     * entity; the browser never sees it.
+     */
+    trackEvent("recharge_payment_method_selected", {
+      amount: rechargeAmount,
+      payment_method: "razorpay",
+      source: "recharge_modal",
+    });
 
     try {
       const planId = selectedPlan._id || selectedPlan.plan_id;
@@ -46,7 +82,7 @@ const PaymentDetailsModal = ({ isOpen, onClose, selectedPlan, onSuccess, onBack 
     } catch {
       setPaymentLoading(false);
     }
-  }, [selectedPlan, paymentLoading, isProcessing, initiatePayment, onClose, onSuccess]);
+  }, [selectedPlan, paymentLoading, isProcessing, isLoaded, scriptError, initiatePayment, onClose, onSuccess]);
 
   const handleClose = useCallback(() => {
     if (paymentLoading || isProcessing) return;
@@ -68,7 +104,10 @@ const PaymentDetailsModal = ({ isOpen, onClose, selectedPlan, onSuccess, onBack 
 
   if (!isOpen || !selectedPlan) return null;
 
-  const isPayDisabled = paymentLoading || isProcessing || !isLoaded || !!scriptError;
+  // Only a genuine in-flight payment disables the button. "Gateway not ready"
+  // is dimmed via aria-disabled instead, so the tap still reaches handlePay.
+  const isPayDisabled = paymentLoading || isProcessing;
+  const isGatewayNotReady = !isLoaded || !!scriptError;
 
   return createPortal(
     <div
@@ -147,10 +186,17 @@ const PaymentDetailsModal = ({ isOpen, onClose, selectedPlan, onSuccess, onBack 
         <div className={styles.footer}>
           <button type="button" className={styles.payButton} onClick={handlePay}
             disabled={isPayDisabled}
+            aria-disabled={isGatewayNotReady}
             aria-label={`Pay ${totalAmount} rupees with Razorpay`}
             aria-busy={paymentLoading || isProcessing}>
             {paymentLoading || isProcessing ? (
               <><span className={styles.spinner} aria-hidden="true" />Processing...</>
+            ) : scriptError ? (
+              // Was showing "Loading Payment Gateway..." forever, which is a
+              // lie once the script has actually failed. Not labelled "Retry":
+              // useRazorpayPayment exposes no way to reload the script, so the
+              // tap can only explain, not fix.
+              'Payment Gateway Unavailable'
             ) : !isLoaded ? (
               'Loading Payment Gateway...'
             ) : (

@@ -278,13 +278,23 @@ $font-primary: "Poppins", sans-serif;
     font-size: 14px;
   }
 
+  // Underlined, not colour-only. Inside a wall of prose an unstyled-looking link
+  // is easy to miss or mis-aim at — readers click next to it and get nothing —
+  // and colour alone is not a sufficient affordance.
   a {
     color: $color-primary;
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
     font-weight: 500;
+    word-break: break-word;
 
     &:hover {
       color: $color-secondary;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-primary;
+      outline-offset: 2px;
     }
   }
 

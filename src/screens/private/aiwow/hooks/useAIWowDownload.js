@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useGetChargesQuery, useDownloadReportPdfMutation, useGetAiHistoryQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import { useWalletBalance } from '../../wallet/useWalletBalance';
 import { trackEvent } from '../../../../utils/analytics';
+import { downloadFile } from '../../../../utils/helper/downloadFile';
 import { useGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
 import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from '../../../../utils/subscription/featureGating';
 import { extractExtendedPlans } from './useAIWowSubscriptionGate';
@@ -161,20 +162,27 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
     setIsDownloading(true);
     try {
       toast.loading('Downloading PDF...', { id });
-      const res = await fetch(url);
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      // Delay toast to let iOS handle the download trigger without swallowing it
+      /*
+       * downloadFile rather than a hand-rolled <a download> click. Facebook,
+       * Instagram and WeChat webviews silently ignore that click, and the old
+       * code showed "PDF downloaded!" unconditionally — so a visitor arriving
+       * from an Instagram link was told the report had saved when nothing had.
+       * The helper falls back to opening the URL and reports what happened.
+       */
+      const outcome = await downloadFile(url, fileName);
+      // Delay the toast to let iOS handle the download trigger without swallowing it
       setTimeout(() => {
-        URL.revokeObjectURL(blobUrl);
         toast.dismiss(id);
-        toast.success('PDF downloaded!', { id: `${id}-success`, duration: 3000 });
+        if (outcome === 'downloaded') {
+          toast.success('PDF downloaded!', { id: `${id}-success`, duration: 3000 });
+        } else if (outcome === 'opened') {
+          toast.success('PDF opened in a new tab. Use your browser menu to save it.', {
+            id: `${id}-success`,
+            duration: 5000,
+          });
+        } else {
+          toast.error('Failed to download PDF', { id: `${id}-success`, duration: 4000 });
+        }
       }, 600);
     } catch {
       toast.error('Failed to download PDF', { id });
@@ -212,23 +220,35 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
           toast.error('Failed to download PDF', { id });
           return;
         }
-        const res = await fetch(pdfUrl);
-        const blob = await res.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        // Delay toast/URL revoke to let iOS handle the download trigger without swallowing it
+        /*
+         * Same in-app-browser problem as handleDirectDownload, but with money
+         * involved: the wallet has already been charged by this point, so
+         * claiming "Payment Successful! PDF downloaded." when the webview
+         * dropped the <a download> click meant the visitor paid and received
+         * nothing, with no hint that anything was wrong. `downloadedPdfUrl` is
+         * still recorded below, which makes the retry free — so the honest
+         * message can point at that.
+         */
+        const outcome = await downloadFile(pdfUrl, fileName);
+        // Delay the toast to let iOS handle the download trigger without swallowing it
         setTimeout(() => {
-          URL.revokeObjectURL(blobUrl);
           toast.dismiss(id);
-          toast.success(
-            downloadPrice > 0 ? 'Payment Successful! PDF downloaded.' : 'PDF downloaded!',
-            { id: `${id}-success`, duration: 3000 }
-          );
+          if (outcome === 'downloaded') {
+            toast.success(
+              downloadPrice > 0 ? 'Payment Successful! PDF downloaded.' : 'PDF downloaded!',
+              { id: `${id}-success`, duration: 3000 }
+            );
+          } else if (outcome === 'opened') {
+            toast.success('PDF opened in a new tab. Use your browser menu to save it.', {
+              id: `${id}-success`,
+              duration: 5000,
+            });
+          } else {
+            toast.error(
+              'Your report is ready but the download did not start. Tap download again — it is free now.',
+              { id: `${id}-success`, duration: 6000 }
+            );
+          }
         }, 600);
         setShowDownloadModal(false);
         setDownloadedPdfUrl(pdfUrl);
@@ -255,13 +275,25 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
   }, [historyId, id, fileName, downloadReportPdf, refreshWallet, downloadPrice, openSubscriptionModal, featureName]);
 
   const handleDownloadClick = useCallback(() => {
+    /*
+     * In-flight guard. This used to rely entirely on callers setting
+     * `disabled={isDownloading}` on their button, which is not a safe place for
+     * it on a path that can charge the wallet: any caller that renders the
+     * button live could re-open the confirm modal mid-download and be charged
+     * twice. Enforced here so the guarantee does not depend on the caller.
+     */
+    if (isDownloading) {
+      toast.error('Your report is still downloading. Please wait.');
+      return;
+    }
+
     // Always show the payment popup so the first download of every generated
     // report is confirmed/charged (re-downloading the same report is free via
     // downloadPrice === 0). No subscription shortcut.
     refreshWallet();
     trackEvent('shubh_ai_payment_initiated', { feature_name: featureName, price: downloadPrice });
     setShowDownloadModal(true);
-  }, [refreshWallet, downloadPrice, featureName]);
+  }, [isDownloading, refreshWallet, downloadPrice, featureName]);
 
   return {
     // State

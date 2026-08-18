@@ -7,7 +7,7 @@ const PalmFaceSection = ({ onFeatureClick }) => {
     <div className={styles.section}>
       <h3 className={styles.sectionTitle}>Palm and Face Reading</h3>
       <div className={styles.grid}>
-        <div className={styles.card} onClick={() => onFeatureClick('/aiwow/palmistry')}>
+        <div className={styles.card} onClick={() => onFeatureClick('/ai-wow/ai-palmistry-scanner')}>
           <div className={styles.header}>
             <h4 className={styles.title}>Palmistry Scanner</h4>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -22,7 +22,7 @@ const PalmFaceSection = ({ onFeatureClick }) => {
           </p>
         </div>
 
-        <div className={styles.card} onClick={() => onFeatureClick('/aiwow/face-reading')}>
+        <div className={styles.card} onClick={() => onFeatureClick('/ai-wow/astro-face-reading')}>
           <div className={styles.header}>
             <h4 className={styles.title}>Face Reading</h4>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

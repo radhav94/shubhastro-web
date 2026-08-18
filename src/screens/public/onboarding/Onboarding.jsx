@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
@@ -9,13 +9,25 @@ import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearAllCalculatorData } from "../../../redux/calculator/calculatorSlice";
 import { useLogoutUserMutation } from "../../../redux/api/userSession/userSessionApi";
 import DeviceLimitModal from "../../../component/UI/modal/DeviceLimitModal/DeviceLimitModal";
+import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import LoadingScreen from "./LoadingScreen";
 import WelcomeScreen from "./WelcomeScreen";
 import GuidanceScreen from "./GuidanceScreen";
-import BirthDetailsScreen from "./BirthDetailsScreen";
+// Lazy: BirthDetailsScreen is the only onboarding step that renders
+// DateTimePicker, which pulls react-datepicker (107 kB) + date-fns (49 kB) —
+// together 15% of the entry chunk that every visitor parses on every page.
+// Onboarding is a static import (it backs /login), so that cost was paid app-wide
+// for a date field on one step.
+//
+// It is index 4 in the `screens` array below and `currentStep` starts at 1
+// (login) or 3 (personalize flow), so this step is never the initial render — it
+// is always reached after at least one interaction, by which time the chunk has
+// loaded.
+const BirthDetailsScreen = lazy(() => import("./BirthDetailsScreen"));
 import PersonalizeScreen from "./PersonalizeScreen";
 import OTPScreen from "./OTPScreen";
 import LoginScreen from "./LoginScreen";
+import { draftToOnboardingFormData } from "../guestChat/guestChatConstants";
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -40,7 +52,7 @@ const Onboarding = () => {
       } catch { /* ignore */ }
     }
 
-    return {
+    const base = {
       guidance: [],
       name: "",
       email: "",
@@ -54,6 +66,22 @@ const Onboarding = () => {
       phoneNumber,
       otp: "",
     };
+
+    // Users reach `?step=personalize` via a hard redirect from the profile
+    // self-check, not by choosing to — including guests who just filled in the
+    // chat details form and verified an OTP. Landing them on a blank
+    // Personalize + BirthDetails pair asks for the same name, gender, birth
+    // date, time and place all over again, which is where they give up. Reuse
+    // what they already told us and let them just confirm.
+    if (isPersonalizeFlow) {
+      const carried = draftToOnboardingFormData();
+      if (carried) {
+        // Anything already known from the account wins over the draft.
+        return { ...base, ...carried, phoneNumber: phoneNumber || carried.phoneNumber || "" };
+      }
+    }
+
+    return base;
   });
 
   // Redirect already-logged-in users to home (unless coming from kundli self-check)
@@ -112,9 +140,28 @@ const Onboarding = () => {
     }
   }, []);
 
+  // Arriving here can be involuntary: the profile self-check does a full page
+  // replace to `?step=personalize`. Say why, so a user who was midway through
+  // starting a chat understands this is the last step rather than a reset.
+  useEffect(() => {
+    if (!isPersonalizeFlow) return;
+    let reason = null;
+    try {
+      reason = sessionStorage.getItem("shubhtalk_personalize_reason");
+      if (reason) sessionStorage.removeItem("shubhtalk_personalize_reason");
+    } catch { /* ignore */ }
+    if (reason) setTimeout(() => toast(reason, { icon: "ℹ️" }), 300);
+  }, [isPersonalizeFlow]);
+
   const handleStepChange = (step) => {
-    // When guidance is skipped, don't allow navigating to step index 2 (GuidanceScreen)
-    if (skipGuidance && step >= 2) return;
+    // When guidance is skipped, don't allow navigating to step index 2
+    // (GuidanceScreen). The dots only render `totalSteps` of them, so this is
+    // currently unreachable — but every other branch here explains itself, and a
+    // silent return is how a control ends up looking broken if that changes.
+    if (skipGuidance && step >= 2) {
+      toast.error("That step isn't part of this signup.");
+      return;
+    }
 
     if (step > 0 && (!formData.name || formData.name.trim().length < 3)) {
       toast.error("Please complete your name in the first step");
@@ -248,7 +295,14 @@ const Onboarding = () => {
 
   return (
     <>
-      <div className={styles.onboardingContainer}>{screens[currentStep]}</div>
+      <div className={styles.onboardingContainer}>
+        {/* Boundary for the lazy BirthDetailsScreen. Inline rather than
+            fullscreen so the step swap doesn't flash a blurred overlay over the
+            onboarding card. */}
+        <Suspense fallback={<PrimaryLoader fullscreen={false} />}>
+          {screens[currentStep]}
+        </Suspense>
+      </div>
       <DeviceLimitModal 
         isOpen={isDeviceLimitOpen}
         onClose={() => {

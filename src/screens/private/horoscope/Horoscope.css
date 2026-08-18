@@ -180,7 +180,7 @@
   right: 0;
   top: 0;
   position: absolute;
-  background-image: url("/src/assets/images/horoscope-pattern.svg");
+  /* background-image: url("/src/assets/images/horoscope-pattern.svg"); */
   background-repeat: no-repeat;
   background-position: right;
 }

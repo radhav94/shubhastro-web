@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { Toast } from "../../../../component";
 import dayjs from "dayjs";
 import { PATH } from "../../../../utils/routes/Paths";
 import SectionHeader from "./SectionHeader";
@@ -29,6 +30,10 @@ const BlogsSection = ({ blogData = [], title, showMore, gridRef, onScrollableCha
   useEffect(() => {
     onScrollableChange?.({ canScrollLeft, canScrollRight });
   }, [canScrollLeft, canScrollRight, onScrollableChange]);
+
+  const handleUnavailableBlog = () => {
+    Toast.error("This article isn't available yet.");
+  };
 
   if (!blogData || blogData.length === 0) return null;
 
@@ -88,24 +93,28 @@ const BlogsSection = ({ blogData = [], title, showMore, gridRef, onScrollableCha
       </div>
 
       <div className={styles.blogsGrid} ref={gridRef}>
-        {blogData.map((blog, i) => (
-          <div
-            key={i}
-            className={styles.blogCard}
-            onClick={() =>
-              navigate(
-                PATH.privateRoutes.SINGLEBLOG.path.replace(
-                  ":slug",
-                  blog.slug || blog._id,
-                ),
-              )
-            }
-            style={{ cursor: "pointer" }}
-          >
+        {blogData.map((blog, i) => {
+          /*
+           * `blog.slug || blog._id` was interpolated straight into the path. With
+           * neither present, String.replace stringifies undefined and the card
+           * navigated to /blog/undefined — a real navigation to a page that can
+           * never resolve. Resolve the target first and keep the card honest:
+           * a real <Link> when there is somewhere to go (so it works with
+           * keyboard, middle-click and cmd/ctrl-click, and shows its destination
+           * on hover), and a dimmed, still-clickable card that explains itself
+           * when there is not.
+           */
+          const slug = blog.slug || blog._id;
+          const cardBody = (
+            <>
             <div className={styles.blogImageWrapper}>
+              {/* alt="" — blog.title is the <h3> in .blogContent below, so
+                  repeating it here made a screen reader read the headline twice
+                  for every card. Empty rather than absent so the image is
+                  treated as decorative instead of falling back to its filename. */}
               <img
                 src={blog.image?.small || blog.img || defaultBlogImg}
-                alt={blog.title}
+                alt=""
                 className={styles.blogImage}
                 onError={(e) => {
                   e.target.onerror = null;
@@ -119,8 +128,36 @@ const BlogsSection = ({ blogData = [], title, showMore, gridRef, onScrollableCha
                 {formatDateToReadable(blog.publishDate)}
               </p>
             </div>
-          </div>
-        ))}
+            </>
+          );
+
+          return slug ? (
+            <Link
+              key={i}
+              to={PATH.privateRoutes.SINGLEBLOG.path.replace(":slug", slug)}
+              className={styles.blogCard}
+            >
+              {cardBody}
+            </Link>
+          ) : (
+            <div
+              key={i}
+              className={`${styles.blogCard} ${styles.blogCardUnavailable}`}
+              role="button"
+              tabIndex={0}
+              aria-disabled="true"
+              onClick={handleUnavailableBlog}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleUnavailableBlog();
+                }
+              }}
+            >
+              {cardBody}
+            </div>
+          );
+        })}
       </div>
     </section>
   );

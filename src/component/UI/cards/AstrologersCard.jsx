@@ -5,7 +5,7 @@ import { appColors } from "../../../utils/theme";
 import { AppIcons, AppImages, DefaultImages, getAstrologerDefaultImage } from "../../../utils/appImages";
 import Divider from "../../Divider";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
-import { GetString } from "../../../utils/helper/string.utils";
+import { GetString, getAstrologerDisplayName, getAstrologerProfilePath } from "../../../utils/helper/string.utils";
 import { Link } from "react-router-dom";
 
 // AstrologerCard.jsx
@@ -23,7 +23,7 @@ const AstrologerCard = ({
     <div className={styles.card}>
       <div className={!isLayoutClassic? styles.topSection1 : styles.topSection} onClick={onProfile}>
         <div className={!isLayoutClassic ? styles.avatarWrapper1 : styles.avatarWrapper}>
-          <Link to={`/astrologer/${data?._id}`}>        
+          <Link to={getAstrologerProfilePath(data)}>        
             <img
               src={data?.imageUrl || getAstrologerDefaultImage(data?.gender)}
               alt={data?.firstName}
@@ -43,9 +43,9 @@ const AstrologerCard = ({
 
         <div className={styles.info}>
           <div className={styles.infoHeader}>
-            <Link to={`/astrologer/${data?._id}`}>
+            <Link to={getAstrologerProfilePath(data)}>
               <PrimaryText size_14 isExtraBold color={appColors.tri}>
-                {data?.firstName} {data?.lastName}
+                {getAstrologerDisplayName(data)}
               </PrimaryText>
             </Link>
           </div>

@@ -48,8 +48,21 @@
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  // cursor: pointer;
   position: relative;
+}
+
+// The row that actually carries the play handler. Cursor lives here rather than
+// on .waveformIcon so the whole clickable area signals itself, and descendants
+// inherit it instead of only the icon looking interactive.
+.cardContentPlayable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:focus-visible {
+    outline: 2px solid #f97316;
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
 }
 
 .astrologerImage {
@@ -74,12 +87,17 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  cursor: pointer;
 
   @media (max-width: 639px) {
     width: 75px;
     height: 75px;
   }
+}
+
+// No recording for this session. Kept tappable so the tap can be answered with
+// an explanation, but dimmed so it no longer reads as a ready-to-play button.
+.waveformIconEmpty {
+  opacity: 0.45;
 }
 
 .separator {
@@ -156,6 +174,8 @@
   
 }
 
+// Rendered as a <button> (was a bare <div onClick>) so it is focusable and
+// announced as an action.
 .consultAgain {
   flex: 1;
   text-align: center;
@@ -164,17 +184,29 @@
   color: #030303;
   cursor: pointer;
   white-space: nowrap;
-  padding-left: 12px;
+  padding: 0 0 0 12px;
+  border: none;
   border-left: 1px solid #ffffff;
+  background: transparent;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
 
   &:hover {
     color: #030303;
   }
+
+  &:focus-visible {
+    outline: 2px solid #f97316;
+    outline-offset: 2px;
+  }
 }
 
+// Blocked while the astrologer is live. Deliberately still tappable so the tap
+// can be answered with an explanation rather than nothing.
 .consultAgainDisabled {
   color: #9ca3af;
-  cursor: not-allowed;
 
   &:hover {
     color: #9ca3af;

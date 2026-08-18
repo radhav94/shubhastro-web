@@ -11,9 +11,18 @@
   padding: 0 16px;
   position: relative;
   z-index: 99;
+  /*
+    This is a full-width bar at z-index 99 holding a single 40px button, and
+    screens pull content up underneath it — FinalPay's .container uses
+    margin-top: -66px (-54px on mobile). Everything in that overlap was
+    swallowing taps meant for the content below. Let them through; the button
+    takes its own back.
+  */
+  pointer-events: none;
 }
 
 .backBtn {
+  pointer-events: auto;
   background: rgb(255, 244, 236);
   border: 1px solid #D43400;
   color: #D43400;

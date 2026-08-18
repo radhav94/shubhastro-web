@@ -428,9 +428,20 @@ const OrderHistoryTab = () => {
       {/* Pagination */}
       {pagination && pagination.pages > 1 && (
         <div className={styles.pagination}>
+          {/* Dimmed at the ends of the range but never `disabled` — a tap that
+              changes nothing on screen reads as a broken page, so say which end
+              we are at instead. */}
           <button
-            disabled={page <= 1}
-            onClick={() => { setPage((p) => p - 1); wrapperRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}
+            type="button"
+            aria-disabled={page <= 1}
+            onClick={() => {
+              if (page <= 1) {
+                Toast.info("You're on the first page.");
+                return;
+              }
+              setPage((p) => p - 1);
+              wrapperRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
             className={styles.pageBtn}
           >
             Previous
@@ -439,8 +450,16 @@ const OrderHistoryTab = () => {
             Page {page} of {pagination.pages}
           </span>
           <button
-            disabled={page >= pagination.pages}
-            onClick={() => { setPage((p) => p + 1); wrapperRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}
+            type="button"
+            aria-disabled={page >= pagination.pages}
+            onClick={() => {
+              if (page >= pagination.pages) {
+                Toast.info(`You're on the last page (${pagination.pages} of ${pagination.pages}).`);
+                return;
+              }
+              setPage((p) => p + 1);
+              wrapperRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
             className={styles.pageBtn}
           >
             Next

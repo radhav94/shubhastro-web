@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { PieChart } from '../../../component';
+import PieChart from './PieChart';
 
 // Example 1: Basic Usage
 const BasicExample = () => {

@@ -28,6 +28,10 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
   const navigate = useNavigate();
   const userLocation = useUserLocation();
 
+  // This section only renders date-based muhurats (Abhijit, Rahu Kaal, Gulika,
+  // Yamakanta), so the payload is pinned to midday. Using the live clock here
+  // made the cache key change every minute, which meant a fresh VedicAstro hit
+  // for practically every homepage view. Keep this day-stable.
   const panchangPayload = useMemo(() => {
     const now = new Date();
     const pad = (n) => String(n).padStart(2, "0");
@@ -35,8 +39,8 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
       day: pad(now.getDate()),
       month: pad(now.getMonth() + 1),
       year: now.getFullYear(),
-      hour: pad(now.getHours()),
-      min: pad(now.getMinutes()),
+      hour: "12",
+      min: "00",
       lat: userLocation.lat,
       lon: userLocation.lon,
       tzone: 5.5,
@@ -76,7 +80,11 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
   return (
     <div className={styles.rightPanel}>
       <div className={styles.muhuratHeader}>
-        <h4>{sectionData?.display_title || sectionData?.title || "TODAY'S MUHURAT"}</h4>
+        {/* h2/h3, not h4/h5. This widget sits in the hero row next to the "Your
+            AI Suite" <h2>, and on mobile the .desktopOnly cards between them are
+            hidden, so the outline jumped h2 → h4 right here. Sizes come from
+            .rightPanel h2 / .muhuratTop h3 in HomeV2.module.scss. */}
+        <h2>{sectionData?.display_title || sectionData?.title || "TODAY'S MUHURAT"}</h2>
         {!userLocation.isDefault && userLocation.locationName && (
           <span className={styles.muhuratLocation}>
             <IoLocationOutline />
@@ -96,9 +104,11 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
           >
             <div className={styles.muhuratTop}>
               <div className={styles.muhuratIcon}>
-                <img src={MUHURAT_ICONS[i] || defaultSquareImg} alt={m.name} width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                {/* alt="" — the <h3> beside it is already m.name, so a filled alt
+                    made a screen reader say the muhurat name twice. */}
+                <img src={MUHURAT_ICONS[i] || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
               </div>
-              <h5>{m.name}</h5>
+              <h3>{m.name}</h3>
             </div>
             <p className={styles.muhuratTime}>
               {m.end ? `${m.start} to ${m.end}` : m.start}

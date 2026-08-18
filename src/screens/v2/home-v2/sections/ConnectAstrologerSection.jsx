@@ -47,9 +47,12 @@ const ConnectAstrologerSection = memo(({ sectionData, styles }) => {
           </svg>
           {sectionData?.quick_message || "Don't Wait. Get Clarity Now."}
         </div> */}
-        <h3 className={styles.ctaHeading}>
+        {/* h2: this banner is a top-level homepage section, so its title sits at
+            the same rank as the other section titles rather than a level below.
+            Size comes from .ctaHeading. */}
+        <h2 className={styles.ctaHeading}>
           {sectionData?.display_title || sectionData?.title || "Talk to an Astrologer"}
-        </h3>
+        </h2>
         <p className={styles.ctaOrange}>{sectionData?.sub_title || "Get Clarity on What Matter Most!"}</p>
         <p className={styles.ctaDesc}>
           {sectionData?.description || "Connect with verified astrologers and get guidance on love, career, health, finance and more."}
@@ -60,7 +63,20 @@ const ConnectAstrologerSection = memo(({ sectionData, styles }) => {
               <img key={i} src={av} alt="" className={styles.ctaAvatar} loading="lazy" />
             ))}
             <span className={styles.ctaAvatarCount}>50+</span> */}
-            <img src={profilsImg} alt="" className={styles.ctaAvatar} loading="lazy" />
+            {/* Intrinsic size of profilsImg.png (359x103). The CSS sizes this
+                with `height: 65px; width: auto`, so without these attributes
+                the browser has no aspect ratio to work from and reserves zero
+                width until the bytes arrive — then the row snaps to ~227px
+                wide and shoves the "50+ ... Online" label sideways. With them
+                the aspect ratio is known up front and the space is reserved. */}
+            <img
+              src={profilsImg}
+              alt=""
+              className={styles.ctaAvatar}
+              width="359"
+              height="103"
+              loading="lazy"
+            />
           </div>
           <span className={styles.ctaOnline}>
             <span className={styles.ctaOnlineDot} />

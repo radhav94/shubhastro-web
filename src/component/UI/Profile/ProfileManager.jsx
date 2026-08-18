@@ -200,13 +200,18 @@ const ProfileManager = ({
       return;
     }
 
-    // If user is not logged in, open guest auth modal instead
-    if (!token) {
-      onClose();
-      setShowGuestAuthModal(true);
-      return;
-    }
-
+    /*
+     * A guest branch used to live here calling setShowGuestAuthModal(), which is
+     * declared nowhere in this component — ESLint flagged it as no-undef, and
+     * reaching it would have thrown a ReferenceError instead of opening anything.
+     * It was also redundant: the render below already routes every tokenless
+     * caller to <GuestKundliAuthModal> before ProfileListingModal (the only thing
+     * that can invoke this handler) is ever mounted visibly. Removed rather than
+     * given a state variable, so the guest path stays in one place. If a
+     * tokenless user ever does reach here, falling through is safe —
+     * handleSubmitProfile already has a guest branch that stores the profile in
+     * the shared cookie.
+     */
     setShowAddProfile(true);
   };
 

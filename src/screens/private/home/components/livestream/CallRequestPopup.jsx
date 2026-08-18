@@ -1,4 +1,5 @@
 import "./CallRequestPopup.scss";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 
 const CallRequestPopup = ({ show, onClose, onJoinAudio, onJoinVideo, host, astrologer, waitingList }) => {
   if (!show) return null;
@@ -15,7 +16,9 @@ const CallRequestPopup = ({ show, onClose, onJoinAudio, onJoinVideo, host, astro
   // Get rate from astrologer data or use default
   const audioRate = astrologer?.audioCallRate || host?.rate || 20;
   const videoRate = astrologer?.videoCallRate || host?.rate || 20;
-  const astrologerName = astrologer?.astrologerName || astrologer?.firstName || host?.name || "Astrologer";
+  // userName-first — `astrologerName` can be the live-list value (real first +
+  // last name), so the helper takes priority.
+  const astrologerName = getAstrologerDisplayName(astrologer) || astrologer?.astrologerName || host?.name || "Astrologer";
 
   return (
     <div className="call-overlay" onClick={onClose}>

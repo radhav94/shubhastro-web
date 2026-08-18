@@ -567,12 +567,14 @@
   color: #333;
   cursor: pointer;
 
-  &:disabled {
+  // Dimmed but still live: it answers with which end of the range you are at,
+  // so the pointer cursor stays honest.
+  &:disabled,
+  &[aria-disabled="true"] {
     opacity: 0.4;
-    cursor: not-allowed;
   }
 
-  &:not(:disabled):hover {
+  &:not(:disabled):not([aria-disabled="true"]):hover {
     background: #f5f5f5;
   }
 }

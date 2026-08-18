@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './GemstoneLanding.module.scss';
 import ClarityIcon from '../../../../assets/icons/clarity.png';
@@ -13,19 +13,29 @@ import { compressImage } from '../../../../utils/helper/compressImage';
 import { trackEvent } from '../../../../utils/analytics';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
+import { Toast } from '../../../../component';
 
 const GemstoneLanding = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const pendingActionRef = useRef(null);
+  // compressImage re-encodes through a canvas and waits up to 8s before falling
+  // back, and it used to run with no visible state at all: pick a photo, and the
+  // page sat there. That silence is what gets read as a dead click, so the
+  // buttons now report it.
+  const [preparing, setPreparing] = useState(false);
 
   const { data: aiwowData } = useGetAiWowPageDataQuery();
   const featureTitle = aiwowData?.data?.list?.flatMap(s => s.content || [])?.find(f => f.slug === 'gemstone-authenticity')?.title || 'Gemstone Authenticity';
 
   const handleBack = () => {
-    navigate(-1);
+    // `navigate(-1)` is inert on the first history entry — a shared link or an ad
+    // landing straight on this feature.
+    if (location.key !== 'default') navigate(-1);
+    else navigate('/ai-wow');
   };
 
   // Guests must add a kundli + verify OTP before capturing/uploading a photo.
@@ -47,10 +57,18 @@ const GemstoneLanding = () => {
   };
 
   const handleCamera = () => {
+    if (preparing) {
+      Toast.info('Preparing your photo — one moment.');
+      return;
+    }
     navigate('/ai-wow/gemstone-authenticity/camera', { replace: true });
   };
 
   const handleUpload = () => {
+    if (preparing) {
+      Toast.info('Preparing your photo — one moment.');
+      return;
+    }
     fileInputRef.current?.click();
   };
 
@@ -58,14 +76,25 @@ const GemstoneLanding = () => {
     const file = event.target.files?.[0];
     if (file) {
       trackEvent("shubh_ai_input_provided", { feature_name: "gemstone-authenticity", input_type: "image" });
-      compressImage(file).then((dataUrl) => {
-        // Guests must authenticate at the moment the photo is submitted.
-        runOrAuth(() => {
-          dispatch(setGemstoneImage(dataUrl));
-          navigate('/ai-wow/gemstone-authenticity/capture', { replace: true });
-        });
-      });
+      setPreparing(true);
+      compressImage(file)
+        .then((dataUrl) => {
+          // Guests must authenticate at the moment the photo is submitted.
+          runOrAuth(() => {
+            dispatch(setGemstoneImage(dataUrl));
+            navigate('/ai-wow/gemstone-authenticity/capture', { replace: true });
+          });
+        })
+        .catch((err) => {
+          console.error('Failed to process selected image:', err);
+          Toast.error('Could not read that image. Please try a different photo.');
+        })
+        .finally(() => setPreparing(false));
     }
+    // Reset so selecting the same file again re-triggers onChange. Without this
+    // a retry with the identical photo fires no event at all — the file dialog
+    // opens, the same file is chosen, and nothing whatsoever happens.
+    event.target.value = '';
   };
 
   const features = [
@@ -174,15 +203,20 @@ const GemstoneLanding = () => {
                 </div>
 
                 <div className={styles.buttonGroup}>
-                  <button 
+                  <button
+                    type="button"
                     className={styles.uploadButton}
                     onClick={handleUpload}
+                    aria-disabled={preparing}
+                    aria-busy={preparing}
                   >
-                    Upload Photo
+                    {preparing ? 'Preparing photo…' : 'Upload Photo'}
                   </button>
-                  <button 
+                  <button
+                    type="button"
                     className={styles.cameraButton}
                     onClick={handleCamera}
+                    aria-disabled={preparing}
                   >
                     Use Camera
                   </button>

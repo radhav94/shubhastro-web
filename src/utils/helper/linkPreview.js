@@ -86,3 +86,121 @@ export const extractDomain = (url) => {
     return url;
   }
 };
+
+/**
+ * Splits text into plain and URL segments so a renderer can turn the URLs into
+ * real links *in place*.
+ *
+ * Chat bubbles used to render the message text verbatim and then append a
+ * separate clickable preview below it. The URL therefore appeared twice, and the
+ * copy inside the sentence — the one a reader actually clicks — was inert text.
+ *
+ * Trailing punctuation is trimmed off the href because the regex is greedy up to
+ * whitespace, so "see https://x.com/a." would otherwise link to a 404.
+ *
+ * @param {string} text
+ * @returns {Array<{ type: 'text'|'url', value: string, href?: string }>}
+ */
+export const splitTextByURL = (text) => {
+  if (!text || typeof text !== 'string') return [];
+
+  const parts = [];
+  // A fresh regex per call: URL_REGEX is global and shared, so reusing it here
+  // would carry lastIndex across calls and drop matches at random.
+  const pattern = /(https?:\/\/[^\s]+)/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: 'text', value: text.slice(lastIndex, match.index) });
+    }
+
+    const raw = match[0];
+    const trailing = raw.match(/[.,;:!?)\]}'"]+$/)?.[0] || '';
+    const href = trailing ? raw.slice(0, -trailing.length) : raw;
+
+    parts.push({ type: 'url', value: href, href });
+    if (trailing) parts.push({ type: 'text', value: trailing });
+
+    lastIndex = pattern.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push({ type: 'text', value: text.slice(lastIndex) });
+  }
+
+  return parts;
+};
+
+/**
+ * Turns bare URLs inside an HTML string into real links, leaving existing
+ * anchors alone.
+ *
+ * CMS-authored article bodies routinely end with something like
+ * `Visit&nbsp;<font><span>https://www.shubhastro.ai/</span></font>` — a URL that
+ * reads as a link and is plain text. Readers click it and nothing happens.
+ *
+ * Parsed through DOMParser rather than regex-replaced: the body is full of
+ * `href`/`src` attributes and nested inline styles, and a regex over raw HTML
+ * would happily rewrite the inside of an attribute. `parseFromString` does not
+ * execute scripts, so this is a structural pass only.
+ *
+ * @param {string} html
+ * @returns {string} the same HTML with bare URLs wrapped in anchors
+ */
+const SKIP_LINKIFY_TAGS = new Set(['A', 'SCRIPT', 'STYLE', 'TEXTAREA', 'CODE', 'PRE']);
+
+export const linkifyHtml = (html) => {
+  if (!html || typeof html !== 'string') return html;
+  if (typeof window === 'undefined' || typeof window.DOMParser === 'undefined') return html;
+  if (!/https?:\/\//i.test(html)) return html;
+
+  try {
+    const doc = new window.DOMParser().parseFromString(html, 'text/html');
+    const walker = doc.createTreeWalker(doc.body, window.NodeFilter.SHOW_TEXT);
+
+    // Collect first, mutate after: replacing nodes while walking invalidates the
+    // walker's position.
+    const targets = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (!node.nodeValue || !/https?:\/\//i.test(node.nodeValue)) continue;
+
+      let skip = false;
+      for (let el = node.parentElement; el && el !== doc.body; el = el.parentElement) {
+        if (SKIP_LINKIFY_TAGS.has(el.tagName)) {
+          skip = true;
+          break;
+        }
+      }
+      if (!skip) targets.push(node);
+    }
+
+    targets.forEach((node) => {
+      const parts = splitTextByURL(node.nodeValue);
+      if (!parts.some((part) => part.type === 'url')) return;
+
+      const fragment = doc.createDocumentFragment();
+      parts.forEach((part) => {
+        if (part.type === 'url') {
+          const anchor = doc.createElement('a');
+          anchor.setAttribute('href', part.href);
+          anchor.setAttribute('target', '_blank');
+          anchor.setAttribute('rel', 'noopener noreferrer');
+          anchor.textContent = part.value;
+          fragment.appendChild(anchor);
+        } else {
+          fragment.appendChild(doc.createTextNode(part.value));
+        }
+      });
+
+      node.parentNode?.replaceChild(fragment, node);
+    });
+
+    return doc.body.innerHTML;
+  } catch (error) {
+    console.error('linkifyHtml failed, using original body:', error);
+    return html;
+  }
+};

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { PATH } from "../../../../../../utils/routes/Paths";
 import { useGetChatMessagesQuery } from "../../../../../../redux/api/chatApi";
 import PrimaryLoader from "../../../../../../component/UI/PrimaryLoader";
+import { getAstrologerDisplayName } from "../../../../../../utils/helper/string.utils";
 
 //     roomId: "6922f748318e70a557f0f17a",
 //     userId: "691da49c281243bd6345349b",
@@ -29,7 +30,7 @@ const ChatList = () => {
 
         <div className={styles.loaderBox}>
           <div className={styles.loader}></div>
-          <PrimaryLoader />
+          <PrimaryLoader fullscreen={false} />
         </div>
       </div>
     );
@@ -96,7 +97,7 @@ const ChatList = () => {
 
             <div className={styles.info}>
               <PrimaryText size_16 isSemiBold>
-                {chat.firstName} {chat.lastName}
+                {getAstrologerDisplayName(chat)}
               </PrimaryText>
 
               <PrimaryText size_12 color="#777">

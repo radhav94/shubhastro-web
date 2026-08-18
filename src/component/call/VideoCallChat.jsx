@@ -9,7 +9,7 @@ import XlsIcon from "../../assets/chat/XLS.svg";
 import styles from "./VideoCallChat.module.scss";
 import { useGetChatHistoryQuery } from "../../redux/api/chatApi";
 import { useGetS3SignedUrlMutation } from "../../redux/api/s3SignedApi";
-import { useFileSelector } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
+import { useFileSelector, FILE_SELECT_CANCELLED } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
 import { Toast } from "../index";
 import dayjs from "dayjs";
 import { useVideoCallChat } from "./useVideoCallChat";
@@ -249,8 +249,14 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
       const { blob } = await openFileSelector(accept);
       const attachType = getAttachType(blob.type);
       await sendFiles(blob, attachType);
-    } catch {
-      console.log("File selection cancelled");
+    } catch (err) {
+      // sendFiles already reports its own upload failures. What reached this
+      // catch silently was everything the picker itself can fail on, which on
+      // the call screen meant the attach sheet closed and nothing followed.
+      if (err?.message !== FILE_SELECT_CANCELLED) {
+        console.error("Call chat attachment failed:", err);
+        Toast.error("Couldn't attach that file. Please try again.");
+      }
     }
   };
 
@@ -425,14 +431,21 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
         const kundliLink = buildKundliLink(msg.kundliId, msg.text ?? msg.message);
         content = (
           <div className={styles.KundliMessage}>
-            <span
+            {/* A <button>, not a span: this is an action. And when the link
+                can't be resolved the tap used to do nothing at all. */}
+            <button
+              type="button"
               onClick={() => {
-                if (kundliLink) setIframeSrc(kundliLink);
+                if (!kundliLink) {
+                  Toast.error("This kundli is no longer available to view.");
+                  return;
+                }
+                setIframeSrc(kundliLink);
               }}
             >
               <GrReactjs />{" "}
               {msg.kundliName ? `${msg.kundliName}'s Kundli` : "View Kundli"}
-            </span>
+            </button>
           </div>
         );
       } else if (msg.type === "products") {
@@ -445,10 +458,21 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
           <div className={styles.productsMessage}>
             {msg.text && <p className={styles.productsNote}>{msg.text}</p>}
             {products.map((p, idx) => (
-              <div
+              // A <button>, not a div: the whole tile is a navigation target.
+              // The Shubh Mall check is already handled above (the block
+              // returns null when it is off), so a missing slug is the only
+              // reason a tap can't go anywhere — say so rather than no-op.
+              <button
+                type="button"
                 key={p.productId || idx}
                 className={styles.productItem}
-                onClick={() => p.slug && isShubhMallEnabled() && navigate(`/product-details/${p.slug}`)}
+                onClick={() => {
+                  if (!p.slug) {
+                    Toast.error("This product is no longer available.");
+                    return;
+                  }
+                  navigate(`/product-details/${p.slug}`);
+                }}
               >
                 {(p.variantImage || p.image || p.images?.[0]) && (
                   <img
@@ -497,7 +521,7 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
                     <span className={styles.viewProductLink}>View Product →</span>
                   )}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         );

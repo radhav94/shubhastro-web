@@ -137,7 +137,20 @@ const HomeIntroPopup = () => {
           aria-label="Popup Banner"
           style={{ cursor: "pointer" }}
         >
-          <img className={styles.banner} src={popupImage} alt="Popup Banner" />
+          {/*
+            Lighthouse reports this image as the homepage LCP element. Its URL
+            arrives with the pageblocker API response, so it cannot be preloaded
+            from the HTML — by the time React can request it the browser has
+            already finished its initial fetch pass. fetchpriority="high" at
+            least gets it to the front of the queue the moment it is discovered.
+          */}
+          <img
+            className={styles.banner}
+            src={popupImage}
+            alt="Popup Banner"
+            fetchpriority="high"
+            decoding="async"
+          />
         </button>
 
         <div className={styles.textBlock}>

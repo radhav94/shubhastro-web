@@ -81,22 +81,38 @@ import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearAllCalculatorData } from "../../../redux/calculator/calculatorSlice";
 import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
 import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
+import {
+  getAstrologerDisplayName,
+  getAstrologerProfilePath,
+} from "../../../utils/helper/string.utils";
+import { getAstrologerImageUrl, getAstrologerDefaultImage } from "../../../utils/appImages";
 
 // "Consult Again" button that disables in real time when the astrologer is live.
 // Uses useAstrologerLiveStatus so it reacts to the live socket event even when
 // the live status arrives after the initial render (the list data alone doesn't
 // update reactively for socket-driven live changes).
+const CONSULT_LIVE_BLOCKED_REASON =
+  "This astrologer is in a live session right now. Join the live stream or try again once it ends.";
+
 const ConsultAgainButton = ({ astrologer, seedLiveStatus, onConsultAgain }) => {
   const { isLive } = useAstrologerLiveStatus(astrologer?._id, seedLiveStatus);
   return (
+    // Blocked-while-live was previously expressed twice over, both silently:
+    // `disabled` meant the browser swallowed the tap, and the handler also
+    // returned early without a word. The user got no response at all. Stay
+    // tappable and explain — same treatment as the order-history button.
     <button
-      className={styles.consultAgainButton}
+      className={`${styles.consultAgainButton} ${isLive ? styles.consultAgainBlocked : ""}`.trim()}
       onClick={(e) => {
         e.stopPropagation();
-        if (isLive) return;
+        if (isLive) {
+          Toast.info(CONSULT_LIVE_BLOCKED_REASON);
+          return;
+        }
         onConsultAgain(astrologer);
       }}
-      disabled={isLive}
+      aria-disabled={isLive}
+      title={isLive ? CONSULT_LIVE_BLOCKED_REASON : "Consult again"}
     >
       Consult Again
     </button>
@@ -109,6 +125,100 @@ const LiveDot = ({ astrologer, seedLiveStatus }) => {
   const { isLive } = useAstrologerLiveStatus(astrologer?._id, seedLiveStatus);
   if (!isLive) return null;
   return <span className={styles.orderLiveDot} title="Live now" aria-label="Astrologer is live" />;
+};
+
+const getAstrologerInitial = (name) =>
+  (name || "")
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 1);
+
+// Name to print on an order card, userName-first.
+//
+// The history endpoints flatten only the astrologer's real name onto each row
+// (`receiverName` on call rows, `astrologerFirstName` + `astrologerLastName` on
+// chat rows) — never their public `userName`. So getAstrologerDisplayName() had
+// nothing to prefer and every card fell through to firstName + lastName, while
+// the astrologer list, profile page and transactions all show the alias.
+//
+// `fetched` is the astrologer document (which does carry userName); the row is
+// the fallback for the frames before that query lands.
+const resolveAstrologerName = (astrologer, fetched) =>
+  (fetched?.userName?.trim() ? fetched.userName : "") ||
+  getAstrologerDisplayName(astrologer) ||
+  astrologer?.name ||
+  "Unknown";
+
+// Reads the alias off the same getAstrologerById cache entry that
+// OrderAstrologerAvatar already subscribes to for this id, so showing it costs
+// no extra request — RTK Query dedupes the two subscriptions.
+const OrderAstrologerName = ({ astrologer }) => {
+  const { data } = useGetAstrologerByIdQuery(
+    { id: astrologer?._id },
+    { skip: !astrologer?._id },
+  );
+  return <>{resolveAstrologerName(astrologer, data?.data)}</>;
+};
+
+// Order-history avatar (.astrologerAvatar is 60px, so the `small` 100x125
+// derivative).
+//
+// The call/chat history endpoints flatten the astrologer onto each row and
+// expose only `astrologerProfileImgUrl` — the unresized original (896x902 and
+// 1433x1433 have both been observed) for a 60px circle. The derivatives live on
+// the astrologer document, and their filenames are not derivable from the
+// original (only the first path segment is shared; the second is random per
+// size), so the sized variant has to be fetched.
+//
+// Resolving per row rather than in the list mapper because that needs a hook.
+// RTK Query dedupes by argument, so repeat rows for the same astrologer share
+// one request — the visible page is typically 3-5 unique astrologers, and any
+// astrologer already loaded elsewhere (profile page, chat, order detail) is a
+// cache hit. `order.astrologer._id` is the same id the card navigates to and
+// that the order detail page feeds into this query.
+//
+// `astrologer.image` (the flat original) paints immediately and is swapped for
+// the derivative when the query lands, so there's no blank avatar while waiting.
+const OrderAstrologerAvatar = ({ astrologer }) => {
+  const { data } = useGetAstrologerByIdQuery(
+    { id: astrologer?._id },
+    { skip: !astrologer?._id }
+  );
+
+  const fetched = data?.data;
+  const hasImage = !!(fetched?.profileImages || fetched?.profileImgUrl || astrologer?.image);
+  // Same name the card prints, so the letter matches the heading.
+  const displayName = resolveAstrologerName(astrologer, fetched);
+
+  // Nothing to show at all — keep the initials circle rather than dropping in a
+  // gendered placeholder for an astrologer who simply has no photo.
+  if (!hasImage) {
+    return <span>{getAstrologerInitial(displayName)}</span>;
+  }
+
+  return (
+    <img
+      src={getAstrologerImageUrl(
+        {
+          profileImages: fetched?.profileImages,
+          profileImgUrl: fetched?.profileImgUrl || astrologer?.image,
+          gender: fetched?.gender,
+        },
+        "small"
+      )}
+      alt={displayName}
+      width={60}
+      height={60}
+      loading="lazy"
+      decoding="async"
+      // Covers a derivative that is listed but missing from S3.
+      onError={(e) => {
+        e.currentTarget.src = getAstrologerDefaultImage(fetched?.gender);
+      }}
+    />
+  );
 };
 
 const Profile = () => {
@@ -378,14 +488,25 @@ const Profile = () => {
     });
 
 
-  // Get pagination info
+  // Get pagination info.
+  //
+  // `hasPreviousPage` is not a field these endpoints return — everywhere else in
+  // the app the flag is read as `hasPrevPage` — so the Previous arrow used to be
+  // permanently inert here. Accept either name and fall back to the page number,
+  // which is the thing that actually decides whether a previous page exists.
   const callPagination = callHistoryData?.data?.pagination;
   const hasNextCallPage = callPagination?.hasNextPage || false;
-  const hasPrevCallPage = callPagination?.hasPreviousPage || false;
+  const hasPrevCallPage =
+    callPagination?.hasPrevPage ||
+    callPagination?.hasPreviousPage ||
+    callHistoryPage > 1;
 
   const chatPagination = chatHistoryData?.data?.pagination;
   const hasNextChatPage = chatPagination?.hasNextPage || false;
-  const hasPrevChatPage = chatPagination?.hasPreviousPage || false;
+  const hasPrevChatPage =
+    chatPagination?.hasPrevPage ||
+    chatPagination?.hasPreviousPage ||
+    chatHistoryPage > 1;
 
 
 
@@ -394,6 +515,24 @@ const Profile = () => {
     const mins = Math.floor(totalSecs / 60);
     const secs = totalSecs % 60;
     return `${mins} Min ${secs} Sec`;
+  };
+
+  // First-paint avatar for an order row. OrderAstrologerAvatar upgrades this to
+  // the sized derivative once the astrologer query lands; this is what shows in
+  // the meantime.
+  //
+  // Reads a derivatives map under both the row's `astrologer`-prefixed naming
+  // convention and the bare name, so if the history endpoints ever include it
+  // the first paint is already the 100x125 variant with no swap. Today they
+  // carry only `astrologerProfileImgUrl`, the unresized original.
+  //
+  // Returns "" when there is no image at all, which lets the avatar keep its
+  // initials circle instead of showing a placeholder photo.
+  const resolveHistoryAvatar = (row) => {
+    const profileImages = row?.astrologerProfileImages || row?.profileImages;
+    const profileImgUrl = row?.astrologerProfileImgUrl;
+    if (!profileImages && !profileImgUrl) return "";
+    return getAstrologerImageUrl({ profileImages, profileImgUrl }, "small");
   };
   // Process order history data - current page call orders
   // Live status is only returned by the call-history endpoint (not chat/recordings),
@@ -414,7 +553,12 @@ const Profile = () => {
           sessionType: item?.type || "audio",
           astrologer: {
             name: item?.receiverName || "Unknown",
-            image: item?.astrologerProfileImgUrl || "",
+            // Alias, if this endpoint ever sends one. getAstrologerDisplayName()
+            // prefers it, so the review modal and the /astrologer/<slug> link
+            // pick it up without waiting for the by-id query. The card name
+            // itself is resolved by OrderAstrologerName either way.
+            userName: item?.receiverUserName || item?.userName || "",
+            image: resolveHistoryAvatar(item),
             _id: item?.receiverId,
             astrologer_ID: item?.astrologer_ID || item?.receiverAstrologerId,
             firstName: item?.receiverName?.split(" ")[0] || "Unknown",
@@ -449,7 +593,9 @@ const Profile = () => {
             name: room.astrologerFirstName
               ? `${room.astrologerFirstName} ${room.astrologerLastName || ""}`
               : "Unknown",
-            image: room.astrologerProfileImgUrl || "",
+            // See the note on the call-history row above.
+            userName: room?.astrologerUserName || room?.userName || "",
+            image: resolveHistoryAvatar(room),
             _id: room.astrologerId,
             astrologer_ID: room.astrologer_ID || room.astrologerAstrologerId,
             firstName: room.astrologerFirstName || "Unknown",
@@ -806,13 +952,13 @@ const Profile = () => {
         setActiveChat({
           roomId,
           chatRoomId: roomId,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           userId: userId,
           astrologerId: astrologerId,
           astrologerID: astro?.astrologer_ID,
           kundliId,
-          astrologerName: astro?.firstName || "",
+          astrologerName: getAstrologerDisplayName(astro),
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
           profileImgUrl: astro?.profileImgUrl,
@@ -824,11 +970,11 @@ const Profile = () => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+            fullName: getAstrologerDisplayName(astro),
             roomId,
             isUserSide: true,
             kundliId,
-            astrologerName: astro?.firstName || "",
+            astrologerName: getAstrologerDisplayName(astro),
             astroID: astro?.astrologer_ID,
             experience: astro?.experience,
             profileImgUrl: astro?.profileImgUrl,
@@ -896,7 +1042,7 @@ const Profile = () => {
           channelName,
           chatRoomId,
           agoraToken: token,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           callType: type,
           userId: userId,
@@ -1044,7 +1190,9 @@ const Profile = () => {
   const handleRateConsultation = (astrologer, roomId) => {
     setReviewData({
       astrologerID: astrologer.astrologer_ID || astrologer._id,
-      fullName: astrologer.name || `${astrologer.firstName || ""} ${astrologer.lastName || ""}`.trim(),
+      // userName-first — only fall back to the plain `name` field when the
+      // helper can't resolve a username / first+last name.
+      fullName: getAstrologerDisplayName(astrologer) || astrologer.name,
       profileImage: astrologer.image || astrologer.profileImgUrl || astrologer.imageUrl,
       roomId,
     });
@@ -1872,21 +2020,16 @@ const Profile = () => {
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       navigate(
-                                        `/astrologer/${order.astrologer._id}`,
+                                        getAstrologerProfilePath(
+                                          order.astrologer,
+                                        ),
                                       );
                                     }}
                                     style={{ cursor: "pointer" }}
                                   >
-                                    {order.astrologer.image ? (
-                                      <img
-                                        src={order.astrologer.image}
-                                        alt={order.astrologer.name}
-                                      />
-                                    ) : (
-                                      <span>
-                                        {getInitials(order.astrologer.name)}
-                                      </span>
-                                    )}
+                                    <OrderAstrologerAvatar
+                                      astrologer={order.astrologer}
+                                    />
                                     <LiveDot
                                       astrologer={order.astrologer}
                                       seedLiveStatus={order.liveStatus}
@@ -1898,12 +2041,17 @@ const Profile = () => {
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         navigate(
-                                          `/astrologer/${order.astrologer._id}`,
+                                          getAstrologerProfilePath(
+                                            order.astrologer,
+                                          ),
                                         );
                                       }}
                                       style={{ cursor: "pointer" }}
                                     >
-                                      {order.astrologer.name}
+                                      {/* userName-first, else first + last name */}
+                                      <OrderAstrologerName
+                                        astrologer={order.astrologer}
+                                      />
                                     </h5>
                                     <div className={styles.orderMeta}>
                                       <span className={styles.orderDate}>
@@ -2146,7 +2294,11 @@ const Profile = () => {
                           <div className={styles.txnDetails}>
                             <h4 className={styles.txnTitle}>
                               {transaction.description || "Transaction with"}{" "}
-                              {transaction?.displayProfile?.name}
+                              {/* userName-first: show the astrologer's username when
+                                  available, else fall back to their real name. */}
+                              {transaction?.displayProfile?.userName ||
+                                getAstrologerDisplayName(transaction?.displayProfile) ||
+                                transaction?.displayProfile?.name}
                             </h4>
                             <span className={styles.txnMeta}>
                               {dayjs(transaction.createdAt).format("DD MMM, YYYY • hh:mm A")} • TXN #{transaction._id?.slice(-4)}

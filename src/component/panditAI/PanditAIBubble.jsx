@@ -7,11 +7,13 @@ import {
   IoMic,
   IoStopCircle,
   IoWallet,
+  IoRefresh,
 } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import dayjs from "dayjs";
 import styles from "./PanditAIBubble.module.scss";
+import Toast from "../toast";
 import usePanditAI, { setPanditAIVoiceHandover } from "./usePanditAI";
 import { GuestKundliAuthModal } from "../UI/Profile";
 import { setSelectedKundli } from "../../redux/kundli/kundliSlice";
@@ -22,16 +24,60 @@ import useSarvamSTT from "../../screens/private/panditAIVoice/useSarvamSTT";
 import { transliterateToLatin } from "./translateText";
 import AIRechargeBanner from "./AIRechargeBanner";
 import AISessionStatus from "./AISessionStatus";
-import panditAiIcon from "../../assets/images/AiPandit.png";
+import { splitTextByURL } from "../../utils/helper/linkPreview";
+
+// Served from the CDN rather than bundled, so it isn't emitted into /assets and
+// isn't re-downloaded per deploy hash. The CDN copy is also the optimised one
+// (4,275 bytes vs 17,728 for the local file).
+const panditAiIcon = "https://assets.shubhastro.ai/images/AiPandit.png";
 
 // Memoized message bubble to avoid re-rendering the entire list on new messages
-const MessageBubble = memo(({ msg }) => {
+const MessageBubble = memo(({ msg, onRetry }) => {
   const isUser = msg.sender === "user";
+  // Failed AI replies used to be plain text with nothing to tap, which is what
+  // drove the rage clicks seen in Clarity. Offer an explicit retry instead.
+  const showRetry = !isUser && msg.isError && typeof onRetry === "function";
   return (
     <div className={`${styles.msgRow} ${isUser ? styles.userRow : styles.aiRow}`}>
-      <div className={`${styles.msgBubble} ${isUser ? styles.userBubble : styles.aiBubble}`}>
-        <p className={styles.msgText}>{msg.text}</p>
+      <div
+        className={`${styles.msgBubble} ${isUser ? styles.userBubble : styles.aiBubble} ${
+          msg.isError ? styles.failedBubble : ""
+        }`}
+      >
+        {/*
+          Linkified rather than printed flat. Readings routinely reference a
+          page ("see your full kundli at https://…"), and as plain text that URL
+          was completely inert — clicking it, which is the obvious thing to do,
+          did nothing at all.
+        */}
+        <p className={styles.msgText}>
+          {splitTextByURL(msg.text).map((part, index) =>
+            part.type === "url" ? (
+              <a
+                key={`${part.value}-${index}`}
+                href={part.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.inlineLink}
+              >
+                {part.value}
+              </a>
+            ) : (
+              <span key={`t-${index}`}>{part.value}</span>
+            )
+          )}
+        </p>
         <div className={styles.msgMeta}>
+          {showRetry && (
+            <button
+              type="button"
+              className={styles.retryBtn}
+              onClick={() => onRetry(msg._id)}
+            >
+              <IoRefresh size={13} />
+              Try again
+            </button>
+          )}
           <span className={styles.msgTime}>{msg.time}</span>
         </div>
       </div>
@@ -67,6 +113,9 @@ const PanditAIBubble = () => {
   // Holds a query (from the "Ask Pandit AI" card) to send once a guest logs in.
   const pendingQueryRef = useRef(null);
   const inputRef = useRef(null);
+  // Set when send is tapped while speech-to-text is still running, so the tap
+  // can be completed once the transcription settles instead of being dropped.
+  const pendingSendRef = useRef(false);
   const lang = "en-IN";
 
   // Persist open state for reconnect on refresh
@@ -87,6 +136,7 @@ const PanditAIBubble = () => {
     sending,
     chatDisabled,
     sendText,
+    retryQuestion,
     followupQuestions,
     messagesEndRef,
     lastAiMsgRef,
@@ -266,19 +316,55 @@ const PanditAIBubble = () => {
     setInterimText(sarvamStt.isTranscribing ? "..." : "");
   }, [useWebStt, sarvamStt.isTranscribing]);
 
-  const handleSend = useCallback(() => {
-    // Block sending while speech-to-text is still in progress so the "..."
-    // placeholder / partial transcription is never sent.
-    if (isListening || sttTranscribing) return;
+  // Performs the actual send. Callers must have already confirmed that
+  // speech-to-text is finished, so `text` holds only transcribed text.
+  const flushSend = useCallback(() => {
     // Send only the confirmed text — never the interim "..." placeholder.
     const outgoing = text.trim();
-    if (outgoing) {
-      stopListening();
-      setInterimText("");
-      sendText(outgoing);
-      setText("");
+    if (!outgoing) return false;
+    stopListening();
+    setInterimText("");
+    sendText(outgoing);
+    setText("");
+    return true;
+  }, [text, sendText, stopListening]);
+
+  const handleSend = useCallback(() => {
+    /*
+     * Tapping send is the natural way to finish dictating, but the button was
+     * `disabled={!canSend}` and canSend excludes `isListening` — so mid-recording
+     * the tap hit a disabled button and this function returned silently too.
+     * Nothing happened and nothing explained why; the only way forward was to
+     * spot that the mic had turned into a separate stop button.
+     *
+     * Now the tap is honoured: stop recording, and send as soon as the
+     * transcription lands. Recording it as a pending intent (rather than sending
+     * immediately) still respects the original constraint that the interim "..."
+     * placeholder must never be sent.
+     */
+    if (isListening || sttTranscribing) {
+      pendingSendRef.current = true;
+      if (isListening) stopListening();
+      return;
     }
-  }, [text, sendText, stopListening, isListening, sttTranscribing]);
+
+    if (!flushSend()) {
+      Toast.error("Type your question first, or tap the mic to dictate it.");
+      inputRef.current?.focus();
+    }
+  }, [isListening, sttTranscribing, stopListening, flushSend]);
+
+  // Completes a send that was requested while speech-to-text was still running.
+  useEffect(() => {
+    if (!pendingSendRef.current) return;
+    if (isListening || sttTranscribing) return;
+    pendingSendRef.current = false;
+    if (!flushSend()) {
+      // Transcription produced nothing usable — say so rather than leaving the
+      // tap unanswered, which is the whole point of honouring it.
+      Toast.error("Didn't catch that. Please try again.");
+    }
+  }, [isListening, sttTranscribing, flushSend]);
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -291,13 +377,23 @@ const PanditAIBubble = () => {
   );
 
   const handleMicClick = useCallback(() => {
-    if (isListening) {
-      stopListening();
-      setInterimText("");
-    } else {
+    // Stopping is always allowed. Starting is not, and the button used to be
+    // `disabled` for those cases, so the tap vanished without explanation.
+    if (!isListening) {
+      if (chatDisabled) {
+        Toast.error("Reconnecting to Pandit AI — one moment.");
+        return;
+      }
+      if (isLoading) {
+        Toast.error("Pandit AI is still replying. Please wait for the answer.");
+        return;
+      }
       startListening();
+      return;
     }
-  }, [isListening, startListening, stopListening]);
+    stopListening();
+    setInterimText("");
+  }, [isListening, startListening, stopListening, isLoading, chatDisabled]);
 
   const handleClose = useCallback(() => {
     stopListening();
@@ -338,7 +434,16 @@ const PanditAIBubble = () => {
 
   const handleInputChange = useCallback((e) => setText(e.target.value), []);
 
-  const placeholder = isListening ? "Listening..." : "Ask Pandit AI...";
+  // The field is disabled while `isLoading`, but the placeholder used to keep
+  // inviting a question ("Ask Pandit AI...") throughout — so a locked input read
+  // as a broken one. Each blocked state now names itself.
+  const placeholder = isListening
+    ? "Listening..."
+    : sttTranscribing
+    ? "Transcribing..."
+    : isLoading
+    ? "Pandit AI is replying..."
+    : "Ask Pandit AI...";
 
   const displayValue = interimText
     ? `${text}${text ? " " : ""}${interimText}`
@@ -486,7 +591,7 @@ const PanditAIBubble = () => {
                     </div>
                     {msgs.map((msg) => (
                       <div key={msg._id} ref={msg._id === lastAiId ? lastAiMsgRef : undefined}>
-                        <MessageBubble msg={msg} />
+                        <MessageBubble msg={msg} onRetry={retryQuestion} />
                       </div>
                     ))}
                   </div>
@@ -496,13 +601,39 @@ const PanditAIBubble = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {followupQuestions.length > 0 && (
+          {/*
+            Gated on the same conditions as the input bar below. The chips used
+            to render regardless, so in guest mode (where the input is replaced
+            by the birth-details form) and after a low-balance session end (where
+            the input is removed) the chat still offered suggested questions that
+            could not actually be sent.
+
+            The in-flight guard matters because `sendText` opens with
+            `setFollowupQuestions([])` — the chip you just tapped disappears
+            immediately, the row unmounts and the layout closes up. Tapping the
+            same spot again a moment later lands on whatever moved into it, which
+            is exactly the "clicked a suggestion, then a dead click" pattern in
+            the session recordings.
+          */}
+          {!guestMode && !sessionEndedLowBalance && followupQuestions.length > 0 && (
             <div className={styles.followupSection}>
               {followupQuestions.map((q, idx) => (
                 <button
                   key={idx}
+                  type="button"
                   className={styles.followupBtn}
-                  onClick={() => sendText(q)}
+                  aria-disabled={sending || chatDisabled}
+                  onClick={() => {
+                    if (chatDisabled) {
+                      Toast.error("Still reconnecting. Please try again in a moment.");
+                      return;
+                    }
+                    if (sending) {
+                      Toast.info("Pandit AI is still replying — one moment.");
+                      return;
+                    }
+                    sendText(q);
+                  }}
                 >
                   {q}
                 </button>
@@ -528,7 +659,7 @@ const PanditAIBubble = () => {
                 <button
                   className={`${styles.micBtn} ${isListening ? styles.micActive : ""}`}
                   onClick={handleMicClick}
-                  disabled={isLoading || chatDisabled}
+                  aria-disabled={isLoading || chatDisabled}
                   aria-label={isListening ? "Stop recording" : "Start voice input"}
                   type="button"
                 >
@@ -555,10 +686,16 @@ const PanditAIBubble = () => {
                 </svg>
               </button>
 
+              {/*
+                aria-disabled, not `disabled`: this button has to stay tappable
+                while dictation is in flight so handleSend can wrap the recording
+                up and send it. A disabled button fires no click at all.
+              */}
               <button
                 className={styles.sendBtn}
                 onClick={handleSend}
-                disabled={!canSend}
+                aria-disabled={!canSend}
+                aria-busy={sttTranscribing || undefined}
                 aria-label="Send message"
                 type="button"
               >

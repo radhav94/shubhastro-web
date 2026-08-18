@@ -25,22 +25,33 @@ const MatchDetailsV2 = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const formData = location.state;
-  if (!formData) return;
 
   const handleBack = () => {
-    navigate(-1);
+    // `navigate(-1)` is inert on the first history entry, which is what a
+    // refresh of this page produces — and a refresh also drops `location.state`,
+    // so that was the exact combination that left the reader stuck.
+    if (location.key !== "default") navigate(-1);
+    else navigate(PATH.privateRoutes.MATCHMAKING.path);
   };
 
   const handleTalkToExpert = () => {
     navigate(PATH.privateRoutes.ASTROLOGERS_CATEGORY.path.replace(":category", "matchmaking"));
   };
 
-  const { boyData, girlData } = formData;
+  const { boyData, girlData } = formData || {};
 
-  // Call your matchmaking API (pass full payload)
-  const { data, error, isLoading } = useGetMatchMakingQuery({ formData });
+  // Call your matchmaking API (pass full payload).
+  //
+  // Every hook here runs unconditionally. `if (!formData) return;` used to sit
+  // above this line, so an instance rendered without navigation state ran zero
+  // hooks — ESLint flagged both this query and the effect below, and the bare
+  // `return;` painted a blank white page with no header and no way out.
+  const { data, error, isLoading, refetch } = useGetMatchMakingQuery(
+    { formData },
+    { skip: !formData }
+  );
 
-  // Handle API error — show backend message as toast and go back
+  // Handle API error — surface the backend message as a toast as well as inline.
   useEffect(() => {
     if (error) {
       const errorMessage = error?.data?.message || "Something went wrong. Please try again.";
@@ -49,10 +60,61 @@ const MatchDetailsV2 = () => {
   }, [error]);
 
   if (isLoading) return <PrimaryLoader isLoading={true} />;
-  if (error) return null;
 
   const matchingDetails = data?.response;
-  if (!matchingDetails) return <PrimaryLoader isLoading={true} />;
+
+  /*
+    Three states used to end in a blank page or a loader that never resolves:
+    no navigation state (`return;`), a failed request (`return null`, so once the
+    toast faded there was no message anywhere), and a 200 that carried no
+    `response` (a permanent fullscreen loader). All three are the same thing to
+    the reader — the match didn't load — so they get one screen that keeps the
+    header, states the reason, and offers a way forward.
+  */
+  const failureReason = !formData
+    ? "We lost the birth details for this match. Please pick both profiles again."
+    : error
+      ? error?.data?.message || "We couldn't calculate this match. Please try again."
+      : !matchingDetails
+        ? "We couldn't calculate this match. Please try again."
+        : null;
+
+  if (failureReason) {
+    return (
+      <div className="min-h-screen flex flex-col items-center font-sans">
+        <div className={styles.headerWrap}>
+          <div className={styles.header}>
+            <div className="flex items-center gap-4">
+              <button onClick={handleBack} className={styles.backButton} aria-label="Go back">
+                <ChevronLeft size={24} className="text-[#FF6A3D]" />
+              </button>
+              <h1 className="text-lg md:text-xl font-semibold text-gray-800">Match Making</h1>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.containerCom}>
+          <div className={styles.matchErrorCard} role="alert">
+            <p className={styles.matchErrorText}>{failureReason}</p>
+            <div className={styles.matchErrorActions}>
+              {formData && (
+                <button type="button" className={styles.matchErrorRetry} onClick={() => refetch()}>
+                  Try again
+                </button>
+              )}
+              <button
+                type="button"
+                className={styles.matchErrorSecondary}
+                onClick={() => navigate(PATH.privateRoutes.MATCHMAKING.path)}
+              >
+                Choose profiles
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // const boyCard = {
   //   Name: boyData.name,

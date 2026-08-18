@@ -33,23 +33,35 @@ const ResendTimer = memo(({ onResend }) => {
   }, [timer]);
 
   const handleClick = () => {
-    if (timer === 0) {
-      onResend();
-      setTimer(20);
+    // Not gated by `disabled`: taps during the countdown used to do nothing at
+    // all. Say when the code can be requested instead.
+    if (timer > 0) {
+      toast.error(`You can request a new code in ${timer}s`);
+      return;
     }
+    onResend();
+    setTimer(20);
   };
 
+  /*
+    The whole row is one button. "Didn't get it?" used to be a bare <span> on the
+    left while the Resend button sat on the far right (the row is
+    justify-content: space-between), so the prompt people actually reach for was
+    inert and the control was a screen-width away. Both texts now share one hit
+    area and keep their original styling.
+  */
   return (
-    <div className={styles.resendContainer}>
-      <span className={styles.resendText}>Didn't get it?</span>
-      <button
-        className={styles.resendBtn}
-        onClick={handleClick}
-        disabled={timer > 0}
-      >
+    <button
+      type="button"
+      className={styles.resendContainer}
+      onClick={handleClick}
+      aria-disabled={timer > 0}
+    >
+      <span className={styles.resendText}>Didn&apos;t get it?</span>
+      <span className={styles.resendBtn}>
         {timer > 0 ? `Resend in ${timer}s` : "Resend"}
-      </button>
-    </div>
+      </span>
+    </button>
   );
 });
 const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
@@ -101,7 +113,32 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
   const handleContinue = async () => {
     const otpValue = otp;
-    if (otpValue.length === 6) {
+
+    /*
+      Say what is missing, and put the keyboard back. The OTP boxes are divs over
+      a hidden input, so on mobile a lost focus means no keyboard and no way to
+      finish the code — refocusing here is the actual recovery action.
+
+      This branch used to not exist: `if (length === 6)` with no else, behind a
+      `disabled` button. An incomplete code meant the tap was swallowed and
+      nothing was said, which is where this flow was being abandoned.
+    */
+    if (otpValue.length !== 6) {
+      toast.error(
+        otpValue.length === 0
+          ? "Enter the 6-digit code we sent you"
+          : `Enter all 6 digits — ${6 - otpValue.length} to go`
+      );
+      inputRef.current?.focus();
+      return;
+    }
+
+    if (loading || isSubmittingRef.current) {
+      toast.error("Verifying your code. One moment.");
+      return;
+    }
+
+    {
       if (isSubmittingRef.current) return;
       isSubmittingRef.current = true;
       setLoading(true);
@@ -422,10 +459,19 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         </div>
 
         <ResendTimer onResend={handleResend} />
+        {/*
+          Never `disabled`. Unlike the resend button — whose label counts down
+          and so explains itself — this one still read "Continue" while refusing
+          to fire, so an incomplete or mis-autofilled code produced a tap that
+          did nothing and explained nothing. handleContinue names the blocker.
+        */}
         <button
-          className={styles.otpprimaryBtn}
+          className={`${styles.otpprimaryBtn} ${
+            otp.length !== 6 || loading ? styles.otpprimaryBtnBlocked : ""
+          }`.trim()}
           onClick={handleContinue}
-          disabled={otp.length !== 6 || loading}
+          aria-disabled={otp.length !== 6 || loading}
+          aria-busy={loading}
         >
           {loading ? "Verifying..." : "Continue"}
         </button>

@@ -1,8 +1,8 @@
-import { createContext, useContext, useState, useRef, useEffect, useCallback } from "react";
+import { useContext, useState, useRef, useEffect, useCallback } from "react";
 import { voiceSocket, registerCallSession, clearCallSession } from "../services/voiceSocketServices";
 import { trackEvent } from "../utils/analytics";
-
-const CallContext = createContext();
+import { getAstrologerDisplayName } from "../utils/helper/string.utils";
+import { CallContext } from "./callContextInstance";
 
 // 🔑 LocalStorage keys for call persistence
 const CALL_STORAGE_KEY = "shubhtalk_active_call";
@@ -540,13 +540,18 @@ export const CallProvider = ({ children }) => {
         roomId,
         channelName,
         agoraToken,
-        callerName: astro.astrologerName || astro.firstName || "Astrologer",
+        // userName-first. `astrologerName` can be the live-list value (real
+        // first + last name), so the helper takes priority.
+        callerName: getAstrologerDisplayName(astro) || astro.astrologerName || "Astrologer",
         isUserSide: true,
         callType: type,
         userId: userIdLocal,
         astrologerId: astroId,
         astrologerID: astro?.astrologer_ID,
         remainingTime,
+        // Needed by the post-call review popup (avatar + default-image gender).
+        profileImgUrl: astro?.profileImgUrl || astro?.imageUrl,
+        gender: astro?.gender,
         origin: "live",
         liveChannel: pending.liveChannel,
       });

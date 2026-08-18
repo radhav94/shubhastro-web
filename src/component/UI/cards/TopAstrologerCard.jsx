@@ -2,7 +2,8 @@ import styles from "./TopAstrologerCard.module.scss";
 import { FaStar } from "react-icons/fa";
 import { PiBookOpenTextLight } from "react-icons/pi";
 import { Link } from "react-router-dom";
-import { getAstrologerDefaultImage } from "../../../utils/appImages";
+import { getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../utils/appImages";
+import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../utils/helper/string.utils";
 
 const TopAstrologerCard = ({ data, onConnect }) => {
   // Handle rating - use rating field or default to 4.5
@@ -11,16 +12,13 @@ const TopAstrologerCard = ({ data, onConnect }) => {
   // Handle experience - convert to number if string
   const experience = parseInt(data?.experience) || 0;
 
-  // Handle image - try multiple possible fields with gender-based fallback
-  const imageUrl =
-    data?.profileImgUrl ||
-    data?.imageUrl ||
-    getAstrologerDefaultImage(data?.gender);
+  // Sized variant, then profileImgUrl, then imageUrl, then the gendered default.
+  const imageUrl = getAstrologerImageUrl(data);
 
   return (
     <div className={styles.topAstrologerCard}>
       <Link
-        to={`/astrologer/${data?._id}`}
+        to={getAstrologerProfilePath(data)}
         className={styles.cardLink}
       >
         <div className={styles.imageContainer}>
@@ -40,7 +38,7 @@ const TopAstrologerCard = ({ data, onConnect }) => {
         </div>
 
         <h3 className={styles.name}>
-          {data?.firstName} {data?.lastName}
+          {getAstrologerDisplayName(data)}
         </h3>
 
         {experience > 0 && (

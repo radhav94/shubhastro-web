@@ -12,8 +12,15 @@ import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscription/subscriptionApi";
-import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
-import PanditAIVoiceBubble from "../../../component/panditAI/PanditAIVoiceBubble";
+// Both bubbles are `position: fixed` launchers, so they are always in the
+// viewport and always compete to be the LCP element — Lighthouse reported the
+// Pandit AI bubble as LCP. Their SCSS also pulls ~108KB of decorative
+// background SVG (AiPanditBg.svg + wire-bg.svg) into the critical path, and a
+// CSS background can never be discovered from the initial HTML nor given
+// fetchpriority. Loading them after first paint takes them out of the LCP race
+// entirely so real content wins it.
+const PanditAIBubble = lazy(() => import("../../../component/panditAI/PanditAIBubble"));
+const PanditAIVoiceBubble = lazy(() => import("../../../component/panditAI/PanditAIVoiceBubble"));
 import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 
@@ -38,7 +45,6 @@ const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));
 import kundliImg from "../../../assets/images/home-hero-kundli.png";
 import astrologerImg from "../../../assets/images/home-hero-astrologer.png";
 import horoscopeImg from "../../../assets/images/home-hero-horoscope.png";
-import astrologerMaleImg from "../../../assets/default-img/astrologer male_v.1.png";
 import defaultSquareImg from "../../../assets/images/default_image_square_500x500.png";
 
 // Community avatars — loaded lazily via URL (below-the-fold, decorative)
@@ -49,7 +55,23 @@ const COMMUNITY_AVATARS = [
   new URL("../../../assets/images/community-avatar-4.png", import.meta.url).href,
   new URL("../../../assets/images/community-avatar-5.png", import.meta.url).href,
 ];
-const heroBg = "https://assets.shubhastro.ai/images/1778659743-240854750.png";
+const heroBg = "https://assets.shubhastro.ai/images/ai-suite.png";
+
+/**
+ * "Sign in" affordance inside the guest greeting.
+ *
+ * This used to be an onClick + underline on the whole `<p>`, with the hint as a
+ * 12px inline span. The handler worked, but the actual target was a short run of
+ * small text inside a paragraph — so a near-miss landed on the surrounding
+ * padding and did nothing, which is how it shows up as a dead click on the one
+ * element a guest reaches for to sign in. As a real button it gets a padded hit
+ * area, keyboard access and a proper accessible name.
+ */
+const GuestSignInLink = ({ onClick }) => (
+  <button type="button" className={styles.guestSignInLink} onClick={onClick}>
+    Sign in
+  </button>
+);
 
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
@@ -87,14 +109,8 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
           <div className={styles.centerCard}>
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
-                <p
-                  className={styles.greeting}
-                  key={`greeting-${name}`}
-                  onClick={name === "Guest" ? () => navigate("/login") : undefined}
-                  style={name === "Guest" ? { cursor: "pointer", textDecoration: "underline" } : undefined}
-                  role={name === "Guest" ? "button" : undefined}
-                >
-                  Hello, {name}! 👋 {name === "Guest" && <span style={{ fontSize: "12px", opacity: 0.8 }}>Sign in</span>}
+                <p className={styles.greeting} key={`greeting-${name}`}>
+                  Hello, {name}! 👋 {name === "Guest" && <GuestSignInLink onClick={() => navigate("/login")} />}
                 </p>
                 <h1>
                   {section.title
@@ -189,7 +205,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
               <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title}</h3>
               {aiServicesItems[0]?.description && <p>{aiServicesItems[0].description}</p>}
               {aiServicesItems[0]?.action_btn && <button className={styles.featureCta}>{aiServicesItems[0].action_btn}</button>}
-              {(aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon) && <img src={aiServicesItems[0].image_url_web || aiServicesItems[0].icon} alt={aiServicesItems[0]?.title || ""} width="120" height="120" className={styles.laalKitaabImgLeft} loading="lazy" />}
+              {(aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon) && <img src={aiServicesItems[0].image_url_web || aiServicesItems[0].icon} alt="" width="120" height="120" className={styles.laalKitaabImgLeft} loading="lazy" />}
             </div>
           )}
         </div>
@@ -209,7 +225,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                     {aiServicesItems[1]?.description && <p>{aiServicesItems[1].description}</p>}
                   </div>
                   {aiServicesItems[1]?.action_btn && <button className={styles.fcCtaLight}>{aiServicesItems[1].action_btn}</button>}
-                  {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon) && <img src={aiServicesItems[1].image_url_web || aiServicesItems[1].icon} alt={aiServicesItems[1]?.title || ""} width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
+                  {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon) && <img src={aiServicesItems[1].image_url_web || aiServicesItems[1].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
                 </div>
               )}
               {aiServicesItems[2] && (
@@ -221,7 +237,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                     {aiServicesItems[2]?.description && <p>{aiServicesItems[2].description}</p>}
                   </div>
                   {aiServicesItems[2]?.action_btn && <button className={styles.panditTalkBtn}>{aiServicesItems[2].action_btn}</button>}
-                  {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon) && <img src={aiServicesItems[2].image_url_web || aiServicesItems[2].icon} alt={aiServicesItems[2]?.title || ""} width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
+                  {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon) && <img src={aiServicesItems[2].image_url_web || aiServicesItems[2].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
                 </div>
               )}
             </div>
@@ -243,7 +259,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   {aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon ? (
               <img
                 src={aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon}
-                alt={aiServicesItems[3]?.title || "ShubhAstro Live Community"}
+                alt=""
                 width="200"
                 height="200"
                 loading="lazy"
@@ -320,7 +336,9 @@ const renderUngroupedHeroSection = (section, props) => {
       return (
         <section key={key} className={styles.heroBanner} style={{ margin: '16px 0' }}>
           <div className={styles.heroContent}>
-            <p className={styles.greeting} onClick={name === "Guest" ? () => navigate("/login") : undefined} style={name === "Guest" ? { cursor: "pointer", textDecoration: "underline" } : undefined} role={name === "Guest" ? "button" : undefined}>Hello, {name}! 👋 {name === "Guest" && <span style={{ fontSize: "12px", opacity: 0.8 }}>Sign in</span>}</p>
+            <p className={styles.greeting}>
+              Hello, {name}! 👋 {name === "Guest" && <GuestSignInLink onClick={() => navigate("/login")} />}
+            </p>
             <h1>{section.title ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></> : <>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></>}</h1>
             {currentMahadasha && <div className={styles.mahadashaTag}>🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong></div>}
           </div>
@@ -396,6 +414,20 @@ const HomeV2 = () => {
   const [triggerSubscriptionStatus] = useLazyGetSubscriptionStatusQuery();
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const pendingWowPathRef = useRef(null);
+
+  // Mount the floating Pandit AI launchers only once the browser is idle, so
+  // they are absent from the DOM while the LCP candidate is being decided.
+  const [showFloatingBubbles, setShowFloatingBubbles] = useState(false);
+  useEffect(() => {
+    const reveal = () => setShowFloatingBubbles(true);
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(reveal, { timeout: 2500 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    // Safari has no requestIdleCallback.
+    const timer = setTimeout(reveal, 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   // ─── Data Fetching ────────────────────────────────────────────────────────
   const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery();
@@ -600,18 +632,26 @@ const HomeV2 = () => {
 
   // ─── Shared props for group renderers ─────────────────────────────────────
   const heroProps = { styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick: handlePaidCardClick, onLiveCommunityClick: handleLiveCommunityClick, onRequireGuestAuth: handleRequireGuestAuth };
-  const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id, astrologerMaleImg };
+  const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id };
 
   // ─── Render ───────────────────────────────────────────────────────────────
+  /*
+   * This branch renders nothing visible until the CMS list arrives, which is why
+   * the homepage LCP breakdown is ~98% "element render delay": the hero image
+   * itself resolves in ~40 ms (it is preloaded in index.html with
+   * fetchpriority=high) and then waits for JS execute + the homepage API before
+   * React can commit the element that displays it.
+   *
+   * A 0x0 overflow:hidden copy of the hero image used to sit here, labelled as an
+   * LCP preload. It could not have that effect: LCP only considers elements with
+   * a non-zero painted area, and a production trace confirmed it — the first LCP
+   * candidate for this URL appeared at 1672 ms (the real 230x230 hero), not at
+   * first paint when the hidden copy was already in the DOM. Its only real effect
+   * was warming the cache, which the index.html preload of the identical URL
+   * already does, so it has been removed rather than left as a false mitigation.
+   */
   if (isHomeLoading || !renderPlan.length) {
-    return (
-      <div className={styles.page} style={{ minHeight: "100vh" }}>
-        {/* Hidden LCP image for browser preload — visible only to paint engine */}
-        <div style={{ position: "absolute", width: 0, height: 0, overflow: "hidden" }} aria-hidden="true">
-          <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
-        </div>
-      </div>
-    );
+    return <div className={styles.page} style={{ minHeight: "100vh" }} />;
   }
 
   return (
@@ -661,8 +701,12 @@ const HomeV2 = () => {
         astrologer={hookSelectedAstrologer}
         connectionType={pendingConnectionType || "chat"}
       />
-      <PanditAIBubble />
-      <PanditAIVoiceBubble />
+      {showFloatingBubbles && (
+        <Suspense fallback={null}>
+          <PanditAIBubble />
+          <PanditAIVoiceBubble />
+        </Suspense>
+      )}
       <HomeIntroPopup />
     </>
   );

@@ -1,6 +1,8 @@
 import { Calendar, Clock, Phone, Video, MessageSquare } from "lucide-react";
 import styles from "./EntityCards.module.scss";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
+import { getAstrologerImageUrl } from "../../../../utils/appImages";
 const getIcon = (type) => {
   switch (type) {
     case "audio": return <Phone size={16} />;
@@ -12,14 +14,19 @@ const getIcon = (type) => {
 
 const SessionCard = ({ item, onClick }) => (
   <div className={styles.card} onClick={() => onClick?.(item)}>
+    {/* .cardImage is 64px, so `small` (100x125) rather than the default medium */}
     <img
-      src={item.astrologerId?.profileImgUrl}
-      alt={`${item.astrologerId?.firstName || ""} ${item.astrologerId?.lastName || ""}`}
+      src={getAstrologerImageUrl(item.astrologerId, "small")}
+      alt={getAstrologerDisplayName(item.astrologerId)}
       className={styles.cardImage}
+      width={64}
+      height={64}
+      loading="lazy"
+      decoding="async"
     />
     <div className={styles.cardDetails}>
       <h3 className={styles.cardName}>
-        {item.astrologerId?.firstName} {item.astrologerId?.lastName}
+        {getAstrologerDisplayName(item.astrologerId)}
       </h3>
       <div className={styles.cardMeta}>
         <span className={styles.metaItem}>

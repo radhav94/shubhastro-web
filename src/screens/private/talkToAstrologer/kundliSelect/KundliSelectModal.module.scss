@@ -22,7 +22,12 @@
   max-width: 500px;
   max-height: 88vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   animation: slideUp 0.3s ease-out;
+
+  @media (max-width: 768px) {
+    max-height: 80dvh;
+  }
 }
 
 @keyframes slideUp {
@@ -87,6 +92,12 @@
     background: #f0f0f0;
     color: #333;
   }
+
+  @media (max-width: 768px) {
+    display: flex;
+    top: -4px;
+    right: 16px;
+  }
 }
 
 /* PROFILE LIST */
@@ -95,8 +106,13 @@
   flex-direction: column;
   gap: 16px;
   margin-bottom: 24px;
-  height: 240px;
-  overflow: auto;
+  max-height: 240px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  @media (max-width: 768px) {
+    max-height: 45dvh;
+  }
 }
 
 .profileItem {
@@ -546,7 +562,6 @@
   // }
 
   .closeBtn {
-    display: flex;
     top: 20px;
     right: 32px;
     font-size: 28px;

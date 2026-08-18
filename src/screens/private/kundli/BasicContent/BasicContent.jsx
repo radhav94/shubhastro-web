@@ -147,7 +147,7 @@ const BasicContent = (props) => {
     "Hora Lord": birthPanchang.hora_lord || "--",
     Sunrise: birthPanchang.sunrise_at_birth || "--",
     Sunset: birthPanchang.sunset_at_birth || "--",
-    AyanamsaType: birthPanchang.ayanamsa_name || "--",
+    "Ayanamsa Name": birthPanchang.ayanamsa_name || "--",
   };
 
   const avakhadaDetailsData = {

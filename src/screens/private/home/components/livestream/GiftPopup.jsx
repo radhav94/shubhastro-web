@@ -6,12 +6,27 @@ import toast from "../../../../../component/toast";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
 import walletIcon from "../../../../../assets/icons/wallet-2.svg";
 
-const GiftPopup = ({ show, onClose, giftList, astrologerId, astrologerName, socketRef, roomId, userId, userName }) => {
-  if (!show) return null;
+const GiftPopup = ({ show, onClose, giftList, astrologerId, socketRef, roomId, userId, userName }) => {
+  /*
+   * `if (!show) return null` used to sit ABOVE these hooks, which made opening
+   * this popup a hard React crash rather than a subtle bug.
+   *
+   * LiveView mounts <GiftPopup show={showGifts} /> unconditionally and toggles
+   * the prop, so the same component instance rendered zero hooks while closed
+   * and three the moment the gift button was tapped. React compares the hook
+   * list against the previous render on update and throws "Rendered more hooks
+   * than during the previous render." — so the tap that opened the gift panel
+   * blew up the render instead of showing anything. ESLint had been flagging all
+   * three as conditional hooks.
+   *
+   * Hooks first, early return after.
+   */
   const [selected, setSelected] = useState(null);
   const [sendGift, { isLoading: isSending }] = useSendGiftMutation();
   const { balance, refreshWallet } = useWalletBalance();
   const user = getUserFromStorage();
+
+  if (!show) return null;
 
   const handleClose = () => {
     setSelected(null);
@@ -19,10 +34,25 @@ const GiftPopup = ({ show, onClose, giftList, astrologerId, astrologerName, sock
   };
 
   const handleSend = async () => {
-    if (!selected) return;
+    /*
+     * Doubly silent before: the button carried
+     * `disabled={!selected || isSending}` so the browser swallowed the tap, and
+     * this function repeated the check with a bare return. Opening the panel and
+     * pressing Send — the obvious thing to do — produced nothing at all and gave
+     * no hint that a gift had to be picked first.
+     */
+    if (isSending) {
+      toast.error("Your gift is on its way — one moment.");
+      return;
+    }
+
+    if (!selected) {
+      toast.error("Pick a gift first, then tap Send.");
+      return;
+    }
 
     if (selected.price > balance) {
-      toast.error("Insufficient balance");
+      toast.error(`Insufficient balance. ${selected.giftName} costs ₹${selected.price} and your wallet has ₹${balance ?? 0}.`);
       return;
     }
 
@@ -92,24 +122,34 @@ const GiftPopup = ({ show, onClose, giftList, astrologerId, astrologerName, sock
         </div>
 
         <div className="gift-grid">
+          {/* Real buttons, not click-handled divs: these are the primary choice
+              control in the panel, so they need keyboard access and an
+              announced pressed state. aria-pressed carries the same meaning as
+              the existing `.active` class. */}
           {giftList?.map((gift) => (
-            <div
+            <button
               key={gift._id}
+              type="button"
               className={`gift-item ${selected?._id === gift._id ? "active" : ""}`}
               onClick={() => setSelected(gift)}
+              aria-pressed={selected?._id === gift._id}
             >
               <div className="gift-img-wrap">
-                <img src={gift.giftImg} alt={gift.giftName} />
+                <img src={gift.giftImg} alt="" width="72" height="72" loading="lazy" />
                 <span className="gift-price-badge">₹{gift.price}</span>
               </div>
               <div className="gift-name">{gift.giftName}</div>
-            </div>
+            </button>
           ))}
         </div>
 
+        {/* aria-disabled, not `disabled` — the dimmed look is kept but the tap
+            still reaches handleSend so it can say what is missing. */}
         <button
+          type="button"
           className="gift-send-btn"
-          disabled={!selected || isSending}
+          aria-disabled={!selected || isSending}
+          aria-busy={isSending}
           onClick={handleSend}
         >
           {isSending ? "Sending..." : "Send"}

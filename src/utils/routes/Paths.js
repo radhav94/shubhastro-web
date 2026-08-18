@@ -1,4 +1,34 @@
 import { lazy } from "react";
+
+/*
+ * Route-level code splitting policy for this file.
+ *
+ * Every screen reached only by navigation is declared with lazy(() =>
+ * import(...)) so it ships as its own chunk instead of joining the single entry
+ * bundle that every first-time visitor blocks on (JS *and* the render-blocking
+ * entry stylesheet, since Vite splits CSS along the same boundaries).
+ *
+ * Two groups deliberately stay static — do not convert them without doing the
+ * matching work in App.jsx first:
+ *
+ * 1. publicRoutes screens (NotFound, ComingSoon, Onboarding/login, Register,
+ *    ForgotPassword, OtpVerification, VerifyPassword). App.jsx maps these as
+ *    top-level router siblings, outside HomeLayout, so they have no nearby
+ *    Suspense boundary and would suspend all the way up to the app-level
+ *    <Suspense fallback={<PrimaryLoader isLoading />}> — a fullscreen blocking
+ *    loader on /login, one of the highest-traffic pages. Lazifying these needs a
+ *    lightweight boundary around the public-route group first.
+ *
+ * 2. Home / HomeV2 (the "/" landing). Splitting the landing screen out of the
+ *    entry chunk buys a smaller download but adds a second serial request
+ *    (entry -> route chunk) before the homepage can paint, which works against
+ *    LCP on the page most visitors land on. Note both identifiers resolve to the
+ *    same module, so they must be converted together or not at all.
+ *
+ * Everything private renders as <child.element /> inside the "/" + HomeLayout
+ * route, which has its own <Suspense fallback={<CircleSpinner />}> around
+ * <Outlet /> (HomeLayout.jsx), so lazy is safe there.
+ */
 import NotFound from "../../screens/private/NotFound/NotFound";
 import ComingSoon from "../../screens/public/coming-soon/ComingSoon";
 
@@ -17,216 +47,274 @@ import Register from "../../screens/public/Register";
 import ForgotPassword from "../../screens/public/ForgotPassword";
 import OtpVerification from "../../screens/public/OtpVerification";
 import VerifyPassword from "../../screens/public/VerifyPassword";
-import Horoscope from "../../screens/private/horoscope/Horoscope";
-import Kundli from "../../screens/private/kundli/Kundali";
-import Numerology from "../../screens/private/numerology/Numerology";
-import FreeReadings from "../../screens/private/readings/Readings";
-import AstroLive from "../../screens/private/astroLive/AstroLive";
-import Video from "../../screens/private/video/Video";
-import Blog from "../../screens/private/blog/Blog";
-import SessionDetails from "../../screens/private/sessionDetails/SessionDetails";
-import Shop from "../../screens/private/shop/Shop";
-import TalkToAstrologer from "../../screens/private/talkToAstrologer/TalkToAstrologer";
-import GuestChatFlow from "../../screens/public/guestChat/GuestChatFlow";
-import Payment from "../../screens/private/payment/Payment";
-import Astrologers from "../../screens/private/astrologersold/Astrologers";
-import Streaming from "../../screens/private/astroLive/streaming/Streaming";
-import DetailHoroscope from "../../screens/private/horoscope/detailHoroscope/DetailHoroscope";
-import TodayPanchang from "../../screens/private/panchang/todayPanchang/TodayPanchang";
-import Vaar from "../../screens/private/panchang/vaar/Vaar";
-import Tithi from "../../screens/private/panchang/tithi/Tithi";
-import OneCardTarot from "../../screens/private/tarot/oneCardTarot/OneCardTarot";
-import ThreeCardTarot from "../../screens/private/tarot/threeCardTarot/ThreeCardTarot";
-import WellNessTarot from "../../screens/private/tarot/wellNessTarot/WellNessTarot";
-import TarotResult from "../../screens/private/tarot/resultTarot/ResultTarot";
-import SignScreen from "../../screens/private/horoscope/SignScreen";
-import Monthly from "../../screens/private/horoscope/monthlyHoroscope/Monthly";
-import Yesterday from "../../screens/private/horoscope/yesterdayhoroscope/Yesterday";
-import MatchMaking from "../../screens/private/matchmaking/MatchMakingV2";
-import MatchDetails from "../../screens/private/matchmaking/details/MatchDetailsV2";
-import About from "../../screens/public/static-pages/About";
-import Disclaimer from "../../screens/public/static-pages/Disclaimer";
-import PricingPolicy from "../../screens/public/static-pages/PricingPolicy";
-import PrivacyPolicy from "../../screens/public/static-pages/PrivacyPolicy";
-import RefundPolicy from "../../screens/public/static-pages/RefundPolicy";
-import AiUsePolicy from "../../screens/public/static-pages/AiUsePolicy";
-import AstrologerOnboardingAgreement from "../../screens/public/static-pages/AstrologerOnboardingAgreement";
-import LiveChatPolicy from "../../screens/public/static-pages/LiveChatPolicy";
-import UserAgreement from "../../screens/public/static-pages/UserAgreement";
-import TermsConditions from "../../screens/public/static-pages/TermsConditions";
-import OnboardingGuide from "../../screens/public/static-pages/OnboardingGuide";
-import Notification from "../../screens/private/notification/Notification";
-import WalletTranscations from "../../screens/private/wallet/WalletTranscations";
-import AstrologerProfile from "../../screens/private/astrologerProfile/AstrologerProfile";
-import SingleBlogDetails from "../../screens/private/blog/blogHeader/SingleBlog";
+const Horoscope = lazy(() => import("../../screens/private/horoscope/Horoscope"));
+const Kundli = lazy(() => import("../../screens/private/kundli/Kundali"));
+const Numerology = lazy(() => import("../../screens/private/numerology/Numerology"));
+const FreeReadings = lazy(() => import("../../screens/private/readings/Readings"));
+const AstroLive = lazy(() => import("../../screens/private/astroLive/AstroLive"));
+const Video = lazy(() => import("../../screens/private/video/Video"));
+// Route-level code split: /blog is only reachable by navigation, so it does not
+// belong in the entry bundle every visitor blocks on. Rendered inside the
+// <Suspense> boundaries in App.jsx and HomeLayout.jsx, so lazy is safe here.
+const Blog = lazy(() => import("../../screens/private/blog/Blog"));
+const SessionDetails = lazy(() => import("../../screens/private/sessionDetails/SessionDetails"));
+const Shop = lazy(() => import("../../screens/private/shop/Shop"));
+const TalkToAstrologer = lazy(() => import("../../screens/private/talkToAstrologer/TalkToAstrologer"));
+const GuestChatFlow = lazy(() => import("../../screens/public/guestChat/GuestChatFlow"));
+const Payment = lazy(() => import("../../screens/private/payment/Payment"));
+const Astrologers = lazy(() => import("../../screens/private/astrologersold/Astrologers"));
+const Streaming = lazy(() => import("../../screens/private/astroLive/streaming/Streaming"));
+const DetailHoroscope = lazy(() => import("../../screens/private/horoscope/detailHoroscope/DetailHoroscope"));
+const TodayPanchang = lazy(() => import("../../screens/private/panchang/todayPanchang/TodayPanchang"));
+const Vaar = lazy(() => import("../../screens/private/panchang/vaar/Vaar"));
+const Tithi = lazy(() => import("../../screens/private/panchang/tithi/Tithi"));
+const OneCardTarot = lazy(() => import("../../screens/private/tarot/oneCardTarot/OneCardTarot"));
+const ThreeCardTarot = lazy(() => import("../../screens/private/tarot/threeCardTarot/ThreeCardTarot"));
+const WellNessTarot = lazy(() => import("../../screens/private/tarot/wellNessTarot/WellNessTarot"));
+const TarotResult = lazy(() => import("../../screens/private/tarot/resultTarot/ResultTarot"));
+const SignScreen = lazy(() => import("../../screens/private/horoscope/SignScreen"));
+const Monthly = lazy(() => import("../../screens/private/horoscope/monthlyHoroscope/Monthly"));
+const Yesterday = lazy(() => import("../../screens/private/horoscope/yesterdayhoroscope/Yesterday"));
+const MatchMaking = lazy(() => import("../../screens/private/matchmaking/MatchMakingV2"));
+const MatchDetails = lazy(() => import("../../screens/private/matchmaking/details/MatchDetailsV2"));
+const About = lazy(() => import("../../screens/public/static-pages/About"));
+// Removed ten unused static-page imports: Disclaimer, PricingPolicy,
+// PrivacyPolicy, RefundPolicy, AiUsePolicy, AstrologerOnboardingAgreement,
+// LiveChatPolicy, UserAgreement, TermsConditions and OnboardingGuide.
+//
+// Their route entries are commented out further down this file — these pages are
+// served through CmsPageWrapper now — but the imports were left behind, so all
+// ten screens and their stylesheets were still being bundled into the entry
+// chunk with no route able to render them. The commented route blocks are kept
+// as-is; restoring one means restoring its import too (preferably as lazy()).
+const Notification = lazy(() => import("../../screens/private/notification/Notification"));
+const WalletTranscations = lazy(() => import("../../screens/private/wallet/WalletTranscations"));
+const AstrologerProfile = lazy(() => import("../../screens/private/astrologerProfile/AstrologerProfile"));
+const SingleBlogDetails = lazy(() => import("../../screens/private/blog/blogHeader/SingleBlog"));
 
-import AgeCalc from "../../screens/private/calculator/ageCalculator/AgeCalc";
-import AgeReport from "../../screens/private/calculator/ageCalculator/AgeReport";
-import AtmakarakaCalculator from "../../screens/private/calculator/Atmakaraka/AtmakarakaCalculator";
-import AtmakarakaReport from "../../screens/private/calculator/Atmakaraka/Report";
-import BirthCalc from "../../screens/private/calculator/birthCalc/BirthCalc";
-import BirthReport from "../../screens/private/calculator/birthCalc/BirthReport";
-import DashaCalc from "../../screens/private/calculator/dasha/DashaCalc";
-import DashaReport from "../../screens/private/calculator/dasha/DashaReport";
-import DestinyCalc from "../../screens/private/calculator/destiny/DestinyCalc";
-import DestinyReport from "../../screens/private/calculator/destiny/DestinyReport";
-import FlamesCalc from "../../screens/private/calculator/flames/FlamesCalc";
-import FlamesReport from "../../screens/private/calculator/flames/FlamesReport";
-import Friendship from "../../screens/private/calculator/friendship/Friendship";
-import FriendshipReport from "../../screens/private/calculator/friendship/FriendshipReport";
-import KaalSarpCalc from "../../screens/private/calculator/kaalsarp/KaalSarpCalc";
-import KaalSarpReport from "../../screens/private/calculator/kaalsarp/KaalSarpReport";
-import LoveCalc from "../../screens/private/calculator/love/LoveCalc";
-import LoveReport from "../../screens/private/calculator/love/LoveReport";
-import MangalDosha from "../../screens/private/calculator/mangaldosha/MangalDosha";
-import MangalReport from "../../screens/private/calculator/mangaldosha/MangalReport";
-import MobileCalc from "../../screens/private/calculator/mobileNumber/MobileCalc";
-import MobileReport from "../../screens/private/calculator/mobileNumber/MobileReport";
-import NumerologyCalc from "../../screens/private/calculator/numerology/NumerologyCalc";
-import NumerologyReport from "../../screens/private/calculator/numerology/NumerologyReport";
-import RashiCalc from "../../screens/private/calculator/rashi/RashiCalc";
-import RashiReport from "../../screens/private/calculator/rashi/RashiReport";
-import RisingSign from "../../screens/private/calculator/risingsign/RisingSign";
-import RisingSignReport from "../../screens/private/calculator/risingsign/RisingSignReport";
-import MulankCalc from "../../screens/private/calculator/mulank/MulankCalc";
-import MulankReport from "../../screens/private/calculator/mulank/MulankReport";
-import NameCompatibilityCalc from "../../screens/private/calculator/nameCompatibility/NameCompatibilityCalc";
-import NameCompatibilityReport from "../../screens/private/calculator/nameCompatibility/NameCompatibilityReport";
-import LoShuCalc from "../../screens/private/calculator/loshu/LoShuCalc";
-import LoShuReport from "../../screens/private/calculator/loshu/LoShuReport";
-import LuckyNameCalc from "../../screens/private/calculator/luckyName/LuckyNameCalc";
-import LuckyNameReport from "../../screens/private/calculator/luckyName/LuckyNameReport";
-import ShaniReport from "../../screens/private/calculator/shanisadesati/ShaniReport";
-import ShaniSadeSati from "../../screens/private/calculator/shanisadesati/ShaniSadeSati";
-import SunSignCalc from "../../screens/private/calculator/sunsign/SunSignCalc";
-import SunSignReport from "../../screens/private/calculator/sunsign/SunSignReport";
-import VehicleCalc from "../../screens/private/calculator/vehicleNumber/VehicleCalc";
-import VehicleReport from "../../screens/private/calculator/vehicleNumber/VehicleReport";
+// Route-level code splitting for the calculator suite (42 screens: 21 input
+// forms and their 21 result screens).
+//
+// Every one of these is reachable only by navigation — none renders on the
+// homepage or any landing route — yet static imports pulled all 42 modules and
+// their .module.scss files into the entry bundle that every first-time visitor
+// blocks on. Each identifier was verified to appear exactly twice in this file
+// (this import plus one live `element:` entry) and to have no importer anywhere
+// else in src, so nothing else can pull them back into the entry chunk.
+//
+// Rendered inside the <Suspense> boundaries in App.jsx and HomeLayout.jsx, so
+// lazy is safe here.
+const AgeCalc = lazy(() => import("../../screens/private/calculator/ageCalculator/AgeCalc"));
+const AgeReport = lazy(() => import("../../screens/private/calculator/ageCalculator/AgeReport"));
+const AtmakarakaCalculator = lazy(() => import("../../screens/private/calculator/Atmakaraka/AtmakarakaCalculator"));
+const AtmakarakaReport = lazy(() => import("../../screens/private/calculator/Atmakaraka/Report"));
+const BirthCalc = lazy(() => import("../../screens/private/calculator/birthCalc/BirthCalc"));
+const BirthReport = lazy(() => import("../../screens/private/calculator/birthCalc/BirthReport"));
+const DashaCalc = lazy(() => import("../../screens/private/calculator/dasha/DashaCalc"));
+const DashaReport = lazy(() => import("../../screens/private/calculator/dasha/DashaReport"));
+const DestinyCalc = lazy(() => import("../../screens/private/calculator/destiny/DestinyCalc"));
+const DestinyReport = lazy(() => import("../../screens/private/calculator/destiny/DestinyReport"));
+const FlamesCalc = lazy(() => import("../../screens/private/calculator/flames/FlamesCalc"));
+const FlamesReport = lazy(() => import("../../screens/private/calculator/flames/FlamesReport"));
+const Friendship = lazy(() => import("../../screens/private/calculator/friendship/Friendship"));
+const FriendshipReport = lazy(() => import("../../screens/private/calculator/friendship/FriendshipReport"));
+const KaalSarpCalc = lazy(() => import("../../screens/private/calculator/kaalsarp/KaalSarpCalc"));
+const KaalSarpReport = lazy(() => import("../../screens/private/calculator/kaalsarp/KaalSarpReport"));
+const LoveCalc = lazy(() => import("../../screens/private/calculator/love/LoveCalc"));
+const LoveReport = lazy(() => import("../../screens/private/calculator/love/LoveReport"));
+const MangalDosha = lazy(() => import("../../screens/private/calculator/mangaldosha/MangalDosha"));
+const MangalReport = lazy(() => import("../../screens/private/calculator/mangaldosha/MangalReport"));
+const MobileCalc = lazy(() => import("../../screens/private/calculator/mobileNumber/MobileCalc"));
+const MobileReport = lazy(() => import("../../screens/private/calculator/mobileNumber/MobileReport"));
+const NumerologyCalc = lazy(() => import("../../screens/private/calculator/numerology/NumerologyCalc"));
+const NumerologyReport = lazy(() => import("../../screens/private/calculator/numerology/NumerologyReport"));
+const RashiCalc = lazy(() => import("../../screens/private/calculator/rashi/RashiCalc"));
+const RashiReport = lazy(() => import("../../screens/private/calculator/rashi/RashiReport"));
+const RisingSign = lazy(() => import("../../screens/private/calculator/risingsign/RisingSign"));
+const RisingSignReport = lazy(() => import("../../screens/private/calculator/risingsign/RisingSignReport"));
+const MulankCalc = lazy(() => import("../../screens/private/calculator/mulank/MulankCalc"));
+const MulankReport = lazy(() => import("../../screens/private/calculator/mulank/MulankReport"));
+const NameCompatibilityCalc = lazy(() => import("../../screens/private/calculator/nameCompatibility/NameCompatibilityCalc"));
+const NameCompatibilityReport = lazy(() => import("../../screens/private/calculator/nameCompatibility/NameCompatibilityReport"));
+const LoShuCalc = lazy(() => import("../../screens/private/calculator/loshu/LoShuCalc"));
+const LoShuReport = lazy(() => import("../../screens/private/calculator/loshu/LoShuReport"));
+const LuckyNameCalc = lazy(() => import("../../screens/private/calculator/luckyName/LuckyNameCalc"));
+const LuckyNameReport = lazy(() => import("../../screens/private/calculator/luckyName/LuckyNameReport"));
+const ShaniReport = lazy(() => import("../../screens/private/calculator/shanisadesati/ShaniReport"));
+const ShaniSadeSati = lazy(() => import("../../screens/private/calculator/shanisadesati/ShaniSadeSati"));
+const SunSignCalc = lazy(() => import("../../screens/private/calculator/sunsign/SunSignCalc"));
+const SunSignReport = lazy(() => import("../../screens/private/calculator/sunsign/SunSignReport"));
+const VehicleCalc = lazy(() => import("../../screens/private/calculator/vehicleNumber/VehicleCalc"));
+const VehicleReport = lazy(() => import("../../screens/private/calculator/vehicleNumber/VehicleReport"));
 
-import CompatibilityLanding from "../../screens/private/compatibility/CompatibilityLanding";
-import CompatibilityResult from "../../screens/private/compatibility/CompatibilityResult";
-import SelectPartner from "../../screens/private/compatibility/SelectPartner";
+const CompatibilityLanding = lazy(() => import("../../screens/private/compatibility/CompatibilityLanding"));
+const CompatibilityResult = lazy(() => import("../../screens/private/compatibility/CompatibilityResult"));
+const SelectPartner = lazy(() => import("../../screens/private/compatibility/SelectPartner"));
 
-import AstrologersDashboard from "../../screens/private/home/components/astrologers/AstrologersDashboard";
-import ChatList from "../../screens/private/home/components/astrologers/atrologerchat/ChatList";
-import ChatWindow from "../../screens/private/home/components/chats/ChatWindow";
-import InteractiveLiveStreaming from "../../screens/private/home/components/livestream/InteractiveLiveStreaming";
-import LivePlayerPage from "../../screens/private/home/components/livestream/LivePlayerPage";
+const AstrologersDashboard = lazy(() => import("../../screens/private/home/components/astrologers/AstrologersDashboard"));
+const ChatList = lazy(() => import("../../screens/private/home/components/astrologers/atrologerchat/ChatList"));
+const ChatWindow = lazy(() => import("../../screens/private/home/components/chats/ChatWindow"));
+// Route-level code splitting for the two live streaming screens.
+//
+// These are the remaining static importers of agora-rtc-react (LivePlayerPage
+// renders InteractiveLiveStreaming, which builds its own AgoraRTCProvider), so
+// leaving them static kept the ~1.2 MB Agora SDK in the entry bundle for every
+// visitor even after the dead root-level provider import was removed from
+// main.jsx. Only viewers of a live session need it.
+const InteractiveLiveStreaming = lazy(() => import("../../screens/private/home/components/livestream/InteractiveLiveStreaming"));
+const LivePlayerPage = lazy(() => import("../../screens/private/home/components/livestream/LivePlayerPage"));
 
-import HoroscopeNew from "../../screens/private/horoscope/Horoscope";
-import HoroscopeOld from "../../screens/private/horoscope/HoroscopeOld";
+const HoroscopeNew = lazy(() => import("../../screens/private/horoscope/Horoscope"));
+const HoroscopeOld = lazy(() => import("../../screens/private/horoscope/HoroscopeOld"));
 
-import LifePathDetails from "../../screens/private/numerology/lifepath/LifePathDetails";
-import LifePathForm from "../../screens/private/numerology/lifepath/LifePathForm";
+const LifePathDetails = lazy(() => import("../../screens/private/numerology/lifepath/LifePathDetails"));
+const LifePathForm = lazy(() => import("../../screens/private/numerology/lifepath/LifePathForm"));
 
-import AIWow from "../../screens/private/aiwow/AIWow";
-import PalmistryLanding from "../../screens/private/aiwow/palmistry/PalmistryLanding";
-import PalmistryInstructions from "../../screens/private/aiwow/palmistry/PalmistryInstructions";
-import PalmistryCamera from "../../screens/private/aiwow/palmistry/PalmistryCamera";
-import PalmistryAnalysis from "../../screens/private/aiwow/palmistry/PalmistryAnalysis";
-import PalmistryResult from "../../screens/private/aiwow/palmistry/PalmistryResult";
-import PalmistryHandSelection from "../../screens/private/aiwow/palmistry/PalmistryHandSelection";
-import FaceReadingLanding from "../../screens/private/aiwow/facereading/FaceReadingLanding";
-import FaceReadingCamera from "../../screens/private/aiwow/facereading/FaceReadingCamera";
-import FaceReadingAnalysis from "../../screens/private/aiwow/facereading/FaceReadingAnalysis";
-import FaceReadingResult from "../../screens/private/aiwow/facereading/FaceReadingResult";
-import SignatureLanding from "../../screens/private/aiwow/signature/SignatureLanding";
-import SignatureCamera from "../../screens/private/aiwow/signature/SignatureCamera";
-import SignatureAnalysis from "../../screens/private/aiwow/signature/SignatureAnalysis";
-import SignatureResult from "../../screens/private/aiwow/signature/SignatureResult";
-import GemstoneLanding from "../../screens/private/aiwow/gemstone/GemstoneLanding";
-import GemstoneCamera from "../../screens/private/aiwow/gemstone/GemstoneCamera";
-import GemstoneAnalysis from "../../screens/private/aiwow/gemstone/GemstoneAnalysis";
-import GemstoneResult from "../../screens/private/aiwow/gemstone/GemstoneResult";
-import ClothColorLanding from "../../screens/private/aiwow/clothcolor/ClothColorLanding";
-import ClothColorInstructions from "../../screens/private/aiwow/clothcolor/ClothColorInstructions";
-import ClothColorCamera from "../../screens/private/aiwow/clothcolor/ClothColorCamera";
-import ClothColorAnalysis from "../../screens/private/aiwow/clothcolor/ClothColorAnalysis";
-import ClothColorResult from "../../screens/private/aiwow/clothcolor/ClothColorResult";
-import TalkToKundliChat from "../../screens/private/aiwow/talktokundli/TalkToKundliChat";
-import CosmicChat from "../../screens/private/aiwow/cosmicchat/CosmicChat";
-import DailyCosmicBriefing from "../../screens/private/aiwow/dailycosmicbriefing/DailyCosmicBriefing";
-import DreamInterpreter from "../../screens/private/aiwow/dreaminterpreter/DreamInterpreter";
-import AgenticCalendar from "../../screens/private/aiwow/agenticcalendar/AgenticCalendar";
-import BusinessPathfinder from "../../screens/private/aiwow/businesspathfinder/BusinessPathfinder";
-import BusinessPathfinderResult from "../../screens/private/aiwow/businesspathfinder/BusinessPathfinderResult";
-import SmartMatchmaking from "../../screens/private/aiwow/smartmatchmaking/SmartMatchmaking";
-import AuraLanding from "../../screens/private/aiwow/aura/AuraLanding";
-import AuraCamera from "../../screens/private/aiwow/aura/AuraCamera";
-import AuraAnalysis from "../../screens/private/aiwow/aura/AuraAnalysis";
-import AuraResult from "../../screens/private/aiwow/aura/AuraResult";
+// Route-level code splitting for the AI Wow suite (36 screens, ~1.5 MB of
+// source — the largest feature group in the app). None of it is needed to
+// render the homepage or any other route, but static imports pulled all of it,
+// JS and every .module.scss, into the single entry bundle that every first-time
+// visitor blocks on. Measured on production: the entry stylesheet was 473 KB
+// gzipped and render-blocking, so FCP tracked its arrival almost exactly
+// (13.3 s on a 1.6 Mbps link). These render inside the <Suspense> boundaries in
+// App.jsx and HomeLayout.jsx, so lazy is safe here.
+const AIWow = lazy(() => import("../../screens/private/aiwow/AIWow"));
+const PalmistryLanding = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryLanding"));
+const PalmistryInstructions = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryInstructions"));
+const PalmistryCamera = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryCamera"));
+const PalmistryAnalysis = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryAnalysis"));
+const PalmistryResult = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryResult"));
+const PalmistryHandSelection = lazy(() => import("../../screens/private/aiwow/palmistry/PalmistryHandSelection"));
+const FaceReadingLanding = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingLanding"));
+const FaceReadingCamera = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingCamera"));
+const FaceReadingAnalysis = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingAnalysis"));
+const FaceReadingResult = lazy(() => import("../../screens/private/aiwow/facereading/FaceReadingResult"));
+const SignatureLanding = lazy(() => import("../../screens/private/aiwow/signature/SignatureLanding"));
+const SignatureCamera = lazy(() => import("../../screens/private/aiwow/signature/SignatureCamera"));
+const SignatureAnalysis = lazy(() => import("../../screens/private/aiwow/signature/SignatureAnalysis"));
+const SignatureResult = lazy(() => import("../../screens/private/aiwow/signature/SignatureResult"));
+const GemstoneLanding = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneLanding"));
+const GemstoneCamera = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneCamera"));
+const GemstoneAnalysis = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneAnalysis"));
+const GemstoneResult = lazy(() => import("../../screens/private/aiwow/gemstone/GemstoneResult"));
+const ClothColorLanding = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorLanding"));
+const ClothColorInstructions = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorInstructions"));
+const ClothColorCamera = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorCamera"));
+const ClothColorAnalysis = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorAnalysis"));
+const ClothColorResult = lazy(() => import("../../screens/private/aiwow/clothcolor/ClothColorResult"));
+const TalkToKundliChat = lazy(() => import("../../screens/private/aiwow/talktokundli/TalkToKundliChat"));
+const CosmicChat = lazy(() => import("../../screens/private/aiwow/cosmicchat/CosmicChat"));
+const DailyCosmicBriefing = lazy(() => import("../../screens/private/aiwow/dailycosmicbriefing/DailyCosmicBriefing"));
+const DreamInterpreter = lazy(() => import("../../screens/private/aiwow/dreaminterpreter/DreamInterpreter"));
+const AgenticCalendar = lazy(() => import("../../screens/private/aiwow/agenticcalendar/AgenticCalendar"));
+const BusinessPathfinder = lazy(() => import("../../screens/private/aiwow/businesspathfinder/BusinessPathfinder"));
+const BusinessPathfinderResult = lazy(() => import("../../screens/private/aiwow/businesspathfinder/BusinessPathfinderResult"));
+const SmartMatchmaking = lazy(() => import("../../screens/private/aiwow/smartmatchmaking/SmartMatchmaking"));
+const AuraLanding = lazy(() => import("../../screens/private/aiwow/aura/AuraLanding"));
+const AuraCamera = lazy(() => import("../../screens/private/aiwow/aura/AuraCamera"));
+const AuraAnalysis = lazy(() => import("../../screens/private/aiwow/aura/AuraAnalysis"));
+const AuraResult = lazy(() => import("../../screens/private/aiwow/aura/AuraResult"));
 
-import SingleCallHistory from "../../screens/private/orderHistory/components/Call/SingleCallHistory";
-import SingleChatHistory from "../../screens/private/orderHistory/components/Chat/SingleChatHistory";
-import OrderHistory from "../../screens/private/orderHistory/OrderHistory";
-import OrderDetails from "../../screens/private/orderHistory/OrderDetails";
+const SingleCallHistory = lazy(() => import("../../screens/private/orderHistory/components/Call/SingleCallHistory"));
+const SingleChatHistory = lazy(() => import("../../screens/private/orderHistory/components/Chat/SingleChatHistory"));
+const OrderHistory = lazy(() => import("../../screens/private/orderHistory/OrderHistory"));
+// Route-level code split: OrderDetails renders OrderInfoCard, the only module in
+// the app that imports hls.js. Attribution put hls.js at 514 KB — 11% of the
+// entry chunk — shipped to every visitor so that one order-history screen can
+// play a call recording. Now it loads with the screen that needs it.
+const OrderDetails = lazy(() => import("../../screens/private/orderHistory/OrderDetails"));
 
-import MallOrderDetail from "../../screens/private/shubhAstroMallHistory/MallOrderDetail";
+const MallOrderDetail = lazy(() => import("../../screens/private/shubhAstroMallHistory/MallOrderDetail"));
 
-import FinalPay from "../../screens/private/payment/FinalPay";
-import PaymentWebhook from "../../screens/private/payment/PaymentWebhook";
+const FinalPay = lazy(() => import("../../screens/private/payment/FinalPay"));
+const PaymentWebhook = lazy(() => import("../../screens/private/payment/PaymentWebhook"));
 
-import ConsultantList from "../../screens/private/shop/consultant/ConsultantList";
-import PaymentScreen from "../../screens/private/shop/consultant/PaymentScreen";
-import PlayScreen from "../../screens/private/shop/detail/playscreen/PlayScreen";
-import ProductDetail from "../../screens/private/shop/detail/ProductDetail";
-import ProductList from "../../screens/private/shop/product/ProductList";
+const ConsultantList = lazy(() => import("../../screens/private/shop/consultant/ConsultantList"));
+const PaymentScreen = lazy(() => import("../../screens/private/shop/consultant/PaymentScreen"));
+const PlayScreen = lazy(() => import("../../screens/private/shop/detail/playscreen/PlayScreen"));
+const ProductDetail = lazy(() => import("../../screens/private/shop/detail/ProductDetail"));
+// Lazy: ProductList is the only importer of shop/data/productData.js, a ~305 KB
+// hardcoded catalogue (~186 KB in-bundle). Imported statically it sat in the
+// entry chunk, so every visitor downloaded the shop catalogue to see the
+// homepage. Route elements render inside HomeLayout's Suspense boundary.
+const ProductList = lazy(() => import("../../screens/private/shop/product/ProductList"));
 
-import EPooja from "../../screens/private/epooja/EPooja";
-import EPoojaDetail from "../../screens/private/epooja/detail/EPoojaDetail";
-import EPoojaBooking from "../../screens/private/epooja/booking/EPoojaBooking";
-import BookingSuccess from "../../screens/private/epooja/booking/BookingSuccess";
-import EPoojaPayment from "../../screens/private/epooja/payment/EPoojaPayment";
-import EPoojaCheckout from "../../screens/private/epooja/checkout/EPoojaCheckout";
-import AstromallCart from "../../screens/private/epooja/cart/AstromallCart";
-import CategoryProducts from "../../screens/private/epooja/category/CategoryProducts";
-import AllCategories from "../../screens/private/epooja/category/AllCategories";
-import PurposeProducts from "../../screens/private/epooja/purpose/PurposeProducts";
+/*
+ * ShubhMall / E-Pooja screens — commented out while the feature is off.
+ *
+ * VITE_SHUBH_MALL_ENABLED is "false" in all three environments in .env-cmdrc
+ * (dev, stage and prod), and App.jsx already drops every route whose path
+ * matches isShubhMallRoute() before registering it. All eleven route entries
+ * below were covered by SHUBH_MALL_PATHS, so none of these screens has been
+ * reachable — yet the static imports still bundled all ten of them, plus their
+ * stylesheets, into the entry chunk that every visitor blocks on.
+ *
+ * Paths.js was the only importer of any of them, and no code outside this file
+ * references the route keys (E_POOJA, ASTROMALL_CART, ASTROMALL_CATEGORY,
+ * ASTROMALL_ALL_CATEGORIES, ASTROMALL_PURPOSE and friends), so removing them
+ * from the build changes no behaviour at the current flag value.
+ *
+ * TO RE-ENABLE: uncomment these ten imports and the matching route block
+ * further down (search "ShubhMall / E-Pooja routes"), then set
+ * VITE_SHUBH_MALL_ENABLED to "true" for the target environment. Prefer
+ * restoring them as lazy(() => import(...)) rather than static imports so the
+ * feature ships as its own chunk instead of re-entering the entry bundle.
+ */
+// import EPooja from "../../screens/private/epooja/EPooja";
+// import EPoojaDetail from "../../screens/private/epooja/detail/EPoojaDetail";
+// import EPoojaBooking from "../../screens/private/epooja/booking/EPoojaBooking";
+// import BookingSuccess from "../../screens/private/epooja/booking/BookingSuccess";
+// import EPoojaPayment from "../../screens/private/epooja/payment/EPoojaPayment";
+// import EPoojaCheckout from "../../screens/private/epooja/checkout/EPoojaCheckout";
+// import AstromallCart from "../../screens/private/epooja/cart/AstromallCart";
+// import CategoryProducts from "../../screens/private/epooja/category/CategoryProducts";
+// import AllCategories from "../../screens/private/epooja/category/AllCategories";
+// import PurposeProducts from "../../screens/private/epooja/purpose/PurposeProducts";
 
-import BuisnessBreakupTarot from "../../screens/private/tarot/buisnessBreakupTarot/BuisnessBreakupTarot";
-import CareerSelectTarot from "../../screens/private/tarot/careerSelectTarot/CareerSelectTarot";
-import DailyTarot from "../../screens/private/tarot/dailyTarot/DailyTarot";
-import EroticLove from "../../screens/private/tarot/eroticLove/EroticLove";
-import FlirtTarot from "../../screens/private/tarot/flirtTarot/FlirtTarot";
-import InDepthLove from "../../screens/private/tarot/inDepthLove/InDepthLove";
-import LoveTriangleTarot from "../../screens/private/tarot/loveTriangleTarot/LoveTriangleTarot";
-import MadeForEachOther from "../../screens/private/tarot/madeForEachOther/MadeForEachOther";
-import RomanticBreakUpTarot from "../../screens/private/tarot/romanticBreakupTarot/RomanticBreakUpTarot";
-import YesNoTarot from "../../screens/private/tarot/yesNoTarot/YesNoTarot";
+const BuisnessBreakupTarot = lazy(() => import("../../screens/private/tarot/buisnessBreakupTarot/BuisnessBreakupTarot"));
+const CareerSelectTarot = lazy(() => import("../../screens/private/tarot/careerSelectTarot/CareerSelectTarot"));
+const DailyTarot = lazy(() => import("../../screens/private/tarot/dailyTarot/DailyTarot"));
+const EroticLove = lazy(() => import("../../screens/private/tarot/eroticLove/EroticLove"));
+const FlirtTarot = lazy(() => import("../../screens/private/tarot/flirtTarot/FlirtTarot"));
+const InDepthLove = lazy(() => import("../../screens/private/tarot/inDepthLove/InDepthLove"));
+const LoveTriangleTarot = lazy(() => import("../../screens/private/tarot/loveTriangleTarot/LoveTriangleTarot"));
+const MadeForEachOther = lazy(() => import("../../screens/private/tarot/madeForEachOther/MadeForEachOther"));
+const RomanticBreakUpTarot = lazy(() => import("../../screens/private/tarot/romanticBreakupTarot/RomanticBreakUpTarot"));
+const YesNoTarot = lazy(() => import("../../screens/private/tarot/yesNoTarot/YesNoTarot"));
 
-import TarotReadingPage from "../../screens/private/v2/tarot/TarotReadingPage";
-import TarotCardDetailPage from "../../screens/private/v2/tarot/TarotCardDetailPage";
-import TarotCardSelectionPage from "../../screens/private/v2/tarot/TarotCardSelectionPage";
-import LoveTriangleSelectionPage from "../../screens/private/v2/tarot/LoveTriangleSelectionPage";
-import LoveTriangleResultPage from "../../screens/private/v2/tarot/LoveTriangleResultPage";
+const TarotReadingPage = lazy(() => import("../../screens/private/v2/tarot/TarotReadingPage"));
+const TarotCardDetailPage = lazy(() => import("../../screens/private/v2/tarot/TarotCardDetailPage"));
+const TarotCardSelectionPage = lazy(() => import("../../screens/private/v2/tarot/TarotCardSelectionPage"));
+const LoveTriangleSelectionPage = lazy(() => import("../../screens/private/v2/tarot/LoveTriangleSelectionPage"));
+const LoveTriangleResultPage = lazy(() => import("../../screens/private/v2/tarot/LoveTriangleResultPage"));
 
 // import Home from "../../screens/v2/home/Home";
 import Home from "../../screens/v2/home-v2/HomeV2";
-import HomeNew from "../../screens/v2/home-new/HomeNew";
+const HomeNew = lazy(() => import("../../screens/v2/home-new/HomeNew"));
 import HomeV2 from "../../screens/v2/home-v2/HomeV2";
-import ProfileV2 from "../../screens/v2/user/Profile";
-import Explore from "../../screens/private/explore/Explore";
-import AddProfile from "../../screens/v2/user/AddProfile";
-import EditProfile from "../../screens/v2/user/EditProfile";
-import LiveLanding from "../../screens/private/live/LiveLanding";
-import FAQ from "../../screens/v2/user/FAQ";
-import CustomerSupport from "../../screens/v2/user/CustomerSupport";
-import RecentTickets from "../../screens/v2/user/RecentTickets";
-import TicketDetails from "../../screens/v2/user/TicketDetails";
-import PrivacySecurity from "../../screens/v2/user/PrivacySecurity";
-import ManageDevices from "../../screens/private/manageDevices/ManageDevices";
-import TermsConditionsView from "../../screens/v2/user/TermsConditionsView";
-import AppLicense from "../../screens/v2/user/AppLicense";
-import FollowedAstrologers from "../../screens/v2/user/FollowedAstrologers";
+const ProfileV2 = lazy(() => import("../../screens/v2/user/Profile"));
+const Explore = lazy(() => import("../../screens/private/explore/Explore"));
+const AddProfile = lazy(() => import("../../screens/v2/user/AddProfile"));
+const EditProfile = lazy(() => import("../../screens/v2/user/EditProfile"));
+const LiveLanding = lazy(() => import("../../screens/private/live/LiveLanding"));
+const FAQ = lazy(() => import("../../screens/v2/user/FAQ"));
+const CustomerSupport = lazy(() => import("../../screens/v2/user/CustomerSupport"));
+const RecentTickets = lazy(() => import("../../screens/v2/user/RecentTickets"));
+const TicketDetails = lazy(() => import("../../screens/v2/user/TicketDetails"));
+const PrivacySecurity = lazy(() => import("../../screens/v2/user/PrivacySecurity"));
+const ManageDevices = lazy(() => import("../../screens/private/manageDevices/ManageDevices"));
+const TermsConditionsView = lazy(() => import("../../screens/v2/user/TermsConditionsView"));
+const AppLicense = lazy(() => import("../../screens/v2/user/AppLicense"));
+const FollowedAstrologers = lazy(() => import("../../screens/v2/user/FollowedAstrologers"));
 
-import LalKitab from "../../screens/private/lalKitab/LalKitab";
-import LalKitabDetail from "../../screens/private/lalKitab/detail/LalKitabDetail";
-import LalKitabZodiac from "../../screens/private/lalKitab/zodiac/LalKitabZodiac";
-import LalKitabProblems from "../../screens/private/lalKitab/problems/LalKitabProblems";
-import OccultChat from "../../screens/private/occult/OccultChat";
-import OccultResult from "../../screens/private/occult/OccultResult";
-import PanditAIVoice from "../../screens/private/panditAIVoice/PanditAIVoice";
-import Community from "../../screens/private/community/Community";
+const LalKitab = lazy(() => import("../../screens/private/lalKitab/LalKitab"));
+const LalKitabDetail = lazy(() => import("../../screens/private/lalKitab/detail/LalKitabDetail"));
+const LalKitabZodiac = lazy(() => import("../../screens/private/lalKitab/zodiac/LalKitabZodiac"));
+const LalKitabProblems = lazy(() => import("../../screens/private/lalKitab/problems/LalKitabProblems"));
+const OccultChat = lazy(() => import("../../screens/private/occult/OccultChat"));
+const OccultResult = lazy(() => import("../../screens/private/occult/OccultResult"));
+const PanditAIVoice = lazy(() => import("../../screens/private/panditAIVoice/PanditAIVoice"));
+const Community = lazy(() => import("../../screens/private/community/Community"));
 
 export const PATH = {
   // DEFAULT: {
@@ -683,11 +771,15 @@ export const PATH = {
       element: AIWow,
       header: false,
     },
+    // Entry screen: "Before you start" instructions, the left/right hand choice
+    // and the Upload / Use Camera actions are all on this one screen.
     PALMISTRY_LANDING: {
       path: ["/ai-wow/ai-palmistry-scanner", "/ai-palmistry-scanner"],
       element: PalmistryLanding,
       header: false,
     },
+    // Merged into PALMISTRY_LANDING; this element is now just a redirect there,
+    // kept so already-shared links and Back-stack entries still resolve.
     PALMISTRY_INSTRUCTIONS: {
       path: ["/ai-wow/ai-palmistry-scanner/instructions", "/ai-palmistry-scanner/instructions"],
       element: PalmistryInstructions,
@@ -1019,51 +1111,57 @@ export const PATH = {
       element: PaymentScreen,
     },
 
-    // E-Pooja Booking
-    E_POOJA: {
-      path: "/shubh-mall",
-      element: EPooja,
-    },
-    ASTROMALL_CART: {
-      path: "/viewcart",
-      element: AstromallCart,
-    },
-    ASTROMALL_CART_PAYMENT: {
-      path: "/shubh-mall/cart/payment",
-      element: EPoojaPayment,
-    },
-    ASTROMALL_CART_CHECKOUT: {
-      path: "/checkout",
-      element: EPoojaCheckout,
-    },
-    E_POOJA_DETAIL: {
-      path: "/product-details/:slug",
-      element: EPoojaDetail,
-    },
-    E_POOJA_BOOKING: {
-      path: "/shubh-mall/:slug/book",
-      element: EPoojaBooking,
-    },
-    E_POOJA_PAYMENT: {
-      path: "/shubh-mall/:slug/payment",
-      element: EPoojaPayment,
-    },
-    E_POOJA_BOOKING_SUCCESS: {
-      path: "/booking-success",
-      element: BookingSuccess,
-    },
-    ASTROMALL_CATEGORY: {
-      path: "/category/:slug",
-      element: CategoryProducts,
-    },
-    ASTROMALL_ALL_CATEGORIES: {
-      path: "/categories",
-      element: AllCategories,
-    },
-    ASTROMALL_PURPOSE: {
-      path: "/purpose/:slug",
-      element: PurposeProducts,
-    },
+    // ShubhMall / E-Pooja routes — commented out with their imports at the top
+    // of this file while VITE_SHUBH_MALL_ENABLED is "false". App.jsx filtered
+    // every one of these out at runtime anyway (all eleven paths match
+    // SHUBH_MALL_PATHS in src/utils/featureConfig.js), so they were unreachable
+    // while still costing every visitor their code and CSS in the entry bundle.
+    //
+    // Uncomment this block together with the imports to restore the feature.
+    // E_POOJA: {
+    //   path: "/shubh-mall",
+    //   element: EPooja,
+    // },
+    // ASTROMALL_CART: {
+    //   path: "/viewcart",
+    //   element: AstromallCart,
+    // },
+    // ASTROMALL_CART_PAYMENT: {
+    //   path: "/shubh-mall/cart/payment",
+    //   element: EPoojaPayment,
+    // },
+    // ASTROMALL_CART_CHECKOUT: {
+    //   path: "/checkout",
+    //   element: EPoojaCheckout,
+    // },
+    // E_POOJA_DETAIL: {
+    //   path: "/product-details/:slug",
+    //   element: EPoojaDetail,
+    // },
+    // E_POOJA_BOOKING: {
+    //   path: "/shubh-mall/:slug/book",
+    //   element: EPoojaBooking,
+    // },
+    // E_POOJA_PAYMENT: {
+    //   path: "/shubh-mall/:slug/payment",
+    //   element: EPoojaPayment,
+    // },
+    // E_POOJA_BOOKING_SUCCESS: {
+    //   path: "/booking-success",
+    //   element: BookingSuccess,
+    // },
+    // ASTROMALL_CATEGORY: {
+    //   path: "/category/:slug",
+    //   element: CategoryProducts,
+    // },
+    // ASTROMALL_ALL_CATEGORIES: {
+    //   path: "/categories",
+    //   element: AllCategories,
+    // },
+    // ASTROMALL_PURPOSE: {
+    //   path: "/purpose/:slug",
+    //   element: PurposeProducts,
+    // },
 
     RECHARGE: {
       path: "/recharge",
@@ -1088,6 +1186,20 @@ export const PATH = {
       element: ChatWindow,
       footer: false,
     },
+    // Fallback astrologer profile URL: /astrologer/<display-name-slug>/<id>.
+    // Only used for astrologers with no usable `userName` — the slug is built
+    // from firstName+lastName and is decorative; the id does the fetching.
+    // Kept routed so previously shared links stay valid.
+    PROFILE_ASTROLOGER_WITH_NAME: {
+      path: "/astrologer/:username/:id",
+      element: AstrologerProfile,
+      header: true,
+      footer: true,
+    },
+    // Canonical astrologer profile URL: /astrologer/<userName>.
+    // The `:id` param holds EITHER the astrologer's userName handle OR a raw
+    // ObjectId (older links) — `astrologers/astrologer?astrologerId=` accepts
+    // both, so the screen passes the segment through unchanged.
     PROFILE_ASTROLOGER: {
       path: "/astrologer/:id",
       element: AstrologerProfile,

@@ -90,7 +90,15 @@
   padding-bottom: 12px;
 }
 
+/* Now a <button>, so the UA button styling has to be reset back to how this
+   looked as a div. Tailwind Preflight already zeroes the border and makes the
+   background transparent; padding and font inheritance are the remainder. */
 .gift-item {
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
   text-align: center;
   cursor: pointer;
   transition: 0.2s;
@@ -161,7 +169,11 @@
   margin-top: 8px;
 }
 
-.gift-send-btn:disabled {
+/* Never `disabled` in the JSX — a disabled button fires no click, so the tap
+   that needed an explanation ("pick a gift first") was the one being swallowed.
+   The dimmed look now hangs off aria-disabled. */
+.gift-send-btn:disabled,
+.gift-send-btn[aria-disabled="true"] {
   opacity: 0.45;
   cursor: not-allowed;
 }

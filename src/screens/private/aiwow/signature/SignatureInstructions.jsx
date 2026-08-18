@@ -9,6 +9,7 @@ import { compressImage } from '../../../../utils/helper/compressImage';
 import { trackEvent } from '../../../../utils/analytics';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
+import { Toast } from '../../../../component';
 
 const SignatureInstructions = () => {
   const navigate = useNavigate();
@@ -50,14 +51,21 @@ const SignatureInstructions = () => {
     const file = event.target.files?.[0];
     if (file) {
       trackEvent("shubh_ai_input_provided", { feature_name: "signature-analysis", input_type: "image" });
-      compressImage(file).then((dataUrl) => {
-        // Guests must authenticate at the moment the photo is submitted.
-        runOrAuth(() => {
-          dispatch(setSignatureImage(dataUrl));
-          navigate('/ai-wow/signature-analysis/capture');
+      compressImage(file)
+        .then((dataUrl) => {
+          // Guests must authenticate at the moment the photo is submitted.
+          runOrAuth(() => {
+            dispatch(setSignatureImage(dataUrl));
+            navigate('/ai-wow/signature-analysis/capture');
+          });
+        })
+        .catch((err) => {
+          console.error('Failed to process selected image:', err);
+          Toast.error('Could not read that image. Please try a different photo.');
         });
-      });
     }
+    // Reset so re-picking the same file still fires onChange.
+    event.target.value = '';
   };
 
   return (

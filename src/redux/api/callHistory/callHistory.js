@@ -29,4 +29,11 @@ export const callHistoryApi = privateRequestNew.injectEndpoints({
   overrideExisting: true,
 });
 
-export const { useGetCallHistoryQuery, useGetCallRecordingsQuery } = callHistoryApi;
+export const {
+  useGetCallHistoryQuery,
+  // Lazy variant: lets callers fetch history on demand instead of on mount.
+  // AstrologerProfile uses it so a 30-record history request is not on the
+  // page-load critical path when its only consumer is a click handler.
+  useLazyGetCallHistoryQuery,
+  useGetCallRecordingsQuery,
+} = callHistoryApi;

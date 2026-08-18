@@ -36,9 +36,34 @@ const useSelectedKundliProfile = (options = {}) => {
   const headerSelectedKundli = useSelector((state) => state.kundli?.selectedKundli);
   const token = useSelector((state) => state.auth?.token);
 
+  /*
+   * The `auth` slice is NOT in the redux-persist whitelist (store.js persists
+   * only kundli, calculator and form), so `state.auth.token` is undefined on
+   * every fresh page load until something repopulates it. Skipping on the Redux
+   * token alone therefore meant the API fallback below — the branch commented
+   * "No profile found in store or localStorage — try fetching from API" — never
+   * ran on a reload or a deep link, which is precisely when the Redux store is
+   * empty and the fallback is the only thing that could help.
+   *
+   * A skipped RTK Query also reports `isLoading: false`, so the
+   * `if (profilesQueryLoading) return` guard further down did not hold it back
+   * either: the hook went straight to "No Kundli profile selected", toasted, and
+   * redirected a user who has profiles on the server and simply had no
+   * localStorage mirror (which the guest-login path deliberately removes).
+   *
+   * Reading the same localStorage keys the profile lookup below already trusts
+   * keeps the two consistent.
+   */
+  const hasAuthToken = !!(
+    token ||
+    (typeof localStorage !== "undefined" &&
+      (localStorage.getItem("shubhtalk_customer_token") ||
+        localStorage.getItem("shubhtalk_astro_token")))
+  );
+
   // Fetch all profiles as fallback when no profile is explicitly selected
   const { data: allProfilesData, isLoading: profilesQueryLoading } = useGetAllKundlisQuery(undefined, {
-    skip: !token,
+    skip: !hasAuthToken,
   });
   
   const [profile, setProfile] = useState(null);

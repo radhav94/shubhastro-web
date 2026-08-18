@@ -12,6 +12,7 @@ import LiveListModal from "./LiveListModal";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { useReelScroll } from "./useReelScroll";
 import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -34,7 +35,7 @@ import { PATH } from "../../../../../utils/routes/Paths";
 import { createPortal } from "react-dom";
 import { ChevronLeft } from "lucide-react";
 import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
-import { AppImages, getAstrologerDefaultImage } from "../../../../../utils/appImages";
+import { AppImages, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../../utils/appImages";
 import astrologerOfflineBg from "../../../../../assets/images/live-streaming-no-astro-background.webp";
 import {
   useCheckFollowingStatusQuery,
@@ -93,7 +94,10 @@ const LiveView = (props) => {
     getAstrologerLiveList()
       .then((res) => {
         const all = res.data?.data || [];
-        setLiveListData(all.filter((l) => l.astrologer && l.astrologer.firstName));
+        // Keep any live entry that has a resolvable name — previously this
+        // required `firstName`, which dropped astrologers that only have a
+        // userName.
+        setLiveListData(all.filter((l) => l.astrologer && getAstrologerDisplayName(l.astrologer)));
       })
       .catch(() => {});
   }, [props.liveListRefreshKey]);
@@ -195,7 +199,7 @@ const LiveView = (props) => {
     setWaitingList,
   } = useCall();
 
-  const { pendingConnections, addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, isInQueue, getConnectionByRoomId } = useWaitingQueue();
+  const { pendingConnections, addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, cancelPendingConnection, isInQueue, getConnectionByRoomId } = useWaitingQueue();
 
   // Auto-minimize call if user is on live stream (handles page refresh)
   useEffect(() => {
@@ -289,6 +293,21 @@ const LiveView = (props) => {
   );
   const fullAstro = astrologerFullData?.data;
 
+  // Astrologer-shaped object for getAstrologerImageUrl, shared by the host
+  // avatar and the end-of-call review payload.
+  //
+  // `fullAstro` is the only guaranteed source of the pre-resized `profileImages`
+  // map. The live-list `astrologer` object may carry it too depending on the
+  // endpoint's projection, so it is read as well and covers the window before
+  // the query resolves. profileImgUrl/imageUrl keep the precedence the avatar
+  // used before, so nothing regresses when derivatives are absent.
+  const hostImageSource = {
+    profileImages: fullAstro?.profileImages || astrologer?.profileImages,
+    profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl,
+    imageUrl: astrologer?.imageUrl,
+    gender: fullAstro?.gender || astrologer?.gender,
+  };
+
   const { data: followingData } = useCheckFollowingStatusQuery(
     { astrologerId },
     { skip: !astrologerId || props.isGuest }
@@ -317,7 +336,7 @@ const LiveView = (props) => {
     try {
       if (!isFollowing) {
         await followAstrologer({ astrologerId }).unwrap();
-        Toast.success(`You are now following ${astrologer?.astrologerName || "this astrologer"}`);
+        Toast.success(`You are now following ${getAstrologerDisplayName(fullAstro) || astrologer?.astrologerName || "this astrologer"}`);
 
         // Emit follow message to live stream chat
         if (props.socketRef?.current?.connected && props.channel && userIdLocal) {
@@ -339,7 +358,7 @@ const LiveView = (props) => {
         }
       } else {
         await unfollowAstrologer({ astrologerId }).unwrap();
-        Toast.success(`Unfollowed ${astrologer?.astrologerName || "this astrologer"}`);
+        Toast.success(`Unfollowed ${getAstrologerDisplayName(fullAstro) || astrologer?.astrologerName || "this astrologer"}`);
       }
     } catch (err) {
       console.error("Follow/Unfollow error:", err);
@@ -503,6 +522,45 @@ const LiveView = (props) => {
   }, [displayMessages.length]);
 
   const isHost = ROLE === "host";
+
+  // Host display name — userName-first. `fullAstro` (fetched by id) carries
+  // `userName`; the live-list entry and socket payloads only have the real
+  // first + last name, so they're just fallbacks.
+  const hostDisplayName =
+    getAstrologerDisplayName(fullAstro) || astrologer?.astrologerName || "Astrologer";
+
+  // Same value but without the "Astrologer" placeholder — used when seeding the
+  // `userName` field of objects we hand to the waiting-queue / waitlist popups.
+  const resolvedHostUserName =
+    getAstrologerDisplayName(fullAstro) ||
+    astrologer?.userName ||
+    astrologer?.astrologerName ||
+    astrologer?.hostName ||
+    "";
+
+  // Report it up so the parent can use the username in the "has left" modal
+  // (that modal's socket payload only provides the real name).
+  const onHostNameResolved = props.onHostNameResolved;
+  useEffect(() => {
+    if (hostDisplayName && hostDisplayName !== "Astrologer") {
+      onHostNameResolved?.(hostDisplayName);
+    }
+  }, [hostDisplayName, onHostNameResolved]);
+
+  // Same idea for the avatar. The "has left" modal's socket payload carries a
+  // bare `profileImage` — the unresized original — and it has no access to
+  // `fullAstro`, so it can't reach the `profileImages` derivatives itself.
+  // Reporting the resolved URL up means the modal renders a sized variant with
+  // no extra request, and it's already in the parent's ref before the host
+  // leaves. That card is 60px, so `small`.
+  const onHostAvatarResolved = props.onHostAvatarResolved;
+  const resolvedHostAvatar = hostImageSource.profileImages
+    ? getAstrologerImageUrl(hostImageSource, "small")
+    : "";
+  useEffect(() => {
+    if (resolvedHostAvatar) onHostAvatarResolved?.(resolvedHostAvatar);
+  }, [resolvedHostAvatar, onHostAvatarResolved]);
+
   const safeRemoteUsers = remoteUsers.filter((u) => u);
   // Connected to a live channel (joined Agora, room not ended / host not gone).
   // This is independent of whether a publisher (video) is present yet — matches
@@ -635,7 +693,10 @@ const LiveView = (props) => {
     }
 
     // 7. Store astrologer info and emit call:initiate via socket
-    setLastRequestedAstro({ ...astrologer, profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl });
+    // `profileImages` is forwarded so the call screens can use a sized variant
+    // for their avatars — they read it off lastRequestedAstro and otherwise fall
+    // back to the unresized original.
+    setLastRequestedAstro({ ...astrologer, userName: resolvedHostUserName, profileImages: hostImageSource.profileImages, profileImgUrl: hostImageSource.profileImgUrl });
     setLastCallType("audio");
     setPendingCallType("audio");
     astrologerRef.current = astrologer;
@@ -650,7 +711,7 @@ const LiveView = (props) => {
       liveRoomDetails: {
         roomId: props.channel,
         hostId: astrologerId,
-        hostName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "",
+        hostName: resolvedHostUserName,
         channel: props.channel,
       },
     });
@@ -658,7 +719,16 @@ const LiveView = (props) => {
     // Add to waiting queue
     addPendingConnection({
       id: `${astrologerId}-audio-${Date.now()}`,
-      astrologer: { ...astrologer, _id: astrologerId, firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "" },
+      // Carry the resolved userName-first name through so the waiting-queue /
+      // waitlist popups show the username. `hostDisplayName` comes from the
+      // full astrologer record (which has userName); the live-list entry only
+      // has the real first + last name.
+      astrologer: {
+        ...astrologer,
+        _id: astrologerId,
+        userName: resolvedHostUserName,
+        firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "",
+      },
       type: "audio",
       roomId: null,
       waitingTime: 5,
@@ -731,7 +801,8 @@ const LiveView = (props) => {
     }
 
     // Store astrologer info in context and ref
-    setLastRequestedAstro({ ...astrologer, profileImgUrl: fullAstro?.profileImgUrl || astrologer?.profileImgUrl });
+    // See the audio path above — forwards profileImages for the call screens.
+    setLastRequestedAstro({ ...astrologer, userName: resolvedHostUserName, profileImages: hostImageSource.profileImages, profileImgUrl: hostImageSource.profileImgUrl });
     setPendingCallType(type);
     astrologerRef.current = astrologer;
     callingChannelRef.current = props.channel;
@@ -750,7 +821,7 @@ const LiveView = (props) => {
       liveRoomDetails: {
         roomId: props.channel,
         hostId: astrologerId,
-        hostName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "",
+        hostName: resolvedHostUserName,
         channel: props.channel,
       },
     });
@@ -758,7 +829,14 @@ const LiveView = (props) => {
     // Add to waiting queue
     addPendingConnection({
       id: `${astrologerId}-${type}-${Date.now()}`,
-      astrologer: { ...astrologer, _id: astrologerId, firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "" },
+      // Carry the resolved userName-first name through (see the audio-call
+      // handler above for why the live-list entry isn't enough).
+      astrologer: {
+        ...astrologer,
+        _id: astrologerId,
+        userName: resolvedHostUserName,
+        firstName: astrologer?.firstName || astrologer?.astrologerName || astrologer?.hostName || "",
+      },
       type,
       roomId: null,
       waitingTime: 5,
@@ -811,7 +889,18 @@ const LiveView = (props) => {
       setReviewData({
         astrologerID: activeCall?.astrologerID || activeCall?.astrologerId,
         fullName: activeCall?.callerName || "Astrologer",
-        profileImage: fullAstro?.profileImgUrl || activeCall?.profileImgUrl || activeCall?.astrologerImage,
+        // FeedbackModal renders the avatar at 44px
+        profileImage: getAstrologerImageUrl(
+          {
+            profileImages: hostImageSource.profileImages,
+            profileImgUrl:
+              hostImageSource.profileImgUrl ||
+              activeCall?.profileImgUrl ||
+              activeCall?.astrologerImage,
+            gender: hostImageSource.gender,
+          },
+          "small"
+        ),
         roomId: activeCall.roomId,
       });
 
@@ -1008,7 +1097,9 @@ const LiveView = (props) => {
           channelName,
           chatRoomId,
           agoraToken,
-          callerName: astro.astrologerName || astro.firstName || "Astrologer",
+          // userName-first (fullAstro carries userName; the live-list entry only
+          // has the real first + last name).
+          callerName: resolvedHostUserName || getAstrologerDisplayName(astro) || astro.astrologerName || "Astrologer",
           isUserSide: true,
           callType: type, // "audio" or "video"
           userId: userIdLocal,
@@ -1016,6 +1107,12 @@ const LiveView = (props) => {
           astrologerID: fullAstro?.astrologer_ID || astro?.astrologer_ID || astroId,
           remainingTime,
           experience: fullAstro?.experience || astro?.experience,
+          // Carry the avatar + gender through — the post-call review popup reads
+          // these off activeCall, and without them it fell back to a generic
+          // placeholder image.
+          profileImgUrl:
+            fullAstro?.profileImgUrl || astro?.profileImgUrl || astro?.imageUrl,
+          gender: fullAstro?.gender || astro?.gender,
           origin: "live",
           liveChannel,
         });
@@ -1205,23 +1302,26 @@ const LiveView = (props) => {
                 <ChevronLeft size={24} />
               </button>
               <div className="host-info">
+              {/* .host-avatar-img is 30px (40px on wider screens), so the
+                  `small` 100x125 derivative rather than `profileImgUrl`, which
+                  points at the unresized original. `fullAstro` comes from
+                  useGetAstrologerByIdQuery above, so the derivatives are
+                  available here; the live-list `astrologer` is kept as the
+                  pre-fetch fallback and preserves the previous precedence. */}
               <img
                 className="host-avatar-img"
-                src={
-                  fullAstro?.profileImgUrl ||
-                  astrologer?.profileImgUrl ||
-                  astrologer?.imageUrl ||
-                  getAstrologerDefaultImage(fullAstro?.gender || astrologer?.gender)
-                }
-                alt={astrologer?.astrologerName || "Astrologer"}
+                src={getAstrologerImageUrl(hostImageSource, "small")}
+                alt={hostDisplayName}
+                width={30}
+                height={30}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = getAstrologerDefaultImage(fullAstro?.gender || astrologer?.gender);
+                  e.target.src = getAstrologerDefaultImage(hostImageSource.gender);
                 }}
               />
               <div className="host-text">
                 <div className="host-name host-name-truncate">
-                  {astrologer?.astrologerName || "Astrologer"}
+                  {hostDisplayName}
                 </div>
                 <div className="host-duration">
                   {isCallForCurrentAstrologer
@@ -1298,7 +1398,7 @@ const LiveView = (props) => {
                     try {
                       const res = await getAstrologerLiveList();
                       const all = res.data?.data || [];
-                      const valid = all.filter((l) => l.astrologer && l.astrologer.firstName);
+                      const valid = all.filter((l) => l.astrologer && getAstrologerDisplayName(l.astrologer));
                       setLiveListData(valid);
                       setShowLiveList(true);
                       scrollDisabledRef.current = true;
@@ -1619,7 +1719,7 @@ const LiveView = (props) => {
             onClose={() => setShowGifts(false)}
             giftList={giftList?.data}
             astrologerId={astrologer?._id || astrologer?.astrologerId}
-            astrologerName={astrologer?.firstName || astrologer?.name}
+            astrologerName={resolvedHostUserName || astrologer?.name}
             socketRef={props.socketRef}
             roomId={props.channel}
             userId={userIdLocal}
@@ -1730,7 +1830,7 @@ const LiveView = (props) => {
                       liveRoomDetails: {
                         roomId: props.channel,
                         hostId: conn?.astrologer?._id || astrologerId,
-                        hostName: conn?.astrologer?.firstName || conn?.astrologer?.astrologerName || "",
+                        hostName: getAstrologerDisplayName(conn?.astrologer) || conn?.astrologer?.astrologerName || resolvedHostUserName,
                         channel: props.channel,
                       },
                     });
@@ -1748,9 +1848,14 @@ const LiveView = (props) => {
                   }}
                   onCancel={(roomId, type) => {
                     if (!roomId) return;
-                    const event = type === "chat" ? "chat:cancel" : "call:cancel";
-                    voiceSocket.emit(event, { roomId, canceledBy: "CUSTOMER" });
-                    removePendingConnection(roomId);
+                    // Delegate to the queue context so the correct socket event
+                    // is emitted for the request's current status:
+                    //   on_hold (missed call)   -> chat/call:hold_cancel
+                    //   astrologer_accepted     -> chat/call:user_reject
+                    //   ringing / waiting       -> chat/call:cancel
+                    // Previously this always emitted the plain cancel event,
+                    // which was wrong once the request went on hold.
+                    cancelPendingConnection(roomId, type);
                   }}
                   onCancelAll={() => { resetCallState(); }}
                   onScrollToAstrologer={(astrologerId) => {

@@ -4,19 +4,24 @@ import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import {
   AppIcons,
-  getAstrologerDefaultImage,
   appSvgs,
+  getAstrologerDefaultImage,
+  getAstrologerImageUrl,
 } from "../../../../utils/appImages";
 import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySessionModal";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 import { getAstrologerAvailability } from "../../../../utils/helper/astrologerAvailability";
 import toast from "../../../toast";
+import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
 
 const NewAstrologerDetailsCard = ({
   astrologer,
   onConnect,
   className = "",
   style = {},
+  // Set on the first card only: loads the photo eagerly at high priority
+  // because it is the one card in this list that can be above the fold.
+  priority = false,
 }) => {
   const navigate = useNavigate();
   const isOnline = astrologer?.isActive === true;
@@ -34,7 +39,7 @@ const NewAstrologerDetailsCard = ({
   const emergencyMinRate = emergencyChatRate > 0 && emergencyCallRate > 0
     ? Math.min(emergencyChatRate, emergencyCallRate)
     : emergencyChatRate || emergencyCallRate;
-  const imageUrl = astrologer?.profileImgUrl || getAstrologerDefaultImage(astrologer?.gender);
+  const imageUrl = getAstrologerImageUrl(astrologer);
 
   return (
     <div
@@ -58,20 +63,41 @@ const NewAstrologerDetailsCard = ({
         </div>
       )}
 
-      <Link to={`/astrologer/${astrologer._id}`} className={styles.detailsImageLink}></Link>
+      {/*
+        Full-card tap target. Kept as an empty overlay anchor so the action
+        buttons stay on top, but it needs an accessible name — without one it is
+        an anonymous link to assistive tech and to tap heuristics.
+      */}
+      <Link
+        to={getAstrologerProfilePath(astrologer)}
+        className={styles.detailsImageLink}
+        aria-label={`View ${getAstrologerDisplayName(astrologer)}'s profile`}
+      ></Link>
         <div className={styles.detailsImageWrapper}>
+          {/* This card had no `loading` attribute, so every photo in the list
+              was eager. The list is infinite-scrolled 9 at a time and the CDN
+              serves unresized originals (896x902, 1433x1433 …) into a box that
+              renders around 95x156, so a first page of results kicked off nine
+              full-size downloads at once — all but the first below the fold —
+              competing with the entry bundle and the API call that first paint
+              is waiting on. `.detailsImage` is 100%/100% inside a sized parent,
+              so the box already reserves the space and no width/height
+              attributes are needed. */}
           <img
             src={imageUrl}
             alt={`${astrologer?.firstName} ${astrologer?.lastName}`}
             className={styles.detailsImage}
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : undefined}
+            decoding="async"
             onError={(e) => { e.target.src = getAstrologerDefaultImage(astrologer?.gender); }}
           />
         </div>
 
       <div className={styles.detailsInfo}>
-        <Link to={`/astrologer/${astrologer?._id}`} className={styles.detailsNameLink}>
+        <Link to={getAstrologerProfilePath(astrologer)} className={styles.detailsNameLink}>
           <h3 className={styles.detailsName}>
-            {astrologer?.firstName} {astrologer?.lastName}
+            {getAstrologerDisplayName(astrologer)}
           </h3>
         </Link>
 

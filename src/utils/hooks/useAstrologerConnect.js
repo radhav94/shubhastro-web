@@ -153,8 +153,14 @@ export const useAstrologerConnect = () => {
           console.log("[NormalFlow] ❌ Insufficient balance — opening recharge modal");
           setOpenModal((prev) => ({ ...prev, recharge: true }));
           return false;
-        } else if (checkBalanceStatus === undefined)
+        } else if (checkBalanceStatus === undefined) {
+          // A partial/malformed balance response used to abort here in total
+          // silence, turning the Chat button into a no-op the user could only
+          // respond to by tapping again. Always say something.
+          console.log("[NormalFlow] ❌ Balance status missing from response — aborting");
+          Toast.error("Couldn't verify availability right now. Please try again.");
           return false;
+        }
         
         // Check if astrologer is online for chat
         // API returns availability fields flat in data (not nested under .availability)

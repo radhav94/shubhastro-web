@@ -98,6 +98,35 @@
   -webkit-text-fill-color: transparent;
 }
 
+/* Shown in place of "Tap to pick" when the deck never arrived, so the fan of
+   face-down cards is explained instead of just being inert. */
+.deckError {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px 0;
+}
+
+.deckError p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+}
+
+.reshuffleButton {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 50px;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .cardsContainer {
   width: 100%;
   max-width: 100%;
@@ -118,6 +147,20 @@
   cursor: pointer;
   transition: all 0.3s ease-out;
   transform-origin: center center;
+  /* Each card is a real <button>; strip the UA chrome so it looks unchanged. */
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+
+.card:focus-visible {
+  outline: 3px solid #ff6b35;
+  outline-offset: 4px;
+  border-radius: 16px;
 }
 
 /* Shuffle animation - smooth collapse to center */
@@ -332,9 +375,10 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
+/* Dimmed until every card is picked, but still a live control — it tells you how
+   many cards are left — so the cursor stays a pointer. */
 .showReadingButton.disabled {
   /* background: #ccc; */
-  cursor: not-allowed;
   box-shadow: none;
   opacity: 0.5;
 }

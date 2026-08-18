@@ -7,6 +7,8 @@ import { GrReactjs } from "react-icons/gr";
 import AudioMessageWrapper from "../../../home/components/chats/AudioMessageWrapper";
 import IframeModal from "../../../home/components/chats/IframeModal";
 import { buildKundliLink } from "../../../../../utils/helper/kundliMessage";
+import { splitTextByURL } from "../../../../../utils/helper/linkPreview";
+import toast from "../../../../../component/toast";
 import styles from "./ChatWindow.module.scss";
 
 // Constants
@@ -96,7 +98,6 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
     (message) => {
       const { type, message: content, fileSize } = message;
 
-      console.log("content Chat::",content)
       switch (type) {
         case MESSAGE_TYPES.IMAGE:
           return (
@@ -178,7 +179,14 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
           return (
             <button
               type="button"
-              onClick={() => kundliLink && handleKundliClick(kundliLink)}
+              onClick={() => {
+                // Without a resolvable link this used to do nothing at all.
+                if (!kundliLink) {
+                  toast.error("This kundli is no longer available to view.");
+                  return;
+                }
+                handleKundliClick(kundliLink);
+              }}
               className={styles.kundliLink}
               aria-label="View Kundli"
             >
@@ -238,10 +246,35 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
           // Check for external URLs in text messages
           const detectedURL = detectURL(content);
           if (detectedURL && type !== MESSAGE_TYPES.KUNDLI) {
+            /*
+              The sentence itself is linkified rather than printed as flat text
+              with a clickable copy of the URL bolted underneath. Previously the
+              URL appeared twice and the one inside the message — the one a
+              reader clicks — did nothing at all.
+            */
+            const parts = splitTextByURL(content);
+            const isBareURL = content.trim() === detectedURL;
+
             return (
               <div className={styles.linkMessage}>
-                {content !== detectedURL && (
-                  <p className={styles.messageText}>{content}</p>
+                {!isBareURL && (
+                  <p className={styles.messageText}>
+                    {parts.map((part, index) =>
+                      part.type === "url" ? (
+                        <a
+                          key={`${part.value}-${index}`}
+                          href={part.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.inlineLink}
+                        >
+                          {part.value}
+                        </a>
+                      ) : (
+                        <span key={`t-${index}`}>{part.value}</span>
+                      )
+                    )}
+                  </p>
                 )}
                 <a
                   href={detectedURL}

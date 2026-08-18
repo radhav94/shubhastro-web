@@ -6,6 +6,164 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
   <meta name="theme-color" content="#F75801">
   <script>
+    // Storage safety net. MUST stay the first script on the page.
+    //
+    // When a browser blocks site data, merely READING `window.localStorage`
+    // throws "Access is denied for this document" — it does not return null.
+    // The app touches localStorage in ~560 places, including a module-scope IIFE
+    // in main.jsx that runs before React mounts, so a single throw there aborts
+    // evaluation of the bundle and the user gets a blank page. That shows up in
+    // analytics as a sub-10-second, zero-click bounce.
+    //
+    // Rather than guard 560 call sites, swap in an in-memory implementation when
+    // the real one is unavailable. The app then runs normally for the visit;
+    // nothing persists across reloads, which is the correct outcome for someone
+    // who has blocked storage anyway.
+    //
+    // This has to live in index.html because ES module imports are evaluated
+    // before the importing module's body — so no code inside the bundle can be
+    // guaranteed to run first.
+    (function () {
+      function createMemoryStorage() {
+        var data = Object.create(null);
+        return {
+          getItem: function (key) {
+            var k = String(key);
+            return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null;
+          },
+          setItem: function (key, value) { data[String(key)] = String(value); },
+          removeItem: function (key) { delete data[String(key)]; },
+          clear: function () { data = Object.create(null); },
+          key: function (i) { var keys = Object.keys(data); return i in keys ? keys[i] : null; },
+          get length() { return Object.keys(data).length; }
+        };
+      }
+
+      function isUsable(name) {
+        try {
+          // The property read itself is what throws when access is denied.
+          var store = window[name];
+          if (!store) return false;
+          // Safari private mode and zero-quota contexts expose the object but
+          // reject writes, so probe before trusting it.
+          var probe = '__storage_probe__';
+          store.setItem(probe, '1');
+          store.removeItem(probe);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      ['localStorage', 'sessionStorage'].forEach(function (name) {
+        if (isUsable(name)) return;
+        try {
+          Object.defineProperty(window, name, {
+            value: createMemoryStorage(),
+            configurable: true
+          });
+          if (window.console && console.warn) {
+            console.warn('[storage] ' + name + ' unavailable — using in-memory fallback for this visit.');
+          }
+        } catch (e) {
+          /* Nothing more we can do; individual call sites will still throw. */
+        }
+      });
+    })();
+  </script>
+  <script>
+    // Global error reporting. Registered early (right after the storage shim) so
+    // it also sees failures during bundle parse/evaluation, not just runtime.
+    //
+    // Two gaps this closes:
+    //
+    // 1. Opacity. When a script from another origin throws without CORS headers,
+    //    the browser hands us the string "Script error." with no file, line or
+    //    stack. Analytics then shows an unactionable "script error" that is
+    //    indistinguishable from a real app bug. Our own bundle is same-origin
+    //    and carries `crossorigin`, so anything masked like this is third-party
+    //    (tag manager, analytics, Agora, Maps) — worth labelling as such rather
+    //    than chasing.
+    //
+    // 2. Unhandled promise rejections were not observed at all. A rejected
+    //    promise with no .catch() previously vanished silently.
+    //
+    // Reports go to Clarity (so they attach to the session recording) and to
+    // dataLayer. Deliberately does not swallow anything: the browser still logs.
+    (function () {
+      var MAX_REPORTS = 10;
+      var sent = 0;
+      var seen = {};
+
+      function report(kind, message, source, extra) {
+        try {
+          message = String(message || 'unknown').slice(0, 300);
+
+          // A cross-origin throw is stripped to this exact shape. Naming it
+          // stops it being mistaken for an app-level failure.
+          var masked = (message === 'Script error.' || message === 'Script error') && !source;
+          var key = kind + '|' + message + '|' + (source || '');
+          if (seen[key]) return;
+          seen[key] = true;
+          if (sent >= MAX_REPORTS) return;
+          sent++;
+
+          if (typeof window.clarity === 'function') {
+            window.clarity('set', 'jsErrorKind', masked ? 'cross_origin_masked' : kind);
+            window.clarity('set', 'jsErrorMessage', message);
+            // The source was going to dataLayer only, so a Clarity session showed
+            // e.g. "Unexpected token '{'" with no way to tell which file threw —
+            // ours or a third-party tag. Without it a syntax error is
+            // unattributable, which is the one case where the file matters most.
+            window.clarity('set', 'jsErrorSource', source || '(unavailable)');
+          }
+
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({
+            event: 'js_error',
+            error_kind: kind,
+            error_masked: masked,
+            error_message: message,
+            error_source: source || '(unavailable)',
+            error_detail: extra || ''
+          });
+        } catch (e) {
+          /* reporting must never itself break the page */
+        }
+      }
+
+      window.addEventListener('error', function (e) {
+        // Resource load failures (img/script/link) surface here too, with the
+        // element as target and no message — report them separately.
+        if (e && e.target && e.target !== window && e.target.tagName) {
+          report(
+            'resource_error',
+            e.target.tagName.toLowerCase() + ' failed to load',
+            e.target.currentSrc || e.target.src || e.target.href || ''
+          );
+          return;
+        }
+        report(
+          'uncaught_error',
+          e && e.message,
+          e && e.filename ? e.filename + ':' + e.lineno + ':' + e.colno : '',
+          e && e.error && e.error.stack ? String(e.error.stack).slice(0, 500) : ''
+        );
+      }, true);
+
+      window.addEventListener('unhandledrejection', function (e) {
+        var r = e && e.reason;
+        var msg = r && r.message ? r.message : String(r);
+        report(
+          'unhandled_rejection',
+          msg,
+          '',
+          r && r.stack ? String(r.stack).slice(0, 500) : ''
+        );
+      });
+    })();
+  </script>
+  <script>
     // iOS Safari/Chrome ignore `user-scalable=no`, so pinch/double-tap still
     // zoom the whole page (e.g. when zooming a photo on the AI-Wow camera
     // screens). Enforce the declared no-zoom intent by blocking the zoom
@@ -32,7 +190,6 @@
   <link rel="icon" type="image/svg+xml" href="/images/mobile-shubh-astro-logo.svg" />
   <link rel="shortcut icon" href="/images/mobile-shubh-astro-logo.svg" />
   <link rel="apple-touch-icon" href="/images/mobile-shubh-astro-logo.svg" />
-  <link rel="manifest" href="/site.webmanifest" />
 
   <!-- Mobile -->
   <meta name="mobile-web-app-capable" content="yes" />
@@ -66,11 +223,94 @@
   <meta name="twitter:title" content="ShubhAstro - Talk to Best Astrologers Online" />
   <meta name="twitter:description" content="Connect with expert astrologers for personalized consultations via chat, call & video. Get free Kundli, daily horoscope, tarot readings & more." />
   <meta name="twitter:image" content="https://www.shubhastro.ai/images/shubhastro-logo-banner.jpeg" />
-  <!-- Preconnect to critical third-party origins -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <!--
+    Preconnect to critical third-party origins.
+
+    Kept to three. Each preconnect costs a DNS lookup + TCP + TLS handshake that
+    competes with the requests that actually block the render, so Lighthouse
+    warns above four and the rule of thumb is to spend them only where the
+    resource cannot be discovered from the HTML. Two were dropped because they
+    were redundant with a request already started during head parse:
+
+      - fonts.googleapis.com — the `rel=preload as=style` a few lines below
+        requests that exact URL during parse, which opens the connection itself.
+      - www.googletagmanager.com — the GTM and gtag snippets further down inject
+        their own <script> tags during parse, opening the connection then, and
+        neither is on the LCP path.
+
+    What remains cannot be discovered any earlier:
+  -->
+  <!-- The font files live on gstatic and are only discovered once the Google
+       Fonts stylesheet has been fetched AND parsed, so the handshake would
+       otherwise start one full round trip late. -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Hosts the body background artwork (preloaded below) and `heroBg`
+       ai-suite.png, the homepage LCP candidate. The hero image URL is a
+       hardcoded constant in HomeV2 but is not in the HTML, so it is only
+       requested after the bundle executes and React renders — a warm connection
+       is worth a slot. -->
   <link rel="preconnect" href="https://assets.shubhastro.ai" />
-  <link rel="preconnect" href="https://www.googletagmanager.com" />
+  <!-- App API origin: on the LCP path of every route. crossorigin is required
+       for RTK Query's CORS fetches to reuse the connection, and it matches the
+       credential-less CORS fetch in the prefetch script below. Kept even though
+       that script warms the same origin on "/", because the prefetch is
+       deliberately limited to logged-out visits to the homepage — every other
+       route still discovers the API only after the bundle runs. -->
+  <link rel="preconnect" href="%VITE_APP_API_BASE_URL%" crossorigin />
+
+  <!--
+    Homepage payload prefetch — starts /api/homepage during HTML parse.
+
+    The "/" landing's LCP element is the pageblocker banner in HomeIntroPopup,
+    and its URL is only known once this response arrives. That made the LCP path
+    four requests deep and strictly serial:
+
+        HTML -> entry JS -> React render -> /api/homepage -> banner image
+
+    so an 18 KB image waited on a ~276 KB (gzip) bundle plus an 87 KB API round
+    trip before it could even be discovered. Firing the request here removes the
+    bundle from in front of the API call; `src/services/appServices/homeServices.js`
+    adopts this in-flight promise inside the endpoint's queryFn, so it stays one
+    request rather than becoming two.
+
+    Deliberately narrow, because index.html is shared by every route:
+      - only on "/" — no other route reads this slug, and an unconditional
+        preload here is exactly the mistake that made every route fetch
+        ai-suite.png (see the note further down).
+      - only when logged out — the response can vary with the Authorization
+        header that RTK Query attaches, and this bare fetch sends none. Logged
+        out is also the only state that sees the popup, so nothing is lost.
+      - headers match what fetchBaseQuery sends, keeping it a simple CORS
+        request with no preflight.
+    Wrapped in try/catch and given a no-op rejection handler: a failure here must
+    never surface as an unhandled rejection or block the app, it just means the
+    endpoint requests normally.
+  -->
+  <script>
+    (function () {
+      try {
+        if (window.location.pathname !== "/") return;
+        if (
+          localStorage.getItem("shubhtalk_customer_token") ||
+          localStorage.getItem("shubhtalk_astro_token")
+        ) return;
+
+        var slug = "newcustomerlandingpage";
+        var promise = fetch(
+          "%VITE_APP_API_BASE_URL%/api/homepage?slug=" + slug,
+          { method: "GET", headers: { "Content-Type": "text/plain" } }
+        ).then(function (response) {
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return response.json();
+        });
+
+        promise.catch(function () {});
+        window.__homepagePrefetch__ = { slug: slug, promise: promise };
+      } catch (e) {
+        /* prefetch is best effort */
+      }
+    })();
+  </script>
   <!-- <link rel="dns-prefetch" href="https://translate.googleapis.com" /> -->
   <link rel="dns-prefetch" href="https://www.gstatic.com" />
   <link rel="dns-prefetch" href="https://firebaseinstallations.googleapis.com" />
@@ -80,8 +320,37 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" /></noscript>
 
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/1778659648-1576013064.png" fetchpriority="high" />
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/images/1778659743-240854750.png" fetchpriority="high" />
+  <!--
+    Body background preload, split by viewport.
+
+    Both files were previously covered by a single unconditional preload of the
+    desktop artwork. The stylesheet below swaps to the -mobile file at 767px, so
+    on a phone the 476 KB desktop PNG was downloaded at high priority and then
+    never painted — measured 1142ms -> 6161ms on a 4 Mbps profile, holding a
+    high-priority slot against the entry bundle for five seconds while the
+    97 KB mobile file was fetched separately.
+
+    The `media` attribute is honoured for rel=preload, so each viewport now
+    fetches only the file its stylesheet will actually use. Breakpoint matches
+    the 767px used in the inline CSS below and throughout the SCSS.
+
+    fetchpriority is deliberately NOT set to "high" here. This artwork is a
+    decorative full-page backdrop, never the LCP element — on the homepage that
+    is the pageblocker banner inside HomeIntroPopup, which sits four serial hops
+    downstream (HTML -> entry JS -> React render -> /api/homepage -> image).
+    The desktop PNG is 476 KB; promoting it to "high" put it in direct
+    contention with the entry bundle, delaying every hop behind it. At the
+    default priority for rel=preload as=image it still starts during HTML parse,
+    it just stops outranking the script that unblocks the actual LCP element.
+    `background-color: #ebecf2` in the inline CSS below covers the gap, so the
+    later paint is a colour-to-artwork swap, not a flash of white.
+  -->
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" fetchpriority="high" media="(min-width: 768px)" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" fetchpriority="high" media="(max-width: 767px)" />
+  <!-- Removed: an unconditional high-priority preload of images/ai-suite.png.
+       It is the `heroBg` for HomeV2/HomeNew only, so every other route fetched
+       it at fetchpriority="high" and never painted it. index.html is shared by
+       all routes, so re-add it from the home route (not here) if needed. -->
 
   <style>
     /* Size-adjusted fallback to reduce CLS from font swap */
@@ -96,7 +365,7 @@
 
     body {
       background-color: #ebecf2;
-      background-image: url('/src/assets/images/main-body-bg-new.png');
+      background-image: url('https://assets.shubhastro.ai/main-body-bg-new.png');
       background-repeat: repeat-y;
       background-attachment: fixed;
       background-size: 100% 100%;
@@ -107,24 +376,47 @@
       font-family: 'Poppins', 'Poppins Fallback', sans-serif;
     }
 
-    /* Astrologer card — global background */
-    /* [class*="astrologerCard"],
-    [class*="detailsCard"],
-    [class*="detailsImageWrapper"] {
-      background: rgba(255, 255, 255, 0.4) !important;
-    } */
+    /*
+      This rule is the background for every route. Without this override, only
+      HomeV2 got the mobile artwork — its `body.home-v2-page` selector outranks
+      the bare `body` above on specificity and carries its own media query — so
+      every other page fell through to the desktop image on phones.
+      Same 767px breakpoint used throughout the SCSS.
+    */
+    @media (max-width: 767px) {
+      body {
+        background-image: url('https://assets.shubhastro.ai/main-body-bg-new-mobile.png');
+      }
+    }
   </style>
 
   <!-- Google Tag Manager -->
+  <!--
+    `j.crossOrigin` so exceptions thrown inside GTM (or any tag it loads)
+    report a real message and stack instead of the browser's opaque
+    "Script error.". GTM is the biggest suspect for masked errors because it
+    executes arbitrary container-configured tags.
+    Verified safe: a GET to https://www.googletagmanager.com/gtm.js?id=GTM-T5DTGXHW
+    with an Origin header returns `access-control-allow-origin` for this origin.
+    Do NOT copy this onto a script whose origin omits that header — the request
+    would fail CORS and the script would not load at all.
+  -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.crossOrigin='anonymous';j.src=
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
   })(window,document,'script','dataLayer','GTM-T5DTGXHW');</script>
   <!-- End Google Tag Manager -->
 
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MQBQTN9GSH"></script>
+  <!--
+    `crossorigin` so exceptions thrown inside gtag report a real message and
+    stack instead of the browser's opaque "Script error.". Safe here because
+    googletagmanager.com serves `access-control-allow-origin: *` (verified);
+    adding this to an origin that does NOT send that header would stop the
+    script loading at all, so it is applied only where confirmed.
+  -->
+  <script async crossorigin="anonymous" src="https://www.googletagmanager.com/gtag/js?id=G-MQBQTN9GSH"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -142,7 +434,12 @@
       if (host !== "shubhastro.ai" && host !== "www.shubhastro.ai") return;
       (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        // `crossOrigin` so exceptions thrown inside Clarity's own script report
+        // a real message and stack rather than "Script error.".
+        // Verified: GET https://www.clarity.ms/tag/xeickgmcun with an Origin
+        // header returns `Access-Control-Allow-Origin: *`. (An earlier HEAD
+        // probe returned 405, which is why this was left off previously.)
+        t=l.createElement(r);t.async=1;t.crossOrigin="anonymous";t.src="https://www.clarity.ms/tag/"+i;
         y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
       })(window, document, "clarity", "script", "xeickgmcun");
     })();
@@ -181,6 +478,14 @@
   <!-- Meta Pixel Code (production only) -->
   <script>
   (function () {
+    // NOTE: deliberately NO `crossOrigin` here, unlike the GTM and Clarity
+    // snippets above. A GET to https://connect.facebook.net/en_US/fbevents.js
+    // with an Origin header returns 200 with `timing-allow-origin: *` but NO
+    // `access-control-allow-origin`. Adding crossOrigin would make the request
+    // fail CORS, the pixel would never load, and ad attribution/conversion
+    // tracking would silently break. The cost is that any exception thrown
+    // inside fbevents.js stays masked as "Script error." — that is Meta's
+    // limitation, not something we can fix from here.
     var host = location.hostname;
     if (host !== "shubhastro.ai" && host !== "www.shubhastro.ai") return;
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?

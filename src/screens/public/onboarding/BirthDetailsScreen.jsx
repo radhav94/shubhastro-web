@@ -247,14 +247,27 @@ const BirthDetailsScreen = ({
           <div className={styles.header}>
             <div className={styles.progressDots}>
               {Array.from({ length: totalSteps }).map((_, index) => (
-                <span
+                /*
+                  The dot for the step you are already on used to call
+                  onStepChange(currentStep), which set the step to the screen
+                  already showing — a tap on the widest, most button-like element
+                  in the header that did nothing at all. It is a position
+                  indicator, not a control, so it is disabled.
+
+                  type="button" is required: these sit inside a Formik <Form>,
+                  and a default-type button would submit it.
+                */
+                <button
                   key={index}
+                  type="button"
                   className={
                     index === currentStep ? styles.dotActive : styles.dotInactive
                   }
-                  onClick={() => onStepChange && onStepChange(index)}
-                  style={{ cursor: onStepChange ? 'pointer' : 'default' }}
-                ></span>
+                  disabled={!onStepChange || index === currentStep}
+                  aria-current={index === currentStep ? "step" : undefined}
+                  aria-label={`Step ${index + 1} of ${totalSteps}`}
+                  onClick={() => onStepChange?.(index)}
+                />
               ))}
             </div>
 
@@ -310,6 +323,7 @@ const BirthDetailsScreen = ({
                 }}
                 placeholder="Select time"
                 disabled={values.unknownBirthTime}
+                disabledReason="Uncheck “Don’t know the exact time of birth” to pick a time"
               />
               <div className={styles.checkboxContainer}>
                 <label className={styles.checkboxLabel}>
@@ -365,10 +379,50 @@ const BirthDetailsScreen = ({
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            className={styles.otpprimaryBtn}
-            disabled={!values.birthDate || !values.birthPlace || !values.latitude || Object.keys(errors).length > 0 || registering}
+          {/*
+            Never `disabled` for a validation reason. This is the last gate before
+            a profile exists, and the most common blocker is a birth place typed
+            without picking a suggestion (so `latitude` is null) — which is easy
+            to miss further up a scrolled mobile form. A disabled button absorbs
+            the tap and explains nothing; this one stays live and names the
+            blocker. `registering` is handled inside the handler instead.
+          */}
+          <button
+            type="submit"
+            className={`${styles.otpprimaryBtn} ${
+              !values.birthDate || !values.birthPlace || !values.latitude ? styles.otpprimaryBtnBlocked : ""
+            }`.trim()}
+            aria-disabled={!values.birthDate || !values.birthPlace || !values.latitude}
+            aria-busy={registering}
+            onClick={(e) => {
+              if (registering) {
+                e.preventDefault();
+                return;
+              }
+              if (!values.birthDate) {
+                e.preventDefault();
+                toast.error("Please select your date of birth.");
+                return;
+              }
+              if (!values.birthPlace) {
+                e.preventDefault();
+                toast.error("Please enter your place of birth.");
+                return;
+              }
+              if (!values.latitude) {
+                e.preventDefault();
+                setFieldTouched("birthPlace", true, true);
+                toast.error("Tap your city from the suggestions so we can use the right timezone.");
+                return;
+              }
+              // Any remaining schema error (e.g. a malformed time) would make
+              // Formik refuse to submit without a word. Say it out loud instead.
+              const remaining = Object.keys(errors);
+              if (remaining.length > 0) {
+                e.preventDefault();
+                toast.error(errors[remaining[0]] || "Please check the details above.");
+              }
+            }}
           >
             {registering ? "Saving..." : "Next"}
           </button>

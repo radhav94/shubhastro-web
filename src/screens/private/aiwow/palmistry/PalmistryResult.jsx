@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, useId } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -41,9 +41,15 @@ const PalmistryResult = () => {
   const navigate = useNavigate();
   const { resultId } = useParams();
   const handleBack = () => {
-    navigate('/ai-wow/ai-palmistry-scanner/instructions', { replace: true });
+    // Instructions + hand choice + capture actions all live on the entry screen now.
+    navigate('/ai-wow/ai-palmistry-scanner', { replace: true });
   };
   const [activeTab, setActiveTab] = useState('overview');
+  // Horizontal strip (scrolls the chosen tab into view) and the non-sticky
+  // wrapper above it (vertical anchor for "start reading from the top").
+  const tabStripRef = useRef(null);
+  const tabsAnchorRef = useRef(null);
+  const tabIdPrefix = useId();
   const [resultData, setResultData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -167,6 +173,40 @@ const PalmistryResult = () => {
     { id: 'insights', label: 'Insights' },
   ];
 
+  /*
+   * Switching tabs used to be a bare setActiveTab, which left two things wrong.
+   *
+   * 1. Vertical. `.tabsContainer` is `position: sticky; top: 57px`, so the strip
+   *    stays put while the reader scrolls down through a long section. Tapping
+   *    another tab swapped the panel but kept the scroll offset, so the new
+   *    section rendered from its top — far above the viewport — and the reader
+   *    was dropped into the middle of it, or onto whatever the browser clamped
+   *    to when the new panel was shorter. Near the finger nothing appeared to
+   *    change, which is what invites the repeat taps.
+   *
+   * 2. Horizontal. Five tabs with `white-space: nowrap` overflow a phone, and
+   *    the strip is `overflow-x: auto`. "Career & Life" is the fourth of five,
+   *    so it is typically clipped — and the only feedback for selecting it was
+   *    an active style on a tab half off-screen.
+   *
+   * Same remedy as the FAQ category pills and the planetary Show More: put the
+   * state change where the user is looking.
+   */
+  const handleTabChange = useCallback((tabId, event) => {
+    setActiveTab(tabId);
+
+    // Bring the chosen tab fully into the strip. `block: "nearest"` so this
+    // never fights the vertical scroll below.
+    event?.currentTarget?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+    // Start the new section at its beginning. Anchoring on the non-sticky
+    // wrapper avoids hard-coding the sticky offset: aligning it to the top of
+    // the viewport leaves the strip at the top with the panel directly below.
+    requestAnimationFrame(() => {
+      tabsAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, []);
+
   // Show loader while fetching
   if (isLoading && !resultData) {
     return (
@@ -181,7 +221,8 @@ const PalmistryResult = () => {
             <h1 className={styles.title}>{featureTitle}</h1>
           </div>
         </header>
-        <PrimaryLoader />
+        {/* Inline so the page header above stays visible and un-blurred. */}
+        <PrimaryLoader fullscreen={false} />
       </div>
     );
   }
@@ -269,7 +310,15 @@ const PalmistryResult = () => {
           </svg>
         </button>
         <h1 className={styles.title}>{featureTitle}</h1>
-        <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
+        {/* aria-disabled, not `disabled`: a disabled button fires no click, so a
+            tap during the download went unacknowledged. handleDownloadClick
+            already refuses to start a second one. */}
+        <button
+          className={styles.downloadButton}
+          onClick={handleDownloadClick}
+          aria-disabled={isDownloading}
+          aria-busy={isDownloading}
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M7 10L12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -280,13 +329,18 @@ const PalmistryResult = () => {
         </div>
       </header>
 
-      <div className={styles.tabsContainerWrap}>
-      <div className={styles.tabsContainer}>
+      <div className={styles.tabsContainerWrap} ref={tabsAnchorRef}>
+      <div className={styles.tabsContainer} ref={tabStripRef} role="tablist" aria-label="Palmistry analysis sections">
         {tabs.map(tab => (
           <button
             key={tab.id}
+            type="button"
+            id={`${tabIdPrefix}-tab-${tab.id}`}
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            aria-controls={`${tabIdPrefix}-panel-${tab.id}`}
             className={`${styles.tab} ${activeTab === tab.id ? styles.activeTab : ''}`}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={(e) => handleTabChange(tab.id, e)}
           >
             {tab.label}
           </button>
@@ -294,7 +348,12 @@ const PalmistryResult = () => {
       </div>
       </div>
 
-      <div className={styles.content}>
+      <div
+        className={styles.content}
+        role="tabpanel"
+        id={`${tabIdPrefix}-panel-${activeTab}`}
+        aria-labelledby={`${tabIdPrefix}-tab-${activeTab}`}
+      >
         {activeTab === 'overview' && (
           <>
             <div className={styles.overviewLayout}>

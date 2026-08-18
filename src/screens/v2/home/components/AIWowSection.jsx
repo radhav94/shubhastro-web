@@ -104,7 +104,10 @@ const AIWowSection = () => {
     if (slug === "ar-vastu-scanner") {
       setShowMobileAppModal(true);
     } else {
-      const path = guestAccessSlugs.includes(slug) ? `/${slug}` : `/aiwow/${slug}`;
+      // All AI WOW features are registered under the `/ai-wow/` prefix. The
+      // legacy `/aiwow/` alias only exists for a handful of slugs, so using it
+      // here dropped every other feature onto the 404 page.
+      const path = guestAccessSlugs.includes(slug) ? `/${slug}` : `/ai-wow/${slug}`;
       navigate(path);
     }
   };

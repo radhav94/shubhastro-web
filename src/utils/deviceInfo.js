@@ -50,3 +50,31 @@ export const getDeviceType = () => {
   if (/Android/.test(ua)) return "mobile-android";
   return "web";
 };
+
+/**
+ * Detects embedded/in-app webviews (Facebook, Instagram, WeChat, LinkedIn, etc.).
+ *
+ * These browsers silently ignore a programmatic `<a download>` click, so any
+ * blob-based download must fall back to opening the file in a new tab instead
+ * of reporting success. See `src/utils/helper/downloadFile.js`.
+ */
+export const isInAppBrowser = () => {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+
+  // Facebook (FBAN/FBAV), Instagram, Messenger, WeChat, Line, LinkedIn, Snapchat, Twitter
+  if (/FBAN|FBAV|FB_IAB|Instagram|Messenger|MicroMessenger|Line\/|LinkedInApp|Snapchat|Twitter/i.test(ua)) {
+    return true;
+  }
+
+  // Generic Android WebView: has "wv" or lacks a real browser token
+  if (/\bwv\b/i.test(ua)) return true;
+
+  // iOS in-app webviews are WebKit without Safari's token
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  if (isIOS && !/Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS/i.test(ua)) {
+    return true;
+  }
+
+  return false;
+};

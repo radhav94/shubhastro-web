@@ -26,10 +26,12 @@
     flex-direction: column;
   }
 }
+// The panel. It stacks two things: the row of controls, and any blocked message
+// underneath it. The controls' own flex row lives in .matchMakingRow so a
+// message can never be squeezed in between them.
 .matchMakingInputs{
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
   padding: 16px;
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(12px);
@@ -37,13 +39,41 @@
   border-radius: 12px;
   // box-shadow: 0 2px 5px rgba(0, 0, 0, 0.10);
   @media (width <= 767px) {
-    flex-direction: column;
     background: transparent;
     box-shadow: none;
     padding: 0px;
     border: none;
   }
 }
+
+.matchMakingRow{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  @media (width <= 767px) {
+    flex-direction: column;
+  }
+}
+// The label is a real click target now (it opens the profile picker, same as the
+// control below it), so it needs to look like one.
+.matchInputLabel {
+  cursor: pointer;
+}
+
+// The profile slot was a <div>; it's a <button> now for keyboard access and so
+// analytics register it as interactive. Reset the UA button styling that the
+// Tailwind classes on the element don't cover, and keep a visible focus ring.
+.matchInputControl {
+  appearance: none;
+  font: inherit;
+  color: inherit;
+
+  &:focus-visible {
+    outline: 2px solid #f97316;
+    outline-offset: 2px;
+  }
+}
+
 .matchInput{
   flex-shrink: 0;
   width: 270px;
@@ -88,6 +118,21 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     transform: translateY(-1px);
   }
+  /*
+    Dimmed but still clickable — the button is deliberately never `disabled`,
+    because a disabled button fires no click and the blocker went unexplained.
+    Keep the pointer cursor: it does respond, with a message.
+  */
+  &.blocked{
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+
+    &:hover{
+      transform: none;
+      box-shadow: none;
+    }
+  }
   &:disabled{
     cursor: not-allowed;
     opacity: 0.6;
@@ -95,6 +140,42 @@
     box-shadow: none;
   }
 }
+
+/*
+  Full width, on its own line under the controls, and shaped like a message
+  rather than stray orange text. It used to be a flex item on the control row,
+  which gave it whatever width was left over — roughly 200px between the Partner
+  field and the CTA — so a two-line sentence broke mid-phrase and read as part of
+  the form rather than as the reason the button won't proceed.
+*/
+.matchBlockedHint{
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: left;
+  color: #B93000;
+  background: rgba(247, 88, 1, 0.09);
+  border: 1px solid rgba(247, 88, 1, 0.28);
+  border-radius: 10px;
+
+  @media (width <= 767px) {
+    margin: 12px 0;
+    font-size: 13px;
+  }
+}
+
+.matchBlockedHintIcon{
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
 .bottomImg{
   width: 40vw;
   height: auto;

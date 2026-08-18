@@ -22,6 +22,7 @@ import ProfileModals from "../../../../screens/private/kundli/components/Profile
 import { useProfileManager } from "../../../../screens/private/kundli/hooks/useProfileManager";
 import { useDispatch } from "react-redux";
 import ProfileManager from "../../Profile/ProfileManager";
+import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) => {
   const dispatch = useDispatch();
@@ -239,7 +240,7 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
           channelName,
           chatRoomId,
           agoraToken: token,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           callType: type,
           userId: userIdLocal,
@@ -272,13 +273,13 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
         setActiveChat({
           roomId,
           chatRoomId,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
           astrologerID: astro?.astrologer_ID || data?.astrologer?.astrologer_ID,
           kundliId,
-          astrologerName: data?.astrologer?.firstName || "",
+          astrologerName: getAstrologerDisplayName(data?.astrologer),
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
           profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
@@ -289,11 +290,11 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
           state: {
             userId: userId,
             astrologerId,
-            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+            fullName: getAstrologerDisplayName(astro),
             roomId,
             isUserSide: true,
             kundliId,
-            astrologerName: data?.astrologer?.firstName || "",
+            astrologerName: getAstrologerDisplayName(data?.astrologer),
             astroID: data?.astrologer?.astrologer_ID,
             experience: data?.astrologer?.experience,
             profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,

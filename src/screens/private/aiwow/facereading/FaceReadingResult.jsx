@@ -2,13 +2,39 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styles from './FaceReadingResult.module.scss';
-import { Toast, PieChart } from '../../../../component';
+import { Toast } from '../../../../component';
+// Direct import, not via the component barrel: PieChart pulls in chart.js/auto,
+// which is side-effectful and would land in the entry chunk if re-exported.
+import PieChart from '../../../../component/UI/charts/PieChart';
 import TTSButton from '../../../../component/UI/TTSButton';
 import DownloadReportModal from '../components/DownloadReportModal';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
 import { PATH } from '../../../../utils/routes/Paths';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
+import { trackEvent } from '../../../../utils/analytics';
+
+/**
+ * The six result sections, each paired with the key it reads from the analysis
+ * response. Every one of those keys is destructured with an empty default
+ * (`= {}`), and `{}` is truthy — so a section the API omitted still rendered its
+ * tab in the bar and opened a completely blank panel. Only offer a tab when
+ * there is something behind it.
+ */
+const TAB_SECTIONS = [
+  { id: 'overall', label: 'Overall', key: 'overallReading' },
+  { id: 'personality', label: 'Personality', key: 'personalityAnalysis' },
+  { id: 'aura', label: 'Aura', key: 'auraColors' },
+  { id: 'features', label: 'Features', key: 'facialFeatures' },
+  { id: 'cosmic', label: 'Cosmic', key: 'cosmicConnections' },
+  { id: 'insights', label: 'Insights', key: 'personalizedInsights' },
+];
+
+const hasContent = (value) => {
+  if (Array.isArray(value)) return value.length > 0;
+  if (value && typeof value === 'object') return Object.keys(value).length > 0;
+  return Boolean(value);
+};
 
 // Aura colour names from the API aren't always valid CSS colours (e.g.
 // "Red-Orange"), which would render as transparent/black. Map them to hex.
@@ -133,14 +159,22 @@ const FaceReadingResult = () => {
     setLoading(false);
   }, [reduxResult, reduxImage, navigate]);
 
-  const tabs = [
-    { id: 'overall', label: 'Overall' },
-    { id: 'personality', label: 'Personality' },
-    { id: 'aura', label: 'Aura' },
-    { id: 'features', label: 'Features' },
-    { id: 'cosmic', label: 'Cosmic' },
-    { id: 'insights', label: 'Insights' },
-  ];
+  // Hiding an empty section is right for the visitor, but hiding it *silently*
+  // would also hide a possible API regression on a paid reading — nobody would
+  // learn that sections stopped arriving. Record which ones came back empty.
+  useEffect(() => {
+    if (!analysisData) return;
+    const missing = TAB_SECTIONS
+      .filter(({ key }) => !hasContent(analysisData[key]))
+      .map(({ id }) => id);
+    if (missing.length) {
+      trackEvent('shubh_ai_result_section_missing', {
+        feature_name: 'astro-face-reading',
+        missing_sections: missing.join(','),
+        missing_count: missing.length,
+      });
+    }
+  }, [analysisData]);
 
   // Prepare pie chart data for aura colors
   const auraChartData = useMemo(() => {
@@ -188,6 +222,13 @@ const FaceReadingResult = () => {
     uniqueTraits = [],
     personalizedInsights = {}
   } = analysisData;
+
+  const tabs = TAB_SECTIONS.filter(({ key }) => hasContent(analysisData[key]));
+
+  // `activeTab` starts at 'overall'; if that section is one of the empty ones it
+  // would point at a tab that is no longer offered and nothing would render.
+  // Fall back to the first tab that does exist.
+  const activeTabId = tabs.some((t) => t.id === activeTab) ? activeTab : tabs[0]?.id;
 
   return (
     <>
@@ -240,7 +281,7 @@ const FaceReadingResult = () => {
           {tabs.map(tab => (
             <button
               key={tab.id}
-              className={`${styles.tab} ${activeTab === tab.id ? styles.activeTab : ''}`}
+              className={`${styles.tab} ${activeTabId === tab.id ? styles.activeTab : ''}`}
               onClick={() => setActiveTab(tab.id)}
             >
               {tab.label}
@@ -251,7 +292,7 @@ const FaceReadingResult = () => {
         {/* Tab Content */}
         <div className={styles.tabContent}>
           {/* Overall Tab */}
-          {activeTab === 'overall' && (
+          {activeTabId === 'overall' && (
             <div className={styles.section}>
               <div className={styles.guidanceGrid}>
                 {/* Strengths */}
@@ -404,7 +445,7 @@ const FaceReadingResult = () => {
           )}
 
           {/* Personality Tab */}
-          {activeTab === 'personality' && (
+          {activeTabId === 'personality' && (
             <div className={styles.section}>
               <div className={styles.guidanceGrid}>
                 {personalityAnalysis && Object.entries(personalityAnalysis).map(([key, value]) => (
@@ -439,7 +480,7 @@ const FaceReadingResult = () => {
           )}
 
           {/* Aura Tab */}
-          {activeTab === 'aura' && (
+          {activeTabId === 'aura' && (
             <div className={styles.section}>
               <div className={styles.auraContainer}>
                 {/* Aura Colors List */}
@@ -504,7 +545,7 @@ const FaceReadingResult = () => {
           )}
 
           {/* Features Tab */}
-          {activeTab === 'features' && (
+          {activeTabId === 'features' && (
             <div className={styles.section}>
               <div className={styles.guidanceGrid}>
                 {facialFeatures && Object.entries(facialFeatures).map(([key, value]) => (
@@ -540,7 +581,7 @@ const FaceReadingResult = () => {
           )}
 
           {/* Cosmic Tab */}
-          {activeTab === 'cosmic' && (
+          {activeTabId === 'cosmic' && (
             <div className={styles.section}>
               <div className={styles.guidanceGrid}>
                 {/* Dominant Planet */}
@@ -678,7 +719,7 @@ const FaceReadingResult = () => {
           )}
 
           {/* Insights Tab */}
-          {activeTab === 'insights' && (
+          {activeTabId === 'insights' && (
             <div className={styles.section}>
               <div className={styles.guidanceGrid}>
                 {personalizedInsights.birthChartCorrelation && (

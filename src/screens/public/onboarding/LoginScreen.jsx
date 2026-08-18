@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
@@ -19,6 +19,9 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const dispatch = useDispatch();
   const [phoneNumber, setPhoneNumber] = useState(formData.phoneNumber || "");
   const [loading, setLoading] = useState(false);
+  // Focused when the CTA is tapped with an incomplete number, so the fix is
+  // one keystroke away rather than a hunt back up the page.
+  const phoneInputRef = useRef(null);
 
   // Show device kicked message if redirected from interceptor
   useState(() => {
@@ -30,36 +33,74 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   });
 
   const handleGetOTP = async () => {
-    if (phoneNumber.length >= 10) {
-      setLoading(true);
-      trackEvent("mobile_number_entered", { mobile_number: phoneNumber, country_code: "91" });
-      trackEvent("otp_requested", { mobile_number: phoneNumber });
-      try {
-        const payload = {
-          phoneNumber: `91${phoneNumber}`,
-          type: "CUSTOMER",
-        };
+    if (loading) return;
 
-        const response = await loginWithPhone(payload);
-
-        if (response.data.success && response.data.statusCode === 200) {
-          trackEvent("otp_sent", { mobile_number: phoneNumber, delivery_status: "success" });
-          toast.success(response.data.message || "OTP sent successfully");
-          updateFormData({ phoneNumber });
-          onNext();
-        } else {
-          toast.error(response.data.message || "Failed to send OTP");
-        }
-      } catch (error) {
-        console.error("Login error:", error);
-        toast.error(
-          error.response?.data?.message ||
-            "Failed to send OTP. Please try again.",
-        );
-      } finally {
-        setLoading(false);
-      }
+    // This was doubly silent: the button carried `disabled={phoneNumber.length < 10}`
+    // so the browser swallowed the tap, and this function also wrapped its whole
+    // body in the same check. Tapping the offer CTA with a partial number did
+    // nothing whatsoever — at the final step of the signup funnel. Say what's
+    // missing and put the cursor back in the field.
+    if (phoneNumber.length < 10) {
+      trackEvent("login_blocked", {
+        blocker: "incomplete_mobile_number",
+        digits_entered: phoneNumber.length,
+      });
+      toast.error(
+        phoneNumber.length === 0
+          ? "Enter your 10-digit mobile number to claim the bonus."
+          : `Please enter all 10 digits — ${10 - phoneNumber.length} to go.`
+      );
+      phoneInputRef.current?.focus();
+      return;
     }
+
+    setLoading(true);
+    trackEvent("mobile_number_entered", { mobile_number: phoneNumber, country_code: "91" });
+    trackEvent("otp_requested", { mobile_number: phoneNumber });
+    try {
+      const payload = {
+        phoneNumber: `91${phoneNumber}`,
+        type: "CUSTOMER",
+      };
+
+      const response = await loginWithPhone(payload);
+
+      if (response.data.success && response.data.statusCode === 200) {
+        trackEvent("otp_sent", { mobile_number: phoneNumber, delivery_status: "success" });
+        toast.success(response.data.message || "OTP sent successfully");
+        updateFormData({ phoneNumber });
+        onNext();
+      } else {
+        trackEvent("login_blocked", {
+          blocker: "otp_send_failed",
+          error_reason: response.data.message || "non_200_response",
+        });
+        toast.error(response.data.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      trackEvent("login_blocked", {
+        blocker: "otp_send_failed",
+        error_reason: error.response?.status
+          ? `http_${error.response.status}`
+          : error.message || "request_threw",
+      });
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to send OTP. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // The desktop-only phone mockup is a 360x540 screenshot of the app's own UI
+  // sitting next to the form. It reads as live interface, so taps land on it and
+  // nothing happens. Everything it depicts is behind the sign-in, so answer the
+  // tap by pointing at the one control that unlocks it.
+  const handleMockupClick = () => {
+    toast("Enter your mobile number to open this.", { icon: "ℹ️" });
+    phoneInputRef.current?.focus();
   };
 
   const handleSkipAndProceed = () => {
@@ -70,7 +111,18 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
     localStorage.removeItem("shubhtalk_customer_token");
     localStorage.removeItem("shubhtalk_customer_id");
     localStorage.removeItem("selectedKundliProfile");
-    navigate(PATH.privateRoutes.HOME.path || "/");
+
+    /*
+     * `replace`, not a push. /login is reached by a plain `navigate("/login")`
+     * from ~10 call sites, so it sits in the history stack; pushing the homepage
+     * on top of it left the dismissed login wall one Back press away, and a push
+     * also truncates the forward entries, so it stayed one Back press away for
+     * the rest of the session. Visitors skipped, pressed Back, landed on login,
+     * skipped again — the loop shows up as repeated "Skip" plus quick back
+     * clicks in session recordings. Replacing the entry means Skip consumes the
+     * login screen, and Back returns to whatever they were doing before it.
+     */
+    navigate(PATH.privateRoutes.HOME.path || "/", { replace: true });
   };
 
   return (
@@ -147,17 +199,27 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
           {/* Phone Input */}
           <div className={styles.newPhoneInput}>
-            <div className={styles.newCountryCode}>
+            {/*
+              Fixed +91. The chevron that used to sit here advertised a country
+              picker that does not exist — validation is Indian-format only and
+              the backend prefixes "91" — so non-Indian visitors clicked it
+              repeatedly and left. Explain on tap rather than imply a choice.
+            */}
+            <button
+              type="button"
+              className={styles.newCountryCode}
+              onClick={() => toast("We currently support Indian (+91) mobile numbers only.", { icon: "ℹ️" })}
+              title="Indian (+91) numbers only"
+            >
               <img src="https://flagcdn.com/w40/in.png" alt="India" />
               <span>+91</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path d="M6 9l6 6 6-6" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
+            </button>
             <input
+              ref={phoneInputRef}
               type="tel"
               value={phoneNumber}
               autoFocus
+              autoComplete="tel-national"
               onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && phoneNumber.length >= 10 && !loading) {
@@ -172,9 +234,11 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
           {/* CTA Button */}
           <button
-            className={styles.newClaimBtn}
+            type="button"
+            className={`${styles.newClaimBtn} ${phoneNumber.length < 10 ? styles.newClaimBtnIncomplete : ""}`.trim()}
             onClick={handleGetOTP}
-            disabled={phoneNumber.length < 10 || loading}
+            aria-disabled={phoneNumber.length < 10}
+            aria-busy={loading}
           >
             {loading ? "Sending..." : "Claim ₹250 Now"}
             {!loading && (
@@ -209,13 +273,18 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
         {/* Right Section - Phone Mockup */}
         <div className={styles.newLoginRight}>
-          <div className={styles.phoneMockup}>
+          <button
+            type="button"
+            className={styles.phoneMockup}
+            onClick={handleMockupClick}
+            aria-label="Enter your mobile number to open the app"
+          >
             <img
               src={loginMobile}
               alt="ShubhAstro App"
               loading="eager"
             />
-          </div>
+          </button>
         </div>
         </div>
       {/* </div> */}

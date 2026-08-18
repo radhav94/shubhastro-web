@@ -605,7 +605,12 @@
     margin-top: 20px;
   }
   
+  // Rendered as a real <button> so keyboard and screen-reader users get the
+  // same affordance as pointer users. It is never `disabled`: an unavailable
+  // tile stays tappable and explains why on tap (see astrologerAvailability.js),
+  // otherwise the tap is swallowed silently and reads as a dead click.
   .connectOption {
+    width: 100%;
     background: rgba(255, 255, 255, 0.4);
     border-radius: 16px;
     padding: 8px 16px;
@@ -615,17 +620,34 @@
     cursor: pointer;
     transition: all 0.2s;
     border: 1.5px solid #fff;
-    
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    appearance: none;
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+
     &:hover {
       background: #FFE8D1;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
+    &:focus-visible {
+      outline: 2px solid #F75801;
+      outline-offset: 2px;
+    }
+
     &.connectOptionDisabled {
       opacity: 0.5;
-      cursor: not-allowed;
 
+      // No `pointer-events: none` and no `disabled` attribute on purpose — the
+      // tap must still reach the handler so the reason can be shown.
+      &:hover {
+        background: rgba(255, 255, 255, 0.4);
+        transform: none;
+        box-shadow: none;
+      }
     }
   }
   

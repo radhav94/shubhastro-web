@@ -48,6 +48,7 @@ import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import AstrologerRingModal from "../../../component/UI/modal/AstrologerRingModal/AstrologerRingModal";
 import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
+import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -253,7 +254,15 @@ const TalkToAstrologer = () => {
     navigate(".", { replace: true, state: null });
   }, [location]);
 
-  const { data: astrodata, isFetching } = useGetAstrologersQuery(
+  // isError/refetch were not read at all, which is why a failed listing request
+  // produced a page with a header, the filter chips and nothing underneath —
+  // see the states rendered below the list.
+  const {
+    data: astrodata,
+    isFetching,
+    isError: isListError,
+    refetch: refetchAstrologers,
+  } = useGetAstrologersQuery(
     {
       page,
       limit,
@@ -355,7 +364,17 @@ const TalkToAstrologer = () => {
     setAllAstrologers([]);
     setHasMore(true);
     setIsFiltered(false);
-    trackEvent("astrologer_list_viewed", { filter_applied: false });
+    // A category URL (/astrologers/marriage-relationships) IS a filtered view —
+    // the filter is just applied a moment later, by the child that receives
+    // `selectedType`. Reporting filter_applied:false here made every paid
+    // category landing look unfiltered in analytics, which is precisely the
+    // dimension those campaigns are measured on.
+    trackEvent("astrologer_list_viewed", {
+      filter_applied: Boolean(categoryFromParams),
+      filter_value: categoryFromParams || undefined,
+      filter_source: categoryFromParams ? "url_category" : "none",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // MERGE API DATA - only for normal (non-filtered) mode
@@ -889,7 +908,7 @@ const TalkToAstrologer = () => {
           channelName: agoraChannel,
           chatRoomId,
           agoraToken: token,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           callType: type,
           userId: userIdLocal,
@@ -928,13 +947,13 @@ const TalkToAstrologer = () => {
         setActiveChat({
           roomId,
           chatRoomId,
-          callerName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+          callerName: getAstrologerDisplayName(astro),
           isUserSide: true,
           userId: userIdLocal,
           astrologerId: astrologerId,
           astrologerID: astro?.astrologer_ID || data?.astrologer?.astrologer_ID,
           kundliId,
-          astrologerName: data?.astrologer?.firstName || "",
+          astrologerName: getAstrologerDisplayName(data?.astrologer),
           remainingTime: data?.remainingTime,
           isEmergency: data?.isEmergency || false,
           profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
@@ -945,11 +964,11 @@ const TalkToAstrologer = () => {
           state: {
             userId: userId,
             astrologerId,
-            fullName: `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim(),
+            fullName: getAstrologerDisplayName(astro),
             roomId,
             isUserSide: true,
             kundliId,
-            astrologerName: data?.astrologer?.firstName || "",
+            astrologerName: getAstrologerDisplayName(data?.astrologer),
             astroID: data?.astrologer?.astrologer_ID,
             experience: data?.astrologer?.experience,
             profileImgUrl: astro?.profileImgUrl || data?.astrologer?.profileImgUrl,
@@ -1131,16 +1150,38 @@ const TalkToAstrologer = () => {
   }, [userIdLocal, isRecommendModalOpen]);
 
   //JSX
-  if (isFetching && page === 1 && allAstrologers.length === 0) {
-    return <PrimaryLoader isLoading={true} />;
-  }
-
+  //
+  // No early full-page return on first load.
+  //
+  // This used to be:
+  //
+  //   if (isFetching && page === 1 && allAstrologers.length === 0)
+  //     return <PrimaryLoader isLoading />;
+  //
+  // which replaced the entire screen with a fullscreen spinner until
+  // useGetAstrologersQuery resolved. Nothing real painted in the meantime — no
+  // heading, no filter chips — so LCP on this route was gated end to end on that
+  // API call, on top of the usual CSR floor (blank HTML -> entry JS -> route
+  // chunk -> React). /chat-to-astrologer is an ad and referral landing page, so
+  // that is a cold, uncached, first-paint path.
+  //
+  // The static shell below (back button, <h1>, FilterChips) depends on no
+  // network data, so it can paint as soon as the route chunk executes, which
+  // makes the <h1> the LCP element and decouples LCP from API latency. The
+  // in-list spinner at loadMoreRef already covers the loading state — the
+  // infinite-scroll observer is guarded on !isFetching and
+  // !initialLoadComplete.current, so the sentinel sitting in the viewport with an
+  // empty list cannot trigger a spurious page increment.
   return (
     <div className={styles.mainContainer}>
       <div className={styles.pageHeader}>
 
+        {/* location.key, not window.history.length — see BackButton.jsx. This is
+            a Google Ads landing page, and the ad redirect chain makes
+            history.length > 1 true, so back used to walk the visitor off the
+            origin instead of into the app. */}
         <button className={styles.localBackBtn} onClick={() => {
-          if (window.history.length > 1) navigate(-1);
+          if (location.key !== "default") navigate(-1);
           else navigate("/", { replace: true });
           }} aria-label="Go back">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -1168,7 +1209,29 @@ const TalkToAstrologer = () => {
       />
 
 
-      <PrimaryLoader isLoading={isFilterLoading} />
+      {/*
+        No loader here.
+        ==============
+        This used to be `<PrimaryLoader isLoading={isFilterLoading} />`, and
+        PrimaryLoader defaults to `fullscreen`, so it rendered a full-page
+        overlay. On a category URL such as /astrologers/love-relationships that
+        overlapped the in-list spinner further down and the page showed two
+        loaders at once:
+
+          - FilterChips auto-applies the category from the URL and calls
+            onFilterLoading(true) at the *start* of the request, so
+            isFilterLoading flips immediately on mount.
+          - isFiltered is only set once that request *resolves* (in
+            handleApplyFilters), and useGetAstrologersQuery is skipped on
+            `isFiltered` — so for the whole duration of the filter request the
+            base list query is still live and isFetching is also true.
+
+        Both flags describe one thing: the astrologer list is loading. It is now
+        rendered once, at loadMoreRef below, using the inline presentation.
+        Keeping it out of here also preserves the LCP work described above — a
+        fullscreen overlay would have covered the <h1> that this route relies on
+        as its LCP element.
+      */}
       {/* Top Astrologers Section - New Design */}
       {!showFilterAstrologer && topTenAstrologers.length > 0 && (
         <>
@@ -1221,7 +1284,7 @@ const TalkToAstrologer = () => {
           </div>
 
           <div className={styles.topAstrologersGrid}>
-            {topTenAstrologers.map((astro) => (
+            {topTenAstrologers.map((astro, topIndex) => (
               // REPLACED: TopAstrologerCard with NewAstrologerCard for consistency
               // <TopAstrologerCard
               //   key={astro._id}
@@ -1235,6 +1298,10 @@ const TalkToAstrologer = () => {
               <NewAstrologerCard
                 key={astro._id}
                 astrologer={astro}
+                // First two cards are above the fold in this horizontal rail and
+                // are the leading image LCP candidates on this route, so they
+                // load eagerly at high priority. The rest stay lazy.
+                priority={topIndex < 2}
                 onConnect={handleConnectClick}
                 onEmergencyClick={(astrologer) => {
                   setSelectedAstrologer(astrologer);
@@ -1346,6 +1413,7 @@ const TalkToAstrologer = () => {
               <NewAstrologerDetailsCard
                 key={astro._id}
                 astrologer={astro}
+                priority={index === 0}
                 onConnect={handleConnectClick}
               />
             </div>
@@ -1353,14 +1421,72 @@ const TalkToAstrologer = () => {
         ))}
       </div>
 
-      {!isFetching && allAstrologers.length === 0 && isFiltered && (
+      {/* `isFilterLoading` is part of the guard so "No astrologers found."
+          cannot flash while a filter request is still in flight — isFetching is
+          already false by then, because the base query is skipped on isFiltered. */}
+      {!isFetching && !isFilterLoading && allAstrologers.length === 0 && isFiltered && (
           <div className={styles.emptyState}>
             <PrimaryText>No astrologers found.</PrimaryText>
           </div>
         )}
 
+      {/*
+        The two states below did not exist. The empty state above requires
+        `isFiltered`, so with no filter applied — which is how everyone arrives on
+        this page — an empty list rendered nothing whatsoever: the header and the
+        filter chips sitting above blank space, with no message, no explanation
+        and nothing to press. A failed request looked exactly the same, because
+        isError was never read.
+
+        That is indistinguishable from a page still loading, so the only move left
+        is to reload and hope, which is what the session recordings show: repeat
+        visits and refreshes minutes apart with almost no clicks in between.
+
+        Both are gated on an empty list, so a failure while paginating further
+        down the list leaves the results already on screen alone.
+      */}
+      {/* Plain elements rather than <PrimaryText>: that component writes colour,
+          size, weight and alignment into an inline style attribute, which
+          outranks a CSS module class, so the styling below would not apply. */}
+      {isListError && !isFiltered && allAstrologers.length === 0 && !isFetching && (
+        <div className={styles.listStateCard}>
+          <h2 className={styles.listStateTitle}>Couldn&apos;t load astrologers</h2>
+          <p className={styles.listStateText}>
+            The list didn&apos;t come through. This is usually a connection hiccup.
+          </p>
+          <button
+            type="button"
+            className={styles.listStateBtn}
+            onClick={() => refetchAstrologers()}
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {!isFetching && !isFilterLoading && !isListError && allAstrologers.length === 0 && !isFiltered && (
+        <div className={styles.listStateCard}>
+          <h2 className={styles.listStateTitle}>No astrologers available right now</h2>
+          <p className={styles.listStateText}>
+            Everyone is offline at the moment. Try again in a few minutes, or ask
+            Pandit AI in the meantime.
+          </p>
+          <button
+            type="button"
+            className={styles.listStateBtn}
+            onClick={() => refetchAstrologers()}
+          >
+            Check again
+          </button>
+        </div>
+      )}
+
+      {/* The single loader for this list — covers both the base query and an
+          in-flight filter request. See the note where the overlay used to be. */}
       <div ref={loadMoreRef} className={styles.loaderWrapper}>
-        {isFetching && <PrimaryLoader isLoading={true} fullscreen={false} />}
+        {(isFetching || isFilterLoading) && (
+          <PrimaryLoader isLoading={true} fullscreen={false} />
+        )}
       </div>
 
       {!hasMore && allAstrologers.length > 0 && recommendedAstrologers.length > 0 && (
@@ -1417,7 +1543,7 @@ const TalkToAstrologer = () => {
 
           {isLoadingRecommended ? (
             <div className={styles.loaderWrapper}>
-              <PrimaryLoader />
+              <PrimaryLoader fullscreen={false} />
             </div>
           ) : (
             <div className={styles.recommendedGrid}>

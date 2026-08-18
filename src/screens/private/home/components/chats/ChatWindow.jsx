@@ -15,6 +15,7 @@ import FloatingActions from "./FloatingActions";
 import useChatSocket from "./useChatSocket";
 import Feedback from "./Feedback";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
+import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 import { useAddAstrologerReviewMutation } from "../../../../../redux/api/review/reviewApi";
 import { trackEvent } from "../../../../../utils/analytics";
 import { Toast } from "../../../../../component";
@@ -41,6 +42,7 @@ import { useChat as useChatContext } from "../../../../../context/ChatContext";
 import RechargeModal from "../../../../../component/recharge-modal/RechargeModal";
 import useAstrologerAvailability from "../../../../../utils/hooks/useAstrologerAvailability";
 
+import { getAstrologerImageUrl } from "../../../../../utils/appImages";
 const ChatWindow = () => {
   const messagesRef = useRef(null);
   const chatPageRef = useRef(null);
@@ -93,7 +95,16 @@ const ChatWindow = () => {
   const roomId = stateRoomId || activeChat?.roomId;
   const fullName = stateFullName || activeChat?.fullName || activeChat?.callerName;
   const kundliId = stateKundliId || activeChat?.kundliId;
-  const astrologerName = stateAstrologerName || activeChat?.astrologerName || astrologerProfileData?.data?.astrologerName || astrologerProfileData?.data?.firstName || "";
+  // userName-first. The profile API (keyed on this chat's astrologerId) is the
+  // authoritative source for `userName`, so prefer it — navigation state /
+  // activeChat can carry an older name captured at connect time (e.g. from the
+  // live flow, which only had the real first + last name).
+  const astrologerName =
+    getAstrologerDisplayName(astrologerProfileData?.data) ||
+    stateAstrologerName ||
+    activeChat?.astrologerName ||
+    astrologerProfileData?.data?.astrologerName ||
+    "";
   const refreshKey = stateRefreshKey;
   const astroID = stateAstroID || activeChat?.astrologerID;
   const experience = stateExperience || activeChat?.experience || astrologerProfileData?.data?.experience || "";
@@ -106,9 +117,15 @@ const ChatWindow = () => {
     }
   }, [activeChat?.astrologerID]);
 
-  // Resolve profileImgUrl: prefer fresh API data; only use fallbacks while API is loading
+  // Resolve profileImgUrl: prefer fresh API data; only use fallbacks while API is loading.
+  //
+  // The chat avatars render at roughly 28-40px, so ask for the `small` (100x125)
+  // derivative rather than the unresized original that `profileImgUrl` points at.
+  // getAstrologerImageUrl falls back to profileImgUrl on its own, which also
+  // covers the fallback branch below — navigation state, activeChat and the
+  // query param all carry only the bare URL.
   const profileImgUrl = astrologerProfileData
-    ? (astrologerProfileData?.data?.profileImgUrl || "")
+    ? (getAstrologerImageUrl(astrologerProfileData?.data, "small") || "")
     : (stateProfileImgUrl || activeChat?.profileImgUrl || (() => {
         try {
           const params = new URLSearchParams(window.location.search);

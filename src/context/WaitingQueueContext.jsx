@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
+import { useContext, useState, useCallback, useRef, useEffect } from "react";
+import { WaitingQueueContext } from "./waitingQueueContextInstance";
 import { voiceSocket, clearChatSession } from "../services/voiceSocketServices";
 import { useCall } from "./CallContext";
 import { useChat } from "./ChatContext";
@@ -9,7 +10,7 @@ import { trackEvent } from "../utils/analytics";
 import { startIncomingSound, stopIncomingSound } from "../utils/incomingSound";
 import { claimRoom, releaseRoom } from "../utils/tabSession";
 import { GUEST_AUTO_ACCEPT_KEY, GUEST_FANOUT_RESOLVED_KEY, GUEST_FANOUT_RESOLVED_WINDOW_MS } from "../screens/public/guestChat/guestChatConstants";
-const WaitingQueueContext = createContext();
+import { getAstrologerDisplayName } from "../utils/helper/string.utils";
 
 // LocalStorage key for persistence
 const QUEUE_STORAGE_KEY = "shubhtalk_waiting_queue";
@@ -533,8 +534,8 @@ export const WaitingQueueProvider = ({ children }) => {
         const astro = typeof astrologerId === "object" ? astrologerId : { _id: astrologerId };
         const astroId = astro?._id || astrologerId;
         const astroName = user?.astro
-          ? `${user.astro.firstName || ""} ${user.astro.lastName || ""}`.trim()
-          : `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
+          ? getAstrologerDisplayName(user.astro)
+          : getAstrologerDisplayName(astro);
 
         if (type === "chat") {
           // Only reconnect if ChatContext doesn't already have an active chat
@@ -549,7 +550,7 @@ export const WaitingQueueProvider = ({ children }) => {
               isUserSide: true,
               userId: userIdLocal,
               astrologerId: astroId,
-              astrologerName: astro?.firstName || "",
+              astrologerName: getAstrologerDisplayName(astro),
               astrologerImage: astro?.profileImgUrl || user?.astro?.profileImgUrl || null,
               remainingTime: billedMinutes || 0,
               callType: "chat",
@@ -692,7 +693,7 @@ export const WaitingQueueProvider = ({ children }) => {
 
       // Build astrologer info from event payload
       const astro = data?.astrologer || {};
-      const astroName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
+      const astroName = getAstrologerDisplayName(astro);
 
       // Set active chat in context so ChatWindow can pick it up
       setActiveChat({
@@ -702,7 +703,7 @@ export const WaitingQueueProvider = ({ children }) => {
         isUserSide: true,
         userId: userIdLocal,
         astrologerId,
-        astrologerName: astro?.firstName || "",
+        astrologerName: getAstrologerDisplayName(astro),
         astrologerID: astro?.astrologer_ID,
         remainingTime: data?.remainingTime,
         isEmergency: data?.isEmergency || false,
@@ -753,7 +754,7 @@ export const WaitingQueueProvider = ({ children }) => {
 
       // Build astrologer info from event payload
       const astro = rest?.astrologer || {};
-      const astroName = `${astro?.firstName || ""} ${astro?.lastName || ""}`.trim();
+      const astroName = getAstrologerDisplayName(astro);
       const agoraChannel = channelName || roomId;
 
       // Determine if this call originated from a live stream

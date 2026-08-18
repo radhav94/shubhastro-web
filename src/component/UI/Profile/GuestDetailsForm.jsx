@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   IoPersonOutline,
   IoCalendarOutline,
   IoTimeOutline,
   IoLocationOutline,
-  IoChevronDown,
   IoSparkles,
   IoShieldCheckmarkOutline,
 } from "react-icons/io5";
 import { FaMars, FaVenus, FaTransgenderAlt } from "react-icons/fa";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
+import Toast from "../../toast";
+import { trackEvent } from "../../../utils/analytics";
 import styles from "./GuestDetailsForm.module.scss";
 
 /**
@@ -52,6 +53,11 @@ const GENDERS = [
   { value: "Others", label: "Others", Icon: FaTransgenderAlt },
 ];
 
+// Visual top-to-bottom order of the fields. `validate()` builds a plain object,
+// and object key order is not something to reason about for "which problem is
+// highest up the page", so the order lives here explicitly.
+const FIELD_ORDER = ["name", "mobileNumber", "identity", "dob", "time", "birthPlace"];
+
 const GuestDetailsForm = ({
   onSubmit,
   submitting = false,
@@ -59,6 +65,8 @@ const GuestDetailsForm = ({
 }) => {
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
+  // Field wrappers, so a failed submit can bring the offending one into view.
+  const fieldRefs = useRef({});
 
   const setField = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -88,9 +96,41 @@ const GuestDetailsForm = ({
   };
 
   const handleSubmit = () => {
+    if (submitting) {
+      Toast.error("Sending your OTP — one moment.");
+      return;
+    }
+
     const e = validate();
     setErrors(e);
-    if (Object.keys(e).length) return;
+    if (Object.keys(e).length) {
+      /*
+       * Six required fields stacked above the button make this form taller than
+       * a phone viewport, so the field that failed is usually scrolled off the
+       * top while the user is looking at the button. The inline <span> errors
+       * do render, just nowhere the user is looking — so "Continue & Get ₹250
+       * Bonus" reads as a broken button and gets tapped again and again.
+       * Matches the handling already in GuestChatFlow: bring the first problem
+       * into view, focus it, and say it once out loud.
+       */
+      const firstInvalid = FIELD_ORDER.find((key) => e[key]);
+      const node = firstInvalid && fieldRefs.current[firstInvalid];
+      if (node) {
+        node.scrollIntoView({ behavior: "smooth", block: "center" });
+        node.querySelector("input, button")?.focus({ preventScroll: true });
+      }
+      if (firstInvalid) Toast.error(e[firstInvalid]);
+
+      // Lets analytics separate repeat taps caused by validation from ones
+      // caused by a failing OTP send, and shows which field trips people up.
+      trackEvent("guest_details_signup_blocked", {
+        blocker: "validation",
+        field: firstInvalid,
+        error_reason: firstInvalid ? e[firstInvalid] : "unknown",
+        invalid_field_count: Object.keys(e).length,
+      });
+      return;
+    }
 
     onSubmit?.({
       name: form.name.trim(),
@@ -111,7 +151,7 @@ const GuestDetailsForm = ({
   return (
     <div className={styles.formCard}>
       {/* Name */}
-      <div className={styles.field}>
+      <div className={styles.field} ref={(el) => (fieldRefs.current.name = el)}>
         <label className={styles.label}>
           Name <span className={styles.req}>*</span>
         </label>
@@ -128,16 +168,24 @@ const GuestDetailsForm = ({
       </div>
 
       {/* Mobile number */}
-      <div className={styles.field}>
+      <div className={styles.field} ref={(el) => (fieldRefs.current.mobileNumber = el)}>
         <label className={styles.label}>
           Mobile Number <span className={styles.req}>*</span>
         </label>
         <div className={styles.mobileWrap}>
-          <span className={styles.flagBox}>
+          {/*
+            Fixed +91. No chevron: it advertised a country picker that does not
+            exist, which non-Indian users tapped repeatedly before giving up.
+          */}
+          <button
+            type="button"
+            className={styles.flagBox}
+            onClick={() => Toast.info("We currently support Indian (+91) mobile numbers only.")}
+            title="Indian (+91) numbers only"
+          >
             <span className={styles.flag}>🇮🇳</span>
             +91
-            <IoChevronDown size={12} />
-          </span>
+          </button>
           <input
             className={styles.input}
             type="tel"
@@ -154,7 +202,7 @@ const GuestDetailsForm = ({
       </div>
 
       {/* Identity */}
-      <div className={styles.field}>
+      <div className={styles.field} ref={(el) => (fieldRefs.current.identity = el)}>
         <label className={styles.label}>
           Identity <span className={styles.req}>*</span>
         </label>
@@ -179,7 +227,7 @@ const GuestDetailsForm = ({
 
       {/* Birth date + time on one row */}
       <div className={styles.row2}>
-        <div className={styles.field}>
+        <div className={styles.field} ref={(el) => (fieldRefs.current.dob = el)}>
           <label className={styles.label}>
             Birth Date <span className={styles.req}>*</span>
           </label>
@@ -204,7 +252,7 @@ const GuestDetailsForm = ({
           {errors.dob && <span className={styles.err}>{errors.dob}</span>}
         </div>
 
-        <div className={styles.field}>
+        <div className={styles.field} ref={(el) => (fieldRefs.current.time = el)}>
           <label className={styles.label}>
             Birth Time <span className={styles.req}>*</span>
           </label>
@@ -221,6 +269,7 @@ const GuestDetailsForm = ({
               mode="time"
               dropUp
               disabled={form.unknownBirthTime}
+              disabledReason="Uncheck “Don’t know the exact time of birth” to pick a time"
               selected={form.time}
               onChange={(d) => setField("time", d)}
               placeholder="HH:MM AM/PM"
@@ -240,7 +289,7 @@ const GuestDetailsForm = ({
       </label>
 
       {/* Place of birth */}
-      <div className={styles.field}>
+      <div className={styles.field} ref={(el) => (fieldRefs.current.birthPlace = el)}>
         <label className={styles.label}>
           Place of Birth <span className={styles.req}>*</span>
         </label>
@@ -264,11 +313,17 @@ const GuestDetailsForm = ({
         {errors.birthPlace && <span className={styles.err}>{errors.birthPlace}</span>}
       </div>
 
+      {/*
+        aria-disabled rather than `disabled`: a disabled button fires no click,
+        so a tap during the OTP send produced no acknowledgement at all. The
+        handler still refuses to submit twice, it just says so now.
+      */}
       <button
         type="button"
         className={styles.submitBtn}
         onClick={handleSubmit}
-        disabled={submitting}
+        aria-disabled={submitting}
+        aria-busy={submitting}
       >
         <IoSparkles size={18} />
         {submitting ? "Sending OTP..." : submitText}
