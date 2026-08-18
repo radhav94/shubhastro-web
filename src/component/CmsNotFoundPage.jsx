@@ -46,7 +46,16 @@ const CmsNotFoundPage = () => {
   if (isLoading) {
     return (
       <div className={styles.container}>
-        <PrimaryLoader />
+        {/*
+          `fullscreen` defaults to true, which is `position: fixed` over the whole
+          viewport at z-index 999999 — above the header (2001). This component is
+          the catch-all that serves every CMS/SEO landing page, so for the whole
+          CMS round trip the entire page was covered by a blocking overlay: taps
+          on the header, the nav or the footer hit the overlay and were swallowed.
+          The loader belongs in the page flow here, where it reports progress
+          without disabling the chrome around it.
+        */}
+        <PrimaryLoader fullscreen={false} />
       </div>
     );
   }
