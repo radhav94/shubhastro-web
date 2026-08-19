@@ -4,12 +4,7 @@ import { useFetchAdvancePanchangQuery } from "../../../../redux/api/panchang/pan
 import useUserLocation from "../../../../utils/hooks/useUserLocation";
 import { IoLocationOutline } from "react-icons/io5";
 
-import abhijitIcon from "../../../../assets/images/Abhijit-Muhurat 1.png";
-import rahuKaalIcon from "../../../../assets/images/Crucial Muhurats.png";
-import gulikaIcon from "../../../../assets/images/Gulika-icon 1.png";
-import yamakantaIcon from "../../../../assets/images/Crucial Muhurats (1).png";
-import defaultSquareImg from "../../../../assets/images/default_image_square_500x500.png";
-const MUHURAT_ICONS = [abhijitIcon, rahuKaalIcon, gulikaIcon, yamakantaIcon];
+import { getMuhuratIcon, MUHURAT_FALLBACK_ICON } from "../../../../utils/muhuratIcons";
 
 /** Strips seconds from time string: "12:17:35" → "12:17" (works with any script) */
 const stripSeconds = (t) => {
@@ -93,7 +88,7 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
         )}
       </div>
       <div className={styles.muhuratGrid}>
-        {muhurats.map((m, i) => (
+        {muhurats.map((m) => (
           <div
             key={m.name}
             className={styles.muhuratItem}
@@ -116,7 +111,7 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
               <div className={styles.muhuratIcon}>
                 {/* alt="" — the <h3> beside it is already m.name, so a filled alt
                     made a screen reader say the muhurat name twice. */}
-                <img src={MUHURAT_ICONS[i] || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                <img src={getMuhuratIcon(m.name)} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = MUHURAT_FALLBACK_ICON; }} />
               </div>
               <h3>{m.name}</h3>
             </div>

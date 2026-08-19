@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./PanchangCard.module.scss";
+import { getMuhuratIcon, MUHURAT_FALLBACK_ICON } from "../../../utils/muhuratIcons";
 
 const PanchangCards = ({ title, data = [], summary, muhratData }) => {
   return (
@@ -30,7 +31,20 @@ const PanchangCards = ({ title, data = [], summary, muhratData }) => {
         <div className={styles.muhuratContainer}>
           {Object.values(muhratData).map((m, i) => (
             <div className={styles.muhuratBox} key={i}>
-              <h3>{m.title}</h3>
+              <h3 className={styles.muhuratHeading}>
+                {/* alt="" — the heading text right next to it is already the
+                    muhurat name, so a filled alt read it out twice. */}
+                <img
+                  src={getMuhuratIcon(m.title)}
+                  alt=""
+                  width="28"
+                  height="28"
+                  loading="lazy"
+                  className={styles.muhuratIcon}
+                  onError={(e) => { e.target.onerror = null; e.target.src = MUHURAT_FALLBACK_ICON; }}
+                />
+                {m.title}
+              </h3>
               <p>
                 <strong>Start:</strong> {m.start}
               </p>
