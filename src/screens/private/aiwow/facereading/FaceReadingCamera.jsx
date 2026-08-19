@@ -67,6 +67,7 @@ const FaceReadingCamera = () => {
 
   const {
     modelsLoaded,
+    modelsFailed,
     faceDetected,
     faceInCircle,
     isTooFar,
@@ -264,7 +265,17 @@ const FaceReadingCamera = () => {
 
   // Capture allowed only when the FULL face is detected, inside the circle,
   // not too far, and not clipped by the frame edges (partial face).
-  const canCapture = faceDetected && faceInCircle && !isTooFar && !isPartialFace;
+  //
+  // When the face model could not be fetched, that gate can never open, so fall
+  // back to a plain manual shutter as soon as the video is live. Detection is a
+  // framing aid, not a requirement for taking a picture — the analysis runs
+  // server-side on whatever image is submitted, and the gallery-upload path
+  // reaches it with no detection at all. Blocking the entire screen on an
+  // optional aid is what turned a failed model fetch into a dead end.
+  const detectionUnavailable = modelsFailed;
+  const canCapture = detectionUnavailable
+    ? videoReady
+    : faceDetected && faceInCircle && !isTooFar && !isPartialFace;
 
   // Draw the current video frame, cropped to the face circle, onto a canvas.
   const cropCurrentFrameToCanvas = () => {
@@ -309,6 +320,10 @@ const FaceReadingCamera = () => {
 
   // Why the shutter can't fire right now, phrased for the user.
   const captureBlockedReason = () => {
+    // Detection is off for good — the only thing still required is a live frame.
+    if (detectionUnavailable) {
+      return videoReady ? null : 'Camera is still starting up — give it a moment.';
+    }
     if (!modelsLoaded) return 'Still loading the face model — give it a moment.';
     if (!videoReady) return 'Camera is still starting up — give it a moment.';
     if (!faceDetected || isTooFar) return 'Move your face closer to the camera.';
@@ -548,7 +563,22 @@ const FaceReadingCamera = () => {
         )}
       </div>
 
-      <div className={styles.cameraWrapper}>
+      {/*
+        Tapping the preview does what it does in every native camera app: takes
+        the shot, or tells you why it can't. The overlay and detection canvas are
+        pointer-events:none, so before this every tap on the viewfinder — the
+        largest target on the screen, and the one a phone user reaches for while
+        waiting — landed on the bare <video> and did nothing.
+
+        Not focusable and aria-hidden from the control tree on purpose: this is a
+        shortcut for the shutter button below, which already has the accessible
+        name and keyboard handling. Exposing both would announce two controls for
+        one action.
+      */}
+      <div
+        className={styles.cameraWrapper}
+        onClick={!capturedImage ? captureImage : undefined}
+      >
         {!capturedImage ? (
           <>
             {videoActive && (
@@ -582,7 +612,15 @@ const FaceReadingCamera = () => {
                 </svg>
               </div>
             </div>
-            {!canCapture && modelsLoaded && (
+            {/* Auto-framing is gone, so say so and tell the user what to do
+                instead — otherwise the circle looks broken and the shutter looks
+                like it fired early. */}
+            {detectionUnavailable && (
+              <div className={styles.faceDetectionMessage}>
+                <p>Auto face framing is unavailable. Centre your face in the circle and tap Capture.</p>
+              </div>
+            )}
+            {!detectionUnavailable && !canCapture && modelsLoaded && (
               <div className={styles.faceDetectionMessage}>
                 <p>
                   {!faceDetected
@@ -625,7 +663,8 @@ const FaceReadingCamera = () => {
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!modelsLoaded ? 'Loading...' : 
+              {detectionUnavailable ? (videoReady ? 'Capture' : 'Starting…') :
+               !modelsLoaded ? 'Loading...' : 
                canCapture ? 'Capture' : 
                !faceDetected || isTooFar ? 'Move Closer' : 
                isPartialFace ? 'Show Full Face' : 
