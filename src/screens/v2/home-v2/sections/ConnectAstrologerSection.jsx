@@ -47,9 +47,12 @@ const ConnectAstrologerSection = memo(({ sectionData, styles }) => {
           </svg>
           {sectionData?.quick_message || "Don't Wait. Get Clarity Now."}
         </div> */}
-        <h3 className={styles.ctaHeading}>
+        {/* h2: this banner is a top-level homepage section, so its title sits at
+            the same rank as the other section titles rather than a level below.
+            Size comes from .ctaHeading. */}
+        <h2 className={styles.ctaHeading}>
           {sectionData?.display_title || sectionData?.title || "Talk to an Astrologer"}
-        </h3>
+        </h2>
         <p className={styles.ctaOrange}>{sectionData?.sub_title || "Get Clarity on What Matter Most!"}</p>
         <p className={styles.ctaDesc}>
           {sectionData?.description || "Connect with verified astrologers and get guidance on love, career, health, finance and more."}

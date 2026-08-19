@@ -45,7 +45,7 @@ export default function useAstrologerStatusSocket() {
         }
 
         // Handle list endpoints
-        const listEndpoints = ["getAstrologers", "filterAstrologers", "getRecommendedAstrologers", "getNewHomeDetails", "getHomeDetails", "getAllUserSessions"];
+        const listEndpoints = ["getAstrologers", "filterAstrologers", "getRecommendedAstrologers", "getNewHomeDetails", "getNewHomeSections", "getHomeDetails", "getAllUserSessions"];
         const matchedEndpoint = listEndpoints.find((ep) => cacheKey.startsWith(ep + "("));
         if (!matchedEndpoint) return;
 
@@ -99,7 +99,7 @@ export default function useAstrologerStatusSocket() {
           }
 
           // List endpoints
-          const listEndpoints = ["getAstrologers", "filterAstrologers", "getRecommendedAstrologers", "getNewHomeDetails", "getHomeDetails", "getAllUserSessions"];
+          const listEndpoints = ["getAstrologers", "filterAstrologers", "getRecommendedAstrologers", "getNewHomeDetails", "getNewHomeSections", "getHomeDetails", "getAllUserSessions"];
           const matchedEndpoint = listEndpoints.find((ep) => cacheKey.startsWith(ep + "("));
           if (!matchedEndpoint) return;
           if (!deepContainsAstrologer(entry.data, hostId)) return;

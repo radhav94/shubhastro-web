@@ -316,9 +316,12 @@ const DailyCosmicBriefing = () => {
           </div>
         )}
 
+        {/* Lands on the astrologer list (/astrologers), same as the Consult CTA
+            on every other AI-Wow result screen. It used to open
+            /talk-to-astrologer, which was the odd one out. */}
         <button
           className={styles.dailyBriefButton}
-          onClick={() => navigate(PATH.privateRoutes.TALK_TO_ASTROLOGER.path)}
+          onClick={() => navigate(PATH.privateRoutes.ASTROLOGERS_LIST.path)}
         >
           Consult with Expert Astrologer
         </button>

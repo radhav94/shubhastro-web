@@ -289,9 +289,9 @@ const LoveTriangleSelectionPage = lazy(() => import("../../screens/private/v2/ta
 const LoveTriangleResultPage = lazy(() => import("../../screens/private/v2/tarot/LoveTriangleResultPage"));
 
 // import Home from "../../screens/v2/home/Home";
+// The "/" landing screen. Named `Home` here because that is the role it plays;
+// the file is still called HomeV2 from when it superseded screens/v2/home/Home.
 import Home from "../../screens/v2/home-v2/HomeV2";
-const HomeNew = lazy(() => import("../../screens/v2/home-new/HomeNew"));
-import HomeV2 from "../../screens/v2/home-v2/HomeV2";
 const ProfileV2 = lazy(() => import("../../screens/v2/user/Profile"));
 const Explore = lazy(() => import("../../screens/private/explore/Explore"));
 const AddProfile = lazy(() => import("../../screens/v2/user/AddProfile"));
@@ -364,18 +364,6 @@ export const PATH = {
     HOME: {
       path: "/",
       element: Home,
-      header: true,
-      footer: true,
-    },
-    HOME_NEW: {
-      path: "/home-new",
-      element: HomeNew,
-      header: true,
-      footer: true,
-    },
-    HOME_V2: {
-      path: "/home-v2",
-      element: HomeV2,
       header: true,
       footer: true,
     },
@@ -771,11 +759,15 @@ export const PATH = {
       element: AIWow,
       header: false,
     },
+    // Entry screen: "Before you start" instructions, the left/right hand choice
+    // and the Upload / Use Camera actions are all on this one screen.
     PALMISTRY_LANDING: {
       path: ["/ai-wow/ai-palmistry-scanner", "/ai-palmistry-scanner"],
       element: PalmistryLanding,
       header: false,
     },
+    // Merged into PALMISTRY_LANDING; this element is now just a redirect there,
+    // kept so already-shared links and Back-stack entries still resolve.
     PALMISTRY_INSTRUCTIONS: {
       path: ["/ai-wow/ai-palmistry-scanner/instructions", "/ai-palmistry-scanner/instructions"],
       element: PalmistryInstructions,
@@ -1182,17 +1174,20 @@ export const PATH = {
       element: ChatWindow,
       footer: false,
     },
-    // Canonical astrologer profile URL: /astrologer/<username-slug>/<id>
-    // The username is a human-readable slug for SEO/sharing; the id is what the
-    // screen actually uses to fetch the astrologer.
+    // Fallback astrologer profile URL: /astrologer/<display-name-slug>/<id>.
+    // Only used for astrologers with no usable `userName` — the slug is built
+    // from firstName+lastName and is decorative; the id does the fetching.
+    // Kept routed so previously shared links stay valid.
     PROFILE_ASTROLOGER_WITH_NAME: {
       path: "/astrologer/:username/:id",
       element: AstrologerProfile,
       header: true,
       footer: true,
     },
-    // Legacy URL kept so old/shared links (and any astrologer without a
-    // username) still resolve.
+    // Canonical astrologer profile URL: /astrologer/<userName>.
+    // The `:id` param holds EITHER the astrologer's userName handle OR a raw
+    // ObjectId (older links) — `astrologers/astrologer?astrologerId=` accepts
+    // both, so the screen passes the segment through unchanged.
     PROFILE_ASTROLOGER: {
       path: "/astrologer/:id",
       element: AstrologerProfile,

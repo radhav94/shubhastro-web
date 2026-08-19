@@ -101,9 +101,11 @@ const QuickLinkSection = memo(({ sectionData, styles }) => {
               onKeyDown={(e) => e.key === "Enter" && resolveRoute(item, navigate)}
             >
               <div className={styles.gridIconBox}>
+                {/* alt="" — item.title is rendered as visible text in the <span>
+                    just below, so a filled alt announced it twice. */}
                 <img
                   src={item.image_url_web || item.image_url || item.icon || defaultQuickImage}
-                  alt={item.title}
+                  alt=""
                   loading="lazy"
                 />
               </div>

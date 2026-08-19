@@ -20,7 +20,7 @@ const PalmistryHandSelection = () => {
       return;
     }
     dispatch(setPalmistrySelectedHand(selectedHand));
-    navigate('/ai-wow/ai-palmistry-scanner/instructions', { replace: true });
+    navigate('/ai-wow/ai-palmistry-scanner', { replace: true });
   };
 
   return (

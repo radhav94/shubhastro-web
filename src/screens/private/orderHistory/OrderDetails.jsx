@@ -441,12 +441,38 @@ const OrderDetails = () => {
           return <PrimaryLoader />;
         }
         return (
-          <ChatWindow
-            chatSessions={processedData.chatSessions}
-            onLoadMore={loadMore}
-            hasMore={hasMore}
-            isLoading={isFetching}
-          />
+          <>
+            {/*
+              Readings frequently open with "without birth details I can only
+              give general guidance". The transcript is read-only, so that line
+              was the only thing on screen about it and readers click the message
+              itself trying to act on it — session recordings show minutes of
+              repeat clicks on exactly that text. `hasKundli` was already being
+              read from useAstrologerConnect here and never used; this is what it
+              was for.
+            */}
+            {!hasKundli && (
+              <div className={styles.birthDetailsPrompt} role="status">
+                <p className={styles.birthDetailsPromptText}>
+                  Readings stay general until we have your birth details. Add them
+                  once and every future consultation is personalised.
+                </p>
+                <button
+                  type="button"
+                  className={styles.birthDetailsPromptBtn}
+                  onClick={() => navigate("/kundli")}
+                >
+                  Add birth details
+                </button>
+              </div>
+            )}
+            <ChatWindow
+              chatSessions={processedData.chatSessions}
+              onLoadMore={loadMore}
+              hasMore={hasMore}
+              isLoading={isFetching}
+            />
+          </>
         );
       case "Remedies":
         return <RemediesTab astrologerId={astrologerId} />;

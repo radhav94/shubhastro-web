@@ -254,7 +254,15 @@ const TalkToAstrologer = () => {
     navigate(".", { replace: true, state: null });
   }, [location]);
 
-  const { data: astrodata, isFetching } = useGetAstrologersQuery(
+  // isError/refetch were not read at all, which is why a failed listing request
+  // produced a page with a header, the filter chips and nothing underneath —
+  // see the states rendered below the list.
+  const {
+    data: astrodata,
+    isFetching,
+    isError: isListError,
+    refetch: refetchAstrologers,
+  } = useGetAstrologersQuery(
     {
       page,
       limit,
@@ -1421,6 +1429,57 @@ const TalkToAstrologer = () => {
             <PrimaryText>No astrologers found.</PrimaryText>
           </div>
         )}
+
+      {/*
+        The two states below did not exist. The empty state above requires
+        `isFiltered`, so with no filter applied — which is how everyone arrives on
+        this page — an empty list rendered nothing whatsoever: the header and the
+        filter chips sitting above blank space, with no message, no explanation
+        and nothing to press. A failed request looked exactly the same, because
+        isError was never read.
+
+        That is indistinguishable from a page still loading, so the only move left
+        is to reload and hope, which is what the session recordings show: repeat
+        visits and refreshes minutes apart with almost no clicks in between.
+
+        Both are gated on an empty list, so a failure while paginating further
+        down the list leaves the results already on screen alone.
+      */}
+      {/* Plain elements rather than <PrimaryText>: that component writes colour,
+          size, weight and alignment into an inline style attribute, which
+          outranks a CSS module class, so the styling below would not apply. */}
+      {isListError && !isFiltered && allAstrologers.length === 0 && !isFetching && (
+        <div className={styles.listStateCard}>
+          <h2 className={styles.listStateTitle}>Couldn&apos;t load astrologers</h2>
+          <p className={styles.listStateText}>
+            The list didn&apos;t come through. This is usually a connection hiccup.
+          </p>
+          <button
+            type="button"
+            className={styles.listStateBtn}
+            onClick={() => refetchAstrologers()}
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {!isFetching && !isFilterLoading && !isListError && allAstrologers.length === 0 && !isFiltered && (
+        <div className={styles.listStateCard}>
+          <h2 className={styles.listStateTitle}>No astrologers available right now</h2>
+          <p className={styles.listStateText}>
+            Everyone is offline at the moment. Try again in a few minutes, or ask
+            Pandit AI in the meantime.
+          </p>
+          <button
+            type="button"
+            className={styles.listStateBtn}
+            onClick={() => refetchAstrologers()}
+          >
+            Check again
+          </button>
+        </div>
+      )}
 
       {/* The single loader for this list — covers both the base query and an
           in-flight filter request. See the note where the overlay used to be. */}

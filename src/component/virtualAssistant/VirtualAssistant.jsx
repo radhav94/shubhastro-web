@@ -18,7 +18,7 @@ import dayjs from "dayjs";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
 import IframeModal from "../../screens/private/home/components/chats/IframeModal";
 import KundliSelectModal from "../../screens/private/talkToAstrologer/kundliSelect/KundliSelectModal";
-import { useFileSelector } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
+import { useFileSelector, FILE_SELECT_CANCELLED } from "../../screens/private/home/components/chats/filePicker/useFileSelector";
 import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
 import { buildKundliLink } from "../../utils/helper/kundliMessage";
 import Toast from "../toast";
@@ -43,6 +43,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const canvasRef = useRef(null);
+  const chatWindowRef = useRef(null);
   const navigate = useNavigate();
   const { openFileSelector } = useFileSelector();
 
@@ -113,7 +114,15 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
         const file = new File([blob], name || `file_${Date.now()}`, { type: blob.type });
         sendFile(file);
       }
-    } catch { /* cancelled */ }
+    } catch (err) {
+      // Backing out of the picker is deliberate, so it stays quiet. Anything
+      // else used to be swallowed by the same bare catch, leaving the attach
+      // sheet closed and nothing to show for the tap.
+      if (err?.message !== FILE_SELECT_CANCELLED) {
+        console.error("Assistant attachment failed:", err);
+        Toast.error("Couldn't attach that file. Please try again.");
+      }
+    }
   };
 
   const handleKundliSelect = (kundli) => {
@@ -184,6 +193,36 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
     }
   }, [sending, isOpen]);
 
+  // Keep the scroll inside the panel. `overscroll-behavior: contain` on the
+  // message list covers "list reached its end", but a wheel over the header,
+  // the input bar, or a list too short to scroll still reached the document —
+  // so the page behind the assistant scrolled away under it.
+  //
+  // Has to be a native non-passive listener: React registers `wheel` passively,
+  // so preventDefault() from an onWheel prop is ignored.
+  useEffect(() => {
+    const el = chatWindowRef.current;
+    if (!isOpen || !el) return undefined;
+
+    const handleWheel = (event) => {
+      // Walk up to the panel root looking for an inner scroller that can still
+      // move. If there is one, let it scroll — overscroll-behavior handles the
+      // edges. Otherwise nothing in here consumes the wheel, so swallow it.
+      for (let node = event.target; node && node !== el; node = node.parentElement) {
+        if (
+          node.scrollHeight > node.clientHeight &&
+          /(auto|scroll)/.test(getComputedStyle(node).overflowY)
+        ) {
+          return;
+        }
+      }
+      event.preventDefault();
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, [isOpen]);
+
   // Stop the camera on browser Back/forward navigation, in case this widget
   // stays mounted across the route change.
   useEffect(() => {
@@ -209,7 +248,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
     <>
       {/* Chat Window */}
       {isOpen && (
-        <div className={styles.chatWindow}>
+        <div className={styles.chatWindow} ref={chatWindowRef}>
           {/* Header */}
           <div className={styles.header}>
             <div className={styles.headerInfo}>

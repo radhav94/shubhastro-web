@@ -8,6 +8,8 @@ import { setFaceReadingImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
 import toast from '../../../../component/toast';
+import { compressImage } from '../../../../utils/helper/compressImage';
+import { isInAppBrowser } from '../../../../utils/deviceInfo';
 
 const FaceReadingCamera = () => {
   const navigate = useNavigate();
@@ -31,6 +33,9 @@ const FaceReadingCamera = () => {
   }, []);
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState(null);
+  // Gallery fallback used when the camera cannot be opened at all.
+  const uploadInputRef = useRef(null);
+  const [isPreparingUpload, setIsPreparingUpload] = useState(false);
   const [facingMode, setFacingMode] = useState('user');
   const [isFrontCamera, setIsFrontCamera] = useState(true);
   // Show the flip button only when the device actually has more than one
@@ -62,6 +67,7 @@ const FaceReadingCamera = () => {
 
   const {
     modelsLoaded,
+    modelsFailed,
     faceDetected,
     faceInCircle,
     isTooFar,
@@ -259,7 +265,17 @@ const FaceReadingCamera = () => {
 
   // Capture allowed only when the FULL face is detected, inside the circle,
   // not too far, and not clipped by the frame edges (partial face).
-  const canCapture = faceDetected && faceInCircle && !isTooFar && !isPartialFace;
+  //
+  // When the face model could not be fetched, that gate can never open, so fall
+  // back to a plain manual shutter as soon as the video is live. Detection is a
+  // framing aid, not a requirement for taking a picture — the analysis runs
+  // server-side on whatever image is submitted, and the gallery-upload path
+  // reaches it with no detection at all. Blocking the entire screen on an
+  // optional aid is what turned a failed model fetch into a dead end.
+  const detectionUnavailable = modelsFailed;
+  const canCapture = detectionUnavailable
+    ? videoReady
+    : faceDetected && faceInCircle && !isTooFar && !isPartialFace;
 
   // Draw the current video frame, cropped to the face circle, onto a canvas.
   const cropCurrentFrameToCanvas = () => {
@@ -304,6 +320,10 @@ const FaceReadingCamera = () => {
 
   // Why the shutter can't fire right now, phrased for the user.
   const captureBlockedReason = () => {
+    // Detection is off for good — the only thing still required is a live frame.
+    if (detectionUnavailable) {
+      return videoReady ? null : 'Camera is still starting up — give it a moment.';
+    }
     if (!modelsLoaded) return 'Still loading the face model — give it a moment.';
     if (!videoReady) return 'Camera is still starting up — give it a moment.';
     if (!faceDetected || isTooFar) return 'Move your face closer to the camera.';
@@ -353,6 +373,62 @@ const FaceReadingCamera = () => {
   const retakePhoto = () => {
     setCapturedImage(null);
     startCamera();
+  };
+
+  /*
+   * Upload fallback for the camera-error screen.
+   *
+   * getUserMedia is unavailable or refused outright in embedded in-app browsers
+   * (Instagram, Facebook, Messenger), and there is no per-site camera setting in
+   * those apps for the user to change. The error screen offered only "Try Again"
+   * — which reloads into the identical refusal — and "Go Back". So the feature
+   * dead-ended for every visitor arriving from a social app, even though the
+   * landing screen one step back already accepts a photo from the gallery and
+   * reaches the same analysis.
+   *
+   * The picker is opened from a real tap on this screen rather than by bouncing
+   * back to the landing and auto-clicking its input: a programmatic .click()
+   * after a navigation has no user activation left and is blocked.
+   *
+   * The chosen photo is fed into `capturedImage`, so it lands on the existing
+   * confirm step and goes through the very same Continue / guest-auth / submit
+   * path as a camera capture. No duplicated submit logic.
+   */
+  const handleUploadClick = () => {
+    if (isPreparingUpload) {
+      toast.info('Still preparing your photo — one moment.');
+      return;
+    }
+    uploadInputRef.current?.click();
+  };
+
+  const handleUploadedFile = (event) => {
+    const input = event.target;
+    const file = input.files?.[0];
+
+    // Clear immediately: re-picking the SAME file fires no `change` event, so a
+    // second attempt after a failure would do nothing at all. Same reason the
+    // landing screen does this.
+    input.value = '';
+
+    if (!file) return;
+
+    // compressImage re-encodes through a canvas and waits for a decode, which is
+    // slow for a large iPhone photo inside a WebView. Keep the button busy so the
+    // wait is lit rather than silent.
+    setIsPreparingUpload(true);
+    compressImage(file)
+      .then((dataUrl) => {
+        setCapturedImage(dataUrl);
+        // Leave the error view — the confirm step renders from `capturedImage`
+        // and does not need a live stream.
+        setError(null);
+      })
+      .catch((err) => {
+        console.error('[FaceReading] Could not prepare the uploaded photo:', err);
+        toast.error("Couldn't read that photo. Please try a different one.");
+      })
+      .finally(() => setIsPreparingUpload(false));
   };
 
   const submitImage = () => {
@@ -415,14 +491,39 @@ const FaceReadingCamera = () => {
           </svg>
           <h3 className={styles.errorTitle}>Camera Access Required</h3>
           <p className={styles.errorText}>{error}</p>
+          {/* In an in-app browser the generic advice above is unactionable —
+              Instagram and Facebook expose no per-site camera permission, so
+              "allow it in your browser settings" points at a screen that does not
+              exist. Say what actually works here. */}
+          {isInAppBrowser() && (
+            <p className={styles.errorText}>
+              This is the Instagram/Facebook in-app browser, which blocks the
+              camera. Upload a photo instead, or open shubhastro.ai in Chrome or
+              Safari.
+            </p>
+          )}
           <div className={styles.errorButtons}>
-            <button className={styles.retryButton} onClick={() => window.location.reload()}>
+            <button
+              className={styles.retryButton}
+              onClick={handleUploadClick}
+              aria-busy={isPreparingUpload}
+            >
+              {isPreparingUpload ? 'Preparing photo…' : 'Upload a photo instead'}
+            </button>
+            <button className={styles.backButton} onClick={() => window.location.reload()}>
               Try Again
             </button>
             <button className={styles.backButton} onClick={handleBack}>
               Go Back
             </button>
           </div>
+          <input
+            ref={uploadInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleUploadedFile}
+            style={{ display: 'none' }}
+          />
         </div>
       </div>
     );
@@ -462,7 +563,22 @@ const FaceReadingCamera = () => {
         )}
       </div>
 
-      <div className={styles.cameraWrapper}>
+      {/*
+        Tapping the preview does what it does in every native camera app: takes
+        the shot, or tells you why it can't. The overlay and detection canvas are
+        pointer-events:none, so before this every tap on the viewfinder — the
+        largest target on the screen, and the one a phone user reaches for while
+        waiting — landed on the bare <video> and did nothing.
+
+        Not focusable and aria-hidden from the control tree on purpose: this is a
+        shortcut for the shutter button below, which already has the accessible
+        name and keyboard handling. Exposing both would announce two controls for
+        one action.
+      */}
+      <div
+        className={styles.cameraWrapper}
+        onClick={!capturedImage ? captureImage : undefined}
+      >
         {!capturedImage ? (
           <>
             {videoActive && (
@@ -496,7 +612,15 @@ const FaceReadingCamera = () => {
                 </svg>
               </div>
             </div>
-            {!canCapture && modelsLoaded && (
+            {/* Auto-framing is gone, so say so and tell the user what to do
+                instead — otherwise the circle looks broken and the shutter looks
+                like it fired early. */}
+            {detectionUnavailable && (
+              <div className={styles.faceDetectionMessage}>
+                <p>Auto face framing is unavailable. Centre your face in the circle and tap Capture.</p>
+              </div>
+            )}
+            {!detectionUnavailable && !canCapture && modelsLoaded && (
               <div className={styles.faceDetectionMessage}>
                 <p>
                   {!faceDetected
@@ -539,7 +663,8 @@ const FaceReadingCamera = () => {
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!modelsLoaded ? 'Loading...' : 
+              {detectionUnavailable ? (videoReady ? 'Capture' : 'Starting…') :
+               !modelsLoaded ? 'Loading...' : 
                canCapture ? 'Capture' : 
                !faceDetected || isTooFar ? 'Move Closer' : 
                isPartialFace ? 'Show Full Face' : 

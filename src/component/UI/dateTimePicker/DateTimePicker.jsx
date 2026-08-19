@@ -100,15 +100,34 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
     return () => clearTimeout(t);
   }, [open]);
 
-  // Close on outside click
+  /*
+   * Close on outside interaction.
+   *
+   * This listened for `mousedown` only. mousedown is a compatibility event that
+   * touch browsers synthesise late, and iOS Safari does not fire it at all for
+   * taps it interprets itself — so on a phone the dropdown could stay stuck open
+   * over the rest of the form, and taps aimed at the fields underneath hit it
+   * instead. LocationSearch, which sits in the same guest-details form, already
+   * listens for touchstart and Escape; this is the same fix so the two behave
+   * alike.
+   */
   useEffect(() => {
-    if (!open) return;
+    if (!open) return undefined;
     const handler = (e) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target))
         setOpen(false);
     };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler, { passive: true });
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [open]);
 
   // Sync manualInput with displayValue when not typing
@@ -635,6 +654,12 @@ const DateTimePicker = ({
       <div className={styles.dateInputRow}>
         <input
           type="text"
+          // The mask takes digits only and inserts the slashes itself, so a phone
+          // should offer the number pad. As plain type="text" iOS opened the
+          // QWERTY keyboard and the user had to find the "123" key before they
+          // could type a single character of their birth date. type stays "text"
+          // rather than "number" so the slashes and the mask still work.
+          inputMode="numeric"
           value={inputText}
           onChange={handleManualChange}
           onBlur={handleManualBlur}

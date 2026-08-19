@@ -1,4 +1,4 @@
-import styles from "../Home.module.scss";
+import styles from "./sharedSections.module.scss";
 
 const SectionHeader = ({ title }) => {
     if (!title) return null;

@@ -223,14 +223,40 @@
   <meta name="twitter:title" content="ShubhAstro - Talk to Best Astrologers Online" />
   <meta name="twitter:description" content="Connect with expert astrologers for personalized consultations via chat, call & video. Get free Kundli, daily horoscope, tarot readings & more." />
   <meta name="twitter:image" content="https://www.shubhastro.ai/images/shubhastro-logo-banner.jpeg" />
-  <!-- Preconnect to critical third-party origins -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <!--
+    Preconnect to critical third-party origins.
+
+    Kept to three. Each preconnect costs a DNS lookup + TCP + TLS handshake that
+    competes with the requests that actually block the render, so Lighthouse
+    warns above four and the rule of thumb is to spend them only where the
+    resource cannot be discovered from the HTML. Two were dropped because they
+    were redundant with a request already started during head parse:
+
+      - fonts.googleapis.com — the `rel=preload as=style` a few lines below
+        requests that exact URL during parse, which opens the connection itself.
+      - www.googletagmanager.com — the GTM and gtag snippets further down inject
+        their own <script> tags during parse, opening the connection then, and
+        neither is on the LCP path.
+
+    What remains cannot be discovered any earlier:
+  -->
+  <!-- The font files live on gstatic and are only discovered once the Google
+       Fonts stylesheet has been fetched AND parsed, so the handshake would
+       otherwise start one full round trip late. -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Hosts the body background artwork (preloaded below) and `heroBg`
+       ai-suite.png, the homepage LCP candidate. The hero image URL is a
+       hardcoded constant in HomeV2 but is not in the HTML, so it is only
+       requested after the bundle executes and React renders — a warm connection
+       is worth a slot. -->
   <link rel="preconnect" href="https://assets.shubhastro.ai" />
   <!-- App API origin: on the LCP path of every route. crossorigin is required
-       for RTK Query's CORS fetches to reuse the connection. -->
+       for RTK Query's CORS fetches to reuse the connection, and it matches the
+       credential-less CORS fetch in the prefetch script below. Kept even though
+       that script warms the same origin on "/", because the prefetch is
+       deliberately limited to logged-out visits to the homepage — every other
+       route still discovers the API only after the bundle runs. -->
   <link rel="preconnect" href="%VITE_APP_API_BASE_URL%" crossorigin />
-  <link rel="preconnect" href="https://www.googletagmanager.com" />
 
   <!--
     Homepage payload prefetch — starts /api/homepage during HTML parse.
@@ -256,6 +282,9 @@
         out is also the only state that sees the popup, so nothing is lost.
       - headers match what fetchBaseQuery sends, keeping it a simple CORS
         request with no preflight.
+      - page 1 only. HomeV2 fetches the remaining sections itself once the
+        browser is idle, so warming those here would compete with first paint
+        for exactly the resource this block exists to get out of the way.
     Wrapped in try/catch and given a no-op rejection handler: a failure here must
     never surface as an unhandled rejection or block the app, it just means the
     endpoint requests normally.
@@ -270,8 +299,13 @@
         ) return;
 
         var slug = "newcustomerlandingpage";
+        // Must match HOME_SECTIONS_PAGE_SIZE in
+        // src/services/appServices/homeServices.js — the endpoint compares this
+        // limit before adopting the promise, and ignores the prefetch if the two
+        // have drifted apart.
+        var limit = 5;
         var promise = fetch(
-          "%VITE_APP_API_BASE_URL%/api/homepage?slug=" + slug,
+          "%VITE_APP_API_BASE_URL%/api/homepage?slug=" + slug + "&pageNo=1&limit=" + limit,
           { method: "GET", headers: { "Content-Type": "text/plain" } }
         ).then(function (response) {
           if (!response.ok) throw new Error("HTTP " + response.status);
@@ -279,7 +313,7 @@
         });
 
         promise.catch(function () {});
-        window.__homepagePrefetch__ = { slug: slug, promise: promise };
+        window.__homepagePrefetch__ = { slug: slug, limit: limit, promise: promise };
       } catch (e) {
         /* prefetch is best effort */
       }
@@ -319,8 +353,8 @@
     `background-color: #ebecf2` in the inline CSS below covers the gap, so the
     later paint is a colour-to-artwork swap, not a flash of white.
   -->
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" media="(min-width: 768px)" />
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" media="(max-width: 767px)" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" fetchpriority="high" media="(min-width: 768px)" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" fetchpriority="high" media="(max-width: 767px)" />
   <!-- Removed: an unconditional high-priority preload of images/ai-suite.png.
        It is the `heroBg` for HomeV2/HomeNew only, so every other route fetched
        it at fetchpriority="high" and never painted it. index.html is shared by

@@ -59,3 +59,46 @@
   padding: 8px 0;
   // background-color: #f3f4f6;
 }
+
+/*
+  Shown above a chat transcript when the account has no kundli yet. The reading
+  itself says the guidance is limited without birth details, but the transcript
+  is read-only — so this is the only place a reader can act on that, instead of
+  clicking the message text and getting nothing.
+*/
+.birthDetailsPrompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  background: rgba(247, 88, 1, 0.07);
+  border: 1px solid rgba(247, 88, 1, 0.25);
+  border-radius: 12px;
+}
+
+.birthDetailsPromptText {
+  margin: 0;
+  flex: 1 1 260px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #7a2400;
+}
+
+.birthDetailsPromptBtn {
+  flex-shrink: 0;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 50px;
+  background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+}

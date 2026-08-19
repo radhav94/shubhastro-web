@@ -728,6 +728,12 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   &:active {
     transform: scale(0.96);
   }
+
+  // Dimmed while a reply is in flight or the socket is reconnecting, but still
+  // live: it answers with the reason rather than swallowing the tap.
+  &[aria-disabled="true"] {
+    opacity: 0.55;
+  }
 }
 
 /* ==================== INPUT BAR ==================== */

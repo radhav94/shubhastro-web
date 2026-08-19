@@ -159,7 +159,10 @@ const MySessionsSection = ({ userId, navigate, styles }) => {
       <section className={styles.mySessionsSection}>
       <div className={styles.mySessionsHeader}>
         <div className={`${styles.titleWithBottomDevider}`}>
-          <h4 className={styles.wowTitle}>MY SESSIONS</h4>
+          {/* h2: same rank as every other section title. The per-session cards
+              below are h3, so the outline reads h2 → h3. Size comes from
+              .wowTitle. */}
+          <h2 className={styles.wowTitle}>MY SESSIONS</h2>
           <div className={styles.BottomDevider}>
             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
               <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
@@ -192,9 +195,11 @@ const MySessionsSection = ({ userId, navigate, styles }) => {
                 astrologerMaleImg for every astrologer without an image,
                 including female ones.
               */}
+              {/* alt="" — the astrologer's name is the <h3> in the card body, so
+                  describing the avatar with it announced the name twice. */}
               <img
                 src={getAstrologerImageUrl(session, "small")}
-                alt={session.astrologerName}
+                alt=""
                 loading="lazy"
                 decoding="async"
                 onError={e => {
@@ -255,14 +260,34 @@ const MySessionsSection = ({ userId, navigate, styles }) => {
                     History
                   </button>
                 ) : (
-                  /* Audio player pill for call sessions */
-                  <div className={styles.sessionPlayer} onClick={() => navigate(`/profile/order-history/${session._id}`, { state: { tab: 'Call' } })} style={{ cursor: 'pointer' }}>
-                    <button className={styles.sessionPlayBtn} onClick={(e) => { e.stopPropagation(); navigate(`/profile/order-history/${session._id}`, { state: { tab: 'Call' } }); }}>
+                  /* Audio player pill for call sessions.
+                     One control, not two. This was a <div onClick> wrapping a
+                     <button> where both ran the identical navigate() — the inner
+                     one only needed stopPropagation to avoid firing it twice.
+                     That gave a screen reader a nested interactive whose only
+                     content was an SVG, so it was announced as bare "button"
+                     with no name, and it put a click target inside a click
+                     target. The pill itself is now the button (matching the
+                     .sessionHistoryBtn in the sibling chat/video branches) and
+                     the play glyph and waveform are inert decoration. Children
+                     are <span>, not <div>: a <button> may only contain phrasing
+                     content, and .sessionWave's display:flex comes from its
+                     class either way.
+                     The label says "details", not "play", because the click
+                     navigates to the order-history screen — it does not start
+                     playback here. */
+                  <button
+                    type="button"
+                    className={styles.sessionPlayer}
+                    onClick={() => navigate(`/profile/order-history/${session._id}`, { state: { tab: 'Call' } })}
+                    aria-label={`View call details with ${session.astrologerName || 'Astrologer'}`}
+                  >
+                    <span className={styles.sessionPlayBtn} aria-hidden="true">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="#f75801">
                         <path d="M8 5v14l11-7z"/>
                       </svg>
-                    </button>
-                    <div className={styles.sessionWave}>
+                    </span>
+                    <span className={styles.sessionWave} aria-hidden="true">
                       <svg xmlns="http://www.w3.org/2000/svg" width="36" height="24" viewBox="0 0 36 24" fill="none">
                         <path d="M0.849557 16.0142C1.31681 16.0142 1.69911 15.6319 1.69911 15.1646V8.79292C1.69911 8.32566 1.31681 7.94336 0.849557 7.94336C0.382301 7.94336 0 8.32566 0 8.79292V15.1646C0 15.6319 0.382301 16.0142 0.849557 16.0142Z" fill="#E56329"/>
                         <path d="M4.24805 5.60688V18.3502C4.24805 18.8175 4.63035 19.1998 5.0976 19.1998C5.56486 19.1998 5.94716 18.8175 5.94716 18.3502V5.60688C5.94716 5.13963 5.56486 4.75732 5.0976 4.75732C4.63035 4.75732 4.24805 5.13963 4.24805 5.60688Z" fill="#E56329"/>
@@ -274,8 +299,8 @@ const MySessionsSection = ({ userId, navigate, styles }) => {
                         <path d="M30.373 4.75732C29.9057 4.75732 29.5234 5.13963 29.5234 5.60688V18.3502C29.5234 18.8175 29.9057 19.1998 30.373 19.1998C30.8403 19.1998 31.2226 18.8175 31.2226 18.3502V5.60688C31.2226 5.13963 30.8403 4.75732 30.373 4.75732Z" fill="#E56329"/>
                         <path d="M35.0449 7.94336C34.5776 7.94336 34.1953 8.32566 34.1953 8.79292V15.1646C34.1953 15.6319 34.5776 16.0142 35.0449 16.0142C35.5121 16.0142 35.8944 15.6319 35.8944 15.1646V8.79292C35.8944 8.32566 35.5121 7.94336 35.0449 7.94336Z" fill="#E56329"/>
                       </svg>
-                    </div>
-                  </div>
+                    </span>
+                  </button>
                 )}
 
                 {/* Action button - hide for AI Astrologer */}

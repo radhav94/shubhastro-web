@@ -66,6 +66,8 @@ $shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   flex-direction: column;
   overflow: hidden;
   animation: slideUp 0.25s ease-out;
+  /* Never let a scroll started inside the panel leak out to the document. */
+  overscroll-behavior: contain;
 
   * {
     box-sizing: border-box;
@@ -162,6 +164,9 @@ $shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 .messagesArea {
   flex: 1;
   overflow-y: auto;
+  /* Stop scroll chaining: once the message list hits its top/bottom, the wheel
+     (or touch drag) used to carry on into the page behind the panel. */
+  overscroll-behavior-y: contain;
   padding: 12px 14px;
   display: flex;
   flex-direction: column;

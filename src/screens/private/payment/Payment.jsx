@@ -58,9 +58,23 @@ const Payment = () => {
     refreshWallet();
   }, [refreshWallet]);
 
-  // Track recharge flow start (once on mount)
+  /*
+   * Track recharge flow start, once per visit to this screen.
+   *
+   * `current_balance` is read at fire time rather than added to the dep array on
+   * purpose: useWalletBalance seeds from localStorage and then refreshes, so
+   * depending on it would emit the event a second time when the fresh figure
+   * lands. Balance is null only before the very first fetch of a session.
+   *
+   * Fires for logged-out visitors too, a beat before the token effect above
+   * redirects them to /login. Harmless, but it means this event is not a clean
+   * signal of a logged-in user starting a recharge.
+   */
   useEffect(() => {
-    trackEvent("recharge_initiated", {});
+    trackEvent("recharge_initiated", {
+      current_balance: balance ?? undefined,
+      source: "recharge_screen",
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -79,10 +93,35 @@ const Payment = () => {
                 </svg>
             </button>
 
-            <div className={styles.titleWallet}>
+            {/*
+              Tap the balance to re-fetch it.
+
+              This was a plain <div>. A visitor who lands here to top up and
+              suspects the figure is stale — they just finished a session, or the
+              amount is seeded from localStorage before the first fetch of the
+              session lands — reaches for the number itself, and nothing happened.
+              refreshWallet is already called on mount, so this only re-runs an
+              action the screen performs anyway, and the amount swaps to "..."
+              while in flight so the tap is visibly acknowledged.
+
+              Deliberately not `disabled` while fetching: a disabled button makes
+              the browser swallow the event outright, which is the very thing
+              being fixed. Repeat taps just re-trigger the fetch.
+            */}
+            <button
+              type="button"
+              className={styles.titleWallet}
+              onClick={refreshWallet}
+              aria-busy={isFetching}
+              aria-label={
+                isFetching
+                  ? "Refreshing wallet balance"
+                  : `Wallet balance ${balance !== null ? `₹${Math.round(balance)}` : "₹0"}. Tap to refresh`
+              }
+            >
               <img
                 src={walletBlc}
-                alt="Wallet"
+                alt=""
                 width={30}
                 height={30}
               />
@@ -90,7 +129,7 @@ const Payment = () => {
               <span className={styles.dangerColor}>
                 {isFetching ? "..." : balance !== null ? `₹ ${Math.round(balance)}` : "₹ 0"}
               </span>
-            </div>
+            </button>
 
         </div>
 

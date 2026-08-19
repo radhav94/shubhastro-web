@@ -1,11 +1,18 @@
 import styles from "./HomeV2.module.scss";
 import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense, Fragment } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { getToken } from "../../../utils/token";
-import { useGetNewHomeDetailsQuery } from "../../../services/appServices/homeServices";
+import {
+  homeApi,
+  useGetNewHomeDetailsQuery,
+  useLazyGetNewHomeSectionsQuery,
+  HOME_FIRST_PAGE_ARG,
+  HOME_SECTIONS_PAGE_SIZE,
+  HOME_SECTIONS_MAX_PAGES,
+} from "../../../services/appServices/homeServices";
 import { useGetCurrentMahadashaFullQuery } from "../../../redux/api/kundli/dashaApi";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import { useAstrologerConnection } from "../home/hooks/useAstrologerConnection";
@@ -38,6 +45,19 @@ import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
 // no split and only made Vite warn about the mixed import.
 import SubscriptionModal from "../../../component/UI/modal/SubscriptionModal/SubscriptionModal";
 import { GuestKundliAuthModal } from "../../../component/UI/Profile";
+
+/*
+ * Identity of a CMS section, used to drop anything already held while paging.
+ *
+ * `_id` is what the CMS sends; the display_type/list_order pair is a fallback for
+ * a payload that omits it. This matters for more than tidiness: if the backend
+ * ignores pageNo and returns the same full list for every page, the duplicates
+ * are what tells HomeV2 to stop paging instead of appending the whole list again.
+ */
+const sectionIdentity = (section) => {
+  if (!section) return null;
+  return section._id || `${section.display_type || ""}#${section.list_order ?? ""}`;
+};
 import HomeIntroPopup from "./HomeIntroPopup";
 const AgenticCalendarV2 = lazy(() => import("./AgenticCalendarV2"));
 
@@ -72,6 +92,43 @@ const GuestSignInLink = ({ onClick }) => (
     Sign in
   </button>
 );
+
+/**
+ * Where an ai-services hero card sends the visitor, or null if the CMS item
+ * shipped without a destination.
+ */
+const heroCardTarget = (item) => item?.redirect_url || item?.link || null;
+
+/**
+ * Props that turn one of the hero's `<div>` cards into something a click can
+ * actually resolve against.
+ *
+ * The cards were plain divs with an onClick, which has two consequences that
+ * both surface as dead clicks. A card with no destination still rendered
+ * `cursor: pointer` on some paths and still rendered its CTA button, so the most
+ * button-like thing above the fold could be clicked to no effect. And the inner
+ * CTA had no handler of its own — it only ever worked because the click bubbled
+ * up to the div — so it was inert for the keyboard even when a destination
+ * existed, since a div is not focusable in the first place.
+ *
+ * With a target: button semantics, tab order, Enter/Space, pointer cursor.
+ * Without one: no affordance at all, so the card reads as the static promo it is.
+ */
+const heroCardActivation = (target, onActivate) => {
+  if (!target) return { style: { cursor: "default" } };
+  return {
+    role: "button",
+    tabIndex: 0,
+    onClick: onActivate,
+    onKeyDown: (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onActivate();
+      }
+    },
+    style: { cursor: "pointer" },
+  };
+};
 
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
@@ -199,15 +256,21 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
         <div className={styles.leftCards}>
           {renderSectionContent(leftSection)}
           {/* Laal Kitaab from ai-services — always in left column */}
-          {aiServicesItems[0] && (
-            <div className={styles.qCardLaal} onClick={() => { const url = aiServicesItems[0]?.redirect_url || aiServicesItems[0]?.link; if (url) navigate(url); }} style={{ cursor: aiServicesItems[0]?.redirect_url || aiServicesItems[0]?.link ? 'pointer' : 'default' }}>
-              <span className={styles.featureTag}>New</span>
-              <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title}</h3>
-              {aiServicesItems[0]?.description && <p>{aiServicesItems[0].description}</p>}
-              {aiServicesItems[0]?.action_btn && <button className={styles.featureCta}>{aiServicesItems[0].action_btn}</button>}
-              {(aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon) && <img src={aiServicesItems[0].image_url_web || aiServicesItems[0].icon} alt={aiServicesItems[0]?.title || ""} width="120" height="120" className={styles.laalKitaabImgLeft} loading="lazy" />}
-            </div>
-          )}
+          {aiServicesItems[0] && (() => {
+            const target = heroCardTarget(aiServicesItems[0]);
+            return (
+              <div
+                className={styles.qCardLaal}
+                {...heroCardActivation(target, () => navigate(target))}
+              >
+                <span className={styles.featureTag}>New</span>
+                <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title}</h3>
+                {aiServicesItems[0]?.description && <p>{aiServicesItems[0].description}</p>}
+                {target && aiServicesItems[0]?.action_btn && <button type="button" className={styles.featureCta} onClick={(e) => { e.stopPropagation(); navigate(target); }}>{aiServicesItems[0].action_btn}</button>}
+                {(aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon) && <img src={aiServicesItems[0].image_url_web || aiServicesItems[0].icon} alt="" width="120" height="120" className={styles.laalKitaabImgLeft} loading="lazy" />}
+              </div>
+            );
+          })()}
         </div>
 
         {/* CENTER column */}
@@ -216,30 +279,42 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
           {/* Occult + AI Pandit from ai-services — always in center column */}
           {aiServicesItems.length > 1 && (
             <div className={`${styles.centerFeatureRow} ${styles.desktopOnly}`}>
-              {aiServicesItems[1] && (
-                <div className={`${styles.centerFeatureCard} ${styles.occultWorld}`} onClick={() => { const url = aiServicesItems[1]?.redirect_url || aiServicesItems[1]?.link; if (url) navigate(url); }} style={{ cursor: aiServicesItems[1]?.redirect_url || aiServicesItems[1]?.link ? 'pointer' : 'default' }}>
-                  <div className={styles.occultEllipse} />
-                  <span className={styles.featureTag}>New</span>
-                  <div className={styles.fcTop}>
-                    <h3>{aiServicesItems[1]?.display_title || aiServicesItems[1]?.title}</h3>
-                    {aiServicesItems[1]?.description && <p>{aiServicesItems[1].description}</p>}
+              {aiServicesItems[1] && (() => {
+                const target = heroCardTarget(aiServicesItems[1]);
+                return (
+                  <div
+                    className={`${styles.centerFeatureCard} ${styles.occultWorld}`}
+                    {...heroCardActivation(target, () => navigate(target))}
+                  >
+                    <div className={styles.occultEllipse} />
+                    <span className={styles.featureTag}>New</span>
+                    <div className={styles.fcTop}>
+                      <h3>{aiServicesItems[1]?.display_title || aiServicesItems[1]?.title}</h3>
+                      {aiServicesItems[1]?.description && <p>{aiServicesItems[1].description}</p>}
+                    </div>
+                    {target && aiServicesItems[1]?.action_btn && <button type="button" className={styles.fcCtaLight} onClick={(e) => { e.stopPropagation(); navigate(target); }}>{aiServicesItems[1].action_btn}</button>}
+                    {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon) && <img src={aiServicesItems[1].image_url_web || aiServicesItems[1].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
                   </div>
-                  {aiServicesItems[1]?.action_btn && <button className={styles.fcCtaLight}>{aiServicesItems[1].action_btn}</button>}
-                  {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon) && <img src={aiServicesItems[1].image_url_web || aiServicesItems[1].icon} alt={aiServicesItems[1]?.title || ""} width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
-                </div>
-              )}
-              {aiServicesItems[2] && (
-                <div className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`} onClick={() => { const url = aiServicesItems[2]?.redirect_url || aiServicesItems[2]?.link; if (url) navigate(url); }} style={{ cursor: aiServicesItems[2]?.redirect_url || aiServicesItems[2]?.link ? 'pointer' : 'default' }}>
-                  <div className={styles.panditEllipse} />
-                  <span className={styles.featureTag}>New</span>
-                  <div className={styles.fcTop}>
-                    <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title}</h3>
-                    {aiServicesItems[2]?.description && <p>{aiServicesItems[2].description}</p>}
+                );
+              })()}
+              {aiServicesItems[2] && (() => {
+                const target = heroCardTarget(aiServicesItems[2]);
+                return (
+                  <div
+                    className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`}
+                    {...heroCardActivation(target, () => navigate(target))}
+                  >
+                    <div className={styles.panditEllipse} />
+                    <span className={styles.featureTag}>New</span>
+                    <div className={styles.fcTop}>
+                      <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title}</h3>
+                      {aiServicesItems[2]?.description && <p>{aiServicesItems[2].description}</p>}
+                    </div>
+                    {target && aiServicesItems[2]?.action_btn && <button type="button" className={styles.panditTalkBtn} onClick={(e) => { e.stopPropagation(); navigate(target); }}>{aiServicesItems[2].action_btn}</button>}
+                    {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon) && <img src={aiServicesItems[2].image_url_web || aiServicesItems[2].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
                   </div>
-                  {aiServicesItems[2]?.action_btn && <button className={styles.panditTalkBtn}>{aiServicesItems[2].action_btn}</button>}
-                  {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon) && <img src={aiServicesItems[2].image_url_web || aiServicesItems[2].icon} alt={aiServicesItems[2]?.title || ""} width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
-                </div>
-              )}
+                );
+              })()}
             </div>
           )}
         </div>
@@ -248,18 +323,24 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
         <div className={styles.rightCol}>
           {renderSectionContent(rightSection)}
           {/* Live Community from ai-services — always in right column */}
+          {/* onLiveCommunityClick falls back to /live, so this card always has
+              somewhere to go — the old inline style said otherwise and rendered
+              `cursor: default` on a card that was in fact clickable. */}
           {aiServicesItems[3] && (
-            <div className={`${styles.liveCommunityCard} ${styles.desktopOnly}`} onClick={() => onLiveCommunityClick(aiServicesItems[3])} style={{ cursor: aiServicesItems[3]?.redirect_url || aiServicesItems[3]?.link ? 'pointer' : 'default' }}>
+            <div
+              className={`${styles.liveCommunityCard} ${styles.desktopOnly}`}
+              {...heroCardActivation(true, () => onLiveCommunityClick(aiServicesItems[3]))}
+            >
               <span className={styles.featureTag}>New</span>
               <h3 className={styles.liveCommunityTitle}>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title}</h3>
               {aiServicesItems[3]?.description && <p className={styles.liveCommunityDesc}>{aiServicesItems[3].description}</p>}
-              {aiServicesItems[3]?.action_btn && <button className={styles.liveCommunityBtn}>{aiServicesItems[3].action_btn}</button>}
+              {aiServicesItems[3]?.action_btn && <button type="button" className={styles.liveCommunityBtn} onClick={(e) => { e.stopPropagation(); onLiveCommunityClick(aiServicesItems[3]); }}>{aiServicesItems[3].action_btn}</button>}
               <div className={styles.avatarCluster}>
                 <div className={styles.avatarClusterInner}>
                   {aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon ? (
               <img
                 src={aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon}
-                alt={aiServicesItems[3]?.title || "ShubhAstro Live Community"}
+                alt=""
                 width="200"
                 height="200"
                 loading="lazy"
@@ -430,10 +511,126 @@ const HomeV2 = () => {
   }, []);
 
   // ─── Data Fetching ────────────────────────────────────────────────────────
-  const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery();
-  const homeList = newHomeData?.data?.list;
+  const dispatch = useDispatch();
+  /*
+   * The CMS section list. Only the first HOME_SECTIONS_PAGE_SIZE sections are
+   * requested up front — enough for the hero group and everything above the fold
+   * — so the first render waits on a fraction of the ~87 KB payload. The effect
+   * below appends the remaining pages into this same cache entry after paint, so
+   * `homeSections` grows from page 1 to the full list.
+   */
+  const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery(HOME_FIRST_PAGE_ARG);
+  const homeSections = newHomeData?.data?.list;
 
-  const sortedSections = useMemo(() => sortSections(homeList), [homeList]);
+  const [fetchHomeSectionsPage] = useLazyGetNewHomeSectionsQuery();
+  /*
+   * Highest page already requested. Without it, a page that comes back empty or
+   * entirely duplicated would leave the section count unchanged and the observer
+   * would keep asking for the same page.
+   */
+  const requestedPageRef = useRef(1);
+  // Watched element at the end of the rendered sections; see the effect below.
+  const sectionsSentinelRef = useRef(null);
+
+  /*
+   * Which page to ask for next, derived from how much is already loaded.
+   *
+   * A count that is not a whole number of pages means the last response was
+   * short, so the server has nothing left — which is also what a server that
+   * ignores pageNo/limit returns on the very first request, keeping that case to
+   * a single request.
+   */
+  const loadedSectionCount = Array.isArray(homeSections) ? homeSections.length : 0;
+  const nextSectionsPage =
+    loadedSectionCount > 0 && loadedSectionCount % HOME_SECTIONS_PAGE_SIZE === 0
+      ? loadedSectionCount / HOME_SECTIONS_PAGE_SIZE + 1
+      : null;
+  const hasMoreSections = nextSectionsPage !== null && nextSectionsPage <= HOME_SECTIONS_MAX_PAGES;
+
+  /*
+   * Fetches one page and appends it into the page-1 cache entry.
+   *
+   * The sections are written into the RTK cache rather than kept in component
+   * state on purpose. useAstrologerStatusSocket keeps astrologer cards live by
+   * walking the cache and patching matching records through updateQueryData; a
+   * private copy in component state is invisible to it, and because Immer
+   * produces new objects the copy would keep rendering the pre-patch data. That
+   * is not hypothetical here: all three astrologer-grid sections sit at
+   * list_order 6, 7 and 11, so every card on the homepage arrives in an appended
+   * page. Holding them outside the cache stopped chat/call availability from
+   * updating without a reload.
+   */
+  const loadNextSectionsPage = useCallback(async () => {
+    if (!hasMoreSections) return;
+    // Already in flight or already done — the observer can fire more than once.
+    if (nextSectionsPage <= requestedPageRef.current) return;
+    requestedPageRef.current = nextSectionsPage;
+
+    let list;
+    try {
+      // preferCacheValue: a lazy trigger refetches by default, which would
+      // re-request every page each time the visitor navigates back to "/".
+      const response = await fetchHomeSectionsPage({ pageNo: nextSectionsPage }, true).unwrap();
+      list = response?.data?.list;
+    } catch {
+      // Below-the-fold content is best effort. The visible page is already
+      // rendered, and the endpoint's own error handling has run.
+      return;
+    }
+    if (!Array.isArray(list) || list.length === 0) return;
+
+    const held = new Set(homeSections.map(sectionIdentity));
+    const fresh = list.filter((section) => {
+      const id = sectionIdentity(section);
+      if (!id || held.has(id)) return false;
+      held.add(id);
+      return true;
+    });
+    if (fresh.length === 0) return;
+
+    dispatch(
+      homeApi.util.updateQueryData("getNewHomeDetails", HOME_FIRST_PAGE_ARG, (draft) => {
+        if (Array.isArray(draft?.data?.list)) draft.data.list.push(...fresh);
+      })
+    );
+  }, [hasMoreSections, nextSectionsPage, homeSections, fetchHomeSectionsPage, dispatch]);
+
+  /*
+   * Pages load as the visitor scrolls, one at a time, rather than all at once
+   * after paint: a sentinel sits below the last rendered section and each time it
+   * comes into view the next page is requested. Appending pushes the sentinel
+   * further down, so the next request needs more scrolling — no burst of parallel
+   * homepage calls competing with the images and fonts of the part of the page the
+   * visitor is actually looking at.
+   *
+   * The 600px rootMargin starts the request just before the sentinel is on screen
+   * so the new sections are usually there by the time the visitor reaches them.
+   */
+  useEffect(() => {
+    if (!hasMoreSections) return undefined;
+    const node = sectionsSentinelRef.current;
+    if (!node) return undefined;
+
+    if (typeof IntersectionObserver === "undefined") {
+      // No observer support: fall back to loading the next page right away so the
+      // rest of the homepage is still reachable.
+      loadNextSectionsPage();
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        loadNextSectionsPage();
+      },
+      { rootMargin: "600px 0px" }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMoreSections, loadNextSectionsPage]);
+
+  const sortedSections = useMemo(() => sortSections(homeSections), [homeSections]);
   const renderPlan = useMemo(() => buildRenderPlan(sortedSections), [sortedSections]);
 
   // Path resolver for an AI suite card based on its source
@@ -679,6 +876,15 @@ const HomeV2 = () => {
               return null;
           }
         })}
+
+        {/*
+          Trigger for the next page of CMS sections. Zero-height and aria-hidden:
+          it carries no content, it only tells the IntersectionObserver above that
+          the visitor has scrolled far enough to want more.
+        */}
+        {hasMoreSections && (
+          <div ref={sectionsSentinelRef} aria-hidden="true" style={{ height: "1px" }} />
+        )}
       </div>
 
       {/* Modals */}

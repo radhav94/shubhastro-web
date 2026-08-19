@@ -30,13 +30,23 @@ const FeedbackModal = ({
   };
 
   const onSubmitClick = async () => {
-    await handleSubmit({
+    /*
+     * resetForm() used to run unconditionally, so a failed submit wiped the
+     * rating and the review text along with it. Someone who had spent minutes
+     * writing a review got a generic "something went wrong" and an empty box —
+     * nothing to retry with, and no way to recover what they had typed.
+     *
+     * A handler opts into keeping the text by returning exactly `false`.
+     * Anything else (including the `undefined` that every existing caller
+     * returns) still clears the form, so this is backwards compatible.
+     */
+    const submitted = await handleSubmit({
       rating,
       review,
       isAnonymous,
     });
 
-    resetForm();
+    if (submitted !== false) resetForm();
   };
 
   const resetForm = () => {

@@ -135,6 +135,33 @@ const getAstrologerInitial = (name) =>
     .toUpperCase()
     .slice(0, 1);
 
+// Name to print on an order card, userName-first.
+//
+// The history endpoints flatten only the astrologer's real name onto each row
+// (`receiverName` on call rows, `astrologerFirstName` + `astrologerLastName` on
+// chat rows) — never their public `userName`. So getAstrologerDisplayName() had
+// nothing to prefer and every card fell through to firstName + lastName, while
+// the astrologer list, profile page and transactions all show the alias.
+//
+// `fetched` is the astrologer document (which does carry userName); the row is
+// the fallback for the frames before that query lands.
+const resolveAstrologerName = (astrologer, fetched) =>
+  (fetched?.userName?.trim() ? fetched.userName : "") ||
+  getAstrologerDisplayName(astrologer) ||
+  astrologer?.name ||
+  "Unknown";
+
+// Reads the alias off the same getAstrologerById cache entry that
+// OrderAstrologerAvatar already subscribes to for this id, so showing it costs
+// no extra request — RTK Query dedupes the two subscriptions.
+const OrderAstrologerName = ({ astrologer }) => {
+  const { data } = useGetAstrologerByIdQuery(
+    { id: astrologer?._id },
+    { skip: !astrologer?._id },
+  );
+  return <>{resolveAstrologerName(astrologer, data?.data)}</>;
+};
+
 // Order-history avatar (.astrologerAvatar is 60px, so the `small` 100x125
 // derivative).
 //
@@ -162,11 +189,13 @@ const OrderAstrologerAvatar = ({ astrologer }) => {
 
   const fetched = data?.data;
   const hasImage = !!(fetched?.profileImages || fetched?.profileImgUrl || astrologer?.image);
+  // Same name the card prints, so the letter matches the heading.
+  const displayName = resolveAstrologerName(astrologer, fetched);
 
   // Nothing to show at all — keep the initials circle rather than dropping in a
   // gendered placeholder for an astrologer who simply has no photo.
   if (!hasImage) {
-    return <span>{getAstrologerInitial(astrologer?.name)}</span>;
+    return <span>{getAstrologerInitial(displayName)}</span>;
   }
 
   return (
@@ -179,7 +208,7 @@ const OrderAstrologerAvatar = ({ astrologer }) => {
         },
         "small"
       )}
-      alt={astrologer?.name}
+      alt={displayName}
       width={60}
       height={60}
       loading="lazy"
@@ -524,6 +553,11 @@ const Profile = () => {
           sessionType: item?.type || "audio",
           astrologer: {
             name: item?.receiverName || "Unknown",
+            // Alias, if this endpoint ever sends one. getAstrologerDisplayName()
+            // prefers it, so the review modal and the /astrologer/<slug> link
+            // pick it up without waiting for the by-id query. The card name
+            // itself is resolved by OrderAstrologerName either way.
+            userName: item?.receiverUserName || item?.userName || "",
             image: resolveHistoryAvatar(item),
             _id: item?.receiverId,
             astrologer_ID: item?.astrologer_ID || item?.receiverAstrologerId,
@@ -559,6 +593,8 @@ const Profile = () => {
             name: room.astrologerFirstName
               ? `${room.astrologerFirstName} ${room.astrologerLastName || ""}`
               : "Unknown",
+            // See the note on the call-history row above.
+            userName: room?.astrologerUserName || room?.userName || "",
             image: resolveHistoryAvatar(room),
             _id: room.astrologerId,
             astrologer_ID: room.astrologer_ID || room.astrologerAstrologerId,
@@ -2012,9 +2048,10 @@ const Profile = () => {
                                       }}
                                       style={{ cursor: "pointer" }}
                                     >
-                                      {/* userName-first, else the plain name */}
-                                      {getAstrologerDisplayName(order.astrologer) ||
-                                        order.astrologer.name}
+                                      {/* userName-first, else first + last name */}
+                                      <OrderAstrologerName
+                                        astrologer={order.astrologer}
+                                      />
                                     </h5>
                                     <div className={styles.orderMeta}>
                                       <span className={styles.orderDate}>
