@@ -93,6 +93,43 @@ const GuestSignInLink = ({ onClick }) => (
   </button>
 );
 
+/**
+ * Where an ai-services hero card sends the visitor, or null if the CMS item
+ * shipped without a destination.
+ */
+const heroCardTarget = (item) => item?.redirect_url || item?.link || null;
+
+/**
+ * Props that turn one of the hero's `<div>` cards into something a click can
+ * actually resolve against.
+ *
+ * The cards were plain divs with an onClick, which has two consequences that
+ * both surface as dead clicks. A card with no destination still rendered
+ * `cursor: pointer` on some paths and still rendered its CTA button, so the most
+ * button-like thing above the fold could be clicked to no effect. And the inner
+ * CTA had no handler of its own — it only ever worked because the click bubbled
+ * up to the div — so it was inert for the keyboard even when a destination
+ * existed, since a div is not focusable in the first place.
+ *
+ * With a target: button semantics, tab order, Enter/Space, pointer cursor.
+ * Without one: no affordance at all, so the card reads as the static promo it is.
+ */
+const heroCardActivation = (target, onActivate) => {
+  if (!target) return { style: { cursor: "default" } };
+  return {
+    role: "button",
+    tabIndex: 0,
+    onClick: onActivate,
+    onKeyDown: (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onActivate();
+      }
+    },
+    style: { cursor: "pointer" },
+  };
+};
+
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
 const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick, onLiveCommunityClick, onRequireGuestAuth }) => {
@@ -219,15 +256,21 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
         <div className={styles.leftCards}>
           {renderSectionContent(leftSection)}
           {/* Laal Kitaab from ai-services — always in left column */}
-          {aiServicesItems[0] && (
-            <div className={styles.qCardLaal} onClick={() => { const url = aiServicesItems[0]?.redirect_url || aiServicesItems[0]?.link; if (url) navigate(url); }} style={{ cursor: aiServicesItems[0]?.redirect_url || aiServicesItems[0]?.link ? 'pointer' : 'default' }}>
-              <span className={styles.featureTag}>New</span>
-              <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title}</h3>
-              {aiServicesItems[0]?.description && <p>{aiServicesItems[0].description}</p>}
-              {aiServicesItems[0]?.action_btn && <button className={styles.featureCta}>{aiServicesItems[0].action_btn}</button>}
-              {(aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon) && <img src={aiServicesItems[0].image_url_web || aiServicesItems[0].icon} alt="" width="120" height="120" className={styles.laalKitaabImgLeft} loading="lazy" />}
-            </div>
-          )}
+          {aiServicesItems[0] && (() => {
+            const target = heroCardTarget(aiServicesItems[0]);
+            return (
+              <div
+                className={styles.qCardLaal}
+                {...heroCardActivation(target, () => navigate(target))}
+              >
+                <span className={styles.featureTag}>New</span>
+                <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title}</h3>
+                {aiServicesItems[0]?.description && <p>{aiServicesItems[0].description}</p>}
+                {target && aiServicesItems[0]?.action_btn && <button type="button" className={styles.featureCta} onClick={(e) => { e.stopPropagation(); navigate(target); }}>{aiServicesItems[0].action_btn}</button>}
+                {(aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon) && <img src={aiServicesItems[0].image_url_web || aiServicesItems[0].icon} alt="" width="120" height="120" className={styles.laalKitaabImgLeft} loading="lazy" />}
+              </div>
+            );
+          })()}
         </div>
 
         {/* CENTER column */}
@@ -236,30 +279,42 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
           {/* Occult + AI Pandit from ai-services — always in center column */}
           {aiServicesItems.length > 1 && (
             <div className={`${styles.centerFeatureRow} ${styles.desktopOnly}`}>
-              {aiServicesItems[1] && (
-                <div className={`${styles.centerFeatureCard} ${styles.occultWorld}`} onClick={() => { const url = aiServicesItems[1]?.redirect_url || aiServicesItems[1]?.link; if (url) navigate(url); }} style={{ cursor: aiServicesItems[1]?.redirect_url || aiServicesItems[1]?.link ? 'pointer' : 'default' }}>
-                  <div className={styles.occultEllipse} />
-                  <span className={styles.featureTag}>New</span>
-                  <div className={styles.fcTop}>
-                    <h3>{aiServicesItems[1]?.display_title || aiServicesItems[1]?.title}</h3>
-                    {aiServicesItems[1]?.description && <p>{aiServicesItems[1].description}</p>}
+              {aiServicesItems[1] && (() => {
+                const target = heroCardTarget(aiServicesItems[1]);
+                return (
+                  <div
+                    className={`${styles.centerFeatureCard} ${styles.occultWorld}`}
+                    {...heroCardActivation(target, () => navigate(target))}
+                  >
+                    <div className={styles.occultEllipse} />
+                    <span className={styles.featureTag}>New</span>
+                    <div className={styles.fcTop}>
+                      <h3>{aiServicesItems[1]?.display_title || aiServicesItems[1]?.title}</h3>
+                      {aiServicesItems[1]?.description && <p>{aiServicesItems[1].description}</p>}
+                    </div>
+                    {target && aiServicesItems[1]?.action_btn && <button type="button" className={styles.fcCtaLight} onClick={(e) => { e.stopPropagation(); navigate(target); }}>{aiServicesItems[1].action_btn}</button>}
+                    {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon) && <img src={aiServicesItems[1].image_url_web || aiServicesItems[1].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
                   </div>
-                  {aiServicesItems[1]?.action_btn && <button className={styles.fcCtaLight}>{aiServicesItems[1].action_btn}</button>}
-                  {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon) && <img src={aiServicesItems[1].image_url_web || aiServicesItems[1].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
-                </div>
-              )}
-              {aiServicesItems[2] && (
-                <div className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`} onClick={() => { const url = aiServicesItems[2]?.redirect_url || aiServicesItems[2]?.link; if (url) navigate(url); }} style={{ cursor: aiServicesItems[2]?.redirect_url || aiServicesItems[2]?.link ? 'pointer' : 'default' }}>
-                  <div className={styles.panditEllipse} />
-                  <span className={styles.featureTag}>New</span>
-                  <div className={styles.fcTop}>
-                    <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title}</h3>
-                    {aiServicesItems[2]?.description && <p>{aiServicesItems[2].description}</p>}
+                );
+              })()}
+              {aiServicesItems[2] && (() => {
+                const target = heroCardTarget(aiServicesItems[2]);
+                return (
+                  <div
+                    className={`${styles.centerFeatureCard} ${styles.aiPanditVoice}`}
+                    {...heroCardActivation(target, () => navigate(target))}
+                  >
+                    <div className={styles.panditEllipse} />
+                    <span className={styles.featureTag}>New</span>
+                    <div className={styles.fcTop}>
+                      <h3>{aiServicesItems[2]?.display_title || aiServicesItems[2]?.title}</h3>
+                      {aiServicesItems[2]?.description && <p>{aiServicesItems[2].description}</p>}
+                    </div>
+                    {target && aiServicesItems[2]?.action_btn && <button type="button" className={styles.panditTalkBtn} onClick={(e) => { e.stopPropagation(); navigate(target); }}>{aiServicesItems[2].action_btn}</button>}
+                    {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon) && <img src={aiServicesItems[2].image_url_web || aiServicesItems[2].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
                   </div>
-                  {aiServicesItems[2]?.action_btn && <button className={styles.panditTalkBtn}>{aiServicesItems[2].action_btn}</button>}
-                  {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon) && <img src={aiServicesItems[2].image_url_web || aiServicesItems[2].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
-                </div>
-              )}
+                );
+              })()}
             </div>
           )}
         </div>
@@ -268,12 +323,18 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
         <div className={styles.rightCol}>
           {renderSectionContent(rightSection)}
           {/* Live Community from ai-services — always in right column */}
+          {/* onLiveCommunityClick falls back to /live, so this card always has
+              somewhere to go — the old inline style said otherwise and rendered
+              `cursor: default` on a card that was in fact clickable. */}
           {aiServicesItems[3] && (
-            <div className={`${styles.liveCommunityCard} ${styles.desktopOnly}`} onClick={() => onLiveCommunityClick(aiServicesItems[3])} style={{ cursor: aiServicesItems[3]?.redirect_url || aiServicesItems[3]?.link ? 'pointer' : 'default' }}>
+            <div
+              className={`${styles.liveCommunityCard} ${styles.desktopOnly}`}
+              {...heroCardActivation(true, () => onLiveCommunityClick(aiServicesItems[3]))}
+            >
               <span className={styles.featureTag}>New</span>
               <h3 className={styles.liveCommunityTitle}>{aiServicesItems[3]?.display_title || aiServicesItems[3]?.title}</h3>
               {aiServicesItems[3]?.description && <p className={styles.liveCommunityDesc}>{aiServicesItems[3].description}</p>}
-              {aiServicesItems[3]?.action_btn && <button className={styles.liveCommunityBtn}>{aiServicesItems[3].action_btn}</button>}
+              {aiServicesItems[3]?.action_btn && <button type="button" className={styles.liveCommunityBtn} onClick={(e) => { e.stopPropagation(); onLiveCommunityClick(aiServicesItems[3]); }}>{aiServicesItems[3].action_btn}</button>}
               <div className={styles.avatarCluster}>
                 <div className={styles.avatarClusterInner}>
                   {aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon ? (
