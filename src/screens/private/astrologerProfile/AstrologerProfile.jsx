@@ -1307,7 +1307,22 @@ const AstrologerProfile = () => {
             {/* Mobile Status Indicator */}
             <div className={styles.mobileStatusBar}>
               {isLive ? (
-                <div className={styles.mobileStatusLive} onClick={handleJoinLive}>
+                /* role/tabIndex/keydown: this is a div with an onClick, so it was
+                   unreachable by keyboard — the one actionable element in the
+                   status bar could only be triggered with a pointer. */
+                <div
+                  className={styles.mobileStatusLive}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Astrologer is live, watch the session"
+                  onClick={handleJoinLive}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleJoinLive();
+                    }
+                  }}
+                >
                   <Radio size={20} />
                   <span>Live Now</span>
                 </div>
@@ -1691,7 +1706,23 @@ const AstrologerProfile = () => {
         <aside className={styles.rightSidebar}>
           {/* Available Now / Offline / Live Card */}
           {isLive ? (
-            <div className={styles.liveCard} onClick={handleJoinLive}>
+            /* Same as the mobile status bar: a div with onClick is invisible to
+               the keyboard. The inner "Join" button was the only reachable
+               control, so the surrounding card — which is what the eye reads as
+               the target — did nothing unless clicked with a pointer. */
+            <div
+              className={styles.liveCard}
+              role="button"
+              tabIndex={0}
+              aria-label="Astrologer is live, watch the session"
+              onClick={handleJoinLive}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleJoinLive();
+                }
+              }}
+            >
               <div className={styles.liveLeft}>
                 <svg className={styles.liveIcon} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="16" cy="16" r="4" fill="white"/>
