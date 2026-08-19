@@ -9,8 +9,6 @@ import styles from "../screens/public/static-pages/StaticPages.module.scss";
 // Routes excluded from CMS static page lookup
 const EXCLUDED_PATHS = [
   "/",
-  "/home-new",
-  "/home-v2",
   // "/ai-wow",
   "/shubh-mall",
   // "/explore",

@@ -536,6 +536,14 @@ const HoroscopeOld = () => {
     }
   };
 
+  // Tapping the big sign banner always opens the zodiac picker, so users can
+  // switch signs without hunting for the profile selector above it.
+  const handleZodiacDisplayClick = () => {
+    trackEvent('horoscope_zodiac_banner_clicked', { sign: selectedZodiac });
+    setTempSelectedZodiac(selectedZodiac);
+    setShowZodiacModal(true);
+  };
+
   const selectedZodiacData = zodiacSigns.find(
     z => z.name.toLowerCase() === selectedZodiac.toLowerCase()
   );
@@ -610,12 +618,32 @@ const HoroscopeOld = () => {
         </div>
 
         <div className="horoscope-container">
-          <div className="zodiac-display">
+          {/* The whole sign banner is tappable — users instinctively click the
+              sign name/symbol to change it (was a dead click before). */}
+          <div
+            className="zodiac-display zodiac-display-interactive"
+            role="button"
+            tabIndex={0}
+            aria-label={`${capitalizedSign} selected. Change zodiac sign`}
+            onClick={handleZodiacDisplayClick}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleZodiacDisplayClick();
+              }
+            }}
+          >
             <div className="zodiac-info">
               <h1 className="zodiac-name">
                 {selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)}
               </h1>
               <p className="zodiac-date-range">{selectedZodiacData?.dateRange}</p>
+              <span className="zodiac-change-hint">
+                Change
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
             </div>
             {zodiacImage && (
               <img 
