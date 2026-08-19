@@ -6,7 +6,7 @@ import styles from "./SubscriptionModal.module.scss";
 import { useGetSubscriptionPlansQuery, usePurchaseWalletSubscriptionMutation, useGetSubscriptionStatusQuery } from "../../../../redux/api/subscription/subscriptionApi";
 import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from "../../../../utils/subscription/featureGating";
 import { SUBSCRIPTION_EVENTS, trackSubscriptionEvent } from "../../../../utils/subscriptionAnalytics";
-import shubhLogoMobile from "../../../../assets/images/mobile-shubh-astro-logo.svg";
+import shubhLogoMobile from "../../../../assets/images/mobile-shubh-astro-logo.png";
 import welcomeBg from "../../../../assets/images/welcome-bonus-bg.webp";
 import welcomeBgMobile from "../../../../assets/images/welcome-bonus-bg-mobile.webp";
 import welcomeIcon from "../../../../assets/images/welcome-bonus-icon.webp";
