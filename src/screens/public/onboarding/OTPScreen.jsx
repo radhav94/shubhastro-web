@@ -78,28 +78,22 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const verifyAbortRef = useRef(null);
 
   /*
-    Never sit on this step with an already-verified session.
+    Do NOT add an "already verified => skip this step" effect here.
 
-    Truecaller (and any future SSO) finishes with tokens stored and the number
-    proven, so there is no OTP to type — nothing was ever sent to that number.
-    LoginScreen jumps straight past this step for those logins, but that is one
-    caller getting it right; landing here in that state is a dead end no matter
-    how it was reached, because every code the user tries will fail.
+    One was tried and had to be reverted: handleContinue below sets
+    `isVerified: true` in formData *before* it decides where to send the user, so
+    an effect watching that flag fired first and pushed everyone — registered
+    users included — onto the profile-setup step. Registered users are moved with
+    a navigate() inside a setTimeout, so the form was on screen before the
+    redirect landed.
 
-    `formData.isVerified` is only set once a login has actually completed (this
-    screen sets it after verifyOtp, LoginScreen sets it after Truecaller), so the
-    normal "OTP just sent" arrival is unaffected. The token check makes sure we
-    only skip when a real session exists.
+    It also double-advanced new users: the effect called onNext() and so did the
+    branch below, skipping Personalize entirely.
+
+    Routing out of this screen belongs to handleContinue alone. Logins that
+    bypass OTP (Truecaller) skip the step at the source instead — LoginScreen
+    calls onSkipOtp() rather than onNext().
   */
-  const skippedRef = useRef(false);
-  useEffect(() => {
-    if (skippedRef.current) return;
-    const hasSession = !!localStorage.getItem("shubhtalk_customer_token");
-    if (formData?.isVerified && hasSession) {
-      skippedRef.current = true;
-      onNext();
-    }
-  }, [formData?.isVerified, onNext]);
 
   // Prevent iOS Safari from scrolling page when keyboard opens
   useEffect(() => {
