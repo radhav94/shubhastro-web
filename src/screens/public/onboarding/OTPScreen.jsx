@@ -77,6 +77,30 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   // cancelled if the user requests a new OTP mid-request.
   const verifyAbortRef = useRef(null);
 
+  /*
+    Never sit on this step with an already-verified session.
+
+    Truecaller (and any future SSO) finishes with tokens stored and the number
+    proven, so there is no OTP to type — nothing was ever sent to that number.
+    LoginScreen jumps straight past this step for those logins, but that is one
+    caller getting it right; landing here in that state is a dead end no matter
+    how it was reached, because every code the user tries will fail.
+
+    `formData.isVerified` is only set once a login has actually completed (this
+    screen sets it after verifyOtp, LoginScreen sets it after Truecaller), so the
+    normal "OTP just sent" arrival is unaffected. The token check makes sure we
+    only skip when a real session exists.
+  */
+  const skippedRef = useRef(false);
+  useEffect(() => {
+    if (skippedRef.current) return;
+    const hasSession = !!localStorage.getItem("shubhtalk_customer_token");
+    if (formData?.isVerified && hasSession) {
+      skippedRef.current = true;
+      onNext();
+    }
+  }, [formData?.isVerified, onNext]);
+
   // Prevent iOS Safari from scrolling page when keyboard opens
   useEffect(() => {
     document.body.style.overflow = 'hidden';

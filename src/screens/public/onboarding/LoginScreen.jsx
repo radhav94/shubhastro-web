@@ -7,6 +7,10 @@ import { PATH } from "../../../utils/routes/Paths";
 import { logout } from "../../../redux/auth/authSlice";
 import { loginWithPhone } from "../../../services/appServices/authService";
 import { trackEvent } from "../../../utils/analytics";
+import useTruecallerLogin from "./useTruecallerLogin";
+import TruecallerLogPanel from "./TruecallerLogPanel";
+import { isTruecallerLogViewerEnabled } from "../../../utils/truecaller/truecallerLog";
+import { resolvePostLoginRedirect } from "../../../utils/auth/completeCustomerLogin";
 import rsBox from "../../../assets/images/rs-box.png";
 import loginMobile from "../../../assets/images/login-mobile.png";
 import bGuid from "../../../assets/images/b-guidence.png";
@@ -14,7 +18,7 @@ import bAstrologer from "../../../assets/images/b-astrology.png";
 import bAccurate from "../../../assets/images/b-prediction.png";
 import bPrivate from "../../../assets/images/b-private.png";
 
-const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
+const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [phoneNumber, setPhoneNumber] = useState(formData.phoneNumber || "");
@@ -22,6 +26,59 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
   // Focused when the CTA is tapped with an incomplete number, so the fix is
   // one keystroke away rather than a hunt back up the page.
   const phoneInputRef = useRef(null);
+
+  /*
+    Truecaller one-tap login. Only offered on Android browsers with a configured
+    partner key (Truecaller's mobile-web verification supports Android only), so
+    everywhere else this stays hidden and the OTP flow is the single path.
+  */
+  // Read once on mount: the flag is persisted, and re-reading on every render
+  // would re-parse the query string for nothing.
+  const [truecallerLogViewer] = useState(isTruecallerLogViewerEnabled);
+
+  const {
+    isSupported: isTruecallerAvailable,
+    isBusy: truecallerBusy,
+    unsupportedReason: truecallerUnsupportedReason,
+    status: truecallerStatus,
+    loginWithTruecaller,
+  } = useTruecallerLogin({
+    onLoggedIn: ({ userData, isRegistered, deviceLimitReached }) => {
+      // Registered users go to their intended destination. New users continue
+      // into the onboarding wizard for profile setup — unless the device limit
+      // popup needs to show, which only renders on Home.
+      if (isRegistered || deviceLimitReached) {
+        navigate(resolvePostLoginRedirect(PATH.privateRoutes.HOME.path), { replace: true });
+        return;
+      }
+
+      /*
+        New user. `onNext()` here used to land them on the OTP step, which is
+        wrong twice over: Truecaller has already verified the number (and
+        completeCustomerLogin has already stored the session tokens), and no OTP
+        was ever sent to it — so the screen asked for a code that does not exist.
+        Go straight to profile setup, which is where the OTP path also ends up
+        for a new user.
+      */
+      updateFormData({
+        isVerified: true,
+        userData,
+        // Downstream steps re-normalise this ("^\+?91" stripped, then re-prefixed),
+        // so the country-code-prefixed form the API returns is fine as-is.
+        ...(userData?.phoneNumber ? { phoneNumber: userData.phoneNumber } : {}),
+        // Prefill from the Truecaller profile when the backend forwards it, so
+        // the user confirms rather than retypes. Spread conditionally: a blank
+        // value here would overwrite nothing, but an explicit `undefined` would
+        // still shadow the defaults in Onboarding's formData.
+        ...(() => {
+          const name = [userData?.firstName, userData?.lastName].filter(Boolean).join(" ").trim();
+          return name ? { name } : {};
+        })(),
+        ...(userData?.email ? { email: userData.email } : {}),
+      });
+      onSkipOtp();
+    },
+  });
 
   // Show device kicked message if redirected from interceptor
   useState(() => {
@@ -247,6 +304,63 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
               </svg>
             )}
           </button>
+
+          {/* Truecaller one-tap — Android only, hidden elsewhere so the OTP
+              flow stays the single visible path on unsupported devices. */}
+          {isTruecallerAvailable && (
+            <>
+              <div className={styles.altLoginDivider}>
+                <span>or</span>
+              </div>
+              <button
+                type="button"
+                className={styles.truecallerBtn}
+                onClick={loginWithTruecaller}
+                disabled={truecallerBusy}
+                aria-busy={truecallerBusy}
+              >
+                <span className={styles.truecallerIcon} aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.24.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2z" />
+                  </svg>
+                </span>
+                {truecallerBusy ? "Verifying with Truecaller..." : "Continue with Truecaller"}
+              </button>
+            </>
+          )}
+
+          {/*
+            DEV only. The button has three independent gates (partner key, not
+            iOS, is Android) and failing any of them just removes it from the
+            DOM — which is impossible to diagnose on a phone, where there are no
+            devtools and a dev server started before the env was set looks
+            exactly like an unsupported device. Stripped from every production
+            build by the `import.meta.env.DEV` guard.
+          */}
+          {(import.meta.env.DEV || truecallerLogViewer) && !isTruecallerAvailable && (
+            <p className={styles.truecallerDevHint}>
+              Truecaller hidden — {truecallerUnsupportedReason}
+              {truecallerUnsupportedReason === "disabled"
+                ? " (set VITE_TRUECALLER_ENABLED to \"true\", then restart the dev server)"
+                : truecallerUnsupportedReason === "no_partner_key"
+                  ? " (set VITE_TRUECALLER_PARTNER_KEY, then restart the dev server)"
+                  : ` (UA: ${(navigator.userAgent || "").slice(0, 60)})`}
+            </p>
+          )}
+
+          {/*
+            Diagnostic log viewer. Off unless the tester opened `?tclog=1` once,
+            so it never shows for a real user. Needed because this flow only runs
+            on a deployed build on a physical Android phone — no devtools, and the
+            page may be frozen by the OS while the Truecaller app is in front.
+          */}
+          {truecallerLogViewer && (
+            <TruecallerLogPanel
+              isSupported={isTruecallerAvailable}
+              unsupportedReason={truecallerUnsupportedReason}
+              status={truecallerStatus}
+            />
+          )}
 
           {/* Security note */}
           <p className={styles.securityNote}>
