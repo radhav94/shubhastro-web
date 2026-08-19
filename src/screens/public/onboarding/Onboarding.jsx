@@ -29,6 +29,21 @@ import OTPScreen from "./OTPScreen";
 import LoginScreen from "./LoginScreen";
 import { draftToOnboardingFormData } from "../guestChat/guestChatConstants";
 
+/**
+ * Indices into the positional `screens` array below. Named because the wizard is
+ * not purely linear — logins that already prove the phone number (Truecaller)
+ * have to land past OTP, and that jump was previously impossible to express.
+ */
+const STEP = {
+  WELCOME: 0,
+  LOGIN: 1,
+  OTP: 2,
+  PERSONALIZE: 3,
+  BIRTH: 4,
+  GUIDANCE: 5,
+  LOADING: 6,
+};
+
 const Onboarding = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -38,7 +53,9 @@ const Onboarding = () => {
   const isPersonalizeFlow = searchParams.get("step") === "personalize";
   const skipGuidance = searchParams.get("skip") === "welcome" || isPersonalizeFlow;
 
-  const [currentStep, setCurrentStep] = useState(isPersonalizeFlow ? 3 : 1);
+  const [currentStep, setCurrentStep] = useState(
+    isPersonalizeFlow ? STEP.PERSONALIZE : STEP.LOGIN
+  );
   const [deviceLimitDevices, setDeviceLimitDevices] = useState(null);
   const [isDeviceLimitOpen, setIsDeviceLimitOpen] = useState(false);
 
@@ -171,8 +188,21 @@ const Onboarding = () => {
       toast.error("Please complete your birth date in the second step");
       return;
     }
-    setCurrentStep(step + 3);
+    // The dots are 0-based within the profile-setup steps, which start at
+    // PERSONALIZE in this array.
+    setCurrentStep(step + STEP.PERSONALIZE);
   };
+
+  /**
+   * Jump a new user straight to profile setup, skipping the OTP step.
+   *
+   * For Truecaller (and any future SSO) the phone number is already verified and
+   * the session tokens are already stored, so the OTP step has nothing to
+   * verify — it can't even try, since no OTP was ever sent to that number. It
+   * used to be reached anyway, because LoginScreen only had `onNext()` and OTP is
+   * simply the next index.
+   */
+  const handleSkipOtp = () => setCurrentStep(STEP.PERSONALIZE);
 
   const handleNext = () => setCurrentStep((prev) => {
     // Skip GuidanceScreen (step 5) when skipGuidance is true
@@ -230,6 +260,7 @@ const Onboarding = () => {
       key="login"
       onNext={handleNext}
       onBack={handleBack}
+      onSkipOtp={handleSkipOtp}
       formData={formData}
       updateFormData={updateFormData}
     />,

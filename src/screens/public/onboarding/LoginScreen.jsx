@@ -18,7 +18,7 @@ import bAstrologer from "../../../assets/images/b-astrology.png";
 import bAccurate from "../../../assets/images/b-prediction.png";
 import bPrivate from "../../../assets/images/b-private.png";
 
-const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
+const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [phoneNumber, setPhoneNumber] = useState(formData.phoneNumber || "");
@@ -43,16 +43,40 @@ const LoginScreen = ({ onNext, onBack, formData, updateFormData }) => {
     status: truecallerStatus,
     loginWithTruecaller,
   } = useTruecallerLogin({
-    onLoggedIn: ({ isRegistered, deviceLimitReached }) => {
+    onLoggedIn: ({ userData, isRegistered, deviceLimitReached }) => {
       // Registered users go to their intended destination. New users continue
       // into the onboarding wizard for profile setup — unless the device limit
       // popup needs to show, which only renders on Home.
       if (isRegistered || deviceLimitReached) {
         navigate(resolvePostLoginRedirect(PATH.privateRoutes.HOME.path), { replace: true });
-      } else {
-        updateFormData({ isVerified: true });
-        onNext();
+        return;
       }
+
+      /*
+        New user. `onNext()` here used to land them on the OTP step, which is
+        wrong twice over: Truecaller has already verified the number (and
+        completeCustomerLogin has already stored the session tokens), and no OTP
+        was ever sent to it — so the screen asked for a code that does not exist.
+        Go straight to profile setup, which is where the OTP path also ends up
+        for a new user.
+      */
+      updateFormData({
+        isVerified: true,
+        userData,
+        // Downstream steps re-normalise this ("^\+?91" stripped, then re-prefixed),
+        // so the country-code-prefixed form the API returns is fine as-is.
+        ...(userData?.phoneNumber ? { phoneNumber: userData.phoneNumber } : {}),
+        // Prefill from the Truecaller profile when the backend forwards it, so
+        // the user confirms rather than retypes. Spread conditionally: a blank
+        // value here would overwrite nothing, but an explicit `undefined` would
+        // still shadow the defaults in Onboarding's formData.
+        ...(() => {
+          const name = [userData?.firstName, userData?.lastName].filter(Boolean).join(" ").trim();
+          return name ? { name } : {};
+        })(),
+        ...(userData?.email ? { email: userData.email } : {}),
+      });
+      onSkipOtp();
     },
   });
 
