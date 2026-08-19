@@ -289,9 +289,9 @@ const LoveTriangleSelectionPage = lazy(() => import("../../screens/private/v2/ta
 const LoveTriangleResultPage = lazy(() => import("../../screens/private/v2/tarot/LoveTriangleResultPage"));
 
 // import Home from "../../screens/v2/home/Home";
+// The "/" landing screen. Named `Home` here because that is the role it plays;
+// the file is still called HomeV2 from when it superseded screens/v2/home/Home.
 import Home from "../../screens/v2/home-v2/HomeV2";
-const HomeNew = lazy(() => import("../../screens/v2/home-new/HomeNew"));
-import HomeV2 from "../../screens/v2/home-v2/HomeV2";
 const ProfileV2 = lazy(() => import("../../screens/v2/user/Profile"));
 const Explore = lazy(() => import("../../screens/private/explore/Explore"));
 const AddProfile = lazy(() => import("../../screens/v2/user/AddProfile"));
@@ -364,18 +364,6 @@ export const PATH = {
     HOME: {
       path: "/",
       element: Home,
-      header: true,
-      footer: true,
-    },
-    HOME_NEW: {
-      path: "/home-new",
-      element: HomeNew,
-      header: true,
-      footer: true,
-    },
-    HOME_V2: {
-      path: "/home-v2",
-      element: HomeV2,
       header: true,
       footer: true,
     },
