@@ -41,6 +41,27 @@ const NewAstrologerDetailsCard = ({
     : emergencyChatRate || emergencyCallRate;
   const imageUrl = getAstrologerImageUrl(astrologer);
 
+  /*
+    `isLive` and `roomId` come from the same hook but are not guaranteed to
+    arrive together — the status flag can be true (from the astrologer record or
+    an early socket event) while roomId is still undefined or has gone stale
+    after a stream ended. Interpolating it regardless sent the user to
+    "/live/undefined", which cannot resolve a room, so a deliberate tap on
+    "Join Live" dumped them somewhere with nothing to watch and they went back to
+    browsing. AstrologerLiveBadge already guards this exact navigation with
+    `if (roomId)`; the cards did not.
+
+    Kept live rather than disabled, and it says what happened instead of
+    silently doing nothing.
+  */
+  const handleJoinLive = () => {
+    if (!liveRoomId) {
+      toast.error("This live session just ended. Try another astrologer.");
+      return;
+    }
+    navigate(`/live/${liveRoomId}`);
+  };
+
   return (
     <div
       className={`${styles.detailsCard} ${!isOnline ? styles.offlineDetailsCard : ""} ${className}`.trim()}
@@ -50,7 +71,7 @@ const NewAstrologerDetailsCard = ({
         <button
           type="button"
           className={`${styles.statusBadge} ${styles.live}`}
-          onClick={() => navigate(`/live/${liveRoomId}`)}
+          onClick={handleJoinLive}
           aria-label="Astrologer is live, click to watch"
         >
           <span className={styles.liveDot} />
@@ -136,7 +157,7 @@ const NewAstrologerDetailsCard = ({
             <div className={styles.detailsButtonWrapper} style={{ width: '100%' }}>
               <button
                 className={styles.liveBtn}
-                onClick={() => navigate(`/live/${liveRoomId}`)}
+                onClick={handleJoinLive}
               >
                 <svg width="16" height="16" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="16" cy="16" r="4" fill="#f75801"/>

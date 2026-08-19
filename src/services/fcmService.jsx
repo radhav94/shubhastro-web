@@ -32,18 +32,32 @@ export const initializeFCM = async () => {
   // TODO: Send token to your backend
   // await sendTokenToServer(token);
 
-  // Notification sound — unlock audio on first user interaction
+  // Notification sound — unlock audio on first user interaction.
+  //
+  // Built on first use rather than here. `new Audio(url)` with preload="auto"
+  // began downloading the mp3 from S3 the moment FCM initialised, for a sound
+  // that only plays if a push actually arrives in the foreground. The element is
+  // still created inside the unlockAudio gesture handler, so play() keeps its
+  // user-activation.
   let audioUnlocked = false;
-  const notificationSound = new Audio("https://shubhastroassets.s3.ap-south-1.amazonaws.com/sound/push-notification.mpeg");
-  notificationSound.preload = "auto";
+  let notificationSound = null;
+  const getNotificationSound = () => {
+    if (!notificationSound) {
+      notificationSound = new Audio(
+        "https://shubhastroassets.s3.ap-south-1.amazonaws.com/sound/push-notification.mpeg"
+      );
+    }
+    return notificationSound;
+  };
 
   const unlockAudio = () => {
     if (audioUnlocked) return;
-    notificationSound.volume = 0;
-    notificationSound.play().then(() => {
-      notificationSound.pause();
-      notificationSound.currentTime = 0;
-      notificationSound.volume = 1;
+    const sound = getNotificationSound();
+    sound.volume = 0;
+    sound.play().then(() => {
+      sound.pause();
+      sound.currentTime = 0;
+      sound.volume = 1;
       audioUnlocked = true;
     }).catch(() => {});
   };
@@ -53,9 +67,10 @@ export const initializeFCM = async () => {
   );
 
   const playNotificationSound = () => {
-    notificationSound.currentTime = 0;
-    notificationSound.volume = 1;
-    notificationSound.play().catch(() => {});
+    const sound = getNotificationSound();
+    sound.currentTime = 0;
+    sound.volume = 1;
+    sound.play().catch(() => {});
   };
 
   // Listen for foreground messages

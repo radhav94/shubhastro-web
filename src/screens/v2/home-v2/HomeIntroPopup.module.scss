@@ -51,6 +51,23 @@
 
 .banner {
   width: 100%;
+  /*
+   * Locks the box to the 1:1 shape of the banner assets, matching the
+   * width/height attributes on the <img>.
+   *
+   * The attributes alone only supply a *provisional* ratio: the moment the
+   * image decodes, its real intrinsic ratio replaces it. That is fine while the
+   * CMS serves square banners, but it would put the shift straight back if a
+   * differently shaped one were uploaded — and this element is the homepage LCP
+   * candidate, so a late resize here is expensive. Declaring the ratio means the
+   * reserved space is final. `object-fit: contain` then letterboxes a
+   * non-square banner inside it rather than resizing the card, which is the
+   * same never-crop behaviour this rule already asked for.
+   *
+   * If the CMS moves to a non-square banner, change this ratio and the
+   * width/height attributes in HomeIntroPopup.jsx together.
+   */
+  aspect-ratio: 1 / 1;
   height: auto;
   border-radius: 12px;
   object-fit: contain;

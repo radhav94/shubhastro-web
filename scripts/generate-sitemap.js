@@ -72,8 +72,8 @@ const staticRoutes = [
   { path: '/', priority: '1.0', changefreq: 'daily' },
   { path: '/explore', priority: '0.9', changefreq: 'daily' },
   { path: '/blog', priority: '0.8', changefreq: 'daily' },
-  { path: '/chat-with-astrologers', priority: '0.9', changefreq: 'daily' },
-  { path: '/call-to-astrologers', priority: '0.9', changefreq: 'daily' },
+  //{ path: '/chat-with-astrologers', priority: '0.9', changefreq: 'daily' },
+  //{ path: '/call-to-astrologers', priority: '0.9', changefreq: 'daily' },
   
   // Horoscope pages
   { path: '/daily-horoscope', priority: '0.9', changefreq: 'daily' },
@@ -97,18 +97,18 @@ const staticRoutes = [
   { path: '/flames-calculator', priority: '0.7', changefreq: 'monthly' },
   { path: '/rashi-calculator', priority: '0.7', changefreq: 'monthly' },
   { path: '/sun-sign-calculator', priority: '0.7', changefreq: 'monthly' },
-  { path: '/rising-sign-calculator', priority: '0.7', changefreq: 'monthly' },
+  //{ path: '/rising-sign-calculator', priority: '0.7', changefreq: 'monthly' },
   { path: '/age-calculator', priority: '0.7', changefreq: 'monthly' },
   { path: '/dasha-calculator', priority: '0.7', changefreq: 'monthly' },
-  { path: '/lucky-mobile-number-calculator', priority: '0.7', changefreq: 'monthly' },
+  //{ path: '/lucky-mobile-number-calculator', priority: '0.7', changefreq: 'monthly' },
   { path: '/lucky-vehicle-number-calculator', priority: '0.7', changefreq: 'monthly' },
   { path: '/mangal-dosha-calculator', priority: '0.7', changefreq: 'monthly' },
-  { path: '/atmakaraka-calculator', priority: '0.7', changefreq: 'monthly' },
+  //{ path: '/atmakaraka-calculator', priority: '0.7', changefreq: 'monthly' },
   
   // Other pages
   { path: '/panchang', priority: '0.8', changefreq: 'daily' },
   { path: '/numerology', priority: '0.7', changefreq: 'monthly' },
-  { path: '/lal-kitab', priority: '0.7', changefreq: 'monthly' },
+  { path: '/laal-kitab', priority: '0.7', changefreq: 'monthly' },
   { path: '/occult', priority: '0.7', changefreq: 'monthly' },
   { path: '/tarot', priority: '0.7', changefreq: 'monthly' },
   { path: '/community', priority: '0.6', changefreq: 'weekly' },

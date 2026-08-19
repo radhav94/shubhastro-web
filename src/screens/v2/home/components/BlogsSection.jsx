@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import { PATH } from "../../../../utils/routes/Paths";
 import SectionHeader from "./SectionHeader";
 import useHorizontalScrollState from "../../../../hooks/useHorizontalScrollState";
-import styles from "../Home.module.scss";
+import styles from "./sharedSections.module.scss";
 import { DefaultImages } from "../../../../utils/appImages";
 import defaultBlogImg from "../../../../assets/images/default_image_16x9_1920x1080.png";
 

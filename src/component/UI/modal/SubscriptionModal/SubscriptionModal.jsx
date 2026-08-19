@@ -177,6 +177,38 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
     });
   }, [isOpen, plans, data, isLoading, isFetching, variant]);
 
+  // #6 SUBSCRIPTION_PAYWALL_DISMISSED — user closed the dialog without a
+  // successful purchase. Wrap onClose so it fires only on a real dismissal.
+  // Declared above the `!isOpen` early return so the Escape effect below can
+  // reference it; hooks may not live after a conditional return.
+  const handleDismiss = () => {
+    if (!purchasedForDismissRef.current && flow !== "success") {
+      trackSubscriptionEvent(SUBSCRIPTION_EVENTS.PAYWALL_DISMISSED, {
+        feature_key: featureName || undefined,
+        plan_type: variant,
+      });
+    }
+    if (onClose) onClose();
+  };
+
+  // Escape closes the dialog. It did nothing before — the only way out was the
+  // small ✕ in the corner — which left keyboard users with no exit from a
+  // role="dialog" aria-modal="true" element. Ignored while a purchase is in
+  // flight so a stray keypress cannot abandon a wallet debit mid-flight.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e) => {
+      if (e.key !== "Escape") return;
+      if (purchasingRef.current) return;
+      handleDismiss();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+    // handleDismiss is re-created each render; `flow` is the only value it reads
+    // that changes while open, so re-bind on it to avoid a stale closure.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, flow]);
+
   if (!isOpen) return null;
 
   const apiPlans = providedPlans || (Array.isArray(data?.data) ? data.data : []);
@@ -343,20 +375,23 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
     }
   };
 
-  // #6 SUBSCRIPTION_PAYWALL_DISMISSED — user closed the dialog without a
-  // successful purchase. Wrap onClose so it fires only on a real dismissal.
-  const handleDismiss = () => {
-    if (!purchasedForDismissRef.current && flow !== "success") {
-      trackSubscriptionEvent(SUBSCRIPTION_EVENTS.PAYWALL_DISMISSED, {
-        feature_key: featureName || undefined,
-        plan_type: variant,
-      });
+  // Clicking the dimmed backdrop dismisses. It did nothing before, which makes
+  // it a guaranteed dead click: reaching for the area outside a dialog is the
+  // first thing most people try, and the only real exit was a 22px ✕ in the
+  // corner. The target check keeps clicks that merely bubble up from inside the
+  // modal from closing it, and a purchase in flight is protected — that tap gets
+  // the same message the plan buttons give.
+  const handleOverlayClick = (e) => {
+    if (e.target !== e.currentTarget) return;
+    if (purchasingRef.current) {
+      toast.error("Your purchase is still going through — one moment.");
+      return;
     }
-    if (onClose) onClose();
+    handleDismiss();
   };
 
   return (
-    <div className={styles.overlay}>
+    <div className={styles.overlay} onClick={handleOverlayClick}>
       <div className={styles.modal} style={modalStyle} role="dialog" aria-modal="true" aria-label="Choose Your Subscription">
         <button className={styles.closeBtn} onClick={handleDismiss} aria-label="Close">
           <IoClose size={22} />
@@ -409,10 +444,42 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
           <p className={styles.subtitle}>{isExtended ? "Your plan limit is exhausted. Pick an extended plan to continue." : "Pick a plan to unlock premium features"}</p>
         </div>
 
+        {/*
+          These two states are where the taps go while there is nothing to tap.
+          The plans API "occasionally 500s" (see the retry effect above), and
+          during that window — up to ~3s of automatic retries — the dialog showed
+          a single line of static text where the plan buttons were about to
+          appear. Every tap aimed at a plan died silently, which is exactly the
+          "several dead clicks, then reached the payment flow" shape.
+          aria-busy/role=status announce the wait, and the empty state now offers
+          the retry instead of being a dead end behind the ✕.
+        */}
         {loading ? (
-          <div className={styles.stateMsg}>Loading plans…</div>
+          <div className={styles.stateMsg} role="status" aria-busy="true">
+            Loading plans…
+          </div>
         ) : cards.length === 0 ? (
-          <div className={styles.stateMsg}>{isExtended ? "No extended plans available right now." : "No plans available right now."}</div>
+          <div className={styles.stateMsg} role="status">
+            <p>
+              {isError
+                ? "We couldn't load the plans. Check your connection and try again."
+                : isExtended
+                  ? "No extended plans available right now."
+                  : "No plans available right now."}
+            </p>
+            {!providedPlans && (
+              <button
+                type="button"
+                className={styles.planCtaOutline}
+                onClick={() => {
+                  plansRetryRef.current = 0;
+                  refetch();
+                }}
+              >
+                Try again
+              </button>
+            )}
+          </div>
         ) : (
           <div className={styles.plansGrid}>
             {cards.map((plan) => (
