@@ -47,6 +47,28 @@
   gap: 16px;
   width: 100%;
   padding-right: 40px;
+  /* Now a <button>: strip the UA chrome so it keeps rendering as the heading it
+     looks like, but keep a pointer cursor and a focus ring so it reads and
+     behaves as the control it now is. `font: inherit` matters — a button does not
+     inherit font-family/size, so without it the label would shrink to the
+     browser default. */
+  appearance: none;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  &[aria-busy="true"] {
+    cursor: progress;
+  }
   @media (width <= 767px) {
     padding-right: 0px;    
   }

@@ -93,6 +93,16 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
             key={m.name}
             className={styles.muhuratItem}
             onClick={() => navigate("/aiwow/muhurat-calendar")}
+            /* role="button" + tabIndex advertise this as a control, so it has to
+               answer Enter/Space too. Without the key handler the card took focus
+               and then did nothing when activated — a dead click for anyone not
+               using a mouse. */
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                navigate("/aiwow/muhurat-calendar");
+              }
+            }}
             role="button"
             tabIndex={0}
             style={{ cursor: "pointer" }}

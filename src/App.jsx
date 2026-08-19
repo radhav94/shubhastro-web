@@ -206,11 +206,49 @@ function App() {
     ]);
   }, []); // Empty deps - router only created once
 
-  // Initialize FCM push notifications
+  // Push notification setup, deliberately gated and deferred.
+  //
+  // This used to run on every page load for every visitor. Registering the
+  // service worker (which itself importScripts two gstatic Firebase bundles),
+  // calling Notification.requestPermission(), then Firebase installations + FCM
+  // token registration is a lot of work for a token that currently only reaches
+  // localStorage — see the "TODO: Send token to your backend" in fcmService.
+  //
+  // It also produces a JS error for a whole class of visitor. In an in-app
+  // webview (Instagram/Facebook on Android) both requestPermission() and
+  // serviceWorker.register() are proxied to native over the injected JS bridge.
+  // Meta's browser does not support web push, so the bridge call into Java
+  // throws and the WebView surfaces it as "error invoking postmessage: java
+  // exception was raised during method invocation" — on our page, at load, for
+  // every visitor arriving from an Instagram ad.
+  //
+  // So only initialise when it can actually succeed: permission already granted
+  // (a repeat visitor who opted in) or a signed-in user we could register a
+  // token against. Deferred to idle either way so it never competes with first
+  // paint. `typeof Notification` is checked before reading .permission because
+  // the constructor is absent entirely in some webviews.
   useEffect(() => {
-    initializeFCM().catch((err) =>
-      console.error("FCM initialization failed:", err)
+    const permissionGranted =
+      typeof Notification !== "undefined" &&
+      Notification.permission === "granted";
+    const signedIn = Boolean(
+      localStorage.getItem("shubhtalk_customer_token") ||
+        localStorage.getItem("shubhtalk_astro_token")
     );
+    if (!permissionGranted && !signedIn) return;
+
+    const start = () =>
+      initializeFCM().catch((err) =>
+        console.error("FCM initialization failed:", err)
+      );
+
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(start, { timeout: 2000 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    // Safari has no requestIdleCallback.
+    const timer = setTimeout(start, 2000);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {

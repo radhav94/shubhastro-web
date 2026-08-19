@@ -2494,6 +2494,11 @@
     cursor: pointer;
     width: 100%;
     transition: transform 0.15s;
+    // This is an <a> now (it was a div with role="button"). Tailwind preflight
+    // already makes anchors inherit both, so these are belt and braces against
+    // the UA blue-and-underlined default if preflight is ever scoped away.
+    color: inherit;
+    text-decoration: none;
 
     &:hover {
       transform: translateY(-2px);

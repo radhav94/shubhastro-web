@@ -144,10 +144,20 @@ const HomeIntroPopup = () => {
             already finished its initial fetch pass. fetchpriority="high" at
             least gets it to the front of the queue the moment it is discovered.
           */}
+          {/*
+            width/height are the intrinsic size of every image that can land
+            here — the bundled fallback and both CMS banners (desktop and
+            mobile) are 256x256 — so the browser can reserve the right box
+            before the bytes arrive instead of collapsing to 0 and pushing the
+            heading and CTA down when it decodes. `.banner` pins the same 1:1
+            ratio in CSS; see the note there before changing either.
+          */}
           <img
             className={styles.banner}
             src={popupImage}
             alt="Popup Banner"
+            width="256"
+            height="256"
             fetchpriority="high"
             decoding="async"
           />

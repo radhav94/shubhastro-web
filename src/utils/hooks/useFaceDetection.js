@@ -3,6 +3,19 @@ import * as faceapi from "face-api.js";
 
 export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
   const [modelsLoaded, setModelsLoaded] = useState(false);
+  /*
+   * Set when the weights under /models cannot be fetched at all.
+   *
+   * This used to be a bare console.error, which left `modelsLoaded` false
+   * forever with nothing on screen to say so. Face detection only gates the
+   * shutter and drives auto-capture, so a failed load silently bricked the whole
+   * camera screen: the shutter stayed labelled "Loading...", `canCapture` never
+   * became true, the framing hint never rendered (it requires modelsLoaded), and
+   * no error view appeared either — so the upload fallback was unreachable. The
+   * visitor was left tapping a shutter that only ever answered "give it a
+   * moment". Callers use this to fall back to a plain manual capture.
+   */
+  const [modelsFailed, setModelsFailed] = useState(false);
   const [faceDetected, setFaceDetected] = useState(false);
   const [faceInCircle, setFaceInCircle] = useState(false);
   const [isTooFar, setIsTooFar] = useState(false);
@@ -14,21 +27,40 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
 
   /* ------------------ LOAD MODELS ------------------ */
   useEffect(() => {
+    let cancelled = false;
+
+    const loadOnce = () => {
+      const MODEL_URL = "/models";
+      return Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
+      ]);
+    };
+
     const loadModels = async () => {
       try {
-        const MODEL_URL = "/models";
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-          faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
-        ]);
-        console.log('✅ Face detection models loaded successfully');
+        await loadOnce();
+        if (cancelled) return;
         setModelsLoaded(true);
       } catch (err) {
-        console.error('❌ Error loading face detection models:', err);
+        // One retry: the usual cause is a dropped request on a mobile
+        // connection rather than a missing file, and the weights are cached
+        // after a successful fetch.
+        console.warn('Face model load failed, retrying once:', err);
+        try {
+          await loadOnce();
+          if (cancelled) return;
+          setModelsLoaded(true);
+        } catch (retryErr) {
+          if (cancelled) return;
+          console.error('Face model load failed after retry:', retryErr);
+          setModelsFailed(true);
+        }
       }
     };
 
     loadModels();
+    return () => { cancelled = true; };
   }, []);
 
   /* ------------------ DETECTION LOOP ------------------ */
@@ -340,6 +372,7 @@ export const useFaceDetection = ({ videoRef, canvasRef, getCircleBounds }) => {
 
   return {
     modelsLoaded,
+    modelsFailed,
     faceDetected,
     faceInCircle,
     isTooFar,

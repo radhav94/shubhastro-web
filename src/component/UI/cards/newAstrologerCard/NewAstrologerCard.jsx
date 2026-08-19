@@ -62,7 +62,22 @@ const NewAstrologerCard = memo(({
   const emergencyMinRate = emergencyChatRate > 0 && emergencyCallRate > 0
     ? Math.min(emergencyChatRate, emergencyCallRate)
     : emergencyChatRate || emergencyCallRate;
-  
+
+  /*
+    Same guard as NewAstrologerDetailsCard: `isLive` can be true while roomId is
+    still undefined or stale, and interpolating it sent the user to
+    "/live/undefined" — a deliberate "Join Live" tap landing on a room that
+    cannot resolve. AstrologerLiveBadge already guards this navigation the same
+    way. Stays clickable; it names the reason instead of going nowhere.
+  */
+  const handleJoinLive = () => {
+    if (!liveRoomId) {
+      toast.error("This live session just ended. Try another astrologer.");
+      return;
+    }
+    navigate(`/live/${liveRoomId}`);
+  };
+
   return (
     <div 
       className={`${styles.astrologerCard} ${!isOnline ? styles.offlineCard : ''} ${className}`.trim()} 
@@ -73,7 +88,7 @@ const NewAstrologerCard = memo(({
         <button
           type="button"
           className={`${styles.statusBadge} ${styles.live}`}
-          onClick={() => navigate(`/live/${liveRoomId}`)}
+          onClick={handleJoinLive}
           aria-label="Astrologer is live, click to watch"
         >
           <span className={styles.liveDot} />
@@ -179,7 +194,7 @@ const NewAstrologerCard = memo(({
           <div className={styles.buttonWrapper} style={{ width: '100%' }}>
             <button
               className={styles.liveBtn}
-              onClick={() => navigate(`/live/${liveRoomId}`)}
+              onClick={handleJoinLive}
             >
               <svg width="16" height="16" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="16" cy="16" r="4" fill="#f75801"/>
