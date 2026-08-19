@@ -8,7 +8,7 @@
   "theme_color": "#F75801",
   "icons": [
     {
-      "src": "/images/mobile-shubh-astro-logo.svg",
+      "src": "/images/mobile-shubh-astro-logo.png",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"

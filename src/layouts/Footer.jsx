@@ -1,5 +1,5 @@
 import styles from "./Footer.module.scss";
-import ShubhAstroLogo from "../assets/images/ShubhAstrologo.svg";
+import ShubhAstroLogo from "../assets/images/ShubhAstrologo.png";
 
 import {
   IoLogoFacebook,

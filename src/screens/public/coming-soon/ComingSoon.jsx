@@ -19,7 +19,7 @@ import {
   IoScan,
   IoShieldCheckmark,
 } from "react-icons/io5";
-import ShubhAstroLogo from "../../../assets/images/ShubhAstrologo.svg";
+import ShubhAstroLogo from "../../../assets/images/ShubhAstrologo.png";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import { BACKEND_PROXY } from "../../../utils/apiConfig";
 import styles from "./ComingSoon.module.scss";
