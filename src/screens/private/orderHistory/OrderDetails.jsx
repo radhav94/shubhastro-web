@@ -279,12 +279,26 @@ const OrderDetails = () => {
       setConnectionType(null);
     };
 
+    // Server-side rejections (astrologer went offline mid-request, session limit,
+    // and so on) arrive on the generic "error" event, not chat:rejected. Without
+    // this listener the waiting state stayed up with nothing to explain it — the
+    // request looked like it was still connecting forever. AstrologerProfile and
+    // Profile both handle it; this screen did not.
+    const handleSocketError = (err) => {
+      Toast.error(err?.message || "Connection error");
+      resetChatFlow();
+      resetCallFlow();
+      cancelAll();
+      setConnectionType(null);
+    };
+
     voiceSocket.on("chat:room", handleChatRoom);
     voiceSocket.on("call:room", handleCallRoom);
     voiceSocket.on("chat:accepted", handleChatAccepted);
     voiceSocket.on("call:accepted", handleCallAccepted);
     voiceSocket.on("chat:rejected", handleRejected);
     voiceSocket.on("call:rejected", handleRejected);
+    voiceSocket.on("error", handleSocketError);
 
     return () => {
       voiceSocket.off("chat:room", handleChatRoom);
@@ -293,6 +307,7 @@ const OrderDetails = () => {
       voiceSocket.off("call:accepted", handleCallAccepted);
       voiceSocket.off("chat:rejected", handleRejected);
       voiceSocket.off("call:rejected", handleRejected);
+      voiceSocket.off("error", handleSocketError);
     };
   }, [userId, astrologerData]);
 
@@ -527,19 +542,23 @@ const OrderDetails = () => {
         isOpen={isConnectPopupOpen}
         onClose={() => setIsConnectPopupOpen(false)}
         astrologer={astrologer}
-        onChatStart={async (astro) => {
+        // The popup passes `isEmergency` as the last argument; forward it, or an
+        // emergency session opened from here is started as a normal one and the
+        // hook's offline guard rejects it. The hook's chat signature is
+        // (astro, checkBalance, isEmergency).
+        onChatStart={async (astro, isEmergency = false) => {
           activeAstroRef.current = astro;
           setIsConnectPopupOpen(false);
-          const result = await handleChatStart(astro);
+          const result = await handleChatStart(astro, true, isEmergency);
           if (result?.emergencyAvailable) {
             setShowEmergencyModal(true);
           }
           return result;
         }}
-        onCallStart={async (astro, type) => {
+        onCallStart={async (astro, type, isEmergency = false) => {
           activeAstroRef.current = astro;
           setIsConnectPopupOpen(false);
-          const result = await handleCallStart(astro, type);
+          const result = await handleCallStart(astro, type, isEmergency);
           if (result?.emergencyAvailable) {
             setShowEmergencyModal(true);
           }
