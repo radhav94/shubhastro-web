@@ -199,6 +199,18 @@ const TopHeader = () => {
    * and middle-clicks must keep their native "open in a new tab/window"
    * behaviour, which is the reason this is an anchor rather than a handler in the
    * first place.
+   *
+   * KNOWN RESIDUE, deliberately not "fixed": on "/" while already at the top,
+   * scrollTo(0) changes nothing, so Clarity still records the click as dead.
+   * That is correct — the logo promises the homepage and the homepage is already
+   * on screen at the top, so there is genuinely nothing to do. Every option for
+   * making the metric go away (forcing a reload, navigating elsewhere, faking a
+   * repaint) is worse for the user than a no-op. Two separate sessions have now
+   * been investigated down to this same point; if the metric is noisy, exclude
+   * this element in Clarity rather than inventing behaviour here.
+   *
+   * Navigation from any other route is fine and is not this case: ScrollToTop
+   * handles PUSH by scrolling to 0 instantly, so the page visibly changes.
    */
   const handleLogoClick = (e) => {
     if (currentPathname !== "/") return;
