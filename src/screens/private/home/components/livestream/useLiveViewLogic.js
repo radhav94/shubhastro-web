@@ -11,6 +11,8 @@ export const useLiveViewLogic = (props) => {
   } = props;
 
   const messagesEndRef = useRef(null);
+  // Attached to the chat field so a send with an empty box can focus it.
+  const inputRef = useRef(null);
   const [showSharePopup, setShowSharePopup] = useState(false);
 
   // Build share URL using the channel (not astrologerId) so the recipient
@@ -26,8 +28,18 @@ export const useLiveViewLogic = (props) => {
 
   const handleSend = (e) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
-    sendChatMessage();
+    /*
+      Tapping the send arrow with nothing typed used to fall through this guard
+      into silence. The box being empty explains itself, but the tap should still
+      land somewhere — put the cursor in the field so the next keystroke works.
+    */
+    if (!chatInput.trim()) {
+      inputRef.current?.focus();
+      return false;
+    }
+    // sendChatMessage reports false (and explains why via a toast) when the
+    // socket is down, the room has not been joined, or the viewer is blocked.
+    return sendChatMessage();
   };
 
   const handleCopyLink = async () => {
@@ -65,6 +77,7 @@ export const useLiveViewLogic = (props) => {
 
   return {
     messagesEndRef,
+    inputRef,
     showSharePopup, setShowSharePopup,
     shareUrl,
     handleSend,
