@@ -160,6 +160,17 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
     phoneInputRef.current?.focus();
   };
 
+  // The bottom trust bar is four icon + bold-label cells inside a bordered,
+  // rounded container with dividers — on mobile a 2x2 grid that reads exactly
+  // like a row of tappable feature cards. It had no handlers at all, so taps on
+  // it did nothing. Everything it advertises sits behind the sign-in, so answer
+  // the tap the same way the phone mockup above does: name the one control that
+  // unlocks it and put the cursor there.
+  const handleTrustItemClick = (label) => {
+    toast(`${label} — enter your mobile number to get started.`, { icon: "ℹ️" });
+    phoneInputRef.current?.focus();
+  };
+
   const handleSkipAndProceed = () => {
     dispatch(logout());
     localStorage.removeItem("shubhtalk_redirect_after_login");
@@ -403,44 +414,31 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
         </div>
       {/* </div> */}
 
-      {/* Bottom Trust Bar */}
+      {/* Bottom Trust Bar. Real <button>s: these look like cards and get tapped,
+          so the tap now gets an answer instead of silence. Button chrome is
+          stripped in the stylesheet. */}
       <div className={styles.trustBar}>
-        <div className={styles.trustItem}>
-          <div className={styles.trustIcon}>
-            <img src={bGuid} alt="" />
-          </div>
-          <div>
-            <strong>Personalized</strong>
-            <span>Guidance</span>
-          </div>
-        </div>
-        <div className={styles.trustItem}>
-          <div className={styles.trustIcon}>
-            <img src={bAstrologer} alt="" />
-          </div>
-          <div>
-            <strong>Talk to Expert</strong>
-            <span>Astrologers</span>
-          </div>
-        </div>
-        <div className={styles.trustItem}>
-          <div className={styles.trustIcon}>
-            <img src={bAccurate} alt="" />
-          </div>
-          <div>
-            <strong>Accurate</strong>
-            <span>Predictions</span>
-          </div>
-        </div>
-        <div className={styles.trustItem}>
-          <div className={styles.trustIcon}>
-            <img src={bPrivate} alt="" />
-          </div>
-          <div>
-            <strong>100% Private</strong>
-            <span>& Secure</span>
-          </div>
-        </div>
+        {[
+          { img: bGuid, title: "Personalized", sub: "Guidance" },
+          { img: bAstrologer, title: "Talk to Expert", sub: "Astrologers" },
+          { img: bAccurate, title: "Accurate", sub: "Predictions" },
+          { img: bPrivate, title: "100% Private", sub: "& Secure" },
+        ].map(({ img, title, sub }) => (
+          <button
+            key={title}
+            type="button"
+            className={styles.trustItem}
+            onClick={() => handleTrustItemClick(`${title} ${sub}`)}
+          >
+            <div className={styles.trustIcon}>
+              <img src={img} alt="" />
+            </div>
+            <div>
+              <strong>{title}</strong>
+              <span>{sub}</span>
+            </div>
+          </button>
+        ))}
       </div>
     </div>
   );
