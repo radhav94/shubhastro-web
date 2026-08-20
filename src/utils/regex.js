@@ -36,3 +36,15 @@ export const PERSON_NAME_ERROR =
   made those addresses unsaveable.
 */
 export const placeNameRegex = /^[\p{L}\p{M}][\p{L}\p{M}\s'’.,&()/-]*$/u;
+
+/*
+  The complement of `personNameRegex`'s character class, for *stripping* rather
+  than testing. Use this when filtering keystrokes in a name-ish field.
+
+  The distinction matters: the astrologer search used to test the whole value and
+  `return` on any disallowed character, which threw away the entire input instead
+  of the offending character. Because the field was controlled, the keystroke
+  simply never appeared — the search box looked broken, with nothing said. Strip
+  what cannot be used and keep the rest, so typing always visibly does something.
+*/
+export const nonNameCharsGlobal = /[^\p{L}\p{M}\s'’.-]/gu;
