@@ -18,6 +18,7 @@ import { Toast } from "../../index";
 import ProfileListingModal from "./ProfileListingModal";
 import { relationOption } from "../../../utils/constanats/appData";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
+import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
 import giftImg from "../../../assets/images/welcome-bonus-icon.webp";
 
 // Visual top-to-bottom order of every field the schema can reject. Yup returns
@@ -165,7 +166,7 @@ const AddProfileModal = ({
   const validationSchema = Yup.object({
     name: Yup.string()
       .required("Name is required")
-      .matches(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces"),
+      .matches(personNameRegex, PERSON_NAME_ERROR),
     relation: (matchmakingMode || hideRelation)
       ? Yup.string().notRequired()
       : Yup.string()

@@ -4,13 +4,14 @@ import { ChevronLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
 import LanguageSelector from "../../../component/LanguageSelector";
+import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
 
 // Validation schema
 const validationSchema = Yup.object({
   name: Yup.string()
     .min(3, "Name must be at least 3 characters")
     .max(50, "Name must not exceed 50 characters")
-    .matches(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
+    .matches(personNameRegex, PERSON_NAME_ERROR)
     .required("Name is required"),
   email: Yup.string()
     .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address"),
@@ -182,9 +183,9 @@ const PersonalizeScreen = ({ onNext, onBack, onSkip, formData, updateFormData, c
                 toast.error("Name must not exceed 50 characters.");
                 return;
               }
-              if (!/^[a-zA-Z\s]+$/.test(name)) {
+              if (!personNameRegex.test(name)) {
                 e.preventDefault();
-                toast.error("Name can only contain letters and spaces.");
+                toast.error(PERSON_NAME_ERROR);
                 return;
               }
               if (

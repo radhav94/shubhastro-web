@@ -37,6 +37,7 @@ import {
 } from "./guestChatConstants";
 import { useGuestChatAuth } from "./useGuestChatAuth";
 import { trackEvent } from "../../../utils/analytics";
+import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
 import chat from "../../private/home/components/chats/ChatWindow.module.scss";
 import styles from "./GuestChatFlow.module.scss";
 
@@ -256,8 +257,8 @@ const GuestChatFlow = () => {
     switch (key) {
       case "name":
         if (!f.name.trim()) return "Please enter your name";
-        if (!/^[A-Za-z\s]+$/.test(f.name.trim()))
-          return "Name can only contain letters and spaces";
+        if (!personNameRegex.test(f.name.trim()))
+          return PERSON_NAME_ERROR;
         return undefined;
       case "mobileNumber":
         if (!/^[6-9]\d{9}$/.test(f.mobileNumber || ""))
