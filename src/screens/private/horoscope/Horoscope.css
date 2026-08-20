@@ -809,32 +809,51 @@
   left: 19px;
 }
 
+/*
+  Selected vs hover — see the matching block in HoroscopeOld.css.
+
+  `:hover` used to fill the inner radio dot and colour the label orange, which
+  is exactly the `.selected` treatment. On a mouse the row under the cursor
+  already looked chosen, so actually clicking it changed nothing perceptible
+  and the picker read as broken. Only `.selected` fills the dot now; hover is a
+  background tint plus a ring hint.
+*/
 .zodiac-item.selected {
   color: #F75801;
   font-weight: 700;
+  background: rgba(247, 88, 1, 0.06);
 }
 .zodiac-item.selected.zodiac-item::before {
   border-color: #F75801;
+  border-width: 2px;
 }
 .zodiac-item.selected.zodiac-item::after {
   background-color: #F75801;
   border: none;
 }
 
-.zodiac-item:hover.zodiac-item::before {
-  border-color: #F75801;
-}
-.zodiac-item:hover.zodiac-item::after {
-  background-color: #F75801;
-  border: none;
+.zodiac-item:hover {
+  color: #F75801;
+  background: rgba(247, 88, 1, 0.03);
 }
 
-.zodiac-item:hover {
-  color: #F75801;;
+.zodiac-item:hover.zodiac-item::before {
+  border-color: rgba(247, 88, 1, 0.55);
 }
 
 .zodiac-item.selected:hover {
-  color: #F75801;;
+  color: #F75801;
+  background: rgba(247, 88, 1, 0.09);
+}
+
+.zodiac-item.selected:hover.zodiac-item::before {
+  border-color: #F75801;
+}
+
+.zodiac-item:focus-visible {
+  outline: 2px solid #F75801;
+  outline-offset: -2px;
+  z-index: 1;
 }
 
 .zodiac-item.selected .zodiac-item-date {

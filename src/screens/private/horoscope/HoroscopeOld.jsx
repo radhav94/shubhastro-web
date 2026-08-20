@@ -601,7 +601,27 @@ const HoroscopeOld = () => {
       <div className="horoscope-page-content">
         {/* Centered Profile Selector with DOB/Place */}
         <div className="horoscope-profile-header">
-          <div className="horoscope-profile-center" onClick={handleOpenModal}>
+          {/* Was a bare <div onClick>: mouse-only, unreachable by keyboard and
+              invisible to assistive tech, despite rendering a chevron that
+              promises a picker. Not a real <button> because it contains block
+              content (the date-of-birth line). */}
+          <div
+            className="horoscope-profile-center"
+            role="button"
+            tabIndex={0}
+            aria-label={
+              activeProfile
+                ? `Profile: ${activeProfile.name}. Change profile`
+                : `Zodiac: ${selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)}. Change zodiac sign`
+            }
+            onClick={handleOpenModal}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleOpenModal();
+              }
+            }}
+          >
             <span className="horoscope-profile-label">{activeProfile ? 'Select Profile' : 'Select Zodiac'}</span>
             <span className="horoscope-profile-name">
               {activeProfile?.name || (selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1))}
@@ -871,9 +891,14 @@ const HoroscopeOld = () => {
                 {zodiacSigns.map((zodiac) => (
                   <button
                     key={zodiac.id}
+                    type="button"
                     className={`zodiac-item ${
                       tempSelectedZodiac === zodiac.name.toLowerCase() ? 'selected' : ''
                     }`}
+                    /* Picking a sign only stages it; the button below commits.
+                       aria-pressed makes that two-step state audible, since
+                       visually it is just a filled radio dot. */
+                    aria-pressed={tempSelectedZodiac === zodiac.name.toLowerCase()}
                     onClick={() => handleZodiacClick(zodiac.name)}
                   >
                     <span className="zodiac-item-name">{zodiac.name}</span>
@@ -881,8 +906,14 @@ const HoroscopeOld = () => {
                   </button>
                 ))}
               </div>
-              <button className="select-zodiac-button" onClick={handleConfirmZodiac}>
-                Select Zodiac
+              {/*
+                Was "Select Zodiac" — the same words as the modal's own title,
+                which made it read as a heading rather than the action that
+                applies the pick. Naming the staged sign makes the two-step
+                nature of the picker obvious.
+              */}
+              <button type="button" className="select-zodiac-button" onClick={handleConfirmZodiac}>
+                Show {tempSelectedZodiac.charAt(0).toUpperCase() + tempSelectedZodiac.slice(1)} horoscope
               </button>
             </div>
           </div>
