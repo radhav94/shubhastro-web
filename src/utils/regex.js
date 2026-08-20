@@ -1,2 +1,38 @@
 export const mobileRegex = /^([6-9]{1})([0-9]{9})$/;
 export const emailRegex = /[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}/;
+
+/*
+  Person names.
+
+  Every name field on the site used to validate with /^[A-Za-z\s]+$/, which
+  accepts only unaccented Latin letters and spaces. That rejects, with no way
+  around it:
+
+    - any non-Latin script — Devanagari, Tamil, Bengali, Arabic/Persian, etc.
+      A visitor whose name is written in their own script simply cannot submit
+      the form, and the only feedback is "Name can only contain letters and
+      spaces", which reads as nonsense because they *did* type letters.
+    - initials and abbreviations: "R. K. Sharma", "St. John"
+    - apostrophes: "D'Souza", "O'Brien" (both the ASCII ' and the typographic ’
+      that iOS/Android keyboards insert automatically)
+    - hyphenated names: "Anne-Marie", "Al-Hassan"
+
+  This was showing up as repeated submissions of the kundli / guest-details
+  forms: the CTA appears to do nothing useful, so it gets tapped again.
+
+  \p{L} covers letters in every script and \p{M} the combining marks that
+  scripts like Devanagari and Arabic need. Requiring the first character to be
+  a letter still rejects input that is only punctuation.
+*/
+export const personNameRegex = /^[\p{L}\p{M}][\p{L}\p{M}\s'’.-]*$/u;
+
+export const PERSON_NAME_ERROR =
+  "Please enter a valid name (letters, spaces, and . ' - only)";
+
+/*
+  Place names for postal addresses (city / state). Same problem as above, plus
+  these legitimately contain characters a name does not: "Jammu & Kashmir",
+  "Dadra and Nagar Haveli (UT)", "Y.S.R. Kadapa". The old letters-only rule
+  made those addresses unsaveable.
+*/
+export const placeNameRegex = /^[\p{L}\p{M}][\p{L}\p{M}\s'’.,&()/-]*$/u;
