@@ -200,6 +200,23 @@ const TalkToAstrologer = () => {
 
   const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, cancelAll, assignRoomId, updateStatusByRoomId, getConnectionByRoomId, pendingConnections } = useWaitingQueue();
 
+  /*
+    Live mirrors of the approval state for the socket handlers further down.
+
+    Those listeners are registered in an effect keyed on
+    [userIdLocal, isRecommendModalOpen], so their closures hold a stale
+    `callApprovalData` / `chatApprovalData` — `null` on first render. Guards
+    written as `if (callApprovalData?.roomId === roomId)` never matched, so
+    on_hold / unavailable / canceled / rejected / error left the approval state
+    set. That state is what drives the looping ring sound in
+    WaitingQueueContext, so it could keep ringing with no call on screen.
+    Same fix as the one applied there.
+  */
+  const callApprovalRef = useRef(null);
+  const chatApprovalRef = useRef(null);
+  useEffect(() => { callApprovalRef.current = callApprovalData; }, [callApprovalData]);
+  useEffect(() => { chatApprovalRef.current = chatApprovalData; }, [chatApprovalData]);
+
   // Permanently dismiss recommendation popup once any connection is initiated
   useEffect(() => {
     if (pendingConnections?.length && !recommendDismissed) {
@@ -809,7 +826,7 @@ const TalkToAstrologer = () => {
       console.log("[TwoWayAccept] ⏸️ call:on_hold", JSON.stringify(data));
       const { roomId, sessionId, astrologerId, type, message } = data;
       // Dismiss ring UI for this roomId
-      if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
+      if (callApprovalRef.current?.roomId === roomId) setCallApprovalData(null);
       setRingQueue((prev) => prev.filter((r) => r.roomId !== roomId));
       // Update queue status
       if (roomId) updateStatusByRoomId(roomId, "on_hold");
@@ -823,7 +840,7 @@ const TalkToAstrologer = () => {
     const handleChatOnHold = (data) => {
       console.log("[TwoWayAccept] ⏸️ chat:on_hold", JSON.stringify(data));
       const { roomId, sessionId, astrologerId, type, message } = data;
-      if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
+      if (chatApprovalRef.current?.roomId === roomId) setChatApprovalData(null);
       setRingQueue((prev) => prev.filter((r) => r.roomId !== roomId));
       if (roomId) updateStatusByRoomId(roomId, "on_hold");
       setOnHoldSessions((prev) => {
@@ -848,7 +865,7 @@ const TalkToAstrologer = () => {
       console.log("[TwoWayAccept] ❌ call:unavailable", JSON.stringify(data));
       const { roomId, astrologerId, message } = data;
       if (roomId) removePendingConnection(roomId);
-      if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
+      if (callApprovalRef.current?.roomId === roomId) setCallApprovalData(null);
       setRingQueue((prev) => prev.filter((r) => r.roomId !== roomId));
       // Don't reset global call flow — other pending connections may still be active
       Toast.error(message || "Astrologer is unavailable. Please try again later.");
@@ -858,7 +875,7 @@ const TalkToAstrologer = () => {
       console.log("[TwoWayAccept] ❌ chat:unavailable", JSON.stringify(data));
       const { roomId, astrologerId, message } = data;
       if (roomId) removePendingConnection(roomId);
-      if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
+      if (chatApprovalRef.current?.roomId === roomId) setChatApprovalData(null);
       setRingQueue((prev) => prev.filter((r) => r.roomId !== roomId));
       // Don't reset global chat flow — other pending connections may still be active
       Toast.error(message || "Astrologer is unavailable. Please try again later.");
@@ -985,7 +1002,7 @@ const TalkToAstrologer = () => {
       const canceledRoomId = data?.roomId || data?.sessionData?.roomId;
       if (canceledRoomId) {
         removePendingConnection(canceledRoomId);
-        if (callApprovalData?.roomId === canceledRoomId) setCallApprovalData(null);
+        if (callApprovalRef.current?.roomId === canceledRoomId) setCallApprovalData(null);
         setRingQueue((prev) => prev.filter((r) => r.roomId !== canceledRoomId));
         // Also remove from on-hold sessions
         setOnHoldSessions((prev) => prev.filter((s) => s.roomId !== canceledRoomId));
@@ -997,7 +1014,7 @@ const TalkToAstrologer = () => {
       const canceledRoomId = data?.roomId || data?.sessionData?.roomId;
       if (canceledRoomId) {
         removePendingConnection(canceledRoomId);
-        if (chatApprovalData?.roomId === canceledRoomId) setChatApprovalData(null);
+        if (chatApprovalRef.current?.roomId === canceledRoomId) setChatApprovalData(null);
         setRingQueue((prev) => prev.filter((r) => r.roomId !== canceledRoomId));
         setOnHoldSessions((prev) => prev.filter((s) => s.roomId !== canceledRoomId));
       }
@@ -1014,7 +1031,7 @@ const TalkToAstrologer = () => {
       const rejectedAstrologerId = data?.astrologerId || data?.sessionData?.astrologerId;
       if (rejectedRoomId) {
         removePendingConnection(rejectedRoomId);
-        if (callApprovalData?.roomId === rejectedRoomId) setCallApprovalData(null);
+        if (callApprovalRef.current?.roomId === rejectedRoomId) setCallApprovalData(null);
         setRingQueue((prev) => prev.filter((r) => r.roomId !== rejectedRoomId));
         setOnHoldSessions((prev) => prev.filter((s) => s.roomId !== rejectedRoomId));
       } else if (rejectedAstrologerId) {
@@ -1064,8 +1081,8 @@ const TalkToAstrologer = () => {
         const errRoomId = err?.roomId;
         if (errRoomId) {
           removePendingConnection(errRoomId);
-          if (callApprovalData?.roomId === errRoomId) setCallApprovalData(null);
-          if (chatApprovalData?.roomId === errRoomId) setChatApprovalData(null);
+          if (callApprovalRef.current?.roomId === errRoomId) setCallApprovalData(null);
+          if (chatApprovalRef.current?.roomId === errRoomId) setChatApprovalData(null);
           setRingQueue((prev) => prev.filter((r) => r.roomId !== errRoomId));
           setOnHoldSessions((prev) => prev.filter((s) => s.roomId !== errRoomId));
         }
@@ -1096,8 +1113,8 @@ const TalkToAstrologer = () => {
       if (errRoomId) {
         removePendingConnection(errRoomId);
         setOnHoldSessions((prev) => prev.filter((s) => s.roomId !== errRoomId));
-        if (callApprovalData?.roomId === errRoomId) setCallApprovalData(null);
-        if (chatApprovalData?.roomId === errRoomId) setChatApprovalData(null);
+        if (callApprovalRef.current?.roomId === errRoomId) setCallApprovalData(null);
+        if (chatApprovalRef.current?.roomId === errRoomId) setChatApprovalData(null);
         setRingQueue((prev) => prev.filter((r) => r.roomId !== errRoomId));
       }
       setActiveCall(null);
