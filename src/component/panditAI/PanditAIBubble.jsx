@@ -240,6 +240,8 @@ const PanditAIBubble = () => {
     }
   }, [isOpen]);
 
+
+
   const handleSpeechResult = useCallback(async (transcript) => {
     setInterimText("");
     transcribeCountRef.current += 1;
@@ -401,6 +403,22 @@ const PanditAIBubble = () => {
     setIsOpen(false);
   }, [stopListening]);
 
+  /*
+    Escape closes the chat — the keyboard counterpart to tapping the backdrop.
+    This is a role="dialog" that covers the page with a fixed overlay, so Escape
+    is the expected way out and there was none: the close button was the only
+    exit. Declared after handleClose so the dependency array is not evaluated
+    while that const is still in its temporal dead zone.
+  */
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") handleClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, handleClose]);
+
   const handleOpen = useCallback(() => {
     const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
     // Guest: open the chat and show the kundli-details form as an inline
@@ -475,7 +493,31 @@ const PanditAIBubble = () => {
 
       {isOpen && (
         <>
-          <div className={styles.overlay} />
+          {/*
+            This backdrop is `position: fixed; inset: 0; z-index: 9990` with a
+            transparent background, and it used to have no handler at all. So
+            while the chat was open an invisible full-screen layer sat over the
+            entire page and swallowed every tap outside the chat window. The page
+            was still fully visible behind it, so there was no hint that anything
+            was blocked: tapping a link, a card or the header did nothing.
+
+            That is not one dead element — it made the whole page dead for as
+            long as the chat stayed open, which is exactly the "opened Pandit AI,
+            then a dead click seconds later" pattern in the recordings.
+
+            Tapping a backdrop to dismiss is the near-universal convention, so
+            that is what it does now — every outside tap goes from doing nothing
+            to doing the expected thing.
+
+            Safe against the portalled date picker: #rdp-portal is z-index
+            100000, above this layer, so the calendar receives its own clicks and
+            this handler never sees them.
+          */}
+          <div
+            className={styles.overlay}
+            onClick={handleClose}
+            aria-hidden="true"
+          />
           <div className={`${styles.chatWindow} notranslate`} role="dialog" aria-label="Pandit AI Chat" translate="no">
           <div className={styles.header}>
             <div className={styles.headerInfo}>

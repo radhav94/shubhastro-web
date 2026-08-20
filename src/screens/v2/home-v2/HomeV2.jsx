@@ -524,11 +524,34 @@ const HomeV2 = () => {
 
   const [fetchHomeSectionsPage] = useLazyGetNewHomeSectionsQuery();
   /*
-   * Highest page already requested. Without it, a page that comes back empty or
-   * entirely duplicated would leave the section count unchanged and the observer
-   * would keep asking for the same page.
+   * True while a page request is in flight, so two observer callbacks (or an
+   * observer plus the no-IntersectionObserver fallback) cannot ask for the same
+   * page twice.
+   *
+   * This used to be a `requestedPageRef` high-water mark that was advanced
+   * *before* the request went out and never rolled back. Every early return
+   * below — a network error, an empty list, a page of nothing but duplicates —
+   * left the section count unchanged, so `nextSectionsPage` recomputed to the
+   * same number and the `nextSectionsPage <= requestedPageRef.current` guard was
+   * then permanently true. One transient failure killed paging for the lifetime
+   * of the page: no more sections, no loader, no error, footer straight after
+   * whatever had already rendered. That is the intermittent "rest of the
+   * homepage never appears" report.
    */
-  const requestedPageRef = useRef(1);
+  const sectionsInFlightRef = useRef(false);
+  /*
+   * Pages whose last attempt failed. A retry has to bypass preferCacheValue:
+   * RTK Query keeps a rejected result as a cache entry like any other, so
+   * preferring the cache would hand back the same rejection without ever going
+   * to the network — a retry that can only fail.
+   */
+  const failedSectionPagesRef = useRef(new Set());
+  /*
+   * Set once the server has told us there is nothing further. Distinct from a
+   * failure: this is terminal on purpose, and it unmounts the sentinel so we
+   * stop asking.
+   */
+  const [sectionsExhausted, setSectionsExhausted] = useState(false);
   // Watched element at the end of the rendered sections; see the effect below.
   const sectionsSentinelRef = useRef(null);
 
@@ -545,7 +568,10 @@ const HomeV2 = () => {
     loadedSectionCount > 0 && loadedSectionCount % HOME_SECTIONS_PAGE_SIZE === 0
       ? loadedSectionCount / HOME_SECTIONS_PAGE_SIZE + 1
       : null;
-  const hasMoreSections = nextSectionsPage !== null && nextSectionsPage <= HOME_SECTIONS_MAX_PAGES;
+  const hasMoreSections =
+    !sectionsExhausted &&
+    nextSectionsPage !== null &&
+    nextSectionsPage <= HOME_SECTIONS_MAX_PAGES;
 
   /*
    * Fetches one page and appends it into the page-1 cache entry.
@@ -562,22 +588,38 @@ const HomeV2 = () => {
    */
   const loadNextSectionsPage = useCallback(async () => {
     if (!hasMoreSections) return;
-    // Already in flight or already done — the observer can fire more than once.
-    if (nextSectionsPage <= requestedPageRef.current) return;
-    requestedPageRef.current = nextSectionsPage;
+    if (sectionsInFlightRef.current) return;
+    sectionsInFlightRef.current = true;
 
     let list;
     try {
       // preferCacheValue: a lazy trigger refetches by default, which would
       // re-request every page each time the visitor navigates back to "/".
-      const response = await fetchHomeSectionsPage({ pageNo: nextSectionsPage }, true).unwrap();
+      // Turned off for a page that failed last time, so the retry actually hits
+      // the network instead of replaying the cached rejection.
+      const preferCacheValue = !failedSectionPagesRef.current.has(nextSectionsPage);
+      const response = await fetchHomeSectionsPage(
+        { pageNo: nextSectionsPage },
+        preferCacheValue
+      ).unwrap();
       list = response?.data?.list;
+      failedSectionPagesRef.current.delete(nextSectionsPage);
     } catch {
-      // Below-the-fold content is best effort. The visible page is already
-      // rendered, and the endpoint's own error handling has run.
+      // Transport-level failure. Below-the-fold content is best effort, so no
+      // error UI — but release the guard, because the next time the sentinel
+      // crosses into view this page should be attempted again rather than the
+      // homepage ending here for good.
+      failedSectionPagesRef.current.add(nextSectionsPage);
+      sectionsInFlightRef.current = false;
       return;
     }
-    if (!Array.isArray(list) || list.length === 0) return;
+
+    if (!Array.isArray(list) || list.length === 0) {
+      // The server answered and had nothing. Terminal, unlike the catch above.
+      sectionsInFlightRef.current = false;
+      setSectionsExhausted(true);
+      return;
+    }
 
     const held = new Set(homeSections.map(sectionIdentity));
     const fresh = list.filter((section) => {
@@ -586,7 +628,16 @@ const HomeV2 = () => {
       held.add(id);
       return true;
     });
-    if (fresh.length === 0) return;
+
+    sectionsInFlightRef.current = false;
+
+    if (fresh.length === 0) {
+      // A full page of sections we already hold — the server is ignoring pageNo,
+      // or we have reached the end and it is repeating the last page. Either way
+      // there is nothing more to get, so stop instead of re-requesting forever.
+      setSectionsExhausted(true);
+      return;
+    }
 
     dispatch(
       homeApi.util.updateQueryData("getNewHomeDetails", HOME_FIRST_PAGE_ARG, (draft) => {
@@ -618,10 +669,27 @@ const HomeV2 = () => {
       return undefined;
     }
 
+    /*
+     * Deliberately not disconnected inside the callback.
+     *
+     * It used to `observer.disconnect()` before requesting, and relied on this
+     * effect re-running to build a fresh one. That only happens when
+     * `hasMoreSections` or the `loadNextSectionsPage` identity changes — and both
+     * are derived from the section list, so when a page resolved without
+     * appending anything neither changed, the effect never re-ran, and the only
+     * observer on the page was already disconnected. Combined with the
+     * high-water-mark guard that used to sit in loadNextSectionsPage, a single
+     * failed or duplicate page permanently ended the homepage.
+     *
+     * Staying connected costs nothing: IntersectionObserver only fires on
+     * threshold crossings, so a sentinel that remains in view after a failed
+     * attempt does not spin — the retry happens the next time the visitor
+     * scrolls it back across the boundary. Re-entry during a request is blocked
+     * by sectionsInFlightRef.
+     */
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
-        observer.disconnect();
         loadNextSectionsPage();
       },
       { rootMargin: "600px 0px" }

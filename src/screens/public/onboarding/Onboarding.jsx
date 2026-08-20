@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
@@ -46,9 +46,33 @@ const STEP = {
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const [logoutUser] = useLogoutUserMutation();
+
+  /*
+   * Where to go once this flow finishes.
+   *
+   * Callers that gate a feature behind an account send us here with
+   * `state.from` — the live player does exactly that
+   * (`navigate("/login?skip=welcome", { state: { from: location.pathname } })`),
+   * as does Login.jsx. OTPScreen honours it, but only on the
+   * already-registered branch. A *new* user goes onNext() through personalize →
+   * birth details → LoadingScreen, and LoadingScreen only ever consulted
+   * `shubhtalk_redirect_after_login` in localStorage. Nothing writes that key on
+   * this path, so every first-time signup that started at a gated feature was
+   * dropped on the homepage instead of the thing they asked for — they then have
+   * to find their way back by hand, which is what the live → login → live
+   * bouncing in session recordings is.
+   *
+   * `/login` is excluded for the same reason the localStorage check excludes it:
+   * returning here would loop.
+   */
+  const fromPath =
+    typeof location.state?.from === "string" && location.state.from !== "/login"
+      ? location.state.from
+      : null;
 
   const isPersonalizeFlow = searchParams.get("step") === "personalize";
   const skipGuidance = searchParams.get("skip") === "welcome" || isPersonalizeFlow;
@@ -113,7 +137,10 @@ const Onboarding = () => {
       try {
         const parsedUserData = JSON.parse(userData);
         if (parsedUserData.isRegister) {
-          navigate(PATH.privateRoutes.HOME.path || "/");
+          // Same reasoning as the LoadingScreen fallback: if a gated page sent
+          // this visitor to log in and they turn out to already be logged in,
+          // send them back there rather than to the homepage.
+          navigate(fromPath || PATH.privateRoutes.HOME.path || "/");
         }
       } catch (error) {
         console.error("Error parsing user data:", error);
@@ -317,8 +344,8 @@ const Onboarding = () => {
           localStorage.removeItem("shubhtalk_redirect_after_login");
           navigate(redirectPath);
         } else {
-          // No redirect path, go to home
-          navigate(PATH.privateRoutes.HOME.path || "/");
+          // Fall back to the page that sent us here before defaulting to home.
+          navigate(fromPath || PATH.privateRoutes.HOME.path || "/");
         }
       }}
     />,

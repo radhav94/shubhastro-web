@@ -10,8 +10,28 @@ const LiveSessionCard = memo(({ styles, sectionData }) => {
   const image = sectionData?.image_url?.original || joinLiveSessionImg;
   const displayTitle = sectionData?.display_title || sectionData?.title || "Live Sessions";
 
+  const goLive = () => navigate("/live");
+
   return (
-    <div className={styles.liveSessionCard} onClick={() => navigate("/live")}>
+    // Was a bare <div onClick>: no role, no tabIndex, no key handler, so the
+    // card was unreachable by keyboard and announced as plain text. The visible
+    // "Join Live Session" button below carried no handler of its own and only
+    // worked by bubbling into this div — which meant the one element that looks
+    // like the CTA had nothing attached to it.
+    <div
+      className={styles.liveSessionCard}
+      role="button"
+      tabIndex={0}
+      aria-label={`${displayTitle}: ${title}`}
+      style={{ cursor: "pointer" }}
+      onClick={goLive}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          goLive();
+        }
+      }}
+    >
       <div className={styles.liveSessionContent}>
         <div className={styles.liveSessionBadge}>
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="11" viewBox="0 0 14 11" fill="none">
@@ -31,7 +51,18 @@ const LiveSessionCard = memo(({ styles, sectionData }) => {
           )}
         </h3>
         <p className={styles.liveSessionDesc}>{description}</p>
-        <button className={styles.liveSessionBtn}>
+        {/* tabIndex={-1} so the card and its CTA are one tab stop, not two
+            pointing at the same destination. stopPropagation keeps a mouse
+            click from also firing the card handler. */}
+        <button
+          type="button"
+          className={styles.liveSessionBtn}
+          tabIndex={-1}
+          onClick={(e) => {
+            e.stopPropagation();
+            goLive();
+          }}
+        >
           Join Live Session
         </button>
       </div>
