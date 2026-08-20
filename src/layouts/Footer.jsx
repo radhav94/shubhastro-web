@@ -9,11 +9,9 @@ import { FaYoutube, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 import { Link, NavLink } from "react-router-dom";
 import { useState, useCallback } from "react";
 import { isShubhMallEnabled } from "../utils/featureConfig";
-import { Toast } from "../component";
 import {
   PLAY_STORE_URL,
   APP_STORE_URL,
-  IOS_UNAVAILABLE_MESSAGE,
 } from "../utils/helper/appStoreLinks";
 
 // Footer link data
@@ -134,12 +132,17 @@ const Footer = () => {
         </div>
       </a>
       {/*
-        Rendered as a <button> while APP_STORE_URL is null. An <a> pointing at a
-        404 looks identical to a working one, so the tap produced nothing the
-        visitor could interpret — hence repeat taps. Explaining on tap keeps the
-        promotion visible and tells them what to do instead.
+        The App Store button is hidden entirely until there is an iOS build to
+        link to, rather than shown as a "Coming soon" placeholder.
+        APP_STORE_URL is the single gate, so publishing the app is a one-line
+        change in utils/helper/appStoreLinks.js and this reappears.
+
+        Previously this rendered a <button> that toasted an explanation, which
+        was itself a fix for an <a> pointing at Apple's example ID
+        (`id123456789`) — a guaranteed 404 that produced rage clicks. Not
+        advertising an app that does not exist removes the dead end outright.
       */}
-      {APP_STORE_URL ? (
+      {APP_STORE_URL && (
         <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" className={styles.v2_storeBtn}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff">
             <path d="M17.05 20.28C16.03 21.23 14.96 21.08 13.93 20.63C12.85 20.17 11.85 20.15 10.71 20.63C9.28 21.25 8.52 21.07 7.62 20.28C2.79 15.25 3.51 7.59 9.05 7.31C10.4 7.38 11.34 8.05 12.13 8.11C13.31 7.87 14.44 7.18 15.7 7.27C17.21 7.39 18.35 7.99 19.1 9.07C15.98 10.94 16.72 15.05 19.58 16.2C19.01 17.7 18.27 19.19 17.04 20.29L17.05 20.28ZM12.03 7.25C11.88 5.02 13.69 3.18 15.77 3C16.06 5.58 13.43 7.5 12.03 7.25Z"/>
@@ -149,22 +152,6 @@ const Footer = () => {
             <span className={styles.v2_storeName}>App Store</span>
           </div>
         </a>
-      ) : (
-        <button
-          type="button"
-          className={styles.v2_storeBtn}
-          onClick={() => Toast.info(IOS_UNAVAILABLE_MESSAGE)}
-          aria-disabled="true"
-          title="iOS app coming soon"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff">
-            <path d="M17.05 20.28C16.03 21.23 14.96 21.08 13.93 20.63C12.85 20.17 11.85 20.15 10.71 20.63C9.28 21.25 8.52 21.07 7.62 20.28C2.79 15.25 3.51 7.59 9.05 7.31C10.4 7.38 11.34 8.05 12.13 8.11C13.31 7.87 14.44 7.18 15.7 7.27C17.21 7.39 18.35 7.99 19.1 9.07C15.98 10.94 16.72 15.05 19.58 16.2C19.01 17.7 18.27 19.19 17.04 20.29L17.05 20.28ZM12.03 7.25C11.88 5.02 13.69 3.18 15.77 3C16.06 5.58 13.43 7.5 12.03 7.25Z"/>
-          </svg>
-          <div className={styles.v2_storeInfo}>
-            <span className={styles.v2_storeLabel}>Coming soon to the</span>
-            <span className={styles.v2_storeName}>App Store</span>
-          </div>
-        </button>
       )}
     </div>
   );
