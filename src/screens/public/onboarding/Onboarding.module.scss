@@ -2257,13 +2257,30 @@
   margin: 0;
   text-align: center;
 
+  /*
+    The link inside this sentence was `text-decoration: none` with an underline
+    only on `:hover` — and hover does not exist on a touchscreen. On a phone it
+    was therefore 12px orange text with no underline, sitting inside a 12px grey
+    sentence: it read as emphasis rather than a link, and the tap target was a
+    couple of words tall. Taps landed on the surrounding sentence, which is plain
+    text and does nothing.
+
+    Always underlined now, and padded out so the target is taller than the text.
+  */
   a {
     color: #F75801;
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
     font-weight: 500;
+    /* Vertical padding grows the touch target without shifting the line box. */
+    padding: 6px 2px;
+    margin: -6px 0;
+    display: inline-block;
 
-    &:hover {
-      text-decoration: underline;
+    &:focus-visible {
+      outline: 2px solid #F75801;
+      outline-offset: 2px;
+      border-radius: 4px;
     }
   }
 }
@@ -2343,6 +2360,24 @@
   justify-content: center;
   gap: 10px;
   // width: 25%;
+
+  /* Rendered as a <button> so the tap these cells already attract gets an
+     answer. Reset the button chrome — note `font: inherit` matters, buttons do
+     not inherit font from the page. `text-align` too, since buttons centre. */
+  appearance: none;
+  background: none;
+  border: none;
+  font: inherit;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
   &:not(:last-child){
     border-right: 2px solid #F4DDCB;
   }
