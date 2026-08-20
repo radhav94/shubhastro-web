@@ -186,8 +186,24 @@
   <meta name="google-site-verification" content="rul7_n9V8ZCcyyJBZ6TpxHZdhz2BWtKHpn0kSRmmtO0" />
   <meta name="facebook-domain-verification" content="9gkyhfsfu85v34pdp6jp3js3w2yr9y" />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/images/mobile-shubh-astro-logo.png" />
+  <!--
+    Favicon.
+
+    These are served from public/, which Vite copies to the site root — so
+    /images/x resolves to public/images/x. They previously pointed at
+    /images/mobile-shubh-astro-logo.png when only the .svg existed there; the PNG
+    was sitting in src/assets/images/, which is not served at this path (a file
+    under src/ is only reachable via a JS/CSS import, which emits a hashed
+    /assets/ URL instead). All three requests 404'd, so the tab fell back to the
+    browser's default globe.
+
+    The declared type was also wrong: `image/svg+xml` on a .png. Browsers sniff
+    the bytes so it still painted where the file existed, but it makes the
+    manifest's matching entry fail validation, so keep it accurate.
+  -->
+  <link rel="icon" type="image/png" sizes="80x80" href="/images/mobile-shubh-astro-logo.png" />
+  <!-- Scalable variant for browsers that prefer it; renders crisply at any size. -->
+  <link rel="icon" type="image/svg+xml" href="/images/mobile-shubh-astro-logo.svg" />
   <link rel="shortcut icon" href="/images/mobile-shubh-astro-logo.png" />
   <link rel="apple-touch-icon" href="/images/mobile-shubh-astro-logo.png" />
 
