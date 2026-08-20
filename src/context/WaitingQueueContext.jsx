@@ -270,6 +270,30 @@ export const WaitingQueueProvider = ({ children }) => {
   const { setChatApprovalData, chatApprovalData, activeChat, setActiveChat, setChatSeconds, setWaitingList: setChatWaitingList, stopTimer: stopChatTimer } = useChat();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
+  /*
+    Live mirrors of the approval state, for the socket handlers below.
+
+    Those handlers are registered in an effect keyed on [userIdLocal], so they
+    are created once and close over the *first* render's `callApprovalData` /
+    `chatApprovalData` — both `null`. Every guard of the shape
+
+        if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
+
+    therefore evaluated `null?.roomId === roomId` → false, and never cleared the
+    approval state. on_hold, ring_timeout, unavailable, canceled and rejected all
+    called stopIncomingSound() directly so the ring went quiet, but the state
+    behind it stayed set. Any later ring then flipped that state and re-ran the
+    effect below, restarting a looping sound with no live "stop" path — a
+    ringtone with no call on screen.
+
+    Reading through refs makes the guards evaluate against the current value
+    without re-registering the socket listeners on every approval change.
+  */
+  const callApprovalRef = useRef(null);
+  const chatApprovalRef = useRef(null);
+  useEffect(() => { callApprovalRef.current = callApprovalData; }, [callApprovalData]);
+  useEffect(() => { chatApprovalRef.current = chatApprovalData; }, [chatApprovalData]);
+
   // Ring sound: loop while an astrologer has accepted and the user is being
   // asked to join (approval data is set), and stop the moment that state is
   // cleared — i.e. when the user joins, cancels, or rejects, or the ring ends
@@ -367,7 +391,7 @@ export const WaitingQueueProvider = ({ children }) => {
       stopIncomingSound();
       const { roomId } = data;
       if (roomId) releaseRoom(roomId);
-      if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
+      if (callApprovalRef.current?.roomId === roomId) setCallApprovalData(null);
       if (roomId) updateStatusByRoomId(roomId, "on_hold");
     };
 
@@ -377,7 +401,7 @@ export const WaitingQueueProvider = ({ children }) => {
       stopIncomingSound();
       const { roomId } = data;
       if (roomId) releaseRoom(roomId);
-      if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
+      if (chatApprovalRef.current?.roomId === roomId) setChatApprovalData(null);
       if (roomId) updateStatusByRoomId(roomId, "on_hold");
     };
 
@@ -386,7 +410,7 @@ export const WaitingQueueProvider = ({ children }) => {
       const { roomId } = data;
       if (roomId) releaseRoom(roomId);
       if (roomId) removePendingConnection(roomId);
-      if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
+      if (callApprovalRef.current?.roomId === roomId) setCallApprovalData(null);
     };
 
     const handleChatUnavailable = (data) => {
@@ -394,7 +418,7 @@ export const WaitingQueueProvider = ({ children }) => {
       const { roomId } = data;
       if (roomId) releaseRoom(roomId);
       if (roomId) removePendingConnection(roomId);
-      if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
+      if (chatApprovalRef.current?.roomId === roomId) setChatApprovalData(null);
     };
 
     const handleCanceled = (data) => {
@@ -403,8 +427,8 @@ export const WaitingQueueProvider = ({ children }) => {
       if (canceledRoomId) {
         releaseRoom(canceledRoomId);
         removePendingConnection(canceledRoomId);
-        if (callApprovalData?.roomId === canceledRoomId) setCallApprovalData(null);
-        if (chatApprovalData?.roomId === canceledRoomId) setChatApprovalData(null);
+        if (callApprovalRef.current?.roomId === canceledRoomId) setCallApprovalData(null);
+        if (chatApprovalRef.current?.roomId === canceledRoomId) setChatApprovalData(null);
       }
     };
 
@@ -417,8 +441,8 @@ export const WaitingQueueProvider = ({ children }) => {
       if (rejectedRoomId) {
         releaseRoom(rejectedRoomId);
         removePendingConnection(rejectedRoomId);
-        if (callApprovalData?.roomId === rejectedRoomId) setCallApprovalData(null);
-        if (chatApprovalData?.roomId === rejectedRoomId) setChatApprovalData(null);
+        if (callApprovalRef.current?.roomId === rejectedRoomId) setCallApprovalData(null);
+        if (chatApprovalRef.current?.roomId === rejectedRoomId) setChatApprovalData(null);
       } else if (rejectedAstrologerId) {
         removePendingByAstrologer(rejectedAstrologerId);
       }
@@ -606,8 +630,8 @@ export const WaitingQueueProvider = ({ children }) => {
       removePendingConnection(roomId);
 
       // Clear approval data if it matches
-      if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
-      if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
+      if (callApprovalRef.current?.roomId === roomId) setCallApprovalData(null);
+      if (chatApprovalRef.current?.roomId === roomId) setChatApprovalData(null);
     };
 
     // session:dismissed — multi-device sync: another device already handled this session
@@ -624,8 +648,8 @@ export const WaitingQueueProvider = ({ children }) => {
       removePendingConnection(roomId);
 
       // Clear approval popups if they match this roomId
-      if (callApprovalData?.roomId === roomId) setCallApprovalData(null);
-      if (chatApprovalData?.roomId === roomId) setChatApprovalData(null);
+      if (callApprovalRef.current?.roomId === roomId) setCallApprovalData(null);
+      if (chatApprovalRef.current?.roomId === roomId) setChatApprovalData(null);
     };
 
     /* ================= GLOBAL CHAT:ENDED HANDLER ================= */
@@ -644,7 +668,7 @@ export const WaitingQueueProvider = ({ children }) => {
       if (endedRoomId) removePendingConnection(endedRoomId);
 
       // Clear approval data if it matches
-      if (chatApprovalData?.roomId === endedRoomId) setChatApprovalData(null);
+      if (chatApprovalRef.current?.roomId === endedRoomId) setChatApprovalData(null);
 
       // Always clear active chat, stop timer, and clean up session
       // The server is authoritative — if it says chat ended, it ended
