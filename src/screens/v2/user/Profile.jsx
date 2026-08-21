@@ -1222,27 +1222,19 @@ const Profile = () => {
   };
 
   const handleDeleteClick = (kundli) => {
-    console.log("=== DELETE BUTTON CLICKED ===");
-    console.log("Full kundli object:", kundli);
-    console.log("Available ID fields:");
-    console.log("  - kundli._id:", kundli._id);
-    console.log("  - kundli.id:", kundli.id);
-    console.log("  - kundli.kundli_ID:", kundli.kundli_ID);
-    console.log("  - kundli.kundliId:", kundli.kundliId);
-    
     // Use _id (same as other working components)
     const idToDelete = kundli._id;
-    
+
     if (!idToDelete) {
-      console.error("❌ No valid ID found!");
+      // Left as console.error: this is a real fault worth surfacing. The
+      // surrounding block used to print ten console.logs including the whole
+      // kundli object — name, birth date, time and place — into every
+      // visitor's console on each delete tap.
+      console.error("Cannot delete profile: no _id on kundli record");
       Toast.error("Cannot delete: Invalid profile ID");
       return;
     }
-    
-    console.log("✅ Using ID:", idToDelete);
-    console.log("ID type:", typeof idToDelete);
-    console.log("ID length:", idToDelete.length);
-    
+
     setProfileToDelete(idToDelete);
     setShowDeleteModal(true);
   };
@@ -1603,6 +1595,47 @@ const Profile = () => {
     return "🐏";
   })();
 
+  /*
+    Entry point for the header identity block (avatar, name, birth-date line).
+
+    That block was plain, inert text. Tapping your own avatar or name at the top
+    of a profile to edit your details is a near-universal convention, so people
+    tap it — Clarity recorded repeated dead clicks on exactly this target (the
+    avatar initial and the name sit adjacent, so they are reported together as
+    one element) and on the date line beneath it, after which the visitor gave
+    up and logged out.
+
+    The edit flow already existed via handleEditClick — it simply had no entry
+    point from the header, so the only way in was the profile list further down
+    the page. When there is no profile yet the same tap opens Add Profile, so it
+    always resolves to something rather than trading one dead click for another.
+
+    Declared here, below primaryProfile / handleEditClick / handleOpenAddProfileModal,
+    so none of them are referenced while still in their temporal dead zone.
+  */
+  const handleEditOwnDetails = () => {
+    if (primaryProfile) {
+      handleEditClick(primaryProfile);
+      return;
+    }
+    handleOpenAddProfileModal();
+  };
+
+  const ownDetailsActivation = {
+    role: "button",
+    tabIndex: 0,
+    "aria-label": primaryProfile
+      ? "Edit your birth details"
+      : "Add your birth details",
+    onClick: handleEditOwnDetails,
+    onKeyDown: (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleEditOwnDetails();
+      }
+    },
+  };
+
   return (
     <div className={styles.profilePage}>
       {/* Header */}
@@ -1612,16 +1645,34 @@ const Profile = () => {
         </button>
 
         <div className={styles.headerCenter}>
-          <div className={styles.userAvatar}>
+          {/*
+            Pointer-only companion target for the block below. Deliberately has
+            no role/tabIndex: it triggers the same action as the labelled button
+            beside it, so adding a second focusable node would just duplicate the
+            control for keyboard and screen-reader users.
+          */}
+          <div
+            className={styles.userAvatar}
+            onClick={handleEditOwnDetails}
+            aria-hidden="true"
+          >
             <span>{userAvatarDisplay}</span>
           </div>
           <div className={styles.headerInfo}>
-            <h1 className={styles.profileName}>{userName}</h1>
-            <p className={styles.profileDetails}>
-              {primaryProfile
-                ? `${dayjs(`${primaryProfile.year}-${primaryProfile.month}-${primaryProfile.day}`).format("DD MMM YYYY")} • ${String(primaryProfile.hour > 12 ? primaryProfile.hour - 12 : primaryProfile.hour === 0 ? 12 : primaryProfile.hour).padStart(2, "0")}:${String(primaryProfile.min).padStart(2, "0")} ${primaryProfile.hour >= 12 ? "PM" : "AM"}`
-                : " "}
-            </p>
+            <div className={styles.headerIdentity} {...ownDetailsActivation}>
+              <h1 className={styles.profileName}>
+                {userName}
+                <LuPencilLine
+                  className={styles.profileNameEditIcon}
+                  aria-hidden="true"
+                />
+              </h1>
+              <p className={styles.profileDetails}>
+                {primaryProfile
+                  ? `${dayjs(`${primaryProfile.year}-${primaryProfile.month}-${primaryProfile.day}`).format("DD MMM YYYY")} • ${String(primaryProfile.hour > 12 ? primaryProfile.hour - 12 : primaryProfile.hour === 0 ? 12 : primaryProfile.hour).padStart(2, "0")}:${String(primaryProfile.min).padStart(2, "0")} ${primaryProfile.hour >= 12 ? "PM" : "AM"}`
+                  : "Add your birth details"}
+              </p>
+            </div>
             {user?.phoneNumber && (
               <p className={styles.profileDetails}>
                 {user.phoneNumber.startsWith("+")
