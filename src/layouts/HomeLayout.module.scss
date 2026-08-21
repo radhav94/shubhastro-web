@@ -29,7 +29,7 @@ $mobile-screen-width: 500px;
   }
 .topLinkWrap{
     background-color: #ffffff31;
-    padding-block: 16px;
+    padding-block: 0px;
     .topLinkDesktop{
       display: block;
       @media screen and (max-width: 768px) {

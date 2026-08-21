@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams, Link } from "react-router-dom";
 import { LiveListProvider } from "../../../../../context/LiveListContext";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
@@ -23,6 +23,11 @@ import styles from "./LivePlayerPage.module.scss";
 const importInteractiveLiveStreaming = () => import("./InteractiveLiveStreaming");
 const InteractiveLiveStreaming = lazy(importInteractiveLiveStreaming);
 
+// How often to re-check for streams while the "nobody is live" card is showing.
+// Only ever runs on that state and only while the tab is visible, so this is a
+// handful of requests per idle visitor rather than a background poll for everyone.
+const EMPTY_STATE_POLL_MS = 30000;
+
 const LivePlayerPage = () => {
   const { channelId } = useParams();
   const [lives, setLives] = useState([]);
@@ -30,11 +35,22 @@ const LivePlayerPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
 
-  // Guests may watch live streams, so there is no login gate here. Kept as a
-  // named callback (rather than inlined in the effect) so the "Try again" /
-  // "Check again" buttons and the auto-resume listener below can all re-run it.
-  const loadLives = useCallback(() => {
-    setIsLoading(true);
+  /*
+    Guests may watch live streams, so there is no login gate here.
+
+    `silent` is for the background refreshes below (the poll and the socket
+    listener): it skips the loading and failure state changes so a refresh behind
+    the "Nobody is live right now" card does not replace that card with a spinner,
+    and a transient failure does not swap a valid empty state for an error one.
+
+    Note the deliberate `loadLives` wrapper underneath. This function cannot be
+    passed straight to `onClick`, because React would hand the click event in as
+    `options` and `options.silent` on a SyntheticEvent is undefined-but-the-object-
+    is-truthy territory — easy to get wrong later. The wrapper takes no arguments,
+    so button handlers and the mount effect can never leak one in.
+  */
+  const fetchLives = ({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
 
     // Start fetching the Agora chunk alongside the live list rather than after
     // it, so splitting the player out does not add a round trip for viewers who
@@ -94,46 +110,83 @@ const LivePlayerPage = () => {
 
       setLives(liveList);
       setLoadFailed(false);
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }).catch(() => {
       // The failure used to be indistinguishable from "nobody is live": both
       // ended with an empty list and a screen that explained neither.
-      setLoadFailed(true);
-      setIsLoading(false);
+      if (!silent) {
+        setLoadFailed(true);
+        setIsLoading(false);
+      }
     });
-  }, [channelId]);
+  };
 
-  useEffect(loadLives, [loadLives]);
-
-  /*
-    Auto-resume when an astrologer goes live while nothing is playing.
-
-    The "Nobody is live right now" card below used to be a dead end until the
-    visitor tapped "Check again" — the reel's own live:session_started handling
-    lives inside LiveStreamingContainer, which isn't mounted when the list is
-    empty. So a viewer who sat through the last astrologer signing off had to
-    poll by hand.
-
-    `useAstrologerStatusSocket` (mounted once in App) re-dispatches the socket
-    event on `window`, so this needs no second socket connection.
-
-    Guarded on the list actually being empty: while a stream is on screen the
-    container handles new sessions itself, and re-fetching here would yank the
-    reel out from under the viewer.
-  */
-  const livesRef = useRef(lives);
-  useEffect(() => { livesRef.current = lives; }, [lives]);
+  // Argument-free wrapper — safe to hand directly to onClick. See fetchLives.
+  const loadLives = () => {
+    fetchLives();
+  };
 
   useEffect(() => {
+    fetchLives();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channelId]);
+
+  /*
+    Re-check for streams while the empty state is on screen.
+
+    The empty card told the visitor to "check back shortly" and gave them a
+    manual "Check again" button, and that was the only way the page could ever
+    learn that somebody had gone live. So they check by hand — one session shows
+    a visitor bouncing between the homepage and this page for an hour and a half
+    across 17 page loads, with long idle gaps between clicks. They were polling
+    us manually.
+
+    Runs only while there is genuinely nothing to watch, so it never competes
+    with the Agora player: the moment the list comes back non-empty this effect
+    tears the interval down, and it is skipped entirely on the loading and
+    failure states (the failure state has its own retry, which the visitor should
+    stay in control of). Silent, so the card does not flicker.
+  */
+  useEffect(() => {
+    if (isLoading || loadFailed || lives.length > 0) return undefined;
+
+    const id = setInterval(() => {
+      // Don't poll a page nobody is looking at — this state can sit open for a
+      // very long time, which is the whole reason it exists.
+      if (document.visibilityState === "visible") {
+        fetchLives({ silent: true });
+      }
+    }, EMPTY_STATE_POLL_MS);
+
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, loadFailed, lives.length]);
+
+  /*
+    Same job as the poll above, but instant.
+
+    The poll is the safety net — it also covers a dropped socket — while this
+    picks the stream up the moment an astrologer goes live instead of up to 30s
+    later. `useAstrologerStatusSocket` (mounted once in App) re-dispatches the
+    socket event on `window`, so this needs no second socket connection.
+
+    Attached under exactly the same guard as the poll, so it only exists while
+    there is nothing to watch: while a stream is on screen LiveStreamingContainer
+    handles new sessions itself, and refetching here would yank the reel out from
+    under the viewer. Silent for the same reason the poll is.
+  */
+  useEffect(() => {
+    if (isLoading || loadFailed || lives.length > 0) return undefined;
+
     const onLiveStatus = (event) => {
       if (event?.detail?.status !== "started") return;
-      if (livesRef.current.length > 0) return;
-      loadLives();
+      fetchLives({ silent: true });
     };
 
     window.addEventListener("live:astrologer_status", onLiveStatus);
     return () => window.removeEventListener("live:astrologer_status", onLiveStatus);
-  }, [loadLives]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, loadFailed, lives.length]);
 
   /*
    * Every exit from this page used to be `return null`, i.e. a blank white page

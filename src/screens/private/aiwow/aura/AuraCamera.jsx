@@ -7,6 +7,11 @@ import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setAuraImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
+import toast from '../../../../component/toast';
+
+// How long a detection block persists before we let the user shoot anyway.
+// Mirrors PalmistryCamera's MANUAL_OVERRIDE_AFTER_MS.
+const MANUAL_OVERRIDE_AFTER_MS = 8000;
 
 const AuraCamera = () => {
   const navigate = useNavigate();
@@ -223,9 +228,46 @@ const AuraCamera = () => {
 
   const captureImage = () => {
     const cropCanvas = cropCurrentFrameToCanvas();
-    if (!cropCanvas) return;
+    if (!cropCanvas) {
+      // Was a bare return. The frame is not croppable when the video has no
+      // dimensions yet, which is indistinguishable from a broken shutter.
+      toast.error('Camera is still warming up — try that again in a second.');
+      return;
+    }
     setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
     stopCamera();
+  };
+
+  /*
+    Capture is blocked while the models are loaded but no face is found.
+
+    That state is indefinite — poor light, a front camera that struggles, or the
+    model simply not locking on — and the shutter was rendered `disabled`, so the
+    button read "No Face Detected", dimmed, and swallowed every tap. Unlike the
+    palmistry scanner there is no upload fallback on this screen, so there was no
+    way forward at all.
+
+    Same escape hatch as PalmistryCamera: keep the button live, explain the
+    blocker on tap, and after a grace period take the shot anyway. Aura analysis
+    reads colour around the subject rather than facial landmarks, so a frame the
+    detector was unsure about is still worth submitting.
+  */
+  const captureBlocked = modelsLoaded && !faceDetected;
+  const [manualCaptureAllowed, setManualCaptureAllowed] = useState(false);
+
+  useEffect(() => {
+    if (!captureBlocked || manualCaptureAllowed || capturedImage) return undefined;
+    const timer = setTimeout(() => setManualCaptureAllowed(true), MANUAL_OVERRIDE_AFTER_MS);
+    return () => clearTimeout(timer);
+  }, [captureBlocked, manualCaptureAllowed, capturedImage]);
+
+  // Every tap gets a response: a photo, or a reason.
+  const handleCaptureTap = () => {
+    if (!captureBlocked || manualCaptureAllowed) {
+      captureImage();
+      return;
+    }
+    toast.error('No face detected yet — move into the frame and find brighter light.');
   };
 
   // Auto-capture the sharpest frame once a face is steady in the frame.
@@ -381,19 +423,29 @@ const AuraCamera = () => {
 
       <div className={styles.controls}>
         {!capturedImage ? (
-          <button 
-            className={`${styles.captureButton} ${(!faceDetected && modelsLoaded) ? styles.disabled : ''}`} 
-            onClick={captureImage}
-            disabled={!faceDetected && modelsLoaded}
+          // aria-disabled, not `disabled` — the dimming still conveys the state,
+          // but the tap has to reach handleCaptureTap to be answered.
+          <button
+            type="button"
+            className={`${styles.captureButton} ${captureBlocked && !manualCaptureAllowed ? styles.disabled : ''}`}
+            onClick={handleCaptureTap}
+            aria-disabled={captureBlocked && !manualCaptureAllowed}
+            aria-label={captureBlocked ? 'No face detected yet' : 'Capture aura photo'}
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={(!faceDetected && modelsLoaded) ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={(!faceDetected && modelsLoaded) ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={captureBlocked && !manualCaptureAllowed ? "0.5" : "1"}/>
+                <circle cx="20" cy="20" r="14" fill="white" opacity={captureBlocked && !manualCaptureAllowed ? "0.5" : "1"}/>
               </svg>
             </div>
             <span className={styles.captureText}>
-              {!modelsLoaded ? 'Loading...' : (faceDetected ? 'Capture' : 'No Face Detected')}
+              {!modelsLoaded
+                ? 'Loading...'
+                : faceDetected
+                  ? 'Capture'
+                  : manualCaptureAllowed
+                    ? 'Capture anyway'
+                    : 'No Face Detected'}
             </span>
           </button>
         ) : (

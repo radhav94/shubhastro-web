@@ -78,20 +78,36 @@ const COMMUNITY_AVATARS = [
 const heroBg = "https://assets.shubhastro.ai/images/ai-suite.png";
 
 /**
- * "Sign in" affordance inside the guest greeting.
+ * Hero greeting.
  *
- * This used to be an onClick + underline on the whole `<p>`, with the hint as a
- * 12px inline span. The handler worked, but the actual target was a short run of
- * small text inside a paragraph — so a near-miss landed on the surrounding
- * padding and did nothing, which is how it shows up as a dead click on the one
- * element a guest reaches for to sign in. As a real button it gets a padded hit
- * area, keyboard access and a proper accessible name.
+ * History: this was originally an onClick + underline on the whole `<p>` with
+ * the hint as a 12px inline span, then the "Sign in" run was promoted to a real
+ * padded button. That fixed the near-miss problem but left the rest of the line
+ * — "Hello, Guest! 👋" — as inert text sitting immediately beside the control.
+ * "Guest" reads as a placeholder for your own name, so reaching for it is the
+ * obvious move, and Clarity still recorded a dead click on this greeting ten
+ * seconds into a first-time visit from Instagram.
+ *
+ * So for guests the whole line is now one control rather than text with a small
+ * button embedded in it. That removes the target ambiguity instead of making the
+ * small target slightly bigger again. Signed-in visitors keep plain text —
+ * there is nothing for them to activate here, and inventing something would
+ * just be a different wrong answer.
  */
-const GuestSignInLink = ({ onClick }) => (
-  <button type="button" className={styles.guestSignInLink} onClick={onClick}>
-    Sign in
-  </button>
-);
+const HeroGreeting = ({ name, onSignIn }) => {
+  if (name !== "Guest") {
+    return <p className={styles.greeting}>Hello, {name}! 👋</p>;
+  }
+  return (
+    <button
+      type="button"
+      className={styles.greetingGuestBtn}
+      onClick={onSignIn}
+    >
+      Hello, Guest! 👋 <span className={styles.guestSignInLink}>Sign in</span>
+    </button>
+  );
+};
 
 /**
  * Where an ai-services hero card sends the visitor, or null if the CMS item
@@ -166,9 +182,11 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
           <div className={styles.centerCard}>
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
-                <p className={styles.greeting} key={`greeting-${name}`}>
-                  Hello, {name}! 👋 {name === "Guest" && <GuestSignInLink onClick={() => navigate("/login")} />}
-                </p>
+                <HeroGreeting
+                  key={`greeting-${name}`}
+                  name={name}
+                  onSignIn={() => navigate("/login")}
+                />
                 <h1>
                   {section.title
                     ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></>
@@ -342,7 +360,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                 src={aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon}
                 alt=""
                 width="200"
-                height="200"
+                height="187"
                 loading="lazy"
               />
             ) : null}
@@ -417,9 +435,7 @@ const renderUngroupedHeroSection = (section, props) => {
       return (
         <section key={key} className={styles.heroBanner} style={{ margin: '16px 0' }}>
           <div className={styles.heroContent}>
-            <p className={styles.greeting}>
-              Hello, {name}! 👋 {name === "Guest" && <GuestSignInLink onClick={() => navigate("/login")} />}
-            </p>
+            <HeroGreeting name={name} onSignIn={() => navigate("/login")} />
             <h1>{section.title ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></> : <>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></>}</h1>
             {currentMahadasha && <div className={styles.mahadashaTag}>🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong></div>}
           </div>

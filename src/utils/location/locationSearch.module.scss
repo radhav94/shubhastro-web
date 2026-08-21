@@ -114,3 +114,23 @@ input[type="time"] {
   text-align: center;
   color: #777;
 }
+
+// Retry for a failed lookup. `font: inherit` so the button reset does not pull
+// in the UA's system font and shrink it out of line with the message it sits in.
+.retryBtn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  padding: 4px 6px;
+  font: inherit;
+  font-weight: 600;
+  color: #f75801;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}

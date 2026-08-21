@@ -47,25 +47,52 @@ const SideBar = ({ open, onClose }) => {
     return "en";
   });
 
+  /*
+    Logout.
+
+    This diverged from TopHeader's handleLogout in two ways that both leave the
+    app looking logged in after a successful logout:
+
+    1. `shubhtalk_user` was never removed. That is the key getUserFromStorage()
+       reads, so the previous user's name and phone survived logout and the
+       header kept rendering them (also worth removing on its own account — it is
+       personal data left behind on a shared device).
+
+    2. No "auth-change" event was dispatched. Both TopHeader and TopBar re-read
+       auth state only on mount and on that event, and this handler navigates
+       client-side without a reload — so nothing told them to refresh. The header
+       kept showing the logged-in avatar and wallet balance.
+
+    Together those meant tapping Logout appeared to do nothing but move you to the
+    homepage, which invites a second tap at the header — and because the token
+    *was* cleared, TopHeader's `!token` branch then sends that tap to
+    /login?skip=welcome. That matches the repeated logout clicks in the session
+    recordings.
+
+    Token removal is also no longer gated behind an exact `shubhtalk_role` match.
+    Every login path sets that key today, so the branch does currently hold, but
+    a logout that silently keeps the session token whenever one key is missing or
+    cased differently is not a risk worth carrying. Removing keys that are not
+    present is a no-op, so clearing both roles unconditionally is strictly safer.
+  */
   const handleLogout = () => {
-    // Dispatch Redux logout action
     dispatch(logout());
-     dispatch(clearSelectedKundli());
-     dispatch(clearAllCalculatorData());
-    
-    const role = localStorage.getItem("shubhtalk_role");
+    dispatch(clearSelectedKundli());
+    dispatch(clearAllCalculatorData());
 
-    if (role === "ASTROLOGER") {
-      localStorage.removeItem("shubhtalk_astro_token");
-      localStorage.removeItem("shubhtalk_astro_id");
-    }
+    [
+      "shubhtalk_astro_token",
+      "shubhtalk_astro_id",
+      "shubhtalk_customer_token",
+      "shubhtalk_customer_id",
+      "shubhtalk_customer_wallet",
+      "shubhtalk_role",
+      "shubhtalk_user",
+      "selectedKundliProfile",
+      "astro_wallet_balance",
+    ].forEach((key) => localStorage.removeItem(key));
 
-    if (role === "CUSTOMER") {
-      localStorage.removeItem("shubhtalk_customer_token");
-      localStorage.removeItem("shubhtalk_customer_id");
-      localStorage.removeItem("shubhtalk_customer_wallet");
-    }
-    localStorage.removeItem("shubhtalk_role");
+    window.dispatchEvent(new Event("auth-change"));
     navigate("/");
     onClose();
   };

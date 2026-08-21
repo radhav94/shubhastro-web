@@ -1496,6 +1496,14 @@
   gap: 2px;
 }
 
+/* Now role="button" tabIndex={0}, so it needs a visible focus ring.
+   Mirrors the same rule in HoroscopeOld.css. */
+.horoscope-profile-center:focus-visible {
+  outline: 2px solid #F75801;
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
 .horoscope-profile-label {
   font-size: 14px;
   color: #000000;
