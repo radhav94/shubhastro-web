@@ -2630,7 +2630,14 @@ const Profile = () => {
         onClose={handleClosePopup}
         astrologer={latestAstrologerData?.data || selectedAstrologer}
         isLoadingAstrologer={isLoadingAstrologer || isFetchingAstrologer}
-        onChatStart={(...args) => { setLastConnectionType("chat"); return handleChatStart(...args); }}
+        // ConnectAstrologerPopup calls onChatStart(astrologer, isEmergency), but
+        // the hook's signature is (astro, checkBalance, isEmergency). Spreading
+        // the popup's args put `isEmergency` into `checkBalance`, so a `false`
+        // there skipped the balance + availability check entirely and the chat
+        // was fired at an offline astrologer, which the server then dropped.
+        // Map the arguments explicitly.
+        // onCallStart already lines up: (astro, type, isEmergency).
+        onChatStart={(astro, isEmergency = false) => { setLastConnectionType("chat"); return handleChatStart(astro, true, isEmergency); }}
         onCallStart={(...args) => { setLastConnectionType(args[1] || "audio"); return handleCallStart(...args); }}
         onEmergencyAvailable={() => {
           setIsConnectPopupOpen(false);
@@ -2642,10 +2649,17 @@ const Profile = () => {
         isOpen={showEmergencyModal}
         onClose={() => setShowEmergencyModal(false)}
         astrologer={latestAstrologerData?.data || selectedAstrologer}
+        // The third argument is what marks this as an emergency session. It was
+        // missing, so the hook treated an emergency chat as a normal one, hit its
+        // "astrologer is offline" guard and returned { emergencyAvailable: true }
+        // instead of emitting chat:initiate. EmergencySessionModal discards
+        // return values, so the tap did nothing at all — chat from Order History
+        // never connected for an offline astrologer, while Call (which did pass
+        // the flag) worked.
         onChatNow={(astro) => {
           setShowEmergencyModal(false);
           activeAstroRef.current = astro;
-          handleChatStart(astro, true);
+          handleChatStart(astro, true, true);
         }}
         onCallNow={(astro) => {
           setShowEmergencyModal(false);

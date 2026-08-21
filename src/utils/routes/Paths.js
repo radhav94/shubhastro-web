@@ -289,9 +289,9 @@ const LoveTriangleSelectionPage = lazy(() => import("../../screens/private/v2/ta
 const LoveTriangleResultPage = lazy(() => import("../../screens/private/v2/tarot/LoveTriangleResultPage"));
 
 // import Home from "../../screens/v2/home/Home";
+// The "/" landing screen. Named `Home` here because that is the role it plays;
+// the file is still called HomeV2 from when it superseded screens/v2/home/Home.
 import Home from "../../screens/v2/home-v2/HomeV2";
-const HomeNew = lazy(() => import("../../screens/v2/home-new/HomeNew"));
-import HomeV2 from "../../screens/v2/home-v2/HomeV2";
 const ProfileV2 = lazy(() => import("../../screens/v2/user/Profile"));
 const Explore = lazy(() => import("../../screens/private/explore/Explore"));
 const AddProfile = lazy(() => import("../../screens/v2/user/AddProfile"));
@@ -364,18 +364,6 @@ export const PATH = {
     HOME: {
       path: "/",
       element: Home,
-      header: true,
-      footer: true,
-    },
-    HOME_NEW: {
-      path: "/home-new",
-      element: HomeNew,
-      header: true,
-      footer: true,
-    },
-    HOME_V2: {
-      path: "/home-v2",
-      element: HomeV2,
       header: true,
       footer: true,
     },
@@ -890,23 +878,40 @@ export const PATH = {
       element: ClothColorResult,
       header: false,
     },
+    /*
+     * The bare paths below (third entry in each array) are the ones the footer
+     * links to — see `footerLinkSections` in layouts/HomeLayout.jsx.
+     *
+     * They were missing on these five, while the six sibling AI-Wow features
+     * registered them from the start (`["/ai-wow/ai-palmistry-scanner",
+     * "/ai-palmistry-scanner"]` and the same for astro-face-reading,
+     * signature-analysis, gemstone-authenticity, clothes-colour-analysis and
+     * aura-photography). So half the AI-Wow footer links opened the feature and
+     * half fell through to `path: "*"` -> NotFound, which is indistinguishable
+     * from a broken button: the visitor taps, gets a not-found page, comes back
+     * and taps again. "Smart MatchMaking" is the one that shows up in session
+     * recordings as repeat clicks on a relationship feature.
+     *
+     * Adding an alias cannot break an existing URL, so the prefixed forms keep
+     * working for anything already linking to them.
+     */
     TALK_TO_KUNDLI_CHAT: {
-      path: ["/ai-wow/talk-to-your-kundli", "/aiwow/talk-to-your-kundli"],
+      path: ["/ai-wow/talk-to-your-kundli", "/aiwow/talk-to-your-kundli", "/talk-to-your-kundli"],
       element: TalkToKundliChat,
       header: false,
     },
     COSMIC_CHAT: {
-      path: ["/ai-wow/cosmic-chat", "/aiwow/cosmic-chat"],
+      path: ["/ai-wow/cosmic-chat", "/aiwow/cosmic-chat", "/cosmic-chat"],
       element: CosmicChat,
       header: false,
     },
     DAILY_COSMIC_BRIEFING: {
-      path: ["/ai-wow/daily-cosmic-briefing", "/aiwow/daily-cosmic-briefing"],
+      path: ["/ai-wow/daily-cosmic-briefing", "/aiwow/daily-cosmic-briefing", "/daily-cosmic-briefing"],
       element: DailyCosmicBriefing,
       header: false,
     },
     DREAM_INTERPRETER: {
-      path: ["/ai-wow/dream-interpreter", "/aiwow/dream-interpreter"],
+      path: ["/ai-wow/dream-interpreter", "/aiwow/dream-interpreter", "/dream-interpreter"],
       element: DreamInterpreter,
       header: false,
     },
@@ -916,7 +921,7 @@ export const PATH = {
       header: false,
     },
     SMART_MATCHMAKING: {
-      path: ["/ai-wow/smart-matchmaking", "/aiwow/smart-matchmaking"],
+      path: ["/ai-wow/smart-matchmaking", "/aiwow/smart-matchmaking", "/smart-matchmaking"],
       element: SmartMatchmaking,
       header: false,
     },

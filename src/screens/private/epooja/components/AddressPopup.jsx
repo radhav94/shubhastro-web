@@ -4,6 +4,7 @@ import styles from "./AddressPopup.module.scss";
 import { FiX, FiHome, FiBriefcase, FiEdit2, FiTrash2 } from "react-icons/fi";
 import { useGetAddressesQuery, useAddAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
+import { personNameRegex, placeNameRegex, PERSON_NAME_ERROR } from "../../../../utils/regex";
 
 const EMPTY_ADDR = { name: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "", type: "home", country: "IN" };
 
@@ -65,16 +66,16 @@ const AddressPopup = ({ open, onClose, onSelect, confirmLabel = "Order Here", co
   const validateAddress = () => {
     const errs = {};
     if (!newAddr.name.trim()) errs.name = "Name is required";
-    else if (!/^[a-zA-Z\s]+$/.test(newAddr.name.trim())) errs.name = "Name must contain only letters";
+    else if (!personNameRegex.test(newAddr.name.trim())) errs.name = PERSON_NAME_ERROR;
     if (!newAddr.phone.trim()) errs.phone = "Phone is required";
     else if (!/^\d{10}$/.test(newAddr.phone.trim())) errs.phone = "Enter a valid 10-digit phone number";
     if (!newAddr.addressLine1.trim()) errs.addressLine1 = "Address line 1 is required";
     if (!newAddr.pincode.trim()) errs.pincode = "Pincode is required";
     else if (!/^\d{6}$/.test(newAddr.pincode.trim())) errs.pincode = "Enter a valid 6-digit pincode";
     if (!newAddr.city.trim()) errs.city = "City is required";
-    else if (!/^[a-zA-Z\s]+$/.test(newAddr.city.trim())) errs.city = "City must contain only letters";
+    else if (!placeNameRegex.test(newAddr.city.trim())) errs.city = "Please enter a valid city";
     if (!newAddr.state.trim()) errs.state = "State is required";
-    else if (!/^[a-zA-Z\s]+$/.test(newAddr.state.trim())) errs.state = "State must contain only letters";
+    else if (!placeNameRegex.test(newAddr.state.trim())) errs.state = "Please enter a valid state";
     setAddrErrors(errs);
     return Object.keys(errs).length === 0;
   };

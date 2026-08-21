@@ -579,6 +579,7 @@ const LiveView = (props) => {
     showSharePopup,
     setShowSharePopup,
     shareUrl,
+    inputRef,
     handleSend,
     handleCopyLink,
     shareToWhatsapp,
@@ -1640,8 +1641,10 @@ const LiveView = (props) => {
             <div className="chat-input-row">
               <div className="input-wrapper">
                 <input
+                  ref={inputRef}
                   type="text"
                   placeholder="Ask a question..."
+                  aria-label="Ask a question in the live chat"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -1651,9 +1654,13 @@ const LiveView = (props) => {
                     }
                   }}
                 />
+                {/* Deliberately never `disabled`: a disabled button swallows the
+                    tap, and handleSend is what explains why a send cannot go
+                    through right now. */}
                 <button
                   type="button"
                   className="send-icon-btn"
+                  aria-label="Send message"
                   onClick={(e) => handleSend(e)}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

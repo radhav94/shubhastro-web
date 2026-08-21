@@ -8,10 +8,13 @@ import { FaCheck } from "react-icons/fa";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { AppIcons, AppImages } from "../../../../utils/appImages";
+import { nonNameCharsGlobal } from "../../../../utils/regex";
 
-// NEW: Yup validation schema for search input — only alphabetic characters and spaces allowed
+// Kept in step with the characters handleDebouncedSearch actually permits.
+// Note this schema is inert in practice: the Formik onSubmit is a no-op and no
+// ErrorMessage is rendered anywhere, so the input handler is the real gate.
 const searchValidationSchema = Yup.object({
-  searchText: Yup.string().matches(/^[A-Za-z\s]*$/, "Only letters and spaces allowed"),
+  searchText: Yup.string().matches(/^[\p{L}\p{M}\s'’.-]*$/u, "Enter a name"),
 });
 
 const FilterChips = ({
@@ -34,6 +37,8 @@ const FilterChips = ({
   );
   const [activeChips, setActiveChips] = useState([]);
   const [searchText, setSearchText] = useState("");
+  // Explains a stripped character in the search box (see handleDebouncedSearch).
+  const [searchHint, setSearchHint] = useState("");
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [experties, setEexperties] = useState("");
@@ -369,14 +374,31 @@ const FilterChips = ({
   const handleDebouncedSearch = (e, setFieldValue) => {
     const rawValue = e.target.value;
 
-    // STRICT VALIDATION: If rawValue contains any non-alphabetic or non-space character,
-    // reject the entire input immediately — do not call API or proceed further
-    if (/[^A-Za-z\s]/.test(rawValue)) {
-      return;
-    }
+    /*
+      This used to be:
 
-    // At this point rawValue is already clean (only A-Za-z and spaces)
-    const sanitizedValue = rawValue;
+        if (/[^A-Za-z\s]/.test(rawValue)) return;
+
+      i.e. one disallowed character anywhere in the value discarded the *entire*
+      input. The Field is controlled by `value={searchText}`, so nothing appeared
+      on screen and nothing was said — typing into the box did visibly nothing.
+      Anyone searching "R. Sharma", a hyphenated or apostrophed name, or a name in
+      a non-Latin script hit a wall, and once an invalid character was in the
+      value every subsequent keystroke was blocked too. The Yup schema below
+      cannot help: onSubmit is a no-op and no ErrorMessage is rendered.
+
+      Now the unusable characters are stripped and everything else is kept, so a
+      keystroke always produces a visible result. `nonNameCharsGlobal` allows
+      letters in any script plus spaces and . ' - — the punctuation real names use.
+    */
+    const sanitizedValue = rawValue.replace(nonNameCharsGlobal, "");
+
+    // Say why a character vanished, rather than letting it look like a glitch.
+    setSearchHint(
+      sanitizedValue === rawValue
+        ? ""
+        : "Search by name — numbers and symbols are ignored."
+    );
 
     // Sync sanitized value to Formik field state and component state
     setFieldValue("searchText", sanitizedValue);
@@ -480,6 +502,7 @@ const FilterChips = ({
       setSelectedGender("");
       setSelectedSort("");
       setSearchText("");
+      setSearchHint("");
       isFilterActiveRef.current = false;
       setShowFilterAstrologer(false);
       onSelect?.(null);
@@ -600,10 +623,12 @@ const FilterChips = ({
                     <button
                       type="button"
                       className={styles.clearSearchBtn}
+                      aria-label="Clear search"
                       onClick={() => {
                         clearTimeout(debounceTimerRef.current);
                         setFieldValue("searchText", "");
                         setSearchText("");
+                        setSearchHint("");
                         if (activeChips.length > 0) {
                           isFilterActiveRef.current = true;
                           applyFilters({
@@ -621,6 +646,11 @@ const FilterChips = ({
                     </button>
                   )}
                 </div>
+                {searchHint && (
+                  <p className={styles.searchHint} role="status">
+                    {searchHint}
+                  </p>
+                )}
               </Form>
             )}
           </Formik>

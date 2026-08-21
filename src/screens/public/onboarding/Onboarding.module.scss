@@ -2125,6 +2125,100 @@
   }
 }
 
+/* ── Truecaller one-tap login (Android mobile web only) ────────────────────── */
+
+/* "or" separator between the OTP CTA and the Truecaller button. */
+.altLoginDivider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+  margin: 14px 0 10px;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.12);
+  }
+
+  span {
+    font-size: 13px;
+    font-weight: 500;
+    color: #8a8a8a;
+    font-family: "Poppins", sans-serif;
+  }
+
+  @media (max-width: 820px) {
+    max-width: 100%;
+  }
+}
+
+/* Secondary style: the phone/OTP CTA stays the primary action. */
+.truecallerBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  padding: 13px 24px;
+  background: #fff;
+  color: #1a1a1a;
+  border: 1.5px solid #d1d5db;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    border-color: #0091ff; /* Truecaller brand blue */
+    box-shadow: 0 2px 10px rgba(0, 145, 255, 0.14);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 820px) {
+    max-width: 100%;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 15px;
+    padding: 12px 20px;
+  }
+}
+
+.truecallerIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #0091ff;
+  color: #fff;
+}
+
+/*
+  Dev-only diagnostic for the hidden Truecaller button (see LoginScreen).
+  Deliberately plain and quiet — it never reaches a production build.
+*/
+.truecallerDevHint {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #9ca3af;
+  word-break: break-word;
+}
+
 .securityNote {
   display: flex;
   align-items: center;
@@ -2163,13 +2257,30 @@
   margin: 0;
   text-align: center;
 
+  /*
+    The link inside this sentence was `text-decoration: none` with an underline
+    only on `:hover` — and hover does not exist on a touchscreen. On a phone it
+    was therefore 12px orange text with no underline, sitting inside a 12px grey
+    sentence: it read as emphasis rather than a link, and the tap target was a
+    couple of words tall. Taps landed on the surrounding sentence, which is plain
+    text and does nothing.
+
+    Always underlined now, and padded out so the target is taller than the text.
+  */
   a {
     color: #F75801;
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
     font-weight: 500;
+    /* Vertical padding grows the touch target without shifting the line box. */
+    padding: 6px 2px;
+    margin: -6px 0;
+    display: inline-block;
 
-    &:hover {
-      text-decoration: underline;
+    &:focus-visible {
+      outline: 2px solid #F75801;
+      outline-offset: 2px;
+      border-radius: 4px;
     }
   }
 }
@@ -2249,6 +2360,24 @@
   justify-content: center;
   gap: 10px;
   // width: 25%;
+
+  /* Rendered as a <button> so the tap these cells already attract gets an
+     answer. Reset the button chrome — note `font: inherit` matters, buttons do
+     not inherit font from the page. `text-align` too, since buttons centre. */
+  appearance: none;
+  background: none;
+  border: none;
+  font: inherit;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
   &:not(:last-child){
     border-right: 2px solid #F4DDCB;
   }

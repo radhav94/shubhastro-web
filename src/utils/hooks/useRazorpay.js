@@ -225,6 +225,35 @@ export const useRazorpayPayment = () => {
         throw new Error(ERROR_MESSAGES.MISSING_RAZORPAY_ORDER_ID);
       }
 
+      /*
+        The gateway order id that Razorpay's checkout actually needs as
+        `order_id`.
+
+        This guard used to check only `order_ID` above, while
+        createRazorpayOptions passed `orderData.gatewayOrderId` — a different
+        field that nothing validated. When the payload does not carry it, the
+        checkout was opened with `order_id: undefined`: the sheet renders, the
+        card and UPI fields appear, and the payment cannot be completed. From the
+        user's side that is a checkout whose inputs do nothing.
+
+        Resolved with the same fallbacks the ShubhMall checkout already uses
+        (EPoojaCheckout / AstromallCart), so the two paths agree on where this
+        value can live.
+      */
+      const gatewayOrderId =
+        orderData.gatewayOrderId ||
+        orderData.razorpay_order_id ||
+        null;
+
+      if (!gatewayOrderId) {
+        console.error(
+          "[Razorpay] No gatewayOrderId/razorpay_order_id in order response — " +
+            "checkout cannot be completed without it:",
+          orderData
+        );
+        throw new Error(ERROR_MESSAGES.MISSING_RAZORPAY_ORDER_ID);
+      }
+
       // Validate order data
       const amount = orderData.totalPrice || orderData.orderAmt;
       if (!amount || amount < MIN_AMOUNT) {
@@ -234,6 +263,7 @@ export const useRazorpayPayment = () => {
       return {
         orderId: orderData.order_ID, // Razorpay order ID
         backendOrderId: orderData._id || orderData.id, // Backend order ID for verification
+        gatewayOrderId, // Passed to Razorpay as `order_id`
         amount,
         currency: orderData.currency || "INR",
         orderData,
@@ -447,8 +477,10 @@ export const useRazorpayPayment = () => {
       currency: orderData.currency,
       name: "ShubhAstro",
       description: `Wallet Recharge - ₹${planData.actualPrice || orderData.amount}`,
-      image: `${window.location.origin}/images/mobile-shubh-astro-logo.svg`,
-      order_id: orderData?.orderData?.gatewayOrderId,
+      image: `${window.location.origin}/images/mobile-shubh-astro-logo.png`,
+      // Resolved and validated in createPaymentOrder, so it is always a real id
+      // by the time we get here — never `order_id: undefined`.
+      order_id: orderData.gatewayOrderId,
       // NOTE: callback_url removed — using handler only for reliable cross-platform support.
       // callback_url causes Android UPI intent flows to not redirect back properly.
       handler: handlers.onSuccess,

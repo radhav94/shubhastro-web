@@ -6,6 +6,7 @@ import styles from "./AddProfileModal.module.scss";
 import { Toast } from "../../index";
 import { relationOption } from "../../../utils/constanats/appData";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
+import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
 
 const EditProfileModal = ({
   isOpen,
@@ -47,7 +48,7 @@ const EditProfileModal = ({
   const validationSchema = Yup.object({
     name: Yup.string()
       .required("Name is required")
-      .matches(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces"),
+      .matches(personNameRegex, PERSON_NAME_ERROR),
     relation: Yup.string()
       .required("Relation is required")
       .test(

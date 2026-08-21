@@ -354,19 +354,35 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     });
   }, [roomId, userId, userName]);
 
+  /*
+    Every failure path here used to `return` after a single console.warn. The
+    typed text stays in the box (it is only cleared after a successful emit), so
+    from the viewer's side the send arrow simply did nothing — they retype, press
+    again, and give up. A console warning is invisible on the phone or desktop of
+    the person it concerns.
+
+    Each reason now says so out loud, and the function reports success back to
+    the caller. `isBlocked` is checked too: it was tracked and returned by this
+    hook but consumed nowhere, so a blocked viewer saw a perfectly normal chat
+    box and their messages were dropped server-side forever.
+  */
   const sendChatMessage = useCallback(() => {
     const msg = chatInput.trim();
     if (!msg) {
-      console.warn("LiveChat → Send skipped: empty message");
-      return;
+      // No toast: the empty box is its own explanation.
+      return false;
+    }
+    if (isBlocked) {
+      Toast.error("You can't send messages in this live session.");
+      return false;
     }
     if (!socketRef.current?.connected) {
-      console.warn("LiveChat → Send skipped: socket not connected");
-      return;
+      Toast.error("You're offline. Your message is still here — try again once you reconnect.");
+      return false;
     }
     if (!currentRoomRef.current) {
-      console.warn("LiveChat → Send skipped: not in a room");
-      return;
+      Toast.error("Still joining the live session. Give it a moment and send again.");
+      return false;
     }
 
     const payload = {
@@ -377,8 +393,10 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
     console.log("LiveChat → Sending message:", payload);
     socketRef.current.emit("live:send_message", payload);
 
+    // Only cleared on success, so a failed send never costs the user their text.
     setChatInput("");
-  }, [chatInput, userId, userName]);
+    return true;
+  }, [chatInput, userId, userName, isBlocked]);
 
   // Block a viewer (host only)
   const blockUser = useCallback((targetUserId, reason) => {

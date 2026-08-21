@@ -226,6 +226,41 @@
   font-style: italic;
 }
 
+/* Tappable sign banner */
+.horoscope-old-page .zodiac-display-interactive {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.horoscope-old-page .zodiac-display-interactive:hover {
+  box-shadow: 0 4px 14px rgba(229, 99, 41, 0.35);
+}
+
+.horoscope-old-page .zodiac-display-interactive:active {
+  transform: scale(0.99);
+}
+
+.horoscope-old-page .zodiac-display-interactive:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.horoscope-old-page .zodiac-change-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 .horoscope-old-page .zodiac-symbol {
   font-size: 140px !important;
   line-height: 1 !important;
@@ -780,35 +815,60 @@
   left: 19px;
 }
 
+/*
+  Selected vs hover.
+
+  These two states used to be almost identical: `:hover` filled the inner radio
+  dot orange and turned the label orange, which is exactly what `.selected`
+  does. The only remaining difference was `font-weight: 600`. On a mouse the
+  row under the cursor was therefore *already* showing the selected treatment,
+  so clicking it produced no perceptible change and read as a broken control —
+  users clicked one sign, then another, then went hunting for the confirm
+  button.
+
+  Now only `.selected` fills the dot. Hover is a background tint plus a
+  ring-colour hint, which says "clickable" without impersonating "chosen".
+*/
 .horoscope-old-page .zodiac-item.selected {
   color: #F75801;
   font-weight: 600;
+  background: rgba(247, 88, 1, 0.06);
 }
 
 .horoscope-old-page .zodiac-item.selected.zodiac-item::before {
   border-color: #F75801;
+  border-width: 2px;
 }
 
+/* The filled inner dot is the one signal reserved for the actual selection. */
 .horoscope-old-page .zodiac-item.selected.zodiac-item::after {
   background-color: #F75801;
   border: none;
 }
 
-.horoscope-old-page .zodiac-item:hover.zodiac-item::before {
-  border-color: #F75801;
-}
-
-.horoscope-old-page .zodiac-item:hover.zodiac-item::after {
-  background-color: #F75801;
-  border: none;
-}
-
 .horoscope-old-page .zodiac-item:hover {
-  color: #F75801;;
+  color: #F75801;
+  background: rgba(247, 88, 1, 0.03);
+}
+
+.horoscope-old-page .zodiac-item:hover.zodiac-item::before {
+  border-color: rgba(247, 88, 1, 0.55);
 }
 
 .horoscope-old-page .zodiac-item.selected:hover {
-  color: #F75801;;
+  color: #F75801;
+  background: rgba(247, 88, 1, 0.09);
+}
+
+.horoscope-old-page .zodiac-item.selected:hover.zodiac-item::before {
+  border-color: #F75801;
+}
+
+/* Keyboard parity: these are real <button>s, so give them a visible focus ring. */
+.horoscope-old-page .zodiac-item:focus-visible {
+  outline: 2px solid #F75801;
+  outline-offset: -2px;
+  z-index: 1;
 }
 
 .horoscope-old-page .zodiac-item.selected .zodiac-item-date {
@@ -1064,6 +1124,13 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
+}
+
+/* Now role="button" tabIndex={0}, so it needs a visible focus ring. */
+.horoscope-old-page .horoscope-profile-center:focus-visible {
+  outline: 2px solid #F75801;
+  outline-offset: 4px;
+  border-radius: 8px;
 }
 
 .horoscope-old-page .horoscope-profile-label {

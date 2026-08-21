@@ -77,6 +77,24 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   // cancelled if the user requests a new OTP mid-request.
   const verifyAbortRef = useRef(null);
 
+  /*
+    Do NOT add an "already verified => skip this step" effect here.
+
+    One was tried and had to be reverted: handleContinue below sets
+    `isVerified: true` in formData *before* it decides where to send the user, so
+    an effect watching that flag fired first and pushed everyone — registered
+    users included — onto the profile-setup step. Registered users are moved with
+    a navigate() inside a setTimeout, so the form was on screen before the
+    redirect landed.
+
+    It also double-advanced new users: the effect called onNext() and so did the
+    branch below, skipping Personalize entirely.
+
+    Routing out of this screen belongs to handleContinue alone. Logins that
+    bypass OTP (Truecaller) skip the step at the source instead — LoginScreen
+    calls onSkipOtp() rather than onNext().
+  */
+
   // Prevent iOS Safari from scrolling page when keyboard opens
   useEffect(() => {
     document.body.style.overflow = 'hidden';

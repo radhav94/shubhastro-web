@@ -210,6 +210,27 @@
   }
 }
 
+// Icon + name on one line. `align-items: center` rather than baseline so a
+// wrapped two-line name (narrow cards) keeps the icon centred against the block
+// instead of pinned to the first line.
+.muhuratHeading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.muhuratIcon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+
+  @media (max-width: 480px) {
+    width: 24px;
+    height: 24px;
+  }
+}
+
 .muhuratBox p {
   font-size: 14px;
   color: #444;

@@ -19,9 +19,10 @@ import {
   IoScan,
   IoShieldCheckmark,
 } from "react-icons/io5";
-import ShubhAstroLogo from "../../../assets/images/ShubhAstrologo.svg";
+import ShubhAstroLogo from "../../../assets/images/ShubhAstrologo.png";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import { BACKEND_PROXY } from "../../../utils/apiConfig";
+import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
 import styles from "./ComingSoon.module.scss";
 
 const API_URL = `${BACKEND_PROXY}/api/landing-leads/submit`;
@@ -40,7 +41,7 @@ const validationSchema = Yup.object({
     .trim()
     .min(2, "Name must be at least 2 characters")
     .max(50, "Name must be under 50 characters")
-    .matches(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
+    .matches(personNameRegex, PERSON_NAME_ERROR)
     .required("Name is required"),
   mobile: Yup.string()
     .matches(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number")

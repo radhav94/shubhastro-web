@@ -18,10 +18,16 @@ export const PLAY_STORE_URL =
 
 /**
  * Set this to the real App Store URL once the iOS app is published, e.g.
- * `https://apps.apple.com/in/app/shubhastro/id0000000000`. While it is null the
- * UI keeps the App Store button visible but explains on tap instead of
- * navigating to a dead page — matching how the rest of the app handles controls
- * that cannot act yet (see utils/helper/astrologerAvailability.js).
+ * `https://apps.apple.com/in/app/shubhastro/id0000000000`. Setting it is the
+ * only change needed — both consumers gate on it.
+ *
+ * While it is null the two surfaces deliberately differ:
+ *   - Footer: the App Store button is not rendered at all. The footer is
+ *     permanent chrome on every page, so a standing "coming soon" placeholder
+ *     is noise rather than information.
+ *   - MobileAppModal: the button stays visible and explains on tap, because
+ *     that modal exists specifically to pitch the app and dropping iOS from it
+ *     would leave the pitch looking Android-only by accident.
  */
 export const APP_STORE_URL = null;
 

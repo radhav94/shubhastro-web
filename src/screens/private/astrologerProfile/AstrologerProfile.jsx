@@ -574,27 +574,26 @@ const AstrologerProfile = () => {
     try {
       const astrologerName = getAstrologerDisplayName(displayData);
 
-      // Find the next available day from weekly schedule
-      const nextAvailable = displayData.weeklySchedule.find((item) => item.time);
-      if (!nextAvailable) {
-        toast.error("No available consultation hours to set a reminder for.");
-        return;
-      }
-
-      // Parse the time slot (e.g., "8:00 am - 7:08 pm")
-      const timeSlot = nextAvailable.time.split(' - ')[0]; // Get start time
-      
-      // Get today's date
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, "0");
-      const day = String(today.getDate()).padStart(2, "0");
-
-      // Parse time and convert to 24-hour format
+      /*
+       * `weeklySchedule` is always seven entries in fixed Monday-first order
+       * (see formatWeeklyAvailability), with `time` null on days the astrologer
+       * is offline.
+       *
+       * This used to be `weeklySchedule.find((item) => item.time)` — named
+       * "next available" but actually the first *listed* day with hours, i.e.
+       * Monday whenever Monday is worked. Its start time was then combined with
+       * TODAY's date, and `nextAvailable.day` was never used at all. So on a
+       * Friday the reminder was created for Friday at Monday's start time,
+       * usually a moment that had already passed, which puts the calendar event
+       * in the past.
+       *
+       * Walk forward from today instead and take the first day that actually has
+       * hours, skipping today if its start time has already gone by.
+       */
       const parseTime = (timeStr) => {
         const [time, period] = timeStr.trim().split(" ");
         let [hours, minutes = "00"] = time.split(":");
-        hours = parseInt(hours);
+        hours = parseInt(hours, 10);
 
         if (period === "pm" && hours !== 12) {
           hours += 12;
@@ -602,11 +601,57 @@ const AstrologerProfile = () => {
           hours = 0;
         }
 
-        return `${String(hours).padStart(2, "0")}${minutes.padStart(2, "0")}`;
+        return { hours, minutes: parseInt(minutes, 10) || 0 };
       };
-      
-      const startTime = parseTime(timeSlot);
-      
+
+      const now = new Date();
+      let start = null;
+
+      for (let offset = 0; offset < 7; offset += 1) {
+        const candidate = new Date(now);
+        candidate.setDate(candidate.getDate() + offset);
+
+        const dayName = candidate.toLocaleDateString("en-US", { weekday: "long" });
+        const entry = displayData.weeklySchedule.find(
+          (item) => item.day === dayName && item.time,
+        );
+        if (!entry) continue;
+
+        // "8:00 am - 7:08 pm" -> start side only. Multiple slots are joined with
+        // ", ", so take the first slot's start.
+        const { hours, minutes } = parseTime(entry.time.split(" - ")[0]);
+        candidate.setHours(hours, minutes, 0, 0);
+
+        // Today's slot is only usable if it has not already started.
+        if (offset === 0 && candidate <= now) continue;
+
+        start = candidate;
+        break;
+      }
+
+      if (!start) {
+        toast.error("No upcoming consultation hours to set a reminder for.");
+        return;
+      }
+
+      /*
+       * Date arithmetic rather than string maths for the end time. The previous
+       * version did `(startHour + 1) % 24` and reused today's date, so a slot
+       * starting at 23:30 produced an end of 00:30 on the SAME day — an event
+       * that ends before it begins. Adding an hour to a Date rolls the date over
+       * correctly.
+       */
+      const end = new Date(start.getTime() + 60 * 60 * 1000);
+      const stamp = (d) =>
+        `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(
+          d.getDate(),
+        ).padStart(2, "0")}T${String(d.getHours()).padStart(2, "0")}${String(
+          d.getMinutes(),
+        ).padStart(2, "0")}00`;
+
+      const startDateTime = stamp(start);
+      const endDateTime = stamp(end);
+
       // Create Google Calendar URL
       const eventTitle = encodeURIComponent(
         `Consultation with ${astrologerName}`,
@@ -618,14 +663,6 @@ const AstrologerProfile = () => {
         "ShubhTalk - Online Consultation",
       );
 
-      // Format: YYYYMMDDTHHmmss
-      const startDateTime = `${year}${month}${day}T${startTime}00`;
-      // Add 1 hour duration
-      const endHours = String(
-        (parseInt(startTime.substring(0, 2)) + 1) % 24,
-      ).padStart(2, "0");
-      const endDateTime = `${year}${month}${day}T${endHours}${startTime.substring(2, 4)}00`;
-      
       const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${startDateTime}/${endDateTime}&details=${eventDetails}&location=${eventLocation}&sf=true&output=xml`;
       
       // Open Google Calendar in new tab
@@ -1095,6 +1132,29 @@ const AstrologerProfile = () => {
           ],
   };
 
+  /*
+   * Whether this astrologer has ANY consultation hours in the week.
+   *
+   * Must stay below `displayData` — it reads it during render, so declaring it up
+   * beside handleSetReminder (which only reads displayData when invoked) would be
+   * a TDZ ReferenceError on every profile view.
+   *
+   * The "Set Reminder" button used to render unconditionally beneath the
+   * Consultation Hours list. For an astrologer offline all week that list is
+   * seven rows of "Offline" next to a fully-enabled button whose only possible
+   * outcome is an error toast — there is no date to put in a calendar. A paid-ad
+   * visitor was recorded doing exactly this across several offline astrologers
+   * before giving up and starting a chat with someone else.
+   *
+   * Same call as the footer's App Store button: do not advertise a control that
+   * cannot succeed. The seven "Offline" rows already state the situation.
+   *
+   * Deliberately NOT `disabled` + toast, which is the house pattern for a
+   * temporarily-unavailable chat/call button. That pattern fits a state the
+   * visitor can wait out; "this astrologer publishes no hours" is not.
+   */
+  const hasConsultationHours = displayData.weeklySchedule.some((item) => item.time);
+
   if (isLoading) return <div className={styles.loading}>Loading...</div>;
   if (error) return <ErrorText>Something went wrong!</ErrorText>;
   if (!data) return <ErrorText>Astrologer not found</ErrorText>;
@@ -1307,7 +1367,22 @@ const AstrologerProfile = () => {
             {/* Mobile Status Indicator */}
             <div className={styles.mobileStatusBar}>
               {isLive ? (
-                <div className={styles.mobileStatusLive} onClick={handleJoinLive}>
+                /* role/tabIndex/keydown: this is a div with an onClick, so it was
+                   unreachable by keyboard — the one actionable element in the
+                   status bar could only be triggered with a pointer. */
+                <div
+                  className={styles.mobileStatusLive}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Astrologer is live, watch the session"
+                  onClick={handleJoinLive}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleJoinLive();
+                    }
+                  }}
+                >
                   <Radio size={20} />
                   <span>Live Now</span>
                 </div>
@@ -1385,17 +1460,20 @@ const AstrologerProfile = () => {
                   </div>
                 ))}
               </div>
-              <button
-                className={styles.reminderBtnFull}
-                onClick={handleSetReminder}
-              >
-                <img
-                  src={NotificationIcon}
-                  alt="Notification"
-                  className={styles.notificationIcon}
-                />
-                Set Reminder
-              </button>
+              {hasConsultationHours && (
+                <button
+                  type="button"
+                  className={styles.reminderBtnFull}
+                  onClick={handleSetReminder}
+                >
+                  <img
+                    src={NotificationIcon}
+                    alt=""
+                    className={styles.notificationIcon}
+                  />
+                  Set Reminder
+                </button>
+              )}
             </div>
 
             {/* Minutes Section */}
@@ -1691,7 +1769,23 @@ const AstrologerProfile = () => {
         <aside className={styles.rightSidebar}>
           {/* Available Now / Offline / Live Card */}
           {isLive ? (
-            <div className={styles.liveCard} onClick={handleJoinLive}>
+            /* Same as the mobile status bar: a div with onClick is invisible to
+               the keyboard. The inner "Join" button was the only reachable
+               control, so the surrounding card — which is what the eye reads as
+               the target — did nothing unless clicked with a pointer. */
+            <div
+              className={styles.liveCard}
+              role="button"
+              tabIndex={0}
+              aria-label="Astrologer is live, watch the session"
+              onClick={handleJoinLive}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleJoinLive();
+                }
+              }}
+            >
               <div className={styles.liveLeft}>
                 <svg className={styles.liveIcon} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="16" cy="16" r="4" fill="white"/>
@@ -1870,17 +1964,20 @@ const AstrologerProfile = () => {
                 </div>
               ))}
             </div>
-            <button
-              className={styles.reminderBtnFull}
-              onClick={handleSetReminder}
-            >
-              <img
-                src={NotificationIcon}
-                alt="Notification"
-                className={styles.notificationIcon}
-              />
-              Set Reminder
-            </button>
+            {hasConsultationHours && (
+              <button
+                type="button"
+                className={styles.reminderBtnFull}
+                onClick={handleSetReminder}
+              >
+                <img
+                  src={NotificationIcon}
+                  alt=""
+                  className={styles.notificationIcon}
+                />
+                Set Reminder
+              </button>
+            )}
           </div>
         </aside>
       </div>
