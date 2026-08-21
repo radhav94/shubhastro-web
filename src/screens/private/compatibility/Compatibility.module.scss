@@ -133,7 +133,16 @@
     }
   }
 
-  button {
+  /*
+    These two CTAs were <button>s nested inside <Link>s (invalid HTML — the
+    button could absorb the click without the anchor navigating) and are plain
+    anchors now. The layout used to hang off the bare `button` element selector,
+    which no longer matches anything in this banner, so it moves onto the two
+    classes and picks up the few things an <a> does not get for free:
+    `text-decoration: none` and an explicit `text-align`.
+  */
+  .callBtn,
+  .chatBtn {
     display: block;
     width: 85%;
     margin: 10px auto;
@@ -143,29 +152,35 @@
     border-radius: 10px;
     cursor: pointer;
     font-weight: 600;
-    
+    text-align: center;
+    text-decoration: none;
+    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
+    color: #fff;
+
+    &:hover,
+    &:focus,
+    &:visited {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #b02c00;
+      outline-offset: 2px;
+    }
+
     @media (max-width: 768px) {
       width: 90%;
       padding: 11px;
       font-size: 15px;
     }
-    
+
     @media (max-width: 480px) {
       width: 100%;
       padding: 10px;
       font-size: 14px;
       margin: 8px auto;
     }
-  }
-
-  .callBtn {
-    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-    color: #fff;
-  }
-
-  .chatBtn {
-    background: var(--orange_gradient, linear-gradient(90deg, #F75801 0%, #D43400 100%));
-    color: #fff;
   }
 }
 
