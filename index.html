@@ -95,6 +95,37 @@
       var sent = 0;
       var seen = {};
 
+      /*
+        Errors thrown by the *containing app's* WebView bridge, not by this site.
+
+        Android's WebView exposes native objects to JS via addJavascriptInterface,
+        and Chromium's java_bridge holds them weakly. Once the host app
+        backgrounds or tears down the WebView the Java object is collected, and
+        any later call from the host's own injected script fails with a message
+        containing "java object is gone". In-app browsers commonly name their
+        channel method `postMessage`, which is where "error invoking postmessage:
+        java object is gone" comes from — observed on Instagram's in-app browser.
+
+        Only the host application can inject those objects. This codebase calls
+        postMessage nowhere and has no native bridge of any kind, so a message
+        shaped like this cannot originate here and there is no code change that
+        would prevent it.
+
+        Labelled rather than dropped, exactly like `masked` above: the report
+        still reaches Clarity and dataLayer so the session is not silently
+        missing an event, but it is no longer indistinguishable from one of our
+        own uncaught errors.
+      */
+      var HOST_BRIDGE_PATTERNS = ['java object is gone', 'error invoking postmessage'];
+
+      function isHostBridgeError(message) {
+        var m = String(message || '').toLowerCase();
+        for (var i = 0; i < HOST_BRIDGE_PATTERNS.length; i++) {
+          if (m.indexOf(HOST_BRIDGE_PATTERNS[i]) !== -1) return true;
+        }
+        return false;
+      }
+
       function report(kind, message, source, extra) {
         try {
           message = String(message || 'unknown').slice(0, 300);
@@ -102,6 +133,12 @@
           // A cross-origin throw is stripped to this exact shape. Naming it
           // stops it being mistaken for an app-level failure.
           var masked = (message === 'Script error.' || message === 'Script error') && !source;
+          var hostBridge = isHostBridgeError(message);
+
+          // Where the error came from, as far as we can tell. 'app' is the only
+          // value worth acting on; the other two are environmental.
+          var origin = hostBridge ? 'host_webview' : masked ? 'cross_origin' : 'app';
+
           var key = kind + '|' + message + '|' + (source || '');
           if (seen[key]) return;
           seen[key] = true;
@@ -109,7 +146,11 @@
           sent++;
 
           if (typeof window.clarity === 'function') {
-            window.clarity('set', 'jsErrorKind', masked ? 'cross_origin_masked' : kind);
+            window.clarity(
+              'set',
+              'jsErrorKind',
+              hostBridge ? 'host_webview_bridge' : masked ? 'cross_origin_masked' : kind
+            );
             window.clarity('set', 'jsErrorMessage', message);
             // The source was going to dataLayer only, so a Clarity session showed
             // e.g. "Unexpected token '{'" with no way to tell which file threw —
@@ -121,7 +162,10 @@
           window.dataLayer = window.dataLayer || [];
           window.dataLayer.push({
             event: 'js_error',
+            // error_kind stays the raw kind so any existing GTM trigger keeps
+            // working; error_origin is the new dimension to filter on.
             error_kind: kind,
+            error_origin: origin,
             error_masked: masked,
             error_message: message,
             error_source: source || '(unavailable)',
