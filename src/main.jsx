@@ -98,6 +98,15 @@ import { Toaster, ToastBar, toast } from "react-hot-toast";
 import { Provider } from "react-redux";
 import { store, persistor } from "./store/store.js";
 import { PersistGate } from "redux-persist/integration/react";
+// Installs window.__gtmLog(). Imported at the entry rather than relying on the
+// first screen that happens to import trackEvent, so the console helper exists
+// from the first paint on any route.
+import { installAnalyticsLogConsoleApi } from "./utils/analyticsLog.js";
+// Debug-only: renders nothing unless the GTM log is switched on. Mounted at the
+// root so the download button is reachable from every route.
+import AnalyticsLogPanel from "./component/dev/AnalyticsLogPanel.jsx";
+
+installAnalyticsLogConsoleApi();
 
 /*
  * The `AgoraProvider` import that used to sit here was removed.
@@ -191,6 +200,7 @@ createRoot(document.getElementById("root")).render(
         </Toaster>
 
         <App />
+        <AnalyticsLogPanel />
       </PersistGate>
     </Provider>
   // </AgoraProvider>
