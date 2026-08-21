@@ -445,11 +445,46 @@
     Do NOT copy this onto a script whose origin omits that header — the request
     would fail CORS and the script would not load at all.
   -->
-  <script>if(window.__analyticsHostAllowed__){(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.crossOrigin='anonymous';j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-T5DTGXHW');}</script>
+
+
+<script>
+  if (window.__analyticsHostAllowed__) {
+    (function (w, d, s, l, i) {
+      w[l] = w[l] || [];
+
+      w[l].push({
+        "gtm.start": new Date().getTime(),
+        event: "gtm.js"
+      });
+
+      var firstScript = d.getElementsByTagName(s)[0];
+      var gtmScript = d.createElement(s);
+
+      var dataLayerParam =
+        l !== "dataLayer"
+          ? "&l=" + l
+          : "";
+
+      gtmScript.async = true;
+      gtmScript.crossOrigin = "anonymous";
+      gtmScript.src =
+        "https://www.googletagmanager.com/gtm.js?id=" +
+        i +
+        dataLayerParam;
+
+      firstScript.parentNode.insertBefore(
+        gtmScript,
+        firstScript
+      );
+    })(
+      window,
+      document,
+      "script",
+      "dataLayer",
+      "GTM-T5DTGXHW"
+    );
+  }
+</script>
   <!-- End Google Tag Manager -->
 
   <!-- Google tag (gtag.js) (production only) -->
@@ -471,7 +506,7 @@
     `Array.isArray(window.dataLayer)` guard) is what makes skipping this block
     safe off production — trackEvent simply no-ops rather than throwing.
   -->
-  <script>
+  <!-- <script>
     if (window.__analyticsHostAllowed__) {
       (function () {
         var s = document.createElement('script');
@@ -486,7 +521,33 @@
       window.gtag('js', new Date());
       window.gtag('config', 'G-MQBQTN9GSH');
     }
-  </script>
+  </script> -->
+
+  <script>
+  if (window.__analyticsHostAllowed__) {
+    window.dataLayer = window.dataLayer || [];
+
+    window.gtag = window.gtag || function () {
+      window.dataLayer.push(arguments);
+    };
+
+    window.gtag("js", new Date());
+
+    window.gtag("config", "G-MQBQTN9GSH", {
+      send_page_view: true
+    });
+
+    var gaScript = document.createElement("script");
+
+    gaScript.async = true;
+    gaScript.crossOrigin = "anonymous";
+    gaScript.src =
+      "https://www.googletagmanager.com/gtag/js?id=G-MQBQTN9GSH";
+
+    document.head.appendChild(gaScript);
+  }
+</script>
+  
   <!-- End Google tag (gtag.js) -->
 
   <!-- Microsoft Clarity (production only) -->
