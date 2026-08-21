@@ -19,6 +19,7 @@ import {
 import { getUserFromStorage } from "../../../../../utils/authStorage";
 import { getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../../utils/appImages";
 import { useCall } from "../../../../../context/CallContext";
+import { getGuestId, isGuestUser } from "../../../../../utils/guestId";
 import { toast as rht } from "react-hot-toast";
 
 const LiveStreamingContainer = ({ client }) => {
@@ -109,6 +110,10 @@ const LiveStreamingContainer = ({ client }) => {
     if (first && last && first.toLowerCase() !== last.toLowerCase()) return `${first} ${last}`;
     return first || "User";
   })();
+
+  // For guests, use guestId as the userId for chat socket
+  const isGuest = !localStorage.getItem("shubhtalk_customer_token");
+  const chatUserId = isGuest ? getGuestId() : userIdLocal;
 
   // Ref to hold retryJoinRoom — breaks circular dep between handleAstrologerStatus and chat
   const retryJoinRef = useRef(null);
@@ -309,7 +314,7 @@ const LiveStreamingContainer = ({ client }) => {
 
   const chat = useLiveChat({
     roomId: channel,
-    userId: userIdLocal,
+    userId: chatUserId,
     userName: userNameLocal,
     onAstrologerStatus: handleAstrologerStatus,
     onStreamEnded: handleStreamEnded,
@@ -368,11 +373,12 @@ const LiveStreamingContainer = ({ client }) => {
     </div>
 
     {/* FIXED VIDEO (PORTALED INSIDE LiveView) */}
-    <LiveView channel={channel} ROLE={ROLE} {...live} {...chat} 
+    <LiveView key={channel} channel={channel} ROLE={ROLE} {...live} {...chat} 
       astrologer={currentLive}
       privateCallInfo={privateCallInfo}
       giftPopupOpenRef={giftPopupOpenRef}
       liveListRefreshKey={liveListRefreshKey}
+      isGuest={isGuest}
       onHostNameResolved={(name) => { resolvedHostNameRef.current = name || ""; }}
       onHostAvatarResolved={(url) => { resolvedHostAvatarRef.current = url || ""; }}
 />

@@ -49,11 +49,16 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
 
     console.log("LiveChat → Connecting via proxy");
 
+    const token = localStorage.getItem("shubhtalk_customer_token");
+    const authPayload = token
+      ? { token }
+      : { userId, role: "GUEST" };
+
     const socket = io(SOCKET_URL, {
       transports: ["websocket"],
       path: SOCKET_PATH,
-      query: { role: "CUSTOMER", userId },
-      auth: { role: "CUSTOMER", userId },
+      query: { role: token ? "CUSTOMER" : "GUEST", userId },
+      auth: authPayload,
     });
     socketRef.current = socket;
 
@@ -66,8 +71,6 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
         console.log("LiveChat → Auto-rejoining room:", currentRoomRef.current);
         socket.emit("live:join_room", {
           roomId: currentRoomRef.current,
-          userId,
-          userName,
           userType: "audience",
         });
       }
@@ -194,11 +197,19 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
         onStreamEndedRef.current?.({ reason: data.code, roomId: endedRoom });
       } else if (data.code === "CONTENT_BLOCKED") {
         Toast.error(data.message || "Message contains inappropriate content");
+      } else if (data.code === "RATE_LIMITED") {
+        Toast.error(data.message || "You're chatting too fast. Please wait a moment.");
       } else if (data.code === "BLOCKED") {
         // User is blocked from this live session
         setIsBlocked(true);
         Toast.error(data.message || "You are blocked from this live session");
       }
+    });
+
+    // Guest tried a restricted action — prompt login
+    socket.on("live:auth_required", (data) => {
+      console.log("LiveChat → Auth required:", data);
+      Toast.error(data.message || "Please login to perform this action");
     });
 
     // Block events
@@ -292,8 +303,6 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
         console.log("LiveChat → Leaving room:", currentRoomRef.current);
         socket.emit("live:leave_room", {
           roomId: currentRoomRef.current,
-          userId,
-          userName,
         });
       }
 
@@ -305,8 +314,6 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
 
       socket.emit("live:join_room", {
         roomId,
-        userId,
-        userName,
         userType: "audience",
       });
     };
@@ -380,10 +387,7 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
 
     const payload = {
       roomId: currentRoomRef.current,
-      userId,
-      userName,
       message: msg,
-      userType: "audience",
       type: "message",
     };
     console.log("LiveChat → Sending message:", payload);

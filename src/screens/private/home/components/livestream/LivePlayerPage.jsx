@@ -1,6 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
-import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useParams, Link } from "react-router-dom";
 import { LiveListProvider } from "../../../../../context/LiveListContext";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { restoreViewerSession, clearViewerSession } from "../../../../../utils/liveSessionStorage";
@@ -13,37 +12,28 @@ import styles from "./LivePlayerPage.module.scss";
 //
 // It used to be a static import, which meant the chunk was part of *this* module
 // and therefore downloaded before any of the code below could run. That is the
-// worst case on /live, which is a paid Google Ads landing page: a guest fetched
-// the entry bundle, then ~1.2 MB of video SDK, then hit the `!isLoggedIn` guard
-// below, rendered `null`, and got redirected straight to /login — having
-// downloaded a real-time streaming engine to display a blank screen.
+// worst case on /live, which is a paid Google Ads landing page: a visitor fetched
+// the entry bundle and then ~1.2 MB of video SDK before this page could decide
+// whether it had anything to play at all — including the "nobody is live" and
+// load-failure cases, where the SDK is never used.
 //
-// Splitting it means the guest redirect now costs only this small module. Real
-// viewers do not pay an extra round trip either: warmInteractiveLiveStreaming()
-// starts the download as soon as we know the visitor is logged in, in parallel
-// with the live-list request, so it is usually resolved by the time it renders.
+// Splitting it means those exits cost only this small module. Real viewers do not
+// pay an extra round trip either: the import is kicked off alongside the
+// live-list request, so it is usually resolved by the time it renders.
 const importInteractiveLiveStreaming = () => import("./InteractiveLiveStreaming");
 const InteractiveLiveStreaming = lazy(importInteractiveLiveStreaming);
 
 const LivePlayerPage = () => {
   const { channelId } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
-  // The persisted redux `auth.isLoggedIn` can be stale (false) even when a
-  // valid customer token exists in localStorage (redux-persist rehydrates an
-  // old value over the token-derived initial state). The rest of the live
-  // module authenticates off the token, so treat a present token as logged in
-  // to avoid a false live -> login -> home redirect.
-  const reduxLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-  const hasCustomerToken = !!localStorage.getItem("shubhtalk_customer_token");
-  const isLoggedIn = reduxLoggedIn || hasCustomerToken;
   const [lives, setLives] = useState([]);
   const [autoStartIndex, setAutoStartIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
 
+  // Guests may watch live streams, so there is no login gate here. Kept as a
+  // named function (rather than inlined in the effect) so the "Try again" /
+  // "Check again" buttons in the failure and empty states can re-run it.
   const loadLives = () => {
-    if (!isLoggedIn) return;
     setIsLoading(true);
 
     // Start fetching the Agora chunk alongside the live list rather than after
@@ -113,12 +103,12 @@ const LivePlayerPage = () => {
     });
   };
 
-  useEffect(loadLives, [channelId, isLoggedIn]);
+  useEffect(loadLives, [channelId]);
 
   /*
    * Every exit from this page used to be `return null`, i.e. a blank white page
-   * under the global header, and there were four of them in a row: the guest
-   * guard, the live-list fetch, and two lazy chunk boundaries sharing a
+   * under the global header, and there were three of them in a row: the
+   * live-list fetch and two lazy chunk boundaries sharing a
    * `<Suspense fallback={null}>` (the Agora player is 1,256 kB and
    * LiveStreamingContainer another 74 kB). On a cold visit from an ad that is
    * seconds of nothing to look at, and any click landing in that window hits the
@@ -127,43 +117,6 @@ const LivePlayerPage = () => {
    * Each state below now renders something, and every one of them offers a way
    * out.
    */
-  if (!isLoggedIn) {
-    /*
-     * Previously a silent navigate to /login with `replace: true` behind a blank
-     * frame. Two problems beyond the blank: the visitor was moved without being
-     * told why, and `replace` dropped /live from the history, so Back from the
-     * login screen returned to the homepage rather than here — which is exactly
-     * the homepage/live bouncing this page produces in session recordings.
-     *
-     * Asking instead of redirecting keeps the history intact and makes the
-     * requirement legible. `from` is still handed to the login flow so a
-     * completed sign-in comes back to the stream.
-     */
-    return (
-      <div className={styles.gateWrap}>
-        <div className={styles.gateCard}>
-          <h1 className={styles.gateTitle}>Live sessions need an account</h1>
-          <p className={styles.gateText}>
-            Log in to watch astrologers live, ask questions in the chat and send gifts.
-          </p>
-          <div className={styles.gateActions}>
-            <button
-              type="button"
-              className={styles.gatePrimary}
-              onClick={() =>
-                navigate("/login?skip=welcome", { state: { from: location.pathname } })
-              }
-            >
-              Log in to watch
-            </button>
-            <Link to="/astrologers" className={styles.gateSecondary}>
-              Browse astrologers instead
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (
