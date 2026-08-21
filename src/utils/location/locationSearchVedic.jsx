@@ -4,10 +4,12 @@ import Toast from "../../component/toast";
 import styles from "./locationSearch.module.scss";
 
 const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled, dropUp = false }) => {
-  const [triggerGeoSearch, { data, isFetching }] = useLazyGeoSearchQuery();
+  const [triggerGeoSearch, { data, isFetching, isError }] = useLazyGeoSearchQuery();
   const [open, setOpen] = useState(false);
   const selectionMade = useRef(false); // Track if a place is selected
   const wrapperRef = useRef(null);
+  // Last query actually sent, so the retry below can re-run it.
+  const lastQueryRef = useRef("");
 
   // Ensure data is always an array
   const results = Array.isArray(data) ? data : [];
@@ -47,8 +49,11 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled,
     selectionMade.current = false; // reset selection
     onChange(e);
 
-    if (newValue && newValue.length >= 2) {
-      triggerGeoSearch(encodeURIComponent(newValue)); // call API
+    if (newValue && newValue.trim().length >= 2) {
+      // Passed raw: geoApi encodes it while building the URL. Encoding here too
+      // double-encoded every space, so no multi-word city could ever be found.
+      lastQueryRef.current = newValue;
+      triggerGeoSearch(newValue);
       setOpen(true);
     } else {
       setOpen(false);
@@ -106,11 +111,40 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled,
         >
           {isFetching && <div className={styles.loading}>Searching…</div>}
 
-          {!isFetching && results.length === 0 && (
+          {/*
+            A failed lookup used to be indistinguishable from a successful empty
+            one: `isError` was never read, so a network error or 5xx left `data`
+            undefined, `results` empty, and the dropdown said "No results".
+
+            That is the worst possible wording here. Picking a suggestion is the
+            only way to set latitude/longitude, and the submit handler refuses to
+            continue without them — so a broken lookup reads as "you typed the
+            city wrong" and the visitor retypes variations of a place that does
+            exist, with no way through and nothing telling them the search itself
+            failed.
+          */}
+          {!isFetching && isError && (
+            <div className={styles.noResult}>
+              Couldn&apos;t reach the location search.{" "}
+              <button
+                type="button"
+                className={styles.retryBtn}
+                onClick={() => {
+                  if (lastQueryRef.current.trim().length >= 2) {
+                    triggerGeoSearch(lastQueryRef.current);
+                  }
+                }}
+              >
+                Try again
+              </button>
+            </div>
+          )}
+
+          {!isFetching && !isError && results.length === 0 && (
             <div className={styles.noResult}>No results</div>
           )}
 
-          {!isFetching &&
+          {!isFetching && !isError &&
             results.map((item, index) => {
               const displayName =
                 item.full_name && item.country && item.country_name

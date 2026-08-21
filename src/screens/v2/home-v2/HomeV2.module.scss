@@ -396,29 +396,43 @@
 }
 
 /*
- * Sign-in affordance for guests. Padded well beyond its text so a thumb aimed
- * near it still lands on the control — the previous version was a 12px inline
- * span, small enough that near-misses hit the paragraph's padding and did
- * nothing at all.
+ * Guest greeting: the whole line is the sign-in control, not just the "Sign in"
+ * run. Padding rather than margin-only so a thumb aimed anywhere near the text
+ * lands on the button, with the negative margin keeping the surrounding layout
+ * where it was.
+ *
+ * `font: inherit` and `text-align: left` are both load-bearing — without them a
+ * button reset picks up the UA's centred 13.333px system font and the greeting
+ * stops matching the plain `.greeting` paragraph it replaces.
  */
-.guestSignInLink {
+.greetingGuestBtn {
+  display: block;
   appearance: none;
   -webkit-appearance: none;
   -webkit-tap-highlight-color: transparent;
   background: transparent;
   border: none;
-  padding: 8px 10px;
-  margin: -8px -4px;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin: -6px -8px;
   font: inherit;
-  font-weight: 600;
-  color: #f75801;
-  text-decoration: underline;
+  font-size: 13px;
+  color: #030303;
+  text-align: left;
   cursor: pointer;
 
   &:focus-visible {
     outline: 2px solid #f75801;
     outline-offset: 2px;
   }
+}
+
+// Inline emphasis inside .greetingGuestBtn — a span, not a control of its own,
+// so nesting stays valid and there is a single tap target for the whole line.
+.guestSignInLink {
+  font-weight: 600;
+  color: #f75801;
+  text-decoration: underline;
 }
 
 .heroBanner h1, .heroBanner .heroH1 {
