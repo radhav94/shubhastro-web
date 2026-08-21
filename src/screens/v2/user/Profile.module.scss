@@ -310,7 +310,6 @@
   gap: 0.5rem;
   white-space: nowrap;
   transition: transform 0.2s;
-
   &:hover {
     transform: scale(1.02);
   }
@@ -2581,7 +2580,18 @@
     transform: translateY(-2px);
   }
 }
-
+@media (width <= 820px) {
+  .addMinutesButton{
+    font-size: 1rem;
+    padding: 12px 12px;
+    min-width: auto;
+  }
+}
+@media (width <= 768px) {
+  .balanceAmount{
+    font-size: 1.6rem;
+  }
+}
 @media (width <= 767px) {
   .balanceMembershipRow {
     grid-template-columns: 1fr;
@@ -2687,6 +2697,7 @@
     min-width: 178px;
     font-size: 15px;
     padding: 9px 12px;
+    min-height: auto;
   }
 
   .profileLinkText {
