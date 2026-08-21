@@ -201,7 +201,7 @@ const ComingSoon = () => {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <img src={ShubhAstroLogo} alt="ShubhAstro" width="150" height="32" className={styles.logo} />
+        <img src={ShubhAstroLogo} alt="ShubhAstro" width="150" height="27" className={styles.logo} />
       </header>
 
       <main className={styles.main}>
@@ -663,7 +663,7 @@ const ComingSoon = () => {
 
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
-          <img src={ShubhAstroLogo} alt="ShubhAstro" width="150" height="32" className={styles.footerLogo} />
+          <img src={ShubhAstroLogo} alt="ShubhAstro" width="150" height="27" className={styles.footerLogo} />
           <p>© 2026 ShubhAstro Pvt. Ltd. All rights reserved</p>
         </div>
       </footer>
