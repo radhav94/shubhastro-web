@@ -166,10 +166,31 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
 
   // Ref placed at the start of the last AI message (set via lastAiMsgRef)
   const lastAiMsgRef = useRef(null);
+  const scrollTimerRef = useRef(null);
+  /*
+    Mirrors `messages` so the scroll callback can stay referentially stable.
+    It used to close over `messages` directly, so it got a new identity on every
+    message change — and it sits in the dependency array of BOTH effects below.
+    One new reply therefore re-ran both effects and queued two overlapping
+    `scrollIntoView({ behavior: "smooth" })` animations on the same element.
+
+    A smooth scroll runs for a few hundred milliseconds, so for roughly the first
+    half-second after an answer appeared the reply text was still sliding under
+    the cursor. Clicking the text in that window lands on whatever moved into
+    that spot instead, and the natural response is to click again — which is the
+    repeated-clicks-then-rage-click pattern seen on Pandit AI answers.
+  */
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
 
   const scrollToLatestMessage = useCallback(() => {
-    const doScroll = () => {
-      const lastMsg = messages[messages.length - 1];
+    // At most one pending scroll: a newer request supersedes the older one
+    // rather than animating alongside it.
+    if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+    scrollTimerRef.current = setTimeout(() => {
+      scrollTimerRef.current = null;
+      const list = messagesRef.current;
+      const lastMsg = list[list.length - 1];
       const isLastFromAi = lastMsg && lastMsg.sender !== "user";
 
       if (isLastFromAi && lastAiMsgRef.current) {
@@ -182,9 +203,16 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           container.scrollTop = container.scrollHeight;
         }
       }
-    };
-    setTimeout(doScroll, 150);
-  }, [messages]);
+    }, 150);
+  }, []);
+
+  // Don't leave a scroll queued against an unmounted chat.
+  useEffect(
+    () => () => {
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+    },
+    []
+  );
 
   useEffect(() => {
     scrollToLatestMessage();

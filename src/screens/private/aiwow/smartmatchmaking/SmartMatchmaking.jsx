@@ -47,7 +47,6 @@ const SmartMatchmaking = () => {
   const [partnerProfile, setPartnerProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(restoredResult);
-  const [error, setError] = useState(null);
   const [rawApiResult, setRawApiResult] = useState(() => {
     if (restoredResult?._id || restoredResult?.historyId) {
       return { ...restoredResult, _id: restoredResult._id || restoredResult.historyId };
@@ -66,8 +65,6 @@ const SmartMatchmaking = () => {
     handleDownloadClick, handleConfirmDownload,
   } = useAIWowDownload({ resultData: downloadResultData });
 
-
-   console.log(result,"56789")
   // Get token using reusable function
   const token = getToken();
 
@@ -125,8 +122,24 @@ const SmartMatchmaking = () => {
 
   // Handle profile selection
   const handleSelectProfile = (profile) => {
+    /*
+      Picking the profile already used on the other side is a no-op, and it used
+      to `return` before the modal was closed — so the tap left the sheet open
+      and unchanged, with nothing to indicate why. Say what happened and close
+      it like any other selection.
+    */
+    const clashesWithOtherSide =
+      (selectingType === "PRIMARY" && profile._id === partnerProfile?._id) ||
+      (selectingType === "PARTNER" && profile._id === primaryProfile?._id);
+
+    if (clashesWithOtherSide) {
+      Toast.error('That profile is already selected on the other side. Pick a different one.');
+      setShowSelectProfile(false);
+      setSelectingType(null);
+      return;
+    }
+
     if (selectingType === "PRIMARY") {
-      if (profile._id === partnerProfile?._id) return;
       setPrimaryProfile(profile);
       // Check if both are same gender
       if (partnerProfile && profile.gender === partnerProfile.gender) {
@@ -138,7 +151,6 @@ const SmartMatchmaking = () => {
     }
 
     if (selectingType === "PARTNER") {
-      if (profile._id === primaryProfile?._id) return;
       setPartnerProfile(profile);
       // Check if both are same gender
       if (primaryProfile && primaryProfile.gender === profile.gender) {
@@ -325,25 +337,59 @@ const SmartMatchmaking = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    /*
+      Every blocking condition is checked here and answered with a message.
+      They used to live in the submit button's `disabled` expression instead
+      (`isLoading || !primary || !partner || sameGender`), which meant the tap
+      produced no event at all: no toast, no focus move, nothing. The only hint
+      was a same-gender toast fired back at selection time, several seconds and
+      one modal-close earlier. Tapping the button after that did literally
+      nothing, forever — which is what the rage clicks on this screen look like.
+    */
+    if (isLoading || isSubmittingRef.current) {
+      Toast.info('Still analyzing — this takes a few seconds.');
+      return;
+    }
+
     if (!primaryProfile || !partnerProfile) {
-      Toast.error('Please select both profiles');
+      Toast.error(
+        !primaryProfile && !partnerProfile
+          ? 'Select both profiles to compare.'
+          : !primaryProfile
+          ? 'Select a primary profile to compare.'
+          : "Select your partner's profile to compare."
+      );
       trackEvent("match_making_validation_failed_missing_fields", { missing_fields: !primaryProfile ? "primary_profile" : "partner_profile" });
       return;
     }
 
-    if (isSubmittingRef.current) return;
+    // A profile saved without a gender makes the equality check below true
+    // (undefined === undefined), so it would otherwise be reported as a
+    // same-gender clash and the user would have no idea what to change.
+    if (!primaryProfile.gender || !partnerProfile.gender) {
+      Toast.error('One of these profiles has no gender saved. Edit the profile to set it, then try again.');
+      trackEvent("match_making_validation_failed_missing_fields", { missing_fields: "gender" });
+      return;
+    }
+
+    if (primaryProfile.gender === partnerProfile.gender) {
+      Toast.error('Matchmaking needs one male and one female profile. Change one of the selections to continue.');
+      trackEvent(primaryProfile.gender === 'female' ? "match_making_validation_failed_same_gender_female" : "match_making_validation_failed_same_gender_male", {});
+      return;
+    }
+
     isSubmittingRef.current = true;
 
     try {
       setIsLoading(true);
-      setError(null);
 
       const apiResult = await runWithEntitlement(() => analyzeSmartMatchmaking(primaryProfile._id, partnerProfile._id));
 
-      // Entitlement block handled by the gate (plans popup / recharge toast).
+      // Entitlement block handled by the gate itself (plans popup, recharge
+      // redirect or its own toast), so stay quiet here rather than stacking a
+      // second message on top of it.
       if (apiResult.blocked) {
         setIsLoading(false);
-        setError({ message: 'Choose a plan to continue with your report.' });
         return;
       }
 
@@ -360,9 +406,15 @@ const SmartMatchmaking = () => {
         // Show toast with backend error message only
         Toast.error(apiResult.error?.message || 'Matchmaking analysis failed');
       }
-    } catch (error) {
-      console.error('Failed to analyze compatibility:', error);
-      setError({ message: 'An unexpected error occurred. Please try again.' });
+    } catch (err) {
+      /*
+        This used to call setError, but `error` was never rendered anywhere on
+        the screen (ESLint flagged it as an unused variable). So an unexpected
+        failure spun the button, stopped, and said nothing at all — the user's
+        only option was to tap Analyze again and get the same silence.
+      */
+      console.error('Failed to analyze compatibility:', err);
+      Toast.error('Something went wrong while analyzing compatibility. Please try again.');
     } finally {
       isSubmittingRef.current = false;
       setIsLoading(false);
@@ -373,15 +425,10 @@ const SmartMatchmaking = () => {
     if (result) {
       setResult(null);
       setRawApiResult(null);
-      setError(null);
       dispatch(clearSmartMatchmakingResult());
     } else {
       navigate(-1);
     }
-  };
-
-  const handleRetry = () => {
-    setError(null);
   };
 
   return (
@@ -425,10 +472,27 @@ const SmartMatchmaking = () => {
                     <label className="block font-medium mb-2">
                       Select Primary Profile
                     </label>
+                    {/*
+                      Both selectors are divs styled with cursor-pointer, so
+                      they read as controls but had no role, no tab stop and no
+                      key handler — unreachable by keyboard and invisible to
+                      assistive tech. Given as button semantics rather than
+                      swapped to <button> so the existing Tailwind layout
+                      classes keep working unchanged.
+                    */}
                     <div
+                      role="button"
+                      tabIndex={0}
                       onClick={() => {
                         setSelectingType("PRIMARY");
                         setShowSelectProfile(true);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setSelectingType("PRIMARY");
+                          setShowSelectProfile(true);
+                        }
                       }}
                       className="flex items-center justify-between border rounded-xl px-4 py-3 bg-white cursor-pointer"
                     >
@@ -442,9 +506,18 @@ const SmartMatchmaking = () => {
                       Select Partner's Profile
                     </label>
                     <div
+                      role="button"
+                      tabIndex={0}
                       onClick={() => {
                         setSelectingType("PARTNER");
                         setShowSelectProfile(true);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setSelectingType("PARTNER");
+                          setShowSelectProfile(true);
+                        }
                       }}
                       className="flex items-center justify-between border rounded-xl px-4 py-3 bg-white cursor-pointer"
                     >
@@ -454,10 +527,16 @@ const SmartMatchmaking = () => {
                       <ChevronDown className="w-4 h-4 text-orange-500" />
                     </div>
                   </div>
+                {/*
+                  aria-disabled rather than `disabled`: a disabled button fires
+                  no click and no submit, so every blocked tap was swallowed in
+                  silence. handleSubmit now owns the validation and names the
+                  reason, so the button has to stay reachable to reach it.
+                */}
                 <button 
                   type="submit"
                   className={styles.matchMakingBtn} 
-                  disabled={isLoading || !primaryProfile || !partnerProfile || (primaryProfile?.gender === partnerProfile?.gender)}
+                  aria-disabled={isLoading || !primaryProfile || !partnerProfile || (primaryProfile?.gender === partnerProfile?.gender)}
                 >
                   {isLoading ? (
                     <>

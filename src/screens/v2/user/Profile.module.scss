@@ -55,6 +55,7 @@
 .userAvatar {
   width: 40px;
   height: 40px;
+  cursor: pointer;
   background: #fff;
   border: 2px solid #fdefd8;
   border-radius: 50%;
@@ -76,7 +77,23 @@
   flex: 1;
 }
 
+// The name + birth-date line is one tap target that opens Edit Profile. It used
+// to be inert text, which is what drove the dead clicks on this block, so it now
+// has to actually look tappable.
+.headerIdentity {
+  cursor: pointer;
+  border-radius: 6px;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}
+
 .profileName {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
   font-size: 1.25rem;
   font-weight: 600;
   color: #000;
@@ -85,6 +102,15 @@
   @media (width <= 767px) {
    font-size: 16px;
   }
+}
+
+// Small pencil beside the name: the affordance that tells you the block is
+// editable at all, rather than leaving it as a target you have to guess at.
+.profileNameEditIcon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: #f75801;
 }
 .orderCardMain{
   display: grid;
