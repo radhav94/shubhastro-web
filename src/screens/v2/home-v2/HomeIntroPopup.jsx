@@ -87,31 +87,45 @@ const HomeIntroPopup = () => {
     setIsOpen(false);
   };
 
-  const handleBannerClick = () => {
+  /*
+    The banner image and the "Generate Kundli" CTA are the same offer, so they
+    have to resolve to the same destination. They were two near-identical copies
+    of this logic, and the banner's copy was missing the CTA's final
+    `else navigate("/kundli")` branch.
+
+    So whenever the CMS pageblocker is enabled with no `link` set — which is
+    exactly the case where the bundled artwork and the "Unlock Your Free Kundli"
+    copy are shown — tapping the banner fell through every branch and navigated
+    nowhere.
+
+    That is worse than an ordinary dead click. markSeen() runs first regardless,
+    so the tap silently spent the one and only showing this popup ever gets on
+    this browser (SEEN_KEY is permanent) and dropped the visitor back on the
+    homepage with nothing to show for it. The banner is a 256x256 button and the
+    page's LCP element, so it is the most likely thing in the dialog to be
+    tapped.
+
+    One function now, so the two cannot drift apart again.
+  */
+  const dismissAndGo = () => {
     markSeen();
     setIsOpen(false);
-    if (isInternal && popupLink) {
-      // Extract path from URL and navigate to it
-      const path = extractPathFromUrl(popupLink);
-      navigate(path);
-    } else if (popupLink) {
+
+    if (popupLink) {
+      if (isInternal) {
+        navigate(extractPathFromUrl(popupLink));
+        return;
+      }
       window.location.href = popupLink;
+      return;
     }
+
+    // No CMS link configured — fall back to what the popup says it does.
+    navigate("/kundli");
   };
 
-  const handleGenerateKundli = () => {
-    markSeen();
-    setIsOpen(false);
-    if (isInternal && popupLink) {
-      // Extract path from URL and navigate to it
-      const path = extractPathFromUrl(popupLink);
-      navigate(path);
-    } else if (popupLink) {
-      window.location.href = popupLink;
-    } else {
-      navigate("/kundli");
-    }
-  };
+  const handleBannerClick = dismissAndGo;
+  const handleGenerateKundli = dismissAndGo;
 
   if (!isOpen) return null;
 

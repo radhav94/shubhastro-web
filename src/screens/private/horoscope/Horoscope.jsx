@@ -689,11 +689,21 @@ const HoroscopeNew = () => {
             </svg>
           </button>
           <span className="horoscope-page-title">Kundli Horoscope</span>
+          {/*
+            Carries the sign across. This navigated to a bare '/daily-horoscope',
+            which silently discarded the zodiac the visitor had chosen and landed
+            them on the generic page to pick it again — even though
+            '/daily-horoscope/:sign' exists and the period switches a few lines
+            up already use `selectedZodiac` for exactly this.
+
+            Switching view is not a request to start over, and losing the
+            selection is invisible until the new page renders the wrong sign.
+          */}
           <button
             className="horoscope-western-btn"
             onClick={() => {
               trackEvent('horoscope_type_switched', { from_type: 'indian', to_type: 'western' });
-              navigate('/daily-horoscope', { replace: true });
+              navigate(`/daily-horoscope/${selectedZodiac}`, { replace: true });
             }}
           >
             Western
@@ -703,7 +713,28 @@ const HoroscopeNew = () => {
 
       {/* Centered Profile Selector with DOB/Place */}
       <div className="horoscope-profile-header">
-        <div className="horoscope-profile-center" onClick={handleOpenModal}>
+        {/* Was a bare <div onClick>: mouse-only, unreachable by keyboard and
+            invisible to assistive tech, despite rendering a chevron that
+            promises a picker. HoroscopeOld (the Western view) already had these
+            semantics — this copy was missed. Not a real <button> because it
+            contains block content (the date-of-birth line). */}
+        <div
+          className="horoscope-profile-center"
+          role="button"
+          tabIndex={0}
+          aria-label={
+            activeProfile
+              ? `Profile: ${activeProfile.name}. Change profile`
+              : `Zodiac: ${selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1)}. Change zodiac sign`
+          }
+          onClick={handleOpenModal}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleOpenModal();
+            }
+          }}
+        >
           <span className="horoscope-profile-label">{activeProfile ? "Select Profile" : "Select Zodiac"}</span>
           <span className="horoscope-profile-name">
             {activeProfile?.name || capitalizedSign}

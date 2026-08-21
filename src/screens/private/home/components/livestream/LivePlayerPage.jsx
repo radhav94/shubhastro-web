@@ -23,6 +23,11 @@ import styles from "./LivePlayerPage.module.scss";
 const importInteractiveLiveStreaming = () => import("./InteractiveLiveStreaming");
 const InteractiveLiveStreaming = lazy(importInteractiveLiveStreaming);
 
+// How often to re-check for streams while the "nobody is live" card is showing.
+// Only ever runs on that state and only while the tab is visible, so this is a
+// handful of requests per idle visitor rather than a background poll for everyone.
+const EMPTY_STATE_POLL_MS = 30000;
+
 const LivePlayerPage = () => {
   const { channelId } = useParams();
   const [lives, setLives] = useState([]);
@@ -30,11 +35,22 @@ const LivePlayerPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
 
-  // Guests may watch live streams, so there is no login gate here. Kept as a
-  // named function (rather than inlined in the effect) so the "Try again" /
-  // "Check again" buttons in the failure and empty states can re-run it.
-  const loadLives = () => {
-    setIsLoading(true);
+  /*
+    Guests may watch live streams, so there is no login gate here.
+
+    `silent` is for the background poll below: it skips the loading and failure
+    state changes so a refresh behind the "Nobody is live right now" card does
+    not replace that card with a spinner every few seconds, and a transient poll
+    failure does not swap a valid empty state for an error one.
+
+    Note the deliberate `loadLives` wrapper underneath. This function cannot be
+    passed straight to `onClick`, because React would hand the click event in as
+    `options` and `options.silent` on a SyntheticEvent is undefined-but-the-object-
+    is-truthy territory — easy to get wrong later. The wrapper takes no arguments,
+    so button handlers and the mount effect can never leak one in.
+  */
+  const fetchLives = ({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
 
     // Start fetching the Agora chunk alongside the live list rather than after
     // it, so splitting the player out does not add a round trip for viewers who
@@ -94,16 +110,57 @@ const LivePlayerPage = () => {
 
       setLives(liveList);
       setLoadFailed(false);
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }).catch(() => {
       // The failure used to be indistinguishable from "nobody is live": both
       // ended with an empty list and a screen that explained neither.
-      setLoadFailed(true);
-      setIsLoading(false);
+      if (!silent) {
+        setLoadFailed(true);
+        setIsLoading(false);
+      }
     });
   };
 
-  useEffect(loadLives, [channelId]);
+  // Argument-free wrapper — safe to hand directly to onClick. See fetchLives.
+  const loadLives = () => {
+    fetchLives();
+  };
+
+  useEffect(() => {
+    fetchLives();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channelId]);
+
+  /*
+    Re-check for streams while the empty state is on screen.
+
+    The empty card told the visitor to "check back shortly" and gave them a
+    manual "Check again" button, and that was the only way the page could ever
+    learn that somebody had gone live. So they check by hand — one session shows
+    a visitor bouncing between the homepage and this page for an hour and a half
+    across 17 page loads, with long idle gaps between clicks. They were polling
+    us manually.
+
+    Runs only while there is genuinely nothing to watch, so it never competes
+    with the Agora player: the moment the list comes back non-empty this effect
+    tears the interval down, and it is skipped entirely on the loading and
+    failure states (the failure state has its own retry, which the visitor should
+    stay in control of). Silent, so the card does not flicker.
+  */
+  useEffect(() => {
+    if (isLoading || loadFailed || lives.length > 0) return undefined;
+
+    const id = setInterval(() => {
+      // Don't poll a page nobody is looking at — this state can sit open for a
+      // very long time, which is the whole reason it exists.
+      if (document.visibilityState === "visible") {
+        fetchLives({ silent: true });
+      }
+    }, EMPTY_STATE_POLL_MS);
+
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, loadFailed, lives.length]);
 
   /*
    * Every exit from this page used to be `return null`, i.e. a blank white page
