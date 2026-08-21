@@ -487,7 +487,22 @@ const AddProfileModal = ({
                     <LocationSearch
                       dropUp
                       value={values.birthPlace}
-                      onChange={(e) => setFieldValue("birthPlace", e.target.value)}
+                      /*
+                        Typing clears the coordinates.
+
+                        Only onPlaceSelect sets lat/lng, but nothing used to
+                        unset them — so picking "Mumbai", then editing the text
+                        to "Pune" and submitting sent the name Pune with
+                        Mumbai's coordinates. The chart is computed from the
+                        coordinates, so that produced a confidently wrong result
+                        with no error anywhere. Clearing them means the guard in
+                        handleSubmit catches it and asks for a fresh pick.
+                      */
+                      onChange={(e) => {
+                        setFieldValue("birthPlace", e.target.value);
+                        setFieldValue("latitude", null);
+                        setFieldValue("longitude", null);
+                      }}
                       onPlaceSelect={(place) => {
                         setFieldValue("birthPlace", place.address);
                         setFieldValue("latitude", place.lat);

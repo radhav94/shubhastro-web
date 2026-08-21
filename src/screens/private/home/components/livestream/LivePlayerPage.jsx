@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useCallback, useEffect, useRef, useState, lazy, Suspense } from "react";
 import { useParams, Link } from "react-router-dom";
 import { LiveListProvider } from "../../../../../context/LiveListContext";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
@@ -31,9 +31,9 @@ const LivePlayerPage = () => {
   const [loadFailed, setLoadFailed] = useState(false);
 
   // Guests may watch live streams, so there is no login gate here. Kept as a
-  // named function (rather than inlined in the effect) so the "Try again" /
-  // "Check again" buttons in the failure and empty states can re-run it.
-  const loadLives = () => {
+  // named callback (rather than inlined in the effect) so the "Try again" /
+  // "Check again" buttons and the auto-resume listener below can all re-run it.
+  const loadLives = useCallback(() => {
     setIsLoading(true);
 
     // Start fetching the Agora chunk alongside the live list rather than after
@@ -101,9 +101,39 @@ const LivePlayerPage = () => {
       setLoadFailed(true);
       setIsLoading(false);
     });
-  };
+  }, [channelId]);
 
-  useEffect(loadLives, [channelId]);
+  useEffect(loadLives, [loadLives]);
+
+  /*
+    Auto-resume when an astrologer goes live while nothing is playing.
+
+    The "Nobody is live right now" card below used to be a dead end until the
+    visitor tapped "Check again" — the reel's own live:session_started handling
+    lives inside LiveStreamingContainer, which isn't mounted when the list is
+    empty. So a viewer who sat through the last astrologer signing off had to
+    poll by hand.
+
+    `useAstrologerStatusSocket` (mounted once in App) re-dispatches the socket
+    event on `window`, so this needs no second socket connection.
+
+    Guarded on the list actually being empty: while a stream is on screen the
+    container handles new sessions itself, and re-fetching here would yank the
+    reel out from under the viewer.
+  */
+  const livesRef = useRef(lives);
+  useEffect(() => { livesRef.current = lives; }, [lives]);
+
+  useEffect(() => {
+    const onLiveStatus = (event) => {
+      if (event?.detail?.status !== "started") return;
+      if (livesRef.current.length > 0) return;
+      loadLives();
+    };
+
+    window.addEventListener("live:astrologer_status", onLiveStatus);
+    return () => window.removeEventListener("live:astrologer_status", onLiveStatus);
+  }, [loadLives]);
 
   /*
    * Every exit from this page used to be `return null`, i.e. a blank white page
