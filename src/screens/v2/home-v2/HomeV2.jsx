@@ -360,7 +360,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                 src={aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon}
                 alt=""
                 width="200"
-                height="200"
+                height="187"
                 loading="lazy"
               />
             ) : null}
