@@ -367,7 +367,14 @@ const EditProfileModal = ({
                   <label>Place of Birth <span className={styles.required}>*</span></label>
                   <LocationSearch
                     value={values.birthPlace}
-                    onChange={(e) => setFieldValue("birthPlace", e.target.value)}
+                    /* Clear the coordinates on edit — see the note in
+                       AddProfileModal. Editing the name after a pick otherwise
+                       submits the previously selected city's coordinates. */
+                    onChange={(e) => {
+                      setFieldValue("birthPlace", e.target.value);
+                      setFieldValue("latitude", null);
+                      setFieldValue("longitude", null);
+                    }}
                     onPlaceSelect={(place) => {
                       setFieldValue("birthPlace", place.address);
                       setFieldValue("latitude", place.lat);

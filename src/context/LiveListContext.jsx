@@ -27,13 +27,22 @@ export const LiveListProvider = ({ children, lives: initialLives, autoStartIndex
   const getCurrentChannel = () => lives[currentIndex]?.channel;
   const getCurrentLive = () => lives[currentIndex] || null;
 
+  /*
+   * Both guard an empty list. The wrap-around is `% lives.length`, and once the
+   * last astrologer ends their session that length is 0 — `% 0` is NaN, which
+   * would stick in currentIndex and make getCurrentLive() permanently null even
+   * after someone goes live again. A swipe or an arrow key can still reach these
+   * during the moment the reel is empty.
+   */
   const goNextLive = () => {
+    if (lives.length === 0) return;
     setDirection("up");
     setCurrentIndex((i) => (i + 1) % lives.length);
     setHasNewLive(false);
   };
 
   const goPrevLive = () => {
+    if (lives.length === 0) return;
     setDirection("down");
     setCurrentIndex((i) => (i - 1 + lives.length) % lives.length);
     setHasNewLive(false);

@@ -38,10 +38,10 @@ const LivePlayerPage = () => {
   /*
     Guests may watch live streams, so there is no login gate here.
 
-    `silent` is for the background poll below: it skips the loading and failure
-    state changes so a refresh behind the "Nobody is live right now" card does
-    not replace that card with a spinner every few seconds, and a transient poll
-    failure does not swap a valid empty state for an error one.
+    `silent` is for the background refreshes below (the poll and the socket
+    listener): it skips the loading and failure state changes so a refresh behind
+    the "Nobody is live right now" card does not replace that card with a spinner,
+    and a transient failure does not swap a valid empty state for an error one.
 
     Note the deliberate `loadLives` wrapper underneath. This function cannot be
     passed straight to `onClick`, because React would hand the click event in as
@@ -159,6 +159,32 @@ const LivePlayerPage = () => {
     }, EMPTY_STATE_POLL_MS);
 
     return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, loadFailed, lives.length]);
+
+  /*
+    Same job as the poll above, but instant.
+
+    The poll is the safety net — it also covers a dropped socket — while this
+    picks the stream up the moment an astrologer goes live instead of up to 30s
+    later. `useAstrologerStatusSocket` (mounted once in App) re-dispatches the
+    socket event on `window`, so this needs no second socket connection.
+
+    Attached under exactly the same guard as the poll, so it only exists while
+    there is nothing to watch: while a stream is on screen LiveStreamingContainer
+    handles new sessions itself, and refetching here would yank the reel out from
+    under the viewer. Silent for the same reason the poll is.
+  */
+  useEffect(() => {
+    if (isLoading || loadFailed || lives.length > 0) return undefined;
+
+    const onLiveStatus = (event) => {
+      if (event?.detail?.status !== "started") return;
+      fetchLives({ silent: true });
+    };
+
+    window.addEventListener("live:astrologer_status", onLiveStatus);
+    return () => window.removeEventListener("live:astrologer_status", onLiveStatus);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, loadFailed, lives.length]);
 

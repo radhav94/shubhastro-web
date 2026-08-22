@@ -210,6 +210,18 @@ export const useProfileManager = (dispatch) => {
       return;
     }
 
+    /*
+      This form had no coordinate check at all, unlike AddProfileModal. A place
+      typed by hand (never picked from the dropdown) left latitude/longitude null,
+      and buildKundliPayload below falls back to `lat: 0, lon: 0` — the Gulf of
+      Guinea. The profile saved without complaint and every chart computed from it
+      was wrong.
+    */
+    if (!formData.latitude || !formData.longitude) {
+      Toast.error("Please select a valid location from the dropdown");
+      return;
+    }
+
     // If user is not logged in, just set the profile locally without saving to backend
     if (!token) {
       const payload = buildKundliPayload(formData);
