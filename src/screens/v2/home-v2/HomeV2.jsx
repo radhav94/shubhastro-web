@@ -568,6 +568,16 @@ const HomeV2 = () => {
    */
   const fetchedSectionPagesRef = useRef(new Set([1]));
   /*
+   * Identities of sections already handed to the store, recorded synchronously.
+   *
+   * The de-dupe cannot rely on reading the store alone: `dispatch` does not update
+   * it until React re-renders, so a second page resolving in the same tick would
+   * be compared against a list that does not yet contain the first one. Unioned
+   * with the store's current contents at use time, so page 1 (which arrives via
+   * the blocking query, not through here) is always included.
+   */
+  const appendedSectionIdsRef = useRef(new Set());
+  /*
    * Pages whose last attempt failed. A retry has to bypass preferCacheValue:
    * RTK Query keeps a rejected result as a cache entry like any other, so
    * preferring the cache would hand back the same rejection without ever going
@@ -591,17 +601,35 @@ const HomeV2 = () => {
    * ignores pageNo/limit returns on the very first request, keeping that case to
    * a single request.
    */
-  const pageFromCount = (count) =>
-    count > 0 && count % HOME_SECTIONS_PAGE_SIZE === 0
-      ? count / HOME_SECTIONS_PAGE_SIZE + 1
-      : null;
+  /*
+   * Which page to ask for next, and whether to keep asking.
+   *
+   * This used to be inferred from the loaded section count:
+   *
+   *     count % PAGE_SIZE === 0 ? count / PAGE_SIZE + 1 : null
+   *
+   * with `null` doubling as the "server has nothing left" signal. That conflates
+   * two unrelated things — a short page from the server, and a short *count*
+   * because our own de-duplication dropped something. One repeated section
+   * anywhere in the CMS list is enough: page 2 comes back full, one item is
+   * already held, the count lands on 9 instead of 10, `9 % 5` is not 0, the page
+   * resolves to null, the sentinel unmounts and paging stops for good. Pages 3
+   * and 4 are never requested and no amount of scrolling recovers them — which
+   * is what "sometimes it loads, sometimes it doesn't" looks like.
+   *
+   * Counting pages instead of sections decouples the two: the next page is simply
+   * the one after the highest we have merged, and exhaustion comes from what the
+   * server actually sent (see the `list.length` check in loadNextSectionsPage).
+   *
+   * State as well as the ref below, because the sentinel's `hasMoreSections`
+   * gate is evaluated during render and has to react when this advances.
+   */
+  const [lastFetchedSectionPage, setLastFetchedSectionPage] = useState(1);
 
   const loadedSectionCount = Array.isArray(homeSections) ? homeSections.length : 0;
-  const nextSectionsPage = pageFromCount(loadedSectionCount);
+  const nextSectionsPage = lastFetchedSectionPage + 1;
   const hasMoreSections =
-    !sectionsExhausted &&
-    nextSectionsPage !== null &&
-    nextSectionsPage <= HOME_SECTIONS_MAX_PAGES;
+    !sectionsExhausted && nextSectionsPage <= HOME_SECTIONS_MAX_PAGES;
 
   /*
    * Live view of the loaded sections, for loadNextSectionsPage.
@@ -646,14 +674,16 @@ const HomeV2 = () => {
     if (sectionsExhausted) return;
     if (sectionsInFlightRef.current) return;
 
-    // Derived here, not captured from render — see homeSectionsRef above.
-    const heldSections = Array.isArray(homeSectionsRef.current) ? homeSectionsRef.current : [];
-    const nextPage = pageFromCount(heldSections.length);
-    if (nextPage === null || nextPage > HOME_SECTIONS_MAX_PAGES) return;
-
-    // Already have it. This is the stale-callback case: return before taking the
-    // latch so the genuinely-next page is still free to load.
-    if (fetchedSectionPagesRef.current.has(nextPage)) return;
+    /*
+     * Read from the ref, which is updated synchronously the moment a page's
+     * payload arrives — not from the render closure. That is what makes a
+     * late-firing observer callback harmless: it computes the same "highest
+     * merged page + 1" a fresh one would, so it either asks for the genuinely
+     * next page or is stopped by the in-flight latch. It can no longer re-request
+     * a page we already hold.
+     */
+    const nextPage = Math.max(...fetchedSectionPagesRef.current) + 1;
+    if (nextPage > HOME_SECTIONS_MAX_PAGES) return;
 
     sectionsInFlightRef.current = true;
 
@@ -690,22 +720,35 @@ const HomeV2 = () => {
     // Real payload in hand, so this page is done. Recorded only now, never
     // before the request, so a failure above leaves it retryable.
     fetchedSectionPagesRef.current.add(nextPage);
+    setLastFetchedSectionPage((prev) => Math.max(prev, nextPage));
 
     /*
-     * De-duplicated against the live list, re-read here rather than reusing
-     * `heldSections` from the top of this function: the await above means other
-     * appends can have landed while this request was in flight.
+     * Whether the server has more is decided by what the server sent — a page
+     * shorter than the limit means the end of the list. Deliberately not decided
+     * by how many survived de-duplication below: those are different questions,
+     * and conflating them is what used to end paging early.
      */
+    const serverHasMore = list.length >= HOME_SECTIONS_PAGE_SIZE;
+
+    // Store contents plus anything appended in this tick — see appendedSectionIdsRef.
     const currentSections = Array.isArray(homeSectionsRef.current) ? homeSectionsRef.current : [];
-    const held = new Set(currentSections.map(sectionIdentity));
+    const held = new Set(appendedSectionIdsRef.current);
+    currentSections.forEach((section) => {
+      const id = sectionIdentity(section);
+      if (id) held.add(id);
+    });
+
     const fresh = list.filter((section) => {
       const id = sectionIdentity(section);
       if (!id || held.has(id)) return false;
       held.add(id);
+      appendedSectionIdsRef.current.add(id);
       return true;
     });
 
     sectionsInFlightRef.current = false;
+
+    if (!serverHasMore) setSectionsExhausted(true);
 
     if (fresh.length === 0) {
       // A full page of sections we already hold — the server is ignoring pageNo,
