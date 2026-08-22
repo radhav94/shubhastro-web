@@ -556,6 +556,18 @@ const HomeV2 = () => {
    */
   const sectionsInFlightRef = useRef(false);
   /*
+   * Pages already fetched with a real payload.
+   *
+   * Not the high-water mark that used to live here. That one recorded a page
+   * *before* the request went out and never rolled back, so one failure killed
+   * paging for good. This records a page only once the server has answered with
+   * a non-empty list, so a failed page is absent from the set and stays
+   * retryable, while a page already held can never be asked for twice.
+   *
+   * Seeded with page 1, which arrives via the blocking getNewHomeDetails query.
+   */
+  const fetchedSectionPagesRef = useRef(new Set([1]));
+  /*
    * Pages whose last attempt failed. A retry has to bypass preferCacheValue:
    * RTK Query keeps a rejected result as a cache entry like any other, so
    * preferring the cache would hand back the same rejection without ever going
@@ -579,15 +591,43 @@ const HomeV2 = () => {
    * ignores pageNo/limit returns on the very first request, keeping that case to
    * a single request.
    */
-  const loadedSectionCount = Array.isArray(homeSections) ? homeSections.length : 0;
-  const nextSectionsPage =
-    loadedSectionCount > 0 && loadedSectionCount % HOME_SECTIONS_PAGE_SIZE === 0
-      ? loadedSectionCount / HOME_SECTIONS_PAGE_SIZE + 1
+  const pageFromCount = (count) =>
+    count > 0 && count % HOME_SECTIONS_PAGE_SIZE === 0
+      ? count / HOME_SECTIONS_PAGE_SIZE + 1
       : null;
+
+  const loadedSectionCount = Array.isArray(homeSections) ? homeSections.length : 0;
+  const nextSectionsPage = pageFromCount(loadedSectionCount);
   const hasMoreSections =
     !sectionsExhausted &&
     nextSectionsPage !== null &&
     nextSectionsPage <= HOME_SECTIONS_MAX_PAGES;
+
+  /*
+   * Live view of the loaded sections, for loadNextSectionsPage.
+   *
+   * The observer below is deliberately never disconnected inside its callback,
+   * and IntersectionObserver keeps delivering while the sentinel is inside the
+   * 600px rootMargin. So a callback can fire in the gap between
+   * `sectionsInFlightRef` being released and React re-rendering with the appended
+   * page — at which point the closure still holds the *previous* render's
+   * `homeSections` and `nextSectionsPage`.
+   *
+   * That was not a harmless extra request. The stale closure re-requested the
+   * page it had just fetched (a cache hit, so instant), and de-duplicated the
+   * response against its own pre-append `homeSections` — which of course did not
+   * contain it yet. So the whole page was appended a *second* time. The count
+   * then landed on 15 instead of 10, `15 % 5 === 0` still looked like a clean
+   * page boundary, and the next page computed as 4: page 3 was never requested
+   * at all, and two sections rendered twice. Nothing errored, and
+   * `hasMoreSections` stayed true, which is why it presented as "page 4 sometimes
+   * doesn't fire".
+   *
+   * Reading the count and the held list from a ref at invocation time makes the
+   * function insensitive to when the callback happens to run.
+   */
+  const homeSectionsRef = useRef(homeSections);
+  homeSectionsRef.current = homeSections;
 
   /*
    * Fetches one page and appends it into the page-1 cache entry.
@@ -603,8 +643,18 @@ const HomeV2 = () => {
    * updating without a reload.
    */
   const loadNextSectionsPage = useCallback(async () => {
-    if (!hasMoreSections) return;
+    if (sectionsExhausted) return;
     if (sectionsInFlightRef.current) return;
+
+    // Derived here, not captured from render — see homeSectionsRef above.
+    const heldSections = Array.isArray(homeSectionsRef.current) ? homeSectionsRef.current : [];
+    const nextPage = pageFromCount(heldSections.length);
+    if (nextPage === null || nextPage > HOME_SECTIONS_MAX_PAGES) return;
+
+    // Already have it. This is the stale-callback case: return before taking the
+    // latch so the genuinely-next page is still free to load.
+    if (fetchedSectionPagesRef.current.has(nextPage)) return;
+
     sectionsInFlightRef.current = true;
 
     let list;
@@ -613,19 +663,19 @@ const HomeV2 = () => {
       // re-request every page each time the visitor navigates back to "/".
       // Turned off for a page that failed last time, so the retry actually hits
       // the network instead of replaying the cached rejection.
-      const preferCacheValue = !failedSectionPagesRef.current.has(nextSectionsPage);
+      const preferCacheValue = !failedSectionPagesRef.current.has(nextPage);
       const response = await fetchHomeSectionsPage(
-        { pageNo: nextSectionsPage },
+        { pageNo: nextPage },
         preferCacheValue
       ).unwrap();
       list = response?.data?.list;
-      failedSectionPagesRef.current.delete(nextSectionsPage);
+      failedSectionPagesRef.current.delete(nextPage);
     } catch {
       // Transport-level failure. Below-the-fold content is best effort, so no
       // error UI — but release the guard, because the next time the sentinel
       // crosses into view this page should be attempted again rather than the
       // homepage ending here for good.
-      failedSectionPagesRef.current.add(nextSectionsPage);
+      failedSectionPagesRef.current.add(nextPage);
       sectionsInFlightRef.current = false;
       return;
     }
@@ -637,7 +687,17 @@ const HomeV2 = () => {
       return;
     }
 
-    const held = new Set(homeSections.map(sectionIdentity));
+    // Real payload in hand, so this page is done. Recorded only now, never
+    // before the request, so a failure above leaves it retryable.
+    fetchedSectionPagesRef.current.add(nextPage);
+
+    /*
+     * De-duplicated against the live list, re-read here rather than reusing
+     * `heldSections` from the top of this function: the await above means other
+     * appends can have landed while this request was in flight.
+     */
+    const currentSections = Array.isArray(homeSectionsRef.current) ? homeSectionsRef.current : [];
+    const held = new Set(currentSections.map(sectionIdentity));
     const fresh = list.filter((section) => {
       const id = sectionIdentity(section);
       if (!id || held.has(id)) return false;
@@ -660,7 +720,7 @@ const HomeV2 = () => {
         if (Array.isArray(draft?.data?.list)) draft.data.list.push(...fresh);
       })
     );
-  }, [hasMoreSections, nextSectionsPage, homeSections, fetchHomeSectionsPage, dispatch]);
+  }, [sectionsExhausted, fetchHomeSectionsPage, dispatch]);
 
   /*
    * Pages load as the visitor scrolls, one at a time, rather than all at once
@@ -712,7 +772,20 @@ const HomeV2 = () => {
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [hasMoreSections, loadNextSectionsPage]);
+    /*
+     * loadedSectionCount is what chains the pages.
+     *
+     * IntersectionObserver only fires on threshold crossings, but it always
+     * delivers one observation when you call observe(). After a page is appended
+     * the sentinel is usually still inside the 600px rootMargin, so no crossing
+     * occurs and the only thing that asks for the next page is this effect
+     * re-running and re-observing. That used to happen incidentally, because
+     * loadNextSectionsPage took `homeSections` as a dependency and so got a new
+     * identity on every append. It is stable now (deliberately — that identity
+     * churn is what let a stale closure re-request a page and skip the next one),
+     * so the count is named here explicitly instead.
+     */
+  }, [hasMoreSections, loadedSectionCount, loadNextSectionsPage]);
 
   const sortedSections = useMemo(() => sortSections(homeSections), [homeSections]);
   const renderPlan = useMemo(() => buildRenderPlan(sortedSections), [sortedSections]);
