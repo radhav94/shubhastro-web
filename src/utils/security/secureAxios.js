@@ -21,6 +21,12 @@ import {
   isEncryptedEnvelope,
   decryptEnvelope,
 } from "./cryptoClient";
+import {
+  SGW_CACHE_BUSTER_ENABLED,
+  SGW_CACHE_BUSTER_PARAM,
+  isCacheBustableMethod,
+  sgwCacheBusterValue,
+} from "./sgwCacheBuster";
 
 export function attachSecureTransport(instance) {
   instance.interceptors.request.use(async (config) => {
@@ -35,6 +41,20 @@ export function attachSecureTransport(instance) {
       // Handshake failed (e.g. Web Crypto unavailable). The gateway is
       // fail-closed and will answer 428; surfaced to the caller below.
     }
+
+    /*
+     * TEMPORARY: same CloudFront workaround as secureBaseQuery — see
+     * sgwCacheBuster.js. Kept on the axios path too so it isn't a partial fix:
+     * privateRequest/publicRequest go through the same /sgw origin and are
+     * equally exposed to a cached envelope from another session.
+     */
+    if (SGW_CACHE_BUSTER_ENABLED && isCacheBustableMethod(config.method)) {
+      config.params = {
+        ...(config.params || {}),
+        [SGW_CACHE_BUSTER_PARAM]: sgwCacheBusterValue(),
+      };
+    }
+
     return config;
   });
 
