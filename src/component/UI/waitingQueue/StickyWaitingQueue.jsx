@@ -182,6 +182,11 @@ const StickyWaitingQueue = () => {
               const status = conn.status || "waiting";
               const isAccepted = status === "astrologer_accepted";
               const isOnHold = status === "on_hold";
+              // Cancel was tapped before the server had assigned a roomId, so the
+              // withdrawal is queued until the room event lands (see
+              // WaitingQueueContext.assignRoomId). Report that instead of showing
+              // Cancel again on a request that is already being withdrawn.
+              const isCancelling = !!conn.cancelRequested && !conn.roomId;
               const profileImg = getProfileImage(conn);
               // Accept / rejoin / hold-cancel all need the server-assigned roomId.
               const ready = isReady(conn);
@@ -210,30 +215,37 @@ const StickyWaitingQueue = () => {
                       {conn.type === "chat" ? "Chat" : conn.type === "video" ? "Video Call" : "Audio Call"}
                     </p>
                     <p className={styles.itemMeta}>
-                      {isAccepted && <span className={styles.metaGreen}>Accepted</span>}
-                      {isOnHold && <span className={styles.metaRed}>Missed Call</span>}
-                      {status === "ringing" && <span className={styles.metaGreen}>{conn.type === "chat" ? "Connecting..." : "Ringing..."}</span>}
-                      {!isAccepted && !isOnHold && status !== "ringing" && (formatWaitDisplay(conn) || "Waiting…")}
+                      {isCancelling && <span className={styles.metaRed}>Cancelling…</span>}
+                      {!isCancelling && isAccepted && <span className={styles.metaGreen}>Accepted</span>}
+                      {!isCancelling && isOnHold && <span className={styles.metaRed}>Missed Call</span>}
+                      {!isCancelling && status === "ringing" && <span className={styles.metaGreen}>{conn.type === "chat" ? "Connecting..." : "Ringing..."}</span>}
+                      {!isCancelling && !isAccepted && !isOnHold && status !== "ringing" && (formatWaitDisplay(conn) || "Waiting…")}
                     </p>
                   </div>
 
                   <div className={styles.itemActions}>
+                    {/*
+                      Withdrawal already in flight. No control is offered rather
+                      than a dead or aria-disabled Cancel, because there is
+                      genuinely nothing left for the user to do — the meta line
+                      beside this says "Cancelling…".
+                    */}
                     {/* Waiting state — Cancel */}
-                    {!isAccepted && !isOnHold && status !== "ringing" && (
+                    {!isCancelling && !isAccepted && !isOnHold && status !== "ringing" && (
                       <button className={styles.cancelBtn} onClick={() => handleCancelOne(conn)}>
                         Cancel
                       </button>
                     )}
 
                     {/* Ringing — Cancel */}
-                    {status === "ringing" && !isAccepted && (
+                    {!isCancelling && status === "ringing" && !isAccepted && (
                       <button className={styles.cancelBtn} onClick={() => handleCancelOne(conn)}>
                         Cancel
                       </button>
                     )}
 
                     {/* On hold / Missed — Rejoin + Cancel */}
-                    {isOnHold && (
+                    {!isCancelling && isOnHold && (
                       <>
                         <button
                           className={`${styles.rejoinBtn} ${!ready ? styles.notReady : ""}`.trim()}
@@ -253,7 +265,7 @@ const StickyWaitingQueue = () => {
                     )}
 
                     {/* Accepted — Join Call/Chat */}
-                    {isAccepted && (
+                    {!isCancelling && isAccepted && (
                       <button
                         className={`${styles.joinCallBtn} ${!ready ? styles.notReady : ""}`.trim()}
                         onClick={() => handleAccept(conn)}
