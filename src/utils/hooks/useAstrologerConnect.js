@@ -22,7 +22,22 @@ export const useAstrologerConnect = () => {
   const token = getToken();
   const userIdLocal = localStorage.getItem("shubhtalk_customer_id");
 
-  const { addPendingConnection, isInQueue } = useWaitingQueue();
+  const { addPendingConnection, isInQueue, isCancelling } = useWaitingQueue();
+
+  /*
+   * A queued entry the user has already cancelled is held until its roomId
+   * arrives so the withdrawal can actually be sent (see WaitingQueueContext).
+   * isInQueue still counts it, which is what stops a duplicate request — but
+   * telling someone who just pressed Cancel that they are "already waiting"
+   * reads as the cancel having been ignored. Name the real state instead.
+   */
+  const queueRejectionMessage = useCallback(
+    (astrologerId) =>
+      ["audio", "video", "chat"].some((t) => isCancelling(astrologerId, t))
+        ? "Still cancelling your previous request. One moment."
+        : "Already waiting for this astrologer",
+    [isCancelling]
+  );
 
   const [openModal, setOpenModal] = useState({
     recharge: false,
@@ -364,7 +379,7 @@ export const useAstrologerConnect = () => {
         // Check if same astrologer already has any pending request (audio, video, or chat)
         if (isInQueue(astro._id, "audio") || isInQueue(astro._id, "video") || isInQueue(astro._id, "chat")) {
           console.log("[NormalFlow] ⏭️ Already in queue for this astrologer");
-          Toast.error("Already waiting for this astrologer");
+          Toast.error(queueRejectionMessage(astro._id));
           return;
         }
 
@@ -404,7 +419,7 @@ export const useAstrologerConnect = () => {
         // Check if same astrologer already has any pending request (call or chat)
         if (isInQueue(astro._id, "chat") || isInQueue(astro._id, "audio") || isInQueue(astro._id, "video")) {
           console.log("[NormalFlow] ⏭️ Already in queue for this astrologer");
-          Toast.error("Already waiting for this astrologer");
+          Toast.error(queueRejectionMessage(astro._id));
           return;
         }
 
@@ -436,7 +451,7 @@ export const useAstrologerConnect = () => {
     } catch (error) {
       console.error("[NormalFlow] ❌ Error in handleAfterKundliSelect:", error);
     }
-  }, [token, userIdLocal, navigate, location, setLastSelectedKundli, setLastCallType, setCallWaitingList, profiles, addPendingConnection, isInQueue]);
+  }, [token, userIdLocal, navigate, location, setLastSelectedKundli, setLastCallType, setCallWaitingList, profiles, addPendingConnection, isInQueue, queueRejectionMessage]);
 
   const handleRechargeNow = useCallback(() => {
     setOpenModal((prev) => ({ ...prev, recharge: false }));

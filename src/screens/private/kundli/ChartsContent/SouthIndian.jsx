@@ -140,7 +140,9 @@ const SouthIndian = ({ style = "south" }) => {
       d45,
       d60,
     ][i];
-    return chart?.isLoading;
+    // isFetching, not isLoading: a switch back to an already-cached style still
+    // refetches, and isLoading is false for a cached entry.
+    return chart?.isFetching;
   });
 
   return (

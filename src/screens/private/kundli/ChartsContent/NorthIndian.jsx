@@ -112,6 +112,15 @@ const NorthIndian = ({ style = "north" }) => {
     { title: "Shastiamsa (Summary of charts)", src: svgUrl(d60.data) },
   ];
 
+  /*
+    This list is index-aligned with `charts` above, so it must contain every
+    entry. It was missing d3s, d10r and d24r, which shifted everything from
+    index 8 onward onto the wrong query and left the last three indexes
+    resolving to `undefined` — so the loader could clear while charts were
+    still arriving. Aligned with the SouthIndian sibling, which was already
+    correct. `isFetching` rather than `isLoading` so a north/south switch back
+    to a cached style still reports its refetch.
+  */
   const loading = charts.some((c, i) => {
     const chart = [
       dChalit,
@@ -122,23 +131,26 @@ const NorthIndian = ({ style = "north" }) => {
       d1,
       d2,
       d3,
+      d3s,
       d4,
       d5,
       d7,
       d8,
       d9,
       d10,
+      d10r,
       d12,
       d16,
       d20,
       d24,
+      d24r,
       d27,
       d30,
       d40,
       d45,
       d60,
     ][i];
-    return chart?.isLoading;
+    return chart?.isFetching;
   });
 
   return (

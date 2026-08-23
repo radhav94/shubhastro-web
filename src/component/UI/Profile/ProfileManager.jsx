@@ -266,12 +266,30 @@ const ProfileManager = ({
       if (token) {
         const result = await createKundli(payload).unwrap();
         Toast.success("Profile added successfully");
-        
-        // NEW LOGIC: In Start Call mode, auto-select the newly created profile
-        if (startCallMode && result?.data) {
-          setSelectedProfileForCall(result.data);
+
+        /*
+          Notify the parent for every mode, not just startCallMode.
+
+          This branch used to tell the parent about the new profile only when
+          `startCallMode` was set, while the guest branch below always did. So a
+          logged-in visitor who added a profile got "Profile added successfully"
+          and a profile that no screen had actually selected. On matchmaking that
+          surfaced as filling in the partner's name, date and birth place, saving
+          it, then being told "Please select both profiles" on Proceed Ahead —
+          the slot was still empty because MatchMakingV2's onProfileSelect never
+          fired. Guests were unaffected, which is why it survived.
+
+          Selecting what the user just created is what every consumer wants
+          (Kundli, Numerology, LalKitab, matchmaking, the call screens), and the
+          guest branch has been doing exactly this for all of them already.
+        */
+        const newProfile = result?.data;
+        if (newProfile) {
+          if (startCallMode) {
+            setSelectedProfileForCall(newProfile);
+          }
           if (onProfileSelect) {
-            onProfileSelect(result.data);
+            onProfileSelect(newProfile);
           }
         }
       } else {

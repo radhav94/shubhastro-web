@@ -27,6 +27,17 @@ const IframeModal = ({ open, src, onClose }) => {
     return () => window.removeEventListener('message', handleMessage);
   }, [onClose]);
 
+  // Escape closes the modal. Without this the only exits were the close button
+  // and the sliver of overlay around a 90%x90% panel.
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   // Add iframe=true query parameter to show minimal header
@@ -35,11 +46,23 @@ const IframeModal = ({ open, src, onClose }) => {
   return createPortal(
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        {!iframeLoading && (
-          <button className={`${styles.closeBtn} notranslate`} onClick={onClose} translate="no">
-            <IoClose size={22} />
-          </button>
-        )}
+        {/*
+          Rendered unconditionally. It used to be gated on `!iframeLoading`, so
+          while the kundli was loading there was no way out of the modal except
+          the ~5% of overlay left visible around the panel — on a phone that is a
+          ~19px strip down each side. If `onLoad` never fired (stalled request,
+          in-app browser) the spinner stayed up with no exit at all, and taps
+          aimed at where the close button should be registered as dead clicks.
+        */}
+        <button
+          type="button"
+          className={`${styles.closeBtn} notranslate`}
+          onClick={onClose}
+          translate="no"
+          aria-label="Close kundli"
+        >
+          <IoClose size={22} />
+        </button>
         <PrimaryLoader isLoading={iframeLoading} fullscreen={false} message="Loading Kundli..." />
         <iframe
           src={iframeSrc}
