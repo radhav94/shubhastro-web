@@ -88,7 +88,6 @@ const PalmistryResult = () => {
     isAlreadyDownloaded, downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload, handleDirectDownload,
     showSubscriptionModal, setShowSubscriptionModal, subscriptionModalVariant, extendedPlans,
-    handleSubscriptionInsufficientBalance,
   } = useAIWowDownload({ resultData: downloadResultData });
 
   const toggleLine = (lineName) => {
@@ -1074,7 +1073,6 @@ const PalmistryResult = () => {
         onClose={() => setShowSubscriptionModal(false)}
         variant={subscriptionModalVariant}
         plans={subscriptionModalVariant === 'extended' ? extendedPlans : undefined}
-        onInsufficientBalance={handleSubscriptionInsufficientBalance}
       />
     </div>
     </>
