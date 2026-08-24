@@ -123,7 +123,7 @@ const DailyCosmicBriefing = () => {
       // User closed the plans popup without purchasing — go back to the suite.
       // If the gate already routed to /recharge, don't override that redirect.
       if (result?.blocked) {
-        if (!result.redirectedToRecharge) navigate('/ai-wow', { replace: true });
+        navigate('/ai-wow', { replace: true });
         return;
       }
 

@@ -99,19 +99,19 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
     if (resolve) resolve(outcome);
   }, []);
 
-  // The user tried to buy a plan from the modal but had insufficient wallet
-  // balance. Close the modal, route to recharge (with a return URL), and
-  // resolve the pending flow as 'recharge' so callers skip their own navigation.
-  const handleModalInsufficientBalance = useCallback(() => {
-    // The SubscriptionModal performs the /recharge navigation itself. Here we
-    // just close the popup and resolve the pending flow as 'recharge' so the
-    // caller skips its own "go back" navigation (which would clobber it).
-    setShowSubscriptionModal(false);
-    purchasedRef.current = false;
-    const resolve = modalResolveRef.current;
-    modalResolveRef.current = null;
-    if (resolve) resolve('recharge');
-  }, []);
+  /*
+    There is deliberately no insufficient-balance handler here any more.
+
+    It used to close this popup and resolve the flow as 'recharge', because
+    SubscriptionModal navigated away to /recharge. The modal now opens the recharge
+    sheet over itself and retries the same plan once the wallet is funded, so an
+    empty wallet is no longer an exit from this flow — it is a step inside it.
+    Closing the popup at that point would have cancelled the purchase the user was
+    in the middle of making.
+
+    The outcome is therefore whatever the user ends up doing: 'purchased' if the
+    retry succeeds, or a plain dismissal if they back out.
+  */
 
   // On a successful purchase, just mark it as purchased. The success modal stays
   // open until the user explicitly closes it via the Continue button.
@@ -198,10 +198,10 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
         return result;
       }
 
-      // Always show the plans popup first. We do NOT redirect to recharge here —
-      // the balance is only checked when the user actually picks a plan. If that
-      // purchase fails with insufficient balance, the modal's
-      // `onInsufficientBalance` handler routes the user to recharge.
+      // Always show the plans popup first. The balance is only checked when the
+      // user actually picks a plan, and an empty wallet is handled inside the
+      // modal (it opens the recharge sheet and retries the same plan), so nothing
+      // here needs to know about it.
       toast.dismiss(gId);
       if (reason === SUBSCRIPTION_REASON.PREMIUM_REQUIRED || reason === SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE) {
         openSubscriptionModal('basic');
@@ -211,10 +211,6 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
 
       // Wait for the user. On purchase, loop to retry generation; otherwise stop.
       const outcome = await waitForModalOutcome();
-      if (outcome === 'recharge') {
-        trackEvent('shubh_ai_payment_failed', { feature_name: featureName, reason: SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE });
-        return { blocked: true, reason: SUBSCRIPTION_REASON.INSUFFICIENT_WALLET_BALANCE, redirectedToRecharge: true };
-      }
       if (outcome === 'free-plan') {
         // Don't retry — the free plan grants nothing new. Say so rather than
         // closing the popup and appearing to do nothing.
@@ -240,7 +236,6 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
       plans={subscriptionModalVariant === 'extended' ? extendedPlans : undefined}
       onClose={handleModalClose}
       onPurchased={handleModalPurchased}
-      onInsufficientBalance={handleModalInsufficientBalance}
       onSelectPlan={handleModalFreePlanSelected}
     />
   );

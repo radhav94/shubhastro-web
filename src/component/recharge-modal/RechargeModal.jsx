@@ -24,6 +24,7 @@ const RechargeModal = ({
   onClose,
   onSuccess,
   title = 'ADD MONEY TO WALLET',
+  showSuccessPopup = true,
 }) => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
@@ -147,10 +148,13 @@ const RechargeModal = ({
     const baseAmount = selectedPlan?.actualPrice || selectedPlan?.amount || selectedPlan?.price || data?.amount || 0;
     const bonus = selectedPlan?.discountedPrice || 0;
     const totalAdded = Number(baseAmount) + Number(bonus);
-    setSuccessAmount(totalAdded);
+    // Callers that continue into their own success/confirmation step (e.g. the
+    // subscription paywall, which recharges and then activates the plan) opt out
+    // — otherwise the user is made to dismiss two success popups in a row.
+    if (showSuccessPopup) setSuccessAmount(totalAdded);
     if (typeof onClose === 'function') onClose();
     if (typeof onSuccess === 'function') onSuccess({ ...data, amount: totalAdded });
-  }, [onClose, onSuccess, refreshWallet, selectedPlan]);
+  }, [onClose, onSuccess, refreshWallet, selectedPlan, showSuccessPopup]);
 
   if (!isOpen && successAmount === null) return null;
 
@@ -158,6 +162,7 @@ const RechargeModal = ({
     return (
       <PaymentSuccessModal
         isOpen={successAmount !== null}
+        redirectTo={null}
         onClose={() => setSuccessAmount(null)}
         amount={successAmount}
       />
@@ -295,9 +300,19 @@ const RechargeModal = ({
         onBack={handlePaymentBack}
       />
 
-      {/* ── Payment Success Popup ── */}
+      {/*
+        ── Payment Success Popup ──
+
+        `redirectTo={null}` is load-bearing. PaymentSuccessModal defaults it to
+        "/" and navigates there when dismissed, so both usages in this file were
+        sending the user to the homepage the moment they tapped through the
+        success popup — losing whatever they had opened the recharge modal to do.
+        This is a modal: where to go next belongs to the caller (which is what
+        `onSuccess` is for), not to the confirmation popup.
+      */}
       <PaymentSuccessModal
         isOpen={successAmount !== null}
+        redirectTo={null}
         onClose={() => setSuccessAmount(null)}
         amount={successAmount}
       />
@@ -310,11 +325,13 @@ RechargeModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSuccess: PropTypes.func,
   title: PropTypes.string,
+  showSuccessPopup: PropTypes.bool,
 };
 
 RechargeModal.defaultProps = {
   onSuccess: null,
   title: 'ADD MONEY TO WALLET',
+  showSuccessPopup: true,
 };
 
 export default RechargeModal;

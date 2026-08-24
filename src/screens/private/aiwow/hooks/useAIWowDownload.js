@@ -101,9 +101,6 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
     setExtendedPlans(Array.isArray(plans) && plans.length > 0 ? plans : null);
     setShowSubscriptionModal(true);
   }, []);
-  const handleSubscriptionInsufficientBalance = useCallback(() => {
-    setShowSubscriptionModal(false);
-  }, []);
 
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
   const kundliId = selectedProfile?._id || selectedProfile?.id || '';
@@ -309,7 +306,6 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
     setShowSubscriptionModal,
     subscriptionModalVariant,
     extendedPlans,
-    handleSubscriptionInsufficientBalance,
 
     // Handlers
     handleDownloadClick,

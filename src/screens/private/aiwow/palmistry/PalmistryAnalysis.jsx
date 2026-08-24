@@ -135,10 +135,7 @@ const PalmistryAnalysis = () => {
         hasStartedRef.current = false;
         sessionStorage.removeItem(PALMISTRY_ANALYSIS_FLAG);
         dispatch(clearPalmistryData());
-        // The gate already routed to /recharge — don't override that redirect.
-        if (!result.redirectedToRecharge) {
-          navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0], { replace: true });
-        }
+        navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0], { replace: true });
         return;
       }
 
