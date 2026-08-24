@@ -16,7 +16,7 @@ const LoveReport = () => {
   const navigate = useNavigate();
   const stored = useSelector(selectCalculatorData("love_calculator"));
 
-  const [loveCalculator, { data, isLoading, isError, error }] =
+  const [loveCalculator, { data, isLoading, isError, isUninitialized, error }] =
     useLoveCalculatorMutation();
 
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -54,10 +54,44 @@ const LoveReport = () => {
     }
   };
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
-  if (isError) return <div>No data found</div>;
-
   const report = data?.data;
+
+  // The form now blocks the one input the API rejects (a same-gender pair), but
+  // this page is a route: it can still be opened directly, or with a payload
+  // stored before that check existed. It used to answer with a bare "No data
+  // found" — or, with nothing stored at all, a blank page — and no way out but
+  // the browser Back button. Show what went wrong and offer the form.
+  //
+  // `isUninitialized` matters here: the mutation is fired from an effect, so on
+  // the very first render nothing is loading and nothing has failed yet. Without
+  // it the failure card flashes before the request has even left.
+  const notReady = !stored || isError || (!report && !isLoading && !isUninitialized);
+  if (notReady) {
+    return (
+      <div className={styles.pageWrapper}>
+        <CalcBackButton />
+        <div className={styles.header}>
+          <h2>Love Calculator Results</h2>
+        </div>
+        <div className={styles.resultCard}>
+          <p className={styles.subLabel}>
+            {error?.data?.message ||
+              (!stored
+                ? "Enter both names and genders to see your love compatibility."
+                : "We couldn't calculate this match. Please try again.")}
+          </p>
+          <button
+            className={styles.calcAgainBtn}
+            onClick={() => navigate("/love-calculator")}
+          >
+            Back to Love Calculator
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading || isUninitialized) return <PrimaryLoader isLoading />;
   if (!report) return null;
 
   const sections = report.sections || [];

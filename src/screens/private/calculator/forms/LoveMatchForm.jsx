@@ -92,6 +92,7 @@ const LoveMatchForm = ({
               <select
                 value={gender1}
                 onChange={(e) => onChange("gender1", e.target.value)}
+                aria-invalid={errors?.form ? true : undefined}
               >
                 <option value="">--Select--</option>
                 <option value="male">Male</option>
@@ -142,6 +143,7 @@ const LoveMatchForm = ({
               <select
                 value={gender2}
                 onChange={(e) => onChange("gender2", e.target.value)}
+                aria-invalid={errors?.form ? true : undefined}
               >
                 <option value="">--Select--</option>
                 <option value="male">Male</option>
@@ -153,6 +155,14 @@ const LoveMatchForm = ({
             </div>
           </div>
         </div>
+
+        {/* Pair-level problem, so it sits with the button the user just
+            pressed rather than under either gender field. */}
+        {errors?.form && (
+          <p className={styles.formError} role="alert">
+            {errors.form}
+          </p>
+        )}
 
         <div className={styles.btnRow}>
           {onReset && (
