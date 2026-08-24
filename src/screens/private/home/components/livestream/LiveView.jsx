@@ -199,7 +199,7 @@ const LiveView = (props) => {
     setWaitingList,
   } = useCall();
 
-  const { pendingConnections, addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, cancelPendingConnection, isInQueue, getConnectionByRoomId } = useWaitingQueue();
+  const { pendingConnections, addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, cancelPendingConnection, isInQueue, isCancelling, getConnectionByRoomId } = useWaitingQueue();
 
   // Auto-minimize call if user is on live stream (handles page refresh)
   useEffect(() => {
@@ -660,7 +660,13 @@ const LiveView = (props) => {
 
     // Check if already in queue for this astrologer
     if (isInQueue(astrologerId, "audio")) {
-      Toast.error("Already waiting for this astrologer");
+      // A cancelled-but-not-yet-withdrawn entry still counts as in-queue, so say
+      // which of the two it is rather than claiming they're still waiting.
+      Toast.error(
+        isCancelling(astrologerId, "audio")
+          ? "Still cancelling your previous request. One moment."
+          : "Already waiting for this astrologer"
+      );
       return;
     }
 
@@ -776,7 +782,11 @@ const LiveView = (props) => {
 
     // Check if already in queue for this astrologer+type
     if (isInQueue(astrologerId, type)) {
-      Toast.error("Already waiting for this astrologer");
+      Toast.error(
+        isCancelling(astrologerId, type)
+          ? "Still cancelling your previous request. One moment."
+          : "Already waiting for this astrologer"
+      );
       return;
     }
 

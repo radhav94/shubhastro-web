@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import SeoHelmet from "../../../../component/SeoHelmet";
@@ -21,6 +21,39 @@ const SingleBlogDetails = () => {
   const singleBLogData = data?.data;
   const [copied, setCopied] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+
+  /*
+    Which share row is open — "article" for the one beside the title, or a blog
+    id for a sidebar item. One piece of state covers both, mirroring `copiedId`.
+
+    The rows used to be revealed only by `.shareWrap:hover` /
+    `.popularShareWrap:hover`. A touch device has no hover, so on a phone the row
+    never appeared at all and the share button — a 36px circle with a pointer
+    cursor, a hover style and aria-label="Share blog" — did nothing whatsoever.
+    The feature was unreachable on the devices most of these readers arrive on.
+
+    Clicking now toggles the row. The CSS hover rules are left in place, so
+    desktop behaviour is unchanged.
+  */
+  const [shareOpenId, setShareOpenId] = useState(null);
+  const toggleShare = (id) => setShareOpenId((cur) => (cur === id ? null : id));
+
+  // Dismiss on Escape or a pointer press elsewhere. The wrappers stop
+  // pointerdown from bubbling, so pressing inside an open row doesn't close it
+  // before the click lands.
+  useEffect(() => {
+    if (!shareOpenId) return undefined;
+    const close = () => setShareOpenId(null);
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") close();
+    };
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [shareOpenId]);
 
   /*
     Article bodies are authored in the CMS and injected as-is. They regularly end
@@ -82,6 +115,9 @@ const SingleBlogDetails = () => {
       default:
         break;
     }
+    // Collapse the row once a destination has been picked. Not for "copy",
+    // which needs to stay open long enough to show its own "Copied!" label.
+    if (platform !== "copy") setShareOpenId(null);
   };
 
   const handleShareBlog = (e, platform, blog) => {
@@ -105,6 +141,7 @@ const SingleBlogDetails = () => {
       default:
         break;
     }
+    if (platform !== "copy") setShareOpenId(null);
   };
 
   if (isLoading) return <p style={{ textAlign: "center", padding: "60px" }}>Loading...</p>;
@@ -155,13 +192,26 @@ const SingleBlogDetails = () => {
                   .filter(Boolean)
                   .join(". ")}`}
               />
-              <div className={styles.shareWrap}>
-                <button className={styles.shareBtn} aria-label="Share blog">
+              <div
+                className={styles.shareWrap}
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  className={styles.shareBtn}
+                  aria-label="Share blog"
+                  aria-expanded={shareOpenId === "article"}
+                  onClick={() => toggleShare("article")}
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 20" fill="none">
                     <path d="M15 14.08C14.24 14.08 13.56 14.38 13.04 14.85L5.91 10.7C5.96 10.47 6 10.24 6 10C6 9.76 5.96 9.53 5.91 9.3L12.96 5.19C13.5 5.69 14.21 6 15 6C16.66 6 18 4.66 18 3C18 1.34 16.66 0 15 0C13.34 0 12 1.34 12 3C12 3.24 12.04 3.47 12.09 3.7L5.04 7.81C4.5 7.31 3.79 7 3 7C1.34 7 0 8.34 0 10C0 11.66 1.34 13 3 13C3.79 13 4.5 12.69 5.04 12.19L12.16 16.35C12.11 16.56 12.08 16.78 12.08 17C12.08 18.61 13.39 19.92 15 19.92C16.61 19.92 17.92 18.61 17.92 17C17.92 15.39 16.61 14.08 15 14.08Z" fill="#D43400"/>
                   </svg>
                 </button>
-                <div className={styles.shareIconSocial}>
+                <div
+                  className={`${styles.shareIconSocial} ${
+                    shareOpenId === "article" ? styles.shareIconSocialOpen : ""
+                  }`}
+                >
                   <span className={styles.socialIconWrapper} onClick={(e) => handleShare(e, "whatsapp")}>
                     <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"></path></svg>
                   </span>
@@ -212,16 +262,42 @@ const SingleBlogDetails = () => {
                       <span className={styles.popularDate}>
                         {dayjs(blog.publishDate).format("DD MMM, YYYY")}
                       </span>
+                      {/*
+                        Pointer-only, deliberately. This whole card is a <Link>,
+                        so giving the share toggle button semantics would nest an
+                        interactive element inside an anchor — invalid, and it
+                        lets the inner control swallow the click without the
+                        anchor navigating. The article's own share button above is
+                        a real, keyboard-reachable <button>; this is the
+                        convenience copy. Restructuring the card so the share
+                        control sits outside the anchor is the proper fix and is
+                        more than this change should take on.
+
+                        preventDefault stops the card navigating when the reader
+                        reaches for share; the added onClick is what makes the row
+                        open at all on touch, where there is no hover.
+                      */}
                       <span
                         className={styles.popularShareWrap}
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleShare(blog._id || blog.blogId);
+                        }}
                       >
                         <span className={styles.popularShare} aria-label="Share blog">
                           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="14" viewBox="0 0 18 20" fill="none">
                             <path d="M15 14.08C14.24 14.08 13.56 14.38 13.04 14.85L5.91 10.7C5.96 10.47 6 10.24 6 10C6 9.76 5.96 9.53 5.91 9.3L12.96 5.19C13.5 5.69 14.21 6 15 6C16.66 6 18 4.66 18 3C18 1.34 16.66 0 15 0C13.34 0 12 1.34 12 3C12 3.24 12.04 3.47 12.09 3.7L5.04 7.81C4.5 7.31 3.79 7 3 7C1.34 7 0 8.34 0 10C0 11.66 1.34 13 3 13C3.79 13 4.5 12.69 5.04 12.19L12.16 16.35C12.11 16.56 12.08 16.78 12.08 17C12.08 18.61 13.39 19.92 15 19.92C16.61 19.92 17.92 18.61 17.92 17C17.92 15.39 16.61 14.08 15 14.08Z" fill="#D43400"/>
                           </svg>
                         </span>
-                        <span className={styles.shareIconSocial}>
+                        <span
+                          className={`${styles.shareIconSocial} ${
+                            shareOpenId === (blog._id || blog.blogId)
+                              ? styles.shareIconSocialOpen
+                              : ""
+                          }`}
+                        >
                           <span className={styles.socialIconWrapper} onClick={(e) => handleShareBlog(e, "whatsapp", blog)}>
                             <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"></path></svg>
                           </span>

@@ -242,6 +242,18 @@ $font-primary: "Poppins", sans-serif;
   }
 }
 
+/*
+  Click-opened state for the share row.
+  
+  The `:hover` rules on .shareWrap / .popularShareWrap stay as the desktop
+  affordance; this is what makes the row reachable on touch, where hover does not
+  exist and so the row could never be shown at all. Declared after
+  .shareIconSocial so it wins on source order at equal specificity.
+*/
+.shareIconSocialOpen {
+  display: flex;
+}
+
 .copiedText {
   position: absolute;
   top: -28px;

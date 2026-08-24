@@ -15,18 +15,61 @@ const SLUG_PATHS = {
   "horoscope": "/daily-horoscope",
 };
 
+const slugify = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+/*
+ * Resolve a card's destination, or null when it has none.
+ *
+ * This used to be `to={SLUG_PATHS[card.slug] || `/${card.slug}` || "/"}`. A
+ * template literal is always truthy, so the `"/"` arm was unreachable and the
+ * expression could only ever produce a path built from whatever `card.slug`
+ * held:
+ *
+ *   slug missing        -> "/undefined"       (CMS not-found page)
+ *   slug ""             -> "/"                (the homepage)
+ *   slug " Free-Kundli" -> "/ Free-Kundli"    (a path containing spaces)
+ *
+ * The empty-string case is the dangerous one. This section renders ON the
+ * homepage, so such a card linked to the page already on screen: the click
+ * navigated nowhere visible and nothing happened, which is a dead click on the
+ * biggest CTA in the section.
+ *
+ * The map is keyed on both the API slugs and the title-derived forms
+ * ("generate-my-kundli", "talk-to-an-astrologer", "explore-horoscope"), so when
+ * the slug is unusable we can still recover a destination from the visible
+ * title. A title is only ever looked up in the map — never turned into a bare
+ * `/${title}` path — since a display string is not a route.
+ */
+const resolveCardPath = (card) => {
+  const slug = slugify(card?.slug);
+  if (slug) return SLUG_PATHS[slug] || `/${slug}`;
+  const fromTitle = slugify(card?.title);
+  return (fromTitle && SLUG_PATHS[fromTitle]) || null;
+};
+
 const ComplementaryServicesSection = memo(({ sectionData, styles }) => {
   const content = sortContentByOrder(sectionData?.content || []);
 
-  if (!content.length) return null;
+  // A card that cannot resolve a destination is dropped rather than rendered as
+  // a link to nowhere — an absent card beats one that eats the tap.
+  const cards = content
+    .map((card) => ({ card, to: resolveCardPath(card) }))
+    .filter(({ to }) => !!to);
+
+  if (!cards.length) return null;
 
   return (
     <>
-      {content.map((card) => (
+      {cards.map(({ card, to }) => (
         <Link
           key={card.ID || card.slug || card.title}
           className={styles.qCard}
-          to={SLUG_PATHS[card.slug] || `/${card.slug}` || "/"}
+          to={to}
         >
           <div className={styles.qText}>
             <h3>{card.title}</h3>

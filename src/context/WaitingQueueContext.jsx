@@ -380,6 +380,24 @@ export const WaitingQueueProvider = ({ children }) => {
     );
   }, []);
 
+  /*
+   * True while a request for this astrologer+type has been cancelled by the user
+   * but the withdrawal is still waiting on a roomId (see cancelPendingConnection).
+   *
+   * isInQueue deliberately still counts these, so a re-tap is refused rather
+   * than duplicated — but "Already waiting for this astrologer" is the wrong
+   * thing to say to someone who just pressed Cancel, and it reads as the app
+   * having ignored the cancel. Callers use this to name the real reason.
+   */
+  const isCancelling = useCallback((astrologerId, type) => {
+    return pendingConnectionsRef.current.some(
+      (c) =>
+        c.astrologer?._id === astrologerId &&
+        c.type === type &&
+        c.cancelRequested
+    );
+  }, []);
+
   // Update status of a pending connection by roomId
   const updateStatusByRoomId = useCallback((roomId, status, extraData = {}) => {
     console.log("[WaitingQueue] 🔄 updateStatusByRoomId:", roomId, "→", status);
@@ -1081,6 +1099,7 @@ export const WaitingQueueProvider = ({ children }) => {
         cancelAllExcept,
         cancelAll,
         isInQueue,
+        isCancelling,
         isQueueFull,
         hasAnyPending,
         updateStatusByRoomId,

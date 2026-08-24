@@ -364,6 +364,24 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
       <div className={styles.dateInputRow}>
         <input
           type="text"
+          /*
+            The same fix the date input below already carries, which this field
+            was missing.
+
+            handleManualChange keeps digits only (`raw.replace(/[^0-9]/g, "")`)
+            and inserts the ":" and the AM/PM itself. As plain type="text" a
+            phone offered the alphabetic keyboard, so every key within reach was
+            stripped by the mask and the field sat there unchanged — no value, no
+            error, nothing to explain it. Birth Time is required, so the form
+            then refused to submit and the only way through was to notice the
+            "123" key, tick "Don't know the exact time of birth", or give up.
+
+            type stays "text" so the mask and the inserted separators keep
+            working. AM/PM is still reachable: 4 digits auto-append a period, a
+            24-hour entry (e.g. 1830) sets PM on its own, and the 44px clock
+            button opens the dropdown's AM/PM column.
+          */
+          inputMode="numeric"
           value={isTyping ? manualInput : displayValue}
           onChange={handleManualChange}
           onBlur={handleManualBlur}

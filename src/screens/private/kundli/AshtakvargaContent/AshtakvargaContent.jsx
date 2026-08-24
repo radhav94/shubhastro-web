@@ -1,33 +1,24 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { skipToken } from "@reduxjs/toolkit/query";
 import styles from "./AshtakvargaContent.module.scss";
 import DynamicChart from "../../../../component/UI/charts/kundli/DynamicChart";
 import { useSelector } from "react-redux";
-import { useFetchAshtakvargaChartQuery } from "../../../../redux/api/kundli/ashtakvargaApi";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { useGetAshtakvargaChartQuery } from "../../../../redux/api/kundli/kundliApi";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
 import TTSButton from "../../../../component/UI/TTSButton";
-
-const sectionVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
-  },
-};
+import useLang from "../../../../utils/hooks/useLang";
 
 const AshtakvargaContent = () => {
   const [activeTab, setActiveTab] = useState("north");
 
   const payload = useSelector((state) => state?.form?.kundliPayload);
-  const params = payload ? buildVedicParam(payload, { style: activeTab }) : null;
+  // `lang` comes from the hook rather than being read inline so a language
+  // change re-renders and refetches, matching KpContent / ChartsContent.
+  const lang = useLang();
+  const params = payload ? buildVedicParam(payload, { style: activeTab, lang }) : null;
 
-  // const { data, isSuccess, isLoading } = useFetchAshtakvargaChartQuery(
-  //   payload ? { payload } : skipToken
-  // );
   const dSun = useGetAshtakvargaChartQuery(
     params ? { chartType: "Sun", params } : skipToken
   );
@@ -53,82 +44,83 @@ const AshtakvargaContent = () => {
     params ? { chartType: "total", params } : skipToken
   );
 
-  const svgUrl = (raw) =>
-    sanitizeSvg(raw) || null;
+  const svgUrl = (raw) => sanitizeSvg(raw) || null;
 
   const charts = [
-    { title: "Sun", src: svgUrl(dSun.data) },
-    { title: "Moon", src: svgUrl(moon.data) },
-    { title: "Mars", src: svgUrl(mars.data) },
-    { title: "Mercury", src: svgUrl(mercury.data) },
-    { title: "Venus", src: svgUrl(venus.data) },
-    { title: "Jupiter", src: svgUrl(jupiter.data) },
-    { title: "Saturn", src: svgUrl(saturn.data) },
-    { title: "Total", src: svgUrl(total.data) },
-  ];
+    { title: "Sun", query: dSun },
+    { title: "Moon", query: moon },
+    { title: "Mars", query: mars },
+    { title: "Mercury", query: mercury },
+    { title: "Venus", query: venus },
+    { title: "Jupiter", query: jupiter },
+    { title: "Saturn", query: saturn },
+    { title: "Total", query: total },
+  ].map(({ title, query }) => ({ title, query, src: svgUrl(query.data) }));
 
-  // Usage
-  // const JupiterUrl = getSvgUrl(data?.data?.Jupiter);
-  // const MarsUrl = getSvgUrl(data?.data?.Mars);
-  // const MercuryUrl = getSvgUrl(data?.data?.Mercury);
-  // const MoonUrl = getSvgUrl(data?.data?.Moon);
-  // const sarvaUrl = getSvgUrl(data?.data?.Sarva);
-  // const saturnUrl = getSvgUrl(data?.data?.Saturn);
-  const sunUrl = svgUrl(dSun.data);
-  // const venusUrl = getSvgUrl(data?.data?.Venus);
+  /*
+    Switching North/South changes `style`, which is part of the RTK Query cache
+    key, so all eight charts become uncached and their `data` goes undefined.
+    The grid below only renders entries that have a `src`, so without this the
+    whole grid emptied out on tap with nothing to replace it — the tab looked
+    dead and invited a re-tap while eight third-party chart requests were still
+    in flight. `isFetching` (not `isLoading`) so a return to an
+    already-cached tab still reports the refetch.
+  */
+  const loading = charts.some(({ query }) => query?.isFetching);
 
   return (
-    <>
-      {/* <PrimaryLoader isLoading={isLoading} /> */}
-      {true && (
-        <div className={styles.mainContainer}>
-          {/* North/South Indian Tab Switcher */}
-          <div className={styles.tabGroup}>
-            <button
-              className={`${styles.tabButton} ${activeTab === "north" ? styles.activeTab : ""}`}
-              onClick={() => setActiveTab("north")}
-            >
-              North Indian
-            </button>
-            <button
-              className={`${styles.tabButton} ${activeTab === "south" ? styles.activeTab : ""}`}
-              onClick={() => setActiveTab("south")}
-            >
-              South Indian
-            </button>
-          </div>
+    <div className={styles.mainContainer}>
+      {/* North/South Indian Tab Switcher */}
+      <div className={styles.tabGroup}>
+        <button
+          type="button"
+          className={`${styles.tabButton} ${activeTab === "north" ? styles.activeTab : ""}`}
+          aria-pressed={activeTab === "north"}
+          onClick={() => setActiveTab("north")}
+        >
+          North Indian
+        </button>
+        <button
+          type="button"
+          className={`${styles.tabButton} ${activeTab === "south" ? styles.activeTab : ""}`}
+          aria-pressed={activeTab === "south"}
+          onClick={() => setActiveTab("south")}
+        >
+          South Indian
+        </button>
+      </div>
 
-          <div className={styles.textContainer}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-              <h1 className={styles.cardTitle}>Ashtakvarga Chart</h1>
-              <TTSButton text="Ashtakvarga Chart. Ashtakvarga is used to assess the strength and patterns that are present in a birth chart. The Ashtakvarga or Ashtakavarga is a numerical quantification or score of each planet placed in the chart with reference to the other 7 planets and the Lagna. In Sarva Ashtaka Varga the total scores of all the BAVs are overlaid and then totalled. This makes the SAV of the chart. The total of all the scores should be 337" />
-            </div>
-            <p>
-              Ashtakvarga is used to assess the strength and patterns that are
-              present in a birth chart. The Ashtakvarga or Ashtakavarga is a
-              numerical quantification or score of each planet placed in the
-              chart with reference to the other 7 planets and the Lagna. In
-              Sarva Ashtaka Varga the total scores of all the BAVs are overlaid
-              and then totalled. This makes the SAV of the chart. The total of
-              all the scores should be 337
-            </p>
-          </div>
-          <div className={styles.grid}>
-            {charts.map(
-              (chart, index) =>
-                chart.src && (
-                  <DynamicChart
-                    key={index}
-                    title={chart.title}
-                    src={chart.src}
-                    fontSize ={20}
-                  />
-                )
-            )}
-          </div>
+      <PrimaryLoader isLoading={loading} />
+
+      <div className={styles.textContainer}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+          <h1 className={styles.cardTitle}>Ashtakvarga Chart</h1>
+          <TTSButton text="Ashtakvarga Chart. Ashtakvarga is used to assess the strength and patterns that are present in a birth chart. The Ashtakvarga or Ashtakavarga is a numerical quantification or score of each planet placed in the chart with reference to the other 7 planets and the Lagna. In Sarva Ashtaka Varga the total scores of all the BAVs are overlaid and then totalled. This makes the SAV of the chart. The total of all the scores should be 337" />
         </div>
-      )}
-    </>
+        <p>
+          Ashtakvarga is used to assess the strength and patterns that are
+          present in a birth chart. The Ashtakvarga or Ashtakavarga is a
+          numerical quantification or score of each planet placed in the
+          chart with reference to the other 7 planets and the Lagna. In
+          Sarva Ashtaka Varga the total scores of all the BAVs are overlaid
+          and then totalled. This makes the SAV of the chart. The total of
+          all the scores should be 337
+        </p>
+      </div>
+      <div className={styles.grid}>
+        {charts.map(
+          (chart, index) =>
+            chart.src && (
+              <DynamicChart
+                key={index}
+                title={chart.title}
+                src={chart.src}
+                fontSize={20}
+              />
+            )
+        )}
+      </div>
+    </div>
   );
 };
 
