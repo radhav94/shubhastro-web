@@ -7,6 +7,7 @@ import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
+import toast from '../../../../component/toast';
 
 const SignatureCamera = () => {
   const navigate = useNavigate();
@@ -201,15 +202,26 @@ const SignatureCamera = () => {
     return cropCanvas;
   };
 
+  // Every tap on the shutter gets a response: either a photo, or an explanation.
+  //
+  // Both of these used to be bare `return`s. `stream` is set the moment
+  // getUserMedia resolves, but `video.videoWidth` stays 0 until the first frame
+  // arrives — so there is a real window where the button reads "Capture
+  // Signature", looks live, and swallows the tap in silence. Tapping a shutter
+  // and getting nothing is indistinguishable from a broken page, which is why
+  // people tap it again.
   const captureImage = () => {
     const video = videoRef.current;
     if (!video || !video.videoWidth) {
-      // Camera not ready yet — nothing to capture.
+      toast.error('Camera is still starting up. One moment.');
       return;
     }
     stopDetection();
     const cropCanvas = cropCurrentFrameToCanvas();
-    if (!cropCanvas) return;
+    if (!cropCanvas) {
+      toast.error('Could not read the camera frame. Please try again.');
+      return;
+    }
     setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
     stopCamera();
   };
@@ -264,6 +276,17 @@ const SignatureCamera = () => {
       width: maxX - minX,
       height: maxY - minY
     };
+  };
+
+  // The shutter is never `disabled` — a natively disabled button fires no event
+  // at all, so while the camera is being acquired every tap vanished with the
+  // label stuck on "Loading...". It stays dimmed, but now it answers.
+  const handleCaptureTap = () => {
+    if (!stream) {
+      toast.error('Waiting for the camera. Allow camera access if prompted.');
+      return;
+    }
+    captureImage();
   };
 
   const retakePhoto = () => {
@@ -427,10 +450,12 @@ const SignatureCamera = () => {
 
       <div className={styles.controls}>
         {!capturedImage ? (
-          <button 
-            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`} 
-            onClick={captureImage}
-            disabled={!stream}
+          <button
+            type="button"
+            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`}
+            onClick={handleCaptureTap}
+            aria-disabled={!stream}
+            aria-label="Capture signature photo"
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
