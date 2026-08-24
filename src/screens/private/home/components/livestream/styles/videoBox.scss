@@ -323,6 +323,42 @@
   overflow: hidden;
 }
 
+/* The avatar + name, now a real button that opens the astrologer's profile.
+   It carries the flex layout the avatar and text used to get from .host-info,
+   which still spaces this against the minimized call pill beside it.
+
+   `font: inherit` and `text-align: left` because a UA button would otherwise
+   impose its own system font and centre the two lines. `min-width: 0` has to be
+   here as well as on .host-info, or .host-name-truncate has no constrained
+   ancestor to ellipsis against and the name pushes the follow button off-screen. */
+.host-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #d4af37;
+    outline-offset: 2px;
+    border-radius: 999px;
+  }
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
 .host-avatar {
   width: 30px;
   height: 30px;
