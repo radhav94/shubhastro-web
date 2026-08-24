@@ -348,6 +348,25 @@
   }
 }
 
+.tipMessage {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  max-width: 90%;
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  text-align: center;
+  pointer-events: none;
+
+  p {
+    margin: 0;
+  }
+}
+
 .frameCorner {
   border: 4px solid;
   transition: border-color 0.3s ease;
