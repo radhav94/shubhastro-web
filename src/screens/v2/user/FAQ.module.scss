@@ -222,15 +222,23 @@
   margin-top: 32px;
 }
 
+/*
+  This is a <p> with no handler, and it used to be a full-width filled block
+  (`background: #E4342F1A`, 16px padding, 10px radius, branded red text) sitting
+  directly above the real "Contact Support" button — two stacked button shapes
+  where only the lower one does anything. It reads as the primary control and
+  gets clicked instead of the button.
+
+  Now plain supporting copy: it is a question ("Still have a query?"), so it
+  should look like the label for the button below, not like a second button.
+*/
 .contactText {
-  background: #E4342F1A;
-  padding: 16px 10px;
-  font-size: 16px;
+  padding: 0;
+  font-size: 15px;
   font-weight: 500;
-  color: #d84315;
-  margin: 0 0 20px 0;
+  color: #555;
+  margin: 0 0 14px 0;
   line-height: 1.3;
-  border-radius: 10px;
 }
 
 .contactButton {
