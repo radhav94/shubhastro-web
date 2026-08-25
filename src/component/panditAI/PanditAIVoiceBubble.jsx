@@ -134,6 +134,17 @@ const PanditAIVoiceBubble = () => {
     }
   }, [endSession, sharedRoomId, markSkipCleanup, stopAudio, walletBalance, remainingPaidTime, ratePerMinute, isFreePeriod, freeMinutesRemaining]);
 
+  // Escape closes the voice window, matching the text chat. Without this the
+  // only way out was the small × in the header.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") handleClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, handleClose]);
+
   const getStatusText = () => {
     if (connecting) return "Connecting...";
     switch (status) {
@@ -172,7 +183,24 @@ const PanditAIVoiceBubble = () => {
 
   return createPortal(
     <>
-      <div className={styles.overlay} />
+      {/*
+        This was `<div className={styles.overlay} />` with no handler — a
+        transparent `position: fixed; inset: 0; z-index: 9990` layer over the
+        whole page. So while the voice window was open, the page stayed fully
+        visible behind it and every tap outside the window did nothing: not one
+        dead element but a dead page, for as long as voice mode lasted.
+
+        PanditAIBubble already documents and fixes exactly this on its own
+        backdrop; the voice bubble was never given the same treatment. Tapping a
+        backdrop to dismiss is the near-universal convention, so that is what it
+        does — and handleClose already routes back to the text chat, so nothing is
+        lost by closing this way.
+      */}
+      <div
+        className={styles.overlay}
+        onClick={handleClose}
+        aria-hidden="true"
+      />
       <div className={styles.chatWindow} role="dialog" aria-label="AI Pandit Voice">
         {/* Header - same as PanditAI */}
         <div className={styles.header}>

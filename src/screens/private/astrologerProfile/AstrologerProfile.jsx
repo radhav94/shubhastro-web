@@ -460,15 +460,40 @@ const AstrologerProfile = () => {
     setOpenModal: hookSetOpenModal,
   } = useAstrologerConnect();
 
-  const handleFollow = async () => {
-    try {
-      if (!token) {
-        navigate("/login", { state: { from: location.pathname } });
-        return;
-      }
-      if (!data?._id) return;
+  /*
+    Follow / unfollow.
 
-      if (!isFollowing) {
+    Both of the non-success paths here used to end in silence, and this is the one
+    control on the page whose entire result is a label change:
+
+      - `if (!data?._id) return;` — a bare return. The button renders from
+        `displayData`, which falls back to the astrologer passed through router
+        state, so it is on screen and enabled before `data` exists.
+      - `catch { console.log(...) }` — on a failed request the label, the follow
+        state and the screen were all left exactly as they were. The button is
+        `disabled` while the mutation runs, so the whole interaction was: "..."
+        for a moment, then back to "+ Follow", with no indication anything went
+        wrong.
+
+    That second path is what a long session hits. Session replay shows this page
+    left hidden for roughly eighteen minutes and the follow attempted at 19:52 —
+    by which point the access token may have expired or the connection dropped
+    while the tab was backgrounded. The request fails, nothing is said, and the
+    visitor is left tapping a button that keeps saying "+ Follow".
+  */
+  const handleFollow = async () => {
+    if (!token) {
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
+    if (!data?._id) {
+      toast.error("Still loading this astrologer. Please try again in a moment.");
+      return;
+    }
+
+    const wasFollowing = isFollowing;
+    try {
+      if (!wasFollowing) {
         await followAstrologer({ astrologerId: data._id }).unwrap();
         toast.success(
           `We will notify you when ${getAstrologerDisplayName(data)} goes live or posts an update!`,
@@ -478,7 +503,19 @@ const AstrologerProfile = () => {
         toast.success(`You unfollowed ${getAstrologerDisplayName(data)}`);
       }
     } catch (err) {
-      console.log("Follow/Unfollow error:", err);
+      console.error("Follow/Unfollow error:", err);
+      // 401 after a long idle period is the likely case here, and "try again"
+      // is useless advice if the session is gone — say which it is.
+      if (err?.status === 401 || err?.originalStatus === 401) {
+        toast.error("Your session expired. Please sign in again to follow.");
+        navigate("/login", { state: { from: location.pathname } });
+        return;
+      }
+      toast.error(
+        wasFollowing
+          ? "Couldn't unfollow just now. Please try again."
+          : "Couldn't follow just now. Please try again.",
+      );
     }
   };
 
@@ -584,11 +621,22 @@ const AstrologerProfile = () => {
 
 
 
+  /*
+    Opening the review modal waits on two history requests before anything
+    appears, and nothing acknowledged the tap while they were in flight — so on a
+    slow connection the control sat there looking broken and got tapped again.
+    That matters more now that the star row above is a second trigger for this
+    same action.
+  */
+  const [openingReview, setOpeningReview] = useState(false);
+
   const handleOpenReviewModal = async () => {
+    if (openingReview) return;
     if (!getToken()) {
       navigate("/login");
       return;
     }
+    setOpeningReview(true);
 
     // Resolve the roomId here rather than on every page load — see the note on
     // fetchCallHistory. Cached by RTK Query, so reopening the modal is free.
@@ -607,13 +655,19 @@ const AstrologerProfile = () => {
       }
     }
 
-    setReviewData({
-      astrologerID: data?.astrologer_ID,
-      fullName: getAstrologerDisplayName(data),
-      profileImage: getAstrologerImageUrl(data),
-      roomId,
-    });
-    setOpenReview(true);
+    try {
+      setReviewData({
+        astrologerID: data?.astrologer_ID,
+        fullName: getAstrologerDisplayName(data),
+        profileImage: getAstrologerImageUrl(data),
+        roomId,
+      });
+      setOpenReview(true);
+    } finally {
+      // In a `finally` so the busy flag can never strand the control on
+      // "Opening…" if anything above it throws.
+      setOpeningReview(false);
+    }
   };
 
   const handleSetReminder = () => {
@@ -1746,7 +1800,27 @@ const AstrologerProfile = () => {
                 </div>
               </div>
               <div className={styles.reviewsSummary}>
-                <StarRating rating={averageRating} />
+                {/*
+                  Five 30px stars sitting immediately above a "Share a Review"
+                  button read as a rating input — that is what a row of stars means
+                  everywhere else — and this row was display-only. Session replay
+                  shows a visitor clicking around the ratings for a long stretch on
+                  this page.
+
+                  It now opens the same review modal the button below opens, so the
+                  affordance resolves to the action people are reaching for. Same
+                  gating as that button, including the sign-in requirement: this is
+                  a second trigger for one action, not a new behaviour.
+                */}
+                <button
+                  type="button"
+                  className={styles.rateTrigger}
+                  onClick={handleOpenReviewModal}
+                  aria-busy={openingReview}
+                  aria-label={`Rate ${getAstrologerDisplayName(data)}. Average rating ${averageRating.toFixed(1)} out of 5`}
+                >
+                  <StarRating rating={averageRating} />
+                </button>
                 <p className={styles.reviewsCount}>
                   {averageRating.toFixed(1)} out of 5 • {totalReviews} total
                   ratings
@@ -1813,11 +1887,15 @@ const AstrologerProfile = () => {
                 </div>
               )}
 
+              {/* Not `disabled` while opening: a disabled button fires no click,
+                  so a second tap would be swallowed rather than refused. The
+                  handler returns early instead, and the label reports the wait. */}
               <button
                 className={styles.shareReviewBtn}
                 onClick={handleOpenReviewModal}
+                aria-busy={openingReview}
               >
-                Share a Review
+                {openingReview ? "Opening…" : "Share a Review"}
               </button>
             </div>
 
