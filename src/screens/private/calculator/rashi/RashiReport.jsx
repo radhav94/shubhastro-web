@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -44,6 +44,8 @@ import {
   rashiDecorTiles,
 } from "../../../../utils/rashiImages";
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
+import RecommendedAstrologersModal from "../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal";
+import useRecommendationOffer from "../../../../utils/hooks/useRecommendationOffer";
 
 /** Turn a value that may be a string, an array, or absent into an array of lines. */
 const toLines = (value) => {
@@ -76,6 +78,59 @@ const formatTime = (tob) => {
   const suffix = h >= 12 ? "PM" : "AM";
   const h12 = h % 12 === 0 ? 12 : h % 12;
   return `${h12}:${String(mRaw).padStart(2, "0")} ${suffix}`;
+};
+
+/*
+  The API sends the dasha chain in graha shorthand ("Mo>Ve>Ju"). Shown raw it
+  means nothing to a reader, and the snapshot copy right below it already talks
+  about the "Venus sub-dasha" in words — so expand it and keep the two agreeing.
+  Anything unrecognised passes through untouched rather than being dropped.
+*/
+const GRAHA_NAMES = {
+  su: "Sun",
+  mo: "Moon",
+  ma: "Mars",
+  me: "Mercury",
+  ju: "Jupiter",
+  ve: "Venus",
+  sa: "Saturn",
+  ra: "Rahu",
+  ke: "Ketu",
+};
+
+const formatDasha = (chain) => {
+  if (!chain || typeof chain !== "string") return "";
+  return chain
+    .split(/[>\-/›]/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => GRAHA_NAMES[part.toLowerCase()] || part)
+    .join(" › ");
+};
+
+/**
+ * Artwork that prefers the API's hosted asset and quietly falls back to the
+ * bundled art when that request fails.
+ *
+ * Worth the extra state: the illustrations used to come from a local
+ * sign-to-file mapping that was inferred, never confirmed. The API now names its
+ * own artwork, which is authoritative — but it is a new asset host, and a broken
+ * image in the hero is far more visible than a slightly different local one.
+ */
+const ArtImage = ({ remote, local, className, alt = "" }) => {
+  const [remoteFailed, setRemoteFailed] = useState(false);
+  const src = !remoteFailed && remote ? remote : local;
+  if (!src) return null;
+  return (
+    <img
+      src={src}
+      alt={alt}
+      aria-hidden={alt ? undefined : "true"}
+      className={className}
+      loading="lazy"
+      onError={() => setRemoteFailed(true)}
+    />
+  );
 };
 
 /** Five stars, `rating` of them filled. */
@@ -136,20 +191,38 @@ const RashiReport = () => {
   const response = data?.response;
   const enriched = response?.enriched;
 
+  // The coin needs its own failure flag rather than going through ArtImage: when
+  // the hosted logo is unavailable AND there is no local coin export, we drop to
+  // the repo's flat zodiac glyph, which only looks right inside the CSS gold
+  // disc. That styling decision depends on whether the load succeeded.
+  const [signLogoFailed, setSignLogoFailed] = useState(false);
+
+  // Call / Chat open the plain recommendation list; closing it reveals the
+  // discounted one once. See useRecommendationOffer.
+  const recommendation = useRecommendationOffer();
+
   // Everything the header chips and hero need, resolved once.
   const hero = useMemo(() => {
     const sign = response?.moon_sign || "";
+    const hostedLogo = signLogoFailed ? "" : enriched?.signLogoUrl || "";
     const coinArt = getRashiCoinImage(sign);
     return {
       sign,
-      // Landscape artwork behind the card's right edge.
-      art: getRashiSignImage(sign),
-      // Prefer the design's coin export; otherwise the glyph gets minted into a
-      // CSS gold disc (see .heroCoinMinted).
-      coin: coinArt || zodiacSignImages[sign.toLowerCase()] || "",
-      coinIsArt: !!coinArt,
+      // Landscape artwork behind the card's right edge. The API now names it
+      // per sign; the bundled art stays as the fallback.
+      artRemote: enriched?.signIllustrationUrl || "",
+      artLocal: getRashiSignImage(sign),
+      // Hosted logo first, then the design's coin export, and only then the
+      // glyph — which gets minted into a CSS gold disc (see .heroCoinMinted).
+      coin: hostedLogo || coinArt || zodiacSignImages[sign.toLowerCase()] || "",
+      coinIsArt: !!(hostedLogo || coinArt),
     };
-  }, [response?.moon_sign]);
+  }, [
+    response?.moon_sign,
+    enriched?.signLogoUrl,
+    enriched?.signIllustrationUrl,
+    signLogoFailed,
+  ]);
 
   // Split the decorative tiles down the two banner edges. Halved rather than
   // hardcoded to 3+3 so dropping a tile in or out of the folder still balances.
@@ -244,7 +317,12 @@ const RashiReport = () => {
                 <div
                   className={`${styles.heroCoinWrap} ${hero.coinIsArt ? "" : styles.heroCoinMinted}`}
                 >
-                  <img src={hero.coin} alt="" className={styles.heroCoin} />
+                  <img
+                    src={hero.coin}
+                    alt=""
+                    className={styles.heroCoin}
+                    onError={() => setSignLogoFailed(true)}
+                  />
                 </div>
               )}
 
@@ -280,6 +358,15 @@ const RashiReport = () => {
                       <dd>
                         {e.moonDegree} {moonSign}
                       </dd>
+                    </div>
+                  )}
+                  {formatDasha(e.currentDasha) && (
+                    <div>
+                      <dt>
+                        <Clock size={13} aria-hidden="true" />
+                        Current Dasha
+                      </dt>
+                      <dd>{formatDasha(e.currentDasha)}</dd>
                     </div>
                   )}
                 </dl>
@@ -324,9 +411,11 @@ const RashiReport = () => {
                 className={styles.heroFlourishLeft}
               />
 
-              {hero.art && (
-                <img src={hero.art} alt="" className={styles.heroArt} loading="lazy" />
-              )}
+              <ArtImage
+                remote={hero.artRemote}
+                local={hero.artLocal}
+                className={styles.heroArt}
+              />
             </section>
           )}
 
@@ -350,7 +439,13 @@ const RashiReport = () => {
               {e.luckyTime && (
                 <div className={styles.todayCard}>
                   <h3>Lucky Time — {e.luckyTime}</h3>
-                  <p>Use this window for important calls, decisions and work that needs focus.</p>
+                  {/* The API now says what the window is actually good for, which
+                      is specific to the day's transit. The generic line is kept
+                      only for payloads that don't carry it yet. */}
+                  <p>
+                    {e.luckyTimeReason ||
+                      "Use this window for important calls, decisions and work that needs focus."}
+                  </p>
                 </div>
               )}
             </section>
@@ -401,10 +496,12 @@ const RashiReport = () => {
                 </h3>
 
                 <div className={styles.nakshatraBody}>
-                  {nakshatraArt && (
+                  {/* No caption: the hosted artwork already carries the figure's
+                      name rendered into the image itself, and the nakshatra's
+                      deity is listed in the tag row beside it. */}
+                  {(e.godImageUrl || nakshatraArt) && (
                     <figure className={styles.nakshatraFigure}>
-                      <img src={nakshatraArt} alt="" loading="lazy" />
-                      {e.deity && <figcaption>Deity: {e.deity}</figcaption>}
+                      <ArtImage remote={e.godImageUrl} local={nakshatraArt} />
                     </figure>
                   )}
 
@@ -416,6 +513,7 @@ const RashiReport = () => {
                       </>
                     )}
                     <div className={styles.tagRow}>
+                      {e.deity && <span>Deity: {e.deity}</span>}
                       {e.nakshatraSymbol && <span>Symbol: {e.nakshatraSymbol}</span>}
                       {e.gana && <span className={styles.tagCap}>Gana: {e.gana}</span>}
                       {toText(e.nature) && <span>Nature: {toText(e.nature)}</span>}
@@ -436,18 +534,20 @@ const RashiReport = () => {
                   Most Compatible Rashis
                 </h3>
                 <ul className={styles.compatList}>
-                  {e.compatible_rashis.map((c) => {
-                    const glyph = zodiacSignImages[String(c.rashi || "").toLowerCase()];
-                    return (
-                      <li key={c.rashi}>
-                        <div className={styles.compatHead}>
-                          {glyph && <img src={glyph} alt="" />}
-                          <span>{c.rashi}</span>
-                        </div>
-                        {c.reason && <p>{c.reason}</p>}
-                      </li>
-                    );
-                  })}
+                  {e.compatible_rashis.map((c) => (
+                    <li key={c.rashi}>
+                      <div className={styles.compatHead}>
+                        {/* Each entry now carries its own hosted logo; the repo
+                            glyph stays as the fallback. */}
+                        <ArtImage
+                          remote={c.signLogoUrl}
+                          local={zodiacSignImages[String(c.rashi || "").toLowerCase()]}
+                        />
+                        <span>{c.rashi}</span>
+                      </div>
+                      {c.reason && <p>{c.reason}</p>}
+                    </li>
+                  ))}
                 </ul>
               </section>
             )}
@@ -522,12 +622,33 @@ const RashiReport = () => {
             </p>
 
             <div className={styles.sidebarActions}>
-              <Link to="/astrologers" className={styles.actionPrimary}>
+              {/*
+                These used to be plain links to the listing pages. They now open
+                the recommendation popup first, which is matched to the report the
+                user is already reading — a better starting point than the full
+                directory. The links stay as <a href> underneath so middle-click
+                and "open in new tab" still reach the listing.
+              */}
+              <a
+                href="/astrologers"
+                className={styles.actionPrimary}
+                onClick={(event) => {
+                  event.preventDefault();
+                  recommendation.open("audio");
+                }}
+              >
                 <Phone size={15} aria-hidden="true" /> Call an astrologer
-              </Link>
-              <Link to="/chat-with-astrologers" className={styles.actionSecondary}>
+              </a>
+              <a
+                href="/chat-with-astrologers"
+                className={styles.actionSecondary}
+                onClick={(event) => {
+                  event.preventDefault();
+                  recommendation.open("chat");
+                }}
+              >
                 <BsChatDots size={15} aria-hidden="true" /> Chat with astrologer
-              </Link>
+              </a>
               <Link to="/ai-wow" className={styles.actionTertiary}>
                 <Sparkles size={15} aria-hidden="true" /> Ask Shubh AI · Free
               </Link>
@@ -543,6 +664,16 @@ const RashiReport = () => {
           </div>
         </aside>
       </div>
+
+      <RecommendedAstrologersModal
+        isOpen={recommendation.isOpen}
+        variant={recommendation.stage === "offer" ? "offer" : "plain"}
+        type={recommendation.type || "chat"}
+        onDismiss={recommendation.dismiss}
+        onFinish={recommendation.finish}
+        // Nothing discounted to show -> the close press just closes.
+        onNothingToOffer={recommendation.finish}
+      />
     </div>
   );
 };
