@@ -1212,9 +1212,23 @@
 .statsSection,.consultationHours,.minutesSection,.aboutSection,.giftSection {
   margin-top: 10px;
 }
+// Now a <button> that opens the image lightbox — see the JSX. Reset the UA
+// button chrome so the portrait looks exactly as it did as a <div>.
 .profileImageWrapper {
   position: relative;
   flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  line-height: 0;
+  cursor: zoom-in;
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 3px;
+    border-radius: 12px;
+  }
 }
 
 .profileImage {
@@ -1720,6 +1734,12 @@
   }
 }
 
+// Applied only while the text is genuinely clamped and collapsed, when clicking
+// it expands the description (see the JSX).
+.aboutTextClickable {
+  cursor: pointer;
+}
+
 .readMoreBtn {
   background: none;
   border: none;
@@ -1727,7 +1747,11 @@
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  padding: 0;
+  // Was `padding: 0`, giving a ~85x22px target — under the 44px minimum, and
+  // the thing people aim at after the truncated text fails them. Negative
+  // horizontal margin keeps it optically aligned with the paragraph above.
+  padding: 8px 6px;
+  margin: 0 -6px;
   transition: color 0.2s;
   display: inline-block;
 

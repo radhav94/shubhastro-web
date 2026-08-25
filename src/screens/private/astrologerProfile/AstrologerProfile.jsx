@@ -39,7 +39,7 @@ import { useGetAstrologerReviewsQuery, useLazyGetAstrologerReviewsQuery } from "
 import { useLazyGetCallHistoryQuery } from "../../../redux/api/callHistory/callHistory";
 import { useLazyGetUserChatMessagesQuery } from "../../../redux/api/chatHistory/chatHistory";
 import useIsDesktop from "../../../utils/hooks/useIsDesktop";
-import StickyReview from "../home/components/call/StickyReview";
+
 import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
@@ -215,7 +215,19 @@ const AstrologerProfile = () => {
       navigate(`/live/${liveRoomId}`, {
         state: { from: getAstrologerProfilePath(data, id) },
       });
+      return;
     }
+
+    /*
+      Was a bare `if (liveRoomId) { … }` with no else. `isLive` and `roomId`
+      arrive from two different places — `isLive` can be seeded straight from the
+      fetched astrologer while the roomId only lands with the
+      live:astrologer_status socket event — so there is a real window where the
+      UI shows LIVE and every join control is a no-op. Four of them share this
+      handler (mobile status bar, sidebar live card, its Join button, and the
+      mobile "Join Live Session" CTA), so they all died silently and together.
+    */
+    toast.error("This live session isn't ready yet. Please try again in a moment.");
   };
 
   // Availability for the three connect tiles (Chat / Audio / Video).
@@ -290,14 +302,48 @@ const AstrologerProfile = () => {
   const aboutTextRef = useRef(null);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
 
+  /*
+    Whether the 5-line clamp is actually cutting the text off. This decides
+    whether "Read More" renders at all, so a wrong answer leaves visibly
+    truncated text with no way to expand it — a paragraph that ends mid-sentence
+    and nothing to click.
+
+    The old version measured once inside a single requestAnimationFrame. That is
+    one frame after the description lands, which on this page is routinely too
+    early: Poppins is loaded from Google Fonts with `media="print"` swapped to
+    `all` on load (see index.html), so the first measurement can happen in the
+    fallback font, and the three-column layout reflows this column as the right
+    rail and sidebar images settle. Either one changes how many lines the text
+    occupies after the single measurement has already been taken.
+
+    Now: re-measure on element resize, and again once webfonts are ready.
+  */
   useEffect(() => {
     const el = aboutTextRef.current;
-    if (el && !showFullAbout) {
-      // Use requestAnimationFrame to ensure layout is computed
-      requestAnimationFrame(() => {
-        setIsAboutTruncated(el.scrollHeight > el.clientHeight);
-      });
-    }
+    if (!el || showFullAbout) return;
+
+    const measure = () => {
+      // +1px tolerance: scrollHeight/clientHeight are rounded, and a
+      // fractional line-height can leave a sub-pixel difference on text that
+      // is not actually clamped.
+      setIsAboutTruncated(el.scrollHeight > el.clientHeight + 1);
+    };
+
+    measure();
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+
+    // Fonts change line count, and this page's font arrives asynchronously.
+    let cancelled = false;
+    document.fonts?.ready?.then(() => {
+      if (!cancelled) measure();
+    });
+
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+    };
   }, [data?.description, showFullAbout]);
   const [isVAOpen, setIsVAOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
@@ -1327,17 +1373,38 @@ const AstrologerProfile = () => {
           <div className={styles.profileContentMain}>
             {/* Profile Card */}
             <div className={styles.profileCard}>
+              {/* This used to navigate to /live/<liveRoomId || astrologerId>,
+                  so on a missing roomId it sent the visitor to a room that does
+                  not exist. Shares the one handler now, so all five join
+                  controls behave identically. */}
               {isLive && (
                 <button
                   className={styles.liveIndicator}
-                  onClick={() => navigate(`/live/${liveRoomId || data?._id}`)}
+                  onClick={handleJoinLive}
                   aria-label="Astrologer is live, click to watch"
                 >
                   <span className={styles.liveDot}></span>
                   LIVE
                 </button>
               )}
-              <div className={styles.profileImageWrapper}>
+              {/*
+                The portrait is the largest, most obvious thing on the page and
+                had no handler at all — a click on it did nothing. The lightbox
+                it should open still exists further down (`imagePreview`, the
+                overlay near the end of this file), but its only trigger was the
+                video/photo gallery, which is commented out at the bottom of the
+                About section. So the whole preview feature was unreachable dead
+                code while the one element everyone clicks sat inert on top of it.
+
+                A <button> rather than an onClick on the <img>: this is now a
+                real control and has to be reachable by keyboard.
+              */}
+              <button
+                type="button"
+                className={styles.profileImageWrapper}
+                onClick={() => setImagePreview(displayData.imageUrl)}
+                aria-label={`View larger photo of ${getAstrologerDisplayName(displayData)}`}
+              >
                 <img
                   src={displayData.imageUrl}
                   alt={getAstrologerDisplayName(displayData)}
@@ -1346,7 +1413,7 @@ const AstrologerProfile = () => {
                     e.target.src = getAstrologerDefaultImage(data?.gender);
                   }}
                 />
-              </div>
+              </button>
               <div className={styles.profileInfo}>
                 <h1 className={styles.astrologerName}>
                   {getAstrologerDisplayName(displayData)}
@@ -1521,11 +1588,29 @@ const AstrologerProfile = () => {
               <h3 className={styles.aboutTitle}>About</h3>
 
               {displayData.description && (
+              /*
+                The clamped paragraph now expands on click. Text cut off
+                mid-sentence is itself the affordance — people click the words,
+                not the 85x22px "Read More" underneath it — and that click used
+                to do nothing. Only wired while it is actually truncated and
+                collapsed, so an untruncated or already-expanded paragraph stays
+                plain text and remains selectable.
+
+                No role/tabIndex here on purpose: the button below is the
+                keyboard- and screen-reader-facing control, and duplicating it
+                onto the paragraph would just add a second stop announcing the
+                whole description as a button label.
+              */
               <p
                 ref={aboutTextRef}
                 className={`${styles.aboutText} ${
                   showFullAbout ? styles.expanded : ""
-                }`}
+                } ${isAboutTruncated && !showFullAbout ? styles.aboutTextClickable : ""}`}
+                onClick={
+                  isAboutTruncated && !showFullAbout
+                    ? () => setShowFullAbout(true)
+                    : undefined
+                }
               >
                 {displayData.description}
               </p>
@@ -1534,6 +1619,7 @@ const AstrologerProfile = () => {
               {isAboutTruncated && !showFullAbout && (
                 <button
                   className={styles.readMoreBtn}
+                  aria-expanded={false}
                   onClick={() => setShowFullAbout((prev) => !prev)}
                 >
                   Read More
@@ -1543,6 +1629,7 @@ const AstrologerProfile = () => {
               {showFullAbout && (
                 <button
                   className={styles.readMoreBtn}
+                  aria-expanded={true}
                   onClick={() => setShowFullAbout((prev) => !prev)}
                 >
                   Read Less
@@ -2079,7 +2166,21 @@ const AstrologerProfile = () => {
         }
       />
 
-      <StickyReview />
+      {/*
+        StickyReview intentionally NOT rendered here.
+
+        It reads `openReview`/`reviewData` from CallContext and renders
+        FeedbackModal, and HomeLayout already renders one for every
+        header/footer route — which this one is (see PROFILE_ASTROLOGER in
+        Paths.js). Rendering a second copy mounted two identical
+        `position: fixed; z-index: 99999` modals on top of each other whenever
+        "Share a Review" was tapped: only the last one in the DOM received
+        clicks, so the other was a fully-rendered, unreachable duplicate — with
+        duplicated star inputs and submit buttons in the accessibility tree.
+
+        Removing it here changes nothing about the flow: setOpenReview(true) in
+        handleOpenReviewModal still opens the layout's instance.
+      */}
 
       {/* Waiting Modal — commented out to avoid duplicate with FooterWaiting */}
       {/* {(WaitingList || callWaitingList) && (
