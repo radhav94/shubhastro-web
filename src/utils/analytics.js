@@ -23,21 +23,14 @@
  *
  *   trackEvent("horoscope_viewed", { sign: "aries", time_period: "daily" });
  *
- * Nothing is printed per event. Every call is recorded to an on-device log
- * instead (see analyticsLog.js), together with which of the two sinks accepted
- * it. Read it from the console with `__gtmLog()`, download it with
- * `__gtmLog.download()`, or use the on-screen panel (AnalyticsLogPanel).
+ * Nothing is printed per event. Use GTM Preview mode or GA4 DebugView to inspect
+ * what is being sent.
  *
  * Analytics must never break the application: everything below is wrapped so a
  * failure here cannot take a screen down with it.
  *
  * =========================================================
  */
-
-import {
-  installAnalyticsLogConsoleApi,
-  logAnalyticsEvent,
-} from "./analyticsLog";
 
 const IS_DEV = import.meta.env.DEV;
 
@@ -79,8 +72,6 @@ const getCustomerId = () => {
 const isValidEventName = (eventName) =>
   typeof eventName === "string" && eventName.trim().length > 0;
 
-installAnalyticsLogConsoleApi();
-
 /**
  * Track an analytics event via GTM dataLayer + direct GA4 gtag.
  *
@@ -102,26 +93,15 @@ export const trackEvent = (eventName, properties = {}) => {
       ...properties,
     };
 
-    /*
-      Both sinks are optional at runtime — the GTM container may not have loaded
-      yet, or an extension may have stripped it. A push in that state is lost,
-      and GTM's own Preview mode cannot show you what never arrived. Record the
-      outcome per sink so "the event didn't fire" can be told apart from "the
-      event fired but nothing was listening".
-    */
-    const delivered = { dataLayer: false, gtag: false };
-
+    // Both sinks are optional at runtime: the GTM container may not have loaded
+    // yet, or an extension may have stripped it.
     if (typeof window !== "undefined" && Array.isArray(window.dataLayer)) {
       window.dataLayer.push({ event: eventName, ...payload });
-      delivered.dataLayer = true;
     }
 
     if (typeof window !== "undefined" && typeof window.gtag === "function") {
       window.gtag("event", eventName, payload);
-      delivered.gtag = true;
     }
-
-    logAnalyticsEvent(eventName, payload, delivered);
   } catch (error) {
     if (IS_DEV) {
       console.error("[Analytics] Failed to track event:", eventName, error);
@@ -148,19 +128,6 @@ export const setAnalyticsUser = (userId) => {
         user_id: normalizedUserId,
       });
     }
-
-    // Routed through the same log as everything else, so identify/clear calls
-    // show up in `__gtmLog()` next to the events they scope.
-    logAnalyticsEvent(
-      "analytics_user_set",
-      { user_id: normalizedUserId },
-      {
-        dataLayer:
-          typeof window !== "undefined" && Array.isArray(window.dataLayer),
-        gtag:
-          typeof window !== "undefined" && typeof window.gtag === "function",
-      }
-    );
   } catch (error) {
     if (IS_DEV) console.error("[Analytics] Failed to set user:", error);
   }
@@ -176,17 +143,6 @@ export const clearAnalyticsUser = () => {
     if (typeof window !== "undefined" && Array.isArray(window.dataLayer)) {
       window.dataLayer.push({ event: "analytics_user_cleared" });
     }
-
-    logAnalyticsEvent(
-      "analytics_user_cleared",
-      {},
-      {
-        dataLayer:
-          typeof window !== "undefined" && Array.isArray(window.dataLayer),
-        gtag:
-          typeof window !== "undefined" && typeof window.gtag === "function",
-      }
-    );
   } catch (error) {
     if (IS_DEV) console.error("[Analytics] Failed to clear user:", error);
   }
