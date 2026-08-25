@@ -98,7 +98,6 @@ import { Toaster, ToastBar, toast } from "react-hot-toast";
 import { Provider } from "react-redux";
 import { store, persistor } from "./store/store.js";
 import { PersistGate } from "redux-persist/integration/react";
-
 /*
  * The `AgoraProvider` import that used to sit here was removed.
  *

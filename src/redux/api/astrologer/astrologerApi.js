@@ -169,10 +169,30 @@ export const astrologerApi = privateRequestNew.injectEndpoints({
       }),
     }),
 
+    /**
+     * Recommended astrologers.
+     *
+     * Path note: the spec for this feature writes `astrologer/recommendation`
+     * (singular), which 404s. The live route is the plural one already used
+     * here, verified against dev.
+     *
+     * @param {Object}  [args]
+     * @param {string}  [args.type]     - "chat" | "audio" | "video"
+     * @param {boolean} [args.discount] - only astrologers currently discounted
+     * @param {number}  [args.page]
+     * @param {number}  [args.limit]
+     */
     getRecommendedAstrologers: builder.query({
-      query: () => ({
-        url: "astrologers/recommendation?limit=12",
-      }),
+      query: ({ type, discount, page, limit = 12 } = {}) => {
+        const params = new URLSearchParams();
+        if (type) params.set("type", type);
+        // Sent only when true: `discount=false` is a different request from
+        // "no discount filter", and the backend should not have to guess.
+        if (discount) params.set("discount", "true");
+        if (page) params.set("page", String(page));
+        if (limit) params.set("limit", String(limit));
+        return { url: `astrologers/recommendation?${params.toString()}` };
+      },
     }),
 
     getExpertiseFilters: builder.query({
