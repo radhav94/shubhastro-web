@@ -83,6 +83,9 @@
   border-radius: 10px;
 }
 
+// Now a seek control (role="slider"), not decoration — see AudioIntro.jsx. The
+// 40px height already gives a comfortable target, so only the affordance and
+// the focus ring are missing.
 .waveform {
   flex: 1 1 auto; // fill the row between the play button and the duration
   min-width: 0;
@@ -91,6 +94,14 @@
   gap: 1px;
   height: 40px;
   overflow: hidden;
+  cursor: pointer;
+  touch-action: manipulation; // no 300ms tap delay when scrubbing on touch
+
+  &:focus-visible {
+    outline: 2px solid #ec6a2b;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
 .bar {
