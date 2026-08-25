@@ -47,6 +47,27 @@ const shopLinks = isShubhMallEnabled()
     ]
   : [];
 
+/*
+  Registered office address.
+
+  Was a bare <p> inside the Contact Us column, duplicated verbatim in the
+  desktop and mobile blocks. On a phone a postal address is expected to open a
+  map — that is what a tap on one means — and this one had no anchor, no map
+  link and no copy affordance, so the tap did nothing. It also sat directly
+  under a bold <h4> whose class is literally named `v2_phoneLink`, which reads
+  as "tap for directions", and the footer's only phone number is commented out,
+  so there was nothing else in the column to reach for except the email.
+
+  `?api=1&query=` is Google's documented cross-platform Maps search URL: it
+  hands off to the Maps app on Android/iOS and opens the web map elsewhere.
+  Defined once here so the two copies cannot drift apart.
+*/
+const REGISTERED_ADDRESS =
+  "Vaibhav Chambers, 9th Rd, opposite Income Tax Office, Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400051";
+const REGISTERED_ADDRESS_MAP_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  REGISTERED_ADDRESS,
+)}`;
+
 const companyLinks = [
   { href: "/about-us", text: "About Us" },
   { href: "/faq", text: "FAQ" },
@@ -238,9 +259,14 @@ const Footer = () => {
           {/* <p className={styles.v2_contactText}>Or call us at</p>
           <a href="tel:+918655682877" className={`${styles.v2_contactText} ${styles.v2_callUs}`}>+91 86556 82877</a> */}
           <h4 className={`${styles.v2_phoneLink}`}>Registered Company Address</h4>
-          <p className={styles.v2_contactText}>
-            Vaibhav Chambers, 9th Rd, opposite Income Tax Office, Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400051
-          </p>
+          <a
+            href={REGISTERED_ADDRESS_MAP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${styles.v2_contactText} ${styles.v2_addressLink}`}
+          >
+            {REGISTERED_ADDRESS}
+          </a>
           <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
           <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
         </div>
@@ -277,9 +303,14 @@ const Footer = () => {
           {/* <p className={styles.v2_contactText}>Or call us at</p>
           <a href="tel:+918655682877" className={styles.v2_contactText}>+91 86556 82877</a> */}
           <h4 className={`${styles.v2_phoneLink} `}>Registered Company Address</h4>
-          <p className={styles.v2_contactText}>
-            Vaibhav Chambers, 9th Rd, opposite Income Tax Office, Bandra Kurla Complex, Bandra East, Mumbai, Maharashtra 400051
-          </p>
+          <a
+            href={REGISTERED_ADDRESS_MAP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${styles.v2_contactText} ${styles.v2_addressLink}`}
+          >
+            {REGISTERED_ADDRESS}
+          </a>
           <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
           <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
           <h3 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h3>
