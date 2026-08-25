@@ -643,6 +643,39 @@ const LiveView = (props) => {
     connection the visitor is in the middle of, and the call pill sits inside
     this same bar. Say so instead of dropping it.
   */
+  /*
+    Open the "Other Live Astrologers" sheet.
+
+    Extracted from the grid button in the top bar so the waiting screen can offer
+    the same thing. That whole top bar is gated behind `isAstrologerLive`, so
+    while a viewer is stuck on "Connecting to live stream…" the grid button does
+    not exist and there is no way to reach another stream — the nav arrows are
+    positioned off-screen (see .live-nav-controls in live.scss) and the swipe
+    reel is undiscoverable.
+  */
+  const handleOpenLiveList = async () => {
+    try {
+      const res = await getAstrologerLiveList();
+      const all = res.data?.data || [];
+      const valid = all.filter((l) => l.astrologer && getAstrologerDisplayName(l.astrologer));
+      setLiveListData(valid);
+      setShowLiveList(true);
+      scrollDisabledRef.current = true;
+      if (props.giftPopupOpenRef) props.giftPopupOpenRef.current = true;
+    } catch (err) {
+      console.error("Failed to fetch live list:", err);
+      Toast.error("Couldn't load the other live sessions. Please try again.");
+    }
+  };
+
+  // Leave the stream for the astrologer list. Mirrors handleViewHostProfile's
+  // cleanup: drop the viewer session and navigate, letting useLiveStreaming's
+  // unmount cleanup tear down Agora and the socket.
+  const handleBrowseAstrologers = () => {
+    clearViewerSession();
+    navigate("/astrologers");
+  };
+
   const handleViewHostProfile = () => {
     if (activeCall) {
       Toast.error(`You're on a call with ${hostDisplayName}. End it to view the profile.`);
@@ -1451,19 +1484,7 @@ const LiveView = (props) => {
                   </div>
                 )} */}
                 {!localPrivateCall && (
-                  <button className="live-grid-btn" onClick={async () => {
-                    try {
-                      const res = await getAstrologerLiveList();
-                      const all = res.data?.data || [];
-                      const valid = all.filter((l) => l.astrologer && getAstrologerDisplayName(l.astrologer));
-                      setLiveListData(valid);
-                      setShowLiveList(true);
-                      scrollDisabledRef.current = true;
-                      if (props.giftPopupOpenRef) props.giftPopupOpenRef.current = true;
-                    } catch (err) {
-                      console.error("Failed to fetch live list:", err);
-                    }
-                  }} aria-label="View all live astrologers">
+                  <button className="live-grid-btn" onClick={handleOpenLiveList} aria-label="View all live astrologers">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                       <rect x="3" y="3" width="8" height="8" rx="2" />
                       <rect x="13" y="3" width="8" height="8" rx="2" />
@@ -1607,6 +1628,42 @@ const LiveView = (props) => {
                       ? 'Waiting for astrologer to start streaming…'
                       : 'Connecting to live stream…'}
                 </span>
+
+                {/*
+                  Everything else on this screen is gated behind
+                  `isAstrologerLive` — the top bar, the chat panel and the right
+                  action rail all disappear while we are not connected. That left
+                  a full-screen background image, one line of text and a 32px
+                  back chevron in the corner as the entire UI. Clarity recorded a
+                  paid mobile visitor landing here straight from a Google Ads
+                  "live astrologer" click, tapping the screen at 00:28, tapping
+                  again at 00:31, then backing out to the homepage and leaving —
+                  a 39-second session. There was nothing else to tap: the
+                  stream-switching arrows are positioned off the left edge of the
+                  viewport, and the swipe reel is invisible.
+
+                  Held back until we know this is more than a normal connect
+                  (10s, or the host/room is already gone) so the buttons do not
+                  flash up during a fast join.
+                */}
+                {(connectingTimedOut || roomEnded || hostLeft || !props.channel) && (
+                  <div className="waiting-actions">
+                    <button
+                      type="button"
+                      className="waiting-action-primary"
+                      onClick={handleOpenLiveList}
+                    >
+                      See other live astrologers
+                    </button>
+                    <button
+                      type="button"
+                      className="waiting-action-secondary"
+                      onClick={handleBrowseAstrologers}
+                    >
+                      Chat or call instead
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
