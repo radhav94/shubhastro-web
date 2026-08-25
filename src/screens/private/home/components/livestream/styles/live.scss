@@ -126,6 +126,26 @@
   }
 }
 
+/*
+  Previous/next live buttons — currently unreachable, left as-is deliberately.
+
+  Two independent reasons they can never be used, both of which need a design
+  decision rather than a CSS guess:
+
+  1. `left: -28%` plus `translate(-40%, …)` puts them entirely off the left edge
+     of the viewport (about -112px on a 400px phone, before the extra -40% of
+     their own width).
+  2. Even on-screen they would be painted over: LiveView portals `.video-box` to
+     document.body at `z-index: 10000`, covering the whole viewport, and this
+     z-index is 1000.
+
+  So the markup renders whenever `lives.length > 1` but nothing shows. Stream
+  switching works only via the swipe reel (touch, undiscoverable) and the grid
+  button in the top bar — and that top bar is itself hidden until the stream
+  connects. Fixing this properly means choosing a spot on the live UI that does
+  not collide with the chat panel or the right action rail, then raising the
+  z-index above the portal.
+*/
 .live-nav-controls {
   position: fixed;
 

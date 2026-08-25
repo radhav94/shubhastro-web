@@ -86,9 +86,15 @@ const SingleBlogDetails = () => {
     relatedBlogs.find((b) => b._id === singleBLogData?._id || b.slug === slug)?.author ||
     "";
 
-  // Sidebar list: prefer related blogs, fallback to all blogs, exclude current
+  // Sidebar list: prefer related blogs, fallback to all blogs, exclude current.
+  //
+  // The `b.slug || b._id` guard is load-bearing: the card's `to` is built with
+  // `.replace(":slug", blog.slug || blog._id)`, so an entry carrying neither
+  // rendered a link to the literal path /blog/undefined, which resolves to the
+  // "No blog found" branch of this very screen. A card that reads like an article
+  // and lands on an empty page is worse than one that was never listed.
   const popularBlogs = (relatedBlogs.length > 0 ? relatedBlogs : allBlogs)
-    .filter((b) => (b.slug || b._id) !== slug && b._id !== singleBLogData?._id)
+    .filter((b) => (b.slug || b._id) && (b.slug || b._id) !== slug && b._id !== singleBLogData?._id)
     .slice(0, 6);
 
   const cleanText = singleBLogData?.body
@@ -96,16 +102,63 @@ const SingleBlogDetails = () => {
     ?.replace(/\s+/g, " ")
     ?.trim();
 
+  /*
+    Route in-article links through React Router.
+
+    The article body is CMS markup injected with dangerouslySetInnerHTML, so the
+    router never sees its anchors. An internal link — "talk to an Astrologer"
+    pointing at /astrologers, or a cross-link to a Kundli or horoscope page —
+    was therefore a full document load: the SPA tears down and re-boots
+    mid-article, re-downloading the entry bundle and re-running every startup
+    request before the destination paints. For seconds the page looks like it
+    ignored the click, which is exactly when a reader clicks again. It also
+    inflates page counts: this pattern showed up as a session with 95 page views
+    from 80 clicks, looping between Kundli, Daily Horoscope and Astrologers.
+
+    Delegated from the container rather than bound per anchor, because the body
+    is replaced wholesale for every article. Everything that should stay a
+    browser navigation is left alone: modified and non-primary clicks, new-tab
+    links, downloads, other origins, and non-http schemes such as mailto: and
+    tel: (URL gives those an origin of "null", so the origin check covers them).
+  */
+  const handleBodyClick = (e) => {
+    if (e.defaultPrevented) return;
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+    const anchor = e.target?.closest?.("a[href]");
+    if (!anchor) return;
+    if (anchor.target && anchor.target !== "_self") return;
+    if (anchor.hasAttribute("download")) return;
+
+    let url;
+    try {
+      url = new URL(anchor.href, window.location.origin);
+    } catch {
+      return;
+    }
+
+    if (url.origin !== window.location.origin) return;
+
+    // An in-page anchor: leave the browser to do the jump.
+    if (url.pathname === window.location.pathname && url.hash) return;
+
+    e.preventDefault();
+    navigate(url.pathname + url.search + url.hash);
+  };
+
   const handleShare = (e, platform) => {
     e.preventDefault();
     e.stopPropagation();
     const url = `${window.location.origin}/blog/${slug}`;
     switch (platform) {
+      // "noopener,noreferrer": unlike a target="_blank" anchor, window.open does
+      // NOT imply noopener, so the share tab kept a live window.opener handle
+      // back to this page.
       case "whatsapp":
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`, "_blank");
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
         break;
       case "facebook":
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank");
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
         break;
       case "copy":
         navigator.clipboard?.writeText(url);
@@ -125,11 +178,12 @@ const SingleBlogDetails = () => {
     e.stopPropagation();
     const url = `${window.location.origin}/blog/${blog.slug || blog._id}`;
     switch (platform) {
+      // See the note in handleShare: window.open needs noopener explicitly.
       case "whatsapp":
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`, "_blank");
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
         break;
       case "facebook":
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank");
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
         break;
       case "copy": {
         const id = blog._id || blog.blogId;
@@ -236,8 +290,12 @@ const SingleBlogDetails = () => {
           />
 
           {/* Blog Content */}
+          {/* onClick delegation, not per-anchor listeners — see handleBodyClick.
+              No role/tabIndex: this is not a control, it only upgrades the
+              anchors inside it, which keep their own keyboard behaviour. */}
           <div
             className={styles.blogContent}
+            onClick={handleBodyClick}
             dangerouslySetInnerHTML={{ __html: blogBodyHtml }}
           ></div>
         </article>

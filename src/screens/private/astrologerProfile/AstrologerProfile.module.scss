@@ -2131,6 +2131,33 @@
   font-weight: 400;
 }
 
+// Explicit pagination for the reviews scroller, which was scroll-only — see the
+// note in AstrologerProfile.jsx.
+.loadMoreReviewsBtn {
+  align-self: center;
+  margin: 4px 0 8px;
+  padding: 10px 20px;
+  border: 1.5px solid #E89B3C;
+  border-radius: 999px;
+  background: transparent;
+  color: #E89B3C;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    background: #E89B3C;
+    color: #fff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 2px;
+  }
+}
+
 .shareReviewBtn {
   width: auto;
   padding: 14px 40px;

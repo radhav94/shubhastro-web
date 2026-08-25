@@ -61,7 +61,10 @@ const PricingPolicy = () => {
       </p>
       <p className={styles.paragraph}>
         Please feel free to reach us at{" "}
-        <a href="mailto:support@ShubhAstro.in" className={styles.link}>
+        {/* href casing was support@ShubhAstro.in while the visible text is
+            lowercase. The local part of an address is case-sensitive per RFC
+            5321, so keep the two identical. */}
+        <a href="mailto:support@shubhastro.in" className={styles.link}>
           support@shubhastro.in
         </a>
       </p>

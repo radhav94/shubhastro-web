@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { IoClose } from "react-icons/io5";
+import Toast from "../../../../../component/toast";
 import { getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../../utils/appImages";
 import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 import { useGetAstrologerByIdQuery } from "../../../../../redux/api/astrologer/astrologerApi";
@@ -88,6 +89,19 @@ const LiveListModal = ({ show, onClose, lives = [] }) => {
   });
 
   const handleSelect = (channel) => {
+    /*
+      Guard the missing-channel case. This used to interpolate unconditionally,
+      so an entry without a `channel` navigated to the literal URL
+      `/live/undefined`. LivePlayerPage does not validate the param — it injects
+      `[{ channel: "undefined" }]` as a placeholder when the id is not in the
+      live list — so Agora never connects and the visitor is parked on
+      "Waiting for astrologer to start streaming…" forever, with no clue that the
+      card they tapped was the problem.
+    */
+    if (!channel) {
+      Toast.error("That session isn't available right now.");
+      return;
+    }
     onClose();
     navigate(`/live/${channel}`);
   };

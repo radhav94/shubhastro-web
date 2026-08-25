@@ -19,8 +19,24 @@ const RemediesTab = ({ astrologerId }) => {
     { skip: !astrologerId }
   );
 
+  /*
+    Whether tapping a remedy can actually open anything.
+
+    `isShubhMallEnabled()` defaults to false when VITE_SHUBH_MALL_ENABLED is
+    unset or blank, and /product-details is in SHUBH_MALL_PATHS, so with the shop
+    switched off there is nowhere for these cards to go. handleProductClick used
+    to `return` silently in exactly that case, while .productCard kept
+    `cursor: pointer`, a hover state, a product photo, a price and a discount
+    badge — an unmistakable shop card that answered every tap with nothing. On a
+    phone there is no cursor either, so the only signal was the tap itself.
+
+    Now the card is only presented as interactive when it can navigate; otherwise
+    it stays a recommendation you can read. Nothing is hidden either way.
+  */
+  const canOpenProduct = (product) => Boolean(product?.slug) && isShubhMallEnabled();
+
   const handleProductClick = (product) => {
-    if (!product.slug || !isShubhMallEnabled()) return;
+    if (!canOpenProduct(product)) return;
     navigate(`/product-details/${product.slug}`, {
       state: {
         _selectedVariant: product.variantId ? {
@@ -92,11 +108,25 @@ const RemediesTab = ({ astrologerId }) => {
                   ? Math.round(((mrp - price) / mrp) * 100)
                   : 0;
 
+              const isOpenable = canOpenProduct(product);
+
               return (
                 <div
                   key={product.variantId || product.productId || product._id || idx}
-                  className={styles.productCard}
-                  onClick={() => handleProductClick(product)}
+                  className={`${styles.productCard} ${isOpenable ? "" : styles.productCardStatic}`}
+                  onClick={isOpenable ? () => handleProductClick(product) : undefined}
+                  role={isOpenable ? "button" : undefined}
+                  tabIndex={isOpenable ? 0 : undefined}
+                  onKeyDown={
+                    isOpenable
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleProductClick(product);
+                          }
+                        }
+                      : undefined
+                  }
                 >
                   {img && (
                     <div className={styles.productImageWrap}>

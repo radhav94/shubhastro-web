@@ -188,6 +188,19 @@
   color: #ff6b35;
 }
 
+// Email addresses inside answers are rendered as mailto links (see
+// linkifyEmails in FAQ.jsx). Underlined because colour alone is not a
+// sufficient cue, and these sit inside grey body copy.
+.answerLink {
+  color: #d84315;
+  text-decoration: underline;
+  overflow-wrap: anywhere; // long addresses must not widen the card
+
+  &:hover {
+    color: #b02f0e;
+  }
+}
+
 .faqAnswer {
   padding: 16px;
   // background: rgba(255, 255, 255, 0.4);
