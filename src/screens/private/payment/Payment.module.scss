@@ -40,13 +40,27 @@
     width: 36px;
   }
 }
+/* Takes the row's remaining width so .localBackBtn stays pinned left, and keeps
+   the 40px offset that optically centres the label against it. Not a control —
+   see the note in Payment.jsx. */
+.titleWalletRow {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 40px;
+  min-width: 0;
+
+  @media (width <= 767px) {
+    padding-right: 0;
+  }
+}
+
 .titleWallet{
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 16px;
-  width: 100%;
-  padding-right: 40px;
   /* Now a <button>: strip the UA chrome so it keeps rendering as the heading it
      looks like, but keep a pointer cursor and a focus ring so it reads and
      behaves as the control it now is. `font: inherit` matters — a button does not
@@ -69,14 +83,35 @@
   &[aria-busy="true"] {
     cursor: progress;
   }
-  @media (width <= 767px) {
-    padding-right: 0px;    
-  }
   @media (width <= 380px) {
     font-size: 16px;
     gap: 10px;
   }
 }
+
+/* Path to wallet history, which this screen previously had no link to. */
+.transactionsLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  color: #D43400;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 6px 8px;
+  border-radius: 8px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 2px;
+  }
+}
+
 .rechargeTop {
   display: flex;
   justify-content: center;

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useParams, useLocation, Link } from "react-router-dom";
 import {
   IoArrowBack,
   IoPersonOutline,
@@ -226,6 +226,57 @@ const GuestChatFlow = () => {
     setForm((f) => ({ ...f, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
   };
+
+  /*
+    Keep the focused field (and the CTA below it) above the on-screen keyboard.
+
+    This screen borrows ChatWindow's `.chatPage`, which is
+    `position: fixed; top: 53px; bottom: 0; overflow: hidden` — the document
+    cannot scroll, and the only scroller is `.body`. A fixed box is laid out
+    against the layout viewport, not the visual one, so when the keyboard opens
+    the bottom of it is simply covered: the last fields and the
+    "Continue & Get ₹250 Bonus" button end up behind the keyboard with no way to
+    scroll to them, because the browser's own "scroll the focused input into
+    view" behaviour has nothing to scroll. Worse in an in-app browser like
+    Facebook's, which takes another slice of viewport for its own chrome.
+
+    A visitor who cannot see the button they are trying to press taps where they
+    think it is — that is a dead click, and it repeats. This session spent nearly
+    six minutes on this form.
+
+    So: scroll the focused control into view inside `.body` ourselves, once the
+    keyboard has finished animating, and again whenever the visual viewport
+    resizes while a field is focused.
+  */
+  const focusScrollTimerRef = useRef(null);
+
+  const scrollActiveFieldIntoView = () => {
+    const el = document.activeElement;
+    const scroller = messagesRef.current;
+    if (!el || !scroller?.contains(el)) return;
+    if (!/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(el.tagName)) return;
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+  };
+
+  // React's onFocus uses focusin, so one handler on the scroller covers every
+  // field inside the form bubble, including ones added later.
+  const handleFieldFocus = () => {
+    clearTimeout(focusScrollTimerRef.current);
+    // The keyboard animates in over ~250-300ms; scrolling before the visual
+    // viewport has settled lands in the wrong place.
+    focusScrollTimerRef.current = setTimeout(scrollActiveFieldIntoView, 300);
+  };
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return undefined;
+    const onResize = () => scrollActiveFieldIntoView();
+    vv.addEventListener("resize", onResize);
+    return () => {
+      vv.removeEventListener("resize", onResize);
+      clearTimeout(focusScrollTimerRef.current);
+    };
+  }, []);
 
   // Open the DateTimePicker's calendar by triggering its (hidden) internal
   // button, so the left calendar icon opens the picker while typing stays enabled.
@@ -463,9 +514,33 @@ const GuestChatFlow = () => {
     navigate("/astrologers", { replace: true });
   };
 
+  /*
+    Resend was silent on failure and could throw on a missing ref.
+
+    There was no try/catch here, and OtpModal's ResendCountdown swallows the
+    rejection ("parent surfaces the error") — so nothing surfaced it. If the
+    resend request failed, tapping "Resend OTP" produced no toast, no error and no
+    countdown: a dead click on the last step of the signup funnel, at the point
+    where the visitor is already waiting on an SMS.
+
+    The throw is deliberate: it keeps ResendCountdown from starting its 60s timer,
+    so the button stays available to try again rather than locking out for a
+    minute after a request that never went out.
+  */
   const handleResendOtp = async () => {
-    await resendOtp(detailsRef.current.mobileNumber);
-    Toast.success("OTP resent successfully");
+    const mobileNumber = detailsRef.current?.mobileNumber || form.mobileNumber;
+    if (!mobileNumber) {
+      Toast.error("We don't have your number. Please go back and enter it again.");
+      throw new Error("guest-chat: resend without a mobile number");
+    }
+
+    try {
+      await resendOtp(mobileNumber);
+      Toast.success("OTP resent successfully");
+    } catch (err) {
+      Toast.error("Couldn't resend the code. Please check your connection and try again.");
+      throw err;
+    }
   };
 
   // Closing the OTP popup returns to the form with all details intact so the
@@ -928,29 +1003,53 @@ const GuestChatFlow = () => {
             >
               <IoArrowBack aria-hidden="true" />
             </button>
-            <img
-              src={imgError || !astrologer?.profileImgUrl ? getAstrologerDefaultImage(astrologer?.gender) : astroImg}
-              className={chat.headerAvatar}
-              alt={astroName}
-              onError={() => setImgError(true)}
-            />
-            <div className={chat.userInfo}>
-              <PrimaryText size_16 isSemiBold>
-                {capitalizeWords(astroName)}
-              </PrimaryText>
-              {astrologer?.experience ? (
-                <span className={chat.experienceText}>
-                  Exp. {parseInt(astrologer.experience) || 0}{" "}
-                  {parseInt(astrologer.experience) > 1 ? "years" : "year"}
-                </span>
-              ) : (
-                <span className={chat.experienceText}>Share your details to start chatting</span>
-              )}
-            </div>
+            {/*
+              The avatar and name are now a link to the astrologer's profile.
+
+              They were a bare <img> plus a <div> with no handler: a 48px circular
+              photo next to a name and "Exp. N years", which is the single most
+              tapped non-button element in any chat UI — people tap the person they
+              are talking to. Here it did nothing, on a screen where the visitor
+              has just picked this astrologer from a list and is being asked for
+              six personal details before anything happens.
+
+              Safe to navigate away from: the form is written to sessionStorage on
+              every change (see the saveGuestDraft effect) and `loadGuestDraft()`
+              seeds the state on mount, so coming back restores everything typed
+              so far. During `collecting` there is no pending request either, so
+              this does not need the leave-confirm that the back button uses.
+            */}
+            <Link
+              to={getAstrologerProfilePath(astrologer || astrologerId, astrologerId)}
+              className={styles.headerIdentityLink}
+              aria-label={`View ${capitalizeWords(astroName)}'s profile`}
+            >
+              <img
+                src={imgError || !astrologer?.profileImgUrl ? getAstrologerDefaultImage(astrologer?.gender) : astroImg}
+                className={chat.headerAvatar}
+                alt={astroName}
+                onError={() => setImgError(true)}
+              />
+              <div className={chat.userInfo}>
+                <PrimaryText size_16 isSemiBold>
+                  {capitalizeWords(astroName)}
+                </PrimaryText>
+                {astrologer?.experience ? (
+                  <span className={chat.experienceText}>
+                    Exp. {parseInt(astrologer.experience) || 0}{" "}
+                    {parseInt(astrologer.experience) > 1 ? "years" : "year"}
+                  </span>
+                ) : (
+                  <span className={chat.experienceText}>Share your details to start chatting</span>
+                )}
+              </div>
+            </Link>
           </div>
         </div>
 
-        <div className={styles.body} ref={messagesRef}>
+        {/* onFocus (focusin) delegation keeps whichever field the keyboard is
+            covering scrolled into view — see handleFieldFocus. */}
+        <div className={styles.body} ref={messagesRef} onFocus={handleFieldFocus}>
           {messages.map((m) => (
             <div
               key={m.id}

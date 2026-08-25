@@ -108,30 +108,63 @@ const Payment = () => {
               the browser swallow the event outright, which is the very thing
               being fixed. Repeat taps just re-trigger the fetch.
             */}
-            <button
-              type="button"
-              className={styles.titleWallet}
-              onClick={refreshWallet}
-              aria-busy={isFetching}
-              aria-label={
-                isFetching
-                  ? "Refreshing wallet balance"
-                  : `Wallet balance ${balance !== null ? `₹${Math.round(balance)}` : "₹0"}. Tap to refresh`
-              }
-            >
-              <img
-                src={walletBlc}
-                alt=""
-                width={30}
-                height={30}
-              />
-              Wallet Balance
-              <span className={styles.dangerColor}>
-                {isFetching ? "..." : balance !== null ? `₹ ${Math.round(balance)}` : "₹ 0"}
-              </span>
-            </button>
+            {/*
+              The refresh button used to be `width: 100%` so that the back button
+              stayed pinned to the left of this row. On a 1100px card that made
+              the whole top strip — including the empty space either side of the
+              wallet text — a single "refresh" target whose only visible effect is
+              a brief "..." and the same number back. Clicks anywhere along it
+              looked, and were logged, as dead.
+
+              The row keeps the full width (so the back button does not move) and
+              the button now shrinks to its own content, so only the icon, label
+              and amount are clickable. `padding-right` moved here to keep the
+              text optically centred against the 40px back button, exactly as
+              before — the visible layout is unchanged.
+            */}
+            <div className={styles.titleWalletRow}>
+              <button
+                type="button"
+                className={styles.titleWallet}
+                onClick={refreshWallet}
+                aria-busy={isFetching}
+                aria-label={
+                  isFetching
+                    ? "Refreshing wallet balance"
+                    : `Wallet balance ${balance !== null ? `₹${Math.round(balance)}` : "₹0"}. Tap to refresh`
+                }
+              >
+                <img
+                  src={walletBlc}
+                  alt=""
+                  width={30}
+                  height={30}
+                />
+                Wallet Balance
+                <span className={styles.dangerColor}>
+                  {isFetching ? "..." : balance !== null ? `₹ ${Math.round(balance)}` : "₹ 0"}
+                </span>
+              </button>
+            </div>
 
         </div>
+
+        {/*
+          Wallet history was unreachable from here.
+
+          /wallet-transactions exists and links *back* to this screen, but nothing
+          on the recharge page pointed at it. Session replay shows a visitor
+          clicking the balance figure repeatedly over several seconds — the
+          behaviour of someone asking where their money went, not someone asking
+          for a refetch. Refreshing was the only thing those clicks could do, and
+          it changes nothing on screen when the figure is already current.
+        */}
+        <Link to="/wallet-transactions" className={styles.transactionsLink}>
+          View transactions
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9 6L15 12L9 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </Link>
 
         <div className={styles.rechargeHeader}>Add Money to Wallet</div>
 

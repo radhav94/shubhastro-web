@@ -148,7 +148,7 @@ const heroCardActivation = (target, onActivate) => {
 
 // ─── Hero Group Renderer ──────────────────────────────────────────────────────
 
-const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick, onLiveCommunityClick, onRequireGuestAuth }) => {
+const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick, pendingPaidCardId, onLiveCommunityClick, onRequireGuestAuth }) => {
   // Sort sections by list_order to determine column placement
   // 1st by list_order → LEFT, 2nd → CENTER, 3rd → RIGHT
   // ai-services is special: it distributes across columns (laal kitaab left, occult/pandit center, community right)
@@ -229,8 +229,33 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   );
                   // Premium cards open the premium plans modal instead of navigating.
                   if (premium) {
+                    /*
+                      Premium cards await a subscription-status request before
+                      anything appears (onPaidCardClick → triggerSubscriptionStatus
+                      → SubscriptionModal). Nothing acknowledged the click while
+                      that round trip was in flight, so on a slow connection the
+                      card sat inert and got clicked again — and the card was a
+                      bare <div onClick>, so it was also unreachable by keyboard.
+                      `aria-busy` drives the pressed state; role/tabIndex/Enter
+                      make it a real control.
+                    */
+                    const isBusy = pendingPaidCardId === (item.ID || item.slug);
                     return (
-                      <div key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} onClick={() => onPaidCardClick(item)} style={{ cursor: 'pointer' }}>
+                      <div
+                        key={`${item.ID || item.slug}-${i}`}
+                        className={styles.wowCard}
+                        onClick={() => onPaidCardClick(item)}
+                        role="button"
+                        tabIndex={0}
+                        aria-busy={isBusy}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onPaidCardClick(item);
+                          }
+                        }}
+                        style={{ cursor: isBusy ? 'progress' : 'pointer' }}
+                      >
                         {/* Paid ribbon hidden temporarily */}
                         {/* {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>} */}
                         {cardIcon}
@@ -247,13 +272,44 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                       <span className={styles.wowCardTitle}>{item.title}</span>
                     </Link>
                   ) : (
-                    <div key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: item.slug ? 'pointer' : 'default' }}>
+                    /*
+                      Fallback for cards with no resolvable route. `cursor` was
+                      gated on `item.slug`, but handleWowCardClick's own gate is
+                      different: a quick-link item is actionable only when it has
+                      `redirect_url` or `slug`, and everything else hits a bare
+                      `return`. So an external quick-link with neither rendered as
+                      a pointer-cursor card that swallowed the click. Gate both the
+                      cursor and the handler on the same condition the handler
+                      actually uses, so a card that can't do anything stops
+                      advertising that it can.
+                    */
+                    (() => {
+                      const isActionable = item.source === "quick-link-section"
+                        ? Boolean(item.redirect_url || item.slug)
+                        : Boolean(item.slug);
+                      return (
+                    <div
+                      key={`${item.ID || item.slug}-${i}`}
+                      className={styles.wowCard}
+                      onClick={isActionable ? (e) => handleWowCardClick(item, e) : undefined}
+                      role={isActionable ? "button" : undefined}
+                      tabIndex={isActionable ? 0 : undefined}
+                      onKeyDown={isActionable ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleWowCardClick(item, e);
+                        }
+                      } : undefined}
+                      style={{ cursor: isActionable ? 'pointer' : 'default' }}
+                    >
                       {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
                       <div className={styles.wowIconBox}>
                         <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
                       <span className={styles.wowCardTitle}>{item.title}</span>
                     </div>
+                      );
+                    })()
                   );
                 })}
               </div>
@@ -508,6 +564,9 @@ const HomeV2 = () => {
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [pendingServiceItem, setPendingServiceItem] = useState(null);
+  // Which premium suite card is waiting on its subscription-status request, so the
+  // card can show a pressed/busy state instead of looking unresponsive.
+  const [pendingPaidCardId, setPendingPaidCardId] = useState(null);
   const [triggerSubscriptionStatus] = useLazyGetSubscriptionStatusQuery();
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const pendingWowPathRef = useRef(null);
@@ -1004,6 +1063,10 @@ const HomeV2 = () => {
     if (!requireAuth()) return;
     // Remember which service was requested so "Unlock Now" (free plan) can open it.
     setPendingServiceItem(item);
+    // Nothing appears on screen until this request resolves, so mark the card as
+    // busy first — otherwise the click is unacknowledged for the whole round trip
+    // and gets repeated. Cleared in `finally` so an error still releases it.
+    setPendingPaidCardId(item?.ID || item?.slug || null);
     try {
       const res = await triggerSubscriptionStatus().unwrap();
       if (res?.data?.hasActiveSubscription) {
@@ -1016,6 +1079,8 @@ const HomeV2 = () => {
     } catch {
       // On any error fetching status, fall back to showing the subscription modal.
       setShowSubscriptionModal(true);
+    } finally {
+      setPendingPaidCardId(null);
     }
   }, [requireAuth, triggerSubscriptionStatus, handleWowCardClick]);
 
@@ -1028,7 +1093,7 @@ const HomeV2 = () => {
   const handleRechargeClose = useCallback(() => hookSetOpenModal((prev) => ({ ...prev, recharge: false })), [hookSetOpenModal]);
 
   // ─── Shared props for group renderers ─────────────────────────────────────
-  const heroProps = { styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick: handlePaidCardClick, onLiveCommunityClick: handleLiveCommunityClick, onRequireGuestAuth: handleRequireGuestAuth };
+  const heroProps = { styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick: handlePaidCardClick, pendingPaidCardId, onLiveCommunityClick: handleLiveCommunityClick, onRequireGuestAuth: handleRequireGuestAuth };
   const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id };
 
   // ─── Render ───────────────────────────────────────────────────────────────
