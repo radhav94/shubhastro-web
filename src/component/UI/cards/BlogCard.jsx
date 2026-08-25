@@ -39,11 +39,11 @@ const BlogCard = ({ image, title, author, date, authorIcon, blogId, slug }) => {
     const url = getBlogUrl();
     switch (platform) {
       case "whatsapp":
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`, "_blank");
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
         setShareOpen(false);
         break;
       case "facebook":
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank");
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
         setShareOpen(false);
         break;
       case "copy":
@@ -116,7 +116,26 @@ const BlogCard = ({ image, title, author, date, authorIcon, blogId, slug }) => {
             <div
               ref={shareRef}
               className={`${Styles.shareBtnMain} ${shareOpen ? Styles.shareOpen : ""}`}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              /*
+                This wrapper sits inside the card's <Link>, and it used to cancel
+                every click that reached it — including clicks on its own padding
+                and on the gaps in the share tray, neither of which has a handler.
+                Those taps got no navigation and no state change: a dead zone
+                punched into the middle of the one control on a blog card.
+
+                Cancel only when the click actually landed on a share control (or
+                inside the open tray, so a near-miss between icons doesn't
+                navigate away mid-share). Anything else falls through to the card
+                link, which is what a click on a blog card means everywhere else.
+              */
+              onClick={(e) => {
+                const hitShareControl =
+                  e.target?.closest?.("button") ||
+                  e.target?.closest?.(`.${Styles.shareIconSocial}`);
+                if (!hitShareControl) return;
+                e.preventDefault();
+                e.stopPropagation();
+              }}
             >
               <button
                 type="button"

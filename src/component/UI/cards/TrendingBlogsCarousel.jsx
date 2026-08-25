@@ -30,10 +30,10 @@ const TrendingBlogsCarousel = ({ blogs = [], title, subtitle }) => {
     const url = getBlogUrl(blog);
     switch (platform) {
       case "whatsapp":
-        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`, "_blank");
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
         break;
       case "facebook":
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank");
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
         break;
       // case "instagram":
       //   window.open("https://www.instagram.com/", "_blank");
