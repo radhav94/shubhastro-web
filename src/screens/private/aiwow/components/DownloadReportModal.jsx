@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styles from "./DownloadReportModal.module.scss";
+import Toast from "../../../../component/toast";
 
 const DEFAULT_LANGUAGES = [
   { id: "en", label: "English", sub: "English" },
@@ -48,8 +49,33 @@ const DownloadReportModal = ({
         ? `₹${downloadCost} will be deducted from your wallet`
         : `Insufficient balance. Please recharge ₹${downloadCost - walletBalance} more`;
 
+  /*
+    `isLoadingCost` gated the action but was absent from both `disabled` and the
+    `disabledBtn` styling below — and it also forces `canAfford` true — so while
+    the price was still resolving the button rendered fully enabled, un-dimmed and
+    labelled "Download", and this function returned in silence.
+
+    That is not always transient. The price comes from findChargeAmount, whose
+    keyword fallback could not match a hyphenated featureName, so an exact-slug
+    miss left the cost null indefinitely: the row above stays on "Loading..." and
+    the button stays permanently dead. (The keyword derivation is fixed in
+    useAIWowDownload.js, but the button must not depend on that holding.)
+
+    Kept tappable rather than disabled — the house pattern here — so the tap is
+    answered instead of swallowed.
+  */
   const handleDownload = () => {
-    if (!canAfford || isDownloading || isLoadingCost) return;
+    if (isDownloading) return;
+    if (isLoadingCost) {
+      Toast.info("Still checking the download price — one moment.");
+      return;
+    }
+    if (!canAfford) {
+      Toast.error(
+        `Insufficient balance. Please add ₹${downloadCost - walletBalance} to download this report.`
+      );
+      return;
+    }
     onDownload(selectedLang);
   };
 
@@ -134,10 +160,14 @@ const DownloadReportModal = ({
         {/* Footer Buttons */}
         <div className={styles.footer}>
           <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
+          {/* Only a genuine in-flight download disables this. "Price still
+              loading" and "not enough balance" are dimmed via aria-disabled so
+              the tap still reaches handleDownload and gets an explanation. */}
           <button
-            className={`${styles.downloadBtn} ${(!canAfford || isDownloading) ? styles.disabledBtn : ""}`}
+            className={`${styles.downloadBtn} ${(!canAfford || isLoadingCost || isDownloading) ? styles.disabledBtn : ""}`}
             onClick={handleDownload}
-            disabled={!canAfford || isDownloading}
+            disabled={isDownloading}
+            aria-disabled={!canAfford || isLoadingCost || isDownloading}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 16L7 11H10V4H14V11H17L12 16Z" />

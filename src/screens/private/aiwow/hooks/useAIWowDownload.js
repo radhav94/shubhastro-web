@@ -25,7 +25,18 @@ export const findChargeAmount = (charges, featureName) => {
   if (!Array.isArray(charges) || !featureName) return null;
   const normalized = featureName.trim().toLowerCase();
   const exactSlug = normalized.replace(/\s+/g, '-') + '-report';
-  const keyword = normalized.split(/\s+/)[0];
+  /*
+    Split on hyphens as well as whitespace.
+    
+    Callers pass either spaced or hyphenated names — SmartMatchmaking sends
+    `featureName: 'Smart-Matchmaking'` — and `split(/\s+/)` on a hyphenated name
+    has nothing to split, so `keyword` became the whole string
+    ("smart-matchmaking"). A charges entry titled or slugged "Smart Matchmaking"
+    contains no hyphen, so the fallback could never match it, and an exact-slug
+    miss then left the price null forever: the download modal's cost row sticks on
+    "Loading..." and its button never becomes usable.
+  */
+  const keyword = normalized.split(/[\s-]+/).filter(Boolean)[0];
   for (const section of charges) {
     if (!Array.isArray(section?.list)) continue;
     const exactMatch = section.list.find((c) => c?.slug?.toLowerCase() === exactSlug);

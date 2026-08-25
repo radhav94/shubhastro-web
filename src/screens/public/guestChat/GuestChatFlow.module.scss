@@ -18,6 +18,24 @@
   }
 }
 
+/* Wraps the header avatar + name, which are now a link to the astrologer's
+   profile (see GuestChatFlow.jsx). Reproduces the flex layout they had as direct
+   children of .headerLeft, so the header looks unchanged. */
+.headerIdentityLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+}
+
 .msgRow {
   display: flex;
   align-items: flex-end;

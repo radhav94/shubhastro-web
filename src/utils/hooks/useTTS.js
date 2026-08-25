@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { textToSpeech, chunkText, SARVAM_LANGUAGES } from "../../services/sarvamTTSService";
 import { translateText } from "../../component/panditAI/translateText";
+import Toast from "../../component/toast";
 
 const LANG_TO_SARVAM = {
   en: SARVAM_LANGUAGES.ENGLISH,
@@ -73,6 +74,36 @@ const useTTS = () => {
 
   const speak = useCallback(async (text) => {
     if (!text) return;
+
+    /*
+      Unlock audio playback inside the tap that asked for it.
+
+      Mobile browsers only allow `play()` when it can be traced to a user
+      gesture, and that permission is consumed synchronously — it does not
+      survive an `await`. Playback below happens after two of them (a translate
+      call, then the Sarvam TTS request), so on iOS and Android the eventual
+      `play()` was rejected with NotAllowedError. Combined with the silent catch
+      at the end of this function, every read-aloud button on a mobile device
+      spun briefly and then said nothing: a dead click, and there are nine of
+      them on the matchmaking result screen alone.
+
+      Playing (and immediately pausing) a muted element now, while the gesture is
+      still live, marks the element as user-activated so it can be reused for the
+      real audio once the network work finishes. Wrapped in try/catch because a
+      browser that does not need it may still reject the empty source, which must
+      not abort the actual request.
+    */
+    let primedAudio = null;
+    try {
+      primedAudio = new Audio();
+      primedAudio.muted = true;
+      const primePromise = primedAudio.play();
+      if (primePromise?.catch) primePromise.catch(() => {});
+      primedAudio.pause();
+      primedAudio.muted = false;
+    } catch {
+      primedAudio = null;
+    }
 
     // Clean up any previous playback/request
     if (abortControllerRef.current) {
@@ -176,7 +207,12 @@ const useTTS = () => {
 
         // Play current chunk and wait for it to finish
         await new Promise((resolve, reject) => {
-          const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
+          // Reuse the element primed inside the tap for the first chunk, so the
+          // user-activation it carries is what actually plays. Later chunks
+          // follow on from an already-playing context and can use fresh
+          // elements. `primedAudio` is null when priming was not possible.
+          const audio = i === 0 && primedAudio ? primedAudio : new Audio();
+          audio.src = `data:audio/wav;base64,${audioBase64}`;
           audioRef.current = audio;
 
           audio.onended = () => {
@@ -206,6 +242,23 @@ const useTTS = () => {
       if (requestIdRef.current !== myRequestId) return;
       console.error("Sarvam TTS failed:", error);
       setStatus("idle");
+
+      /*
+        Every failure here used to end at console.error. The button reverted from
+        its loading state to its idle state and said nothing, which from the
+        outside is identical to a button that does nothing at all — and this hook
+        drives the read-aloud control on the blog, the AI-Wow reports and the
+        matchmaking result screen.
+
+        NotAllowedError is called out separately because it is the one the visitor
+        can actually act on: the browser blocked playback rather than the request
+        failing.
+      */
+      Toast.error(
+        error?.name === "NotAllowedError"
+          ? "Your browser blocked audio playback. Tap the read-aloud button again to allow it."
+          : "Couldn't play the audio just now. Please try again."
+      );
     }
   }, []);
 
