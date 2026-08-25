@@ -3,6 +3,40 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, Plus, Minus } from "lucide-react";
 import styles from "./FAQ.module.scss";
 
+/*
+  Turns any email address inside an answer string into a mailto link.
+
+  Answers are authored as plain strings, so an address in one of them rendered
+  as an inert text node. On a phone, an email in running text is expected to
+  open the mail app; for the account-deletion answer that address *is* the
+  answer, so a tap that does nothing leaves the reader with no next step.
+
+  Deliberately email-only — no generic URL/phone linkifier — so it cannot
+  mangle the arrow notation used elsewhere in these answers
+  ("Profile → Privacy & Security → Delete Account").
+*/
+// Two patterns on purpose: split needs the /g capture group, while the per-part
+// check must be a fresh, non-global test — reusing a /g regex with .test()
+// carries `lastIndex` between calls and would match every other address.
+// The domain is matched as repeated dot-separated labels rather than a loose
+// [\w.-]+, so a sentence-ending period after an address is not swallowed into
+// the mailto.
+const EMAIL_SPLIT_PATTERN = /([\w.+-]+@[\w-]+(?:\.[\w-]+)+)/g;
+const IS_EMAIL = /^[\w.+-]+@[\w-]+(?:\.[\w-]+)+$/;
+
+const linkifyEmails = (text) =>
+  String(text)
+    .split(EMAIL_SPLIT_PATTERN)
+    .map((part, i) =>
+      IS_EMAIL.test(part) ? (
+        <a key={i} href={`mailto:${part}`} className={styles.answerLink}>
+          {part}
+        </a>
+      ) : (
+        part
+      ),
+    );
+
 const FAQ = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -404,7 +438,12 @@ const FAQ = () => {
               </button>
               {expandedQuestion === faq.id && (
                 <div className={styles.faqAnswer} id={`faq-answer-${faq.id}`} role="region">
-                  <p>{faq.answer}</p>
+                  {/* Answers are plain strings, and one of them (account
+                      deletion) instructs the reader to email an address. As a
+                      text node that is a dead tap on mobile, where an email in
+                      running text is expected to open the mail app — and it is
+                      the one answer whose whole value is that address. */}
+                  <p>{linkifyEmails(faq.answer)}</p>
                 </div>
               )}
             </div>

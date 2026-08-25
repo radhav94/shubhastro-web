@@ -358,17 +358,33 @@ $font-primary:     "Poppins", sans-serif;
   &:hover { color: $color-accent; }
 }
 
+// The address itself is now a Maps link (see Footer.jsx). Inherits size/colour
+// from .v2_contactText so the column looks unchanged; only the affordance is new.
+.v2_addressLink {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: $color-accent;
+    text-decoration: underline;
+  }
+}
+
+// These are the two <h4> labels above the address and the legal name. Despite
+// the class name they are not, and never were, links — the phone number that
+// once used it is commented out in Footer.jsx. The link reset and colour
+// transition are leftovers from that, and on a bold label sitting above a
+// postal address they helped it read as tappable. Dropped so it looks like the
+// label it is. (Class name kept: the dark-theme block overrides it by name.)
 .v2_phoneLink {
   color: $color-dark;
   font-size: 14px;
   font-weight: 600;
-  text-decoration: none;
   display: block;
   margin-top: 10px;
   margin-bottom: 4px;
-  margin-top: 10px;
-  transition: color 0.2s;
-  // &:hover { color: $color-accent; }
 }
 
 .v2_chatLink {

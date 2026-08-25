@@ -46,6 +46,21 @@
   &:hover {
     background: #f0f0f0;
   }
+
+  &:focus-visible {
+    outline: 2px solid #f97316;
+    outline-offset: 2px;
+  }
+}
+
+// Applied when the product cannot be opened (shop disabled, or no slug) — see
+// RemediesTab.jsx. Drops the affordances so it reads as information, not a link.
+.productCardStatic {
+  cursor: default;
+
+  &:hover {
+    background: #fafafa;
+  }
 }
 
 .productImageWrap {

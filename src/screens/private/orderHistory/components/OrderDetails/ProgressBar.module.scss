@@ -6,6 +6,23 @@
   border-radius: 999px;
   cursor: pointer;
   margin-top: 12px;
+  // Without this the browser can claim a horizontal drag on the bar as a page
+  // scroll and cancel the pointer stream mid-scrub, which is what made seeking
+  // on touch fail even though the bar looks draggable. See ProgressBar.jsx.
+  touch-action: none;
+
+  // A 6px track is well under the 44px minimum target, and the thumb is 14px.
+  // Extend the hit area vertically without moving anything visually.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -14px 0;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f97316;
+    outline-offset: 4px;
+  }
 }
 
 .progressFill {

@@ -141,13 +141,63 @@
   position: absolute;
   inset: 0;
   display: flex;
+  // Column so the escape-hatch actions stack under the status label. Nothing
+  // else on this screen is interactive while we are not connected — see the
+  // note in LiveView.jsx.
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 16px;
   color: #000;
   font-size: 16px;
   font-weight: 600;
   background: #fdf0e4;
   overflow: hidden;
+}
+
+/* Escape hatches on the waiting screen. */
+.waiting-actions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(320px, 78%);
+}
+
+.waiting-action-primary,
+.waiting-action-secondary {
+  width: 100%;
+  padding: 13px 18px;
+  border-radius: 999px;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.waiting-action-primary {
+  border: none;
+  color: #fff;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.32);
+}
+
+.waiting-action-secondary {
+  border: 1.5px solid rgba(0, 0, 0, 0.18);
+  color: #1a1a1a;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(8px);
 }
 
 .waiting-bg-img {
@@ -995,6 +1045,35 @@
   font-size: 12px;
   font-weight: 700;
   color: #fff;
+}
+
+/*
+  Event rows (a join, a follow, an unnamed gift) carry a glyph instead of a
+  fabricated initial. Before this, the join row took its letter from the first
+  word of the message text, so "Guest … joined" painted a "G" avatar for a person
+  who does not exist — and got tapped. See the note in LiveView.jsx.
+*/
+.inline-initial-glyph {
+  color: rgba(255, 255, 255, 0.92);
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+// The astrologer's avatar in chat opens their profile, so it is a real <button>
+// and needs the UA chrome reset plus a focus ring.
+.inline-initial-btn {
+  padding: 0;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
 }
 
 .inline-host-message .inline-initial {

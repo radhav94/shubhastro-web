@@ -161,7 +161,10 @@ const AstrologerOnboardingAgreement = () => {
 
       <h4 className={styles.subtitle}>13. CONTACT</h4>
       <p className={styles.paragraph}>For onboarding queries, earnings disputes, or other matters:</p>
-      <p className={styles.paragraph}><strong>Email:</strong> astro-partners@shubhastro.com</p>
+      {/* Was plain text. Every other contact email in these policy pages is a
+          mailto anchor — including this exact address in OnboardingGuide.jsx —
+          so on a phone this one looked identical and did nothing when tapped. */}
+      <p className={styles.paragraph}><strong>Email:</strong> <a href="mailto:astro-partners@shubhastro.com" className={styles.link}>astro-partners@shubhastro.com</a></p>
        <p className={styles.paragraph}><strong>Address:</strong> [Registered Office Address, City, State, PIN, India]</p>
        <h4 className={styles.subtitle}>ACKNOWLEDGEMENT AND EXECUTION</h4>
        <p className={styles.paragraph}>I confirm that I have reviewed the terms in their entirety and hereby accord my unconditional consent to the same. I solemnly affirm that such consent is given <strong>without any force, threat, or coercion,</strong> and that I am executing this instrument with full knowledge of its legal consequences. </p>
