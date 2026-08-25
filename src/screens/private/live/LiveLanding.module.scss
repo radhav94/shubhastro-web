@@ -294,6 +294,23 @@
   }
 }
 
+/*
+  Non-interactive variant of .actionBtn, for the like and comment counts that
+  have no action behind them. Keeps the circle and the number so the card looks
+  unchanged, but removes the affordances that made them read as buttons — the
+  pointer cursor and the darken-and-scale hover. Declared after .actionBtn so it
+  wins on source order; the responsive blocks below only override size, so those
+  still apply to both.
+*/
+.actionStatic {
+  cursor: default;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.5);
+    transform: none;
+  }
+}
+
 /* Desktop - Horizontal Side-by-Side with Auto-scroll */
 @media (min-width: 769px) {
   .content {

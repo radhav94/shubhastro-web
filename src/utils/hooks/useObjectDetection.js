@@ -4,23 +4,43 @@ import { useEffect, useRef, useState } from "react";
  * Generic object detection hook using color and shape analysis
  * Can be configured for different object types (gemstone, signature, cloth)
  */
-export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'object' }) => {
+export const useObjectDetection = ({
+  videoRef,
+  canvasRef,
+  detectionType = 'object',
+  // Optional () => ({ left, right, top, bottom }) in 0..1 of the video box.
+  // Signature detection uses it so it analyses exactly the region that will be
+  // saved, instead of a hardcoded guess at where the capture box sits.
+  getRegionBounds = null,
+}) => {
   const [detectionReady, setDetectionReady] = useState(true); // No models to load
   const [objectDetected, setObjectDetected] = useState(false);
   const [detectionQuality, setDetectionQuality] = useState(0);
-  
+  // Why detection is failing, so the camera screen can say something useful
+  // instead of leaving the user staring at a red frame. One of:
+  // 'dark' | 'no-ink' | 'too-much' | 'skin' | 'flat' | null
+  const [detectionReason, setDetectionReason] = useState(null);
+
   const rafRef = useRef(null);
   const detectionStartedRef = useRef(false);
   const detectionHistoryRef = useRef([]); // Temporal smoothing
   const lastRunRef = useRef(0); // Throttle timestamp
+  const regionBoundsRef = useRef(getRegionBounds);
+  useEffect(() => { regionBoundsRef.current = getRegionBounds; }, [getRegionBounds]);
 
   // How often the (CPU-heavy) pixel analysis actually runs. Running it every
   // animation frame on a full-res frame freezes the camera on iOS Safari, so
   // we throttle to a few times per second — plenty for detection feedback.
   const DETECTION_INTERVAL_MS = 150;
   // Downscale the analysis canvas: pixel heuristics don't need full 720p, and
-  // a smaller buffer keeps getImageData cheap on mobile.
-  const MAX_ANALYSIS_DIM = 320;
+  // a smaller buffer keeps getImageData cheap on mobile. Signature strokes are
+  // thin, though — at 320px a pen line is sub-pixel and gets smoothed away
+  // into the paper, so that flow gets a bigger buffer.
+  const MAX_ANALYSIS_DIM = detectionType === 'signature' ? 480 : 320;
+  // Frames (out of the last 10) that must agree before we flip the flag.
+  // Auto-capture fires off this, and a wrong signature photo means a wrong
+  // reading, so signature demands a clearer majority than the other flows.
+  const STABLE_FRAMES = detectionType === 'signature' ? 7 : 5;
 
   useEffect(() => {
     // No models to load for basic detection
@@ -68,13 +88,19 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
       // Analyze based on detection type
       let detected = false;
       let quality = 0;
+      let reason = null;
 
       switch (detectionType) {
         case 'gemstone':
           ({ detected, quality } = detectGemstone(imageData, canvas.width, canvas.height));
           break;
         case 'signature':
-          ({ detected, quality } = detectSignature(imageData, canvas.width, canvas.height));
+          ({ detected, quality, reason } = detectSignature(
+            imageData,
+            canvas.width,
+            canvas.height,
+            resolveRegion(canvas.width, canvas.height)
+          ));
           break;
         case 'cloth':
           ({ detected, quality } = detectCloth(imageData, canvas.width, canvas.height));
@@ -92,10 +118,12 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
         detectionHistoryRef.current.shift();
       }
 
-      const stableDetected = detectionHistoryRef.current.filter(Boolean).length >= 5;
+      const stableDetected =
+        detectionHistoryRef.current.filter(Boolean).length >= STABLE_FRAMES;
 
       setObjectDetected(stableDetected);
       setDetectionQuality(quality);
+      setDetectionReason(stableDetected ? null : reason);
     } catch (err) {
       console.error('Object detection error:', err);
     }
@@ -195,72 +223,240 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
     return { detected, quality };
   };
 
+  /* ------------------ ANALYSIS REGION ------------------ */
+  // Pixel rect inside the analysis canvas that we should look at. Prefers the
+  // caller's live capture-box geometry; falls back to a centre crop.
+  const resolveRegion = (width, height) => {
+    const fallback = { left: 0.15, right: 0.85, top: 0.25, bottom: 0.75 };
+    let bounds = fallback;
+    try {
+      const fromCaller = regionBoundsRef.current?.();
+      if (fromCaller && fromCaller.right > fromCaller.left && fromCaller.bottom > fromCaller.top) {
+        bounds = fromCaller;
+      }
+    } catch {
+      bounds = fallback;
+    }
+    const clamp = (v) => Math.min(1, Math.max(0, v));
+    return {
+      x0: Math.floor(clamp(bounds.left) * width),
+      x1: Math.ceil(clamp(bounds.right) * width),
+      y0: Math.floor(clamp(bounds.top) * height),
+      y1: Math.ceil(clamp(bounds.bottom) * height),
+    };
+  };
+
   /* ------------------ SIGNATURE DETECTION ------------------ */
-  const detectSignature = (imageData, width, height) => {
+  // A signature is a specific thing: sparse, thin, dark strokes on a light,
+  // near-colourless page. The old heuristic only asked for >1% dark pixels and
+  // >1% edges anywhere in the middle of the frame, which is true of almost any
+  // indoor scene — a desk, a shadow, a patterned wall. Auto-capture keys off
+  // this flag, so it fired within a second of the camera opening and saved
+  // whatever happened to be in view.
+  //
+  // Ink is found by comparing each sample against its own neighbourhood, not
+  // against one number for the whole frame. A global threshold (fixed, or
+  // Otsu) fails on real desk conditions: a page held under a lamp is bright on
+  // one side and shadowed on the other, so the single best global split lands
+  // on the *lighting gradient* — half the page gets labelled "ink", and the
+  // sparse/thin-stroke checks then correctly reject a page that really does
+  // have a signature on it. Local thresholding is what document scanners use
+  // for exactly this reason, and it ignores the gradient entirely.
+  //
+  // On top of the mask we check that what we found behaves like a signature:
+  //   • the page is light                         → we're looking at paper
+  //   • ink sits well below the local paper level  → real ink, not sensor noise
+  //   • ink is sparse                              → strokes, not a dark object
+  //   • no large solid dark mass anywhere          → not a phone/book in frame
+  //   • nearly every ink sample touches paper      → thin strokes, not a blob
+  //   • strokes run in more than one direction     → not just ruled lines
+  //   • low saturation, little skin                → not a hand, face or fabric
+  const detectSignature = (imageData, width, height, region) => {
     const data = imageData.data;
-    let darkPixels = 0;
-    let edgePixels = 0;
-    let skinTonePixels = 0;
+    const { x0, x1, y0, y1 } = region;
+    const regionW = x1 - x0;
+    const regionH = y1 - y0;
+    if (regionW < 16 || regionH < 16) return { detected: false, quality: 0, reason: 'no-ink' };
 
-    // Only analyze center region (where capture box is)
-    const startX = Math.floor(width * 0.15);
-    const endX = Math.floor(width * 0.85);
-    const startY = Math.floor(height * 0.25);
-    const endY = Math.floor(height * 0.75);
-    let sampledPixels = 0;
+    const step = 2; // sample every other pixel — keeps stroke detail, halves cost
+    const cols = Math.floor(regionW / step);
+    const rows = Math.floor(regionH / step);
+    if (cols < 8 || rows < 8) return { detected: false, quality: 0, reason: 'no-ink' };
 
-    for (let y = startY; y < endY; y++) {
-      for (let x = startX; x < endX; x++) {
+    const gray = new Uint8Array(cols * rows);
+    let skinPixels = 0;
+    let saturationSum = 0;
+    let graySum = 0;
+    const total = cols * rows;
+
+    for (let ry = 0; ry < rows; ry++) {
+      const y = y0 + ry * step;
+      for (let rx = 0; rx < cols; rx++) {
+        const x = x0 + rx * step;
         const i = (y * width + x) * 4;
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
-        const brightness = (r + g + b) / 3;
-        sampledPixels++;
+        const v = (0.299 * r + 0.587 * g + 0.114 * b) | 0;
+        gray[ry * cols + rx] = v;
+        graySum += v;
 
-        if (brightness < 120) darkPixels++;
-
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        saturationSum += max === 0 ? 0 : (max - min) / max;
         if (r > 95 && g > 40 && b > 20 && r > g && g > b && Math.abs(r - g) > 15 && r - b > 15) {
-          skinTonePixels++;
+          skinPixels++;
         }
       }
     }
 
-    // Edge detection in center region
-    for (let y = startY + 1; y < endY - 1; y += 2) {
-      for (let x = startX + 1; x < endX - 1; x += 2) {
-        const i = (y * width + x) * 4;
-        const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
-        
-        const rightI = (y * width + (x + 1)) * 4;
-        const rightBrightness = (data[rightI] + data[rightI + 1] + data[rightI + 2]) / 3;
-        
-        const downI = ((y + 1) * width + x) * 4;
-        const downBrightness = (data[downI] + data[downI + 1] + data[downI + 2]) / 3;
-        
-        if (Math.abs(brightness - rightBrightness) > 40 || Math.abs(brightness - downBrightness) > 40) {
-          edgePixels++;
+    const skinRatio = skinPixels / total;
+    const avgSaturation = saturationSum / total;
+    const pageMean = graySum / total;
+
+    // ── Local threshold via a summed-area table ──────────────────────────
+    // A sample is ink when it is clearly darker than the average of the patch
+    // around it. The margin scales with local brightness so the same code works
+    // on a page at 200 and the same page in dim light at 110.
+    const stride = cols + 1;
+    const integral = new Float64Array(stride * (rows + 1));
+    for (let ry = 0; ry < rows; ry++) {
+      let rowSum = 0;
+      for (let rx = 0; rx < cols; rx++) {
+        rowSum += gray[ry * cols + rx];
+        integral[(ry + 1) * stride + rx + 1] = integral[ry * stride + rx + 1] + rowSum;
+      }
+    }
+    const radius = Math.max(6, Math.round(cols / 16));
+    const patchMean = (rx, ry) => {
+      const ax = Math.max(0, rx - radius);
+      const bx = Math.min(cols - 1, rx + radius);
+      const ay = Math.max(0, ry - radius);
+      const by = Math.min(rows - 1, ry + radius);
+      const area = (bx - ax + 1) * (by - ay + 1);
+      const sum =
+        integral[(by + 1) * stride + (bx + 1)] -
+        integral[ay * stride + (bx + 1)] -
+        integral[(by + 1) * stride + ax] +
+        integral[ay * stride + ax];
+      return sum / area;
+    };
+
+    const isInk = new Uint8Array(total);
+    let inkCount = 0;
+    let inkSum = 0;
+    let paperSum = 0;
+    // Anything far below the page average is a solid dark object rather than a
+    // pen stroke; local thresholding only marks such a mass at its outline, so
+    // we count it globally too.
+    const darkMassCutoff = pageMean * 0.55;
+    let darkMass = 0;
+    // Second, much more forgiving pass. Its only job is to tell "there is
+    // nothing written here" apart from "there is something written here but the
+    // lens can't resolve it" — an out-of-focus stroke is smeared into a wide
+    // band only a few levels below the paper, so it misses the real margin
+    // entirely. Without this the user gets told to position their signature
+    // while it is already sitting in the middle of the frame.
+    let faintCount = 0;
+    for (let ry = 0; ry < rows; ry++) {
+      for (let rx = 0; rx < cols; rx++) {
+        const idx = ry * cols + rx;
+        const v = gray[idx];
+        if (v < darkMassCutoff) darkMass++;
+        const local = patchMean(rx, ry);
+        const margin = Math.max(9, local * 0.08);
+        if (v < local - margin) {
+          isInk[idx] = 1;
+          inkCount++;
+          inkSum += v;
+        } else {
+          paperSum += v;
+          if (v < local - Math.max(4, local * 0.035)) faintCount++;
         }
       }
     }
+    const faintRatio = faintCount / total;
+    if (!inkCount || inkCount === total) {
+      return { detected: false, quality: 0, reason: faintRatio > 0.004 ? 'blurry' : 'no-ink' };
+    }
 
-    const darkRatio = darkPixels / sampledPixels;
-    const edgeRatio = edgePixels / (sampledPixels / 4);
-    const skinRatio = skinTonePixels / sampledPixels;
+    const inkMean = inkSum / inkCount;
+    const paperMean = paperSum / (total - inkCount);
+    const contrast = paperMean - inkMean;
+    const inkRatio = inkCount / total;
+    const darkMassRatio = darkMass / total;
 
-    // Relaxed detection for signature on white/light paper:
-    // - Even small amount of dark ink counts (lowered from 0.05 to 0.01)
-    // - Edge ratio lowered (signature strokes are thin)
-    // - Still reject faces (skin tone check)
-    const detected = 
-      darkRatio > 0.01 &&      // Has some dark ink (even small signature)
-      darkRatio < 0.6 &&       // Not a completely dark background
-      edgeRatio > 0.01 &&      // Has some edges (ink strokes)
-      skinRatio < 0.2;         // No significant skin tones
+    // ── Stroke test ──────────────────────────────────────────────────────
+    // Walk the ink mask and count how many ink samples sit next to paper.
+    // A pen line is 1-3 samples wide, so nearly all of it is boundary. A
+    // shadow, a dark table or a phone case is a solid mass — mostly interior.
+    // Also track the spread of the ink so a single dark speck can't qualify.
+    //
+    // Direction matters too: ruled notebook lines are ink by every other
+    // measure, but they only ever produce paper→ink transitions vertically. A
+    // signature loops and climbs, so it produces plenty of horizontal ones.
+    let boundary = 0;
+    let horizontalEdges = 0;
+    let verticalEdges = 0;
+    let minX = cols;
+    let maxX = -1;
+    const columnHasInk = new Uint8Array(cols);
+    for (let ry = 0; ry < rows; ry++) {
+      for (let rx = 0; rx < cols; rx++) {
+        const idx = ry * cols + rx;
+        if (!isInk[idx]) continue;
+        if (rx < minX) minX = rx;
+        if (rx > maxX) maxX = rx;
+        columnHasInk[rx] = 1;
+        const leftPaper = rx === 0 || !isInk[idx - 1];
+        const rightPaper = rx === cols - 1 || !isInk[idx + 1];
+        const upPaper = ry === 0 || !isInk[idx - cols];
+        const downPaper = ry === rows - 1 || !isInk[idx + cols];
+        if (leftPaper || rightPaper) horizontalEdges++;
+        if (upPaper || downPaper) verticalEdges++;
+        if (leftPaper || rightPaper || upPaper || downPaper) boundary++;
+      }
+    }
 
-    const quality = detected ? Math.min(100, Math.round((darkRatio * 150 + edgeRatio * 250))) : 0;
+    const strokeRatio = boundary / inkCount;
+    const directionMix = horizontalEdges / Math.max(1, horizontalEdges + verticalEdges);
+    const spanX = maxX < 0 ? 0 : (maxX - minX + 1) / cols;
+    let occupiedColumns = 0;
+    for (let rx = 0; rx < cols; rx++) occupiedColumns += columnHasInk[rx];
+    const columnCoverage = occupiedColumns / cols;
 
-    return { detected, quality };
+    // ── Verdict ──────────────────────────────────────────────────────────
+    if (pageMean < 90) return { detected: false, quality: 0, reason: 'dark' };
+    if (skinRatio > 0.12 || avgSaturation > 0.4) {
+      return { detected: false, quality: 0, reason: 'skin' };
+    }
+    if (darkMassRatio > 0.28 || inkRatio > 0.25) {
+      return { detected: false, quality: 0, reason: 'too-much' };
+    }
+    // Deliberately low floor: a thin pen line across a 1000x500 box is only a
+    // few tenths of a percent of it. Blank paper is held out here rather than by
+    // contrast — against its own local average, clean paper has no ink at all.
+    if (inkRatio < 0.002) {
+      return { detected: false, quality: 0, reason: faintRatio > 0.004 ? 'blurry' : 'no-ink' };
+    }
+    if (strokeRatio < 0.5) return { detected: false, quality: 0, reason: 'too-much' };
+    // Checked before contrast: ruled lines pass every intensity test, so
+    // "nothing is written on this page" is the accurate thing to say about a
+    // blank notebook, not "the camera is focusing".
+    if (directionMix < 0.12) return { detected: false, quality: 0, reason: 'no-ink' };
+    // Ink found, but washed out against the page: out of focus, glare, or a
+    // pencil too faint to read.
+    if (contrast < 25) return { detected: false, quality: 0, reason: 'blurry' };
+    if (spanX < 0.12 || columnCoverage < 0.08) {
+      return { detected: false, quality: 0, reason: 'no-ink' };
+    }
+
+    const quality = Math.min(
+      100,
+      Math.round(contrast * 0.5 + strokeRatio * 30 + Math.min(inkRatio, 0.12) * 200)
+    );
+
+    return { detected: true, quality, reason: null };
   };
 
   /* ------------------ IMPROVED CLOTH DETECTION ------------------ */
@@ -448,6 +644,7 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
     }
     setObjectDetected(false);
     setDetectionQuality(0);
+    setDetectionReason(null);
     detectionHistoryRef.current = []; // Clear history
     
     if (canvasRef.current) {
@@ -460,6 +657,7 @@ export const useObjectDetection = ({ videoRef, canvasRef, detectionType = 'objec
     detectionReady,
     objectDetected,
     detectionQuality,
+    detectionReason,
     startDetection,
     stopDetection
   };

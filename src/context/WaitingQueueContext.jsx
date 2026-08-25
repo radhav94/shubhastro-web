@@ -16,6 +16,34 @@ import { getAstrologerDisplayName } from "../utils/helper/string.utils";
 const QUEUE_STORAGE_KEY = "shubhtalk_waiting_queue";
 const QUEUE_MAX_AGE = 30 * 60 * 1000; // 30 minutes
 
+/*
+ * How long a cancel-before-roomId entry is kept waiting for its room event.
+ *
+ * A request is created with `roomId: null` and only gets one when the server
+ * emits chat:room / call:room. Cancelling inside that window has nothing to
+ * address the withdrawal to, so the entry is flagged and held until the roomId
+ * arrives (see markDeferredCancel / assignRoomId). If the room never arrives
+ * there is nothing to cancel against, so the entry is swept rather than left
+ * showing "Cancelling…" for the rest of the session.
+ *
+ * Comfortably longer than a normal room round trip, short enough that a dropped
+ * socket doesn't leave a stuck card on screen.
+ */
+const CANCEL_ROOM_WAIT_MS = 15000;
+
+/*
+ * Flags every entry that cannot be withdrawn yet, and drops the rest.
+ *
+ * Used by all three cancel paths. Returning a new list rather than mutating so
+ * callers stay pure state updaters.
+ */
+const markDeferredCancel = (list, keep = () => false) =>
+  list
+    .filter((c) => !c.roomId || keep(c))
+    .map((c) =>
+      c.roomId ? c : { ...c, status: "cancelling", cancelRequested: true }
+    );
+
 // Returns true when a guest fan-out has just been resolved (i.e. one astrologer
 // already accepted and won) and we're still within the straggler window. Late
 // acceptances from the other fanned-out astrologers should be auto-rejected.
@@ -72,6 +100,18 @@ export const WaitingQueueProvider = ({ children }) => {
   const pendingConnectionsRef = useRef(pendingConnections);
   pendingConnectionsRef.current = pendingConnections;
 
+  /*
+   * Rooms whose deferred cancel has already been emitted.
+   *
+   * The same chat:room / call:room event is handled by both a page-level
+   * listener and the global one in this provider, so assignRoomId can be called
+   * twice for one room inside a single tick. pendingConnectionsRef only updates
+   * on render, so both calls would see the same flagged entry and both emit.
+   * This set is written synchronously, which makes the withdrawal exactly-once
+   * regardless of render timing.
+   */
+  const deferredCancelSentRef = useRef(new Set());
+
   const persist = useCallback((connections) => {
     try {
       localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(connections));
@@ -118,23 +158,74 @@ export const WaitingQueueProvider = ({ children }) => {
   // When the room event identifies the astrologer (astrologerId), we match the exact
   // pending entry; otherwise we fall back to the first pending of this type.
   const assignRoomId = useCallback((roomId, type, waitingTime, status = "ringing", astrologerId = null) => {
+    const norm = (t) => (t === "chat" ? "chat" : t);
+    const matchIn = (list) => {
+      let idx = -1;
+      // Prefer the exact astrologer when the room event identifies it.
+      if (astrologerId) {
+        idx = list.findIndex(
+          (c) => c.astrologer?._id === astrologerId && norm(c.type) === norm(type) && !c.roomId
+        );
+      }
+      /*
+       * Fallback: first pending connection of this type without a roomId.
+       *
+       * Most call sites omit astrologerId, so this is the common path, and it has
+       * to prefer a request the user still wants over one they withdrew. Matching
+       * a withdrawn entry first would spend the incoming room on a cancel and
+       * leave the live request holding `roomId: null` forever — no room, no
+       * ringing, no way to cancel it either.
+       */
+      if (idx === -1) {
+        idx = list.findIndex(
+          (c) => norm(c.type) === norm(type) && !c.roomId && !c.cancelRequested
+        );
+      }
+      // Only withdrawn entries left: this room belongs to one of them, so let the
+      // deferred cancel below claim it.
+      if (idx === -1) {
+        idx = list.findIndex((c) => norm(c.type) === norm(type) && !c.roomId);
+      }
+      return idx;
+    };
+
+    /*
+     * The user cancelled this request before the server had assigned it a
+     * roomId, so the withdrawal could not be addressed to anything at the time.
+     * The roomId has just arrived — send it now, and don't put the entry back on
+     * screen as a live request.
+     *
+     * Checked here rather than inside the state updater because emitting a
+     * socket event is a side effect, and because the updater can be re-run.
+     */
+    const current = pendingConnectionsRef.current;
+    const pendingIdx = matchIn(current);
+    const target = pendingIdx === -1 ? null : current[pendingIdx];
+
+    if (target?.cancelRequested && roomId && !deferredCancelSentRef.current.has(roomId)) {
+      deferredCancelSentRef.current.add(roomId);
+      const eventName = norm(type) === "chat" ? "chat:cancel" : "call:cancel";
+      voiceSocket.emit(eventName, { roomId, canceledBy: "CUSTOMER" });
+      releaseRoom(roomId);
+      setPendingConnections((prev) => {
+        const next = prev.filter((c) => c.id !== target.id);
+        if (next.length === prev.length) return prev;
+        persist(next);
+        if (next.length === 0) clearGuestFanoutFlags();
+        return next;
+      });
+      return;
+    }
+
     setPendingConnections((prev) => {
       // Idempotent: this room is already assigned — don't assign it again.
       if (prev.some((c) => c.roomId === roomId)) return prev;
 
-      const norm = (t) => (t === "chat" ? "chat" : t);
-      let idx = -1;
-      // Prefer the exact astrologer when the room event identifies it.
-      if (astrologerId) {
-        idx = prev.findIndex(
-          (c) => c.astrologer?._id === astrologerId && norm(c.type) === norm(type) && !c.roomId
-        );
-      }
-      // Fallback: first pending connection of this type without a roomId.
-      if (idx === -1) {
-        idx = prev.findIndex((c) => norm(c.type) === norm(type) && !c.roomId);
-      }
+      const idx = matchIn(prev);
       if (idx === -1) return prev;
+      // Re-checked against the live list: a cancel can land between the read
+      // above and this updater running.
+      if (prev[idx].cancelRequested) return prev;
       const next = [...prev];
       next[idx] = { ...next[idx], roomId, id: roomId, waitingTime: waitingTime || next[idx].waitingTime, status };
       persist(next);
@@ -158,6 +249,24 @@ export const WaitingQueueProvider = ({ children }) => {
     });
   }, [persist]);
 
+  /*
+   * Safety net for a deferred cancel whose room event never arrives (socket drop,
+   * server error). Without this the entry would sit on screen reading
+   * "Cancelling…" indefinitely, which is a worse outcome than the silent removal
+   * this whole mechanism replaced.
+   */
+  const scheduleDeferredCancelSweep = useCallback(() => {
+    setTimeout(() => {
+      setPendingConnections((prev) => {
+        const next = prev.filter((c) => !(c.cancelRequested && !c.roomId));
+        if (next.length === prev.length) return prev;
+        persist(next);
+        if (next.length === 0) clearGuestFanoutFlags();
+        return next;
+      });
+    }, CANCEL_ROOM_WAIT_MS);
+  }, [persist]);
+
   // Cancel and remove a specific pending connection
   const cancelPendingConnection = useCallback((roomId, type, astrologerId) => {
     if (roomId) {
@@ -178,11 +287,35 @@ export const WaitingQueueProvider = ({ children }) => {
       const remaining = pendingConnectionsRef.current.filter((c) => c.roomId !== roomId);
       if (remaining.length === 0) clearGuestFanoutFlags();
     } else if (astrologerId) {
-      removePendingByAstrologer(astrologerId);
-      const remaining = pendingConnectionsRef.current.filter((c) => c.astrologer?._id !== astrologerId);
-      if (remaining.length === 0) clearGuestFanoutFlags();
+      /*
+       * No roomId yet, so there is nothing to address a withdrawal to.
+       *
+       * This branch used to call removePendingByAstrologer and stop there: the
+       * card vanished but no cancel event was ever emitted, so the request stayed
+       * live on the server. The astrologer then accepted it, chat:astrologer_accepted
+       * came back, and the ring modal opened — with the looping ringtone — for a
+       * chat the user had already withdrawn. And because the entry was gone,
+       * isInQueue returned false, so tapping Chat again created a *second*
+       * server-side request for the same astrologer, which is exactly the
+       * duplicate isInQueue exists to prevent. That is the
+       * initiate/cancel/initiate loop that shows up in session recordings.
+       *
+       * Hold the entry and flag it instead. assignRoomId emits the real cancel
+       * the moment the roomId lands, and until then the flag keeps isInQueue
+       * truthful so a re-tap is rejected rather than duplicated.
+       */
+      setPendingConnections((prev) => {
+        const next = prev.map((c) =>
+          c.astrologer?._id === astrologerId && !c.roomId && (!type || c.type === type)
+            ? { ...c, status: "cancelling", cancelRequested: true }
+            : c
+        );
+        persist(next);
+        return next;
+      });
+      scheduleDeferredCancelSweep();
     }
-  }, [removePendingConnection, removePendingByAstrologer]);
+  }, [removePendingConnection, persist, scheduleDeferredCancelSweep]);
 
   // Cancel ALL pending connections except the accepted one
   const cancelAllExcept = useCallback((acceptedRoomId) => {
@@ -201,9 +334,14 @@ export const WaitingQueueProvider = ({ children }) => {
         }
       }
     });
-    setPendingConnections([]);
-    persist([]);
-  }, [persist]);
+    // Entries still without a roomId could not be withdrawn above, so keep them
+    // flagged for assignRoomId rather than dropping them and leaking a live
+    // server-side request — same reason as cancelPendingConnection.
+    const next = markDeferredCancel(current, (c) => c.roomId === acceptedRoomId);
+    setPendingConnections(next);
+    persist(next);
+    if (next.some((c) => c.cancelRequested)) scheduleDeferredCancelSweep();
+  }, [persist, scheduleDeferredCancelSweep]);
 
   // Cancel all pending connections
   const cancelAll = useCallback(() => {
@@ -222,16 +360,41 @@ export const WaitingQueueProvider = ({ children }) => {
         }
       }
     });
-    setPendingConnections([]);
-    persist([]);
-    // Everything withdrawn — drop the guest auto-accept handshake.
-    clearGuestFanoutFlags();
-  }, [persist]);
+    // Same as cancelAllExcept: anything without a roomId yet is held flagged so
+    // assignRoomId can withdraw it for real.
+    const next = markDeferredCancel(current);
+    setPendingConnections(next);
+    persist(next);
+    if (next.length === 0) {
+      // Everything withdrawn — drop the guest auto-accept handshake.
+      clearGuestFanoutFlags();
+    } else {
+      scheduleDeferredCancelSweep();
+    }
+  }, [persist, scheduleDeferredCancelSweep]);
 
   // Check if a specific astrologer+type is already in the queue
   const isInQueue = useCallback((astrologerId, type) => {
     return pendingConnectionsRef.current.some(
       (c) => c.astrologer?._id === astrologerId && c.type === type
+    );
+  }, []);
+
+  /*
+   * True while a request for this astrologer+type has been cancelled by the user
+   * but the withdrawal is still waiting on a roomId (see cancelPendingConnection).
+   *
+   * isInQueue deliberately still counts these, so a re-tap is refused rather
+   * than duplicated — but "Already waiting for this astrologer" is the wrong
+   * thing to say to someone who just pressed Cancel, and it reads as the app
+   * having ignored the cancel. Callers use this to name the real reason.
+   */
+  const isCancelling = useCallback((astrologerId, type) => {
+    return pendingConnectionsRef.current.some(
+      (c) =>
+        c.astrologer?._id === astrologerId &&
+        c.type === type &&
+        c.cancelRequested
     );
   }, []);
 
@@ -260,6 +423,27 @@ export const WaitingQueueProvider = ({ children }) => {
   // Get a pending connection by astrologerId
   const getConnectionByAstrologerId = useCallback((astrologerId) => {
     return pendingConnectionsRef.current.find((c) => c.astrologer?._id === astrologerId) || null;
+  }, []);
+
+  /*
+   * True when the user has already withdrawn this request but the cancel is still
+   * queued because the roomId had not arrived yet (see cancelPendingConnection).
+   *
+   * assignRoomId normally sends the withdrawal the instant the room event lands,
+   * but the astrologer can accept in the same breath — the acceptance carries a
+   * roomId and can be processed before, or instead of, the room event. Without
+   * this check that acceptance rings for a chat the user already cancelled.
+   *
+   * Matches on astrologerId as well as roomId because the flagged entry may still
+   * be holding `roomId: null`.
+   */
+  const isWithdrawn = useCallback((roomId, astrologerId, type) => {
+    return pendingConnectionsRef.current.some(
+      (c) =>
+        c.cancelRequested &&
+        ((roomId && c.roomId === roomId) ||
+          (astrologerId && c.astrologer?._id === astrologerId && (!type || c.type === type)))
+    );
   }, []);
 
   const hasAnyPending = pendingConnections.length > 0;
@@ -322,6 +506,17 @@ export const WaitingQueueProvider = ({ children }) => {
         console.log("[GlobalTwoWay] ⏭️ Ignoring call:astrologer_accepted — not this tab's request", roomId);
         return;
       }
+      // Already withdrawn by the user, cancel still queued for want of a roomId.
+      // Reject rather than ring for a call they cancelled.
+      if (roomId && isWithdrawn(roomId, astrologerId, type || "audio")) {
+        console.log("[GlobalTwoWay] 🚫 User already cancelled — rejecting late call acceptance", roomId);
+        stopIncomingSound();
+        voiceSocket.emit("call:user_reject", { roomId });
+        releaseRoom(roomId);
+        removePendingByAstrologer(astrologerId);
+        return;
+      }
+
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
 
       // Guest fan-out straggler: another fanned-out astrologer already accepted
@@ -357,6 +552,17 @@ export const WaitingQueueProvider = ({ children }) => {
         console.log("[GlobalTwoWay] ⏭️ Ignoring chat:astrologer_accepted — not this tab's request", roomId);
         return;
       }
+      // Already withdrawn by the user, cancel still queued for want of a roomId.
+      // Reject rather than ring for a chat they cancelled.
+      if (roomId && isWithdrawn(roomId, astrologerId, "chat")) {
+        console.log("[GlobalTwoWay] 🚫 User already cancelled — rejecting late chat acceptance", roomId);
+        stopIncomingSound();
+        voiceSocket.emit("chat:user_reject", { roomId });
+        releaseRoom(roomId);
+        removePendingByAstrologer(astrologerId);
+        return;
+      }
+
       if (roomId) updateStatusByRoomId(roomId, "astrologer_accepted", { sessionId });
 
       // Guest fan-out straggler: another fanned-out astrologer already accepted
@@ -893,6 +1099,7 @@ export const WaitingQueueProvider = ({ children }) => {
         cancelAllExcept,
         cancelAll,
         isInQueue,
+        isCancelling,
         isQueueFull,
         hasAnyPending,
         updateStatusByRoomId,

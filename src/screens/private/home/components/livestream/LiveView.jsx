@@ -199,7 +199,7 @@ const LiveView = (props) => {
     setWaitingList,
   } = useCall();
 
-  const { pendingConnections, addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, cancelPendingConnection, isInQueue, getConnectionByRoomId } = useWaitingQueue();
+  const { pendingConnections, addPendingConnection, assignRoomId, removePendingConnection, removePendingByAstrologer, cancelAllExcept, cancelPendingConnection, isInQueue, isCancelling, getConnectionByRoomId } = useWaitingQueue();
 
   // Auto-minimize call if user is on live stream (handles page refresh)
   useEffect(() => {
@@ -310,7 +310,7 @@ const LiveView = (props) => {
 
   const { data: followingData } = useCheckFollowingStatusQuery(
     { astrologerId },
-    { skip: !astrologerId }
+    { skip: !astrologerId || props.isGuest }
   );
   const isFollowing = followingData?.data?.isFollowing || false;
   const [followAstrologer, { isLoading: followLoading }] = useFollowAstrologerByIdMutation();
@@ -660,7 +660,13 @@ const LiveView = (props) => {
 
     // Check if already in queue for this astrologer
     if (isInQueue(astrologerId, "audio")) {
-      Toast.error("Already waiting for this astrologer");
+      // A cancelled-but-not-yet-withdrawn entry still counts as in-queue, so say
+      // which of the two it is rather than claiming they're still waiting.
+      Toast.error(
+        isCancelling(astrologerId, "audio")
+          ? "Still cancelling your previous request. One moment."
+          : "Already waiting for this astrologer"
+      );
       return;
     }
 
@@ -776,7 +782,11 @@ const LiveView = (props) => {
 
     // Check if already in queue for this astrologer+type
     if (isInQueue(astrologerId, type)) {
-      Toast.error("Already waiting for this astrologer");
+      Toast.error(
+        isCancelling(astrologerId, type)
+          ? "Still cancelling your previous request. One moment."
+          : "Already waiting for this astrologer"
+      );
       return;
     }
 
@@ -1370,6 +1380,7 @@ const LiveView = (props) => {
             {/* Follow button - right side of top bar */}
             {!isHost && (
               <div className="top-bar-right">
+                {!props.isGuest && (
                 <button
                   className={`follow-btn ${isFollowing ? "following" : ""}`}
                   onClick={handleFollow}
@@ -1381,6 +1392,7 @@ const LiveView = (props) => {
                     ? "Following"
                     : "+ Follow"}
                 </button>
+                )}
                 {/* {isHostMuted && !localPrivateCall && remoteUsers.length > 0 && !roomEnded && (
                   <div className="mute-indicator">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1668,7 +1680,7 @@ const LiveView = (props) => {
                 </button>
               </div>
               
-              {!isHost && !isCallForCurrentAstrologer && !pendingConnections.some((c) => c.astrologer?._id === astrologerId) && (
+              {!isHost && !props.isGuest && !isCallForCurrentAstrologer && !pendingConnections.some((c) => c.astrologer?._id === astrologerId) && (
                 <button 
                   className="call-price-btn"
                   onClick={handleDirectVoiceCall}
@@ -1884,7 +1896,7 @@ const LiveView = (props) => {
             </div>
 
             {/* Send Gift */}
-            {!isHost && (
+            {!isHost && !props.isGuest && (
               <button className="icon-btn" onClick={() => setShowGifts(true)}>
                 <div className="icon-circle">
                   <img src={AppImages.LiveGift} alt="Send gift" width="28" height="28" />

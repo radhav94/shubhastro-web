@@ -163,6 +163,7 @@ const ProfileModals = ({
                                         <option value="Mother">Mother</option>
                                         <option value="Father">Father</option>
                                         <option value="Friend">Friend</option>
+                                        <option value="Others">Others</option>
                                     </select>
                                 </div>
 
@@ -219,7 +220,16 @@ const ProfileModals = ({
                                     <label>Place of Birth</label>
                                     <LocationSearch
                                         value={formData.birthPlace}
-                                        onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
+                                        /* Coordinates are cleared on edit so a
+                                           hand-typed name can't be submitted with
+                                           the previously picked city's lat/lng.
+                                           See AddProfileModal for the full note. */
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            birthPlace: e.target.value,
+                                            latitude: null,
+                                            longitude: null,
+                                        })}
                                         onPlaceSelect={(place) => setFormData({
                                             ...formData,
                                             birthPlace: place.address,

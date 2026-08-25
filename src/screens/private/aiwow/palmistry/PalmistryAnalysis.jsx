@@ -7,6 +7,7 @@ import { setPalmistryResult, setPalmistryResultId, clearPalmistryData, setPalmis
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
+import Toast from '../../../../component/toast';
 
 // Session flag: set while an analysis is in progress / not yet successful, so a
 // page reload doesn't auto re-analyze a failed image. Shared with the capture
@@ -134,10 +135,7 @@ const PalmistryAnalysis = () => {
         hasStartedRef.current = false;
         sessionStorage.removeItem(PALMISTRY_ANALYSIS_FLAG);
         dispatch(clearPalmistryData());
-        // The gate already routed to /recharge — don't override that redirect.
-        if (!result.redirectedToRecharge) {
-          navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0], { replace: true });
-        }
+        navigate(PATH.privateRoutes.PALMISTRY_LANDING.path[0], { replace: true });
         return;
       }
 
@@ -251,14 +249,6 @@ const PalmistryAnalysis = () => {
     }
   };
 
-  const handleGenerateAnalysis = () => {
-    if (isAnalyzing || analysisComplete) return;
-    if (!palmImage || !selectedHand || !profile) return;
-    hasStartedRef.current = true;
-    setError(null);
-    performAnalysis(palmImage, selectedHand);
-  };
-
   const handleRetakePicture = () => {
     // Clear only the captured image and go back to the instructions screen.
     // Keep the selected hand so hand selection is skipped.
@@ -271,6 +261,52 @@ const PalmistryAnalysis = () => {
       setIsNavigating(true);
       navigate(PATH.privateRoutes.PALMISTRY_RESULT.path[0], { replace: true });
     }
+  };
+
+  /*
+    Every early exit here used to be a bare `return`, and the button was rendered
+    `disabled` on top of that — so a blocked tap produced no click event, no
+    message and no change of any kind. This is the last step of a flow the
+    visitor has already spent minutes on (instructions, hand selection, capture
+    or upload), which is why Clarity records dead clicks on it immediately after a
+    photo upload.
+
+    Each blocker now names itself. `profileLoading` is a state the visitor can
+    simply wait out, so it explains and stays put; a genuinely missing profile is
+    actionable, so it sends them somewhere they can pick one.
+
+    Declared after handleRetakePicture and handleShowResult so neither is
+    referenced while still in its temporal dead zone.
+  */
+  const handleGenerateAnalysis = () => {
+    if (isAnalyzing) {
+      Toast.info('Already reading your palm — one moment.');
+      return;
+    }
+    if (analysisComplete) {
+      handleShowResult();
+      return;
+    }
+    if (profileLoading) {
+      Toast.info('Loading your birth details — one moment.');
+      return;
+    }
+    if (!profile) {
+      Toast.error('Select a birth profile first, then generate your reading.');
+      navigate(PATH.privateRoutes.AI_WOW?.path || '/ai-wow');
+      return;
+    }
+    if (!palmImage || !selectedHand) {
+      // The mount effect normally redirects before this can be reached; if the
+      // data went missing afterwards, say so rather than ignoring the tap.
+      Toast.error('Your palm photo is missing. Please take it again.');
+      handleRetakePicture();
+      return;
+    }
+
+    hasStartedRef.current = true;
+    setError(null);
+    performAnalysis(palmImage, selectedHand);
   };
 
   const handleRetry = () => {
@@ -384,11 +420,19 @@ const PalmistryAnalysis = () => {
                 >
                   Retake picture
                 </button>
+                {/*
+                  aria-disabled, not `disabled`. The dimming stays so the state
+                  is still visible, but the button keeps firing so
+                  handleGenerateAnalysis can explain the blocker. `cursor` is
+                  left as pointer for the same reason — 'not-allowed' on a
+                  control that does respond would be a lie, and it does nothing
+                  on touch anyway.
+                */}
                 <button
                   className={styles.resultButton}
                   onClick={handleGenerateAnalysis}
-                  disabled={!profile || profileLoading}
-                  style={{ opacity: (!profile || profileLoading) ? 0.6 : 1, cursor: (!profile || profileLoading) ? 'not-allowed' : 'pointer' }}
+                  aria-disabled={!profile || profileLoading}
+                  style={{ opacity: (!profile || profileLoading) ? 0.6 : 1 }}
                 >
                   Generate analysis
                 </button>

@@ -211,8 +211,32 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
             <span><b>10K+</b> Astrologers Online</span>
           </div>
 
-          {/* Offer Section */}
-          <div className={styles.offerSection}>
+          {/*
+            Offer Section.
+
+            The gift-box graphic plus "₹250 / RECHARGE / FOR NEW SIGN UPS" is the
+            largest thing on this screen and it reads as the offer itself, so it
+            gets tapped — and it had no handler at all, so the tap did nothing.
+            Every other decorative block here already answers a tap (the phone
+            mockup, the trust bar, the +91 chip); this was the last inert one, and
+            it is the one that looks most like a claim button.
+
+            Wired to handleGetOTP rather than a bespoke handler so the messaging,
+            the focus move and the tracking stay single-sourced with the real CTA:
+            with a complete number the tap claims the bonus, and without one it
+            says which digits are missing and puts the cursor in the field.
+
+            Pointer-only on purpose — no role/tabIndex. The same action is already
+            a labelled control ("Claim ₹250 Now") a few lines below, so a keyboard
+            user reaches it without an extra tab stop that announces the same
+            thing, and the <h1>/<p> here keep their semantics instead of being
+            flattened into a button's accessible name.
+          */}
+          <div
+            className={styles.offerSection}
+            onClick={handleGetOTP}
+            title="Enter your mobile number to claim ₹250"
+          >
             <div className={styles.giftBox}>
               <img
                 src={rsBox}

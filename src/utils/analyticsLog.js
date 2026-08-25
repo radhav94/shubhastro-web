@@ -35,6 +35,55 @@
 
 const STORAGE_KEY = "gtm_event_log";
 const ENABLED_KEY = "gtm_log";
+
+/**
+ * Which GTM containers / GA measurement IDs are actually live on the page.
+ *
+ * Read from the page rather than hardcoded from index.html, because that is the
+ * question worth answering: `sent: both` only says the two sinks existed, not
+ * which container received the event. A stage build pointed at the prod container
+ * (or a container that never loaded) looks identical otherwise.
+ *
+ * `window.google_tag_manager` is keyed by every id GTM/gtag has initialised —
+ * `GTM-…`, `G-…`, `AW-…`. It only appears once the remote script has run, so fall
+ * back to reading the ids off the script tags, which are in the HTML from the
+ * start.
+ *
+ * @returns {{ gtm: string[], ga: string[], other: string[] }}
+ */
+export const getTagIds = () => {
+  const ids = new Set();
+  try {
+    const registry = window.google_tag_manager;
+    if (registry) Object.keys(registry).forEach((k) => ids.add(k));
+  } catch {
+    /* ignore */
+  }
+  try {
+    document
+      .querySelectorAll('script[src*="googletagmanager.com"]')
+      .forEach((el) => {
+        const m = /[?&]id=([^&]+)/.exec(el.src || "");
+        if (m) ids.add(decodeURIComponent(m[1]));
+      });
+  } catch {
+    /* ignore */
+  }
+
+  const all = [...ids];
+  return {
+    gtm: all.filter((id) => /^GTM-/i.test(id)),
+    ga: all.filter((id) => /^G-/i.test(id)),
+    // AW- (Google Ads), DC- (Floodlight), and GTM's internal keys.
+    other: all.filter((id) => !/^(GTM-|G-)/i.test(id)),
+  };
+};
+
+/** Compact "GTM-x,G-y" form, for storing on each entry and in the dump header. */
+const tagIdsSummary = () => {
+  const { gtm, ga } = getTagIds();
+  return [...gtm, ...ga].join(",") || "none";
+};
 /** Ring buffer size. Enough for a long session without filling storage. */
 const MAX_ENTRIES = 300;
 /** Hard ceiling so a render loop firing events can't exhaust the quota. */
@@ -144,6 +193,10 @@ export const logAnalyticsEvent = (event, payload, delivered) => {
           : delivered.gtag
             ? "gtag"
             : "none",
+    // Recorded per entry, not once for the session: the container loads
+    // asynchronously, so early events can legitimately show fewer ids than later
+    // ones — which is exactly how "fired before GTM was ready" shows up.
+    tags: tagIdsSummary(),
     path: typeof window !== "undefined" ? window.location.pathname : "-",
     props: payload,
   });
@@ -169,6 +222,8 @@ export const formatAnalyticsLog = () => {
   }, {});
   const dropped = entries.filter((e) => e.sent === "none").length;
 
+  const { gtm, ga, other } = getTagIds();
+
   const header = [
     "ShubhAstro — analytics / GTM event log",
     `generated  : ${new Date().toISOString()}`,
@@ -178,6 +233,9 @@ export const formatAnalyticsLog = () => {
     `userAgent  : ${typeof navigator !== "undefined" ? navigator.userAgent : "-"}`,
     `dataLayer  : ${Array.isArray(window?.dataLayer) ? `present (${window.dataLayer.length} items)` : "MISSING"}`,
     `gtag       : ${typeof window?.gtag === "function" ? "present" : "MISSING"}`,
+    `GTM cont.  : ${gtm.join(", ") || "NONE DETECTED"}`,
+    `GA4 meas.  : ${ga.join(", ") || "NONE DETECTED"}`,
+    ...(other.length ? [`other ids  : ${other.join(", ")}`] : []),
     "".padEnd(78, "-"),
     "counts by event:",
     ...Object.entries(counts)
@@ -187,8 +245,13 @@ export const formatAnalyticsLog = () => {
   ].join("\n");
 
   const body = entries
-    .map(({ t, event, sent, path, props }) =>
-      `${t}  ${String(sent).padEnd(9)} ${event}\n    path : ${path}\n    props: ${JSON.stringify(props)}`
+    .map(({ t, event, sent, tags, path, props }) =>
+      [
+        `${t}  ${String(sent).padEnd(9)} ${event}`,
+        `    tags : ${tags || "-"}`,
+        `    path : ${path}`,
+        `    props: ${JSON.stringify(props)}`,
+      ].join("\n")
     )
     .join("\n");
 
@@ -229,16 +292,18 @@ export const installAnalyticsLogConsoleApi = () => {
   if (typeof window === "undefined" || window.__gtmLog) return;
 
   const api = () => {
-    const rows = readAll().map(({ t, event, sent, path, props }) => ({
+    const rows = readAll().map(({ t, event, sent, tags, path, props }) => ({
       time: t.slice(11, 23),
       event,
       sent,
+      tags,
       path,
       props: JSON.stringify(props),
     }));
     console.table(rows);
-    return `${rows.length} events — __gtmLog.text() / .download() / .clear()`;
+    return `${rows.length} events — __gtmLog.text() / .download() / .clear() / .ids()`;
   };
+  api.ids = getTagIds;
   api.entries = getAnalyticsLogEntries;
   api.text = formatAnalyticsLog;
   api.download = downloadAnalyticsLog;

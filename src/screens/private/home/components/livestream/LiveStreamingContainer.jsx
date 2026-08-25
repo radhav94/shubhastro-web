@@ -19,6 +19,7 @@ import {
 import { getUserFromStorage } from "../../../../../utils/authStorage";
 import { getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../../utils/appImages";
 import { useCall } from "../../../../../context/CallContext";
+import { getGuestId, isGuestUser } from "../../../../../utils/guestId";
 import { toast as rht } from "react-hot-toast";
 
 const LiveStreamingContainer = ({ client }) => {
@@ -110,6 +111,10 @@ const LiveStreamingContainer = ({ client }) => {
     return first || "User";
   })();
 
+  // For guests, use guestId as the userId for chat socket
+  const isGuest = !localStorage.getItem("shubhtalk_customer_token");
+  const chatUserId = isGuest ? getGuestId() : userIdLocal;
+
   // Ref to hold retryJoinRoom — breaks circular dep between handleAstrologerStatus and chat
   const retryJoinRef = useRef(null);
 
@@ -147,12 +152,50 @@ const LiveStreamingContainer = ({ client }) => {
   const [endedInfo, setEndedInfo] = useState(null);
   const endedTimerRef = useRef(null);
 
+  // Latest list, for the timers below: they run after their closure was created,
+  // and removeLive queues a state update rather than applying it synchronously.
+  const liveListRef = useRef(liveList);
+  useEffect(() => { liveListRef.current = liveList; }, [liveList]);
+
+  /**
+   * Drop a finished room from the reel, and leave the reel entirely if that was
+   * the last one.
+   *
+   * Every exit from a stream funnelled into `removeLive` alone, and nothing
+   * handled the list becoming empty. `getCurrentChannel()` then returns
+   * undefined, so LiveView was mounted with `channel: undefined` and sat on its
+   * "waiting" screen forever — the customer was left staring at it after the last
+   * astrologer went off air.
+   *
+   * Worse, the URL still read /live/<deadRoomId>. Pressing Back returned to it,
+   * and LivePlayerPage injects a placeholder entry for an unknown channelId that
+   * carries no `astrologer` — which is where the error page came from.
+   *
+   * Navigating to /live with `replace` fixes both: the dead room leaves the
+   * history stack, and LivePlayerPage re-runs its fetch with no channelId, landing
+   * on its existing "Nobody is live right now" card, which offers a way out.
+   */
+  const releaseRoom = useCallback((roomId) => {
+    if (!roomId) return;
+    const list = liveListRef.current;
+    if (!list) return;
+
+    list.removeLive(roomId);
+    setLiveListRefreshKey((k) => k + 1);
+
+    // Computed from the pre-removal list, since the state update above is queued.
+    const remaining = (list.lives || []).filter((l) => l.channel !== roomId);
+    if (ROLE === "audience" && remaining.length === 0) {
+      navigate("/live", { replace: true });
+    }
+  }, [ROLE, navigate]);
+
   const dismissEnded = useCallback(() => {
     const rid = endedInfo?.roomId;
     setEndedInfo(null);
     if (endedTimerRef.current) { clearTimeout(endedTimerRef.current); endedTimerRef.current = null; }
-    if (rid) { liveList?.removeLive(rid); setLiveListRefreshKey((k) => k + 1); }
-  }, [endedInfo, liveList]);
+    releaseRoom(rid);
+  }, [endedInfo, releaseRoom]);
 
   // Cleanup on unmount — clear timer and reset modal state
   useEffect(() => {
@@ -193,15 +236,12 @@ const LiveStreamingContainer = ({ client }) => {
         setEndedInfo({ hostName: resolvedHostName, profileImage: resolvedImage, gender, roomId });
         if (endedTimerRef.current) clearTimeout(endedTimerRef.current);
         endedTimerRef.current = setTimeout(() => {
-          setEndedInfo((prev) => {
-            if (prev?.roomId) { liveList?.removeLive(prev.roomId); setLiveListRefreshKey((k) => k + 1); }
-            return null;
-          });
+          setEndedInfo(null);
+          releaseRoom(roomId);
         }, 2000);
       } else {
         // Not watching this stream — just remove silently
-        liveList?.removeLive(roomId);
-        setLiveListRefreshKey((k) => k + 1);
+        releaseRoom(roomId);
       }
     }
 
@@ -268,12 +308,10 @@ const LiveStreamingContainer = ({ client }) => {
     });
     if (endedTimerRef.current) clearTimeout(endedTimerRef.current);
     endedTimerRef.current = setTimeout(() => {
-      setEndedInfo((prev) => {
-        if (prev?.roomId && liveList) { liveList.removeLive(prev.roomId); setLiveListRefreshKey((k) => k + 1); }
-        return null;
-      });
+      setEndedInfo(null);
+      releaseRoom(targetRoom);
     }, 5000);
-  }, [liveList, channel]);
+  }, [liveList, channel, releaseRoom]);
 
   // Broadcast: new live session started (from any astrologer)
   const handleSessionStarted = useCallback((data) => {
@@ -309,7 +347,7 @@ const LiveStreamingContainer = ({ client }) => {
 
   const chat = useLiveChat({
     roomId: channel,
-    userId: userIdLocal,
+    userId: chatUserId,
     userName: userNameLocal,
     onAstrologerStatus: handleAstrologerStatus,
     onStreamEnded: handleStreamEnded,
@@ -368,11 +406,12 @@ const LiveStreamingContainer = ({ client }) => {
     </div>
 
     {/* FIXED VIDEO (PORTALED INSIDE LiveView) */}
-    <LiveView channel={channel} ROLE={ROLE} {...live} {...chat} 
+    <LiveView key={channel} channel={channel} ROLE={ROLE} {...live} {...chat} 
       astrologer={currentLive}
       privateCallInfo={privateCallInfo}
       giftPopupOpenRef={giftPopupOpenRef}
       liveListRefreshKey={liveListRefreshKey}
+      isGuest={isGuest}
       onHostNameResolved={(name) => { resolvedHostNameRef.current = name || ""; }}
       onHostAvatarResolved={(url) => { resolvedHostAvatarRef.current = url || ""; }}
 />

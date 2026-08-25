@@ -142,13 +142,17 @@ const KpContent = () => {
       {/* North/South Tab Switcher */}
       <div className={styles.tabGroup}>
         <button
+          type="button"
           className={`${styles.tabButton} ${activeTab === "north" ? styles.activeTab : ""}`}
+          aria-pressed={activeTab === "north"}
           onClick={() => setActiveTab("north")}
         >
           North Indian
         </button>
         <button
+          type="button"
           className={`${styles.tabButton} ${activeTab === "south" ? styles.activeTab : ""}`}
+          aria-pressed={activeTab === "south"}
           onClick={() => setActiveTab("south")}
         >
           South Indian

@@ -56,6 +56,29 @@ const TarotReadingPage = () => {
     })
   }
 
+  /*
+    The reading cards are the entire point of this page, and they were plain
+    `<div onClick>` — no role, no tab stop, no key handler. So the only way to
+    start any tarot reading was a mouse or a tap: keyboard users could not reach
+    them at all, and assistive tech saw ten unlabelled divs.
+
+    Given button semantics rather than swapped to `<button>` so the existing
+    absolute-positioned card layout (badge, image, overlaid content) keeps
+    working untouched.
+  */
+  const cardActivation = (reading) => ({
+    role: 'button',
+    tabIndex: 0,
+    'aria-label': `${reading.title} tarot reading`,
+    onClick: () => handleCardClick(reading),
+    onKeyDown: (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        handleCardClick(reading)
+      }
+    },
+  })
+
   return (
     <div className={styles.tarotReadingPage}>
       <div className={styles.tarotHeader}>
@@ -79,11 +102,25 @@ const TarotReadingPage = () => {
           <div
             key={reading.id}
             className={styles.tarotCard}
-            onClick={() => handleCardClick(reading)}
+            {...cardActivation(reading)}
           >
-            <span className={`${styles.tarotBadge} ${styles[reading.type.toLowerCase()]}`}>
-              {reading.type}
-            </span>
+            {/*
+              Only rendered when there is actually a badge to show. Every reading
+              in the list above currently has `type: ''`, which meant
+              `styles[''.toLowerCase()]` resolved to undefined and the class came
+              out as the literal string "tarotBadge undefined" — and because
+              .tarotBadge is absolutely positioned with 10px/32px padding, each
+              card carried an empty ~64x30px transparent element pinned over its
+              top edge. Harmless for clicks (they bubble to the card), but it is
+              stray DOM with a bogus class on every card.
+            */}
+            {reading.type ? (
+              <span
+                className={`${styles.tarotBadge} ${styles[reading.type.toLowerCase()] || ''}`.trim()}
+              >
+                {reading.type}
+              </span>
+            ) : null}
             <div className={styles.tarotCardContent}>
               <h3 className={styles.tarotCardTitle}>{reading.title}</h3>
               <div className={styles.tarotCardImage}>

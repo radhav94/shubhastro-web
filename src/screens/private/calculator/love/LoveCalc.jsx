@@ -30,13 +30,16 @@ const LoveCalc = () => {
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => {
-        const updated = { ...prev };
-        delete updated[field];
-        return updated;
-      });
-    }
+    setErrors((prev) => {
+      if (!prev[field] && !prev.form) return prev;
+      const updated = { ...prev };
+      delete updated[field];
+      // The pair error belongs to gender1 and gender2 together, so changing
+      // either one has to clear it — keyed on a single field it would stay on
+      // screen after the user had already fixed it.
+      if (field === "gender1" || field === "gender2") delete updated.form;
+      return updated;
+    });
   };
 
   const handleReset = () => {
@@ -57,6 +60,20 @@ const LoveCalc = () => {
     if (!formData.gender1) newErrors.gender1 = "Gender is required";
     if (!formData.name2) newErrors.name2 = "Partner name is required";
     if (!formData.gender2) newErrors.gender2 = "Gender is required";
+
+    // The backend rejects a same-gender pair outright with a 400, so there is
+    // no report to render. Navigating anyway landed the user on the report
+    // route's bare "No data found" — a dead end, several seconds after the
+    // mistake, with nothing to go back and fix. Same rule and same wording,
+    // enforced here before we leave the form.
+    if (
+      formData.gender1 &&
+      formData.gender2 &&
+      formData.gender1 === formData.gender2
+    ) {
+      newErrors.form =
+        "Please select one male and one female partner to calculate love compatibility.";
+    }
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length) return;

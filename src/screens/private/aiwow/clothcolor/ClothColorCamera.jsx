@@ -7,6 +7,7 @@ import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setClothColorImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
+import toast from '../../../../component/toast';
 
 const ClothColorCamera = () => {
   const navigate = useNavigate();
@@ -218,17 +219,35 @@ const ClothColorCamera = () => {
     return cropCanvas;
   };
 
+  // Every tap on the shutter gets a response: either a photo, or an explanation.
+  // `stream` is set as soon as getUserMedia resolves but `video.videoWidth`
+  // stays 0 until the first frame lands, so there is a window where the button
+  // looks live and used to swallow the tap in silence.
   const captureImage = () => {
     const video = videoRef.current;
     if (!video || !video.videoWidth) {
-      // Camera not ready yet — nothing to capture.
+      toast.error('Camera is still starting up. One moment.');
       return;
     }
     stopDetection();
     const cropCanvas = cropCurrentFrameToCanvas();
-    if (!cropCanvas) return;
+    if (!cropCanvas) {
+      toast.error('Could not read the camera frame. Please try again.');
+      return;
+    }
     setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
     stopCamera();
+  };
+
+  // The shutter is never `disabled` — a natively disabled button fires no event
+  // at all, so while the camera was being acquired every tap vanished with the
+  // label stuck on "Loading...". It stays dimmed, but now it answers.
+  const handleCaptureTap = () => {
+    if (!stream) {
+      toast.error('Waiting for the camera. Allow camera access if prompted.');
+      return;
+    }
+    captureImage();
   };
 
   // Auto-capture the sharpest frame once the cloth is steady in the frame.
@@ -406,10 +425,12 @@ const ClothColorCamera = () => {
 
       <div className={styles.controls}>
         {!capturedImage ? (
-          <button 
-            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`} 
-            onClick={captureImage}
-            disabled={!stream}
+          <button
+            type="button"
+            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`}
+            onClick={handleCaptureTap}
+            aria-disabled={!stream}
+            aria-label="Capture clothing photo"
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">

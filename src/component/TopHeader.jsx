@@ -403,7 +403,7 @@ const TopHeader = () => {
               aria-label="ShubhAstro home"
               onClick={handleLogoClick}
             >
-              <img src={ShubhTalkLogo} alt="Shubh Talk Logo" width="150" height="32" />
+              <img src={ShubhTalkLogo} alt="Shubh Talk Logo" width="150" height="27" />
             </Link>
 
             <Link

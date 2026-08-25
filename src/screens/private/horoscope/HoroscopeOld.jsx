@@ -586,11 +586,17 @@ const HoroscopeOld = () => {
             <ChevronLeft size={24} />
           </button>
           <span className="horoscope-page-title">Western Horoscope</span>
+          {/*
+            Mirror of the Western button in Horoscope.jsx: carry the sign over
+            instead of dropping the visitor on the bare '/daily-horoscope-indian'
+            picker. '/daily-horoscope-indian/:sign' is a real route, and the
+            period switches above already navigate with `selectedZodiac`.
+          */}
           <button
             className="indian-horoscope-btn"
             onClick={() => {
               trackEvent('horoscope_type_switched', { from_type: 'western', to_type: 'indian' });
-              navigate('/daily-horoscope-indian', { replace: true });
+              navigate(`/daily-horoscope-indian/${selectedZodiac}`, { replace: true });
             }}
           >
             Indian

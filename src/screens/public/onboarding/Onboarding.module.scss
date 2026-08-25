@@ -1845,6 +1845,9 @@
   display: flex;
   align-items: flex-end;
   gap: 16px;
+  // Tappable: it routes into the same claim action as the CTA below. Without
+  // this the block looked exactly as inert as it used to behave.
+  cursor: pointer;
 
   @media (max-width: 820px) {
     justify-content: center;

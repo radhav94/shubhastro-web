@@ -95,6 +95,37 @@
       var sent = 0;
       var seen = {};
 
+      /*
+        Errors thrown by the *containing app's* WebView bridge, not by this site.
+
+        Android's WebView exposes native objects to JS via addJavascriptInterface,
+        and Chromium's java_bridge holds them weakly. Once the host app
+        backgrounds or tears down the WebView the Java object is collected, and
+        any later call from the host's own injected script fails with a message
+        containing "java object is gone". In-app browsers commonly name their
+        channel method `postMessage`, which is where "error invoking postmessage:
+        java object is gone" comes from — observed on Instagram's in-app browser.
+
+        Only the host application can inject those objects. This codebase calls
+        postMessage nowhere and has no native bridge of any kind, so a message
+        shaped like this cannot originate here and there is no code change that
+        would prevent it.
+
+        Labelled rather than dropped, exactly like `masked` above: the report
+        still reaches Clarity and dataLayer so the session is not silently
+        missing an event, but it is no longer indistinguishable from one of our
+        own uncaught errors.
+      */
+      var HOST_BRIDGE_PATTERNS = ['java object is gone', 'error invoking postmessage'];
+
+      function isHostBridgeError(message) {
+        var m = String(message || '').toLowerCase();
+        for (var i = 0; i < HOST_BRIDGE_PATTERNS.length; i++) {
+          if (m.indexOf(HOST_BRIDGE_PATTERNS[i]) !== -1) return true;
+        }
+        return false;
+      }
+
       function report(kind, message, source, extra) {
         try {
           message = String(message || 'unknown').slice(0, 300);
@@ -102,6 +133,12 @@
           // A cross-origin throw is stripped to this exact shape. Naming it
           // stops it being mistaken for an app-level failure.
           var masked = (message === 'Script error.' || message === 'Script error') && !source;
+          var hostBridge = isHostBridgeError(message);
+
+          // Where the error came from, as far as we can tell. 'app' is the only
+          // value worth acting on; the other two are environmental.
+          var origin = hostBridge ? 'host_webview' : masked ? 'cross_origin' : 'app';
+
           var key = kind + '|' + message + '|' + (source || '');
           if (seen[key]) return;
           seen[key] = true;
@@ -109,7 +146,11 @@
           sent++;
 
           if (typeof window.clarity === 'function') {
-            window.clarity('set', 'jsErrorKind', masked ? 'cross_origin_masked' : kind);
+            window.clarity(
+              'set',
+              'jsErrorKind',
+              hostBridge ? 'host_webview_bridge' : masked ? 'cross_origin_masked' : kind
+            );
             window.clarity('set', 'jsErrorMessage', message);
             // The source was going to dataLayer only, so a Clarity session showed
             // e.g. "Unexpected token '{'" with no way to tell which file threw —
@@ -121,7 +162,10 @@
           window.dataLayer = window.dataLayer || [];
           window.dataLayer.push({
             event: 'js_error',
+            // error_kind stays the raw kind so any existing GTM trigger keeps
+            // working; error_origin is the new dimension to filter on.
             error_kind: kind,
+            error_origin: origin,
             error_masked: masked,
             error_message: message,
             error_source: source || '(unavailable)',
@@ -414,7 +458,27 @@
     }
   </style>
 
-  <!-- Google Tag Manager -->
+  <!--
+    Analytics host gate — single source of truth for GTM, gtag and Clarity.
+    Must stay above all three.
+
+    Only the production domain (apex + www) is measured. Other subdomains
+    (beta/staging), localhost and preview deployments are skipped, so test
+    traffic does not pollute GA4 sessions, GTM conversions or Clarity replays.
+
+    Deliberately a hostname allowlist rather than an env var: index.html is a
+    static shell served from one build, and the same artifact can be deployed to
+    more than one host, so the build-time env cannot be trusted to say where the
+    page actually ended up.
+  -->
+  <script>
+    window.__analyticsHostAllowed__ = (function () {
+      var host = location.hostname;
+      return host === "shubhastro.ai" || host === "www.shubhastro.ai";
+    })();
+  </script>
+
+  <!-- Google Tag Manager (production only) -->
   <!--
     `j.crossOrigin` so exceptions thrown inside GTM (or any tag it loads)
     report a real message and stack instead of the browser's opaque
@@ -425,37 +489,118 @@
     Do NOT copy this onto a script whose origin omits that header — the request
     would fail CORS and the script would not load at all.
   -->
-  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.crossOrigin='anonymous';j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-T5DTGXHW');</script>
+
+
+<script>
+  if (window.__analyticsHostAllowed__) {
+    (function (w, d, s, l, i) {
+      w[l] = w[l] || [];
+
+      w[l].push({
+        "gtm.start": new Date().getTime(),
+        event: "gtm.js"
+      });
+
+      var firstScript = d.getElementsByTagName(s)[0];
+      var gtmScript = d.createElement(s);
+
+      var dataLayerParam =
+        l !== "dataLayer"
+          ? "&l=" + l
+          : "";
+
+      gtmScript.async = true;
+      gtmScript.crossOrigin = "anonymous";
+      gtmScript.src =
+        "https://www.googletagmanager.com/gtm.js?id=" +
+        i +
+        dataLayerParam;
+
+      firstScript.parentNode.insertBefore(
+        gtmScript,
+        firstScript
+      );
+    })(
+      window,
+      document,
+      "script",
+      "dataLayer",
+      "GTM-T5DTGXHW"
+    );
+  }
+</script>
   <!-- End Google Tag Manager -->
 
-  <!-- Google tag (gtag.js) -->
+  <!-- Google tag (gtag.js) (production only) -->
   <!--
-    `crossorigin` so exceptions thrown inside gtag report a real message and
+    Injected from script rather than left as a static `<script async src>` tag,
+    because a static tag has no way to opt out per host — the browser fetches it
+    during parse regardless. Same reason Clarity is injected below.
+
+    `crossOrigin` so exceptions thrown inside gtag report a real message and
     stack instead of the browser's opaque "Script error.". Safe here because
     googletagmanager.com serves `access-control-allow-origin: *` (verified);
     adding this to an origin that does NOT send that header would stop the
     script loading at all, so it is applied only where confirmed.
+
+    `window.gtag` is assigned explicitly instead of relying on a hoisted
+    `function gtag(){}` declaration: inside this block a function declaration
+    would no longer be a global, and utils/analytics.js dispatches on
+    `typeof window.gtag === "function"`. That same check (plus its
+    `Array.isArray(window.dataLayer)` guard) is what makes skipping this block
+    safe off production — trackEvent simply no-ops rather than throwing.
   -->
-  <script async crossorigin="anonymous" src="https://www.googletagmanager.com/gtag/js?id=G-MQBQTN9GSH"></script>
+  <!-- <script>
+    if (window.__analyticsHostAllowed__) {
+      (function () {
+        var s = document.createElement('script');
+        s.async = true;
+        s.crossOrigin = 'anonymous';
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-MQBQTN9GSH';
+        document.head.appendChild(s);
+      })();
+
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+      window.gtag('config', 'G-MQBQTN9GSH');
+    }
+  </script> -->
+
   <script>
+  if (window.__analyticsHostAllowed__) {
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-MQBQTN9GSH');
-  </script>
+
+    window.gtag = window.gtag || function () {
+      window.dataLayer.push(arguments);
+    };
+
+    window.gtag("js", new Date());
+
+    window.gtag("config", "G-MQBQTN9GSH", {
+      send_page_view: true
+    });
+
+    var gaScript = document.createElement("script");
+
+    gaScript.async = true;
+    gaScript.crossOrigin = "anonymous";
+    gaScript.src =
+      "https://www.googletagmanager.com/gtag/js?id=G-MQBQTN9GSH";
+
+    document.head.appendChild(gaScript);
+  }
+</script>
+  
   <!-- End Google tag (gtag.js) -->
 
   <!-- Microsoft Clarity (production only) -->
   <script type="text/javascript">
     (function () {
-      // Only load Clarity on the production domain (apex + www) — skip other
-      // subdomains (beta/staging), local development and preview environments.
-      var host = location.hostname;
-      if (host !== "shubhastro.ai" && host !== "www.shubhastro.ai") return;
+      // Production domain only. Reads the shared __analyticsHostAllowed__ flag
+      // set above rather than repeating the hostname comparison, so GTM, gtag
+      // and Clarity can never disagree about which hosts are measured.
+      if (!window.__analyticsHostAllowed__) return;
       (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
         // `crossOrigin` so exceptions thrown inside Clarity's own script report
@@ -510,8 +655,8 @@
     // tracking would silently break. The cost is that any exception thrown
     // inside fbevents.js stays masked as "Script error." — that is Meta's
     // limitation, not something we can fix from here.
-    var host = location.hostname;
-    if (host !== "shubhastro.ai" && host !== "www.shubhastro.ai") return;
+    // Shared flag, same as GTM/gtag/Clarity — see __analyticsHostAllowed__ above.
+    if (!window.__analyticsHostAllowed__) return;
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
     n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
     n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
@@ -525,6 +670,18 @@
 </head>
 
 <body>
+  <!--
+    The two <noscript> fallbacks below are NOT host-gated, and cannot be: they
+    exist precisely for visitors with JavaScript disabled, so no host check can
+    run to suppress them. They will therefore fire on staging/preview hosts for
+    JS-disabled visitors only.
+
+    Left in place rather than removed because that is a vanishingly small slice
+    of traffic and removing them would also drop the no-JS measurement on
+    production, which is the case they were added for. If non-prod noise ever
+    matters more than no-JS coverage, delete both tags — there is no way to have
+    both.
+  -->
   <!-- Meta Pixel (noscript fallback) -->
   <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=28311323818486102&ev=PageView&noscript=1"/></noscript>
   <!-- Google Tag Manager (noscript) -->

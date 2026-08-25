@@ -21,6 +21,16 @@ import { corsMiddleware } from "./cors.js";
 const app = express();
 app.disable("x-powered-by");
 
+/*
+ * No ETags. Express generates a weak ETag for every res.json() body, and the
+ * responses this app produces itself — notably the 428 from requireSession, which
+ * is emitted before the encrypting proxy runs and so never picks up that layer's
+ * no-store/ETag stripping — are session-scoped. A cache validator on them invites
+ * a shared cache to store and revalidate a rejection, which a visitor holding a
+ * perfectly good session would then be served.
+ */
+app.set("etag", false);
+
 // CORS first — the frontend calls the secure gateway cross-origin, so preflight (OPTIONS)
 // must be answered before reaching the handshake router or the proxies.
 app.use(corsMiddleware);

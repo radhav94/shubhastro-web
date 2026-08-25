@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { IoClose } from "react-icons/io5";
 import styles from "./SubscriptionModal.module.scss";
@@ -10,6 +9,7 @@ import shubhLogoMobile from "../../../../assets/images/mobile-shubh-astro-logo.p
 import welcomeBg from "../../../../assets/images/welcome-bonus-bg.webp";
 import welcomeBgMobile from "../../../../assets/images/welcome-bonus-bg-mobile.webp";
 import welcomeIcon from "../../../../assets/images/welcome-bonus-icon.webp";
+import RechargeModal from "../../../recharge-modal/RechargeModal";
 
 // Build the "What's included" rows straight from the API response — the
 // marketing bullets in `metadata.highlights`. No derived defaults; whatever the
@@ -84,7 +84,12 @@ const getPurchaseFailureReason = (res) => {
   return null;
 };
 
-const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsufficientBalance, variant = "basic", plans, featureName = "" }) => {
+/*
+  `onInsufficientBalance` is gone. It existed so callers could close this modal
+  and get out of the way of a redirect to /recharge; recharging now happens inside
+  this modal, so ending the flow at that point is exactly the wrong thing to do.
+*/
+const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant = "basic", plans, featureName = "" }) => {
   const isExtended = variant === "extended";
 
   // Extended plans are returned inline by the generate/report response. When the
@@ -117,11 +122,15 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
     }
     if (!isError) plansRetryRef.current = 0;
   }, [isError, error, refetch]);
-
-  const navigate = useNavigate();
   const [purchaseWallet] = usePurchaseWalletSubscriptionMutation();
   const [pendingCode, setPendingCode] = useState(null);
   const [flow, setFlow] = useState("idle"); // "idle" | "processing" | "success"
+  /*
+    The plan the user picked when their wallet came up short. Holding the card
+    (not just a flag) is what lets the purchase be retried automatically once the
+    recharge lands, so they never have to find and pick the same plan again.
+  */
+  const [rechargeForCard, setRechargeForCard] = useState(null);
   const [successPlan, setSuccessPlan] = useState(null);
 
   /*
@@ -272,19 +281,27 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
       ? { "--modal-w": "min(420px, 100%)" }
       : { "--modal-w": `min(${columns * 300 + (columns - 1) * 20 + 76 - peek}px, 100%)` };
 
-  const redirectToRecharge = () => {
-    const returnUrl = window.location.pathname + window.location.search;
-    const rechargeUrl = `/recharge?returnUrl=${encodeURIComponent(returnUrl)}`;
-    navigate(rechargeUrl);
+  /**
+   * Recharge finished. Buy the plan the user originally picked, right away.
+   *
+   * `handleSelect` is safe to re-enter here: its `purchasingRef` guard was
+   * released in the `finally` of the failed attempt, and the backend has already
+   * credited the wallet by the time RechargeModal reports success.
+   */
+  const handleRechargeSuccess = () => {
+    const card = rechargeForCard;
+    setRechargeForCard(null);
+    if (card) handleSelect(card);
+  };
 
-    // Some AI-Wow flows close/unmount the parent modal immediately after the
-    // low-balance callback. Keep a browser-level fallback so the user still
-    // lands on recharge if the SPA navigation is interrupted.
-    window.setTimeout(() => {
-      if (window.location.pathname !== "/recharge") {
-        window.location.assign(rechargeUrl);
-      }
-    }, 50);
+  /**
+   * Recharge dismissed without paying. Stay on the plans list rather than
+   * closing everything — the user may want a cheaper plan, and closing here
+   * would resolve the caller's pending flow as if they had given up on the
+   * feature entirely.
+   */
+  const handleRechargeDismiss = () => {
+    setRechargeForCard(null);
   };
 
   const handleSelect = async (card) => {
@@ -336,14 +353,22 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
           plan_code: card.plan.code,
         });
         setFlow("idle");
-        toast.error("Insufficient wallet balance. Please recharge to continue.");
-        // Notify the parent first so it can close the modal and suppress its own
-        // post-close "go back" navigation (which would otherwise clobber the
-        // redirect below). Then perform the redirect here — a single, reliable
-        // hop that doesn't depend on the parent wiring.
-        if (onInsufficientBalance) onInsufficientBalance();
-        else if (onClose) onClose();
-        redirectToRecharge();
+        /*
+          Recharge in place, then buy the plan — no navigation.
+
+          This used to close the modal and route to /recharge. That threw away
+          everything the caller had on screen, and since none of it is persisted
+          (no redux-persist in this project), the return trip landed people at the
+          start of the flow: a palmistry customer who had just paid was sent back
+          to "select hand" with their captured photo gone. It also asked them to
+          find their way back and pick the plan again, from a page that had no
+          idea what they had been doing.
+
+          Opening RechargeModal over this one keeps the whole flow alive. On
+          success we retry the exact same plan straight away, so the user lands on
+          their report instead of somewhere upstream.
+        */
+        setRechargeForCard(card);
       } else if (reason === "AI_WOW_PREMIUM_FLOW_DISABLED") {
         // #5 SUBSCRIPTION_PURCHASE_FAILED
         trackSubscriptionEvent(SUBSCRIPTION_EVENTS.PURCHASE_FAILED, {
@@ -549,6 +574,25 @@ const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, onInsuf
           </>
         )}
       </div>
+
+      {/*
+        Rendered inside this modal's overlay so the plans stay mounted underneath:
+        the purchase is retried against the same `rechargeForCard` the moment the
+        recharge succeeds. Sibling of .modal rather than a child of it, so the
+        recharge sheet isn't clipped by the plan card layout.
+      */}
+      <RechargeModal
+        isOpen={!!rechargeForCard}
+        onClose={handleRechargeDismiss}
+        onSuccess={handleRechargeSuccess}
+        /*
+          No "wallet topped up" popup here: the recharge is a step towards the
+          plan, not the destination. This modal goes straight into "Activating
+          your subscription…" and then its own success view, so the wallet popup
+          would only add a second screen to dismiss on the way to the report.
+        */
+        showSuccessPopup={false}
+      />
     </div>
   );
 };

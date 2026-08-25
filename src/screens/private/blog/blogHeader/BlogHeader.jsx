@@ -68,13 +68,37 @@ const BlogHeader = () => {
     setSearchParams(next);
   };
 
+  // Slug -> display name, shared by the heading and the "already showing" toast
+  // so the two can't describe the same filter differently.
+  const categoryName = (slug) =>
+    categories.find((cat) => cat.slug === slug)?.name || "";
+
+  /*
+    The heading was the literal string "ALL BLOGS", regardless of the filter. Pick
+    a category and the page went on announcing "ALL BLOGS" above a grid that was
+    no longer all blogs.
+
+    That is worth fixing on its own, but it also invites the click this turned up
+    in session replay: a reader who has filtered and wants the whole list back
+    sees a heading that says exactly what they want, and taps it. It is an <h2>,
+    so nothing happens. No handler is added here — a heading shouldn't be a
+    control, and the sidebar's "All Blogs" button already does that job a few
+    pixels away. Making the text honest removes the reason to reach for it.
+
+    Written in title case because `.headerTitle` applies `text-transform:
+    uppercase`, so the rendered heading is unchanged for the unfiltered view.
+  */
+  const headingText = activeCategory
+    ? categoryName(activeCategory) || activeCategory
+    : "All Blogs";
+
   const handleCategoryChange = (slug) => {
     const next = new URLSearchParams(searchParams);
     if (slug) next.set("category", slug);
     else next.delete("category");
     next.delete("page"); // a different filter starts from the first page
     const label = slug
-      ? categories.find((cat) => cat.slug === slug)?.name || "this category"
+      ? categoryName(slug) || "this category"
       : "all blogs";
     applyParams(next, `Already showing ${label}.`);
   };
@@ -133,7 +157,7 @@ const BlogHeader = () => {
         {/* Main content */}
         <div className={styles.main}>
           <div className={styles.headerSection}>
-            <h2 className={styles.headerTitle}>ALL BLOGS</h2>
+            <h2 className={styles.headerTitle}>{headingText}</h2>
           </div>
 
           {isLoading && !shown ? (

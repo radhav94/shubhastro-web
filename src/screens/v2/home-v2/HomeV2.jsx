@@ -78,20 +78,36 @@ const COMMUNITY_AVATARS = [
 const heroBg = "https://assets.shubhastro.ai/images/ai-suite.png";
 
 /**
- * "Sign in" affordance inside the guest greeting.
+ * Hero greeting.
  *
- * This used to be an onClick + underline on the whole `<p>`, with the hint as a
- * 12px inline span. The handler worked, but the actual target was a short run of
- * small text inside a paragraph — so a near-miss landed on the surrounding
- * padding and did nothing, which is how it shows up as a dead click on the one
- * element a guest reaches for to sign in. As a real button it gets a padded hit
- * area, keyboard access and a proper accessible name.
+ * History: this was originally an onClick + underline on the whole `<p>` with
+ * the hint as a 12px inline span, then the "Sign in" run was promoted to a real
+ * padded button. That fixed the near-miss problem but left the rest of the line
+ * — "Hello, Guest! 👋" — as inert text sitting immediately beside the control.
+ * "Guest" reads as a placeholder for your own name, so reaching for it is the
+ * obvious move, and Clarity still recorded a dead click on this greeting ten
+ * seconds into a first-time visit from Instagram.
+ *
+ * So for guests the whole line is now one control rather than text with a small
+ * button embedded in it. That removes the target ambiguity instead of making the
+ * small target slightly bigger again. Signed-in visitors keep plain text —
+ * there is nothing for them to activate here, and inventing something would
+ * just be a different wrong answer.
  */
-const GuestSignInLink = ({ onClick }) => (
-  <button type="button" className={styles.guestSignInLink} onClick={onClick}>
-    Sign in
-  </button>
-);
+const HeroGreeting = ({ name, onSignIn }) => {
+  if (name !== "Guest") {
+    return <p className={styles.greeting}>Hello, {name}! 👋</p>;
+  }
+  return (
+    <button
+      type="button"
+      className={styles.greetingGuestBtn}
+      onClick={onSignIn}
+    >
+      Hello, Guest! 👋 <span className={styles.guestSignInLink}>Sign in</span>
+    </button>
+  );
+};
 
 /**
  * Where an ai-services hero card sends the visitor, or null if the CMS item
@@ -166,9 +182,11 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
           <div className={styles.centerCard}>
             <div className={styles.heroBanner}>
               <div className={styles.heroContent}>
-                <p className={styles.greeting} key={`greeting-${name}`}>
-                  Hello, {name}! 👋 {name === "Guest" && <GuestSignInLink onClick={() => navigate("/login")} />}
-                </p>
+                <HeroGreeting
+                  key={`greeting-${name}`}
+                  name={name}
+                  onSignIn={() => navigate("/login")}
+                />
                 <h1>
                   {section.title
                     ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></>
@@ -342,7 +360,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                 src={aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon}
                 alt=""
                 width="200"
-                height="200"
+                height="187"
                 loading="lazy"
               />
             ) : null}
@@ -417,9 +435,7 @@ const renderUngroupedHeroSection = (section, props) => {
       return (
         <section key={key} className={styles.heroBanner} style={{ margin: '16px 0' }}>
           <div className={styles.heroContent}>
-            <p className={styles.greeting}>
-              Hello, {name}! 👋 {name === "Guest" && <GuestSignInLink onClick={() => navigate("/login")} />}
-            </p>
+            <HeroGreeting name={name} onSignIn={() => navigate("/login")} />
             <h1>{section.title ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></> : <>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></>}</h1>
             {currentMahadasha && <div className={styles.mahadashaTag}>🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong></div>}
           </div>
@@ -540,6 +556,28 @@ const HomeV2 = () => {
    */
   const sectionsInFlightRef = useRef(false);
   /*
+   * Pages already fetched with a real payload.
+   *
+   * Not the high-water mark that used to live here. That one recorded a page
+   * *before* the request went out and never rolled back, so one failure killed
+   * paging for good. This records a page only once the server has answered with
+   * a non-empty list, so a failed page is absent from the set and stays
+   * retryable, while a page already held can never be asked for twice.
+   *
+   * Seeded with page 1, which arrives via the blocking getNewHomeDetails query.
+   */
+  const fetchedSectionPagesRef = useRef(new Set([1]));
+  /*
+   * Identities of sections already handed to the store, recorded synchronously.
+   *
+   * The de-dupe cannot rely on reading the store alone: `dispatch` does not update
+   * it until React re-renders, so a second page resolving in the same tick would
+   * be compared against a list that does not yet contain the first one. Unioned
+   * with the store's current contents at use time, so page 1 (which arrives via
+   * the blocking query, not through here) is always included.
+   */
+  const appendedSectionIdsRef = useRef(new Set());
+  /*
    * Pages whose last attempt failed. A retry has to bypass preferCacheValue:
    * RTK Query keeps a rejected result as a cache entry like any other, so
    * preferring the cache would hand back the same rejection without ever going
@@ -563,15 +601,61 @@ const HomeV2 = () => {
    * ignores pageNo/limit returns on the very first request, keeping that case to
    * a single request.
    */
+  /*
+   * Which page to ask for next, and whether to keep asking.
+   *
+   * This used to be inferred from the loaded section count:
+   *
+   *     count % PAGE_SIZE === 0 ? count / PAGE_SIZE + 1 : null
+   *
+   * with `null` doubling as the "server has nothing left" signal. That conflates
+   * two unrelated things — a short page from the server, and a short *count*
+   * because our own de-duplication dropped something. One repeated section
+   * anywhere in the CMS list is enough: page 2 comes back full, one item is
+   * already held, the count lands on 9 instead of 10, `9 % 5` is not 0, the page
+   * resolves to null, the sentinel unmounts and paging stops for good. Pages 3
+   * and 4 are never requested and no amount of scrolling recovers them — which
+   * is what "sometimes it loads, sometimes it doesn't" looks like.
+   *
+   * Counting pages instead of sections decouples the two: the next page is simply
+   * the one after the highest we have merged, and exhaustion comes from what the
+   * server actually sent (see the `list.length` check in loadNextSectionsPage).
+   *
+   * State as well as the ref below, because the sentinel's `hasMoreSections`
+   * gate is evaluated during render and has to react when this advances.
+   */
+  const [lastFetchedSectionPage, setLastFetchedSectionPage] = useState(1);
+
   const loadedSectionCount = Array.isArray(homeSections) ? homeSections.length : 0;
-  const nextSectionsPage =
-    loadedSectionCount > 0 && loadedSectionCount % HOME_SECTIONS_PAGE_SIZE === 0
-      ? loadedSectionCount / HOME_SECTIONS_PAGE_SIZE + 1
-      : null;
+  const nextSectionsPage = lastFetchedSectionPage + 1;
   const hasMoreSections =
-    !sectionsExhausted &&
-    nextSectionsPage !== null &&
-    nextSectionsPage <= HOME_SECTIONS_MAX_PAGES;
+    !sectionsExhausted && nextSectionsPage <= HOME_SECTIONS_MAX_PAGES;
+
+  /*
+   * Live view of the loaded sections, for loadNextSectionsPage.
+   *
+   * The observer below is deliberately never disconnected inside its callback,
+   * and IntersectionObserver keeps delivering while the sentinel is inside the
+   * 600px rootMargin. So a callback can fire in the gap between
+   * `sectionsInFlightRef` being released and React re-rendering with the appended
+   * page — at which point the closure still holds the *previous* render's
+   * `homeSections` and `nextSectionsPage`.
+   *
+   * That was not a harmless extra request. The stale closure re-requested the
+   * page it had just fetched (a cache hit, so instant), and de-duplicated the
+   * response against its own pre-append `homeSections` — which of course did not
+   * contain it yet. So the whole page was appended a *second* time. The count
+   * then landed on 15 instead of 10, `15 % 5 === 0` still looked like a clean
+   * page boundary, and the next page computed as 4: page 3 was never requested
+   * at all, and two sections rendered twice. Nothing errored, and
+   * `hasMoreSections` stayed true, which is why it presented as "page 4 sometimes
+   * doesn't fire".
+   *
+   * Reading the count and the held list from a ref at invocation time makes the
+   * function insensitive to when the callback happens to run.
+   */
+  const homeSectionsRef = useRef(homeSections);
+  homeSectionsRef.current = homeSections;
 
   /*
    * Fetches one page and appends it into the page-1 cache entry.
@@ -587,8 +671,20 @@ const HomeV2 = () => {
    * updating without a reload.
    */
   const loadNextSectionsPage = useCallback(async () => {
-    if (!hasMoreSections) return;
+    if (sectionsExhausted) return;
     if (sectionsInFlightRef.current) return;
+
+    /*
+     * Read from the ref, which is updated synchronously the moment a page's
+     * payload arrives — not from the render closure. That is what makes a
+     * late-firing observer callback harmless: it computes the same "highest
+     * merged page + 1" a fresh one would, so it either asks for the genuinely
+     * next page or is stopped by the in-flight latch. It can no longer re-request
+     * a page we already hold.
+     */
+    const nextPage = Math.max(...fetchedSectionPagesRef.current) + 1;
+    if (nextPage > HOME_SECTIONS_MAX_PAGES) return;
+
     sectionsInFlightRef.current = true;
 
     let list;
@@ -597,19 +693,19 @@ const HomeV2 = () => {
       // re-request every page each time the visitor navigates back to "/".
       // Turned off for a page that failed last time, so the retry actually hits
       // the network instead of replaying the cached rejection.
-      const preferCacheValue = !failedSectionPagesRef.current.has(nextSectionsPage);
+      const preferCacheValue = !failedSectionPagesRef.current.has(nextPage);
       const response = await fetchHomeSectionsPage(
-        { pageNo: nextSectionsPage },
+        { pageNo: nextPage },
         preferCacheValue
       ).unwrap();
       list = response?.data?.list;
-      failedSectionPagesRef.current.delete(nextSectionsPage);
+      failedSectionPagesRef.current.delete(nextPage);
     } catch {
       // Transport-level failure. Below-the-fold content is best effort, so no
       // error UI — but release the guard, because the next time the sentinel
       // crosses into view this page should be attempted again rather than the
       // homepage ending here for good.
-      failedSectionPagesRef.current.add(nextSectionsPage);
+      failedSectionPagesRef.current.add(nextPage);
       sectionsInFlightRef.current = false;
       return;
     }
@@ -621,15 +717,38 @@ const HomeV2 = () => {
       return;
     }
 
-    const held = new Set(homeSections.map(sectionIdentity));
+    // Real payload in hand, so this page is done. Recorded only now, never
+    // before the request, so a failure above leaves it retryable.
+    fetchedSectionPagesRef.current.add(nextPage);
+    setLastFetchedSectionPage((prev) => Math.max(prev, nextPage));
+
+    /*
+     * Whether the server has more is decided by what the server sent — a page
+     * shorter than the limit means the end of the list. Deliberately not decided
+     * by how many survived de-duplication below: those are different questions,
+     * and conflating them is what used to end paging early.
+     */
+    const serverHasMore = list.length >= HOME_SECTIONS_PAGE_SIZE;
+
+    // Store contents plus anything appended in this tick — see appendedSectionIdsRef.
+    const currentSections = Array.isArray(homeSectionsRef.current) ? homeSectionsRef.current : [];
+    const held = new Set(appendedSectionIdsRef.current);
+    currentSections.forEach((section) => {
+      const id = sectionIdentity(section);
+      if (id) held.add(id);
+    });
+
     const fresh = list.filter((section) => {
       const id = sectionIdentity(section);
       if (!id || held.has(id)) return false;
       held.add(id);
+      appendedSectionIdsRef.current.add(id);
       return true;
     });
 
     sectionsInFlightRef.current = false;
+
+    if (!serverHasMore) setSectionsExhausted(true);
 
     if (fresh.length === 0) {
       // A full page of sections we already hold — the server is ignoring pageNo,
@@ -644,7 +763,7 @@ const HomeV2 = () => {
         if (Array.isArray(draft?.data?.list)) draft.data.list.push(...fresh);
       })
     );
-  }, [hasMoreSections, nextSectionsPage, homeSections, fetchHomeSectionsPage, dispatch]);
+  }, [sectionsExhausted, fetchHomeSectionsPage, dispatch]);
 
   /*
    * Pages load as the visitor scrolls, one at a time, rather than all at once
@@ -696,7 +815,20 @@ const HomeV2 = () => {
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, [hasMoreSections, loadNextSectionsPage]);
+    /*
+     * loadedSectionCount is what chains the pages.
+     *
+     * IntersectionObserver only fires on threshold crossings, but it always
+     * delivers one observation when you call observe(). After a page is appended
+     * the sentinel is usually still inside the 600px rootMargin, so no crossing
+     * occurs and the only thing that asks for the next page is this effect
+     * re-running and re-observing. That used to happen incidentally, because
+     * loadNextSectionsPage took `homeSections` as a dependency and so got a new
+     * identity on every append. It is stable now (deliberately — that identity
+     * churn is what let a stale closure re-request a page and skip the next one),
+     * so the count is named here explicitly instead.
+     */
+  }, [hasMoreSections, loadedSectionCount, loadNextSectionsPage]);
 
   const sortedSections = useMemo(() => sortSections(homeSections), [homeSections]);
   const renderPlan = useMemo(() => buildRenderPlan(sortedSections), [sortedSections]);

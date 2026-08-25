@@ -4,6 +4,7 @@ import { ChevronLeft, Heart, MessageCircle, Share2 } from "lucide-react";
 import { AppImages } from "../../../utils/appImages";
 import styles from "./LiveLanding.module.scss";
 import { trackEvent } from "../../../utils/analytics";
+import Toast from "../../../component/toast";
 
 const LiveLanding = () => {
     const [activeTab, setActiveTab] = useState("daily");
@@ -87,6 +88,44 @@ const LiveLanding = () => {
         navigate("/astrologers");
     };
 
+    /*
+      Share was one of three icon buttons on each card — heart, comment, share —
+      and none of the three had a handler. All were real <button>s carrying
+      `.actionBtn`, which sets `cursor: pointer` and a `:hover` that darkens and
+      scales the circle, so each one visibly answered the pointer and then did
+      nothing on click. Three per card across three cards is nine dead controls,
+      sitting in the TikTok-style right rail of a full-screen media card — the
+      most obviously tappable thing on the page.
+
+      Sharing needs no backend, so it is now real. Web Share where the browser
+      has it (most mobile, Windows/ChromeOS Chrome), clipboard otherwise, which
+      covers the desktop browsers that don't implement it.
+    */
+    const handleShare = async (insight) => {
+        const url = `${window.location.origin}/live-landing`;
+
+        try {
+            if (navigator.share) {
+                await navigator.share({
+                    title: insight.title,
+                    text: insight.description,
+                    url,
+                });
+                trackEvent("live_insight_shared", { insight_id: insight.id, method: "web_share" });
+                return;
+            }
+
+            await navigator.clipboard.writeText(`${insight.title} — ${url}`);
+            Toast.success("Link copied to clipboard");
+            trackEvent("live_insight_shared", { insight_id: insight.id, method: "clipboard" });
+        } catch (err) {
+            // Dismissing the OS share sheet rejects with AbortError. That's the
+            // user changing their mind, not a failure, so say nothing.
+            if (err?.name === "AbortError") return;
+            Toast.error("Couldn't share this insight. Please try again.");
+        }
+    };
+
     return (
         <div className={styles.liveLanding}>
             {/* Header with Tabs */}
@@ -142,18 +181,32 @@ const LiveLanding = () => {
                                 </button>
                             </div>
 
-                            {/* Action Buttons */}
+                            {/*
+                              Likes and comments are static counts on hardcoded
+                              content — there is no endpoint behind either, so
+                              neither can ever succeed. They stay visible as
+                              figures but no longer claim to be controls:
+                              `.actionStatic` drops the pointer cursor and the
+                              hover response, so they read as the stats they are
+                              instead of buttons that ignore you. Wiring them up
+                              needs like/comment endpoints for these cards first.
+                            */}
                             <div className={styles.actionButtons}>
-                                <button className={styles.actionBtn}>
-                                    <Heart size={28} />
+                                <div className={`${styles.actionBtn} ${styles.actionStatic}`}>
+                                    <Heart size={28} aria-hidden="true" />
                                     <span>{insight.likes}</span>
-                                </button>
-                                <button className={styles.actionBtn}>
-                                    <MessageCircle size={28} />
+                                </div>
+                                <div className={`${styles.actionBtn} ${styles.actionStatic}`}>
+                                    <MessageCircle size={28} aria-hidden="true" />
                                     <span>{insight.comments}</span>
-                                </button>
-                                <button className={styles.actionBtn}>
-                                    <Share2 size={28} />
+                                </div>
+                                <button
+                                    type="button"
+                                    className={styles.actionBtn}
+                                    onClick={() => handleShare(insight)}
+                                    aria-label={`Share ${insight.title}`}
+                                >
+                                    <Share2 size={28} aria-hidden="true" />
                                     <span>{insight.shares}</span>
                                 </button>
                             </div>

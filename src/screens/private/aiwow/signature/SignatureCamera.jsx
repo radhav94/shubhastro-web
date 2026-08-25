@@ -7,6 +7,7 @@ import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setSignatureImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
+import toast from '../../../../component/toast';
 
 const SignatureCamera = () => {
   const navigate = useNavigate();
@@ -33,12 +34,36 @@ const SignatureCamera = () => {
   const [facingMode, setFacingMode] = useState('environment'); // Back camera for signature
   const [isFrontCamera, setIsFrontCamera] = useState(false);
 
+  // Detection should look at exactly the rectangle we are going to crop and
+  // save, not at a fixed slice of the middle of the frame — the capture box is
+  // 1000x500 and responsive, so those two are not the same rectangle.
+  const getSignatureRegionBounds = () => {
+    const video = videoRef.current;
+    const box = captureAreaRef.current;
+    if (!video || !box) return null;
+    const videoRect = video.getBoundingClientRect();
+    const boxRect = box.getBoundingClientRect();
+    if (!videoRect.width || !videoRect.height) return null;
+    return {
+      left: (boxRect.left - videoRect.left) / videoRect.width,
+      right: (boxRect.right - videoRect.left) / videoRect.width,
+      top: (boxRect.top - videoRect.top) / videoRect.height,
+      bottom: (boxRect.bottom - videoRect.top) / videoRect.height,
+    };
+  };
+
   const {
     detectionReady,
     objectDetected,
+    detectionReason,
     startDetection,
     stopDetection
-  } = useObjectDetection({ videoRef, canvasRef: detectionCanvasRef, detectionType: 'signature' });
+  } = useObjectDetection({
+    videoRef,
+    canvasRef: detectionCanvasRef,
+    detectionType: 'signature',
+    getRegionBounds: getSignatureRegionBounds,
+  });
 
   useEffect(() => {
     console.log('SignatureCamera mounted, starting camera');
@@ -61,11 +86,20 @@ const SignatureCamera = () => {
 
       let mediaStream;
       try {
+        // Signature is the one AI-Wow flow that depends on fine detail: a pen
+        // line is a couple of pixels wide, so the other cameras' 720p is not
+        // enough here. The capture box is ~1000px of CSS on a 2x screen, i.e.
+        // ~2000 device pixels — a 1280-wide frame gets upscaled to fill it,
+        // which is most of why the preview looks soft. `ideal` is a preference,
+        // so a device without 1080p still just gets its best mode.
+        // focusMode is honoured on Android; desktop and iOS ignore unknown
+        // entries in `advanced` rather than failing.
         mediaStream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { ideal: facingMode },
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            advanced: [{ focusMode: 'continuous' }]
           }
         });
       } catch (constraintErr) {
@@ -201,20 +235,34 @@ const SignatureCamera = () => {
     return cropCanvas;
   };
 
+  // Every tap on the shutter gets a response: either a photo, or an explanation.
+  //
+  // Both of these used to be bare `return`s. `stream` is set the moment
+  // getUserMedia resolves, but `video.videoWidth` stays 0 until the first frame
+  // arrives — so there is a real window where the button reads "Capture
+  // Signature", looks live, and swallows the tap in silence. Tapping a shutter
+  // and getting nothing is indistinguishable from a broken page, which is why
+  // people tap it again.
   const captureImage = () => {
     const video = videoRef.current;
     if (!video || !video.videoWidth) {
-      // Camera not ready yet — nothing to capture.
+      toast.error('Camera is still starting up. One moment.');
       return;
     }
     stopDetection();
     const cropCanvas = cropCurrentFrameToCanvas();
-    if (!cropCanvas) return;
+    if (!cropCanvas) {
+      toast.error('Could not read the camera frame. Please try again.');
+      return;
+    }
     setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
     stopCamera();
   };
 
-  // Auto-capture the sharpest frame once the signature is steady in the frame.
+  // Auto-capture the sharpest frame once a signature is steady in the frame.
+  // `objectDetected` is already temporally smoothed (7 of the last 10 frames),
+  // and the short start delay gives the user room to line the page up rather
+  // than firing the instant the paper drifts into view.
   const { autoCapturing } = useAutoCapture({
     ready: detectionReady && objectDetected,
     active: !capturedImage,
@@ -224,46 +272,28 @@ const SignatureCamera = () => {
       setCapturedImage(dataUrl);
       stopCamera();
     },
+    options: { startDelayMs: 700, minHoldMs: 700, maxWaitMs: 3000 },
   });
 
-  // Helper function to find signature bounding box using edge detection
-  const findSignatureBounds = (imageData) => {
-    const { data, width, height } = imageData;
-    let minX = width, minY = height, maxX = 0, maxY = 0;
-    let foundPixels = false;
-    
-    // Convert to grayscale and find dark pixels (signature ink)
-    const threshold = 180; // Pixels darker than this are considered part of signature
-    
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const index = (y * width + x) * 4;
-        const r = data[index];
-        const g = data[index + 1];
-        const b = data[index + 2];
-        
-        // Calculate grayscale value
-        const gray = (r + g + b) / 3;
-        
-        // If pixel is dark enough, it's likely part of the signature
-        if (gray < threshold) {
-          foundPixels = true;
-          minX = Math.min(minX, x);
-          minY = Math.min(minY, y);
-          maxX = Math.max(maxX, x);
-          maxY = Math.max(maxY, y);
-        }
-      }
+  // Why the frame is still red. Vague waiting is what makes people think the
+  // screen is broken, so name the thing that needs fixing.
+  const detectionHint = {
+    dark: 'Too dark — move to better light',
+    'no-ink': 'Position your signature within the frame',
+    'too-much': 'Show only the signature on plain paper',
+    skin: 'Keep hands out of the frame',
+    blurry: 'Hold still while the camera focuses',
+  }[detectionReason] || 'Position your signature within the frame';
+
+  // The shutter is never `disabled` — a natively disabled button fires no event
+  // at all, so while the camera is being acquired every tap vanished with the
+  // label stuck on "Loading...". It stays dimmed, but now it answers.
+  const handleCaptureTap = () => {
+    if (!stream) {
+      toast.error('Waiting for the camera. Allow camera access if prompted.');
+      return;
     }
-    
-    if (!foundPixels) return null;
-    
-    return {
-      x: minX,
-      y: minY,
-      width: maxX - minX,
-      height: maxY - minY
-    };
+    captureImage();
   };
 
   const retakePhoto = () => {
@@ -409,7 +439,7 @@ const SignatureCamera = () => {
             </div>
             {!objectDetected && detectionReady && (
               <div className={styles.detectionMessage}>
-                <p>Position your signature within the frame</p>
+                <p>{detectionHint}</p>
               </div>
             )}
             {objectDetected && autoCapturing && detectionReady && (
@@ -417,6 +447,12 @@ const SignatureCamera = () => {
                 <p>Hold steady… capturing</p>
               </div>
             )}
+            {/* Most "blurry preview" cases are simply the page held too close:
+                laptop webcams have a fixed focus and cannot resolve anything
+                nearer than roughly a forearm's length. */}
+            <div className={styles.tipMessage}>
+              <p>Keep the paper flat and about an arm&apos;s length away, filling the box</p>
+            </div>
           </>
         ) : (
           <img src={capturedImage} alt="Captured" className={styles.capturedImage} />
@@ -427,10 +463,12 @@ const SignatureCamera = () => {
 
       <div className={styles.controls}>
         {!capturedImage ? (
-          <button 
-            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`} 
-            onClick={captureImage}
-            disabled={!stream}
+          <button
+            type="button"
+            className={`${styles.captureButton} ${!stream ? styles.disabled : ''}`}
+            onClick={handleCaptureTap}
+            aria-disabled={!stream}
+            aria-label="Capture signature photo"
           >
             <div className={styles.captureIcon}>
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">

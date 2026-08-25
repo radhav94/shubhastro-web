@@ -178,6 +178,13 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
     return null;
   };
 
+  /*
+    Set when the typed hour was recognised as 24-hour (00, or 13-23) so the
+    period appended further down reflects the entry rather than defaulting to AM.
+    A ref, not state: it is produced and consumed inside a single keystroke.
+  */
+  const forcedPeriodRef = useRef(null);
+
   // Auto-format time input: only digits allowed, auto-inserts ":" and " AM/PM"
   const handleManualChange = (e) => {
     setIsTyping(true);
@@ -249,11 +256,26 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
         limitedDigits = `0${limitedDigits}`;
       }
 
-      // "00" or "1x" beyond 12 is a real mistake — keep only the digit typed
-      // last, padded, so the user can carry on rather than hitting a wall.
+      /*
+        A two-digit hour of 00 or 13-23 is someone entering a 24-hour time, which
+        is how birth times are written on most certificates. That used to be
+        treated as a typo and salvaged down to its last digit: "1830" became
+        08:30 AM — ten hours off, with nothing on screen to say so. A birth time
+        that wrong invalidates the entire chart, and it was the silent kind of
+        wrong, so it shipped straight into the kundli.
+
+        Convert instead, and carry the implied period across so the auto-appended
+        AM/PM below doesn't stamp "AM" over a PM time.
+      */
       if (limitedDigits.length >= 2) {
         const h = parseInt(limitedDigits.slice(0, 2), 10);
-        if (h < 1 || h > 12) {
+        if (h === 0 || (h >= 13 && h <= 23)) {
+          forcedPeriodRef.current = h >= 12 ? "PM" : "AM";
+          const h12 = h % 12 === 0 ? 12 : h % 12;
+          limitedDigits = `${String(h12).padStart(2, "0")}${limitedDigits.slice(2)}`;
+        } else if (h < 1 || h > 12) {
+          // 24-99: a genuine mistake. Keep the digit typed last, padded, so the
+          // user can carry on rather than hitting a wall.
           const lastDigit = limitedDigits[1];
           limitedDigits = parseInt(lastDigit, 10) > 0
             ? `0${lastDigit}${limitedDigits.slice(2)}`
@@ -281,7 +303,10 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
     // currently selected period when editing, otherwise default to AM. The
     // user can still toggle it via the 'a'/'p' keys or the dropdown.
     if (limitedDigits.length === 4) {
-      const p = period ?? "AM";
+      // A 24-hour entry decided the period itself; otherwise keep whatever is
+      // already selected, defaulting to AM.
+      const p = forcedPeriodRef.current || period || "AM";
+      forcedPeriodRef.current = null;
       formatted += ` ${p}`;
       setManualInput(formatted);
       const parsed = parseManualTime(formatted);
@@ -339,6 +364,24 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
       <div className={styles.dateInputRow}>
         <input
           type="text"
+          /*
+            The same fix the date input below already carries, which this field
+            was missing.
+
+            handleManualChange keeps digits only (`raw.replace(/[^0-9]/g, "")`)
+            and inserts the ":" and the AM/PM itself. As plain type="text" a
+            phone offered the alphabetic keyboard, so every key within reach was
+            stripped by the mask and the field sat there unchanged — no value, no
+            error, nothing to explain it. Birth Time is required, so the form
+            then refused to submit and the only way through was to notice the
+            "123" key, tick "Don't know the exact time of birth", or give up.
+
+            type stays "text" so the mask and the inserted separators keep
+            working. AM/PM is still reachable: 4 digits auto-append a period, a
+            24-hour entry (e.g. 1830) sets PM on its own, and the 44px clock
+            button opens the dropdown's AM/PM column.
+          */
+          inputMode="numeric"
           value={isTyping ? manualInput : displayValue}
           onChange={handleManualChange}
           onBlur={handleManualBlur}

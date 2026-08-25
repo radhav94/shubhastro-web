@@ -103,10 +103,7 @@ const ClothColorAnalysis = () => {
         leavingRef.current = true;
         hasStartedRef.current = false;
         dispatch(clearClothColorData());
-        // The gate already routed to /recharge — don't override that redirect.
-        if (!result.redirectedToRecharge) {
-          navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path[0], { replace: true });
-        }
+        navigate(PATH.privateRoutes.CLOTH_COLOR_LANDING.path[0], { replace: true });
         return;
       }
 

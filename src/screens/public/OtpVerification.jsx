@@ -96,7 +96,23 @@ const OtpVerification = () => {
 
 const handleVerifyOtp = async (event) => {
   event.preventDefault();
-  if (isVerifying) return;
+
+  /*
+    These guards used to live only in the button's `disabled` attribute. A
+    disabled button fires no click at all, so the tap was swallowed with no
+    message and no focus change while the label still read "Verify OTP" — the
+    same defect OtpModal and OTPScreen both carry comments about having fixed.
+    This screen was missed. Say what is wrong instead.
+  */
+  if (isVerifying) {
+    Toast.error("Verifying your code — one moment.");
+    return;
+  }
+  if (!isOtpComplete) {
+    Toast.error("Enter all 6 digits of the OTP.");
+    return;
+  }
+
   setIsVerifying(true);
 
   const fcmTokens = await requestFCMToken();
@@ -209,7 +225,12 @@ const handleVerifyOtp = async (event) => {
   }, [counter, isTimerActive]);
 
   const handleResend = async () => {
-    if (isTimerActive) return;
+    // Was a bare `return`, reached only via a natively disabled button that never
+    // fired anyway. Now the button is tappable throughout, so name the wait.
+    if (isTimerActive) {
+      Toast.error(`You can request a new OTP in ${counter}s.`);
+      return;
+    }
 
   try {
     const payload = {
@@ -324,22 +345,36 @@ const handleVerifyOtp = async (event) => {
             />
 
 
+            {/*
+              aria-disabled, not `disabled`. The dimmed look is kept by the same
+              `.disabled` class; the handler above is what refuses the submit, and
+              it now says why.
+            */}
             <button
               type="submit"
               className={`${styles.verifyButton} ${
                 !isOtpComplete ? styles.disabled : ""
               }`}
-              disabled={!isOtpComplete}
+              aria-disabled={!isOtpComplete || isVerifying}
+              aria-busy={isVerifying}
             >
               Verify OTP
             </button>
           </form>
             <div className={styles.resendOptions}>
+              {/*
+                Also not `disabled`. The countdown label does explain itself, but a
+                natively disabled button fires no event whatsoever, so for the full
+                two minutes every tap on it vanished — no message, no focus, and on
+                touch not even a cursor hint. Clarity records exactly that as a
+                dead click, which is how this surfaced. handleResend now reports
+                the remaining wait instead.
+              */}
               <button
                 type="button"
                 className={styles.resendButton}
                 onClick={handleResend}
-                disabled={isTimerActive}
+                aria-disabled={isTimerActive}
               >
                 {isTimerActive ? (
                   <>
