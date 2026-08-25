@@ -37,12 +37,7 @@ import styles from "./RashiReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import TTSButton from "../../../../component/UI/TTSButton";
 import { zodiacSignImages } from "../../horoscope/zodiac";
-import {
-  getNakshatraImage,
-  getRashiCoinImage,
-  getRashiSignImage,
-  rashiDecorTiles,
-} from "../../../../utils/rashiImages";
+import { rashiDecorTiles } from "../../../../utils/rashiImages";
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 import RecommendedAstrologersModal from "../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal";
 import useRecommendationOffer from "../../../../utils/hooks/useRecommendationOffer";
@@ -109,13 +104,17 @@ const formatDasha = (chain) => {
 };
 
 /**
- * Artwork that prefers the API's hosted asset and quietly falls back to the
- * bundled art when that request fails.
+ * Hosted artwork, rendering nothing if it cannot be loaded.
  *
- * Worth the extra state: the illustrations used to come from a local
- * sign-to-file mapping that was inferred, never confirmed. The API now names its
- * own artwork, which is authoritative — but it is a new asset host, and a broken
- * image in the hero is far more visible than a slightly different local one.
+ * The per-sign images all come from the API (S3) now; the bundled copies that
+ * used to back them have been removed. `local` is therefore optional and is only
+ * passed where an already-shipped asset happens to fit — the zodiac glyphs the
+ * horoscope screens use — so a failed request degrades to a glyph rather than to
+ * a broken image, at no extra download.
+ *
+ * @param {Object} props
+ * @param {string} [props.remote] - hosted URL from the API
+ * @param {string} [props.local]  - optional already-bundled fallback
  */
 const ArtImage = ({ remote, local, className, alt = "" }) => {
   const [remoteFailed, setRemoteFailed] = useState(false);
@@ -201,21 +200,23 @@ const RashiReport = () => {
   // discounted one once. See useRecommendationOffer.
   const recommendation = useRecommendationOffer();
 
-  // Everything the header chips and hero need, resolved once.
+  // Everything the hero needs, resolved once. Both images come from the API.
   const hero = useMemo(() => {
     const sign = response?.moon_sign || "";
     const hostedLogo = signLogoFailed ? "" : enriched?.signLogoUrl || "";
-    const coinArt = getRashiCoinImage(sign);
     return {
       sign,
-      // Landscape artwork behind the card's right edge. The API now names it
-      // per sign; the bundled art stays as the fallback.
-      artRemote: enriched?.signIllustrationUrl || "",
-      artLocal: getRashiSignImage(sign),
-      // Hosted logo first, then the design's coin export, and only then the
-      // glyph — which gets minted into a CSS gold disc (see .heroCoinMinted).
-      coin: hostedLogo || coinArt || zodiacSignImages[sign.toLowerCase()] || "",
-      coinIsArt: !!(hostedLogo || coinArt),
+      // Landscape artwork behind the card's right edge, named per sign by the API.
+      art: enriched?.signIllustrationUrl || "",
+      /*
+        The hosted logo, or the zodiac glyph struck into a CSS gold disc if it
+        cannot be loaded. That glyph is not a rashi-report asset — it is the
+        zodiac set the horoscope screens already ship — so this fallback adds no
+        weight, and it keeps the hero from rendering an empty circle when S3 is
+        unreachable.
+      */
+      coin: hostedLogo || zodiacSignImages[sign.toLowerCase()] || "",
+      coinIsArt: !!hostedLogo,
     };
   }, [
     response?.moon_sign,
@@ -235,7 +236,7 @@ const RashiReport = () => {
 
   const { moon_sign: moonSign, prediction, bot_response: botResponse } = response;
   const e = enriched || {};
-  const nakshatraArt = getNakshatraImage(e.nakshatra);
+
   const firstName = String(stored?.name || "").trim().split(/\s+/)[0] || "";
 
   const ttsScript = [
@@ -411,11 +412,7 @@ const RashiReport = () => {
                 className={styles.heroFlourishLeft}
               />
 
-              <ArtImage
-                remote={hero.artRemote}
-                local={hero.artLocal}
-                className={styles.heroArt}
-              />
+              <ArtImage remote={hero.art} className={styles.heroArt} />
             </section>
           )}
 
@@ -499,9 +496,9 @@ const RashiReport = () => {
                   {/* No caption: the hosted artwork already carries the figure's
                       name rendered into the image itself, and the nakshatra's
                       deity is listed in the tag row beside it. */}
-                  {(e.godImageUrl || nakshatraArt) && (
+                  {e.godImageUrl && (
                     <figure className={styles.nakshatraFigure}>
-                      <ArtImage remote={e.godImageUrl} local={nakshatraArt} />
+                      <ArtImage remote={e.godImageUrl} />
                     </figure>
                   )}
 
