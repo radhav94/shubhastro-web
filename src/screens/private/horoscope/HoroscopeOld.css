@@ -733,13 +733,32 @@
   }
 }
 
+/* Now a real <button> that dismisses the sheet — see the JSX. Same 48x4 bar
+   visually; the ::before extends the tap target to the 44px minimum without
+   changing the layout, since the bar itself is only 4px tall. */
 .horoscope-old-page .modal-handle {
   width: 48px;
   height: 4px;
   background: #cccccc;
+  border: none;
+  padding: 0;
   border-radius: 2px;
   margin: 12px auto 8px;
   flex-shrink: 0;
+  display: block;
+  position: relative;
+  cursor: pointer;
+}
+
+.horoscope-old-page .modal-handle::before {
+  content: '';
+  position: absolute;
+  inset: -20px -40px;
+}
+
+.horoscope-old-page .modal-handle:focus-visible {
+  outline: 2px solid #F75801;
+  outline-offset: 8px;
 }
 
 .horoscope-old-page .modal-title {

@@ -3,6 +3,26 @@ import { useLazyGeoSearchQuery } from "../../redux/api/geoApi";
 import Toast from "../../component/toast";
 import styles from "./locationSearch.module.scss";
 
+/*
+  Wait for a pause in typing before hitting the geo endpoint.
+
+  This used to fire on every single keystroke. A place like
+  "Sri Ramnagar, Punjab, Pak" is ~25 characters, so it produced ~25 requests,
+  and `isFetching` is true whenever the most recent one is outstanding. On a
+  phone connection the requests take longer than the gaps between keystrokes,
+  so the dropdown sat on "Searching…" essentially the whole time the visitor
+  was typing and the suggestion list never settled long enough to tap.
+
+  That is a dead end rather than a slow one: picking a suggestion is the only
+  thing that sets latitude/longitude, and the submit handler refuses to continue
+  without them. So the visitor cannot reach the coordinates no matter how many
+  times they retype the place or resubmit the form.
+
+  350ms matches the toast de-duplication window used elsewhere and is below the
+  ~400ms at which a pause starts to feel like lag.
+*/
+const GEO_SEARCH_DEBOUNCE_MS = 350;
+
 const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled, dropUp = false }) => {
   const [triggerGeoSearch, { data, isFetching, isError }] = useLazyGeoSearchQuery();
   const [open, setOpen] = useState(false);
@@ -10,6 +30,21 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled,
   const wrapperRef = useRef(null);
   // Last query actually sent, so the retry below can re-run it.
   const lastQueryRef = useRef("");
+  const debounceRef = useRef(null);
+
+  /*
+    True from the keystroke until the debounced request is actually fired, at
+    which point `isFetching` takes over. Without this the gap between the two
+    would briefly expose the PREVIOUS query's `data` — so a half-typed city
+    would flash stale suggestions, or "No results" for a place that exists.
+  */
+  const [searchPending, setSearchPending] = useState(false);
+
+  // One flag for "the list is not settled yet", used to gate every branch below.
+  const searching = searchPending || isFetching;
+
+  // Any pending keystroke must not fire after the field goes away.
+  useEffect(() => () => clearTimeout(debounceRef.current), []);
 
   // Ensure data is always an array
   const results = Array.isArray(data) ? data : [];
@@ -49,13 +84,22 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled,
     selectionMade.current = false; // reset selection
     onChange(e);
 
+    clearTimeout(debounceRef.current);
+
     if (newValue && newValue.trim().length >= 2) {
-      // Passed raw: geoApi encodes it while building the URL. Encoding here too
-      // double-encoded every space, so no multi-word city could ever be found.
-      lastQueryRef.current = newValue;
-      triggerGeoSearch(newValue);
+      // Open and show "Searching…" straight away, so the field responds to the
+      // keystroke even though the request itself waits for a pause.
       setOpen(true);
+      setSearchPending(true);
+      debounceRef.current = setTimeout(() => {
+        // Passed raw: geoApi encodes it while building the URL. Encoding here too
+        // double-encoded every space, so no multi-word city could ever be found.
+        lastQueryRef.current = newValue;
+        triggerGeoSearch(newValue);
+        setSearchPending(false);
+      }, GEO_SEARCH_DEBOUNCE_MS);
     } else {
+      setSearchPending(false);
       setOpen(false);
     }
   };
@@ -109,7 +153,17 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled,
           style={dropUp ? { top: "auto", bottom: "100%", marginBottom: 8 } : undefined}
           role="listbox"
         >
-          {isFetching && <div className={styles.loading}>Searching…</div>}
+          {/*
+            A status message, not a control — it has no pointer cursor and
+            nothing to activate. It gets clicked anyway when it is the only thing
+            in the dropdown, which is what the debounce above is there to stop.
+            aria-live so the state change is announced rather than only seen.
+          */}
+          {searching && (
+            <div className={styles.loading} role="status" aria-live="polite">
+              Searching…
+            </div>
+          )}
 
           {/*
             A failed lookup used to be indistinguishable from a successful empty
@@ -123,13 +177,18 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled,
             exist, with no way through and nothing telling them the search itself
             failed.
           */}
-          {!isFetching && isError && (
-            <div className={styles.noResult}>
+          {!searching && isError && (
+            <div className={styles.noResult} role="status" aria-live="polite">
               Couldn&apos;t reach the location search.{" "}
               <button
                 type="button"
                 className={styles.retryBtn}
                 onClick={() => {
+                  // Deliberate tap, so it runs now rather than waiting out the
+                  // debounce. Cancels any queued keystroke search first so the
+                  // two cannot race.
+                  clearTimeout(debounceRef.current);
+                  setSearchPending(false);
                   if (lastQueryRef.current.trim().length >= 2) {
                     triggerGeoSearch(lastQueryRef.current);
                   }
@@ -140,11 +199,13 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled,
             </div>
           )}
 
-          {!isFetching && !isError && results.length === 0 && (
-            <div className={styles.noResult}>No results</div>
+          {!searching && !isError && results.length === 0 && (
+            <div className={styles.noResult} role="status" aria-live="polite">
+              No results
+            </div>
           )}
 
-          {!isFetching && !isError &&
+          {!searching && !isError &&
             results.map((item, index) => {
               const displayName =
                 item.full_name && item.country && item.country_name

@@ -891,7 +891,17 @@ const HoroscopeOld = () => {
         {showZodiacModal && (
           <div className="zodiac-modal" onClick={() => setShowZodiacModal(false)}>
             <div className="zodiac-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-handle"></div>
+              {/* Was an inert <div>. A grabber bar is the universal "this sheet
+                  can be dismissed" affordance, so it gets tapped — and this one
+                  sits inside a container that stops click propagation, so the
+                  tap could not even fall through to the backdrop's own dismiss
+                  handler. Guaranteed dead click, right where the thumb rests. */}
+              <button
+                type="button"
+                className="modal-handle"
+                aria-label="Close zodiac picker"
+                onClick={() => setShowZodiacModal(false)}
+              />
               <h2 className="modal-title">Select Zodiac</h2>
               <div className="zodiac-list">
                 {zodiacSigns.map((zodiac) => (
