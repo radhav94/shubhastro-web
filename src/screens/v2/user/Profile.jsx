@@ -2141,7 +2141,22 @@ const Profile = () => {
                                   </div>
                                 </div>
 
-                                <button className={styles.orderTypeIcon}>
+                                {/* Was a <button> with no onClick and no
+                                    accessible name: focusable, announced as an
+                                    unlabelled button, and a tap on it just
+                                    bubbled to the card. It only indicates the
+                                    session type, so it is a <span> now. */}
+                                <span
+                                  className={styles.orderTypeIcon}
+                                  aria-label={
+                                    order.type === "call"
+                                      ? order.sessionType === "video"
+                                        ? "Video call"
+                                        : "Audio call"
+                                      : "Chat"
+                                  }
+                                  role="img"
+                                >
                                   {order.type === "call" ? (
                                     order.sessionType === "video" ? (
                                       <Video size={20} />
@@ -2151,7 +2166,7 @@ const Profile = () => {
                                   ) : (
                                     <MessageCircle size={20} />
                                   )}
-                                </button>
+                                </span>
                               </div>
 
                               <div className={styles.orderCardBottom}>

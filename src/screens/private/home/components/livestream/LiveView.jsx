@@ -1686,13 +1686,30 @@ const LiveView = (props) => {
             {/* Inline Messages Overlay */}
             <div className="inline-messages-overlay" ref={setMessagesOverlayRef}>
               {displayMessages.map((m, index) => {
-                // System messages (join) — show first letter like regular messages
+                /*
+                  System messages (joins, etc).
+
+                  The avatar circle used to read `m.text.split(" ")[0]` and show
+                  its first letter — an initial derived from the *sentence*, not
+                  from a person. "Guest xyz joined" therefore rendered a filled
+                  26px circle labelled "G", indistinguishable from a real
+                  participant's avatar in the same feed. Clarity recorded a dead
+                  click labelled exactly "G" on a paid mobile visit to this page:
+                  a tap on an avatar that represents nobody and opens nothing.
+
+                  A glyph instead, so the row reads as an event rather than as a
+                  person. There is no per-viewer profile in this product, so
+                  there is nothing a tap here could ever open.
+                */
                 if (m.isSystem) {
-                  const name = m.text?.split(" ")?.[0] || "U";
                   return (
                     <div key={m.id || index} className="inline-message" style={{ opacity: 0.7 }}>
-                      <span className="inline-initial">
-                        {name.charAt(0).toUpperCase()}
+                      <span className="inline-initial inline-initial-glyph" aria-hidden="true">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M15 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                          <circle cx="8.5" cy="7" r="4" />
+                          <path d="M18 8v6M15 11h6" />
+                        </svg>
                       </span>
                       <div className="inline-message-body">
                         <span className="inline-text" style={{ fontStyle: "italic", fontSize: 12 }}>{m.text}</span>
@@ -1705,8 +1722,21 @@ const LiveView = (props) => {
                   const gd = m.giftData;
                   return (
                     <div key={m.id || index} className="inline-message inline-gift-message">
-                      <span className="inline-initial" style={{ background: "linear-gradient(135deg, #f75801, #d43400)" }}>
-                        {(m.sender || "G").charAt(0).toUpperCase()}
+                      {/* Same reasoning as the system row above: `m.sender || "G"`
+                          fabricated a "G" for an unnamed gifter, which is a
+                          letter belonging to no one. Show the gift itself. */}
+                      <span
+                        className={`inline-initial ${m.sender ? "" : "inline-initial-glyph"}`}
+                        style={{ background: "linear-gradient(135deg, #f75801, #d43400)" }}
+                        aria-hidden={m.sender ? undefined : "true"}
+                      >
+                        {m.sender ? (
+                          m.sender.charAt(0).toUpperCase()
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+                          </svg>
+                        )}
                       </span>
                       <div className="gift-card-bubble">
                         {gd?.giftImg && <img src={gd.giftImg} alt={gd?.giftName} className="gift-card-img" />}
@@ -1723,8 +1753,19 @@ const LiveView = (props) => {
                 if (m.isFollow) {
                   return (
                     <div key={m.id || index} className="inline-message" style={{ opacity: 0.6 }}>
-                      <span className="inline-initial" style={{ background: "#22c55e" }}>
-                        {(m.sender || "U").charAt(0).toUpperCase()}
+                      {/* "U" was a fabricated initial too — see the system row. */}
+                      <span
+                        className={`inline-initial ${m.sender ? "" : "inline-initial-glyph"}`}
+                        style={{ background: "#22c55e" }}
+                        aria-hidden={m.sender ? undefined : "true"}
+                      >
+                        {m.sender ? (
+                          m.sender.charAt(0).toUpperCase()
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
+                          </svg>
+                        )}
                       </span>
                       <div className="inline-message-body">
                         <span className="inline-text" style={{ fontStyle: "italic", fontSize: 11 }}>{m.text}</span>
@@ -1733,11 +1774,30 @@ const LiveView = (props) => {
                   );
                 }
                 // Regular messages
+                const isHostMessage = m.role === "host";
                 return (
-                  <div key={m.id || index} className={`inline-message ${m.role === "host" ? "inline-host-message" : ""}`}>
-                    <span className="inline-initial">
-                      {(m.sender || (m.role === "host" ? "A" : "U")).charAt(0).toUpperCase()}
-                    </span>
+                  <div key={m.id || index} className={`inline-message ${isHostMessage ? "inline-host-message" : ""}`}>
+                    {/*
+                      The astrologer's own avatar in chat is the one initial here
+                      with somewhere to go, so it opens their profile — the same
+                      action as the name/avatar bar at the top of the stream.
+                      Viewer avatars stay inert: this product has no viewer
+                      profile, so there is nothing to open.
+                    */}
+                    {isHostMessage ? (
+                      <button
+                        type="button"
+                        className="inline-initial inline-initial-btn"
+                        onClick={handleViewHostProfile}
+                        aria-label={`View ${m.sender || hostDisplayName || "astrologer"}'s profile`}
+                      >
+                        {(m.sender || hostDisplayName || "A").charAt(0).toUpperCase()}
+                      </button>
+                    ) : (
+                      <span className="inline-initial">
+                        {(m.sender || "U").charAt(0).toUpperCase()}
+                      </span>
+                    )}
                     <div className="inline-message-body">
                       {m.sender && (
                         <span className="inline-sender">{m.sender}</span>

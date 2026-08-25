@@ -1786,6 +1786,26 @@ const AstrologerProfile = () => {
                   {loadingMore && (
                     <div className={styles.reviewsLoading}>Loading more...</div>
                   )}
+
+                  {/*
+                    Pagination was scroll-only: handleLoadMoreReviews existed but
+                    nothing rendered a control for it, so more reviews arrived
+                    only by scrolling this inner `max-height: 500px` box. A nested
+                    scroller inside the page scroller is easy to miss on a phone
+                    and worse in an in-app browser, so page 2 onwards was
+                    effectively unreachable — visitors read the first few reviews
+                    and tapped at them instead. An explicit control also gives the
+                    keyboard a way to reach the rest.
+                  */}
+                  {!loadingMore && reviewPage < reviewTotalPages && (
+                    <button
+                      type="button"
+                      className={styles.loadMoreReviewsBtn}
+                      onClick={handleLoadMoreReviews}
+                    >
+                      Load more reviews
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className={styles.noReviews}>
@@ -2099,7 +2119,27 @@ const AstrologerProfile = () => {
             className={styles.mobileConnectBtn}
             onClick={() => {
               if (!data?.isActive) {
-                toast.error("This astrologer is currently offline. Please try again later.");
+                /*
+                  Was `toast.error("This astrologer is currently offline. Please
+                  try again later.")` — a dead end that told the visitor to come
+                  back later and nothing else. The shared helper in
+                  astrologerAvailability.js is the single source of this wording
+                  and names the alternative ("Try another astrologer or check back
+                  soon"), which is what the desktop connect tiles already show. A
+                  session recording has a visitor tapping this button repeatedly
+                  across twelve minutes while the astrologer stayed offline, so
+                  the two copies disagreeing was costing the one hint that goes
+                  anywhere. `info` rather than `error`: nothing failed.
+                */
+                toast.info(
+                  unavailableReason({
+                    label: "Chat",
+                    isOnline: false,
+                    isLive,
+                    isTypeActive: true,
+                    hasPrice: true,
+                  }),
+                );
                 return;
               }
               setShowMobileConnectPopup(true);
