@@ -69,6 +69,23 @@ const AudioIntro = ({
     }
   };
 
+  // Simulated playback ticker, extracted so seeking can restart it from a new
+  // position instead of fighting the `startedAt` baseline captured in the old
+  // interval's closure.
+  const startSimulated = (fromSeconds) => {
+    clearTimer();
+    const startedAt = Date.now() - fromSeconds * 1000;
+    timerRef.current = setInterval(() => {
+      const elapsed = (Date.now() - startedAt) / 1000;
+      if (elapsed >= totalTime) {
+        setCurrentTime(totalTime);
+        stop();
+      } else {
+        setCurrentTime(elapsed);
+      }
+    }, 100);
+  };
+
   const stop = () => {
     setIsPlaying(false);
     clearTimer();
@@ -97,16 +114,55 @@ const AudioIntro = ({
     }
 
     // Simulated playback (no real audio source)
-    const startedAt = Date.now() - currentTime * 1000;
-    timerRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startedAt) / 1000;
-      if (elapsed >= totalTime) {
-        setCurrentTime(totalTime);
-        stop();
-      } else {
-        setCurrentTime(elapsed);
-      }
-    }, 100);
+    startSimulated(currentTime >= totalTime ? 0 : currentTime);
+  };
+
+  /*
+    Seek by clicking the waveform.
+
+    The bars are drawn in two colours split at the playback position, which is
+    exactly what a scrubbable progress track looks like — so it gets clicked,
+    and until now nothing happened anywhere except on the 40px play button. 220
+    bars of obvious affordance, all inert.
+
+    Works in both modes: with a real `src` we move `audio.currentTime`; in the
+    simulated mode we move the state and, if it is running, restart the ticker
+    from the new offset.
+  */
+  const seekTo = (seconds) => {
+    const next = Math.min(totalTime, Math.max(0, seconds));
+    setCurrentTime(next);
+
+    if (src && audioRef.current) {
+      audioRef.current.currentTime = next;
+      return;
+    }
+    if (isPlaying) startSimulated(next);
+  };
+
+  const handleWaveformClick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (!rect.width) return;
+    const ratio = (e.clientX - rect.left) / rect.width;
+    seekTo(ratio * totalTime);
+  };
+
+  const handleWaveformKeyDown = (e) => {
+    // 5s nudges, plus Home/End — the conventional keyboard contract for a
+    // slider, which this now is.
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+      e.preventDefault();
+      seekTo(currentTime + 5);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+      e.preventDefault();
+      seekTo(currentTime - 5);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      seekTo(0);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      seekTo(totalTime);
+    }
   };
 
   // Cleanup on unmount
@@ -154,7 +210,21 @@ const AudioIntro = ({
           {isPlaying ? <FaPause /> : <FaPlay className={styles.playIcon} />}
         </button>
 
-        <div className={styles.waveform} aria-hidden="true">
+        {/* Was `aria-hidden` on a plain div. Now a real slider: clickable,
+            focusable, and announced with its position. The individual bars stay
+            decorative. */}
+        <div
+          className={styles.waveform}
+          role="slider"
+          tabIndex={0}
+          aria-label="Seek voice intro"
+          aria-valuemin={0}
+          aria-valuemax={Math.round(totalTime)}
+          aria-valuenow={Math.round(currentTime)}
+          aria-valuetext={`${formatTime(currentTime)} of ${formatTime(totalTime)}`}
+          onClick={handleWaveformClick}
+          onKeyDown={handleWaveformKeyDown}
+        >
           {bars.map((h, i) => {
             const played = i / BAR_COUNT <= progress;
             return (
@@ -162,6 +232,7 @@ const AudioIntro = ({
                 key={i}
                 className={`${styles.bar} ${played ? styles.barPlayed : ""}`}
                 style={{ height: `${h}%` }}
+                aria-hidden="true"
               />
             );
           })}

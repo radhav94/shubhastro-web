@@ -32,16 +32,21 @@
     display: flex;
     align-items: center;
 
-    i {
+    // The old `i.fa.fa-search` never rendered (FontAwesome is not loaded in
+    // this app), so this rule styled nothing. Kept for the inline SVG that
+    // replaced it — same position, same inertness so it cannot swallow a tap
+    // meant for the field.
+    .searchIcon {
       position: absolute;
-      left: 14px;
+      left: 12px;
       color: #999;
-      font-size: 14px;
       pointer-events: none;
     }
 
     input {
-      padding-left: 12px;
+      // Was 12px, which only looked right while the icon was invisible. Leaves
+      // room for the 16px glyph plus its 12px offset.
+      padding-left: 36px;
       min-width: 200px;
       outline-color: #d83700;
 
@@ -507,6 +512,9 @@
   appearance: none;
   -webkit-appearance: none;
   background: transparent;
+  // Required for the *price* slider only: two inputs are stacked on top of each
+  // other there, so the upper one would block the lower one's thumb entirely.
+  // The cost is that the track itself becomes inert — see .singleRange below.
   pointer-events: none;
   outline: none;
 
@@ -559,6 +567,18 @@
       transform: scale(1.15);
     }
   }
+}
+
+/*
+  Rating and Experience are single-thumb sliders, so they never needed the
+  stacking workaround that .rangeSlider carries for Price. Inheriting
+  `pointer-events: none` there left only the 20px thumb clickable: tapping
+  anywhere on the 4px track — the obvious way to set a value, and the native
+  behaviour of <input type="range"> — did nothing at all. Restoring pointer
+  events lets the browser handle track clicks and keyboard arrows again.
+*/
+.singleRange {
+  pointer-events: auto;
 }
 
 .priceLabels {

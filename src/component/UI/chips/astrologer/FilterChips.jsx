@@ -605,16 +605,80 @@ const FilterChips = ({
           <Formik
             initialValues={{ searchText: "" }}
             validationSchema={searchValidationSchema}
-            onSubmit={() => {}}
+            /*
+              Was `onSubmit={() => {}}`. The Field sits inside a <Form>, so
+              Enter submits it — and submitting did nothing. The only path to a
+              search was the 500 ms debounce in handleDebouncedSearch, so
+              pressing Enter (the first thing anyone does in a search box, and
+              the only affordance on a phone keyboard) produced no response at
+              all: no request, no spinner, no message. Clarity logs that as a
+              dead interaction on the last screen of the session.
+
+              Now Enter runs the same search immediately and cancels the pending
+              debounce, so the query cannot fire twice.
+            */
+            onSubmit={({ searchText: submitted }) => {
+              clearTimeout(debounceTimerRef.current);
+              const value = (submitted || searchText || "").trim();
+
+              if (!value) {
+                // Empty box: mirror the clear button rather than firing a
+                // no-op request.
+                if (activeChips.length > 0) {
+                  isFilterActiveRef.current = true;
+                  applyFilters({
+                    pageNo: 1,
+                    skills: selectedSkills,
+                    ignoreSearch: true,
+                    append: false,
+                  });
+                } else {
+                  handleClick("all");
+                }
+                return;
+              }
+
+              setActive(activeChips.length > 0 ? "" : "search");
+              isFilterActiveRef.current = true;
+              applyFilters({
+                searchValue: value,
+                skills: selectedSkills,
+                category: "search",
+                pageNo: 1,
+              });
+            }}
           >
             {({ setFieldValue }) => (
-              <Form>
+              <Form role="search">
                 <div>
-                  <i className="fa fa-search" />
+                  {/*
+                    Was `<i className="fa fa-search" />`. FontAwesome is not
+                    loaded anywhere in this app — no stylesheet link in
+                    index.html, no package in package.json — so that element
+                    rendered as an empty 0x0 box and the search field had no
+                    icon at all, only a placeholder. Inline SVG so the
+                    affordance actually paints; aria-hidden because the input's
+                    label carries the meaning.
+                  */}
+                  <svg
+                    className={styles.searchIcon}
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                    <path d="M20 20L16.5 16.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
                   <Field
+                    aria-label="Search astrologers by name"
                     name="searchText"
                     className={`${styles.chip} ${active === "search" ? styles.activeChip : ""}`}
                     type="text"
+                    // Labels the phone keyboard's action key "Search" instead of
+                    // the generic "Go"/newline, now that pressing it does something.
+                    enterKeyHint="search"
                     placeholder="Search Name"
                     value={searchText}
                     onInput={(e) => handleDebouncedSearch(e, setFieldValue)}
@@ -901,7 +965,8 @@ const FilterChips = ({
                         step={0.5}
                         value={minRating}
                         onChange={(e) => setMinRating(Number(e.target.value))}
-                        className={styles.rangeSlider}
+                        aria-label="Minimum rating"
+                        className={`${styles.rangeSlider} ${styles.singleRange}`}
                       />
                     </div>
                     <div className={styles.priceLabels}>
@@ -927,7 +992,8 @@ const FilterChips = ({
                         step={1}
                         value={minExperience}
                         onChange={(e) => setMinExperience(Number(e.target.value))}
-                        className={styles.rangeSlider}
+                        aria-label="Minimum experience in years"
+                        className={`${styles.rangeSlider} ${styles.singleRange}`}
                       />
                     </div>
                     <div className={styles.priceLabels}>

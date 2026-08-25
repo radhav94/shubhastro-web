@@ -9,6 +9,7 @@ import { FaYoutube, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 import { Link, NavLink } from "react-router-dom";
 import { useState, useCallback } from "react";
 import { isShubhMallEnabled } from "../utils/featureConfig";
+import { trackEvent } from "../utils/analytics";
 import {
   PLAY_STORE_URL,
   APP_STORE_URL,
@@ -117,9 +118,32 @@ const Footer = () => {
     </div>
   );
 
+  /*
+    These links carry target="_blank", so the tab being recorded never
+    navigates — the store opens in a new one. Session recorders can only observe
+    the original tab, so a working click is indistinguishable from a broken one
+    and gets reported as a dead click on "Download App". Three separate Clarity
+    reports for one visitor read as "did not lead to navigation, possibly a
+    broken link"; the link resolves to a live listing (verified 200, real app
+    page), it just cannot be seen from the recorded tab.
+
+    An explicit event is the only way to know whether these are actually being
+    used. Fires before the browser opens the new tab, and trackEvent already
+    swallows its own failures, so it cannot interfere with the navigation.
+  */
+  const trackStoreClick = (store) => {
+    trackEvent("app_store_click", { store, location: "footer" });
+  };
+
   const storeButtons = (
     <div className={styles.v2_storeButtons}>
-      <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className={styles.v2_storeBtn}>
+      <a
+        href={PLAY_STORE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles.v2_storeBtn}
+        onClick={() => trackStoreClick("google_play")}
+      >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M3 20.5V3.5C3 2.91 3.34 2.39 3.84 2.15L13.69 12L3.84 21.85C3.34 21.6 3 21.09 3 20.5Z" fill="#4CAF50"/>
           <path d="M16.81 15.12L6.05 21.34L14.54 12.85L16.81 15.12Z" fill="#F44336"/>
@@ -143,7 +167,13 @@ const Footer = () => {
         advertising an app that does not exist removes the dead end outright.
       */}
       {APP_STORE_URL && (
-        <a href={APP_STORE_URL} target="_blank" rel="noopener noreferrer" className={styles.v2_storeBtn}>
+        <a
+          href={APP_STORE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.v2_storeBtn}
+          onClick={() => trackStoreClick("app_store")}
+        >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff">
             <path d="M17.05 20.28C16.03 21.23 14.96 21.08 13.93 20.63C12.85 20.17 11.85 20.15 10.71 20.63C9.28 21.25 8.52 21.07 7.62 20.28C2.79 15.25 3.51 7.59 9.05 7.31C10.4 7.38 11.34 8.05 12.13 8.11C13.31 7.87 14.44 7.18 15.7 7.27C17.21 7.39 18.35 7.99 19.1 9.07C15.98 10.94 16.72 15.05 19.58 16.2C19.01 17.7 18.27 19.19 17.04 20.29L17.05 20.28ZM12.03 7.25C11.88 5.02 13.69 3.18 15.77 3C16.06 5.58 13.43 7.5 12.03 7.25Z"/>
           </svg>

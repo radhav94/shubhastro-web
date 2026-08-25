@@ -753,12 +753,34 @@ const HoroscopeNew = () => {
       <div className="horoscope-page-content">
         <div className="horoscope-container">
 
-          {/* Sun Sign / Moon Sign - Primary Tabs */}
+          {/*
+            Sun Sign / Moon Sign - Primary Tabs
+
+            Hidden on "This Year" unless a moon sign is actually known. The
+            yearly query is the only one that ignores the sub-tab
+            (`skip: activeTab !== 'This Year'` — no Sun/Moon variant exists), so
+            it re-runs only when the tab changes `activeSignNumber`, which needs
+            `profileMoonSign`. For a visitor with no birth profile — every guest,
+            and the entry state of this page — tapping either tab on This Year
+            moved the underline and changed nothing else: same sign, same
+            request, same text. That is the dead click Clarity flags around the
+            sign selectors. Rather than render a control that cannot do
+            anything, show it only where it works.
+          */}
+          {(activeTab !== 'This Year' || profileMoonSign) && (
           <div className="sign-tabs-wrapper">
             <div className="sign-tabs">
               {['Sun Sign', 'Moon Sign'].map((signTab) => {
                 const isActive = (signTab === 'Moon Sign') ? activeSignTab === 'Moon' : activeSignTab === 'Sun';
-                const tabZodiacName = signTab === 'Moon Sign' ? capitalizedMoonSign : capitalizedSunSign;
+                /*
+                  Only name the sign when it is genuinely that sign. Without a
+                  profile, `capitalizedMoonSign` falls back to the *selected*
+                  (sun) sign, so both tabs read "(Aries)" and the Moon tab looked
+                  like it had failed to switch anything.
+                */
+                const tabZodiacName = signTab === 'Moon Sign'
+                  ? (profileMoonSign ? capitalizedMoonSign : null)
+                  : capitalizedSunSign;
                 return (
                   <button
                     key={signTab}
@@ -776,14 +798,17 @@ const HoroscopeNew = () => {
                     }}
                   >
                     {signTab}
-                    <span className="sign-tab-zodiac-wrap">
-                      ({tabZodiacName})
-                    </span>
+                    {tabZodiacName && (
+                      <span className="sign-tab-zodiac-wrap">
+                        ({tabZodiacName})
+                      </span>
+                    )}
                   </button>
                 );
               })}
             </div>
           </div>
+          )}
 
           {/* Today / Tomorrow / This Week / This Year - Pill Tabs */}
           <div className="time-tabs-wrapper pill-tabs-wrapper">
@@ -1044,7 +1069,17 @@ const HoroscopeNew = () => {
         {showZodiacModal && (
           <div className="zodiac-modal" onClick={() => setShowZodiacModal(false)}>
             <div className="zodiac-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-handle"></div>
+              {/* Was an inert <div>. A grabber bar is the universal "this sheet
+                  can be dismissed" affordance, so it gets tapped — and this one
+                  sits inside a container that stops click propagation, so the
+                  tap could not even fall through to the backdrop's own dismiss
+                  handler. Guaranteed dead click, right where the thumb rests. */}
+              <button
+                type="button"
+                className="modal-handle"
+                aria-label="Close zodiac picker"
+                onClick={() => setShowZodiacModal(false)}
+              />
               <h2 className="modal-title">Select Zodiac</h2>
               <div className="zodiac-list">
                 {zodiacSigns.map((zodiac) => (

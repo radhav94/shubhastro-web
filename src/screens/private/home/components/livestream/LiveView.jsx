@@ -12,7 +12,7 @@ import LiveListModal from "./LiveListModal";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { useReelScroll } from "./useReelScroll";
 import { isShubhMallEnabled } from "../../../../../utils/featureConfig";
-import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
+import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../../utils/helper/string.utils";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -622,6 +622,39 @@ const LiveView = (props) => {
         navigate(backPath, { replace: true });
       }
     }
+  };
+
+  /*
+    Open the streamer's profile from the name/avatar bar.
+
+    That bar was a plain <div>: an avatar, the host's name and the word "Live",
+    with no handler on any of it. Tapping a streamer's avatar or name to see who
+    they are is the one gesture every live product shares, so it gets tapped
+    here too — and did nothing at all. Clarity reports the click as
+    "<name>Live", which is this element's two text nodes concatenated.
+
+    Cleanup mirrors the non-pending-call branch of handleCloseLive: drop the
+    viewer session and navigate. The Agora/socket teardown then runs from
+    useLiveStreaming's unmount cleanup, exactly as it does for the back button —
+    skipCleanupRef is deliberately NOT set, because we are leaving the stream
+    rather than backgrounding it for a call.
+
+    An active call is the one case that must not navigate: it is a paid
+    connection the visitor is in the middle of, and the call pill sits inside
+    this same bar. Say so instead of dropping it.
+  */
+  const handleViewHostProfile = () => {
+    if (activeCall) {
+      Toast.error(`You're on a call with ${hostDisplayName}. End it to view the profile.`);
+      return;
+    }
+
+    const profilePath = getAstrologerProfilePath(
+      fullAstro || astrologer,
+      astrologerId
+    );
+    clearViewerSession();
+    navigate(profilePath);
   };
 
   // Handle call initiation - uses real call flow (same as homepage astrologer listing)
@@ -1319,28 +1352,41 @@ const LiveView = (props) => {
                   useGetAstrologerByIdQuery above, so the derivatives are
                   available here; the live-list `astrologer` is kept as the
                   pre-fetch fallback and preserves the previous precedence. */}
-              <img
-                className="host-avatar-img"
-                src={getAstrologerImageUrl(hostImageSource, "small")}
-                alt={hostDisplayName}
-                width={30}
-                height={30}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = getAstrologerDefaultImage(hostImageSource.gender);
-                }}
-              />
-              <div className="host-text">
-                <div className="host-name host-name-truncate">
-                  {hostDisplayName}
+              {/*
+                A real <button>, so the avatar and name open the astrologer's
+                profile. Only the avatar and the text are wrapped — the
+                minimized call pill below stays a sibling, because it is itself
+                interactive and nesting it inside a button would be invalid.
+              */}
+              <button
+                type="button"
+                className="host-identity"
+                onClick={handleViewHostProfile}
+                aria-label={`View ${hostDisplayName}'s profile`}
+              >
+                <img
+                  className="host-avatar-img"
+                  src={getAstrologerImageUrl(hostImageSource, "small")}
+                  alt=""
+                  width={30}
+                  height={30}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = getAstrologerDefaultImage(hostImageSource.gender);
+                  }}
+                />
+                <div className="host-text">
+                  <div className="host-name host-name-truncate">
+                    {hostDisplayName}
+                  </div>
+                  <div className="host-duration">
+                    {isCallForCurrentAstrologer
+                      ? `Private Call ${formatCallTime(callSeconds)}`
+                      : `Live`
+                    }
+                  </div>
                 </div>
-                <div className="host-duration">
-                  {isCallForCurrentAstrologer
-                    ? `Private Call ${formatCallTime(callSeconds)}`
-                    : `Live`
-                  }
-                </div>
-              </div>
+              </button>
               {/* Minimized call pill - right after name */}
               {/* Minimized call pill - right after name */}
               {isCallForCurrentAstrologer && !isCallExpanded && (

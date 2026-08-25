@@ -1,6 +1,7 @@
 import styles from "./ChatWindow.module.scss";
 import toast from "../../../../../component/toast";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import ProfileManager from "../../../../../component/UI/Profile/ProfileManager";
 import { useChat } from "../../../../../context/ChatContext";
 import { useVoiceRecorder } from "../../../talkToAstrologer/voiceChat/useVoiceRecorder";
@@ -482,14 +483,17 @@ const ChatInput = ({
         </div>
       )}
 
-      <ProfileManager
-        isOpen={kundliModalOpen}
-        onClose={() => setKundliModalOpen(false)}
-        startCallMode={true}
-        callModeBtnTitle="Continue"
-        onStartCall={handleChatAfterKundliSelect}
-        title="Select Profile"
-      />
+      {createPortal(
+        <ProfileManager
+          isOpen={kundliModalOpen}
+          onClose={() => setKundliModalOpen(false)}
+          startCallMode={true}
+          callModeBtnTitle="Continue"
+          onStartCall={handleChatAfterKundliSelect}
+          title="Select Profile"
+        />,
+        document.body,
+      )}
 
       {/* Mic Permission Denied Modal */}
       {micPermissionDenied && (
