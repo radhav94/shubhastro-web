@@ -640,6 +640,29 @@
   }
 }
 
+/*
+  Dimmed-but-tappable submit. Replaces `disabled` for the two blocked cases (no
+  description yet, submit in flight) so the tap still reaches the handler and gets
+  an explanation — see handleTicketSubmit. Matches the `:disabled` look above so
+  nothing changes visually.
+*/
+.ticketSubmitBlocked {
+  opacity: 0.5;
+
+  &:hover {
+    background: #E56329;
+  }
+}
+
+/* In-modal reason a submit was refused or failed. */
+.ticketError {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #c9521f;
+  text-align: left;
+}
+
 // Ticket success actions
 .ticketActions {
   display: flex;

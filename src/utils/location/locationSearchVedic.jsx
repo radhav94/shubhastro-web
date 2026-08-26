@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useLazyGeoSearchQuery } from "../../redux/api/geoApi";
 import Toast from "../../component/toast";
 import styles from "./locationSearch.module.scss";
@@ -46,8 +46,41 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled,
   // Any pending keystroke must not fire after the field goes away.
   useEffect(() => () => clearTimeout(debounceRef.current), []);
 
-  // Ensure data is always an array
-  const results = Array.isArray(data) ? data : [];
+  /*
+    Ensure data is always an array, then float Indian places to the top.
+
+    The geo endpoint (`geo-search-advanced?city=`) takes nothing but the query
+    string — no country or region parameter — so it returns worldwide matches in
+    whatever order it likes. For a partially-typed Indian city that regularly puts
+    a small foreign town above the city the visitor meant: session replay caught
+    someone in India setting their birth place to "Kolka, Cote d'Ivoire" while
+    typing Kolkata, and then asking three questions about their future. Every
+    prediction after that was computed for West Africa — wrong coordinates and a
+    wrong timezone, silently. Same-name pairs make it worse: Hyderabad exists in
+    both India and Pakistan.
+
+    India-first matches what this product already assumes everywhere else: phone
+    validation is +91-only in all three signup forms, and `handleSelect` below
+    falls back to timezone 5.5 (IST) when the API omits one.
+
+    Deliberately a reorder and not a filter — people are born abroad, and this is
+    a birth-place field. Everything the API returned is still listed, in its
+    original relative order within each group; only the grouping is new.
+  */
+  const results = useMemo(() => {
+    const list = Array.isArray(data) ? data : [];
+    if (list.length < 2) return list;
+
+    const isIndian = (item) => {
+      const code = String(item?.country ?? "").trim().toUpperCase();
+      const name = String(item?.country_name ?? "").trim().toLowerCase();
+      return code === "IN" || code === "IND" || name === "india";
+    };
+
+    // Array.prototype.sort is stable in every engine we target, so mapping to
+    // 0/1 preserves the endpoint's own ranking inside each group.
+    return [...list].sort((a, b) => Number(isIndian(b)) - Number(isIndian(a)));
+  }, [data]);
 
   /*
     The dropdown used to close in only two situations: the query dropping below

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import TransactionsTable from "./TransactionsTable";
 import { useGetTransactionsQuery } from "../../../services/appServices/transactionService";
 import { Link } from "react-router-dom";
@@ -11,7 +11,6 @@ const WALLET = "wallet";
 
 const WalletTranscations = () => {
   const [activeTab, setActiveTab] = useState(WALLET);
-  const [transactionData, setTransactionData] = useState([]);
 
   const { data, isFetching } = useGetTransactionsQuery();
   const {
@@ -20,20 +19,43 @@ const WalletTranscations = () => {
     isFetching: isFetchingWallet,
   } = useWalletBalance();
 
-  // Track wallet screen open + transaction history view (once on mount)
+  // Track wallet screen open + transaction history view (once on mount).
+  // No disable directive needed: trackEvent is a module import, not a dependency.
   useEffect(() => {
     trackEvent("wallet_screen_opened", {});
     trackEvent("transaction_history_viewed", {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (activeTab === PAYMENT) {
-      setTransactionData(data?.data?.filter((row) => row.type === "credit"));
-    } else {
-      setTransactionData(data?.data);
-    }
-  }, [activeTab, data]);
+  /*
+    The crash this fixes: `TypeError: data?.map is not a function`.
+
+    `transactions/all` responds with
+
+        { data: { transactions: [...], pagination: { ... } } }
+
+    (see Profile.jsx, which reads `transactionsData.data.transactions` and
+    `.data.pagination` off this same query). This screen read `data?.data` — the
+    wrapper object — and handed it to TransactionsTable, which maps over it. The
+    component's `data = []` default never helped, because the value was an object
+    rather than `undefined`, so its `data.length === 0` empty-state check was also
+    false and execution fell through to `.map`. The Payment Logs tab was broken the
+    same way one line up: `.filter` on the same object.
+
+    Derived with useMemo instead of mirrored into state by an effect. The old
+    version had to keep a second copy of the list in sync with two triggers, and
+    computing it is both shorter and immune to the two getting out of step.
+
+    The tab filter also matched the wrong field. `row.type` is not the debit/credit
+    flag — Profile.jsx compares `type` against "refunded" and reads the direction
+    from `billing.user.action`, which is what this table's own row rendering uses.
+    So `row.type === "credit"` matched nothing and Payment Logs was always empty.
+  */
+  const rows = useMemo(() => {
+    const list = Array.isArray(data?.data?.transactions) ? data.data.transactions : [];
+    return activeTab === PAYMENT
+      ? list.filter((row) => row?.billing?.user?.action === "credit")
+      : list;
+  }, [data, activeTab]);
 
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
@@ -108,7 +130,7 @@ const WalletTranscations = () => {
       {/* Table (Scrollable on mobile) */}
       {!isFetching && (
         <div className="overflow-x-auto">
-          <TransactionsTable data={transactionData} />
+          <TransactionsTable data={rows} />
         </div>
       )}
     </div>

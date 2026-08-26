@@ -29,9 +29,30 @@ const ConnectCard = () => {
         otherwise the link announces as "ask to astrologer ask to astrologer
         Consult with an Astrologer".
       */}
+      {/*
+        width/height are the intrinsic pixel sizes (verified on disk: 2400x417 and
+        750x240). Both images are `width: 100%; height: auto`, so with the
+        attributes present the browser derives the aspect ratio and reserves the
+        right height before the file arrives. Without them the banner occupied zero
+        height until it decoded and then appeared — about 105px on a phone —
+        pushing everything below it down after first paint. This card renders on
+        ~20 calculator report screens, so that shift was on all of them.
+      */}
       <Link to="/astrologers">
-        <img src={askToAsrtroDesktop} className={styles.askToAsrtroDesktop} alt="" />
-        <img src={askToAsrtroMob} className={styles.askToAsrtroMob} alt="" />
+        <img
+          src={askToAsrtroDesktop}
+          className={styles.askToAsrtroDesktop}
+          width="2400"
+          height="417"
+          alt=""
+        />
+        <img
+          src={askToAsrtroMob}
+          className={styles.askToAsrtroMob}
+          width="750"
+          height="240"
+          alt=""
+        />
         <span className={styles.askAnAstrobtn}>Consult with an Astrologer</span>
       </Link>
       {/* <p className={styles.title}>

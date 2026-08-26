@@ -631,8 +631,12 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
 }
 
 /* ==================== EMPTY & SKELETON ==================== */
+// Now a <button> that focuses the chat input — see the note in the JSX. The
+// chrome reset keeps it rendering exactly as it did as a <div>; `width: 100%`
+// replaces the block-level width a div had inside this flex column.
 .emptyState {
   flex: 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -641,6 +645,17 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   padding: 24px;
   color: #9b877b;
   text-align: center;
+  appearance: none;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: -4px;
+    border-radius: 12px;
+  }
 
   p {
     max-width: 230px;

@@ -318,7 +318,28 @@ const HomeLayout = () => {
 
         {showHeader && !isWebview && <Breadcrumb />}
 
-        <Suspense fallback={<CircleSpinner />}>
+        {/*
+          The fallback reserves the route's height.
+
+          Every screen in Paths.js is `lazy()`, so this fallback paints on every
+          navigation. `CircleSpinner` is in-flow and ~90px tall, while the layout
+          is `min-height: 100vh` with `.contentWrapper { flex: 1 }` and the footer
+          as the next flex child — so a 90px route pulls the (tall, on mobile)
+          footer up into the viewport, and swapping in the real page then shoves it
+          back down. That happens after first paint, so it counts in full towards
+          CLS, on every route change. Clarity measured 1.335 on a two-navigation
+          calculator session.
+
+          `.routeFallback` holds the space a page would occupy so the footer stays
+          put across the swap.
+        */}
+        <Suspense
+          fallback={
+            <div className={styles.routeFallback}>
+              <CircleSpinner />
+            </div>
+          }
+        >
           <main className={styles.outletDiv} style={!isOnline ? { background: 'transparent' } : {}}>
             {/* Always keep Outlet mounted — NoInternet is an overlay so active calls aren't disrupted */}
             <Outlet />

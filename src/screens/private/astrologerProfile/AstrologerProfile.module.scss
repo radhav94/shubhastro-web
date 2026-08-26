@@ -1338,6 +1338,24 @@
   flex: 1;
 }
 
+// The Rating tile only. Chrome reset so it renders identically to the two plain
+// tiles beside it, plus the affordance it now earns. See the note in the JSX.
+.statItemLink {
+  appearance: none;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 4px;
+    border-radius: 8px;
+  }
+}
+
 .statIcon {
   width: 28px;
   height: 28px;
@@ -1960,10 +1978,22 @@
   box-shadow: none !important;
   padding: 16px;
   margin: 10px 0px 32px 0px;
+
+  /* Scroll target for the Rating tile. `.topHeaderWrap` is position: fixed at
+     top: 93px (53px under 1180px), so scrolling this to the top of the viewport
+     would put the "USER REVIEWS" heading behind it. scroll-margin-top is the
+     mechanism for exactly that: it offsets where scrollIntoView considers the
+     top of this element to be. Values match the header's own breakpoints. */
+  scroll-margin-top: 160px;
+
+  @media screen and (width <= 1180px) {
+    scroll-margin-top: 120px;
+  }
   @media (width <= 767px) {
     padding: 16px;
     margin: 10px 0px 32px 0px;
     border-radius: 12px;
+    scroll-margin-top: 110px;
   }
 }
 
@@ -2748,6 +2778,90 @@
   min-height: 100vh;
   font-size: 18px;
   color: #666666;
+}
+
+/* ===========================
+   LOAD / ERROR / NOT-FOUND STATES
+   These sit under the page's own fixed .topHeaderWrap, so they need the same
+   clearance the loaded page gets. See the note in AstrologerProfile.jsx.
+=========================== */
+.stateBody {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 160px 20px 60px;
+  min-height: 60vh;
+
+  @media screen and (width <= 1180px) {
+    padding-top: 120px;
+  }
+  @media screen and (width <= 767px) {
+    padding-top: 100px;
+  }
+}
+
+.stateCard {
+  width: 100%;
+  max-width: 460px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid #fff;
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  padding: 28px 22px;
+}
+
+.stateTitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+}
+
+.stateText {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #555;
+  margin: 0 0 20px;
+}
+
+.stateActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.statePrimary,
+.stateSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 2px;
+  }
+}
+
+.statePrimary {
+  border: none;
+  color: #fff;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+}
+
+.stateSecondary {
+  border: 1.5px solid rgba(0, 0, 0, 0.18);
+  color: #1a1a1a;
+  background: rgba(255, 255, 255, 0.75);
 }
 .titleDivider {
   display: flex;
