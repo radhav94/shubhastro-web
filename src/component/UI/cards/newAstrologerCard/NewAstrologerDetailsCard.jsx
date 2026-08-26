@@ -23,6 +23,9 @@ const NewAstrologerDetailsCard = ({
   // Set on the first card only: loads the photo eagerly at high priority
   // because it is the one card in this list that can be above the fold.
   priority = false,
+  // "chat" | "audio" | null — which of this card's connect requests is still
+  // resolving. Supplied by the parent from useAstrologerConnect's isConnecting.
+  connectingType = null,
 }) => {
   const navigate = useNavigate();
   const isOnline = astrologer?.isActive === true;
@@ -213,9 +216,15 @@ const NewAstrologerDetailsCard = ({
                     onConnect(astrologer, "chat");
                   }}
                   aria-disabled={!chatEnabled}
+                  aria-busy={connectingType === "chat"}
                   title={!chatEnabled ? chatReason : "Start chat"}
                 >
-                  <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
+                  {/* The balance/availability check behind onConnect is a network
+                      round trip. Without a label change the button looks inert for
+                      its duration, which is what produces repeated chat attempts
+                      in session recordings. */}
+                  <img src={AppIcons.ChatMinutesIcon} alt="" />{" "}
+                  {connectingType === "chat" ? "Connecting…" : "Chat"}
                 </button>
                 <p className={styles.detailsPriceText}>
                   {chatPrice > 0 ? (
@@ -244,9 +253,11 @@ const NewAstrologerDetailsCard = ({
                     onConnect(astrologer, "audio");
                   }}
                   aria-disabled={!callEnabled}
+                  aria-busy={connectingType === "audio"}
                   title={!callEnabled ? callReason : "Start call"}
                 >
-                  <img src={AppIcons.CallMinutesIcon} alt="" /> Call
+                  <img src={AppIcons.CallMinutesIcon} alt="" />{" "}
+                  {connectingType === "audio" ? "Connecting…" : "Call"}
                 </button>
                 <p className={styles.detailsPriceText}>
                   {callPrice > 0 ? (
