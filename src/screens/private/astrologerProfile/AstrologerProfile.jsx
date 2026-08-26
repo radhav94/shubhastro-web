@@ -15,7 +15,7 @@ import {
   useGetAstrologerByIdQuery,
   useGetAstrologersQuery,
 } from "../../../redux/api/astrologer/astrologerApi";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { ErrorText, PrimaryText } from "../../../component";
 import toast from "../../../component/toast";
 import { unavailableReason } from "../../../utils/helper/astrologerAvailability";
@@ -48,6 +48,7 @@ import { useChat } from "../../../context/ChatContext";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { trackEvent } from "../../../utils/analytics";
 import { ProfileManager } from "../../../component/UI/Profile";
+import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { Link } from "react-router-dom";
 import { BookOpen } from "lucide-react";
@@ -177,6 +178,15 @@ const AstrologerProfile = () => {
   // both, so it's passed through untouched.
   const { id: astrologerParam } = useParams();
   const navigate = useNavigate();
+  /*
+    The router's location, which this file previously never obtained — every
+    `location.pathname` here was resolving to the global `window.location`. That
+    happens to work for `pathname`, so it went unnoticed, but `window.location`
+    has no `key`, and `key` is how you tell whether there is in-app history to go
+    back to. Without this, handleBackOut's check would read `undefined` and always
+    take the `navigate(-1)` branch — silently keeping the bug it exists to fix.
+  */
+  const location = useLocation();
   // Same Figma-exported star icon as NewAstrologerCard, which this page also
   // renders — both hardcoded `id="clip0_4961_937"`, so they collided.
   const starClipId = `astroProfileStarClip-${useId()}`;
@@ -185,6 +195,7 @@ const AstrologerProfile = () => {
     data: astrologerData,
     isLoading,
     error,
+    refetch: refetchAstrologer,
   } = useGetAstrologerByIdQuery(
     { id: astrologerParam },
     { skip: !astrologerParam },
@@ -481,6 +492,20 @@ const AstrologerProfile = () => {
     while the tab was backgrounded. The request fails, nothing is said, and the
     visitor is left tapping a button that keeps saying "+ Follow".
   */
+  /*
+    Leave the profile.
+
+    `navigate(-1)` alone is inert on the first history entry — a shared link, an
+    ad, or a Google in-app browser opening this profile directly — so the back
+    chevron did nothing at all for exactly those visitors. Same pattern the rest
+    of the codebase uses (see BackButton.jsx and LalKitabDetail.jsx): prefer real
+    history, fall back to the listing this profile belongs to.
+  */
+  const handleBackOut = () => {
+    if (location.key !== "default") navigate(-1);
+    else navigate("/astrologers", { replace: true });
+  };
+
   const handleFollow = async () => {
     if (!token) {
       navigate("/login", { state: { from: location.pathname } });
@@ -1038,6 +1063,9 @@ const AstrologerProfile = () => {
     }
   };
 
+  // Scroll target for the Rating stat tile.
+  const reviewsSectionRef = useRef(null);
+
   // Infinite scroll for reviews
   const reviewsListRef = useRef(null);
   const handleReviewsScroll = useCallback(() => {
@@ -1255,9 +1283,82 @@ const AstrologerProfile = () => {
    */
   const hasConsultationHours = displayData.weeklySchedule.some((item) => item.time);
 
-  if (isLoading) return <div className={styles.loading}>Loading...</div>;
-  if (error) return <ErrorText>Something went wrong!</ErrorText>;
-  if (!data) return <ErrorText>Astrologer not found</ErrorText>;
+  /*
+    Load / error / not-found states.
+
+    These were `<div>Loading...</div>` and two bare <ErrorText> strings. The
+    loading one fills the viewport (`min-height: 100vh`) with a centred grey
+    word and nothing else: the page's own header — including its back button —
+    is rendered further down, after these returns, so during the load there was
+    not one interactive element on screen. A visitor who has just tapped an
+    astrologer from the listing taps where the photo and the Chat/Call buttons
+    are about to be, and gets nothing.
+
+    That window is not short on a phone: this screen's chunk is ~84 kB on top of
+    the astrologer request, and session replay caught a dead click three seconds
+    after arrival in the Google in-app browser. The two error states were worse —
+    a sentence with no header and no way out at all.
+
+    All three now keep the page chrome, so a tap always has the back button to
+    land on, and the failure states offer a retry and a route onward. Mirrors the
+    treatment LivePlayerPage's gate states already have.
+  */
+  const stateShell = (children) => (
+    <div className={styles.profilePage}>
+      <header className={styles.topHeaderWrap}>
+        <div className={styles.topHeader}>
+          <div className={styles.headerLeft}>
+            <button className={styles.backBtn} onClick={handleBackOut} aria-label="Go back">
+              <IoChevronBack />
+            </button>
+            <h2 className={styles.headerTitle}>Profile</h2>
+          </div>
+        </div>
+      </header>
+      <div className={styles.stateBody}>{children}</div>
+    </div>
+  );
+
+  if (isLoading) {
+    return stateShell(
+      <PrimaryLoader fullscreen={false} message="" />
+    );
+  }
+
+  if (error) {
+    return stateShell(
+      <div className={styles.stateCard}>
+        <h1 className={styles.stateTitle}>Couldn&apos;t load this profile</h1>
+        <p className={styles.stateText}>
+          This is usually a connection hiccup rather than a problem with the astrologer.
+        </p>
+        <div className={styles.stateActions}>
+          <button type="button" className={styles.statePrimary} onClick={refetchAstrologer}>
+            Try again
+          </button>
+          <Link to="/astrologers" className={styles.stateSecondary}>
+            Browse astrologers
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return stateShell(
+      <div className={styles.stateCard}>
+        <h1 className={styles.stateTitle}>Astrologer not found</h1>
+        <p className={styles.stateText}>
+          This profile may have been removed, or the link may be out of date.
+        </p>
+        <div className={styles.stateActions}>
+          <Link to="/astrologers" className={styles.statePrimary}>
+            See who&apos;s online
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const StarRating = ({ rating, max = 5 }) => {
     return (
@@ -1282,7 +1383,8 @@ const AstrologerProfile = () => {
       <header className={styles.topHeaderWrap}>
         <div className={styles.topHeader}>
           <div className={styles.headerLeft}>
-            <button className={styles.backBtn} onClick={() => navigate(-1)}>
+            {/* handleBackOut, not a bare navigate(-1) — see its definition. */}
+            <button className={styles.backBtn} onClick={handleBackOut} aria-label="Go back">
               <IoChevronBack />
             </button>
             <h2 className={styles.headerTitle}>Profile</h2>
@@ -1550,17 +1652,38 @@ const AstrologerProfile = () => {
                 <div className={styles.statLabel}>Consultations</div>
               </div>
               <div className={styles.statDivider}></div>
-              <div className={styles.statItem}>
+              {/*
+                The Rating tile jumps to the reviews.
+
+                All three tiles here look like the interactive tiles used
+                elsewhere in the app, and none of them did anything. Experience
+                and Consultations have nowhere to go, so they stay as the figures
+                they are — but Rating is a summary of a section that is on this
+                same page, and a rating summary that scrolls to the reviews is the
+                standard behaviour. It is the one of the three worth a handler
+                rather than an explanation.
+              */}
+              <button
+                type="button"
+                className={`${styles.statItem} ${styles.statItemLink}`}
+                onClick={() =>
+                  reviewsSectionRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  })
+                }
+                aria-label={`Rating ${Number(displayData.rating).toFixed(1)} out of 5. Jump to reviews`}
+              >
                 <img
                   src={RatingIcon}
-                  alt="Rating"
+                  alt=""
                   className={styles.statIcon}
                 />
                 <div className={styles.statValue}>
                   {Number(displayData.rating).toFixed(1)}
                 </div>
                 <div className={styles.statLabel}>Rating</div>
-              </div>
+              </button>
             </div>
 
             {/* Consultation Hours */}
@@ -1750,8 +1873,8 @@ const AstrologerProfile = () => {
               />
             )}
 
-            {/* User Reviews */}
-            <div className={styles.reviewsSection}>
+            {/* User Reviews — scroll target for the Rating tile above. */}
+            <div className={styles.reviewsSection} ref={reviewsSectionRef}>
               <div className={styles.devider}>
                 <h3 className={styles.sectionTitle}>USER REVIEWS</h3>
                 <div className={styles.titleDivider}>

@@ -18,6 +18,7 @@ import { useWalletBalance } from "../wallet/useWalletBalance";
 import { PATH } from "../../../utils/routes/Paths";
 import { trackEvent } from "../../../utils/analytics";
 import { downloadFile } from "../../../utils/helper/downloadFile";
+import { openDeferredTab } from "../../../utils/helper/openDeferredTab";
 import { findChargeAmount } from "./hooks/useAIWowDownload";
 
 // Reusable Section Title with Divider (same as Explore page, auto-width)
@@ -389,12 +390,31 @@ const AIWow = () => {
   };
 
   const handleViewResultPdf = async (featureId) => {
+    /*
+      Same gesture problem as the receipt button in Profile.jsx: this used to
+      `await fetchPdfUrl(...)` and only then call `window.open`, by which point
+      the click's permission was spent — desktop Chrome blocked it as a popup and
+      iOS/in-app browsers dropped it. It then toasted "PDF opened!" regardless, so
+      the one signal the visitor got actively contradicted what they saw.
+
+      The tab is claimed inside the tap now, and success is only claimed once the
+      tab has actually been sent to the document.
+    */
+    const tab = openDeferredTab();
     try {
       toast.loading("Opening PDF...", { id: "pdf-view" });
       const pdfUrl = await fetchPdfUrl(featureId);
-      window.open(pdfUrl, "_blank", "noopener,noreferrer");
-      toast.success("PDF opened!", { id: "pdf-view" });
+
+      if (tab.settle(pdfUrl)) {
+        toast.success("PDF opened!", { id: "pdf-view" });
+        return;
+      }
+
+      // No usable tab — open it here rather than losing the document.
+      toast.success("Opening your PDF in this tab.", { id: "pdf-view" });
+      window.location.assign(pdfUrl);
     } catch {
+      tab.abort();
       toast.error("Failed to open PDF", { id: "pdf-view" });
     }
   };

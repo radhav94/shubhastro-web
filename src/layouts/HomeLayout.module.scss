@@ -168,6 +168,20 @@ $mobile-screen-width: 500px;
     }
   }
 
+  /*
+    Height reserved for a route that is still loading — see the Suspense note in
+    HomeLayout.jsx. Without it the in-flow spinner is the only content, the footer
+    is pulled up into the viewport by `.layout { min-height: 100vh }` +
+    `.contentWrapper { flex: 1 }`, and the real page then pushes it back down.
+  */
+  .routeFallback {
+    width: 100%;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .topGap {
     height: 95px; // TopHeader (88px) + TopBar (95px)
 

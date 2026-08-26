@@ -3,10 +3,14 @@ import { FiTrash } from "react-icons/fi";
 
 export default function TransactionsTable({ data = [] }) {
   /*
-    A default parameter only fires for `undefined`, so `null` — or the paginated
-    object this used to be handed — sailed through and blew up on `.length` /
-    `.map`. A table is not the right place to take down the whole route, so
-    anything that is not an array is treated as no rows.
+    The `data = []` default only covers `undefined`. A caller that passed an
+    object — which is exactly what WalletTranscations did, handing over the
+    `{ transactions, pagination }` wrapper — got past the empty-state check below
+    (`{}.length === 0` is false) and crashed the whole route on `.map`.
+
+    Normalising here means a wrong shape degrades to the empty state instead of
+    taking down the page. The caller is fixed too; this is the guard for the next
+    one.
   */
   const rows = Array.isArray(data) ? data : [];
 

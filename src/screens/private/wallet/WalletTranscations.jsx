@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import TransactionsTable from "./TransactionsTable";
 import { useGetTransactionsQuery } from "../../../services/appServices/transactionService";
 import { Link } from "react-router-dom";
@@ -11,12 +11,12 @@ const WALLET = "wallet";
 
 const WalletTranscations = () => {
   const [activeTab, setActiveTab] = useState(WALLET);
-  const [transactionData, setTransactionData] = useState([]);
 
   /*
     `limit` is explicit because the endpoint defaults to 10 and this screen has no
     pagination controls — without it the page silently claimed you had only ever
-    made ten transactions.
+    made ten transactions. The response does carry `data.pagination.hasNextPage`,
+    so a "Load more" here would be the proper fix (Profile.jsx already does that).
   */
   const { data, isFetching } = useGetTransactionsQuery({ page: 1, limit: 50 });
   const {
@@ -25,33 +25,43 @@ const WalletTranscations = () => {
     isFetching: isFetchingWallet,
   } = useWalletBalance();
 
-  // Track wallet screen open + transaction history view (once on mount)
+  // Track wallet screen open + transaction history view (once on mount).
+  // No disable directive needed: trackEvent is a module import, not a dependency.
   useEffect(() => {
     trackEvent("wallet_screen_opened", {});
     trackEvent("transaction_history_viewed", {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    /*
-      The rows live at `data.data.transactions`; `data.data` is the paginated
-      envelope `{ transactions, pagination }`, not an array. This screen treated it
-      as one, so the Wallet tab handed an object to the table (`.map is not a
-      function`) and the Payment Logs tab called `.filter` on it — either way the
-      route died with "Something went wrong" before rendering. Profile.jsx reads
-      the same endpoint correctly and is the reference for this shape.
-    */
-    const rows = Array.isArray(data?.data?.transactions) ? data.data.transactions : [];
+  /*
+    The crash this fixes: `TypeError: data?.map is not a function`.
 
-    if (activeTab === PAYMENT) {
-      // Credit/debit is `billing.user.action`, not `type` — `type` carries values
-      // like "refunded". Filtering on `type === "credit"` matched nothing, so this
-      // tab would have been empty even once the crash was gone.
-      setTransactionData(rows.filter((row) => row?.billing?.user?.action === "credit"));
-    } else {
-      setTransactionData(rows);
-    }
-  }, [activeTab, data]);
+    `transactions/all` responds with
+
+        { data: { transactions: [...], pagination: { ... } } }
+
+    (see Profile.jsx, which reads `transactionsData.data.transactions` and
+    `.data.pagination` off this same query). This screen read `data?.data` — the
+    wrapper object — and handed it to TransactionsTable, which maps over it. The
+    component's `data = []` default never helped, because the value was an object
+    rather than `undefined`, so its `data.length === 0` empty-state check was also
+    false and execution fell through to `.map`. The Payment Logs tab was broken the
+    same way one line up: `.filter` on the same object.
+
+    Derived with useMemo instead of mirrored into state by an effect. The old
+    version had to keep a second copy of the list in sync with two triggers, and
+    computing it is both shorter and immune to the two getting out of step.
+
+    The tab filter also matched the wrong field. `row.type` is not the debit/credit
+    flag — Profile.jsx compares `type` against "refunded" and reads the direction
+    from `billing.user.action`, which is what this table's own row rendering uses.
+    So `row.type === "credit"` matched nothing and Payment Logs was always empty.
+  */
+  const rows = useMemo(() => {
+    const list = Array.isArray(data?.data?.transactions) ? data.data.transactions : [];
+    return activeTab === PAYMENT
+      ? list.filter((row) => row?.billing?.user?.action === "credit")
+      : list;
+  }, [data, activeTab]);
 
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
@@ -126,7 +136,7 @@ const WalletTranscations = () => {
       {/* Table (Scrollable on mobile) */}
       {!isFetching && (
         <div className="overflow-x-auto">
-          <TransactionsTable data={transactionData} />
+          <TransactionsTable data={rows} />
         </div>
       )}
     </div>
