@@ -4,7 +4,24 @@
   height: 100%;          /* ⭐ full height instead of 100vh */
   margin: 0;
   padding: 0;
-  font-family: "Poppins";
+  /*
+    Was `font-family: "Poppins"` with no fallback list.
+
+    index.html defines a metric-adjusted fallback face for exactly this reason —
+    `@font-face { font-family: 'Poppins Fallback'; src: local('Arial');
+    size-adjust: 110%; ascent-override: 90% ... }` — and wires it into `body`.
+    But this class wraps the entire app, so it overrode that for every element
+    inside, and text fell back to the UA default (Roboto on Android) instead.
+
+    Poppins is loaded non-blocking (`media="print"` swapped to `all` on load), so
+    the swap always lands after first paint. Every text block therefore re-flowed
+    with unadjusted metrics — line heights change across headings, paragraphs and
+    table rows — and all of it counts towards CLS.
+
+    Matching body's stack restores the adjusted fallback, so the swap is close to
+    metrically neutral.
+  */
+  font-family: "Poppins", "Poppins Fallback", sans-serif;
   background: transparent !important;
   position: relative;    /* ⭐ required for stacking */
   overflow: visible;     /* ⭐ allow page scroll */

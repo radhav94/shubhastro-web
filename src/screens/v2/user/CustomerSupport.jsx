@@ -5,6 +5,7 @@ import { useGetSupportQuestionsQuery, useLazyGetSubTopicsQuery, useLazyGetSuppor
 import EntityCard from "./entityCards/EntityCard";
 import entityCardStyles from "./entityCards/EntityCards.module.scss";
 import RatingCard from "./RatingCard";
+import Toast from "../../../component/toast";
 import styles from "./CustomerSupport.module.scss";
 import { trackEvent } from "../../../utils/analytics";
 
@@ -12,6 +13,10 @@ const CustomerSupport = () => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  // Persistent, in-modal reason a ticket submit was refused or failed — a toast
+  // at the top of the screen is not where the visitor is looking.
+  const [ticketError, setTicketError] = useState("");
+  const ticketTextareaRef = useRef(null);
   const [selectedRating, setSelectedRating] = useState(0);
   const messagesEndRef = useRef(null);
 
@@ -204,8 +209,37 @@ const CustomerSupport = () => {
     setTimeout(() => setShowTicketModal(true), 300);
   };
 
+  /*
+    Submit a support ticket.
+
+    Two silent paths, on the last step of the one flow a stuck visitor reaches for:
+
+     - An empty description was a bare `return`, and the button also carried
+       `disabled={!ticketIssue.trim() || …}`. A disabled button dispatches no
+       click at all, so tapping Submit with nothing typed was doubly swallowed:
+       no event, no message, no hint that the textarea above is required.
+     - The catch was empty, deferring to the global toast in privateRequestNew.
+       That toast renders at the top of the screen while the visitor is looking at
+       the button inside the modal, so a failed submit reads as a button that does
+       nothing — and this modal keeps its text, so the natural response is to tap
+       Submit again.
+
+    The button is now tappable in both cases and this handler owns the
+    explanation, with a failure message that persists inside the modal.
+  */
   const handleTicketSubmit = async () => {
-    if (!ticketIssue.trim()) return;
+    if (isSubmittingTicket) {
+      Toast.info("Submitting your ticket — one moment.");
+      return;
+    }
+
+    if (!ticketIssue.trim()) {
+      setTicketError("Please describe your issue before submitting.");
+      ticketTextareaRef.current?.focus();
+      return;
+    }
+
+    setTicketError("");
     setIsSubmittingTicket(true);
 
     try {
@@ -240,7 +274,9 @@ const CustomerSupport = () => {
 
       setMessages((prev) => [...prev, botResponse]);
     } catch {
-      // error handled by privateRequestNew
+      // privateRequestNew raises its own toast; this keeps the reason next to the
+      // button so a retry isn't a guess. The modal and the typed text stay put.
+      setTicketError("Couldn't submit your ticket. Please check your connection and try again.");
     } finally {
       setIsSubmittingTicket(false);
     }
@@ -249,6 +285,7 @@ const CustomerSupport = () => {
   const handleTicketCancel = () => {
     setShowTicketModal(false);
     setTicketIssue("");
+    setTicketError("");
     setSelectedEntity(null);
   };
 
@@ -575,12 +612,22 @@ const CustomerSupport = () => {
           <div className={styles.ticketModalContent}>
             <h3 className={styles.ticketModalTitle}>Describe your issue</h3>
             <textarea
+              ref={ticketTextareaRef}
               className={styles.ticketTextarea}
               placeholder="Please describe your issue in detail..."
               value={ticketIssue}
-              onChange={(e) => setTicketIssue(e.target.value)}
+              onChange={(e) => {
+                setTicketIssue(e.target.value);
+                if (ticketError) setTicketError("");
+              }}
               rows={4}
+              aria-invalid={!!ticketError}
             />
+            {ticketError && (
+              <p className={styles.ticketError} role="alert">
+                {ticketError}
+              </p>
+            )}
             <div className={styles.ticketModalActions}>
               <button
                 className={styles.ticketCancelButton}
@@ -589,10 +636,18 @@ const CustomerSupport = () => {
               >
                 Cancel
               </button>
+              {/*
+                aria-disabled, not `disabled`: an empty description and an
+                in-flight submit both need the tap to reach handleTicketSubmit so
+                it can say which one is blocking. See its note.
+              */}
               <button
-                className={styles.ticketSubmitButton}
+                className={`${styles.ticketSubmitButton} ${
+                  !ticketIssue.trim() || isSubmittingTicket ? styles.ticketSubmitBlocked : ""
+                }`}
                 onClick={handleTicketSubmit}
-                disabled={!ticketIssue.trim() || isSubmittingTicket}
+                aria-disabled={!ticketIssue.trim() || isSubmittingTicket}
+                aria-busy={isSubmittingTicket}
               >
                 {isSubmittingTicket ? "Submitting..." : "Submit"}
               </button>

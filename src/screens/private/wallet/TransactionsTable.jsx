@@ -2,7 +2,18 @@ import React from "react";
 import { FiTrash } from "react-icons/fi";
 
 export default function TransactionsTable({ data = [] }) {
-  console.log("data", data);
+  /*
+    The `data = []` default only covers `undefined`. A caller that passed an
+    object — which is exactly what WalletTranscations did, handing over the
+    `{ transactions, pagination }` wrapper — got past the empty-state check below
+    (`{}.length === 0` is false) and crashed the whole route on `.map`.
+
+    Normalising here means a wrong shape degrades to the empty state instead of
+    taking down the page. The caller is fixed too; this is the guard for the next
+    one.
+  */
+  const rows = Array.isArray(data) ? data : [];
+
   const formatCurrency = (value) => {
     const abs = Math.abs(value);
     return `₹ ${abs}`;
@@ -22,7 +33,7 @@ export default function TransactionsTable({ data = [] }) {
   };
 
   // If no data, show the message like in the image
-  if (data.length === 0) {
+  if (rows.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded shadow-sm">
         <div className="text-xl text-gray-400 mb-2">
@@ -54,7 +65,7 @@ export default function TransactionsTable({ data = [] }) {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-100">
-          {data?.map((r) => (
+          {rows.map((r) => (
             <tr key={r._id} className="hover:bg-gray-50">
               <td className="px-6 py-4 text-sm text-left text-gray-700">
                 {r.description || r.message || "-"}{r?.sessionDetails?.durationSeconds > 0 && (<> for {formatTime(r.sessionDetails.durationSeconds) } min.</>)}

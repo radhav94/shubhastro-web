@@ -44,12 +44,38 @@
 .errorState,
 .emptyState {
   display: flex;
+  // Column, so the retry button added to the two error states sits under the
+  // message instead of beside it.
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 14px;
   padding: 90px 20px;
   text-align: center;
   color: #6b7280;
   font-size: 14px;
+
+  p {
+    margin: 0;
+  }
+}
+
+/* Retry for the two failure states, which previously offered nothing at all. */
+.stateRetryBtn {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
 }
 
 .recordingsList {

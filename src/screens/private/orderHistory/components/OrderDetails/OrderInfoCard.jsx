@@ -110,13 +110,26 @@ const OrderInfoCard = ({
       // Lazily attach HLS the first time the user plays, so audio loads only
       // when clicked instead of for every card on page load.
       if (!hlsRef.current && !media.src) {
-        const hls = attachHls(media, recordingUrl, hlsRef);
-        if (hls) {
-          // HLS.js: start playback once the manifest has been parsed.
-          hls.once(Hls.Events.MANIFEST_PARSED, () => playAudio(media));
-        } else {
-          playAudio(media);
-        }
+        // attachHls stores the instance on hlsRef for the unmount cleanup, so
+        // the return value is not needed here.
+        attachHls(media, recordingUrl, hlsRef);
+        /*
+          Start playback inside the tap, not from a network callback.
+
+          This used to be `hls.once(Hls.Events.MANIFEST_PARSED, () => playAudio(media))`
+          — the manifest is a network round trip, so by the time it fired the
+          gesture that permitted playback was long gone and mobile browsers
+          rejected `play()` with NotAllowedError. In an in-app browser that made
+          the first tap on a recording do nothing at all, every time; a second tap
+          could work because `media.src` was set by then and took the sync path
+          below. That is the repeat-tap pattern session replay shows on this card.
+
+          `attachHls` has already pointed the element at hls.js's MediaSource
+          synchronously, so calling play() now is valid: the element is marked
+          user-activated and begins as soon as the manifest and first segment
+          arrive. playAudio surfaces a rejection either way.
+        */
+        playAudio(media);
         return;
       }
       if (isPlaying) { stopAudio(media); } else { playAudio(media); }
