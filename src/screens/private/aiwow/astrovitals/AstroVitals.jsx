@@ -4,7 +4,7 @@ import styles from './AstroVitals.module.scss';
 import { Toast } from '../../../../component';
 import { syncAstroVitals } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
-import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import RouteLoader from '../../../../component/UI/RouteLoader';
 
 const AstroVitals = () => {
   const navigate = useNavigate();
@@ -168,7 +168,8 @@ const AstroVitals = () => {
   };
 
   if (profileLoading) {
-    return <PrimaryLoader isLoading={true} />;
+    // Reserves in-flow height while the profile loads — see RouteLoader.
+    return <RouteLoader message="Loading your birth details…" />;
   }
 
   const handleNewAnalysis = () => {

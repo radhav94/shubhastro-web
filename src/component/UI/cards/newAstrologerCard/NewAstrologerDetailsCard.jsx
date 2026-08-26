@@ -10,6 +10,7 @@ import {
 } from "../../../../utils/appImages";
 import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySessionModal";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
+import { resolveLiveChannelForAstrologer } from "../../../../utils/helper/resolveLiveChannel";
 import { getAstrologerAvailability } from "../../../../utils/helper/astrologerAvailability";
 import toast from "../../../toast";
 import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
@@ -42,24 +43,41 @@ const NewAstrologerDetailsCard = ({
   const imageUrl = getAstrologerImageUrl(astrologer);
 
   /*
-    `isLive` and `roomId` come from the same hook but are not guaranteed to
-    arrive together — the status flag can be true (from the astrologer record or
-    an early socket event) while roomId is still undefined or has gone stale
-    after a stream ended. Interpolating it regardless sent the user to
-    "/live/undefined", which cannot resolve a room, so a deliberate tap on
-    "Join Live" dumped them somewhere with nothing to watch and they went back to
-    browsing. AstrologerLiveBadge already guards this exact navigation with
-    `if (roomId)`; the cards did not.
+    `isLive` and `roomId` come from the same hook but do not arrive together.
+    Interpolating a null roomId sent the user to "/live/undefined", which cannot
+    resolve a room. A previous pass swapped that for a toast on the assumption the
+    gap was transient — it isn't. roomId reaches useAstrologerLiveStatus only from
+    the astrologer payload or the `live:astrologer_status` socket event, and that
+    event fires on a status *change*, so a visitor who loads this card while the
+    stream is already running never receives it and every join control stays a
+    no-op for the whole visit.
 
-    Kept live rather than disabled, and it says what happened instead of
-    silently doing nothing.
+    Resolve the channel from the live list instead, and only report failure when
+    the astrologer genuinely isn't streaming. `joiningLive` makes the tap visibly
+    do something, which a toast does not — Clarity cannot see toasts, so a
+    toast-only path keeps being logged as a dead click.
   */
-  const handleJoinLive = () => {
-    if (!liveRoomId) {
-      toast.error("This live session just ended. Try another astrologer.");
+  const [joiningLive, setJoiningLive] = useState(false);
+
+  const handleJoinLive = async () => {
+    if (joiningLive) return;
+
+    if (liveRoomId) {
+      navigate(`/live/${liveRoomId}`);
       return;
     }
-    navigate(`/live/${liveRoomId}`);
+
+    setJoiningLive(true);
+    try {
+      const channel = await resolveLiveChannelForAstrologer(astrologer?._id);
+      if (channel) {
+        navigate(`/live/${channel}`);
+        return;
+      }
+      toast.error("This live session just ended. Try another astrologer.");
+    } finally {
+      setJoiningLive(false);
+    }
   };
 
   return (
@@ -75,7 +93,7 @@ const NewAstrologerDetailsCard = ({
           aria-label="Astrologer is live, click to watch"
         >
           <span className={styles.liveDot} />
-          <span>Live</span>
+          <span>{joiningLive ? "Opening…" : "Live"}</span>
         </button>
       ) : (
         <div className={`${styles.statusBadge} ${isOnline ? styles.online : styles.offline}`}>
@@ -166,7 +184,7 @@ const NewAstrologerDetailsCard = ({
                   <path d="M13 19C11.5 17.5 11 16 11 14.5C11 13 11.5 11.5 13 10" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round"/>
                   <path d="M19 10C20.5 11.5 21 13 21 14.5C21 16 20.5 17.5 19 19" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round"/>
                 </svg>
-                Join Live
+                {joiningLive ? "Opening…" : "Join Live"}
               </button>
               <p className={styles.detailsPriceText}>&nbsp;</p>
             </div>

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useGetMangalDoshaReportQuery } from "../../../../redux/api/calculator/calcApi";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import styles from "./MangalReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
@@ -13,7 +13,8 @@ const MangalReport = () => {
   const stored = useSelector(selectCalculatorData("mangal_dosha"));
   const { data, isLoading } = useGetMangalDoshaReportQuery(stored, { skip: !stored });
 
-  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (!stored || isLoading) return <CalcReportLoader />;
   if (!data?.response) return <div>No data found</div>;
 
   const {

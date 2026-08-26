@@ -55,6 +55,7 @@ import { BookOpen } from "lucide-react";
 import { AppIcons, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../utils/appImages";
 import AstrologerLiveBadge from "../../../component/UI/astrologerLiveBadge/AstrologerLiveBadge";
 import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
+import { resolveLiveChannelForAstrologer } from "../../../utils/helper/resolveLiveChannel";
 import AudioIntro from "./AudioIntro";
 
 // Import custom SVG icons
@@ -220,25 +221,57 @@ const AstrologerProfile = () => {
     data?.astrologerLiveStatus
   );
 
-  const handleJoinLive = () => {
+  // Set while the channel is being looked up, so all five join controls can show
+  // that the tap registered. See handleJoinLive.
+  const [joiningLive, setJoiningLive] = useState(false);
+
+  const goToLive = (channel) => {
+    trackEvent("live_stream_joined", { astrologer_id: id, stream_id: channel });
+    navigate(`/live/${channel}`, {
+      state: { from: getAstrologerProfilePath(data, id) },
+    });
+  };
+
+  /*
+    Shared by all five join controls: the LIVE pill, the mobile status bar, the
+    sidebar live card, that card's Join button, and the mobile "Join Live Session"
+    CTA.
+
+    An earlier pass replaced a bare `if (liveRoomId) { … }` with a toast, on the
+    understanding that a missing roomId was a brief window. It is not. `roomId`
+    reaches useAstrologerLiveStatus only from `astrologerLiveStatus` on the fetched
+    astrologer or from the `live:astrologer_status` socket event, and that event
+    fires on a status *change* — so a visitor who opens this profile while the
+    stream is already running never gets it. If the API omitted the roomId, all
+    five controls stay no-ops for the whole visit, and the toast made that
+    invisible to Clarity rather than fixing it.
+
+    Clarity caught it: a visitor tried to join a live session, then worked through
+    this astrologer's LIVE controls at 01:09, got nothing, and left.
+
+    So look the channel up from the live list — the same source LivePlayerPage
+    uses — and only report failure when the astrologer genuinely isn't in it. The
+    busy state gives the tap a visible response, which a toast cannot.
+  */
+  const handleJoinLive = async () => {
+    if (joiningLive) return;
+
     if (liveRoomId) {
-      trackEvent("live_stream_joined", { astrologer_id: id, stream_id: liveRoomId });
-      navigate(`/live/${liveRoomId}`, {
-        state: { from: getAstrologerProfilePath(data, id) },
-      });
+      goToLive(liveRoomId);
       return;
     }
 
-    /*
-      Was a bare `if (liveRoomId) { … }` with no else. `isLive` and `roomId`
-      arrive from two different places — `isLive` can be seeded straight from the
-      fetched astrologer while the roomId only lands with the
-      live:astrologer_status socket event — so there is a real window where the
-      UI shows LIVE and every join control is a no-op. Four of them share this
-      handler (mobile status bar, sidebar live card, its Join button, and the
-      mobile "Join Live Session" CTA), so they all died silently and together.
-    */
-    toast.error("This live session isn't ready yet. Please try again in a moment.");
+    setJoiningLive(true);
+    try {
+      const channel = await resolveLiveChannelForAstrologer(id);
+      if (channel) {
+        goToLive(channel);
+        return;
+      }
+      toast.error("This live session just ended. Try another astrologer.");
+    } finally {
+      setJoiningLive(false);
+    }
   };
 
   // Availability for the three connect tiles (Chat / Audio / Video).
@@ -1540,7 +1573,7 @@ const AstrologerProfile = () => {
                   aria-label="Astrologer is live, click to watch"
                 >
                   <span className={styles.liveDot}></span>
-                  LIVE
+                  {joiningLive ? "OPENING…" : "LIVE"}
                 </button>
               )}
               {/*
@@ -1607,7 +1640,7 @@ const AstrologerProfile = () => {
                   }}
                 >
                   <Radio size={20} />
-                  <span>Live Now</span>
+                  <span>{joiningLive ? "Opening…" : "Live Now"}</span>
                 </div>
               ) : data?.isActive ? (
                 <div className={styles.mobileStatusAvailable}>
@@ -2104,7 +2137,7 @@ const AstrologerProfile = () => {
                 </svg>
                 <span className={styles.liveText}>Live Now</span>
               </div>
-              <button className={styles.joinLiveSidebarBtn} onClick={(e) => { e.stopPropagation(); handleJoinLive(); }}>
+              <button className={styles.joinLiveSidebarBtn} aria-busy={joiningLive} onClick={(e) => { e.stopPropagation(); handleJoinLive(); }}>
                 Join
               </button>
             </div>

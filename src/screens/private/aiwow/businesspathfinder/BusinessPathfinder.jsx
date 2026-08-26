@@ -5,6 +5,7 @@ import styles from './BusinessPathfinder.module.scss';
 import { Toast } from '../../../../component';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import RouteLoader from '../../../../component/UI/RouteLoader';
 import { useGetBusinessPathfinderOptionsQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import { ProfileManager, GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import { setSelectedKundliProfile } from '../../../../redux/aiwow/aiwowSlice';
@@ -220,7 +221,10 @@ const BusinessPathfinder = () => {
     }
   };
 
-  if (profileLoading || optionsLoading) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the profile and options load — see RouteLoader.
+  // (PrimaryLoader is still imported: the in-render "Generating your report..."
+  // overlay below is a deliberate fullscreen one.)
+  if (profileLoading || optionsLoading) return <RouteLoader message="Loading your birth details…" />;
 
   return (
     <>

@@ -8,7 +8,7 @@ import KundliSummary from "../../../../component/UI/circular/KundliSummaryV2";
 import DynamicTable from "../../../../component/UI/table/matching/DynamicTableV2";
 import TTSButton from "../../../../component/UI/TTSButton";
 import { Toast } from "../../../../component";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import RouteLoader from "../../../../component/UI/RouteLoader";
 
 // const scores = [
 //   { type: "Vashya", score: "2/2" },
@@ -59,7 +59,8 @@ const MatchDetailsV2 = () => {
     }
   }, [error]);
 
-  if (isLoading) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the match request runs — see RouteLoader.
+  if (isLoading) return <RouteLoader message="Matching the charts…" />;
 
   const matchingDetails = data?.response;
 

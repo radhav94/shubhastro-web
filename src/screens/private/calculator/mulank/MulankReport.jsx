@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useMulankCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import styles from "./MulankReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import TTSButton from "../../../../component/UI/TTSButton";
@@ -21,7 +21,8 @@ const MulankReport = () => {
     }
   }, []);
 
-  if (isLoading || isUninitialized) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (isLoading || isUninitialized) return <CalcReportLoader message="Calculating your numbers…" />;
   if (!data?.data) return <div>No data found</div>;
 
   const result = data.data;

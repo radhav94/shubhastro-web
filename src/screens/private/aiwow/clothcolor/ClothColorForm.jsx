@@ -5,7 +5,7 @@ import styles from './ClothColorForm.module.scss';
 import { setClothColorFormData } from '../../../../redux/aiwow/aiwowSlice';
 import { PATH } from '../../../../utils/routes/Paths';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
-import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import RouteLoader from '../../../../component/UI/RouteLoader';
 
 const ClothColorForm = () => {
   const navigate = useNavigate();
@@ -72,7 +72,8 @@ const ClothColorForm = () => {
   };
 
   if (profileLoading) {
-    return <PrimaryLoader isLoading={true} />;
+    // Reserves in-flow height while the profile loads — see RouteLoader.
+    return <RouteLoader message="Loading your birth details…" />;
   }
 
   return (

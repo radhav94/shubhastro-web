@@ -565,7 +565,25 @@ const TodayPanchang = () => {
         }}
       />
 
-      <PrimaryLoader isLoading={isLoading} />
+      {/*
+        Was `<PrimaryLoader isLoading={isLoading} />` on its own — fullscreen, so
+        `position: fixed` and no height in the document flow. Everything real is
+        gated behind `isSuccess` below, so until the advance-panchang request
+        resolved this route was a back button and nothing else. HomeLayout is
+        `min-height: 100vh` with the footer as the next flex child, so that pulled
+        the footer into the viewport, and the whole panchang page — input card,
+        tabs, card grid, tables — then landed in one commit and shoved it back
+        down. Clarity recorded 0.805 CLS on a session ending here.
+
+        Keyed off `!isSuccess` rather than `isLoading` so the reserved box also
+        covers the gap between a finished-but-failed request and the content that
+        never arrives, instead of collapsing to zero height.
+      */}
+      {!isSuccess && (
+        <div className={styles.panchangStateWrap}>
+          <PrimaryLoader isLoading={isLoading} fullscreen={false} message="Loading today's panchang…" />
+        </div>
+      )}
 
       {isSuccess && (
         <div className={styles.mainContainer}>

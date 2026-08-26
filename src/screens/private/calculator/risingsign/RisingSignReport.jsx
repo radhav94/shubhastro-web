@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { useGetRisingSignQuery } from "../../../../redux/api/calculator/calcApi";
 import styles from "./RisingSignReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import TTSButton from "../../../../component/UI/TTSButton";
 import { zodiacSignImages } from "../../horoscope/zodiac";
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
@@ -17,7 +17,8 @@ const RisingSignReport = () => {
   const stored = useSelector(selectCalculatorData("rising_sign"));
   const { data, isLoading } = useGetRisingSignQuery(stored, { skip: !stored });
 
-  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (!stored || isLoading) return <CalcReportLoader message="Finding your rising sign…" />;
   if (!data?.response) return <div>No data found</div>;
 
   const { ascendant, bot_response, prediction } = data.response;
