@@ -12,7 +12,13 @@ const WALLET = "wallet";
 const WalletTranscations = () => {
   const [activeTab, setActiveTab] = useState(WALLET);
 
-  const { data, isFetching } = useGetTransactionsQuery();
+  /*
+    `limit` is explicit because the endpoint defaults to 10 and this screen has no
+    pagination controls — without it the page silently claimed you had only ever
+    made ten transactions. The response does carry `data.pagination.hasNextPage`,
+    so a "Load more" here would be the proper fix (Profile.jsx already does that).
+  */
+  const { data, isFetching } = useGetTransactionsQuery({ page: 1, limit: 50 });
   const {
     balance,
     refreshWallet,

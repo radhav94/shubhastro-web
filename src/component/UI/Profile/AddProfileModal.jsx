@@ -20,6 +20,10 @@ import { relationOption } from "../../../utils/constanats/appData";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
 import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
 import giftImg from "../../../assets/images/welcome-bonus-icon.webp";
+import {
+  getSignupBonusLabel,
+  isSignupBonusEnabled,
+} from "../../../utils/featureConfig";
 
 // Visual top-to-bottom order of every field the schema can reject. Yup returns
 // a plain object and its key order is not the page order, so picking
@@ -113,6 +117,14 @@ const AddProfileModal = ({
     relation: "",
     mobileNumber: "",
     birthDate: "",
+    /*
+      The text actually sitting in the birth-date box, which is not the same
+      thing as `birthDate`: that only receives a value once the typed text parses
+      to a real date. Without this, a filled-but-unparseable box was
+      indistinguishable from an empty one and Yup answered "Birth date is
+      required" over a field the user could plainly see they had filled in.
+    */
+    birthDateRaw: "",
     birthTime: "",
     birthPlace: "",
     unknownBirthTime: false,
@@ -186,7 +198,15 @@ const AddProfileModal = ({
         .required("Mobile number is required")
         .matches(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number")
       : Yup.string().notRequired(),
-    birthDate: Yup.string().required("Birth date is required"),
+    // Two different failures, two different messages. "Required" is only true
+    // when the box is genuinely empty; text that would not parse gets told what
+    // is actually wrong with it.
+    birthDate: Yup.string().when("birthDateRaw", {
+      is: (raw) => !!String(raw || "").trim(),
+      then: (schema) =>
+        schema.required("Enter a valid birth date as DD/MM/YYYY (not in the future)"),
+      otherwise: (schema) => schema.required("Birth date is required"),
+    }),
     birthTime: Yup.string().when("unknownBirthTime", {
       is: false,
       then: (schema) => schema.required("Birth time is required"),
@@ -218,7 +238,11 @@ const AddProfileModal = ({
     }
 
     try {
-      await onSubmit(values);
+      // `birthDateRaw` exists only so validation can tell an empty box from an
+      // unparseable one. Stripped here so the parent's payload shape — and the
+      // API's — stays exactly as it was.
+      const { birthDateRaw: _birthDateRaw, ...payload } = values;
+      await onSubmit(payload);
     } catch (err) {
       // Error handling is done in parent
     }
@@ -231,6 +255,7 @@ const AddProfileModal = ({
       relation: "",
       mobileNumber: "",
       birthDate: "",
+      birthDateRaw: "",
       birthTime: "",
       birthPlace: "",
       unknownBirthTime: false,
@@ -431,6 +456,9 @@ const AddProfileModal = ({
                             setFieldValue("birthDate", "");
                           }
                         }}
+                        // Lets validation tell "empty" apart from "typed but not
+                        // a usable date" — see the birthDate schema.
+                        onRawChange={(text) => setFieldValue("birthDateRaw", text)}
                         maxDate={new Date()}
                         placeholder="DD/MM/YYYY"
                       />
@@ -535,7 +563,9 @@ const AddProfileModal = ({
                   {isLoading
                     ? "Please wait..."
                     : isGuest
-                    ? "Continue & Get ₹250 Bonus"
+                    ? isSignupBonusEnabled()
+                      ? `Continue & Get ${getSignupBonusLabel()} Bonus`
+                      : "Continue"
                     : submitButtonText || "Add Profile"}
                 </button>
 
