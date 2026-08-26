@@ -602,20 +602,49 @@ const DateTimePicker = ({
     return date;
   };
 
+  /* A typed entry is complete once it has three parts and a four-digit year.
+     Deliberately not "the text is 10 characters long": that assumed a
+     zero-padded DD/MM/YYYY and so treated 5/8/1990 as still being typed. */
+  const looksComplete = (text) => {
+    const parts = String(text).split("/");
+    return parts.length === 3 && parts[0] && parts[1] && parts[2]?.length === 4;
+  };
+
   const handleManualChange = (e) => {
     const val = e.target.value;
     setIsManuallyEditing(true);
-    // Auto-insert slashes for DD/MM/YYYY format
-    const digits = val.replace(/[^0-9]/g, "");
-    let formatted = "";
-    for (let i = 0; i < digits.length && i < 8; i++) {
-      if (i === 2 || i === 4) formatted += "/";
-      formatted += digits[i];
+
+    /*
+      The old formatter threw the user's own separators away and re-inserted its
+      own after positions 2 and 4, so it only worked for people who zero-pad.
+      Typing the perfectly ordinary "5/8/1990" produced "58/19/90" — a box that
+      looks filled, a date that can never parse, and therefore a "Birth date is
+      required" error on submit with a visibly non-empty field.
+
+      Now: if the user types separators, they are respected and each segment is
+      capped (2/2/4). If they type straight digits, the positional auto-insert
+      still applies, so "05081990" keeps working.
+    */
+    const cleaned = val.replace(/[^0-9/]/g, "");
+    let formatted;
+    if (cleaned.includes("/")) {
+      formatted = cleaned
+        .split("/")
+        .slice(0, 3)
+        .map((seg, i) => seg.slice(0, i === 2 ? 4 : 2))
+        .join("/");
+    } else {
+      formatted = "";
+      for (let i = 0; i < cleaned.length && i < 8; i++) {
+        if (i === 2 || i === 4) formatted += "/";
+        formatted += cleaned[i];
+      }
     }
+
     setInputText(formatted);
     onRawChange?.(formatted);
-    // Check validity once full date is entered (DD/MM/YYYY = 10 chars)
-    if (formatted.length === 10) {
+
+    if (looksComplete(formatted)) {
       const parsed = parseManualDate(formatted);
       if (parsed) {
         setDateError("");
@@ -649,6 +678,18 @@ const DateTimePicker = ({
     const parsed = parseManualDate(inputText);
     if (parsed) {
       setIsManuallyEditing(false);
+      /*
+        Tidy the display to DD/MM/YYYY now that focus has left. Done on blur
+        rather than while typing, because padding mid-entry fights the person
+        still typing ("5" would become "05" before they reach the month).
+        onChange already fired with the parsed date, so this is display only.
+      */
+      const pad = (n) => String(n).padStart(2, "0");
+      const tidy = `${pad(parsed.getDate())}/${pad(parsed.getMonth() + 1)}/${parsed.getFullYear()}`;
+      if (tidy !== inputText) {
+        setInputText(tidy);
+        onRawChange?.(tidy);
+      }
     } else {
       setDateError("Invalid date");
       onError?.("Invalid date");

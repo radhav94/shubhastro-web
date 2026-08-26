@@ -2,7 +2,14 @@ import React from "react";
 import { FiTrash } from "react-icons/fi";
 
 export default function TransactionsTable({ data = [] }) {
-  console.log("data", data);
+  /*
+    A default parameter only fires for `undefined`, so `null` — or the paginated
+    object this used to be handed — sailed through and blew up on `.length` /
+    `.map`. A table is not the right place to take down the whole route, so
+    anything that is not an array is treated as no rows.
+  */
+  const rows = Array.isArray(data) ? data : [];
+
   const formatCurrency = (value) => {
     const abs = Math.abs(value);
     return `₹ ${abs}`;
@@ -22,7 +29,7 @@ export default function TransactionsTable({ data = [] }) {
   };
 
   // If no data, show the message like in the image
-  if (data.length === 0) {
+  if (rows.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded shadow-sm">
         <div className="text-xl text-gray-400 mb-2">
@@ -54,7 +61,7 @@ export default function TransactionsTable({ data = [] }) {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-100">
-          {data?.map((r) => (
+          {rows.map((r) => (
             <tr key={r._id} className="hover:bg-gray-50">
               <td className="px-6 py-4 text-sm text-left text-gray-700">
                 {r.description || r.message || "-"}{r?.sessionDetails?.durationSeconds > 0 && (<> for {formatTime(r.sessionDetails.durationSeconds) } min.</>)}

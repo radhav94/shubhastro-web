@@ -13,7 +13,12 @@ const WalletTranscations = () => {
   const [activeTab, setActiveTab] = useState(WALLET);
   const [transactionData, setTransactionData] = useState([]);
 
-  const { data, isFetching } = useGetTransactionsQuery();
+  /*
+    `limit` is explicit because the endpoint defaults to 10 and this screen has no
+    pagination controls — without it the page silently claimed you had only ever
+    made ten transactions.
+  */
+  const { data, isFetching } = useGetTransactionsQuery({ page: 1, limit: 50 });
   const {
     balance,
     refreshWallet,
@@ -28,10 +33,23 @@ const WalletTranscations = () => {
   }, []);
 
   useEffect(() => {
+    /*
+      The rows live at `data.data.transactions`; `data.data` is the paginated
+      envelope `{ transactions, pagination }`, not an array. This screen treated it
+      as one, so the Wallet tab handed an object to the table (`.map is not a
+      function`) and the Payment Logs tab called `.filter` on it — either way the
+      route died with "Something went wrong" before rendering. Profile.jsx reads
+      the same endpoint correctly and is the reference for this shape.
+    */
+    const rows = Array.isArray(data?.data?.transactions) ? data.data.transactions : [];
+
     if (activeTab === PAYMENT) {
-      setTransactionData(data?.data?.filter((row) => row.type === "credit"));
+      // Credit/debit is `billing.user.action`, not `type` — `type` carries values
+      // like "refunded". Filtering on `type === "credit"` matched nothing, so this
+      // tab would have been empty even once the crash was gone.
+      setTransactionData(rows.filter((row) => row?.billing?.user?.action === "credit"));
     } else {
-      setTransactionData(data?.data);
+      setTransactionData(rows);
     }
   }, [activeTab, data]);
 
