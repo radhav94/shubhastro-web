@@ -50,7 +50,11 @@ const OrderDetails = () => {
   const isWaiting = !!(chatWaiting || callWaiting);
   const waitingRoomId = chatRoomIdLocal || callRoomIdLocal;
 
-  const { data: astrologerData, isLoading: isLoadingAstrologer } = useGetAstrologerByIdQuery(
+  const {
+    data: astrologerData,
+    isLoading: isLoadingAstrologer,
+    refetch: refetchAstrologer,
+  } = useGetAstrologerByIdQuery(
     { id: astrologerId }
   );
 
@@ -396,13 +400,23 @@ const OrderDetails = () => {
 
   const renderTabContent = () => {
     if (isLoadingMessages || isLoadingAstrologer) {
-      return <PrimaryLoader />;
+      return <PrimaryLoader fullscreen={false} message="Loading your consultation…" />;
     }
 
+    /*
+      These two states used to be a bare sentence each. Combined with the header
+      only rendering when `astrologerInfo` exists (see the JSX below), that left
+      the screen with no back button and no action of any kind — the only way out
+      was the OS back gesture, which is what "quick back clicks" on this route
+      look like. The header is now always present, and both states offer a retry.
+    */
     if (error) {
       return (
         <div className={styles.errorState}>
           <p>Failed to load order details</p>
+          <button type="button" className={styles.stateRetryBtn} onClick={refetchAstrologer}>
+            Try again
+          </button>
         </div>
       );
     }
@@ -411,6 +425,9 @@ const OrderDetails = () => {
       return (
         <div className={styles.errorState}>
           <p>Astrologer information not available</p>
+          <button type="button" className={styles.stateRetryBtn} onClick={refetchAstrologer}>
+            Try again
+          </button>
         </div>
       );
     }
@@ -532,9 +549,20 @@ const OrderDetails = () => {
 
   return (
     <div className={styles.orderDetails}>
-      {astrologerInfo && (
-        <OrderHeader astrologer={astrologerInfo} onBack={handleBack} />
-      )}
+      {/*
+        Always rendered, so the back button exists from the first paint.
+
+        This was `{astrologerInfo && <OrderHeader …/>}`, and astrologerInfo is
+        null while the astrologer request is in flight — which is every visit to
+        this route — and also in both failure states. So the first thing a visitor
+        saw here was a loader and a tab strip with nothing to go back with.
+        OrderHeader reads only `name`, `image`, `experience` and `isOnline`, so a
+        placeholder renders the same chrome without inventing any detail.
+      */}
+      <OrderHeader
+        astrologer={astrologerInfo || { name: "Consultation", experience: "" }}
+        onBack={handleBack}
+      />
       <OrderTabs activeTab={activeTab} onTabChange={setActiveTab} />
       <div className={styles.tabContent}>{renderTabContent()}</div>
 

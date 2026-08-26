@@ -614,12 +614,27 @@ const PanditAIBubble = () => {
               </div>
             ) : messages.length === 0 ? (
               guestMode ? null : (
-              <div className={styles.emptyState}>
+              /*
+                The empty state is an invitation — an icon above the words "Ask
+                Pandit AI anything about your life" — so it gets tapped as though
+                it were the way in. It was a plain <div> and did nothing; the
+                actual input is a separate bar further down. Tapping it now focuses
+                that input, which is what the sentence promises.
+
+                A <button> so it is reachable by keyboard too; the input it focuses
+                is the real control, so the label stays descriptive.
+              */
+              <button
+                type="button"
+                className={styles.emptyState}
+                onClick={() => inputRef.current?.focus()}
+                aria-label="Ask Pandit AI a question"
+              >
                 <span className={styles.emptyIcon}>
                   <IoChatbubbleEllipses size={34} />
                 </span>
                 <p>Ask Pandit AI anything about your life</p>
-              </div>
+              </button>
               )
             ) : (
               (() => {

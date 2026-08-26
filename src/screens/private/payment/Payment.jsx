@@ -159,12 +159,12 @@ const Payment = () => {
           for a refetch. Refreshing was the only thing those clicks could do, and
           it changes nothing on screen when the figure is already current.
         */}
-        <Link to="/wallet-transactions" className={styles.transactionsLink}>
+        {/* <Link to="/wallet-transactions" className={styles.transactionsLink}>
           View transactions
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M9 6L15 12L9 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-        </Link>
+        </Link> */}
 
         <div className={styles.rechargeHeader}>Add Money to Wallet</div>
 

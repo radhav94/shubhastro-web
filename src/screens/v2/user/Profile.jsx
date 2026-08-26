@@ -86,6 +86,7 @@ import {
   getAstrologerProfilePath,
 } from "../../../utils/helper/string.utils";
 import { getAstrologerImageUrl, getAstrologerDefaultImage } from "../../../utils/appImages";
+import { openDeferredTab } from "../../../utils/helper/openDeferredTab";
 
 // "Consult Again" button that disables in real time when the astrologer is live.
 // Uses useAstrologerLiveStatus so it reacts to the live socket event even when
@@ -2405,22 +2406,54 @@ const Profile = () => {
                               disabled={invoiceLoadingId === transaction._id}
                               onClick={async (e) => {
                                 e.stopPropagation();
+
+                                /*
+                                  The receipt tab is claimed here, synchronously,
+                                  before the request. `window.open` is only
+                                  allowed while the click's gesture is live, and
+                                  awaiting the invoice spends it — so the old
+                                  `await getInvoice(...)` followed by
+                                  `window.open(pdfUrl)` was blocked as an
+                                  unrequested popup by desktop Chrome and dropped
+                                  entirely by iOS and in-app browsers. The spinner
+                                  ran, stopped, and no receipt appeared. Session
+                                  replay caught a visitor working through wallet
+                                  transactions and receipts on desktop Chrome.
+                                */
+                                const tab = openDeferredTab();
                                 setInvoiceLoadingId(transaction._id);
                                 try {
                                   const data = await getInvoice(transaction._id).unwrap();
-                                  const pdfUrl =
+                                  const candidate =
                                     data?.data?.pdfUrl ||
                                     data?.data?.url ||
                                     data?.data ||
                                     data?.pdfUrl ||
                                     data?.url;
-                                  if (pdfUrl) {
-                                    window.open(pdfUrl, "_blank");
-                                  } else {
+                                  // `data?.data` is in that chain and can be an
+                                  // object or a message string, both truthy — so
+                                  // check it really is a URL before navigating.
+                                  const pdfUrl =
+                                    typeof candidate === "string" && /^https?:\/\//i.test(candidate)
+                                      ? candidate
+                                      : null;
+
+                                  if (!pdfUrl) {
+                                    tab.abort();
                                     Toast.error("Invoice not available");
+                                    return;
+                                  }
+
+                                  if (!tab.settle(pdfUrl)) {
+                                    // The tab was refused or closed. Falling back
+                                    // to this tab still gets them the receipt,
+                                    // and back returns here.
+                                    Toast.info("Opening your receipt in this tab.");
+                                    window.location.assign(pdfUrl);
                                   }
                                 } catch (err) {
                                   console.error("[Invoice] Error:", err);
+                                  tab.abort();
                                   Toast.error("Invoice not available for this transaction");
                                 } finally {
                                   setInvoiceLoadingId(null);
