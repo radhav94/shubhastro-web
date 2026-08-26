@@ -17,6 +17,14 @@ import bGuid from "../../../assets/images/b-guidence.png";
 import bAstrologer from "../../../assets/images/b-astrology.png";
 import bAccurate from "../../../assets/images/b-prediction.png";
 import bPrivate from "../../../assets/images/b-private.png";
+import {
+  getSignupBonusAmount,
+  isSignupBonusEnabled,
+} from "../../../utils/featureConfig";
+
+// Read once at module scope: an env value cannot change during a session.
+const signupBonus = getSignupBonusAmount();
+const hasBonus = isSignupBonusEnabled();
 
 const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) => {
   const navigate = useNavigate();
@@ -232,10 +240,17 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
             thing, and the <h1>/<p> here keep their semantics instead of being
             flattened into a button's accessible name.
           */}
+          {/*
+            Dropped entirely when the bonus is switched off (amount 0). The block
+            is nothing but the offer — gift box, figure, "FOR NEW SIGN UPS" — so
+            with no offer to make there is nothing here to soften; rendering it
+            would advertise "₹0".
+          */}
+          {hasBonus && (
           <div
             className={styles.offerSection}
             onClick={handleGetOTP}
-            title="Enter your mobile number to claim ₹250"
+            title={`Enter your mobile number to claim ₹${signupBonus}`}
           >
             <div className={styles.giftBox}>
               <img
@@ -246,12 +261,14 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
             </div>
             <div className={styles.offerText}>
               <h1>
-                <span className={styles.rupeeSymbol}>₹</span>250
+                <span className={styles.rupeeSymbol}>₹</span>
+                {signupBonus}
               </h1>
               <p className={styles.rechargeLabel}>RECHARGE</p>
               <p className={styles.forNewSignups}>FOR NEW SIGN UPS</p>
             </div>
           </div>
+          )}
 
           {/* Feature Badges */}
           <div className={styles.featureBadges}>
@@ -332,7 +349,11 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
             aria-disabled={phoneNumber.length < 10}
             aria-busy={loading}
           >
-            {loading ? "Sending..." : "Claim ₹250 Now"}
+            {loading
+              ? "Sending..."
+              : hasBonus
+              ? `Claim ₹${signupBonus} Now`
+              : "Get OTP"}
             {!loading && (
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
