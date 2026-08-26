@@ -771,7 +771,12 @@
     box-shadow: 0 2px 8px rgba(224, 120, 0, 0.4);
   }
 
-  &:disabled {
+  /* The button now carries `aria-disabled` instead of `disabled` while the
+   * follow request is in flight, so the dimmed treatment has to key off the
+   * attribute. `:disabled` is kept in the selector so the rule still applies if
+   * anything else in this file renders a genuinely disabled follow button. */
+  &:disabled,
+  &[aria-disabled="true"] {
     opacity: 0.6;
     cursor: not-allowed;
   }
@@ -1903,6 +1908,39 @@
   color: #fff;
 }
 
+/* Viewer count is a READOUT, not a control.
+ *
+ * Clarity dead clicks in the live room kept landing on this element. It sits in
+ * the action rail directly above "Send gift" and "Share", and it inherited the
+ * exact same `.icon-circle` treatment as those two — a 40px circle with a
+ * border, a translucent blurred fill and a drop shadow. On desktop the inline
+ * `cursor: default` hinted that it was inert, but on mobile (where every one of
+ * these sessions came from) there is no cursor, so the badge was visually
+ * indistinguishable from the two real buttons bracketing it. Viewers tapped it
+ * and nothing happened.
+ *
+ * There is no viewer-list screen in this codebase, so there is no action to
+ * wire up here — the honest fix is to remove the affordance rather than invent
+ * a destination. `pointer-events: none` would not help either: the tap would
+ * just fall through to the video surface and still be recorded as dead.
+ *
+ * Stripping the circle chrome leaves an eye glyph + number, which is the
+ * conventional "N watching" stat treatment and no longer reads as pressable.
+ * Size and spacing are untouched, so the rail's rhythm is unchanged. */
+.right-action-bar .viewer-icon-btn {
+  cursor: default;
+  gap: 4px;
+
+  .icon-circle {
+    background: none;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    width: auto;
+    height: 24px;
+  }
+}
+
 .icon-circle {
   width: 40px;
   height: 40px;
@@ -2206,6 +2244,18 @@
     img {
       filter: brightness(0);
     }
+  }
+
+  /* Keep the viewer-count readout chrome-free in the camera-off (light) theme
+   * too. The rule above uses `background: !important`, which would otherwise
+   * beat the `.viewer-icon-btn .icon-circle` override further up the file and
+   * put the circular button shell back on the one element in this rail that is
+   * not a button. See the comment on `.right-action-bar .viewer-icon-btn`. */
+  .right-action-bar .viewer-icon-btn .icon-circle {
+    background: none !important;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
   }
 
   .icon-label {

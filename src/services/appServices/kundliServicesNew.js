@@ -37,8 +37,61 @@ const clearSessionAndRedirectToLogin = () => {
  */
 const PERSONALIZE_REASON_KEY = "shubhtalk_personalize_reason";
 
-const redirectToPersonalize = () => {
+/*
+  Loop protection for the redirect below.
+
+  `checkSelfKundliAndRedirect` runs from `getAllKundlis`'s onQueryStarted, and
+  TopHeader issues that query on every page for every logged-in visitor. So this
+  is not a one-time gate on a single screen — it is a `window.location.replace`
+  that can fire on any route, from a background data fetch, a network round trip
+  after the page has already painted and become interactive.
+
+  With no cap, a logged-in visitor whose profile keeps 404ing is thrown off every
+  page they open, forever. A Clarity session shows it plainly: homepage → login →
+  birth date, time and place entered → back to the homepage → login again →
+  again, 62 clicks over 13 minutes, ending back on the homepage with a run of dead
+  and rage clicks on the "Generate My Kundli" card. Those clicks are dead because
+  the document is being replaced out from under them: the SPA navigation starts
+  and the hard replace discards it.
+
+  Two attempts, then stop. A visitor stuck without a profile is better off on a
+  working homepage — where "Generate My Kundli" reaches /kundli and Select Profile
+  → Add Profile still works — than in a bounce loop. The counter lives in
+  sessionStorage (per tab, cleared by the browser) and is reset the moment a
+  kundli is found, so this heals itself.
+*/
+const PERSONALIZE_REDIRECT_KEY = "shubhtalk_personalize_redirects";
+const MAX_PERSONALIZE_REDIRECTS = 2;
+
+const getPersonalizeRedirectCount = () => {
   try {
+    return Number(sessionStorage.getItem(PERSONALIZE_REDIRECT_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+};
+
+const clearPersonalizeRedirectCount = () => {
+  try {
+    sessionStorage.removeItem(PERSONALIZE_REDIRECT_KEY);
+  } catch {
+    /* ignore */
+  }
+};
+
+const redirectToPersonalize = () => {
+  const attempts = getPersonalizeRedirectCount();
+  if (attempts >= MAX_PERSONALIZE_REDIRECTS) {
+    // Already sent them there and they are back without a profile. Redirecting
+    // again would just take the page away from them a third time.
+    console.warn(
+      `[kundli] Skipping personalize redirect after ${attempts} attempts — leaving the visitor on ${window.location.pathname}`
+    );
+    return;
+  }
+
+  try {
+    sessionStorage.setItem(PERSONALIZE_REDIRECT_KEY, String(attempts + 1));
     sessionStorage.setItem(
       PERSONALIZE_REASON_KEY,
       "Just one more step — we need to finish setting up your profile before you can chat."
@@ -54,7 +107,13 @@ const checkSelfKundliAndRedirect = async (data) => {
   const hasSelf = profiles.length > 0;
 
   // User already has a self profile — nothing to do.
-  if (hasSelf) return;
+  if (hasSelf) {
+    // Whatever was wrong has resolved, so forget the bounce count. Without this
+    // a visitor who legitimately needed one redirect early on would carry the
+    // tally for the rest of the tab's life.
+    clearPersonalizeRedirectCount();
+    return;
+  }
 
   const path = window.location.pathname;
   if (path === "/login" || path === "/register" || path === "/profile/add") return;

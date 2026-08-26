@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import SeoHelmet from "../../../../component/SeoHelmet";
 import {
@@ -17,6 +17,12 @@ import { linkifyHtml } from "../../../../utils/helper/linkPreview";
 const SingleBlogDetails = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  // Router location, explicitly. Without this `location` resolves to
+  // `window.location`, whose `key` is undefined — so the `key !== "default"`
+  // check below would always take navigate(-1), including on a first history
+  // entry where it does nothing. (Exactly the bug that was sitting in
+  // AstrologerProfile.)
+  const location = useLocation();
   const { data, isLoading } = useGetSingleBlogQuery(slug);
   const singleBLogData = data?.data;
   const [copied, setCopied] = useState(false);
@@ -139,8 +145,43 @@ const SingleBlogDetails = () => {
 
     if (url.origin !== window.location.origin) return;
 
-    // An in-page anchor: leave the browser to do the jump.
-    if (url.pathname === window.location.pathname && url.hash) return;
+    /*
+      Anchors that resolve to the article we are already on.
+
+      The previous version only bailed out when there was a hash
+      (`pathname === current && url.hash`), which left two very common cases
+      falling through to `navigate(<the page we are already reading>)` — a no-op
+      that renders nothing new, i.e. a dead click:
+
+        <a href="#">        url.hash is "" for a bare "#", so this fell through.
+        <a href="">         resolves to the current URL, same thing.
+
+      Both are routine in CMS-authored bodies, and `.blogContent a` underlines and
+      colours every anchor, so a placeholder link is indistinguishable from a real
+      one. Worse, the `preventDefault()` also suppressed the scroll-to-top that
+      browsers natively perform for `href="#"` — so the handler took away the one
+      thing the click used to do.
+
+      A hash whose target does not exist in this article is dead natively too, and
+      is treated the same way: a broken in-page link is a CMS content problem we
+      cannot fix from here, and returning the reader to the top of the piece is the
+      least surprising thing left.
+    */
+    const isSamePage =
+      url.pathname === window.location.pathname && url.search === window.location.search;
+
+    if (isSamePage) {
+      const targetId = url.hash ? decodeURIComponent(url.hash.slice(1)) : "";
+      if (targetId) {
+        const target =
+          document.getElementById(targetId) || document.getElementsByName(targetId)[0];
+        // Real in-page anchor with something to jump to — let the browser do it.
+        if (target) return;
+      }
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
 
     e.preventDefault();
     navigate(url.pathname + url.search + url.hash);
@@ -198,8 +239,56 @@ const SingleBlogDetails = () => {
     if (platform !== "copy") setShareOpenId(null);
   };
 
-  if (isLoading) return <p style={{ textAlign: "center", padding: "60px" }}>Loading...</p>;
-  if (!singleBLogData) return <p style={{ textAlign: "center", padding: "60px" }}>No blog found</p>;
+  /*
+    Both of these were a single centred <p> with a 60px pad and nothing else on
+    the page — no back control, no link to the blog index, nothing to click. The
+    "No blog found" branch is also where an unresolvable slug lands (including the
+    /blog/undefined case the sidebar guard upstream exists to prevent), so it is
+    reachable from inside the product, not just from a bad external link.
+
+    Same treatment as the other dead-end states: say what happened and always
+    offer a way onward.
+  */
+  if (isLoading) {
+    return (
+      <div className={styles.stateWrap}>
+        <p className={styles.stateText}>Loading article…</p>
+        <Link to={PATH.privateRoutes.BLOG.path} className={styles.stateLink}>
+          Back to all blogs
+        </Link>
+      </div>
+    );
+  }
+
+  if (!singleBLogData) {
+    return (
+      <div className={styles.stateWrap}>
+        <h1 className={styles.stateTitle}>We couldn&apos;t find that article</h1>
+        <p className={styles.stateText}>
+          It may have been moved or unpublished.
+        </p>
+        <div className={styles.stateActions}>
+          {/*
+            `location.key === "default"` means this is the first entry in the
+            history stack, where navigate(-1) is inert. Sending them to the blog
+            index is better than a button that does nothing.
+          */}
+          <button
+            type="button"
+            className={styles.stateBtn}
+            onClick={() =>
+              location.key !== "default" ? navigate(-1) : navigate(PATH.privateRoutes.BLOG.path)
+            }
+          >
+            Go back
+          </button>
+          <Link to={PATH.privateRoutes.BLOG.path} className={styles.stateLink}>
+            Browse all blogs
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const seoData = {
     meta_title: singleBLogData.meta_title || singleBLogData.title,
@@ -212,7 +301,17 @@ const SingleBlogDetails = () => {
 
       {/* Breadcrumb */}
       <nav className={styles.breadcrumb}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label="Go back">
+        {/* A bare navigate(-1) does nothing when this article is the first entry
+            in the history stack — which is the normal case for blog traffic,
+            since most of it arrives on an article straight from search. Fall back
+            to the blog index so the chevron always goes somewhere. */}
+        <button
+          className={styles.backBtn}
+          onClick={() =>
+            location.key !== "default" ? navigate(-1) : navigate(PATH.privateRoutes.BLOG.path)
+          }
+          aria-label="Go back"
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>

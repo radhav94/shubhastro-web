@@ -421,3 +421,86 @@ $font-primary: "Poppins", sans-serif;
   justify-content: center;
   cursor: pointer;
 }
+
+/* ---------------------------------------
+    LOADING / NOT-FOUND STATES
+
+    These replaced a bare centred <p> that carried no interactive element at
+    all. min-height keeps the block tall enough that the layout's tall mobile
+    footer isn't pulled up into view — the same in-flow-height problem behind
+    the CLS work on the calculator report screens.
+-----------------------------------------*/
+.stateWrap {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 16px;
+  text-align: center;
+}
+
+.stateTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: $color-text;
+  margin: 0;
+
+  @media (max-width: 767px) {
+    font-size: 18px;
+  }
+}
+
+.stateText {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #5f5245;
+  margin: 0;
+}
+
+.stateActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+// Both are full-height targets rather than inline text: on a phone this block is
+// the only thing on the screen and these are the only ways off it.
+.stateBtn,
+.stateLink {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 80px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+.stateBtn {
+  border: 0;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+  color: #fff;
+  font-weight: 600;
+}
+
+.stateLink {
+  border: 1px solid rgba(247, 88, 1, 0.45);
+  background: #fff;
+  color: $color-secondary;
+}
