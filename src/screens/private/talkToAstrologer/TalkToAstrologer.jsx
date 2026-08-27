@@ -1452,11 +1452,50 @@ const TalkToAstrologer = () => {
       {/* `isFilterLoading` is part of the guard so "No astrologers found."
           cannot flash while a filter request is still in flight — isFetching is
           already false by then, because the base query is skipped on isFiltered. */}
+      {/*
+        The filtered empty state was a single line of text — "No astrologers
+        found." — with no interactive element at all. The two unfiltered states
+        below were given proper cards with a retry, but this one was missed, and
+        it is the one a paid campaign lands on: /astrologers/:category applies the
+        filter straight from the URL, so a category that is renamed, retired or
+        simply has nobody online right now drops the visitor on a dead end with
+        the filter still stuck on.
+
+        FilterChips takes the URL slug and applies it without checking it against
+        the fetched category list, so an unrecognised slug behaves identically to
+        an empty category — same dead end, no explanation.
+
+        Clearing the filter therefore has to clear the URL too. resetFilters()
+        alone is not enough: `selectedType` is recomputed from
+        `location.state?.selectedType || ?category || useParams().category`, so
+        FilterChips would immediately re-apply it and we would bounce straight
+        back to empty. `replace` keeps the Back button pointing wherever the
+        visitor actually came from.
+      */}
       {!isFetching && !isFilterLoading && allAstrologers.length === 0 && isFiltered && (
-          <div className={styles.emptyState}>
-            <PrimaryText>No astrologers found.</PrimaryText>
-          </div>
-        )}
+        <div className={styles.listStateCard}>
+          <h2 className={styles.listStateTitle}>No astrologers in this category</h2>
+          <p className={styles.listStateText}>
+            {categoryFromParams
+              ? "Nobody is available under this category at the moment."
+              : "Nothing matches the filters you've applied."}
+          </p>
+          <button
+            type="button"
+            className={styles.listStateBtn}
+            onClick={() => {
+              resetFilters();
+              if (categoryFromParams || location.search || location.state?.selectedType) {
+                // ASTROLOGERS_LIST, not ASTROLOGERS — the latter is
+                // /talk-to-astrologer/expert/:name, a different screen entirely.
+                navigate(PATH.privateRoutes.ASTROLOGERS_LIST.path, { replace: true, state: {} });
+              }
+            }}
+          >
+            Show all astrologers
+          </button>
+        </div>
+      )}
 
       {/*
         The two states below did not exist. The empty state above requires
