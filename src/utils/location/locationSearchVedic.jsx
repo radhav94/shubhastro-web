@@ -23,7 +23,11 @@ import styles from "./locationSearch.module.scss";
 */
 const GEO_SEARCH_DEBOUNCE_MS = 350;
 
-const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled, dropUp = false }) => {
+// `inputRef` is optional and exposes the text field to the caller. Callers that
+// block on a missing place (the Muhurat CTA does) need to put the cursor back in
+// this field when they say so, otherwise the message names a control the user
+// then has to go hunting for.
+const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled, dropUp = false, inputRef }) => {
   const [triggerGeoSearch, { data, isFetching, isError }] = useLazyGeoSearchQuery();
   const [open, setOpen] = useState(false);
   const selectionMade = useRef(false); // Track if a place is selected
@@ -163,6 +167,7 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled,
   return (
     <div className={`${styles.wrapper} notranslate`} ref={wrapperRef}>
       <input
+        ref={inputRef}
         type="text"
         value={value}
         onChange={handleInputChange} // API triggers only here
