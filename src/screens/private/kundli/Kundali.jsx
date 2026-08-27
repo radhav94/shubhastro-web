@@ -386,15 +386,47 @@ const Kundali = () => {
     data: fullData,
     isLoading: planetLoading,
     isSuccess: planetSuccess,
+    isError: planetError,
   } = useGetPlanetsQuery(params ? params : skipToken);
 
   const {
     data,
     isSuccess: isAstro,
     isLoading: astroLoading,
+    isError: astroError,
   } = useGetAstroDetailsQuery(params ? params : skipToken);
 
   const astroDetails = data?.response;
+
+  /*
+    Which tree the chart area renders.
+
+    This used to be `planetLoading || isAstro ? <PrimaryTabs/> : <HtmlContentCard/>`,
+    which mixes a loading flag from one request with a success flag from a
+    *different* one: `planetLoading` belongs to useGetPlanetsQuery, `isAstro` to
+    useGetAstroDetailsQuery. They resolve independently, so whenever planets came
+    back first the condition walked through three states:
+
+      both in flight    planetLoading true, isAstro false   -> PrimaryTabs
+      planets resolved  both flags false                    -> HtmlContentCard
+      astro resolved    isAstro true                         -> PrimaryTabs
+
+    That middle frame replaced the whole tabbed chart with an unrelated block of
+    informational HTML and then replaced it back — two full-height reflows of
+    the main content column, which is the kind of thing a CLS of 0.794 on this
+    route is made of. It only shows when planets wins the race, which is why it
+    is intermittent.
+
+    It also lands at the worst moment in the guest flow: the fullscreen loader
+    below is deliberately suppressed while a profile dialog is open, so the
+    swap happens in plain view right as the signup sheet closes.
+
+    HtmlContentCard is the "there is no chart data" fallback, so key it on the
+    requests actually failing. In flight, uninitialised or succeeded all show
+    the tabs — which is what the loading state already did.
+  */
+  const chartDataUnavailable =
+    (planetError || astroError) && !planetSuccess && !isAstro;
 
   // Track kundli page view when profile data is loaded
   useEffect(() => {
@@ -922,15 +954,15 @@ const Kundali = () => {
       {selectedProfile && (
         <div ref={contentRef} id="kundli-tabs">
           {!isDirectKundliView && <KundliHeader />}
-          {planetLoading || isAstro ? (
-            <PrimaryTabs 
-              key={selectedProfile._id} 
-              tabs={tabsData} 
+          {chartDataUnavailable ? (
+            <HtmlContentCard sections={kundliInfoData} />
+          ) : (
+            <PrimaryTabs
+              key={selectedProfile._id}
+              tabs={tabsData}
               initialActiveIndex={activeTabIndex}
               onTabChange={handleTabChange}
             />
-          ) : (
-            <HtmlContentCard sections={kundliInfoData} />
           )}
         </div>
       )}
