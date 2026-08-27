@@ -38,6 +38,23 @@ const IframeModal = ({ open, src, onClose }) => {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
+  /*
+    Lock the page behind while the modal is open. On iOS a scroll that starts on
+    the overlay is handed to the document, which moves the page under a
+    position:fixed layer and drags the close button out from under the finger —
+    so a tap aimed at it lands somewhere else and the modal appears stuck open.
+  */
+  useEffect(() => {
+    if (!open) return undefined;
+    const { overflow, position, width } = document.body.style;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = overflow;
+      document.body.style.position = position;
+      document.body.style.width = width;
+    };
+  }, [open]);
+
   if (!open) return null;
 
   // Add iframe=true query parameter to show minimal header
@@ -64,12 +81,19 @@ const IframeModal = ({ open, src, onClose }) => {
           <IoClose size={22} />
         </button>
         <PrimaryLoader isLoading={iframeLoading} fullscreen={false} message="Loading Kundli..." />
-        <iframe
-          src={iframeSrc}
-          title="Kundli"
-          className={`${styles.iframe} ${iframeLoading ? styles.iframeHidden : ''}`}
-          onLoad={() => setIframeLoading(false)}
-        />
+        {/*
+          The wrapper is what scrolls. iOS Safari sizes an iframe to its content
+          and ignores overflow on the frame itself, so without a touch-scrollable
+          parent a kundli taller than the panel simply cannot be reached.
+        */}
+        <div className={styles.iframeWrap}>
+          <iframe
+            src={iframeSrc}
+            title="Kundli"
+            className={`${styles.iframe} ${iframeLoading ? styles.iframeHidden : ''}`}
+            onLoad={() => setIframeLoading(false)}
+          />
+        </div>
       </div>
     </div>,
     document.body

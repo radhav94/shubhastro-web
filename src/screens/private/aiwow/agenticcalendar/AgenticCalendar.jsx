@@ -6,7 +6,7 @@ import { Toast } from '../../../../component';
 import { analyzeCalendarEvents } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
-import RouteLoader from '../../../../component/UI/RouteLoader';
+import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
 import { FiMapPin, FiCalendar, FiChevronLeft, FiChevronRight, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
@@ -14,6 +14,7 @@ import LocationSearch from '../../../../utils/location/locationSearchVedic';
 import useUserLocation from '../../../../utils/hooks/useUserLocation';
 import { setMuhuratCalendarResult, clearMuhuratCalendarResult } from '../../../../redux/aiwow/aiwowSlice';
 import DownloadReportModal from '../components/DownloadReportModal';
+import MuhuratReport from './MuhuratReport';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
 import toast from '../../../../component/toast';
 
@@ -61,10 +62,9 @@ const AgenticCalendar = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(restoredResult);
-  const [expandedOccasion, setExpandedOccasion] = useState(() => {
-    if (restoredResult?.optimalTimings?.length > 0) return restoredResult.optimalTimings[0].eventName;
-    return null;
-  });
+  // Which event is being viewed is now the report's own concern — it renders a
+  // tab per event and re-selects the first one whenever the set changes — so the
+  // screen no longer tracks an expanded occasion.
   const [locked, setLocked] = useState(!!restoredResult); // Lock selections after clicking Get Timing
   const resultsRef = useRef(null);
   const locationFieldRef = useRef(null);
@@ -235,7 +235,6 @@ const AgenticCalendar = () => {
     setLocked(false);
     setAnalysis(null);
     setRawApiResult(null);
-    setExpandedOccasion(null);
     dispatch(clearMuhuratCalendarResult());
   };
 
@@ -295,7 +294,6 @@ const AgenticCalendar = () => {
     try {
       setIsLoading(true);
       setAnalysis(null);
-      setExpandedOccasion(null);
 
       const today = new Date();
       const formatDate = (d) => {
@@ -355,7 +353,6 @@ const AgenticCalendar = () => {
         setAnalysis(result.data);
         dispatch(setMuhuratCalendarResult(result.data));
         setRawApiResult(result.data);
-        setExpandedOccasion(occasions[0]);
         setTimeout(() => {
           resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
@@ -375,75 +372,7 @@ const AgenticCalendar = () => {
     }
   };
 
-  // Parse time string like "6:27 AM" or "02:08 PM" and return a Date for today
-  const parseTime = (timeStr) => {
-    if (!timeStr) return null;
-    const cleaned = timeStr.trim();
-    const match = cleaned.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-    if (!match) return null;
-    let h = parseInt(match[1], 10);
-    const m = parseInt(match[2], 10);
-    const meridiem = match[3].toUpperCase();
-    if (meridiem === 'PM' && h !== 12) h += 12;
-    if (meridiem === 'AM' && h === 12) h = 0;
-    const d = new Date();
-    d.setHours(h, m, 0, 0);
-    return d;
-  };
-
-  // Check if a time range slot has passed, considering the event date
-  const isSlotPassed = (timeRangeStr, eventDate) => {
-    if (!timeRangeStr) return false;
-    
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
-    // Parse event date if provided
-    let eventDateObj;
-    if (eventDate) {
-      // eventDate format: "2026-02-26" (ISO date string)
-      eventDateObj = new Date(eventDate + 'T00:00:00');
-    } else {
-      eventDateObj = today;
-    }
-    
-    // Compare dates (ignoring time)
-    const eventDateOnly = new Date(eventDateObj.getFullYear(), eventDateObj.getMonth(), eventDateObj.getDate());
-    
-    // If event date is in the past, all slots are passed
-    if (eventDateOnly < today) {
-      return true;
-    }
-    
-    // If event date is in the future, no slots are passed
-    if (eventDateOnly > today) {
-      return false;
-    }
-    
-    // Event date is today - compare time
-    // Split on any dash variant to get start time
-    const parts = timeRangeStr.split(/\s*[-–—−]\s*/);
-    if (parts.length < 1) return false;
-    
-    // Parse the start time
-    const timeMatch = parts[0].trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-    if (!timeMatch) return false;
-    
-    let h = parseInt(timeMatch[1], 10);
-    const m = parseInt(timeMatch[2], 10);
-    const meridiem = timeMatch[3].toUpperCase();
-    if (meridiem === 'PM' && h !== 12) h += 12;
-    if (meridiem === 'AM' && h === 12) h = 0;
-    
-    // Create the full datetime for today
-    const slotDateTime = new Date();
-    slotDateTime.setHours(h, m, 0, 0);
-    
-    return slotDateTime < now;
-  };
-
-  // Reserves in-flow height while the profile loads — see RouteLoader.
-  if (profileLoading) return <RouteLoader message="Loading your birth details…" />;
+  if (profileLoading) return <PrimaryLoader isLoading={true} />;
 
   return (
     <>
@@ -651,126 +580,20 @@ const AgenticCalendar = () => {
             )}
           </button>
 
-          {/* Results Grid (Desktop) / Accordion (Mobile) */}
+          {/*
+            Redesigned report: one tab per event, favourable windows and periods
+            to avoid side by side, the next date it found, and a Best Muhurat
+            panel with the connect actions. Replaces the accordion of raw slot
+            rows that used to live here.
+          */}
           {analysis?.optimalTimings?.length > 0 && (
-            <div className={`${styles.resultsWrap} ${[...new Set(analysis.optimalTimings.map(t => t.eventName))].length === 2 ? styles.resultsTwo : ''} ${[...new Set(analysis.optimalTimings.map(t => t.eventName))].length === 1 ? styles.resultsOne : ''}`} ref={resultsRef}>
-              {(() => {
-                // Group timings by eventName
-                // const sorted = [...analysis.optimalTimings].sort((a, b) => {
-                //   const dateA = a.bestDate || '';
-                //   const dateB = b.bestDate || '';
-                //   if (dateA !== dateB) return dateA.localeCompare(dateB);
-                //   const timeA = a.bestTimeRange || '';
-                //   const timeB = b.bestTimeRange || '';
-                //   return timeA.localeCompare(timeB);
-                // });
-
-                const grouped = analysis.optimalTimings.reduce((acc, item) => {
-                  if (!acc[item.eventName]) acc[item.eventName] = [];
-                  acc[item.eventName].push(item);
-                  return acc;
-                }, {});
-
-                return Object.entries(grouped).map(([name, timings]) => {
-                  const isExpanded = expandedOccasion === name;
-                  const isCustom = customOccasions.includes(name);
-
-                  return (
-                    <div key={name} className={styles.resultCard}>
-                      {/* Card header */}
-                      <div
-                        className={styles.resultCardHeader}
-                        onClick={() => setExpandedOccasion(isExpanded ? null : name)}
-                      >
-                        <div className={styles.accordionTitle}>
-                          <span>{name}</span>
-                          {isCustom && <span className={styles.customTag}>Custom</span>}
-                        </div>
-                        <span className={styles.ttsWrap} onClick={(e) => e.stopPropagation()}>
-                          <TTSButton text={`${name}. ${timings.map(t => {
-                            let text = '';
-                            if (t.bestDate) text += new Date(t.bestDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) + '. ';
-                            if (t.bestTimeRange) {
-                              const label = isSlotPassed(t.bestTimeRange, t.bestDate) ? 'Passed' : 'Best Time';
-                              text += label + ': ' + t.bestTimeRange + '. ';
-                            }
-                            if (t.alternateTimeRange) {
-                              const label = isSlotPassed(t.alternateTimeRange, t.bestDate) ? 'Passed' : 'Alternate';
-                              text += label + ': ' + t.alternateTimeRange + '. ';
-                            }
-                            if (t.reason) text += t.reason;
-                            return text;
-                          }).join('. ')}`} />
-                        </span>
-                        <span className={styles.mobileChevron}>
-                          {isExpanded ? <FiChevronUp size={20} color="#f75801" /> : <FiChevronDown size={20} color="#f75801" />}
-                        </span>
-                      </div>
-
-                      {/* Card body - all entries for this event */}
-                      <div className={`${styles.resultCardBody} ${isExpanded ? styles.resultCardBodyOpen : ''}`}>
-                        {timings.map((timing, tIdx) => {
-                          const slots = [];
-                          if (timing.bestTimeRange) {
-                            slots.push({ time: timing.bestTimeRange, best: true });
-                          }
-                          if (timing.alternateTimeRange) {
-                            slots.push({ time: timing.alternateTimeRange, best: false });
-                          }
-                          if (timing.timeSlots?.length) {
-                            timing.timeSlots.forEach((s) => slots.push(s));
-                          }
-
-                          const passed = slots.filter((s) => isSlotPassed(s.time, timing.bestDate));
-                          const upcoming = slots.filter((s) => !isSlotPassed(s.time, timing.bestDate));
-
-                          return (
-                            <div key={tIdx}>
-                              {timing.bestDate && (
-                                <span className={styles.cardDate}>
-                                  <FiCalendar size={12} />
-                                  {new Date(timing.bestDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
-                                </span>
-                              )}
-                              {passed.length > 0 && (
-                                <>
-                                  <h4 className={styles.slotGroupTitle}>Earlier Today</h4>
-                                  {passed.map((s, i) => (
-                                    <div key={i} className={styles.slotRow}>
-                                      <span className={styles.slotTime}>{s.time}</span>
-                                      <span className={styles.passedBadge}>Passed</span>
-                                    </div>
-                                  ))}
-                                </>
-                              )}
-                              {upcoming.length > 0 && (
-                                <>
-                                  <h4 className={styles.slotGroupTitle}>Upcoming</h4>
-                                  {upcoming.map((s, i) => (
-                                    <div key={i} className={`${styles.slotRow} ${s.best ? styles.slotBest : styles.slotUpcoming}`}>
-                                      <span className={styles.slotTime}>{s.time}</span>
-                                      {s.best && <span className={styles.bestBadge}>Best Time</span>}
-                                    </div>
-                                  ))}
-                                </>
-                              )}
-                              {passed.length === 0 && upcoming.length === 0 && timing.bestDate && (
-                                <div className={styles.slotRow + ' ' + styles.slotBest}>
-                                  <span className={styles.slotTime}>
-                                    {timing.bestDate} {timing.bestTimeRange && `• ${timing.bestTimeRange}`}
-                                  </span>
-                                  <span className={styles.bestBadge}>Best Time</span>
-                                </div>
-                              )}
-                              {timing.reason && <p className={styles.slotReason}>{timing.reason}</p>}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                });
-              })()}
+            <div ref={resultsRef}>
+              <MuhuratReport
+                analysis={analysis}
+                customOccasions={customOccasions}
+                locationLabel={locationValue}
+                onDownload={handleDownloadClick}
+              />
             </div>
           )}
 

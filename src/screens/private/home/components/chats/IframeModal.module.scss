@@ -1,36 +1,77 @@
 /* IframeModal.module.scss */
+
+/*
+  iOS notes, because this modal was unusable there.
+
+  `position: fixed; inset: 0` resolves against iOS Safari's *layout* viewport,
+  which includes the strip behind the address bar and the bottom toolbar. So the
+  overlay was taller than what you can actually see, and `height: 90%` of it plus
+  `align-items: center` pushed the panel's top edge — and the close button pinned
+  to it — up behind the browser chrome. Hence "unable to close the Kundli".
+
+  `100dvh` is the visible height, and `-webkit-fill-available` covers the older
+  iOS versions that predate it. Both are already used this way in
+  livestream/styles/videoBox.scss.
+*/
 .overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100dvh;
+  height: -webkit-fill-available;
   background: rgba(0, 0, 0, 0.6);
   z-index: 9999999;
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Keeps the panel clear of the notch and the home indicator. */
+  padding: max(12px, var(--safe-top, 0px)) 12px max(12px, var(--safe-bottom, 0px));
+  box-sizing: border-box;
 }
 
+/*
+  A column, not a centring flex container. It used to be
+  `align-items: center; justify-content: center`, which centres the iframe — and
+  iOS Safari expands an iframe to its content height rather than honouring
+  `height: 100%`. A too-tall, centred iframe has its top clipped by
+  `overflow: hidden`, and the top of the kundli page is exactly where its tab bar
+  lives. That is why the tabs "were not displayed" on iOS specifically.
+*/
 .modal {
   position: relative;
-  width: 90%;
-  height: 90%;
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+
+  /* Phones get the whole panel: a kundli has tabs and wide tables, and 90% of a
+     small screen wasted the margins for nothing. */
+  width: 100%;
+  height: 100%;
+
+  /* Desktop keeps the previous proportions. */
+  @media (min-width: 768px) {
+    width: 90%;
+    height: 90%;
+    max-width: 1200px;
+  }
 }
 
 .closeBtn {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: 8px;
+  right: 8px;
   z-index: 10;
   background: rgba(0, 0, 0, 0.7);
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  /* 44px is Apple's minimum tap target; the old 32px button sat 6px from a
+     corner where the iframe's own header competes for the same pixels. */
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -43,9 +84,29 @@
   }
 }
 
+/*
+  `flex: 1` with `min-height: 0` gives the iframe a definite height to fill
+  instead of letting it size to its content. Without `min-height: 0` a flex item
+  refuses to shrink below its content, which is how the iframe grew past the panel
+  in the first place.
+
+  The wrapper carries the scrolling: iOS ignores `overflow` on the iframe element
+  itself, so a page taller than the frame can only be reached through a
+  touch-scrollable parent.
+*/
+.iframeWrap {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .iframe {
+  display: block;
   width: 100%;
   height: 100%;
+  min-height: 100%;
   border: none;
 }
 
