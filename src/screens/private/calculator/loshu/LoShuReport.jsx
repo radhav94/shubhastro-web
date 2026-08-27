@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useLoShuGridCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
 import { useEffect } from "react";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import styles from "./LoShuReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import TTSButton from "../../../../component/UI/TTSButton";
@@ -22,7 +22,8 @@ const LoShuReport = () => {
     }
   }, []);
 
-  if (isLoading || isUninitialized) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (isLoading || isUninitialized) return <CalcReportLoader message="Building your grid…" />;
   if (!data?.data) return <div>No data found</div>;
 
   const report = data.data;

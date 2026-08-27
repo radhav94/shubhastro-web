@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useFriendshipCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
 import { useEffect } from "react";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import styles from "./FriendshipReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
@@ -29,7 +29,8 @@ const FriendshipReport = () => {
       });
   }, []); // run once
 
-  if (isLoading || !data) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (isLoading || !data) return <CalcReportLoader message="Checking your match…" />;
 
   const report = data?.data;
   if (!report) return null;

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useVehicleNumerologyCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
 import { useEffect } from "react";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import styles from "./VehicleReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
@@ -26,7 +26,8 @@ const VehicleReport = () => {
       });
   }, []);
 
-  if (isLoading) return <PrimaryLoader isLoading={isLoading} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (isLoading) return <CalcReportLoader />;
   if (isError) return <div className={styles.center}>No data found</div>;
 
   const report = data?.data;

@@ -107,6 +107,32 @@ const AddProfileModal = ({
   inline = false,
 }) => {
   const [showListing, setShowListing] = useState(false);
+
+  /*
+    Dismissal plumbing for the overlay dead clicks.
+
+    This sheet auto-opens over /kundli for guests (Kundali.jsx opens it on
+    arrival so a visitor has a form to fill instead of an empty page), and
+    GuestKundliAuthModal hardcodes `closeOnOverlayClick={false}`. The result was
+    an interstitial the visitor never asked for whose only exit was a 32px round
+    ✕ — clicking the dimmed area around it did literally nothing. A Clarity
+    session shows exactly that: three clicks on the overlay at 00:02, 00:05 and
+    00:09, then the visitor left for the homepage at 00:11.
+
+    Two things below fix it without reintroducing the accidental-dismissal
+    problem `closeOnOverlayClick={false}` exists to prevent:
+
+    - `hasUserInputRef` records whether any of the costly fields has been filled
+      in. An untouched form has nothing to lose, so an outside click closes it.
+      Once there is content, the sheet stays put.
+    - `nudgeClose` gives the blocked case a *visible* response (a brief pulse on
+      the ✕) rather than silence. A toast alone would not do: toasts are not
+      visible to Clarity, so the click would still be recorded as dead.
+  */
+  const hasUserInputRef = useRef(false);
+  const closeBtnRef = useRef(null);
+  const [nudgeClose, setNudgeClose] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     identity: "Male",
@@ -225,6 +251,8 @@ const AddProfileModal = ({
   };
 
   const handleClose = () => {
+    hasUserInputRef.current = false;
+    setNudgeClose(false);
     setFormData({
       name: "",
       identity: "Male",
@@ -240,6 +268,51 @@ const AddProfileModal = ({
     });
     onClose();
   };
+
+  /*
+    A click on the dim area outside the sheet. See hasUserInputRef above for why
+    this is not simply `closeOnOverlayClick ? handleClose : undefined`.
+
+    The target check matters: the sheet stops propagation, but DateTimePicker and
+    LocationSearch render poppers, and a click that starts inside one of those
+    and bubbles up here should not be read as "clicked outside".
+  */
+  const handleOverlayClick = (e) => {
+    if (inline) return;
+    if (e.target !== e.currentTarget) return;
+
+    if (closeOnOverlayClick || !hasUserInputRef.current) {
+      handleClose();
+      return;
+    }
+
+    // Something has been typed, so keep the form. Point at the way out instead
+    // of swallowing the click.
+    closeBtnRef.current?.focus();
+    setNudgeClose(true);
+    Toast.info("Tap ✕ to close without saving.");
+  };
+
+  // Escape closes the sheet even when overlay dismissal is off. Escape is a
+  // deliberate keypress rather than a stray click, so it is safe here and is
+  // what a keyboard user expects from a dialog — this component had no key
+  // handling at all before.
+  useEffect(() => {
+    if (!isOpen || inline) return undefined;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") handleClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, inline]);
+
+  // Clear the ✕ pulse after it has played once.
+  useEffect(() => {
+    if (!nudgeClose) return undefined;
+    const id = setTimeout(() => setNudgeClose(false), 1200);
+    return () => clearTimeout(id);
+  }, [nudgeClose]);
 
   const handleCloseListing = () => {
     setShowListing(false);
@@ -288,12 +361,28 @@ const AddProfileModal = ({
   return (
     <div
       className={`${styles.modalOverlay} ${inline ? styles.inline : ""}`}
-      onClick={closeOnOverlayClick && !inline ? handleClose : undefined}
+      onClick={handleOverlayClick}
     >
       <div className={styles.sideSheet} onClick={(e) => e.stopPropagation()}>
         <div className={styles.sheetHeader}>
-          <div className={styles.sheetHandle}></div>
-          <button className={styles.closeBtn} onClick={handleClose} aria-label="Close">
+          {/* The grabber bar was a bare <div>: it is the universal "drag or tap
+              me to dismiss" affordance on a bottom sheet, and it did nothing.
+              Same defect, same fix as the zodiac sheet on the horoscope screens —
+              make it a real close control with a 44px tap target. */}
+          <button
+            type="button"
+            className={styles.sheetHandle}
+            onClick={handleClose}
+            aria-label="Close"
+          >
+            <span className={styles.sheetHandleBar} />
+          </button>
+          <button
+            ref={closeBtnRef}
+            className={`${styles.closeBtn} ${nudgeClose ? styles.closeBtnNudge : ""}`}
+            onClick={handleClose}
+            aria-label="Close"
+          >
             <IoClose />
           </button>
 
@@ -327,7 +416,29 @@ const AddProfileModal = ({
             validateOnBlur={true}
             validateOnChange={false}
           >
-            {({ values, setFieldValue, errors, submitCount }) => (
+            {({ values, setFieldValue, errors, submitCount }) => {
+              /*
+                Mirror "has this form got anything worth keeping?" out to the
+                overlay handler, which lives outside Formik. Read from `values`
+                rather than DOM events, because DateTimePicker and LocationSearch
+                set their fields through setFieldValue — a keystroke listener
+                would not see a picked date or a selected birth place and would
+                happily throw them away on a stray outside click.
+
+                Gender is excluded on purpose: it is pre-set to "Male", and a
+                single pill tap is not worth blocking dismissal over. Assigning a
+                ref during render matches what ScrollToError above already does.
+              */
+              hasUserInputRef.current = Boolean(
+                values.name ||
+                  values.mobileNumber ||
+                  values.relation ||
+                  values.birthDate ||
+                  values.birthTime ||
+                  values.birthPlace
+              );
+
+              return (
               <Form className={styles.profileForm}>
                 {/* Scroll to first error on failed submit */}
                 <ScrollToError errors={errors} submitCount={submitCount} />
@@ -546,7 +657,8 @@ const AddProfileModal = ({
                   </div>
                 )}
               </Form>
-            )}
+              );
+            }}
           </Formik>
         </div>
       </div>

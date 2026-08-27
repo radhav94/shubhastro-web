@@ -4,7 +4,7 @@ import styles from './KarmicDebtTracker.module.scss';
 import { Toast } from '../../../../component';
 import { analyzeKarmicDebt } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
-import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import RouteLoader from '../../../../component/UI/RouteLoader';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
 
 const KarmicDebtTracker = () => {
@@ -80,7 +80,8 @@ const KarmicDebtTracker = () => {
   };
 
   if (profileLoading) {
-    return <PrimaryLoader isLoading={true} />;
+    // Reserves in-flow height while the profile loads — see RouteLoader.
+    return <RouteLoader message="Loading your birth details…" />;
   }
 
   return (

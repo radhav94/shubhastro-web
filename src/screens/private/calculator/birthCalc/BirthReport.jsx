@@ -13,9 +13,9 @@ import {
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 import { skipToken } from "@reduxjs/toolkit/query";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { sanitizeSvg } from "../../../../utils/helper/sanitizeSvg";
 import CalcBackButton from "../CalcBackButton";
+import CalcReportLoader from "../CalcReportLoader";
 
 export const planetaryHeaders = [
   { label: "Planet", key: "name" },
@@ -127,7 +127,22 @@ const BirthReport = () => {
 
   const loading = planetLoading || birthLoading || navLoading;
 
-  if (!payload) return null;
+  /*
+    Was a bare `return null` — a route rendering literally nothing, which pulls
+    HomeLayout's footer up into the viewport until something replaces it. Give it
+    the same reserved height as the loading state, plus the back button so the
+    state is not a dead end.
+  */
+  if (!payload) {
+    return (
+      <div className={styles.stateWrap}>
+        <CalcBackButton />
+        <p className={styles.stateText}>
+          We don&apos;t have your birth details. Go back and run the calculator again.
+        </p>
+      </div>
+    );
+  }
 
   const svgBirthUrl = birthChart || null;
 
@@ -138,7 +153,19 @@ const BirthReport = () => {
   return (
     <div>
       <CalcBackButton />
-      <PrimaryLoader isLoading={loading} />
+      {/*
+        Was `<PrimaryLoader isLoading={loading} />` — fullscreen, so `position:
+        fixed` and zero in-flow height. Until all three requests resolved this
+        route was just a back button, and then a full natal report (two chart
+        SVGs, two tables and a ConnectCard) landed in one commit. That is the
+        biggest single-shot insertion of any calculator report here.
+
+        Keyed off the same condition that gates the content below, rather than
+        `loading`, so the reserved box is never released early and never lingers.
+      */}
+      {!(planetSuccess && birthSuccess && navSuccess) && (
+        <CalcReportLoader message="Drawing your charts…" />
+      )}
 
       {planetSuccess && birthSuccess && navSuccess && (
         <div className={styles.pageWrapper}>

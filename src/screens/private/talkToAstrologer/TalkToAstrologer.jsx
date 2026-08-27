@@ -142,6 +142,10 @@ const TalkToAstrologer = () => {
     setOpenModal: hookSetOpenModal,
     kundliRef,
     hasKundli,
+    // Lets the Chat/Call button that was tapped show that the request is in
+    // flight. Without it the balance round trip happens behind an unchanged
+    // button, which reads as a dead tap and invites a second one.
+    isConnecting,
   } = useAstrologerConnect();
 
   // Use profile manager hook (same as Home page)
@@ -1432,6 +1436,13 @@ const TalkToAstrologer = () => {
                 astrologer={astro}
                 priority={index === 0}
                 onConnect={handleConnectClick}
+                connectingType={
+                  isConnecting(astro._id, "chat")
+                    ? "chat"
+                    : isConnecting(astro._id, "audio")
+                      ? "audio"
+                      : null
+                }
               />
             </div>
           </>

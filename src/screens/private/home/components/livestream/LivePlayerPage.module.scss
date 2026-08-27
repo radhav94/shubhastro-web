@@ -51,17 +51,21 @@
 // Both actions are full-height targets rather than inline text, because on a
 // phone this card is the only thing on the screen and these are the only two
 // ways off it.
-.gatePrimary {
+// Both roles are used on an <a> and on a <button> depending on the state, so the
+// shared declarations neutralise the button defaults (font, appearance) and give
+// the anchor the flex centring a button gets for free.
+.gatePrimary,
+.gateSecondary {
   min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 12px 20px;
-  border: 0;
   border-radius: 80px;
-  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
-  color: #fff;
   font-family: inherit;
   font-size: 15px;
-  font-weight: 600;
   cursor: pointer;
+  text-decoration: none;
   -webkit-appearance: none;
   appearance: none;
 
@@ -71,22 +75,49 @@
   }
 }
 
+.gatePrimary {
+  border: 0;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+  color: #fff;
+  font-weight: 600;
+}
+
 .gateSecondary {
-  min-height: 46px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 20px;
   border: 1px solid rgba(247, 88, 1, 0.45);
-  border-radius: 80px;
   background: #fff;
   color: #d43400;
-  font-size: 15px;
   font-weight: 500;
-  text-decoration: none;
+}
 
-  &:focus-visible {
-    outline: 2px solid #f75801;
-    outline-offset: 2px;
+/* Loading states. The loader sits on its own until LOADING_ESCAPE_MS elapses,
+   at which point .gateEscape appears beneath it. Centred as a column so the
+   spinner does not jump sideways when the panel arrives. */
+.gateLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 460px;
+}
+
+.gateEscape {
+  width: 100%;
+  margin-top: 24px;
+  text-align: center;
+  animation: gateEscapeIn 0.25s ease-out;
+
+  /* The shared .gateText has a 22px bottom margin sized for the cards; here the
+     actions follow immediately. */
+  .gateText {
+    margin-bottom: 14px;
   }
+}
+
+@keyframes gateEscapeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gateEscape { animation: none; }
 }

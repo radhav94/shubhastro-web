@@ -8,6 +8,9 @@ import { setGemstoneImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
 import toast from '../../../../component/toast';
+import { compressImage } from '../../../../utils/helper/compressImage';
+import { isInAppBrowser } from '../../../../utils/deviceInfo';
+import { trackEvent } from '../../../../utils/analytics';
 
 const GemstoneCamera = () => {
   const navigate = useNavigate();
@@ -32,6 +35,10 @@ const GemstoneCamera = () => {
   const [error, setError] = useState(null);
   const [facingMode, setFacingMode] = useState('environment');
   const [isFrontCamera, setIsFrontCamera] = useState(false);
+  // Upload fallback on the camera-error screen. See the error branch below for
+  // why that screen needs one.
+  const uploadInputRef = useRef(null);
+  const [isPreparingUpload, setIsPreparingUpload] = useState(false);
 
   const {
     detectionReady,
@@ -245,6 +252,47 @@ const GemstoneCamera = () => {
     submitImage();
   };
 
+  /*
+    Upload fallback for the camera-error screen.
+
+    Mirrors GemstoneLanding's handleFileChange, including the `event.target.value`
+    reset (without it, re-picking the identical photo fires no change event at all)
+    and the `preparing` state (compressImage re-encodes through a canvas and waits
+    up to 8s before falling back, which is a long unlit pause on a webview).
+  */
+  const handleUploadClick = () => {
+    if (isPreparingUpload) {
+      toast.info('Preparing your photo — one moment.');
+      return;
+    }
+    uploadInputRef.current?.click();
+  };
+
+  const handleUploadedFile = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      trackEvent('shubh_ai_input_provided', { feature_name: 'gemstone-authenticity', input_type: 'image' });
+      setIsPreparingUpload(true);
+      compressImage(file)
+        .then((dataUrl) => {
+          if (!localStorage.getItem('shubhtalk_customer_token')) {
+            // Hold the photo so the guest flow can submit it once they verify.
+            setCapturedImage(dataUrl);
+            setShowGuestAuthModal(true);
+            return;
+          }
+          dispatch(setGemstoneImage(dataUrl));
+          navigate('/ai-wow/gemstone-authenticity/capture', { replace: true });
+        })
+        .catch((err) => {
+          console.error('Failed to process selected image:', err);
+          toast.error('Could not read that image. Please try a different photo.');
+        })
+        .finally(() => setIsPreparingUpload(false));
+    }
+    event.target.value = '';
+  };
+
   const handleBack = () => {
     console.log('Back button clicked, stopping camera immediately');
     
@@ -273,6 +321,29 @@ const GemstoneCamera = () => {
     navigate('/ai-wow/gemstone-authenticity', { replace: true });
   };
 
+  /*
+    Checked before the error branch, not after.
+
+    The camera-error screen can now start the guest flow (a guest who uploads a
+    photo from it has to verify before the analysis runs). `error` stays set while
+    that happens, so with the old ordering the error branch would win and the
+    modal would never render — the visitor would pick a photo and watch the same
+    error screen sit there. Hoisting this also keeps its original intent: while
+    the guest flow is open, nothing else on this route should be on screen.
+  */
+  if (showGuestAuthModal) {
+    return (
+      <GuestKundliAuthModal
+        isOpen
+        onClose={() => {
+          setShowGuestAuthModal(false);
+          navigate('/ai-wow/gemstone-authenticity');
+        }}
+        onSuccess={handleGuestAuthSuccess}
+      />
+    );
+  }
+
   if (error) {
     return (
       <div className={styles.container}>
@@ -291,30 +362,50 @@ const GemstoneCamera = () => {
           </svg>
           <h3 className={styles.errorTitle}>Camera Access Required</h3>
           <p className={styles.errorText}>{error}</p>
+          {/*
+            In an in-app webview the advice in `error` above is unactionable: the
+            Google app, Instagram and Facebook expose no per-site camera
+            permission, so "allow camera access in your browser settings" points
+            at a screen that does not exist. FaceReadingCamera already says this;
+            this screen did not.
+          */}
+          {isInAppBrowser() && (
+            <p className={styles.errorText}>
+              You&apos;re in an app&apos;s built-in browser, which blocks the camera.
+              Upload a photo instead, or open shubhastro.ai in Chrome or Safari.
+            </p>
+          )}
+          {/*
+            "Try Again" reloads and "Go Back" returns to the intro page — so where
+            the camera is blocked rather than merely un-permitted, this screen was
+            a closed loop: every route off it led straight back to the same
+            failure, even though uploading a photo works perfectly well and
+            produces the identical analysis. Offer that here.
+          */}
           <div className={styles.errorButtons}>
-            <button className={styles.retryButton} onClick={() => window.location.reload()}>
+            <button
+              className={styles.retryButton}
+              onClick={handleUploadClick}
+              aria-busy={isPreparingUpload}
+            >
+              {isPreparingUpload ? 'Preparing photo…' : 'Upload a photo instead'}
+            </button>
+            <button className={styles.backButton} onClick={() => window.location.reload()}>
               Try Again
             </button>
             <button className={styles.backButton} onClick={handleBack}>
               Go Back
             </button>
           </div>
+          <input
+            ref={uploadInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleUploadedFile}
+          />
         </div>
       </div>
-    );
-  }
-
-  // While the guest auth flow is open, hide the camera view entirely.
-  if (showGuestAuthModal) {
-    return (
-      <GuestKundliAuthModal
-        isOpen
-        onClose={() => {
-          setShowGuestAuthModal(false);
-          navigate('/ai-wow/gemstone-authenticity');
-        }}
-        onSuccess={handleGuestAuthSuccess}
-      />
     );
   }
 

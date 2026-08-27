@@ -1,9 +1,10 @@
-import { memo, useId } from "react";
+import { memo, useId, useState } from "react";
 import { BookOpen } from "lucide-react";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { AppIcons, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../utils/appImages";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
+import { resolveLiveChannelForAstrologer } from "../../../../utils/helper/resolveLiveChannel";
 import toast from "../../../toast";
 import { unavailableReason } from "../../../../utils/helper/astrologerAvailability";
 import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
@@ -64,18 +65,40 @@ const NewAstrologerCard = memo(({
     : emergencyChatRate || emergencyCallRate;
 
   /*
-    Same guard as NewAstrologerDetailsCard: `isLive` can be true while roomId is
-    still undefined or stale, and interpolating it sent the user to
-    "/live/undefined" — a deliberate "Join Live" tap landing on a room that
-    cannot resolve. AstrologerLiveBadge already guards this navigation the same
-    way. Stays clickable; it names the reason instead of going nowhere.
+    `isLive` can be true while roomId is null, and interpolating it sent the user
+    to "/live/undefined" — a deliberate "Join Live" tap landing on a room that
+    cannot resolve. An earlier pass replaced that with a toast, treating the gap
+    as transient. It isn't: roomId only reaches useAstrologerLiveStatus from the
+    astrologer payload or the `live:astrologer_status` socket event, and that event
+    fires on a status *change*, so anyone who loads this list while a stream is
+    already running never receives it.
+
+    Look the channel up from the live list instead, and only report failure when
+    the astrologer genuinely isn't streaming. `joiningLive` gives the tap a visible
+    response — a toast is invisible to Clarity, so a toast-only path keeps showing
+    up as a dead click even when the copy is correct.
   */
-  const handleJoinLive = () => {
-    if (!liveRoomId) {
-      toast.error("This live session just ended. Try another astrologer.");
+  const [joiningLive, setJoiningLive] = useState(false);
+
+  const handleJoinLive = async () => {
+    if (joiningLive) return;
+
+    if (liveRoomId) {
+      navigate(`/live/${liveRoomId}`);
       return;
     }
-    navigate(`/live/${liveRoomId}`);
+
+    setJoiningLive(true);
+    try {
+      const channel = await resolveLiveChannelForAstrologer(astrologer?._id);
+      if (channel) {
+        navigate(`/live/${channel}`);
+        return;
+      }
+      toast.error("This live session just ended. Try another astrologer.");
+    } finally {
+      setJoiningLive(false);
+    }
   };
 
   return (
@@ -92,7 +115,7 @@ const NewAstrologerCard = memo(({
           aria-label="Astrologer is live, click to watch"
         >
           <span className={styles.liveDot} />
-          <span>Live</span>
+          <span>{joiningLive ? "Opening…" : "Live"}</span>
         </button>
       ) : (
         <div className={`${styles.statusBadge} ${isOnline ? styles.online : styles.offline}`}>
@@ -201,6 +224,7 @@ const NewAstrologerCard = memo(({
             <button
               className={styles.liveBtn}
               onClick={handleJoinLive}
+              aria-busy={joiningLive}
             >
               <svg width="16" height="16" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="16" cy="16" r="4" fill="#f75801"/>
@@ -209,7 +233,7 @@ const NewAstrologerCard = memo(({
                 <path d="M13 19C11.5 17.5 11 16 11 14.5C11 13 11.5 11.5 13 10" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round"/>
                 <path d="M19 10C20.5 11.5 21 13 21 14.5C21 16 20.5 17.5 19 19" stroke="#f75801" strokeWidth="2.5" strokeLinecap="round"/>
               </svg>
-              Join Live
+              {joiningLive ? "Opening…" : "Join Live"}
             </button>
             <p className={styles.priceText}>&nbsp;</p>
           </div>

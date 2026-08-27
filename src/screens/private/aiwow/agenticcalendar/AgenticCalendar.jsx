@@ -6,7 +6,7 @@ import { Toast } from '../../../../component';
 import { analyzeCalendarEvents } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
-import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import RouteLoader from '../../../../component/UI/RouteLoader';
 import { FiMapPin, FiCalendar, FiChevronLeft, FiChevronRight, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
@@ -442,7 +442,8 @@ const AgenticCalendar = () => {
     return slotDateTime < now;
   };
 
-  if (profileLoading) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the profile loads — see RouteLoader.
+  if (profileLoading) return <RouteLoader message="Loading your birth details…" />;
 
   return (
     <>

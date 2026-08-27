@@ -5,7 +5,7 @@ import styles from './DreamInterpreter.module.scss';
 import { Toast } from '../../../../component';
 import { interpretDream } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
-import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import RouteLoader from '../../../../component/UI/RouteLoader';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
@@ -196,7 +196,8 @@ const DreamInterpreter = () => {
   };
 
   if (!isGuest && profileLoading) {
-    return <PrimaryLoader isLoading={true} />;
+    // Reserves in-flow height while the profile loads — see RouteLoader.
+    return <RouteLoader message="Loading your birth details…" />;
   }
 
   return (

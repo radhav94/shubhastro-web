@@ -5,7 +5,7 @@ import {
   useGetDashaRepQuery,
   useGetDashaPeriodsQuery,
 } from "../../../../redux/api/calculator/calcApi";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import styles from "./DashaReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import TTSButton from "../../../../component/UI/TTSButton";
@@ -21,7 +21,8 @@ const DashaReport = () => {
   const { data: periodsData, isLoading: periodsLoading } =
     useGetDashaPeriodsQuery(stored, { skip: !stored });
 
-  if (!stored || isLoading || periodsLoading) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (!stored || isLoading || periodsLoading) return <CalcReportLoader />;
   if (!data?.response?.dashas) return <div>No data found</div>;
 
   const dashas = data.response.dashas;

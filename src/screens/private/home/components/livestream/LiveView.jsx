@@ -165,13 +165,28 @@ const LiveView = (props) => {
     setChannelGeneration(gen);
   }, [props.channel]);
 
-  // If no remote users appear within 10s of connecting, show "waiting" instead of "connecting"
+  /*
+    If no remote users appear, switch the copy from "connecting" to "waiting" —
+    and, more importantly, reveal the waiting screen's action buttons, which are
+    gated on this flag further down.
+
+    Was 10s. That is the entire lifetime of some sessions arriving on this ad
+    landing page: one Clarity session loaded at 00:06, tapped once at 00:14 with
+    nothing on screen but the 32px back chevron, and left at 00:15 — the actions
+    were still 6s away. Until this flips, the waiting screen has exactly one
+    interactive element, because the top bar, chat and action rail are all gated
+    behind `isAstrologerLive`.
+
+    5s still avoids the flash-up the gate exists to prevent (a successful join
+    lands in 1–3s, and the flag is cleared the moment a remote user appears), and
+    matches LOADING_ESCAPE_MS in LivePlayerPage so the two waits behave alike.
+  */
   useEffect(() => {
     if (remoteUsers?.length > 0 || hostLeft || roomEnded) {
       setConnectingTimedOut(false);
       return;
     }
-    const timer = setTimeout(() => setConnectingTimedOut(true), 10000);
+    const timer = setTimeout(() => setConnectingTimedOut(true), 5000);
     return () => clearTimeout(timer);
   }, [remoteUsers?.length, hostLeft, roomEnded, props.channel]);
 
@@ -332,7 +347,22 @@ const LiveView = (props) => {
   }, [showWaitingToast]);
 
   const handleFollow = async () => {
-    if (!astrologerId) return;
+    // The old guard was a bare `if (!astrologerId) return;`. That path is not
+    // hypothetical: when LivePlayerPage is opened on a channel it has no live
+    // entry for, it injects a placeholder `[{ channel: channelId }]` with no
+    // astrologer attached, so `astrologerId` is undefined for the whole
+    // session — the Follow button rendered, looked normal, and did nothing on
+    // every tap. Name the blocker instead of returning silently, matching the
+    // copy the call/chat guards further down already use.
+    if (!astrologerId) {
+      Toast.error("Astrologer information not available");
+      return;
+    }
+    // The button is `aria-disabled` rather than `disabled` while a request is
+    // in flight (a `disabled` button fires no click at all, so the tap is
+    // swallowed and Clarity records it as dead). Re-entry is therefore blocked
+    // here instead of by the DOM.
+    if (followLoading || unfollowLoading) return;
     try {
       if (!isFollowing) {
         await followAstrologer({ astrologerId }).unwrap();
@@ -362,7 +392,20 @@ const LiveView = (props) => {
       }
     } catch (err) {
       console.error("Follow/Unfollow error:", err);
-      Toast.error("Something went wrong");
+      // "Something went wrong" told the visitor nothing about what to do next.
+      // A 401 here is common in this flow: the live page is often reached from
+      // an ad with a long dwell time, so the token can expire mid-session while
+      // the Follow button still renders as if it will work.
+      const status = err?.status || err?.originalStatus;
+      if (status === 401) {
+        Toast.error("Your session expired. Please log in again to follow.");
+        navigate(PATH.publicRoutes.LOGIN.path);
+        return;
+      }
+      Toast.error(
+        err?.data?.message ||
+          (isFollowing ? "Could not unfollow. Please try again." : "Could not follow. Please try again.")
+      );
     }
   };
 
@@ -1459,11 +1502,17 @@ const LiveView = (props) => {
             {/* Follow button - right side of top bar */}
             {!isHost && (
               <div className="top-bar-right">
+                {/* The Follow button carries `aria-disabled` rather than
+                  * `disabled` while the request is in flight: a disabled button
+                  * dispatches no click event, so the tap is swallowed by the DOM
+                  * and shows up in Clarity as a dead click. Re-entry is guarded
+                  * inside handleFollow instead. */}
                 {!props.isGuest && (
                 <button
                   className={`follow-btn ${isFollowing ? "following" : ""}`}
                   onClick={handleFollow}
-                  disabled={followLoading || unfollowLoading}
+                  aria-disabled={followLoading || unfollowLoading}
+                  aria-busy={followLoading || unfollowLoading}
                 >
                   {followLoading || unfollowLoading
                     ? "..."
@@ -2047,9 +2096,17 @@ const LiveView = (props) => {
               </div>
             )}
 
-            {/* Viewers */}
-            <div className="icon-btn viewer-icon-btn" style={{ cursor: "default" }}>
-              <div className="icon-circle">
+            {/* Viewers — a readout, not a control.
+              *
+              * The `cursor: default` that used to live inline here has moved to
+              * `.viewer-icon-btn` in videoBox.scss, together with rules that
+              * strip the circular button chrome this shared with the gift and
+              * share buttons on either side of it. Clarity dead clicks were
+              * landing here because on mobile the badge looked exactly like the
+              * two real buttons around it. `role="status"` plus an explicit
+              * label also stops assistive tech reading it as a bare number. */}
+            <div className="icon-btn viewer-icon-btn" role="status" aria-label={`${viewerCount} watching`}>
+              <div className="icon-circle" aria-hidden="true">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                   <circle cx="12" cy="12" r="3" fill="currentColor"/>

@@ -1,0 +1,26 @@
+/*
+  Reserves in-flow height for a route that is waiting on data.
+
+  `PrimaryLoader` defaults to `fullscreen`, which is `position: fixed` and so
+  contributes nothing to layout. A route whose only rendered output is that loader
+  is, as far as the document is concerned, empty — and HomeLayout is
+  `min-height: 100vh` with `.contentWrapper { flex: 1 }` and the footer as the next
+  flex child, so an empty route pulls the footer up into the viewport. When the
+  real content arrives it shoves the footer back down, after first paint, and all
+  of that movement counts toward CLS.
+
+  70vh rather than a fixed pixel height: routes vary enormously in length, and this
+  only has to keep the footer below the fold until the content lands.
+*/
+.wrap {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 0 16px;
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+}

@@ -6,7 +6,7 @@ import styles from "./LoveReport.module.scss";
 import { PrimaryText } from "../../../../component";
 import DividerWithImage from "../../../../component/UI/DividerWithImage";
 import ShubhTalkLogo from "../../../../assets/icons/logo.png";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import CalcBackButton from "../CalcBackButton";
 import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
 import { Share2, ChevronDown } from "lucide-react";
@@ -91,7 +91,8 @@ const LoveReport = () => {
     );
   }
 
-  if (isLoading || isUninitialized) return <PrimaryLoader isLoading />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (isLoading || isUninitialized) return <CalcReportLoader message="Checking your match…" />;
   if (!report) return null;
 
   const sections = report.sections || [];
