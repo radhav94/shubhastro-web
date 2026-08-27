@@ -338,21 +338,31 @@ $dark-orange: #d43400;
   border: 1.5px solid rgba(255,255,255,0);
   border-radius: 16px;
   padding: 16px;
-  transition: transform 0.2s, box-shadow 0.2s;
   @media (width <= 767px) {
     gap: 10px;
     padding: 0px;
   }
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    border: 1.5px solid rgba(255,255,255,0.9);
-    @media (width <= 767px) {
-      transform: none;
-      box-shadow: none;
-      border: 1.5px solid rgba(255,255,255,0);
-    }
-  }
+  /*
+   * No hover lift. These six cards describe what the generated Teva contains —
+   * they are content, not controls: plain <div>s with no handler, no href and
+   * nothing to navigate to.
+   *
+   * They used to carry `transition: transform, box-shadow` plus a hover state
+   * that raised the card 3px, added a drop shadow and lit up its border. That
+   * combination is the standard "this is pressable" affordance, so visitors
+   * pressed it and nothing happened. Clarity, Chrome desktop, /laal-kitab:
+   * dead clicks at 00:54-00:55 on this block, immediately after the visitor
+   * arrived from Quora and never reached the one real CTA on the page.
+   *
+   * Note the previous rule already cancelled the lift under 767px, so the
+   * affordance only ever existed on pointer devices — which is exactly where
+   * hover makes the promise, and exactly the platform in the report.
+   *
+   * The one action here is "Generate Laal Kitab" in the hero. Wiring these
+   * cards to it was considered and rejected: generation is subscription-gated,
+   * so an accidental tap on a paragraph of description must not start a paid
+   * flow. Removing the false promise is the fix.
+   */
 }
 
 .featureIcon {

@@ -19,6 +19,10 @@ const ProfileListingModal = ({
   hasNestedModal = false, // New prop to indicate if nested modal is open
   callModeBtnTitle,
   startCallModeBtnType,
+  // Optional { text, seq } shown above "+ Add Profile" when the caller refuses
+  // to open the add form — currently the saved-profile ceiling. Optional so
+  // existing callers are unaffected; ProfileManager is the only one that sets it.
+  addBlockedNotice = null,
 }) => {
   if (!isOpen) return null;
 
@@ -193,6 +197,21 @@ const ProfileListingModal = ({
           </div>
 
           <div className={styles.startCallBtnContainer}>
+            {/*
+              Keyed on `seq` so a repeat tap on a refused "+ Add Profile"
+              remounts this and replays the fade — otherwise the second tap
+              renders nothing new and reads as another dead click. role="status"
+              announces it without moving focus off the button.
+            */}
+            {addBlockedNotice && (
+              <p
+                key={addBlockedNotice.seq}
+                className={styles.addBlockedNotice}
+                role="status"
+              >
+                {addBlockedNotice.text}
+              </p>
+            )}
             {showAddButton && (
               <button
                 className={styles.addProfileBtn}
@@ -201,6 +220,9 @@ const ProfileListingModal = ({
                     onAddProfile();
                   }
                 }}
+                // Not `disabled`: a disabled button fires no click, so the tap
+                // would be swallowed and the notice could never be re-announced.
+                aria-disabled={!!addBlockedNotice}
               >
                 + Add Profile
               </button>

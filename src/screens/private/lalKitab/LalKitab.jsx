@@ -259,7 +259,12 @@ const LalKitab = () => {
         <div className={styles.featureGrid}>
           {features.map((f, i) => (
             <div key={i} className={styles.featureCard}>
-              <span className={styles.featureIcon}>{f.icon}</span>
+              {/* aria-hidden: the emoji is decorative and duplicates the title
+                  beside it. Left in the accessibility tree, a screen reader
+                  announces its Unicode name before every card — "pill,
+                  Remedies", "balance scale, Debts Analysis" — which is noise,
+                  not information. */}
+              <span className={styles.featureIcon} aria-hidden="true">{f.icon}</span>
               <div>
                 <h4 className={styles.featureTitle}>{f.title}</h4>
                 <p className={styles.featureDesc}>{f.desc}</p>

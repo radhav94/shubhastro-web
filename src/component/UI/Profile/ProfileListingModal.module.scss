@@ -251,6 +251,46 @@
   gap: 10px;
 }
 
+/*
+ * Visible refusal for "+ Add Profile" at the saved-profile ceiling. This
+ * replaces a toast, which lives in a portal at the edge of the viewport and so
+ * left the modal completely unchanged — the tap looked swallowed to the visitor
+ * and was recorded as a dead click by Clarity.
+ */
+.addBlockedNotice {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff3ee;
+  border: 1px solid rgba(247, 88, 1, 0.25);
+  color: #9a3412;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+  animation: addBlockedIn 0.24s ease-out;
+}
+
+@keyframes addBlockedIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Reduced motion: keep the notice, drop the slide. */
+@media (prefers-reduced-motion: reduce) {
+  .addBlockedNotice { animation: none; }
+}
+
+/* Refused state reads as unavailable but stays clickable (aria-disabled, not
+   disabled) so the notice can be re-announced on a repeat tap. */
+.addProfileBtn[aria-disabled="true"] {
+  opacity: 0.55;
+
+  &:hover, &:active {
+    box-shadow: none;
+    transform: none;
+  }
+}
+
 .deleteBtn {
   background: transparent;
   border: none;
