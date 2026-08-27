@@ -36,6 +36,36 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
   const phoneInputRef = useRef(null);
 
   /*
+    Inline answer for taps that cannot proceed.
+
+    Every decorative-but-tappable region on this screen — the ₹250 offer block,
+    the desktop phone mockup, the four trust-bar cells, the +91 chip — used to
+    answer with `toast(...)` and a focus move. That reads as a fix, but Clarity
+    cannot see a toast: it lives in a portal at the edge of the viewport, is gone
+    within seconds, and mutates nothing in the region that was clicked. So every
+    one of those taps is still logged as a dead click, and this screen keeps
+    coming back in the reports — most recently Chrome desktop, repeated clicks on
+    the trust bar at 00:39-00:42 ("Talk to Expert Astrologers"), then the phone
+    mockup (alt="ShubhAstro App") at 01:51.
+
+    Worse for the actual user: on desktop the form is in the left column and the
+    toast fires top-right, so a click on the mockup on the right produced no
+    change anywhere near the cursor.
+
+    The hint renders as a real element directly under the phone input — beside
+    the one control that unblocks everything — and the input border lights up
+    with it. `seq` increments on every call and is used as the element's React
+    key, so a repeat tap on the same target remounts the paragraph and replays
+    its animation. Without that, a second tap would set an identical string,
+    React would render nothing new, and we would be right back to a dead click.
+  */
+  const [hint, setHint] = useState(null);
+  const showFormHint = (text) => {
+    setHint((prev) => ({ text, seq: (prev?.seq || 0) + 1 }));
+    phoneInputRef.current?.focus();
+  };
+
+  /*
     Truecaller one-tap login. Only offered on Android browsers with a configured
     partner key (Truecaller's mobile-web verification supports Android only), so
     everywhere else this stays hidden and the OTP flow is the single path.
@@ -110,12 +140,13 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
         blocker: "incomplete_mobile_number",
         digits_entered: phoneNumber.length,
       });
-      toast.error(
+      // Inline, not a toast: this is the last step of the signup funnel and the
+      // message has to appear at the field it is about. See showFormHint.
+      showFormHint(
         phoneNumber.length === 0
           ? "Enter your 10-digit mobile number to claim the bonus."
           : `Please enter all 10 digits — ${10 - phoneNumber.length} to go.`
       );
-      phoneInputRef.current?.focus();
       return;
     }
 
@@ -163,9 +194,12 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
   // sitting next to the form. It reads as live interface, so taps land on it and
   // nothing happens. Everything it depicts is behind the sign-in, so answer the
   // tap by pointing at the one control that unlocks it.
+  //
+  // This is the element Clarity reported as the "ShubhAstro App" click at 01:51
+  // — that string is the image's alt text. It was already handled, but with a
+  // toast, which is the one kind of answer the metric cannot register.
   const handleMockupClick = () => {
-    toast("Enter your mobile number to open this.", { icon: "ℹ️" });
-    phoneInputRef.current?.focus();
+    showFormHint("Enter your mobile number to open this.");
   };
 
   // The bottom trust bar is four icon + bold-label cells inside a bordered,
@@ -174,9 +208,13 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
   // it did nothing. Everything it advertises sits behind the sign-in, so answer
   // the tap the same way the phone mockup above does: name the one control that
   // unlocks it and put the cursor there.
+  //
+  // "Talk to Expert Astrologers" is one of these four cells, and it is what
+  // Clarity described as the visitor "exploring astrologer listings" with
+  // repeated dead clicks at 00:39-00:42. The toast answer was there already; it
+  // just was not visible to the metric or, on desktop, anywhere near the click.
   const handleTrustItemClick = (label) => {
-    toast(`${label} — enter your mobile number to get started.`, { icon: "ℹ️" });
-    phoneInputRef.current?.focus();
+    showFormHint(`${label} — enter your mobile number to get started.`);
   };
 
   const handleSkipAndProceed = () => {
@@ -307,7 +345,9 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
           </div>
 
           {/* Phone Input */}
-          <div className={styles.newPhoneInput}>
+          <div
+            className={`${styles.newPhoneInput} ${hint ? styles.newPhoneInputHighlight : ""}`.trim()}
+          >
             {/*
               Fixed +91. The chevron that used to sit here advertised a country
               picker that does not exist — validation is Indian-format only and
@@ -317,7 +357,9 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
             <button
               type="button"
               className={styles.newCountryCode}
-              onClick={() => toast("We currently support Indian (+91) mobile numbers only.", { icon: "ℹ️" })}
+              onClick={() =>
+                showFormHint("We currently support Indian (+91) mobile numbers only.")
+              }
               title="Indian (+91) numbers only"
             >
               <img src="https://flagcdn.com/w40/in.png" alt="India" />
@@ -329,7 +371,12 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
               value={phoneNumber}
               autoFocus
               autoComplete="tel-national"
-              onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) => {
+                setPhoneNumber(e.target.value.replace(/\D/g, ""));
+                // Typing is the response the hint asked for, so clear it rather
+                // than leaving stale advice sitting under a field being filled.
+                if (hint) setHint(null);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && phoneNumber.length >= 10 && !loading) {
                   handleGetOTP();
@@ -340,6 +387,18 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
               inputMode="numeric"
             />
           </div>
+
+          {/*
+            role="status" so the message is announced to a screen reader when it
+            appears, without stealing focus from the input we just moved the
+            cursor into. Keyed on `seq` so a repeated tap remounts it — see
+            showFormHint for why that matters.
+          */}
+          {hint && (
+            <p key={hint.seq} className={styles.loginInlineHint} role="status">
+              {hint.text}
+            </p>
+          )}
 
           {/* CTA Button */}
           <button
