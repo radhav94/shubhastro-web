@@ -268,8 +268,31 @@ $font-primary: "Poppins", sans-serif;
   pointer-events: none;
 }
 
+/*
+  Banner. `aspect-ratio` is load-bearing, not cosmetic.
+
+  This was `width: 100%` with `max-height` and `object-fit` but no height and no
+  ratio, and the <img> carried no width/height attributes either. An image with no
+  intrinsic size and no CSS height lays out at 0px tall, so the box collapsed until
+  the bytes decoded and then expanded to as much as 480px — shoving the title's
+  sibling content, the entire article body and the footer down in one commit, after
+  first paint. Clarity recorded 0.68 CLS on a session that landed straight on an
+  article, clicked nothing and never navigated, so that shift is essentially the
+  page's whole score.
+
+  16/9 matches the bundled fallback (default_image_16x9_1920x1080.png). Because
+  `object-fit: cover` is already here, a real banner with a different ratio is
+  cropped into this box rather than resizing it — so the height reserved before the
+  image arrives is the same height it occupies afterwards, which is the property
+  that actually removes the shift.
+
+  `max-height` is kept: past ~853px of column width the 16/9 height would exceed
+  480px, and the cap applies identically before and after load, so it stays
+  deterministic either way.
+*/
 .bannerImage {
   width: 100%;
+  aspect-ratio: 16 / 9;
   max-height: 480px;
   object-fit: cover;
   border-radius: 12px;
@@ -325,6 +348,23 @@ $font-primary: "Poppins", sans-serif;
   ol {
     margin-left: 20px;
     margin-bottom: 16px;
+  }
+
+  /*
+    CMS-authored images. This body is injected with dangerouslySetInnerHTML and had
+    no `img` rule whatsoever, so an editor pasting a full-size photo produced an
+    image wider than the column.
+
+    `height: auto` alongside `max-width` keeps the ratio when the width is clamped;
+    without it a width-constrained image with a height attribute would squash.
+
+    Note this does NOT fix layout shift for body images — reserving space needs
+    their real dimensions, which the CMS HTML does not carry. See the summary: the
+    durable fix is emitting width/height into the stored markup.
+  */
+  img {
+    max-width: 100%;
+    height: auto;
   }
 }
 

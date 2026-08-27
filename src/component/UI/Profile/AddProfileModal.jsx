@@ -44,27 +44,24 @@ const FIELD_ORDER = [
  * the single most common one). Those wrappers now carry `data-field`, which
  * this selector has always accepted.
  */
-const ScrollToError = ({ errors, submitCount }) => {
-  // Formik hands back a fresh `errors` object on every validation pass, and
-  // validateOnBlur is on — so keying the effect on `errors` would re-run it
-  // (and re-toast) each time a field is blurred. Only a new submit attempt
-  // should trigger this, so submitCount is the sole dependency and the latest
-  // errors are read through a ref.
-  const errorsRef = useRef(errors);
-  errorsRef.current = errors;
+/**
+ * Scrolls to, focuses and names the first invalid field. Shared by the
+ * submit-driven effect below and the CTA's own explicit validation pass.
+ *
+ * Returns true when it reported something, so callers can tell "blocked and
+ * explained" apart from "nothing wrong here".
+ */
+const reportFirstError = (errors) => {
+  if (!errors) return false;
 
-  useEffect(() => {
-    if (submitCount === 0) return;
+  const firstInvalid = FIELD_ORDER.find((key) => errors[key]);
+  if (!firstInvalid) return false;
 
-    const currentErrors = errorsRef.current;
-    const firstInvalid = FIELD_ORDER.find((key) => currentErrors[key]);
-    if (!firstInvalid) return;
+  const target = document.querySelector(
+    `[name="${firstInvalid}"], [data-field="${firstInvalid}"]`
+  );
 
-    const target = document.querySelector(
-      `[name="${firstInvalid}"], [data-field="${firstInvalid}"]`
-    );
-    if (!target) return;
-
+  if (target) {
     target.scrollIntoView({ behavior: "smooth", block: "center" });
     // A data-field wrapper isn't focusable itself, so reach for the control
     // inside it; preventScroll keeps the smooth scroll above from being cut off.
@@ -72,9 +69,46 @@ const ScrollToError = ({ errors, submitCount }) => {
       ? target
       : target.querySelector("input, select, textarea, button");
     focusTarget?.focus({ preventScroll: true });
+  }
 
-    Toast.error(currentErrors[firstInvalid]);
-  }, [submitCount]);
+  // Toast even when the field can't be found, so the tap is never silent.
+  Toast.error(errors[firstInvalid]);
+  return true;
+};
+
+const ScrollToError = ({ errors, submitCount, isValidating, reportedSubmitRef }) => {
+  // Formik hands back a fresh `errors` object on every validation pass, and
+  // validateOnBlur is on — so keying the effect on `errors` alone would re-run it
+  // (and re-toast) each time a field is blurred.
+  const errorsRef = useRef(errors);
+  errorsRef.current = errors;
+
+  /*
+    `isValidating` is in the dependency list, and that is the whole fix.
+
+    Formik increments `submitCount` and *then* runs validation. With
+    `validateOnChange` off, a form whose fields have never been validated has
+    `errors === {}` at the moment submitCount changes — so keying this effect on
+    submitCount alone meant the very first blocked tap found nothing to report and
+    returned in total silence. Only the second tap worked, because by then the
+    first pass had populated `errors`.
+
+    Clarity caught exactly that: a visitor tapped "Continue & Get ₹250 Bonus" at
+    01:23, got nothing, tapped again at 01:38, and left at 02:06.
+
+    Re-running when `isValidating` flips back to false means we look at `errors`
+    after the pass has finished. `reportedSubmitRef` keeps it to one report per
+    submit attempt, since the CTA below may already have reported.
+  */
+  useEffect(() => {
+    if (submitCount === 0) return;
+    if (isValidating) return;
+    if (reportedSubmitRef.current === submitCount) return;
+
+    if (reportFirstError(errorsRef.current)) {
+      reportedSubmitRef.current = submitCount;
+    }
+  }, [submitCount, isValidating, reportedSubmitRef]);
 
   return null;
 };
@@ -132,6 +166,11 @@ const AddProfileModal = ({
   const hasUserInputRef = useRef(false);
   const closeBtnRef = useRef(null);
   const [nudgeClose, setNudgeClose] = useState(false);
+
+  // Which submit attempt has already had its first error reported. Shared by the
+  // CTA's own validation pass and ScrollToError so a blocked tap produces one
+  // message, not two. A ref rather than state: it must not trigger a re-render.
+  const reportedSubmitRef = useRef(0);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -416,7 +455,7 @@ const AddProfileModal = ({
             validateOnBlur={true}
             validateOnChange={false}
           >
-            {({ values, setFieldValue, errors, submitCount }) => {
+            {({ values, setFieldValue, errors, submitCount, isValidating, validateForm }) => {
               /*
                 Mirror "has this form got anything worth keeping?" out to the
                 overlay handler, which lives outside Formik. Read from `values`
@@ -441,7 +480,12 @@ const AddProfileModal = ({
               return (
               <Form className={styles.profileForm}>
                 {/* Scroll to first error on failed submit */}
-                <ScrollToError errors={errors} submitCount={submitCount} />
+                <ScrollToError
+                  errors={errors}
+                  submitCount={submitCount}
+                  isValidating={isValidating}
+                  reportedSubmitRef={reportedSubmitRef}
+                />
                 <div className={styles.formGroup}>
                   <label>Name <span className={styles.required}>*</span></label>
                   <div className={styles.iconField}>
@@ -635,10 +679,31 @@ const AddProfileModal = ({
                   className={styles.submitBtn}
                   aria-disabled={isLoading}
                   aria-busy={isLoading}
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     if (isLoading) {
                       e.preventDefault();
                       Toast.error("Saving your details — one moment.");
+                      return;
+                    }
+
+                    /*
+                      Validate here as well, rather than relying on Formik's
+                      submit sequence. ScrollToError now waits for `isValidating`
+                      so it reports correctly on its own, but this makes the CTA
+                      independent of that ordering entirely: on the very first tap
+                      we run the pass ourselves and name the blocker immediately.
+
+                      Not preventDefault'd on success — the native submit still
+                      runs and Formik calls handleSubmit as usual. reportedSubmitRef
+                      stops ScrollToError repeating what we just said.
+                    */
+                    const validationErrors = await validateForm();
+                    if (validationErrors && Object.keys(validationErrors).length > 0) {
+                      e.preventDefault();
+                      if (reportFirstError(validationErrors)) {
+                        // submitCount is about to become submitCount + 1.
+                        reportedSubmitRef.current = submitCount + 1;
+                      }
                     }
                   }}
                 >
