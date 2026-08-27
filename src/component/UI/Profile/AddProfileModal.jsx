@@ -20,6 +20,10 @@ import { relationOption } from "../../../utils/constanats/appData";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
 import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
 import giftImg from "../../../assets/images/welcome-bonus-icon.webp";
+import {
+  getSignupBonusLabel,
+  isSignupBonusEnabled,
+} from "../../../utils/featureConfig";
 
 // Visual top-to-bottom order of every field the schema can reject. Yup returns
 // a plain object and its key order is not the page order, so picking
@@ -711,7 +715,9 @@ const AddProfileModal = ({
                   {isLoading
                     ? "Please wait..."
                     : isGuest
-                    ? "Continue & Get ₹250 Bonus"
+                    ? isSignupBonusEnabled()
+                      ? `Continue & Get ${getSignupBonusLabel()} Bonus`
+                      : "Continue"
                     : submitButtonText || "Add Profile"}
                 </button>
 

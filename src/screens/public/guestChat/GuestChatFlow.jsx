@@ -40,6 +40,10 @@ import { trackEvent } from "../../../utils/analytics";
 import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
 import chat from "../../private/home/components/chats/ChatWindow.module.scss";
 import styles from "./GuestChatFlow.module.scss";
+import {
+  getSignupBonusLabel,
+  isSignupBonusEnabled,
+} from "../../../utils/featureConfig";
 
 const INITIAL_FORM = {
   name: "",
@@ -967,7 +971,11 @@ const GuestChatFlow = () => {
         aria-busy={sendingOtp}
       >
         <IoSparkles size={18} />
-        {sendingOtp ? "Sending OTP..." : "Continue & Get ₹250 Bonus"}
+        {sendingOtp
+          ? "Sending OTP..."
+          : isSignupBonusEnabled()
+          ? `Continue & Get ${getSignupBonusLabel()} Bonus`
+          : "Continue"}
       </button>
 
       {submitError && (

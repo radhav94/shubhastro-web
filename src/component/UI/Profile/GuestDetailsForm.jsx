@@ -14,6 +14,10 @@ import Toast from "../../toast";
 import { trackEvent } from "../../../utils/analytics";
 import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
 import styles from "./GuestDetailsForm.module.scss";
+import {
+  getSignupBonusLabel,
+  isSignupBonusEnabled,
+} from "../../../utils/featureConfig";
 
 /**
  * Compact guest-details form styled like the guest-chat form-in-bubble.
@@ -62,7 +66,9 @@ const FIELD_ORDER = ["name", "mobileNumber", "identity", "dob", "time", "birthPl
 const GuestDetailsForm = ({
   onSubmit,
   submitting = false,
-  submitText = "Continue & Get ₹250 Bonus",
+  submitText = isSignupBonusEnabled()
+    ? `Continue & Get ${getSignupBonusLabel()} Bonus`
+    : "Continue",
 }) => {
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
