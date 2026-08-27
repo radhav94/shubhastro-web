@@ -381,10 +381,26 @@ const SingleBlogDetails = () => {
           </div>
 
           {/* Banner Image */}
+          {/*
+            width/height give the browser the 16:9 ratio during HTML parse, before
+            the stylesheet's `aspect-ratio` is even applied — belt and braces
+            against the box collapsing to 0px and then expanding when the image
+            decodes. They are a ratio hint, not a size: `.bannerImage` is
+            `width: 100%`, so the rendered width is unaffected. See the note on
+            .bannerImage for why this matters (0.68 CLS on this route).
+
+            fetchPriority high: on a direct landing this is the article's hero and
+            the leading LCP candidate, and its URL only arrives with the blog
+            payload, so it cannot be preloaded from the HTML.
+          */}
           <img
             src={singleBLogData?.image?.medium || singleBLogData?.img || defaultBlogImg}
             alt={singleBLogData.title}
             className={styles.bannerImage}
+            width="1200"
+            height="675"
+            fetchPriority="high"
+            decoding="async"
             onError={(e) => { e.target.onerror = null; e.target.src = defaultBlogImg; }}
           />
 
