@@ -123,3 +123,19 @@
   color: #1a1a1a;
   text-align: right;
 }
+
+/*
+  Reserves in-flow height while the advance-panchang request is running.
+
+  The loader here used to be the default fullscreen PrimaryLoader, which is
+  `position: fixed` and therefore contributes nothing to layout — see the note in
+  TodayPanchang.jsx. 70vh matches the calculator report screens (CalcReportLoader)
+  so the whole app behaves the same way while a route is waiting on data.
+*/
+.panchangStateWrap {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}

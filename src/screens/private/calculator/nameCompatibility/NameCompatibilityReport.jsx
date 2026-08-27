@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useNameCompatibilityCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
 import { useEffect } from "react";
 import styles from "./NameCompatibilityReport.module.scss";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import CalcBackButton from "../CalcBackButton";
 import TTSButton from "../../../../component/UI/TTSButton";
 import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
@@ -22,7 +22,8 @@ const NameCompatibilityReport = () => {
     }
   }, []);
 
-  if (isLoading || isUninitialized) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (isLoading || isUninitialized) return <CalcReportLoader message="Checking your match…" />;
   if (!data?.data) return <div>No data found</div>;
 
   const report = data.data;

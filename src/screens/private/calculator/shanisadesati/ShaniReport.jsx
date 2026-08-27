@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useGetSadeSatiReportQuery } from "../../../../redux/api/calculator/calcApi";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import styles from "./ShaniReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import { BsCheckCircleFill } from "react-icons/bs";
@@ -17,7 +17,8 @@ const ShaniReport = () => {
   const stored = useSelector(selectCalculatorData("shani_sade_sati"));
   const { data, isLoading } = useGetSadeSatiReportQuery(stored, { skip: !stored });
 
-  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (!stored || isLoading) return <CalcReportLoader />;
   if (!data?.response) return <div>No data found</div>;
 
   const {

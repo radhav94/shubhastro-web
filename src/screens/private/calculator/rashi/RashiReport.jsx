@@ -32,7 +32,7 @@ import cardGrowth from "../../../../assets/images/rashi/decor/card-growth.png";
 import cardLove from "../../../../assets/images/rashi/decor/card-love.png";
 import { BsChatDots } from "react-icons/bs";
 import { useGetRashiCalQuery } from "../../../../redux/api/calculator/calcApi";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import styles from "./RashiReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import TTSButton from "../../../../component/UI/TTSButton";
@@ -231,7 +231,11 @@ const RashiReport = () => {
   const leftTiles = rashiDecorTiles.slice(0, half);
   const rightTiles = rashiDecorTiles.slice(half);
 
-  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  // (Was a default `<PrimaryLoader isLoading />`, which is `position: fixed` and
+  // so contributed no height, letting the footer ride up into the viewport until
+  // the report landed.)
+  if (!stored || isLoading) return <CalcReportLoader />;
   if (!response) return <div className={styles.empty}>No data found</div>;
 
   const { moon_sign: moonSign, prediction, bot_response: botResponse } = response;

@@ -5,7 +5,7 @@ import { Toast } from '../../../../component';
 import { startCosmicChat, sendCosmicChatMessage } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
-import PrimaryLoader from '../../../../component/UI/PrimaryLoader';
+import RouteLoader from '../../../../component/UI/RouteLoader';
 // Footer removed - route has footer: false, chat input is fixed at bottom
 
 const CosmicChat = () => {
@@ -229,7 +229,8 @@ const CosmicChat = () => {
   if (!localStorage.getItem("shubhtalk_customer_token")) return null;
 
   if (profileLoading) {
-    return <PrimaryLoader isLoading={true} />;
+    // Reserves in-flow height while the profile loads — see RouteLoader.
+    return <RouteLoader message="Loading your birth details…" />;
   }
 
   return (

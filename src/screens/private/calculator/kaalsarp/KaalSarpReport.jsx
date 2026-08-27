@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useGetKaalSarpReportQuery } from "../../../../redux/api/calculator/calcApi";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import styles from "./KaalSarpReport.module.scss";
 import { BsCheckCircleFill } from "react-icons/bs";
 import CalcBackButton from "../CalcBackButton";
@@ -15,7 +15,8 @@ const KaalSarpReport = () => {
   const stored = useSelector(selectCalculatorData("kaal_sarp"));
   const { data, isLoading } = useGetKaalSarpReportQuery(stored, { skip: !stored });
 
-  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (!stored || isLoading) return <CalcReportLoader />;
   if (!data?.response) return <div>No data found</div>;
 
   const { is_dosha_present, bot_response, remedies } = data.response;

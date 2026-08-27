@@ -44,6 +44,81 @@ const STEP = {
   LOADING: 6,
 };
 
+/* ───────────────────────── Onboarding answers draft ─────────────────────────
+ *
+ * `redirectToPersonalize` in services/appServices/kundliServicesNew.js does a
+ * `window.location.replace("/login?step=personalize")` when a logged-in user has
+ * no self kundli and the Profile API 404s. That is a full page load, so every bit
+ * of React state in this wizard is gone — including the name, gender, birth date,
+ * birth time and birth place the user may have just typed into PersonalizeScreen
+ * and BirthDetailsScreen one screen earlier.
+ *
+ * The only carry-over that existed was `draftToOnboardingFormData`, and that only
+ * covers visitors who came through the guest-chat details form. Anyone who signed
+ * up the normal way (enter number → OTP → personalize → birth details) landed on
+ * a blank pair of forms and had to answer all six questions again, with no
+ * indication that anything had been kept.
+ *
+ * A Clarity session shows the cost: registered and claimed the welcome bonus at
+ * 05:52, then was still entering a place of birth at 20:45 — fifteen minutes and
+ * 142 clicks across 21 pages later.
+ *
+ * sessionStorage for the same reason the guest draft uses it: this holds personal
+ * details, so it should survive a navigation within the visit and nothing more.
+ * `otp` is deliberately never persisted.
+ */
+const ONBOARDING_DRAFT_KEY = "shubhtalk_onboarding_draft";
+
+const DRAFT_FIELDS = [
+  "name",
+  "email",
+  "identity",
+  "birthDate",
+  "birthTime",
+  "birthPlace",
+  "unknownBirthTime",
+  "latitude",
+  "longitude",
+  "phoneNumber",
+  "guidance",
+];
+
+const loadOnboardingDraft = () => {
+  try {
+    const raw = sessionStorage.getItem(ONBOARDING_DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const saveOnboardingDraft = (formData) => {
+  try {
+    const draft = {};
+    DRAFT_FIELDS.forEach((key) => {
+      const value = formData[key];
+      // Skip empties so a partially-filled draft never overwrites a better value
+      // when it is merged back over `base`.
+      if (value === "" || value === null || value === undefined) return;
+      draft[key] = value;
+    });
+    if (Object.keys(draft).length === 0) return;
+    sessionStorage.setItem(ONBOARDING_DRAFT_KEY, JSON.stringify(draft));
+  } catch {
+    /* sessionStorage unavailable (private mode / quota) — non-critical */
+  }
+};
+
+const clearOnboardingDraft = () => {
+  try {
+    sessionStorage.removeItem(ONBOARDING_DRAFT_KEY);
+  } catch {
+    /* ignore */
+  }
+};
+
 const Onboarding = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -115,9 +190,18 @@ const Onboarding = () => {
     // date, time and place all over again, which is where they give up. Reuse
     // what they already told us and let them just confirm.
     if (isPersonalizeFlow) {
-      const carried = draftToOnboardingFormData();
-      if (carried) {
-        // Anything already known from the account wins over the draft.
+      // Two sources, applied weakest-first:
+      //   guest-chat draft — what a guest typed into the chat details form.
+      //   onboarding draft — what they typed into these very screens before the
+      //                      hard redirect threw the React state away. More
+      //                      recent, so it wins.
+      const carried = {
+        ...(draftToOnboardingFormData() || {}),
+        ...(loadOnboardingDraft() || {}),
+      };
+
+      if (Object.keys(carried).length > 0) {
+        // Anything already known from the account wins over either draft.
         return { ...base, ...carried, phoneNumber: phoneNumber || carried.phoneNumber || "" };
       }
     }
@@ -262,6 +346,10 @@ const Onboarding = () => {
       dispatch(clearSelectedKundli());
       dispatch(clearAllCalculatorData());
       localStorage.clear();
+      // localStorage.clear() doesn't touch sessionStorage, and this is a
+      // deliberate abandon — don't prefill the next person's signup with the
+      // previous one's birth details.
+      clearOnboardingDraft();
       window.dispatchEvent(new Event("auth-change"));
       // Hard redirect so the onboarding state fully resets to the login screen
       // (a React Router navigate would keep the same /login component mounted
@@ -278,7 +366,14 @@ const Onboarding = () => {
   };
 
   const updateFormData = (data) => {
-    setFormData((prev) => ({ ...prev, ...data }));
+    setFormData((prev) => {
+      const next = { ...prev, ...data };
+      // Persist on every step so a `window.location.replace` to
+      // `?step=personalize` — which can fire from the profile self-check at any
+      // point — doesn't cost the user their answers. See ONBOARDING_DRAFT_KEY.
+      saveOnboardingDraft(next);
+      return next;
+    });
   };
 
   const screens = [
@@ -334,6 +429,10 @@ const Onboarding = () => {
     <LoadingScreen
       key="loading"
       onComplete={() => {
+        // The wizard finished, so the draft has served its purpose. Leaving it
+        // would prefill a later signup in the same tab.
+        clearOnboardingDraft();
+
         // Check for redirect path after registration completion
         const redirectPath = localStorage.getItem(
           "shubhtalk_redirect_after_login",

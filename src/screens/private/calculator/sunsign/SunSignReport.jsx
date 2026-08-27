@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { useGetSunSignQuery } from "../../../../redux/api/calculator/calcApi";
 import styles from "./SunSignReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import { Share2 } from "lucide-react";
 import { zodiacSignImages } from "../../horoscope/zodiac";
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
@@ -17,7 +17,8 @@ const SunSignReport = () => {
   const stored = useSelector(selectCalculatorData("sun_sign"));
   const { data, isLoading } = useGetSunSignQuery(stored, { skip: !stored });
 
-  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (!stored || isLoading) return <CalcReportLoader message="Finding your sun sign…" />;
   if (!data?.response) return <div>No data found</div>;
 
   const { sun_sign, prediction, bot_response } = data.response;

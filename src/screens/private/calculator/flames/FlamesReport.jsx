@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useFlamesCalculatorMutation } from "../../../../redux/api/calculator/calcApi";
 import { useEffect } from "react";
 import styles from "./FlamesReport.module.scss";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import CalcBackButton from "../CalcBackButton";
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
@@ -31,7 +31,8 @@ const FlamesReport = () => {
       });
   }, []); // run once
 
-  if (isLoading || !data) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (isLoading || !data) return <CalcReportLoader />;
 
   const report = data?.data;
   if (!report) return null;

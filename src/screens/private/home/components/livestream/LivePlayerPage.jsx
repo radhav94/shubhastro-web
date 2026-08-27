@@ -28,6 +28,72 @@ const InteractiveLiveStreaming = lazy(importInteractiveLiveStreaming);
 // handful of requests per idle visitor rather than a background poll for everyone.
 const EMPTY_STATE_POLL_MS = 30000;
 
+// How long a loading state may sit with nothing to interact with before it
+// offers a way out.
+//
+// This page is a paid Google Ads landing page and it is the one route where
+// HomeLayout renders neither the TopHeader (suppressed for /live) nor the footer
+// (`footer: false` on the route). So while either of the loading states below is
+// on screen there is not a single interactive element anywhere in the document —
+// a tap in that window cannot do anything, whatever it lands on.
+//
+// It is not a narrow window either: InteractiveLiveStreaming is a 1,256 kB chunk
+// (the Agora SDK), fetched after the live-list request resolves. Clarity has a
+// session that arrived from a YouTube ad, waited through page load at 00:06,
+// tapped once at 00:14 to no effect, and was gone by 00:15 — 15 seconds, one
+// page, one click.
+//
+// Five seconds is long enough that a normal connection never sees this, and
+// short enough to catch someone before they give up.
+const LOADING_ESCAPE_MS = 5000;
+
+/*
+ * A loading state that grows an escape hatch if it outstays its welcome.
+ *
+ * The alternatives offered mirror what the "nobody is live" and load-failure
+ * cards already do, and what LiveView's waiting screen does once connecting
+ * times out: name the situation and give a route to an astrologer who can be
+ * reached right now.
+ */
+const LiveLoadingGate = ({ message }) => {
+  const [showEscape, setShowEscape] = useState(false);
+
+  useEffect(() => {
+    const id = setTimeout(() => setShowEscape(true), LOADING_ESCAPE_MS);
+    return () => clearTimeout(id);
+  }, []);
+
+  return (
+    <div className={styles.gateWrap}>
+      <div className={styles.gateLoading}>
+        <PrimaryLoader fullscreen={false} message={message} />
+
+        {showEscape && (
+          <div className={styles.gateEscape}>
+            <p className={styles.gateText}>
+              Still loading — live video is a big download on a slow connection.
+            </p>
+            <div className={styles.gateActions}>
+              <Link to="/astrologers" className={styles.gatePrimary}>
+                Chat or call an astrologer now
+              </Link>
+              {/* A stalled chunk download can't be retried from here, so a full
+                  reload is the honest remedy rather than a no-op retry button. */}
+              <button
+                type="button"
+                className={styles.gateSecondary}
+                onClick={() => window.location.reload()}
+              >
+                Reload the page
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const LivePlayerPage = () => {
   const { channelId } = useParams();
   const [lives, setLives] = useState([]);
@@ -202,11 +268,7 @@ const LivePlayerPage = () => {
    */
 
   if (isLoading) {
-    return (
-      <div className={styles.gateWrap}>
-        <PrimaryLoader fullscreen={false} message="Finding live sessions…" />
-      </div>
-    );
+    return <LiveLoadingGate message="Finding live sessions…" />;
   }
 
   if (loadFailed) {
@@ -293,14 +355,11 @@ const LivePlayerPage = () => {
           The fallback shows a loader rather than null: two lazy chunks resolve
           behind this boundary (the Agora player at 1,256 kB, then
           LiveStreamingContainer), and on a cold visit that was a blank page for
-          the duration of both downloads. */}
-      <Suspense
-        fallback={
-          <div className={styles.gateWrap}>
-            <PrimaryLoader fullscreen={false} message="Starting the live player…" />
-          </div>
-        }
-      >
+          the duration of both downloads. It is LiveLoadingGate rather than a
+          bare loader because this is the longest of the two waits and, with no
+          header and no footer on this route, a loader on its own leaves the page
+          with nothing to interact with. */}
+      <Suspense fallback={<LiveLoadingGate message="Starting the live player…" />}>
         <InteractiveLiveStreaming />
       </Suspense>
     </LiveListProvider>

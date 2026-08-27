@@ -46,6 +46,51 @@ export const useAstrologerConnect = () => {
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [chatRoomId, setChatRoomId] = useState(null);
 
+  /*
+   * Guards the window between the tap and the queue entry existing.
+   *
+   * handleChatStart / handleCallStart both `await getBalance(...)` — a network
+   * round trip — before anything reaches handleAfterKundliSelect, which is where
+   * the `isInQueue` duplicate check lives. So during that round trip isInQueue is
+   * still false and nothing stopped a second tap from firing the whole flow
+   * again. Nor did the button change in any way, so from the visitor's side the
+   * first tap simply did nothing.
+   *
+   * Clarity shows the cost on the conversion path: a visitor who had just signed
+   * up and entered their birth details made "multiple chat attempts" from 06:21
+   * and only got into a session at 07:24 — roughly a minute of tapping a button
+   * that looked inert while a balance check was in flight behind it.
+   *
+   * Keyed by astrologer + type rather than a single boolean, because these
+   * handlers are shared by 14 screens and a global lock would wrongly block a
+   * different astrologer. The ref is the guard (synchronous, so it wins a
+   * double-tap race); the state exists only so consumers can render it.
+   */
+  const connectInFlightRef = useRef(new Set());
+  const [connectingKey, setConnectingKey] = useState(null);
+
+  const connectKey = (astrologerId, type) => `${astrologerId || "unknown"}:${type}`;
+
+  const beginConnect = useCallback((astrologerId, type) => {
+    const key = connectKey(astrologerId, type);
+    if (connectInFlightRef.current.has(key)) return null;
+    connectInFlightRef.current.add(key);
+    setConnectingKey(key);
+    return key;
+  }, []);
+
+  const endConnect = useCallback((key) => {
+    if (!key) return;
+    connectInFlightRef.current.delete(key);
+    setConnectingKey((cur) => (cur === key ? null : cur));
+  }, []);
+
+  // For consumers that want to show a busy state on the specific button tapped.
+  const isConnecting = useCallback(
+    (astrologerId, type) => connectingKey === connectKey(astrologerId, type),
+    [connectingKey]
+  );
+
   // Fetch user's kundli profiles for validation
   const { data: kundliData, isLoading: isValidating } = useGetAllKundlisQuery(undefined, {
     skip: !token || !userIdLocal,
@@ -148,6 +193,15 @@ export const useAstrologerConnect = () => {
     }
     console.log("[NormalFlow] ✅ Validation passed");
 
+    // Reject a repeat tap while this astrologer's chat request is still resolving.
+    // See connectInFlightRef.
+    const inFlightKey = beginConnect(astro?._id, "chat");
+    if (!inFlightKey) {
+      Toast.info("Connecting you now — one moment.");
+      return false;
+    }
+
+    try {
     setSelectedAstrologer(astro);
     setLastRequestedAstro(astro);
     setLastRequestedCallAstro(astro);
@@ -224,9 +278,21 @@ export const useAstrologerConnect = () => {
     // Open kundli selection
     // setOpenModal((prev) => ({ ...prev, kundli: true }));
     console.log("[NormalFlow] ➡️ Proceeding to handleAfterKundliSelect (chat)");
-    handleAfterKundliSelect(astro, null, isEmergency)
+    // Awaited so the in-flight guard is held until the queue entry actually
+    // exists. It used to be fire-and-forget, which would have released the guard
+    // while the socket emit was still pending and reopened the double-tap window.
+    await handleAfterKundliSelect(astro, null, isEmergency);
     return true;
-  }, [getBalance, setLastRequestedAstro, validateBeforeConnection]);
+    } finally {
+      endConnect(inFlightKey);
+    }
+    // handleAfterKundliSelect is deliberately NOT a dependency: it is declared
+    // further down this same hook, so naming it here would evaluate it during
+    // render and throw "Cannot access 'handleAfterKundliSelect' before
+    // initialization". The body only reads it at invocation time, by which point
+    // it exists. (This is why the file already carries exhaustive-deps warnings.)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getBalance, setLastRequestedAstro, validateBeforeConnection, beginConnect, endConnect]);
 
   // Call handler
   const handleCallStart = useCallback(async (astro, type, isEmergency = false) => {
@@ -247,6 +313,14 @@ export const useAstrologerConnect = () => {
     }
     console.log("[NormalFlow] ✅ Validation passed");
 
+    // Same double-tap guard as the chat path — see connectInFlightRef.
+    const inFlightKey = beginConnect(astro?._id, type);
+    if (!inFlightKey) {
+      Toast.info("Connecting you now — one moment.");
+      return false;
+    }
+
+    try {
     setSelectedAstrologer(astro);
     setLastRequestedCallAstro(astro);
     activeCallAstroRef.current = astro; // Store in ref immediately
@@ -312,9 +386,17 @@ export const useAstrologerConnect = () => {
 
     // setOpenModal((prev) => ({ ...prev, kundli: true }));
     console.log("[NormalFlow] ➡️ Proceeding to handleAfterKundliSelect (call type:", type, ")");
-    handleAfterKundliSelect(astro, type, isEmergency)
+    // Awaited for the same reason as the chat path: hold the guard until the
+    // queue entry exists rather than releasing it mid-emit.
+    await handleAfterKundliSelect(astro, type, isEmergency);
     return true;
-  }, [getBalance, setLastRequestedCallAstro, validateBeforeConnection]);
+    } finally {
+      endConnect(inFlightKey);
+    }
+    // handleAfterKundliSelect omitted deliberately — see the note on
+    // handleChatStart's dependency array.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getBalance, setLastRequestedCallAstro, validateBeforeConnection, beginConnect, endConnect]);
 
   // After kundli selection
   const handleAfterKundliSelect = useCallback(async (selectedAstrologer, connectionType = null, isEmergency = false) => {
@@ -464,6 +546,10 @@ export const useAstrologerConnect = () => {
     handleCallStart,
     handleAfterKundliSelect,
     handleRechargeNow,
+    // Whether a chat/call request for a given astrologer + type is still
+    // resolving, so the button that was tapped can show it instead of looking
+    // inert. See connectInFlightRef.
+    isConnecting,
     openModal,
     setOpenModal,
     selectedAstrologer,

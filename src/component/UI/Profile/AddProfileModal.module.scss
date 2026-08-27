@@ -62,12 +62,37 @@
   padding: 10px 16px 6px;
 }
 
+/* Grabber bar. Now a real close button (it was an inert <div> that looked like
+   the standard dismiss affordance), so the visible 40x4 bar moved into
+   .sheetHandleBar and this element only supplies the 44px tap target around it.
+   Layout is unchanged: the button is transparent and its 20px height plus the
+   bar's own box reproduce the old `margin: 0 auto 10px` spacing. */
 .sheetHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 20px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  /* Keeps the bar and the content below it exactly where they were.
+     Before: a 4px bar at y=10 (header padding-top) with `margin-bottom: 10px`,
+     so the next element started at y=24.
+     Now: a 20px box centred on the bar, so the bar sits 8px inside it. -8px top
+     puts the bar back at y=10; the box then ends at y=22, and 2px bottom leaves
+     the next element at y=24. The extra 16px of height is pure tap target. */
+  margin: -8px auto 2px;
+}
+
+.sheetHandleBar {
+  display: block;
   width: 40px;
   height: 4px;
   background: #e6d8c8;
   border-radius: 2px;
-  margin: 0 auto 10px;
 }
 
 .closeBtn {
@@ -88,6 +113,34 @@
   z-index: 3;
 
   &:hover { background: #fff2ea; }
+}
+
+/* Applied for ~1.2s when someone clicks outside the sheet while the form has
+   data in it. The click can't be allowed to dismiss the form, but it must not
+   do nothing either: this is the visible answer that points at the way out.
+   A toast alone wouldn't be enough — Clarity can't see toasts, so the click
+   would still be logged as dead. */
+.closeBtnNudge {
+  animation: closeBtnPulse 0.6s ease-in-out 2;
+}
+
+@keyframes closeBtnPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(247, 88, 1, 0);
+  }
+  50% {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 6px rgba(247, 88, 1, 0.22);
+  }
+}
+
+/* Respect a reduced-motion preference: keep the highlight, drop the movement. */
+@media (prefers-reduced-motion: reduce) {
+  .closeBtnNudge {
+    animation: none;
+    box-shadow: 0 0 0 4px rgba(247, 88, 1, 0.3);
+  }
 }
 
 .sheetTitle {

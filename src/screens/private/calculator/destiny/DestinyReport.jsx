@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useGetNumerologyReportQuery } from "../../../../redux/api/calculator/calcApi";
-import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
+import CalcReportLoader from "../CalcReportLoader";
 import styles from "./DestinyReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import TTSButton from "../../../../component/UI/TTSButton";
@@ -13,7 +13,8 @@ const DestinyReport = () => {
   const stored = useSelector(selectCalculatorData("destiny_calc"));
   const { data, isLoading } = useGetNumerologyReportQuery(stored, { skip: !stored });
 
-  if (!stored || isLoading) return <PrimaryLoader isLoading={true} />;
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (!stored || isLoading) return <CalcReportLoader message="Calculating your numbers…" />;
   if (!data?.response?.destiny) return <div>No data found</div>;
 
   const destiny = data.response.destiny;
