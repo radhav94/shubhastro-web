@@ -6,7 +6,6 @@ import { FiChevronRight, FiCalendar, FiChevronLeft } from "react-icons/fi";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import useUserLocation from "../../../utils/hooks/useUserLocation";
 import { GuestKundliAuthModal } from "../../../component/UI/Profile";
-import toast from "../../../component/toast";
 
 const OCCASIONS = [
   'Marriage', 'Job Interview', 'Business Launch', 'House Purchase',
@@ -46,6 +45,32 @@ const AgenticCalendarV2 = ({ styles }) => {
   const [locationValue, setLocationValue] = useState('');
   const [locationData, setLocationData] = useState(null);
 
+  /*
+    Inline, in-region answer for a "View Muhurat" tap that cannot proceed.
+
+    Both blockers here used to answer with `toast.error(...)`. That reads like
+    feedback but it is invisible to the dead-click metric and, more importantly,
+    often invisible to the user: the toaster is mounted `position="top-right"`
+    (main.jsx), while this CTA sits at the bottom of a tall widget partway down
+    the homepage — so on desktop the only thing that changed was off-screen,
+    nowhere near the cursor. It also mutates nothing inside the clicked region,
+    which is exactly what Clarity records as a dead click.
+
+    Same treatment LoginScreen already uses for its blocked taps: a real element
+    rendered next to the control that was clicked, plus a highlight on whichever
+    field is actually missing. `seq` increments on every call and keys the
+    element, so tapping the CTA a second time remounts the paragraph and replays
+    its animation — without that, a repeat tap would set an identical string,
+    React would render nothing, and it would be a dead click again.
+  */
+  const [hint, setHint] = useState(null);
+  const locationInputRef = useRef(null);
+  const occasionsRef = useRef(null);
+
+  const showHint = (text, target) => {
+    setHint((prev) => ({ text, target, seq: (prev?.seq || 0) + 1 }));
+  };
+
   // Auto-fill location from detected user location (same source as Today's Muhurat)
   useEffect(() => {
     if (!userLocation.isDefault && userLocation.loaded && userLocation.locationName && userLocation.locationName !== "Your Location") {
@@ -64,6 +89,9 @@ const AgenticCalendarV2 = ({ styles }) => {
   const allOccasions = [...OCCASIONS, ...customOccasions];
 
   const toggleOccasion = (occasion) => {
+    // Picking an occasion is the response the hint asked for, so drop stale
+    // advice rather than leaving it under a form that has moved on.
+    if (hint?.target === 'occasions') setHint(null);
     setSelectedOccasions(prev =>
       prev.includes(occasion) ? prev.filter(o => o !== occasion) : [...prev, occasion]
     );
@@ -100,13 +128,18 @@ const AgenticCalendarV2 = ({ styles }) => {
 
   const handleGetMuhurat = () => {
     if (selectedOccasions.length === 0) {
-      toast.error("Select at least one occasion to view Muhurat");
+      showHint("Pick at least one occasion above to see its Muhurat.", 'occasions');
+      // The chips row scrolls horizontally and sits above the CTA, so make sure
+      // the thing the message points at is actually on screen.
+      occasionsRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       return;
     }
     if (!effectiveLocation) {
-      toast.error("Enter your location and pick it from the suggestions");
+      showHint("Add your city and tap it in the suggestions — Muhurat timings depend on it.", 'location');
+      locationInputRef.current?.focus();
       return;
     }
+    setHint(null);
     const state = {
       occasions: selectedOccasions,
       period: selectedPeriod,
@@ -142,8 +175,10 @@ const AgenticCalendarV2 = ({ styles }) => {
       <div className={styles.calBody}>
 
         {/* Select Occasions */}
-        <div className={styles.calOccasions}>
-          <p className={styles.calLabel}>Select Occasions</p>
+        <div className={styles.calOccasions} ref={occasionsRef}>
+          <p className={`${styles.calLabel} ${hint?.target === 'occasions' ? styles.calLabelBlocked : ''}`.trim()}>
+            Select Occasions
+          </p>
           <div className={styles.calChips}>
             {/* Render order is deliberately stable. This list used to be sorted
                 with the selected occasions first, so tapping a chip made it jump
@@ -222,8 +257,9 @@ const AgenticCalendarV2 = ({ styles }) => {
           <label style={{ fontSize: 15, fontWeight: 600, color: '#1f2937', display: 'block', marginBottom: 6 }}>
             Location
           </label>
-          <div className={styles.agenticCalLocation}>
+          <div className={`${styles.agenticCalLocation} ${hint?.target === 'location' ? styles.calLocationBlocked : ''}`.trim()}>
             <LocationSearch
+              inputRef={locationInputRef}
               value={locationValue}
               placeholder="Enter your location"
               onChange={(e) => {
@@ -233,6 +269,7 @@ const AgenticCalendarV2 = ({ styles }) => {
               onPlaceSelect={({ address, lat, lng }) => {
                 setLocationValue(address);
                 setLocationData({ address, lat, lng });
+                if (hint?.target === 'location') setHint(null);
               }}
             />
             {/* CTA */}
@@ -246,6 +283,17 @@ const AgenticCalendarV2 = ({ styles }) => {
             View Muhurat
           </button>
           </div>
+
+          {/*
+            role="status" so the message is announced rather than only seen, and
+            without stealing focus from the field we just moved the cursor into.
+            Keyed on `seq` — see the showHint comment for why.
+          */}
+          {hint && (
+            <p key={hint.seq} className={styles.calInlineHint} role="status">
+              {hint.text}
+            </p>
+          )}
         </div>
       </div>
 
