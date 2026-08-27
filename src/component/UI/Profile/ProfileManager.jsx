@@ -19,6 +19,9 @@ import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 // Shared cookie key for guest (non-logged-in) kundli profiles across pages
 const GUEST_KUNDLI_COOKIE = "guestKundliProfiles";
 
+// Ceiling on saved kundli profiles, enforced in handleAddProfile.
+const MAX_PROFILES = 5;
+
 /**
  * ProfileManager - Complete profile management flow component
  *
@@ -76,6 +79,26 @@ const ProfileManager = ({
   // ProfileListingModal from flashing when `loginSuccess` sets a token
   // mid-flow (the ternary would otherwise flip to the listing branch).
   const [guestAuthInProgress, setGuestAuthInProgress] = useState(false);
+
+  /*
+    Why "+ Add Profile" needs a visible refusal.
+
+    At the profile ceiling, handleAddProfile used to `Toast.error("Please Delete
+    One Kundli from Existing One")` and return. The listing modal it was tapped
+    from did not change in any way, and a toast renders in a portal at the edge
+    of the viewport — Clarity cannot see it, so the tap is recorded as a dead
+    click, and the visitor sees nothing happen where they are looking.
+
+    Clarity, Chrome desktop on /kundli: two clicks on profile actions at 10:47
+    and 10:57, ten seconds apart, then the visitor left. Tapping, waiting,
+    tapping again is what a swallowed control looks like.
+
+    `seq` increments on every refusal and is used as the notice's React key, so a
+    second tap remounts the element and replays its animation. Without it the
+    repeat tap would set an identical string, React would render nothing new,
+    and the click would be dead all over again.
+  */
+  const [addBlocked, setAddBlocked] = useState(null);
 
   // State for Start Call mode
   const [selectedProfileForCall, setSelectedProfileForCall] = useState(null);
@@ -141,6 +164,12 @@ const ProfileManager = ({
     (profile) => !excludedProfileIds.includes(profile._id)
   );
 
+  // Deleting a profile clears the ceiling notice — it would otherwise keep
+  // claiming the list is full while the user is looking at a list that is not.
+  useEffect(() => {
+    if (profiles.length < MAX_PROFILES) setAddBlocked(null);
+  }, [profiles.length]);
+
   // Reset all modal states when ProfileManager closes
   useEffect(() => {
     if (!isOpen) {
@@ -151,6 +180,7 @@ const ProfileManager = ({
       setProfileToEdit(null);
       setSelectedProfileForCall(null);
       setGuestAuthInProgress(false);
+      setAddBlocked(null);
     }
   }, [isOpen]);
 
@@ -194,11 +224,17 @@ const ProfileManager = ({
 
   // Handler: Open add profile modal
   const handleAddProfile = () => {
-    // Maximum of 5 profiles allowed
-    if (profiles.length >= 5) {
-      Toast.error("Please Delete One Kundli from Existing One");
+    // At the ceiling, refuse visibly inside the modal instead of via a toast.
+    // See the addBlocked declaration for the Clarity evidence.
+    if (profiles.length >= MAX_PROFILES) {
+      setAddBlocked((prev) => ({
+        text: `You already have ${MAX_PROFILES} saved profiles, which is the maximum. Delete one from the list above to add another.`,
+        seq: (prev?.seq || 0) + 1,
+      }));
       return;
     }
+
+    setAddBlocked(null);
 
     /*
      * A guest branch used to live here calling setShowGuestAuthModal(), which is
@@ -586,6 +622,7 @@ const ProfileManager = ({
         showDeleteButton={enabledOperations.delete}
         showEditButton={enabledOperations.edit}
         hasNestedModal={showAddProfile || showEditProfile || showDeleteModal}
+        addBlockedNotice={addBlocked}
       />
 
       {/* Add Profile Modal */}
