@@ -2014,6 +2014,11 @@
   flex-shrink: 0;
   cursor: pointer;
   transition: transform 0.15s;
+  // Quick-link tiles are real <a>/<Link> elements now (they were div
+  // role="button"), so the anchor defaults have to be neutralised: no
+  // underline, and the label keeps its own colour rather than the link blue.
+  text-decoration: none;
+  color: inherit;
 
   &:hover {
     transform: translateY(-2px);

@@ -2037,6 +2037,66 @@
 }
 
 /*
+ * Field lit up while an inline hint is showing. This is the first half of the
+ * visible answer to a tap on one of the screen's decorative-but-tappable
+ * regions (the ₹250 offer block, the phone mockup, the trust bar, the +91 chip);
+ * those used to reply with a toast only, which Clarity logs as a dead click and
+ * which on desktop appeared in the opposite corner from the click.
+ */
+.newPhoneInputHighlight {
+  border-color: #f75801;
+  box-shadow: 0 0 0 3px rgba(247, 88, 1, 0.15);
+}
+
+/*
+ * The hint itself, directly under the field. Remounted on every tap (keyed on a
+ * counter in LoginScreen), so the fade-in replays and there is a fresh DOM
+ * mutation even when the message text is unchanged.
+ */
+.loginInlineHint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  max-width: 420px;
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fff3ee;
+  border: 1px solid rgba(247, 88, 1, 0.25);
+  color: #9a3412;
+  font-size: 13px;
+  line-height: 1.45;
+  font-family: "Poppins", sans-serif;
+  animation: loginHintIn 0.24s ease-out;
+
+  @media (max-width: 820px) {
+    max-width: 100%;
+  }
+}
+
+@keyframes loginHintIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * Reduced motion: keep the hint, drop the slide. The element still appears, so
+ * the tap is still visibly answered.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .loginInlineHint {
+    animation: none;
+  }
+}
+
+/*
  * Fixed +91 prefix. Rendered as a <button> only so a tap can be answered — it
  * deliberately carries no chevron, because the previous version looked like a
  * country picker and drew repeated clicks from non-Indian visitors. Styled to
