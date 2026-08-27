@@ -5022,3 +5022,51 @@ $glass-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9),
     flex-direction: column;
   }
 }
+
+/* ─── Blocked "View Muhurat" tap ───────────────────────────────────────────
+   The CTA is deliberately never `disabled` (see .calCtaIncomplete), so a tap
+   with nothing selected has to answer with something visible *here*, next to
+   the button. A toast could not do that: the toaster is top-right and this
+   widget sits partway down the page, so the tap changed nothing near the cursor
+   and registered as a dead click in Clarity.
+
+   Defined at the end of the file on purpose — `.calLocationBlocked input` and
+   `.agenticCalLocation input` have equal specificity, so source order decides. */
+.calInlineHint {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #b3300a;
+  font-family: 'Poppins', sans-serif;
+  animation: calHintIn 0.28s ease-out;
+
+  @media (width <= 767px) {
+    font-size: 12px;
+  }
+}
+
+@keyframes calHintIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* "Select Occasions" turns into the error colour so the message names a label
+   the user can actually spot. */
+.calLabelBlocked {
+  color: #b3300a;
+}
+
+.calLocationBlocked {
+  input {
+    border-color: #d43400;
+    background: rgba(255, 255, 255, 0.75);
+  }
+}
