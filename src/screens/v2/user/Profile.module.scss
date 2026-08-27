@@ -55,7 +55,8 @@
 .userAvatar {
   width: 40px;
   height: 40px;
-  cursor: pointer;
+  /* No pointer: the avatar is not a control any more — only the pencil is. A
+     pointer here would promise a click that does nothing. */
   background: #fff;
   border: 2px solid #fdefd8;
   border-radius: 50%;
@@ -77,17 +78,11 @@
   flex: 1;
 }
 
-// The name + birth-date line is one tap target that opens Edit Profile. It used
-// to be inert text, which is what drove the dead clicks on this block, so it now
-// has to actually look tappable.
+// Plain text again. This block used to be the tap target itself, which meant the
+// date line, the phone number and the empty space beside the name all opened the
+// edit form. The pencil button carries the action now.
 .headerIdentity {
-  cursor: pointer;
   border-radius: 6px;
-
-  &:focus-visible {
-    outline: 2px solid #f75801;
-    outline-offset: 2px;
-  }
 }
 
 .profileName {
@@ -104,13 +99,41 @@
   }
 }
 
-// Small pencil beside the name: the affordance that tells you the block is
-// editable at all, rather than leaving it as a target you have to guess at.
+/*
+  The pencil is the only way into the edit form from the header, so it needs a
+  real tap target rather than a 14px glyph. The padding does that without moving
+  the icon: negative margins pull the box back so the pencil still sits tight
+  against the name, while the hit area extends past it.
+*/
+.profileNameEditBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  margin: -8px -8px -8px -2px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 0;
+
+  &:hover .profileNameEditIcon {
+    color: #d43400;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 0;
+  }
+}
+
 .profileNameEditIcon {
   flex-shrink: 0;
   width: 14px;
   height: 14px;
   color: #f75801;
+  transition: color 0.15s ease;
 }
 .orderCardMain{
   display: grid;

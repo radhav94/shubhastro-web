@@ -602,20 +602,88 @@ const DateTimePicker = ({
     return date;
   };
 
+  /* A typed entry is complete once it has three parts and a four-digit year.
+     Deliberately not "the text is 10 characters long": that assumed a
+     zero-padded DD/MM/YYYY and so treated 5/8/1990 as still being typed. */
+  const looksComplete = (text) => {
+    const parts = String(text).split("/");
+    return parts.length === 3 && parts[0] && parts[1] && parts[2]?.length === 4;
+  };
+
   const handleManualChange = (e) => {
     const val = e.target.value;
     setIsManuallyEditing(true);
-    // Auto-insert slashes for DD/MM/YYYY format
-    const digits = val.replace(/[^0-9]/g, "");
-    let formatted = "";
-    for (let i = 0; i < digits.length && i < 8; i++) {
-      if (i === 2 || i === 4) formatted += "/";
-      formatted += digits[i];
+
+    /*
+      The old formatter threw the user's own separators away and re-inserted its
+      own after positions 2 and 4, so it only worked for people who zero-pad.
+      Typing the perfectly ordinary "5/8/1990" produced "58/19/90" — a box that
+      looks filled, a date that can never parse, and therefore a "Birth date is
+      required" error on submit with a visibly non-empty field.
+
+      Now: if the user types separators, they are respected and each segment is
+      capped (2/2/4). If they type straight digits, the positional auto-insert
+      still applies, so "05081990" keeps working.
+    */
+    /*
+      Whether this keystroke removed characters. The trailing separator below
+      must not be re-added while deleting: backspacing "12/" would erase the
+      slash, the formatter would immediately put it back, and the caret could
+      never get past it.
+    */
+    const isDeleting = val.length < inputText.length;
+
+    /*
+      One mask for both ways of typing, rather than a branch per style.
+
+      Split on whatever separators the user typed, then fill day/month/year to
+      their widths (2/2/4), carrying anything that overflows a segment into the
+      next one. That is what makes both routes work with the same code:
+
+        "12121990"  -> one part, carried across   -> 12/12/1990
+        "5/8/1990"  -> three short parts, kept    -> 5/8/1990
+
+      The carry is the part that was missing: capping each segment without it
+      silently *dropped* the digits that did not fit, so once the box read
+      "12/12" every further keystroke disappeared.
+    */
+    const SEGMENT_WIDTHS = [2, 2, 4];
+    const rawParts = val.replace(/[^0-9/]/g, "").split("/");
+    const segments = [];
+    let carry = "";
+    for (let i = 0; i < 3; i++) {
+      const merged = (carry + (rawParts[i] ?? "")).replace(/\D/g, "");
+      segments.push(merged.slice(0, SEGMENT_WIDTHS[i]));
+      carry = merged.slice(SEGMENT_WIDTHS[i]);
     }
+    // Trailing empties would render as "12//" while the year is still being typed.
+    while (segments.length > 1 && segments[segments.length - 1] === "") segments.pop();
+
+    let formatted = segments.join("/");
+
+    /*
+      Close the segment as soon as it is full, so the field reads "12/" and
+      "12/12/" instead of sitting on "12" and "12/12" until the next digit
+      arrives — the separator used to appear one keystroke late, which looks like
+      the mask stopped working right after the month.
+
+      `endsWithSeparator` keeps a slash the user typed themselves, so "5/" does
+      not collapse back to "5" and turn the next keystroke into "58".
+    */
+    const last = segments.length - 1;
+    const endsWithSeparator = /\/$/.test(val);
+    if (
+      !isDeleting &&
+      segments.length < 3 &&
+      (endsWithSeparator || segments[last].length === SEGMENT_WIDTHS[last])
+    ) {
+      formatted += "/";
+    }
+
     setInputText(formatted);
     onRawChange?.(formatted);
-    // Check validity once full date is entered (DD/MM/YYYY = 10 chars)
-    if (formatted.length === 10) {
+
+    if (looksComplete(formatted)) {
       const parsed = parseManualDate(formatted);
       if (parsed) {
         setDateError("");
@@ -649,6 +717,18 @@ const DateTimePicker = ({
     const parsed = parseManualDate(inputText);
     if (parsed) {
       setIsManuallyEditing(false);
+      /*
+        Tidy the display to DD/MM/YYYY now that focus has left. Done on blur
+        rather than while typing, because padding mid-entry fights the person
+        still typing ("5" would become "05" before they reach the month).
+        onChange already fired with the parsed date, so this is display only.
+      */
+      const pad = (n) => String(n).padStart(2, "0");
+      const tidy = `${pad(parsed.getDate())}/${pad(parsed.getMonth() + 1)}/${parsed.getFullYear()}`;
+      if (tidy !== inputText) {
+        setInputText(tidy);
+        onRawChange?.(tidy);
+      }
     } else {
       setDateError("Invalid date");
       onError?.("Invalid date");
