@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { useFetchBirthDetailsQuery } from "../../../../redux/api/kundli/kundliApi";
 import { capitalizeWords } from "../../../../utils/capitalize";
 import { format12HourTime } from "../../../../utils/dateFormat/dateTime";
+import { formatTithiList } from "../../../../utils/helper/tithiNames";
 import arrowUp from "../../../../assets/images/arrow-up.svg";
 
 const AccordionSection = ({ title, data = {}, defaultOpen = false }) => {
@@ -199,7 +200,7 @@ const BasicContent = (props) => {
           title="Ghatka Chakra"
           data={{
             Rasi: capitalizeWords(ghatkaChakra.rasi) || "--",
-            Tithi: Array.isArray(ghatkaChakra.tithi) ? ghatkaChakra.tithi.join(", ") : (ghatkaChakra.tithi || "--"),
+            Tithi: formatTithiList(ghatkaChakra.tithi) || "--",
             Day: capitalizeWords(ghatkaChakra.day) || "--",
             Nakshatra: capitalizeWords(ghatkaChakra.nakshatra) || "--",
             Tatva: capitalizeWords(ghatkaChakra.tatva) || "--",
