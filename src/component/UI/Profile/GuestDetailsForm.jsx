@@ -110,9 +110,9 @@ const GuestDetailsForm = ({
        * a phone viewport, so the field that failed is usually scrolled off the
        * top while the user is looking at the button. The inline <span> errors
        * do render, just nowhere the user is looking — so "Continue & Get ₹250
-       * Bonus" reads as a broken button and gets tapped again and again.
-       * Matches the handling already in GuestChatFlow: bring the first problem
-       * into view, focus it, and say it once out loud.
+       * Bonus" reads as a broken button and gets tapped again and again. Bring
+       * the first problem into view instead; no toast, because the same words
+       * are already printed under the field we are scrolling to.
        */
       const firstInvalid = FIELD_ORDER.find((key) => e[key]);
       const node = firstInvalid && fieldRefs.current[firstInvalid];
@@ -120,7 +120,6 @@ const GuestDetailsForm = ({
         node.scrollIntoView({ behavior: "smooth", block: "center" });
         node.querySelector("input, button")?.focus({ preventScroll: true });
       }
-      if (firstInvalid) Toast.error(e[firstInvalid]);
 
       // Lets analytics separate repeat taps caused by validation from ones
       // caused by a failing OTP send, and shows which field trips people up.
