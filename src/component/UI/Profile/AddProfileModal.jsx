@@ -49,11 +49,17 @@ const FIELD_ORDER = [
  * this selector has always accepted.
  */
 /**
- * Scrolls to, focuses and names the first invalid field. Shared by the
- * submit-driven effect below and the CTA's own explicit validation pass.
+ * Scrolls to and focuses the first invalid field. Shared by the submit-driven
+ * effect below and the CTA's own explicit validation pass.
  *
- * Returns true when it reported something, so callers can tell "blocked and
- * explained" apart from "nothing wrong here".
+ * Deliberately silent: every field renders its own <ErrorMessage>, so a toast
+ * saying "Name is required" on top of the "Name is required" already sitting
+ * under the input is the same message twice, and the toast is the copy that
+ * covers the form and then disappears. Bringing the field into view is what the
+ * user actually needs; the text is already there when they arrive.
+ *
+ * Returns true when it found something to report, so callers can tell "blocked"
+ * apart from "nothing wrong here".
  */
 const reportFirstError = (errors) => {
   if (!errors) return false;
@@ -75,15 +81,13 @@ const reportFirstError = (errors) => {
     focusTarget?.focus({ preventScroll: true });
   }
 
-  // Toast even when the field can't be found, so the tap is never silent.
-  Toast.error(errors[firstInvalid]);
   return true;
 };
 
 const ScrollToError = ({ errors, submitCount, isValidating, reportedSubmitRef }) => {
   // Formik hands back a fresh `errors` object on every validation pass, and
   // validateOnBlur is on — so keying the effect on `errors` alone would re-run it
-  // (and re-toast) each time a field is blurred.
+  // (and re-scroll) each time a field is blurred.
   const errorsRef = useRef(errors);
   errorsRef.current = errors;
 
@@ -261,17 +265,39 @@ const AddProfileModal = ({
       then: (schema) => schema.required("Birth time is required"),
       otherwise: (schema) => schema.notRequired(),
     }),
-    birthPlace: Yup.string().required("Place of birth is required"),
+    /*
+      "Typed but never picked from the dropdown" used to live only in
+      handleSubmit as a toast, so — unlike every other rule here — it produced no
+      red text under the field it was talking about. Expressing it as a schema
+      test puts it inline with the rest, the same way the calculator forms show
+      every problem next to its own field. handleSubmit keeps its guard as a
+      backstop for anything that reaches it with no coordinates.
+    */
+    birthPlace: Yup.string()
+      .required("Place of birth is required")
+      .test(
+        "has-coordinates",
+        "Please select a valid location from the dropdown",
+        function (value) {
+          if (!value) return true; // `required` already reports this case.
+          const { latitude, longitude } = this.parent;
+          return Boolean(latitude && longitude);
+        }
+      ),
   });
 
-  const handleSubmit = async (values) => {
-    // Passes Yup (birthPlace is a non-empty string) but has no coordinates, i.e.
-    // the user typed a place and never picked a suggestion. Yup can't see this,
-    // so there is no ErrorMessage for it — the toast is the only feedback, and
-    // the field it refers to is usually off-screen by the time the button is
-    // tapped. Point at it as well as naming it.
+  const handleSubmit = async (values, { setFieldError, setFieldTouched }) => {
+    /*
+      Backstops for the two rules the schema also covers. They report through
+      setFieldError rather than a toast so the message lands under the field it
+      is about, like every other error on this form.
+    */
+
+    // A place typed by hand and never picked from the dropdown: non-empty string,
+    // no coordinates.
     if (!values.latitude || !values.longitude) {
-      Toast.error("Please select a valid location from the dropdown");
+      setFieldTouched("birthPlace", true, false);
+      setFieldError("birthPlace", "Please select a valid location from the dropdown");
       const placeField = document.querySelector('[data-field="birthPlace"]');
       if (placeField) {
         placeField.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -280,9 +306,13 @@ const AddProfileModal = ({
       return;
     }
 
-    // Validate: Prevent creating a "Self" profile if one already exists
+    // Prevent creating a second "Self" profile.
     if (values.relation?.toLowerCase() === "self" && hasSelfProfile) {
-      Toast.error("A Self profile already exists. Please select a different relation.");
+      setFieldTouched("relation", true, false);
+      setFieldError(
+        "relation",
+        "A Self profile already exists. Please select a different relation."
+      );
       return;
     }
 
@@ -459,7 +489,15 @@ const AddProfileModal = ({
             validateOnBlur={true}
             validateOnChange={false}
           >
-            {({ values, setFieldValue, errors, submitCount, isValidating, validateForm }) => {
+            {({
+              values,
+              setFieldValue,
+              setTouched,
+              errors,
+              submitCount,
+              isValidating,
+              validateForm,
+            }) => {
               /*
                 Mirror "has this form got anything worth keeping?" out to the
                 overlay handler, which lives outside Formik. Read from `values`
@@ -704,6 +742,30 @@ const AddProfileModal = ({
                     const validationErrors = await validateForm();
                     if (validationErrors && Object.keys(validationErrors).length > 0) {
                       e.preventDefault();
+
+                      /*
+                        Mark every invalid field touched.
+
+                        Formik's <ErrorMessage> only renders once a field is
+                        touched, and the pass that marks all of them touched is
+                        part of Formik's own submit sequence — which the
+                        preventDefault above skips. So a blocked tap used to show
+                        a single toast and not one line of red text, while the
+                        calculator forms (Atmakaraka & co.) list every problem
+                        under its own field. Same behaviour here now: inline
+                        errors on every invalid field, and the first one is
+                        scrolled into view.
+
+                        `false` skips a re-validate; we already have the errors.
+                      */
+                      setTouched(
+                        Object.keys(validationErrors).reduce(
+                          (acc, field) => ({ ...acc, [field]: true }),
+                          {}
+                        ),
+                        false
+                      );
+
                       if (reportFirstError(validationErrors)) {
                         // submitCount is about to become submitCount + 1.
                         reportedSubmitRef.current = submitCount + 1;
