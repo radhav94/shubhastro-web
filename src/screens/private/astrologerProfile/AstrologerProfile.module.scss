@@ -1359,6 +1359,31 @@
 /* Status cards (Available Now / Offline, both breakpoints) and the minutes
    tiles are <button>s now. These resets keep them pixel-identical to the divs
    they replaced; the affordance is the cursor and the focus ring. */
+/* Why a Chat/Call/Video tile can't start a session, shown in the connect card
+   rather than in a toast. See AstrologerProfile.jsx. */
+.connectBlockedNote {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #b45309;
+  background: rgba(247, 88, 1, 0.08);
+  border: 1px solid rgba(247, 88, 1, 0.25);
+  border-radius: 8px;
+  padding: 8px 10px;
+  animation: connectBlockedNoteIn 0.18s ease-out;
+}
+
+@keyframes connectBlockedNoteIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .statusCardBtn {
   appearance: none;
   border: none;

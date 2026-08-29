@@ -1344,6 +1344,34 @@ const AstrologerProfile = () => {
   const hoursSectionRef = useRef(null);
   const [connectPulse, setConnectPulse] = useState(false);
 
+  /*
+    Why an unavailable Chat/Call/Video tile answers on the card instead of in a
+    toast.
+
+    The three connect tiles stay tappable when the astrologer can't take that
+    session type — a `disabled` button fires no event at all, which is worse — and
+    the answer was `toast.info(reason)`. That is invisible where it matters: the
+    toast is portalled to the edge of the viewport, it changes nothing in the tile
+    that was tapped, and react-hot-toast renders an identical repeat as no visible
+    change. So the tap is logged dead and a second tap gets less feedback, not
+    more.
+
+    Clarity, desktop Chrome: a visitor returned to the same astrologer's profile
+    three times (00:38, 02:06, 03:53) and made two attempts a second apart at
+    04:14 and 04:15 before leaving. Same shape as the listing card, which now
+    reports inline; this is the other half of that fix.
+  */
+  const [blockedNote, setBlockedNote] = useState(null);
+
+  const reportBlocked = (reason) =>
+    setBlockedNote((prev) => ({ text: reason, seq: (prev?.seq || 0) + 1 }));
+
+  useEffect(() => {
+    if (!blockedNote) return undefined;
+    const id = setTimeout(() => setBlockedNote(null), 5000);
+    return () => clearTimeout(id);
+  }, [blockedNote]);
+
   const revealConnectOptions = () => {
     /*
       Whichever connect surface this width actually renders: the sidebar card
@@ -2330,7 +2358,7 @@ const AstrologerProfile = () => {
                   className={`${styles.connectOption} ${!connectTiles.chat.enabled ? styles.connectOptionDisabled : ""}`}
                   onClick={() => {
                     if (!connectTiles.chat.enabled) {
-                      toast.info(connectTiles.chat.reason);
+                      reportBlocked(connectTiles.chat.reason);
                       return;
                     }
                     handleChatStart(data);
@@ -2357,7 +2385,7 @@ const AstrologerProfile = () => {
                   className={`${styles.connectOption} ${!connectTiles.audio.enabled ? styles.connectOptionDisabled : ""}`}
                   onClick={() => {
                     if (!connectTiles.audio.enabled) {
-                      toast.info(connectTiles.audio.reason);
+                      reportBlocked(connectTiles.audio.reason);
                       return;
                     }
                     handleCallStart(data, "audio");
@@ -2384,7 +2412,7 @@ const AstrologerProfile = () => {
                   className={`${styles.connectOption} ${!connectTiles.video.enabled ? styles.connectOptionDisabled : ""}`}
                   onClick={() => {
                     if (!connectTiles.video.enabled) {
-                      toast.info(connectTiles.video.reason);
+                      reportBlocked(connectTiles.video.reason);
                       return;
                     }
                     handleCallStart(data, "video");
@@ -2406,6 +2434,14 @@ const AstrologerProfile = () => {
                   </div>
                 </button>
               </div>
+            )}
+
+            {/* role="status" so the reason is announced as well as seen. See
+                reportBlocked. */}
+            {blockedNote && (
+              <p key={blockedNote.seq} className={styles.connectBlockedNote} role="status">
+                {blockedNote.text}
+              </p>
             )}
           </div>}
 
