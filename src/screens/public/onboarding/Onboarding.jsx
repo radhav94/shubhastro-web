@@ -28,6 +28,7 @@ import PersonalizeScreen from "./PersonalizeScreen";
 import OTPScreen from "./OTPScreen";
 import LoginScreen from "./LoginScreen";
 import { draftToOnboardingFormData } from "../guestChat/guestChatConstants";
+import { loadOtpResume, saveOtpResume, clearOtpResume } from "./otpResume";
 
 /**
  * Indices into the positional `screens` array below. Named because the wizard is
@@ -119,6 +120,8 @@ const clearOnboardingDraft = () => {
   }
 };
 
+
+
 const Onboarding = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -152,8 +155,15 @@ const Onboarding = () => {
   const isPersonalizeFlow = searchParams.get("step") === "personalize";
   const skipGuidance = searchParams.get("skip") === "welcome" || isPersonalizeFlow;
 
+  /*
+    Read once, on mount, before the state below is seeded from it: a visitor who
+    was on the OTP step when the tab was discarded resumes there instead of at an
+    empty number field. See otpResume.js.
+  */
+  const [otpResume] = useState(() => (isPersonalizeFlow ? null : loadOtpResume()));
+
   const [currentStep, setCurrentStep] = useState(
-    isPersonalizeFlow ? STEP.PERSONALIZE : STEP.LOGIN
+    isPersonalizeFlow ? STEP.PERSONALIZE : otpResume ? STEP.OTP : STEP.LOGIN
   );
   const [deviceLimitDevices, setDeviceLimitDevices] = useState(null);
   const [isDeviceLimitOpen, setIsDeviceLimitOpen] = useState(false);
@@ -166,6 +176,14 @@ const Onboarding = () => {
         const user = userData ? JSON.parse(userData) : null;
         phoneNumber = user?.phoneNumber || localStorage.getItem("shubhtalk_customer_phone") || "";
       } catch { /* ignore */ }
+    } else {
+      /*
+        Signup flow after a reload. The resume marker is the fresher source; the
+        draft covers the case where it has aged out, so the login field still
+        opens with the number they typed rather than blank. Both are this
+        visitor's own input, in their own tab.
+      */
+      phoneNumber = otpResume?.phoneNumber || loadOnboardingDraft()?.phoneNumber || "";
     }
 
     const base = {
@@ -268,6 +286,21 @@ const Onboarding = () => {
     }
   }, []);
 
+  /*
+    Keep the OTP-step marker in step with where the wizard actually is. Written
+    while the code is outstanding, removed the moment we move on — verified,
+    stepped back to change the number, or anywhere else — so a later visit to
+    /login in this tab never resumes into a code that no longer exists.
+  */
+  useEffect(() => {
+    if (isPersonalizeFlow) return;
+    if (currentStep === STEP.OTP && formData.phoneNumber) {
+      saveOtpResume(formData.phoneNumber);
+    } else {
+      clearOtpResume();
+    }
+  }, [currentStep, formData.phoneNumber, isPersonalizeFlow]);
+
   // Arriving here can be involuntary: the profile self-check does a full page
   // replace to `?step=personalize`. Say why, so a user who was midway through
   // starting a chat understands this is the last step rather than a reset.
@@ -350,6 +383,7 @@ const Onboarding = () => {
       // deliberate abandon — don't prefill the next person's signup with the
       // previous one's birth details.
       clearOnboardingDraft();
+      clearOtpResume();
       window.dispatchEvent(new Event("auth-change"));
       // Hard redirect so the onboarding state fully resets to the login screen
       // (a React Router navigate would keep the same /login component mounted
@@ -432,6 +466,7 @@ const Onboarding = () => {
         // The wizard finished, so the draft has served its purpose. Leaving it
         // would prefill a later signup in the same tab.
         clearOnboardingDraft();
+        clearOtpResume();
 
         // Check for redirect path after registration completion
         const redirectPath = localStorage.getItem(

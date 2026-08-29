@@ -2731,6 +2731,26 @@
   }
 }
 
+/* Secondary route out of the live card's empty state — see LiveSessionCard. */
+.liveSessionLink {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 2px 0 0;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #7a4a2f;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  width: fit-content;
+
+  &:hover {
+    color: #d43400;
+  }
+}
+
 .liveSessionImgWrap {
   display: flex;
   align-items: flex-end;

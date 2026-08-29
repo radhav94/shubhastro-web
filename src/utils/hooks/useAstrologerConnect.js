@@ -301,19 +301,22 @@ export const useAstrologerConnect = () => {
     console.log("[NormalFlow]   → callType:", type);
     console.log("[NormalFlow]   → isEmergency:", isEmergency);
 
-    // Check media permissions before proceeding
-    const permType = type === "video" ? "both" : "microphone";
-    const hasPermission = await checkPermission(permType);
-    if (!hasPermission) return false;
-    
-    // Validate profile and kundli before proceeding
-    if (!validateBeforeConnection()) {
-      console.log("[NormalFlow] ❌ validateBeforeConnection failed — aborting call start");
-      return false;
-    }
-    console.log("[NormalFlow] ✅ Validation passed");
+    /*
+      Claim the guard before anything async.
 
-    // Same double-tap guard as the chat path — see connectInFlightRef.
+      It used to be taken after `checkPermission()`, and that is the slowest step
+      on the call path: on mobile it can reach getUserMedia and, first time round,
+      put a browser permission prompt in front of the user. For that whole window
+      `isConnecting` was false, so the Call button on the card still read "Call" —
+      inert as far as the visitor could tell — and each further tap started
+      another permission check rather than being turned away.
+
+      Clarity caught the shape of it on the listing: Call tapped at 01:13, 01:14
+      and 01:16, with the outcome only landing at 01:18.
+
+      Same guard, just claimed one step earlier, so the tapped button switches to
+      "Connecting…" immediately and repeat taps are answered instead of queued.
+    */
     const inFlightKey = beginConnect(astro?._id, type);
     if (!inFlightKey) {
       Toast.info("Connecting you now — one moment.");
@@ -321,6 +324,18 @@ export const useAstrologerConnect = () => {
     }
 
     try {
+    // Check media permissions before proceeding
+    const permType = type === "video" ? "both" : "microphone";
+    const hasPermission = await checkPermission(permType);
+    if (!hasPermission) return false;
+
+    // Validate profile and kundli before proceeding
+    if (!validateBeforeConnection()) {
+      console.log("[NormalFlow] ❌ validateBeforeConnection failed — aborting call start");
+      return false;
+    }
+    console.log("[NormalFlow] ✅ Validation passed");
+
     setSelectedAstrologer(astro);
     setLastRequestedCallAstro(astro);
     activeCallAstroRef.current = astro; // Store in ref immediately

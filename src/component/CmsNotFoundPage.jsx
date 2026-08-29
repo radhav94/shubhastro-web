@@ -1,6 +1,7 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useGetStaticPageBySlugQuery } from "../redux/api/staticPages/staticPagesApi";
+import { createCmsBodyClickHandler } from "../utils/helper/cmsBodyLinks";
 import { updateMeta, resetMeta } from "../utils/updateMeta";
 import styles from "../screens/public/static-pages/StaticPages.module.scss";
 import PrimaryLoader from "./UI/PrimaryLoader";
@@ -18,7 +19,16 @@ import BackButton from "./UI/BackButton/BackButton";
  */
 const CmsNotFoundPage = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const slug = pathname.replace(/^\//, "");
+
+  /*
+    Keep in-body links inside the SPA. These pages are the legal/static set, and
+    the native app opens them in a webview with `?type=webview` — where a full
+    document load means re-booting the whole app for a link to the Privacy Policy.
+    Same treatment the blog article body already has. See cmsBodyLinks.
+  */
+  const handleBodyClick = useMemo(() => createCmsBodyClickHandler(navigate), [navigate]);
 
   const { data, isLoading, isError } = useGetStaticPageBySlugQuery(slug, {
     skip: !slug,
@@ -79,6 +89,7 @@ const CmsNotFoundPage = () => {
       )}
       <div
         className={styles.htmlContent}
+        onClick={handleBodyClick}
         dangerouslySetInnerHTML={{ __html: pageData.body }}
       />
     </div>

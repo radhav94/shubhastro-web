@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
@@ -61,6 +61,37 @@ const NewAstrologerDetailsCard = ({
     toast-only path keeps being logged as a dead click.
   */
   const [joiningLive, setJoiningLive] = useState(false);
+
+  /*
+    Why the unavailable reason is rendered on the card instead of toasted.
+
+    Chat and Call stay tappable when the astrologer can't take the session (the
+    house pattern — a `disabled` button fires no event at all), and the tap was
+    answered with `toast.info(reason)`. That answer is invisible where it matters:
+    the toast is portalled to the edge of the viewport, it mutates nothing in the
+    card that was tapped, and react-hot-toast renders an identical repeat as no
+    visible change at all. So the tap is logged as dead, and a visitor tapping
+    again gets less feedback each time, not more.
+
+    A Clarity session: three Call taps on the listing at 01:13, 01:14 and 01:16,
+    and the "Astrologer is offline" line only registering with the visitor at
+    01:18 — after the third attempt.
+
+    Now the reason lands under the buttons it belongs to. `seq` keys the element so
+    a repeat tap remounts it and replays the animation rather than setting the same
+    string twice.
+  */
+  const [blockedNote, setBlockedNote] = useState(null);
+
+  const reportBlocked = (reason) =>
+    setBlockedNote((prev) => ({ text: reason, seq: (prev?.seq || 0) + 1 }));
+
+  // Clear it again so a card left on screen doesn't keep stale advice.
+  useEffect(() => {
+    if (!blockedNote) return undefined;
+    const id = setTimeout(() => setBlockedNote(null), 5000);
+    return () => clearTimeout(id);
+  }, [blockedNote]);
 
   const handleJoinLive = async () => {
     if (joiningLive) return;
@@ -210,7 +241,7 @@ const NewAstrologerDetailsCard = ({
                   className={`${styles.detailsChatBtn} ${!chatEnabled ? styles.unavailable : ""}`.trim()}
                   onClick={() => {
                     if (!chatEnabled) {
-                      toast.info(chatReason);
+                      reportBlocked(chatReason);
                       return;
                     }
                     onConnect(astrologer, "chat");
@@ -247,7 +278,7 @@ const NewAstrologerDetailsCard = ({
                   className={`${styles.detailsCallBtn} ${!callEnabled ? styles.unavailable : ""}`.trim()}
                   onClick={() => {
                     if (!callEnabled) {
-                      toast.info(callReason);
+                      reportBlocked(callReason);
                       return;
                     }
                     onConnect(astrologer, "audio");
@@ -277,6 +308,13 @@ const NewAstrologerDetailsCard = ({
             </>
           )}
         </div>
+
+        {/* role="status" so it is announced as well as seen. See reportBlocked. */}
+        {blockedNote && (
+          <p key={blockedNote.seq} className={styles.detailsBlockedNote} role="status">
+            {blockedNote.text}
+          </p>
+        )}
       </div>
 
       <EmergencySessionModal

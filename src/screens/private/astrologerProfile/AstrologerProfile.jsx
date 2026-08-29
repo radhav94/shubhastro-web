@@ -1317,6 +1317,118 @@ const AstrologerProfile = () => {
   const hasConsultationHours = displayData.weeklySchedule.some((item) => item.time);
 
   /*
+    ── Dead clicks on the status card and the minutes tiles ──
+
+    Two groups of elements on this page look like the primary CTA and did
+    nothing at all:
+
+    - The "Available Now" / "Offline" status card (mobile bar + desktop rail).
+      It is the largest, highest-contrast block above the fold, it sits exactly
+      where a Connect button belongs, and its own live-state twin in the same
+      slot IS clickable (`handleJoinLive`). So the card teaches that it is a
+      button and then ignores three quarters of the states it renders in.
+    - "Chat Minutes" / "Call Minutes" / "Video Minutes". Same tile grammar as the
+      Rating tile beside them, which is a working button, and they are labelled
+      with the three actions the visitor came here to perform. "Chat Minutes"
+      reads as "tap to chat"; it was a number.
+
+    Neither becomes a paid action on tap — starting a chat from a statistics tile
+    would be worse than doing nothing. They bring the real connect controls into
+    view and flash them instead, which is the answer to the question the tap was
+    asking. `connectPulse` is what makes it visible: on desktop the sidebar card
+    is often already on screen, so a scroll alone would look like nothing
+    happened, and a toast would not register with session replay either.
+  */
+  const connectCardRef = useRef(null);
+  const mobileBottomBarRef = useRef(null);
+  const hoursSectionRef = useRef(null);
+  const [connectPulse, setConnectPulse] = useState(false);
+
+  /*
+    Why an unavailable Chat/Call/Video tile answers on the card instead of in a
+    toast.
+
+    The three connect tiles stay tappable when the astrologer can't take that
+    session type — a `disabled` button fires no event at all, which is worse — and
+    the answer was `toast.info(reason)`. That is invisible where it matters: the
+    toast is portalled to the edge of the viewport, it changes nothing in the tile
+    that was tapped, and react-hot-toast renders an identical repeat as no visible
+    change. So the tap is logged dead and a second tap gets less feedback, not
+    more.
+
+    Clarity, desktop Chrome: a visitor returned to the same astrologer's profile
+    three times (00:38, 02:06, 03:53) and made two attempts a second apart at
+    04:14 and 04:15 before leaving. Same shape as the listing card, which now
+    reports inline; this is the other half of that fix.
+  */
+  const [blockedNote, setBlockedNote] = useState(null);
+
+  const reportBlocked = (reason) =>
+    setBlockedNote((prev) => ({ text: reason, seq: (prev?.seq || 0) + 1 }));
+
+  useEffect(() => {
+    if (!blockedNote) return undefined;
+    const id = setTimeout(() => setBlockedNote(null), 5000);
+    return () => clearTimeout(id);
+  }, [blockedNote]);
+
+  const revealConnectOptions = () => {
+    /*
+      Whichever connect surface this width actually renders: the sidebar card
+      above 1024px, the fixed bottom bar below it (the sidebars are
+      `display: none !important` there, and an unrendered element has no
+      offsetParent).
+    */
+    const sidebarCard = connectCardRef.current?.offsetParent
+      ? connectCardRef.current
+      : null;
+    const target = sidebarCard || mobileBottomBarRef.current;
+
+    if (!target) {
+      // Live streaming: the connect card is not rendered in either place and
+      // joining the stream is the only way to reach this astrologer.
+      toast.info(
+        unavailableReason({
+          label: "Chat",
+          isOnline: true,
+          isLive: true,
+          isTypeActive: true,
+          hasPrice: true,
+        }),
+      );
+      return;
+    }
+
+    // The bottom bar is `position: fixed`, so it is already on screen — the
+    // pulse is the whole response there.
+    if (target === sidebarCard) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    setConnectPulse(true);
+  };
+
+  // Offline: there is nothing to connect to, so say so once and put the
+  // published hours (and the Set Reminder button under them) in front of them.
+  const handleOfflineStatusClick = () => {
+    toast.info(
+      unavailableReason({
+        label: "Chat",
+        isOnline: false,
+        isLive,
+        isTypeActive: true,
+        hasPrice: true,
+      }),
+    );
+    hoursSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  useEffect(() => {
+    if (!connectPulse) return undefined;
+    const id = setTimeout(() => setConnectPulse(false), 1200);
+    return () => clearTimeout(id);
+  }, [connectPulse]);
+
+  /*
     Load / error / not-found states.
 
     These were `<div>Loading...</div>` and two bare <ErrorText> strings. The
@@ -1643,19 +1755,29 @@ const AstrologerProfile = () => {
                   <span>{joiningLive ? "Opening…" : "Live Now"}</span>
                 </div>
               ) : data?.isActive ? (
-                <div className={styles.mobileStatusAvailable}>
+                <button
+                  type="button"
+                  className={`${styles.mobileStatusAvailable} ${styles.statusCardBtn}`}
+                  onClick={revealConnectOptions}
+                  aria-label="Astrologer is available now. Show the connect options"
+                >
                   <div className={styles.mobileStatusDot}></div>
                   <span>Available Now</span>
-                </div>
+                </button>
               ) : (
-                <div className={styles.mobileStatusOffline}>
+                <button
+                  type="button"
+                  className={`${styles.mobileStatusOffline} ${styles.statusCardBtn}`}
+                  onClick={handleOfflineStatusClick}
+                  aria-label="Astrologer is offline. Show the consultation hours"
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="none">
                     <rect width="32" height="32" rx="16" fill="#E0E0E0"/>
                     <path d="M8.34093 7.78665C8.27892 7.72514 8.19507 7.69071 8.10773 7.69089C8.02038 7.69107 7.93667 7.72584 7.87491 7.7876C7.81315 7.84936 7.77838 7.93307 7.7782 8.02042C7.77802 8.10776 7.81245 8.19161 7.87396 8.25362L12.0833 12.4597H12.0537C11.1357 12.4621 10.2527 12.8127 9.58315 13.4408C8.91357 14.0688 8.50724 14.9276 8.44616 15.8436C7.91479 15.9992 7.45737 16.3412 7.15783 16.8069C6.8583 17.2726 6.73676 17.8306 6.81551 18.3787C6.89426 18.9268 7.16802 19.428 7.58656 19.7905C8.00509 20.153 8.54032 20.3524 9.09401 20.3521H19.9758L23.6589 24.0386C23.7213 24.0997 23.8051 24.134 23.8924 24.134C23.9797 24.134 24.0636 24.0997 24.1259 24.0386C24.1875 23.9765 24.2221 23.8926 24.2221 23.8051C24.2221 23.7176 24.1875 23.6337 24.1259 23.5716L8.34093 7.78665Z" fill="#BDBDBD"/>
                     <path d="M23.1163 15.1497C23.355 14.1247 23.2354 13.0488 22.7774 12.1013C22.3194 11.1537 21.5507 10.3916 20.5992 9.94179C19.6478 9.492 18.5709 9.38168 17.548 9.62918C16.5251 9.87669 15.6178 10.4671 14.9772 11.3021C14.6598 11.1658 14.3119 11.1164 13.9691 11.1592C13.6264 11.202 13.3012 11.3353 13.0271 11.5455L21.8338 20.3521H22.577C23.2276 20.3526 23.8553 20.1118 24.3387 19.6762C24.822 19.2407 25.1267 18.6414 25.1938 17.9942C25.2609 17.3471 25.0856 16.698 24.7019 16.1726C24.3181 15.6472 23.7532 15.2827 23.1163 15.1497Z" fill="#BDBDBD"/>
                   </svg>
                   <span>Offline</span>
-                </div>
+                </button>
               )}
             </div>
 
@@ -1720,7 +1842,7 @@ const AstrologerProfile = () => {
             </div>
 
             {/* Consultation Hours */}
-            <div className={styles.consultationHours}>
+            <div className={styles.consultationHours} ref={hoursSectionRef}>
               <div className={styles.hoursHeader}>
                 <img src={TimeIcon} alt="Time" className={styles.clockIcon} />
                 <span className={styles.hoursTitle}>Consultation Hours</span>
@@ -1753,43 +1875,59 @@ const AstrologerProfile = () => {
               )}
             </div>
 
-            {/* Minutes Section */}
+            {/* Minutes Section — see revealConnectOptions for why these are
+                buttons that point at the connect controls rather than figures. */}
             <div className={styles.minutesSection}>
-              <div className={styles.minuteItem}>
+              <button
+                type="button"
+                className={`${styles.minuteItem} ${styles.minuteItemLink}`}
+                onClick={revealConnectOptions}
+                aria-label={`${displayData.metrics.chatMinutes} chat minutes delivered. Show the connect options`}
+              >
                 <img
                   src={ChatMinutesIcon}
-                  alt="Chat"
+                  alt=""
                   className={styles.minuteIcon}
                 />
                 <div className={styles.minuteValue}>
                   {displayData.metrics.chatMinutes}
                 </div>
                 <div className={styles.minuteLabel}>Chat Minutes</div>
-              </div>
+              </button>
               <div className={styles.minuteDivider}></div>
-              <div className={styles.minuteItem}>
+              <button
+                type="button"
+                className={`${styles.minuteItem} ${styles.minuteItemLink}`}
+                onClick={revealConnectOptions}
+                aria-label={`${displayData.metrics.audioMinutes} call minutes delivered. Show the connect options`}
+              >
                 <img
                   src={CallMinutesIcon}
-                  alt="Call"
+                  alt=""
                   className={styles.minuteIcon}
                 />
                 <div className={styles.minuteValue}>
                   {displayData.metrics.audioMinutes}
                 </div>
                 <div className={styles.minuteLabel}>Call Minutes</div>
-              </div>
+              </button>
               <div className={styles.minuteDivider}></div>
-              <div className={styles.minuteItem}>
+              <button
+                type="button"
+                className={`${styles.minuteItem} ${styles.minuteItemLink}`}
+                onClick={revealConnectOptions}
+                aria-label={`${displayData.metrics.videoMinutes} video minutes delivered. Show the connect options`}
+              >
                 <img
                   src={VideoMinutesIcon}
-                  alt="Video"
+                  alt=""
                   className={styles.minuteIcon}
                 />
                 <div className={styles.minuteValue}>
                   {displayData.metrics.videoMinutes}
                 </div>
                 <div className={styles.minuteLabel}>Video Minutes</div>
-              </div>
+              </button>
             </div>
 
             {/* About Section */}
@@ -2142,12 +2280,22 @@ const AstrologerProfile = () => {
               </button>
             </div>
           ) : data?.isActive ? (
-            <div className={styles.availableCard}>
+            <button
+              type="button"
+              className={`${styles.availableCard} ${styles.statusCardBtn}`}
+              onClick={revealConnectOptions}
+              aria-label="Astrologer is available now. Show the connect options"
+            >
               <div className={styles.statusDot}></div>
               <span className={styles.statusText}>Available Now</span>
-            </div>
+            </button>
           ) : (
-            <div className={styles.offlineCard}>
+            <button
+              type="button"
+              className={`${styles.offlineCard} ${styles.statusCardBtn}`}
+              onClick={handleOfflineStatusClick}
+              aria-label="Astrologer is offline. Show the consultation hours"
+            >
               <div className={styles.offlineIcon}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
                   <rect width="32" height="32" rx="16" fill="#E0E0E0"/>
@@ -2156,11 +2304,14 @@ const AstrologerProfile = () => {
                 </svg>
               </div>
               <span className={styles.offlineText}>Offline</span>
-            </div>
+            </button>
           )}
 
           {/* Connect Now Card — hidden when astrologer is live streaming */}
-          {!isLive && <div className={styles.connectCard}>
+          {!isLive && <div
+            ref={connectCardRef}
+            className={`${styles.connectCard} ${connectPulse ? styles.connectPulse : ""}`}
+          >
             <h3 className={styles.connectTitle}>CONNECT NOW</h3>
             <div className={styles.titleDivider}>
               <div className={styles.dividerLine}></div>
@@ -2207,7 +2358,7 @@ const AstrologerProfile = () => {
                   className={`${styles.connectOption} ${!connectTiles.chat.enabled ? styles.connectOptionDisabled : ""}`}
                   onClick={() => {
                     if (!connectTiles.chat.enabled) {
-                      toast.info(connectTiles.chat.reason);
+                      reportBlocked(connectTiles.chat.reason);
                       return;
                     }
                     handleChatStart(data);
@@ -2234,7 +2385,7 @@ const AstrologerProfile = () => {
                   className={`${styles.connectOption} ${!connectTiles.audio.enabled ? styles.connectOptionDisabled : ""}`}
                   onClick={() => {
                     if (!connectTiles.audio.enabled) {
-                      toast.info(connectTiles.audio.reason);
+                      reportBlocked(connectTiles.audio.reason);
                       return;
                     }
                     handleCallStart(data, "audio");
@@ -2261,7 +2412,7 @@ const AstrologerProfile = () => {
                   className={`${styles.connectOption} ${!connectTiles.video.enabled ? styles.connectOptionDisabled : ""}`}
                   onClick={() => {
                     if (!connectTiles.video.enabled) {
-                      toast.info(connectTiles.video.reason);
+                      reportBlocked(connectTiles.video.reason);
                       return;
                     }
                     handleCallStart(data, "video");
@@ -2283,6 +2434,14 @@ const AstrologerProfile = () => {
                   </div>
                 </button>
               </div>
+            )}
+
+            {/* role="status" so the reason is announced as well as seen. See
+                reportBlocked. */}
+            {blockedNote && (
+              <p key={blockedNote.seq} className={styles.connectBlockedNote} role="status">
+                {blockedNote.text}
+              </p>
             )}
           </div>}
 
@@ -2325,7 +2484,10 @@ const AstrologerProfile = () => {
       {/* End 3-Column Layout */}
 
       {/* Mobile Bottom Bar - Chat & Call */}
-      <div className={styles.mobileBottomBar}>
+      <div
+        ref={mobileBottomBarRef}
+        className={`${styles.mobileBottomBar} ${connectPulse ? styles.connectPulse : ""}`}
+      >
         {isLive ? (
           <button
             className={styles.mobileJoinLiveBtn}

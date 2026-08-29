@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Plus, Minus } from "lucide-react";
 import { useGetStaticPageBySlugQuery } from "../redux/api/staticPages/staticPagesApi";
 import JsonLd from "./JsonLd";
+import { createCmsBodyClickHandler } from "../utils/helper/cmsBodyLinks";
 import { updateMeta, resetMeta, updateCanonical } from "../utils/updateMeta";
 import styles from "../screens/public/static-pages/StaticPages.module.scss";
 
@@ -131,6 +132,11 @@ const CmsPageWrapper = ({ children }) => {
 const CmsAccordion = ({ title, body }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Keep in-body links inside the SPA rather than reloading the whole app. See
+  // cmsBodyLinks.
+  const navigate = useNavigate();
+  const handleBodyClick = useMemo(() => createCmsBodyClickHandler(navigate), [navigate]);
+
   // Extract first line (text content of first HTML tag) as header
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = body;
@@ -162,6 +168,7 @@ const CmsAccordion = ({ title, body }) => {
           <div className={styles.cmsAccordionContent}>
             <div
               className={styles.htmlContent}
+              onClick={handleBodyClick}
               dangerouslySetInnerHTML={{ __html: remainingBody }}
             />
           </div>

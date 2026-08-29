@@ -134,12 +134,28 @@ const AdditionalPlanetaryInfo = ({ onPlanetClick }) => {
     { id: 3, label: "Pratyantardasha" }
   ];
 
+  /*
+    Only the first two levels drill down: Mahadasha -> Antardasha ->
+    Pratyantardasha, and there is nothing below the third.
+
+    The row kept its onClick at step 3 anyway, and `.dashaTableRow` carries
+    `cursor: pointer`, a hover background and an `:active` colour at every level.
+    So on the Pratyantardasha table every row advertised itself as pressable,
+    highlighted under the cursor, flashed on press — and did nothing at all. That
+    is the deepest screen in this section, reached only by someone reading the
+    dasha breakdown in detail; a Clarity session shows one doing exactly that for
+    ten minutes across the Panchang, Avakhada, Ghatka Chakra and Dasha views.
+
+    `canDrillDown` now gates the handler and the affordance together, so the last
+    level reads as the data table it is.
+  */
+  const canDrillDown = currentStep < 3;
+
   const handleRowClick = (row) => {
-    if (currentStep < 3) {
-      setDirection(1);
-      setSelectedPath([...selectedPath, row]);
-      setCurrentStep(currentStep + 1);
-    }
+    if (!canDrillDown) return;
+    setDirection(1);
+    setSelectedPath([...selectedPath, row]);
+    setCurrentStep(currentStep + 1);
   };
 
   const handlePlanetLinkClick = (e, row) => {
@@ -412,8 +428,21 @@ const AdditionalPlanetaryInfo = ({ onPlanetClick }) => {
                   currentData.map((row, index) => (
                     <div
                       key={index}
-                      className={styles.dashaTableRow}
-                      onClick={() => handleRowClick(row)}
+                      className={`${styles.dashaTableRow} ${canDrillDown ? styles.dashaTableRowClickable : ""}`}
+                      {...(canDrillDown
+                        ? {
+                            role: "button",
+                            tabIndex: 0,
+                            "aria-label": `${row.planet}: open ${currentStep === 1 ? "Antardasha" : "Pratyantardasha"}`,
+                            onClick: () => handleRowClick(row),
+                            onKeyDown: (e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                handleRowClick(row);
+                              }
+                            },
+                          }
+                        : {})}
                     >
                       <div className={styles.dashaTableCell}>
                         <div className={styles.planetCellContent}>

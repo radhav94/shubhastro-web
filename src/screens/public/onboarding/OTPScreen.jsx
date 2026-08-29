@@ -15,6 +15,7 @@ import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearGuestKundliProfiles } from "../../../utils/helper/cookies";
 import { getDeviceInfo, getDeviceType } from "../../../utils/deviceInfo";
 import { trackEvent } from "../../../utils/analytics";
+import { clearOtpResume } from "./otpResume";
 // import onboardingBg from "../../../assets/images/onboarding.png";
 import onboardingBg from "../../../assets/images/new-login-bg-2.jpeg";
 // import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
@@ -177,6 +178,15 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         const response = await verifyOtp(payload, { signal: controller.signal });
 
         if (response.data.success && response.data.statusCode === 200) {
+          /*
+            This code has been spent. The registered-user branch below leaves via
+            navigate() without a step change, so Onboarding's step effect never
+            gets the chance to drop the resume marker — clear it here, or a later
+            /login in this tab would reopen "enter the code" for a code that is
+            already used. See otpResume.js.
+          */
+          clearOtpResume();
+
           // Store tokens and user data
           const { data: userData } = response.data;
           const accessToken = userData.accessToken;
@@ -436,9 +446,24 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         />
       </div> */}
 
-      {/* Back Button - top left corner */}
+      {/*
+        Back Button - top left corner.
+
+        `onBack` (the wizard's own step-back) rather than BackButton's default
+        history walk. This screen is one step inside a single-route wizard, so
+        there is no history entry for "the number I just typed": with a visit that
+        started at /login — a Google click-through straight onto the login page is
+        the common case — BackButton's `location.key === "default"` branch sends
+        the visitor to the homepage, i.e. out of the signup they were two taps from
+        finishing. Anywhere else it walks to whatever preceded /login. Neither is
+        what a back arrow on an OTP screen promises.
+
+        onBack returns to the phone-number step with the number still in the field
+        (Onboarding keeps formData across steps), which is the one thing someone
+        looks for here after mistyping a digit.
+      */}
       <div className={styles.otpBackButtonWrap}>
-        <BackButton/>
+        <BackButton onClick={onBack} />
       </div>
 
       {/* Language Translator - top right corner */}
@@ -446,9 +471,34 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
       <div className={styles.loginContent}>
         <h1 className={styles.title}>Aligning your stars...</h1>
+        {/*
+          The number is the control, not just a label.
+
+          "We've sent a 6-digit code to your mobile +91 98765 43210" invites
+          exactly one action when that number is wrong: tap the number. It was
+          plain text inside a <p>, so that tap did nothing, and the only other
+          thing on screen that looked like a way back led out of the signup (see
+          the back button above). A mistyped digit therefore had no recovery at
+          all — the code never arrives, the visitor taps the number, then the
+          resend, then leaves.
+
+          The "Change" chip is there because the underline alone reads as
+          emphasis on a phone. Both go back to the number step.
+        */}
         <p className={styles.subtitle}>
-          We've sent a 6-digit code to your mobile <br></br>+91{" "}
-          {formData.phoneNumber || "98989 98989"}. Enter it below to continue.
+          We've sent a 6-digit code to your mobile <br></br>
+          <button
+            type="button"
+            className={styles.otpChangeNumber}
+            onClick={onBack}
+            aria-label={`Change mobile number ${formData.phoneNumber || ""}`}
+          >
+            <span className="notranslate">
+              +91 {formData.phoneNumber || "98989 98989"}
+            </span>
+            <span className={styles.otpChangeNumberChip}>Change</span>
+          </button>
+          . Enter it below to continue.
         </p>
 
         <div className={styles.otpInputs} onClick={() => inputRef.current?.focus()}>

@@ -42,6 +42,24 @@ const AudioIntro = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalTime, setTotalTime] = useState(duration);
+  /*
+    Why this exists: `play()` returns a promise that rejects for reasons that are
+    routine on iOS — Low Power Mode, an audio session another app or element
+    holds, metadata not loaded yet — and the old handler answered every one of
+    them with `setIsPlaying(false)` and nothing else. The icon flipped to Pause
+    and straight back to Play, no sound, no explanation. On a phone that is a tap
+    that did nothing, which is how it reaches the dead-click report: an iOS Safari
+    visitor on an astrologer profile, one tap at 00:20, gone by 00:59.
+
+    A file that 404s or is in a codec Safari won't take was equally silent — the
+    <audio> element's own `error` event was not handled at all.
+
+    `seq` remounts the message so a second failed tap replays it instead of
+    setting an identical string that React renders as no change.
+  */
+  const [playError, setPlayError] = useState(null);
+  const reportPlayError = (text) =>
+    setPlayError((prev) => ({ text, seq: (prev?.seq || 0) + 1 }));
 
   // Deterministic heights that resemble a real voice recording. The waveform
   // stays active across the full width (dense spiky lines), with a gentle
@@ -94,7 +112,7 @@ const AudioIntro = ({
     }
   };
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
     if (isPlaying) {
       stop();
       return;
@@ -106,10 +124,29 @@ const AudioIntro = ({
       if (audioRef.current) audioRef.current.currentTime = 0;
     }
 
+    setPlayError(null);
     setIsPlaying(true);
 
     if (src && audioRef.current) {
-      audioRef.current.play().catch(() => setIsPlaying(false));
+      try {
+        await audioRef.current.play();
+      } catch {
+        /*
+          One retry through load() first: with `preload="metadata"` Safari can
+          reject a play() that arrives before it has enough of the file, and a
+          reload plus replay is the usual remedy. Only then do we give up and say
+          so.
+        */
+        try {
+          audioRef.current.load();
+          await audioRef.current.play();
+        } catch {
+          setIsPlaying(false);
+          reportPlayError(
+            "Couldn't start the intro. Tap play again, or turn off Low Power Mode if it's on."
+          );
+        }
+      }
       return;
     }
 
@@ -181,6 +218,13 @@ const AudioIntro = ({
     setCurrentTime(totalTime);
     stop();
   };
+  // The element's own failure path: a 404 voiceNoteUrl or a codec Safari won't
+  // decode never reaches the play() promise, and was silent.
+  const handleAudioError = () => {
+    setIsPlaying(false);
+    clearTimer();
+    reportPlayError("This voice intro couldn't be loaded.");
+  };
 
   return (
     <div className={styles.audioIntro}>
@@ -192,6 +236,7 @@ const AudioIntro = ({
           onLoadedMetadata={handleLoadedMeta}
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleEnded}
+          onError={handleAudioError}
         />
       )}
 
@@ -242,6 +287,15 @@ const AudioIntro = ({
           {formatTime(isPlaying || currentTime > 0 ? currentTime : totalTime)}
         </span>
       </div>
+
+      {/* role="status" so the reason is announced without stealing focus from
+          the play button the visitor just tapped. Keyed on seq — see
+          reportPlayError. */}
+      {playError && (
+        <p key={playError.seq} className={styles.playError} role="status">
+          {playError.text}
+        </p>
+      )}
     </div>
   );
 };

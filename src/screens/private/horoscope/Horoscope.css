@@ -544,7 +544,31 @@
   overflow: hidden;
 }
 
+/* Truncated yearly overview cards are buttons — see Horoscope.jsx. The whole
+   card opens the full prediction, so it needs the affordance and a focus ring. */
+.overview-card-clickable {
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.overview-card-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(247, 88, 1, 0.12);
+}
+
+.overview-card-clickable:focus-visible {
+  outline: 2px solid #F75801;
+  outline-offset: 3px;
+}
+
 .show-more-link {
+  /* Button reset: this was a <span>, and the surrounding paragraph styles it. */
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
   color: #F75801;
   font-weight: 600;
   cursor: pointer;
@@ -564,6 +588,11 @@
 }
 
 .show-less-link {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
   color: #F75801;
   font-weight: 600;
   cursor: pointer;
@@ -571,6 +600,13 @@
   display: inline-block;
   margin-top: 16px;
   transition: color 0.2s ease;
+}
+
+.show-less-link:focus-visible,
+.show-more-link:focus-visible {
+  outline: 2px solid #F75801;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .show-less-link:hover {

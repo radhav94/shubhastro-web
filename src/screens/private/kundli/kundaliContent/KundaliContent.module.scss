@@ -370,25 +370,36 @@ $shadow-4: 0px 4px 12px rgba(0, 0, 0, 0.08);
   grid-template-columns: 1fr 1fr 1fr 40px;
   align-items: center;
   border-bottom: 1px solid #fff;
-  cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
-  
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+/* The pressable affordance belongs only to rows that actually drill down —
+   Mahadasha and Antardasha. Pratyantardasha is the last level, and it used to
+   carry all of this with no handler behind it. See AdditionalPlanetaryInfo. */
+.dashaTableRowClickable {
+  cursor: pointer;
+
   &:hover {
     background-color: rgba(255, 255, 255, 0.4);
-    
+
     .dashaTableArrow {
       opacity: 1;
       transform: translateX(0);
     }
   }
-  
-  &:last-child {
-    border-bottom: none;
-  }
-  
+
   &:active {
     background-color: #fff5d6;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: -2px;
   }
 }
 
