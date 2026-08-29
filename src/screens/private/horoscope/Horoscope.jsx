@@ -1005,8 +1005,44 @@ const HoroscopeNew = () => {
                       ? truncateToWords(section.content, 25) 
                       : { text: section.content, isTruncated: false };
                     
+                    const sectionCategoryId =
+                      categories.find(c => c.label === section.title)?.id || section.title;
+                    const expandSection = () => handleShowMore(sectionCategoryId, index);
+
                     return (
-                      <div key={index} className="overview-card" ref={el => overviewCardRefs.current[index] = el}>
+                      /*
+                        On "This Year" each card shows the first 25 words of a
+                        prediction, so the card IS a teaser — and the only thing
+                        that opened it was the words "show more" at the end of the
+                        last paragraph. A card of clipped text ending in "..." is
+                        read as tappable in its entirety; clicking the title, the
+                        body or the whitespace did nothing, and on a three-column
+                        grid that inline link is a small target at the end of a
+                        ragged line.
+
+                        Truncated cards are buttons now. Untruncated ones are left
+                        as plain divs: there is nothing more to show, and making
+                        them look interactive would just move the dead click.
+                      */
+                      <div
+                        key={index}
+                        className={`overview-card ${isTruncated ? 'overview-card-clickable' : ''}`}
+                        ref={el => overviewCardRefs.current[index] = el}
+                        {...(isTruncated
+                          ? {
+                              role: 'button',
+                              tabIndex: 0,
+                              'aria-label': `${section.title} — read the full prediction`,
+                              onClick: expandSection,
+                              onKeyDown: (e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  expandSection();
+                                }
+                              },
+                            }
+                          : {})}
+                      >
                         <div className="overview-card-header">
                           <div className="overview-card-left">
                             <h3 className="overview-card-title">
@@ -1022,12 +1058,22 @@ const HoroscopeNew = () => {
                                 {isTruncated && pIndex === arr.length - 1 && (
                                   <>
                                     ...
-                                    <span 
+                                    {/* A real button, not a <span onClick>: it was
+                                        unreachable by keyboard and announced as
+                                        plain text. tabIndex -1 because the card
+                                        around it is now the tab stop for the same
+                                        action. */}
+                                    <button
+                                      type="button"
                                       className="show-more-link"
-                                      onClick={() => handleShowMore(categories.find(c => c.label === section.title)?.id || section.title)}
+                                      tabIndex={-1}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        expandSection();
+                                      }}
                                     >
                                       show more
-                                    </span>
+                                    </button>
                                   </>
                                 )}
                               </p>
@@ -1046,7 +1092,11 @@ const HoroscopeNew = () => {
                   <p key={index}>{paragraph}</p>
                 ))}
                 {cameFromOverview && activeTab === 'This Year' && activeCategory !== 'overview' && (
-                  <span 
+                  /* Was a <span onClick>: no keyboard access and no announced
+                     role, on the only control that gets back to the overview
+                     without using the browser's Back button. */
+                  <button
+                    type="button"
                     className="show-less-link"
                     onClick={() => {
                       setCameFromOverview(false);
@@ -1059,7 +1109,7 @@ const HoroscopeNew = () => {
                     }}
                   >
                     Show Less
-                  </span>
+                  </button>
                 )}
               </div>
             )}

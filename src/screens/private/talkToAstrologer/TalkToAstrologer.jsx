@@ -9,7 +9,7 @@ import {
   Toast,
 } from "../../../component";
 import styles from "./TalkToAstrologer.module.scss";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useNavigate, useLocation, useParams, useNavigationType } from "react-router-dom";
 import { useTalkToAstrologer } from "./useTalkToAstrologer";
 import {
   useGetAstrologersQuery,
@@ -60,8 +60,33 @@ const astroImages = [
   "https://d2wkagtnczagqh.cloudfront.net/astrology-blog/wp-content/uploads/2025/06/16143512/Blog-Banner-for-Website-Content-1280-x-853-px-9-768x512.jpg",
 ];
 
+/*
+  What the visitor had loaded, kept across an unmount of this screen.
+
+  The list is infinite-scrolled nine at a time and accumulated in component
+  state, so leaving for a profile and coming back rebuilt it from page 1. Two
+  things follow: everything past the first nine is gone, and the document is now
+  too short for ScrollToTop to honour the offset it saved for that history entry
+  — so a visitor three pages down returns to the top with no way back to where
+  they were except scrolling it all again. Session recordings show that as rapid
+  listing -> profile -> listing bouncing.
+
+  Module scope rather than sessionStorage on purpose: this is a cache of server
+  data with prices and availability in it, and it should not outlive the document.
+  A reload starts clean. Restored only for POP (back/forward) and only when the
+  view is the same one — a different category, or the online-only view, is a
+  different list and starts fresh.
+*/
+const listingCache = {
+  viewKey: null,
+  page: 1,
+  items: [],
+  hasMore: true,
+};
+
 const TalkToAstrologer = () => {
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const dispatch = useDispatch();
   const { category: categoryFromParams } = useParams();
   const requireAuth = useRequireAuth();
@@ -109,6 +134,10 @@ const TalkToAstrologer = () => {
   const [{ isActiveOnline, isActiveType }, setActiveConfig] = useState(
     getActiveConfigFromURL(),
   );
+
+  // Identity of the list being shown, so listingCache is only ever restored onto
+  // the same view it was captured from.
+  const viewKey = location.pathname;
 
   useEffect(() => {
     setActiveConfig(getActiveConfigFromURL());
@@ -380,10 +409,55 @@ const TalkToAstrologer = () => {
   }, []);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-    setPage(1);
-    setAllAstrologers([]);
-    setHasMore(true);
+    /*
+      No window.scrollTo(0, 0) here.
+
+      Scroll is owned by ScrollToTop (rendered in HomeLayout): PUSH goes to the
+      top, POP restores the offset stored for that history entry — which exists
+      precisely because main.jsx turns off native restoration. This effect ran on
+      every mount, including the mount that a back navigation produces, and it
+      fired against the same frames the restore loop was using. So coming back
+      from an astrologer profile fought the restore and, since the loop hands
+      control to the user on the first touch, a scroll gesture on arrival left
+      the visitor at the top of the list with their place gone.
+
+      That is the read on a session recording from an iOS Safari visitor opening
+      profiles at 00:05, 00:19 and again straight after, bouncing to the listing
+      between each — seven clicks, seven pages, two and a half minutes.
+    */
+
+    // Coming back: put the list back the size it was, so the restored scroll
+    // offset lands on the card they left from. See listingCache.
+    const canRestore =
+      navigationType === "POP" &&
+      // A category URL is a filtered view: FilterChips rebuilds it from the slug
+      // on arrival, so restoring the unfiltered list underneath it would only
+      // flash content that is about to be replaced.
+      !categoryFromParams &&
+      listingCache.viewKey === viewKey &&
+      listingCache.items.length > 0;
+
+    if (canRestore) {
+      setPage(listingCache.page);
+      setAllAstrologers(listingCache.items);
+      setHasMore(listingCache.hasMore);
+      /*
+        The observer below waits on this ref, and the effect that normally sets it
+        requires `page === 1` — which a restored page 2+ never is, so infinite
+        scroll would be dead for the rest of the visit without this.
+      */
+      initialLoadComplete.current = true;
+    } else {
+      listingCache.viewKey = viewKey;
+      listingCache.page = 1;
+      listingCache.items = [];
+      listingCache.hasMore = true;
+
+      setPage(1);
+      setAllAstrologers([]);
+      setHasMore(true);
+    }
+
     setIsFiltered(false);
     // A category URL (/astrologers/marriage-relationships) IS a filtered view —
     // the filter is just applied a moment later, by the child that receives
@@ -439,6 +513,19 @@ const TalkToAstrologer = () => {
       initialLoadComplete.current = true;
     }
   }, [allAstrologers.length, page, isFiltered]);
+
+  /*
+    Keep the cache in step with what is on screen, so a back navigation can put
+    it back. Only the unfiltered list: a filtered view is driven by FilterChips
+    and rebuilt from the URL on arrival anyway.
+  */
+  useEffect(() => {
+    if (isFiltered || allAstrologers.length === 0) return;
+    listingCache.viewKey = viewKey;
+    listingCache.page = page;
+    listingCache.items = allAstrologers;
+    listingCache.hasMore = hasMore;
+  }, [allAstrologers, page, hasMore, isFiltered, viewKey]);
 
   // Intersection Observer for infinite scroll - only in normal mode
   useEffect(() => {

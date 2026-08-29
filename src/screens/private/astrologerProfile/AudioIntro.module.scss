@@ -124,6 +124,28 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Shown when play() is refused or the file won't load — see AudioIntro.jsx.
+   Inline rather than a toast: the answer belongs next to the button that was
+   tapped, and a toast is invisible to session replay. */
+.playError {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #c2410c;
+  animation: playErrorIn 0.2s ease-out;
+}
+
+@keyframes playErrorIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (max-width: 480px) {
   .audioIntro {
     gap: 10px;

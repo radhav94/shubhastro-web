@@ -863,6 +863,32 @@
   }
 }
 
+/* Why the astrologer can't take this session, shown on the card rather than in a
+   toast. See NewAstrologerDetailsCard. */
+.detailsBlockedNote {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #b45309;
+  background: rgba(247, 88, 1, 0.08);
+  border: 1px solid rgba(247, 88, 1, 0.25);
+  border-radius: 8px;
+  padding: 6px 8px;
+  width: 100%;
+  animation: detailsBlockedNoteIn 0.18s ease-out;
+}
+
+@keyframes detailsBlockedNoteIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .detailsButtonWrapper {
   flex: 1;
   display: flex;
