@@ -485,6 +485,42 @@
   line-height: 1.5;
 }
 
+/* The mobile number in the OTP subtitle — a real control now. See OTPScreen. */
+.otpChangeNumber {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+.otpChangeNumberChip {
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #d43400;
+  background: rgba(247, 88, 1, 0.1);
+  border: 1px solid rgba(247, 88, 1, 0.35);
+}
+
 .primaryBtn {
   width: calc(100% - 0px);
   margin: 5px 0px 10px 0px;
@@ -892,6 +928,14 @@
 .otpBoxActive {
   border-color: #F75801;
   box-shadow: 0 0 0 2px rgba(247, 88, 1, 0.15);
+}
+
+/* The six boxes are divs over one hidden input, so tapping a box only moves
+   focus — no visible change, which is indistinguishable from a broken tap (and
+   is logged as a dead click). Strengthen the caret box while the field holds
+   focus so the tap answers for itself. */
+.otpInputs:focus-within .otpBoxActive {
+  box-shadow: 0 0 0 4px rgba(247, 88, 1, 0.3);
 }
 
 .otpBoxFilled {
