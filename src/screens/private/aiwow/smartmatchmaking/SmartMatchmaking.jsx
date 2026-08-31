@@ -214,6 +214,14 @@ const SmartMatchmaking = () => {
     return {
       name: data.name,
       gender: data.identity.toLowerCase(),
+      // Matchmaking profiles are created with the relation field hidden
+      // (matchmakingMode), so `data.relation` is empty here. Default to
+      // "Others" rather than leaving it unset: the edit flow's Self/relation
+      // constraints (see EditProfileModal) treat a "Self" relation specially,
+      // and profiles created without a relation used to end up being edited as
+      // "Self", which then collided with the "a Self profile already exists"
+      // rule. "Others" keeps every matchmaking profile out of that special case.
+      relation: data.relation || "Others",
       day: dateObj.getDate(),
       month: dateObj.getMonth() + 1,
       year: dateObj.getFullYear(),
@@ -324,7 +332,14 @@ const SmartMatchmaking = () => {
           : profileToEdit.gender === "female"
             ? "Female"
             : "Others",
-      relation: "Self",
+      // Always "Others" in matchmaking. Relation is a meaningless concept here
+      // (the add form hides the field entirely), so we don't trust whatever is
+      // stored on the record — older matchmaking profiles were created/edited
+      // as "Self", which is exactly what the edit modal showed and what
+      // collided with the "a Self profile already exists" rule. Forcing
+      // "Others" keeps every matchmaking profile — old or new — out of the
+      // Self special case.
+      relation: "Others",
       birthDate: `${profileToEdit.year}-${String(profileToEdit.month).padStart(2, "0")}-${String(profileToEdit.day).padStart(2, "0")}`,
       birthTime: `${String(profileToEdit.hour).padStart(2, "0")}:${String(profileToEdit.min).padStart(2, "0")}`,
       birthPlace: profileToEdit.place,
