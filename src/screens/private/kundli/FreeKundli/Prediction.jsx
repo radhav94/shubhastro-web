@@ -75,6 +75,39 @@ const Prediction = ({ params, skipToken }) => {
   const accordionRefs = useRef([]);
   const HEADER_OFFSET = 100;
 
+  /*
+    Keep the section you expanded under your thumb.
+
+    "Show More" sits at the bottom of each prediction block and the revealed
+    content — the rest of a 500-character passage, plus Contributors and House
+    Scores — is inserted above it. So expanding pushes the button itself down by
+    several screens on a phone, and a second tap aimed at where it just was lands
+    on prose: nothing happens, and the reader has also lost their place.
+
+    PlanetaryCard already solved this for its own Show More; this block had no
+    handling at all. A Clarity session shows an Instagram in-app visitor working
+    these expanders in the career predictions between 09:10 and 10:11.
+
+    Scroll the section itself rather than the revealed region: the heading and the
+    outcome pill are the context that makes the passage readable, and "start" puts
+    them at the top of the viewport with the text following.
+  */
+  const metaRefs = useRef({});
+
+  const toggleMeta = (metaKey) => {
+    const wasOpen = Boolean(openMeta[metaKey]);
+    setOpenMeta((p) => ({ ...p, [metaKey]: !p[metaKey] }));
+
+    // rAF so the newly rendered content is laid out before we measure.
+    requestAnimationFrame(() => {
+      metaRefs.current[metaKey]?.scrollIntoView({
+        behavior: "smooth",
+        // Collapsing needs no repositioning beyond keeping the block on screen.
+        block: wasOpen ? "nearest" : "start",
+      });
+    });
+  };
+
   /* open first accordion by default */
   useEffect(() => {
     if (predictions.length) setOpenIndex(0);
@@ -208,6 +241,10 @@ const Prediction = ({ params, skipToken }) => {
                       <div
                         key={key}
                         className={styles.box}
+                        ref={(el) => {
+                          if (el) metaRefs.current[metaKey] = el;
+                          else delete metaRefs.current[metaKey];
+                        }}
                       >
                         <div className="flex justify-between items-center mb-2">
                           <p className="text-sm font-semibold text-gray-700">
@@ -279,13 +316,10 @@ const Prediction = ({ params, skipToken }) => {
                         {(showPreview || value.contributors || value.houseScores) && (
                           <div className={styles.showMoreContainer}>
                             <button
-                              onClick={() =>
-                                setOpenMeta((p) => ({
-                                  ...p,
-                                  [metaKey]: !p[metaKey],
-                                }))
-                              }
+                              type="button"
+                              onClick={() => toggleMeta(metaKey)}
                               className={styles.showMoreBtn}
+                              aria-expanded={Boolean(isMetaOpen)}
                             >
                               {isMetaOpen ? "Show Less" : "Show More"}
                             </button>

@@ -518,6 +518,12 @@ $font-primary:     "Poppins", sans-serif;
   max-height: 500px;
 }
 
+/* Contact Us: email + a wrapping registered address + legal name runs past the
+   500px used for the link columns, and max-height clips silently. See Footer.jsx. */
+.v2_accordionOpenTall {
+  max-height: 900px;
+}
+
 // ============================================================
 // BOTTOM BAR
 // ============================================================
