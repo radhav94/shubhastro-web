@@ -178,8 +178,15 @@ const LiveView = (props) => {
     behind `isAstrologerLive`.
 
     5s still avoids the flash-up the gate exists to prevent (a successful join
-    lands in 1–3s, and the flag is cleared the moment a remote user appears), and
-    matches LOADING_ESCAPE_MS in LivePlayerPage so the two waits behave alike.
+    lands in 1–3s, and the flag is cleared the moment a remote user appears).
+
+    Deliberately NOT the same as LOADING_ESCAPE_MS in LivePlayerPage, which is
+    now 2.5s. That one covers a *download* — the live-list request and the Agora
+    chunk — where there is no lower bound worth protecting, so it can afford to
+    be impatient. This one covers the Agora join itself, which normally completes
+    in 1–3s, so dropping it to 2.5s would flash the waiting actions up during a
+    perfectly healthy connect. The two waits are sequential, so the visitor sees
+    an escape route by 2.5s regardless; this timeout only governs the second leg.
   */
   useEffect(() => {
     if (remoteUsers?.length > 0 || hostLeft || roomEnded) {

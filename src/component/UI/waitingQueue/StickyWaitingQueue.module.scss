@@ -186,6 +186,33 @@
   margin-top: 2px;
 }
 
+/*
+ * "Still connecting…" note, shown when a not-yet-ready action is tapped.
+ *
+ * Replaces a toast — see the notReady comment in StickyWaitingQueue.jsx. It sits
+ * inside the row so the response lands next to the button that was pressed, and
+ * it animates in because an appearing line is what makes the tap register as
+ * having done something (both to the user and to session-replay tooling).
+ */
+.itemNotReadyNote {
+  font-size: 12px;
+  line-height: 1.35;
+  color: #b45309;
+  margin: 4px 0 0;
+  animation: notReadyNoteIn 0.18s ease-out;
+}
+
+@keyframes notReadyNoteIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .itemActions {
   display: flex;
   align-items: center;

@@ -175,6 +175,10 @@ const AddProfileModal = ({
   const closeBtnRef = useRef(null);
   const [nudgeClose, setNudgeClose] = useState(false);
 
+  // Bumped when submission is blocked on a birth place with no coordinates, to
+  // bring the suggestion list back up. See the guard in handleSubmit.
+  const [placeReopenSignal, setPlaceReopenSignal] = useState(0);
+
   // Which submit attempt has already had its first error reported. Shared by the
   // CTA's own validation pass and ScrollToError so a blocked tap produces one
   // message, not two. A ref rather than state: it must not trigger a re-render.
@@ -318,6 +322,19 @@ const AddProfileModal = ({
       if (placeField) {
         placeField.scrollIntoView({ behavior: "smooth", block: "center" });
         placeField.querySelector("input")?.focus({ preventScroll: true });
+      }
+      /*
+        Put the dropdown back on screen, because the message above tells the user
+        to pick from it.
+
+        Focusing the input is not enough on its own: LocationSearch re-opens from
+        its `onFocus`, and `focus()` fires no event when the field is already
+        focused — the normal case when someone taps submit straight after typing.
+        This asks for the list explicitly instead. See reopenSignal in
+        locationSearchVedic.jsx.
+      */
+      if (values.birthPlace?.trim()) {
+        setPlaceReopenSignal((n) => n + 1);
       }
       return;
     }
@@ -707,6 +724,7 @@ const AddProfileModal = ({
                     <IoLocationOutline className={styles.leftIcon} />
                     <LocationSearch
                       dropUp
+                      reopenSignal={placeReopenSignal}
                       value={values.birthPlace}
                       /*
                         Typing clears the coordinates.
@@ -793,6 +811,18 @@ const AddProfileModal = ({
                       if (reportFirstError(validationErrors)) {
                         // submitCount is about to become submitCount + 1.
                         reportedSubmitRef.current = submitCount + 1;
+                      }
+
+                      /*
+                        Same reasoning as the guard in handleSubmit: when the
+                        blocker is a birth place with no coordinates, the error
+                        text sends the user to a dropdown, so put the dropdown
+                        back up. Gated on there being something typed to search
+                        for — an empty field just needs filling in, and reopening
+                        an empty list would say nothing.
+                      */
+                      if (validationErrors.birthPlace && values.birthPlace?.trim()) {
+                        setPlaceReopenSignal((n) => n + 1);
                       }
                     }
                   }}
