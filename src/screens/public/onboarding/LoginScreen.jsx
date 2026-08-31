@@ -128,7 +128,29 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
   });
 
   const handleGetOTP = async () => {
-    if (loading) return;
+    /*
+      A tap while the OTP request is already in flight.
+
+      This was a bare `return`. The CTA itself does change to "Sending…", but
+      this handler is shared with the ₹250 offer block — the largest thing on the
+      screen, and the element Clarity names — which has no busy state of its own.
+      So tapping the offer during the wait produced nothing at all, and the wait
+      is a network round trip on a phone connection.
+
+      Clarity filed this session under RAGE clicks (not dead clicks): "Claim ₹250
+      Now" at 08:31 and again at 13:16, 57 clicks over 21 minutes, never
+      completing authentication. Rapid repeated taps on one control is exactly
+      what an unacknowledged in-flight request produces.
+
+      Answered the same way as every other blocked tap on this screen, and the
+      same way OTPScreen already answers its own duplicate submit. showFormHint
+      keys on an incrementing `seq`, so the third tap re-animates the line rather
+      than resolving to an identical render.
+    */
+    if (loading) {
+      showFormHint("Sending your code — one moment.");
+      return;
+    }
 
     // This was doubly silent: the button carried `disabled={phoneNumber.length < 10}`
     // so the browser swallowed the tap, and this function also wrapped its whole
@@ -308,7 +330,22 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
           </div>
           )}
 
-          {/* Feature Badges */}
+          {/*
+            Feature Badges.
+
+            Same treatment as the trust bar at the bottom of this screen, and for
+            the same reason: a circular bordered icon beside a bold label in a
+            divided cell reads as a feature card, so it gets tapped. These two
+            were the last pair on the screen still composed that way with no
+            handler at all — identical grammar to the trustItem cells a few
+            hundred pixels below, which do respond. Clarity has a desktop visit
+            from LinkedIn interacting with elements in this column before
+            skipping the form entirely.
+
+            Reuses handleTrustItemClick so the wording, the focus move and the
+            inline hint stay single-sourced with the other four cells. Real
+            <button>s, with the chrome stripped in the stylesheet.
+          */}
           <div className={styles.featureBadges}>
             <div className={styles.topLineStart}>
               <b className={styles.bLeft}></b>
@@ -319,7 +356,11 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
               </span>
               <b className={styles.bRight}></b>
             </div>
-            <div className={styles.featureBadge}>
+            <button
+              type="button"
+              className={styles.featureBadge}
+              onClick={() => handleTrustItemClick("Enjoy AI Features")}
+            >
               <div className={styles.badgeIcon}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#F75801" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -329,8 +370,12 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
                 <strong>Enjoy AI</strong>
                 <span>Features</span>
               </div>
-            </div>
-            <div className={styles.featureBadge}>
+            </button>
+            <button
+              type="button"
+              className={styles.featureBadge}
+              onClick={() => handleTrustItemClick("Private Sessions")}
+            >
               <div className={styles.badgeIcon}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <rect x="3" y="11" width="18" height="11" rx="2" stroke="#F75801" strokeWidth="2"/>
@@ -341,7 +386,7 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
                 <strong>Private</strong>
                 <span>Sessions</span>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Phone Input */}

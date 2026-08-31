@@ -245,19 +245,50 @@ const FilterChips = ({
       return;
 
     const nextPage = pageRef.current + 1;
-    // Use refs for latest filter values to avoid stale closures
+    // Every filter comes from a ref here, not from this closure — see the note on
+    // applyFilters. The scroll effect that calls this is not re-created when the
+    // filter sheet changes, so anything read from the closure would be whatever
+    // was set the last time `[hasMore, isLoading]` changed.
     applyFilters({
       pageNo: nextPage,
       append: true,
       searchValue: searchTextRef.current,
       skills: selectedSkillsRef.current,
       experties: expertiesRef.current,
+      modalFilters: {
+        languages: selectedLanguagesRef.current,
+        sort: selectedSortRef.current,
+        gender: selectedGenderRef.current,
+        minPrice: minPriceRef.current,
+        maxPrice: maxPriceRef.current,
+        minRating: minRatingRef.current,
+        minExperience: minExperienceRef.current,
+      },
     });
   };
 
   // -------------------------
   // APPLY FILTERS
   // -------------------------
+  /*
+    `modalFilters` carries the values set in the filter sheet (language, price,
+    rating, experience, gender, sort).
+
+    They used to be read straight from this closure, which is correct for the
+    direct calls but wrong for `loadMore`. That one runs from the scroll effect,
+    whose closure is only refreshed when `[hasMore, isLoading]` changes — so a
+    filter chosen after the effect last ran was invisible to it, and page 2
+    onwards was requested WITHOUT it. Scrolling a language-filtered list appended
+    astrologers who do not speak that language, silently widening the result set
+    the user had just narrowed.
+
+    The refs to prevent this were already declared at the top of the component
+    and kept in sync ("Refs to hold latest filter state for pagination"), but only
+    searchText / selectedSkills / experties were ever actually read. This closes
+    the gap for the rest, using the same explicit-parameter pattern those three
+    already use rather than reading refs in here — direct callers keep passing
+    nothing and keep getting live state.
+  */
   const applyFilters = async ({
     ignoreSearch = false,
     searchValue,
@@ -266,10 +297,19 @@ const FilterChips = ({
     pageNo = 1,
     append = false,
     skills,
+    modalFilters,
   } = {}) => {
     const finalSearchText = ignoreSearch ? "" : (searchValue ?? searchText);
     const finalExperties = expertiesValue ?? experties;
     const finalSkills = skills ?? selectedSkills;
+
+    const finalLanguages = modalFilters?.languages ?? selectedLanguages;
+    const finalSort = modalFilters?.sort ?? selectedSort;
+    const finalGender = modalFilters?.gender ?? selectedGender;
+    const finalMinPrice = modalFilters?.minPrice ?? minPrice;
+    const finalMaxPrice = modalFilters?.maxPrice ?? maxPrice;
+    const finalMinRating = modalFilters?.minRating ?? minRating;
+    const finalMinExperience = modalFilters?.minExperience ?? minExperience;
 
     const isOnline = finalExperties === "online";
     // Also treat as online when user navigated to /online URL route
@@ -283,16 +323,16 @@ const FilterChips = ({
         searchText: finalSearchText,
         selectedSkills: finalSkills,
         experties: isOnline ? "" : finalExperties,
-        selectedSort,
-        selectedGender,
+        selectedSort: finalSort,
+        selectedGender: finalGender,
         page: pageNo,
         limit: 9,
         ...(shouldFilterOnline && { isActive: true }),
-        ...(minPrice > 0 && { minPrice }),
-        ...(maxPrice < 1000 && { maxPrice }),
-        ...(minRating > 0 && { minRating }),
-        ...(minExperience > 0 && { minExperience }),
-        ...(selectedLanguages.length > 0 && { language: selectedLanguages.join(",") }),
+        ...(finalMinPrice > 0 && { minPrice: finalMinPrice }),
+        ...(finalMaxPrice < 1000 && { maxPrice: finalMaxPrice }),
+        ...(finalMinRating > 0 && { minRating: finalMinRating }),
+        ...(finalMinExperience > 0 && { minExperience: finalMinExperience }),
+        ...(finalLanguages.length > 0 && { language: finalLanguages.join(",") }),
         isActiveType,
       }).unwrap();
 
