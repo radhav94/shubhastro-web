@@ -1288,6 +1288,28 @@
   }
 }
 
+/* Each topic in the expertise line, when the API gave us a slug to filter the
+   listing by. Underlined on rest rather than hover-only: there is no hover on a
+   phone, and a tag that only looks tappable on a desktop is how this line ended
+   up being clicked with nothing behind it. See AstrologerProfile.jsx. */
+.expertiseTagLink {
+  color: inherit;
+  // text-decoration: underline;
+  // text-decoration-color: rgba(247, 88, 1, 0.45);
+  text-underline-offset: 3px;
+
+  &:hover {
+    color: #d43400;
+    text-decoration-color: #d43400;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
 .languages {
   display: flex;
   gap: 8px;
