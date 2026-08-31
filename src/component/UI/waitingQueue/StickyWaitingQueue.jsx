@@ -55,6 +55,53 @@ const StickyWaitingQueue = () => {
     }
   }, [pendingConnections.length, expanded]);
 
+  /*
+    Per-row "not ready yet" note, keyed by the row's own identity.
+
+    This was a `toast.info()`, which is the one kind of answer that does not
+    count. A toast renders in a portal at the edge of the viewport, is gone in
+    seconds, and mutates nothing inside the row that was tapped — so Clarity
+    still records the tap as a dead click, and a second tap sets the identical
+    toast text, which React renders as no change at all. Clarity caught this
+    surface directly: a mobile visitor from Instagram sat on "Waiting for
+    astrologer" at 07:31, tried both the chat and the call controls, and
+    withdrew both shortly after.
+
+    It also mattered for the user, not just the metric: the buttons are on the
+    right edge of a bottom-anchored card, and the toast fires somewhere else
+    entirely, so on a phone the response to a tap appeared nowhere near the
+    thumb that made it.
+
+    `seq` increments on every call and is used as the note's React key, so
+    tapping the same not-ready button twice remounts the paragraph and replays
+    its animation instead of resolving to an identical no-op render.
+
+    Declared up here, above the early returns below, so the hook order is
+    unconditional.
+  */
+  const [notReadyNote, setNotReadyNote] = useState(null);
+  const noteSeqRef = useRef(0);
+
+  const rowKeyOf = (conn) => conn.roomId || conn.astrologer?._id;
+
+  /*
+    Drop the note as soon as the row it belongs to can actually act, so a stale
+    "still connecting" line cannot sit under a button that now works. Keyed on the
+    joined roomId list rather than the array identity: the context replaces
+    pendingConnections on every status tick, and re-running on that would clear
+    the note before it had been read.
+  */
+  const readyRowKeys = pendingConnections
+    .filter((c) => c.roomId)
+    .map((c) => c.roomId)
+    .join(",");
+  useEffect(() => {
+    if (!notReadyNote) return;
+    const row = pendingConnections.find((c) => rowKeyOf(c) === notReadyNote.key);
+    if (!row || row.roomId) setNotReadyNote(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [readyRowKeys]);
+
   if (pendingConnections.length === 0) return null;
   if (callApproval || chatApproval || callMissed || chatMissed) return null;
   if (activeCall || activeChat) return null;
@@ -81,16 +128,16 @@ const StickyWaitingQueue = () => {
   // Queue entries are created with `roomId: null` and only receive one when the
   // server emits chat:room / call:room. Every action below needs that roomId, so
   // until it lands the buttons used to be silent no-ops — the user taps Cancel
-  // or Join during the "connecting…" window and nothing happens at all. Now the
-  // buttons are visibly not-ready and a tap explains the wait.
+  // or Join during the "connecting…" window and nothing happens at all.
   const isReady = (conn) => Boolean(conn.roomId);
 
-  const notReady = () => {
-    toast.info("Still connecting to the astrologer — one moment.");
+  const notReady = (conn) => {
+    noteSeqRef.current += 1;
+    setNotReadyNote({ key: rowKeyOf(conn), seq: noteSeqRef.current });
   };
 
   const handleAccept = (conn) => {
-    if (!isReady(conn)) return notReady();
+    if (!isReady(conn)) return notReady(conn);
     stopIncomingSound();
     const eventName = conn.type === "chat" ? "chat:user_accept" : "call:user_accept";
     voiceSocket.emit(eventName, { roomId: conn.roomId });
@@ -100,7 +147,7 @@ const StickyWaitingQueue = () => {
   };
 
   const handleUnhold = (conn) => {
-    if (!isReady(conn)) return notReady();
+    if (!isReady(conn)) return notReady(conn);
     const userId = localStorage.getItem("shubhtalk_customer_id");
     if (!userId) {
       toast.error("Your session expired. Please log in again to rejoin.");
@@ -138,7 +185,7 @@ const StickyWaitingQueue = () => {
   };
 
   const handleHoldCancel = (conn) => {
-    if (!isReady(conn)) return notReady();
+    if (!isReady(conn)) return notReady(conn);
     const eventName = conn.type === "chat" ? "chat:hold_cancel" : "call:hold_cancel";
     voiceSocket.emit(eventName, { roomId: conn.roomId });
     removePendingConnection(conn.roomId);
@@ -221,6 +268,21 @@ const StickyWaitingQueue = () => {
                       {!isCancelling && status === "ringing" && <span className={styles.metaGreen}>{conn.type === "chat" ? "Connecting..." : "Ringing..."}</span>}
                       {!isCancelling && !isAccepted && !isOnHold && status !== "ringing" && (formatWaitDisplay(conn) || "Waiting…")}
                     </p>
+                    {/*
+                      Inside the row, directly under the wait line and beside the
+                      button that was tapped — see notReady. role="status" so it
+                      is announced without stealing focus; keyed on seq so a
+                      repeat tap remounts it rather than rendering nothing new.
+                    */}
+                    {notReadyNote?.key === rowKeyOf(conn) && (
+                      <p
+                        key={notReadyNote.seq}
+                        className={styles.itemNotReadyNote}
+                        role="status"
+                      >
+                        Still connecting to {name} — one moment.
+                      </p>
+                    )}
                   </div>
 
                   <div className={styles.itemActions}>

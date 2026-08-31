@@ -47,10 +47,31 @@ const ConnectAstrologerSection = memo(({ sectionData, styles }) => {
           </svg>
           {sectionData?.quick_message || "Don't Wait. Get Clarity Now."}
         </div> */}
-        {/* h2: this banner is a top-level homepage section, so its title sits at
-            the same rank as the other section titles rather than a level below.
-            Size comes from .ctaHeading. */}
-        <h2 className={styles.ctaHeading}>
+        {/*
+          h2: this banner is a top-level homepage section, so its title sits at
+          the same rank as the other section titles rather than a level below.
+          Size comes from .ctaHeading.
+
+          Clickable now, same destination as the two buttons in .ctaRight
+          (handleNavigate -> /astrologers). This heading is the largest, most
+          prominent text in the banner — larger than either button — and reads
+          as the headline CTA of the whole section. Clarity: a visitor tapped
+          "Talk to an Astrologer" at 00:26 on the homepage and got nothing; the
+          working buttons sit in a separate column and were never reached.
+        */}
+        <h2
+          className={styles.ctaHeading}
+          role="button"
+          tabIndex={0}
+          onClick={handleNavigate}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleNavigate();
+            }
+          }}
+          style={{ cursor: "pointer" }}
+        >
           {sectionData?.display_title || sectionData?.title || "Talk to an Astrologer"}
         </h2>
         <p className={styles.ctaOrange}>{sectionData?.sub_title || "Get Clarity on What Matter Most!"}</p>

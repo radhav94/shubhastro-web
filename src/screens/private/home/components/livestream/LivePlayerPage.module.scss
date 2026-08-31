@@ -48,6 +48,33 @@
   gap: 10px;
 }
 
+/*
+ * Outcome of a manual "Check again" — see handleCheckAgain in LivePlayerPage.jsx.
+ *
+ * Sits under the actions so the answer appears directly beneath the button that
+ * was pressed. It animates in because an appearing line is what makes the tap
+ * legible as having done something; without it, a check that finds nothing is
+ * indistinguishable from a button that does nothing.
+ */
+.gateCheckResult {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #5f5245;
+  margin: 14px 0 0;
+  animation: gateCheckResultIn 0.2s ease-out;
+}
+
+@keyframes gateCheckResultIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 // Both actions are full-height targets rather than inline text, because on a
 // phone this card is the only thing on the screen and these are the only two
 // ways off it.
