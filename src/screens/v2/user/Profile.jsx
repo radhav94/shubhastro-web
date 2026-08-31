@@ -808,19 +808,30 @@ const Profile = () => {
   const pagination = transactionsData?.data?.pagination;
   const hasNextPage = pagination?.hasNextPage || false;
 
-  // Update loaded transactions when new data arrives
+  // Update loaded transactions when new data arrives.
+  //
+  // The list is derived from the RTK Query cache. The Apply/Reset handlers call
+  // setAllLoadedTransactions([]) to clear the accumulated pages, but when the
+  // new filter params happen to match a previously cached request, RTK Query
+  // returns the SAME transactionsData reference — so none of this effect's
+  // dependencies change, the effect doesn't re-run, and the just-cleared list
+  // stays empty. That produced "No transactions yet" after Apply even though
+  // cached data existed. Keying the page-1 branch on the transactions array
+  // itself (not the wrapper reference) and re-seeding whenever the list was
+  // cleared fixes the cache-hit case.
+  const cachedTransactions = transactionsData?.data?.transactions;
   useEffect(() => {
-    if (transactionsData?.data?.transactions && shouldFetch) {
+    if (cachedTransactions && shouldFetch) {
       if (currentPage === 1) {
-        setAllLoadedTransactions(transactionsData.data.transactions);
+        setAllLoadedTransactions(cachedTransactions);
       } else {
         setAllLoadedTransactions((prev) => [
           ...prev,
-          ...transactionsData.data.transactions,
+          ...cachedTransactions,
         ]);
       }
     }
-  }, [transactionsData, currentPage, shouldFetch]);
+  }, [cachedTransactions, currentPage, shouldFetch]);
 
   // Infinite scroll handler for transactions
   const handleTransactionScroll = (e) => {
@@ -3226,7 +3237,10 @@ const Profile = () => {
                   setTxnAppliedMinPrice("");
                   setTxnAppliedMaxPrice("");
                   setCurrentPage(1);
-                  setAllLoadedTransactions([]);
+                  // Don't clear the list here. On a cache hit the sync effect
+                  // won't re-run (same cached reference), so a manual clear
+                  // would leave the list permanently empty. The page-1 branch
+                  // of the effect overwrites it with fresh data when it arrives.
                   setTxnFilterModalOpen(false);
                 }}
               >
@@ -3240,10 +3254,40 @@ const Profile = () => {
                   setTxnAppliedDateRange(txnDateRange);
                   setTxnAppliedFromDate(txnCustomFromDate);
                   setTxnAppliedToDate(txnCustomToDate);
-                  setTxnAppliedMinPrice(txnMinPrice);
-                  setTxnAppliedMaxPrice(txnMaxPrice);
+                  /*
+                    The slider bounds (0 and 1000) mean "no limit", not a real
+                    cap. Sending minPrice=0 is harmless, but sending
+                    maxPrice=1000 filtered out every transaction above ₹1000
+                    (recharges etc.) and returned an empty list — "No
+                    transaction yet" even though the user capped nothing.
+
+                    It also has to guard the inverted case: if the two thumbs
+                    end up crossed (min ≥ max, which the overlapping sliders can
+                    produce), the backend gets minPrice > maxPrice and returns
+                    nothing. When that happens, treat the price filter as unset
+                    rather than sending a contradictory range.
+                  */
+                  {
+                    const minNum = Number(txnMinPrice) || 0;
+                    const maxNum = Number(txnMaxPrice) || 1000;
+                    const priceIsFullRange =
+                      minNum <= 0 && maxNum >= 1000;
+                    const priceIsInverted = minNum >= maxNum;
+
+                    if (priceIsFullRange || priceIsInverted) {
+                      setTxnAppliedMinPrice("");
+                      setTxnAppliedMaxPrice("");
+                    } else {
+                      setTxnAppliedMinPrice(minNum > 0 ? String(minNum) : "");
+                      setTxnAppliedMaxPrice(maxNum < 1000 ? String(maxNum) : "");
+                    }
+                  }
                   setCurrentPage(1);
-                  setAllLoadedTransactions([]);
+                  // Don't clear the list here — see the sync effect. On a cache
+                  // hit (same params as before) the effect won't re-run, so a
+                  // manual clear would strand the list at empty and show
+                  // "No transactions yet" even though data exists. The effect's
+                  // page-1 branch replaces the list when fresh data arrives.
                   setTxnFilterModalOpen(false);
                 }}
               >
