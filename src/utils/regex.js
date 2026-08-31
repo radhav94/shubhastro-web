@@ -23,8 +23,18 @@ export const emailRegex = /[A-Za-z0-9]+@[A-Za-z0-9]+\.[A-Za-z]{2,}/;
   \p{L} covers letters in every script and \p{M} the combining marks that
   scripts like Devanagari and Arabic need. Requiring the first character to be
   a letter still rejects input that is only punctuation.
+
+  That "first character" requirement was anchored to position 0
+  (`^[\p{L}\p{M}]...`), which silently excludes names that legitimately start
+  with one of the punctuation marks the error message advertises as allowed —
+  "O'Brien" typed apostrophe-first as "'Brien" while backspacing, "-Sharma",
+  or ".D'Souza". The error message promises ". ' -" are usable characters, but
+  the regex only accepted them from the second character onward, so the field
+  rejected input the message said was fine. The lookahead below still requires
+  at least one letter somewhere (rejecting pure punctuation like "---" or
+  "..."), without pinning it to a specific position.
 */
-export const personNameRegex = /^[\p{L}\p{M}][\p{L}\p{M}\s'’.-]*$/u;
+export const personNameRegex = /^(?=.*[\p{L}\p{M}])[\p{L}\p{M}\s'’.-]+$/u;
 
 export const PERSON_NAME_ERROR =
   "Please enter a valid name (letters, spaces, and . ' - only)";
