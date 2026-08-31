@@ -21,7 +21,46 @@ import { SGW_HANDSHAKE_URL } from "../apiConfig";
 const HKDF_INFO = "shubhtalk-sgw-aesgcm-v1";
 const HANDSHAKE_URL = SGW_HANDSHAKE_URL;
 
-const subtle = globalThis.crypto?.subtle;
+/*
+  Resolve the global object without assuming `globalThis` exists.
+
+  This was `globalThis.crypto?.subtle`. The `?.` guards `crypto` being absent but
+  not `globalThis` itself, and `globalThis` is ES2020 — Chrome 71, Firefox 65,
+  Safari 12.1. Anything older throws `ReferenceError: globalThis is not defined`.
+
+  That is not a contained failure. It happens while this module is being
+  evaluated, and this module lands in the entry chunk, so the reference error
+  aborts app startup on every route and the visitor gets a blank page. Clarity
+  recorded it on the in-app WebView pages (`?type=webview`): a JavaScript error at
+  00:01 on /faq, more on /community-guidelines, 1 click across 3 pages in 100
+  seconds. Android System WebView is updated independently of the OS and is
+  routinely years behind on cheap or unpatched devices.
+
+  `build.target` in vite.config.js cannot help here. esbuild lowers *syntax*
+  (that is what the `??` / `||=` floor documented there is for); it does not
+  polyfill missing *globals*. So this has to be guarded in source.
+
+  Falling through to `{}` rather than throwing is deliberate: `subtle` then comes
+  out undefined, which is a state this module already handles — performHandshake
+  and decryptEnvelope both check `if (!subtle)` and reject with "Web Crypto
+  unavailable". Callers already deal with that (the gateway is obfuscation, not a
+  security boundary — see the note at the top of this file). So an ancient WebView
+  loses response encryption and keeps a working app, instead of showing nothing.
+
+  Mirrors what React and React-Redux already emit in their own bundles
+  (`typeof globalThis != "undefined" ? globalThis : ...`), which is why those
+  chunks survive these engines and this one did not.
+*/
+const globalScope =
+  typeof globalThis !== "undefined"
+    ? globalThis
+    : typeof self !== "undefined"
+      ? self
+      : typeof window !== "undefined"
+        ? window
+        : {};
+
+const subtle = globalScope.crypto?.subtle;
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
