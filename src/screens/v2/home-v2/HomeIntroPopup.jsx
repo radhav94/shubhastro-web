@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import styles from "./HomeIntroPopup.module.scss";
@@ -40,6 +40,51 @@ const HomeIntroPopup = () => {
   const [popupLink, setPopupLink] = useState(null);
   const [isInternal, setIsInternal] = useState(false);
 
+  /*
+    Has the visitor started using the page already?
+
+    This popup does not open on mount — it opens when the homepage API resolves
+    and reports `pageblocker.status === true`. That is a network round trip, so
+    the dialog lands somewhere between half a second and a couple of seconds
+    AFTER the homepage has painted and become interactive. Anyone who reaches for
+    something in that window has their click taken by a full-screen interstitial
+    that was not on screen when they committed to the tap.
+
+    Clarity caught exactly that: a desktop visitor clicked at 00:01, the click was
+    recorded dead and labelled "Generate My KundliUnlock" — the homepage card they
+    aimed at concatenated with this dialog's "Unlock Your Free Kundli" heading —
+    and the session stayed on one page with no navigation, then flipped between
+    visible and hidden four times in the next nine seconds and was abandoned.
+
+    So: an interstitial that has not arrived before the visitor starts working is
+    too late to be useful and can only get in the way. Deliberately NOT paired
+    with markSeen() — the offer has not been shown, so it should not be burned;
+    SEEN_KEY is permanent and would retire it for good on this browser.
+
+    A ref, not state: this must not trigger a render, and the effect below reads
+    it at the moment the data lands rather than reacting to it.
+  */
+  const hasInteractedRef = useRef(false);
+
+  useEffect(() => {
+    const markInteracted = () => {
+      hasInteractedRef.current = true;
+    };
+    // pointerdown rather than click: it fires at the START of the gesture, so a
+    // press already underway when the response lands still counts. `scroll` is
+    // passive and covers reading without clicking. capture:true so a handler
+    // that stops propagation cannot hide the interaction from us.
+    const opts = { passive: true, capture: true };
+    window.addEventListener("pointerdown", markInteracted, opts);
+    window.addEventListener("keydown", markInteracted, opts);
+    window.addEventListener("scroll", markInteracted, opts);
+    return () => {
+      window.removeEventListener("pointerdown", markInteracted, opts);
+      window.removeEventListener("keydown", markInteracted, opts);
+      window.removeEventListener("scroll", markInteracted, opts);
+    };
+  }, []);
+
   // Fetch homepage data to get pageblocker configuration
   const { data: homeData } = useGetNewHomeDetailsQuery("newcustomerlandingpage");
   const pageBlocker = homeData?.data?.pageblocker;
@@ -67,7 +112,8 @@ const HomeIntroPopup = () => {
         if (pageBlocker.is_internal !== undefined) {
           setIsInternal(pageBlocker.is_internal);
         }
-        if (!alreadySeen) setIsOpen(true);
+        // Don't cut across someone already using the page — see hasInteractedRef.
+        if (!alreadySeen && !hasInteractedRef.current) setIsOpen(true);
       }
     }
     // If pageblocker.status is false or doesn't exist, don't show any popup
