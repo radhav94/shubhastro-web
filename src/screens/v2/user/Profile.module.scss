@@ -1238,12 +1238,54 @@
     -webkit-appearance: none;
     outline: none;
 
-    &::-webkit-slider-runnable-track {
-        height: 4px;
-        background: #e5e7eb;
-        border-radius: 2px;
+    /*
+      Two range inputs are stacked in the same wrapper. Both are full-width and
+      absolutely positioned; only the thumbs receive pointer events. The MAX
+      input is the last DOM sibling, so it paints on top of the MIN input across
+      the whole track — which means over the left half of the track the max
+      input's (transparent) body sat above the min thumb and swallowed the
+      grab, so the max thumb (parked at the right/1000 by default) was reachable
+      but the min thumb often was not, and adjusting the max end felt dead.
+      Give each input a z-index and let the thumbs win: the min slider sits
+      above so its thumb stays grabbable on the left, while both thumbs keep
+      pointer-events:all so the max thumb on the right is reachable too.
+    */
+    &:nth-of-type(1) {
+        z-index: 3;
+    }
+    &:nth-of-type(2) {
+        z-index: 4;
     }
 
+    /*
+      Only the FIRST slider paints the grey track; the second one's track is
+      transparent. With both tracks opaque, whichever input paints last drew its
+      grey bar over the other input's thumb — so the orange dot appeared to sit
+      *behind* the bar. One visible track + transparent second track keeps a
+      single clean bar with both thumbs on top of it.
+    */
+    &::-webkit-slider-runnable-track {
+        height: 4px;
+        background: transparent;
+        border-radius: 2px;
+    }
+    &:nth-of-type(1)::-webkit-slider-runnable-track {
+        background: #e5e7eb;
+    }
+    &::-moz-range-track {
+        height: 4px;
+        background: transparent;
+        border-radius: 2px;
+    }
+    &:nth-of-type(1)::-moz-range-track {
+        background: #e5e7eb;
+    }
+
+    /*
+      z-index on the thumb keeps the dot above the sibling input's track.
+      position: relative is required for z-index to take effect on the thumb
+      pseudo-element in WebKit.
+    */
     &::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
@@ -1255,13 +1297,9 @@
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         cursor: pointer;
         pointer-events: all;
+        position: relative;
+        z-index: 5;
         margin-top: -8px;
-    }
-
-    &::-moz-range-track {
-        height: 4px;
-        background: #e5e7eb;
-        border-radius: 2px;
     }
 
     &::-moz-range-thumb {
@@ -1273,6 +1311,8 @@
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         cursor: pointer;
         pointer-events: all;
+        position: relative;
+        z-index: 5;
     }
 }
 
