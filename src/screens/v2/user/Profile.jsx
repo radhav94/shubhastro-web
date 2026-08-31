@@ -1597,19 +1597,19 @@ const Profile = () => {
   })();
 
   /*
-    Entry point for the header identity block (avatar, name, birth-date line).
+    Edit entry point for the header. Reached only from the pencil button beside
+    the name.
 
-    That block was plain, inert text. Tapping your own avatar or name at the top
-    of a profile to edit your details is a near-universal convention, so people
-    tap it — Clarity recorded repeated dead clicks on exactly this target (the
-    avatar initial and the name sit adjacent, so they are reported together as
-    one element) and on the date line beneath it, after which the visitor gave
-    up and logged out.
+    The whole identity block — avatar, name, birth-date line — used to carry this
+    handler, to give the dead clicks people were aiming at their own name
+    somewhere to land. That over-corrected: the strip spans the full width of the
+    header, so the date line, the phone number and the empty space to the right of
+    the name all opened the edit modal, and a stray tap anywhere in the top bar
+    put a form on screen. A visible pencil is the affordance people were looking
+    for; it does not need the surrounding text to be clickable too.
 
-    The edit flow already existed via handleEditClick — it simply had no entry
-    point from the header, so the only way in was the profile list further down
-    the page. When there is no profile yet the same tap opens Add Profile, so it
-    always resolves to something rather than trading one dead click for another.
+    When there is no profile yet the same control opens Add Profile, so it always
+    resolves to something.
 
     Declared here, below primaryProfile / handleEditClick / handleOpenAddProfileModal,
     so none of them are referenced while still in their temporal dead zone.
@@ -1622,21 +1622,6 @@ const Profile = () => {
     handleOpenAddProfileModal();
   };
 
-  const ownDetailsActivation = {
-    role: "button",
-    tabIndex: 0,
-    "aria-label": primaryProfile
-      ? "Edit your birth details"
-      : "Add your birth details",
-    onClick: handleEditOwnDetails,
-    onKeyDown: (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        handleEditOwnDetails();
-      }
-    },
-  };
-
   return (
     <div className={styles.profilePage}>
       {/* Header */}
@@ -1646,27 +1631,35 @@ const Profile = () => {
         </button>
 
         <div className={styles.headerCenter}>
-          {/*
-            Pointer-only companion target for the block below. Deliberately has
-            no role/tabIndex: it triggers the same action as the labelled button
-            beside it, so adding a second focusable node would just duplicate the
-            control for keyboard and screen-reader users.
-          */}
-          <div
-            className={styles.userAvatar}
-            onClick={handleEditOwnDetails}
-            aria-hidden="true"
-          >
+          <div className={styles.userAvatar} aria-hidden="true">
             <span>{userAvatarDisplay}</span>
           </div>
           <div className={styles.headerInfo}>
-            <div className={styles.headerIdentity} {...ownDetailsActivation}>
+            <div className={styles.headerIdentity}>
               <h1 className={styles.profileName}>
                 {userName}
-                <LuPencilLine
-                  className={styles.profileNameEditIcon}
-                  aria-hidden="true"
-                />
+                {/*
+                  The one control that opens the edit form. A real <button>, so it
+                  is focusable and labelled on its own — the pencil used to be an
+                  aria-hidden decoration sitting inside a clickable strip.
+                */}
+                <button
+                  type="button"
+                  className={styles.profileNameEditBtn}
+                  onClick={handleEditOwnDetails}
+                  aria-label={
+                    primaryProfile
+                      ? "Edit your birth details"
+                      : "Add your birth details"
+                  }
+                  title={
+                    primaryProfile
+                      ? "Edit your birth details"
+                      : "Add your birth details"
+                  }
+                >
+                  <LuPencilLine className={styles.profileNameEditIcon} aria-hidden="true" />
+                </button>
               </h1>
               <p className={styles.profileDetails}>
                 {primaryProfile
