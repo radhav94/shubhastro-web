@@ -1190,6 +1190,27 @@ const AstrologerProfile = () => {
       data?.expertise?.length > 0
         ? data.expertise.map((e) => (typeof e === "object" ? e.title : e))
         : ["Relationships", "Finance", "Health"],
+    /*
+      The same expertise entries, but keeping any `slug` the API sent.
+
+      The line below the astrologer's name reads as a row of topic tags, and
+      Clarity keeps reporting clicks in this block that do nothing — most
+      recently a desktop visitor "interacting with biography details" across two
+      visits to the same profile. A topic tag means "show me astrologers for
+      this", and the listing already supports exactly that as a plain URL:
+      /astrologers/<slug> is what FilterChips auto-applies from.
+
+      Only entries that carry a real slug become links. Slugifying the title to
+      guess the URL was rejected: an unrecognised slug lands on the listing's
+      "No astrologers in this category" state, which trades a dead click for a
+      dead end. So when the payload has no slugs this renders exactly as before.
+    */
+    expertiseTags:
+      data?.expertise?.length > 0
+        ? data.expertise
+            .filter((e) => typeof e === "object" && e?.title && e?.slug)
+            .map((e) => ({ title: e.title, slug: e.slug }))
+        : [],
     languagePreference:
       data?.languagePreferences?.length > 0
         ? data.languagePreferences
@@ -1719,9 +1740,28 @@ const AstrologerProfile = () => {
                 <h1 className={styles.astrologerName}>
                   {getAstrologerDisplayName(displayData)}
                 </h1>
-                <p className={styles.expertise}>
-                  {displayData.expertise.join(" • ")}
-                </p>
+                {/* Linked tags when the API gave us slugs, plain text otherwise.
+                    See expertiseTags above. */}
+                {displayData.expertiseTags.length > 0 ? (
+                  <p className={styles.expertise}>
+                    {displayData.expertiseTags.map((tag, i) => (
+                      <React.Fragment key={tag.slug}>
+                        {i > 0 && <span aria-hidden="true"> • </span>}
+                        <Link
+                          to={`/astrologers/${tag.slug}`}
+                          className={styles.expertiseTagLink}
+                          title={`See astrologers for ${tag.title}`}
+                        >
+                          {tag.title}
+                        </Link>
+                      </React.Fragment>
+                    ))}
+                  </p>
+                ) : (
+                  <p className={styles.expertise}>
+                    {displayData.expertise.join(" • ")}
+                  </p>
+                )}
                 <div className={styles.languages}>
                   {displayData.languagePreference.map((lang, i) => (
                     <span key={i} className={styles.languageTag}>

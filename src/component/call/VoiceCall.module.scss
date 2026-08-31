@@ -150,7 +150,7 @@
   align-items: center;
   gap: 10px;
   // background: #fff;
-  @media (width <= 767px) {
+  @media (width <= 768px) {
     padding: 6px 16px 6px 16px;
     background: #fff;
     width: 100%;
@@ -166,7 +166,7 @@
   height: 30px;
   width: 1px;
   background-color: #BDBDBD;
-  @media (width <= 767px) {
+  @media (width <= 768px) {
     display: none;    
   }
 }
@@ -295,7 +295,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     transform: translateY(-1px);
   }
-  @media (width <= 767px) {
+  @media (width <= 768px) {
     font-size: 12px;
     width: 100%;
     border-radius: 40px;
@@ -919,6 +919,7 @@
     top: unset;
     padding: 10px 12px;
     gap: 8px;
+    margin-top: 37px;
   }
 
   .actionBtn {
@@ -996,7 +997,14 @@
 /* ===============================
    📱 SMALL MOBILE (≤480px)
    =============================== */
-
+// @media (width <= 767px) {
+//   .actionButtons {
+//     // top: unset;
+//     // padding: 10px 12px;
+//     // gap: 8px;
+//     margin-top: 0px;
+//   }
+// }
 @media (max-width: 480px) {
 
   // .header {

@@ -192,7 +192,13 @@ const ProfileManager = ({
     return {
       name: data.name,
       gender: data.identity.toLowerCase(),
-      relation: data.relation || "",
+      // In matchmaking mode the relation dropdown is hidden, so `data.relation`
+      // is empty and this used to send a blank relation to kundlis/create —
+      // leaving the profile with no relation tag on the profile page. Default
+      // matchmaking profiles to "Others" (relation is meaningless there and it
+      // keeps them out of the "Self" special case on edit). The normal profile
+      // flow keeps sending whatever the user picked.
+      relation: data.relation || (matchmakingMode ? "Others" : ""),
       day: dateObj.getDate(),
       month: dateObj.getMonth() + 1,
       year: dateObj.getFullYear(),
@@ -550,10 +556,14 @@ const ProfileManager = ({
   const getEditInitialData = () => {
     if (!profileToEdit) return null;
 
-    // Ensure relation value matches the option values exactly (capitalize first letter)
-    const relationValue = profileToEdit.relation 
+    // Ensure relation value matches the option values exactly (capitalize first letter).
+    // In matchmaking mode relation is irrelevant, so fall back to "Others"
+    // rather than "Self" — a "Self" default made the edit modal show Self and,
+    // on save, collide with the "a Self profile already exists" rule.
+    const relationFallback = matchmakingMode ? "Others" : "Self";
+    const relationValue = profileToEdit.relation
       ? profileToEdit.relation.charAt(0).toUpperCase() + profileToEdit.relation.slice(1).toLowerCase()
-      : "Self";
+      : relationFallback;
 
     return {
       name: profileToEdit.name,

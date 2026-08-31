@@ -1303,10 +1303,16 @@ const VideoCalling = ({ callData }) => {
         </div>
 
         <div className={styles.miniVideo}>
-          {/* Mini Video Container - Always rendered */}
+          {/* Mini Video Container - Always rendered.
+              This shows the astrologer's REMOTE video (one-way call — the
+              customer never broadcasts their own camera), same as
+              remoteVideoRef in the full view. It must NOT be mirrored:
+              flipping it swaps the astrologer's left/right, which is what
+              produced the "mirrored PIP" report. Mirroring only makes sense
+              for a local self-view, which this isn't. */}
           <div
             ref={localVideoMiniRef}
-            style={{ width: "100%", height: "100%", transform: "scaleX(-1)" }}
+            style={{ width: "100%", height: "100%" }}
           />
           {/* Avatar Overlay — astrologer camera off */}
           {!remoteVideoEnabled && (
