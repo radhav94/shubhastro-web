@@ -86,7 +86,13 @@ const companyLinks = [
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
-  const [openSection, setOpenSection] = useState(null);
+  /*
+    "contact", not null: the mobile Contact Us column is an accordion now (see
+    renderAccordionShell) and it opens expanded, so the email, registered address
+    and legal name are on screen exactly as they were before this change. Only the
+    heading's behaviour is new.
+  */
+  const [openSection, setOpenSection] = useState("contact");
 
   const toggleSection = useCallback((section) => {
     setOpenSection((prev) => (prev === section ? null : section));
@@ -120,7 +126,22 @@ const Footer = () => {
     </ul>
   );
 
-  const renderAccordionColumn = (id, title, links) => (
+  /*
+    Accordion shell, taking arbitrary body content.
+
+    Generalised from the links-only version so the mobile "Contact Us" column can
+    use it too. That column was a plain <h3> in the same `.v2_heading` style,
+    stacked directly under three headings that ARE toggles — so it reads as the
+    fourth one and gets tapped, and did nothing at all. Clarity: a visitor tapped
+    "Contact Us" at 00:14, and again at 03:28, with dead clicks and a refresh in
+    between; they had also used the "Explore Services" accordion, so they knew
+    these headings open.
+
+    Contact starts expanded (see the `openSection` initial value), so nothing that
+    was previously visible is hidden on arrival — the tap now collapses it, which
+    is a visible answer either way.
+  */
+  const renderAccordionShell = (id, title, body, { tall = false } = {}) => (
     <div className={styles.v2_column}>
       <div
         className={styles.v2_accordionHeader}
@@ -133,11 +154,21 @@ const Footer = () => {
         <h3 className={styles.v2_heading}>{title}</h3>
         <span className={styles.v2_accordionIcon}>{openSection === id ? "−" : "+"}</span>
       </div>
-      <div className={`${styles.v2_accordionBody} ${openSection === id ? styles.v2_accordionOpen : ""}`}>
-        {renderLinks(links)}
+      {/* `tall` raises the open max-height for bodies that are not a short link
+          list — the contact block carries a wrapping postal address and would be
+          clipped by the 500px used for the link columns. */}
+      <div
+        className={`${styles.v2_accordionBody} ${
+          openSection === id ? (tall ? styles.v2_accordionOpenTall : styles.v2_accordionOpen) : ""
+        }`}
+      >
+        {body}
       </div>
     </div>
   );
+
+  const renderAccordionColumn = (id, title, links) =>
+    renderAccordionShell(id, title, renderLinks(links));
 
   /*
     These links carry target="_blank", so the tab being recorded never
@@ -296,23 +327,33 @@ const Footer = () => {
         {renderAccordionColumn("services", "Explore Services", serviceLinks)}
         {/* {isShubhMallEnabled() && renderAccordionColumn("shop", "Shop Our Products", shopLinks)} */}
         {renderAccordionColumn("company", "Company Policies", companyLinks)}
+        {renderAccordionShell(
+          "contact",
+          "Contact Us",
+          <>
+            <p className={styles.v2_contactText}>Have questions?</p>
+            <a href="mailto:connect@pittiegroup.com" className={styles.v2_emailLink}>connect@pittiegroup.com</a>
+            {/* <p className={styles.v2_contactText}>Or call us at</p>
+            <a href="tel:+918655682877" className={styles.v2_contactText}>+91 86556 82877</a> */}
+            <h4 className={`${styles.v2_phoneLink} `}>Registered Company Address</h4>
+            <a
+              href={REGISTERED_ADDRESS_MAP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${styles.v2_contactText} ${styles.v2_addressLink}`}
+            >
+              {REGISTERED_ADDRESS}
+            </a>
+            <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
+            <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
+          </>,
+          { tall: true }
+        )}
+
+        {/* Outside the accordion above: collapsing Contact Us must not take the
+            store buttons with it, and "Download App" is a CTA rather than a
+            reference column, so it stays put. */}
         <div className={`${styles.v2_column} ${styles.v2_marT}`}>
-          <h3 className={styles.v2_heading}>Contact Us</h3>
-          <p className={styles.v2_contactText}>Have questions?</p>
-          <a href="mailto:connect@pittiegroup.com" className={styles.v2_emailLink}>connect@pittiegroup.com</a>
-          {/* <p className={styles.v2_contactText}>Or call us at</p>
-          <a href="tel:+918655682877" className={styles.v2_contactText}>+91 86556 82877</a> */}
-          <h4 className={`${styles.v2_phoneLink} `}>Registered Company Address</h4>
-          <a
-            href={REGISTERED_ADDRESS_MAP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`${styles.v2_contactText} ${styles.v2_addressLink}`}
-          >
-            {REGISTERED_ADDRESS}
-          </a>
-          <h4 className={`${styles.v2_phoneLink}`}>Legal Company Name</h4>
-          <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
           <h3 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h3>
           {storeButtons}
         </div>

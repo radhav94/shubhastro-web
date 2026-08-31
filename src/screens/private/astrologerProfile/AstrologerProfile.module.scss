@@ -1356,6 +1356,92 @@
   }
 }
 
+/* Status cards (Available Now / Offline, both breakpoints) and the minutes
+   tiles are <button>s now. These resets keep them pixel-identical to the divs
+   they replaced; the affordance is the cursor and the focus ring. */
+/* Why a Chat/Call/Video tile can't start a session, shown in the connect card
+   rather than in a toast. See AstrologerProfile.jsx. */
+.connectBlockedNote {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #b45309;
+  background: rgba(247, 88, 1, 0.08);
+  border: 1px solid rgba(247, 88, 1, 0.25);
+  border-radius: 8px;
+  padding: 8px 10px;
+  animation: connectBlockedNoteIn 0.18s ease-out;
+}
+
+@keyframes connectBlockedNoteIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.statusCardBtn {
+  appearance: none;
+  border: none;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 2px;
+  }
+}
+
+.minuteItemLink {
+  appearance: none;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 4px;
+    border-radius: 8px;
+  }
+}
+
+/* Flash the connect surface the status card / minutes tiles just pointed at.
+   On desktop that card is frequently already on screen, so the scroll alone
+   would read as "nothing happened". */
+.connectPulse {
+  animation: connectPulseFlash 1.2s ease-out 1;
+}
+
+@keyframes connectPulseFlash {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(247, 88, 1, 0);
+  }
+  25% {
+    box-shadow: 0 0 0 4px rgba(247, 88, 1, 0.45);
+  }
+  60% {
+    box-shadow: 0 0 0 6px rgba(247, 88, 1, 0.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .connectPulse {
+    animation: none;
+    outline: 2px solid rgba(247, 88, 1, 0.6);
+    outline-offset: 2px;
+  }
+}
+
 .statIcon {
   width: 28px;
   height: 28px;
