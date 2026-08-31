@@ -27,7 +27,12 @@ const GEO_SEARCH_DEBOUNCE_MS = 350;
 // block on a missing place (the Muhurat CTA does) need to put the cursor back in
 // this field when they say so, otherwise the message names a control the user
 // then has to go hunting for.
-const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled, dropUp = false, inputRef }) => {
+// `reopenSignal` is an incrementing counter. Any change to it re-opens the
+// suggestion list for whatever is currently typed, and re-runs the query if the
+// list is empty. Callers that block submission on a missing pick use this so the
+// suggestions they are telling the user to choose from are actually on screen —
+// see the note on the effect below.
+const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled, dropUp = false, inputRef, reopenSignal = 0 }) => {
   const [triggerGeoSearch, { data, isFetching, isError }] = useLazyGeoSearchQuery();
   const [open, setOpen] = useState(false);
   const selectionMade = useRef(false); // Track if a place is selected
@@ -140,6 +145,46 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled,
       setOpen(false);
     }
   };
+
+  /*
+    Re-open the list on demand.
+
+    Coordinates are only ever set by picking a suggestion, so a caller that finds
+    latitude/longitude missing tells the user to "select a valid location from the
+    dropdown". That instruction is worthless if no dropdown is showing, and until
+    this existed none reliably was: the caller's only lever was focusing the input
+    and letting the `onFocus` handler below re-open as a side effect — but
+    `focus()` does not fire a focus event on an element that already has focus,
+    which is exactly the state a mobile visitor is in when they tap a submit
+    button without the field being blurred first. So the message named a control
+    that was not on screen, and the button got tapped again.
+
+    Clarity, mobile, Instagram referral: repeated taps on "Continue & Get ₹250
+    Bonus", resolving only once the visitor got a suggestion list up and picked
+    Agartala, Tripura.
+
+    Also re-issues the query when there is nothing to show — the debounce may
+    have been cut short by the submit, leaving an empty list behind.
+  */
+  useEffect(() => {
+    if (!reopenSignal) return;
+    const query = (value || "").trim();
+    if (query.length < 2) return;
+
+    selectionMade.current = false;
+    setOpen(true);
+
+    const haveResults = Array.isArray(data) && data.length > 0;
+    if (!haveResults || lastQueryRef.current !== query) {
+      clearTimeout(debounceRef.current);
+      lastQueryRef.current = query;
+      setSearchPending(false);
+      triggerGeoSearch(query);
+    }
+    // Deliberately keyed on the signal alone: this must fire when the caller says
+    // so, not when `value` or `data` happen to change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reopenSignal]);
 
   const handleSelect = (item) => {
     const lat = Number(item?.coordinates?.[0]);

@@ -145,6 +145,42 @@
   border-color: transparent;
 }
 
+/*
+ * The tile whose request is in flight. Not `disabled` for the same reason as
+ * above — the tap still needs to reach the handler so a repeat can be answered —
+ * so this is purely the visible state: the tile that was tapped is lit and its
+ * price line reads "Connecting…".
+ */
+.optionCard.connecting {
+  border-color: #f75801;
+  background: rgba(247, 88, 1, 0.06);
+}
+
+/* Why an attempt didn't start, shown inside the sheet rather than in a toast.
+   See ConnectAstrologerPopup.jsx. */
+.blockedNote {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #b45309;
+  background: rgba(247, 88, 1, 0.08);
+  border: 1px solid rgba(247, 88, 1, 0.25);
+  border-radius: 8px;
+  padding: 10px 12px;
+  animation: blockedNoteIn 0.18s ease-out;
+}
+
+@keyframes blockedNoteIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .iconCircle {
   width: 64px;
   height: 64px;

@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { useParams, Link } from "react-router-dom";
 import { LiveListProvider } from "../../../../../context/LiveListContext";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
@@ -43,9 +43,19 @@ const EMPTY_STATE_POLL_MS = 30000;
 // tapped once at 00:14 to no effect, and was gone by 00:15 — 15 seconds, one
 // page, one click.
 //
-// Five seconds is long enough that a normal connection never sees this, and
-// short enough to catch someone before they give up.
-const LOADING_ESCAPE_MS = 5000;
+// Was five seconds, chosen against a session that gave up at 00:15. That set the
+// bar too low: Clarity has since recorded a desktop visitor who clicked "Live"
+// in the nav at 05:14 and hid the tab at 05:22 — the entire visit to this route
+// was eight seconds, and it was the only click in a ten-minute session. A 5s
+// gate leaves roughly three seconds of actionable screen in a visit that short,
+// and the same user ID shows the pattern twice.
+//
+// 2.5s still clears a normal join: the live-list request and the Agora chunk are
+// both kicked off together at the top of fetchLives, and a warm connection
+// resolves them well inside a second, so the escape UI stays unseen in the
+// common case. It only surfaces when the wait is already abnormal — which is
+// exactly when the visitor is deciding whether to leave.
+const LOADING_ESCAPE_MS = 2500;
 
 /*
  * A loading state that grows an escape hatch if it outstays its welcome.
@@ -125,7 +135,9 @@ const LivePlayerPage = () => {
 
     const savedSession = restoreViewerSession();
 
-    getAstrologerLiveList().then((res) => {
+    // Returned so callers can react when the check finishes — the manual
+    // "Check again" button needs to know when to stop saying "Checking…".
+    return getAstrologerLiveList().then((res) => {
       const data = res.data?.data || [];
 
       // dedupe channels
@@ -177,6 +189,7 @@ const LivePlayerPage = () => {
       setLives(liveList);
       setLoadFailed(false);
       if (!silent) setIsLoading(false);
+      return liveList.length;
     }).catch(() => {
       // The failure used to be indistinguishable from "nobody is live": both
       // ended with an empty list and a screen that explained neither.
@@ -184,12 +197,54 @@ const LivePlayerPage = () => {
         setLoadFailed(true);
         setIsLoading(false);
       }
+      return null;
     });
   };
 
   // Argument-free wrapper — safe to hand directly to onClick. See fetchLives.
   const loadLives = () => {
     fetchLives();
+  };
+
+  /*
+    Result of the last manual "Check again", so the button can report back.
+
+    That button was `onClick={loadLives}`, i.e. a NON-silent refetch: it set
+    isLoading, which unmounts the "Nobody is live right now" card and swaps in
+    LiveLoadingGate. When the list came back empty again — the overwhelmingly
+    common case, since that is why the card is on screen — the identical card
+    returned. So the whole visible effect of the tap was a spinner flash
+    resolving to the exact screen the user started on, with nothing stating that
+    a check had run or what it found.
+
+    Clarity recorded the predictable outcome: a mobile visitor from Google, on
+    this page at 04:27, tapping "Check again" repeatedly. A person who cannot
+    tell whether a button fired presses it again, and the heuristic scores a
+    transient flash back to an identical DOM as a dead click.
+
+    The re-check is now silent, so the card stays put instead of flickering, and
+    the outcome is written next to the button. `seq` increments per check and
+    keys the message, so a second tap that finds nothing new still remounts the
+    line and replays its animation rather than rendering an identical string.
+  */
+  const [checking, setChecking] = useState(false);
+  const [checkResult, setCheckResult] = useState(null);
+  const checkSeqRef = useRef(0);
+
+  const handleCheckAgain = () => {
+    if (checking) return;
+    setChecking(true);
+    fetchLives({ silent: true })
+      .then((count) => {
+        checkSeqRef.current += 1;
+        // A non-zero count unmounts this card entirely (the player takes over),
+        // so the only outcomes worth wording are "still none" and "check failed".
+        setCheckResult({
+          seq: checkSeqRef.current,
+          failed: count === null,
+        });
+      })
+      .finally(() => setChecking(false));
   };
 
   useEffect(() => {
@@ -309,13 +364,35 @@ const LivePlayerPage = () => {
             call with an astrologer who is online now.
           </p>
           <div className={styles.gateActions}>
-            <button type="button" className={styles.gatePrimary} onClick={loadLives}>
-              Check again
+            {/* Never `disabled` while checking: a disabled button swallows the
+                tap outright, which is the failure mode this whole change exists
+                to remove. aria-busy states it instead, and handleCheckAgain
+                ignores re-entry. */}
+            <button
+              type="button"
+              className={styles.gatePrimary}
+              onClick={handleCheckAgain}
+              aria-busy={checking}
+            >
+              {checking ? "Checking…" : "Check again"}
             </button>
             <Link to="/astrologers" className={styles.gateSecondary}>
               See who&apos;s online
             </Link>
           </div>
+          {/* Outcome of the tap, next to the button that made it — see
+              handleCheckAgain. Keyed on seq so a repeat check replays. */}
+          {checkResult && !checking && (
+            <p
+              key={checkResult.seq}
+              className={styles.gateCheckResult}
+              role="status"
+            >
+              {checkResult.failed
+                ? "Couldn't reach the live list just now — check your connection and try again."
+                : "Checked just now — still nobody live. We'll bring the stream up automatically the moment someone starts."}
+            </p>
+          )}
         </div>
       </div>
     );
