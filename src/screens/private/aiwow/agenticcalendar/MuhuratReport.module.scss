@@ -259,6 +259,27 @@ $panel: rgba(255, 255, 255, 0.72);
   white-space: nowrap;
 }
 
+/* "Passed" chip on a window whose time has already gone by today. Neutral grey,
+   pushed to the row's end. */
+.passedChip {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #eef0f3;
+  color: #6b7280;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Fade a passed window so it reads as no longer actionable. */
+.slotPassed {
+  opacity: 0.6;
+}
+
 .scoreChip {
   background: #fff;
   border: 1px solid rgba(191, 118, 66, 0.28);
@@ -559,6 +580,11 @@ $panel: rgba(255, 255, 255, 0.72);
   font-size: 0.8rem;
   font-weight: 700;
   text-decoration: none;
+  /* .actionTertiary is a <button> now — match the sibling <a> links. */
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .actionPrimary {
@@ -575,6 +601,8 @@ $panel: rgba(255, 255, 255, 0.72);
 .actionTertiary {
   background: #fdece2;
   color: $brand-dark;
+  /* Temporarily hidden — "Ask AI Pandit". Remove this line to bring it back. */
+  display: none;
 }
 
 /* Download moved into .cardTools as an icon button (see the design), so the

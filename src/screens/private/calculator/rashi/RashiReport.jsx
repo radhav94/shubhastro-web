@@ -1,17 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
-  Calendar,
   ChevronRight,
   Clock,
+  Crown,
+  Download,
   Gem,
   MapPin,
   Moon,
   Phone,
+  Share2,
   Sparkles,
   Star,
-  User,
 } from "lucide-react";
 import heroFlourish from "../../../../assets/images/rashi/decor/hero-flourish.png";
 import heroFlourishLeft from "../../../../assets/images/rashi/decor/hero-flourish-left.png";
@@ -30,12 +31,19 @@ import cardPersonality from "../../../../assets/images/rashi/decor/card-personal
 import cardStrengths from "../../../../assets/images/rashi/decor/card-strengths.png";
 import cardGrowth from "../../../../assets/images/rashi/decor/card-growth.png";
 import cardLove from "../../../../assets/images/rashi/decor/card-love.png";
+import detailCardBg from "../../../../assets/images/rashi/decor/detail-card-bg.png";
+import detailUserIcon from "../../../../assets/images/rashi/icons/detail-user.png";
+import detailTimeIcon from "../../../../assets/images/rashi/icons/detail-time.png";
+import detailCalendarIcon from "../../../../assets/images/rashi/icons/detail-calendar.png";
+import detailPlaceIcon from "../../../../assets/images/rashi/icons/detail-place.png";
+import careerArt from "../../../../assets/images/rashi/decor/career-art.png";
 import { BsChatDots } from "react-icons/bs";
 import { useGetRashiCalQuery } from "../../../../redux/api/calculator/calcApi";
 import CalcReportLoader from "../CalcReportLoader";
 import styles from "./RashiReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import TTSButton from "../../../../component/UI/TTSButton";
+import { Toast } from "../../../../component";
 import { zodiacSignImages } from "../../horoscope/zodiac";
 import { rashiDecorTiles } from "../../../../utils/rashiImages";
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
@@ -155,7 +163,7 @@ const DayRating = ({ rating }) => {
  * single sentences for strengths/growth areas but the design shows them as
  * bullets, so render whichever arrives instead of assuming one shape.
  */
-const InsightCard = ({ icon, decor, title, lines, variant }) => {
+const InsightCard = ({ icon, decor, title, lines, variant, cornerArt }) => {
   const items = toLines(lines);
   if (!items.length) return null;
   return (
@@ -178,6 +186,11 @@ const InsightCard = ({ icon, decor, title, lines, variant }) => {
           ))}
         </ul>
       )}
+      {/* Optional sign artwork tucked into the bottom-right corner. Shown only on
+          mobile (see .cardCornerArt) where the hero's own artwork is hidden. */}
+      {cornerArt && (
+        <ArtImage remote={cornerArt} className={styles.cardCornerArt} />
+      )}
     </section>
   );
 };
@@ -185,7 +198,18 @@ const InsightCard = ({ icon, decor, title, lines, variant }) => {
 const RashiReport = () => {
   const navigate = useNavigate();
   const stored = useSelector(selectCalculatorData("rashi_moon_sign"));
-  const { data, isLoading } = useGetRashiCalQuery(stored, { skip: !stored });
+
+  // The report is for signed-in users only. A guest who lands here directly
+  // (e.g. via a bookmarked URL) is sent back to the calculator, where the
+  // sign-up popup is shown on submit.
+  const isLoggedIn = Boolean(localStorage.getItem("shubhtalk_customer_token"));
+  useEffect(() => {
+    if (!isLoggedIn) navigate("/rashi-calculator", { replace: true });
+  }, [isLoggedIn, navigate]);
+
+  const { data, isLoading } = useGetRashiCalQuery(stored, {
+    skip: !stored || !isLoggedIn,
+  });
 
   const response = data?.response;
   const enriched = response?.enriched;
@@ -271,18 +295,45 @@ const RashiReport = () => {
   ].filter((c) => c.value);
 
   const personalDetails = [
-    { icon: User, label: "Name", value: stored?.name },
-    { icon: Clock, label: "Time of Birth", value: formatTime(stored?.tob) },
-    { icon: Calendar, label: "Date of Birth", value: formatDate(stored?.dob) },
-    { icon: MapPin, label: "Place of Birth", value: stored?.place },
+    { icon: detailUserIcon, label: "Name", value: stored?.name },
+    { icon: detailTimeIcon, label: "Time of Birth", value: formatTime(stored?.tob) },
+    { icon: detailCalendarIcon, label: "Date of Birth", value: formatDate(stored?.dob) },
+    { icon: detailPlaceIcon, label: "Place of Birth", value: stored?.place },
   ].filter((d) => d.value);
+
+  // Share the report via the native share sheet, falling back to copying the URL.
+  const handleShare = async () => {
+    const shareData = {
+      title: `${stored?.name ? stored.name + "'s " : ""}Rashi Report`,
+      text: moonSign ? `My moon sign is ${moonSign}. Check your Rashi report on ShubhAstro.` : "Check your Rashi report on ShubhAstro.",
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+      await navigator.clipboard.writeText(window.location.href);
+      Toast.success("Link copied to clipboard");
+    } catch {
+      // User dismissed the share sheet, or the API is unavailable — ignore.
+    }
+  };
+
+  // No PDF pipeline on this calculator report, so use the browser's print
+  // dialog (which offers "Save as PDF").
+  const handleDownload = () => window.print();
 
   return (
     <div className={styles.wrapper}>
       <CalcBackButton />
 
       <div className={styles.layout}>
-        <div className={styles.main}>
+        {/* Header + hero live in their own group so that on mobile the sidebar
+            ("Want to know more") can sit directly beneath the hero, above the
+            Today strip and the rest of the report. On desktop this group sits
+            in the left column above .main. */}
+        <div className={styles.topGroup}>
           <header className={styles.pageHeader}>
             {/* Decorative only — the zodiac tiles carry no information, so they
                 are aria-hidden and sit behind the copy rather than beside it. */}
@@ -312,69 +363,77 @@ const RashiReport = () => {
           {moonSign && (
             <section className={styles.hero}>
               {/*
-                Coin. When the design's own coin export is present it is used as
-                a plain image. Otherwise the gold disc is drawn in CSS with the
-                repo's zodiac glyph on top — that art is already correctly mapped
-                per sign, so this is right for all twelve signs today rather than
-                only for whichever coin files have been named.
+                Top row: coin beside the sign header. Grouped so that on mobile
+                the coin + badge + sign name stay on one line while the meta and
+                attribute blocks below each take the card's full width.
               */}
-              {hero.coin && (
-                <div
-                  className={`${styles.heroCoinWrap} ${hero.coinIsArt ? "" : styles.heroCoinMinted}`}
-                >
-                  <img
-                    src={hero.coin}
-                    alt=""
-                    className={styles.heroCoin}
-                    onError={() => setSignLogoFailed(true)}
-                  />
-                </div>
-              )}
+              <div className={styles.heroTop}>
+                {/*
+                  Coin. When the design's own coin export is present it is used as
+                  a plain image. Otherwise the gold disc is drawn in CSS with the
+                  repo's zodiac glyph on top — that art is already correctly mapped
+                  per sign, so this is right for all twelve signs today rather than
+                  only for whichever coin files have been named.
+                */}
+                {hero.coin && (
+                  <div
+                    className={`${styles.heroCoinWrap} ${hero.coinIsArt ? "" : styles.heroCoinMinted}`}
+                  >
+                    <img
+                      src={hero.coin}
+                      alt=""
+                      className={styles.heroCoin}
+                      onError={() => setSignLogoFailed(true)}
+                    />
+                  </div>
+                )}
 
-              {/* Sign block */}
-              <div className={styles.heroSignBlock}>
-                <span className={styles.heroBadge}>
-                  <Moon size={12} aria-hidden="true" /> Your Moon Sign
-                </span>
-
-                <div className={styles.heroSignRow}>
-                  <h2 className={styles.heroSign}>{moonSign}</h2>
-                  <span className={styles.heroTts}>
-                    <TTSButton text={ttsScript} />
+                {/* Sign header — badge + sign name + read-aloud, with the
+                    Nakshatra / Moon / Dasha meta stacked directly beneath. */}
+                <div className={styles.heroSignHeader}>
+                  <span className={styles.heroBadge}>
+                    <Moon size={12} aria-hidden="true" /> Your Moon Sign
                   </span>
-                </div>
 
-                <dl className={styles.heroMeta}>
-                  {e.nakshatra && (
-                    <div>
-                      <dt>
-                        <MapPin size={13} aria-hidden="true" />
-                        {e.nakshatraPada ? `Pada ${e.nakshatraPada}` : "Nakshatra"}
-                      </dt>
-                      <dd>{e.nakshatra} Nakshatra</dd>
-                    </div>
-                  )}
-                  {e.moonDegree && (
-                    <div>
-                      <dt>
-                        <Moon size={13} aria-hidden="true" />
-                        Moon at
-                      </dt>
-                      <dd>
-                        {e.moonDegree} {moonSign}
-                      </dd>
-                    </div>
-                  )}
-                  {formatDasha(e.currentDasha) && (
-                    <div>
-                      <dt>
-                        <Clock size={13} aria-hidden="true" />
-                        Current Dasha
-                      </dt>
-                      <dd>{formatDasha(e.currentDasha)}</dd>
-                    </div>
-                  )}
-                </dl>
+                  <div className={styles.heroSignRow}>
+                    <h2 className={styles.heroSign}>{moonSign}</h2>
+                    <span className={styles.heroTts}>
+                      <TTSButton text={ttsScript} />
+                    </span>
+                  </div>
+
+                  <dl className={styles.heroMeta}>
+                    {e.nakshatra && (
+                      <div>
+                        <dt>
+                          <MapPin size={13} aria-hidden="true" />
+                          {e.nakshatraPada ? `Pada ${e.nakshatraPada}` : "Nakshatra"}
+                        </dt>
+                        <dd>{e.nakshatra} Nakshatra</dd>
+                      </div>
+                    )}
+                    {e.moonDegree && (
+                      <div>
+                        <dt>
+                          <Moon size={13} aria-hidden="true" />
+                          Moon at
+                        </dt>
+                        <dd>
+                          {e.moonDegree} {moonSign}
+                        </dd>
+                      </div>
+                    )}
+                    {formatDasha(e.currentDasha) && (
+                      <div>
+                        <dt>
+                          <Clock size={13} aria-hidden="true" />
+                          Current Dasha
+                        </dt>
+                        <dd>{formatDasha(e.currentDasha)}</dd>
+                      </div>
+                    )}
+                  </dl>
+                </div>
               </div>
 
               {/* Attributes */}
@@ -419,18 +478,20 @@ const RashiReport = () => {
               <ArtImage remote={hero.art} className={styles.heroArt} />
             </section>
           )}
+        </div>
 
+        <div className={styles.main}>
           {/* TODAY STRIP */}
           {(e.todayTransit || e.dayRating || e.luckyTime) && (
             <section className={styles.todayStrip}>
               {e.todayTransit && (
-                <div className={styles.todayCard}>
+                <div className={`${styles.todayCard} ${styles.todayCardWarm}`}>
                   <h3>Today for {moonSign}</h3>
                   <p>{e.todayTransit}</p>
                 </div>
               )}
               {e.dayRating != null && (
-                <div className={styles.todayCard}>
+                <div className={`${styles.todayCard} ${styles.todayCardPink}`}>
                   <h3>
                     Positive Day <DayRating rating={e.dayRating} />
                   </h3>
@@ -438,7 +499,7 @@ const RashiReport = () => {
                 </div>
               )}
               {e.luckyTime && (
-                <div className={styles.todayCard}>
+                <div className={`${styles.todayCard} ${styles.todayCardLilac}`}>
                   <h3>Lucky Time — {e.luckyTime}</h3>
                   {/* The API now says what the window is actually good for, which
                       is specific to the day's transit. The generic line is kept
@@ -485,6 +546,7 @@ const RashiReport = () => {
             title="Career"
             lines={e.snapshot?.career}
             variant="wideCard"
+            cornerArt={careerArt}
           />
 
           {/* NAKSHATRA + COMPATIBILITY */}
@@ -503,6 +565,11 @@ const RashiReport = () => {
                   {e.godImageUrl && (
                     <figure className={styles.nakshatraFigure}>
                       <ArtImage remote={e.godImageUrl} />
+                      {e.deity && (
+                        <span className={styles.deityPill}>
+                          <Crown size={15} aria-hidden="true" /> Deity: {e.deity}
+                        </span>
+                      )}
                     </figure>
                   )}
 
@@ -514,7 +581,7 @@ const RashiReport = () => {
                       </>
                     )}
                     <div className={styles.tagRow}>
-                      {e.deity && <span>Deity: {e.deity}</span>}
+                      {/* Deity is now shown as the pill over the god image. */}
                       {e.nakshatraSymbol && <span>Symbol: {e.nakshatraSymbol}</span>}
                       {e.gana && <span className={styles.tagCap}>Gana: {e.gana}</span>}
                       {toText(e.nature) && <span>Nature: {toText(e.nature)}</span>}
@@ -594,26 +661,55 @@ const RashiReport = () => {
         {/* SIDEBAR */}
         <aside className={styles.sidebar}>
           <div className={styles.sidebarInner}>
-            <h2 className={styles.sidebarTitle}>
-              Want to know more{firstName ? `, ${firstName}` : ""}?
-            </h2>
+            <div className={styles.sidebarHead}>
+              <span className={styles.sidebarHeadIcon} aria-hidden="true">
+                <img src="/images/mobile-shubh-astro-logo.svg" alt="" />
+              </span>
+              <h2 className={styles.sidebarTitle}>
+                Want to know more{firstName ? `, ${firstName}` : ""}?
+              </h2>
+              <div className={styles.sidebarHeadActions}>
+                <button
+                  type="button"
+                  className={styles.sidebarIconBtn}
+                  onClick={handleDownload}
+                  aria-label="Download report"
+                  title="Download"
+                >
+                  <Download size={16} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className={styles.sidebarIconBtn}
+                  onClick={handleShare}
+                  aria-label="Share report"
+                  title="Share"
+                >
+                  <Share2 size={16} aria-hidden="true" />
+                </button>
+              </div>
+            </div>
 
             {personalDetails.length > 0 && (
-              <div className={styles.detailsCard}>
+              <div
+                className={styles.detailsCard}
+                style={{ backgroundImage: `url(${detailCardBg})` }}
+              >
                 <h3>Personal Details</h3>
                 <dl>
-                  {personalDetails.map((detail) => {
-                    const Icon = detail.icon;
-                    return (
-                      <div key={detail.label}>
-                        <dt>
-                          <Icon size={13} aria-hidden="true" />
-                          {detail.label}
-                        </dt>
-                        <dd>{detail.value}</dd>
-                      </div>
-                    );
-                  })}
+                  {personalDetails.map((detail) => (
+                    <div key={detail.label}>
+                      <img
+                        src={detail.icon}
+                        alt=""
+                        aria-hidden="true"
+                        className={styles.detailIcon}
+                      />
+                      <span className={styles.detailText}>
+                        {detail.label} : {detail.value}
+                      </span>
+                    </div>
+                  ))}
                 </dl>
               </div>
             )}
@@ -650,9 +746,13 @@ const RashiReport = () => {
               >
                 <BsChatDots size={15} aria-hidden="true" /> Chat with astrologer
               </a>
-              <Link to="/ai-wow" className={styles.actionTertiary}>
-                <Sparkles size={15} aria-hidden="true" /> Ask Shubh AI · Free
-              </Link>
+              <button
+                type="button"
+                className={styles.actionTertiary}
+                onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask"))}
+              >
+                <Sparkles size={15} aria-hidden="true" /> Ask AI Pandit
+              </button>
             </div>
 
             <button
@@ -664,6 +764,32 @@ const RashiReport = () => {
             </button>
           </div>
         </aside>
+      </div>
+
+      {/* Mobile-only fixed action bar. The sidebar's Call/Chat buttons are
+          hidden on mobile; these pinned buttons take their place so the two
+          primary actions stay reachable while scrolling the report. */}
+      <div className={styles.mobileActionBar}>
+        <a
+          href="/chat-with-astrologers"
+          className={styles.mobileActionChat}
+          onClick={(event) => {
+            event.preventDefault();
+            recommendation.open("chat");
+          }}
+        >
+          <BsChatDots size={16} aria-hidden="true" /> Chat with astrologer
+        </a>
+        <a
+          href="/astrologers"
+          className={styles.mobileActionCall}
+          onClick={(event) => {
+            event.preventDefault();
+            recommendation.open("audio");
+          }}
+        >
+          <Phone size={16} aria-hidden="true" /> Call an astrologer
+        </a>
       </div>
 
       <RecommendedAstrologersModal

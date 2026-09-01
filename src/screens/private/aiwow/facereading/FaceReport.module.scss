@@ -150,7 +150,7 @@ $hair: rgba(191, 118, 66, 0.16);
   flex-shrink: 0;
   margin: 0;
   width: 296px;
-  min-height: 340px;
+  min-height: 296px;
   /*
     The bottom padding reserves the badge's row. The badge is positioned
     absolutely, so it does not take part in centring — without that reserved
@@ -768,6 +768,12 @@ $hair: rgba(191, 118, 66, 0.16);
   font-size: 0.8rem;
   font-weight: 700;
   text-decoration: none;
+  /* .actionTertiary is a <button> now — keep it visually identical to the
+     sibling <a> action links. */
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .actionPrimary {
@@ -784,6 +790,8 @@ $hair: rgba(191, 118, 66, 0.16);
 .actionTertiary {
   background: #fdece2;
   color: $brand-dark;
+  /* Temporarily hidden — "Ask AI Pandit". Remove this line to bring it back. */
+  display: none;
 }
 
 

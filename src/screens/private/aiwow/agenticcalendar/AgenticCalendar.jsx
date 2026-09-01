@@ -275,7 +275,8 @@ const AgenticCalendar = () => {
 
   const handleAddCustom = () => {
     clearNavState();
-    const trimmed = customInput.trim();
+    // Letters/spaces only — drop any stray digits/symbols and collapse spaces.
+    const trimmed = customInput.replace(/[^\p{L}\p{M}\s]/gu, '').replace(/\s+/g, ' ').trim();
     if (trimmed && !allOccasions.includes(trimmed)) {
       setCustomOccasions((prev) => [...prev, trimmed]);
       setSelectedOccasions((prev) => [...prev, trimmed]);
@@ -309,8 +310,13 @@ const AgenticCalendar = () => {
         fromDate = formatDate(customFromDate);
         toDate = customToDate ? formatDate(customToDate) : fromDate;
       } else if (selectedPeriod === 'Today') {
+        // "Today" spans today → tomorrow (valid forward range) so the API
+        // returns both days' windows. The report puts today's under "Favorable
+        // Muhurats" and tomorrow's under "Next Favorable Windows".
         fromDate = formatDate(today);
-        toDate = fromDate;
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        toDate = formatDate(tomorrow);
       } else if (selectedPeriod === 'Tomorrow') {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -606,6 +612,7 @@ const AgenticCalendar = () => {
                 customOccasions={customOccasions}
                 locationLabel={locationValue}
                 onDownload={handleDownloadClick}
+                isTodayView={selectedPeriod === 'Today' && !customFromDate}
               />
             </div>
           )}
@@ -727,7 +734,12 @@ const AgenticCalendar = () => {
               className={styles.modalInput}
               placeholder="e.g., House Warming"
               value={customInput}
-              onChange={(e) => { if (e.target.value.length <= 30) setCustomInput(e.target.value); }}
+              onChange={(e) => {
+                // Occasion names are letters/spaces only — strip digits and
+                // special characters as they are typed (no numbers, no symbols).
+                const cleaned = e.target.value.replace(/[^\p{L}\p{M}\s]/gu, '');
+                if (cleaned.length <= 30) setCustomInput(cleaned);
+              }}
               maxLength={30}
               autoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleAddCustom()}
