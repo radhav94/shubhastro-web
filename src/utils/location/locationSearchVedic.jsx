@@ -282,9 +282,68 @@ const LocationSearch = ({ value, onChange, onPlaceSelect, placeholder, disabled,
             </div>
           )}
 
+          {/*
+            Nothing matched.
+
+            This was the bare string "No results", and it is the harshest dead end
+            in this component: picking a suggestion is the ONLY way latitude and
+            longitude get set, and every submit handler that uses this field
+            refuses to continue without them. So two words with no route forward
+            leave the visitor unable to finish the form at all — while the
+            `isError` branch directly above, a strictly less final situation, gets
+            both an explanation and a button.
+
+            Clarity, Instagram mobile: a visitor filling the signup form produced a
+            dead click on "No results" at 00:01:22, then kept going for another six
+            minutes — 61 clicks, one page, registration never completed. This row
+            is the only thing in the dropdown when it shows, so it is what gets
+            tapped, exactly as the "Searching…" note above predicts.
+
+            The endpoint is `geo-search-advanced?city=` — it matches a city, not a
+            full address. So the single most useful thing to offer is a retry with
+            just the first comma-separated segment, which is what someone typing
+            "Surajpur, Chhattisgarh" needs. Offered only when there is actually a
+            narrower query to try, so the button never appears as a no-op.
+          */}
           {!searching && !isError && results.length === 0 && (
             <div className={styles.noResult} role="status" aria-live="polite">
-              No results
+              {(() => {
+                const searched = lastQueryRef.current.trim();
+                const firstSegment = searched.split(",")[0].trim();
+                const canNarrow =
+                  firstSegment.length >= 2 && firstSegment.length < searched.length;
+
+                return (
+                  <>
+                    No matches{searched ? ` for “${searched}”` : ""}. Search by city
+                    name and check the spelling.
+                    {canNarrow && (
+                      <>
+                        {" "}
+                        <button
+                          type="button"
+                          className={styles.retryBtn}
+                          onClick={() => {
+                            // Same guards as the error retry: cancel any queued
+                            // keystroke search so the two cannot race.
+                            clearTimeout(debounceRef.current);
+                            setSearchPending(false);
+                            selectionMade.current = false;
+                            // Put the narrowed text in the field too, so what is
+                            // searched and what is shown stay in step — and so a
+                            // further edit starts from the working query.
+                            onChange({ target: { value: firstSegment } });
+                            lastQueryRef.current = firstSegment;
+                            triggerGeoSearch(firstSegment);
+                          }}
+                        >
+                          Search “{firstSegment}” instead
+                        </button>
+                      </>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )}
 
