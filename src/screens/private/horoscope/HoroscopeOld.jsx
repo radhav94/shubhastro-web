@@ -818,9 +818,26 @@ const HoroscopeOld = () => {
                 
                 <div className={`overview-cards-grid ${(activeTab === 'This Week' || activeTab === 'This Year') ? 'three-column' : ''}`}>
                   {currentContent.overviewSections.map((section, index) => {
-                    const { text: truncatedText, isTruncated } = activeTab === 'This Year' 
-                      ? truncateToWords(section.content, 25) 
-                      : { text: section.content, isTruncated: false };
+                    /*
+                      Daily/weekly overview cards used to render the full
+                      category text with no truncation, but the card has a fixed
+                      height (180px desktop, 200px tablet) with overflow:hidden —
+                      so anything longer was clipped with no way to read the
+                      rest. Only the yearly tab offered "show more". Clarity
+                      session 156r2de (03:16 PM Sep 1, desktop) ended on the
+                      Libra daily page with rage clicks on the horoscope text
+                      between 11:19 and 11:35 — clicking clipped text expecting
+                      it to expand, on the one tab where nothing did.
+
+                      Truncate daily/weekly the same way, so every clipped card
+                      gets the same "show more" that opens the full single
+                      category view (handleShowMore). The word limit is generous
+                      enough that short categories still render whole and never
+                      show the link.
+                    */
+                    const { text: truncatedText, isTruncated } = activeTab === 'This Year'
+                      ? truncateToWords(section.content, 25)
+                      : truncateToWords(section.content, 40);
                     
                     return (
                       <div key={index} className="overview-card" ref={el => overviewCardRefs.current[index] = el}>
@@ -843,13 +860,18 @@ const HoroscopeOld = () => {
                                 {paragraph}
                                 {isTruncated && pIndex === arr.length - 1 && (
                                   <>
-                                    ...
-                                    <span 
+                                    {'... '}
+                                    {/* A real <button>, not a click-only <span>:
+                                        keyboard reachable and announced. type is
+                                        "button" so it never submits an ancestor
+                                        form. */}
+                                    <button
+                                      type="button"
                                       className="show-more-link"
                                       onClick={() => handleShowMore(categories.find(c => c.label === section.title)?.id || section.title)}
                                     >
                                       show more
-                                    </span>
+                                    </button>
                                   </>
                                 )}
                               </p>
@@ -867,8 +889,15 @@ const HoroscopeOld = () => {
                 {currentContent.content.split('\n\n').map((paragraph, index) => (
                   <p key={index}>{paragraph}</p>
                 ))}
-                {cameFromOverview && activeTab === 'This Year' && activeCategory !== 'overview' && (
-                  <span 
+                {/* Return to overview after a "show more". Was gated on
+                    activeTab === 'This Year', but now that daily/weekly cards
+                    truncate and open a category too, they need the same way
+                    back — without it the visitor is stranded on the single
+                    category with no route to the other cards. A <button> for
+                    the same keyboard/AT reasons as show-more. */}
+                {cameFromOverview && activeCategory !== 'overview' && (
+                  <button
+                    type="button"
                     className="show-less-link"
                     onClick={() => {
                       setCameFromOverview(false);
@@ -881,7 +910,7 @@ const HoroscopeOld = () => {
                     }}
                   >
                     Show Less
-                  </span>
+                  </button>
                 )}
               </div>
             )}
