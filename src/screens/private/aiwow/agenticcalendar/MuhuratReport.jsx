@@ -599,6 +599,9 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
         onFinish={recommendation.finish}
         // Nothing discounted to show -> the close press just closes.
         onNothingToOffer={recommendation.finish}
+        // Bring the user back to this Muhurat report after the chat ends
+        // (only when the chat was started from here).
+        returnTo={`${window.location.pathname}${window.location.search}`}
       />
     </div>
   );
