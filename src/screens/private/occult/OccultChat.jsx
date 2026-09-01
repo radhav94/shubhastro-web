@@ -113,6 +113,25 @@ const OccultChat = () => {
   };
 
   const handleGenerate = async () => {
+    /*
+      Logged in but no kundli profile chosen yet.
+
+      The button used to be `disabled` in this state, which swallows the tap with
+      no response at all — the exact dead-click pattern the rest of this app has
+      been moving away from (PalmistryCamera, the login CTA, the waiting queue all
+      stay tappable and answer instead). Clarity caught it: a mobile visitor on
+      /occult tapped "Get Occult Reading" and got nothing, since the only thing
+      that would let the button fire — selecting a profile — was a separate
+      control they had not touched.
+
+      Open the profile picker, which is the actual next step. That is more useful
+      than doGenerate's "select a profile first" toast, because it takes the
+      action rather than describing it.
+    */
+    if (token && !selectedProfile) {
+      setShowProfileManager(true);
+      return;
+    }
     if (!token) {
       pendingGuestActionRef.current = (profile) => doGenerate(profile);
       setShowGuestAuthModal(true);
@@ -196,7 +215,18 @@ const OccultChat = () => {
               )}
             </>
           )}
-          <button className={styles.generateBtn} onClick={handleGenerate} disabled={((token && (!selectedProfile || isGenerating)) || guestGenerating) && !showSubscriptionModal}>
+          {/*
+            Only `disabled` while a request is genuinely in flight — the label
+            reads "Analyzing…" then, so the tap is self-explanatory. The
+            no-profile case is deliberately NOT disabled: handleGenerate now takes
+            that tap to the profile picker instead of the browser swallowing it.
+          */}
+          <button
+            className={styles.generateBtn}
+            onClick={handleGenerate}
+            disabled={((token && isGenerating) || guestGenerating) && !showSubscriptionModal}
+            aria-busy={(isGenerating || guestGenerating) && !showSubscriptionModal}
+          >
             {((isGenerating || guestGenerating) && !showSubscriptionModal) ? "Analyzing..." : "Get Occult Reading"}
           </button>
         </div>

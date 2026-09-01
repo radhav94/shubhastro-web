@@ -19,6 +19,33 @@ const FeedbackModal = ({
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
   const [isAnonymous, setAnonymous] = useState(false);
+  /*
+    Why the Submit button stopped being `disabled`.
+
+    It was `disabled={rating === 0 || loading}`. A natively disabled button fires
+    no click event at all, so tapping it did nothing whatsoever — no message, no
+    focus, nothing for the browser or the metric to register beyond a dead click.
+
+    Nothing on screen connects "Submit does nothing" to "you have not picked a
+    star". The heading asks you to rate your experience, but the stars are
+    icon-only, carry no required marker, and the review textarea is explicitly
+    labelled "(optional)" — so a visitor who writes a comment and reaches for
+    Submit has every reason to think they are done.
+
+    This modal opens by itself over whatever page you are on the moment a call
+    ends (StickyReview is mounted in HomeLayout), which is how it turns into
+    minutes of tapping. Clarity session 8pnsm2 (12:21 PM Sep 1, Meta ad, mobile)
+    joined a call at 02:02, returned to /kundli, and then produced dead clicks on
+    masked elements from 06:30 to 11:14 — this modal shows the astrologer's name,
+    which Clarity masks, so its own labels come through as masked text.
+
+    Now: the button stays tappable, is marked aria-disabled for assistive tech,
+    and a blocked tap says which step is missing. `seq` increments so a second
+    tap replays the message instead of re-rendering identical output.
+  */
+  const [hint, setHint] = useState(null);
+  const showHint = (text) =>
+    setHint((prev) => ({ text, seq: (prev?.seq || 0) + 1 }));
   const maxLength = 160;
 
   if (!open) return null;
@@ -30,6 +57,15 @@ const FeedbackModal = ({
   };
 
   const onSubmitClick = async () => {
+    if (loading) {
+      showHint("Submitting your review — one moment.");
+      return;
+    }
+    if (rating === 0) {
+      showHint("Tap a star above to rate your experience, then submit.");
+      return;
+    }
+
     /*
      * resetForm() used to run unconditionally, so a failed submit wiped the
      * rating and the review text along with it. Someone who had spent minutes
@@ -53,6 +89,7 @@ const FeedbackModal = ({
     setRating(0);
     setReview("");
     setAnonymous(false);
+    setHint(null);
   };
 
   return (
@@ -99,7 +136,11 @@ const FeedbackModal = ({
               key={i}
               type="button"
               className={`${styles.star} ${i <= rating ? styles.active : ""}`}
-              onClick={() => setRating(i)}
+              onClick={() => {
+                setRating(i);
+                // Rating was the blocker; retire the message asking for it.
+                setHint(null);
+              }}
               aria-label={`${i} star${i > 1 ? "s" : ""}`}
               aria-checked={i <= rating}
               role="radio"
@@ -140,11 +181,26 @@ const FeedbackModal = ({
           <span>Hide my name from the review</span>
         </label>
 
+        {/*
+          role="status" so the reason is announced without pulling focus off the
+          button. Keyed on `seq` so a repeated tap remounts the line — an
+          identical re-render is the one answer a dead click cannot show.
+        */}
+        {hint && (
+          <p key={hint.seq} className={styles.submitHint} role="status">
+            {hint.text}
+          </p>
+        )}
+
         {/* Figma: full-width pill button with "Submit >" */}
         <button
-          className={styles.submitBtn}
+          type="button"
+          className={`${styles.submitBtn} ${
+            rating === 0 || loading ? styles.submitBtnBlocked : ""
+          }`.trim()}
           onClick={onSubmitClick}
-          disabled={rating === 0 || loading}
+          aria-disabled={rating === 0 || loading}
+          aria-busy={loading || undefined}
         >
           {loading ? "Submitting..." : "Submit"} <ChevronRight  size={24} />
         </button>

@@ -4,6 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
+import {
+  clearedPlaceCoords,
+  validateBirthPlace,
+} from "../../../../utils/helper/birthPlaceCoords";
 import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 import styles from "./AtmakarakaCalculator.module.scss";
 import { ProfileManager } from "../../../../component/UI/Profile";
@@ -44,6 +48,18 @@ const AtmakarakaCalculator = () => {
       [key]: value,
     }));
     setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
+
+  /*
+    Typing clears the coordinates.
+
+    Only onPlaceSelect sets lat/lng, so editing a picked place kept the old
+    city's coordinates and the Atmakaraka was computed for the wrong place under
+    the right name. See birthPlaceCoords.js.
+  */
+  const handlePlaceChange = (value) => {
+    setFormData((prev) => ({ ...prev, ...clearedPlaceCoords(value) }));
+    setErrors((prev) => ({ ...prev, place: "" }));
   };
 
   const fillFromProfile = (profile) => {
@@ -89,7 +105,14 @@ const AtmakarakaCalculator = () => {
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
-    if (!formData.place) newErrors.place = "Place of birth is required";
+    // Checks the coordinates, not just the text: a hand-typed place that was
+    // never picked from the dropdown used to submit with lat: null.
+    const placeError = validateBirthPlace(
+      formData.place,
+      formData.lat,
+      formData.lng
+    );
+    if (placeError) newErrors.place = placeError;
 
     if (!formData.isTimeUnknown && !formData.tob) {
       newErrors.tob = "Time of birth is required or select unknown";
@@ -224,7 +247,7 @@ const AtmakarakaCalculator = () => {
             </label>
             <LocationSearch
               value={formData.place}
-              onChange={(e) => handleChange("place", e.target.value)}
+              onChange={(e) => handlePlaceChange(e.target.value)}
               onPlaceSelect={(location) => {
                 handleChange("place", location.address);
                 handleChange("lat", location.lat);

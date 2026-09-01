@@ -136,7 +136,18 @@ const AstroBirthForm = ({
             </label>
             <LocationSearch
               value={place}
-              onChange={(e) => onChange("place", e.target.value)}
+              /*
+                Typing clears the coordinates.
+
+                Only onPlaceSelect sets lat/lng, so editing a picked place kept
+                the old city's coordinates and the report came back for the
+                wrong place under the right name. See birthPlaceCoords.js.
+              */
+              onChange={(e) => {
+                onChange("place", e.target.value);
+                onChange("lat", null);
+                onChange("lng", null);
+              }}
               onPlaceSelect={(location) => {
                 onChange("place", location.address);
                 onChange("lat", location.lat);

@@ -319,14 +319,25 @@ const MatchMaking = () => {
             <label>Birth Place*</label>
             <LocationSearch
               value={data.place.address}
+              /*
+                Typing clears the coordinates.
+
+                Only onPlaceSelect sets lat/lng, and spreading the previous
+                place carried them over — so editing a picked city matched the
+                two charts against the old coordinates under the new name. The
+                validator below already rejects a place with no coordinates, so
+                dropping them here turns a silently wrong match into a visible
+                "select a valid location". See birthPlaceCoords.js.
+              */
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
                   [personKey]: {
                     ...prev[personKey],
                     place: {
-                      ...prev[personKey].place,
                       address: e.target.value,
+                      lat: null,
+                      lng: null,
                     },
                   },
                 }))

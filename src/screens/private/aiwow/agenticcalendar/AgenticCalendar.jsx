@@ -532,9 +532,22 @@ const AgenticCalendar = () => {
             <LocationSearch
               value={locationValue}
               placeholder="Enter your location"
+              /*
+                Editing away from the picked place drops its coordinates.
+
+                Clearing only on an empty field left a stale `locationData`
+                behind: pick Mumbai, edit the text to Pune, and the field read
+                Pune while the request still carried Mumbai's coordinates and
+                address. Unlike the calculator forms this screen does not need
+                coordinates (see `effectiveLocation` above), so dropping them
+                just falls back to the browser location or omits lat/lon.
+              */
               onChange={(e) => {
-                setLocationValue(e.target.value);
-                if (!e.target.value.trim()) setLocationData(null);
+                const typed = e.target.value;
+                setLocationValue(typed);
+                setLocationData((prev) =>
+                  prev && prev.address === typed ? prev : null
+                );
               }}
               onPlaceSelect={({ address, lat, lng }) => {
                 setLocationValue(address);
