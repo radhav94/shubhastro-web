@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { IoClose } from "react-icons/io5";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { BsChatDots } from "react-icons/bs";
@@ -152,8 +153,13 @@ const RecommendedAstrologersModal = ({
   return (
     <>
       {/* Hidden, not unmounted, while the kundli picker is up: unmounting would
-          tear down the connect hook mid-flow. */}
-      {!openModal.kundli && (
+          tear down the connect hook mid-flow.
+
+          Portaled to <body> so the fixed overlay is positioned against the
+          viewport, not a transformed/clipped ancestor in the report tree — that
+          ancestor stacking context was what let the app header paint over the
+          modal's top and pushed it off-centre. */}
+      {!openModal.kundli && createPortal(
         <div className={styles.overlay} role="dialog" aria-modal="true">
           <div className={`${styles.modal} ${isOffer ? styles.offerModal : ""}`}>
             <header className={styles.header}>
@@ -342,7 +348,8 @@ const RecommendedAstrologersModal = ({
               <span>Private &amp; Confidential</span>
             </footer>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <ProfileManager
