@@ -1,14 +1,34 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { BsChatDots } from 'react-icons/bs';
+import { MdOutlinePhoneInTalk } from 'react-icons/md';
+import { Sparkles } from 'lucide-react';
 import styles from './GemstoneResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
 import TTSButton from '../../../../component/UI/TTSButton';
 import DownloadReportModal from '../components/DownloadReportModal';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
+import RecommendedAstrologersModal from '../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal';
+import useRecommendationOffer from '../../../../utils/hooks/useRecommendationOffer';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
+
+// Detail / astrological icons provided in src/assets/gemstone-details.
+import detailIcon1 from '../../../../assets/gemstone-details/icon-1.png';
+import detailIcon2 from '../../../../assets/gemstone-details/icon-2.png';
+import detailIcon3 from '../../../../assets/gemstone-details/icon-3.png';
+import detailIcon4 from '../../../../assets/gemstone-details/icon-4.png';
+import detailIcon5 from '../../../../assets/gemstone-details/icon-5.png';
+import detailIcon6 from '../../../../assets/gemstone-details/icon-6.png';
+import detailIcon7 from '../../../../assets/gemstone-details/icon-7.png';
+import detailIcon8 from '../../../../assets/gemstone-details/icon-8.png';
+import detailIcon9 from '../../../../assets/gemstone-details/icon-9.png';
+import detailIcon10 from '../../../../assets/gemstone-details/icon-10.png';
+import detailIcon11 from '../../../../assets/gemstone-details/icon-11.png';
+import detailsHeaderIcon from '../../../../assets/gemstone-details/icon-details-header.png';
 
 const GemstoneResult = () => {
   const navigate = useNavigate();
@@ -36,6 +56,9 @@ const GemstoneResult = () => {
       setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
     }
   };
+
+  // Same two-stage recommendation popup as the Rashi / Face / Muhurat reports.
+  const recommendation = useRecommendationOffer();
 
   const reduxResult = useSelector((state) => state.aiwow.gemstone.result);
   const reduxImage = useSelector((state) => state.aiwow.gemstone.image);
@@ -104,29 +127,9 @@ const GemstoneResult = () => {
   // ─── OVERVIEW TAB ───
   const renderOverview = (d) => (
     <div className={styles.tabContent}>
-      <div className={styles.overviewRow}>
-        <div className={styles.gemstoneImageWrapper}>
-          <img src={d.image} alt="Gemstone" className={styles.gemstoneImage} />
-        </div>
-        <div className={styles.identificationCard} style={{ position: 'relative' }}>
-          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-            <TTSButton text={`Gemstone Identification. Name: ${d.identification.name || ''}. Hindi Name: ${d.identification.hindiName || ''}. Scientific: ${d.identification.scientificName || ''}. Natural: ${d.identification.isNatural ? 'Yes' : 'No'}`} />
-          </span>
-          <h3 className={styles.cardTitle}>Gemstone Identification</h3>
-          <InfoRow label="Name" value={d.identification.name} />
-          <InfoRow label="Hindi Name" value={d.identification.hindiName} />
-          <InfoRow label="Scientific" value={d.identification.scientificName} />
-          <InfoRow label="Natural" value={d.identification.isNatural ? 'Yes' : 'No'} />
-        </div>
-        <div className={styles.summaryCard} style={{ position: 'relative' }}>
-          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-            <TTSButton text={`Overall Summary. ${d.overall.summary || ''}. ${d.overall.recommendation || ''}`} />
-          </span>
-          <h3 className={styles.cardTitle}>Overall Summary</h3>
-          <p className={styles.summaryText}>{d.overall.summary}</p>
-          <p className={styles.recommendationText}>{d.overall.recommendation}</p>
-        </div>
-      </div>
+      {/* Image + identification + overall summary now live in the top banner
+          (see the render below); the Overview tab shows the personalized
+          insights only. */}
 
       {/* Personalized Insights */}
       {d.personalized && Object.keys(d.personalized).length > 0 && (
@@ -209,173 +212,186 @@ const GemstoneResult = () => {
   );
 
   // ─── DETAILS TAB ───
-  const renderDetails = (d) => (
-    <div className={styles.tabContent}>
-      <div className={styles.detailsGrid}>
-        {/* Quality */}
-        <div className={styles.detailBox} style={{ position: 'relative' }}>
-          <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-            <TTSButton text={`Quality. ${d.details.quality || 'N/A'}`} />
-          </span>
-          <h4 className={styles.boxTitle}>Quality</h4>
-          <p className={styles.boxValue}>{d.details.quality || "—"}</p>
-        </div>
+  const renderDetails = (d) => {
+    // Build the "physical detail" items from whatever the API returned so each
+    // renders as a colored-icon card with label:value rows.
+    const detailItems = [];
 
-        {/* Color */}
-        {d.details.color && (
-          <div className={styles.detailBox} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Color. Primary: ${d.details.color.primary || ''}. Secondary: ${d.details.color.secondary || ''}`} />
-            </span>
-            <h4 className={styles.boxTitle}>Color</h4>
-            <InfoRow label="Primary" value={d.details.color.primary} />
-            <InfoRow label="Secondary" value={d.details.color.secondary} />
+    if (d.details.quality) {
+      detailItems.push({
+        key: 'quality', title: 'Quality', icon: detailIcon1,
+        rows: [{ label: 'Grade', value: d.details.quality }],
+      });
+    }
+    if (d.details.color && (d.details.color.primary || d.details.color.secondary)) {
+      detailItems.push({
+        key: 'color', title: 'Color', icon: detailIcon2,
+        rows: [
+          { label: 'Primary', value: d.details.color.primary },
+          { label: 'Secondary', value: d.details.color.secondary },
+        ],
+      });
+    }
+    if (d.details.clarity && (d.details.clarity.grade || d.details.clarity.inclusions?.length)) {
+      detailItems.push({
+        key: 'clarity', title: 'Clarity', icon: detailIcon3,
+        rows: [
+          { label: 'Grade', value: d.details.clarity.grade },
+          d.details.clarity.inclusions?.length > 0
+            ? { label: 'Inclusions', value: d.details.clarity.inclusions.join(', ') }
+            : null,
+        ].filter(Boolean),
+      });
+    }
+    if (d.details.cut && (d.details.cut.shape || d.details.cut.quality)) {
+      detailItems.push({
+        key: 'cut', title: 'Cut', icon: detailIcon4,
+        rows: [
+          { label: 'Shape', value: d.details.cut.shape },
+          { label: 'Quality', value: d.details.cut.quality },
+        ],
+      });
+    }
+    if (d.details.estimatedCarat && (d.details.estimatedCarat.range || d.details.estimatedCarat.approximate)) {
+      detailItems.push({
+        key: 'carat', title: 'Carat Weight', icon: detailIcon5,
+        rows: [
+          { label: 'Range', value: d.details.estimatedCarat.range },
+          d.details.estimatedCarat.approximate
+            ? { label: 'Approx', value: `${d.details.estimatedCarat.approximate} ct` }
+            : null,
+        ].filter(Boolean),
+      });
+    }
+    if (d.details.treatment) {
+      detailItems.push({
+        key: 'treatment', title: 'Treatment', icon: detailIcon6,
+        rows: [{ label: 'Detected', value: d.details.treatment.isDetected ? 'Yes' : 'No' }],
+        desc: d.details.treatment.description,
+      });
+    }
+
+    const detailsTTS = detailItems
+      .map((it) => `${it.title}. ${it.rows.map((r) => `${r.label}: ${r.value}`).join('. ')}${it.desc ? '. ' + it.desc : ''}`)
+      .join('. ');
+
+    // Astrological property rows: colored icon + title + tinted badge + description.
+    const astroItems = [];
+    if (d.astrological.rulingPlanet) {
+      astroItems.push({
+        key: 'planet', title: 'Ruling Planet', tint: '#f59e0b', icon: detailIcon7,
+        badge: d.astrological.rulingPlanet.planet, desc: d.astrological.rulingPlanet.influence,
+      });
+    }
+    if (d.astrological.zodiacSigns) {
+      astroItems.push({
+        key: 'zodiac', title: 'Zodiac Signs', tint: '#8b5cf6', icon: detailIcon8,
+        badge: d.astrological.zodiacSigns.primary,
+        desc: d.astrological.zodiacSigns.secondary?.length > 0
+          ? `Also: ${d.astrological.zodiacSigns.secondary.join(', ')}` : '',
+      });
+    }
+    if (d.astrological.chakra) {
+      astroItems.push({
+        key: 'chakra', title: 'Chakra', tint: '#22c55e', icon: detailIcon9,
+        badge: d.astrological.chakra.name, desc: d.astrological.chakra.benefits,
+      });
+    }
+    if (d.astrological.element) {
+      astroItems.push({
+        key: 'element', title: 'Element', tint: '#ef4444', icon: detailIcon10,
+        badge: d.astrological.element, desc: '',
+      });
+    }
+    if (d.astrological.numerology) {
+      astroItems.push({
+        key: 'numerology', title: 'Numerology', tint: '#0ea5e9', icon: detailIcon11,
+        badge: String(d.astrological.numerology.number), desc: d.astrological.numerology.significance,
+      });
+    }
+
+    const astroTTS = astroItems
+      .map((it) => `${it.title}. ${it.badge}${it.desc ? '. ' + it.desc : ''}`)
+      .join('. ');
+
+    return (
+      <div className={styles.tabContent}>
+        {/* ── Details card ── */}
+        {detailItems.length > 0 && (
+          <div className={styles.detailCard}>
+            <div className={styles.detailCardHead}>
+              <h3 className={styles.detailCardTitle}>
+                <span className={styles.detailCardIcon} aria-hidden="true">
+                  <img src={detailsHeaderIcon} alt="" />
+                </span>
+                Details
+              </h3>
+              <TTSButton text={`Details. ${detailsTTS}`} />
+            </div>
+
+            <div className={styles.detailItemsGrid}>
+              {detailItems.map((it) => (
+                <div className={styles.detailItem} key={it.key}>
+                  <div className={styles.detailItemHead}>
+                    <span className={styles.detailItemIcon} aria-hidden="true">
+                      <img src={it.icon} alt="" />
+                    </span>
+                    <span className={styles.detailItemTitle}>{it.title}</span>
+                  </div>
+                  <div className={styles.detailItemRows}>
+                    {it.rows.map((r, i) => (
+                      <div className={styles.detailItemRow} key={i}>
+                        <span className={styles.detailItemLabel}>{r.label}</span>
+                        <span className={styles.detailItemValue}>{r.value || '—'}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {it.desc && <p className={styles.detailItemDesc}>{it.desc}</p>}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Clarity */}
-        {d.details.clarity && (
-          <div className={styles.detailBox} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Clarity. Grade: ${d.details.clarity.grade || ''}${d.details.clarity.inclusions?.length > 0 ? '. Inclusions: ' + d.details.clarity.inclusions.join(', ') : ''}`} />
-            </span>
-            <h4 className={styles.boxTitle}>Clarity</h4>
-            <InfoRow label="Grade" value={d.details.clarity.grade} />
-            {d.details.clarity.inclusions?.length > 0 && (
-              <InfoRow
-                label="Inclusions"
-                value={d.details.clarity.inclusions.join(", ")}
-              />
-            )}
-          </div>
-        )}
+        {/* ── Astrological Properties card ── */}
+        {astroItems.length > 0 && (
+          <div className={styles.detailCard}>
+            <div className={styles.detailCardHead}>
+              <h3 className={styles.detailCardTitle}>
+                <span className={styles.detailCardIcon} aria-hidden="true">✨</span>
+                Astrological Properties
+              </h3>
+              <TTSButton text={`Astrological Properties. ${astroTTS}`} />
+            </div>
 
-        {/* Cut */}
-        {d.details.cut && (
-          <div className={styles.detailBox} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Cut. Shape: ${d.details.cut.shape || ''}. Quality: ${d.details.cut.quality || ''}`} />
-            </span>
-            <h4 className={styles.boxTitle}>Cut</h4>
-            <InfoRow label="Shape" value={d.details.cut.shape} />
-            <InfoRow label="Quality" value={d.details.cut.quality} />
-          </div>
-        )}
-
-        {/* Carat */}
-        {d.details.estimatedCarat && (
-          <div className={styles.detailBox} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Carat Weight. Range: ${d.details.estimatedCarat.range || ''}. Approximate: ${d.details.estimatedCarat.approximate || ''} carats`} />
-            </span>
-            <h4 className={styles.boxTitle}>Carat Weight</h4>
-            <InfoRow label="Range" value={d.details.estimatedCarat.range} />
-            <InfoRow
-              label="Approx"
-              value={`${d.details.estimatedCarat.approximate} ct`}
-            />
-          </div>
-        )}
-
-        {/* Treatment */}
-        {d.details.treatment && (
-          <div className={styles.detailBox} style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-              <TTSButton text={`Treatment. Detected: ${d.details.treatment.isDetected ? 'Yes' : 'No'}. ${d.details.treatment.description || ''}`} />
-            </span>
-            <h4 className={styles.boxTitle}>Treatment</h4>
-            <InfoRow
-              label="Detected"
-              value={d.details.treatment.isDetected ? "Yes" : "No"}
-            />
-            {d.details.treatment.description && (
-              <p className={styles.boxDesc}>
-                {d.details.treatment.description}
-              </p>
-            )}
+            <div className={styles.astroList}>
+              {astroItems.map((it) => (
+                <div className={styles.astroRow} key={it.key}>
+                  <span className={styles.astroRowIcon} aria-hidden="true">
+                    <img src={it.icon} alt="" />
+                  </span>
+                  <div className={styles.astroRowBody}>
+                    <div className={styles.astroRowTop}>
+                      <span className={styles.astroRowTitle}>{it.title}</span>
+                      {it.badge && (
+                        <span
+                          className={styles.astroRowBadge}
+                          style={{ color: it.tint, background: `${it.tint}1f` }}
+                        >
+                          {it.badge}
+                        </span>
+                      )}
+                    </div>
+                    {it.desc && <p className={styles.astroRowDesc}>{it.desc}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
-      
-      {/* Astrological Section */}
-      <div className={styles.astroDetailsGrid}>
-        <h2 className={styles.SectionTitle}>Astrological Properties</h2>
-        <div className={styles.astroGrid}>
-          {d.astrological.rulingPlanet && (
-            <div className={styles.astroBox} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                <TTSButton text={`Ruling Planet. ${d.astrological.rulingPlanet.planet}. ${d.astrological.rulingPlanet.influence || ''}`} />
-              </span>
-              <h4 className={styles.boxTitle}>Ruling Planet</h4>
-              <p className={styles.boxHighlight}>
-                {d.astrological.rulingPlanet.planet}
-              </p>
-              <p className={styles.boxDesc}>
-                {d.astrological.rulingPlanet.influence}
-              </p>
-            </div>
-          )}
-
-          {d.astrological.zodiacSigns && (
-            <div className={styles.astroBox} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                <TTSButton text={`Zodiac Signs. Primary: ${d.astrological.zodiacSigns.primary || ''}${d.astrological.zodiacSigns.secondary?.length > 0 ? '. Also: ' + d.astrological.zodiacSigns.secondary.join(', ') : ''}`} />
-              </span>
-              <h4 className={styles.boxTitle}>Zodiac Signs</h4>
-              <p className={styles.boxHighlight}>
-                {d.astrological.zodiacSigns.primary}
-              </p>
-              {d.astrological.zodiacSigns.secondary?.length > 0 && (
-                <p className={styles.boxDesc}>
-                  Also: {d.astrological.zodiacSigns.secondary.join(", ")}
-                </p>
-              )}
-            </div>
-          )}
-
-          {d.astrological.chakra && (
-            <div className={styles.astroBox} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                <TTSButton text={`Chakra. ${d.astrological.chakra.name}. ${d.astrological.chakra.benefits || ''}`} />
-              </span>
-              <h4 className={styles.boxTitle}>Chakra</h4>
-              <p className={styles.boxHighlight}>
-                {d.astrological.chakra.name}
-              </p>
-              <p className={styles.boxDesc}>
-                {d.astrological.chakra.benefits}
-              </p>
-            </div>
-          )}
-
-          {d.astrological.element && (
-            <div className={styles.astroBox} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                <TTSButton text={`Element. ${d.astrological.element}`} />
-              </span>
-              <h4 className={styles.boxTitle}>Element</h4>
-              <p className={styles.boxHighlight}>{d.astrological.element}</p>
-            </div>
-          )}
-
-          {d.astrological.numerology && (
-            <div className={styles.astroBox} style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                <TTSButton text={`Numerology. Number: ${d.astrological.numerology.number}. ${d.astrological.numerology.significance || ''}`} />
-              </span>
-              <h4 className={styles.boxTitle}>Numerology</h4>
-              <p className={styles.boxHighlight}>
-                {d.astrological.numerology.number}
-              </p>
-              <p className={styles.boxDesc}>
-                {d.astrological.numerology.significance}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   // ─── ASTROLOGICAL TAB ───
   const renderAstrological = (d) => (
@@ -683,44 +699,173 @@ const GemstoneResult = () => {
       </div> */}
 
       <div className={styles.content}>
-        {gemstones.length > 1 && (
-          <div className={styles.gemstoneTabs}>
-            {gemstones.map((gemstone, index) => (
-              <button
-                key={index}
-                className={`${styles.gemstoneTab} ${selectedGemstoneIndex === index ? styles.active : ''}`}
-                onClick={() => { setSelectedGemstoneIndex(index); setActiveTab('overview'); }}
-              >
-                {gemstone.identification.name || `Gemstone ${index + 1}`}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* ── Banner ── */}
+        <div className={styles.banner}>
+          <div className={styles.bannerMain}>
+            <div className={styles.bannerBadges}>
+              <span className={styles.bannerBadge}>Gemstone Scan</span>
+              <span className={styles.bannerBadge}>Authenticity Check</span>
+              <span className={styles.bannerBadge}>Vedic Recommendation</span>
+            </div>
+            <h2 className={styles.bannerTitle}>Overall Summary</h2>
+            {currentGemstone?.overall?.recommendation && (
+              <p className={styles.bannerRecommendation}>
+                {currentGemstone.overall.recommendation}
+              </p>
+            )}
+            {currentGemstone?.overall?.summary && (
+              <p className={styles.bannerSummary}>{currentGemstone.overall.summary}</p>
+            )}
 
-        <div className={styles.tabs}>
-          {['overview', 'details', 'suitability', 'healing'].map((tab) => (
-            <button
-              key={tab}
-              className={`${styles.tab} ${activeTab === tab ? styles.active : ''}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+            <div className={styles.bannerFacts}>
+              {currentGemstone?.identification?.name && (
+                <div className={styles.bannerFact}>
+                  <span className={styles.bannerFactLabel}>Name</span>
+                  <span className={styles.bannerFactValue}>{currentGemstone.identification.name}</span>
+                </div>
+              )}
+              {currentGemstone?.identification?.hindiName && (
+                <div className={styles.bannerFact}>
+                  <span className={styles.bannerFactLabel}>Hindi Name</span>
+                  <span className={styles.bannerFactValue}>{currentGemstone.identification.hindiName}</span>
+                </div>
+              )}
+              {currentGemstone?.identification?.scientificName && (
+                <div className={styles.bannerFact}>
+                  <span className={styles.bannerFactLabel}>Scientific</span>
+                  <span className={styles.bannerFactValue}>{currentGemstone.identification.scientificName}</span>
+                </div>
+              )}
+              <div className={styles.bannerFact}>
+                <span className={styles.bannerFactLabel}>Natural</span>
+                <span className={styles.bannerFactValue}>
+                  {currentGemstone?.identification?.isNatural ? 'Yes' : 'No'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {currentGemstone?.image && (
+            <div className={styles.bannerVisual}>
+              <div className={styles.bannerImageFrame}>
+                {/* extra two corner brackets (top-right, bottom-left); the other
+                    two come from the frame's ::before/::after */}
+                <span className={styles.frameCornerTR} aria-hidden="true" />
+                <span className={styles.frameCornerBL} aria-hidden="true" />
+                <img
+                  src={currentGemstone.image}
+                  alt={currentGemstone?.identification?.name || 'Gemstone'}
+                  className={styles.bannerImage}
+                />
+                <span className={styles.scanComplete}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Stone Scan Complete
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {activeTab === 'overview' && renderOverview(currentGemstone)}
-        {activeTab === 'details' && renderDetails(currentGemstone)}
-        {/* {activeTab === 'astrological' && renderAstrological(currentGemstone)} */}
-        {activeTab === 'suitability' && renderSuitability(currentGemstone)}
-        {activeTab === 'healing' && renderHealing(currentGemstone)}
+        <div className={styles.layout}>
+          <div className={styles.main}>
+            {gemstones.length > 1 && (
+              <div className={styles.gemstoneTabs}>
+                {gemstones.map((gemstone, index) => (
+                  <button
+                    key={index}
+                    className={`${styles.gemstoneTab} ${selectedGemstoneIndex === index ? styles.active : ''}`}
+                    onClick={() => { setSelectedGemstoneIndex(index); setActiveTab('overview'); }}
+                  >
+                    {gemstone.identification.name || `Gemstone ${index + 1}`}
+                  </button>
+                ))}
+              </div>
+            )}
 
-        <button 
-          className={styles.consultButton}
-          onClick={() => navigate(PATH.privateRoutes.ASTROLOGERS_LIST.path)}
-        >
-          Consult with Expert Astrologer
-        </button>
+            <div className={styles.tabs}>
+              {[
+                { id: 'overview', label: 'Personalized Insights' },
+                { id: 'details', label: 'Details' },
+                { id: 'suitability', label: 'Suitability' },
+                { id: 'healing', label: 'Healing' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  className={`${styles.tab} ${activeTab === tab.id ? styles.active : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {activeTab === 'overview' && renderOverview(currentGemstone)}
+            {activeTab === 'details' && renderDetails(currentGemstone)}
+            {/* {activeTab === 'astrological' && renderAstrological(currentGemstone)} */}
+            {activeTab === 'suitability' && renderSuitability(currentGemstone)}
+            {activeTab === 'healing' && renderHealing(currentGemstone)}
+
+            {/* Mobile CTAs — the sticky sidebar is hidden below 1024px, so the
+                same actions are shown inline here. */}
+            <div className={styles.mobileActions}>
+              <a
+                href={PATH.privateRoutes.ASTROLOGERS_LIST.path}
+                className={styles.actionPrimary}
+                onClick={(event) => { event.preventDefault(); recommendation.open('audio'); }}
+              >
+                <MdOutlinePhoneInTalk size={15} aria-hidden="true" /> Call an astrologer
+              </a>
+              <a
+                href="/chat-with-astrologers"
+                className={styles.actionSecondary}
+                onClick={(event) => { event.preventDefault(); recommendation.open('chat'); }}
+              >
+                <BsChatDots size={14} aria-hidden="true" /> Chat with astrologer
+              </a>
+              <Link to="/ai-wow" className={styles.actionTertiary}>
+                <Sparkles size={14} aria-hidden="true" /> Ask Shubh AI · Free
+              </Link>
+            </div>
+          </div>
+
+          {/* Sticky recommendation sidebar — same Call/Chat/Ask Shubh AI popup
+              flow as the Rashi / Face / Muhurat reports. */}
+          <aside className={styles.sidebar}>
+            <div className={styles.sideCard}>
+              <p className={styles.sideKicker}>Your Gemstone</p>
+              <h3 className={styles.sideTitle}>
+                {currentGemstone?.overall?.title || currentGemstone?.identification?.name || 'Overall Summary'}
+              </h3>
+              {currentGemstone?.overall?.summary && (
+                <p className={styles.sideBody}>{currentGemstone.overall.summary}</p>
+              )}
+
+              <div className={styles.actions}>
+                {/* Real <a href> so middle-click / open-in-new-tab still reach
+                    the listing; the click opens the matched popup first. */}
+                <a
+                  href={PATH.privateRoutes.ASTROLOGERS_LIST.path}
+                  className={styles.actionPrimary}
+                  onClick={(event) => { event.preventDefault(); recommendation.open('audio'); }}
+                >
+                  <MdOutlinePhoneInTalk size={15} aria-hidden="true" /> Call an astrologer
+                </a>
+                <a
+                  href="/chat-with-astrologers"
+                  className={styles.actionSecondary}
+                  onClick={(event) => { event.preventDefault(); recommendation.open('chat'); }}
+                >
+                  <BsChatDots size={14} aria-hidden="true" /> Chat with astrologer
+                </a>
+                <Link to="/ai-wow" className={styles.actionTertiary}>
+                  <Sparkles size={14} aria-hidden="true" /> Ask Shubh AI · Free
+                </Link>
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
 
       <DownloadReportModal
@@ -738,6 +883,15 @@ const GemstoneResult = () => {
         onClose={() => setShowSubscriptionModal(false)}
         variant={subscriptionModalVariant}
         plans={subscriptionModalVariant === 'extended' ? extendedPlans : undefined}
+      />
+
+      <RecommendedAstrologersModal
+        isOpen={recommendation.isOpen}
+        variant={recommendation.stage === 'offer' ? 'offer' : 'plain'}
+        type={recommendation.type || 'chat'}
+        onDismiss={recommendation.dismiss}
+        onFinish={recommendation.finish}
+        onNothingToOffer={recommendation.finish}
       />
     </div>
     </>
