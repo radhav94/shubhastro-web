@@ -796,16 +796,14 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
               >
                 <BsChatDots size={14} aria-hidden="true" /> Chat with astrologer
               </a>
-              <Link to="/ai-wow" className={styles.actionTertiary}>
-                <Sparkles size={14} aria-hidden="true" /> Ask Shubh AI · Free
-              </Link>
-            </div>
-
-            {onDownload && (
-              <button type="button" className={styles.downloadLink} onClick={onDownload}>
-                Download report
+              <button
+                type="button"
+                className={styles.actionTertiary}
+                onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask"))}
+              >
+                <Sparkles size={14} aria-hidden="true" /> Ask AI Pandit
               </button>
-            )}
+            </div>
           </div>
         </aside>
       </div>
