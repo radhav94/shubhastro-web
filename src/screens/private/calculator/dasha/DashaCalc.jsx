@@ -4,6 +4,7 @@ import AstroBirthForm from "../forms/AstroBirthForm";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import { validateBirthPlace } from "../../../../utils/helper/birthPlaceCoords";
 import styles from "./DashaCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 import BackButton from "../../../../component/UI/BackButton/BackButton";
@@ -61,7 +62,14 @@ const DashaCalc = () => {
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
-    if (!formData.place) newErrors.place = "Place of birth is required";
+    // Checks the coordinates, not just the text: a hand-typed place that was
+    // never picked from the dropdown used to submit with lat: null.
+    const placeError = validateBirthPlace(
+      formData.place,
+      formData.lat,
+      formData.lng
+    );
+    if (placeError) newErrors.place = placeError;
 
     if (!formData.isTimeUnknown && !formData.tob) {
       newErrors.tob = "Time of birth is required or select unknown";

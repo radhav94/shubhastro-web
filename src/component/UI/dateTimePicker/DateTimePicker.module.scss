@@ -208,7 +208,21 @@
   }
 }
 
+/* These are <button>s now (they were click-only divs). The reset keeps the
+   rendered result identical to the previous markup; `width: 100%` matters
+   because a button shrinks to its content, and the tap target should stay the
+   full width of the column. */
 .timeItem {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-family: inherit;
+  text-align: center;
   padding: 8px 12px;
   font-size: 14px;
   color: #1a1a1a;

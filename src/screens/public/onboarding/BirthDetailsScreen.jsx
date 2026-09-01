@@ -18,10 +18,43 @@ const validationSchema = Yup.object({
   birthDate: Yup.string()
     .required("Birth date is required")
     .matches(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+  /*
+    Birth time, when "Don't know" is unticked.
+
+    `matches` alone used to guard this. Yup's `matches` skips undefined but NOT
+    the empty string (`excludeEmptyString` defaults to false), so a blank time
+    field failed with "Invalid time format" — a message about a format for a
+    value the visitor had never entered. Nothing on screen said the field was
+    required, the CTA's blocked styling did not cover it, and `birthTime` is
+    never registered through Formik's <Field>, so `touched.birthTime` stays
+    false forever and its <ErrorMessage> could not render either. The only
+    output was a toast reading "Invalid time format".
+
+    Clarity session wji3wo (10:35 AM Sep 1, mobile, 17:44, 50 clicks) is that
+    dead end: repeated birth-detail entry, time-selection attempts including the
+    "Don't know" option, a failed attempt to proceed at 10:01, a refresh at
+    12:15, one more go at the date/time pickers at 17:20, and no profile at the
+    end.
+
+    `required` now reports the actual problem and points at the escape hatch;
+    `excludeEmptyString` keeps the format message for genuinely malformed input
+    instead of doubling up on the blank case.
+  */
   birthTime: Yup.string()
     .when("unknownBirthTime", {
       is: false,
-      then: (schema) => schema.matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format"),
+      then: (schema) =>
+        schema
+          .required(
+            "Select your birth time, or tick “Don’t know the exact time of birth”."
+          )
+          // Yup's `matches` takes (regex, options) — the message has to go
+          // inside the options object, otherwise `excludeEmptyString` lands in
+          // an ignored third argument and the blank case reports twice.
+          .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+            message: "Invalid time format",
+            excludeEmptyString: true,
+          }),
       otherwise: (schema) => schema.notRequired(),
     }),
   birthPlace: Yup.string()
@@ -56,6 +89,22 @@ const BirthDetailsScreen = ({
   const dispatch = useDispatch();
   const [registering, setRegistering] = useState(false);
   const [createKundli] = useCreateKundliMutation();
+
+  /*
+    Every blocked tap on the CTA used to answer with `toast.error` only. A toast
+    sits away from the form, disappears on its own, and — because the tap calls
+    preventDefault — leaves the page byte-for-byte identical, so a visitor who
+    scrolled up to re-read the fields had nothing to go back to and the tap
+    registers as a dead click.
+
+    Same inline-hint mechanism LoginScreen uses (see showFormHint there): keyed
+    on an incrementing `seq` so tapping a second time replays the message rather
+    than resolving to an unchanged render. Formik's own `submitCount` is no use
+    here because preventDefault stops the submit, so it never increments.
+  */
+  const [hint, setHint] = useState(null);
+  const showFormHint = (text) =>
+    setHint((prev) => ({ text, seq: (prev?.seq || 0) + 1 }));
 
   const initialValues = {
     birthDate: formData.birthDate || "",
@@ -242,7 +291,12 @@ const BirthDetailsScreen = ({
       validateOnBlur={true}
       enableReinitialize={false}
     >
-      {({ values, setFieldValue, setFieldTouched, errors, touched, isValid, validateForm }) => (
+      {({ values, setFieldValue, setFieldTouched, errors, touched, isValid, validateForm }) => {
+        // Blank time with "Don't know" unticked. The schema rejects this; the
+        // CTA needs the same answer so its blocked styling matches reality.
+        const needsBirthTime = !values.unknownBirthTime && !values.birthTime;
+
+        return (
         <Form className={styles.birthDetailsScreen}>
           <div className={styles.header}>
             <div className={styles.progressDots}>
@@ -308,7 +362,17 @@ const BirthDetailsScreen = ({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Birth Time</label>
+              {/*
+                Marked required only while "Don't know" is unticked, which is
+                exactly when the schema demands it. Unmarked, the field read as
+                optional while still blocking the CTA.
+              */}
+              <label>
+                Birth Time
+                {!values.unknownBirthTime && (
+                  <span className={styles.required}>*</span>
+                )}
+              </label>
               <DateTimePicker
                 mode="time"
                 selected={values.birthTime ? (() => { const [h, m] = values.birthTime.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
@@ -317,6 +381,7 @@ const BirthDetailsScreen = ({
                     const hh = String(date.getHours()).padStart(2, "0");
                     const mm = String(date.getMinutes()).padStart(2, "0");
                     setFieldValue("birthTime", `${hh}:${mm}`);
+                    setHint(null);
                   } else {
                     setFieldValue("birthTime", "");
                   }
@@ -335,6 +400,9 @@ const BirthDetailsScreen = ({
                       if (e.target.checked) {
                         setFieldValue("birthTime", "");
                       }
+                      // Ticking this resolves the time blocker, so retire the
+                      // hint that asked for it.
+                      setHint(null);
                     }}
                   />
                   <span>Don't know the exact time of birth</span>
@@ -380,6 +448,17 @@ const BirthDetailsScreen = ({
           </div>
 
           {/*
+            role="status" so the reason is announced without moving focus.
+            Keyed on `seq` so a repeated tap remounts the line — an identical
+            re-render is the one answer a dead-click metric cannot see.
+          */}
+          {hint && (
+            <p key={hint.seq} className={styles.loginInlineHint} role="status">
+              {hint.text}
+            </p>
+          )}
+
+          {/*
             Never `disabled` for a validation reason. This is the last gate before
             a profile exists, and the most common blocker is a birth place typed
             without picking a suggestion (so `latitude` is null) — which is easy
@@ -390,44 +469,76 @@ const BirthDetailsScreen = ({
           <button
             type="submit"
             className={`${styles.otpprimaryBtn} ${
-              !values.birthDate || !values.birthPlace || !values.latitude ? styles.otpprimaryBtnBlocked : ""
+              !values.birthDate ||
+              !values.birthPlace ||
+              !values.latitude ||
+              needsBirthTime
+                ? styles.otpprimaryBtnBlocked
+                : ""
             }`.trim()}
-            aria-disabled={!values.birthDate || !values.birthPlace || !values.latitude}
+            aria-disabled={
+              !values.birthDate ||
+              !values.birthPlace ||
+              !values.latitude ||
+              needsBirthTime
+            }
             aria-busy={registering}
             onClick={(e) => {
               if (registering) {
                 e.preventDefault();
+                // A silent return here is the exact path a repeat tap takes.
+                // The label already reads "Saving...", but say so at the hint
+                // line too, since that is where the previous taps were answered.
+                showFormHint("Saving your details — one moment.");
                 return;
               }
               if (!values.birthDate) {
                 e.preventDefault();
-                toast.error("Please select your date of birth.");
+                showFormHint("Please select your date of birth.");
+                return;
+              }
+              if (needsBirthTime) {
+                /*
+                  Reported here as well as by the schema. The time field is not
+                  wired through Formik's <Field>, so `touched.birthTime` is never
+                  set and its <ErrorMessage> cannot appear — without this the
+                  blocked tap had no visible answer anywhere on the page.
+                */
+                e.preventDefault();
+                showFormHint(
+                  "Select your birth time, or tick “Don’t know the exact time of birth”."
+                );
                 return;
               }
               if (!values.birthPlace) {
                 e.preventDefault();
-                toast.error("Please enter your place of birth.");
+                showFormHint("Please enter your place of birth.");
                 return;
               }
               if (!values.latitude) {
                 e.preventDefault();
                 setFieldTouched("birthPlace", true, true);
-                toast.error("Tap your city from the suggestions so we can use the right timezone.");
+                showFormHint(
+                  "Tap your city from the suggestions so we can use the right timezone."
+                );
                 return;
               }
-              // Any remaining schema error (e.g. a malformed time) would make
-              // Formik refuse to submit without a word. Say it out loud instead.
+              // Any remaining schema error would make Formik refuse to submit
+              // without a word. Say it out loud instead.
               const remaining = Object.keys(errors);
               if (remaining.length > 0) {
                 e.preventDefault();
-                toast.error(errors[remaining[0]] || "Please check the details above.");
+                showFormHint(
+                  errors[remaining[0]] || "Please check the details above."
+                );
               }
             }}
           >
             {registering ? "Saving..." : "Next"}
           </button>
         </Form>
-      )}
+        );
+      }}
     </Formik>
   );
 };

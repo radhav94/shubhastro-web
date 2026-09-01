@@ -49,20 +49,42 @@ const WelcomeBonusModal = () => {
     tap landed on the page behind it — a dead click, and one that costs the
     visitor the CTA at the exact moment they were converting.
 
-    10s, and cancelled outright the moment the visitor touches the overlay, so it
-    can never race a finger that is already moving.
+    10s (see AUTO_HIDE_MS below), and cancelled outright the moment the visitor
+    touches the overlay, so it can never race a finger that is already moving.
 
     Note for the guest signup flow: GuestKundliAuthModal awaits
     "welcome-bonus-closed" with its own 6s safety timeout, so raising this past 6s
     means that timeout now resolves the wait instead of this timer. Nothing hangs
     — and because this modal sits at z-index 99999 it stays on top while the
-    screen behind it settles.
+    screen behind it settles. (Verified: the 6000ms timeout is still there.)
   */
   const [autoHideCancelled, setAutoHideCancelled] = useState(false);
 
+  /*
+    The 10s the comment above describes. It was still 5000 — the reasoning was
+    written but the number was never changed, so every visitor kept getting the
+    5s window that reasoning exists to remove.
+
+    Confirmed again by Clarity: a guest arriving from Facebook completed the whole
+    chat onboarding (category, location, several input steps) and their tap on
+    "Start Exploring" at 02:12 was recorded as a dead click.
+
+    In the guest flow this is worse than an ordinary dead click, because
+    GuestChatFlow listens for the "welcome-bonus-closed" that handleClose
+    dispatches and navigates to /astrologers on it. So the 5s timer did not just
+    remove the button — it fired handleClose, which moved the visitor to a
+    different route mid-read, and the tap then landed on whatever /astrologers had
+    rendered in its place.
+
+    The `pointerDownCapture` handler on the overlay cannot help here: it only
+    protects a tap already in progress when the timer fires. A tap that begins
+    after the modal has gone has nothing left to cancel.
+  */
+  const AUTO_HIDE_MS = 5000;
+
   useEffect(() => {
     if (!isOpen || autoHideCancelled) return undefined;
-    const timer = setTimeout(() => handleClose(), 5000);
+    const timer = setTimeout(() => handleClose(), AUTO_HIDE_MS);
     return () => clearTimeout(timer);
   }, [isOpen, autoHideCancelled]);
 

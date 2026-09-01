@@ -4,6 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
+import {
+  clearedPlaceCoords,
+  validateBirthPlace,
+} from "../../../../utils/helper/birthPlaceCoords";
 import { TODAY } from "../../../../utils/dateFormat/date";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
 import styles from "../mangaldosha/MangalDosha.module.scss";
@@ -36,7 +40,10 @@ const KaalSarpCalc = () => {
     if (!profile) return;
     const dob = `${profile.year}-${String(profile.month).padStart(2, "0")}-${String(profile.day).padStart(2, "0")}`;
     const tob = `${String(profile.hour).padStart(2, "0")}:${String(profile.min).padStart(2, "0")}`;
-    setFormData({ name: profile.name || "", gender: (profile.gender || profile.identity || "").toLowerCase() || "", dob, tob, place: profile.place || "", lat: profile.lat || null, lng: profile.lon || null, isTimeUnknown: false });
+    // `lon` is the saved-profile field name, `lng` is what LocationSearch emits;
+    // profiles can arrive with either, and now that submit requires coordinates
+    // reading only one of them would block a valid selected profile.
+    setFormData({ name: profile.name || "", gender: (profile.gender || profile.identity || "").toLowerCase() || "", dob, tob, place: profile.place || "", lat: profile.lat || null, lng: profile.lon || profile.lng || null, isTimeUnknown: false });
     setErrors({});
   };
 
@@ -59,6 +66,18 @@ const KaalSarpCalc = () => {
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
+  /*
+    Typing clears the coordinates.
+
+    Only onPlaceSelect sets lat/lng, so editing a picked place kept the old
+    city's coordinates and the dosha was calculated for the wrong place under
+    the right name. See birthPlaceCoords.js.
+  */
+  const handlePlaceChange = (value) => {
+    setFormData((prev) => ({ ...prev, ...clearedPlaceCoords(value) }));
+    setErrors((prev) => ({ ...prev, place: "" }));
+  };
+
   const onReset = () => {
     setFormData(initialFormState);
     setErrors({});
@@ -75,7 +94,10 @@ const KaalSarpCalc = () => {
     if (!formData.name) newErrors.name = "Name is required";
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
-    if (!formData.place) newErrors.place = "Place of birth is required";
+    // Checks the coordinates, not just the text: a hand-typed place that was
+    // never picked from the dropdown used to submit with lat: null.
+    const placeError = validateBirthPlace(formData.place, formData.lat, formData.lng);
+    if (placeError) newErrors.place = placeError;
     if (!formData.isTimeUnknown && !formData.tob) newErrors.tob = "Time of birth is required";
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     const payload = { ...formData, tob: formData.isTimeUnknown ? "12:00" : formData.tob };
@@ -147,7 +169,7 @@ const KaalSarpCalc = () => {
           </div>
           <div className={styles.field}>
             <label>Place of Birth <span>*</span></label>
-            <LocationSearch value={formData.place} onChange={(e) => handleChange("place", e.target.value)} onPlaceSelect={(loc) => { handleChange("place", loc.address); handleChange("lat", loc.lat); handleChange("lng", loc.lng); }} />
+            <LocationSearch value={formData.place} onChange={(e) => handlePlaceChange(e.target.value)} onPlaceSelect={(loc) => { handleChange("place", loc.address); handleChange("lat", loc.lat); handleChange("lng", loc.lng); }} />
             {errors.place && <p className={styles.err}>{errors.place}</p>}
           </div>
         </div>

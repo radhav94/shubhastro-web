@@ -188,6 +188,15 @@
   margin-top: 4px;
 }
 
+/*
+ * The blocked look moved from `:enabled` to an explicit class.
+ *
+ * The button is no longer ever natively `disabled` (a disabled button swallows
+ * the tap and explains nothing — see FeedbackModal), so `:enabled` now always
+ * matches and can no longer express the two states. Base = actionable,
+ * .submitBtnBlocked = waiting on a rating or on the request in flight. The
+ * rendered result in both states is unchanged.
+ */
 .submitBtn {
   width: 100%;
   margin-top: 14px;
@@ -198,15 +207,41 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #d43400 100%));;
+  background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #d43400 100%));
   font-weight: 600;
-  cursor: not-allowed;
+  cursor: pointer;
   color: var(--color-white);
+  opacity: 1;
+}
+
+.submitBtnBlocked {
+  /* Deliberately still `cursor: pointer` on the blocked state: the tap now does
+     something (it says what is missing), so not-allowed would be a lie. */
   opacity: 0.5;
 }
 
-.submitBtn:enabled {
-  background: var(--orange_gradient, linear-gradient(90deg, #f75801 0%, #d43400 100%));
-  cursor: pointer;
-  opacity: 1;
+.submitHint {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #d43400;
+  text-align: center;
+  animation: submitHintIn 0.18s ease-out;
+}
+
+@keyframes submitHintIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submitHint {
+    animation: none;
+  }
 }

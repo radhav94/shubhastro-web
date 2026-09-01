@@ -146,7 +146,34 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
     [selected]
   );
 
+  /*
+    Picking from the dropdown.
+
+    Two things used to make a tap here do nothing at all:
+
+    1. Nothing closed the dropdown. Hour and minute have to stay open so the
+       other column is still reachable, but AM/PM is the last thing you choose in
+       "HH:MM AM/PM" order and it is binary — there is nothing left to do in that
+       column, and no Done control anywhere. So the list just sat there over the
+       rest of the form.
+    2. Re-tapping the value that is already selected rebuilt the same time and
+       handed it to onChange. The parent writes back the identical string, so
+       React re-rendered to exactly the same output: no value change, no close,
+       no highlight change, nothing.
+
+    Together those made the natural "yes, that one" tap — on the already-active
+    hour, or on AM when AM was already showing — completely inert. Clarity
+    session wji3wo (10:35 AM Sep 1, mobile, 17:44, 50 clicks) shows it directly:
+    repeated clicks on "AM" at 03:58, then again on a masked hour/minute cell at
+    17:20 and "AM" at 17:22, and no profile at the end of the session.
+
+    A tap that does not change the value is the user confirming it, so treat it
+    as "done" and close. Choosing a period when a time is already set is also
+    done. Before any time exists the list stays open, because that first tap is
+    the start of picking rather than the end.
+  */
   const handleSelect = (type, value) => {
+    const hadTime = selected != null;
     const curH = hour ?? 12;
     const curM = minute ?? 0;
     const curP = period ?? "AM";
@@ -158,8 +185,13 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
     else if (type === "minute") newM = value;
     else newP = value;
 
+    const unchanged =
+      hadTime && newH === curH && newM === curM && newP === curP;
+
     setIsTyping(false);
     onChange(buildDate(newH, newM, newP));
+
+    if (unchanged || (type === "period" && hadTime)) setOpen(false);
   };
 
   // Parse manual time input like "02:30 AM" or "2:30 pm"
@@ -421,42 +453,59 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
           className={styles.timeDropdown}
           style={placeUp ? { top: "auto", bottom: "calc(100% + 4px)" } : undefined}
         >
+          {/*
+            Buttons, not divs. These were click-only <div>s: no keyboard access
+            and nothing announced to assistive tech, on the one control standing
+            between a visitor and a birth time. Same rule the rest of this file
+            already follows for the calendar overlay.
+
+            type="button" is required, not cosmetic — these render inside a
+            Formik <Form> (BirthDetailsScreen, AddProfileModal), where a
+            default-type button submits it.
+          */}
+
           {/* Hours */}
           <div className={styles.timeColumn} ref={hourListRef}>
             {HOURS.map((h) => (
-              <div
+              <button
                 key={h}
+                type="button"
+                aria-pressed={h === hour}
                 className={`${styles.timeItem} ${h === hour ? styles.activeItem : ""}`}
                 onClick={() => handleSelect("hour", h)}
               >
                 {pad(h)}
-              </div>
+              </button>
             ))}
           </div>
 
           {/* Minutes */}
           <div className={styles.timeColumn} ref={minuteListRef}>
             {MINUTES.map((m) => (
-              <div
+              <button
                 key={m}
+                type="button"
+                aria-pressed={m === minute}
                 className={`${styles.timeItem} ${m === minute ? styles.activeItem : ""}`}
                 onClick={() => handleSelect("minute", m)}
               >
                 {pad(m)}
-              </div>
+              </button>
             ))}
           </div>
 
           {/* AM / PM */}
           <div className={styles.timeColumn}>
             {PERIODS.map((p) => (
-              <div
+              <button
                 key={p}
+                type="button"
+                aria-pressed={p === period}
                 className={`${styles.timeItem} ${p === period ? styles.activeItem : ""}`}
                 onClick={() => handleSelect("period", p)}
               >
                 {p}
-              </div>
+              </button>
             ))}
           </div>
         </div>
