@@ -1,0 +1,409 @@
+$ink: #24160f;
+$brand: #f75801;
+$brand-dark: #d43400;
+
+/*
+  The overlay scrolls, not the panel, and the panel is centred with `margin: auto`
+  rather than `place-items: center`.
+
+  Centring a flex/grid item that is taller than its container pushes the overflow
+  out of *both* ends, and the part above the top is unreachable — a fixed overlay
+  has nowhere to scroll to. The offer variant is the taller of the two (each card
+  gains a struck-through price, an OFF badge and a savings badge), so it was the
+  one that ended up jammed against the top edge with its header cut off.
+
+  `margin: auto` inside a scrollable flex container centres the panel while it
+  fits and top-aligns it once it does not, with the overlay taking over the
+  scrolling. Nothing gets clipped at either size.
+*/
+.overlay {
+  position: fixed;
+  inset: 0;
+  /* Above the app's fixed header/sub-nav (z-index 2001) so the modal covers
+     them instead of tucking behind — the panel's top was slipping under the
+     header before. */
+  z-index: 100000;
+  background: rgba(36, 22, 15, 0.45);
+  display: flex;
+  justify-content: center;
+  /* Vertically centre the panel in the viewport. `safe` keeps the top edge
+     reachable when the panel is taller than the screen (it top-aligns instead
+     of clipping the overflow above the fold), while the overlay handles the
+     scrolling. */
+  align-items: safe center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px;
+}
+
+.modal {
+  position: relative;
+  width: 100%;
+  /* The offer variant pays for its extra content in width, not height, so the
+     panel is wide enough to hold three cards with the discount detail beside
+     each price. */
+  max-width: 940px;
+  /* Flex children refuse to shrink below content by default; without this the
+     panel can still push past the overlay instead of letting it scroll. */
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #fffdfb 0%, #fff4ec 100%);
+  border: 1px solid rgba(247, 88, 1, 0.14);
+  border-radius: 20px;
+  box-shadow: 0 18px 48px rgba(120, 53, 15, 0.24);
+  padding: 18px 18px 12px;
+}
+
+/* The offer stage reads a touch warmer, so it registers as a different screen
+   rather than the same list rendered again. */
+.offerModal {
+  background: linear-gradient(180deg, #fff8f3 0%, #ffeadd 100%);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-right: 34px;
+}
+
+.headerIcon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 1px solid rgba(247, 88, 1, 0.2);
+  color: $brand;
+}
+
+.headerText {
+  min-width: 0;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: $ink;
+    line-height: 1.3;
+  }
+
+  p {
+    margin: 3px 0 0;
+    font-size: 0.76rem;
+    color: #8a6a55;
+  }
+}
+
+.close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 1.5px solid $brand;
+  color: $brand;
+  cursor: pointer;
+
+  &:hover {
+    background: $brand;
+    color: #fff;
+  }
+}
+
+.loaderWrap {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+}
+
+.empty {
+  margin: 32px 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #8a6a55;
+}
+
+/* ── Carousel ─────────────────────────────────────────────────────────── */
+.carousel {
+  position: relative;
+  margin-top: 16px;
+}
+
+.track {
+  list-style: none;
+  margin: 0;
+  padding: 4px 2px 8px;
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid rgba(247, 88, 1, 0.35);
+  color: $brand;
+  box-shadow: 0 3px 10px rgba(120, 53, 15, 0.16);
+}
+
+.arrowPrev {
+  left: -14px;
+}
+
+.arrowNext {
+  right: -14px;
+  background: $brand;
+  border-color: $brand;
+  color: #fff;
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────── */
+.card {
+  position: relative;
+  flex: 0 0 auto;
+  /* Fixed basis with scroll-snap: three across on desktop, and the fourth
+     peeking is the affordance that there is more to scroll. Wide enough that the
+     offer variant's price row (₹20/min · ₹25/min · 20% OFF · Save ₹5) fits on
+     one line instead of stacking and adding height. */
+  width: 272px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 14px 14px;
+  background: #fff;
+  border: 1px solid rgba(191, 118, 66, 0.16);
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(191, 118, 66, 0.08);
+
+  /* On a phone the row cannot get wider, so one card fills the viewport and the
+     carousel does the rest — still no extra height. */
+  @media (max-width: 620px) {
+    width: 240px;
+  }
+}
+
+.bestMatch {
+  border-color: $brand;
+  background: linear-gradient(180deg, #fff6f0 0%, #ffffff 55%);
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.16);
+}
+
+.bestBadge {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  background: $brand;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 15px 0 12px 0;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f3e6dc;
+  margin-top: 8px;
+}
+
+.name {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $ink;
+  text-align: center;
+}
+
+.meta {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b4c3a;
+}
+
+.metaStar {
+  color: #f5a524;
+}
+
+.langRow {
+  margin: 2px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.lang {
+  background: #f4f6f8;
+  color: #4a5b66;
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+/* ── Price ────────────────────────────────────────────────────────────── */
+/*
+  One row, and a floor tall enough to hold the offer variant's two small lines.
+  Both stages therefore render the same height, so switching from the plain list
+  to the offer does not make the panel grow — the discount detail is absorbed
+  across the card's width instead.
+*/
+.priceBlock {
+  width: 100%;
+  min-height: 56px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #fff8f4;
+  border: 1px solid rgba(247, 88, 1, 0.12);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.priceAside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+}
+
+.badgeRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.wasPrice {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #9c8375;
+  white-space: nowrap;
+}
+
+.offBadge {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.nowPrice {
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: $ink;
+  white-space: nowrap;
+
+  small {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #6b4c3a;
+  }
+}
+
+.saveBadge {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid rgba(21, 128, 61, 0.18);
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.connectBtn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, $brand, $brand-dark);
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  &:hover {
+    filter: brightness(1.05);
+  }
+}
+
+/* ── Dots + trust bar ─────────────────────────────────────────────────── */
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.dot,
+.dotOn {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(247, 88, 1, 0.25);
+}
+
+.dotOn {
+  background: $brand;
+}
+
+.trustBar {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(247, 88, 1, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #b03a1a;
+
+  i {
+    font-style: normal;
+    opacity: 0.5;
+  }
+}

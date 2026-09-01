@@ -1,0 +1,797 @@
+$ink: #24160f;
+$muted: #8a6a55;
+$brand: #f75801;
+$brand-dark: #d43400;
+$panel: rgba(255, 255, 255, 0.72);
+$hair: rgba(191, 118, 66, 0.16);
+
+.report {
+  padding: 18px 16px 32px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* ── Banner ───────────────────────────────────────────────────────────── */
+.banner {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+  padding: 22px 24px;
+  // border-radius: 20px;
+  // background: linear-gradient(120deg, #fff6ef 0%, #ffe6d5 100%);
+  // border: 1.5px solid rgba(255, 255, 255, 0.95);
+  // box-shadow: 0 3px 18px rgba(191, 118, 66, 0.12);
+
+  @media (max-width: 860px) {
+    flex-direction: column;
+  }
+}
+
+.bannerCopy {
+  flex: 1;
+  min-width: 0;
+}
+
+.kicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 12px;
+
+  /* One gradient for all three. The earlier per-pill shades read as a status
+     ranking, which these labels do not carry — they just name the report. */
+  span {
+    background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 999px;
+  }
+}
+
+.bannerTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: $ink;
+  line-height: 1.1;
+
+  @media (max-width: 560px) {
+    font-size: 1.4rem;
+  }
+}
+
+.bannerSub {
+  margin: 4px 0 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a06a45;
+}
+
+.bannerText {
+  margin: 10px 0 0;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: #5d4636;
+  max-width: 62ch;
+}
+
+.metaChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0 0;
+
+  > div {
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 1);
+    border-radius: 12px;
+    padding: 9px 14px;
+    min-width: 108px;
+    box-shadow: 0 2px 8px rgba(191, 118, 66, 0.08);
+  }
+
+  dt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: $muted;
+    margin-bottom: 4px;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: $ink;
+  }
+}
+
+/* Small tinted square per chip, so the four are distinguishable at a glance. */
+.chipIcon {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.toneViolet { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.toneOrange { background: linear-gradient(135deg, #fb923c, #ea580c); }
+.toneGold   { background: linear-gradient(135deg, #fbbf24, #d97706); }
+.toneRed    { background: linear-gradient(135deg, #f87171, #dc2626); }
+.tonePink   { background: linear-gradient(135deg, #f472b6, #db2777); }
+
+/*
+  A centring flex column, not a `text-align: center` block.
+
+  `text-align` only centres inline content against the *content box*, and the
+  badge's intrinsic width (nowrap label + icon + padding) is wider than that box —
+  so the badge overflowed symmetrically while the circle stayed centred on the
+  narrower box, and the two ended up on different axes. `align-items: center`
+  centres both against the same line whatever their widths.
+*/
+.bannerPhoto {
+  position: relative;
+  flex-shrink: 0;
+  margin: 0;
+  width: 296px;
+  min-height: 296px;
+  /*
+    The bottom padding reserves the badge's row. The badge is positioned
+    absolutely, so it does not take part in centring — without that reserved
+    space the circle centred against the full height and the badge, pinned to the
+    bottom, landed on top of the chin. Reserving it means `justify-content:
+    center` centres the circle in what is left, which also seats it slightly
+    above the frame's midpoint exactly as the design has it.
+  */
+  // padding: 26px 26px 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    position: relative;
+    z-index: 1;
+    width: 190px;
+    height: 190px;
+    object-fit: cover;
+    /* Circular, as in the design — the square crop read as a profile card. */
+    border-radius: 50%;
+    border: 6px solid #fff;
+    box-shadow: 0 6px 20px rgba(191, 118, 66, 0.2);
+  }
+
+  /*
+    Rounded rectangle with a white outline over a translucent fill, as in the
+    design — not a solid white pill. The fill lets the banner gradient through,
+    which is what stops it looking like a sticker pasted on top.
+  */
+  /*
+    Sizes to its own text, and never wraps.
+
+    `width: 100%` was the mistake: the figure's content box is narrower than
+    "Face Scan Complete" at this weight, so the label broke onto a second line and
+    the badge grew into a tall block with the tick stranded to its left. The
+    figure is wide enough for the one-line badge to sit inside the brackets.
+  */
+  figcaption {
+    /*
+      Taken out of flow and pinned to the bottom of the frame, so it lines up
+      with the bottom brackets instead of floating above them — and so its height
+      no longer pushes the circle off the frame's vertical centre.
+    */
+    position: absolute;
+    left: 50%;
+    bottom: -15px;
+    transform: translateX(-50%);
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.55);
+    border: 3px solid #fff;
+    color: #16a34a;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 9px 18px;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(120, 53, 15, 0.1);
+  }
+
+  @media (max-width: 860px) {
+    align-self: center;
+  }
+}
+
+/*
+  Scan-frame brackets. Each `i` is one corner: two visible borders on an
+  otherwise transparent box, so the L shape comes from the border alone and
+  nothing needs to be drawn or shipped.
+*/
+.scanFrame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  /* White, matching the design. Orange brackets competed with the pills and the
+     chip icons for the same accent; white reads as camera chrome instead. */
+  i {
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    border: 3px solid rgba(255, 255, 255, 0.95);
+  }
+
+  i:nth-child(1) {
+    top: 0;
+    left: 0;
+    border-right: none;
+    border-bottom: none;
+    border-top-left-radius: 4px;
+  }
+  i:nth-child(2) {
+    top: 0;
+    right: 0;
+    border-left: none;
+    border-bottom: none;
+    border-top-right-radius: 4px;
+  }
+  i:nth-child(3) {
+    bottom: 0;
+    left: 0;
+    border-right: none;
+    border-top: none;
+    border-bottom-left-radius: 4px;
+  }
+  i:nth-child(4) {
+    bottom: 0;
+    right: 0;
+    border-left: none;
+    border-top: none;
+    border-bottom-right-radius: 4px;
+  }
+}
+
+/* Sits beside the title. It used to be absolutely positioned at the banner's
+   top-right, which put it straight on top of the photo's scan bracket. */
+.bannerTts {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────── */
+/*
+  One translucent bar holding all six tabs, as in the design — not six separate
+  white pills. Only the active tab is a filled pill; the rest sit on the bar and
+  are separated by hairline dividers.
+*/
+.tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  /* Spacing comes from `.main`'s gap — the bar is a flex item in that column. */
+  margin: 0;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 12px rgba(191, 118, 66, 0.08);
+
+  /* Six equal tracks do not fit a phone, so the bar scrolls instead of
+     squeezing the labels. */
+  @media (max-width: 640px) {
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+.tab {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: #6b4c3a;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+
+  /*
+    Divider drawn on the tab itself rather than as a separate element, so the
+    markup stays a plain list of buttons. `.tab + .tab` skips the first one, and
+    the two rules below drop the pair that touch the active pill — otherwise a
+    line would run into its rounded edge.
+  */
+  & + &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 18px;
+    width: 1px;
+    background: rgba(191, 118, 66, 0.28);
+  }
+
+  &:hover:not(.tabOn) {
+    color: $brand-dark;
+  }
+
+  @media (max-width: 640px) {
+    flex: 0 0 auto;
+  }
+}
+
+.tabOn {
+  background: linear-gradient(135deg, $brand, $brand-dark);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(212, 52, 0, 0.28);
+
+  &::before,
+  & + .tab::before {
+    display: none;
+  }
+}
+
+/* ── Layout ───────────────────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 18px;
+  align-items: start;
+  /* Was on `.tabs`, which used to sit above this grid. */
+  margin-top: 18px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.duoRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+/* ── Panels ───────────────────────────────────────────────────────────── */
+.panel {
+  padding: 18px;
+  border-radius: 18px;
+  background: $panel;
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 12px rgba(191, 118, 66, 0.07);
+}
+
+.panelWide {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Row that holds the panel title and its read-aloud button, as in the design —
+   the two used to have no shared layout, so the button had to be positioned
+   absolutely against a title that could wrap to a different height. */
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+
+.panelTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+/* Filled, rounded icon tile in front of every section title. Plain glyphs read
+   as decoration; a tinted tile reads as a section marker, which is what the
+   design uses to tell the six panels apart at a glance. */
+.panelIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+  /* Falls back to the brand gradient for panels with no explicit tone. */
+  background: linear-gradient(135deg, $brand, $brand-dark);
+}
+
+.triGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.duoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.subCard {
+  padding: 14px;
+  border-radius: 13px;
+  background: #fff;
+  border: 1px solid $hair;
+  min-width: 0;
+}
+
+/*
+  Card headings. One dark label weight for every sub-card, as in the design —
+  the coloured-text version made every heading fight the body copy for
+  attention. Meaning now lives on the icon glyph alone, via the `ink*` classes.
+*/
+.subTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+.inkGood,
+.inkGreen  { color: #15803d; }
+.inkWarn,
+.inkOrange { color: #c2410c; }
+.inkInfo,
+.inkBlue   { color: #1d4ed8; }
+.inkLove,
+.inkPink   { color: #db2777; }
+.inkViolet { color: #7c3aed; }
+.inkGold   { color: #b45309; }
+
+.traitHead {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 7px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+.body {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.6;
+  color: $muted;
+}
+
+.bodyMuted {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: #a06a45;
+}
+
+.bullets {
+  margin: 0;
+  padding-left: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  li {
+    font-size: 0.76rem;
+    line-height: 1.5;
+    color: $muted;
+  }
+}
+
+/* ── Level chips: the API's own grading, colour only ─────────────────── */
+.levelChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}
+
+.levelExcellent { background: #f3e8ff; color: #7c3aed; }
+.levelVeryGood  { background: #dcfce7; color: #15803d; }
+.levelStrong    { background: #ffedd5; color: #c2410c; }
+.levelGood      { background: #fff1cc; color: #b45309; }
+.levelModerate  { background: #dbeafe; color: #1d4ed8; }
+
+.levelShape {
+  background: #fdece2;
+  color: #b03a1a;
+
+  &::before {
+    display: none;
+  }
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 9px 0 0;
+}
+
+.chip {
+  background: #f4f6f8;
+  color: #4a5b66;
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+/* ── Aura ─────────────────────────────────────────────────────────────── */
+/* Donut centred on top, colour breakdown in a two-column grid beneath — the
+   layout from the reference card. */
+.auraWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+}
+
+/* conic-gradient donut: four slices do not justify a charting library, and this
+   avoids pulling chart.js into the route. */
+.donut {
+  flex-shrink: 0;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.donutHole {
+  /* Smaller hole = thicker coloured ring, so each slice is clearly visible.
+     A 62% hole left the ring too thin for the colours to read. */
+  width: 52%;
+  height: 52%;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.auraLegend {
+  width: 100%;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 20px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  dt {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: $ink;
+    text-transform: capitalize;
+  }
+
+  dd {
+    margin: 8px 0 0;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: $muted;
+  }
+}
+
+.auraDot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Soft pill tinted with the slice's own colour (background + text set inline
+   from the hex), matching the reference where each tier badge carries its
+   colour. */
+.auraTier {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────── */
+/*
+  The COLUMN just fills the grid row so the sticky child has somewhere to
+  travel; the CARD is the element that actually sticks. Making the column
+  itself sticky (as before) gave it no scroll range — a sticky box only sticks
+  while it is shorter than its scrolling ancestor — so the panel scrolled away
+  with the page. This mirrors the Rashi report's working setup.
+*/
+.sidebar {
+  align-self: stretch;
+}
+
+.sideCard {
+  position: relative;
+  padding: 18px;
+  border-radius: 18px;
+  background: $panel;
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 14px rgba(191, 118, 66, 0.1);
+
+  /* Clear the full fixed stack this route sits under: TopHeader + top bar (95px)
+     plus this report's own fixed .headerWrap (~55px) = ~150px, the same value
+     FaceReadingResult's container uses for padding-top. Below 1180px the top bar
+     shrinks to 52px, so the stack is ~115px. +8px breathing gap. Cap height and
+     scroll internally so the buttons stay reachable on short viewports. */
+  @media (min-width: 1025px) {
+    position: sticky;
+    top: 172px;
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+
+  @media (min-width: 1025px) and (max-width: 1180px) {
+    top: 130px;
+    max-height: calc(100vh - 138px);
+  }
+}
+
+/* Download/share pair, top-right of the card as in the design — not the
+   underlined text link this used to be. */
+.sideTools {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  gap: 6px;
+}
+
+.sideToolBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(191, 118, 66, 0.2);
+  color: $brand-dark;
+  cursor: pointer;
+
+  &:hover {
+    background: #fff;
+  }
+}
+
+.sideKicker {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #a06a45;
+}
+
+.sideTitle {
+  margin: 6px 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: $ink;
+}
+
+.sideBody {
+  margin: 8px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.6;
+  color: $muted;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.actionPrimary,
+.actionSecondary,
+.actionTertiary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  /* .actionTertiary is a <button> now — keep it visually identical to the
+     sibling <a> action links. */
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.actionPrimary {
+  background: linear-gradient(135deg, $brand, $brand-dark);
+  color: #fff;
+}
+
+.actionSecondary {
+  background: #fff;
+  border: 1.5px solid rgba(247, 88, 1, 0.5);
+  color: $brand-dark;
+}
+
+.actionTertiary {
+  background: #fdece2;
+  color: $brand-dark;
+  /* Temporarily hidden — "Ask AI Pandit". Remove this line to bring it back. */
+  display: none;
+}
+
+

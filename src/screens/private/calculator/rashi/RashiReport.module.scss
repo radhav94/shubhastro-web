@@ -1,325 +1,1473 @@
+@use "../../../../assets/variables/variables" as *;
+
+$brand: #f75801;
+$brand-dark: #d43400;
+$ink: #2d2320;
+$muted: #6b5f5a;
+$panel: rgba(255, 255, 255, 0.55);
+$panel-border: rgba(255, 255, 255, 0.9);
+
+$gradient: linear-gradient(90deg, #{$brand} 0%, #{$brand-dark} 100%);
+
+// Decorative zodiac tiles down the banner edges. The column width and the
+// stagger offset below are derived from this, so changing it here is enough.
+$decor-tile: 49px;
+$decor-tile-sm: 36px;
+
+/*
+  Total height of everything fixed above this page's content, which is what the
+  sticky sidebar has to clear:
+
+    HomeLayout's TopHeader + top bar   95px  (53px below 1180px)
+  + CalcBackButton's fixed bar         62px  (10 + 40 button + 10 + 1.5 border)
+
+  Getting this wrong is not subtle — at 110px the sidebar's heading sat behind the
+  back bar and looked clipped off.
+*/
+$fixed-stack: 157px;
+$fixed-stack-md: 115px;
+$sticky-gap: 8px;
+
 .wrapper {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 0 16px;
-  text-align: center;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 16px 16px 48px;
+
+  /* Room for the fixed mobile action bar so the last content isn't hidden
+     behind it. */
+  @media (max-width: 560px) {
+    padding-bottom: 90px;
+  }
 }
 
-.title {
-  font-size: 22px;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 6px;
-  color: #1a1a1a;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+/* ── MOBILE ACTION BAR (fixed bottom) ──────────────────────────────────── */
+.mobileActionBar {
+  display: none;
 
-.rashiCard {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(12px);
-  border: 1.5px solid #fff;
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  // box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-  position: relative;
-}
-
-.rashiCard::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  border-radius: 12px 12px 0 0;
-  background: linear-gradient(90deg, #f75801, #d43400);
-}
-
-.label {
-  font-size: 12px;
-  letter-spacing: 1px;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.headingUnderline {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-.dividerLine {
-  line-height: 0;
-}
-
-.dividerMoon {
-  flex-shrink: 0;
-  line-height: 0;
-  color: #030303;
-}
-
-/* Rashi Card - matching figma style */
-.card {
-  background: linear-gradient(90deg, #fff8f3 0%, #ffd6d6 100%);
-  border: 1.5px solid #fff;
-  border-radius: 12px;
-  padding: 20px 24px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-  margin: 0 auto 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
+  @media (max-width: 560px) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: fixed;
     left: 0;
     right: 0;
-    height: 5px;
-    border-radius: 12px 12px 0 0;
+    bottom: 0;
+    z-index: 1000;
+    /* Extra bottom padding (plus the device safe-area) so the buttons never
+       clip against the screen edge. */
+    padding: 10px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(247, 88, 1, 0.15);
+    box-shadow: 0 -4px 18px rgba(191, 118, 66, 0.12);
   }
 }
 
-.cardLeft {
-  text-align: left;
-}
-
-.cardLabel {
-  font-size: 13px;
-  color: #6b7280;
-  margin-bottom: 4px;
-}
-
-.signName {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a1a1a;
-}
-
-.signImageWrap {
-  width: 64px;
-  height: 64px;
-  flex-shrink: 0;
-  display: flex;
+.mobileActionChat,
+.mobileActionCall {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+  padding: 13px 8px;
+  border-radius: 26px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  /* Icon shouldn't shrink; the label can ellipsize on very narrow screens
+     rather than clipping the button. */
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.mobileActionChat {
   background: #fff;
-  border-radius: 50%;
-  padding: 0;
+  color: $brand-dark;
+  border: 1.5px solid rgba(247, 88, 1, 0.5);
 }
 
-.signImage {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: linear-gradient(90deg, #f75801, #d43400);
-  border-radius: 50%;
+.mobileActionCall {
+  background: $gradient;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.3);
 }
 
-.calcAgainBtn {
-  display: block;
+.empty {
+  padding: 64px 16px;
   text-align: center;
-  margin: 0 auto 24px;
-  background: none;
-  border: none;
-  color: #f75801;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 10px 0;
-  text-decoration: underline;
-  transition: opacity 0.2s;
-
-  &:hover {
-    opacity: 0.8;
-  }
+  color: $muted;
 }
 
-.detailsCard {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(12px);
-  border: 1.5px solid #fff;
-  border-radius: 12px;
-  padding: 24px;
-  // box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-  margin-bottom: 24px;
-  position: relative;
-}
-
-.accordionBox {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 2px solid white;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  overflow: hidden;
-  text-align: left;
-}
-
-.accordionHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  cursor: pointer;
-  user-select: none;
-  background: transparent;
-  border: none;
-  width: 100%;
-  text-align: left;
-
-  span:first-child {
-    font-size: 16px;
-    font-weight: 600;
-    color: #1a1a1a;
-  }
-}
-
-.ttsWrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.chevron {
-  transition: transform 0.25s ease;
-  flex-shrink: 0;
-}
-
-.chevronOpen {
-  transform: rotate(180deg);
-}
-
-.accordionBody {
-  display: none;
-  padding: 0 20px 16px;
-
-  p {
-    font-size: 14px;
-    color: #374151;
-    line-height: 1.7;
-    margin: 0 0 8px;
-  }
-}
-
-.accordionBodyOpen {
-  display: block;
-}
-
-/* Personal Details Grid */
-.detailsGrid {
+/* ── LAYOUT ────────────────────────────────────────────────────────────── */
+.layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 20px;
+  align-items: start;
+
+  /* Left column stacks the header/hero group above the rest of the report;
+     the sidebar sits in the right column spanning both. */
+  .topGroup {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .main {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .sidebar {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  @media (max-width: 1024px) {
+    grid-template-columns: minmax(0, 1fr);
+
+    /*
+      Mobile order: hero group first, then the "Want to know more" sidebar,
+      then the Today strip and the rest of the report.
+    */
+    .topGroup {
+      grid-column: 1;
+      grid-row: auto;
+      order: 1;
+    }
+
+    .sidebar {
+      grid-column: 1;
+      grid-row: auto;
+      order: 2;
+    }
+
+    .main {
+      grid-column: 1;
+      grid-row: auto;
+      order: 3;
+    }
+  }
+}
+
+/* Header + hero group — a flex column so the hero keeps its gap from the header
+   just as it did inside .main. */
+.topGroup {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 
-  span {
-    font-size: 13px;
-    color: #6b7280;
-    display: block;
-    margin-bottom: 2px;
-  }
-
-  p {
-    font-weight: 600;
-    color: #d43400;
+  /* On mobile the group above already carries the hero, so keep the top gap
+     consistent with the rest of the stacked sections. */
+  @media (max-width: 1024px) {
+    margin-top: 16px;
   }
 }
 
-.aboutBox {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(12px);
-  border: 1.5px solid #fff;
-  border-radius: 12px;
-  padding: 16px;
-  border-radius: 12px;
-  padding: 24px;
-  // box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-  margin-bottom: 32px;
+/* ── PAGE HEADER (banner) ──────────────────────────────────────────────── */
+.pageHeader {
   position: relative;
+  overflow: hidden;
+  /* Tall enough for three 49px tiles per column to sit clear of each other and
+     read as a band, rather than as icons crowding the text. */
+  min-height: 210px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Side padding clears the .decorLeft / .decorRight column width. */
+  padding: 30px 150px;
 
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 5px;
-    border-radius: 12px 12px 0 0;
-    background: linear-gradient(90deg, #f75801, #d43400);
+  @media (max-width: 900px) {
+    min-height: 165px;
+    padding: 24px 96px;
   }
 
-  h4 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: #111827;
+  @media (max-width: 560px) {
+    min-height: 0;
+    padding: 20px 16px;
+  }
+}
+
+.pageHeaderInner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 640px;
+}
+
+/* Tile columns hug each edge, staggered so they don't line up in a hard grid. */
+.decorLeft,
+.decorRight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  pointer-events: none;
+
+  img {
+    // Source tiles are exported at 96px, so this stays under 1x-per-CSS-pixel
+    // on a 2x screen (49 * 2 = 98).
+    width: $decor-tile;
+    height: $decor-tile;
+    object-fit: contain;
+    opacity: 0.85;
   }
 
-  p {
-    line-height: 1.6;
-    color: #374151;
-    font-size: 14px;
-    font-weight: 600;
-    color: #1a1a1a;
+  // Column has to hold padding + stagger + tile (12 + 36 + 36), and the banner's
+  // horizontal padding below must clear this width or the tiles sit under the copy.
+  @media (max-width: 900px) {
+    width: 90px;
+
+    img {
+      width: $decor-tile-sm;
+      height: $decor-tile-sm;
+    }
+  }
+
+  /* No room beside the copy — the band still reads from the gradient alone. */
+  @media (max-width: 560px) {
+    display: none;
+  }
+}
+
+.decorLeft {
+  left: 0;
+  align-items: flex-start;
+  padding-left: 22px;
+
+  /* Nudge alternate tiles inward for the staggered look. One tile-width, so the
+     stagger scales with the tile rather than drifting out of proportion. */
+  img:nth-child(even) {
+    margin-left: $decor-tile;
+  }
+
+  @media (max-width: 900px) {
+    padding-left: 12px;
+
+    img:nth-child(even) {
+      margin-left: $decor-tile-sm;
+    }
+  }
+}
+
+.decorRight {
+  right: 0;
+  align-items: flex-end;
+  padding-right: 22px;
+
+  img:nth-child(even) {
+    margin-right: $decor-tile;
+  }
+
+  @media (max-width: 900px) {
+    padding-right: 12px;
+
+    img:nth-child(even) {
+      margin-right: $decor-tile-sm;
+    }
+  }
+}
+
+.pageTitle {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: $ink;
+  margin: 0 0 8px;
+  line-height: 1.25;
+
+  span {
+    background: $gradient;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1.35rem;
+  }
+}
+
+.pageSubtitle {
+  margin: 0 auto;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: $muted;
+
+  @media (max-width: 768px) {
+    font-size: 0.82rem;
+  }
+}
+
+/* ── HERO ──────────────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  overflow: hidden;
+  /*
+    Desktop grid: left column = coin+sign header (row 1) and the meta (row 2);
+    right column = the attribute block, spanning both rows. This keeps the
+    original three-region look while letting the meta live outside the sign
+    header so it can go full-width on mobile.
+  */
+  display: grid;
+  /* Left column takes the remaining space (coin + sign + meta); right column is
+     a fixed band for the four attribute chips. A fixed right track (rather than
+     `auto`, which grows to its content and overran the left column) is what
+     stops the chips overlapping the meta. */
+  grid-template-columns: minmax(0, 1fr) 360px;
+  column-gap: 24px;
+  row-gap: 14px;
+  align-items: center;
+  min-height: 208px;
+  padding: 20px 22px;
+  /* Near-white with the faintest warm wash at the edges, as in the design —
+     not the translucent panel the rest of the page uses. */
+  background: rgba(255, 255, 255,0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  border-radius: 18px;
+  box-shadow: 0 2px 14px rgba(191, 118, 66, 0.08);
+
+  /* Left: coin + (sign header with the meta stacked beneath). Right: chips. */
+  .heroTop {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .heroAttributes {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  /* Keep the content clear of .heroArt, which is absolutely positioned in the
+     right-hand corner. Matched to the art's width + its fade, and only applied
+     at the widths where the art actually renders. */
+  @media (min-width: 1281px) {
+    padding-right: 250px;
+  }
+
+  /* Tablet: attributes drop below into their own full-width row. */
+  @media (max-width: 1100px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    min-height: 0;
+
+    .heroAttributes {
+      grid-column: 1;
+      grid-row: auto;
+    }
+  }
+
+  /*
+    Mobile: a clean vertical stack mirroring the app design —
+      row 1  coin + (Your Moon Sign badge, sign name, read-aloud)
+      row 2  Pada / Moon-at meta, full width with a centre divider
+      row 3  symbol pill + 2x2 attribute chips, full width
+  */
+  @media (max-width: 560px) {
+    padding: 16px;
+    gap: 14px;
+
+    /* Order the stack: coin/sign header → sign artwork → attribute chips. */
+    .heroTop {
+      order: 1;
+    }
+    /* .heroArt sets order: 2 in its own rule. */
+    .heroAttributes {
+      order: 3;
+    }
+  }
+}
+
+/*
+  Top row of the hero: coin beside the sign header.
+*/
+.heroTop {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  z-index: 1;
+  min-width: 0;
+
+  @media (max-width: 560px) {
+    gap: 14px;
+  }
+}
+
+.heroSignHeader {
+  /* Fills the remaining width in the left column; no fixed min-width, which was
+     forcing the block wider than its grid track and overlapping the chips. */
+  flex: 1;
+  min-width: 0;
+}
+
+/* Coin */
+.heroCoinWrap {
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.heroCoin {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  display: block;
+
+  @media (max-width: 768px) {
+    width: 96px;
+    height: 96px;
+  }
+
+  @media (max-width: 560px) {
+    width: 104px;
+    height: 104px;
+  }
+}
+
+/*
+  Minted coin — used when the design's coin export isn't available for this sign.
+  Two rings (fluted outer rim, lighter inner face) with the zodiac glyph struck
+  on top. The glyph art is white line work on transparency, so it reads as relief
+  against the gold without any per-sign tuning.
+*/
+.heroCoinMinted {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 32% 28%, #ffd580 0%, #f0a132 38%, #d97706 72%, #b45309 100%);
+  box-shadow:
+    0 0 0 5px #e08b2a,
+    0 0 0 6px #c2701c,
+    0 6px 18px rgba(180, 83, 9, 0.35),
+    inset 0 2px 6px rgba(255, 255, 255, 0.45),
+    inset 0 -4px 10px rgba(120, 53, 15, 0.35);
+
+  .heroCoin {
+    width: 58%;
+    height: 58%;
+    /* Slight lift so the white glyph reads as struck metal, not a flat sticker. */
+    filter: drop-shadow(0 1px 1px rgba(120, 53, 15, 0.55));
+  }
+
+  @media (max-width: 768px) {
+    width: 96px;
+    height: 96px;
+    box-shadow:
+      0 0 0 4px #e08b2a,
+      0 0 0 5px #c2701c,
+      0 5px 14px rgba(180, 83, 9, 0.35),
+      inset 0 2px 5px rgba(255, 255, 255, 0.45),
+      inset 0 -3px 8px rgba(120, 53, 15, 0.35);
+  }
+
+  @media (max-width: 560px) {
+    width: 104px;
+    height: 104px;
+  }
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: $gradient;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+.heroSignRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 12px;
+}
+
+.heroSign {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: $ink;
+  margin: 0;
+  line-height: 1.1;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}
+
+.heroTts {
+  display: inline-flex;
+}
+
+/*
+  Label on top, value in bold underneath. Two columns that wrap, not a flex row:
+  the dasha chain is a third entry now, and as a flex row all three squeezed into
+  the block's width and each value broke over two or three lines.
+*/
+.heroMeta {
+  display: grid;
+  /* Two columns: Pada + Moon-at on the first row, Current Dasha (when present)
+     spanning the full width beneath them. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 22px;
+  margin: 0;
+
+  /* The dasha chain is the longest value, so it takes the whole row rather than
+     a half-width column. */
+  > div:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  dt {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.74rem;
+    color: #c2703f;
+    margin-bottom: 4px;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: $ink;
+  }
+
+  @media (max-width: 560px) {
+    gap: 10px 18px;
+  }
+}
+
+/* Attributes — divided off from the sign block by a hairline rule on desktop. */
+.heroAttributes {
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 22px;
+  border-left: 1px solid rgba(196, 130, 90, 0.22);
+
+  @media (max-width: 1100px) {
+    padding-left: 0;
+    border-left: none;
+  }
+}
+
+.heroSymbol {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: 12px;
+  padding: 7px 16px 7px 7px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: $ink;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+
+  /* Mobile: the symbol pill spans the full card width, matching the design. */
+  @media (max-width: 560px) {
+    align-self: stretch;
+    width: 100%;
+    font-size: 0.8rem;
+    padding: 10px 16px 10px 10px;
+  }
+}
+
+.heroSymbolIcon {
+  width: 21px;
+  height: 21px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #34d399, #10b981);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/*
+  auto-fit rather than a fixed 4 columns: .heroAttributes can be as narrow as
+  260px, where four tracks are ~57px each. The chips used to carry `width: 75px`,
+  so instead of shrinking with their track they overflowed it and painted on top
+  of each other — the "Lucky Color" label was being clipped by the chip beside
+  it. Now they keep a 72px floor and wrap onto a second row when there is no
+  room, which is also why the old 480px breakpoint is gone: wrapping handles
+  every width instead of one hardcoded one.
+*/
+.chipGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 10px;
+  margin: 0;
+
+  /*
+    Desktop: keep all four attribute chips on a single row (Planet, Elements,
+    Lucky Color, Lucky Day), matching the design, instead of wrapping to 3 + 1.
+  */
+  @media (min-width: 1101px) {
+    grid-template-columns: repeat(4, minmax(70px, 1fr));
+  }
+
+  /*
+    Mobile: a fixed 2x2 grid of larger, left-aligned cards, matching the app
+    design — icon + label on the top line, the value in bold underneath.
+  */
+  @media (max-width: 560px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+.chip {
+  background: rgba(255, 255, 255,0.4);
+  border: 1px solid rgba(255, 255, 255, 1);
+  border-radius: 12px;
+  padding: 10px 6px 9px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(191, 118, 66, 0.07);
+  /* No width/height here — the grid track sizes the chip. A fixed width is what
+     caused the overlap, and the old `height: 78` had no unit so it never
+     applied at all. */
+  min-width: 0;
+
+  dt {
+    font-size: 0.58rem;
+    font-weight: 500;
+    margin-bottom: 3px;
+    /* Colour comes from the .tone* modifier. */
+    color: inherit;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: $ink;
+    text-transform: capitalize;
+  }
+
+  /*
+    Mobile: left-aligned card. The icon sits inline with the coloured label on
+    the first line (via .chipIcon below), the value bold beneath.
+  */
+  @media (max-width: 560px) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 8px;
+    text-align: left;
+    padding: 14px;
+
+    dt {
+      grid-column: 2;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0;
+    }
+
+    dd {
+      grid-column: 1 / -1;
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
+  }
+}
+
+/* Design's own export, already tinted — no background here. */
+.chipIcon {
+  width: 21px;
+  height: 21px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 6px;
+
+  /* Mobile: icon moves to the first line beside the label. */
+  @media (max-width: 560px) {
+    width: 30px;
+    height: 30px;
+    grid-column: 1;
+    grid-row: 1;
     margin: 0;
   }
 }
 
-.botText {
-  font-weight: 600;
-  color: #1a1a1a !important;
+/* Label colours sampled from each icon. */
+.toneViolet {
+  color: #633ed6;
 }
 
-@media (max-width: 640px) {
-  // .wrapper {
-  //   padding: 14px;
-  //   // margin: 0 auto 20px;
-  // }
+.toneOrange {
+  color: #e95034;
+}
 
-  .title {
-    font-size: 18px;
+.toneRed {
+  color: #eb2124;
+}
+
+.tonePink {
+  color: #d83f8b;
+}
+
+/* Line-art flourishes in opposite corners. Both are declared before .heroArt and
+   sit at z-index 0, so the sign art paints over them and the copy (z-index 1)
+   stays above both. */
+.heroFlourish,
+.heroFlourishLeft {
+  position: absolute;
+  width: 300px;
+  height: auto;
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+
+  @media (max-width: 768px) {
+    width: 190px;
+    opacity: 0.4;
+  }
+}
+
+.heroFlourish {
+  top: 0;
+  right: 0;
+}
+
+.heroFlourishLeft {
+  bottom: 0;
+  left: 0;
+}
+
+/* Sits flush in the card's top-right corner and bleeds off both edges, faded in
+   from the left so it never collides with the chips. */
+.heroArt {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 270px;
+  object-fit: cover;
+  object-position: center right;
+  mask-image: linear-gradient(to right, transparent, #000 42%);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 42%);
+  pointer-events: none;
+
+  /* Hidden on tablet/desktop-narrow where there's no room in the corner. */
+  @media (max-width: 1280px) {
+    display: none;
   }
 
-  .card {
-    padding: 16px;
+  /*
+    Mobile: show the sign artwork as a normal centred block beneath the sign
+    header (coin + sign + meta), sitting above the attribute chips.
+  */
+  @media (max-width: 560px) {
+    display: block;
+    position: static;
+    order: 2;                 // after .heroTop (coin/sign), before .heroAttributes
+    width: 180px;
+    height: auto;
+    margin: 4px auto 0;
+    object-fit: contain;
+    object-position: center;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+}
+
+/* ── TODAY STRIP ───────────────────────────────────────────────────────── */
+.todayStrip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .signImageWrap {
-    width: 48px;
-    height: 48px;
-    padding: 0;
+  /* Mobile: tighter gap so the three stacked cards read as a compact group
+     rather than three oversized blocks. */
+  @media (max-width: 560px) {
+    gap: 10px;
+  }
+}
+
+.todayCard {
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid $panel-border;
+  border-radius: 12px;
+  padding: 12px 14px;
+
+  /*
+    Each card's heading sits inside a soft, tinted "pill" — a different colour
+    per card (cream / pink / lilac) — matching the app design. The pill hugs the
+    text (inline-flex) rather than spanning the card width. Applies on every
+    viewport.
+  */
+  h3 {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    width: auto;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: $brand-dark;
+    margin: 0 0 10px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    /* Default pill — overridden per card below. */
+    background: #fdf0cf;
   }
 
-  .signImage {
+  p {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.55;
+    color: $muted;
+  }
+
+  @media (max-width: 560px) {
+    padding: 14px;
+
+    p {
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+  }
+}
+
+/*
+  Per-card pill colours. Tied to explicit variant classes rather than
+  :nth-child so the colour stays with the card type even when the API omits one
+  of the three cards.
+*/
+.todayCardWarm h3 {
+  background: #fdf0cf;
+  color: #b45309;
+}
+
+.todayCardPink h3 {
+  background: #ffe3e0;
+  color: #e0452c;
+}
+
+.todayCardLilac h3 {
+  background: #e9e5ff;
+  color: #5b45c9;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 1px;
+}
+
+.starOn {
+  color: $brand;
+  fill: currentColor;
+}
+
+.starOff {
+  color: rgba(247, 88, 1, 0.3);
+  fill: none;
+}
+
+/* ── INSIGHT CARDS ─────────────────────────────────────────────────────── */
+.insightGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Mobile: one card per row (single column). */
+  @media (max-width: 560px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+}
+
+.insightCard {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid $panel-border;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+/* Swirl anchored to the card's bottom-left, behind the copy. The export's ink
+   sits in its own bottom-left corner, so it lines up by pinning both edges. */
+.cardDecor {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: auto;
+  opacity: 0.75;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wideCard {
+  width: 100%;
+
+  /* Mobile: reserve room at the bottom for the sign artwork (bottom-right) so
+     the Career copy sits above it, not on top of it. */
+  @media (max-width: 560px) {
+    padding-bottom: 150px;
+    position: relative;
+  }
+}
+
+/*
+  Sign artwork for the Career card. Hidden on desktop/tablet (the hero already
+  shows the illustration there); on mobile it sits as a full-width band along
+  the card's bottom edge — the copy above reserves room for it via padding on
+  .wideCard so the two never overlap.
+*/
+.cardCornerArt {
+  display: none;
+
+  @media (max-width: 560px) {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
-    height: 100%;
+    /* Cap the height so the artwork stays as a band along the bottom instead of
+       filling the whole card and rising behind the copy. */
+    height: 140px;
+    object-fit: contain;
+    /* Sit in the card's bottom-right corner. */
+    object-position: bottom right;
+    opacity: 1;
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+.insightTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: $ink;
+  margin: 0 0 10px;
+}
+
+/* Design's own export — already coloured per section, so no gradient here. */
+.insightIcon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+}
+
+/* Above .cardDecor. */
+.insightText,
+.insightList,
+.insightTitle {
+  position: relative;
+  z-index: 1;
+}
+
+.insightText {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: $muted;
+}
+
+.insightList {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  li {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: $muted;
+  }
+}
+
+/* ── NAKSHATRA + COMPATIBILITY ─────────────────────────────────────────── */
+.bottomRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.nakshatraCard,
+.compatCard,
+.readingCard {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid $panel-border;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.nakshatraBody {
+  display: flex;
+  gap: 14px;
+
+  @media (max-width: 620px) {
+    flex-direction: column;
+  }
+}
+
+.nakshatraFigure {
+  margin: 0;
+  width: 190px;
+  flex-shrink: 0;
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+
+  img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
   }
 
-  .signName {
-    font-size: 20px;
+  @media (max-width: 620px) {
+    width: 100%;
+    max-width: 260px;
+    /* Centre the figure in the stacked (mobile) layout. */
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Blue/violet deity bar pinned across the bottom of the god image, matching the
+   reference — crown icon + "Deity: <name>". */
+.deityPill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #4f39c9;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-align: center;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.nakshatraText {
+  min-width: 0;
+
+  h4 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: $ink;
+    margin: 0 0 6px;
   }
 
-  .detailsGrid {
-    grid-template-columns: 1fr;
+  p {
+    margin: 0 0 10px;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: $muted;
+  }
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  span {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(247, 88, 1, 0.2);
+    color: $brand-dark;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 7px;
+  }
+}
+
+/* API sends these lowercase ("manushya", "mongoose"). */
+.tagCap {
+  text-transform: capitalize;
+}
+
+.compatList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  li {
+    p {
+      margin: 4px 0 0;
+      font-size: 0.72rem;
+      line-height: 1.5;
+      color: $muted;
+    }
+  }
+}
+
+.compatHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  img {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+  }
+
+  span {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: $brand-dark;
+  }
+}
+
+/* ── LUCKY EXTRAS ──────────────────────────────────────────────────────── */
+.luckyRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid $panel-border;
+  border-radius: 12px;
+  padding: 14px;
+
+  @media (max-width: 560px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  span {
+    display: block;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: $muted;
+    margin-bottom: 2px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: $brand-dark;
+  }
+}
+
+.botText {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: $muted;
+}
+
+/* ── SIDEBAR ───────────────────────────────────────────────────────────── */
+.sidebar {
+  /*
+    Must fill the grid row for the sticky child to have anywhere to travel.
+    `.layout` sets `align-items: start`, which sized this column to its own
+    content — so `position: sticky` below had zero scroll range and the panel just
+    scrolled away with the page.
+  */
+  align-self: stretch;
+  height: 100%;
+
+  @media (max-width: 1024px) {
+    /*
+      Placement/order on mobile is handled by the `.layout .sidebar` rule above,
+      which drops the sidebar directly under the hero group. Here we just let it
+      size to its own content.
+    */
+    height: auto;
+  }
+}
+
+.sidebarInner {
+  background: $panel;
+  border: 1.5px solid $panel-border;
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  padding: 14px;
+  position: sticky;
+  top: $fixed-stack + $sticky-gap;
+  /* On short viewports the panel would otherwise overflow past the fold with no
+     way to reach the buttons at its end, so it can still scroll internally —
+     but the scrollbar itself is hidden to keep the panel clean. */
+  max-height: calc(100vh - #{$fixed-stack + $sticky-gap * 2});
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+
+  /* Hide the scrollbar chrome (still scrollable). */
+  scrollbar-width: none;            // Firefox
+  -ms-overflow-style: none;         // old Edge/IE
+  &::-webkit-scrollbar {            // Chrome / Safari
+    width: 0;
+    height: 0;
+  }
+
+  /* Sticky only applies above 1024px, but the top bar shrinks at 1180px, so the
+     1025-1180px band needs the shorter offset. */
+  @media (max-width: 1180px) {
+    top: $fixed-stack-md + $sticky-gap;
+    max-height: calc(100vh - #{$fixed-stack-md + $sticky-gap * 2});
+  }
+
+  @media (max-width: 1024px) {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+.sidebarHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* Brand logo badge in front of the "Want to know more" title. */
+.sidebarHeadIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: #fff;
+  border: 1.5px solid rgba(247, 88, 1, 0.4);
+  flex-shrink: 0;
+  overflow: hidden;
+
+  img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+  }
+}
+
+.sidebarTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $ink;
+  margin: 0;
+  /* Take the space between the leading logo and the trailing action buttons. */
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebarHeadActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sidebarIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: #fff;
+  border: 1.5px solid rgba(247, 88, 1, 0.4);
+  color: $brand-dark;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+
+  &:hover {
+    background: rgba(247, 88, 1, 0.08);
+    transform: translateY(-1px);
+  }
+}
+
+.detailsCard {
+  /* Soft pink swirl artwork (set inline from the imported PNG). A light tint
+     sits under it so the card still reads if the image ever fails to load. */
+  background-color: #fff2f5;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  border: 1px solid rgba(247, 88, 1, 0.15);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+
+  h3 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: $ink;
+    margin: 0 0 8px;
+  }
+
+  dl {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
     gap: 12px;
   }
 
-  .accordionHeader {
-    padding: 14px 16px;
+  /* Each row: coloured icon image + "Label : Value" text on one line. */
+  dl > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
+}
 
-  .accordionBody {
-    padding: 0 16px 14px;
+/* Coloured circular icon image in front of each detail row. */
+.detailIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+}
+
+.detailText {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: $ink;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.sidebarNote {
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: $muted;
+  margin: 0 0 10px;
+}
+
+.sidebarActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.actionPrimary,
+.actionSecondary,
+.actionTertiary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 22px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.2s;
+  /* .actionTertiary is a <button> now — match the sibling <a> links. */
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.actionPrimary {
+  background: $gradient;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.28);
+
+  /* Hidden on mobile — only "Ask Shubh AI" is kept there. */
+  @media (max-width: 560px) {
+    display: none;
+  }
+}
+
+.actionSecondary {
+  background: #fff;
+  color: $brand-dark;
+  border: 1.5px solid rgba(247, 88, 1, 0.35);
+
+  /* Hidden on mobile — only "Ask Shubh AI" is kept there. */
+  @media (max-width: 560px) {
+    display: none;
+  }
+}
+
+.actionTertiary {
+  background: rgba(255, 255, 255, 0.75);
+  color: $brand-dark;
+  border: 1.5px dashed rgba(247, 88, 1, 0.45);
+  /* Temporarily hidden — "Ask AI Pandit". Remove this line to bring it back. */
+  display: none;
+}
+
+.checkAnother {
+  width: 100%;
+  margin-top: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $brand-dark;
+  padding: 6px;
+
+  &:hover {
+    text-decoration: underline;
   }
 }

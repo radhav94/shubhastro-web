@@ -157,15 +157,15 @@
   background: #ffffff;
   border: 1.5px solid transparent;
   border-radius: 17px;
-  padding: 17px 18px;
+  padding: 16px;
   min-height: 433px;
   box-sizing: border-box;
   box-shadow: 0 4px 12px rgba(31, 41, 55, 0.12);
   // Fixed, consistent card size regardless of plan count. The modal width is
   // sized to the number of cards (see --modal-w) so there's no leftover space.
-  flex: 0 0 300px;
-  width: 300px;
-  max-width: 300px;
+  flex: 0 0 290px;
+  width: 290px;
+  max-width: 290px;
 
   @media (max-width: 900px) {
     flex: 0 0 calc(100% - 36px);

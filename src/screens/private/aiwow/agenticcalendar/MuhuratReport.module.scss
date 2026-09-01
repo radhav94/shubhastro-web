@@ -1,0 +1,609 @@
+$ink: #24160f;
+$muted: #8a6a55;
+$brand: #f75801;
+$brand-dark: #d43400;
+$panel: rgba(255, 255, 255, 0.72);
+
+.report {
+  margin-top: 22px;
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(191, 118, 66, 0.24);
+  background: #fff;
+  color: #6b4c3a;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    border-color: rgba(247, 88, 1, 0.45);
+  }
+}
+
+.tabOn {
+  background: linear-gradient(135deg, $brand, $brand-dark);
+  border-color: transparent;
+  color: #fff;
+}
+
+.customTag {
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 5px;
+  padding: 1px 6px;
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.tab:not(.tabOn) .customTag {
+  background: #fdece2;
+  color: $brand-dark;
+}
+
+/* ── Layout ───────────────────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 18px;
+  align-items: start;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Banner ───────────────────────────────────────────────────────────── */
+.banner {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 20px 22px;
+  border-radius: 18px;
+  background: rgba($color: #fff, $alpha: 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 14px rgba(191, 118, 66, 0.08);
+}
+
+/* Illustration sits inline at the left, as in the design, and is the first thing
+   dropped on a narrow screen — it carries no information. */
+.bannerArt {
+  flex-shrink: 0;
+  width: 132px;
+  height: auto;
+  align-self: center;
+
+  @media (max-width: 620px) {
+    display: none;
+  }
+}
+
+.bannerCopy {
+  min-width: 0;
+  flex: 1;
+}
+
+.bannerTitle {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: $ink;
+  line-height: 1.15;
+
+  @media (max-width: 560px) {
+    font-size: 1.25rem;
+  }
+}
+
+.bannerText {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  color: $muted;
+  max-width: 52ch;
+}
+
+.bannerTts {
+  flex-shrink: 0;
+}
+
+/* ── Panels ───────────────────────────────────────────────────────────── */
+.panelRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.panel,
+.nextPanel {
+  padding: 18px;
+  border-radius: 16px;
+   background: rgba($color: #fff, $alpha: 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 12px rgba(191, 118, 66, 0.07);
+}
+
+.panelTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+.panelSub {
+  margin: 5px 0 14px;
+  font-size: 0.75rem;
+  color: $muted;
+}
+
+.iconGood {
+  color: #10b981;
+}
+
+.iconBad {
+  color: #ef4444;
+}
+
+.iconNext {
+  color: #6366f1;
+}
+
+/* ── Slots ────────────────────────────────────────────────────────────── */
+.slotList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.slot {
+  min-width: 0;
+}
+
+.slotHead {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.slotTime {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $ink;
+  white-space: nowrap;
+}
+
+.slotNote {
+  margin: 5px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: $muted;
+}
+
+.qualityChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  /* Dot before the label, as in the design. */
+  &::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}
+
+/* Grades as the engine sends them: Excellent / Very Good / Good, with a neutral
+   bucket so an unfamiliar grade still renders as a chip rather than unstyled. */
+.qualityExcellent {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.qualityVeryGood {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.qualityGood {
+  background: #fff1cc;
+  color: #b45309;
+}
+
+.qualityAverage {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Choghadiya / muhurat type — a name, not a grade, so no status dot. */
+.choghadiyaChip {
+  background: #fdece2;
+  color: #b03a1a;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* "Passed" chip on a window whose time has already gone by today. Neutral grey,
+   pushed to the row's end. */
+.passedChip {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #eef0f3;
+  color: #6b7280;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Fade a passed window so it reads as no longer actionable. */
+.slotPassed {
+  opacity: 0.6;
+}
+
+.scoreChip {
+  background: #fff;
+  border: 1px solid rgba(191, 118, 66, 0.28);
+  color: #6b4c3a;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.dayContext {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #a06a45;
+}
+
+/* Secondary line: why the grade, as opposed to why this window suits the user. */
+.slotWhy {
+  margin: 3px 0 0;
+  font-size: 0.71rem;
+  line-height: 1.45;
+  color: #a06a45;
+}
+
+.moreBtn {
+  margin-top: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #b03a1a;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.moreIcon,
+.moreIconOpen {
+  transition: transform 0.2s ease;
+}
+
+.moreIconOpen {
+  transform: rotate(180deg);
+}
+
+.slotExplain {
+  margin: 6px 0 0;
+  padding: 9px 11px;
+  border-radius: 9px;
+  background: #fff;
+  border: 1px solid rgba(191, 118, 66, 0.16);
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: #6b4c3a;
+}
+
+.bestChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 9px 0 0;
+}
+
+.qualityAvoid {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* ── Next window ──────────────────────────────────────────────────────── */
+.nextBadge {
+  margin-left: 6px;
+  background: #ede9fe;
+  color: #6d28d9;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.nextGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.nextCard {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 14px;
+  border-radius: 13px;
+  background: rgba($color: #fff, $alpha: 0.6);
+  border: 1px solid rgba(191, 118, 66, 0.16);
+}
+
+/* Watermark behind the copy, bottom-right. Faded well down so the timing and the
+   reason stay the most legible things in the card. */
+.nextCardArt {
+  position: absolute;
+  right: -10px;
+  bottom: -12px;
+  width: 92px;
+  height: auto;
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────── */
+/*
+  The COLUMN just fills the grid row; the CARD is the element that sticks.
+  Making the column itself sticky gave it no scroll range (a sticky box only
+  sticks while shorter than its scrolling ancestor, and the column was the same
+  height as its only child), so it scrolled away with the page. Mirrors the
+  Rashi / Face report setup.
+*/
+.sidebar {
+  align-self: stretch;
+}
+
+.bestCard {
+  position: relative;
+  overflow: hidden;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba($color: #fff, $alpha: 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 14px rgba(191, 118, 66, 0.1);
+
+  /* Fixed stack bottom is ~150px (TopHeader + top bar 95px + this report's fixed
+     .headerWrap ~55px). Stick well BELOW it with a clear gap so the card isn't
+     glued to the header and its top never slips underneath. Shorter stack below
+     1180px where the top bar shrinks to 52px. */
+  @media (min-width: 1025px) {
+    position: sticky;
+    top: 172px;
+  }
+
+  @media (min-width: 1025px) and (max-width: 1180px) {
+    top: 130px;
+  }
+}
+
+/* Top-right ornament, as in the design. `padding-right` on the meta rows is not
+   needed because the badge and date sit well clear of it. */
+.bestOrnament {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 74px;
+  height: auto;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Download + share, over the ornament. */
+.cardTools {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+}
+
+.toolBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: #fff;
+  border: 1.5px solid rgba(247, 88, 1, 0.55);
+  color: $brand-dark;
+
+  &:hover {
+    background: $brand;
+    border-color: $brand;
+    color: #fff;
+  }
+}
+
+.bestBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #fff6d9;
+  color: #a16207;
+  border: 1px solid rgba(161, 98, 7, 0.2);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 7px;
+}
+
+.bestMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 12px 0 0;
+  /* Left clear of the tool buttons above. */
+  padding-right: 70px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #a06a45;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Dot between date and place, as in the design. Only between, never trailing —
+     hence the sibling selector rather than a border or a literal character. */
+  span + span::before {
+    content: "•";
+    margin-right: 6px;
+    opacity: 0.55;
+  }
+}
+
+.bestTime {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: $ink;
+}
+
+.bestReason {
+  margin: 7px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: $muted;
+}
+
+/* Hairline with a gap in the middle for the lotus. The rule is drawn by the two
+   flex children rather than as a background, so the mark sits in a real gap
+   instead of on top of a line showing through it. */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(196, 130, 90, 0.22);
+  }
+}
+
+.dividerMark {
+  display: inline-flex;
+  color: rgba(196, 130, 90, 0.65);
+}
+
+.verifyNote {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid rgba(191, 118, 66, 0.16);
+  font-size: 0.73rem;
+  line-height: 1.45;
+  color: #6b4c3a;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.actionPrimary,
+.actionSecondary,
+.actionTertiary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  /* .actionTertiary is a <button> now — match the sibling <a> links. */
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.actionPrimary {
+  background: linear-gradient(135deg, $brand, $brand-dark);
+  color: #fff;
+}
+
+.actionSecondary {
+  background: #fff;
+  border: 1.5px solid rgba(247, 88, 1, 0.5);
+  color: $brand-dark;
+}
+
+.actionTertiary {
+  background: #fdece2;
+  color: $brand-dark;
+  /* Temporarily hidden — "Ask AI Pandit". Remove this line to bring it back. */
+  display: none;
+}
+
+/* Download moved into .cardTools as an icon button (see the design), so the
+   bottom text link that used to live here is gone. */
