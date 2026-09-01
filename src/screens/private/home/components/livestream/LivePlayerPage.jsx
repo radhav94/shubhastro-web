@@ -323,7 +323,8 @@ const LivePlayerPage = () => {
    */
 
   if (isLoading) {
-    return <LiveLoadingGate message="Finding live sessions…" />;
+    //return <LiveLoadingGate message="Finding live sessions…" />;
+    return <LiveLoadingGate message="" />;
   }
 
   if (loadFailed) {
