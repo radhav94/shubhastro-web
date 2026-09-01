@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import TTSButton from "../../../../component/UI/TTSButton";
 import { PATH } from "../../../../utils/routes/Paths";
+import RecommendedAstrologersModal from "../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal";
+import useRecommendationOffer from "../../../../utils/hooks/useRecommendationOffer";
 import styles from "./FaceReport.module.scss";
 
 /** "analyticalMind" -> "Analytical Mind" */
@@ -40,7 +42,12 @@ const AURA_COLORS = {
   "light-blue": "#4FC3F7", "sky-blue": "#4FC3F7", blue: "#1E62D0",
   "royal-blue": "#3949AB", indigo: "#3F51B5", violet: "#8E24AA",
   purple: "#8E24AA", magenta: "#D81B60", pink: "#EC407A", brown: "#8D6E63",
-  white: "#E0E0E0", silver: "#BDBDBD", gray: "#9E9E9E", grey: "#9E9E9E",
+  // Light/neutral aura colours need an explicit, *visible* swatch — the CSS
+  // named "cream"/"white"/"ivory" are so pale they vanish on the report's
+  // cream background, which is exactly why the donut's largest slice showed
+  // no colour. Map them to a warmer, distinguishable tone instead.
+  cream: "#E6C79C", ivory: "#E6D8B8", beige: "#D9C2A0", tan: "#D2A679",
+  white: "#CFCFCF", silver: "#BDBDBD", gray: "#9E9E9E", grey: "#9E9E9E",
   black: "#212121",
 };
 
@@ -52,6 +59,18 @@ const auraHex = (name) => {
   for (const part of key.split("-")) if (AURA_COLORS[part]) return AURA_COLORS[part];
   return "#ccc";
 };
+
+/*
+  Soft tinted background for the tier badge. `auraHex` can return a full #hex
+  OR a bare CSS colour name (e.g. "blue"), so appending an alpha suffix isn't
+  safe universally. For a 6-digit hex we add "1f" (~12% alpha); otherwise fall
+  back to color-mix so named colours still get a light tint without producing
+  an invalid value like "blue1f".
+*/
+const auraTierTint = (hex) =>
+  /^#[0-9a-fA-F]{6}$/.test(hex)
+    ? `${hex}1f`
+    : `color-mix(in srgb, ${hex} 12%, transparent)`;
 
 /* The API's own grading, mapped to a colour only. */
 const LEVEL_CLASS = {
@@ -219,6 +238,11 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
 
   const [activeTab, setActiveTab] = useState("all");
   const shows = (id) => activeTab === "all" || activeTab === id;
+
+  // Same two-stage recommendation popup the Rashi report uses: Call/Chat open a
+  // matched astrologer list first, and only escalate to the discounted offer on
+  // dismiss. Keeps the CTA behaviour identical across reports.
+  const recommendation = useRecommendationOffer();
 
   /* The banner reads the headline summary only. The cards below it are read by
      the Over All panel's own button, so the two never speak the same text. */
@@ -532,7 +556,12 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
                             aria-hidden="true"
                           />
                           {slice.label} — {slice.percentage}%
-                          <span className={styles.auraTier}>{titleise(slice.tier)}</span>
+                          <span
+                            className={styles.auraTier}
+                            style={{ background: auraTierTint(slice.hex), color: slice.hex }}
+                          >
+                            {titleise(slice.tier)}
+                          </span>
                         </dt>
                         {slice.meaning && <dd>{slice.meaning}</dd>}
                       </div>
@@ -741,15 +770,32 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
             )}
 
             <div className={styles.actions}>
-              <Link
-                to={PATH.privateRoutes.ASTROLOGERS_LIST.path}
+              {/*
+                Call/Chat open the matched-astrologer recommendation popup first
+                (same as the Rashi report) instead of jumping straight to the
+                listing. Kept as real <a href> so middle-click / open-in-new-tab
+                still reach the listing page.
+              */}
+              <a
+                href={PATH.privateRoutes.ASTROLOGERS_LIST.path}
                 className={styles.actionPrimary}
+                onClick={(event) => {
+                  event.preventDefault();
+                  recommendation.open("audio");
+                }}
               >
                 <MdOutlinePhoneInTalk size={15} aria-hidden="true" /> Call an astrologer
-              </Link>
-              <Link to="/chat-with-astrologers" className={styles.actionSecondary}>
+              </a>
+              <a
+                href="/chat-with-astrologers"
+                className={styles.actionSecondary}
+                onClick={(event) => {
+                  event.preventDefault();
+                  recommendation.open("chat");
+                }}
+              >
                 <BsChatDots size={14} aria-hidden="true" /> Chat with astrologer
-              </Link>
+              </a>
               <Link to="/ai-wow" className={styles.actionTertiary}>
                 <Sparkles size={14} aria-hidden="true" /> Ask Shubh AI · Free
               </Link>
@@ -763,6 +809,16 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
           </div>
         </aside>
       </div>
+
+      <RecommendedAstrologersModal
+        isOpen={recommendation.isOpen}
+        variant={recommendation.stage === "offer" ? "offer" : "plain"}
+        type={recommendation.type || "chat"}
+        onDismiss={recommendation.dismiss}
+        onFinish={recommendation.finish}
+        // Nothing discounted to show -> the close press just closes.
+        onNothingToOffer={recommendation.finish}
+      />
     </div>
   );
 };

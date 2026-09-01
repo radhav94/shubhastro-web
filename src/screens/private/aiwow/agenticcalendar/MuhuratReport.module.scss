@@ -374,15 +374,15 @@ $panel: rgba(255, 255, 255, 0.72);
 }
 
 /* ── Sidebar ──────────────────────────────────────────────────────────── */
+/*
+  The COLUMN just fills the grid row; the CARD is the element that sticks.
+  Making the column itself sticky gave it no scroll range (a sticky box only
+  sticks while shorter than its scrolling ancestor, and the column was the same
+  height as its only child), so it scrolled away with the page. Mirrors the
+  Rashi / Face report setup.
+*/
 .sidebar {
   align-self: stretch;
-
-  @media (min-width: 1025px) {
-    position: sticky;
-    /* Clears the three fixed bars this page sits under, same stack the rashi
-       report accounts for. */
-    top: 157px;
-  }
 }
 
 .bestCard {
@@ -393,6 +393,19 @@ $panel: rgba(255, 255, 255, 0.72);
   background: rgba($color: #fff, $alpha: 0.4);
   border: 1.5px solid rgba(255, 255, 255, 0.95);
   box-shadow: 0 2px 14px rgba(191, 118, 66, 0.1);
+
+  /* Fixed stack bottom is ~150px (TopHeader + top bar 95px + this report's fixed
+     .headerWrap ~55px). Stick well BELOW it with a clear gap so the card isn't
+     glued to the header and its top never slips underneath. Shorter stack below
+     1180px where the top bar shrinks to 52px. */
+  @media (min-width: 1025px) {
+    position: sticky;
+    top: 172px;
+  }
+
+  @media (min-width: 1025px) and (max-width: 1180px) {
+    top: 130px;
+  }
 }
 
 /* Top-right ornament, as in the design. `padding-right` on the meta rows is not

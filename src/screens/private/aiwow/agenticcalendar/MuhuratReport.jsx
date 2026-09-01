@@ -13,6 +13,8 @@ import { MdOutlinePhoneInTalk } from "react-icons/md";
 import { Sparkles, ShieldAlert } from "lucide-react";
 import TTSButton from "../../../../component/UI/TTSButton";
 import { PATH } from "../../../../utils/routes/Paths";
+import RecommendedAstrologersModal from "../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal";
+import useRecommendationOffer from "../../../../utils/hooks/useRecommendationOffer";
 import bannerArt from "../../../../assets/images/muhurat/banner-art.png";
 import bestOrnament from "../../../../assets/images/muhurat/best-ornament.png";
 import slotArt1 from "../../../../assets/images/muhurat/slot-1.png";
@@ -164,6 +166,11 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
   }, [analysis?.optimalTimings]);
 
   const [activeEvent, setActiveEvent] = useState(byEvent[0]?.name || null);
+
+  // Same two-stage recommendation popup as the Rashi / Face reports: Call/Chat
+  // open a matched astrologer list first and only escalate to the discounted
+  // offer on dismiss.
+  const recommendation = useRecommendationOffer();
 
   // Selections change between runs, so an event no longer in the response must
   // not leave the report showing an empty tab.
@@ -478,15 +485,31 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
             </p>
 
             <div className={styles.actions}>
-              <Link
-                to={PATH.privateRoutes.ASTROLOGERS_LIST.path}
+              {/*
+                Call/Chat open the matched-astrologer recommendation popup first
+                (same as the Rashi / Face reports). Kept as real <a href> so
+                middle-click / open-in-new-tab still reach the listing.
+              */}
+              <a
+                href={PATH.privateRoutes.ASTROLOGERS_LIST.path}
                 className={styles.actionPrimary}
+                onClick={(event) => {
+                  event.preventDefault();
+                  recommendation.open("audio");
+                }}
               >
                 <MdOutlinePhoneInTalk size={15} aria-hidden="true" /> Call an astrologer
-              </Link>
-              <Link to="/chat-with-astrologers" className={styles.actionSecondary}>
+              </a>
+              <a
+                href="/chat-with-astrologers"
+                className={styles.actionSecondary}
+                onClick={(event) => {
+                  event.preventDefault();
+                  recommendation.open("chat");
+                }}
+              >
                 <BsChatDots size={14} aria-hidden="true" /> Chat with astrologer
-              </Link>
+              </a>
               <Link to="/ai-wow" className={styles.actionTertiary}>
                 <Sparkles size={14} aria-hidden="true" /> Ask Shubh AI · Free
               </Link>
@@ -495,6 +518,16 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
           </div>
         </aside>
       </div>
+
+      <RecommendedAstrologersModal
+        isOpen={recommendation.isOpen}
+        variant={recommendation.stage === "offer" ? "offer" : "plain"}
+        type={recommendation.type || "chat"}
+        onDismiss={recommendation.dismiss}
+        onFinish={recommendation.finish}
+        // Nothing discounted to show -> the close press just closes.
+        onNothingToOffer={recommendation.finish}
+      />
     </div>
   );
 };
