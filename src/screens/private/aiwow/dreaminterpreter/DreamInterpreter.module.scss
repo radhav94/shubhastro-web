@@ -364,6 +364,26 @@
   }
 }
 
+/* Dimmed but still pressable: the description is too short to submit, and the
+   press is what surfaces .submitBlockHint below. Deliberately not `:disabled`,
+   which would swallow the press and explain nothing. */
+.submitButtonBlocked {
+  opacity: 0.6;
+
+  &:hover {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+  }
+}
+
+.submitBlockHint {
+  margin: 0.5rem auto 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #D43400;
+}
+
 .spinner {
   width: 16px;
   height: 16px;
