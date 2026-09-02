@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { BsChatDots } from "react-icons/bs";
 import { MdOutlinePhoneInTalk } from "react-icons/md";
@@ -764,7 +763,12 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
             {bannerChips.length > 0 && (
               <p className={styles.chipRow}>
                 {bannerChips.slice(1).map((chip) => (
-                  <span key={chip.label} className={styles.chip}>{chip.value}</span>
+                  <span
+                    key={chip.label}
+                    className={`${styles.chip} ${styles[`chip_${chip.tone}`] || ""}`}
+                  >
+                    {chip.value}
+                  </span>
                 ))}
               </p>
             )}
@@ -816,6 +820,9 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
         onFinish={recommendation.finish}
         // Nothing discounted to show -> the close press just closes.
         onNothingToOffer={recommendation.finish}
+        // Bring the user back to this report after the chat ends (only when the
+        // chat was started from here).
+        returnTo={`${window.location.pathname}${window.location.search}`}
       />
     </div>
   );

@@ -2,7 +2,7 @@ $ink: #24160f;
 $muted: #8a6a55;
 $brand: #f75801;
 $brand-dark: #d43400;
-$panel: rgba(255, 255, 255, 0.72);
+$panel: rgba(255, 255, 255, 0.4);
 $hair: rgba(191, 118, 66, 0.16);
 
 .report {
@@ -390,7 +390,7 @@ $hair: rgba(191, 118, 66, 0.16);
   padding: 18px;
   border-radius: 18px;
   background: $panel;
-  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  border: 1.5px solid rgba(255, 255, 255, 1);
   box-shadow: 0 2px 12px rgba(191, 118, 66, 0.07);
 }
 
@@ -458,8 +458,8 @@ $hair: rgba(191, 118, 66, 0.16);
 .subCard {
   padding: 14px;
   border-radius: 13px;
-  background: #fff;
-  border: 1px solid $hair;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid #fff;
   min-width: 0;
 }
 
@@ -577,6 +577,39 @@ $hair: rgba(191, 118, 66, 0.16);
   font-weight: 600;
   padding: 3px 9px;
   border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+/* Coloured pill variants for the sidebar summary chips (Face Shape, Planet,
+   Zodiac), tinted per their banner tone — soft fill + coloured text + border. */
+.chip_toneViolet {
+  background: #f3e8ff;
+  color: #6d28d9;
+  border-color: rgba(109, 40, 217, 0.3);
+}
+
+.chip_toneOrange {
+  background: #ffedd5;
+  color: #c2410c;
+  border-color: rgba(194, 65, 12, 0.3);
+}
+
+.chip_toneGold {
+  background: #fff1cc;
+  color: #b45309;
+  border-color: rgba(180, 83, 9, 0.3);
+}
+
+.chip_toneRed {
+  background: #fde7ef;
+  color: #db2777;
+  border-color: rgba(219, 39, 119, 0.3);
+}
+
+.chip_tonePink {
+  background: #fde7ef;
+  color: #db2777;
+  border-color: rgba(219, 39, 119, 0.3);
 }
 
 /* ── Aura ─────────────────────────────────────────────────────────────── */

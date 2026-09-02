@@ -60,6 +60,10 @@ const RecommendedAstrologersModal = ({
   onDismiss,
   onFinish,
   onNothingToOffer,
+  // Optional path to return to after the chat ends. Only used for chat (the
+  // chat screen reads it once the session ends). Passed by screens that want
+  // the user brought back to them — currently the Muhurat report.
+  returnTo = null,
 }) => {
   const isOffer = variant === "offer";
   const trackRef = useRef(null);
@@ -134,8 +138,16 @@ const RecommendedAstrologersModal = ({
       handleCallStart(astro, type, isEmergency). Passing `true` third on the call
       path would flag it as an emergency session, not "check the balance".
     */
-    if (type === "chat") handleChatStart(astrologer, true, false);
-    else handleCallStart(astrologer, type === "video" ? "video" : "audio");
+    if (type === "chat") {
+      // Remember where to send the user once the chat ends. The chat launch is
+      // a full-page navigation, so router state would be lost — persist it.
+      if (returnTo) {
+        try { sessionStorage.setItem("shubhtalk_chat_return_path", returnTo); } catch { /* ignore */ }
+      }
+      handleChatStart(astrologer, true, false);
+    } else {
+      handleCallStart(astrologer, type === "video" ? "video" : "audio");
+    }
     onFinish?.();
   };
 

@@ -80,6 +80,8 @@ const AgenticCalendar = () => {
 
   const downloadResultData = useMemo(() => {
     if (!rawApiResult) return null;
+    // featureName must stay as the charges/history slug so the download price
+    // resolves; the saved file is renamed via `downloadFileName` below.
     return { ...rawApiResult, featureName: 'Agentic-Calendar' };
   }, [rawApiResult]);
 
@@ -87,7 +89,7 @@ const AgenticCalendar = () => {
     isDownloading, showDownloadModal, setShowDownloadModal,
     downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload,
-  } = useAIWowDownload({ resultData: downloadResultData });
+  } = useAIWowDownload({ resultData: downloadResultData, downloadFileName: 'Muhurat-Calendar' });
 
   const [navStateConsumed, setNavStateConsumed] = useState(false);
   const [autoSubmitPending, setAutoSubmitPending] = useState(false);
@@ -755,7 +757,7 @@ const AgenticCalendar = () => {
       isOpen={showDownloadModal}
       onClose={() => setShowDownloadModal(false)}
       onDownload={handleConfirmDownload}
-      featureName="Agentic Calendar Report"
+      featureName="Muhurat Calendar Report"
       downloadCost={downloadPrice}
       walletBalance={walletBalance ?? 0}
       isDownloading={isDownloading}
