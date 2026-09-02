@@ -10,7 +10,7 @@ const GST_RATE = 0.18;
 
 const PaymentDetailsModal = ({ isOpen, onClose, selectedPlan, onSuccess, onBack }) => {
   const [paymentLoading, setPaymentLoading] = useState(false);
-  const { initiatePayment, isProcessing, isLoaded, scriptError } = useRazorpayPayment();
+  const { initiatePayment, isProcessing, isLoaded, scriptError, retryScriptLoad } = useRazorpayPayment();
 
   const rechargeAmount = selectedPlan?.actualPrice || 0;
   const gstAmount = Math.round(rechargeAmount * GST_RATE);
@@ -35,8 +35,20 @@ const PaymentDetailsModal = ({ isOpen, onClose, selectedPlan, onSuccess, onBack 
     // here rather than inside initiatePayment: that guard returns without
     // calling onFailure, so setting paymentLoading first would strand the
     // button on "Processing..." forever.
+    /*
+      A failed gateway load is now recoverable in place.
+
+      This used to tell the user to reload the whole page, because the hook had no
+      way to re-inject the script — and the failed <script> tag stayed in the DOM,
+      so nothing short of a reload could ever succeed. That is a dead end on the
+      last step of a recharge, and it lands hardest in the Facebook/Instagram
+      in-app browsers where third-party script loads fail in the first place.
+      retryScriptLoad discards the dead tag and fetches again, so the tap does
+      real work instead of issuing instructions.
+    */
     if (scriptError) {
-      Toast.error('Payment gateway could not load. Check your connection, then reload the page and try again.');
+      Toast.info('Retrying the payment gateway…');
+      retryScriptLoad();
       return;
     }
     if (!isLoaded) {
@@ -82,7 +94,7 @@ const PaymentDetailsModal = ({ isOpen, onClose, selectedPlan, onSuccess, onBack 
     } catch {
       setPaymentLoading(false);
     }
-  }, [selectedPlan, paymentLoading, isProcessing, isLoaded, scriptError, initiatePayment, onClose, onSuccess]);
+  }, [selectedPlan, paymentLoading, isProcessing, isLoaded, scriptError, retryScriptLoad, initiatePayment, onClose, onSuccess]);
 
   const handleClose = useCallback(() => {
     if (paymentLoading || isProcessing) return;
@@ -192,11 +204,11 @@ const PaymentDetailsModal = ({ isOpen, onClose, selectedPlan, onSuccess, onBack 
             {paymentLoading || isProcessing ? (
               <><span className={styles.spinner} aria-hidden="true" />Processing...</>
             ) : scriptError ? (
-              // Was showing "Loading Payment Gateway..." forever, which is a
-              // lie once the script has actually failed. Not labelled "Retry":
-              // useRazorpayPayment exposes no way to reload the script, so the
-              // tap can only explain, not fix.
-              'Payment Gateway Unavailable'
+              // Now labelled as a retry, because there is one: retryScriptLoad
+              // drops the failed <script> tag and fetches it again. Previously
+              // the hook had no reload path, so this could only state that the
+              // gateway was unavailable and leave a page refresh as the only cure.
+              'Retry Payment Gateway'
             ) : !isLoaded ? (
               'Loading Payment Gateway...'
             ) : (
