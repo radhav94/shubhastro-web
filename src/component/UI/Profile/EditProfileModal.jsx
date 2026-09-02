@@ -5,7 +5,7 @@ import LocationSearch from "../../../utils/location/locationSearchVedic";
 import styles from "./AddProfileModal.module.scss";
 import { relationOption } from "../../../utils/constanats/appData";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
-import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
+import { personNameRegex, PERSON_NAME_ERROR, PERSON_NAME_MIN, PERSON_NAME_MIN_ERROR } from "../../../utils/regex";
 
 const EditProfileModal = ({
   isOpen,
@@ -49,7 +49,9 @@ const EditProfileModal = ({
   // Validation schema
   const validationSchema = Yup.object({
     name: Yup.string()
+      .trim()
       .required("Name is required")
+      .min(PERSON_NAME_MIN, PERSON_NAME_MIN_ERROR)
       .matches(personNameRegex, PERSON_NAME_ERROR),
     relation: Yup.string()
       .required("Relation is required")

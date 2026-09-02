@@ -14,6 +14,7 @@ import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 import BackButton from "../../../../component/UI/BackButton/BackButton";
+import { validatePersonName } from "../../../../utils/regex";
 
 const STORAGE_KEY = "atmakaraka-and-darakaraka";
 
@@ -102,7 +103,8 @@ const AtmakarakaCalculator = () => {
 
     const newErrors = {};
 
-    if (!formData.name) newErrors.name = "Name is required";
+    const nameErr = validatePersonName(formData.name);
+    if (nameErr) newErrors.name = nameErr;
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
     // Checks the coordinates, not just the text: a hand-typed place that was

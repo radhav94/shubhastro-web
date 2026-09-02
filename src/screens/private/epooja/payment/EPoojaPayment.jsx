@@ -5,7 +5,7 @@ import { FiChevronLeft, FiSearch, FiMinus, FiPlus, FiX, FiHome, FiBriefcase, FiT
 import { FaStar } from "react-icons/fa";
 import { useGetCartQuery, useUpdateCartItemMutation, useRemoveCartItemMutation, useAddToCartMutation, useGetAddressesQuery, useAddAddressMutation, useUpdateAddressMutation, useDeleteAddressMutation } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
-import { personNameRegex, placeNameRegex, PERSON_NAME_ERROR } from "../../../../utils/regex";
+import { placeNameRegex, validatePersonName } from "../../../../utils/regex";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 import { DefaultImages } from "../../../../utils/appImages";
 import ProductImage from "../../../../component/UI/ProductImage";
@@ -66,8 +66,8 @@ const EPoojaPayment = () => {
 
   const validateAddress = () => {
     const errs = {};
-    if (!newAddr.name.trim()) errs.name = "Name is required";
-    else if (!personNameRegex.test(newAddr.name.trim())) errs.name = PERSON_NAME_ERROR;
+    const nameErr = validatePersonName(newAddr.name);
+    if (nameErr) errs.name = nameErr;
     if (!newAddr.phone.trim()) errs.phone = "Phone is required";
     else if (!/^\d{10}$/.test(newAddr.phone.trim())) errs.phone = "Enter a valid 10-digit phone number";
     if (!newAddr.addressLine1.trim()) errs.addressLine1 = "Address line 1 is required";

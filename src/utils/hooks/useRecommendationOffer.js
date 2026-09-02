@@ -36,6 +36,15 @@ export const useRecommendationOffer = () => {
     setState({ open: true, stage: "plain", type });
   }, []);
 
+  // Open straight on the discounted offer stage. Used by the report's back
+  // button as an exit-intent offer: leaving the report shows the discounted
+  // astrologers instead of the plain list. Marks the offer spent so it isn't
+  // shown a second time on the same mount.
+  const openOffer = useCallback((type = "chat") => {
+    offerSpentRef.current = true;
+    setState({ open: true, stage: "offer", type });
+  }, []);
+
   const finish = useCallback(() => {
     setState((prev) => ({ open: false, stage: null, type: prev.type }));
   }, []);
@@ -55,6 +64,7 @@ export const useRecommendationOffer = () => {
     stage: state.stage,
     type: state.type,
     open,
+    openOffer,
     dismiss,
     finish,
   };
