@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { trackEvent } from "../../../../utils/analytics";
 import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import { validatePersonName } from "../../../../utils/regex";
 import { useNavigate } from "react-router-dom";
 import FlamesForm from "../forms/FlamesForm";
 import styles from "./Friendship.module.scss";
@@ -39,8 +40,10 @@ const Friendship = () => {
     trackEvent("calculator_used", { calculator_name: "Friendship" });
 
     const newErrors = {};
-    if (!formData.name1) newErrors.name1 = "Name is required";
-    if (!formData.name2) newErrors.name2 = "Friend's name is required";
+    const name1Err = validatePersonName(formData.name1);
+    if (name1Err) newErrors.name1 = name1Err;
+    const name2Err = validatePersonName(formData.name2, { requiredError: "Friend's name is required" });
+    if (name2Err) newErrors.name2 = name2Err;
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length) return;

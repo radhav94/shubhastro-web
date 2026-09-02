@@ -3,6 +3,7 @@ import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import { validatePersonName } from "../../../../utils/regex";
 import styles from "./MulankCalc.module.scss";
 import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 import { ProfileManager } from "../../../../component/UI/Profile";
@@ -56,7 +57,8 @@ const MulankCalc = () => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Mulank" });
     const newErrors = {};
-    if (!formData.name) newErrors.name = "Name is required";
+    const nameErr = validatePersonName(formData.name);
+    if (nameErr) newErrors.name = nameErr;
     if (!formData.dob) newErrors.dob = "Date of birth is required";
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     dispatch(setCalculatorData({ key: STORAGE_KEY, data: formData }));

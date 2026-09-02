@@ -12,7 +12,7 @@ import DateTimePicker from "../dateTimePicker/DateTimePicker";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import Toast from "../../toast";
 import { trackEvent } from "../../../utils/analytics";
-import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
+import { validatePersonName } from "../../../utils/regex";
 import styles from "./GuestDetailsForm.module.scss";
 import {
   getSignupBonusLabel,
@@ -88,9 +88,8 @@ const GuestDetailsForm = ({
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = "Please enter your name";
-    else if (!personNameRegex.test(form.name.trim()))
-      e.name = PERSON_NAME_ERROR;
+    const nameErr = validatePersonName(form.name, { requiredError: "Please enter your name" });
+    if (nameErr) e.name = nameErr;
     if (!/^[6-9]\d{9}$/.test(form.mobileNumber || ""))
       e.mobileNumber = "Enter a valid 10-digit mobile number";
     if (!form.identity) e.identity = "Please select your gender";

@@ -852,6 +852,9 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
         onFinish={recommendation.finish}
         // Nothing discounted to show -> the close press just closes.
         onNothingToOffer={recommendation.finish}
+        // First browser Back on the report opens the discounted offer instead
+        // of leaving (this report has no in-page back button).
+        onExitOffer={() => recommendation.openOffer("chat")}
         // Bring the user back to this report after the chat ends (only when the
         // chat was started from here).
         returnTo={`${window.location.pathname}${window.location.search}`}
