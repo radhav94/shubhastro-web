@@ -13,7 +13,7 @@ const VehicleReport = () => {
 
   const stored = useSelector(selectCalculatorData("vehicle_calculator"));
 
-  const [vehicleNumerologyCalculator, { data, isLoading, isError }] =
+  const [vehicleNumerologyCalculator, { data, isLoading, isError, isUninitialized, error }] =
     useVehicleNumerologyCalculatorMutation();
 
   useEffect(() => {
@@ -26,11 +26,47 @@ const VehicleReport = () => {
       });
   }, []);
 
-  // Reserves in-flow height while the request runs — see CalcReportLoader.
-  if (isLoading) return <CalcReportLoader />;
-  if (isError) return <div className={styles.center}>No data found</div>;
-
   const report = data?.data;
+
+  /*
+    This page is a route, so it can be opened without going through the form —
+    a bookmark, a shared link, or Back after the stored payload was cleared.
+
+    With nothing stored the effect above returns without firing, so `isLoading`
+    and `isError` both stay false and `report` stays undefined, which fell
+    through to `if (!report) return null` — a blank content area with no
+    explanation and no way forward but the browser Back button. A failed request
+    landed on a bare "No data found" with the same lack of an exit.
+
+    Mirrors LoveReport, including why `isUninitialized` is needed: the mutation is
+    fired from an effect, so on the very first render nothing is loading and
+    nothing has failed yet, and without it this card would flash before the
+    request has even left.
+  */
+  const notReady = !stored || isError || (!report && !isLoading && !isUninitialized);
+  if (notReady) {
+    return (
+      <div className={styles.wrapper}>
+        <CalcBackButton />
+        <h2 className={styles.title}>Vehicle Number Analysis</h2>
+        <div className={styles.descriptionBox}>
+          {error?.data?.message ||
+            (!stored
+              ? "Enter your vehicle number to see its numerology analysis."
+              : "We couldn't analyse that vehicle number. Please try again.")}
+        </div>
+        <button
+          className={styles.againBtn}
+          onClick={() => navigate("/lucky-vehicle-number-calculator")}
+        >
+          Back to Vehicle Number Calculator
+        </button>
+      </div>
+    );
+  }
+
+  // Reserves in-flow height while the request runs — see CalcReportLoader.
+  if (isLoading || isUninitialized) return <CalcReportLoader />;
   if (!report) return null;
 
   return (

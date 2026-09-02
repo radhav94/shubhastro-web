@@ -469,7 +469,32 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
       {/* Language Translator - top right corner */}
       {/* <LanguageSelector /> */}
 
-      <div className={styles.loginContent}>
+      {/*
+        Clicking the copy on this screen returns focus to the code field.
+
+        The six boxes are <div>s layered over one `opacity: 0` input, so there is
+        no caret anywhere on screen. `autoFocus` puts focus in that input on
+        mount, but a click on anything outside .otpInputs — the heading, the
+        subtitle, the surrounding padding — silently takes it away. The active box
+        keeps its highlight regardless (it is driven by otp.length, not by focus),
+        so the screen still looks ready to accept the code while every keystroke
+        goes nowhere. Nothing on screen reports the difference.
+
+        Clarity caught the shape of it on this screen: dead clicks logged against
+        the "Aligning your stars…We've sent a 6-digit code" text block at 00:54
+        and 02:19, eight minutes on two pages, and the visitor left on /login
+        without ever completing the code.
+
+        Real controls are excluded so the Change-number, resend and Continue
+        buttons keep their own behaviour.
+      */}
+      <div
+        className={styles.loginContent}
+        onClick={(e) => {
+          if (e.target?.closest?.("button, a, input")) return;
+          inputRef.current?.focus();
+        }}
+      >
         <h1 className={styles.title}>Aligning your stars...</h1>
         {/*
           The number is the control, not just a label.
