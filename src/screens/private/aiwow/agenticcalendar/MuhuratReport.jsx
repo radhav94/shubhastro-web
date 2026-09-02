@@ -241,13 +241,40 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
     }
 
     const primary = days.find((d) => d.date === fromIso) || null;
-    const later = days.find((d) => d.date > fromIso) || null;
+    let later = days.find((d) => d.date > fromIso) || null;
+
+    /*
+      Today view must always show a "Next Favorable Window". If the active event
+      itself has no later-dated window, borrow the next day's windows from any
+      other event in the response (earliest later date, best-ranked first) so the
+      section is present regardless of which event is selected.
+    */
+    if (!later) {
+      const laterByDate = new Map();
+      byEvent.forEach((ev) => {
+        (ev.days || []).forEach((d) => {
+          if (d.date > fromIso) {
+            if (!laterByDate.has(d.date)) laterByDate.set(d.date, []);
+            laterByDate.get(d.date).push(...(d.timings || []));
+          }
+        });
+      });
+      const earliestLater = [...laterByDate.keys()].sort((a, b) => a.localeCompare(b))[0];
+      if (earliestLater) {
+        later = {
+          date: earliestLater,
+          timings: [...laterByDate.get(earliestLater)].sort(
+            (a, b) => (a.rank ?? 99) - (b.rank ?? 99)
+          ),
+        };
+      }
+    }
 
     // If the active event has no window on the primary day, its (later) window
     // is the "next" one — leaving Favorable Muhurats empty for that event.
     if (!primary) return { today: null, nextDay: later || days[0] || null };
     return { today: primary, nextDay: later };
-  }, [active, fromIso, isTodayView]);
+  }, [active, byEvent, fromIso, isTodayView]);
 
   const best = today?.timings?.[0] || null;
 
@@ -426,41 +453,53 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
             )}
           </div>
 
-          {/* Only when the analysis actually covered a second date. A single-day
-              request returns one date, so this stays hidden rather than
-              re-presenting the same day's lower-ranked windows as a later one. */}
-          {nextDay?.timings?.length > 0 && (
+          {/*
+            Next Favorable Window.
+            - Today view: always shown (per requirement) — with tomorrow's
+              windows when available, or an empty note otherwise.
+            - Other views: only when the analysis covered a second date, so a
+              single-day request doesn't re-present the same day's windows.
+          */}
+          {(isTodayView || nextDay?.timings?.length > 0) && (
             <section className={styles.nextPanel}>
               <h3 className={styles.panelTitle}>
                 <FiCalendar size={16} className={styles.iconNext} aria-hidden="true" />
                 Next Favorable Window
-                {dayOffsetLabel(nextDay.date) && (
+                {nextDay?.date && dayOffsetLabel(nextDay.date) && (
                   <span className={styles.nextBadge}>{dayOffsetLabel(nextDay.date)}</span>
                 )}
               </h3>
-              <p className={styles.panelSub}>
-                {formatDate(nextDay.date)} · {nextDay.timings.length}{" "}
-                {nextDay.timings.length === 1 ? "timing" : "timings"} available
-              </p>
-              <div className={styles.nextGrid}>
-                {nextDay.timings.map((timing, index) => (
-                  <div key={`${timing.bestTimeRange}-${timing.rank}`} className={styles.nextCard}>
-                    <img
-                      src={SLOT_ART[index % SLOT_ART.length]}
-                      alt=""
-                      aria-hidden="true"
-                      className={styles.nextCardArt}
-                    />
-                    <span className={styles.slotTime}>{timing.bestTimeRange}</span>
-                    {timing.quality && (
-                      <span className={`${styles.qualityChip} ${qualityClass(timing.quality)}`}>
-                        {timing.quality}
-                      </span>
-                    )}
-                    {timing.reason && <p className={styles.slotNote}>{timing.reason}</p>}
+              {nextDay?.timings?.length > 0 ? (
+                <>
+                  <p className={styles.panelSub}>
+                    {formatDate(nextDay.date)} · {nextDay.timings.length}{" "}
+                    {nextDay.timings.length === 1 ? "timing" : "timings"} available
+                  </p>
+                  <div className={styles.nextGrid}>
+                    {nextDay.timings.map((timing, index) => (
+                      <div key={`${timing.bestTimeRange}-${timing.rank}`} className={styles.nextCard}>
+                        <img
+                          src={SLOT_ART[index % SLOT_ART.length]}
+                          alt=""
+                          aria-hidden="true"
+                          className={styles.nextCardArt}
+                        />
+                        <span className={styles.slotTime}>{timing.bestTimeRange}</span>
+                        {timing.quality && (
+                          <span className={`${styles.qualityChip} ${qualityClass(timing.quality)}`}>
+                            {timing.quality}
+                          </span>
+                        )}
+                        {timing.reason && <p className={styles.slotNote}>{timing.reason}</p>}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </>
+              ) : (
+                <p className={styles.panelSub}>
+                  No favorable window found for the next day.
+                </p>
+              )}
             </section>
           )}
         </div>

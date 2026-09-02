@@ -763,7 +763,12 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
             {bannerChips.length > 0 && (
               <p className={styles.chipRow}>
                 {bannerChips.slice(1).map((chip) => (
-                  <span key={chip.label} className={styles.chip}>{chip.value}</span>
+                  <span
+                    key={chip.label}
+                    className={`${styles.chip} ${styles[`chip_${chip.tone}`] || ""}`}
+                  >
+                    {chip.value}
+                  </span>
                 ))}
               </p>
             )}
