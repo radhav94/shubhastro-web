@@ -255,3 +255,68 @@ div[id^="goog-gt-"] {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Hide scrollbars inside popups / modals / bottom-sheets everywhere.
+
+   Scrolling still works (touch, wheel, keyboard) — only the visible scrollbar
+   is removed, so a dialog reads as one clean sheet regardless of viewport
+   height. CSS-module class names are hashed (e.g. `_modalOverlay_ab12`), so we
+   match on substrings of the common overlay/modal/popup/sheet names and cover
+   both the container and any scroll region inside it.
+   ────────────────────────────────────────────────────────────────────────── */
+[class*="modalOverlay"],
+[class*="modalContent"],
+[class*="Overlay"],
+[class*="overlay"],
+[class*="popup"],
+[class*="Popup"],
+[class*="modal"],
+[class*="Modal"],
+[class*="sheet"],
+[class*="Sheet"],
+[class*="dialog"],
+[class*="Dialog"],
+[class*="modalOverlay"] *,
+[class*="modalContent"] *,
+[class*="Overlay"] *,
+[class*="overlay"] *,
+[class*="popup"] *,
+[class*="Popup"] *,
+[class*="modal"] *,
+[class*="Modal"] *,
+[class*="sheet"] *,
+[class*="Sheet"] *,
+[class*="dialog"] *,
+[class*="Dialog"] * {
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* old Edge / IE */
+}
+[class*="modalOverlay"]::-webkit-scrollbar,
+[class*="modalContent"]::-webkit-scrollbar,
+[class*="Overlay"]::-webkit-scrollbar,
+[class*="overlay"]::-webkit-scrollbar,
+[class*="popup"]::-webkit-scrollbar,
+[class*="Popup"]::-webkit-scrollbar,
+[class*="modal"]::-webkit-scrollbar,
+[class*="Modal"]::-webkit-scrollbar,
+[class*="sheet"]::-webkit-scrollbar,
+[class*="Sheet"]::-webkit-scrollbar,
+[class*="dialog"]::-webkit-scrollbar,
+[class*="Dialog"]::-webkit-scrollbar,
+[class*="modalOverlay"] *::-webkit-scrollbar,
+[class*="modalContent"] *::-webkit-scrollbar,
+[class*="Overlay"] *::-webkit-scrollbar,
+[class*="overlay"] *::-webkit-scrollbar,
+[class*="popup"] *::-webkit-scrollbar,
+[class*="Popup"] *::-webkit-scrollbar,
+[class*="modal"] *::-webkit-scrollbar,
+[class*="Modal"] *::-webkit-scrollbar,
+[class*="sheet"] *::-webkit-scrollbar,
+[class*="Sheet"] *::-webkit-scrollbar,
+[class*="dialog"] *::-webkit-scrollbar,
+[class*="Dialog"] *::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}

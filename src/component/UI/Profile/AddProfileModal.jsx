@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import {
@@ -471,7 +472,7 @@ const AddProfileModal = ({
     ...(matchmakingMode ? [] : [{ value: "Others", label: "Others", Icon: FaTransgenderAlt }]),
   ];
 
-  return (
+  const overlay = (
     <div
       className={`${styles.modalOverlay} ${inline ? styles.inline : ""}`}
       onClick={handleOverlayClick}
@@ -853,6 +854,12 @@ const AddProfileModal = ({
       </div>
     </div>
   );
+
+  // Inline mode renders in place (e.g. inside the Pandit AI chat). The overlay
+  // mode is portaled to <body> so its `position: fixed` is measured against the
+  // viewport, not a transformed/positioned ancestor (e.g. the live-stream view),
+  // which was clipping the sheet's bottom and killing its scroll.
+  return inline ? overlay : createPortal(overlay, document.body);
 };
 
 export default AddProfileModal;

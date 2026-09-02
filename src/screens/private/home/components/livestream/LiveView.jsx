@@ -28,6 +28,7 @@ import Toast from "../../../../../component/toast";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
 import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
 import { useMediaPermission } from "../../../../../utils/hooks/useMediaPermission";
+import { GuestKundliAuthModal } from "../../../../../component/UI/Profile";
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
 import { PATH } from "../../../../../utils/routes/Paths";
@@ -624,6 +625,10 @@ const LiveView = (props) => {
   const isAstrologerLive = isLiveConnected;
   const viewerCount = participantCount || (safeRemoteUsers?.length || 0) + 1;
 
+  // Guests can watch the live stream but must sign up before chatting. Opened
+  // when a guest tries to send a live-chat message.
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+
   const {
     messagesEndRef,
     showSharePopup,
@@ -634,7 +639,13 @@ const LiveView = (props) => {
     handleCopyLink,
     shareToWhatsapp,
     shareToGmail,
-  } = useLiveViewLogic(props);
+  } = useLiveViewLogic({
+    ...props,
+    onGuestBlocked: () => {
+      setShowGuestAuthModal(true);
+      return true;
+    },
+  });
 
   const handleCloseLive = async () => {
     if (isHost) {
@@ -1974,6 +1985,13 @@ const LiveView = (props) => {
             shareToWhatsapp={shareToWhatsapp}
             shareToGmail={shareToGmail}
             handleCopyLink={handleCopyLink}
+          />
+
+          {/* Guests can watch but must sign up before sending a live-chat
+              message. Opened from useLiveViewLogic's onGuestBlocked. */}
+          <GuestKundliAuthModal
+            isOpen={showGuestAuthModal}
+            onClose={() => setShowGuestAuthModal(false)}
           />
 
           <LiveListModal
