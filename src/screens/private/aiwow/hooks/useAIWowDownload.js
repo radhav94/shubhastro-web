@@ -86,7 +86,7 @@ const handleReportBlock = (reason, { id, featureName, onUpsell, extendedPlans })
  * @param {string} [options.toastId] - Unique toast ID for download notifications
  * @returns {Object} Download state and handlers
  */
-export const useAIWowDownload = ({ resultData, toastId }) => {
+export const useAIWowDownload = ({ resultData, toastId, downloadFileName }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadedPdfUrl, setDownloadedPdfUrl] = useState(null);
@@ -162,9 +162,12 @@ export const useAIWowDownload = ({ resultData, toastId }) => {
   }, [isAlreadyDownloaded, chargesData, featureName]);
 
   const id = toastId || `${featureName.replace(/\s+/g, '-').toLowerCase()}-pdf`;
+  // The saved file name can be overridden independently of `featureName` (which
+  // must keep matching the charges/history slug). Falls back to the feature name.
   const fileName = useMemo(() => {
-    return `${featureName.replace(/\s+/g, '-')}.pdf`;
-  }, [featureName]);
+    const base = downloadFileName || featureName;
+    return `${base.replace(/\s+/g, '-')}.pdf`;
+  }, [downloadFileName, featureName]);
 
   const handleDirectDownload = useCallback(async (url) => {
     setIsDownloading(true);

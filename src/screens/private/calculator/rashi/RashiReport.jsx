@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
   ChevronRight,
@@ -800,6 +800,9 @@ const RashiReport = () => {
         onFinish={recommendation.finish}
         // Nothing discounted to show -> the close press just closes.
         onNothingToOffer={recommendation.finish}
+        // Bring the user back to this report after the chat ends (only when the
+        // chat was started from here).
+        returnTo={`${window.location.pathname}${window.location.search}`}
       />
     </div>
   );
