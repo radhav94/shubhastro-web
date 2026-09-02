@@ -383,10 +383,12 @@ const EditProfileModal = ({
                     }}
                     onRawChange={(rawText) => {
                       setIsEditing(true);
-                      if (!rawText) {
-                        setFieldValue("birthDate", "");
-                        setDateInputError("");
-                      }
+                      // Invalidate the parsed value on every keystroke; the
+                      // picker re-fires onChange only for a complete valid date,
+                      // so a half-edited or emptied box no longer keeps the old
+                      // parsed date alive (which let a stale date submit).
+                      setFieldValue("birthDate", "");
+                      if (!rawText) setDateInputError("");
                     }}
                     onError={(err) => setDateInputError(err)}
                     placeholder="DD/MM/YYYY"

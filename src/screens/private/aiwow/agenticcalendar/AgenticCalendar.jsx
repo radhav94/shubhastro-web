@@ -261,9 +261,9 @@ const AgenticCalendar = () => {
   const toggleOccasion = (occasion) => {
     if (!beginEdit()) return;
     clearNavState();
-    setSelectedOccasions((prev) =>
-      prev.includes(occasion) ? prev.filter((o) => o !== occasion) : [...prev, occasion]
-    );
+    // Single-select: tapping an occasion selects only that one; tapping the
+    // already-selected one clears it.
+    setSelectedOccasions((prev) => (prev.includes(occasion) ? [] : [occasion]));
   };
 
   const handleRemoveChip = (occasion) => {
@@ -277,11 +277,13 @@ const AgenticCalendar = () => {
 
   const handleAddCustom = () => {
     clearNavState();
-    // Letters/spaces only — drop any stray digits/symbols and collapse spaces.
-    const trimmed = customInput.replace(/[^\p{L}\p{M}\s]/gu, '').replace(/\s+/g, ' ').trim();
+    // Any characters allowed (letters, numbers, symbols); just collapse extra
+    // spaces and trim the ends.
+    const trimmed = customInput.replace(/\s+/g, ' ').trim();
     if (trimmed && !allOccasions.includes(trimmed)) {
       setCustomOccasions((prev) => [...prev, trimmed]);
-      setSelectedOccasions((prev) => [...prev, trimmed]);
+      // Single-select: a newly added custom occasion becomes the only selection.
+      setSelectedOccasions([trimmed]);
       setCustomInput('');
       setShowCustomModal(false);
     }
@@ -737,10 +739,10 @@ const AgenticCalendar = () => {
               placeholder="e.g., House Warming"
               value={customInput}
               onChange={(e) => {
-                // Occasion names are letters/spaces only — strip digits and
-                // special characters as they are typed (no numbers, no symbols).
-                const cleaned = e.target.value.replace(/[^\p{L}\p{M}\s]/gu, '');
-                if (cleaned.length <= 30) setCustomInput(cleaned);
+                // Any characters allowed (letters, numbers, symbols); only the
+                // 30-char length cap is enforced.
+                const value = e.target.value;
+                if (value.length <= 30) setCustomInput(value);
               }}
               maxLength={30}
               autoFocus

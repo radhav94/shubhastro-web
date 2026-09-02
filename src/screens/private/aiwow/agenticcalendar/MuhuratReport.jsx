@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
   FiCalendar,
@@ -16,7 +17,6 @@ import { PATH } from "../../../../utils/routes/Paths";
 import RecommendedAstrologersModal from "../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal";
 import useRecommendationOffer from "../../../../utils/hooks/useRecommendationOffer";
 import bannerArt from "../../../../assets/images/muhurat/banner-art.png";
-import bestOrnament from "../../../../assets/images/muhurat/best-ornament.png";
 import slotArt1 from "../../../../assets/images/muhurat/slot-1.png";
 import slotArt2 from "../../../../assets/images/muhurat/slot-2.png";
 import slotArt3 from "../../../../assets/images/muhurat/slot-3.png";
@@ -367,35 +367,38 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
       )}
 
       <div className={styles.layout}>
-        <div className={styles.main}>
-          <header className={styles.banner}>
-            <img src={bannerArt} alt="" aria-hidden="true" className={styles.bannerArt} />
-            <div className={styles.bannerCopy}>
-              <h2 className={styles.bannerTitle}>{active.name}</h2>
-              <p className={styles.bannerText}>
-                Select an auspicious time for your {active.name.toLowerCase()} and
-                begin with confidence.
+        {/* Banner is a direct child of the layout grid (not inside .main) so
+            that on mobile the "Best Muhurat" card can sit directly beneath it,
+            above the panels. On desktop it stays in the left column, row 1. */}
+        <header className={styles.banner}>
+          <img src={bannerArt} alt="" aria-hidden="true" className={styles.bannerArt} />
+          <div className={styles.bannerCopy}>
+            <h2 className={styles.bannerTitle}>{active.name}</h2>
+            <p className={styles.bannerText}>
+              Select an auspicious time for your {active.name.toLowerCase()} and
+              begin with confidence.
+            </p>
+            {/* Panchang context for the day, sent with every window. */}
+            {today?.timings?.[0]?.details && (
+              <p className={styles.dayContext}>
+                {[
+                  today.timings[0].details.tithi,
+                  today.timings[0].details.nakshatra &&
+                    `${today.timings[0].details.nakshatra} Nakshatra`,
+                  today.timings[0].details.yoga &&
+                    `${today.timings[0].details.yoga} Yoga`,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
-              {/* Panchang context for the day, sent with every window. */}
-              {today?.timings?.[0]?.details && (
-                <p className={styles.dayContext}>
-                  {[
-                    today.timings[0].details.tithi,
-                    today.timings[0].details.nakshatra &&
-                      `${today.timings[0].details.nakshatra} Nakshatra`,
-                    today.timings[0].details.yoga &&
-                      `${today.timings[0].details.yoga} Yoga`,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-              )}
-            </div>
-            <span className={styles.bannerTts}>
-              <TTSButton text={ttsScript} />
-            </span>
-          </header>
+            )}
+          </div>
+          <span className={styles.bannerTts}>
+            <TTSButton text={ttsScript} />
+          </span>
+        </header>
 
+        <div className={styles.main}>
           <div className={styles.panelRow}>
             {today?.timings?.length > 0 && (
               <section className={styles.panel}>
@@ -506,9 +509,6 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
 
         <aside className={styles.sidebar}>
           <div className={styles.bestCard}>
-            <img src={bestOrnament} alt="" aria-hidden="true" className={styles.bestOrnament} />
-
-            {/* Sit above the ornament, which is purely backdrop here. */}
             <div className={styles.cardTools}>
               {onDownload && (
                 <button
@@ -629,6 +629,37 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
           </div>
         </aside>
       </div>
+
+      {/* Mobile-only pinned actions. The sidebar's Call/Chat buttons are hidden
+          on mobile; these fixed buttons take their place (same as the Rashi
+          report). Portaled to <body> so `position: fixed` is measured against
+          the viewport rather than any transformed/animated ancestor in the
+          Muhurat-calendar page tree. */}
+      {createPortal(
+        <div className={styles.mobileActionBar}>
+          <a
+            href="/chat-with-astrologers"
+            className={styles.mobileActionChat}
+            onClick={(event) => {
+              event.preventDefault();
+              recommendation.open("chat");
+            }}
+          >
+            <BsChatDots size={16} aria-hidden="true" /> Chat with astrologer
+          </a>
+          <a
+            href={PATH.privateRoutes.ASTROLOGERS_LIST.path}
+            className={styles.mobileActionCall}
+            onClick={(event) => {
+              event.preventDefault();
+              recommendation.open("audio");
+            }}
+          >
+            <MdOutlinePhoneInTalk size={16} aria-hidden="true" /> Call an astrologer
+          </a>
+        </div>,
+        document.body
+      )}
 
       <RecommendedAstrologersModal
         isOpen={recommendation.isOpen}
