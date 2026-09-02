@@ -650,18 +650,36 @@ const ChatWindow = () => {
     // Don't redirect while feedback modal is open
     if (openFeedback) return;
 
-    // Feedback just closed and no active session → redirect to astrologers list
+    /*
+      When the chat was launched from a report's chat popup (e.g. the Muhurat
+      calendar), a return path is stashed in sessionStorage. Read + clear it so
+      the user is taken back to that report instead of the astrologers list.
+      Only chat sets this marker, so calls fall through to the default.
+    */
+    const consumeReturnPath = () => {
+      try {
+        const path = sessionStorage.getItem("shubhtalk_chat_return_path");
+        if (path) sessionStorage.removeItem("shubhtalk_chat_return_path");
+        return path || null;
+      } catch {
+        return null;
+      }
+    };
+
+    // Feedback just closed and no active session → redirect
     if (hadFeedback && !openFeedback && !isChatActive && !activeCall) {
-      navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path, { replace: true });
+      const returnPath = consumeReturnPath();
+      navigate(returnPath || PATH.privateRoutes.Chat_With_ASTROLOGER.path, { replace: true });
       return;
     }
 
-    // Chat was active and just ended → redirect to astrologers list
+    // Chat was active and just ended → redirect
     // Use a short delay to allow feedback modal state to settle (e.g. report-triggered end)
     if (hadChat && !isChatActive && !activeCall) {
       const timer = setTimeout(() => {
         if (!openFeedbackRef.current) {
-          navigate(PATH.privateRoutes.Chat_With_ASTROLOGER.path, { replace: true });
+          const returnPath = consumeReturnPath();
+          navigate(returnPath || PATH.privateRoutes.Chat_With_ASTROLOGER.path, { replace: true });
         }
       }, 150);
       return () => clearTimeout(timer);
