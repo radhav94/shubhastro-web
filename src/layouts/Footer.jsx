@@ -302,9 +302,18 @@ const Footer = () => {
           <p className={styles.v2_contactText}>PITTIE GLOBAL PRIVATE LIMITED</p>
         </div>
         
-        <div className={`${styles.v2_column} ${styles.v2_columnWide}`}>
-          <h3 className={`${styles.v2_heading}`}>Download App</h3>
-          {storeButtons}
+        <div>
+          <div className={`${styles.v2_column} ${styles.v2_columnWide}`}>
+            <h3 className={`${styles.v2_heading}`}>Our Group Brands</h3>
+            <ul>
+              <li><a href="https://www.epicon.in/" target="_blank">Epicon</a></li>
+              <li><a href="https://www.docubay.com/" target="_blank">Docubay</a></li>
+            </ul>
+          </div>
+          <div className={`${styles.v2_column} ${styles.v2_columnWide}`} style={{marginTop:"16px"}}>
+            <h3 className={`${styles.v2_heading}`}>Download App</h3>
+            {storeButtons}
+          </div>
         </div>
 
       </div>
@@ -350,12 +359,23 @@ const Footer = () => {
           { tall: true }
         )}
 
-        {/* Outside the accordion above: collapsing Contact Us must not take the
-            store buttons with it, and "Download App" is a CTA rather than a
+        {renderAccordionShell(
+          "brands",
+          "Our Group Brands",
+          <ul>
+            <li><a href="https://www.epicon.in/" target="_blank" rel="noopener noreferrer">Epicon</a></li>
+            <li><a href="https://www.docubay.com/" target="_blank" rel="noopener noreferrer">Docubay</a></li>
+          </ul>
+        )}
+
+        {/* Outside the accordion above: collapsing sections must not take the
+            store buttons with them, and "Download App" is a CTA rather than a
             reference column, so it stays put. */}
-        <div className={`${styles.v2_column} ${styles.v2_marT}`}>
-          <h3 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h3>
-          {storeButtons}
+        <div>
+          <div className={`${styles.v2_column}`}>
+            <h3 className={`${styles.v2_heading} ${styles.v2_heading_sub}`}>Download App</h3>
+            {storeButtons}
+          </div>
         </div>
       </div>
 
