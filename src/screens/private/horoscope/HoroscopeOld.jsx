@@ -271,19 +271,19 @@ const HoroscopeOld = () => {
   
   // Fetch data based on active tab
   // Both "Today" and "Daily" use the same daily API
-  const { data: dailyData, isLoading: dailyLoading } = useFetchWesternDailyQuery(signNumber, {
+  const { data: dailyData, isLoading: dailyLoading, isError: dailyError, refetch: refetchDaily } = useFetchWesternDailyQuery(signNumber, {
     skip: activeTab !== 'Today' && activeTab !== 'Daily'
   });
 
-  const { data: tomorrowData, isLoading: tomorrowLoading } = useFetchWesternTomorrowQuery(signNumber, {
+  const { data: tomorrowData, isLoading: tomorrowLoading, isError: tomorrowError, refetch: refetchTomorrow } = useFetchWesternTomorrowQuery(signNumber, {
     skip: activeTab !== 'Tomorrow'
   });
   
-  const { data: weeklyData, isLoading: weeklyLoading } = useFetchWeeklyQuery(signNumber, {
+  const { data: weeklyData, isLoading: weeklyLoading, isError: weeklyError, refetch: refetchWeekly } = useFetchWeeklyQuery(signNumber, {
     skip: activeTab !== 'This Week'
   });
   
-  const { data: yearlyData, isLoading: yearlyLoading } = useFetchWesternYearlyQuery(signNumber, {
+  const { data: yearlyData, isLoading: yearlyLoading, isError: yearlyError, refetch: refetchYearly } = useFetchWesternYearlyQuery(signNumber, {
     skip: activeTab !== 'This Year'
   });
 
@@ -297,6 +297,24 @@ const HoroscopeOld = () => {
     if (activeTab === 'This Year') return yearlyData;
     return null;
   };
+
+  /*
+    Failure state of the query currently on screen. Mirrors getCurrentData().
+
+    None of these error flags were read, so a failed western-horoscope fetch fell
+    through to the "Please wait while we fetch your horoscope..." fallback in
+    getContent() and stayed there — indistinguishable from loading, with nothing
+    to press. Same defect as the Indian horoscope screen; same remedy.
+  */
+  const getCurrentQueryState = () => {
+    if (activeTab === 'Today' || activeTab === 'Daily') return { failed: dailyError, retry: refetchDaily };
+    if (activeTab === 'Tomorrow') return { failed: tomorrowError, retry: refetchTomorrow };
+    if (activeTab === 'This Week') return { failed: weeklyError, retry: refetchWeekly };
+    if (activeTab === 'This Year') return { failed: yearlyError, retry: refetchYearly };
+    return { failed: false, retry: null };
+  };
+
+  const { failed: contentFailed, retry: retryContent } = getCurrentQueryState();
 
   const currentData = getCurrentData();
 
@@ -371,8 +389,28 @@ const HoroscopeOld = () => {
   // Get content for active category
   const getContent = () => {
     if (!currentData?.response) {
+      /*
+        A failed fetch must not impersonate a pending one. This single fallback
+        used to cover loading, empty and failed alike, and no query here read its
+        error flag — so a failed request left "Please wait while we fetch your
+        horoscope..." on screen for good, with no message and nothing to press.
+        A browser refresh was the only way out.
+      */
+      const signLabel = selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1);
+      if (contentFailed) {
+        return {
+          title: signLabel,
+          subtitle: "Couldn't load",
+          content: "We couldn't load this horoscope just now. Please check your connection and try again.",
+          luckyColor: null,
+          luckyColorCode: null,
+          luckyNumber: null,
+          isOverview: false,
+          failed: true
+        };
+      }
       return {
-        title: selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1),
+        title: signLabel,
         subtitle: 'Loading...',
         content: 'Please wait while we fetch your horoscope...',
         luckyColor: null,
@@ -889,6 +927,19 @@ const HoroscopeOld = () => {
                 {currentContent.content.split('\n\n').map((paragraph, index) => (
                   <p key={index}>{paragraph}</p>
                 ))}
+                {/*
+                  A failed load gets something to press. Without this the only
+                  recovery was a browser refresh — see getContent().
+                */}
+                {currentContent.failed && retryContent && (
+                  <button
+                    type="button"
+                    className="horoscope-retry-btn"
+                    onClick={() => retryContent()}
+                  >
+                    Try again
+                  </button>
+                )}
                 {/* Return to overview after a "show more". Was gated on
                     activeTab === 'This Year', but now that daily/weekly cards
                     truncate and open a category too, they need the same way

@@ -287,12 +287,12 @@ const HoroscopeNew = () => {
   const activeSignNumber = signToNumber[activeZodiac] || signNumber;
   
   // Fetch data based on active tab
-  const { data: dailyData, isLoading: dailyLoading } = useFetchDailyQuery(activeSignNumber, {
+  const { data: dailyData, isLoading: dailyLoading, isError: dailyError, refetch: refetchDaily } = useFetchDailyQuery(activeSignNumber, {
     skip: activeTab !== 'Today' || dailySubTab !== 'Sun'
   });
 
   // Daily Moon
-  const { data: dailyMoonData, isLoading: dailyMoonLoading } = useFetchDailyMoonQuery(activeSignNumber, {
+  const { data: dailyMoonData, isLoading: dailyMoonLoading, isError: dailyMoonError, refetch: refetchDailyMoon } = useFetchDailyMoonQuery(activeSignNumber, {
     skip: activeTab !== 'Today' || dailySubTab !== 'Moon'
   });
 
@@ -302,36 +302,36 @@ const HoroscopeNew = () => {
 
   // Daily Nakshatra (uses nakshatra number, default to 1 if not known)
   const [selectedNakshatra, setSelectedNakshatra] = useState(1);
-  const { data: dailyNakshatraData, isLoading: dailyNakshatraLoading } = useFetchDailyNakshatraQuery(selectedNakshatra, {
+  const { data: dailyNakshatraData, isLoading: dailyNakshatraLoading, isError: dailyNakshatraError, refetch: refetchDailyNakshatra } = useFetchDailyNakshatraQuery(selectedNakshatra, {
     skip: activeTab !== 'Today' || dailySubTab !== 'Nakshatra'
   });
 
-  const { data: tomorrowData, isLoading: tomorrowLoading } = useFetchTomorrowQuery(activeSignNumber, {
+  const { data: tomorrowData, isLoading: tomorrowLoading, isError: tomorrowError, refetch: refetchTomorrow } = useFetchTomorrowQuery(activeSignNumber, {
     skip: activeTab !== 'Tomorrow' || tomorrowSubTab !== 'Sun'
   });
 
   // Tomorrow Moon
-  const { data: tomorrowMoonData, isLoading: tomorrowMoonLoading } = useFetchTomorrowMoonQuery(activeSignNumber, {
+  const { data: tomorrowMoonData, isLoading: tomorrowMoonLoading, isError: tomorrowMoonError, refetch: refetchTomorrowMoon } = useFetchTomorrowMoonQuery(activeSignNumber, {
     skip: activeTab !== 'Tomorrow' || tomorrowSubTab !== 'Moon'
   });
 
   // Tomorrow Nakshatra
   const [selectedTomorrowNakshatra, setSelectedTomorrowNakshatra] = useState(1);
-  const { data: tomorrowNakshatraData, isLoading: tomorrowNakshatraLoading } = useFetchTomorrowNakshatraQuery(
+  const { data: tomorrowNakshatraData, isLoading: tomorrowNakshatraLoading, isError: tomorrowNakshatraError, refetch: refetchTomorrowNakshatra } = useFetchTomorrowNakshatraQuery(
     selectedTomorrowNakshatra, {
     skip: activeTab !== 'Tomorrow' || tomorrowSubTab !== 'Nakshatra'
   });
   
-  const { data: weeklyMoonData, isLoading: weeklyMoonLoading } = useFetchWeeklyMoonQuery(activeSignNumber, {
+  const { data: weeklyMoonData, isLoading: weeklyMoonLoading, isError: weeklyMoonError, refetch: refetchWeeklyMoon } = useFetchWeeklyMoonQuery(activeSignNumber, {
     skip: activeTab !== 'This Week' || weeklySubTab !== 'Moon'
   });
 
   // Weekly Sun
-  const { data: weeklySunData, isLoading: weeklySunLoading } = useFetchWeeklySunQuery(activeSignNumber, {
+  const { data: weeklySunData, isLoading: weeklySunLoading, isError: weeklySunError, refetch: refetchWeeklySun } = useFetchWeeklySunQuery(activeSignNumber, {
     skip: activeTab !== 'This Week' || weeklySubTab !== 'Sun'
   });
   
-  const { data: yearlyData, isLoading: yearlyLoading } = useFetchYearlyQuery(activeSignNumber, {
+  const { data: yearlyData, isLoading: yearlyLoading, isError: yearlyError, refetch: refetchYearly } = useFetchYearlyQuery(activeSignNumber, {
     skip: activeTab !== 'This Year'
   });
 
@@ -411,6 +411,35 @@ const HoroscopeNew = () => {
 
   const currentData = getCurrentData();
 
+  /*
+    The failure state of whichever query is actually on screen.
+
+    Mirrors getCurrentData() deliberately: nine queries feed this page and only
+    one of them is ever displayed, so reporting a failure means knowing which one
+    that is. None of them had their error flag read at all before, which is why a
+    failed fetch could masquerade as loading forever — see getContent().
+  */
+  const getCurrentQueryState = () => {
+    if (activeTab === 'Today') {
+      if (dailySubTab === 'Moon') return { failed: dailyMoonError, retry: refetchDailyMoon };
+      if (dailySubTab === 'Nakshatra') return { failed: dailyNakshatraError, retry: refetchDailyNakshatra };
+      return { failed: dailyError, retry: refetchDaily };
+    }
+    if (activeTab === 'Tomorrow') {
+      if (tomorrowSubTab === 'Moon') return { failed: tomorrowMoonError, retry: refetchTomorrowMoon };
+      if (tomorrowSubTab === 'Nakshatra') return { failed: tomorrowNakshatraError, retry: refetchTomorrowNakshatra };
+      return { failed: tomorrowError, retry: refetchTomorrow };
+    }
+    if (activeTab === 'This Week') {
+      if (weeklySubTab === 'Moon') return { failed: weeklyMoonError, retry: refetchWeeklyMoon };
+      return { failed: weeklySunError, retry: refetchWeeklySun };
+    }
+    if (activeTab === 'This Year') return { failed: yearlyError, retry: refetchYearly };
+    return { failed: false, retry: null };
+  };
+
+  const { failed: contentFailed, retry: retryContent } = getCurrentQueryState();
+
   // Update categories based on API response
   useEffect(() => {
     let newCategories = [{ id: 'overview', label: 'Overview' }]; // Always start with Overview
@@ -471,8 +500,34 @@ const HoroscopeNew = () => {
   // Get content for active category
   const getContent = () => {
     if (!currentData?.response) {
+      /*
+        A failed fetch must not impersonate a pending one.
+
+        This branch used to return "Please wait while we fetch your horoscope..."
+        for every no-data case, and no query on this screen read its error flag —
+        so when a VedicAstro request failed, the page sat on that line
+        indefinitely. Nothing said it had gone wrong and there was nothing to
+        press, which leaves a browser refresh as the only available move. Clarity
+        recorded exactly that on the Virgo daily page: a manual reload partway
+        through the session, then a return to the same page.
+
+        The two states are now told apart, and the failure carries a real retry.
+      */
+      const signLabel = selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1);
+      if (contentFailed) {
+        return {
+          title: signLabel,
+          subtitle: "Couldn't load",
+          content: "We couldn't load this horoscope just now. Please check your connection and try again.",
+          luckyColor: null,
+          luckyColorCode: null,
+          luckyNumber: null,
+          isOverview: false,
+          failed: true
+        };
+      }
       return {
-        title: selectedZodiac.charAt(0).toUpperCase() + selectedZodiac.slice(1),
+        title: signLabel,
         subtitle: 'Loading...',
         content: 'Please wait while we fetch your horoscope...',
         luckyColor: null,
@@ -1091,6 +1146,19 @@ const HoroscopeNew = () => {
                 {currentContent.content.split('\n\n').map((paragraph, index) => (
                   <p key={index}>{paragraph}</p>
                 ))}
+                {/*
+                  A failed load gets something to press. Without this the only
+                  recovery was a browser refresh — see getContent().
+                */}
+                {currentContent.failed && retryContent && (
+                  <button
+                    type="button"
+                    className="horoscope-retry-btn"
+                    onClick={() => retryContent()}
+                  >
+                    Try again
+                  </button>
+                )}
                 {cameFromOverview && activeTab === 'This Year' && activeCategory !== 'overview' && (
                   /* Was a <span onClick>: no keyboard access and no announced
                      role, on the only control that gets back to the overview

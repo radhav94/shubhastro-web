@@ -67,55 +67,15 @@ export const useRazorpayPayment = () => {
   const razorpayInstanceRef = useRef(null);
   const timeoutRef = useRef(null);
   const isUnmountedRef = useRef(false);
+  // The script tag this hook instance is listening to, so its listeners can be
+  // detached on unmount even after a retry replaced the original element.
+  const scriptElRef = useRef(null);
   const orderStatusUpdatedRef = useRef(false); // Track if order status already updated
 
   // RTK Query mutations
   const [createOrder, { isLoading: isCreatingOrder }] = useCreateOrderMutation();
   const [verifyPayment, { isLoading: isVerifyingPayment }] = useVerifyPaymentMutation();
   const [getWalletBalance] = useLazyGetWalletBalanceQuery();
-
-  /**
-   * Load Razorpay script dynamically
-   */
-  useEffect(() => {
-    // Check if already loaded
-    if (window.Razorpay) {
-      setIsLoaded(true);
-      return;
-    }
-
-    // Check if script already exists
-    const existingScript = document.querySelector(`script[src="${RAZORPAY_SCRIPT_URL}"]`);
-    
-    if (existingScript) {
-      if (existingScript.dataset.loaded === "true") {
-        setIsLoaded(true);
-      } else {
-        existingScript.addEventListener("load", handleScriptLoad);
-        existingScript.addEventListener("error", handleScriptError);
-      }
-      return;
-    }
-
-    // Create and load script
-    const script = document.createElement("script");
-    script.src = RAZORPAY_SCRIPT_URL;
-    script.async = true;
-    script.dataset.loaded = "false";
-    
-    script.addEventListener("load", handleScriptLoad);
-    script.addEventListener("error", handleScriptError);
-    
-    document.body.appendChild(script);
-
-    // Cleanup
-    return () => {
-      if (script) {
-        script.removeEventListener("load", handleScriptLoad);
-        script.removeEventListener("error", handleScriptError);
-      }
-    };
-  }, []);
 
   /**
    * Cleanup on unmount
@@ -144,6 +104,18 @@ export const useRazorpayPayment = () => {
    * Handle script load error
    */
   const handleScriptError = useCallback(() => {
+    /*
+     * Mark the tag as failed even if this hook instance has unmounted.
+     *
+     * A script element that has errored never fires `load` again, but it stays in
+     * the DOM — so without this marker the "script already exists" branch in
+     * attemptScriptLoad would attach listeners to a dead tag and wait forever.
+     * That is what made a failed gateway load unrecoverable for the rest of the
+     * page's life, with a refresh as the only way out.
+     */
+    const script = document.querySelector(`script[src="${RAZORPAY_SCRIPT_URL}"]`);
+    if (script) script.dataset.failed = "true";
+
     if (!isUnmountedRef.current) {
       const error = ERROR_MESSAGES.SCRIPT_LOAD_FAILED;
       setScriptError(error);
@@ -152,6 +124,79 @@ export const useRazorpayPayment = () => {
       Toast.error(error);
     }
   }, []);
+
+  /*
+   * Injects the checkout script, and can be called again to retry.
+   *
+   * Defined after the two handlers on purpose: naming them in the dependency
+   * array before their `const` initialisers run would throw a TDZ
+   * ReferenceError during render.
+   *
+   * `force` is the retry path — it discards a previously failed tag before
+   * re-injecting, which is the part that makes a retry actually possible.
+   * Third-party script loads are exactly what fails in the Facebook/Instagram
+   * in-app browsers a large share of this traffic arrives in, and a recharge that
+   * cannot be retried is a dead end on the revenue path.
+   */
+  const attemptScriptLoad = useCallback((force = false) => {
+    if (window.Razorpay) {
+      setIsLoaded(true);
+      setScriptError(null);
+      return;
+    }
+
+    const existingScript = document.querySelector(`script[src="${RAZORPAY_SCRIPT_URL}"]`);
+
+    if (existingScript) {
+      if (existingScript.dataset.loaded === "true") {
+        setIsLoaded(true);
+        setScriptError(null);
+        return;
+      }
+      const alreadyFailed = existingScript.dataset.failed === "true";
+      if (!force && !alreadyFailed) {
+        // Still in flight from another mount — just listen for its outcome.
+        existingScript.addEventListener("load", handleScriptLoad);
+        existingScript.addEventListener("error", handleScriptError);
+        scriptElRef.current = existingScript;
+        return;
+      }
+      existingScript.remove();
+    }
+
+    const script = document.createElement("script");
+    script.src = RAZORPAY_SCRIPT_URL;
+    script.async = true;
+    script.dataset.loaded = "false";
+    script.addEventListener("load", handleScriptLoad);
+    script.addEventListener("error", handleScriptError);
+    scriptElRef.current = script;
+    document.body.appendChild(script);
+  }, [handleScriptLoad, handleScriptError]);
+
+  /**
+   * Load Razorpay script dynamically
+   */
+  useEffect(() => {
+    attemptScriptLoad();
+    return () => {
+      const script = scriptElRef.current;
+      if (script) {
+        script.removeEventListener("load", handleScriptLoad);
+        script.removeEventListener("error", handleScriptError);
+      }
+    };
+  }, [attemptScriptLoad, handleScriptLoad, handleScriptError]);
+
+  /**
+   * Retry a failed gateway script load. Exposed so the payment UI can offer a
+   * real retry instead of only explaining that the gateway is unavailable.
+   */
+  const retryScriptLoad = useCallback(() => {
+    setScriptError(null);
+    setIsLoaded(false);
+    attemptScriptLoad(true);
+  }, [attemptScriptLoad]);
 
   /**
    * Clear payment timeout
@@ -656,5 +701,8 @@ export const useRazorpayPayment = () => {
     isProcessing: isProcessing || isCreatingOrder || isVerifyingPayment,
     isLoaded,
     scriptError,
+    // Lets the payment UI offer a working retry when the gateway script fails,
+    // rather than only reporting that it is unavailable.
+    retryScriptLoad,
   };
 };

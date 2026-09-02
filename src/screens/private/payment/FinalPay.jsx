@@ -40,7 +40,7 @@ const FinalPay = () => {
   const { refreshWallet } = useWalletBalance();
   
   // Razorpay payment hook
-  const { initiatePayment, isProcessing, isLoaded, scriptError } = useRazorpayPayment();
+  const { initiatePayment, isProcessing, isLoaded, scriptError, retryScriptLoad } = useRazorpayPayment();
 
   // Redirect if no plan ID
   useEffect(() => {
@@ -103,8 +103,13 @@ const FinalPay = () => {
 
     // The gateway script loads over the network and can lag behind first paint,
     // especially on mobile. Say so rather than absorbing the tap.
+    //
+    // A failed load is retried in place rather than only reported: the hook drops
+    // the dead <script> tag and fetches again, so the visitor is not pushed into
+    // reloading the page at the last step of a recharge.
     if (scriptError) {
-      Toast.error(scriptError);
+      Toast.info("Retrying the payment gateway…");
+      retryScriptLoad();
       return;
     }
     if (!isLoaded) {
@@ -259,7 +264,10 @@ const FinalPay = () => {
       {scriptError && (
         <div className={styles.errorBox}>
           <p>{scriptError}</p>
-          <button onClick={() => window.location.reload()} className={styles.retryButton}>
+          {/* Re-fetches just the gateway script. Was window.location.reload(),
+              which worked but threw away the whole page — including the selected
+              plan — to recover from one failed third-party request. */}
+          <button type="button" onClick={retryScriptLoad} className={styles.retryButton}>
             Retry
           </button>
         </div>
