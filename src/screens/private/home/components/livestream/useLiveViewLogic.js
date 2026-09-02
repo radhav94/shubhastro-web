@@ -8,6 +8,10 @@ export const useLiveViewLogic = (props) => {
     sendChatMessage,
     messages,
     remoteUsers,
+    // Called instead of sending when a guest (not signed in) tries to send a
+    // live-chat message; the host opens the sign-up popup. Returns true if it
+    // handled the block, so we skip sending.
+    onGuestBlocked,
   } = props;
 
   const messagesEndRef = useRef(null);
@@ -35,6 +39,12 @@ export const useLiveViewLogic = (props) => {
     */
     if (!chatInput.trim()) {
       inputRef.current?.focus();
+      return false;
+    }
+    // Guests can watch the live stream but must sign up before sending a
+    // message. Hand off to the host (which opens the sign-up popup) and stop.
+    const isGuest = !localStorage.getItem("shubhtalk_customer_token");
+    if (isGuest && onGuestBlocked?.() === true) {
       return false;
     }
     // sendChatMessage reports false (and explains why via a toast) when the
