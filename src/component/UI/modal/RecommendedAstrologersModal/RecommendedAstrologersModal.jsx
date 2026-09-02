@@ -52,6 +52,9 @@ const discountOf = (rate) => {
  * @param {Function} props.onDismiss - user closed it; may escalate to the offer
  * @param {Function} props.onFinish  - a connection started; close for good
  * @param {Function} [props.onNothingToOffer] - offer variant has no discounts
+ * @param {Function} [props.onExitOffer] - if set, the first browser Back on the
+ *   report (while this popup is closed) opens the discounted offer instead of
+ *   leaving. For screens whose only back control is the browser button.
  */
 const RecommendedAstrologersModal = ({
   isOpen,
@@ -60,6 +63,7 @@ const RecommendedAstrologersModal = ({
   onDismiss,
   onFinish,
   onNothingToOffer,
+  onExitOffer,
   // Optional path to return to after the chat ends. Only used for chat (the
   // chat screen reads it once the session ends). Passed by screens that want
   // the user brought back to them — currently the Muhurat report.
@@ -109,6 +113,81 @@ const RecommendedAstrologersModal = ({
     setPage(0);
     if (trackRef.current) trackRef.current.scrollLeft = 0;
   }, [isOpen, variant]);
+
+  /*
+    Make the Back button (browser Back, a swipe-back gesture, and the report's
+    own back button, which calls navigate(-1)) close the popup instead of leaving
+    the page — while the popup is showing.
+
+      - the FIRST Back on the plain list escalates it to the discounted offer;
+      - a Back on the offer closes the popup;
+      - a Back when the popup is not showing does nothing special (normal nav).
+
+    Implemented with a single, long-lived popstate listener plus a guard history
+    entry pushed whenever the popup shows. Earlier attempts re-subscribed the
+    listener on every variant change and popped the entry in cleanup with
+    history.back(); a stray cleanup then navigated the page back on its own,
+    which is the "page goes back by itself" bug this avoids.
+  */
+  const trapActive = isOpen && !openModal.kundli;
+
+  // Keep the latest dismiss handler in a ref so the single, long-lived popstate
+  // listener always calls the current one without re-subscribing (re-subscribing
+  // is what previously let a stray cleanup fire history.back() and send the page
+  // back on its own).
+  const onDismissRef = useRef(onDismiss);
+  onDismissRef.current = onDismiss;
+  const trapActiveRef = useRef(trapActive);
+  trapActiveRef.current = trapActive;
+
+  // Exit-intent: when a screen passes `onExitOffer`, the FIRST browser Back on
+  // the report (while the popup is closed) opens the discounted offer instead of
+  // leaving — same behaviour Rashi gives its in-page back button, but for the
+  // screens (Muhurat, Face) whose only "back" is the browser button. Fired at
+  // most once per mount; after that Back leaves the report normally.
+  const onExitOfferRef = useRef(onExitOffer);
+  onExitOfferRef.current = onExitOffer;
+  const exitOfferSpentRef = useRef(false);
+
+  // A single listener for the whole life of the component. It only reacts when
+  // the popup is actually showing (step back inside it), or — for the exit-intent
+  // case — the first time Back is pressed while the popup is closed.
+  useEffect(() => {
+    const onPopState = () => {
+      if (trapActiveRef.current) {
+        // Popup showing: consume the Back and step back inside it. Re-arm
+        // immediately so the NEXT Back (e.g. on the offer stage) is caught too.
+        window.history.pushState({ recommendedModal: true }, "");
+        onDismissRef.current?.(); // escalate plain -> offer, or close the offer
+        return;
+      }
+      // Popup closed. If this screen wants an exit-intent offer and we haven't
+      // shown it yet, open it now and swallow this Back.
+      if (onExitOfferRef.current && !exitOfferSpentRef.current) {
+        exitOfferSpentRef.current = true;
+        window.history.pushState({ recommendedModal: true }, "");
+        onExitOfferRef.current(); // opens the discounted offer stage
+        return;
+      }
+      // Nothing to do -> let the Back navigate away.
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  // Arm a guard entry:
+  //  - whenever the popup shows, so the first Back has something to consume;
+  //  - and, for the exit-intent case, once on mount while it's still closed, so
+  //    the very first Back on the report is caught rather than leaving.
+  useEffect(() => {
+    if (trapActive) window.history.pushState({ recommendedModal: true }, "");
+  }, [trapActive]);
+  useEffect(() => {
+    if (onExitOffer && !exitOfferSpentRef.current) {
+      window.history.pushState({ recommendedModal: true }, "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const scrollByCard = (direction) => {
     const track = trackRef.current;
@@ -162,6 +241,11 @@ const RecommendedAstrologersModal = ({
 
   const pageCount = astrologers.length;
 
+  // Narrow the panel when only one or two astrologers are shown, so the cards
+  // aren't stranded in a wide, mostly-empty modal.
+  const widthClass =
+    pageCount === 1 ? styles.modalOne : pageCount === 2 ? styles.modalTwo : "";
+
   return (
     <>
       {/* Hidden, not unmounted, while the kundli picker is up: unmounting would
@@ -173,7 +257,7 @@ const RecommendedAstrologersModal = ({
           modal's top and pushed it off-centre. */}
       {!openModal.kundli && createPortal(
         <div className={styles.overlay} role="dialog" aria-modal="true">
-          <div className={`${styles.modal} ${isOffer ? styles.offerModal : ""}`}>
+          <div className={`${styles.modal} ${isOffer ? styles.offerModal : ""} ${widthClass}`}>
             <header className={styles.header}>
               <span className={styles.headerIcon} aria-hidden="true">
                 {type === "chat" ? (
@@ -189,7 +273,7 @@ const RecommendedAstrologersModal = ({
               <button
                 type="button"
                 className={styles.close}
-                onClick={onDismiss}
+                onClick={() => (onFinish || onDismiss)?.()}
                 aria-label="Close"
               >
                 <IoClose size={20} />
