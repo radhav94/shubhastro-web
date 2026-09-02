@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -224,6 +224,10 @@ const RashiReport = () => {
   // discounted one once. See useRecommendationOffer.
   const recommendation = useRecommendationOffer();
 
+  // The in-page back button shows the discounted offer once as an exit-intent
+  // prompt; after that a Back press leaves the report normally.
+  const backOfferShownRef = useRef(false);
+
   // Everything the hero needs, resolved once. Both images come from the API.
   const hero = useMemo(() => {
     const sign = response?.moon_sign || "";
@@ -326,7 +330,26 @@ const RashiReport = () => {
 
   return (
     <div className={styles.wrapper}>
-      <CalcBackButton />
+      {/* Exit-intent offer on the in-page back button:
+            - popup already open -> the Back steps back inside it (escalate the
+              plain list to the offer, or close the offer);
+            - popup closed and the offer hasn't been shown yet -> open the
+              discounted offer instead of leaving the report;
+            - offer already shown once -> let Back navigate away as usual. */}
+      <CalcBackButton
+        onBack={() => {
+          if (recommendation.isOpen) {
+            recommendation.dismiss();
+            return true;
+          }
+          if (!backOfferShownRef.current) {
+            backOfferShownRef.current = true;
+            recommendation.openOffer("chat");
+            return true;
+          }
+          return false;
+        }}
+      />
 
       <div className={styles.layout}>
         {/* Header + hero live in their own group so that on mobile the sidebar
@@ -800,6 +823,12 @@ const RashiReport = () => {
         onFinish={recommendation.finish}
         // Nothing discounted to show -> the close press just closes.
         onNothingToOffer={recommendation.finish}
+        // Browser Back on the report opens the discounted offer once (the
+        // in-page < button does the same via onBack above).
+        onExitOffer={() => {
+          backOfferShownRef.current = true;
+          recommendation.openOffer("chat");
+        }}
         // Bring the user back to this report after the chat ends (only when the
         // chat was started from here).
         returnTo={`${window.location.pathname}${window.location.search}`}

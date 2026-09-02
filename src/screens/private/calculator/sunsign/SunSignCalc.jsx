@@ -8,6 +8,7 @@ import {
   clearedPlaceCoords,
   validateBirthPlace,
 } from "../../../../utils/helper/birthPlaceCoords";
+import { validatePersonName } from "../../../../utils/regex";
 import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 import styles from "./SunSignCalc.module.scss";
 import { ProfileManager } from "../../../../component/UI/Profile";
@@ -102,7 +103,8 @@ const SunSignCalc = () => {
     trackEvent("calculator_used", { calculator_name: "Sun Sign" });
 
     const newErrors = {};
-    if (!formData.name) newErrors.name = "Name is required";
+    const nameErr = validatePersonName(formData.name);
+    if (nameErr) newErrors.name = nameErr;
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
     // Checks the coordinates, not just the text: a hand-typed place that was

@@ -317,7 +317,14 @@ const AstrologerProfile = () => {
   const isDesktop = useIsDesktop(1025);
   const { data: topAstrologersData } = useGetAstrologersQuery(
     { page: 1, limit: 10, isActive: true },
-    { skip: !isDesktop },
+    {
+      skip: !isDesktop,
+      // Sidebar list, not the primary content. Serve a recent result from cache
+      // instead of refetching on every profile view — this is the same query the
+      // /astrologers listing uses, so navigating between profiles keeps it warm
+      // rather than paying the request each time.
+      refetchOnMountOrArgChange: 120,
+    },
   );
   const {
     data: reviewsData,

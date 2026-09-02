@@ -11,7 +11,7 @@ import { useAstrologerConnect } from "../../../../utils/hooks/useAstrologerConne
 import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 import { getAstrologerImageUrl } from "../../../../utils/appImages";
 import ProfileManager from "../../Profile/ProfileManager";
-import { RechargeModal } from "../../..";
+import { RechargeModal, Toast } from "../../..";
 import PrimaryLoader from "../../PrimaryLoader";
 import styles from "./RecommendedAstrologersModal.module.scss";
 
@@ -52,6 +52,13 @@ const discountOf = (rate) => {
  * @param {Function} props.onDismiss - user closed it; may escalate to the offer
  * @param {Function} props.onFinish  - a connection started; close for good
  * @param {Function} [props.onNothingToOffer] - offer variant has no discounts
+ * @param {Function} [props.onExitOffer] - if set, the first browser Back on the
+ *   report (while this popup is closed) opens the discounted offer instead of
+ *   leaving. For screens whose only back control is the browser button.
+ * @param {Function} [props.onEmergencyAvailable] - astrologer is offline but
+ *        bookable as an emergency session. Host screens that own an emergency
+ *        modal pass this; without it the press falls back to a message rather
+ *        than doing nothing.
  */
 const RecommendedAstrologersModal = ({
   isOpen,
@@ -60,6 +67,8 @@ const RecommendedAstrologersModal = ({
   onDismiss,
   onFinish,
   onNothingToOffer,
+  onExitOffer,
+  onEmergencyAvailable,
   // Optional path to return to after the chat ends. Only used for chat (the
   // chat screen reads it once the session ends). Passed by screens that want
   // the user brought back to them — currently the Muhurat report.
@@ -78,9 +87,13 @@ const RecommendedAstrologersModal = ({
     handleChatStart,
     handleCallStart,
     handleAfterKundliSelect,
+    isConnecting,
     openModal,
     setOpenModal,
   } = useAstrologerConnect();
+
+  /** The connection type as the connect hook keys it. */
+  const connectType = type === "chat" ? "chat" : type === "video" ? "video" : "audio";
 
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
 
@@ -110,6 +123,81 @@ const RecommendedAstrologersModal = ({
     if (trackRef.current) trackRef.current.scrollLeft = 0;
   }, [isOpen, variant]);
 
+  /*
+    Make the Back button (browser Back, a swipe-back gesture, and the report's
+    own back button, which calls navigate(-1)) close the popup instead of leaving
+    the page — while the popup is showing.
+
+      - the FIRST Back on the plain list escalates it to the discounted offer;
+      - a Back on the offer closes the popup;
+      - a Back when the popup is not showing does nothing special (normal nav).
+
+    Implemented with a single, long-lived popstate listener plus a guard history
+    entry pushed whenever the popup shows. Earlier attempts re-subscribed the
+    listener on every variant change and popped the entry in cleanup with
+    history.back(); a stray cleanup then navigated the page back on its own,
+    which is the "page goes back by itself" bug this avoids.
+  */
+  const trapActive = isOpen && !openModal.kundli;
+
+  // Keep the latest dismiss handler in a ref so the single, long-lived popstate
+  // listener always calls the current one without re-subscribing (re-subscribing
+  // is what previously let a stray cleanup fire history.back() and send the page
+  // back on its own).
+  const onDismissRef = useRef(onDismiss);
+  onDismissRef.current = onDismiss;
+  const trapActiveRef = useRef(trapActive);
+  trapActiveRef.current = trapActive;
+
+  // Exit-intent: when a screen passes `onExitOffer`, the FIRST browser Back on
+  // the report (while the popup is closed) opens the discounted offer instead of
+  // leaving — same behaviour Rashi gives its in-page back button, but for the
+  // screens (Muhurat, Face) whose only "back" is the browser button. Fired at
+  // most once per mount; after that Back leaves the report normally.
+  const onExitOfferRef = useRef(onExitOffer);
+  onExitOfferRef.current = onExitOffer;
+  const exitOfferSpentRef = useRef(false);
+
+  // A single listener for the whole life of the component. It only reacts when
+  // the popup is actually showing (step back inside it), or — for the exit-intent
+  // case — the first time Back is pressed while the popup is closed.
+  useEffect(() => {
+    const onPopState = () => {
+      if (trapActiveRef.current) {
+        // Popup showing: consume the Back and step back inside it. Re-arm
+        // immediately so the NEXT Back (e.g. on the offer stage) is caught too.
+        window.history.pushState({ recommendedModal: true }, "");
+        onDismissRef.current?.(); // escalate plain -> offer, or close the offer
+        return;
+      }
+      // Popup closed. If this screen wants an exit-intent offer and we haven't
+      // shown it yet, open it now and swallow this Back.
+      if (onExitOfferRef.current && !exitOfferSpentRef.current) {
+        exitOfferSpentRef.current = true;
+        window.history.pushState({ recommendedModal: true }, "");
+        onExitOfferRef.current(); // opens the discounted offer stage
+        return;
+      }
+      // Nothing to do -> let the Back navigate away.
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  // Arm a guard entry:
+  //  - whenever the popup shows, so the first Back has something to consume;
+  //  - and, for the exit-intent case, once on mount while it's still closed, so
+  //    the very first Back on the report is caught rather than leaving.
+  useEffect(() => {
+    if (trapActive) window.history.pushState({ recommendedModal: true }, "");
+  }, [trapActive]);
+  useEffect(() => {
+    if (onExitOffer && !exitOfferSpentRef.current) {
+      window.history.pushState({ recommendedModal: true }, "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const scrollByCard = (direction) => {
     const track = trackRef.current;
     if (!track) return;
@@ -126,32 +214,115 @@ const RecommendedAstrologersModal = ({
     setPage(Math.round(track.scrollLeft / step));
   };
 
-  const connect = (astrologer) => {
+  /*
+    Connect, then decide what to do with the panel — in that order.
+
+    This used to call the handler fire-and-forget and then onFinish() on the very
+    next line, which closed the panel while the balance / availability round trip
+    was still in flight. Two separate failures came out of that:
+
+      * The panel vanished instantly with nothing to replace it, so for the whole
+        length of the request the screen simply went back to the report.
+      * `isOpen` gates this entire component (`if (!isOpen) return ...` below), and
+        the RechargeModal and kundli picker are rendered *inside* it. The connect
+        hook opens those through `setOpenModal` only after its await resolves — by
+        which point the gate had already closed and they could never paint. An
+        insufficient balance therefore produced no recharge sheet at all.
+
+    Net effect for the visitor: press Call, panel disappears, nothing arrives. The
+    only move left is to go back and press Call again. Clarity caught precisely
+    that on the Rashi report — Call/Chat pressed over and over between 20:26 and
+    21:13. The follow-up modals now live outside the gate (see followUpModals) and
+    the close waits for an outcome.
+
+    Argument order differs between the two handlers and getting it wrong is
+    silent: handleChatStart(astro, checkBalance, isEmergency) but
+    handleCallStart(astro, type, isEmergency). Passing `true` third on the call
+    path would flag an emergency session rather than "check the balance".
+  */
+  const connect = async (astrologer) => {
     setSelectedAstrologer(astrologer);
-    // The hook may still need a kundli or a recharge before anything happens,
-    // and it drives those through `openModal`. Either way the user has committed
-    // to connecting, so the recommendation panel is done — and must not come
-    // back as the "before you go" offer on top of the connecting screen.
-    /*
-      Argument order is not the same for the two, and getting it wrong here is
-      silent: handleChatStart(astro, checkBalance, isEmergency) but
-      handleCallStart(astro, type, isEmergency). Passing `true` third on the call
-      path would flag it as an emergency session, not "check the balance".
-    */
-    if (type === "chat") {
-      // Remember where to send the user once the chat ends. The chat launch is
-      // a full-page navigation, so router state would be lost — persist it.
-      if (returnTo) {
-        try { sessionStorage.setItem("shubhtalk_chat_return_path", returnTo); } catch { /* ignore */ }
+
+    let result;
+    try {
+      if (type === "chat") {
+        // Remember where to send the user once the chat ends. The chat launch is
+        // a full-page navigation, so router state would be lost — persist it.
+        if (returnTo) {
+          try { sessionStorage.setItem("shubhtalk_chat_return_path", returnTo); } catch { /* ignore */ }
+        }
+        result = await handleChatStart(astrologer, true, false);
+      } else {
+        result = await handleCallStart(astrologer, connectType);
       }
-      handleChatStart(astrologer, true, false);
-    } else {
-      handleCallStart(astrologer, type === "video" ? "video" : "audio");
+    } catch (err) {
+      // An unexpected throw must not be the one path that still says nothing.
+      console.error("Recommended astrologer connect failed:", err);
+      onFinish?.();
+      Toast.error("Couldn't start that session. Please try again.");
+      return;
     }
+
+    /*
+      Offline astrologer that can still be booked as an emergency session. Every
+      other caller of these handlers checks this flag and opens its emergency
+      modal; this one dropped the return value on the floor, so the press did
+      nothing at all — the same defect already documented on the Profile screen.
+      Delegate when the host screen owns an emergency modal, and never go silent
+      when it doesn't.
+    */
+    if (result?.emergencyAvailable) {
+      onFinish?.();
+      if (onEmergencyAvailable) {
+        onEmergencyAvailable(astrologer);
+      } else {
+        Toast.info(
+          `${getAstrologerDisplayName(astrologer)} is offline right now. Please choose another astrologer.`
+        );
+      }
+      return;
+    }
+
+    /*
+      Close on success (a connection is under way, so the "before you go" offer
+      must not land on top of the connecting screen) and also on a handled
+      failure — the hook has already surfaced a Toast or opened the recharge
+      sheet, and those read better without this panel stacked over them.
+    */
     onFinish?.();
   };
 
-  if (!isOpen) return null;
+  /*
+    Rendered regardless of `isOpen`.
+
+    Both of these are opened by the connect hook *after* its await resolves, which
+    is after this panel has closed. While they lived behind the `isOpen` early
+    return they were unmountable by definition: the recharge sheet for a visitor
+    with an empty wallet never appeared, which is what turned Call/Chat into a
+    dead press. They are self-gating on `openModal.*`, so rendering them while the
+    panel is shut costs nothing.
+  */
+  const followUpModals = (
+    <>
+      <ProfileManager
+        isOpen={openModal.kundli}
+        onClose={() => setOpenModal((prev) => ({ ...prev, kundli: false }))}
+        startCallMode
+        onStartCall={handleAfterKundliSelect}
+        title="Select Profile to Continue"
+        enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+      />
+
+      <RechargeModal
+        isOpen={openModal.recharge}
+        onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
+        astrologer={selectedAstrologer}
+        connectionType={type === "chat" ? "chat" : "call"}
+      />
+    </>
+  );
+
+  if (!isOpen) return followUpModals;
 
   const heading = isOffer
     ? "Before you go, meet astrologers matched to your report"
@@ -161,6 +332,11 @@ const RecommendedAstrologersModal = ({
     : "Based on your report and current availability";
 
   const pageCount = astrologers.length;
+
+  // Narrow the panel when only one or two astrologers are shown, so the cards
+  // aren't stranded in a wide, mostly-empty modal.
+  const widthClass =
+    pageCount === 1 ? styles.modalOne : pageCount === 2 ? styles.modalTwo : "";
 
   return (
     <>
@@ -173,7 +349,7 @@ const RecommendedAstrologersModal = ({
           modal's top and pushed it off-centre. */}
       {!openModal.kundli && createPortal(
         <div className={styles.overlay} role="dialog" aria-modal="true">
-          <div className={`${styles.modal} ${isOffer ? styles.offerModal : ""}`}>
+          <div className={`${styles.modal} ${isOffer ? styles.offerModal : ""} ${widthClass}`}>
             <header className={styles.header}>
               <span className={styles.headerIcon} aria-hidden="true">
                 {type === "chat" ? (
@@ -189,7 +365,7 @@ const RecommendedAstrologersModal = ({
               <button
                 type="button"
                 className={styles.close}
-                onClick={onDismiss}
+                onClick={() => (onFinish || onDismiss)?.()}
                 aria-label="Close"
               >
                 <IoClose size={20} />
@@ -307,12 +483,23 @@ const RecommendedAstrologersModal = ({
                           )}
                         </div>
 
+                        {/*
+                          Never `disabled` — a disabled button swallows the press
+                          and reports nothing, which is the failure mode this
+                          whole change is undoing. The panel now stays up while
+                          the balance check runs, so the tapped card says so;
+                          repeat presses are answered by the connect hook's
+                          in-flight guard.
+                        */}
                         <button
                           type="button"
                           className={styles.connectBtn}
                           onClick={() => connect(astrologer)}
+                          aria-busy={isConnecting(astrologer._id, connectType)}
                         >
-                          {type === "chat" ? (
+                          {isConnecting(astrologer._id, connectType) ? (
+                            "Connecting…"
+                          ) : type === "chat" ? (
                             <>
                               <BsChatDots size={14} aria-hidden="true" /> Chat
                             </>
@@ -364,21 +551,7 @@ const RecommendedAstrologersModal = ({
         document.body
       )}
 
-      <ProfileManager
-        isOpen={openModal.kundli}
-        onClose={() => setOpenModal((prev) => ({ ...prev, kundli: false }))}
-        startCallMode
-        onStartCall={handleAfterKundliSelect}
-        title="Select Profile to Continue"
-        enabledOperations={{ list: true, add: true, edit: true, delete: true }}
-      />
-
-      <RechargeModal
-        isOpen={openModal.recharge}
-        onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
-        astrologer={selectedAstrologer}
-        connectionType={type === "chat" ? "chat" : "call"}
-      />
+      {followUpModals}
     </>
   );
 };

@@ -59,6 +59,25 @@ $brand-dark: #d43400;
   background: linear-gradient(180deg, #fff8f3 0%, #ffeadd 100%);
 }
 
+/* When only one or two astrologers are shown, narrow the panel to fit the
+   card(s) instead of leaving a wide, mostly-empty modal. The default (3+) keeps
+   the 940px max-width above. */
+.modalOne {
+  max-width: 380px;
+
+  .track {
+    justify-content: center;
+  }
+}
+
+.modalTwo {
+  max-width: 660px;
+
+  .track {
+    justify-content: center;
+  }
+}
+
 .header {
   display: flex;
   align-items: flex-start;

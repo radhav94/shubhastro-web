@@ -8,6 +8,7 @@ import {
   clearedPlaceCoords,
   validateBirthPlace,
 } from "../../../../utils/helper/birthPlaceCoords";
+import { validatePersonName } from "../../../../utils/regex";
 import { TODAY } from "../../../../utils/dateFormat/date";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
 import styles from "../mangaldosha/MangalDosha.module.scss";
@@ -98,7 +99,8 @@ const BirthCalc = () => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Birth Details" });
     const newErrors = {};
-    if (!formData.name) newErrors.name = "Name is required";
+    const nameErr = validatePersonName(formData.name);
+    if (nameErr) newErrors.name = nameErr;
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
     // Checks the coordinates, not just the text: a hand-typed place that was

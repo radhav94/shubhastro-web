@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import LoveMatchForm from "../forms/LoveMatchForm";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import { validatePersonName } from "../../../../utils/regex";
 import styles from "./LoveCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 import BackButton from "../../../../component/UI/BackButton/BackButton";
@@ -56,9 +57,11 @@ const LoveCalc = () => {
     trackEvent("calculator_used", { calculator_name: "Love Compatibility" });
 
     const newErrors = {};
-    if (!formData.name1) newErrors.name1 = "Name is required";
+    const name1Err = validatePersonName(formData.name1);
+    if (name1Err) newErrors.name1 = name1Err;
     if (!formData.gender1) newErrors.gender1 = "Gender is required";
-    if (!formData.name2) newErrors.name2 = "Partner name is required";
+    const name2Err = validatePersonName(formData.name2, { requiredError: "Partner name is required" });
+    if (name2Err) newErrors.name2 = name2Err;
     if (!formData.gender2) newErrors.gender2 = "Gender is required";
 
     // The backend rejects a same-gender pair outright with a 400, so there is

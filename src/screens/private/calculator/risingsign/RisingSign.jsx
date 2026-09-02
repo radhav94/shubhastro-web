@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import { validateBirthPlace } from "../../../../utils/helper/birthPlaceCoords";
+import { validatePersonName } from "../../../../utils/regex";
 import styles from "./RisingSign.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 import BackButton from "../../../../component/UI/BackButton/BackButton";
@@ -60,7 +61,8 @@ const RisingSign = () => {
 
     const newErrors = {};
 
-    if (!formData.name) newErrors.name = "Name is required";
+    const nameErr = validatePersonName(formData.name);
+    if (nameErr) newErrors.name = nameErr;
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
     // Checks the coordinates, not just the text: a hand-typed place that was

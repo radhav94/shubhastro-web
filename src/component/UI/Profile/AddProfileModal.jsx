@@ -18,7 +18,7 @@ import { Toast } from "../../index";
 import ProfileListingModal from "./ProfileListingModal";
 import { relationOption } from "../../../utils/constanats/appData";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
-import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
+import { personNameRegex, PERSON_NAME_ERROR, PERSON_NAME_MIN, PERSON_NAME_MIN_ERROR } from "../../../utils/regex";
 import giftImg from "../../../assets/images/welcome-bonus-icon.webp";
 import {
   getSignupBonusLabel,
@@ -250,7 +250,9 @@ const AddProfileModal = ({
   // Validation schema
   const validationSchema = Yup.object({
     name: Yup.string()
+      .trim()
       .required("Name is required")
+      .min(PERSON_NAME_MIN, PERSON_NAME_MIN_ERROR)
       .matches(personNameRegex, PERSON_NAME_ERROR),
     relation: (matchmakingMode || hideRelation)
       ? Yup.string().notRequired()

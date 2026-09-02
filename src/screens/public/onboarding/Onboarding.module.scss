@@ -936,6 +936,30 @@
    focus so the tap answers for itself. */
 .otpInputs:focus-within .otpBoxActive {
   box-shadow: 0 0 0 4px rgba(247, 88, 1, 0.3);
+  animation: otpCaretPulse 1.2s ease-in-out infinite;
+}
+
+/* Makes the caret honest about focus.
+   .otpBoxActive is driven by otp.length, not by focus, so the "next box" stayed
+   highlighted after a click elsewhere had blurred the (opacity: 0) input — the
+   screen looked ready to type while keystrokes went nowhere. Dimming the box when
+   the field is not focused is what distinguishes "type here" from "tap to
+   resume". */
+.otpInputs:not(:focus-within) .otpBoxActive {
+  border-color: #b9926f;
+  box-shadow: none;
+}
+
+@keyframes otpCaretPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(247, 88, 1, 0.3); }
+  50% { box-shadow: 0 0 0 4px rgba(247, 88, 1, 0.12); }
+}
+
+/* Respect reduced-motion preferences: keep the focused emphasis, drop the pulse. */
+@media (prefers-reduced-motion: reduce) {
+  .otpInputs:focus-within .otpBoxActive {
+    animation: none;
+  }
 }
 
 .otpBoxFilled {
