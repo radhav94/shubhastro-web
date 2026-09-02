@@ -22,7 +22,7 @@ import {
 import ShubhAstroLogo from "../../../assets/images/ShubhAstrologo.png";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import { BACKEND_PROXY } from "../../../utils/apiConfig";
-import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
+import { personNameRegex, PERSON_NAME_ERROR, PERSON_NAME_MIN, PERSON_NAME_MIN_ERROR } from "../../../utils/regex";
 import styles from "./ComingSoon.module.scss";
 
 const API_URL = `${BACKEND_PROXY}/api/landing-leads/submit`;
@@ -39,7 +39,7 @@ const initialValues = {
 const validationSchema = Yup.object({
   fullName: Yup.string()
     .trim()
-    .min(2, "Name must be at least 2 characters")
+    .min(PERSON_NAME_MIN, PERSON_NAME_MIN_ERROR)
     .max(50, "Name must be under 50 characters")
     .matches(personNameRegex, PERSON_NAME_ERROR)
     .required("Name is required"),

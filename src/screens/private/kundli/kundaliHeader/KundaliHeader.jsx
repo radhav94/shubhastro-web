@@ -14,6 +14,7 @@ import {
 } from "../../../../services/appServices/kundliServicesNew";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import { buildKundliPayload } from "./utils";
+import { validatePersonName } from "../../../../utils/regex";
 import {
   format12HourTime,
   padZero,
@@ -198,6 +199,12 @@ const KundaliHeader = () => {
   // Submit Form
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const nameErr = validatePersonName(formData.name);
+    if (nameErr) {
+      Toast.error(nameErr);
+      return;
+    }
 
     if (!formData.birthPlace) {
       Toast.error("Please select your birth place");

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import NumerologyForm from "../forms/NumerologyForm";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import { validatePersonName } from "../../../../utils/regex";
 import styles from "./NumerologyCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 import BackButton from "../../../../component/UI/BackButton/BackButton";
@@ -48,7 +49,8 @@ const NumerologyCalc = () => {
 
     const newErrors = {};
 
-    if (!formData.name) newErrors.name = "Name is required";
+    const nameErr = validatePersonName(formData.name);
+    if (nameErr) newErrors.name = nameErr;
     if (!formData.dob) newErrors.dob = "Date of birth is required";
 
     if (Object.keys(newErrors).length > 0) {

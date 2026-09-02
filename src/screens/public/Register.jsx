@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { PATH } from "../../utils/routes/Paths";
 import { registerUser } from "../../services/appServices/authService";
 import LocationSearch from "../../utils/location/locationSearchVedic";
+import { validatePersonName } from "../../utils/regex";
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
@@ -89,6 +90,21 @@ const Register = () => {
         !birthPlace
       ) {
         setError("Please fill in all required fields.");
+        setLoading(false);
+        return;
+      }
+
+      // Name rules: min 3 characters and valid characters, same as the rest of
+      // the site (see validatePersonName).
+      const firstNameErr = validatePersonName(firstName, { requiredError: "First name is required" });
+      if (firstNameErr) {
+        setError(firstNameErr.replace(/^Name/, "First name"));
+        setLoading(false);
+        return;
+      }
+      const lastNameErr = validatePersonName(lastName, { requiredError: "Last name is required" });
+      if (lastNameErr) {
+        setError(lastNameErr.replace(/^Name/, "Last name"));
         setLoading(false);
         return;
       }

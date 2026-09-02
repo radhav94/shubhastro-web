@@ -3,6 +3,7 @@ import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import { validatePersonName } from "../../../../utils/regex";
 import styles from "./LuckyNameCalc.module.scss";
 import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 import { ProfileManager } from "../../../../component/UI/Profile";
@@ -62,7 +63,8 @@ const LuckyNameCalc = () => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Lucky Name" });
     const newErrors = {};
-    if (!formData.name) newErrors.name = "Name is required";
+    const nameErr = validatePersonName(formData.name);
+    if (nameErr) newErrors.name = nameErr;
     if (!formData.dob) newErrors.dob = "Date of birth is required";
     if (!formData.system) newErrors.system = "Please select a system";
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
