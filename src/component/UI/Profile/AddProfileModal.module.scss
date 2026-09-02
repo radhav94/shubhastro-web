@@ -44,6 +44,16 @@
   flex-direction: column;
   animation: slideUp 0.3s ease-out;
   overflow: auto;
+
+  /* Keep the content scrollable when the viewport is short, but never paint a
+     visible scrollbar — the form should read as one clean sheet. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
 }
 
 @keyframes slideUp {
@@ -495,28 +505,28 @@
     border-radius: 20px;
     width: 100%;
     max-width: 600px;
-    max-height: 90vh;
+    max-height: 95vh;
     animation: fadeIn 0.25s ease-out;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
   }
 
   .sheetHandle { display: none; }
 
-  .sheetHeader { padding: 22px 24px 12px; }
+  /* Compact spacing so the whole form fits in the viewport without scrolling. */
+  .sheetHeader { padding: 16px 24px 8px; }
 
-  .sheetContent { padding: 4px 24px 24px; }
+  .sheetContent { padding: 2px 24px 18px; }
 
-  /* Roomier spacing on desktop where there's space */
-  .sheetTitle { font-size: 24px; }
-  .headerSub { font-size: 13px; max-width: 260px; }
-  .giftImg { width: 96px; }
-  .profileForm { gap: 16px; }
+  .sheetTitle { font-size: 22px; }
+  .headerSub { font-size: 12.5px; max-width: 260px; }
+  .giftImg { width: 82px; }
+  .profileForm { gap: 11px; }
 
   .formGroup input,
-  .formGroup select { height: 48px; font-size: 15px; }
+  .formGroup select { height: 44px; font-size: 15px; }
 
-  .mobileWrap { height: 48px; }
-  .formGroup .mobileWrap input { height: 46px; }
+  .mobileWrap { height: 44px; }
+  .formGroup .mobileWrap input { height: 42px; }
 
-  .identityButtons button { padding: 14px 6px; }
+  .identityButtons button { padding: 10px 6px; }
 }

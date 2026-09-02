@@ -6,6 +6,65 @@ $panel: rgba(255, 255, 255, 0.72);
 
 .report {
   margin-top: 22px;
+
+  /* Leave room for the fixed mobile action bar so it doesn't cover content. */
+  @media (max-width: 767px) {
+    padding-bottom: 90px;
+  }
+}
+
+/* ── MOBILE ACTION BAR (fixed bottom) ──────────────────────────────────── */
+.mobileActionBar {
+  display: none;
+
+  @media (max-width: 767px) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    padding: 10px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(247, 88, 1, 0.15);
+    box-shadow: 0 -4px 18px rgba(191, 118, 66, 0.12);
+  }
+}
+
+.mobileActionChat,
+.mobileActionCall {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 13px 8px;
+  border-radius: 26px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.mobileActionChat {
+  background: #fff;
+  color: $brand-dark;
+  border: 1.5px solid rgba(247, 88, 1, 0.5);
+}
+
+.mobileActionCall {
+  background: linear-gradient(135deg, $brand, $brand-dark);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.3);
 }
 
 /* ── Tabs ─────────────────────────────────────────────────────────────── */
@@ -57,15 +116,30 @@ $panel: rgba(255, 255, 255, 0.72);
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-rows: auto 1fr;
+  /* Banner top-left, panels below it, sidebar spanning the right column. */
+  grid-template-areas:
+    "banner sidebar"
+    "main   sidebar";
   gap: 18px;
   align-items: start;
 
   @media (max-width: 1024px) {
     grid-template-columns: minmax(0, 1fr);
+    /* Single column: banner, then the Best Muhurat card, then the panels. */
+    grid-template-areas:
+      "banner"
+      "sidebar"
+      "main";
   }
 }
 
+.banner {
+  grid-area: banner;
+}
+
 .main {
+  grid-area: main;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -84,10 +158,18 @@ $panel: rgba(255, 255, 255, 0.72);
   background: rgba($color: #fff, $alpha: 0.4);
   border: 1.5px solid rgba(255, 255, 255, 0.95);
   box-shadow: 0 2px 14px rgba(191, 118, 66, 0.08);
+
+  /* On a narrow screen stack the banner so the illustration sits centered
+     above the copy instead of squeezing beside it. */
+  @media (max-width: 620px) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+  }
 }
 
-/* Illustration sits inline at the left, as in the design, and is the first thing
-   dropped on a narrow screen — it carries no information. */
+/* Illustration sits inline at the left, as in the design. */
 .bannerArt {
   flex-shrink: 0;
   width: 132px;
@@ -95,7 +177,8 @@ $panel: rgba(255, 255, 255, 0.72);
   align-self: center;
 
   @media (max-width: 620px) {
-    display: none;
+    width: 200px;
+    max-width: 70%;
   }
 }
 
@@ -125,6 +208,15 @@ $panel: rgba(255, 255, 255, 0.72);
 
 .bannerTts {
   flex-shrink: 0;
+
+  /* On mobile the banner stacks vertically, so pin the speaker to the top-right
+     corner of the banner instead of letting it fall to the bottom. */
+  @media (max-width: 620px) {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+  }
 }
 
 /* ── Panels ───────────────────────────────────────────────────────────── */
@@ -403,6 +495,7 @@ $panel: rgba(255, 255, 255, 0.72);
   Rashi / Face report setup.
 */
 .sidebar {
+  grid-area: sidebar;
   align-self: stretch;
 }
 
@@ -590,12 +683,22 @@ $panel: rgba(255, 255, 255, 0.72);
 .actionPrimary {
   background: linear-gradient(135deg, $brand, $brand-dark);
   color: #fff;
+
+  /* Hidden on mobile — the fixed .mobileActionBar takes over. */
+  @media (max-width: 767px) {
+    display: none;
+  }
 }
 
 .actionSecondary {
   background: #fff;
   border: 1.5px solid rgba(247, 88, 1, 0.5);
   color: $brand-dark;
+
+  /* Hidden on mobile — the fixed .mobileActionBar takes over. */
+  @media (max-width: 767px) {
+    display: none;
+  }
 }
 
 .actionTertiary {
