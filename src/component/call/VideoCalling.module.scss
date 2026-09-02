@@ -974,10 +974,6 @@
 
 @media (max-width: 768px) {
 
-  body {
-    overflow: hidden;
-  }
-
   .avatarImage {
     width: 160px;
     height: 160px;
@@ -1081,7 +1077,14 @@
     height: 165px;
   }
 }
-
+@media (width <= 767px) {
+  .actionButtons {
+    top: 50px;
+    padding: 8px 10px;
+    gap: 6px;
+    margin-top: 44px;
+  }
+}
 /* ===============================
    📱 SMALL MOBILE (≤480px)
    =============================== */
@@ -1145,12 +1148,12 @@
     font-size: 13px;
   }
 
-  .actionButtons {
-    top: 50px;
-    padding: 8px 10px;
-    gap: 6px;
-    margin-top: 44px;
-  }
+  // .actionButtons {
+  //   top: 50px;
+  //   padding: 8px 10px;
+  //   gap: 6px;
+  //   margin-top: 44px;
+  // }
 
   .callTimerBottom {
     font-size: 0px;
