@@ -671,7 +671,17 @@ const AddProfileModal = ({
                         }}
                         // Lets validation tell "empty" apart from "typed but not
                         // a usable date" — see the birthDate schema.
-                        onRawChange={(text) => setFieldValue("birthDateRaw", text)}
+                        onRawChange={(text) => {
+                          setFieldValue("birthDateRaw", text);
+                          // Invalidate the parsed value on every keystroke; the
+                          // picker only re-fires onChange once the text is a
+                          // complete, valid date, so clearing here first means a
+                          // half-edited or emptied box no longer keeps the old
+                          // parsed date alive. Without this, clearing the field
+                          // still passed validation and the form submitted with
+                          // a stale date the user could no longer see.
+                          setFieldValue("birthDate", "");
+                        }}
                         maxDate={new Date()}
                         placeholder="DD/MM/YYYY"
                       />
