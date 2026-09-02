@@ -322,12 +322,24 @@ const TalkToAstrologer = () => {
     },
     {
       skip: isFiltered, // Skip normal API when in filtered mode
-      refetchOnMountOrArgChange: true,
+      /*
+        Serve a recent result from cache instead of hitting the network on every
+        mount. This screen is bounced in and out of constantly (listing ->
+        profile -> back), and `true` bypassed the RTK Query cache every time, so
+        each return paid the full request — through the encrypted gateway — before
+        any card could paint. A number keeps the cached list if it is younger than
+        this many seconds and only refetches past it. Card availability is kept
+        fresh independently by the live-status sockets, so 60s on the list itself
+        is safe.
+      */
+      refetchOnMountOrArgChange: 60,
        },
   );
 
   const { data: recommendedData, isLoading: isLoadingRecommended } =
-    useGetRecommendedAstrologersQuery(undefined, { refetchOnMountOrArgChange: true });
+    // Secondary strip, not the primary grid — a longer cache window is fine and
+    // keeps its request from competing with the main list on first paint.
+    useGetRecommendedAstrologersQuery(undefined, { refetchOnMountOrArgChange: 300 });
 
   const data = astrodata?.data?.result || [];
   const recommendedAstrologers = recommendedData?.data || [];
