@@ -20,6 +20,8 @@ import TTSButton from "../../../../component/UI/TTSButton";
 import { PATH } from "../../../../utils/routes/Paths";
 import RecommendedAstrologersModal from "../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal";
 import useRecommendationOffer from "../../../../utils/hooks/useRecommendationOffer";
+import sideDecorTR from "../../../../assets/images/facereading/side-decor-tr.png";
+import sideDecorBL from "../../../../assets/images/facereading/side-decor-bl.png";
 import styles from "./FaceReport.module.scss";
 
 /** "analyticalMind" -> "Analytical Mind" */
@@ -423,29 +425,28 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
       </header>
 
       <div className={styles.layout}>
-        <div className={styles.main}>
-          {/*
-            ── TABS ─────────────────────────────────────────────────────
-            Inside the main column, not above the whole layout — the bar has to
-            stop where the content panels stop, and living in the same grid
-            track means it inherits that width instead of repeating the
-            sidebar's 290px here.
-          */}
-          <div className={styles.tabs} role="tablist">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                className={`${styles.tab} ${activeTab === tab.id ? styles.tabOn : ""}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        {/*
+          ── TABS ─────────────────────────────────────────────────────
+          A direct child of the layout grid (placed in the left column on
+          desktop) rather than inside .main, so that on mobile the sidebar
+          ("Your Personality") can sit directly beneath the tabs.
+        */}
+        <div className={styles.tabs} role="tablist">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              className={`${styles.tab} ${activeTab === tab.id ? styles.tabOn : ""}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
+        <div className={styles.main}>
           {/* ── OVER ALL ─────────────────────────────────────────────── */}
           {shows("all") && (
             <Panel
@@ -729,6 +730,8 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
         {/* ── SIDEBAR ────────────────────────────────────────────────── */}
         <aside className={styles.sidebar}>
           <div className={styles.sideCard}>
+            <img src={sideDecorTR} alt="" aria-hidden="true" className={styles.sideDecorTR} />
+            <img src={sideDecorBL} alt="" aria-hidden="true" className={styles.sideDecorBL} />
             <div className={styles.sideTools}>
               {onDownload && (
                 <button
@@ -752,26 +755,30 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
               </button>
             </div>
 
-            <p className={styles.sideKicker}>Your Personality</p>
-            {topTrait && <h3 className={styles.sideTitle}>{titleise(topTrait.key)}</h3>}
-            {(topTrait?.description || overallReading.summary) && (
-              <p className={styles.sideBody}>
-                {topTrait?.description || overallReading.summary}
-              </p>
-            )}
+            {/* Inner card holds the personality copy + pills; the download/share
+                tools sit above it and the CTAs below, matching the design. */}
+            <div className={styles.sideInner}>
+              <p className={styles.sideKicker}>Your Personality</p>
+              {topTrait && <h3 className={styles.sideTitle}>{titleise(topTrait.key)}</h3>}
+              {(topTrait?.description || overallReading.summary) && (
+                <p className={styles.sideBody}>
+                  {topTrait?.description || overallReading.summary}
+                </p>
+              )}
 
-            {bannerChips.length > 0 && (
-              <p className={styles.chipRow}>
-                {bannerChips.slice(1).map((chip) => (
-                  <span
-                    key={chip.label}
-                    className={`${styles.chip} ${styles[`chip_${chip.tone}`] || ""}`}
-                  >
-                    {chip.value}
-                  </span>
-                ))}
-              </p>
-            )}
+              {bannerChips.length > 0 && (
+                <p className={styles.chipRow}>
+                  {bannerChips.slice(1).map((chip) => (
+                    <span
+                      key={chip.label}
+                      className={`${styles.chip} ${styles[`chip_${chip.tone}`] || ""}`}
+                    >
+                      {chip.value}
+                    </span>
+                  ))}
+                </p>
+              )}
+            </div>
 
             <div className={styles.actions}>
               {/*
@@ -810,6 +817,31 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
             </div>
           </div>
         </aside>
+      </div>
+
+      {/* Mobile-only fixed action bar. The sidebar's Call/Chat buttons are
+          hidden on mobile; these pinned buttons take their place. */}
+      <div className={styles.mobileActionBar}>
+        <a
+          href="/chat-with-astrologers"
+          className={styles.mobileActionChat}
+          onClick={(event) => {
+            event.preventDefault();
+            recommendation.open("chat");
+          }}
+        >
+          <BsChatDots size={16} aria-hidden="true" /> Chat with astrologer
+        </a>
+        <a
+          href={PATH.privateRoutes.ASTROLOGERS_LIST.path}
+          className={styles.mobileActionCall}
+          onClick={(event) => {
+            event.preventDefault();
+            recommendation.open("audio");
+          }}
+        >
+          <MdOutlinePhoneInTalk size={16} aria-hidden="true" /> Call an astrologer
+        </a>
       </div>
 
       <RecommendedAstrologersModal
