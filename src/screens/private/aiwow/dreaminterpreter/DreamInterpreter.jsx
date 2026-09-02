@@ -35,6 +35,13 @@ const DreamInterpreter = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [interpretation, setInterpretation] = useState(restoredResult);
   const [error, setError] = useState(null);
+  /*
+    Why the submit button cannot fire yet, shown inline beneath it.
+    `seq` increments on every blocked press so React remounts the message and a
+    second press is visibly acknowledged rather than appearing inert.
+  */
+  const [blockHint, setBlockHint] = useState(null);
+  const blockSeqRef = useRef(0);
   const [showMorePsych, setShowMorePsych] = useState(false);
   const [showMoreAstro, setShowMoreAstro] = useState(false);
   const [showMorePersonalized, setShowMorePersonalized] = useState(false);
@@ -65,18 +72,43 @@ const DreamInterpreter = () => {
     }
   }, [interpretation, error]);
 
+  /*
+    Dimmed-but-pressable state for the submit button. Drives styling and
+    `aria-disabled` only — never the `disabled` attribute, which would stop the
+    press reaching handleSubmit and explaining itself.
+  */
+  const isSubmitBlocked =
+    !isLoading && dreamDescription.trim().length < 20;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!dreamDescription.trim()) {
-      Toast.error('Please describe your dream');
+    /*
+      These two guards are now reachable. While the button carried `disabled`
+      for the same conditions they were dead code — the press never arrived.
+      Reported inline rather than via Toast so the explanation appears next to
+      the control and is visible in session replay.
+    */
+    const described = dreamDescription.trim();
+    if (!described) {
+      blockSeqRef.current += 1;
+      setBlockHint({
+        seq: blockSeqRef.current,
+        message: 'Please describe your dream first.',
+      });
       return;
     }
 
-    if (dreamDescription.trim().length < 20) {
-      Toast.error('Please provide more details about your dream (at least 20 characters)');
+    if (described.length < 20) {
+      blockSeqRef.current += 1;
+      setBlockHint({
+        seq: blockSeqRef.current,
+        message: `Please add a little more detail — ${described.length} of 20 characters so far.`,
+      });
       return;
     }
+
+    setBlockHint(null);
 
     // Guest user: show kundli auth modal before interpreting
     const token = localStorage.getItem("shubhtalk_customer_token");
@@ -330,10 +362,28 @@ const DreamInterpreter = () => {
               </div>
             </div>
 
-            <button 
-              type="submit" 
-              className={styles.submitButton}
-              disabled={isLoading || !dreamDescription.trim() || dreamDescription.trim().length < 20}
+            {/*
+              Only `isLoading` disables this button — the spinner and
+              "Interpreting Dream..." label already account for that state.
+
+              The incomplete-description cases used to be folded into `disabled`
+              too, which swallowed the tap outright: the label still read
+              "Interpret Dream" while refusing to fire, and the validation in
+              handleSubmit (which explains exactly what is missing) could never
+              run, because a disabled button dispatches no click at all. The
+              character counter sits above and does not react to a press.
+
+              Clarity recorded the result on this screen — multiple dead clicks
+              before the visitor worked out for themselves that more text was
+              needed, then a successful submit at 01:28.
+            */}
+            <button
+              type="submit"
+              className={`${styles.submitButton} ${
+                isSubmitBlocked ? styles.submitButtonBlocked : ''
+              }`.trim()}
+              disabled={isLoading}
+              aria-disabled={isSubmitBlocked}
             >
               {isLoading ? (
                 <>
@@ -344,6 +394,22 @@ const DreamInterpreter = () => {
                 'Interpret Dream'
               )}
             </button>
+
+            {/*
+              Inline, not a toast: this is the answer to a press on the button
+              directly above it, and it has to be visible in session replay.
+              Keyed on `seq` so a repeat press re-announces instead of looking
+              like nothing happened.
+            */}
+            {blockHint && (
+              <p
+                key={blockHint.seq}
+                className={styles.submitBlockHint}
+                role="status"
+              >
+                {blockHint.message}
+              </p>
+            )}
           </form>
         ) : (
           <div className={styles.resultSection}>

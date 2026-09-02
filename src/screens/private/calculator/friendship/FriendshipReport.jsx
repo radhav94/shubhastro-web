@@ -7,6 +7,7 @@ import styles from "./FriendshipReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
 import { selectCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";
+import Toast from "../../../../component/toast";
 import profileImg from "../../../../assets/images/Profile image.png";
 
 const FriendshipReport = () => {
@@ -18,13 +19,37 @@ const FriendshipReport = () => {
     useFriendshipCalculatorMutation();
 
   useEffect(() => {
-    if (!stored) return;
+    /*
+      No stored input means there is nothing to calculate.
+
+      This used to just `return`, which left `data` undefined and fell into the
+      `isLoading || !data` branch below — so the screen rendered "Checking your
+      match…" permanently. Anyone reaching /friendship-calculator/report without
+      submitting the form first (a bookmark, a shared link, or Back after the
+      store was cleared) sat on a loader that could never resolve, with nothing
+      on screen to press. Send them to the form that produces the input.
+    */
+    if (!stored) {
+      navigate("/friendship-calculator", { replace: true });
+      return;
+    }
 
     friendshipCalculator(stored)
       .unwrap()
       .catch((err) => {
+        /*
+          Say why, then bounce.
+
+          `message` was already being built on this line and then thrown away, so
+          a failed calculation silently teleported the visitor back to the form
+          with no explanation at all. The natural reading of that is "my input was
+          rejected", so they retype the same two names and submit again — and get
+          the same silent bounce. That is the repeated submit / "Calculate Again"
+          run Clarity recorded on this calculator between 06:44 and 08:56.
+        */
         const message =
           err?.data?.message || "Something went wrong. Please try again.";
+        Toast.error(message);
         navigate("/friendship-calculator", { replace: true });
       });
   }, []); // run once
