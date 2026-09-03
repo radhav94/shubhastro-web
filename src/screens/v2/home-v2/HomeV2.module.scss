@@ -1192,7 +1192,7 @@
 .muhuratGrid {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 
   @media (max-width: 900px) {
     display: grid;
@@ -1226,20 +1226,27 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 6px;
+  margin-bottom: 11px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1a1a;
+  line-height: 19px;
   @media (width <= 1024px) {
     gap: 0px;
+  }
+  @media (width <= 768px) {
+    font-size: 13px;
   }
 
   // Muhurat name — an <h3> now (was <h5>, one rank below the widget's own
   // heading once that became an <h2>). Size is unchanged.
-  h3 {
-    font-size: 15px;
-    font-weight: 500;
-    color: #1a1a1a;
-    margin: 0;
-    line-height: 19px;
-  }
+  // h3 {
+  //   font-size: 15px;
+  //   font-weight: 500;
+  //   color: #1a1a1a;
+  //   margin: 0;
+  //   line-height: 19px;
+  // }
 }
 
 .muhuratIcon {

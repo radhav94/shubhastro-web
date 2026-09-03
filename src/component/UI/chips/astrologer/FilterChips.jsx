@@ -799,7 +799,7 @@ const FilterChips = ({
                   onClick={() => handleClick(btn.slug)}
                   aria-pressed={isActive}
                 >
-                  <span>{btn.name}</span>
+                  {btn.name}
                 </button>
               );
             })

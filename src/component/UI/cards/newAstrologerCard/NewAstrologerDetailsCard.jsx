@@ -132,7 +132,7 @@ const NewAstrologerDetailsCard = ({
       ) : (
         <div className={`${styles.statusBadge} ${isOnline ? styles.online : styles.offline}`}>
           <span className={styles.statusDot} />
-          <span>{isOnline ? "Online" : "Offline"}</span>
+          {isOnline ? "Online" : "Offline"}
         </div>
       )}
 
@@ -169,23 +169,21 @@ const NewAstrologerDetailsCard = ({
 
       <div className={styles.detailsInfo}>
         <Link to={getAstrologerProfilePath(astrologer)} className={styles.detailsNameLink}>
-          <h3 className={styles.detailsName}>
+          {/* <h3 className={styles.detailsName}> */}
             {getAstrologerDisplayName(astrologer)}
-          </h3>
+          {/* </h3> */}
         </Link>
 
         <div className={styles.detailsMeta}>
-          <div className={styles.detailsExperience}>
+          <span className={styles.detailsExperience}>
             <img src={appSvgs.Experience} className={styles.detailsExperienceIcon} alt="" />
-            <span className={styles.detailsExperienceText}>
               {parseInt(astrologer?.experience) || 0} yrs
-            </span>
-          </div>
+          </span>
           {astrologer?.rating > 0 && (
-            <div className={styles.detailsRatingInline}>
+            <span className={styles.detailsRatingInline}>
               <Star size={12} fill="#FFB246" stroke="#FFB246" />
-              <span>{astrologer.rating.toFixed(1)}</span>
-            </div>
+              {astrologer.rating.toFixed(1)}
+            </span>
           )}
         </div>
 
