@@ -156,6 +156,48 @@
   }
 }
 
+/*
+ * The "Add your birth details" prompt, which is a real button rather than the
+ * inert paragraph it used to be — see the note at its call site in Profile.jsx.
+ *
+ * Deliberately reads as a link, not a pill: it sits directly under the name in a
+ * tight header, and a filled button there would compete with the primary actions
+ * further down the page. The underline plus the accent colour are what say
+ * "pressable" — text alone was the whole problem.
+ *
+ * Negative margins reclaim the padding so it occupies the same line box as the
+ * .profileDetails paragraph it replaces, while still giving a comfortable touch
+ * target. Font size is matched to that paragraph at both breakpoints so the
+ * header does not shift depending on whether details exist.
+ */
+.profileDetailsPrompt {
+  display: inline-block;
+  padding: 6px 4px;
+  margin: -6px -4px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f75801;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: left;
+
+  @media (width <= 767px) {
+    font-size: 0.7rem;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
 .logoutButton {
   position: relative;
   width: 40px;

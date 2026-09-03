@@ -1031,6 +1031,24 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 
+  /*
+    Busy state while the follow/unfollow request is in flight.
+    aria-disabled rather than :disabled on purpose — the button stays clickable so
+    a tap is never swallowed (see handleFollow's re-entry guard). This restores
+    the visual "not right now" the native `disabled` attribute used to give for
+    free, and suppresses the lift so it does not still feel pressable.
+  */
+  &[aria-disabled="true"] {
+    opacity: 0.65;
+    cursor: progress;
+
+    &:hover,
+    &:active {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
   &.following {
     background: #E8E8E8;
     color: #666666;

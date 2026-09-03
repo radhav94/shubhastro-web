@@ -547,6 +547,24 @@ const AstrologerProfile = () => {
   };
 
   const handleFollow = async () => {
+    /*
+      Re-entry is turned away here rather than by a native `disabled` on the
+      button, which is what this used to rely on.
+
+      `disabled` fires no click event at all, so while the follow request was in
+      flight every tap on Follow vanished — no message, nothing for the browser or
+      the dead-click heuristic to see. That is the one pattern this file argues
+      against in four separate places (the connect tiles, the status card and the
+      minutes tiles all use aria-disabled precisely to avoid it), and the Follow
+      button in the header was the last control still doing it.
+
+      The label already flips while loading, so this only has to cover the case
+      where someone taps again before it settles.
+    */
+    if (followLoading || unfollowLoading) {
+      toast.info("Still saving that — one moment.");
+      return;
+    }
     if (!token) {
       navigate("/login", { state: { from: location.pathname } });
       return;
@@ -1568,10 +1586,14 @@ const AstrologerProfile = () => {
                 Virtual Assistant
               </button>
             )}
+            {/* aria-disabled, not `disabled` — see the re-entry guard at the top
+                of handleFollow for why. */}
             <button
+              type="button"
               className={`${styles.followBtn} ${isFollowing ? styles.following : ""}`}
               onClick={handleFollow}
-              disabled={followLoading || unfollowLoading}
+              aria-disabled={followLoading || unfollowLoading}
+              aria-busy={followLoading || unfollowLoading || undefined}
             >
               {followLoading || unfollowLoading
                 ? "..."

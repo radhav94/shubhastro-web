@@ -430,6 +430,40 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
           className={styles.input}
           autoComplete="off"
         />
+        {/*
+          Invisible hit area over the right 1/3, so a tap near the clock icon
+          opens the dropdown even though typing stays enabled on the rest of the
+          field. The date field below has carried this for a while; this one did
+          not, which is the same one-field-lags-the-other story as the inputMode
+          note above.
+
+          Why it matters more on a phone than the geometry suggests. Callers do
+          not pass `openOnClick`, so it is false everywhere in the app — meaning a
+          tap on the input itself deliberately does NOT open the picker, it
+          focuses the field for typing. That leaves the 44px clock button as the
+          only way in. Miss it and the tap either lands on the input (number pad,
+          not the picker the visitor was after) or, in the gap beside it, on the
+          row div — nothing at all.
+
+          Clarity session 1hiiox5 (Sep 3, Facebook in-app, mobile) is that
+          pattern: repeated clicks and inputs on the time and date fields of the
+          kundli form, some scored as dead clicks, around 03:55.
+
+          `.calendarBtn` sits at z-index 2 and this at z-index 1, so the icon
+          still receives its own taps and keeps its toggle behaviour; this only
+          catches the area beside it. Same arrangement, and the same stylesheet
+          rules, as the date field — no new CSS.
+        */}
+        <button
+          type="button"
+          className={styles.calendarOverlay}
+          onClick={() => {
+            if (timeBlock.blocked) return timeBlock.explain();
+            if (!disabled) setOpen(true);
+          }}
+          tabIndex={-1}
+          aria-hidden="true"
+        />
         <button
           type="button"
           className={styles.calendarBtn}

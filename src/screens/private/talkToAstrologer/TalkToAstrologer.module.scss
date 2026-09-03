@@ -96,16 +96,46 @@
   // }
 }
 
+/*
+  The two section headings on this page — "TOP ASTROLOGERS FOR YOU" and
+  "EXPLORE ASTROLOGERS". Both are plain <h2>s with no handler and nowhere to go:
+  the content each one introduces is immediately beneath it.
+
+  They used to carry `border-bottom: 2px solid #000` alongside `width: fit-content`,
+  which draws a rule directly under the words, hugging their exact width. That is
+  what `text-decoration: underline` looks like, so visitors read them as links and
+  clicked them.
+
+  Clarity reported both, independently, on the same page:
+    - "TOP ASTROLOGERS FOR YOU" — a dead click at 00:03:47 (desktop).
+    - "EXPLORE ASTROLOGERS" — repeatedly clicked within the first few seconds,
+      "multiple dead clicks", before the visitor found the category chips at
+      00:52 and got where they were going (session 1e75ar2, desktop).
+
+  One report on one heading is ambiguous. Both headings that share this class,
+  one of them with repeated clicks, is the style making a promise the elements
+  cannot keep.
+
+  Removing the rule rather than wiring the headings up: there is no destination
+  for either, and the section is not left bare — `.sectionDivider` renders an
+  ornamental line/moon/line divider directly below each title, so the separation
+  the border was duplicating is still there. Same call, and the same reasoning, as
+  the Laal Kitab feature cards (LalKitab.module.scss): removing the false promise
+  is the fix.
+
+  The margin was also collapsed into one declaration. It previously read
+  `margin: 0 0 0.5rem 0` and then `margin: 0 auto`, and the second silently threw
+  away the 0.5rem gap the first asked for — which matters more now that the gap to
+  the divider is the only thing separating them.
+*/
 .sectionTitle {
   font-size: 1rem;
   font-weight: 700;
   color: #2c2c2c;
   letter-spacing: 1.5px;
-  margin: 0 0 0.5rem 0;
   font-family: "Poppins", sans-serif;
   width: fit-content;
-  border-bottom: 2px solid #000;
-  margin: 0 auto;
+  margin: 0 auto 0.5rem;
 
   // @media (max-width: 768px) {
   //   font-size: 14px;
@@ -376,6 +406,43 @@
   &:focus-visible {
     outline: 2px solid #f75801;
     outline-offset: 2px;
+  }
+}
+
+/*
+ * Outcome line under the list-state buttons, stating what the press found.
+ *
+ * It animates in because an appearing line is what makes the press legible as
+ * having done something. Without it, a check that finds nobody online is
+ * indistinguishable from a button that does nothing — which is exactly how these
+ * two buttons behaved before, and why they collected repeat clicks.
+ *
+ * Deliberately matched to .gateCheckResult in LivePlayerPage.module.scss so the
+ * same interaction reads the same way on both empty states.
+ */
+.listStateResult {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #5f5245;
+  margin: 14px 0 0;
+  animation: listStateResultIn 0.2s ease-out;
+}
+
+@keyframes listStateResultIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Someone who has asked not to see motion still needs the line itself. */
+@media (prefers-reduced-motion: reduce) {
+  .listStateResult {
+    animation: none;
   }
 }
 

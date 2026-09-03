@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import toast from "react-hot-toast";
 
 export const useLiveViewLogic = (props) => {
@@ -6,7 +6,6 @@ export const useLiveViewLogic = (props) => {
     chatInput,
     setChatInput,
     sendChatMessage,
-    messages,
     remoteUsers,
     // Called instead of sending when a guest (not signed in) tries to send a
     // live-chat message; the host opens the sign-up popup. Returns true if it
@@ -26,9 +25,44 @@ export const useLiveViewLogic = (props) => {
     ? `${window.location.origin}/live/${channel}`
     : `${window.location.origin}/live`;
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  /*
+    Chat auto-scroll deliberately does NOT live here. Do not add it back.
+    It is owned by the effect on `messagesOverlayRef` in LiveView.jsx.
+    `messagesEndRef` above is now only a DOM anchor at the end of the list.
+
+    What was here:
+
+      useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, [messages]);
+
+    Two problems with it, both user-visible on the live page.
+
+    1. It fought the other scroll controller and won. LiveView.jsx pins the
+       comments list to the bottom too, but only when the viewer is already at
+       the bottom (or the list was empty) — its comment says "Don't yank them if
+       they've scrolled up", which is the correct behaviour for a chat you might
+       want to read back through. This effect had no such guard and ran on every
+       change to `messages`, so it dragged the viewer back down regardless. The
+       deliberate guard next door was dead code in practice.
+
+       Clarity recorded the consequence: a 31-minute desktop session on /live
+       (user 12b48hp, Sep 3) with rage clicks and dead clicks landing on chat
+       message bubbles mid-conversation. Message bubbles are inert by design —
+       no handler, and correctly no `cursor: pointer` — so the clicks were never
+       going to do anything; the reason to keep clicking at a message is that it
+       will not stay still long enough to read or select.
+
+    2. `scrollIntoView` does not confine itself to the chat box. It scrolls
+       every ancestor scrolling container needed to bring the element into view,
+       and on /live the chat sits inside the swipeable reel (useReelScroll /
+       useSwipeReel). So each new message could nudge the reel itself, not just
+       the comments.
+
+    The remaining effect in LiveView.jsx still pins on every new message for a
+    viewer who is at the bottom, so keeping up with a live chat is unchanged.
+    Only the yank-while-reading-back is gone.
+  */
 
   const handleSend = (e) => {
     e.preventDefault();
