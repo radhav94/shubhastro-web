@@ -35,6 +35,46 @@ import detailIcon10 from '../../../../assets/gemstone-details/icon-10.png';
 import detailIcon11 from '../../../../assets/gemstone-details/icon-11.png';
 import detailsHeaderIcon from '../../../../assets/gemstone-details/icon-details-header.png';
 
+// Identification (banner) fact icons — from the design (tabler icon set).
+import factNameIcon from '../../../../assets/gemstone-details/fact-name.png';
+import factHindiIcon from '../../../../assets/gemstone-details/fact-hindi.png';
+import factScientificIcon from '../../../../assets/gemstone-details/fact-scientific.png';
+import factNaturalIcon from '../../../../assets/gemstone-details/fact-natural.png';
+
+// Suitability tab icons — check badge for the header, Om for the ritual mantra.
+import suitCheckIcon from '../../../../assets/gemstone-details/suit-check.png';
+import suitOmIcon from '../../../../assets/gemstone-details/suit-om.png';
+// Healing tab — heart+plus icon for the "Healing Properties" header.
+import healHeaderIcon from '../../../../assets/gemstone-details/heal-header.png';
+// Overview tab — sparkle icon for the "Personalized Insights" section title.
+import insightsHeaderIcon from '../../../../assets/gemstone-details/insights-header.png';
+
+// Personalized Insights card icons — from the design (each ships its own soft
+// tinted circle). Keyed to the insight so the right glyph shows per card.
+import insightBirthChartIcon from '../../../../assets/gemstone-details/insight-birth-chart.png';
+import insightPlanetaryIcon from '../../../../assets/gemstone-details/insight-planetary.png';
+import insightDoshaIcon from '../../../../assets/gemstone-details/insight-dosha.png';
+import insightLifePathIcon from '../../../../assets/gemstone-details/insight-life-path.png';
+import insightRecommendedIcon from '../../../../assets/gemstone-details/insight-recommended.png';
+import insightAdviceIcon from '../../../../assets/gemstone-details/insight-advice.png';
+
+// Match an insight (by its API key) to the right design icon. Falls back to the
+// generic "advice" bulb for any insight key the design didn't cover.
+const INSIGHT_ICONS = {
+  birthchartcompatibility: insightBirthChartIcon,
+  planetarybenefit: insightPlanetaryIcon,
+  planetarybenefits: insightPlanetaryIcon,
+  dosharemedies: insightDoshaIcon,
+  dosharemedy: insightDoshaIcon,
+  lifepathalignment: insightLifePathIcon,
+  recommendedforuser: insightRecommendedIcon,
+  recommended: insightRecommendedIcon,
+  personalizedadvice: insightAdviceIcon,
+  advice: insightAdviceIcon,
+};
+const getInsightIcon = (key) =>
+  INSIGHT_ICONS[String(key || '').toLowerCase().replace(/[^a-z]/g, '')] || insightAdviceIcon;
+
 const GemstoneResult = () => {
   const navigate = useNavigate();
   const [gemstones, setGemstones] = useState([]);
@@ -178,7 +218,10 @@ const GemstoneResult = () => {
       {/* Personalized Insights */}
       {d.personalized && Object.keys(d.personalized).length > 0 && (
         <div className={styles.personalizedSection}>
-          <h3 className={styles.sectionTitle}>Personalized Insights</h3>
+          <h3 className={styles.sectionTitle}>
+            <img src={insightsHeaderIcon} alt="" className={styles.sectionTitleIcon} aria-hidden="true" />
+            Personalized Insights
+          </h3>
           <div className={styles.personalizedGrid}>
             {Object.entries(d.personalized).map(([key, value]) => {
               if (!value) return null;
@@ -196,7 +239,10 @@ const GemstoneResult = () => {
                     <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
                       <TTSButton text={`${title}. ${value.map(item => typeof item === 'string' ? item : JSON.stringify(item)).join('. ')}`} />
                     </span>
-                    <h4 className={styles.boxTitle}>{title}</h4>
+                    <h4 className={styles.boxTitle}>
+                      <img src={getInsightIcon(key)} alt="" className={styles.insightIcon} />
+                      {title}
+                    </h4>
                     <ul className={styles.compactList}>
                       {value.map((item, i) => (
                         <li key={i}>{typeof item === 'string' ? item : JSON.stringify(item)}</li>
@@ -217,7 +263,10 @@ const GemstoneResult = () => {
                         return label + ': ' + String(v);
                       }).join('. ')}`} />
                     </span>
-                    <h4 className={styles.boxTitle}>{title}</h4>
+                    <h4 className={styles.boxTitle}>
+                      <img src={getInsightIcon(key)} alt="" className={styles.insightIcon} />
+                      {title}
+                    </h4>
                     {Object.entries(value).map(([subKey, subVal]) => {
                       if (!subVal) return null;
                       if (Array.isArray(subVal)) {
@@ -244,7 +293,10 @@ const GemstoneResult = () => {
                   <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
                     <TTSButton text={`${title}. ${String(value)}`} />
                   </span>
-                  <h4 className={styles.boxTitle}>{title}</h4>
+                  <h4 className={styles.boxTitle}>
+                    <img src={getInsightIcon(key)} alt="" className={styles.insightIcon} />
+                    {title}
+                  </h4>
                   <p className={styles.boxDesc}>{String(value)}</p>
                 </div>
               );
@@ -495,6 +547,7 @@ const GemstoneResult = () => {
         </span>
         <button className={styles.dropdownHeader} onClick={() => toggleSection('suitability')}>
           <div className={styles.dropdownTitleWrap}>
+            <img src={suitCheckIcon} alt="" className={styles.dropdownTitleIcon} aria-hidden="true" />
             <h3 className={styles.dropdownTitle}>Suitability Analysis</h3>
             {d.suitability.score && (
               <span className={styles.scoreBadge}>{d.suitability.score} - {d.suitability.level}</span>
@@ -560,7 +613,12 @@ const GemstoneResult = () => {
                 {(d.wearing.mantra || d.wearing.activationRitual) && (
                   <div className={styles.suitBox}>
                     <h4 className={styles.boxTitle}>Ritual</h4>
-                    {d.wearing.mantra && <p className={styles.mantraText}>{d.wearing.mantra}</p>}
+                    {d.wearing.mantra && (
+                      <div className={styles.mantraRow}>
+                        <img src={suitOmIcon} alt="" className={styles.mantraIcon} aria-hidden="true" />
+                        <p className={styles.mantraText}>{d.wearing.mantra}</p>
+                      </div>
+                    )}
                     {d.wearing.activationRitual && <p className={styles.boxDesc}>{d.wearing.activationRitual}</p>}
                   </div>
                 )}
@@ -581,7 +639,10 @@ const GemstoneResult = () => {
           <TTSButton text={`Healing Properties. ${d.healing.physical?.length > 0 ? 'Physical: ' + d.healing.physical.join(', ') + '. ' : ''}${d.healing.emotional?.length > 0 ? 'Emotional: ' + d.healing.emotional.join(', ') + '. ' : ''}${d.healing.spiritual?.length > 0 ? 'Spiritual: ' + d.healing.spiritual.join(', ') : ''}`} />
         </span>
         <button className={styles.dropdownHeader} onClick={() => toggleSection('healing')}>
-          <h3 className={styles.dropdownTitle}>Healing Properties</h3>
+          <div className={styles.dropdownTitleWrap}>
+            <img src={healHeaderIcon} alt="" className={styles.dropdownTitleIcon} aria-hidden="true" />
+            <h3 className={styles.dropdownTitle}>Healing Properties</h3>
+          </div>
           {!isDesktop && <Arrow isOpen={openSections.healing} />}
         </button>
         {(isDesktop || openSections.healing) && (
@@ -765,11 +826,8 @@ const GemstoneResult = () => {
               {currentGemstone?.identification?.name && (
                 <div className={styles.bannerFact}>
                   <span className={styles.bannerFactHead}>
-                    <span className={`${styles.bannerFactIcon} ${styles.factIconViolet}`} aria-hidden="true">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 3h12l4 6-10 12L2 9l4-6z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                        <path d="M2 9h20M8 3l-2 6 6 12 6-12-2-6" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-                      </svg>
+                    <span className={styles.bannerFactIcon} aria-hidden="true">
+                      <img src={factNameIcon} alt="" className={styles.bannerFactImg} />
                     </span>
                     <span className={styles.bannerFactLabel}>Name</span>
                   </span>
@@ -779,11 +837,8 @@ const GemstoneResult = () => {
               {currentGemstone?.identification?.hindiName && (
                 <div className={styles.bannerFact}>
                   <span className={styles.bannerFactHead}>
-                    <span className={`${styles.bannerFactIcon} ${styles.factIconOrange}`} aria-hidden="true">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <path d="M4 6h9M8.5 6c0 6-1 9-4 12M8 12c3 0 6 2 6 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M15 20l3.2-9 3.2 9M16 17.2h4.4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                    <span className={styles.bannerFactIcon} aria-hidden="true">
+                      <img src={factHindiIcon} alt="" className={styles.bannerFactImg} />
                     </span>
                     <span className={styles.bannerFactLabel}>Hindi Name</span>
                   </span>
@@ -793,12 +848,8 @@ const GemstoneResult = () => {
               {currentGemstone?.identification?.scientificName && (
                 <div className={styles.bannerFact}>
                   <span className={styles.bannerFactHead}>
-                    <span className={`${styles.bannerFactIcon} ${styles.factIconGold}`} aria-hidden="true">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="9" r="6" stroke="currentColor" strokeWidth="1.8" />
-                        <path d="M12 6l1 2 2 .3-1.5 1.5.4 2.2L12 11l-1.9 1 .4-2.2L9 8.3l2-.3 1-2z" fill="currentColor" />
-                        <path d="M9 14l-1.5 7L12 19l4.5 2L15 14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                    <span className={styles.bannerFactIcon} aria-hidden="true">
+                      <img src={factScientificIcon} alt="" className={styles.bannerFactImg} />
                     </span>
                     <span className={styles.bannerFactLabel}>Scientific</span>
                   </span>
@@ -807,11 +858,8 @@ const GemstoneResult = () => {
               )}
               <div className={styles.bannerFact}>
                 <span className={styles.bannerFactHead}>
-                  <span className={`${styles.bannerFactIcon} ${styles.factIconPink}`} aria-hidden="true">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                      <path d="M12 22s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                      <circle cx="12" cy="10" r="2.4" stroke="currentColor" strokeWidth="1.6" />
-                    </svg>
+                  <span className={styles.bannerFactIcon} aria-hidden="true">
+                    <img src={factNaturalIcon} alt="" className={styles.bannerFactImg} />
                   </span>
                   <span className={styles.bannerFactLabel}>Natural</span>
                 </span>

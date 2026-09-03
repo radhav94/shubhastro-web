@@ -231,6 +231,12 @@
   background: rgba(255, 255, 255, 0.7);
 }
 
+.bannerFactImg {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
 .factIconViolet { color: #7c3aed; }
 .factIconOrange { color: #d43400; }
 .factIconGold   { color: #c98a1a; }
@@ -826,6 +832,20 @@
   margin: 0 0 8px 0;
 }
 
+/* "Personalized Insights" title row — sparkle icon + text inline. */
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sectionTitleIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .summaryText,
 .recommendationText {
   font-size: 13px;
@@ -938,12 +958,23 @@
 }
 
 .boxTitle {
-  font-size: 12px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
   color: #1f2937;
   margin: 0 0 6px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
+}
+
+/* Design icon shown before each Personalized Insight title (ships its own soft
+   tinted circle background). */
+.insightIcon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .boxValue {
@@ -1308,12 +1339,37 @@
   font-family: 'Georgia', serif;
   font-style: italic;
   color: #1f2937;
-  background: rgba(255, 255, 255, 0.4);
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Ritual mantra: Om icon in a soft box beside the mantra text (as in design). */
+.mantraRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.55);
   border: 1.5px solid #ffffff;
   backdrop-filter: blur(12px);
-  border-radius: 6px;
-  padding: 8px;
+  border-radius: 10px;
+  padding: 10px;
   margin: 4px 0 0 0;
+}
+
+.mantraIcon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Check-badge icon before the "Suitability Analysis" title. */
+.dropdownTitleIcon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .compatibleText {
