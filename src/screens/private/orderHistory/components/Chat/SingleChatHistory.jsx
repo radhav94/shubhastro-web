@@ -67,7 +67,18 @@ const SingleChatHistory = () => {
   const [addReview, { isLoading: reviewLoading }] =
     useAddAstrologerReviewMutation();
 
-  // 🔹 Review submit handler
+  /*
+    🔹 Review submit handler
+
+    Returns false on failure so FeedbackModal keeps the rating and the review
+    text. Without that the handler returned `undefined`, which the modal reads as
+    success and responds to by running resetForm() — so a failed post cleared
+    everything the visitor had written while leaving the modal open, i.e. an
+    empty form and no explanation of what to do with it.
+
+    Same fix, and the same reasoning, as StickyReview.jsx (the reference
+    implementation) and ChatWindow.jsx.
+  */
   const handleReviewSubmit = async ({ rating, review, isAnonymous }) => {
     const payload = {
       astrologerID: astrologerId,
@@ -81,9 +92,11 @@ const SingleChatHistory = () => {
       await addReview(payload).unwrap();
       setOpenFeedback(false);
       alert("Review submitted successfully");
+      return true;
     } catch (err) {
       console.error(err);
       alert("Failed to submit review");
+      return false;
     }
   };
 

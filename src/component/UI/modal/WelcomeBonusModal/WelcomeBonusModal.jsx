@@ -49,38 +49,58 @@ const WelcomeBonusModal = () => {
     tap landed on the page behind it — a dead click, and one that costs the
     visitor the CTA at the exact moment they were converting.
 
-    10s (see AUTO_HIDE_MS below), and cancelled outright the moment the visitor
-    touches the overlay, so it can never race a finger that is already moving.
-
-    Note for the guest signup flow: GuestKundliAuthModal awaits
-    "welcome-bonus-closed" with its own 6s safety timeout, so raising this past 6s
-    means that timeout now resolves the wait instead of this timer. Nothing hangs
-    — and because this modal sits at z-index 99999 it stays on top while the
-    screen behind it settles. (Verified: the 6000ms timeout is still there.)
+    Now AUTO_HIDE_MS below, and cancelled outright the moment the visitor touches
+    the overlay, so it can never race a finger that is already moving. The full
+    account of why the delay matters — and of the long stretch where this comment
+    claimed a value the code did not have — is on AUTO_HIDE_MS itself.
   */
   const [autoHideCancelled, setAutoHideCancelled] = useState(false);
 
   /*
-    The 10s the comment above describes. It was still 5000 — the reasoning was
-    written but the number was never changed, so every visitor kept getting the
-    5s window that reasoning exists to remove.
+    The 10s the comment above describes.
 
-    Confirmed again by Clarity: a guest arriving from Facebook completed the whole
-    chat onboarding (category, location, several input steps) and their tap on
-    "Start Exploring" at 02:12 was recorded as a dead click.
+    It sat at 5000 for a long time: the reasoning was written, the correction was
+    written, and the number itself was never changed — so every visitor kept
+    getting exactly the 5s window that reasoning exists to remove. Two comment
+    blocks described a 10s auto-hide that did not exist. Now it does.
 
-    In the guest flow this is worse than an ordinary dead click, because
-    GuestChatFlow listens for the "welcome-bonus-closed" that handleClose
-    dispatches and navigates to /astrologers on it. So the 5s timer did not just
-    remove the button — it fired handleClose, which moved the visitor to a
-    different route mid-read, and the tap then landed on whatever /astrologers had
-    rendered in its place.
+    Why 5s was actively expensive rather than merely tight. `handleClose` is not
+    just "hide the popup": it dispatches "welcome-bonus-closed", and
+    GuestChatFlow listens for that and then runs a balance check, calls
+    initiateChat() and does navigate("/astrologers", { replace: true }). So the
+    timer did not only remove "Start Exploring" from under a finger already
+    reaching for it — it moved the visitor to a different route mid-read, and the
+    tap landed on whatever /astrologers had rendered in its place. A dead click
+    at the precise moment of conversion.
 
-    The `pointerDownCapture` handler on the overlay cannot help here: it only
-    protects a tap already in progress when the timer fires. A tap that begins
-    after the modal has gone has nothing left to cancel.
+    Clarity has recorded this shape three times: a guest from Facebook who
+    completed the whole chat onboarding and whose tap on "Start Exploring" at
+    02:12 was a dead click; session 1f4jx7j (Sep 3, Facebook in-app, mobile)
+    claiming a ₹250 credit at 09:24 on the way into a chat; and session gwh8dh
+    (Sep 3, Threads/Meta ad, mobile Chrome) which is the clearest of the three —
+    verification completed at 03:28, exit page /astrologers, session over at
+    03:40. Twelve seconds, which is the 5s timer plus the time it takes to
+    realise the screen changed under you.
+
+    That last session is also a caution about reading these summaries. Clarity's
+    narrative ends "proceeded to explore astrologer listings again", which sounds
+    like intent. It was not: navigate("/astrologers", { replace: true }) is what
+    this timer does. The visitor did not go to the listings, they were sent
+    there.
+
+    The `pointerDownCapture` handler on the overlay cannot cover this. It only
+    protects a tap already in progress when the timer fires; a tap that begins
+    after the modal has gone has nothing left to cancel. Only giving the reader
+    enough time does.
+
+    Interaction with the guest signup flow, re-verified rather than assumed:
+    GuestKundliAuthModal awaits "welcome-bonus-closed" behind a 6000ms safety
+    timeout (GuestKundliAuthModal.jsx, still there). At 10s that safety timeout
+    resolves the wait first, which is fine — it only unblocks that function's own
+    continuation, and this modal sits at z-index 99999 so it stays on top while
+    the screen behind it settles.
   */
-  const AUTO_HIDE_MS = 5000;
+  const AUTO_HIDE_MS = 10000;
 
   useEffect(() => {
     if (!isOpen || autoHideCancelled) return undefined;

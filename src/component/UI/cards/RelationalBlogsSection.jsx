@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import { PATH } from "../../../utils/routes/Paths";
 import styles from "./RelationalBlogsSection.module.scss";
 import { DefaultImages } from "../../../utils/appImages";
 
 const RelationalBlogsSection = ({ blogs = [], title, subtitle }) => {
-  const navigate = useNavigate();
   const [copiedId, setCopiedId] = useState(null);
 
   const getBlogUrl = (blog) => {
@@ -14,6 +13,18 @@ const RelationalBlogsSection = ({ blogs = [], title, subtitle }) => {
   };
 
   const handleShare = (e, platform, blog) => {
+    /*
+      preventDefault as well as stopPropagation, now that the card is a real
+      anchor.
+
+      The ordering here is a trap worth naming. These share controls are
+      descendants of the card link, and their handler runs first as the event
+      target. stopPropagation() then keeps the event from reaching the card, which
+      also means any cancel-guard living on an ancestor never runs — so without
+      preventDefault right here the browser would still follow the link and the
+      visitor would be navigated away mid-share.
+    */
+    e.preventDefault();
     e.stopPropagation();
     const url = getBlogUrl(blog);
     switch (platform) {
@@ -33,13 +44,29 @@ const RelationalBlogsSection = ({ blogs = [], title, subtitle }) => {
     }
   };
 
-  const handleBlogClick = (blog) => {
+  const getBlogPath = (blog) => {
     const slug = blog.slug || blog._id;
-    if (!slug) {
-      console.error('Blog slug is missing:', blog);
+    if (!slug) return null;
+    return PATH.privateRoutes.SINGLEBLOG.path.replace(":slug", slug);
+  };
+
+  /*
+    Runs on a plain click that was NOT a share control — the anchor handles the
+    navigation itself, this only restores the scroll-to-top the old handler did.
+
+    Also the belt to handleShare's braces: if a share control is ever added here
+    without its own preventDefault, this catches it before the link fires. Shape
+    copied from BlogCard.jsx, which solved the same problem for the blog list.
+  */
+  const handleCardClick = (e) => {
+    const hitShareControl =
+      e.target?.closest?.("button") ||
+      e.target?.closest?.(`.${styles.shareIconSocial}`);
+    if (hitShareControl) {
+      e.preventDefault();
+      e.stopPropagation();
       return;
     }
-    navigate(PATH.privateRoutes.SINGLEBLOG.path.replace(":slug", slug));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -73,11 +100,38 @@ const RelationalBlogsSection = ({ blogs = [], title, subtitle }) => {
       </div>
 
       <div className={styles.blogsGrid}>
-        {displayBlogs.map((blog) => (
-          <div
+        {/*
+          A real <Link>, not a <div onClick={navigate(...)}>.
+
+          The div version worked for a plain left-click and for nothing else. No
+          Ctrl/⌘-click or middle-click to open in a new tab, no right-click "Open
+          link in new tab", no URL on hover, no keyboard focus, and nothing
+          announced as a link. Every one of those attempts is a click the browser
+          discards and Clarity scores as dead.
+
+          That matters most for exactly the visitor these related-blog cards are
+          aimed at. Clarity session khu0xq (Sep 3, desktop Chrome, 1h22m, 32
+          pages) read two long articles and switched between them repeatedly,
+          with dead clicks around 01:05:34 — the reading pattern where opening the
+          next article in a second tab is the obvious move.
+
+          The correct pattern was already in the codebase: BlogHeader.jsx and
+          Blogs.jsx both wrap BlogCard in a <Link>, and BlogsSection.jsx does the
+          same. These related/popular/carousel components were simply never
+          brought across.
+        */}
+        {displayBlogs.map((blog) => {
+          const blogPath = getBlogPath(blog);
+          if (!blogPath) {
+            console.error("Blog slug is missing:", blog);
+            return null;
+          }
+          return (
+          <Link
             key={blog._id || blog.blogId}
+            to={blogPath}
             className={styles.blogCard}
-            onClick={() => handleBlogClick(blog)}
+            onClick={handleCardClick}
           >
             <div className={styles.imageWrapper}>
               <img
@@ -107,8 +161,21 @@ const RelationalBlogsSection = ({ blogs = [], title, subtitle }) => {
                       })()
                     : ""}
                 </p>
-                <div className={styles.shareBtnMain} onClick={(e) => e.stopPropagation()}>
-                  <button className={styles.shareBtn} aria-label="Share blog">
+                {/*
+                  The wrapper cancels rather than only stopping propagation, for
+                  the reason spelled out in handleShare: inside an anchor,
+                  stopPropagation alone still lets the browser follow the link.
+                */}
+                <div
+                  className={styles.shareBtnMain}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  {/* type="button" so it can never be read as a form submit, and
+                      so a click on the toggle is unambiguously just a toggle. */}
+                  <button type="button" className={styles.shareBtn} aria-label="Share blog">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 20" fill="none">
                       <path d="M15 14.08C14.24 14.08 13.56 14.38 13.04 14.85L5.91 10.7C5.96 10.47 6 10.24 6 10C6 9.76 5.96 9.53 5.91 9.3L12.96 5.19C13.5 5.69 14.21 6 15 6C16.66 6 18 4.66 18 3C18 1.34 16.66 0 15 0C13.34 0 12 1.34 12 3C12 3.24 12.04 3.47 12.09 3.7L5.04 7.81C4.5 7.31 3.79 7 3 7C1.34 7 0 8.34 0 10C0 11.66 1.34 13 3 13C3.79 13 4.5 12.69 5.04 12.19L12.16 16.35C12.11 16.56 12.08 16.78 12.08 17C12.08 18.61 13.39 19.92 15 19.92C16.61 19.92 17.92 18.61 17.92 17C17.92 15.39 16.61 14.08 15 14.08Z" fill="#D43400"/>
                     </svg>
@@ -128,8 +195,9 @@ const RelationalBlogsSection = ({ blogs = [], title, subtitle }) => {
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          </Link>
+          );
+        })}
       </div>
     </div>
   );

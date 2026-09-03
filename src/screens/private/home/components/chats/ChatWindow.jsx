@@ -481,17 +481,43 @@ const ChatWindow = () => {
 
   const user = getUserFromStorage();
   const [addAstrologerReview, { isLoading }] = useAddAstrologerReviewMutation();
-  const handleReviewSubmit = async ({ rating, review, isAnonymous }) => {
-    try {
-      // Use astroID from location state, fall back to captured ref, activeChat, activeCall, or reviewData
-      const reviewAstrologerID = astroID || lastAstrologerIDRef.current || activeChat?.astrologerID || activeCall?.astrologerID || activeCall?.astrologerId || reviewData?.astrologerID || reviewData?.astrologer_ID;
-      
-      if (!reviewAstrologerID) {
-        Toast.error("Something went wrong. Please try again.");
-        setOpenFeedback(false);
-        return;
-      }
+  /*
+    Returns false when the review could not be posted, which keeps FeedbackModal
+    mounted with the rating and text intact so the visitor can actually retry.
 
+    Every failure path here used to show "Something went wrong. Please try
+    again." and then call setOpenFeedback(false). That closed the modal, and
+    FeedbackModal's own resetForm() runs whenever the handler returns anything
+    other than `false` — so the advice to try again arrived at the same moment
+    both the form and everything typed into it disappeared. On the missing-id
+    path it was worse than unhelpful: retrying could not have succeeded, because
+    the id was already absent from every source before the request was made.
+
+    FeedbackModal has supported this since the resetForm fix — a handler opts in
+    by returning exactly `false`. StickyReview.jsx already does, and its handler
+    is the reference for this one. ChatWindow was simply never brought across,
+    so the opt-in existed with no caller here using it.
+
+    Clarity session 1tu0x7x (Sep 3, Instagram in-app, mobile, 11:37) shows the
+    cost: a guest deep in a chat, "entering information", hitting "Something
+    went wrong" at 04:18. Only success closes the modal now.
+  */
+  const handleReviewSubmit = async ({ rating, review, isAnonymous }) => {
+    // Use astroID from location state, fall back to captured ref, activeChat, activeCall, or reviewData
+    const reviewAstrologerID = astroID || lastAstrologerIDRef.current || activeChat?.astrologerID || activeCall?.astrologerID || activeCall?.astrologerId || reviewData?.astrologerID || reviewData?.astrologer_ID;
+
+    if (!reviewAstrologerID) {
+      /*
+        Not retryable: none of the seven sources above carried an id, and
+        pressing Submit again re-reads the same empty values. Say what might
+        actually help instead of "try again", and leave the text on screen so it
+        survives the reload prompt.
+      */
+      Toast.error("We couldn't identify this astrologer. Please reload the page and try again.");
+      return false;
+    }
+
+    try {
       const res = await addAstrologerReview({
         astrologerID: reviewAstrologerID,
         rating,
@@ -500,20 +526,22 @@ const ChatWindow = () => {
         roomId,
       }).unwrap();
 
-      if (res.success) {
-        Toast.success(res.message || "Review submitted successfully");
-        if (isChatActive && !isMessageDisabled) {
-          handleDisconnect();
-        }
-      } else {
-        Toast.error("Something went wrong. Please try again.");
+      if (!res.success) {
+        Toast.error("Couldn't post your review. Please try again.");
+        return false;
       }
 
+      Toast.success(res.message || "Review submitted successfully");
+      if (isChatActive && !isMessageDisabled) {
+        handleDisconnect();
+      }
       setOpenFeedback(false);
+      return true;
     } catch (error) {
+      // Generic copy on purpose — the raw API message is not user-facing.
       console.error("Failed to submit review", error);
-      Toast.error("Something went wrong. Please try again.");
-      setOpenFeedback(false);
+      Toast.error("Couldn't post your review. Please try again.");
+      return false;
     }
   };
 

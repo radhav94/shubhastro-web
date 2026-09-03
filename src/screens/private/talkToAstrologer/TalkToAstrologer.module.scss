@@ -379,6 +379,43 @@
   }
 }
 
+/*
+ * Outcome line under the list-state buttons, stating what the press found.
+ *
+ * It animates in because an appearing line is what makes the press legible as
+ * having done something. Without it, a check that finds nobody online is
+ * indistinguishable from a button that does nothing — which is exactly how these
+ * two buttons behaved before, and why they collected repeat clicks.
+ *
+ * Deliberately matched to .gateCheckResult in LivePlayerPage.module.scss so the
+ * same interaction reads the same way on both empty states.
+ */
+.listStateResult {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #5f5245;
+  margin: 14px 0 0;
+  animation: listStateResultIn 0.2s ease-out;
+}
+
+@keyframes listStateResultIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Someone who has asked not to see motion still needs the line itself. */
+@media (prefers-reduced-motion: reduce) {
+  .listStateResult {
+    animation: none;
+  }
+}
+
 @media (max-width: 768px) {
   .loaderWrapper {
     padding: 1.5rem 0;
