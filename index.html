@@ -533,6 +533,139 @@
     })();
   </script>
 
+  <!--
+    Deferred loader for third-party tag scripts. Shared by GTM, gtag and the
+    Meta Pixel below.
+
+    What moved and what did NOT
+    ---------------------------
+    Only the third-party script fetches are deferred. Every stub, queue and
+    configuration call stays exactly where it was, at HTML parse time:
+
+      - window.dataLayer = []            (GTM + gtag queue)
+      - the gtm.start / event:'gtm.js' push
+      - window.gtag shim, gtag('js'), gtag('config')
+      - the fbq stub, fbq('init'), fbq('track','PageView')
+
+    That split is the whole point, and it is not optional. Two hard constraints
+    force it:
+
+    1. src/utils/analytics.js dispatches on `Array.isArray(window.dataLayer)`
+       and `typeof window.gtag === "function"` — it silently no-ops when either
+       is missing. There are ~94 modules calling trackEvent(). Deferring the
+       stubs would drop every event fired before the tag scripts arrived, with
+       no error anywhere.
+    2. The global error reporter near the top of this file pushes `js_error` to
+       dataLayer, and it is deliberately registered before the bundle is even
+       parsed so it can catch evaluation failures. It must keep having an array
+       to push into.
+
+    Both GTM and fbevents.js are designed for exactly this: they drain whatever
+    is already queued, in order, when they load. So nothing is lost — events are
+    recorded with their original payloads and processed slightly later.
+
+    Timing
+    ------
+    Preference order is `load` -> requestIdleCallback, so tags never compete with
+    the critical render. But `load` waits on every subresource, including the
+    476 KB body-background PNG preloaded above, which on a slow connection can be
+    seconds away — and requestIdleCallback never fires at all in a background
+    tab without its timeout. So there is also an unconditional ceiling measured
+    from parse time. Whichever path arrives first wins; `fired` makes it once.
+
+    The ceiling is deliberately short. Tags that load 10-20s in are effectively
+    broken for attribution, so this is a performance change, not a "delay it
+    until nobody is looking" change.
+  -->
+  <script>
+    (function () {
+      /* requestIdleCallback's own deadline once load has fired. */
+      var IDLE_TIMEOUT_MS = 2000;
+      /* Used when requestIdleCallback is absent (Safari < 16.4). */
+      var NO_IDLE_DELAY_MS = 1200;
+      /* Hard ceiling from parse time, independent of `load` and of idle. */
+      var MAX_WAIT_MS = 4000;
+
+      /*
+        Dev logging, off by default on every host so production console output is
+        untouched. Opt in with ?analyticsDebug=1 (persisted for the tab).
+
+        Note this only controls *logging*. It deliberately does NOT bypass
+        __analyticsHostAllowed__ — local and staging must never emit production
+        analytics. On localhost you will therefore see the "skipped" line, which
+        is the accurate description of what happened.
+      */
+      var debug = false;
+      try {
+        if (location.search.indexOf("analyticsDebug=1") !== -1) {
+          sessionStorage.setItem("__analyticsDebug__", "1");
+        }
+        debug = sessionStorage.getItem("__analyticsDebug__") === "1";
+      } catch (e) {
+        /* storage shim above should prevent this, but never break on logging */
+      }
+
+      function log(label, message) {
+        if (!debug || !window.console || !console.log) return;
+        console.log("[" + label + "] " + message);
+      }
+
+      /**
+       * Run `loadScript` exactly once, after the page has settled.
+       *
+       * Note: no literal script tags in these comments. A "</" + "script>"
+       * sequence inside an inline script terminates the block in the HTML
+       * parser, and even a harmless-looking opening tag confuses tooling that
+       * extracts these blocks by pattern.
+       *
+       * @param {string} label  Name used in debug logs, e.g. "GTM".
+       * @param {function} loadScript  Injects the third-party script element.
+       */
+      window.__deferTagScript__ = function (label, loadScript) {
+        if (!window.__analyticsHostAllowed__) {
+          log(label, "Skipped — host not allowed (" + location.hostname + ")");
+          return;
+        }
+
+        var fired = false;
+
+        function run(reason) {
+          if (fired) return;
+          fired = true;
+          log(label, "Loading (" + reason + ")");
+          try {
+            loadScript();
+            log(label, "Script tag injected");
+          } catch (e) {
+            /* A tag failing to load must never take the page down. */
+            if (window.console && console.warn) {
+              console.warn("[" + label + "] injection failed:", e);
+            }
+          }
+        }
+
+        function afterLoad() {
+          if (typeof window.requestIdleCallback === "function") {
+            window.requestIdleCallback(function () { run("idle"); }, { timeout: IDLE_TIMEOUT_MS });
+          } else {
+            setTimeout(function () { run("timer"); }, NO_IDLE_DELAY_MS);
+          }
+        }
+
+        log(label, "Scheduled");
+
+        if (document.readyState === "complete") {
+          afterLoad();
+        } else {
+          window.addEventListener("load", afterLoad, { once: true });
+        }
+
+        /* Ceiling: guarantees the tag loads even if `load` or idle never comes. */
+        setTimeout(function () { run("max-wait"); }, MAX_WAIT_MS);
+      };
+    })();
+  </script>
+
   <!-- Google Tag Manager (production only) -->
   <!--
     `j.crossOrigin` so exceptions thrown inside GTM (or any tag it loads)
@@ -546,26 +679,61 @@
   -->
 
 
-<script>
-  if (window.__analyticsHostAllowed__) {
-    (function (w, d, s, l, i) {
-      w[l] = w[l] || [];
+<!--
+  The dataLayer queue and the gtm.start / event:'gtm.js' push stay here at parse
+  time; only gtm.js itself is deferred (see __deferTagScript__ above).
 
-      w[l].push({
-        "gtm.start": new Date().getTime(),
-        event: "gtm.js"
-      });
+  Why the push is NOT moved to load time with the script: GTM replays the whole
+  existing dataLayer array in order when it initialises, so app events fired
+  before it arrives are still processed. Keeping this push first preserves the
+  exact array ordering the container sees today — `event: 'gtm.js'` ahead of
+  everything the app pushes — which is what container triggers are built
+  against. Moving it would reorder the array relative to app events, which is a
+  behaviour change for no benefit.
+
+  Known cosmetic side effect: `gtm.start` is a parse-time timestamp while the
+  container now loads later, so any GTM variable derived from it (container load
+  time) will read higher than before. It affects reporting only, not triggering,
+  and it is the honest number — the container really does load later now.
+-->
+<script>
+  (function (w, d, s, l, i) {
+    if (!w.__analyticsHostAllowed__) return;
+
+    w[l] = w[l] || [];
+
+    w[l].push({
+      "gtm.start": new Date().getTime(),
+      event: "gtm.js"
+    });
+
+    var dataLayerParam =
+      l !== "dataLayer"
+        ? "&l=" + l
+        : "";
+
+    w.__deferTagScript__("GTM", function () {
+      /*
+        Idempotence. The scheduler already guarantees one call, but this is the
+        durable guard: it survives anything else on the page (or a future React
+        call site) trying to inject the container a second time. A duplicate
+        gtm.js means every tag fires twice.
+      */
+      if (d.querySelector("script[data-gtm-script]")) return;
 
       var firstScript = d.getElementsByTagName(s)[0];
       var gtmScript = d.createElement(s);
 
-      var dataLayerParam =
-        l !== "dataLayer"
-          ? "&l=" + l
-          : "";
-
       gtmScript.async = true;
+      /*
+        `crossOrigin` so exceptions thrown inside GTM (or any tag it loads)
+        report a real message and stack instead of the browser's opaque
+        "Script error.". Verified: a GET to
+        https://www.googletagmanager.com/gtm.js?id=GTM-T5DTGXHW with an Origin
+        header returns access-control-allow-origin for this origin.
+      */
       gtmScript.crossOrigin = "anonymous";
+      gtmScript.setAttribute("data-gtm-script", i);
       gtmScript.src =
         "https://www.googletagmanager.com/gtm.js?id=" +
         i +
@@ -575,14 +743,14 @@
         gtmScript,
         firstScript
       );
-    })(
-      window,
-      document,
-      "script",
-      "dataLayer",
-      "GTM-T5DTGXHW"
-    );
-  }
+    });
+  })(
+    window,
+    document,
+    "script",
+    "dataLayer",
+    "GTM-T5DTGXHW"
+  );
 </script>
   <!-- End Google Tag Manager -->
 
@@ -622,8 +790,24 @@
     }
   </script> -->
 
+  <!--
+    As with GTM above: the shim and both configuration calls stay at parse time,
+    only gtag/js is deferred.
+
+    `window.gtag` in particular MUST exist before the bundle evaluates —
+    src/utils/analytics.js checks `typeof window.gtag === "function"` and
+    silently skips GA4 otherwise. The shim queues `arguments` objects into
+    dataLayer, and gtag/js drains them in order on arrival, so events keep their
+    original payloads.
+
+    `window.gtag` is assigned explicitly rather than declared as a hoisted
+    `function gtag(){}`: inside this IIFE a function declaration would not be a
+    global, so analytics.js would never see it.
+  -->
   <script>
-  if (window.__analyticsHostAllowed__) {
+  (function () {
+    if (!window.__analyticsHostAllowed__) return;
+
     window.dataLayer = window.dataLayer || [];
 
     window.gtag = window.gtag || function () {
@@ -636,15 +820,26 @@
       send_page_view: true
     });
 
-    var gaScript = document.createElement("script");
+    window.__deferTagScript__("GA4", function () {
+      /* See the GTM guard — a second gtag/js would double every GA4 hit. */
+      if (document.querySelector("script[data-ga-script]")) return;
 
-    gaScript.async = true;
-    gaScript.crossOrigin = "anonymous";
-    gaScript.src =
-      "https://www.googletagmanager.com/gtag/js?id=G-MQBQTN9GSH";
+      var gaScript = document.createElement("script");
 
-    document.head.appendChild(gaScript);
-  }
+      gaScript.async = true;
+      /*
+        Safe here: googletagmanager.com serves `access-control-allow-origin: *`
+        (verified). It buys real messages/stacks for exceptions thrown inside
+        gtag instead of "Script error.".
+      */
+      gaScript.crossOrigin = "anonymous";
+      gaScript.setAttribute("data-ga-script", "G-MQBQTN9GSH");
+      gaScript.src =
+        "https://www.googletagmanager.com/gtag/js?id=G-MQBQTN9GSH";
+
+      document.head.appendChild(gaScript);
+    });
+  })();
 </script>
   
   <!-- End Google tag (gtag.js) -->
@@ -700,26 +895,70 @@
   }
   </script>
   <!-- Meta Pixel Code (production only) -->
+  <!--
+    Meta's standard snippet, split at its natural seam.
+
+    The official snippet does two unrelated things in one expression: it installs
+    the `fbq` stub (which queues calls into `n.queue`), and it injects
+    fbevents.js. Only the injection is deferred here. The stub, `fbq('init')` and
+    `fbq('track','PageView')` all still run at parse time, so:
+
+      - `window.fbq` exists immediately for any caller,
+      - init + PageView sit in `n.queue` with their original arguments,
+      - fbevents.js drains that queue in order when it arrives.
+
+    This is Meta's own documented queueing behaviour — `n.callMethod` is
+    undefined until the real script loads, which is exactly why the stub pushes
+    to a queue. So there is no lost PageView and, importantly, no *duplicate*
+    one: PageView is queued once here and never re-sent on load.
+
+    NOTE: deliberately NO `crossOrigin`, unlike the GTM/gtag/Clarity snippets. A
+    GET to https://connect.facebook.net/en_US/fbevents.js with an Origin header
+    returns 200 with `timing-allow-origin: *` but NO
+    `access-control-allow-origin`. Adding crossOrigin would make the request fail
+    CORS, the pixel would never load, and ad attribution would silently break.
+    The cost is that exceptions inside fbevents.js stay masked as
+    "Script error." — Meta's limitation, not something fixable here.
+  -->
   <script>
-  (function () {
-    // NOTE: deliberately NO `crossOrigin` here, unlike the GTM and Clarity
-    // snippets above. A GET to https://connect.facebook.net/en_US/fbevents.js
-    // with an Origin header returns 200 with `timing-allow-origin: *` but NO
-    // `access-control-allow-origin`. Adding crossOrigin would make the request
-    // fail CORS, the pixel would never load, and ad attribution/conversion
-    // tracking would silently break. The cost is that any exception thrown
-    // inside fbevents.js stays masked as "Script error." — that is Meta's
-    // limitation, not something we can fix from here.
+  (function (f, b, e, v) {
     // Shared flag, same as GTM/gtag/Clarity — see __analyticsHostAllowed__ above.
-    if (!window.__analyticsHostAllowed__) return;
-    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    if (!f.__analyticsHostAllowed__) return;
+
+    // --- Stub + queue: stays at parse time. Verbatim from Meta's snippet. ---
+    var n;
+    if (!f.fbq) {
+      n = f.fbq = function () {
+        n.callMethod
+          ? n.callMethod.apply(n, arguments)
+          : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n;
+      n.loaded = !0;
+      n.version = '2.0';
+      n.queue = [];
+    }
+
     fbq('init', '28311323818486102');
     fbq('track', 'PageView');
-  })();
+
+    // --- Script fetch: deferred. ---
+    f.__deferTagScript__("Facebook Pixel", function () {
+      /*
+        Idempotence guard. fbevents.js loading twice re-drains the queue and
+        would double the PageView and every queued conversion.
+      */
+      if (b.querySelector("script[data-fb-pixel-script]")) return;
+
+      var t = b.createElement(e);
+      t.async = !0;
+      t.setAttribute("data-fb-pixel-script", "28311323818486102");
+      t.src = v;
+      var s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s);
+    });
+  })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
   </script>
   <!-- End Meta Pixel Code -->
 </head>
