@@ -275,6 +275,38 @@ const TalkToAstrologer = () => {
   const [chatRoomId, setChatRoomId] = useState(null);
   const [isFiltered, setIsFiltered] = useState(false);
 
+  /*
+    Manual re-check state for the two list-state cards at the bottom of this file
+    ("No astrologers available right now" / "Couldn't load astrologers").
+
+    Both buttons were a bare `onClick={() => refetchAstrologers()}`. That is a
+    non-silent refetch, so it flips `isFetching`, and every one of those cards is
+    gated on `!isFetching` — so the tap unmounted the card the visitor had just
+    pressed, showed the list spinner, and then, when the list came back empty
+    again (the overwhelmingly common case, since an empty list is why the card is
+    on screen at all), re-mounted the identical card. The entire visible effect
+    of the press was a spinner flash resolving to the exact screen they started
+    on, with nothing saying a check had run or what it found.
+
+    That is the same defect, and the same cause, as the "Check again" button on
+    the live player's empty state — see the long note above `handleCheckAgain` in
+    LivePlayerPage.jsx, where it was diagnosed from a Clarity session and fixed.
+    This screen was missed at the time. Session q4kzpk (Sep 3, desktop, 31 min,
+    151 clicks) crossed both surfaces.
+
+    Same remedy, so the two behave alike:
+      - `checking` keeps the card mounted through the refetch instead of letting
+        `isFetching` tear it down, and suppresses the list spinner, so the card
+        stays still and the button itself reports progress.
+      - `checkResult` states the outcome next to the button that caused it,
+        keyed on an incrementing `seq` so a repeat press that finds nothing new
+        still remounts the line and replays its animation rather than rendering
+        a byte-identical string that looks like nothing happened.
+  */
+  const [checking, setChecking] = useState(false);
+  const [checkResult, setCheckResult] = useState(null);
+  const checkSeqRef = useRef(0);
+
   const limit = 9;
 
   // const [createChatRoom] = useCreateChatRoomMutation();
@@ -335,6 +367,36 @@ const TalkToAstrologer = () => {
       refetchOnMountOrArgChange: 60,
        },
   );
+
+  /*
+    Handler for both list-state buttons — see the `checking` declaration above
+    for why a bare refetch was not enough.
+
+    Re-entry is ignored rather than blocked with `disabled`: a disabled button
+    swallows the press outright, which is the failure this change exists to
+    remove. The label and aria-busy report the in-flight state instead.
+
+    A refetch that finds astrologers unmounts the card on its own (the list is no
+    longer empty), so the only outcomes worth wording are "still nobody" and
+    "the request failed".
+  */
+  const handleCheckAgain = () => {
+    if (checking) return;
+    setChecking(true);
+    Promise.resolve(refetchAstrologers())
+      .then((res) => {
+        checkSeqRef.current += 1;
+        setCheckResult({
+          seq: checkSeqRef.current,
+          failed: Boolean(res?.error || res?.isError),
+        });
+      })
+      .catch(() => {
+        checkSeqRef.current += 1;
+        setCheckResult({ seq: checkSeqRef.current, failed: true });
+      })
+      .finally(() => setChecking(false));
+  };
 
   const { data: recommendedData, isLoading: isLoadingRecommended } =
     // Secondary strip, not the primary grid — a longer cache window is fine and
@@ -1614,43 +1676,86 @@ const TalkToAstrologer = () => {
       {/* Plain elements rather than <PrimaryText>: that component writes colour,
           size, weight and alignment into an inline style attribute, which
           outranks a CSS module class, so the styling below would not apply. */}
-      {isListError && !isFiltered && allAstrologers.length === 0 && !isFetching && (
+      {/*
+        `(!isFetching || checking)` on both cards below, not `!isFetching`.
+
+        A manual re-check flips `isFetching`, so the bare guard unmounted the very
+        card whose button had just been pressed and replaced it with the spinner —
+        the press appeared to do nothing but flash. Holding the card up while our
+        own check runs keeps the screen still, and lets the button report progress
+        and then the outcome. See `handleCheckAgain`.
+      */}
+      {isListError && !isFiltered && allAstrologers.length === 0 && (!isFetching || checking) && (
         <div className={styles.listStateCard}>
           <h2 className={styles.listStateTitle}>Couldn&apos;t load astrologers</h2>
           <p className={styles.listStateText}>
             The list didn&apos;t come through. This is usually a connection hiccup.
           </p>
+          {/* Never `disabled` while checking — that swallows the tap. aria-busy
+              states it, and handleCheckAgain ignores re-entry. */}
           <button
             type="button"
             className={styles.listStateBtn}
-            onClick={() => refetchAstrologers()}
+            onClick={handleCheckAgain}
+            aria-busy={checking}
           >
-            Try again
+            {checking ? "Trying…" : "Try again"}
           </button>
+          {checkResult && !checking && (
+            <p
+              key={checkResult.seq}
+              className={styles.listStateResult}
+              role="status"
+            >
+              {checkResult.failed
+                ? "Still couldn't reach the list — check your connection and try again."
+                : "Reached the list, but nobody is online just yet."}
+            </p>
+          )}
         </div>
       )}
 
-      {!isFetching && !isFilterLoading && !isListError && allAstrologers.length === 0 && !isFiltered && (
+      {(!isFetching || checking) && !isFilterLoading && !isListError && allAstrologers.length === 0 && !isFiltered && (
         <div className={styles.listStateCard}>
           <h2 className={styles.listStateTitle}>No astrologers available right now</h2>
           <p className={styles.listStateText}>
             Everyone is offline at the moment. Try again in a few minutes, or ask
             Pandit AI in the meantime.
           </p>
+          {/* See the note on the button above. */}
           <button
             type="button"
             className={styles.listStateBtn}
-            onClick={() => refetchAstrologers()}
+            onClick={handleCheckAgain}
+            aria-busy={checking}
           >
-            Check again
+            {checking ? "Checking…" : "Check again"}
           </button>
+          {/* Outcome of the press, next to the button that caused it. Keyed on
+              seq so a repeat check replays instead of rendering an identical
+              string that reads as no response. */}
+          {checkResult && !checking && (
+            <p
+              key={checkResult.seq}
+              className={styles.listStateResult}
+              role="status"
+            >
+              {checkResult.failed
+                ? "Couldn't reach the list just now — check your connection and try again."
+                : "Checked just now — everyone is still offline."}
+            </p>
+          )}
         </div>
       )}
 
       {/* The single loader for this list — covers both the base query and an
           in-flight filter request. See the note where the overlay used to be. */}
+      {/* `!checking` so a manual re-check does not show this spinner as well as
+          the button's own "Checking…" label. The card above stays put and the
+          button reports for itself, which is the point — two competing progress
+          signals for one press is what made the old behaviour read as a flash. */}
       <div ref={loadMoreRef} className={styles.loaderWrapper}>
-        {(isFetching || isFilterLoading) && (
+        {((isFetching && !checking) || isFilterLoading) && (
           <PrimaryLoader isLoading={true} fullscreen={false} />
         )}
       </div>

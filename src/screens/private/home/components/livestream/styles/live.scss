@@ -146,20 +146,62 @@
   not collide with the chat panel or the right action rail, then raising the
   z-index above the portal.
 */
+/*
+  Previous / next controls for the live reel.
+
+  These were positioned off the screen entirely:
+
+      position: fixed;
+      left: -28%;
+      top: 10%;
+      transform: translate(-40%, -50%);
+
+  `left: -28%` on a viewport-fixed element puts them 28% of the viewport past
+  its left edge, and the extra translate(-40%) pushes them further out again. So
+  two working buttons — see LiveStreamingContainer.jsx, they call
+  liveList.goPrevLive/goNextLive and one of them even carries a
+  `nav-btn-highlight` state announcing that a new stream has started — could
+  never be seen or clicked by anyone.
+
+  The intent was almost certainly to sit them beside the player rather than over
+  it. `.video-box` is `width: 30vw` with `margin: 0 auto`, i.e. a narrow centred
+  column on desktop, so offsetting from the *viewport* edge was never going to
+  land next to it. Anchoring to the player's own left edge does: the column spans
+  50% ± 15vw, so `50% - 15vw` is its left edge and 56px clears a 44px button with
+  room to spare.
+
+  Why this matters rather than just being tidy. On desktop there is no swipe, and
+  `useReelScroll`'s wheel and arrow-key handling is real but completely
+  undiscoverable — nothing on screen advertises either. That left the top bar's
+  grid button as the only visible way to reach another astrologer, and it is
+  gated behind `isAstrologerLive`, so a viewer waiting on "Connecting to live
+  stream…" had no route at all. The comment above handleOpenLiveList in
+  LiveView.jsx names this off-screen positioning as the reason that workaround
+  was needed; this fixes the cause instead.
+
+  Clarity session m3u3bg (Sep 3, desktop Chrome, 1h10m) fits: repeated trips
+  between the homepage and /live, and dead clicks at 00:30:50 and 00:32:26 while
+  trying to pick an astrologer.
+
+  Hidden below 1180px on purpose — that is the breakpoint where `.video-box`
+  becomes full-width, so there is no gutter left to sit in, and touch swipe is
+  available there anyway. Overlaying the video on a phone would trade one problem
+  for another.
+*/
 .live-nav-controls {
   position: fixed;
-
-  /* anchor to viewport */
-  left: -28%;
-
-  /* vertical balance */
-  top: 10%;
-  transform: translate(-40%, -50%);
+  top: 50%;
+  left: calc(50% - 15vw - 56px);
+  transform: translateY(-50%);
 
   display: flex;
   flex-direction: column;
   gap: 12px;
   z-index: 1000;
+
+  @media (width <= 1180px) {
+    display: none;
+  }
 }
 
 
