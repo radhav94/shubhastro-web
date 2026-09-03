@@ -3,6 +3,7 @@ import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import { validatePersonName } from "../../../../utils/regex";
 import { TODAY } from "../../../../utils/dateFormat/date";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
 import styles from "../flames/FlamesCalc.module.scss";
@@ -61,7 +62,8 @@ const DestinyCalc = () => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Destiny Number" });
     const newErrors = {};
-    if (!formData.name) newErrors.name = "Name is required";
+    const nameErr = validatePersonName(formData.name);
+    if (nameErr) newErrors.name = nameErr;
     if (!formData.dob) newErrors.dob = "Date of birth is required";
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     dispatch(setCalculatorData({ key: STORAGE_KEY, data: formData }));

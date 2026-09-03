@@ -3,10 +3,9 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import styles from "./AddProfileModal.module.scss";
-import { Toast } from "../../index";
 import { relationOption } from "../../../utils/constanats/appData";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
-import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
+import { personNameRegex, PERSON_NAME_ERROR, PERSON_NAME_MIN, PERSON_NAME_MIN_ERROR } from "../../../utils/regex";
 
 const EditProfileModal = ({
   isOpen,
@@ -34,6 +33,9 @@ const EditProfileModal = ({
   const [isEditing, setIsEditing] = useState(false);
   // Track whether the DateTimePicker has an invalid date input
   const [dateInputError, setDateInputError] = useState("");
+  // Bumped when submission is blocked on a birth place with no coordinates, to
+  // bring the suggestion list back up. See the guard in handleSubmit.
+  const [placeReopenSignal, setPlaceReopenSignal] = useState(0);
 
   // Check if a "Self" profile exists (excluding the current profile being edited)
   const hasSelfProfile = savedKundlis.some(
@@ -47,7 +49,9 @@ const EditProfileModal = ({
   // Validation schema
   const validationSchema = Yup.object({
     name: Yup.string()
+      .trim()
       .required("Name is required")
+      .min(PERSON_NAME_MIN, PERSON_NAME_MIN_ERROR)
       .matches(personNameRegex, PERSON_NAME_ERROR),
     relation: Yup.string()
       .required("Relation is required")
@@ -92,7 +96,29 @@ const EditProfileModal = ({
       then: (schema) => schema.required("Birth time is required"),
       otherwise: (schema) => schema.notRequired(),
     }),
-    birthPlace: Yup.string().required("Place of birth is required"),
+    /*
+      "Typed but never picked from the dropdown" lived only in handleSubmit as a
+      toast, so — unlike every other rule here — it produced no red text under
+      the field it was about. Same schema test AddProfileModal already carries.
+
+      This modal hits the case more often than the add form does: it opens
+      pre-filled with a saved birth place, and editing that text clears the
+      coordinates (see the LocationSearch note below). So the ordinary act of
+      correcting a place leaves the form looking complete with no coordinates.
+      Clarity session 12h6ps4 (11:33 AM Sep 1, mobile, 19:14, 105 clicks) shows
+      repeated profile additions and edits at 02:18, 10:16 and 15:38.
+    */
+    birthPlace: Yup.string()
+      .required("Place of birth is required")
+      .test(
+        "has-coordinates",
+        "Please select a valid location from the dropdown",
+        function (value) {
+          if (!value) return true; // `required` already reports this case.
+          const { latitude, longitude } = this.parent;
+          return Boolean(latitude && longitude);
+        }
+      ),
   });
   
 
@@ -116,14 +142,40 @@ const EditProfileModal = ({
     }
   }, [initialData, isOpen]);
 
-  const handleSubmit = async (values) => {
-    // Block submission if the date input has an error (incomplete/invalid year)
+  const handleSubmit = async (values, { setFieldError, setFieldTouched }) => {
+    // Block submission if the date input has an error (incomplete/invalid year).
+    // Silent by design: `dateInputError` is already rendered under the date
+    // field, so the reason is on screen before the tap happens.
     if (dateInputError) {
       return;
     }
 
+    /*
+      Backstop for the schema's has-coordinates test. Reports through
+      setFieldError rather than a toast so the message lands under the field it
+      is about, like every other error on this form.
+    */
     if (!values.latitude || !values.longitude) {
-      Toast.error("Please select a valid location from the dropdown");
+      setFieldTouched("birthPlace", true, false);
+      setFieldError("birthPlace", "Please select a valid location from the dropdown");
+      const placeField = document.querySelector('[data-field="editBirthPlace"]');
+      if (placeField) {
+        placeField.scrollIntoView({ behavior: "smooth", block: "center" });
+        placeField.querySelector("input")?.focus({ preventScroll: true });
+      }
+      /*
+        Put the dropdown back on screen, because the message above tells the user
+        to pick from it.
+
+        Focusing the input is not enough on its own: LocationSearch re-opens from
+        its `onFocus`, and `focus()` fires no event when the field is already
+        focused — the normal case when someone taps submit straight after typing.
+        This asks for the list explicitly instead. See reopenSignal in
+        locationSearchVedic.jsx.
+      */
+      if (values.birthPlace?.trim()) {
+        setPlaceReopenSignal((n) => n + 1);
+      }
       return;
     }
 
@@ -138,7 +190,13 @@ const EditProfileModal = ({
     
     // Prevent changing from "Self" if this is the last Self profile
     if (isChangingFromSelf && selfProfilesCount === 1) {
-      Toast.error("Cannot change the last Self profile. At least one Self profile is required.");
+      // Backstop for the schema's "last-self" test — inline, under the Relation
+      // field the message is about, rather than in a toast away from it.
+      setFieldTouched("relation", true, false);
+      setFieldError(
+        "relation",
+        "Cannot change the last Self profile. At least one Self profile is required."
+      );
       return;
     }
 
@@ -149,7 +207,13 @@ const EditProfileModal = ({
       hasSelfProfile && 
       initialData?.relation?.toLowerCase() !== "self"
     ) {
-      Toast.error("A Self profile already exists. Please select a different relation.");
+      // Backstop for the schema's "unique-self" test — reported inline for the
+      // same reason as above.
+      setFieldTouched("relation", true, false);
+      setFieldError(
+        "relation",
+        "A Self profile already exists. Please select a different relation."
+      );
       return;
     }
 
@@ -319,10 +383,12 @@ const EditProfileModal = ({
                     }}
                     onRawChange={(rawText) => {
                       setIsEditing(true);
-                      if (!rawText) {
-                        setFieldValue("birthDate", "");
-                        setDateInputError("");
-                      }
+                      // Invalidate the parsed value on every keystroke; the
+                      // picker re-fires onChange only for a complete valid date,
+                      // so a half-edited or emptied box no longer keeps the old
+                      // parsed date alive (which let a stale date submit).
+                      setFieldValue("birthDate", "");
+                      if (!rawText) setDateInputError("");
                     }}
                     onError={(err) => setDateInputError(err)}
                     placeholder="DD/MM/YYYY"
@@ -363,9 +429,10 @@ const EditProfileModal = ({
                   </div>
                 </div>
 
-                <div className={styles.formGroup}>
+                <div className={styles.formGroup} data-field="editBirthPlace">
                   <label>Place of Birth <span className={styles.required}>*</span></label>
                   <LocationSearch
+                    reopenSignal={placeReopenSignal}
                     value={values.birthPlace}
                     /* Clear the coordinates on edit — see the note in
                        AddProfileModal. Editing the name after a pick otherwise
@@ -385,10 +452,22 @@ const EditProfileModal = ({
                   <ErrorMessage name="birthPlace" component="div" className={styles.errorText} />
                 </div>
 
+                {/*
+                  Not `disabled`. A disabled button fires no click event at all,
+                  so the browser swallows the tap and the interaction is recorded
+                  as a dead click with nothing to show for it. Kept tappable with
+                  aria-disabled/aria-busy; the label already reads "Updating..."
+                  while the request is in flight, so a repeat tap has something
+                  visible to land on.
+                */}
                 <button
                   type="submit"
                   className={styles.submitBtn}
-                  disabled={isLoading}
+                  aria-disabled={isLoading}
+                  aria-busy={isLoading}
+                  onClick={(e) => {
+                    if (isLoading) e.preventDefault();
+                  }}
                 >
                   {isLoading ? "Updating..." : "Save Profile"}
                 </button>

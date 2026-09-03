@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
   FiCalendar,
@@ -16,7 +17,6 @@ import { PATH } from "../../../../utils/routes/Paths";
 import RecommendedAstrologersModal from "../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal";
 import useRecommendationOffer from "../../../../utils/hooks/useRecommendationOffer";
 import bannerArt from "../../../../assets/images/muhurat/banner-art.png";
-import bestOrnament from "../../../../assets/images/muhurat/best-ornament.png";
 import slotArt1 from "../../../../assets/images/muhurat/slot-1.png";
 import slotArt2 from "../../../../assets/images/muhurat/slot-2.png";
 import slotArt3 from "../../../../assets/images/muhurat/slot-3.png";
@@ -68,6 +68,30 @@ const formatDate = (value) => {
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 };
 
+/*
+  A window has "passed" when its date is the actual current day and its end time
+  is already behind the current clock. Parses the end of a "hh:mm AM - hh:mm PM"
+  range. Returns false for any other day or an unparseable range.
+*/
+const isWindowPassed = (timeRange, dateIso) => {
+  if (!timeRange || !dateIso) return false;
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  if (dateIso !== todayIso) return false; // only today's windows can be "passed"
+
+  const end = String(timeRange).split("-")[1]?.trim();
+  const m = end && end.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!m) return false;
+  let hh = parseInt(m[1], 10);
+  const mm = parseInt(m[2], 10);
+  const mer = m[3].toUpperCase();
+  if (mer === "PM" && hh !== 12) hh += 12;
+  if (mer === "AM" && hh === 12) hh = 0;
+  const endMinutes = hh * 60 + mm;
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  return endMinutes < nowMinutes;
+};
+
 const dayOffsetLabel = (value) => {
   const d = parseDate(value);
   if (!d) return null;
@@ -81,13 +105,13 @@ const dayOffsetLabel = (value) => {
 
 /** One favourable window. Collapsed to the essentials, with the engine's own
  *  long-form explanation available on demand rather than always on screen. */
-const SlotRow = ({ timing }) => {
+const SlotRow = ({ timing, passed = false }) => {
   const [open, setOpen] = useState(false);
   const explanation = timing?.details?.fullExplanation;
   const choghadiya = timing?.details?.choghadiya;
 
   return (
-    <li className={styles.slot}>
+    <li className={`${styles.slot} ${passed ? styles.slotPassed : ""}`}>
       <div className={styles.slotHead}>
         <span className={styles.slotTime}>{timing.bestTimeRange}</span>
         {timing.quality && (
@@ -96,6 +120,11 @@ const SlotRow = ({ timing }) => {
           </span>
         )}
         {choghadiya && <span className={styles.choghadiyaChip}>{choghadiya}</span>}
+        {passed && (
+          <span className={styles.passedChip}>
+            <FiClock size={12} aria-hidden="true" /> Passed
+          </span>
+        )}
       </div>
 
       {/* `reason` is the personalised line (it references the user's own chart);
@@ -139,7 +168,7 @@ const SlotRow = ({ timing }) => {
  * @param {string} [props.locationLabel]
  * @param {Function} [props.onDownload]
  */
-const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownload }) => {
+const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownload, isTodayView = false }) => {
   // event -> [{ date, timings: [rank-ordered] }]
   const byEvent = useMemo(() => {
     const timings = analysis?.optimalTimings || [];
@@ -180,8 +209,73 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
   }, [byEvent, activeEvent]);
 
   const active = byEvent.find((g) => g.name === activeEvent) || byEvent[0];
-  const today = active?.days?.[0] || null;
-  const nextDay = active?.days?.[1] || null;
+  /*
+    Split the grouped days into a "primary" day and a "next" day.
+
+    Primary = today's date if the response includes it, else the earliest day.
+    Next    = the first day AFTER the primary day.
+
+    This keeps the "Today" flow correct even when the API returns two dates
+    (today + tomorrow): today's windows fill "Favorable Muhurats" and tomorrow's
+    fill "Next Favorable Window". When only one date comes back, `nextDay` is
+    null and the panel stays hidden.
+  */
+  /*
+    Split the active event's day(s) by the analysis range, not the browser
+    clock: `analysis.fromDate` is the primary day (its windows fill "Favorable
+    Muhurats") and any later date — e.g. `analysis.toDate` — is the "Next
+    Favorable Window". The backend's notion of "today" comes from the requested
+    fromDate, which can differ from the device date, so matching on that keeps
+    today's windows and tomorrow's windows in the right panels.
+  */
+  const fromIso = String(analysis?.fromDate || "").slice(0, 10);
+  const { today, nextDay } = useMemo(() => {
+    const days = active?.days || [];
+    if (!days.length) return { today: null, nextDay: null };
+
+    // Only the "Today" view splits into today (Favorable Muhurats) vs tomorrow
+    // (Next Favorable Window). Every other period keeps the first/second-day
+    // behaviour so ranges and single-day requests are unaffected.
+    if (!isTodayView || !fromIso) {
+      return { today: days[0] || null, nextDay: days[1] || null };
+    }
+
+    const primary = days.find((d) => d.date === fromIso) || null;
+    let later = days.find((d) => d.date > fromIso) || null;
+
+    /*
+      Today view must always show a "Next Favorable Window". If the active event
+      itself has no later-dated window, borrow the next day's windows from any
+      other event in the response (earliest later date, best-ranked first) so the
+      section is present regardless of which event is selected.
+    */
+    if (!later) {
+      const laterByDate = new Map();
+      byEvent.forEach((ev) => {
+        (ev.days || []).forEach((d) => {
+          if (d.date > fromIso) {
+            if (!laterByDate.has(d.date)) laterByDate.set(d.date, []);
+            laterByDate.get(d.date).push(...(d.timings || []));
+          }
+        });
+      });
+      const earliestLater = [...laterByDate.keys()].sort((a, b) => a.localeCompare(b))[0];
+      if (earliestLater) {
+        later = {
+          date: earliestLater,
+          timings: [...laterByDate.get(earliestLater)].sort(
+            (a, b) => (a.rank ?? 99) - (b.rank ?? 99)
+          ),
+        };
+      }
+    }
+
+    // If the active event has no window on the primary day, its (later) window
+    // is the "next" one — leaving Favorable Muhurats empty for that event.
+    if (!primary) return { today: null, nextDay: later || days[0] || null };
+    return { today: primary, nextDay: later };
+  }, [active, byEvent, fromIso, isTodayView]);
+
   const best = today?.timings?.[0] || null;
 
   /*
@@ -273,35 +367,38 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
       )}
 
       <div className={styles.layout}>
-        <div className={styles.main}>
-          <header className={styles.banner}>
-            <img src={bannerArt} alt="" aria-hidden="true" className={styles.bannerArt} />
-            <div className={styles.bannerCopy}>
-              <h2 className={styles.bannerTitle}>{active.name}</h2>
-              <p className={styles.bannerText}>
-                Select an auspicious time for your {active.name.toLowerCase()} and
-                begin with confidence.
+        {/* Banner is a direct child of the layout grid (not inside .main) so
+            that on mobile the "Best Muhurat" card can sit directly beneath it,
+            above the panels. On desktop it stays in the left column, row 1. */}
+        <header className={styles.banner}>
+          <img src={bannerArt} alt="" aria-hidden="true" className={styles.bannerArt} />
+          <div className={styles.bannerCopy}>
+            <h2 className={styles.bannerTitle}>{active.name}</h2>
+            <p className={styles.bannerText}>
+              Select an auspicious time for your {active.name.toLowerCase()} and
+              begin with confidence.
+            </p>
+            {/* Panchang context for the day, sent with every window. */}
+            {today?.timings?.[0]?.details && (
+              <p className={styles.dayContext}>
+                {[
+                  today.timings[0].details.tithi,
+                  today.timings[0].details.nakshatra &&
+                    `${today.timings[0].details.nakshatra} Nakshatra`,
+                  today.timings[0].details.yoga &&
+                    `${today.timings[0].details.yoga} Yoga`,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
-              {/* Panchang context for the day, sent with every window. */}
-              {today?.timings?.[0]?.details && (
-                <p className={styles.dayContext}>
-                  {[
-                    today.timings[0].details.tithi,
-                    today.timings[0].details.nakshatra &&
-                      `${today.timings[0].details.nakshatra} Nakshatra`,
-                    today.timings[0].details.yoga &&
-                      `${today.timings[0].details.yoga} Yoga`,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-              )}
-            </div>
-            <span className={styles.bannerTts}>
-              <TTSButton text={ttsScript} />
-            </span>
-          </header>
+            )}
+          </div>
+          <span className={styles.bannerTts}>
+            <TTSButton text={ttsScript} />
+          </span>
+        </header>
 
+        <div className={styles.main}>
           <div className={styles.panelRow}>
             {today?.timings?.length > 0 && (
               <section className={styles.panel}>
@@ -323,6 +420,7 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
                     <SlotRow
                       key={`${timing.bestTimeRange}-${timing.rank}`}
                       timing={timing}
+                      passed={isTodayView && isWindowPassed(timing.bestTimeRange, today.date)}
                     />
                   ))}
                 </ul>
@@ -358,50 +456,59 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
             )}
           </div>
 
-          {/* Only when the analysis actually covered a second date. A single-day
-              request returns one date, so this stays hidden rather than
-              re-presenting the same day's lower-ranked windows as a later one. */}
-          {nextDay?.timings?.length > 0 && (
+          {/*
+            Next Favorable Window.
+            - Today view: always shown (per requirement) — with tomorrow's
+              windows when available, or an empty note otherwise.
+            - Other views: only when the analysis covered a second date, so a
+              single-day request doesn't re-present the same day's windows.
+          */}
+          {(isTodayView || nextDay?.timings?.length > 0) && (
             <section className={styles.nextPanel}>
               <h3 className={styles.panelTitle}>
                 <FiCalendar size={16} className={styles.iconNext} aria-hidden="true" />
                 Next Favorable Window
-                {dayOffsetLabel(nextDay.date) && (
+                {nextDay?.date && dayOffsetLabel(nextDay.date) && (
                   <span className={styles.nextBadge}>{dayOffsetLabel(nextDay.date)}</span>
                 )}
               </h3>
-              <p className={styles.panelSub}>
-                {formatDate(nextDay.date)} · {nextDay.timings.length}{" "}
-                {nextDay.timings.length === 1 ? "timing" : "timings"} available
-              </p>
-              <div className={styles.nextGrid}>
-                {nextDay.timings.map((timing, index) => (
-                  <div key={`${timing.bestTimeRange}-${timing.rank}`} className={styles.nextCard}>
-                    <img
-                      src={SLOT_ART[index % SLOT_ART.length]}
-                      alt=""
-                      aria-hidden="true"
-                      className={styles.nextCardArt}
-                    />
-                    <span className={styles.slotTime}>{timing.bestTimeRange}</span>
-                    {timing.quality && (
-                      <span className={`${styles.qualityChip} ${qualityClass(timing.quality)}`}>
-                        {timing.quality}
-                      </span>
-                    )}
-                    {timing.reason && <p className={styles.slotNote}>{timing.reason}</p>}
+              {nextDay?.timings?.length > 0 ? (
+                <>
+                  <p className={styles.panelSub}>
+                    {formatDate(nextDay.date)} · {nextDay.timings.length}{" "}
+                    {nextDay.timings.length === 1 ? "timing" : "timings"} available
+                  </p>
+                  <div className={styles.nextGrid}>
+                    {nextDay.timings.map((timing, index) => (
+                      <div key={`${timing.bestTimeRange}-${timing.rank}`} className={styles.nextCard}>
+                        <img
+                          src={SLOT_ART[index % SLOT_ART.length]}
+                          alt=""
+                          aria-hidden="true"
+                          className={styles.nextCardArt}
+                        />
+                        <span className={styles.slotTime}>{timing.bestTimeRange}</span>
+                        {timing.quality && (
+                          <span className={`${styles.qualityChip} ${qualityClass(timing.quality)}`}>
+                            {timing.quality}
+                          </span>
+                        )}
+                        {timing.reason && <p className={styles.slotNote}>{timing.reason}</p>}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </>
+              ) : (
+                <p className={styles.panelSub}>
+                  No favorable window found for the next day.
+                </p>
+              )}
             </section>
           )}
         </div>
 
         <aside className={styles.sidebar}>
           <div className={styles.bestCard}>
-            <img src={bestOrnament} alt="" aria-hidden="true" className={styles.bestOrnament} />
-
-            {/* Sit above the ornament, which is purely backdrop here. */}
             <div className={styles.cardTools}>
               {onDownload && (
                 <button
@@ -510,14 +617,49 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
               >
                 <BsChatDots size={14} aria-hidden="true" /> Chat with astrologer
               </a>
-              <Link to="/ai-wow" className={styles.actionTertiary}>
-                <Sparkles size={14} aria-hidden="true" /> Ask Shubh AI · Free
-              </Link>
+              <button
+                type="button"
+                className={styles.actionTertiary}
+                onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask"))}
+              >
+                <Sparkles size={14} aria-hidden="true" /> Ask AI Pandit
+              </button>
             </div>
 
           </div>
         </aside>
       </div>
+
+      {/* Mobile-only pinned actions. The sidebar's Call/Chat buttons are hidden
+          on mobile; these fixed buttons take their place (same as the Rashi
+          report). Portaled to <body> so `position: fixed` is measured against
+          the viewport rather than any transformed/animated ancestor in the
+          Muhurat-calendar page tree. */}
+      {createPortal(
+        <div className={styles.mobileActionBar}>
+          <a
+            href="/chat-with-astrologers"
+            className={styles.mobileActionChat}
+            onClick={(event) => {
+              event.preventDefault();
+              recommendation.open("chat");
+            }}
+          >
+            <BsChatDots size={16} aria-hidden="true" /> Chat with astrologer
+          </a>
+          <a
+            href={PATH.privateRoutes.ASTROLOGERS_LIST.path}
+            className={styles.mobileActionCall}
+            onClick={(event) => {
+              event.preventDefault();
+              recommendation.open("audio");
+            }}
+          >
+            <MdOutlinePhoneInTalk size={16} aria-hidden="true" /> Call an astrologer
+          </a>
+        </div>,
+        document.body
+      )}
 
       <RecommendedAstrologersModal
         isOpen={recommendation.isOpen}
@@ -527,6 +669,12 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
         onFinish={recommendation.finish}
         // Nothing discounted to show -> the close press just closes.
         onNothingToOffer={recommendation.finish}
+        // First browser Back on the report opens the discounted offer instead
+        // of leaving (this report has no in-page back button).
+        onExitOffer={() => recommendation.openOffer("chat")}
+        // Bring the user back to this Muhurat report after the chat ends
+        // (only when the chat was started from here).
+        returnTo={`${window.location.pathname}${window.location.search}`}
       />
     </div>
   );

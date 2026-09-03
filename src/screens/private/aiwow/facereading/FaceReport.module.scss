@@ -2,13 +2,72 @@ $ink: #24160f;
 $muted: #8a6a55;
 $brand: #f75801;
 $brand-dark: #d43400;
-$panel: rgba(255, 255, 255, 0.72);
+$panel: rgba(255, 255, 255, 0.4);
 $hair: rgba(191, 118, 66, 0.16);
 
 .report {
   padding: 18px 16px 32px;
-  max-width: 1180px;
+  max-width: 1440px;
   margin: 0 auto;
+
+  /* Room for the fixed mobile action bar so the last content isn't hidden. */
+  @media (max-width: 640px) {
+    padding-bottom: 90px;
+  }
+}
+
+/* ── Mobile action bar (fixed bottom) ─────────────────────────────────── */
+.mobileActionBar {
+  display: none;
+
+  @media (max-width: 640px) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    padding: 10px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(247, 88, 1, 0.15);
+    box-shadow: 0 -4px 18px rgba(191, 118, 66, 0.12);
+  }
+}
+
+.mobileActionChat,
+.mobileActionCall {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 13px 8px;
+  border-radius: 26px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.mobileActionChat {
+  background: #fff;
+  color: $brand-dark;
+  border: 1.5px solid rgba(247, 88, 1, 0.5);
+}
+
+.mobileActionCall {
+  background: linear-gradient(135deg, $brand, $brand-dark);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.3);
 }
 
 /* ── Banner ───────────────────────────────────────────────────────────── */
@@ -25,6 +84,7 @@ $hair: rgba(191, 118, 66, 0.16);
 
   @media (max-width: 860px) {
     flex-direction: column;
+    top: 20px;
   }
 }
 
@@ -95,9 +155,23 @@ $hair: rgba(191, 118, 66, 0.16);
     background: rgba(255, 255, 255, 0.4);
     border: 1px solid rgba(255, 255, 255, 1);
     border-radius: 12px;
-    padding: 9px 14px;
-    min-width: 108px;
+    padding: 9px;
+    min-width: 141px;
+    height: 71px;
     box-shadow: 0 2px 8px rgba(191, 118, 66, 0.08);
+  }
+
+  /* Mobile: a uniform 2-column grid so all four chips are the same width and
+     height, regardless of their text length. */
+  @media (max-width: 640px) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+
+    > div {
+      min-width: 0;
+      height: 100%;
+    }
   }
 
   dt {
@@ -107,7 +181,7 @@ $hair: rgba(191, 118, 66, 0.16);
     font-size: 0.62rem;
     font-weight: 600;
     color: $muted;
-    margin-bottom: 4px;
+    margin-bottom: 14px;
   }
 
   dd {
@@ -150,7 +224,7 @@ $hair: rgba(191, 118, 66, 0.16);
   flex-shrink: 0;
   margin: 0;
   width: 296px;
-  min-height: 340px;
+  min-height: 296px;
   /*
     The bottom padding reserves the badge's row. The badge is positioned
     absolutely, so it does not take part in centring — without that reserved
@@ -168,12 +242,12 @@ $hair: rgba(191, 118, 66, 0.16);
   img {
     position: relative;
     z-index: 1;
-    width: 190px;
-    height: 190px;
+    width: 210px;
+    height: 210px;
     object-fit: cover;
     /* Circular, as in the design — the square crop read as a profile card. */
     border-radius: 50%;
-    border: 6px solid #fff;
+    // border: 6px solid #fff;
     box-shadow: 0 6px 20px rgba(191, 118, 66, 0.2);
   }
 
@@ -206,7 +280,7 @@ $hair: rgba(191, 118, 66, 0.16);
     gap: 8px;
     white-space: nowrap;
     background: rgba(255, 255, 255, 0.55);
-    border: 3px solid #fff;
+    border: 2px solid #fff;
     color: #16a34a;
     font-size: 0.65rem;
     font-weight: 700;
@@ -283,11 +357,16 @@ $hair: rgba(191, 118, 66, 0.16);
   are separated by hairline dividers.
 */
 .tabs {
-  display: flex;
+  display: inline-flex;
   align-items: stretch;
   gap: 0;
-  width: 100%;
-  /* Spacing comes from `.main`'s gap — the bar is a flex item in that column. */
+  /* Bar hugs its tabs (sized to the labels) rather than stretching full width.
+     `justify-self: start` stops the grid cell from stretching the bar to the
+     full column, and `width: fit-content` keeps the translucent background the
+     same width as the labels. */
+  width: fit-content;
+  max-width: 100%;
+  justify-self: start;
   margin: 0;
   padding: 6px;
   border-radius: 999px;
@@ -295,9 +374,8 @@ $hair: rgba(191, 118, 66, 0.16);
   border: 1px solid rgba(255, 255, 255, 0.9);
   box-shadow: 0 2px 12px rgba(191, 118, 66, 0.08);
 
-  /* Six equal tracks do not fit a phone, so the bar scrolls instead of
-     squeezing the labels. */
   @media (max-width: 640px) {
+    display: flex;
     overflow-x: auto;
     scrollbar-width: none;
 
@@ -309,15 +387,22 @@ $hair: rgba(191, 118, 66, 0.16);
 
 .tab {
   position: relative;
-  flex: 1 1 0;
+  /* Each tab is sized to its label; the bar hugs them rather than stretching. */
+  flex: 0 0 auto;
   min-width: 0;
-  padding: 10px 12px;
+  /* inline-flex + centering so every tab (filled active pill and plain ones)
+     shares the same baseline and vertical alignment. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
   border: none;
   border-radius: 999px;
   background: none;
   color: #6b4c3a;
   font-size: 0.82rem;
   font-weight: 700;
+  line-height: 1;
   white-space: nowrap;
   cursor: pointer;
 
@@ -364,11 +449,45 @@ $hair: rgba(191, 118, 66, 0.16);
   grid-template-columns: minmax(0, 1fr) 290px;
   gap: 18px;
   align-items: start;
-  /* Was on `.tabs`, which used to sit above this grid. */
   margin-top: 18px;
+
+  /* Desktop: tabs + main stack in the left column; sidebar spans both rows on
+     the right. */
+  .tabs {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .main {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  /* Sidebar starts at row 2 so its top aligns with the "Over All" panel, level
+     with the tabs' content below — not up beside the tabs bar. */
+  .sidebar {
+    grid-column: 2;
+    grid-row: 2;
+  }
 
   @media (max-width: 1024px) {
     grid-template-columns: minmax(0, 1fr);
+
+    /* Mobile: tabs first, then the "Your Personality" sidebar, then the rest of
+       the report content. */
+    .tabs {
+      grid-column: 1;
+      grid-row: auto;
+      order: 1;
+    }
+    .sidebar {
+      grid-column: 1;
+      grid-row: auto;
+      order: 2;
+    }
+    .main {
+      grid-column: 1;
+      grid-row: auto;
+      order: 3;
+    }
   }
 }
 
@@ -390,7 +509,7 @@ $hair: rgba(191, 118, 66, 0.16);
   padding: 18px;
   border-radius: 18px;
   background: $panel;
-  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  border: 1.5px solid rgba(255, 255, 255, 1);
   box-shadow: 0 2px 12px rgba(191, 118, 66, 0.07);
 }
 
@@ -458,8 +577,8 @@ $hair: rgba(191, 118, 66, 0.16);
 .subCard {
   padding: 14px;
   border-radius: 13px;
-  background: #fff;
-  border: 1px solid $hair;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid #fff;
   min-width: 0;
 }
 
@@ -577,6 +696,39 @@ $hair: rgba(191, 118, 66, 0.16);
   font-weight: 600;
   padding: 3px 9px;
   border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+/* Coloured pill variants for the sidebar summary chips (Face Shape, Planet,
+   Zodiac), tinted per their banner tone — soft fill + coloured text + border. */
+.chip_toneViolet {
+  background: #f3e8ff;
+  color: #6d28d9;
+  border-color: rgba(109, 40, 217, 0.3);
+}
+
+.chip_toneOrange {
+  background: #ffedd5;
+  color: #c2410c;
+  border-color: rgba(194, 65, 12, 0.3);
+}
+
+.chip_toneGold {
+  background: #fff1cc;
+  color: #b45309;
+  border-color: rgba(180, 83, 9, 0.3);
+}
+
+.chip_toneRed {
+  background: #fde7ef;
+  color: #db2777;
+  border-color: rgba(219, 39, 119, 0.3);
+}
+
+.chip_tonePink {
+  background: #fde7ef;
+  color: #db2777;
+  border-color: rgba(219, 39, 119, 0.3);
 }
 
 /* ── Aura ─────────────────────────────────────────────────────────────── */
@@ -674,8 +826,11 @@ $hair: rgba(191, 118, 66, 0.16);
 
 .sideCard {
   position: relative;
-  padding: 18px;
-  border-radius: 18px;
+  overflow: hidden;
+  /* Extra top padding leaves room for the download/share tools that sit above
+     the inner personality card. */
+  padding: 56px 16px 16px;
+  border-radius: 20px;
   background: $panel;
   border: 1.5px solid rgba(255, 255, 255, 0.95);
   box-shadow: 0 2px 14px rgba(191, 118, 66, 0.1);
@@ -707,6 +862,7 @@ $hair: rgba(191, 118, 66, 0.16);
   right: 14px;
   display: flex;
   gap: 6px;
+  z-index: 2;
 }
 
 .sideToolBtn {
@@ -724,6 +880,39 @@ $hair: rgba(191, 118, 66, 0.16);
   &:hover {
     background: #fff;
   }
+}
+
+/* Nested personality card inside the sidebar — soft gradient fill, white border,
+   rounded, holding the kicker/title/body/pills. */
+.sideInner {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 241, 232, 0.55));
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(191, 118, 66, 0.06);
+}
+
+/* Decorative artwork in the OUTER sidebar card's top-right and bottom-left
+   corners, painted behind the tools / inner card / buttons. */
+.sideDecorTR,
+.sideDecorBL {
+  position: absolute;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sideDecorTR {
+  top: 0;
+  right: 0;
+}
+
+.sideDecorBL {
+  bottom: 0;
+  left: 0;
 }
 
 .sideKicker {
@@ -750,10 +939,18 @@ $hair: rgba(191, 118, 66, 0.16);
 }
 
 .actions {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 9px;
   margin-top: 16px;
+
+  /* Mobile: the sidebar Call/Chat buttons are replaced by a fixed bottom bar
+     (see .mobileActionBar), so hide the inline set here. */
+  @media (max-width: 640px) {
+    display: none;
+  }
 }
 
 .actionPrimary,
@@ -768,6 +965,12 @@ $hair: rgba(191, 118, 66, 0.16);
   font-size: 0.8rem;
   font-weight: 700;
   text-decoration: none;
+  /* .actionTertiary is a <button> now — keep it visually identical to the
+     sibling <a> action links. */
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .actionPrimary {
@@ -784,6 +987,8 @@ $hair: rgba(191, 118, 66, 0.16);
 .actionTertiary {
   background: #fdece2;
   color: $brand-dark;
+  /* Temporarily hidden — "Ask AI Pandit". Remove this line to bring it back. */
+  display: none;
 }
 
 

@@ -4,6 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
+import {
+  clearedPlaceCoords,
+  validateBirthPlace,
+} from "../../../../utils/helper/birthPlaceCoords";
+import { validatePersonName } from "../../../../utils/regex";
 import { TODAY } from "../../../../utils/dateFormat/date";
 import { useGetAllKundlisQuery } from "../../../../services/appServices/kundliServicesNew";
 import styles from "../mangaldosha/MangalDosha.module.scss";
@@ -48,7 +53,10 @@ const ShaniSadeSati = () => {
     if (!profile) return;
     const dob = `${profile.year}-${String(profile.month).padStart(2, "0")}-${String(profile.day).padStart(2, "0")}`;
     const tob = `${String(profile.hour).padStart(2, "0")}:${String(profile.min).padStart(2, "0")}`;
-    setFormData({ name: profile.name || "", gender: (profile.gender || profile.identity || "").toLowerCase() || "", dob, tob, place: profile.place || "", lat: profile.lat || null, lng: profile.lon || null, isTimeUnknown: false });
+    // `lon` is the saved-profile field name, `lng` is what LocationSearch emits;
+    // profiles can arrive with either, and now that submit requires coordinates
+    // reading only one of them would block a perfectly valid selected profile.
+    setFormData({ name: profile.name || "", gender: (profile.gender || profile.identity || "").toLowerCase() || "", dob, tob, place: profile.place || "", lat: profile.lat || null, lng: profile.lon || profile.lng || null, isTimeUnknown: false });
     setErrors({});
   };
   const { data: kundliData } = useGetAllKundlisQuery(undefined, { skip: !token });
@@ -69,6 +77,18 @@ const ShaniSadeSati = () => {
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
 
+  /*
+    Typing clears the coordinates.
+
+    Only onPlaceSelect sets lat/lng, so editing a picked place kept the old
+    city's coordinates: pick Mumbai, change the text to Pune, and the Saturn
+    phases came back for Mumbai under the name Pune. See birthPlaceCoords.js.
+  */
+  const handlePlaceChange = (value) => {
+    setFormData((prev) => ({ ...prev, ...clearedPlaceCoords(value) }));
+    setErrors((prev) => ({ ...prev, place: "" }));
+  };
+
   const onReset = () => {
     setFormData(initialFormState);
     setErrors({});
@@ -82,10 +102,14 @@ const ShaniSadeSati = () => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Shani Sade Sati" });
     const newErrors = {};
-    if (!formData.name) newErrors.name = "Name is required";
+    const nameErr = validatePersonName(formData.name);
+    if (nameErr) newErrors.name = nameErr;
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
-    if (!formData.place) newErrors.place = "Place of birth is required";
+    // Checks the coordinates, not just the text: a hand-typed place that was
+    // never picked from the dropdown used to submit with lat: null.
+    const placeError = validateBirthPlace(formData.place, formData.lat, formData.lng);
+    if (placeError) newErrors.place = placeError;
     if (!formData.isTimeUnknown && !formData.tob) newErrors.tob = "Time of birth is required";
     if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     const payload = { ...formData, tob: formData.isTimeUnknown ? "12:00" : formData.tob };
@@ -161,7 +185,7 @@ const ShaniSadeSati = () => {
             <label>Place of Birth <span>*</span></label>
             <LocationSearch
               value={formData.place}
-              onChange={(e) => handleChange("place", e.target.value)}
+              onChange={(e) => handlePlaceChange(e.target.value)}
               onPlaceSelect={(loc) => { handleChange("place", loc.address); handleChange("lat", loc.lat); handleChange("lng", loc.lng); }}
             />
             {errors.place && <p className={styles.err}>{errors.place}</p>}

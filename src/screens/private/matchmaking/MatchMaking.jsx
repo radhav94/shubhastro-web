@@ -12,6 +12,7 @@ import {
   useGetAllKundlisQuery,
 } from "../../../services/appServices/kundliServicesNew";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
+import { validatePersonName } from "../../../utils/regex";
 
 const isDuplicateKundli = (payload, list) => {
   return list.some(
@@ -154,7 +155,8 @@ const MatchMaking = () => {
 
   const validatePerson = (data) => {
     const newErrors = {};
-    if (!data.name.trim()) newErrors.name = "Name is required";
+    const nameErr = validatePersonName(data.name);
+    if (nameErr) newErrors.name = nameErr;
     if (!data.dob) newErrors.dob = "Date of Birth is required";
     if (!data.tob) newErrors.tob = "Time of Birth is required";
     if (!data.place.address) newErrors.place = "Birth Place is required";
@@ -319,14 +321,25 @@ const MatchMaking = () => {
             <label>Birth Place*</label>
             <LocationSearch
               value={data.place.address}
+              /*
+                Typing clears the coordinates.
+
+                Only onPlaceSelect sets lat/lng, and spreading the previous
+                place carried them over — so editing a picked city matched the
+                two charts against the old coordinates under the new name. The
+                validator below already rejects a place with no coordinates, so
+                dropping them here turns a silently wrong match into a visible
+                "select a valid location". See birthPlaceCoords.js.
+              */
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
                   [personKey]: {
                     ...prev[personKey],
                     place: {
-                      ...prev[personKey].place,
                       address: e.target.value,
+                      lat: null,
+                      lng: null,
                     },
                   },
                 }))

@@ -80,6 +80,8 @@ const AgenticCalendar = () => {
 
   const downloadResultData = useMemo(() => {
     if (!rawApiResult) return null;
+    // featureName must stay as the charges/history slug so the download price
+    // resolves; the saved file is renamed via `downloadFileName` below.
     return { ...rawApiResult, featureName: 'Agentic-Calendar' };
   }, [rawApiResult]);
 
@@ -87,7 +89,7 @@ const AgenticCalendar = () => {
     isDownloading, showDownloadModal, setShowDownloadModal,
     downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload,
-  } = useAIWowDownload({ resultData: downloadResultData });
+  } = useAIWowDownload({ resultData: downloadResultData, downloadFileName: 'Muhurat-Calendar' });
 
   const [navStateConsumed, setNavStateConsumed] = useState(false);
   const [autoSubmitPending, setAutoSubmitPending] = useState(false);
@@ -259,9 +261,9 @@ const AgenticCalendar = () => {
   const toggleOccasion = (occasion) => {
     if (!beginEdit()) return;
     clearNavState();
-    setSelectedOccasions((prev) =>
-      prev.includes(occasion) ? prev.filter((o) => o !== occasion) : [...prev, occasion]
-    );
+    // Single-select: tapping an occasion selects only that one; tapping the
+    // already-selected one clears it.
+    setSelectedOccasions((prev) => (prev.includes(occasion) ? [] : [occasion]));
   };
 
   const handleRemoveChip = (occasion) => {
@@ -275,10 +277,13 @@ const AgenticCalendar = () => {
 
   const handleAddCustom = () => {
     clearNavState();
-    const trimmed = customInput.trim();
+    // Any characters allowed (letters, numbers, symbols); just collapse extra
+    // spaces and trim the ends.
+    const trimmed = customInput.replace(/\s+/g, ' ').trim();
     if (trimmed && !allOccasions.includes(trimmed)) {
       setCustomOccasions((prev) => [...prev, trimmed]);
-      setSelectedOccasions((prev) => [...prev, trimmed]);
+      // Single-select: a newly added custom occasion becomes the only selection.
+      setSelectedOccasions([trimmed]);
       setCustomInput('');
       setShowCustomModal(false);
     }
@@ -309,8 +314,13 @@ const AgenticCalendar = () => {
         fromDate = formatDate(customFromDate);
         toDate = customToDate ? formatDate(customToDate) : fromDate;
       } else if (selectedPeriod === 'Today') {
+        // "Today" spans today → tomorrow (valid forward range) so the API
+        // returns both days' windows. The report puts today's under "Favorable
+        // Muhurats" and tomorrow's under "Next Favorable Windows".
         fromDate = formatDate(today);
-        toDate = fromDate;
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        toDate = formatDate(tomorrow);
       } else if (selectedPeriod === 'Tomorrow') {
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -532,9 +542,22 @@ const AgenticCalendar = () => {
             <LocationSearch
               value={locationValue}
               placeholder="Enter your location"
+              /*
+                Editing away from the picked place drops its coordinates.
+
+                Clearing only on an empty field left a stale `locationData`
+                behind: pick Mumbai, edit the text to Pune, and the field read
+                Pune while the request still carried Mumbai's coordinates and
+                address. Unlike the calculator forms this screen does not need
+                coordinates (see `effectiveLocation` above), so dropping them
+                just falls back to the browser location or omits lat/lon.
+              */
               onChange={(e) => {
-                setLocationValue(e.target.value);
-                if (!e.target.value.trim()) setLocationData(null);
+                const typed = e.target.value;
+                setLocationValue(typed);
+                setLocationData((prev) =>
+                  prev && prev.address === typed ? prev : null
+                );
               }}
               onPlaceSelect={({ address, lat, lng }) => {
                 setLocationValue(address);
@@ -593,6 +616,7 @@ const AgenticCalendar = () => {
                 customOccasions={customOccasions}
                 locationLabel={locationValue}
                 onDownload={handleDownloadClick}
+                isTodayView={selectedPeriod === 'Today' && !customFromDate}
               />
             </div>
           )}
@@ -714,7 +738,12 @@ const AgenticCalendar = () => {
               className={styles.modalInput}
               placeholder="e.g., House Warming"
               value={customInput}
-              onChange={(e) => { if (e.target.value.length <= 30) setCustomInput(e.target.value); }}
+              onChange={(e) => {
+                // Any characters allowed (letters, numbers, symbols); only the
+                // 30-char length cap is enforced.
+                const value = e.target.value;
+                if (value.length <= 30) setCustomInput(value);
+              }}
               maxLength={30}
               autoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleAddCustom()}
@@ -730,7 +759,7 @@ const AgenticCalendar = () => {
       isOpen={showDownloadModal}
       onClose={() => setShowDownloadModal(false)}
       onDownload={handleConfirmDownload}
-      featureName="Agentic Calendar Report"
+      featureName="Muhurat Calendar Report"
       downloadCost={downloadPrice}
       walletBalance={walletBalance ?? 0}
       isDownloading={isDownloading}

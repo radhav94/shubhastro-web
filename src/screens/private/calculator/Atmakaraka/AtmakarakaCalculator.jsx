@@ -4,12 +4,17 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
 import LocationSearch from "../../../../utils/location/locationSearchVedic";
+import {
+  clearedPlaceCoords,
+  validateBirthPlace,
+} from "../../../../utils/helper/birthPlaceCoords";
 import DateTimePicker from "../../../../component/UI/dateTimePicker/DateTimePicker";
 import styles from "./AtmakarakaCalculator.module.scss";
 import { ProfileManager } from "../../../../component/UI/Profile";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 import BackButton from "../../../../component/UI/BackButton/BackButton";
+import { validatePersonName } from "../../../../utils/regex";
 
 const STORAGE_KEY = "atmakaraka-and-darakaraka";
 
@@ -44,6 +49,18 @@ const AtmakarakaCalculator = () => {
       [key]: value,
     }));
     setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
+
+  /*
+    Typing clears the coordinates.
+
+    Only onPlaceSelect sets lat/lng, so editing a picked place kept the old
+    city's coordinates and the Atmakaraka was computed for the wrong place under
+    the right name. See birthPlaceCoords.js.
+  */
+  const handlePlaceChange = (value) => {
+    setFormData((prev) => ({ ...prev, ...clearedPlaceCoords(value) }));
+    setErrors((prev) => ({ ...prev, place: "" }));
   };
 
   const fillFromProfile = (profile) => {
@@ -86,10 +103,18 @@ const AtmakarakaCalculator = () => {
 
     const newErrors = {};
 
-    if (!formData.name) newErrors.name = "Name is required";
+    const nameErr = validatePersonName(formData.name);
+    if (nameErr) newErrors.name = nameErr;
     if (!formData.gender) newErrors.gender = "Gender is required";
     if (!formData.dob) newErrors.dob = "Date of birth is required";
-    if (!formData.place) newErrors.place = "Place of birth is required";
+    // Checks the coordinates, not just the text: a hand-typed place that was
+    // never picked from the dropdown used to submit with lat: null.
+    const placeError = validateBirthPlace(
+      formData.place,
+      formData.lat,
+      formData.lng
+    );
+    if (placeError) newErrors.place = placeError;
 
     if (!formData.isTimeUnknown && !formData.tob) {
       newErrors.tob = "Time of birth is required or select unknown";
@@ -224,7 +249,7 @@ const AtmakarakaCalculator = () => {
             </label>
             <LocationSearch
               value={formData.place}
-              onChange={(e) => handleChange("place", e.target.value)}
+              onChange={(e) => handlePlaceChange(e.target.value)}
               onPlaceSelect={(location) => {
                 handleChange("place", location.address);
                 handleChange("lat", location.lat);

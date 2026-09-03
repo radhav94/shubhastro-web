@@ -22,6 +22,7 @@ import RouteErrorBoundary from "./component/RouteErrorBoundary";
 import PrimaryLoader from "./component/UI/PrimaryLoader";
 import NoInternet, { useOnlineStatus } from "./component/NoInternet/NoInternet";
 import { initializeFCM } from "./services/fcmService.jsx";
+import { isInAppBrowser } from "./utils/deviceInfo";
 import CmsPageWrapper from "./component/CmsPageWrapper";
 import CmsNotFoundPage from "./component/CmsNotFoundPage";
 import Toast from "./component/toast";
@@ -262,6 +263,24 @@ function App() {
   // paint. `typeof Notification` is checked before reading .permission because
   // the constructor is absent entirely in some webviews.
   useEffect(() => {
+    /*
+     * Never attempt this in an embedded browser, whatever the sign-in state.
+     *
+     * The gate below (permission granted, or signed in) spares first-time
+     * visitors, who are the bulk of Instagram/Facebook ad traffic. It does not
+     * spare a *returning signed-in* visitor in the same browser: for them
+     * `signedIn` is true, initializeFCM runs, and requestPermission() /
+     * serviceWorker.register() go over the host app's injected JS bridge again.
+     *
+     * Meta's in-app browser does not support web push at all, so that call can
+     * only ever fail. It surfaces as an uncaught "error invoking postmessage: …"
+     * — Clarity has recorded both variants of it ("java exception was raised
+     * during method invocation" and "java object is gone"), on two separate
+     * Instagram visitors 19 minutes apart, one of whom lasted 20 seconds. There
+     * is no token worth registering behind a call that cannot succeed.
+     */
+    if (isInAppBrowser()) return;
+
     const permissionGranted =
       typeof Notification !== "undefined" &&
       Notification.permission === "granted";

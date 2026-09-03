@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import {
@@ -18,7 +19,7 @@ import { Toast } from "../../index";
 import ProfileListingModal from "./ProfileListingModal";
 import { relationOption } from "../../../utils/constanats/appData";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
-import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
+import { personNameRegex, PERSON_NAME_ERROR, PERSON_NAME_MIN, PERSON_NAME_MIN_ERROR } from "../../../utils/regex";
 import giftImg from "../../../assets/images/welcome-bonus-icon.webp";
 import {
   getSignupBonusLabel,
@@ -250,7 +251,9 @@ const AddProfileModal = ({
   // Validation schema
   const validationSchema = Yup.object({
     name: Yup.string()
+      .trim()
       .required("Name is required")
+      .min(PERSON_NAME_MIN, PERSON_NAME_MIN_ERROR)
       .matches(personNameRegex, PERSON_NAME_ERROR),
     relation: (matchmakingMode || hideRelation)
       ? Yup.string().notRequired()
@@ -469,7 +472,7 @@ const AddProfileModal = ({
     ...(matchmakingMode ? [] : [{ value: "Others", label: "Others", Icon: FaTransgenderAlt }]),
   ];
 
-  return (
+  const overlay = (
     <div
       className={`${styles.modalOverlay} ${inline ? styles.inline : ""}`}
       onClick={handleOverlayClick}
@@ -668,7 +671,17 @@ const AddProfileModal = ({
                         }}
                         // Lets validation tell "empty" apart from "typed but not
                         // a usable date" — see the birthDate schema.
-                        onRawChange={(text) => setFieldValue("birthDateRaw", text)}
+                        onRawChange={(text) => {
+                          setFieldValue("birthDateRaw", text);
+                          // Invalidate the parsed value on every keystroke; the
+                          // picker only re-fires onChange once the text is a
+                          // complete, valid date, so clearing here first means a
+                          // half-edited or emptied box no longer keeps the old
+                          // parsed date alive. Without this, clearing the field
+                          // still passed validation and the form submitted with
+                          // a stale date the user could no longer see.
+                          setFieldValue("birthDate", "");
+                        }}
                         maxDate={new Date()}
                         placeholder="DD/MM/YYYY"
                       />
@@ -851,6 +864,12 @@ const AddProfileModal = ({
       </div>
     </div>
   );
+
+  // Inline mode renders in place (e.g. inside the Pandit AI chat). The overlay
+  // mode is portaled to <body> so its `position: fixed` is measured against the
+  // viewport, not a transformed/positioned ancestor (e.g. the live-stream view),
+  // which was clipping the sheet's bottom and killing its scroll.
+  return inline ? overlay : createPortal(overlay, document.body);
 };
 
 export default AddProfileModal;

@@ -12,7 +12,12 @@ const StickyReview = () => {
     reviewData
   } = useCall();
   const navigate = useNavigate();
-  const [addAstrologerReview] = useAddAstrologerReviewMutation();
+  // `isLoading` was never read, so FeedbackModal's `loading` prop arrived
+  // undefined: the button never showed "Submitting..." and a second tap while
+  // the request was in flight posted the review twice. It matters more now that
+  // the button is no longer natively disabled (see FeedbackModal).
+  const [addAstrologerReview, { isLoading: isSubmittingReview }] =
+    useAddAstrologerReviewMutation();
 
   if (!openReview)
     return null;
@@ -71,6 +76,7 @@ const StickyReview = () => {
           open={openReview}
           onClose={() => setOpenReview(false)}
           handleSubmit={handleReviewSubmit}
+          loading={isSubmittingReview}
           ratedUserName={reviewData?.fullName}
           profileImgUrl={reviewData?.profileImage || reviewData?.profileImgUrl}
           gender={reviewData?.gender}

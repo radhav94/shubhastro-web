@@ -3,6 +3,7 @@ import { trackEvent } from "../../../../utils/analytics";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import useFormFromLocalStorage from "../useFormFromLocalStorage";
+import { validatePersonName } from "../../../../utils/regex";
 import styles from "./NameCompatibilityCalc.module.scss";
 import { setCalculatorData } from "../../../../redux/calculator/calculatorSlice";
 import { setSelectedKundli } from "../../../../redux/kundli/kundliSlice";
@@ -56,8 +57,10 @@ const NameCompatibilityCalc = () => {
     e.preventDefault();
     trackEvent("calculator_used", { calculator_name: "Name Compatibility" });
     const newErrors = {};
-    if (!formData.name1) newErrors.name1 = "Your name is required";
-    if (!formData.name2) newErrors.name2 = "Partner name is required";
+    const name1Err = validatePersonName(formData.name1, { requiredError: "Your name is required" });
+    if (name1Err) newErrors.name1 = name1Err;
+    const name2Err = validatePersonName(formData.name2, { requiredError: "Partner name is required" });
+    if (name2Err) newErrors.name2 = name2Err;
     if (Object.keys(newErrors).length) { setErrors(newErrors); return; }
     dispatch(setCalculatorData({ key: STORAGE_KEY, data: formData }));
     navigate("/name-compatibility-calculator/report");

@@ -618,6 +618,36 @@
   color: #B82E00;
 }
 
+/*
+  Recovery control for a horoscope that failed to load. Styled as a real button
+  rather than a text link because it is the only way forward on that state — the
+  screen previously offered nothing and left a browser refresh as the sole option.
+*/
+.horoscope-retry-btn {
+  appearance: none;
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 20px;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.horoscope-retry-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(247, 88, 1, 0.3);
+}
+
+.horoscope-retry-btn:focus-visible {
+  outline: 2px solid #F75801;
+  outline-offset: 2px;
+}
+
 .overview-card-text {
   padding: 14px 18px 18px 18px;
   border-top: 1.5px solid #ffffff;

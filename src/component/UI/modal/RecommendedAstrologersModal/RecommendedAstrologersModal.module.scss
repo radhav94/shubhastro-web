@@ -19,10 +19,18 @@ $brand-dark: #d43400;
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 1200;
+  /* Above the app's fixed header/sub-nav (z-index 2001) so the modal covers
+     them instead of tucking behind — the panel's top was slipping under the
+     header before. */
+  z-index: 100000;
   background: rgba(36, 22, 15, 0.45);
   display: flex;
   justify-content: center;
+  /* Vertically centre the panel in the viewport. `safe` keeps the top edge
+     reachable when the panel is taller than the screen (it top-aligns instead
+     of clipping the overflow above the fold), while the overlay handles the
+     scrolling. */
+  align-items: safe center;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 16px;
@@ -30,7 +38,6 @@ $brand-dark: #d43400;
 
 .modal {
   position: relative;
-  margin: auto;
   width: 100%;
   /* The offer variant pays for its extra content in width, not height, so the
      panel is wide enough to hold three cards with the discount detail beside
@@ -50,6 +57,25 @@ $brand-dark: #d43400;
    rather than the same list rendered again. */
 .offerModal {
   background: linear-gradient(180deg, #fff8f3 0%, #ffeadd 100%);
+}
+
+/* When only one or two astrologers are shown, narrow the panel to fit the
+   card(s) instead of leaving a wide, mostly-empty modal. The default (3+) keeps
+   the 940px max-width above. */
+.modalOne {
+  max-width: 380px;
+
+  .track {
+    justify-content: center;
+  }
+}
+
+.modalTwo {
+  max-width: 660px;
+
+  .track {
+    justify-content: center;
+  }
 }
 
 .header {

@@ -39,6 +39,31 @@ export const personNameRegex = /^(?=.*[\p{L}\p{M}])[\p{L}\p{M}\s'’.-]+$/u;
 export const PERSON_NAME_ERROR =
   "Please enter a valid name (letters, spaces, and . ' - only)";
 
+// Minimum length required for a person's name across every name field on the
+// site. Kept here so the rule (and its message) stay identical everywhere.
+export const PERSON_NAME_MIN = 3;
+export const PERSON_NAME_MIN_ERROR = `Name must be at least ${PERSON_NAME_MIN} characters`;
+
+/**
+ * Validate a person-name field the same way in every form.
+ *
+ * Returns an error message string when invalid, or "" when the value is a valid
+ * name (non-empty, >= 3 chars after trimming, matches personNameRegex).
+ *
+ * @param {string} value        raw field value
+ * @param {Object} [opts]
+ * @param {string} [opts.requiredError]  message when empty (label-specific)
+ * @returns {string} error message, or "" when valid
+ */
+export const validatePersonName = (value, opts = {}) => {
+  const { requiredError = "Name is required" } = opts;
+  const trimmed = (value || "").trim();
+  if (!trimmed) return requiredError;
+  if (trimmed.length < PERSON_NAME_MIN) return PERSON_NAME_MIN_ERROR;
+  if (!personNameRegex.test(trimmed)) return PERSON_NAME_ERROR;
+  return "";
+};
+
 /*
   Place names for postal addresses (city / state). Same problem as above, plus
   these legitimately contain characters a name does not: "Jammu & Kashmir",

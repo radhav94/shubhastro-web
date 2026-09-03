@@ -157,7 +157,14 @@ const Payment = () => {
           clicking the balance figure repeatedly over several seconds — the
           behaviour of someone asking where their money went, not someone asking
           for a refetch. Refreshing was the only thing those clicks could do, and
-          it changes nothing on screen when the figure is already current.
+          it changes nothing on screen when the figure is already current, so
+          Clarity logs it as a dead click.
+
+          This link was written to answer that and then left commented out, which
+          meant the diagnosis shipped without the remedy — the balance figure was
+          still the only thing to press and still did nothing visible. Clarity has
+          since recorded the same shape again on this page: a dead click, then the
+          visitor going to look at their balance.
         */}
         {/* <Link to="/wallet-transactions" className={styles.transactionsLink}>
           View transactions
