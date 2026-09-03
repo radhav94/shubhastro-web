@@ -385,15 +385,50 @@
 }
 
 /* Disabled states when results are showing */
-/* Dimmed while the form is locked to a result, but deliberately NOT
-   `pointer-events: none`: the tap has to reach the handler so it can unlock the
-   form. `pointer-events: none` here made every chip a dead click. */
+/* Disabled look while a result is showing (form is locked). Deliberately NOT
+   `pointer-events: none`: the tap still reaches the handler so it can surface
+   the "Tap Modify Selections" hint. The greyed fill + not-allowed cursor make
+   it read as clearly inert until Modify Selections is pressed. */
 .chipDisabled {
-  opacity: 0.5;
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+
+  /* Freeze hover entirely: the base `.chip:hover` turns the text orange, which
+     on a selected (orange-filled) chip made the label vanish. Keep the resting
+     colours instead. */
+  &:hover {
+    border-color: #e0e0e0;
+    color: #333;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* Selected + disabled: keep the white label on the orange fill on hover. */
+  &.chipSelected:hover {
+    color: #fff;
+    border-color: transparent;
+  }
 }
 
 .periodDisabled {
-  opacity: 0.5;
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+
+  /* Keep the resting fill on hover: the selected (orange) period chip must not
+     change on hover while locked. Non-selected chips get their transparent
+     background back rather than the hover tint. */
+  &:hover {
+    background: transparent;
+    box-shadow: none;
+    transform: none;
+  }
+
+  &.periodActive:hover {
+    background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+    color: #fff;
+  }
 }
 
 /* Loading */

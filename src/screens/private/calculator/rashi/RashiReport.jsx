@@ -823,6 +823,9 @@ const RashiReport = () => {
         onFinish={recommendation.finish}
         // Nothing discounted to show -> the close press just closes.
         onNothingToOffer={recommendation.finish}
+        // Enables "closing the offer leaves the report"; the modal performs the
+        // actual history navigation (it owns its guard entry).
+        onExitClose={() => {}}
         // Browser Back on the report opens the discounted offer once (the
         // in-page < button does the same via onBack above).
         onExitOffer={() => {

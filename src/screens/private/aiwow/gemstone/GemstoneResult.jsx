@@ -1007,6 +1007,9 @@ const GemstoneResult = () => {
         onDismiss={recommendation.dismiss}
         onFinish={recommendation.finish}
         onNothingToOffer={recommendation.finish}
+        // Enables "closing the offer leaves the report"; the modal performs the
+        // actual history navigation (it owns its guard entry).
+        onExitClose={() => {}}
       />
 
       {/* Mobile-only fixed action bar. The "Your Gemstone" card's Call/Chat

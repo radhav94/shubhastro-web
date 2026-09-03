@@ -35,7 +35,12 @@ const hasContent = (value) => {
 
 const FaceReadingResult = () => {
   const navigate = useNavigate();
-  const handleBack = () => navigate(PATH.privateRoutes.FACE_READING_LANDING.path[0], { replace: true });
+  // Route the in-page back button through the browser Back so it hits the
+  // exit-intent guard that FaceReport's RecommendedAstrologersModal arms on
+  // mount — i.e. the first press opens the discounted-astrologer offer instead
+  // of leaving, exactly like the browser Back does. The modal handles leaving
+  // the report once the offer is closed.
+  const handleBack = () => window.history.back();
   const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(true);
   

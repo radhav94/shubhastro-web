@@ -68,6 +68,12 @@ const RecommendedAstrologersModal = ({
   onFinish,
   onNothingToOffer,
   onExitOffer,
+  // Called when the user closes the popup while it is on the discounted OFFER
+  // stage (via the close button or a Back). Host screens pass this to leave the
+  // report on that close — so "Back opens the offer, closing the offer takes you
+  // back" is a single flow. Not called when a connection is starting (onFinish)
+  // or when the plain list escalates to the offer (onDismiss).
+  onExitClose,
   onEmergencyAvailable,
   // Optional path to return to after the chat ends. Only used for chat (the
   // chat screen reads it once the session ends). Passed by screens that want
@@ -149,6 +155,41 @@ const RecommendedAstrologersModal = ({
   const trapActiveRef = useRef(trapActive);
   trapActiveRef.current = trapActive;
 
+  // Latest offer-stage close handler + current stage, read by the long-lived
+  // popstate listener without re-subscribing.
+  const isOfferRef = useRef(isOffer);
+  isOfferRef.current = isOffer;
+  const onExitCloseRef = useRef(onExitClose);
+  onExitCloseRef.current = onExitClose;
+
+  /*
+    A user-initiated close of the popup (close button or Back).
+
+    On the OFFER stage, closing means "I'm done, take me back to the page before
+    the report". We do the history navigation HERE rather than in the host,
+    because only this component knows whether it has a guard entry sitting on top
+    of the stack: when the popup is open there is one (armed to catch a Back), so
+    leaving the report is two steps back (guard + report), otherwise one. Doing
+    it in the host with navigate(-1) landed on our own guard entry — the report
+    stayed put, which is the "close doesn't go back" bug. `onExitClose` is now a
+    notification the host can use (e.g. analytics); the actual navigation is
+    ours.
+
+    On the PLAIN stage, closing escalates to the offer (onDismiss), unchanged.
+  */
+  const handleUserClose = () => {
+    if (isOfferRef.current && onExitCloseRef.current) {
+      const steps = guardArmedRef.current ? -2 : -1;
+      guardArmedRef.current = false;
+      onExitCloseRef.current(); // host notification (navigation handled below)
+      window.history.go(steps); // leave the report -> the page before it
+      return;
+    }
+    onDismissRef.current?.();
+  };
+  const handleUserCloseRef = useRef(handleUserClose);
+  handleUserCloseRef.current = handleUserClose;
+
   // Exit-intent: when a screen passes `onExitOffer`, the FIRST browser Back on
   // the report (while the popup is closed) opens the discounted offer instead of
   // leaving — same behaviour Rashi gives its in-page back button, but for the
@@ -158,24 +199,48 @@ const RecommendedAstrologersModal = ({
   onExitOfferRef.current = onExitOffer;
   const exitOfferSpentRef = useRef(false);
 
-  // A single listener for the whole life of the component. It only reacts when
-  // the popup is actually showing (step back inside it), or — for the exit-intent
-  // case — the first time Back is pressed while the popup is closed.
+  /*
+    Whether a single guard history entry is currently armed. We keep at most ONE
+    at a time: arming more (or re-pushing on every popstate, or popping with
+    history.back()) thrashes the History API and trips the browser's "Throttling
+    navigation to prevent the browser from hanging" protection — after which
+    history operations silently no-op, which is exactly why closing the popup
+    stopped taking the user back.
+  */
+  const guardArmedRef = useRef(false);
+
+  const armGuard = () => {
+    if (guardArmedRef.current) return;
+    window.history.pushState({ recommendedModal: true }, "");
+    guardArmedRef.current = true;
+  };
+
+  // A single listener for the whole life of the component. It reacts only when
+  // the popup is showing (step back inside / close it), or — for the exit-intent
+  // case — the first Back pressed while the popup is closed.
   useEffect(() => {
     const onPopState = () => {
+      // The Back just consumed our guard entry.
+      guardArmedRef.current = false;
+
       if (trapActiveRef.current) {
-        // Popup showing: consume the Back and step back inside it. Re-arm
-        // immediately so the NEXT Back (e.g. on the offer stage) is caught too.
-        window.history.pushState({ recommendedModal: true }, "");
-        onDismissRef.current?.(); // escalate plain -> offer, or close the offer
+        if (isOfferRef.current) {
+          // Offer stage -> handleUserClose runs onExitClose, which navigates
+          // away. Do NOT re-arm: that navigation IS the exit.
+          handleUserCloseRef.current();
+        } else {
+          // Plain stage -> escalate to the offer; re-arm so the next Back on the
+          // offer is caught too.
+          armGuard();
+          handleUserCloseRef.current();
+        }
         return;
       }
-      // Popup closed. If this screen wants an exit-intent offer and we haven't
-      // shown it yet, open it now and swallow this Back.
+      // Popup closed. First Back with an exit-intent offer pending -> open it.
       if (onExitOfferRef.current && !exitOfferSpentRef.current) {
         exitOfferSpentRef.current = true;
-        window.history.pushState({ recommendedModal: true }, "");
-        onExitOfferRef.current(); // opens the discounted offer stage
+        armGuard();
+        onExitOfferRef.current();
         return;
       }
       // Nothing to do -> let the Back navigate away.
@@ -184,17 +249,18 @@ const RecommendedAstrologersModal = ({
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
-  // Arm a guard entry:
-  //  - whenever the popup shows, so the first Back has something to consume;
-  //  - and, for the exit-intent case, once on mount while it's still closed, so
-  //    the very first Back on the report is caught rather than leaving.
+  // Arm a single guard entry whenever the popup shows, so a browser Back has
+  // something to consume. We never pop it here: popping with history.back() is
+  // what caused the navigation-throttling loop. A leftover guard (popup closed
+  // some other way) is harmlessly consumed by the user's next Back.
   useEffect(() => {
-    if (trapActive) window.history.pushState({ recommendedModal: true }, "");
+    if (trapActive) armGuard();
   }, [trapActive]);
+
+  // Exit-intent screens: arm one guard on mount (while closed) so the very first
+  // browser Back is caught and opens the offer instead of leaving.
   useEffect(() => {
-    if (onExitOffer && !exitOfferSpentRef.current) {
-      window.history.pushState({ recommendedModal: true }, "");
-    }
+    if (onExitOffer && !exitOfferSpentRef.current) armGuard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -365,7 +431,7 @@ const RecommendedAstrologersModal = ({
               <button
                 type="button"
                 className={styles.close}
-                onClick={() => (onFinish || onDismiss)?.()}
+                onClick={() => handleUserClose()}
                 aria-label="Close"
               >
                 <IoClose size={20} />

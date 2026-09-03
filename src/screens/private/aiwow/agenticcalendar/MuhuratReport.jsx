@@ -669,6 +669,10 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
         onFinish={recommendation.finish}
         // Nothing discounted to show -> the close press just closes.
         onNothingToOffer={recommendation.finish}
+        // Enables "closing the offer leaves the report". The actual history
+        // navigation is handled inside the modal (it knows about its own guard
+        // history entry); this is just the opt-in / notification hook.
+        onExitClose={() => {}}
         // First browser Back on the report opens the discounted offer instead
         // of leaving (this report has no in-page back button).
         onExitOffer={() => recommendation.openOffer("chat")}
