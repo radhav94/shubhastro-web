@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom'; // re-add when "Ask Shubh AI" is restored
 import { BsChatDots } from 'react-icons/bs';
 import { MdOutlinePhoneInTalk } from 'react-icons/md';
-import { Sparkles } from 'lucide-react';
+import { Download, Share2 } from 'lucide-react'; // Sparkles removed with hidden "Ask Shubh AI" button
 import styles from './GemstoneResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
@@ -15,6 +15,11 @@ import RecommendedAstrologersModal from '../../../../component/UI/modal/Recommen
 import useRecommendationOffer from '../../../../utils/hooks/useRecommendationOffer';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
+
+// Decorative corner flourishes — the same wave art used on the Rashi / Muhurat
+// report cards (top-right and bottom-left corners).
+import cardFlourish from '../../../../assets/images/rashi/decor/hero-flourish.png';
+import cardFlourishLeft from '../../../../assets/images/rashi/decor/hero-flourish-left.png';
 
 // Detail / astrological icons provided in src/assets/gemstone-details.
 import detailIcon1 from '../../../../assets/gemstone-details/icon-1.png';
@@ -32,7 +37,6 @@ import detailsHeaderIcon from '../../../../assets/gemstone-details/icon-details-
 
 const GemstoneResult = () => {
   const navigate = useNavigate();
-  const handleBack = () => navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0], { replace: true });
   const [gemstones, setGemstones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedGemstoneIndex, setSelectedGemstoneIndex] = useState(0);
@@ -59,6 +63,27 @@ const GemstoneResult = () => {
 
   // Same two-stage recommendation popup as the Rashi / Face / Muhurat reports.
   const recommendation = useRecommendationOffer();
+
+  // The back button shows the discounted offer once as an exit-intent prompt;
+  // after that (or once a connection is under way) Back leaves the report.
+  const backOfferShownRef = useRef(false);
+  const handleBack = () => {
+    // Popup already open -> step back inside it (escalate plain -> offer, or
+    // close the offer) instead of leaving the report.
+    if (recommendation.isOpen) {
+      recommendation.dismiss();
+      return;
+    }
+    // First Back press -> show the discounted astrologers offer instead of
+    // navigating away.
+    if (!backOfferShownRef.current) {
+      backOfferShownRef.current = true;
+      recommendation.openOffer('chat');
+      return;
+    }
+    // Offer already shown -> leave the report.
+    navigate(PATH.privateRoutes.GEMSTONE_LANDING.path[0], { replace: true });
+  };
 
   const reduxResult = useSelector((state) => state.aiwow.gemstone.result);
   const reduxImage = useSelector((state) => state.aiwow.gemstone.image);
@@ -115,6 +140,25 @@ const GemstoneResult = () => {
     }
     setLoading(false);
   }, [reduxResult, reduxImage, navigate]);
+
+  // Share the report via the native share sheet, falling back to copying the URL.
+  const handleShare = async () => {
+    const shareData = {
+      title: `${featureTitle} Report`,
+      text: 'Check your Gemstone Authenticity report on ShubhAstro.',
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+      await navigator.clipboard.writeText(window.location.href);
+      Toast.success('Link copied to clipboard');
+    } catch {
+      // User dismissed the share sheet, or the API is unavailable — ignore.
+    }
+  };
 
   // ─── Dropdown Arrow Component ───
   const Arrow = ({ isOpen }) => (
@@ -720,24 +764,57 @@ const GemstoneResult = () => {
             <div className={styles.bannerFacts}>
               {currentGemstone?.identification?.name && (
                 <div className={styles.bannerFact}>
-                  <span className={styles.bannerFactLabel}>Name</span>
+                  <span className={styles.bannerFactHead}>
+                    <span className={`${styles.bannerFactIcon} ${styles.factIconViolet}`} aria-hidden="true">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 3h12l4 6-10 12L2 9l4-6z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                        <path d="M2 9h20M8 3l-2 6 6 12 6-12-2-6" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                    <span className={styles.bannerFactLabel}>Name</span>
+                  </span>
                   <span className={styles.bannerFactValue}>{currentGemstone.identification.name}</span>
                 </div>
               )}
               {currentGemstone?.identification?.hindiName && (
                 <div className={styles.bannerFact}>
-                  <span className={styles.bannerFactLabel}>Hindi Name</span>
+                  <span className={styles.bannerFactHead}>
+                    <span className={`${styles.bannerFactIcon} ${styles.factIconOrange}`} aria-hidden="true">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M4 6h9M8.5 6c0 6-1 9-4 12M8 12c3 0 6 2 6 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M15 20l3.2-9 3.2 9M16 17.2h4.4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                    <span className={styles.bannerFactLabel}>Hindi Name</span>
+                  </span>
                   <span className={styles.bannerFactValue}>{currentGemstone.identification.hindiName}</span>
                 </div>
               )}
               {currentGemstone?.identification?.scientificName && (
                 <div className={styles.bannerFact}>
-                  <span className={styles.bannerFactLabel}>Scientific</span>
+                  <span className={styles.bannerFactHead}>
+                    <span className={`${styles.bannerFactIcon} ${styles.factIconGold}`} aria-hidden="true">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="9" r="6" stroke="currentColor" strokeWidth="1.8" />
+                        <path d="M12 6l1 2 2 .3-1.5 1.5.4 2.2L12 11l-1.9 1 .4-2.2L9 8.3l2-.3 1-2z" fill="currentColor" />
+                        <path d="M9 14l-1.5 7L12 19l4.5 2L15 14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                    <span className={styles.bannerFactLabel}>Scientific</span>
+                  </span>
                   <span className={styles.bannerFactValue}>{currentGemstone.identification.scientificName}</span>
                 </div>
               )}
               <div className={styles.bannerFact}>
-                <span className={styles.bannerFactLabel}>Natural</span>
+                <span className={styles.bannerFactHead}>
+                  <span className={`${styles.bannerFactIcon} ${styles.factIconPink}`} aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 22s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                      <circle cx="12" cy="10" r="2.4" stroke="currentColor" strokeWidth="1.6" />
+                    </svg>
+                  </span>
+                  <span className={styles.bannerFactLabel}>Natural</span>
+                </span>
                 <span className={styles.bannerFactValue}>
                   {currentGemstone?.identification?.isNatural ? 'Yes' : 'No'}
                 </span>
@@ -769,78 +846,114 @@ const GemstoneResult = () => {
         </div>
 
         <div className={styles.layout}>
-          <div className={styles.main}>
-            {gemstones.length > 1 && (
-              <div className={styles.gemstoneTabs}>
-                {gemstones.map((gemstone, index) => (
-                  <button
-                    key={index}
-                    className={`${styles.gemstoneTab} ${selectedGemstoneIndex === index ? styles.active : ''}`}
-                    onClick={() => { setSelectedGemstoneIndex(index); setActiveTab('overview'); }}
-                  >
-                    {gemstone.identification.name || `Gemstone ${index + 1}`}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            <div className={styles.tabs}>
-              {[
-                { id: 'overview', label: 'Personalized Insights' },
-                { id: 'details', label: 'Details' },
-                { id: 'suitability', label: 'Suitability' },
-                { id: 'healing', label: 'Healing' },
-              ].map((tab) => (
+          {/* Tabs live directly in the layout grid (not inside .main) so that on
+              mobile they can order above the "Your Gemstone" sidebar card, with
+              the tab content below both. */}
+          {gemstones.length > 1 && (
+            <div className={styles.gemstoneTabs}>
+              {gemstones.map((gemstone, index) => (
                 <button
-                  key={tab.id}
-                  className={`${styles.tab} ${activeTab === tab.id ? styles.active : ''}`}
-                  onClick={() => setActiveTab(tab.id)}
+                  key={index}
+                  className={`${styles.gemstoneTab} ${selectedGemstoneIndex === index ? styles.active : ''}`}
+                  onClick={() => { setSelectedGemstoneIndex(index); setActiveTab('overview'); }}
                 >
-                  {tab.label}
+                  {gemstone.identification.name || `Gemstone ${index + 1}`}
                 </button>
               ))}
             </div>
+          )}
 
+          <div className={styles.tabs}>
+            {[
+              { id: 'overview', label: 'Personalized Insights' },
+              { id: 'details', label: 'Details' },
+              { id: 'suitability', label: 'Suitability' },
+              { id: 'healing', label: 'Healing' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                className={`${styles.tab} ${activeTab === tab.id ? styles.active : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className={styles.main}>
             {activeTab === 'overview' && renderOverview(currentGemstone)}
             {activeTab === 'details' && renderDetails(currentGemstone)}
             {/* {activeTab === 'astrological' && renderAstrological(currentGemstone)} */}
             {activeTab === 'suitability' && renderSuitability(currentGemstone)}
             {activeTab === 'healing' && renderHealing(currentGemstone)}
-
-            {/* Mobile CTAs — the sticky sidebar is hidden below 1024px, so the
-                same actions are shown inline here. */}
-            <div className={styles.mobileActions}>
-              <a
-                href={PATH.privateRoutes.ASTROLOGERS_LIST.path}
-                className={styles.actionPrimary}
-                onClick={(event) => { event.preventDefault(); recommendation.open('audio'); }}
-              >
-                <MdOutlinePhoneInTalk size={15} aria-hidden="true" /> Call an astrologer
-              </a>
-              <a
-                href="/chat-with-astrologers"
-                className={styles.actionSecondary}
-                onClick={(event) => { event.preventDefault(); recommendation.open('chat'); }}
-              >
-                <BsChatDots size={14} aria-hidden="true" /> Chat with astrologer
-              </a>
-              <Link to="/ai-wow" className={styles.actionTertiary}>
-                <Sparkles size={14} aria-hidden="true" /> Ask Shubh AI · Free
-              </Link>
-            </div>
           </div>
 
           {/* Sticky recommendation sidebar — same Call/Chat/Ask Shubh AI popup
-              flow as the Rashi / Face / Muhurat reports. */}
+              flow as the Rashi / Face / Muhurat reports. On mobile it sits right
+              below the tabs pill (above the tab content). */}
           <aside className={styles.sidebar}>
             <div className={styles.sideCard}>
-              <p className={styles.sideKicker}>Your Gemstone</p>
-              <h3 className={styles.sideTitle}>
-                {currentGemstone?.overall?.title || currentGemstone?.identification?.name || 'Overall Summary'}
-              </h3>
-              {currentGemstone?.overall?.summary && (
-                <p className={styles.sideBody}>{currentGemstone.overall.summary}</p>
-              )}
+              {/* Decorative wave flourishes — top-right and bottom-left corners,
+                  reusing the Rashi / Muhurat report art. Behind the content. */}
+              <img src={cardFlourish} alt="" aria-hidden="true" className={styles.sideFlourish} />
+              <img src={cardFlourishLeft} alt="" aria-hidden="true" className={styles.sideFlourishLeft} />
+
+              {/* Download + share actions, top-right of the card. */}
+              <div className={styles.sideCardActions}>
+                <button
+                  type="button"
+                  className={styles.sideIconBtn}
+                  onClick={handleDownloadClick}
+                  disabled={isDownloading}
+                  aria-label="Download report"
+                  title="Download"
+                >
+                  <Download size={16} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className={styles.sideIconBtn}
+                  onClick={handleShare}
+                  aria-label="Share report"
+                  title="Share"
+                >
+                  <Share2 size={16} aria-hidden="true" />
+                </button>
+              </div>
+
+              {/* Inner glass panel holding the summary + chips. */}
+              <div className={styles.sidePanel}>
+                <p className={styles.sideKicker}>Your Gemstone</p>
+                <h3 className={styles.sideTitle}>
+                  {currentGemstone?.overall?.title || currentGemstone?.identification?.name || 'Overall Summary'}
+                </h3>
+                {currentGemstone?.overall?.summary && (
+                  <p className={styles.sideBody}>{currentGemstone.overall.summary}</p>
+                )}
+
+                {/* Identification chips (name / hindi / scientific / natural). */}
+                {(() => {
+                  const id = currentGemstone?.identification || {};
+                  const chips = [
+                    id.name && { label: id.name, tone: 'violet' },
+                    id.hindiName && { label: id.hindiName, tone: 'orange' },
+                    id.scientificName && { label: id.scientificName, tone: 'gold' },
+                    { label: id.isNatural ? 'Natural' : 'Treated', tone: 'pink' },
+                  ].filter(Boolean);
+                  return chips.length > 0 ? (
+                    <div className={styles.sideChips}>
+                      {chips.map((chip, i) => (
+                        <span
+                          key={i}
+                          className={`${styles.sideChip} ${styles[`chip${chip.tone.charAt(0).toUpperCase() + chip.tone.slice(1)}`]}`}
+                        >
+                          {chip.label}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
+              </div>
 
               <div className={styles.actions}>
                 {/* Real <a href> so middle-click / open-in-new-tab still reach
@@ -859,9 +972,11 @@ const GemstoneResult = () => {
                 >
                   <BsChatDots size={14} aria-hidden="true" /> Chat with astrologer
                 </a>
+                {/* Ask Shubh AI hidden for now
                 <Link to="/ai-wow" className={styles.actionTertiary}>
                   <Sparkles size={14} aria-hidden="true" /> Ask Shubh AI · Free
                 </Link>
+                */}
               </div>
             </div>
           </aside>
@@ -893,6 +1008,26 @@ const GemstoneResult = () => {
         onFinish={recommendation.finish}
         onNothingToOffer={recommendation.finish}
       />
+
+      {/* Mobile-only fixed action bar. The "Your Gemstone" card's Call/Chat
+          buttons are hidden on mobile; these pinned buttons take their place,
+          matching the Face / Rashi report pattern. */}
+      <div className={styles.mobileActionBar}>
+        <a
+          href="/chat-with-astrologers"
+          className={styles.mobileActionChat}
+          onClick={(event) => { event.preventDefault(); recommendation.open('chat'); }}
+        >
+          <BsChatDots size={16} aria-hidden="true" /> Chat with astrologer
+        </a>
+        <a
+          href={PATH.privateRoutes.ASTROLOGERS_LIST.path}
+          className={styles.mobileActionCall}
+          onClick={(event) => { event.preventDefault(); recommendation.open('audio'); }}
+        >
+          <MdOutlinePhoneInTalk size={16} aria-hidden="true" /> Call an astrologer
+        </a>
+      </div>
     </div>
     </>
   );

@@ -85,6 +85,11 @@
   padding: 0;
   max-width: 1440px;
   margin: 0 auto;
+
+  /* Leave room so the fixed mobile action bar never covers the last content. */
+  @media (max-width: 1024px) {
+    padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* ── Banner ─────────────────────────────────────────────────────────────── */
@@ -102,7 +107,7 @@
   @media (max-width: 860px) {
     flex-direction: column;
     align-items: flex-start;
-    gap: 24px;
+    // gap: 24px;
     padding: 20px 18px;
   }
 }
@@ -179,6 +184,58 @@
   backdrop-filter: blur(6px);
 }
 
+/* Mobile: match the reference layout — summary text, then the gem image, then
+   the fact cards. The facts live inside .bannerMain while the image is its
+   sibling, so we flatten .bannerMain with `display: contents` and use `order`
+   to slot the image between the summary and the facts.
+   The fact cards also flow column-first (Name / Scientific on top, Hindi Name /
+   Natural below) to mirror the design, and share an even 2-column size. */
+@media (max-width: 767px) {
+  .bannerMain {
+    display: contents;
+  }
+
+  .bannerVisual {
+    order: 1;
+    align-self: center;
+  }
+
+  .bannerFacts {
+    order: 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    grid-auto-flow: column;
+    width: 100%;
+  }
+
+  .bannerFact {
+    min-width: 0;
+  }
+}
+
+.bannerFactHead {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bannerFactIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.factIconViolet { color: #7c3aed; }
+.factIconOrange { color: #d43400; }
+.factIconGold   { color: #c98a1a; }
+.factIconPink   { color: #db2777; }
+
 .bannerFactLabel {
   font-size: 0.68rem;
   font-weight: 600;
@@ -209,8 +266,8 @@
   place-items: center;
 
   @media (max-width: 860px) {
-    width: 230px;
-    height: 230px;
+    width: 270px;
+    height: 290px;
   }
 }
 
@@ -261,8 +318,8 @@
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
 
   @media (max-width: 860px) {
-    width: 178px;
-    height: 178px;
+    width: 210px;
+    height: 210px;
   }
 }
 
@@ -295,8 +352,32 @@
   align-items: start;
   padding: 16px;
 
+  /* Desktop: the (optional gemstone selector +) tab bar and the tab content
+     stack in the left column; the sidebar sits in the right column, starting
+     level with the tab content. */
+  .gemstoneTabs { grid-column: 1; grid-row: 1; }
+  .tabs {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .main {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .sidebar {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+  }
+
   @media (max-width: 1024px) {
     grid-template-columns: minmax(0, 1fr);
+
+    /* Mobile: tabs pill first, then the "Your Gemstone" card, then the report
+       content below both. */
+    .gemstoneTabs { grid-column: 1; grid-row: auto; order: 1; }
+    .tabs   { grid-column: 1; grid-row: auto; order: 2; }
+    .sidebar { grid-column: 1; grid-row: auto; order: 3; }
+    .main   { grid-column: 1; grid-row: auto; order: 4; }
   }
 }
 
@@ -306,20 +387,16 @@
 
 .sidebar {
   align-self: stretch;
-
-  @media (max-width: 1024px) {
-    display: none; /* the CTAs live inline within the report on mobile */
-  }
 }
 
 .sideCard {
   position: relative;
-  padding: 18px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.55);
+  overflow: hidden; /* clip the decorative waves to the rounded card */
+  padding: 16px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, #fdece1 0%, #fbdcc6 100%);
   border: 1.5px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 2px 14px rgba(191, 118, 66, 0.1);
-  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(191, 118, 66, 0.14);
 
   /* Stick clear below the fixed header stack (TopHeader + top bar 95px + this
      report's own fixed .headerWrap ~55px), with a gap so it never glues to or
@@ -328,7 +405,6 @@
     position: sticky;
     top: 172px;
     max-height: calc(100vh - 180px);
-    overflow-y: auto;
     overscroll-behavior-y: contain;
   }
 
@@ -336,6 +412,7 @@
     top: 130px;
     max-height: calc(100vh - 138px);
   }
+
 }
 
 .sideKicker {
@@ -355,28 +432,177 @@
 }
 
 .sideBody {
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   font-size: 0.85rem;
   line-height: 1.55;
   color: #6b4c3a;
 }
 
+/* ── Decorative wave flourishes (top-right + bottom-left corners) ───────────
+   Reuses the Rashi / Muhurat report art, faded and behind the content. */
+.sideFlourish,
+.sideFlourishLeft {
+  position: absolute;
+  width: 200px;
+  height: auto;
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sideFlourish {
+  top: 0;
+  right: 0;
+}
+
+.sideFlourishLeft {
+  bottom: 0;
+  left: 0;
+}
+
+/* ── Download / share icon buttons, top-right of the card ─────────────────── */
+.sideCardActions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sideIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid rgba(247, 88, 1, 0.45);
+  color: #d43400;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+
+  &:hover {
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(212, 52, 0, 0.18);
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+/* ── Inner glass panel (summary + chips) ──────────────────────────────────── */
+.sidePanel {
+  position: relative;
+  z-index: 2;
+  padding: 16px;
+  margin-bottom: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+/* ── Identification chips ─────────────────────────────────────────────────── */
+.sideChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.sideChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #fff;
+  border: 1.5px solid currentColor;
+  white-space: nowrap;
+}
+
+.chipViolet { color: #7c3aed; }
+.chipOrange { color: #d43400; }
+.chipGold   { color: #c98a1a; }
+.chipPink   { color: #db2777; }
+
 .actions {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  /* Mobile: the card sits sticky below the tab pill and shows only the summary
+     + chips, so the Call/Chat CTAs are hidden here to keep it compact. They are
+     replaced by the fixed .mobileActionBar pinned to the bottom of the screen. */
+  @media (max-width: 1024px) {
+    display: none;
+  }
 }
 
-/* Inline CTAs shown only on mobile, where the sticky sidebar is hidden. */
-.mobileActions {
+/* ── Mobile action bar (fixed bottom) — replaces the card's Call/Chat CTAs on
+   mobile, matching the Face / Rashi report pattern. ─────────────────────── */
+.mobileActionBar {
   display: none;
 
   @media (max-width: 1024px) {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 10px;
-    margin-top: 20px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    padding: 10px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(247, 88, 1, 0.15);
+    box-shadow: 0 -4px 18px rgba(191, 118, 66, 0.12);
   }
+}
+
+.mobileActionChat,
+.mobileActionCall {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 13px 8px;
+  border-radius: 26px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.mobileActionChat {
+  background: #fff;
+  color: #d43400;
+  border: 1.5px solid rgba(247, 88, 1, 0.5);
+}
+
+.mobileActionCall {
+  background: linear-gradient(135deg, #f75801, #d43400);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.3);
 }
 
 .actionPrimary,
@@ -478,6 +704,14 @@
   overflow-x: auto;
 
   &::-webkit-scrollbar { display: none; }
+
+  /* Mobile: the tab pill scrolls with the page (not sticky), but still fills
+     the row so it doesn't shrink to its content. */
+  @media (max-width: 1024px) {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 .tab {
