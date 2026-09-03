@@ -108,12 +108,12 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
             style={{ cursor: "pointer" }}
           >
             <div className={styles.muhuratTop}>
-              <div className={styles.muhuratIcon}>
+              {/* <div className={styles.muhuratIcon}> */}
                 {/* alt="" — the <h3> beside it is already m.name, so a filled alt
                     made a screen reader say the muhurat name twice. */}
                 <img src={getMuhuratIcon(m.name)} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = MUHURAT_FALLBACK_ICON; }} />
-              </div>
-              <h3>{m.name}</h3>
+              {/* </div> */}
+              {m.name}
             </div>
             <p className={styles.muhuratTime}>
               {m.end ? `${m.start} to ${m.end}` : m.start}

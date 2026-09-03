@@ -115,17 +115,17 @@ const NewAstrologerCard = memo(({
           aria-label="Astrologer is live, click to watch"
         >
           <span className={styles.liveDot} />
-          <span>{joiningLive ? "Opening…" : "Live"}</span>
+          {joiningLive ? "Opening…" : "Live"}
         </button>
       ) : (
         <div className={`${styles.statusBadge} ${isOnline ? styles.online : styles.offline}`}>
           <span className={styles.statusDot} />
-          <span>{isOnline ? 'Online' : 'Offline'}</span>
+          {isOnline ? 'Online' : 'Offline'}
         </div>
       )}
 
       <div className={styles.ratingBadge}>
-            <span className={styles.star}>
+            {/* <span className={styles.star}> */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
@@ -149,8 +149,8 @@ const NewAstrologerCard = memo(({
                   </clipPath>
                 </defs>
               </svg>
-            </span>
-            <span className={styles.ratingText}>{astrologer.rating ? Number(astrologer.rating).toFixed(1) : '0.0'}</span>
+            {/* </span> */}
+            {astrologer.rating ? Number(astrologer.rating).toFixed(1) : '0.0'}
           </div>
 
       <Link to={getAstrologerProfilePath(astrologer)} className={styles.cardLink}>
@@ -203,9 +203,7 @@ const NewAstrologerCard = memo(({
         {astrologer.experience && (
           <div className={styles.experienceRow}>
             <BookOpen size={18} className={styles.bookIcon} />
-            <span className={styles.experienceText}>
               {astrologer.experience} years exp.
-            </span>
           </div>
         )}
         {astrologer?.languagePreferences?.length > 0 && (
