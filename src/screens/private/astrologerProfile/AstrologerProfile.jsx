@@ -1588,7 +1588,15 @@ const AstrologerProfile = () => {
 
       {/* 3-Column Layout Container */}
       <div className={styles.threeColumnLayout}>
-        {/* Left Sidebar - Top Astrologers (Desktop Only) */}
+        {/* Left Sidebar - Top Astrologers (Desktop Only)
+
+            Gated on `isDesktop` so the sidebar markup is never mounted below
+            1025px. The CSS already hides `.leftSidebar` with
+            `display: none !important` at ≤1024px, so mobile never showed this —
+            this just stops building the (live-badge-bearing) DOM only to hide
+            it. `useIsDesktop(1025)` measures synchronously on first render, so
+            desktop still renders it on the first paint with no flash. */}
+        {isDesktop && (
         <aside className={styles.leftSidebar}>
           {topAstrologers.length > 0 && (
           <section className={styles.astrologersSection}>
@@ -1637,7 +1645,6 @@ const AstrologerProfile = () => {
 
                     <div className={styles.rightSideContent}>
                       <div className={styles.ratingBadge}>
-                        <span className={styles.star}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="20"
@@ -1665,12 +1672,9 @@ const AstrologerProfile = () => {
                               </clipPath>
                             </defs>
                           </svg>
-                        </span>
-                        <span className={styles.ratingText}>
                           {astrologer.rating
                             ? Number(astrologer.rating).toFixed(1)
                             : "0.0"}
-                        </span>
                       </div>
                       <h3 className={styles.astrologerNames}>
                         {getAstrologerDisplayName(astrologer)}
@@ -1678,9 +1682,7 @@ const AstrologerProfile = () => {
                       {astrologer.experience && (
                         <div className={styles.experienceRow}>
                           <BookOpen size={18} className={styles.bookIcon} />
-                          <span className={styles.experienceText}>
                             {astrologer.experience} years exp.
-                          </span>
                         </div>
                       )}
                     </div>
@@ -1696,6 +1698,7 @@ const AstrologerProfile = () => {
           </section>
           )}
         </aside>
+        )}
 
         {/* Center Column - Existing Profile Content */}
         <div className={styles.centerColumn}>
@@ -1836,9 +1839,7 @@ const AstrologerProfile = () => {
                   alt="Experience"
                   className={styles.statIcon}
                 />
-                <div className={styles.statValue}>
                   {displayData.experience}+
-                </div>
                 <div className={styles.statLabel}>Experience</div>
               </div>
               <div className={styles.statDivider}></div>
@@ -1848,9 +1849,9 @@ const AstrologerProfile = () => {
                   alt="Consultations"
                   className={styles.statIcon}
                 />
-                <div className={styles.statValue}>
+                {/* <div className={styles.statValue}> */}
                   {displayData.totalConsultations}
-                </div>
+                {/* </div> */}
                 <div className={styles.statLabel}>Consultations</div>
               </div>
               <div className={styles.statDivider}></div>
@@ -1881,9 +1882,9 @@ const AstrologerProfile = () => {
                   alt=""
                   className={styles.statIcon}
                 />
-                <div className={styles.statValue}>
+                {/* <div className={styles.statValue}> */}
                   {Number(displayData.rating).toFixed(1)}
-                </div>
+                {/* </div> */}
                 <div className={styles.statLabel}>Rating</div>
               </button>
             </div>
@@ -1936,9 +1937,9 @@ const AstrologerProfile = () => {
                   alt=""
                   className={styles.minuteIcon}
                 />
-                <div className={styles.minuteValue}>
+                {/* <div className={styles.minuteValue}> */}
                   {displayData.metrics.chatMinutes}
-                </div>
+                {/* </div> */}
                 <div className={styles.minuteLabel}>Chat Minutes</div>
               </button>
               <div className={styles.minuteDivider}></div>
@@ -1953,9 +1954,9 @@ const AstrologerProfile = () => {
                   alt=""
                   className={styles.minuteIcon}
                 />
-                <div className={styles.minuteValue}>
+                {/* <div className={styles.minuteValue}> */}
                   {displayData.metrics.audioMinutes}
-                </div>
+                {/* </div> */}
                 <div className={styles.minuteLabel}>Call Minutes</div>
               </button>
               <div className={styles.minuteDivider}></div>
@@ -1970,9 +1971,7 @@ const AstrologerProfile = () => {
                   alt=""
                   className={styles.minuteIcon}
                 />
-                <div className={styles.minuteValue}>
                   {displayData.metrics.videoMinutes}
-                </div>
                 <div className={styles.minuteLabel}>Video Minutes</div>
               </button>
             </div>
@@ -2183,7 +2182,7 @@ const AstrologerProfile = () => {
                         </span>
                         <div className={styles.reviewRating}>
                           <FaStar className={styles.reviewStar} />
-                          <span>{Number(review.rating).toFixed(1)}</span>
+                          {Number(review.rating).toFixed(1)}
                         </div>
                       </div>
                       <h4 className={styles.reviewerName}>
@@ -2291,7 +2290,15 @@ const AstrologerProfile = () => {
         </div>
         {/* End Center Column */}
 
-        {/* Right Sidebar - Available Now & Connect (Desktop Only) */}
+        {/* Right Sidebar - Available Now & Connect (Desktop Only)
+
+            Same as the left sidebar: `.rightSidebar` is `display: none !important`
+            at ≤1024px, so this whole Available/Connect Now/Consultation Hours
+            block was built and hidden on every phone. The mobile status bar,
+            mobile bottom bar and ConnectAstrologerPopup provide these actions on
+            small screens, so gating this on `isDesktop` removes hidden DOM
+            without changing anything visible at any breakpoint. */}
+        {isDesktop && (
         <aside className={styles.rightSidebar}>
           {/* Available Now / Offline / Live Card */}
           {isLive ? (
@@ -2413,9 +2420,7 @@ const AstrologerProfile = () => {
                   aria-disabled={!connectTiles.chat.enabled}
                   title={!connectTiles.chat.enabled ? connectTiles.chat.reason : "Start chat"}
                 >
-                  <div className={styles.optionIcon}>
-                    <BiMessageDetail />
-                  </div>
+                    <BiMessageDetail className={styles.optionIcon} />
                   <div className={styles.optionInfo}>
                     <span className={styles.optionLabel}>Chat</span>
                     <span className={styles.optionPrice}>
@@ -2440,9 +2445,7 @@ const AstrologerProfile = () => {
                   aria-disabled={!connectTiles.audio.enabled}
                   title={!connectTiles.audio.enabled ? connectTiles.audio.reason : "Start audio call"}
                 >
-                  <div className={styles.optionIcon}>
-                    <BiPhone />
-                  </div>
+                    <BiPhone className={styles.optionIcon} />
                   <div className={styles.optionInfo}>
                     <span className={styles.optionLabel}>Audio Call</span>
                     <span className={styles.optionPrice}>
@@ -2467,9 +2470,7 @@ const AstrologerProfile = () => {
                   aria-disabled={!connectTiles.video.enabled}
                   title={!connectTiles.video.enabled ? connectTiles.video.reason : "Start video call"}
                 >
-                  <div className={styles.optionIcon}>
-                    <BiVideo />
-                  </div>
+                    <BiVideo className={styles.optionIcon} />
                   <div className={styles.optionInfo}>
                     <span className={styles.optionLabel}>Video Call</span>
                     <span className={styles.optionPrice}>
@@ -2527,6 +2528,7 @@ const AstrologerProfile = () => {
             )}
           </div>
         </aside>
+        )}
       </div>
       {/* End 3-Column Layout */}
 
