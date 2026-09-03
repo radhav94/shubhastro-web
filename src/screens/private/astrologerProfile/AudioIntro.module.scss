@@ -102,6 +102,9 @@
     outline-offset: 2px;
     border-radius: 4px;
   }
+  @media (width <= 767px) {
+      gap: 0.1px;
+  }
 }
 
 .bar {

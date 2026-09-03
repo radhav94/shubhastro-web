@@ -220,15 +220,17 @@
   background: #fff8f0;
   padding: 3px 8px;
   border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
   position: absolute;
-  // left: 50%;
-  // transform: translateX(-50%);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   top: 5px;
   left: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #606060;
+  svg{
+    width: 14px;
+    height: 14px;
+  }
   @media screen and (width <= 767px) {
     padding: 0px 8px;
     top: 8px;
@@ -269,7 +271,12 @@
 .experienceRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
+  font-size: 12px;
+  color: #424242;
+  // @media (width <= 767px) {
+  //   font-size: 10px;
+  // }
 }
 
 .bookIcon {
@@ -278,15 +285,15 @@
   width: 14px;
 }
 
-.experienceText {
-  font-family: "Poppins", sans-serif;
-  font-size: 12px;
-  color: #424242;
-  @include line-clamp(1);
-  @media (width <= 767px) {
-    font-size: 10px;
-  }
-}
+// .experienceText {
+//   font-family: "Poppins", sans-serif;
+//   font-size: 12px;
+//   color: #424242;
+//   @include line-clamp(1);
+//   @media (width <= 767px) {
+//     font-size: 10px;
+//   }
+// }
 
 
 
@@ -702,10 +709,6 @@
   color: inherit;
   cursor: pointer;
   max-width: calc(100% - 70px);
-}
-
-.detailsName {
-  font-family: "Poppins", sans-serif;
   font-size: 16px;
   font-weight: 500;
   color: #1a1a1a;
@@ -716,6 +719,19 @@
     font-size: 14px;
   }
 }
+
+// .detailsName {
+//   font-family: "Poppins", sans-serif;
+//   font-size: 16px;
+//   font-weight: 500;
+//   color: #1a1a1a;
+//   margin: 0;
+//   line-height: 1.2;
+//   @include line-clamp(1);
+//   @media screen and (width <= 767px) {
+//     font-size: 14px;
+//   }
+// }
 
 .detailsMeta {
   display: flex;
@@ -737,6 +753,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #424242;
+  @media screen and (width <= 767px) {
+    font-size: 12px;
+  }
 }
 
 .detailsExperienceIcon {

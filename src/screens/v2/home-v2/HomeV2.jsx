@@ -198,7 +198,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                 )}
               </div>
               <div className={styles.heroBgImg}>
-                <div className={styles.heroBgGlow} />
+                {/* <div className={styles.heroBgGlow} /> */}
                 <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
               </div>
             </div>
