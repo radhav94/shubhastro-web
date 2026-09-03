@@ -240,12 +240,10 @@ const AgenticCalendar = () => {
     dispatch(clearMuhuratCalendarResult());
   };
 
-  // `locked` is a *mode* (a result is on screen), not an in-flight state, so
-  // the inputs must stay tappable. Arriving from the home page auto-submits and
-  // therefore locks immediately, which left every chip inert with nothing but
-  // a relabelled button to hint that "Modify Selections" had to be pressed
-  // first. A tap on a frozen chip is an unambiguous request to change the
-  // selection, so unlock and apply it.
+  // While a result is on screen (`locked`), the occasion / period / date inputs
+  // are frozen: the user must press "Modify Selections" first before they can
+  // change anything. A tap on a frozen input therefore does nothing except hint
+  // where the unlock control is — it no longer auto-unlocks.
   // Returns false when the caller must not proceed.
   const beginEdit = () => {
     if (!locked) return true;
@@ -253,9 +251,8 @@ const AgenticCalendar = () => {
       Toast.error('Still finding your timings — one moment.');
       return false;
     }
-    unlockSelections();
-    Toast.success('Selections unlocked. Adjust them, then tap Get Timing Recommendations.');
-    return true;
+    Toast.info('Tap "Modify Selections" to change your occasion.');
+    return false;
   };
 
   const toggleOccasion = (occasion) => {

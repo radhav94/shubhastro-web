@@ -85,6 +85,570 @@
   padding: 0;
   max-width: 1440px;
   margin: 0 auto;
+
+  /* Leave room so the fixed mobile action bar never covers the last content. */
+  @media (max-width: 1024px) {
+    padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ── Banner ─────────────────────────────────────────────────────────────── */
+/* No background of its own — the page's own warm gradient shows through, as in
+   the design. Just layout + spacing here. */
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 32px 40px 28px;
+  background: transparent;
+  position: relative;
+
+  @media (max-width: 860px) {
+    flex-direction: column;
+    align-items: flex-start;
+    // gap: 24px;
+    padding: 20px 18px;
+  }
+}
+
+.bannerMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.bannerBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.bannerBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.bannerTitle {
+  margin: 0 0 8px;
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1.05;
+  color: #1c1109;
+
+  @media (max-width: 860px) {
+    font-size: 2rem;
+  }
+}
+
+.bannerRecommendation {
+  margin: 0 0 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8a4a24;
+}
+
+.bannerSummary {
+  margin: 0 0 22px;
+  max-width: 520px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #5c4030;
+}
+
+.bannerFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.bannerFact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 110px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 1);
+  backdrop-filter: blur(6px);
+}
+
+/* Mobile: match the reference layout — summary text, then the gem image, then
+   the fact cards. The facts live inside .bannerMain while the image is its
+   sibling, so we flatten .bannerMain with `display: contents` and use `order`
+   to slot the image between the summary and the facts.
+   The fact cards also flow column-first (Name / Scientific on top, Hindi Name /
+   Natural below) to mirror the design, and share an even 2-column size. */
+@media (max-width: 767px) {
+  .bannerMain {
+    display: contents;
+  }
+
+  .bannerVisual {
+    order: 1;
+    align-self: center;
+  }
+
+  .bannerFacts {
+    order: 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    grid-auto-flow: column;
+    width: 100%;
+  }
+
+  .bannerFact {
+    min-width: 0;
+  }
+}
+
+.bannerFactHead {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bannerFactIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.factIconViolet { color: #7c3aed; }
+.factIconOrange { color: #d43400; }
+.factIconGold   { color: #c98a1a; }
+.factIconPink   { color: #db2777; }
+
+.bannerFactLabel {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #9a6a48;
+}
+
+.bannerFactValue {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #24160f;
+}
+
+.bannerVisual {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Round gem image inside a white four-corner bracket frame, with the
+   "Stone Scan Complete" pill floating over the bottom edge — as in the design.
+   The four L-shaped brackets are drawn as corner children so all four appear
+   (a pseudo-element pair could only make two). */
+.bannerImageFrame {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  display: grid;
+  place-items: center;
+
+  @media (max-width: 860px) {
+    width: 270px;
+    height: 290px;
+  }
+}
+
+/* Four white corner brackets. */
+.bannerImageFrame::before,
+.bannerImageFrame::after,
+.frameCornerTR,
+.frameCornerBL {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-color: #ffffff;
+  border-style: solid;
+}
+.bannerImageFrame::before { /* top-left */
+  top: 0;
+  left: 0;
+  border-width: 3px 0 0 3px;
+  border-top-left-radius: 8px;
+}
+.bannerImageFrame::after { /* bottom-right */
+  bottom: 0;
+  right: 0;
+  border-width: 0 3px 3px 0;
+  border-bottom-right-radius: 8px;
+}
+.frameCornerTR { /* top-right */
+  top: 0;
+  right: 0;
+  border-width: 3px 3px 0 0;
+  border-top-right-radius: 8px;
+}
+.frameCornerBL { /* bottom-left */
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 3px 3px;
+  border-bottom-left-radius: 8px;
+}
+
+/* Round image kept smaller than the frame so its circle sits fully inside the
+   corner brackets (never crossing them). */
+.bannerImage {
+  width: 216px;
+  height: 216px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+
+  @media (max-width: 860px) {
+    width: 210px;
+    height: 210px;
+  }
+}
+
+/* Floats over the bottom edge of the frame, centred. */
+.scanComplete {
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255,0.4);
+  border: 1px solid white;
+  color: #16a34a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Two-column layout: report on the left, sticky recommendation card on the
+   right (matches the Rashi / Face / Muhurat reports). ── */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 18px;
+  align-items: start;
+  padding: 16px;
+
+  /* Desktop: the (optional gemstone selector +) tab bar and the tab content
+     stack in the left column; the sidebar sits in the right column, starting
+     level with the tab content. */
+  .gemstoneTabs { grid-column: 1; grid-row: 1; }
+  .tabs {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .main {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .sidebar {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+  }
+
+  @media (max-width: 1024px) {
+    grid-template-columns: minmax(0, 1fr);
+
+    /* Mobile: tabs pill first, then the "Your Gemstone" card, then the report
+       content below both. */
+    .gemstoneTabs { grid-column: 1; grid-row: auto; order: 1; }
+    .tabs   { grid-column: 1; grid-row: auto; order: 2; }
+    .sidebar { grid-column: 1; grid-row: auto; order: 3; }
+    .main   { grid-column: 1; grid-row: auto; order: 4; }
+  }
+}
+
+.main {
+  min-width: 0;
+}
+
+.sidebar {
+  align-self: stretch;
+}
+
+.sideCard {
+  position: relative;
+  overflow: hidden; /* clip the decorative waves to the rounded card */
+  padding: 16px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, #fdece1 0%, #fbdcc6 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 20px rgba(191, 118, 66, 0.14);
+
+  /* Stick clear below the fixed header stack (TopHeader + top bar 95px + this
+     report's own fixed .headerWrap ~55px), with a gap so it never glues to or
+     slips under the header. Shorter stack below 1180px. */
+  @media (min-width: 1025px) {
+    position: sticky;
+    top: 172px;
+    max-height: calc(100vh - 180px);
+    overscroll-behavior-y: contain;
+  }
+
+  @media (min-width: 1025px) and (max-width: 1180px) {
+    top: 130px;
+    max-height: calc(100vh - 138px);
+  }
+
+}
+
+.sideKicker {
+  margin: 0 0 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a06a4a;
+}
+
+.sideTitle {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #24160f;
+}
+
+.sideBody {
+  margin: 0 0 14px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: #6b4c3a;
+}
+
+/* ── Decorative wave flourishes (top-right + bottom-left corners) ───────────
+   Reuses the Rashi / Muhurat report art, faded and behind the content. */
+.sideFlourish,
+.sideFlourishLeft {
+  position: absolute;
+  width: 200px;
+  height: auto;
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sideFlourish {
+  top: 0;
+  right: 0;
+}
+
+.sideFlourishLeft {
+  bottom: 0;
+  left: 0;
+}
+
+/* ── Download / share icon buttons, top-right of the card ─────────────────── */
+.sideCardActions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sideIconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid rgba(247, 88, 1, 0.45);
+  color: #d43400;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+
+  &:hover {
+    background: #fff;
+    box-shadow: 0 3px 10px rgba(212, 52, 0, 0.18);
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+/* ── Inner glass panel (summary + chips) ──────────────────────────────────── */
+.sidePanel {
+  position: relative;
+  z-index: 2;
+  padding: 16px;
+  margin-bottom: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+/* ── Identification chips ─────────────────────────────────────────────────── */
+.sideChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.sideChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #fff;
+  border: 1.5px solid currentColor;
+  white-space: nowrap;
+}
+
+.chipViolet { color: #7c3aed; }
+.chipOrange { color: #d43400; }
+.chipGold   { color: #c98a1a; }
+.chipPink   { color: #db2777; }
+
+.actions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  /* Mobile: the card sits sticky below the tab pill and shows only the summary
+     + chips, so the Call/Chat CTAs are hidden here to keep it compact. They are
+     replaced by the fixed .mobileActionBar pinned to the bottom of the screen. */
+  @media (max-width: 1024px) {
+    display: none;
+  }
+}
+
+/* ── Mobile action bar (fixed bottom) — replaces the card's Call/Chat CTAs on
+   mobile, matching the Face / Rashi report pattern. ─────────────────────── */
+.mobileActionBar {
+  display: none;
+
+  @media (max-width: 1024px) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    padding: 10px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(247, 88, 1, 0.15);
+    box-shadow: 0 -4px 18px rgba(191, 118, 66, 0.12);
+  }
+}
+
+.mobileActionChat,
+.mobileActionCall {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 13px 8px;
+  border-radius: 26px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.mobileActionChat {
+  background: #fff;
+  color: #d43400;
+  border: 1.5px solid rgba(247, 88, 1, 0.5);
+}
+
+.mobileActionCall {
+  background: linear-gradient(135deg, #f75801, #d43400);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.3);
+}
+
+.actionPrimary,
+.actionSecondary,
+.actionTertiary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.actionPrimary {
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+  color: #fff;
+  border: none;
+
+  &:hover {
+    box-shadow: 0 6px 16px rgba(212, 52, 0, 0.28);
+  }
+}
+
+.actionSecondary {
+  background: #fff;
+  color: #d43400;
+  border: 1.5px solid #f75801;
+
+  &:hover {
+    background: #fff5f0;
+  }
+}
+
+.actionTertiary {
+  background: #fdece2;
+  color: #d43400;
+  border: none;
+
+  &:hover {
+    background: #fce0d0;
+  }
 }
 
 // ─── Gemstone Selection Tabs ───
@@ -122,42 +686,76 @@
   width: 100%;
   background-color: #fff;
 }
+/* Segmented pill tab bar: a rounded translucent container holding the tabs,
+   the active tab a filled orange pill, the rest plain text separated by a thin
+   divider — as in the design. */
 .tabs {
-  display: flex;
-  // border-bottom: 1px solid #e5e7eb;
-  // background: rgba(255, 255, 255, 0.4);
-  border-bottom: 1.5px solid #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 0 18px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 10px rgba(191, 118, 66, 0.08);
   backdrop-filter: blur(12px);
-  position: sticky;
-  top: 95px;
-  z-index: 9;
+  max-width: 100%;
   overflow-x: auto;
-  margin: 0 auto;
-  max-width: 1440px;
-  padding: 0 16px;
-  @media (width <= 1180px) {
-    top: 53px;
-  }
+
   &::-webkit-scrollbar { display: none; }
+
+  /* Mobile: the tab pill scrolls with the page (not sticky), but still fills
+     the row so it doesn't shrink to its content. */
+  @media (max-width: 1024px) {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
-.gemstoneTabs ~ .tabs { top: 114px; }
-
 .tab {
-  flex: 1;
-  // min-width: 90px;
-  padding: 14px 10px;
+  position: relative;
+  flex-shrink: 0;
+  padding: 9px 18px;
   background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
-  font-size: 13px;
-  font-weight: 500;
-  color: #1f2937;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b4c3a;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s;
-  &:hover { color: #D43400; }
-  &.active { color: #D43400; border-bottom-color: #D43400; }
+  transition: color 0.2s, background 0.2s;
+
+  /* thin divider between inactive tabs */
+  & + .tab::before {
+    content: "";
+    position: absolute;
+    left: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 16px;
+    background: rgba(138, 106, 85, 0.25);
+  }
+
+  &:hover {
+    color: #d43400;
+  }
+
+  &.active {
+    color: #fff;
+    font-weight: 700;
+    background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+    box-shadow: 0 3px 10px rgba(212, 52, 0, 0.28);
+  }
+
+  /* the divider disappears next to the active (filled) pill */
+  &.active::before,
+  &.active + .tab::before {
+    display: none;
+  }
 }
 
 .tabContent {
@@ -394,6 +992,205 @@
   }
 }
 
+// ─── DETAILS TAB (redesigned card) ─────────────────────────────────────────
+.detailCard {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid #ffffff;
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 20px;
+
+  &:last-child { margin-bottom: 0; }
+
+  @media (min-width: 768px) { padding: 22px; }
+}
+
+.detailCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1.5px solid #ffffff;
+}
+
+.detailCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+
+  @media (min-width: 768px) { font-size: 20px; }
+}
+
+.detailCardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.detailItemsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+
+  @media (max-width: 560px) { grid-template-columns: 1fr; }
+}
+
+.detailItem {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid #ffffff;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.detailItemHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.detailItemIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.detailItemTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.detailItemRows {
+  display: flex;
+  flex-direction: column;
+}
+
+.detailItemRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(191, 118, 66, 0.14);
+
+  &:last-child { border-bottom: none; }
+}
+
+.detailItemLabel {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.detailItemValue {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: right;
+  word-break: break-word;
+}
+
+.detailItemDesc {
+  margin: 8px 0 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+// Astrological Properties — icon + title + tinted badge + description rows
+.astroList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.astroRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(191, 118, 66, 0.14);
+
+  &:last-child { border-bottom: none; }
+}
+
+.astroRowIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.astroRowBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.astroRowTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.astroRowTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.astroRowBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.astroRowDesc {
+  margin: 4px 0 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
 // ─── DROPDOWN SECTIONS (Suitability & Healing) ───
 .dropdown {
   background: rgba(255, 255, 255, 0.4);
@@ -546,7 +1343,7 @@
 // ─── Tablet ───
 @media (min-width: 768px) {
   // .tabContent { padding: 24px; }
-  .tab { font-size: 14px; padding: 16px 14px; }
+  .tab { font-size: 13px; padding: 11px 13px; }
   .cardTitle,.sectionTitle { font-size: 16px; }
   .boxTitle { font-size: 13px; }
   .label, .value { font-size: 13px; }

@@ -852,6 +852,9 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
         onFinish={recommendation.finish}
         // Nothing discounted to show -> the close press just closes.
         onNothingToOffer={recommendation.finish}
+        // Enables "closing the offer leaves the report"; the modal performs the
+        // actual history navigation (it owns its guard entry).
+        onExitClose={() => {}}
         // First browser Back on the report opens the discounted offer instead
         // of leaving (this report has no in-page back button).
         onExitOffer={() => recommendation.openOffer("chat")}
