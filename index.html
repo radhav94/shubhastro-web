@@ -910,8 +910,10 @@
   <!-- End Google tag (gtag.js) -->
 
  <!-- Branch.io Script (production only) -->
-<!-- Branch.io Script (production only) -->
 <script>
+// Declare Branch Key variable
+var branchKey = "%VITE_BRANCH_KEY%";
+
 (function(b, r, a, n, c, h, _, s, d, k) {
     if (!b[n] || !b[n]._q) {
         for (; s < _.length;) {
@@ -946,7 +948,7 @@
 );
 
 branch.init(
-    "key_test_lyCHzZviNrix5WjCDNYmDnfbutj5bLw3",
+    branchKey,
     function(err, data) {
 
         if (err) {
@@ -981,6 +983,8 @@ branch.init(
             }
         );
     }
+);
+</script>
 );
 </script>
   <!-- End Branch.io CDN Script -->
