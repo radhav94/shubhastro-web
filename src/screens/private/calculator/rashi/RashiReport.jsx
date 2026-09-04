@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
+  CheckCircle2,
   ChevronRight,
   Clock,
   Crown,
@@ -163,9 +164,10 @@ const DayRating = ({ rating }) => {
  * single sentences for strengths/growth areas but the design shows them as
  * bullets, so render whichever arrives instead of assuming one shape.
  */
-const InsightCard = ({ icon, decor, title, lines, variant, cornerArt }) => {
+const InsightCard = ({ icon, decor, title, lines, variant, cornerArt, listStyle }) => {
   const items = toLines(lines);
   if (!items.length) return null;
+  const isCheck = listStyle === "check";
   return (
     <section className={`${styles.insightCard} ${variant ? styles[variant] : ""}`}>
       {/* Per-card swirl in the bottom-left corner. Comes pre-tinted to the card's
@@ -177,12 +179,15 @@ const InsightCard = ({ icon, decor, title, lines, variant, cornerArt }) => {
         <img src={icon} alt="" className={styles.insightIcon} />
         {title}
       </h3>
-      {items.length === 1 ? (
+      {items.length === 1 && !isCheck ? (
         <p className={styles.insightText}>{items[0]}</p>
       ) : (
-        <ul className={styles.insightList}>
+        <ul className={`${styles.insightList} ${isCheck ? styles.insightListCheck : ""}`}>
           {items.map((item) => (
-            <li key={item}>{item}</li>
+            <li key={item}>
+              {isCheck && <CheckCircle2 size={14} className={styles.checkIcon} aria-hidden="true" />}
+              {item}
+            </li>
           ))}
         </ul>
       )}
@@ -294,8 +299,20 @@ const RashiReport = () => {
   const chips = [
     { label: "Planet", value: e.rulingPlanet, icon: chipPlanet, tone: "toneViolet" },
     { label: "Elements", value: e.element, icon: chipElements, tone: "toneOrange" },
-    { label: "Lucky Color", value: toText(e.luckyColors), icon: chipLuckyColor, tone: "toneRed" },
-    { label: "Lucky Day", value: e.luckyDay, icon: chipLuckyDay, tone: "tonePink" },
+  ].filter((c) => c.value);
+
+  /*
+    "Your Cosmic Profile" — the lucky attributes shown as a row of icon cards
+    below the hero (see design). Lucky Color / Day reuse the design's chip icons;
+    Gem / Numbers / Letters use inline glyphs (no dedicated export yet). `tone`
+    sets the icon-tile background + label colour per the reference.
+  */
+  const cosmicProfile = [
+    { key: "color", label: "Lucky Color", value: toText(e.luckyColors), img: chipLuckyColor, tone: "toneRed" },
+    { key: "day", label: "Lucky Day", value: e.luckyDay, img: chipLuckyDay, tone: "tonePink" },
+    { key: "gem", label: "Lucky Gem", value: toText(e.luckyGem), tone: "toneRed" },
+    { key: "numbers", label: "Lucky Numbers", value: toText(e.luckyNumbers), tone: "toneAmber" },
+    { key: "letters", label: "Lucky Letters", value: toText(e.luckyLetters), tone: "toneBlue" },
   ].filter((c) => c.value);
 
   const personalDetails = [
@@ -425,6 +442,7 @@ const RashiReport = () => {
                     </span>
                   </div>
 
+                  {/* Meta stacked directly beneath the sign, inside the sign header. */}
                   <dl className={styles.heroMeta}>
                     {e.nakshatra && (
                       <div>
@@ -504,6 +522,38 @@ const RashiReport = () => {
         </div>
 
         <div className={styles.main}>
+          {/* YOUR COSMIC PROFILE — sits above the Today strip (see design). */}
+          {cosmicProfile.length > 0 && (
+            <section className={styles.cosmicSection}>
+              <h3 className={styles.cosmicHeading}>
+                <span className={styles.cosmicHeadingIcon} aria-hidden="true">
+                  <Sparkles size={16} strokeWidth={2.2} />
+                </span>
+                Your Cosmic Profile
+              </h3>
+
+              <div className={styles.cosmicGrid}>
+                {cosmicProfile.map((c) => (
+                  <div key={c.key} className={styles.cosmicCard}>
+                    <span className={`${styles.cosmicIcon} ${styles[c.tone]}`} aria-hidden="true">
+                      {c.img ? (
+                        <img src={c.img} alt="" className={styles.cosmicIconImg} />
+                      ) : c.key === "gem" ? (
+                        <Gem size={16} strokeWidth={2.2} />
+                      ) : c.key === "numbers" ? (
+                        <span className={styles.cosmicGlyph}>#</span>
+                      ) : (
+                        <span className={styles.cosmicGlyph}>Aa</span>
+                      )}
+                    </span>
+                    <span className={`${styles.cosmicLabel} ${styles[c.tone]}`}>{c.label}</span>
+                    <p className={styles.cosmicValue}>{c.value}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* TODAY STRIP */}
           {(e.todayTransit || e.dayRating || e.luckyTime) && (
             <section className={styles.todayStrip}>
@@ -549,6 +599,7 @@ const RashiReport = () => {
               decor={cardStrengths}
               title="Your Strengths"
               lines={e.snapshot?.strengths}
+              listStyle="check"
             />
             <InsightCard
               icon={secGrowth}
@@ -643,30 +694,6 @@ const RashiReport = () => {
               </section>
             )}
           </div>
-
-          {/* LUCKY EXTRAS — present in the payload, no home in the panels above */}
-          {(toText(e.luckyGem) || toText(e.luckyNumbers) || toText(e.luckyLetters)) && (
-            <section className={styles.luckyRow}>
-              {toText(e.luckyGem) && (
-                <div>
-                  <span>Lucky Gem</span>
-                  <p className={styles.tagCap}>{toText(e.luckyGem)}</p>
-                </div>
-              )}
-              {toText(e.luckyNumbers) && (
-                <div>
-                  <span>Lucky Numbers</span>
-                  <p>{toText(e.luckyNumbers)}</p>
-                </div>
-              )}
-              {toText(e.luckyLetters) && (
-                <div>
-                  <span>Lucky Letters</span>
-                  <p>{toText(e.luckyLetters)}</p>
-                </div>
-              )}
-            </section>
-          )}
 
           {/* The original long-form reading still ships in the payload. */}
           {(prediction || botResponse) && (
@@ -774,7 +801,7 @@ const RashiReport = () => {
                 className={styles.actionTertiary}
                 onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask"))}
               >
-                <Sparkles size={15} aria-hidden="true" /> Ask AI Pandit
+                <Sparkles size={15} aria-hidden="true" /> Ask Pandit AI · Free
               </button>
             </div>
 
