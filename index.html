@@ -482,10 +482,38 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com" />
   <link rel="dns-prefetch" href="https://firebaseinstallations.googleapis.com" />
 
-  <!-- Non-render-blocking font load -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" /></noscript>
+  <!--
+    Non-render-blocking font load.
+
+    Poppins only. `Montserrat` and `Open+Sans` used to be requested here too and
+    were never referenced anywhere: `grep -rn "Montserrat\|Open Sans" src`
+    returns zero matches, and every `$font-primary` SCSS variable in the codebase
+    resolves to `"Poppins", sans-serif`.
+
+    That mattered more than it looks. Google Fonts emits one `@font-face` block
+    per weight *per unicode subset* (latin, latin-ext, and for Open Sans also
+    cyrillic, greek, vietnamese…), so three families expanded to 60 blocks.
+    Measured against the same mobile UA:
+
+        before  32,371 B CSS, 60 @font-face blocks
+        after    6,078 B CSS, 15 @font-face blocks   (-26,293 B, -81%)
+
+    To be precise about the win: unused `@font-face` rules do not download font
+    files, so this does not remove 5 font fetches. What it removes is 26 KB of
+    CSS on the critical path plus 45 redundant `@font-face` rules the browser
+    would otherwise parse and keep in its font-matching set.
+
+    All five Poppins weights are kept because all five are used — measured across
+    src: 600 x1614, 500 x569, 700 x485 (+31 `bold`, +11 `font-bold`), 400 x158,
+    800 x27. Do not trim these without re-counting.
+
+    Two weights are referenced but NOT requested and so already fall back:
+    `font-weight: 900` (5 uses) and `300` (4 uses). Pre-existing and cosmetic —
+    left alone rather than adding two more font files for 9 declarations.
+  -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" /></noscript>
 
   <!--
     Body background preload, split by viewport.
@@ -511,9 +539,28 @@
     it just stops outranking the script that unblocks the actual LCP element.
     `background-color: #ebecf2` in the inline CSS below covers the gap, so the
     later paint is a colour-to-artwork swap, not a flash of white.
+
+    Applied 2026-09-04: the paragraph above has said "deliberately NOT set to
+    high" for some time, but both tags still carried `fetchpriority="high"`. The
+    reasoning was written and never applied to the markup. Independently
+    re-verified before removing it: per the Largest Contentful Paint API, an
+    element with a `url()` background IS an LCP candidate, but Chromium excludes
+    "elements that cover the full viewport, that are likely considered as
+    background rather than content" (web.dev/articles/lcp). This artwork is
+    `background-size: cover; background-attachment: fixed` on
+    `body.home-v2-page`, i.e. full-viewport, so it cannot be the LCP element and
+    cannot be harmed by dropping to default preload priority.
+
+    Measured payloads over the wire, for the record:
+      main-body-bg-new.png         486,842 B  (desktop, >=768px)
+      main-body-bg-new-mobile.png   98,604 B  (mobile,  <=767px)
+
+    Both are PNG. Converting them to WebP/AVIF is the far larger win and is
+    blocked on the CDN assets existing — once they do, wire up `image-set()` with
+    a PNG fallback rather than re-adding priority here.
   -->
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" fetchpriority="high" media="(min-width: 768px)" />
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" fetchpriority="high" media="(max-width: 767px)" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" media="(min-width: 768px)" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" media="(max-width: 767px)" />
   <!-- Removed: an unconditional high-priority preload of images/ai-suite.png.
        It is the `heroBg` for HomeV2/HomeNew only, so every other route fetched
        it at fetchpriority="high" and never painted it. index.html is shared by
@@ -985,8 +1032,7 @@ branch.init(
     }
 );
 </script>
-);
-</script>
+
   <!-- End Branch.io CDN Script -->
 
 
