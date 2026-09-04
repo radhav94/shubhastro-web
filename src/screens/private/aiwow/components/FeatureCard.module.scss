@@ -81,27 +81,29 @@
   }
 }
 
-.iconWrapper {
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  @media (width <= 768px) {
-    padding: 0.8rem;
-  }
-}
+// .iconWrapper {
+//   // padding: 1.5rem;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   @media (width <= 768px) {
+//     padding: 0.8rem;
+//   }
+// }
 
 .iconBackground {
   width: 80px;
   height: 80px;
-  padding: 0.2rem;
   border-radius: 1rem;
   background: rgba(255, 245, 235, 0.6);
   border: 1px solid rgba(247, 88, 1, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 1.2rem auto;
+  @media (width <= 768px) {
+    width: 50px;
+    height: 50px;
+    margin: 0.9rem auto;
+  }
 }
 
 .icon {

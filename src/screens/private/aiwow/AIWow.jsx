@@ -24,18 +24,9 @@ import { findChargeAmount } from "./hooks/useAIWowDownload";
 // Reusable Section Title with Divider (same as Explore page, auto-width)
 const SectionTitleWithDivider = ({ title, description, styles }) => (
   <div className={styles.sectionHeader}>
-    <div className={styles.titleWithDivider}>
+    {/* <div className={styles.titleWithDivider}> */}
       <h2 className={styles.sectionTitle}>{title}</h2>
-      <div className={styles.dividerContainer}>
-        <div className={styles.dividerLine} />
-        <span style={{ flexShrink: 0 }}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
-            <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
-          </svg>
-        </span>
-        <div className={styles.dividerLine} />
-      </div>
-    </div>
+    {/* </div> */}
     {description && <p className={styles.sectionDescription}>{description}</p>}
   </div>
 );
@@ -504,7 +495,7 @@ const AIWow = () => {
           {activeTab === "aiwow" && (
             <>
               <div className={styles.heroSection}>
-                <div className={styles.heroBadge}>Powered by Advanced AI</div>
+                <span className={styles.heroBadge}>Powered by Advanced AI</span>
                 <h2 className={styles.heroTitle}>AI Experiences</h2>
                 <p className={styles.heroSubtitle}>
                   Explore the future of astrology with our cutting-edge AI-powered tools and

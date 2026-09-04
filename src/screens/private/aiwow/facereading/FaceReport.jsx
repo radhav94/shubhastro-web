@@ -812,7 +812,7 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
                 className={styles.actionTertiary}
                 onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask"))}
               >
-                <Sparkles size={14} aria-hidden="true" /> Ask AI Pandit
+                <Sparkles size={14} aria-hidden="true" /> Ask Pandit AI · Free
               </button>
             </div>
           </div>

@@ -47,6 +47,7 @@ import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal"
 import { useChat } from "../../../context/ChatContext";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { trackEvent } from "../../../utils/analytics";
+import { BranchEvents } from "../../../utils/branchEvents";
 import { ProfileManager } from "../../../component/UI/Profile";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
@@ -211,8 +212,19 @@ const AstrologerProfile = () => {
 
   // Track astrologer profile view (fires when a new astrologer id is opened)
   useEffect(() => {
-    if (id) trackEvent("astrologer_profile_viewed", { astrologer_id: id });
-  }, [id]);
+    if (id) {
+      trackEvent("astrologer_profile_viewed", { astrologer_id: id });
+      
+      // Track to Branch.io
+      BranchEvents.trackAstrologerProfileViewed({
+        astrologer_id: id,
+        astrologer_name: data?.name || getAstrologerDisplayName(data),
+        category: data?.category || "general",
+        rating: data?.averageRating || 0,
+        experience_years: data?.experience || 0,
+      });
+    }
+  }, [id, data]);
 
   // Live status — seeded from the fetched astrologer, then kept up to date via
   // the live:astrologer_status socket event (no polling needed).
