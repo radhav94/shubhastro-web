@@ -7,6 +7,7 @@ import { PATH } from "../../../utils/routes/Paths";
 import { logout } from "../../../redux/auth/authSlice";
 import { loginWithPhone } from "../../../services/appServices/authService";
 import { trackEvent } from "../../../utils/analytics";
+import { BranchEvents } from "../../../utils/branchEvents";
 import useTruecallerLogin from "./useTruecallerLogin";
 import TruecallerLogPanel from "./TruecallerLogPanel";
 import { isTruecallerLogViewerEnabled } from "../../../utils/truecaller/truecallerLog";
@@ -173,6 +174,16 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
     }
 
     setLoading(true);
+    
+    // Track Signup Started event
+    BranchEvents.trackSignupStarted({
+      page_name: "Login",
+      route_name: "login",
+      route_path: window.location.pathname,
+      signup_method: "phone",
+      source: "login_screen",
+    });
+    
     trackEvent("mobile_number_entered", { mobile_number: phoneNumber, country_code: "91" });
     trackEvent("otp_requested", { mobile_number: phoneNumber });
     try {

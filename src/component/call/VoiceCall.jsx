@@ -5,6 +5,7 @@ import { AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
 import { getWorstNetworkQuality } from "../../agora/networkQuality";
 import { getAstrologerDisplayName } from "../../utils/helper/string.utils";
 import { trackEvent } from "../../utils/analytics";
+import { BranchEvents } from "../../utils/branchEvents";
 import {
   IoMic,
   IoMicOff,
@@ -532,6 +533,20 @@ const AgoraVoiceCalling = ({ callData }) => {
       }
       
       startTimer();
+
+      // Track Consultation Started event
+      BranchEvents.trackConsultationStarted({
+        page_name: "Voice Call",
+        route_name: "voice-call",
+        route_path: window.location.pathname,
+        user_type: "logged_in",
+        user_id: localStorage.getItem("shubhtalk_customer_id"),
+        astrologer_id: activeCall?.astrologerId,
+        astrologer_name: callerName || getAstrologerDisplayName(lastRequestedAstro),
+        consultation_id: roomId,
+        consultation_type: "audio",
+        source: "listing",
+      });
     };
 
     startCall().catch((err) => {
@@ -622,6 +637,23 @@ const AgoraVoiceCalling = ({ callData }) => {
     // Don't emit call:end if we're upgrading to video
     if (!isUpgradingToVideo.current) {
       const currentCall = activeCallRef.current;
+      
+      // Track Consultation Completed event
+      BranchEvents.trackConsultationCompleted({
+        page_name: "Call Ended",
+        route_name: "voice-call",
+        route_path: window.location.pathname,
+        user_type: "logged_in",
+        user_id: localStorage.getItem("shubhtalk_customer_id"),
+        astrologer_id: currentCall?.astrologerId,
+        astrologer_name: currentCall?.callerName || callerName,
+        consultation_id: roomId,
+        consultation_type: "audio",
+        actual_duration_minutes: Math.round(callSeconds / 60),
+        scheduled_duration_minutes: 0,
+        completion_status: "completed",
+      });
+      
       setReviewData({
         astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,
         fullName: currentCall?.callerName || callerName,

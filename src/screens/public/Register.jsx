@@ -5,6 +5,7 @@ import { PrimaryButton, PrimaryText, Toast } from "../../component";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PATH } from "../../utils/routes/Paths";
 import { registerUser } from "../../services/appServices/authService";
+import { BranchEvents } from "../../utils/branchEvents";
 import LocationSearch from "../../utils/location/locationSearchVedic";
 import { validatePersonName } from "../../utils/regex";
 
@@ -147,6 +148,16 @@ const Register = () => {
       }
 
       if (response?.data?.statusCode === 201) {
+        // Track Registration Completed event
+        BranchEvents.trackRegistrationCompleted({
+          page_name: "Registration",
+          route_name: "register",
+          route_path: window.location.pathname,
+          user_type: "logged_in",
+          registration_method: "phone",
+          user_id: response?.data?.data?._id || null,
+        });
+        
         Toast.success("Registration successful!");
 
         navigate(PATH.privateRoutes.HOME.path, { replace: true });
