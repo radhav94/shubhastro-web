@@ -82,7 +82,6 @@ const RecommendedAstrologersModal = ({
 }) => {
   const isOffer = variant === "offer";
   const trackRef = useRef(null);
-  const [page, setPage] = useState(0);
 
   const { data, isLoading, isFetching } = useGetRecommendedAstrologersQuery(
     { type, discount: isOffer, page: 1, limit: 10 },
@@ -125,7 +124,6 @@ const RecommendedAstrologersModal = ({
   // Reset the carousel whenever the panel opens or switches variant, so the
   // offer never starts halfway along the previous stage's scroll position.
   useEffect(() => {
-    setPage(0);
     if (trackRef.current) trackRef.current.scrollLeft = 0;
   }, [isOpen, variant]);
 
@@ -152,6 +150,8 @@ const RecommendedAstrologersModal = ({
   // back on its own).
   const onDismissRef = useRef(onDismiss);
   onDismissRef.current = onDismiss;
+  const onFinishRef = useRef(onFinish);
+  onFinishRef.current = onFinish;
   const trapActiveRef = useRef(trapActive);
   trapActiveRef.current = trapActive;
 
@@ -185,7 +185,10 @@ const RecommendedAstrologersModal = ({
       window.history.go(steps); // leave the report -> the page before it
       return;
     }
-    onDismissRef.current?.();
+    // Plain stage: closing just closes the popup (no escalation to the
+    // discounted offer). `onFinish` closes without advancing the stage;
+    // `onDismiss` is the fallback for hosts that don't pass onFinish.
+    (onFinishRef.current || onDismissRef.current)?.();
   };
   const handleUserCloseRef = useRef(handleUserClose);
   handleUserCloseRef.current = handleUserClose;
@@ -224,16 +227,9 @@ const RecommendedAstrologersModal = ({
       guardArmedRef.current = false;
 
       if (trapActiveRef.current) {
-        if (isOfferRef.current) {
-          // Offer stage -> handleUserClose runs onExitClose, which navigates
-          // away. Do NOT re-arm: that navigation IS the exit.
-          handleUserCloseRef.current();
-        } else {
-          // Plain stage -> escalate to the offer; re-arm so the next Back on the
-          // offer is caught too.
-          armGuard();
-          handleUserCloseRef.current();
-        }
+        // Both stages: a Back closes the popup (plain -> plain close; offer ->
+        // onExitClose navigates away). Neither re-arms the guard.
+        handleUserCloseRef.current();
         return;
       }
       // Popup closed. First Back with an exit-intent offer pending -> open it.
@@ -270,14 +266,6 @@ const RecommendedAstrologersModal = ({
     const card = track.querySelector("[data-card]");
     const step = card ? card.offsetWidth + 16 : track.clientWidth;
     track.scrollBy({ left: direction * step, behavior: "smooth" });
-  };
-
-  const onTrackScroll = () => {
-    const track = trackRef.current;
-    if (!track) return;
-    const card = track.querySelector("[data-card]");
-    const step = card ? card.offsetWidth + 16 : 1;
-    setPage(Math.round(track.scrollLeft / step));
   };
 
   /*
@@ -459,7 +447,7 @@ const RecommendedAstrologersModal = ({
                   </button>
                 )}
 
-                <ul className={styles.track} ref={trackRef} onScroll={onTrackScroll}>
+                <ul className={styles.track} ref={trackRef}>
                   {astrologers.map((astrologer, index) => {
                     const rate = rateFor(astrologer, type);
                     const discount = discountOf(rate);
@@ -590,17 +578,6 @@ const RecommendedAstrologersModal = ({
                     <FiChevronRight size={18} />
                   </button>
                 )}
-              </div>
-            )}
-
-            {pageCount > 1 && (
-              <div className={styles.dots} aria-hidden="true">
-                {astrologers.map((a, i) => (
-                  <span
-                    key={a._id}
-                    className={i === page ? styles.dotOn : styles.dot}
-                  />
-                ))}
               </div>
             )}
 
