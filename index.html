@@ -263,20 +263,64 @@
     })();
   </script>
   <script>
-    // iOS Safari/Chrome ignore `user-scalable=no`, so pinch/double-tap still
-    // zoom the whole page (e.g. when zooming a photo on the AI-Wow camera
-    // screens). Enforce the declared no-zoom intent by blocking the zoom
-    // gestures at the document level.
+    // iOS Safari/Chrome ignore `user-scalable=no`, so pinch zoom still zooms the
+    // whole page (e.g. when zooming a photo on the AI-Wow camera screens).
+    // `gesture*` are the non-standard WebKit pinch events; cancelling them
+    // enforces the declared no-zoom intent. They carry no click behaviour, so
+    // suppressing them costs nothing.
+    //
+    // Double-tap zoom is NOT handled here any more. It is now
+    // `touch-action: manipulation` on html/body in the stylesheet below.
+    //
+    // What used to be here, and why it had to go:
+    //
+    //   var lastTouchEnd = 0;
+    //   document.addEventListener('touchend', function (e) {
+    //     var now = Date.now();
+    //     if (now - lastTouchEnd <= 300) { e.preventDefault(); }
+    //     lastTouchEnd = now;
+    //   }, { passive: false });
+    //
+    // Cancelling `touchend` does not just suppress zoom. Per the Touch Events
+    // spec, a cancelled touchend also suppresses the compatibility mouse events
+    // the browser would synthesise from that tap — mousedown, mouseup and
+    // **click**. So on any touch device, a second tap landing within 300ms of a
+    // previous one produced no click event at all. Not a slow click, not a
+    // mis-targeted click: none.
+    //
+    // Three things made that much worse than a lost double-tap:
+    //
+    //  1. `lastTouchEnd = now` ran unconditionally, including on the taps it had
+    //     just cancelled. Each suppressed tap therefore reset the window, so
+    //     someone tapping at a steady sub-300ms rate had EVERY tap after the
+    //     first cancelled, for as long as they kept tapping. A burst of tapping
+    //     became a sustained lockout rather than one dropped event.
+    //  2. It was position-blind. Two taps on two entirely different controls
+    //     300ms apart were treated as a double-tap, so quick sequential
+    //     navigation lost its second tap too.
+    //  3. It is self-reinforcing in exactly the wrong way. Someone whose tap
+    //     appears to do nothing taps again quickly — and that retry was
+    //     guaranteed to be cancelled. The interface got less responsive the
+    //     harder it was pressed.
+    //
+    // On a text input the effect is starker still: no click means no focus,
+    // which means no keyboard. Clarity session 1893d8t (Sep 3, Facebook in-app
+    // browser, mobile) shows the shape of it — a visitor in a live room making
+    // "multiple input attempts" against dead clicks from 01:20 to 01:59, then
+    // leaving. This handler applied to every page and every control on every
+    // touch device, so it is a plausible contributor to a broad share of the
+    // dead clicks on mobile, not just that one session.
+    //
+    // `touch-action: manipulation` is the supported way to express this: it
+    // keeps panning and pinch zoom, removes double-tap zoom, and never
+    // interferes with click dispatch. Safari has honoured it since 9.3, well
+    // below this project's safari13 floor, and it does not disturb the custom
+    // touch handling in the live reel or Agora because it changes only the
+    // browser's own gesture defaults.
     (function () {
       ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (evt) {
         document.addEventListener(evt, function (e) { e.preventDefault(); }, { passive: false });
       });
-      var lastTouchEnd = 0;
-      document.addEventListener('touchend', function (e) {
-        var now = Date.now();
-        if (now - lastTouchEnd <= 300) { e.preventDefault(); }
-        lastTouchEnd = now;
-      }, { passive: false });
     })();
   </script>
   <meta name="robots" content="%VITE_ROBOTS_CONTENT%" />
@@ -484,6 +528,27 @@
       ascent-override: 90%;
       descent-override: 22%;
       line-gap-override: 0%;
+    }
+
+    /*
+      Removes double-tap-to-zoom without touching click dispatch — the
+      replacement for the `touchend` preventDefault handler described in the
+      script block near the top of this file. That handler cancelled the click
+      event synthesised from any tap following another within 300ms, which broke
+      rapid tapping site-wide on touch devices.
+
+      `manipulation` means: keep panning and pinch zoom, drop double-tap zoom and
+      other non-standard gestures. Pinch is separately suppressed by the
+      `gesture*` handlers, matching the `user-scalable=no` in the viewport meta.
+
+      touch-action is not inherited, but the browser derives a tap's effective
+      behaviour by walking up from the hit element, so declaring it here covers
+      the whole document. Anything needing different behaviour can override it
+      on itself.
+    */
+    html,
+    body {
+      touch-action: manipulation;
     }
 
     body {
@@ -843,6 +908,169 @@
 </script>
   
   <!-- End Google tag (gtag.js) -->
+
+ <!-- Branch.io Script (production only) -->
+<!-- Branch.io Script (production only) -->
+<script>
+(function () {
+    // if (!window.__analyticsHostAllowed__) {
+    //     console.log("[Branch] Analytics host not allowed");
+    //     return;
+    // }
+
+    // Create Branch SDK queue/stub
+    (function(b, r, a, n, c, h, _, s, d, k) {
+        if (!b[n]) {
+            b[n] = {};
+            b[n].q = [];
+
+            for (; s < _.length;) {
+                c = _[s++];
+                k = b[n][c];
+
+                b[n][c] = function(a, c) {
+                    return function(d, e) {
+                        b[n].q.push([c, a, d, e]);
+                        if (!k) return;
+                    };
+                }(c, k);
+            }
+        }
+    })(window, window.branch || {}, 'branch', [
+        "addListener",
+        "applyCode",
+        "banner",
+        "closeBanner",
+        "closeJourney",
+        "creditHistory",
+        "credits",
+        "data",
+        "deepview",
+        "deepviewCta",
+        "first",
+        "getCode",
+        "init",
+        "links",
+        "logout",
+        "redeem",
+        "referrals",
+        "removeListener",
+        "sendSMS",
+        "setIdentity",
+        "track",
+        "validateCode",
+        "trackCommerceEvent",
+        "trackContentEvent",
+        "trackLifecycleEvent",
+        "trackUserEvent",
+        "triggerInstallSearch",
+        "version",
+        "vitals"
+    ], "branch");
+})();
+</script>
+
+<script>
+(function () {
+    console.log("[Branch] 1️⃣ Loading Branch SDK...");
+
+    var script = document.createElement("script");
+    script.src = "https://cdn.branch.io/branch-latest.min.js";
+    script.async = true;
+
+    script.onload = function () {
+        console.log("[Branch] 2️⃣ SDK loaded");
+        console.log("[Branch] window.branch type:", typeof window.branch);
+        console.log("[Branch] window.branch.init type:", typeof window.branch?.init);
+
+        // Get branch key from Vite env (replaced at build time)
+        var branchKey = "%VITE_BRANCH_KEY%";
+        
+        console.log("[Branch] Branch key format:", branchKey);
+        console.log("[Branch] Is placeholder?", branchKey.indexOf("%") !== -1);
+        
+        if (!branchKey || branchKey.indexOf("%") !== -1) {
+            console.error("[Branch] ❌ Branch key not configured:", branchKey);
+            return;
+        }
+
+        console.log("[Branch] 3️⃣ Calling window.branch.init()...");
+        console.log("[Branch] ✅ window.branch exists before init:", !!window.branch);
+
+        var initStartTime = Date.now();
+        var initCalled = false;
+
+        window.branch.init(
+            branchKey,
+            {
+                tracking_disabled: false
+            },
+            function (err, data) {
+                var initTime = Date.now() - initStartTime;
+                console.log("[Branch] ⏱️  Init callback took:", initTime + "ms");
+                
+                initCalled = true;
+                console.log("[Branch] ✅ Init callback CALLED");
+                
+                if (err) {
+                    console.error("[Branch] ❌ INIT ERROR:", err);
+                    console.error("[Branch] ❌ Error details:", JSON.stringify(err));
+                    return;
+                }
+
+                console.log("[Branch] ✅ 4️⃣ Init SUCCESS");
+                console.log("[Branch] ✅ Init data:", data);
+                console.log("[Branch] ✅ window.branch.ready:", window.branch?.ready);
+
+                console.log("[Branch] 5️⃣ Calling window.branch.track()...");
+
+                var trackStartTime = Date.now();
+                window.branch.track(
+                    "TEST_BRANCH_EVENT",
+                    {
+                        event_category: "test",
+                        event_type: "test_event",
+                        test_name: "app_initialized",
+                        environment: "development",
+                        test_timestamp: new Date().toISOString()
+                    },
+                    function(err, result) {
+                        var trackTime = Date.now() - trackStartTime;
+                        console.log("[Branch] ⏱️  Track callback took:", trackTime + "ms");
+                        
+                        if (err) {
+                            console.error("[Branch] ❌ Track error:", err);
+                            console.error("[Branch] ❌ Track error details:", JSON.stringify(err));
+                        } else {
+                            console.log("[Branch] ✅ Track success:", result);
+                        }
+                    }
+                );
+
+                console.log("[Branch] ✅ 6️⃣ Track() called");
+                console.log("[Branch] ✅ Waiting for api2.branch.io network request...");
+            }
+        );
+
+        console.log("[Branch] ✅ init() method was called");
+        
+        // Safety check: log if callback never fires
+        setTimeout(function() {
+            if (!initCalled) {
+                console.error("[Branch] ⚠️  INIT CALLBACK NOT CALLED after 5 seconds!");
+            }
+        }, 5000);
+    };
+
+    script.onerror = function () {
+        console.error("[Branch] ❌ SDK failed to load from CDN");
+    };
+
+    document.head.appendChild(script);
+})();
+</script>
+  <!-- End Branch.io CDN Script -->
+
 
   <!-- Microsoft Clarity (production only) -->
   <script type="text/javascript">

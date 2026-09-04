@@ -551,13 +551,43 @@ const LiveView = (props) => {
   // call re-renders/remounts the chat panel, which would otherwise reset the
   // scroll position to the top. Landing at the bottom keeps the newest comments
   // in view instead.
-  const setMessagesOverlayRef = useCallback((node) => {
-    messagesOverlayRef.current = node;
-    if (node) node.scrollTop = node.scrollHeight;
+  /*
+    Jump, don't animate.
+
+    `.inline-messages-overlay` sets `scroll-behavior: smooth` in videoBox.scss,
+    and that applies to programmatic scrolls — including a bare
+    `scrollTop = scrollHeight`. `scrollTo({ behavior: "auto" })` overrides it per
+    call, which is what both pins below want. See the effect underneath for why
+    an animated pin is actively harmful here.
+  */
+  const pinToBottom = useCallback((node) => {
+    if (!node) return;
+    node.scrollTo({ top: node.scrollHeight, behavior: "auto" });
   }, []);
 
-  // Keep pinned to the newest messages on fresh load (list was empty) or when
-  // the user is already at the bottom. Don't yank them if they've scrolled up.
+  const setMessagesOverlayRef = useCallback((node) => {
+    messagesOverlayRef.current = node;
+    pinToBottom(node);
+  }, [pinToBottom]);
+
+  /*
+    Keep pinned to the newest messages on fresh load (list was empty) or when
+    the viewer is already at the bottom. Don't yank them if they've scrolled up.
+
+    This is now the only thing that scrolls the comments list. An unconditional
+    `messagesEndRef.current.scrollIntoView()` in useLiveViewLogic used to run on
+    every message and override the guard below, which is what put rage clicks on
+    chat bubbles in Clarity — the full account is in that file, at the point the
+    effect was removed. Do not reintroduce a second scroll controller here.
+
+    `isAtBottom` must be measured against a settled scroll position, which is why
+    the pin uses `behavior: "auto"`. With the container's CSS `scroll-behavior:
+    smooth` an animated pin leaves `scrollTop` short of the target for a few
+    hundred milliseconds; a burst of messages arriving inside that window reads
+    as "not at bottom" (the tolerance is only 50px, and `clientHeight` here is
+    capped at 150px), and the list would silently stop following the
+    conversation — the opposite failure, equally confusing.
+  */
   useEffect(() => {
     const container = messagesOverlayRef.current;
     if (!container) {
@@ -567,10 +597,10 @@ const LiveView = (props) => {
     const wasEmpty = prevScrollLenRef.current === 0;
     const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
     if (wasEmpty || isAtBottom) {
-      container.scrollTop = container.scrollHeight;
+      pinToBottom(container);
     }
     prevScrollLenRef.current = displayMessages.length;
-  }, [displayMessages.length]);
+  }, [displayMessages.length, pinToBottom]);
 
   const isHost = ROLE === "host";
 

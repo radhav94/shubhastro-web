@@ -581,17 +581,25 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
 // URLs inside a reading are real links now, so they have to look like it.
 .inlineLink {
   color: #d43400;
-  text-decoration: underline;
+  text-decoration: none;
   word-break: break-all;
 
   &:hover {
     color: #f75801;
+    text-decoration: underline;
   }
 
   &:focus-visible {
     outline: 2px solid #f75801;
     outline-offset: 2px;
   }
+}
+
+// A named link (from Markdown `[label](url)`) shows a short human label, so it
+// must not break mid-word like a raw URL, and reads better with a little weight.
+.namedLink {
+  font-weight: 500;
+  word-break: normal;
 }
 
 .msgMeta {

@@ -1672,11 +1672,37 @@ const Profile = () => {
                   <LuPencilLine className={styles.profileNameEditIcon} aria-hidden="true" />
                 </button>
               </h1>
-              <p className={styles.profileDetails}>
-                {primaryProfile
-                  ? `${dayjs(`${primaryProfile.year}-${primaryProfile.month}-${primaryProfile.day}`).format("DD MMM YYYY")} • ${String(primaryProfile.hour > 12 ? primaryProfile.hour - 12 : primaryProfile.hour === 0 ? 12 : primaryProfile.hour).padStart(2, "0")}:${String(primaryProfile.min).padStart(2, "0")} ${primaryProfile.hour >= 12 ? "PM" : "AM"}`
-                  : "Add your birth details"}
-              </p>
+              {/*
+                Two different things were sharing one <p>: a read-only summary of
+                the saved birth details, and the words "Add your birth details" —
+                which is an instruction, not a label. Rendered as inert text it
+                told the visitor to do something and then ignored them for
+                tapping it. The only way to act was the small pencil beside the
+                name, and nothing connected the two.
+
+                People tap imperatives. Clarity session 1rw7ji4 (Sep 3, Instagram
+                in-app, mobile) ends with 50 seconds of a freshly registered
+                visitor working over the profile header — name and location —
+                before the session stops.
+
+                So the prompt is now the control, sharing handleEditOwnDetails
+                with the pencil. The summary stays a plain <p>, because when there
+                are real details to read the pencil is the right and only
+                affordance.
+              */}
+              {primaryProfile ? (
+                <p className={styles.profileDetails}>
+                  {`${dayjs(`${primaryProfile.year}-${primaryProfile.month}-${primaryProfile.day}`).format("DD MMM YYYY")} • ${String(primaryProfile.hour > 12 ? primaryProfile.hour - 12 : primaryProfile.hour === 0 ? 12 : primaryProfile.hour).padStart(2, "0")}:${String(primaryProfile.min).padStart(2, "0")} ${primaryProfile.hour >= 12 ? "PM" : "AM"}`}
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.profileDetailsPrompt}
+                  onClick={handleEditOwnDetails}
+                >
+                  Add your birth details
+                </button>
+              )}
             </div>
             {user?.phoneNumber && (
               <p className={styles.profileDetails}>

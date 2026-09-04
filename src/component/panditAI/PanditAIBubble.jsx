@@ -58,7 +58,12 @@ const MessageBubble = memo(({ msg, onRetry }) => {
                 href={part.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={styles.inlineLink}
+                // A Markdown link carries a human label distinct from its URL
+                // (e.g. "Business Pathfinder"), so it reads as a named link
+                // rather than a raw address that can wrap mid-word.
+                className={`${styles.inlineLink} ${
+                  part.value !== part.href ? styles.namedLink : ""
+                }`}
               >
                 {part.value}
               </a>
