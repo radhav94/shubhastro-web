@@ -8,7 +8,6 @@ import {
   getAstrologerDefaultImage,
   getAstrologerImageUrl,
 } from "../../../../utils/appImages";
-import { BranchEvents } from "../../../../utils/branchEvents";
 import EmergencySessionModal from "../../modal/EmergencySessionModal/EmergencySessionModal";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 import { resolveLiveChannelForAstrologer } from "../../../../utils/helper/resolveLiveChannel";
@@ -93,26 +92,6 @@ const NewAstrologerDetailsCard = ({
     const id = setTimeout(() => setBlockedNote(null), 5000);
     return () => clearTimeout(id);
   }, [blockedNote]);
-
-  // Track Astrologer Profile Viewed when card is displayed
-  useEffect(() => {
-    if (astrologer?._id) {
-      const userId = localStorage.getItem("shubhtalk_customer_id");
-      BranchEvents.trackAstrologerProfileViewed({
-        page_name: "Astrologer Profile",
-        route_name: "astrologer-detail",
-        route_path: window.location.pathname,
-        user_type: userId ? "logged_in" : "guest",
-        user_id: userId,
-        astrologer_id: astrologer._id,
-        astrologer_name: getAstrologerDisplayName(astrologer),
-        category: astrologer?.category || "general",
-        source: "listing",
-        rating: astrologer?.rating || 0,
-        experience_years: astrologer?.experience || 0,
-      });
-    }
-  }, [astrologer?._id]);
 
   const handleJoinLive = async () => {
     if (joiningLive) return;

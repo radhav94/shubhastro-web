@@ -306,6 +306,7 @@ const Footer = () => {
           <div className={`${styles.v2_column} ${styles.v2_columnWide}`}>
             <h3 className={`${styles.v2_heading}`}>Our Group Brands</h3>
             <ul>
+              <li><a href="https://www.epiccompany.com/" target="_blank">Epiccompany</a></li>
               <li><a href="https://www.epicon.in/" target="_blank">Epicon</a></li>
               <li><a href="https://www.docubay.com/" target="_blank">Docubay</a></li>
             </ul>
@@ -363,6 +364,7 @@ const Footer = () => {
           "brands",
           "Our Group Brands",
           <ul>
+            <li><a href="https://www.epiccompany.com/" target="_blank" rel="noopener noreferrer">Epiccompany</a></li>
             <li><a href="https://www.epicon.in/" target="_blank" rel="noopener noreferrer">Epicon</a></li>
             <li><a href="https://www.docubay.com/" target="_blank" rel="noopener noreferrer">Docubay</a></li>
           </ul>
