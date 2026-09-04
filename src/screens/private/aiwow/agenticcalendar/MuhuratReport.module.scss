@@ -645,14 +645,37 @@ $panel: rgba(255, 255, 255, 0.72);
 }
 
 .verifyNote {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  font-weight: 600;
+  color: #5c4030;
+  max-width: 74%;
+}
+
+/* Peach panel that holds the verify prompt + a faint Ganesha watermark on the
+   right, matching the design. */
+.verifyPanel {
+  position: relative;
+  overflow: hidden;
   margin: 0 0 12px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: #fff;
-  border: 1px solid rgba(191, 118, 66, 0.16);
-  font-size: 0.73rem;
-  line-height: 1.45;
-  color: #6b4c3a;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fdeadd 0%, #fbdcc6 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.verifyArt {
+  position: absolute;
+  right: -6px;
+  bottom: 1px;
+  width: 76px;
+  height: auto;
+  // opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .actions {
@@ -702,10 +725,8 @@ $panel: rgba(255, 255, 255, 0.72);
 }
 
 .actionTertiary {
-  background: #fdece2;
-  color: $brand-dark;
-  /* Temporarily hidden — "Ask AI Pandit". Remove this line to bring it back. */
-  display: none;
+  border: 1.5px solid #DF3F014D;
+  color: #d43400;
 }
 
 /* Download moved into .cardTools as an icon button (see the design), so the

@@ -20,6 +20,7 @@ import bannerArt from "../../../../assets/images/muhurat/banner-art.png";
 import slotArt1 from "../../../../assets/images/muhurat/slot-1.png";
 import slotArt2 from "../../../../assets/images/muhurat/slot-2.png";
 import slotArt3 from "../../../../assets/images/muhurat/slot-3.png";
+import ganpatiArt from "../../../../assets/images/muhurat/ganpati.png";
 import styles from "./MuhuratReport.module.scss";
 
 /*
@@ -587,9 +588,20 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
               </span>
             </div>
 
-            <p className={styles.verifyNote}>
-              Want an astrologer to verify this timing for your important event?
-            </p>
+            {/* Verify prompt — peach panel with a faint Ganesha watermark on the
+                right (decorative). If the art fails to load it's hidden so the
+                panel still reads cleanly. */}
+            <div className={styles.verifyPanel}>
+              <p className={styles.verifyNote}>
+                Want an astrologer to verify this timing for your important event?
+              </p>
+              <img
+                src={ganpatiArt}
+                alt=""
+                aria-hidden="true"
+                className={styles.verifyArt}
+              />
+            </div>
 
             <div className={styles.actions}>
               {/*
@@ -622,7 +634,7 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
                 className={styles.actionTertiary}
                 onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask"))}
               >
-                <Sparkles size={14} aria-hidden="true" /> Ask AI Pandit
+                <Sparkles size={14} aria-hidden="true" /> Ask Pandit AI · Free
               </button>
             </div>
 

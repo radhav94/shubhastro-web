@@ -15,6 +15,7 @@ import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearGuestKundliProfiles } from "../../../utils/helper/cookies";
 import { getDeviceInfo, getDeviceType } from "../../../utils/deviceInfo";
 import { trackEvent } from "../../../utils/analytics";
+import { BranchEvents } from "../../../utils/branchEvents";
 import { clearOtpResume } from "./otpResume";
 // import onboardingBg from "../../../assets/images/onboarding.png";
 import onboardingBg from "../../../assets/images/new-login-bg-2.jpeg";
@@ -157,12 +158,11 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
       return;
     }
 
-    {
-      if (isSubmittingRef.current) return;
-      isSubmittingRef.current = true;
-      setLoading(true);
-      trackEvent("otp_entered", { mobile_number: formData.phoneNumber });
-      try {
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
+    setLoading(true);
+    trackEvent("otp_entered", { mobile_number: formData.phoneNumber });
+    try {
         const fcmTokens = await requestFCMToken();
 
         const payload = {
@@ -176,7 +176,6 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         const controller = new AbortController();
         verifyAbortRef.current = controller;
         const response = await verifyOtp(payload, { signal: controller.signal });
-
         if (response.data.success && response.data.statusCode === 200) {
           /*
             This code has been spent. The registered-user branch below leaves via
@@ -191,6 +190,19 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           const { data: userData } = response.data;
           const accessToken = userData.accessToken;
           const refreshToken = userData.refreshToken;
+          
+          // Track OTP Verified event via BranchEvents
+          BranchEvents.trackOtpVerified({
+            page_name: "OTP Verification",
+            route_name: "verify-otp",
+            route_path: window.location.pathname,
+            user_type: "guest",
+            verification_method: "sms",
+            success: true,
+            phone: formData.phoneNumber,
+            verification_time_ms: new Date().getTime() - (window.__otpSentTime || Date.now()),
+          });
+          
           trackEvent("otp_verified_success", { user_id: userData._id, mobile_number: formData.phoneNumber });
 
           // Set role FIRST before setting tokens
@@ -375,7 +387,6 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
         isSubmittingRef.current = false;
         verifyAbortRef.current = null;
       }
-    }
   };
 
   // Keep ref updated for Web OTP auto-submit
@@ -398,7 +409,6 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
       }
     };
   }, [otp]);
-
   const handleResend = async () => {
     // Cancel any in-flight verification
     if (verifyAbortRef.current) {
@@ -409,6 +419,17 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     setOtp("");
 
     trackEvent("otp_resend_requested", { mobile_number: formData.phoneNumber });
+    // Track OTP Sent event via BranchEvents
+    BranchEvents.trackOtpSent({
+      page_name: "OTP Verification",
+      route_name: "verify-otp",
+      route_path: window.location.pathname,
+      user_type: "guest",
+      otp_channel: "sms",
+      signup_method: "phone",
+      success: true,
+      phone: formData.phoneNumber,
+    });
     try {
       const payload = {
         phoneNumber: `91${formData.phoneNumber}`,

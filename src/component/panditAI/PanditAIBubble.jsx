@@ -91,7 +91,7 @@ const MessageBubble = memo(({ msg, onRetry }) => {
 });
 MessageBubble.displayName = "MessageBubble";
 
-const PanditAIBubble = () => {
+const PanditAIBubble = ({ hideBubble = false }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(() => sessionStorage.getItem("panditai_open") === "true");
@@ -479,7 +479,7 @@ const PanditAIBubble = () => {
 
   return createPortal(
     <>
-      {!isOpen && (
+      {!isOpen && !hideBubble && (
         <button
           className={styles.bubble}
           onClick={handleOpen}
