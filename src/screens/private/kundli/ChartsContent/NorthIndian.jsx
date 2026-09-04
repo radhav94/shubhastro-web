@@ -155,7 +155,34 @@ const NorthIndian = ({ style = "north" }) => {
 
   return (
     <div>
-      <PrimaryLoader isLoading={loading} />
+      {/*
+        `fullscreen={false}` — this must not be the blocking overlay it was.
+
+        PrimaryLoader defaults to fullscreen, which is
+        `position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 999999`
+        with a translucent white background and a backdrop blur, and no
+        `pointer-events: none`. So while it was up, the whole viewport was
+        covered by something that intercepts every tap.
+
+        That is the wrong shape for this tab specifically, because the grid below
+        renders progressively — each chart appears as its own request lands
+        (`chart.src && <DynamicChart/>`). And `loading` stays true until the
+        slowest of the twenty-seven chart queries above finishes. So the visitor
+        watched charts fade in one by one through a 30-50% white blur, tapped
+        them, and got nothing, for as long as the slowest request took. On a
+        mobile in-app webview going through the encrypted gateway, the tail on
+        twenty-seven concurrent requests is not short.
+
+        Clarity session mepvs8 (Sep 3, Instagram in-app, mobile, 21:48, 138
+        clicks, exit /kundli) is consistent with it: chart formats explored early
+        on, then repeated returns to the detailed Kundli sections at 14:31, 17:41
+        and 20:12.
+
+        Inline, the loader sits in flow above the grid and says "more coming"
+        without shielding what has already arrived. Nothing here needs
+        interaction blocked — these are read-only charts.
+      */}
+      <PrimaryLoader isLoading={loading} fullscreen={false} />
 
       <div className={styles.mainContainer}>
         <div className={styles.grid}>

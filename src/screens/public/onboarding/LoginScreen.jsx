@@ -80,6 +80,7 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
     isBusy: truecallerBusy,
     unsupportedReason: truecallerUnsupportedReason,
     status: truecallerStatus,
+    notice: truecallerNotice,
     loginWithTruecaller,
   } = useTruecallerLogin({
     onLoggedIn: ({ userData, isRegistered, deviceLimitReached }) => {
@@ -481,11 +482,17 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
               <div className={styles.altLoginDivider}>
                 <span>or</span>
               </div>
+              {/* `aria-disabled`, not native `disabled`. A disabled button
+                  dispatches no click event at all, so during the 45s Truecaller
+                  poll every tap on the primary one-tap login control was
+                  invisible to both the hook and Clarity. Keeping it clickable
+                  lets `loginWithTruecaller` answer with the notice below.
+                  See session yh6bcf. */}
               <button
                 type="button"
                 className={styles.truecallerBtn}
                 onClick={loginWithTruecaller}
-                disabled={truecallerBusy}
+                aria-disabled={truecallerBusy}
                 aria-busy={truecallerBusy}
               >
                 {/* <span className={styles.truecallerIcon} aria-hidden="true"> */}
@@ -495,6 +502,19 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
                 {/* </span> */}
                 {truecallerBusy ? "Verifying with Truecaller..." : "Continue with Truecaller"}
               </button>
+
+              {/* Sits directly under the button so the answer to a re-tap is
+                  where the finger already is, rather than in a top-right toast
+                  Clarity cannot record. */}
+              {truecallerNotice && (
+                <p
+                  key={truecallerNotice.seq}
+                  className={styles.truecallerNotice}
+                  role="status"
+                >
+                  {truecallerNotice.text}
+                </p>
+              )}
             </>
           )}
 

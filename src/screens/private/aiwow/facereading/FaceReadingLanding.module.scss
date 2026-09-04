@@ -220,13 +220,15 @@
   }
 }
 
+/* Static shot-guideline heading, not a control — see the note in
+   PalmistryLanding.module.scss (session vwy4oo). Brand-gradient text at
+   weight 600 is the same treatment as this page's primary buttons, so the
+   checklist rows read as tappable. Neutral heading colour matches
+   ClothColorLanding and AuraLanding. */
 .checkTitle {
   font-size: 1rem;
   font-weight: 600;
-  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #1f2937;
   margin: 0 0 0.25rem 0;
 }
 
