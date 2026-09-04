@@ -19,6 +19,7 @@ import {
 import FilterChips from "../../../component/UI/chips/astrologer/FilterChips";
 import { useCreateChatRoomMutation } from "../../../redux/api/chatApi";
 import { trackEvent } from "../../../utils/analytics";
+import { BranchEvents } from "../../../utils/branchEvents";
 import ProfileModals from "../kundli/components/ProfileModals";
 import { useProfileManager } from "../kundli/hooks/useProfileManager";
 import { ProfileManager } from "../../../component/UI/Profile";
@@ -134,6 +135,22 @@ const TalkToAstrologer = () => {
   const [{ isActiveOnline, isActiveType }, setActiveConfig] = useState(
     getActiveConfigFromURL(),
   );
+
+  // Track Astrologer Listing Viewed on component mount
+  useEffect(() => {
+    const userId = localStorage.getItem("shubhtalk_customer_id");
+    BranchEvents.trackAstrologerListingViewed({
+      page_name: "Astrologer Listing",
+      route_name: "astrologers",
+      route_path: window.location.pathname,
+      user_type: userId ? "logged_in" : "guest",
+      user_id: userId,
+      listing_type: isActiveOnline ? "online" : "all",
+      category: categoryFromParams || null,
+      filter: null,
+      sort_by: "rating",
+    });
+  }, [categoryFromParams, isActiveOnline]);
 
   // Identity of the list being shown, so listingCache is only ever restored onto
   // the same view it was captured from.

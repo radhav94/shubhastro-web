@@ -9,11 +9,11 @@ const FeatureCard = ({ badge, badgeType, title, description, icon, onStartNow, l
     <div className={styles.card} onClick={onStartNow}>
       {/* Paid ribbon hidden temporarily */}
       {/* {isPaid && <span className={styles.paidRibbon}>Paid</span>} */}
-      <div className={styles.iconWrapper}>
-        <div className={styles.iconBackground}>
-          <img src={icon || defaultSquareImg} alt={title} className={styles.icon} />
-        </div>
-      </div>
+      {/* <div className={styles.iconWrapper}> */}
+        {/* <div className={styles.iconBackground}> */}
+          <img src={icon || defaultSquareImg} alt={title} className={styles.iconBackground} />
+        {/* </div> */}
+      {/* </div> */}
       
       <div className={styles.content}>
         {badge && (

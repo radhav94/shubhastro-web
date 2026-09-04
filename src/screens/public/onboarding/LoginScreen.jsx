@@ -7,6 +7,7 @@ import { PATH } from "../../../utils/routes/Paths";
 import { logout } from "../../../redux/auth/authSlice";
 import { loginWithPhone } from "../../../services/appServices/authService";
 import { trackEvent } from "../../../utils/analytics";
+import { BranchEvents } from "../../../utils/branchEvents";
 import useTruecallerLogin from "./useTruecallerLogin";
 import TruecallerLogPanel from "./TruecallerLogPanel";
 import { isTruecallerLogViewerEnabled } from "../../../utils/truecaller/truecallerLog";
@@ -79,6 +80,7 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
     isBusy: truecallerBusy,
     unsupportedReason: truecallerUnsupportedReason,
     status: truecallerStatus,
+    notice: truecallerNotice,
     loginWithTruecaller,
   } = useTruecallerLogin({
     onLoggedIn: ({ userData, isRegistered, deviceLimitReached }) => {
@@ -173,6 +175,16 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
     }
 
     setLoading(true);
+    
+    // Track Signup Started event
+    BranchEvents.trackSignupStarted({
+      page_name: "Login",
+      route_name: "login",
+      route_path: window.location.pathname,
+      signup_method: "phone",
+      source: "login_screen",
+    });
+    
     trackEvent("mobile_number_entered", { mobile_number: phoneNumber, country_code: "91" });
     trackEvent("otp_requested", { mobile_number: phoneNumber });
     try {
@@ -276,7 +288,7 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
               <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="#F75801" strokeWidth="2" strokeLinecap="round"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#F75801" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-            <span><b>10K+</b> Astrologers Online</span>
+            <b>10K+</b> Astrologers Online
           </div>
 
           {/*
@@ -312,13 +324,11 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
             onClick={handleGetOTP}
             title={`Enter your mobile number to claim ₹${signupBonus}`}
           >
-            <div className={styles.giftBox}>
-              <img
+              <img className={styles.giftBox}
                 src={rsBox}
                 alt="Gift"
                 loading="eager"
               />
-            </div>
             <div className={styles.offerText}>
               <h1>
                 <span className={styles.rupeeSymbol}>₹</span>
@@ -472,20 +482,39 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
               <div className={styles.altLoginDivider}>
                 <span>or</span>
               </div>
+              {/* `aria-disabled`, not native `disabled`. A disabled button
+                  dispatches no click event at all, so during the 45s Truecaller
+                  poll every tap on the primary one-tap login control was
+                  invisible to both the hook and Clarity. Keeping it clickable
+                  lets `loginWithTruecaller` answer with the notice below.
+                  See session yh6bcf. */}
               <button
                 type="button"
                 className={styles.truecallerBtn}
                 onClick={loginWithTruecaller}
-                disabled={truecallerBusy}
+                aria-disabled={truecallerBusy}
                 aria-busy={truecallerBusy}
               >
-                <span className={styles.truecallerIcon} aria-hidden="true">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                {/* <span className={styles.truecallerIcon} aria-hidden="true"> */}
+                  <svg className={styles.truecallerIcon} width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.24.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2z" />
                   </svg>
-                </span>
+                {/* </span> */}
                 {truecallerBusy ? "Verifying with Truecaller..." : "Continue with Truecaller"}
               </button>
+
+              {/* Sits directly under the button so the answer to a re-tap is
+                  where the finger already is, rather than in a top-right toast
+                  Clarity cannot record. */}
+              {truecallerNotice && (
+                <p
+                  key={truecallerNotice.seq}
+                  className={styles.truecallerNotice}
+                  role="status"
+                >
+                  {truecallerNotice.text}
+                </p>
+              )}
             </>
           )}
 
@@ -579,13 +608,11 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
             className={styles.trustItem}
             onClick={() => handleTrustItemClick(`${title} ${sub}`)}
           >
-            <div className={styles.trustIcon}>
-              <img src={img} alt="" />
-            </div>
-            <div>
+              <img src={img} alt="" className={styles.trustIcon} />
+            <p>
               <strong>{title}</strong>
               <span>{sub}</span>
-            </div>
+            </p>
           </button>
         ))}
       </div>

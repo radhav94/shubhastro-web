@@ -103,6 +103,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     handleEditProfile,
     handleSubmitProfile,
     handleSubmitEditProfile,
+    placeReopenSignal,
     formatProfileDisplay,
   } = useProfileManager(dispatch);
 
@@ -439,6 +440,7 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
         setFormData={setFormData}
         setEditFormData={setEditFormData}
         formatProfileDisplay={formatProfileDisplay}
+        placeReopenSignal={placeReopenSignal}
         showContinueButton={true}
         onContinue={handleContinueAfterKundliSelect}
       />

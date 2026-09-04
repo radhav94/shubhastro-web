@@ -11,6 +11,7 @@ import LanguageSelector from "../../../component/LanguageSelector";
 import { registerUser } from "../../../services/appServices/authService";
 import { useCreateKundliMutation } from "../../../services/appServices/kundliServicesNew";
 import { trackEvent } from "../../../utils/analytics";
+import { BranchEvents } from "../../../utils/branchEvents";
 import { setEmail, logout } from "../../../redux/auth/authSlice";
 
 // Validation schema
@@ -152,7 +153,21 @@ const BirthDetailsScreen = ({
       if (response?.data?.statusCode === 201 || response?.data?.success) {
         toast.dismiss();
         toast.success(response?.data?.message || "Registration successful!");
-        trackEvent("profile_created", { user_id: localStorage.getItem("shubhtalk_customer_id") });
+        
+        // Track Profile Completed event
+        const userId = localStorage.getItem("shubhtalk_customer_id");
+        BranchEvents.trackProfileCompleted({
+          page_name: "Birth Details",
+          route_name: "birth-details",
+          route_path: window.location.pathname,
+          user_type: "logged_in",
+          user_id: userId,
+          profile_completion_status: "completed",
+          birth_date_provided: !!mergedFormData.birthDate,
+          location_provided: !!mergedFormData.birthPlace,
+        });
+        
+        trackEvent("profile_created", { user_id: userId });
         localStorage.setItem("shubhtalk_show_welcome_bonus", "true");
 
         const currentUserData = localStorage.getItem("userData");

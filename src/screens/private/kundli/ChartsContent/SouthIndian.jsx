@@ -147,7 +147,12 @@ const SouthIndian = ({ style = "south" }) => {
 
   return (
     <div>
-      <PrimaryLoader isLoading={loading} />
+      {/* `fullscreen={false}` for the same reason as the NorthIndian sibling —
+          see the long note there. The grid renders progressively while `loading`
+          stays true until the slowest of twenty-seven chart queries lands, so a
+          fullscreen overlay swallowed every tap on charts the visitor could
+          already see. */}
+      <PrimaryLoader isLoading={loading} fullscreen={false} />
 
       <div className={styles.mainContainer}>
         <div className={styles.grid}>

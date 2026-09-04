@@ -4,7 +4,9 @@
  * =========================================================
  *
  * Centralized event tracking for all app branches and flows.
- * All events are logged to GTM and GA4 via trackEvent.
+ * All events are tracked to:
+ * 1. Branch.io via window.trackBranchEvent()
+ * 2. GTM and GA4 via trackEvent()
  *
  * Every event tracks:
  * - user_id
@@ -24,6 +26,23 @@
  */
 
 import { trackEvent } from "./analytics";
+
+/**
+ * Track event to Branch.io directly via window.trackBranchEvent
+ * All Branch events must route through this single function
+ */
+const trackToBranch = (eventName, eventData = {}) => {
+  try {
+    if (typeof window !== "undefined" && typeof window.trackBranchEvent === "function") {
+      // Use the common window.trackBranchEvent function
+      window.trackBranchEvent(eventName, eventData);
+    } else if (IS_DEV) {
+      console.warn("[BranchEvents] window.trackBranchEvent not available for event:", eventName);
+    }
+  } catch (error) {
+    if (IS_DEV) console.error("[BranchEvents] Failed to track to Branch:", error);
+  }
+};
 
 const IS_DEV = import.meta.env.DEV;
 
@@ -55,9 +74,20 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "onboarding",
       event_type: "landing_page_open",
+      page_name: params.page_name || "Home",
+      route_name: params.route_name || null,
+      route_path: params.route_path || window.location.pathname,
+      page_url: window.location.href,
+      referrer: document.referrer || null,
+      user_type: params.user_type || "guest",
+      user_id: params.user_id || null,
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("landing_page_open", eventParams);
+    trackToBranch("Landing Page", eventParams);
     trackEvent("landing_page_open", eventParams);
   },
 
@@ -69,9 +99,19 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "onboarding",
       event_type: "signup_started",
+      page_name: params.page_name || "Signup",
+      route_name: params.route_name || "signup",
+      route_path: params.route_path || window.location.pathname,
+      user_type: "guest",
+      signup_method: params.signup_method || null,
+      source: params.source || "direct",
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("signup_started", eventParams);
+    trackToBranch("Signup Started", eventParams);
     trackEvent("signup_started", eventParams);
   },
 
@@ -84,12 +124,21 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "onboarding",
       event_type: "otp_sent",
-      phone: params.phone || "unknown",
-      method: params.method || "sms",
+      page_name: params.page_name || "OTP",
+      route_name: params.route_name || "verify-otp",
+      route_path: params.route_path || window.location.pathname,
+      user_type: "guest",
+      otp_channel: params.otp_channel || params.method || "sms",
+      signup_method: params.signup_method || "phone",
+      success: true,
+      phone: params.phone || null,
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
       timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("otp_sent", eventParams);
+    trackToBranch("OTP Sent", eventParams);
     trackEvent("otp_sent", eventParams);
   },
 
@@ -102,11 +151,21 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "onboarding",
       event_type: "otp_verified",
-      phone: params.phone || "unknown",
+      page_name: params.page_name || "OTP",
+      route_name: params.route_name || "verify-otp",
+      route_path: params.route_path || window.location.pathname,
+      user_type: "guest",
+      verification_method: params.verification_method || "sms",
+      success: true,
+      phone: params.phone || null,
       verification_time_ms: params.verification_time_ms || 0,
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("otp_verified", eventParams);
+    trackToBranch("OTP Verified", eventParams);
     trackEvent("otp_verified", eventParams);
   },
 
@@ -119,11 +178,19 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "onboarding",
       event_type: "registration_completed",
-      user_id: params.user_id || "unknown",
-      signup_method: params.signup_method || "phone",
+      page_name: params.page_name || "Registration",
+      route_name: params.route_name || "signup",
+      route_path: params.route_path || window.location.pathname,
+      user_type: "logged_in",
+      registration_method: params.registration_method || params.signup_method || "phone",
+      user_id: params.user_id || null,
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("registration_completed", eventParams);
+    trackToBranch("Registration Completed", eventParams);
     trackEvent("registration_completed", eventParams);
   },
 
@@ -136,13 +203,21 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "onboarding",
       event_type: "profile_completed",
-      user_id: params.user_id || "unknown",
-      profile_fields: params.profile_fields || [],
+      page_name: params.page_name || "Profile",
+      route_name: params.route_name || "profile",
+      route_path: params.route_path || window.location.pathname,
+      user_type: "logged_in",
+      user_id: params.user_id || null,
+      profile_completion_status: "completed",
       birth_date_provided: params.birth_date_provided || false,
       location_provided: params.location_provided || false,
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("profile_completed", eventParams);
+    trackToBranch("Profile Completed", eventParams);
     trackEvent("profile_completed", eventParams);
   },
 
@@ -155,13 +230,23 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "promotion",
       event_type: "promo_eligible",
-      promo_code: params.promo_code || "unknown",
+      page_name: params.page_name || "Promo",
+      route_name: params.route_name || null,
+      route_path: params.route_path || window.location.pathname,
+      user_type: params.user_type || "logged_in",
+      user_id: params.user_id || null,
+      promo_id: params.promo_id || null,
       promo_type: params.promo_type || "standard",
+      eligibility_status: true,
       promo_value: params.promo_value || 0,
       currency: params.currency || "INR",
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("promo_eligible", eventParams);
+    trackToBranch("Promo Eligible", eventParams);
     trackEvent("promo_eligible", eventParams);
   },
 
@@ -174,13 +259,23 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "promotion",
       event_type: "promo_credited",
-      promo_code: params.promo_code || "unknown",
-      amount: params.amount || 0,
+      page_name: params.page_name || "Promo",
+      route_name: params.route_name || null,
+      route_path: params.route_path || window.location.pathname,
+      user_type: params.user_type || "logged_in",
+      user_id: params.user_id || null,
+      promo_id: params.promo_id || null,
+      promo_type: params.promo_type || "standard",
+      credit_status: "success",
+      promo_amount: params.promo_amount || 0,
       currency: params.currency || "INR",
-      reason: params.reason || "signup_bonus",
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("promo_credited", eventParams);
+    trackToBranch("Promo Credited", eventParams);
     trackEvent("promo_credited", eventParams);
   },
 
@@ -199,12 +294,23 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "astrologer_discovery",
       event_type: "astrologer_listing_viewed",
-      filter_type: params.filter_type || "all",
-      result_count: params.result_count || 0,
+      page_name: params.page_name || "Astrologers",
+      route_name: params.route_name || "astrologers",
+      route_path: params.route_path || window.location.pathname,
+      user_type: params.user_type || "logged_in",
+      user_id: params.user_id || null,
+      listing_type: params.listing_type || "all",
+      category: params.category || null,
+      filter: params.filter || null,
       sort_by: params.sort_by || "rating",
+      result_count: params.result_count || 0,
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("astrologer_listing_viewed", eventParams);
+    trackToBranch("Astrologer Listing Viewed", eventParams);
     trackEvent("astrologer_listing_viewed", eventParams);
   },
 
@@ -217,14 +323,24 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "astrologer_discovery",
       event_type: "astrologer_profile_viewed",
-      astrologer_id: params.astrologer_id || "unknown",
-      astrologer_name: params.astrologer_name || "unknown",
-      specialization: params.specialization || "general",
+      page_name: params.page_name || "Astrologer Profile",
+      route_name: params.route_name || "astrologer-detail",
+      route_path: params.route_path || window.location.pathname,
+      user_type: params.user_type || "logged_in",
+      user_id: params.user_id || null,
+      astrologer_id: params.astrologer_id || null,
+      astrologer_name: params.astrologer_name || null,
+      category: params.category || "general",
+      source: params.source || "listing",
       rating: params.rating || 0,
       experience_years: params.experience_years || 0,
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("astrologer_profile_viewed", eventParams);
+    trackToBranch("Astrologer Profile Viewed", eventParams);
     trackEvent("astrologer_profile_viewed", eventParams);
   },
 
@@ -237,12 +353,21 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "wallet",
       event_type: "wallet_screen_viewed",
+      page_name: params.page_name || "Wallet",
+      route_name: params.route_name || "wallet",
+      route_path: params.route_path || window.location.pathname,
+      user_type: "logged_in",
+      user_id: params.user_id || null,
+      source: params.source || "menu",
       current_balance: params.current_balance || 0,
       currency: params.currency || "INR",
-      screen_source: params.screen_source || "menu",
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("wallet_screen_viewed", eventParams);
+    trackToBranch("Wallet Screen Viewed", eventParams);
     trackEvent("wallet_screen_viewed", eventParams);
   },
 
@@ -255,15 +380,25 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "wallet",
       event_type: "recharge_pack_selected",
-      pack_id: params.pack_id || "unknown",
+      page_name: params.page_name || "Recharge",
+      route_name: params.route_name || "recharge",
+      route_path: params.route_path || window.location.pathname,
+      user_type: "logged_in",
+      user_id: params.user_id || null,
+      pack_id: params.pack_id || null,
       pack_name: params.pack_name || "standard",
       amount: params.amount || 0,
       currency: params.currency || "INR",
+      source: params.source || "wallet",
       includes_bonus: params.includes_bonus || false,
       bonus_amount: params.bonus_amount || 0,
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("recharge_pack_selected", eventParams);
+    trackToBranch("Recharge Pack Selected", eventParams);
     trackEvent("recharge_pack_selected", eventParams);
   },
 
@@ -276,15 +411,25 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "wallet",
       event_type: "wallet_recharge_initiated",
+      page_name: params.page_name || "Payment",
+      route_name: params.route_name || "payment",
+      route_path: params.route_path || window.location.pathname,
+      user_type: "logged_in",
+      user_id: params.user_id || null,
+      pack_id: params.pack_id || null,
+      pack_name: params.pack_name || null,
       amount: params.amount || 0,
       currency: params.currency || "INR",
       payment_method: params.payment_method || "card",
-      pack_id: params.pack_id || "unknown",
-      order_id: params.order_id || "unknown",
+      transaction_id: params.transaction_id || null,
+      order_id: params.order_id || null,
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
       timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("wallet_recharge_initiated", eventParams);
+    trackToBranch("Actual Wallet Recharge Initiated", eventParams);
     trackEvent("wallet_recharge_initiated", eventParams);
   },
 
@@ -297,17 +442,26 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "wallet",
       event_type: "wallet_recharge_successful",
+      page_name: params.page_name || "Payment Success",
+      route_name: params.route_name || "payment",
+      route_path: params.route_path || window.location.pathname,
+      user_type: "logged_in",
+      user_id: params.user_id || null,
+      pack_id: params.pack_id || null,
+      pack_name: params.pack_name || null,
       amount: params.amount || 0,
       currency: params.currency || "INR",
-      transaction_id: params.transaction_id || "unknown",
-      order_id: params.order_id || "unknown",
-      pack_id: params.pack_id || "unknown",
       payment_method: params.payment_method || "card",
+      transaction_id: params.transaction_id || null,
+      order_id: params.order_id || null,
       payment_status: "success",
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
       timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("wallet_recharge_successful", eventParams);
+    trackToBranch("Actual Wallet Recharge Successful", eventParams);
     trackEvent("wallet_recharge_successful", eventParams);
   },
 
@@ -320,17 +474,27 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "consultation",
       event_type: "consultation_started",
-      astrologer_id: params.astrologer_id || "unknown",
-      astrologer_name: params.astrologer_name || "unknown",
-      consultation_type: params.consultation_type || "chat", // "chat", "voice", "video"
+      page_name: params.page_name || "Consultation",
+      route_name: params.route_name || "consultation",
+      route_path: params.route_path || window.location.pathname,
+      user_type: "logged_in",
+      user_id: params.user_id || null,
+      astrologer_id: params.astrologer_id || null,
+      astrologer_name: params.astrologer_name || null,
+      consultation_id: params.consultation_id || null,
+      consultation_type: params.consultation_type || "chat",
+      source: params.source || "listing",
       duration_minutes: params.duration_minutes || 0,
       cost: params.cost || 0,
       currency: params.currency || "INR",
-      order_id: params.order_id || "unknown",
+      order_id: params.order_id || null,
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
       timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("consultation_started", eventParams);
+    trackToBranch("Consultation Started", eventParams);
     trackEvent("consultation_started", eventParams);
   },
 
@@ -343,20 +507,30 @@ export const BranchEvents = {
     const eventParams = {
       event_category: "consultation",
       event_type: "consultation_completed",
-      astrologer_id: params.astrologer_id || "unknown",
-      astrologer_name: params.astrologer_name || "unknown",
+      page_name: params.page_name || "Consultation End",
+      route_name: params.route_name || "consultation",
+      route_path: params.route_path || window.location.pathname,
+      user_type: "logged_in",
+      user_id: params.user_id || null,
+      astrologer_id: params.astrologer_id || null,
+      astrologer_name: params.astrologer_name || null,
+      consultation_id: params.consultation_id || null,
       consultation_type: params.consultation_type || "chat",
       actual_duration_minutes: params.actual_duration_minutes || 0,
       scheduled_duration_minutes: params.scheduled_duration_minutes || 0,
       cost: params.cost || 0,
       currency: params.currency || "INR",
-      order_id: params.order_id || "unknown",
+      order_id: params.order_id || null,
+      completion_status: "completed",
       rating: params.rating || 0,
       review_provided: params.review_provided || false,
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
       timestamp: new Date().toISOString(),
       ...params,
     };
     logEvent("consultation_completed", eventParams);
+    trackToBranch("Consultation Completed", eventParams);
     trackEvent("consultation_completed", eventParams);
   },
 };

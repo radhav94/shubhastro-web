@@ -65,6 +65,32 @@ const FaceReadingCamera = () => {
   const [videoActive, setVideoActive] = useState(true);
   const [videoReady, setVideoReady] = useState(false); // ⭐ Track video ready state
 
+  /*
+   * Why the shutter's answer is rendered in the DOM instead of toasted.
+   *
+   * Clarity dead clicks (session 14rx49k, Sep 4, mobile Chrome from Facebook):
+   * the visitor opened this camera at 01:30 and left within seconds without
+   * completing an analysis, in a 2m30s session.
+   *
+   * A blocked shutter tap did already respond — `captureBlockedReason()` fed
+   * `toast.info(...)`. But the toaster mounts top-right while the shutter sits at
+   * the bottom of a full-bleed dark camera view, so on a phone the answer
+   * appears about as far from the finger as the screen allows, and Clarity does
+   * not record toasts at all. The tap therefore looked dead both to the user
+   * glancing at the shutter and to us reading the report.
+   *
+   * `seq` is bumped on every tap so an unchanged reason still remounts the
+   * node: repeated taps produce repeated DOM mutations Clarity can see, and
+   * screen readers re-announce rather than staying silent on a duplicate string.
+   */
+  const [captureNotice, setCaptureNotice] = useState(null);
+  const noticeSeqRef = useRef(0);
+
+  const announceCaptureNotice = (text) => {
+    noticeSeqRef.current += 1;
+    setCaptureNotice({ seq: noticeSeqRef.current, text });
+  };
+
   const {
     modelsLoaded,
     modelsFailed,
@@ -346,15 +372,16 @@ const FaceReadingCamera = () => {
     // reads as a dead click and invites retry after retry.
     const reason = captureBlockedReason();
     if (reason) {
-      toast.info(reason);
+      announceCaptureNotice(reason);
       return;
     }
 
     const canvas = cropCurrentFrameToCanvas();
     if (!canvas) {
-      toast.error("Couldn't read the camera frame. Please try again.");
+      announceCaptureNotice("Couldn't read the camera frame. Please try again.");
       return;
     }
+    setCaptureNotice(null);
     setCapturedImage(canvas.toDataURL('image/jpeg', 0.95));
     stopCamera();
   };
@@ -365,12 +392,14 @@ const FaceReadingCamera = () => {
     active: !capturedImage,
     getFrameCanvas: cropCurrentFrameToCanvas,
     onCapture: (dataUrl) => {
+      setCaptureNotice(null);
       setCapturedImage(dataUrl);
       stopCamera();
     },
   });
 
   const retakePhoto = () => {
+    setCaptureNotice(null);
     setCapturedImage(null);
     startCamera();
   };
@@ -620,6 +649,19 @@ const FaceReadingCamera = () => {
                 <p>Auto face framing is unavailable. Centre your face in the circle and tap Capture.</p>
               </div>
             )}
+            {/* The model-load window had nothing on screen at all: the existing
+                framing hint below requires `modelsLoaded`, and the failure notice
+                above requires `modelsFailed`, so between mount and one of those
+                two settling the only signal was the shutter caption reading
+                "Loading...". That window is not short — `/models` ships 556 KB of
+                weight shards (tiny_face_detector + face_landmark_68) on top of a
+                157 KB gzip face-api chunk, all fetched after this route mounts.
+                Say what is happening while it downloads. */}
+            {!detectionUnavailable && !modelsLoaded && (
+              <div className={styles.faceDetectionMessage}>
+                <p>Getting face framing ready — one moment.</p>
+              </div>
+            )}
             {!detectionUnavailable && !canCapture && modelsLoaded && (
               <div className={styles.faceDetectionMessage}>
                 <p>
@@ -649,6 +691,17 @@ const FaceReadingCamera = () => {
       <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       <div className={styles.controls}>
+        {/* Sits directly above the shutter, so the answer to a blocked tap is
+            where the finger already is. */}
+        {!capturedImage && captureNotice && (
+          <p
+            key={captureNotice.seq}
+            className={styles.captureNotice}
+            role="status"
+          >
+            {captureNotice.text}
+          </p>
+        )}
         {!capturedImage ? (
           <button
             type="button"

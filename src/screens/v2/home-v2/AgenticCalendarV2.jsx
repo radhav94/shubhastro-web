@@ -42,6 +42,40 @@ const AgenticCalendarV2 = ({ styles }) => {
   const [customToDate, setCustomToDate] = useState(null);
   const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear());
+
+  /*
+    Explanation line inside the date-range modal, for the two taps in there that
+    cannot do anything.
+
+    Muhurat dates are today-or-later, so every day cell before today is
+    unselectable. That was expressed with a native `disabled`, and the month
+    navigation had no lower bound — so you could page back to a month where
+    *every* cell was disabled and then click freely with nothing happening at
+    all. A natively disabled button fires no click event, so there was nothing to
+    hang an explanation on and nothing for the metric to see either.
+
+    Clarity session 11ziuus (Sep 3, desktop, 57 seconds, 68 clicks, homepage
+    only) is that exact shape: clusters of rapid repeated clicks on the date
+    picker at 00:10 and 00:42, "month options like September and April", and the
+    picker opened and closed repeatedly without a selection ever completing.
+    September was the month it opens on; April is five taps back, and in April
+    every single date is in the past.
+
+    `seq` increments per call and keys the element, so a second blocked tap
+    remounts the line instead of setting an identical string that React renders
+    as no change — the same reason the CTA hint above uses it.
+  */
+  const [dateHint, setDateHint] = useState(null);
+  const showDateHint = (text) =>
+    setDateHint((prev) => ({ text, seq: (prev?.seq || 0) + 1 }));
+
+  // Today, floored, plus its month/year — used to bound navigation and to mark
+  // past cells. Recomputed per render, which is fine and avoids a stale midnight.
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const isViewingCurrentMonth =
+    calendarYear === startOfToday.getFullYear() &&
+    calendarMonth === startOfToday.getMonth();
   const [locationValue, setLocationValue] = useState('');
   const [locationData, setLocationData] = useState(null);
 
@@ -104,14 +138,36 @@ const AgenticCalendarV2 = ({ styles }) => {
     }
   };
 
+  /*
+    Same rule as everywhere else in this component: the Add button is never
+    natively `disabled`, so the tap lands and reports what is wrong.
+
+    It previously carried `disabled={!customInput.trim()}` and this function
+    silently did nothing for the two cases it cannot handle — an empty name, and
+    a name that already exists in the list. The duplicate case is the worse of
+    the two, because the button looks perfectly enabled while doing nothing.
+  */
+  const customInputRef = useRef(null);
+  const [customHint, setCustomHint] = useState(null);
+  const showCustomHint = (text) =>
+    setCustomHint((prev) => ({ text, seq: (prev?.seq || 0) + 1 }));
+
   const handleAddCustom = () => {
     const trimmed = customInput.trim();
-    if (trimmed && !allOccasions.includes(trimmed)) {
-      setCustomOccasions(prev => [...prev, trimmed]);
-      setSelectedOccasions(prev => [...prev, trimmed]);
-      setCustomInput("");
-      setShowCustomModal(false);
+    if (!trimmed) {
+      showCustomHint("Type a name for the occasion first.");
+      customInputRef.current?.focus();
+      return;
     }
+    if (allOccasions.includes(trimmed)) {
+      showCustomHint(`"${trimmed}" is already in the list — pick it from the chips above.`);
+      return;
+    }
+    setCustomOccasions(prev => [...prev, trimmed]);
+    setSelectedOccasions(prev => [...prev, trimmed]);
+    setCustomInput("");
+    setCustomHint(null);
+    setShowCustomModal(false);
   };
 
   // `locationData` is only populated by picking a Google Places suggestion, so a
@@ -160,11 +216,6 @@ const AgenticCalendarV2 = ({ styles }) => {
           {/* h2: same rank as every other section title on the homepage. As an
               <h4> it skipped a level in the outline. Size comes from .wowTitle. */}
           <h2 className={styles.wowTitle}>MUHURAT CALENDAR</h2>
-          <div className={styles.BottomDevider}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
-              <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
-            </svg>
-          </div>
         </div>
         <button className={styles.viewAllBtn} style={{ color: '#f75801' }} onClick={() => { const go = () => navigate('/ai-wow/muhurat-calendar'); if (!isLoggedIn) { openGuestAuth(go); return; } go(); }}>
           View All <FiChevronRight size={14} />
@@ -241,7 +292,18 @@ const AgenticCalendarV2 = ({ styles }) => {
           ))}
           <button
             className={`${styles.calChipAdd} ${customFromDate ? styles.calDateActive : ''}`}
-            onClick={() => setShowDatePicker(true)}
+            onClick={() => {
+              /*
+                Reopen on the current month with no stale advice. Without the
+                reset, closing the picker while parked on a fully-past month and
+                reopening it dropped you straight back there — which is how one
+                dead end becomes a loop of open, click at nothing, close.
+              */
+              setDateHint(null);
+              setCalendarMonth(startOfToday.getMonth());
+              setCalendarYear(startOfToday.getFullYear());
+              setShowDatePicker(true);
+            }}
           >
             <FiCalendar size={14} />
             {customFromDate
@@ -324,14 +386,33 @@ const AgenticCalendarV2 = ({ styles }) => {
             </p>
             {/* Calendar Nav */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
-              <button onClick={() => { if(calendarMonth===0){setCalendarMonth(11);setCalendarYear(y=>y-1);}else{setCalendarMonth(m=>m-1);} }}
-                style={{ background:'none', border:'none', cursor:'pointer', padding:4 }}>
+              {/* Stops at the current month. Paging further back only ever
+                  reached months where every cell was unselectable, which is how
+                  a visitor ends up in April clicking at nothing. Never `disabled`
+                  — that would swallow the tap and explain nothing; aria-disabled
+                  plus a reason instead. */}
+              <button
+                type="button"
+                aria-label="Previous month"
+                aria-disabled={isViewingCurrentMonth}
+                onClick={() => {
+                  if (isViewingCurrentMonth) {
+                    showDateHint("Muhurat dates start from today, so there is nothing to choose before this month.");
+                    return;
+                  }
+                  setDateHint(null);
+                  if(calendarMonth===0){setCalendarMonth(11);setCalendarYear(y=>y-1);}else{setCalendarMonth(m=>m-1);}
+                }}
+                style={{ background:'none', border:'none', cursor: isViewingCurrentMonth ? 'not-allowed' : 'pointer', padding:4, opacity: isViewingCurrentMonth ? 0.4 : 1 }}>
                 <FiChevronLeft size={20} />
               </button>
               <span style={{ fontWeight:600, fontSize:14 }}>
                 {new Date(calendarYear, calendarMonth).toLocaleDateString("en-US", { month:"long", year:"numeric" })}
               </span>
-              <button onClick={() => { if(calendarMonth===11){setCalendarMonth(0);setCalendarYear(y=>y+1);}else{setCalendarMonth(m=>m+1);} }}
+              <button
+                type="button"
+                aria-label="Next month"
+                onClick={() => { setDateHint(null); if(calendarMonth===11){setCalendarMonth(0);setCalendarYear(y=>y+1);}else{setCalendarMonth(m=>m+1);} }}
                 style={{ background:'none', border:'none', cursor:'pointer', padding:4 }}>
                 <FiChevronRight size={20} />
               </button>
@@ -345,7 +426,7 @@ const AgenticCalendarV2 = ({ styles }) => {
                 const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
                 const offset = firstDay === 0 ? 6 : firstDay - 1;
                 const daysInMonth = new Date(calendarYear, calendarMonth+1, 0).getDate();
-                const today = new Date(); today.setHours(0,0,0,0);
+                const today = startOfToday;
                 const cells = [];
                 for(let i=0;i<offset;i++) cells.push(<span key={`e${i}`} />);
                 for(let d=1;d<=daysInMonth;d++){
@@ -356,13 +437,20 @@ const AgenticCalendarV2 = ({ styles }) => {
                   const isTo = customToDate && thisDate.getTime() === new Date(customToDate.getFullYear(), customToDate.getMonth(), customToDate.getDate()).getTime();
                   const isInRange = customFromDate && customToDate && thisDate > customFromDate && thisDate < customToDate;
                   cells.push(
-                    <button key={d} disabled={isPast}
+                    /* aria-disabled, not `disabled`. A past date still cannot be
+                       chosen, but the tap now lands and says why instead of
+                       vanishing — see the showDateHint note above. */
+                    <button key={d} type="button" aria-disabled={isPast}
                       style={{ border:'none', borderRadius:6, padding:'6px 0', fontSize:13, cursor:isPast?'not-allowed':'pointer',
                         background: isFrom||isTo ? '#f75801' : isInRange ? '#fff3ee' : 'transparent',
                         color: isFrom||isTo ? '#fff' : isPast ? '#d1d5db' : '#1a1a1a',
                         fontWeight: isFrom||isTo ? 700 : 400 }}
                       onClick={() => {
-                        if(isPast) return;
+                        if(isPast){
+                          showDateHint("That date has already passed — choose today or a later date.");
+                          return;
+                        }
+                        setDateHint(null);
                         if(!customFromDate||(customFromDate&&customToDate)){
                           setCustomFromDate(thisDate); setCustomToDate(null);
                         } else {
@@ -376,6 +464,18 @@ const AgenticCalendarV2 = ({ styles }) => {
                 return cells;
               })()}
             </div>
+            {/*
+              role="status" so a blocked tap is announced as well as seen, and
+              placed inside the modal so the answer appears where the click
+              happened rather than in the top-right toaster. Keyed on seq so a
+              repeated blocked tap replays instead of rendering nothing.
+            */}
+            {dateHint && (
+              <p key={dateHint.seq} role="status"
+                style={{ margin:'12px 0 0', fontSize:12.5, lineHeight:1.5, color:'#b45309' }}>
+                {dateHint.text}
+              </p>
+            )}
           </div>
         </div>,
         document.body
@@ -394,10 +494,11 @@ const AgenticCalendarV2 = ({ styles }) => {
             </div>
             <label style={{ fontSize:13, color:'#6b7280', display:'block', marginBottom:8 }}>Occasion Name</label>
             <input
+              ref={customInputRef}
               type="text"
               placeholder="e.g., House Warming"
               value={customInput}
-              onChange={e => { if(e.target.value.length<=30) setCustomInput(e.target.value); }}
+              onChange={e => { if(e.target.value.length<=30) { setCustomInput(e.target.value); setCustomHint(null); } }}
               maxLength={30}
               autoFocus
               onKeyDown={e => e.key==="Enter" && handleAddCustom()}
@@ -406,9 +507,17 @@ const AgenticCalendarV2 = ({ styles }) => {
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:8, marginBottom:16 }}>
               <span style={{ fontSize:12, color:'#9ca3af' }}>{customInput.length}/30</span>
             </div>
+            {customHint && (
+              <p key={customHint.seq} role="status"
+                style={{ margin:'0 0 12px', fontSize:12.5, lineHeight:1.5, color:'#b45309' }}>
+                {customHint.text}
+              </p>
+            )}
+            {/* aria-disabled, not `disabled` — see handleAddCustom. */}
             <button
+              type="button"
               onClick={handleAddCustom}
-              disabled={!customInput.trim()}
+              aria-disabled={!customInput.trim()}
               style={{ width:'100%', height:44, background:'#f75801', border:'none', borderRadius:999, color:'#fff', fontSize:15, fontWeight:700, cursor:'pointer', opacity: customInput.trim() ? 1 : 0.5 }}
             >Add</button>
           </div>

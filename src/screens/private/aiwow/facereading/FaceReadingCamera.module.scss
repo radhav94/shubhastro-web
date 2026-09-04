@@ -266,6 +266,21 @@
   transition: transform 0.1s;
 }
 
+/* Inline answer to a blocked shutter tap. Replaces a top-right toast that the
+   user could not see from the shutter and that Clarity could not record.
+   See the note in FaceReadingCamera.jsx (session 14rx49k). */
+.captureNotice {
+  margin: 0 auto 10px;
+  max-width: 20rem;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
 .captureText {
   color: white;
   font-size: 0.9375rem;

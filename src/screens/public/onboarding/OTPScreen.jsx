@@ -193,11 +193,16 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           
           // Track OTP Verified event via BranchEvents
           BranchEvents.trackOtpVerified({
+            page_name: "OTP Verification",
+            route_name: "verify-otp",
+            route_path: window.location.pathname,
+            user_type: "guest",
+            verification_method: "sms",
+            success: true,
             phone: formData.phoneNumber,
             verification_time_ms: new Date().getTime() - (window.__otpSentTime || Date.now()),
           });
           
-          trackEvent("otp_verified_success", { user_id: userData._id, mobile_number: formData.phoneNumber });
           trackEvent("otp_verified_success", { user_id: userData._id, mobile_number: formData.phoneNumber });
 
           // Set role FIRST before setting tokens
@@ -416,8 +421,14 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     trackEvent("otp_resend_requested", { mobile_number: formData.phoneNumber });
     // Track OTP Sent event via BranchEvents
     BranchEvents.trackOtpSent({
+      page_name: "OTP Verification",
+      route_name: "verify-otp",
+      route_path: window.location.pathname,
+      user_type: "guest",
+      otp_channel: "sms",
+      signup_method: "phone",
+      success: true,
       phone: formData.phoneNumber,
-      method: "sms",
     });
     try {
       const payload = {

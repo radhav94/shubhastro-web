@@ -168,55 +168,87 @@ const AstrologerOnboardingAgreement = () => {
        <p className={styles.paragraph}><strong>Address:</strong> [Registered Office Address, City, State, PIN, India]</p>
        <h4 className={styles.subtitle}>ACKNOWLEDGEMENT AND EXECUTION</h4>
        <p className={styles.paragraph}>I confirm that I have reviewed the terms in their entirety and hereby accord my unconditional consent to the same. I solemnly affirm that such consent is given <strong>without any force, threat, or coercion,</strong> and that I am executing this instrument with full knowledge of its legal consequences. </p>
+       {/* Clarity dead clicks (session 5maopk, Sep 4, mobile): a prospective
+           astrologer read this agreement to the end and then tapped the
+           "Astrologer Full Name" / "Date" row repeatedly at 05:26-05:28, got
+           nothing, and left. Clarity named the element "Astrologer Full Name
+           Date" because that is the concatenated text of the whole
+           `.signatureRow`, so the taps landed on the row, not on one label.
+
+           Nothing here is an input and nothing ever was — this block is a
+           facsimile of the paper contract's execution area, built from `<span>`
+           labels and `<span>` rules. But it looked exactly like a form on a
+           phone: a bold label sitting above a solid dark full-width underline,
+           inside a filled grey card, and `.signatureRow` collapses to
+           `flex-direction: column` under 768px so every field stretches to the
+           full width the way a mobile text field does. Tapping it is the
+           correct reading of what was on screen.
+
+           Deliberately NOT converting these to real inputs. There is no form,
+           no state, no submit and no endpoint for an executed agreement on this
+           page; per the PREAMBLE, acceptance on the Platform happens by
+           completing registration. Building a signing flow is a legal and
+           product decision, not a dead-click fix. Instead: say what the block
+           is for, point prospective astrologers at the partnership address that
+           section 13 above already publishes, and take away the input
+           affordance in the stylesheet (`.signatureLine` is now a dashed rule
+           and the card fill is gone). */}
+       <p className={styles.paragraph}>
+         The execution block below reproduces the signature area of the printed
+         agreement and is not fillable here. Acceptance on the Platform is
+         recorded when you complete astrologer registration, as set out in the
+         Preamble. To request a countersigned copy or to begin onboarding, email{" "}
+         <a href="mailto:astro-partners@shubhastro.com" className={styles.link}>astro-partners@shubhastro.com</a>.
+       </p>
        <div className={styles.signatureBlock}>
         <div className={styles.signatureRow}>
           <div className={styles.signatureField}>
             <span className={styles.signatureLabel}>Astrologer Full Name</span>
-            <span className={styles.signatureLine}></span>
+            <span className={styles.signatureLine} aria-hidden="true"></span>
           </div>
           <div className={styles.signatureDateField}>
             <span className={styles.signatureLabel}>Date</span>
-            <span className={styles.signatureLine}></span>
+            <span className={styles.signatureLine} aria-hidden="true"></span>
           </div>
         </div>
         <div className={styles.signatureRow}>
           <div className={styles.signatureField}>
             <span className={styles.signatureLabel}>Astrologer Signature</span>
-            <span className={styles.signatureLine}></span>
+            <span className={styles.signatureLine} aria-hidden="true"></span>
           </div>
           <div className={styles.signatureDateField}>
             <span className={styles.signatureLabel}>Date</span>
-            <span className={styles.signatureLine}></span>
+            <span className={styles.signatureLine} aria-hidden="true"></span>
           </div>
         </div>
         <div className={styles.signatureRow}>
           <div className={styles.signatureField}>
             <span className={styles.signatureLabel}>PAN Number</span>
-            <span className={styles.signatureLine}></span>
+            <span className={styles.signatureLine} aria-hidden="true"></span>
           </div>
           <div className={styles.signatureDateField}>
             <span className={styles.signatureLabel}>Date</span>
-            <span className={styles.signatureLine}></span>
+            <span className={styles.signatureLine} aria-hidden="true"></span>
           </div>
         </div>
         <div className={styles.signatureRow}>
           <div className={styles.signatureField}>
             <span className={styles.signatureLabel}>Bank Account (Last 4 digits)</span>
-            <span className={styles.signatureLine}></span>
+            <span className={styles.signatureLine} aria-hidden="true"></span>
           </div>
           <div className={styles.signatureDateField}>
             <span className={styles.signatureLabel}>Date</span>
-            <span className={styles.signatureLine}></span>
+            <span className={styles.signatureLine} aria-hidden="true"></span>
           </div>
         </div>
         <div className={styles.signatureRow}>
           <div className={styles.signatureField}>
             <span className={styles.signatureLabel}>For Shubhastro (Authorized Signatory)</span>
-            <span className={styles.signatureLine}></span>
+            <span className={styles.signatureLine} aria-hidden="true"></span>
           </div>
           <div className={styles.signatureDateField}>
             <span className={styles.signatureLabel}>Date</span>
-            <span className={styles.signatureLine}></span>
+            <span className={styles.signatureLine} aria-hidden="true"></span>
           </div>
         </div>
       </div>

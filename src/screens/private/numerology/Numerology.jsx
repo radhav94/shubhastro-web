@@ -515,9 +515,7 @@ const NumerologyWeb = () => {
                 </span>
               </div>
               <div className={styles.cardBody}>
-                <div className={styles.cardContent}>
                   <p className={styles.cardDescription}>{item.meaning}</p>
-                </div>
                 {item?.number && <div className={styles.cardNumber}>{item.number}</div>}
               </div>
             </div>

@@ -482,10 +482,38 @@
   <link rel="dns-prefetch" href="https://www.gstatic.com" />
   <link rel="dns-prefetch" href="https://firebaseinstallations.googleapis.com" />
 
-  <!-- Non-render-blocking font load -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" /></noscript>
+  <!--
+    Non-render-blocking font load.
+
+    Poppins only. `Montserrat` and `Open+Sans` used to be requested here too and
+    were never referenced anywhere: `grep -rn "Montserrat\|Open Sans" src`
+    returns zero matches, and every `$font-primary` SCSS variable in the codebase
+    resolves to `"Poppins", sans-serif`.
+
+    That mattered more than it looks. Google Fonts emits one `@font-face` block
+    per weight *per unicode subset* (latin, latin-ext, and for Open Sans also
+    cyrillic, greek, vietnamese…), so three families expanded to 60 blocks.
+    Measured against the same mobile UA:
+
+        before  32,371 B CSS, 60 @font-face blocks
+        after    6,078 B CSS, 15 @font-face blocks   (-26,293 B, -81%)
+
+    To be precise about the win: unused `@font-face` rules do not download font
+    files, so this does not remove 5 font fetches. What it removes is 26 KB of
+    CSS on the critical path plus 45 redundant `@font-face` rules the browser
+    would otherwise parse and keep in its font-matching set.
+
+    All five Poppins weights are kept because all five are used — measured across
+    src: 600 x1614, 500 x569, 700 x485 (+31 `bold`, +11 `font-bold`), 400 x158,
+    800 x27. Do not trim these without re-counting.
+
+    Two weights are referenced but NOT requested and so already fall back:
+    `font-weight: 900` (5 uses) and `300` (4 uses). Pre-existing and cosmetic —
+    left alone rather than adding two more font files for 9 declarations.
+  -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" /></noscript>
 
   <!--
     Body background preload, split by viewport.
@@ -511,9 +539,28 @@
     it just stops outranking the script that unblocks the actual LCP element.
     `background-color: #ebecf2` in the inline CSS below covers the gap, so the
     later paint is a colour-to-artwork swap, not a flash of white.
+
+    Applied 2026-09-04: the paragraph above has said "deliberately NOT set to
+    high" for some time, but both tags still carried `fetchpriority="high"`. The
+    reasoning was written and never applied to the markup. Independently
+    re-verified before removing it: per the Largest Contentful Paint API, an
+    element with a `url()` background IS an LCP candidate, but Chromium excludes
+    "elements that cover the full viewport, that are likely considered as
+    background rather than content" (web.dev/articles/lcp). This artwork is
+    `background-size: cover; background-attachment: fixed` on
+    `body.home-v2-page`, i.e. full-viewport, so it cannot be the LCP element and
+    cannot be harmed by dropping to default preload priority.
+
+    Measured payloads over the wire, for the record:
+      main-body-bg-new.png         486,842 B  (desktop, >=768px)
+      main-body-bg-new-mobile.png   98,604 B  (mobile,  <=767px)
+
+    Both are PNG. Converting them to WebP/AVIF is the far larger win and is
+    blocked on the CDN assets existing — once they do, wire up `image-set()` with
+    a PNG fallback rather than re-adding priority here.
   -->
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" fetchpriority="high" media="(min-width: 768px)" />
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" fetchpriority="high" media="(max-width: 767px)" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" media="(min-width: 768px)" />
+  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" media="(max-width: 767px)" />
   <!-- Removed: an unconditional high-priority preload of images/ai-suite.png.
        It is the `heroBg` for HomeV2/HomeNew only, so every other route fetched
        it at fetchpriority="high" and never painted it. index.html is shared by
@@ -910,165 +957,82 @@
   <!-- End Google tag (gtag.js) -->
 
  <!-- Branch.io Script (production only) -->
-<!-- Branch.io Script (production only) -->
 <script>
-(function () {
-    // if (!window.__analyticsHostAllowed__) {
-    //     console.log("[Branch] Analytics host not allowed");
-    //     return;
-    // }
+// Declare Branch Key variable
+var branchKey = "%VITE_BRANCH_KEY%";
 
-    // Create Branch SDK queue/stub
-    (function(b, r, a, n, c, h, _, s, d, k) {
-        if (!b[n]) {
-            b[n] = {};
-            b[n].q = [];
-
-            for (; s < _.length;) {
-                c = _[s++];
-                k = b[n][c];
-
-                b[n][c] = function(a, c) {
-                    return function(d, e) {
-                        b[n].q.push([c, a, d, e]);
-                        if (!k) return;
-                    };
-                }(c, k);
-            }
+(function(b, r, a, n, c, h, _, s, d, k) {
+    if (!b[n] || !b[n]._q) {
+        for (; s < _.length;) {
+            c(h, _[s++]);
         }
-    })(window, window.branch || {}, 'branch', [
-        "addListener",
-        "applyCode",
-        "banner",
-        "closeBanner",
-        "closeJourney",
-        "creditHistory",
-        "credits",
-        "data",
-        "deepview",
-        "deepviewCta",
-        "first",
-        "getCode",
-        "init",
-        "links",
-        "logout",
-        "redeem",
-        "referrals",
-        "removeListener",
-        "sendSMS",
-        "setIdentity",
-        "track",
-        "validateCode",
-        "trackCommerceEvent",
-        "trackContentEvent",
-        "trackLifecycleEvent",
-        "trackUserEvent",
-        "triggerInstallSearch",
-        "version",
-        "vitals"
-    ], "branch");
-})();
-</script>
 
-<script>
-(function () {
-    console.log("[Branch] 1️⃣ Loading Branch SDK...");
+        d = r.createElement(a);
+        d.async = 1;
+        d.src = "https://cdn.branch.io/branch-latest.min.js";
 
-    var script = document.createElement("script");
-    script.src = "https://cdn.branch.io/branch-latest.min.js";
-    script.async = true;
+        k = r.getElementsByTagName(a)[0];
+        k.parentNode.insertBefore(d, k);
 
-    script.onload = function () {
-        console.log("[Branch] 2️⃣ SDK loaded");
-        console.log("[Branch] window.branch type:", typeof window.branch);
-        console.log("[Branch] window.branch.init type:", typeof window.branch?.init);
+        b[n] = h;
+    }
+})(
+    window,
+    document,
+    "script",
+    "branch",
+    function(b, r) {
+        b[r] = function() {
+            b._q.push([r, arguments]);
+        };
+    },
+    {
+        _q: [],
+        _v: 1
+    },
+    "addListener banner closeBanner closeJourney data deepview deepviewCta first init link logout removeListener setBranchViewData setIdentity track trackCommerceEvent logEvent disableTracking getBrowserFingerprintId crossPlatformIds lastAttributedTouchData setAPIResponseCallback qrCode setRequestMetaData setAPIUrl getAPIUrl setDMAParamsForEEA".split(" "),
+    0
+);
 
-        // Get branch key from Vite env (replaced at build time)
-        var branchKey = "%VITE_BRANCH_KEY%";
-        
-        console.log("[Branch] Branch key format:", branchKey);
-        console.log("[Branch] Is placeholder?", branchKey.indexOf("%") !== -1);
-        
-        if (!branchKey || branchKey.indexOf("%") !== -1) {
-            console.error("[Branch] ❌ Branch key not configured:", branchKey);
+branch.init(
+    branchKey,
+    function(err, data) {
+
+        if (err) {
+            console.error("[Branch] INIT ERROR:", err);
             return;
         }
 
-        console.log("[Branch] 3️⃣ Calling window.branch.init()...");
-        console.log("[Branch] ✅ window.branch exists before init:", !!window.branch);
+        console.log("[Branch] INIT SUCCESS:", data);
 
-        var initStartTime = Date.now();
-        var initCalled = false;
-
-        window.branch.init(
-            branchKey,
+        branch.logEvent(
+            "TEST_BRANCH_EVENT",
             {
-                tracking_disabled: false
+                test: true,
+                source: "react_web",
+                page: window.location.href,
+                timestamp: new Date().toISOString()
             },
-            function (err, data) {
-                var initTime = Date.now() - initStartTime;
-                console.log("[Branch] ⏱️  Init callback took:", initTime + "ms");
-                
-                initCalled = true;
-                console.log("[Branch] ✅ Init callback CALLED");
-                
-                if (err) {
-                    console.error("[Branch] ❌ INIT ERROR:", err);
-                    console.error("[Branch] ❌ Error details:", JSON.stringify(err));
-                    return;
+            function(eventErr, result) {
+
+                if (eventErr) {
+                    console.error(
+                        "[Branch] EVENT ERROR:",
+                        eventErr
+                    );
+                } else {
+                    console.log(
+                        "[Branch] EVENT SUCCESS:",
+                        result
+                    );
                 }
 
-                console.log("[Branch] ✅ 4️⃣ Init SUCCESS");
-                console.log("[Branch] ✅ Init data:", data);
-                console.log("[Branch] ✅ window.branch.ready:", window.branch?.ready);
-
-                console.log("[Branch] 5️⃣ Calling window.branch.track()...");
-
-                var trackStartTime = Date.now();
-                window.branch.track(
-                    "TEST_BRANCH_EVENT",
-                    {
-                        event_category: "test",
-                        event_type: "test_event",
-                        test_name: "app_initialized",
-                        environment: "development",
-                        test_timestamp: new Date().toISOString()
-                    },
-                    function(err, result) {
-                        var trackTime = Date.now() - trackStartTime;
-                        console.log("[Branch] ⏱️  Track callback took:", trackTime + "ms");
-                        
-                        if (err) {
-                            console.error("[Branch] ❌ Track error:", err);
-                            console.error("[Branch] ❌ Track error details:", JSON.stringify(err));
-                        } else {
-                            console.log("[Branch] ✅ Track success:", result);
-                        }
-                    }
-                );
-
-                console.log("[Branch] ✅ 6️⃣ Track() called");
-                console.log("[Branch] ✅ Waiting for api2.branch.io network request...");
             }
         );
-
-        console.log("[Branch] ✅ init() method was called");
-        
-        // Safety check: log if callback never fires
-        setTimeout(function() {
-            if (!initCalled) {
-                console.error("[Branch] ⚠️  INIT CALLBACK NOT CALLED after 5 seconds!");
-            }
-        }, 5000);
-    };
-
-    script.onerror = function () {
-        console.error("[Branch] ❌ SDK failed to load from CDN");
-    };
-
-    document.head.appendChild(script);
-})();
+    }
+);
 </script>
+
   <!-- End Branch.io CDN Script -->
 
 
