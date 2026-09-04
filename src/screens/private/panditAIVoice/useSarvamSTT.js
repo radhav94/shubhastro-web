@@ -17,6 +17,15 @@ export default function useSarvamSTT({ onResult, onEnd }) {
   const [isSupported] = useState(
     typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia
   );
+  /*
+   * Why the mic failure is state rather than only a console line.
+   *
+   * `navigator.mediaDevices` is commonly absent in embedded in-app browsers
+   * (Instagram, Facebook, Messenger), which is what `isSupported` catches — and
+   * even where it exists the permission can be refused. Both used to be silent.
+   * Callers read this to tell the user what happened.
+   */
+  const [error, setError] = useState(null);
 
   const mediaRecorderRef = useRef(null);
   const streamRef = useRef(null);
@@ -56,6 +65,7 @@ export default function useSarvamSTT({ onResult, onEnd }) {
 
   const startListening = useCallback(async () => {
     if (!isSupported) return;
+    setError(null);
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -167,6 +177,19 @@ export default function useSarvamSTT({ onResult, onEnd }) {
       setIsListening(true);
     } catch (err) {
       console.error("[SarvamSTT] Mic access error:", err);
+      /*
+        This used to be the console.error alone, so a refused or unavailable
+        microphone left the caller with no way to say anything: the mic button
+        went back to "Tap to start" and the tap looked ignored. Name the cause so
+        the UI can print it. See session ypvzho.
+      */
+      setError(
+        err?.name === "NotAllowedError" || err?.name === "PermissionDeniedError"
+          ? "Microphone access was blocked. Allow it in your browser settings, or type your question instead."
+          : err?.name === "NotFoundError"
+            ? "No microphone found on this device. Type your question instead."
+            : "Couldn't start the microphone. Please try again, or type your question instead."
+      );
       setIsListening(false);
     }
   }, [isSupported, stopRecording]);
@@ -175,5 +198,5 @@ export default function useSarvamSTT({ onResult, onEnd }) {
     stopRecording();
   }, [stopRecording]);
 
-  return { isListening, isTranscribing, isSupported, startListening, stopListening };
+  return { isListening, isTranscribing, isSupported, error, startListening, stopListening };
 }

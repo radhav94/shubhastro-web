@@ -13,6 +13,10 @@ export const useProfileManager = (dispatch) => {
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
+  // Bumped when submission is blocked on a birth place with no coordinates, to
+  // bring the suggestion list back up. Consumers pass it to the birth-place
+  // LocationSearch. See the guard in handleSubmitProfile.
+  const [placeReopenSignal, setPlaceReopenSignal] = useState(0);
 
   // Get Redux form data
   const reduxUserDetails = useSelector((state) => state?.form?.userDetails);
@@ -219,6 +223,27 @@ export const useProfileManager = (dispatch) => {
     */
     if (!formData.latitude || !formData.longitude) {
       Toast.error("Please select a valid location from the dropdown");
+      /*
+        Put the dropdown that message refers to back on screen.
+
+        `reopenSignal` has existed in locationSearchVedic.jsx for a while and is
+        wired into AddProfileModal and EditProfileModal, but this hook was left
+        toasting alone. Coordinates are only ever set by picking a suggestion, so
+        the message named a control that was not showing — and the caller cannot
+        fix that by focusing the input, because `focus()` fires no event on an
+        already-focused field, which is exactly the state someone is in when they
+        tap submit straight after typing.
+
+        Clarity dead clicks (session 1lkvwpx, Sep 4, Facebook in-app browser):
+        five minutes on a birth-details form, 39 clicks, "Please select a valid
+        loc" at 02:34 and again at 03:56, page refreshes at 03:14 and 04:28, then
+        back to the homepage having never completed. Clarity truncates the text,
+        but "select a valid" matches this string rather than GuestDetailsForm's
+        "Please pick a location from the dropdown".
+      */
+      if (formData.birthPlace?.trim()) {
+        setPlaceReopenSignal((n) => n + 1);
+      }
       return;
     }
 
@@ -374,6 +399,8 @@ export const useProfileManager = (dispatch) => {
     handleEditProfileFromListing,
     handleSubmitProfile,
     handleSubmitEditProfile,
+    /** Pass to the birth-place LocationSearch as `reopenSignal`. */
+    placeReopenSignal,
     formatProfileDisplay,
   };
 };

@@ -24,6 +24,14 @@ const ProfileModals = ({
     formatProfileDisplay,
     showContinueButton = false,
     onContinue,
+    /*
+      Incrementing counter from useProfileManager. Bumped when a submit is
+      blocked because the birth place has no coordinates, so the suggestion list
+      the error message points at is actually put back on screen. Defaults to 0,
+      which LocationSearch treats as "no signal", so a consumer that does not
+      pass it behaves exactly as before. See session 1lkvwpx.
+    */
+    placeReopenSignal = 0,
 }) => {
     return (
         <>
@@ -219,6 +227,7 @@ const ProfileModals = ({
                                 <div className={styles.formGroup}>
                                     <label>Place of Birth</label>
                                     <LocationSearch
+                                        reopenSignal={placeReopenSignal}
                                         value={formData.birthPlace}
                                         /* Coordinates are cleared on edit so a
                                            hand-typed name can't be submitted with
