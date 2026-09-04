@@ -538,7 +538,39 @@ const AIWow = () => {
               {isHistoryLoading && historyPage === 1 ? (
                 <PrimaryLoader fullscreen={false} />
               ) : historyList.length === 0 ? (
-                <div className={styles.resultsPlaceholder}>No history found</div>
+                /*
+                  Clarity dead clicks (session 1wl115p, Sep 4, Facebook in-app
+                  browser): opened Result History at 04:44, found no records, and
+                  kept tapping around before leaving.
+
+                  This was `<div className={styles.resultsPlaceholder}>No history
+                  found</div>` — and that class is a `min-height: 300px;
+                  min-width: 300px` translucent white card with `border-radius:
+                  12px` and centred text. So the entire tab was one big
+                  card-shaped surface with no handler on it, and it is the only
+                  thing on screen once the tab is empty. Tapping it is the
+                  obvious thing to try.
+
+                  Same defect as the TalkToAstrologer empty state and the AI-Wow
+                  checklist titles: static content wearing an interactive
+                  appearance. Rather than only making it look inert, give the tap
+                  something to do — a new visitor has no history precisely
+                  because they have not run a feature yet, and the features are
+                  one tab away.
+                */
+                <div className={styles.resultsPlaceholder} role="status">
+                  <p className={styles.resultsPlaceholderTitle}>No reports yet</p>
+                  <p className={styles.resultsPlaceholderText}>
+                    Reports you generate with Shubh AI will appear here.
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.resultsPlaceholderCta}
+                    onClick={() => setActiveTab("aiwow")}
+                  >
+                    Explore Shubh AI
+                  </button>
+                </div>
               ) : (
                 <>
                   {historyList.map((item) => (
