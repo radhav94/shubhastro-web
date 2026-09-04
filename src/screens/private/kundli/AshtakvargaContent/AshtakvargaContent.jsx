@@ -90,7 +90,13 @@ const AshtakvargaContent = () => {
         </button>
       </div>
 
-      <PrimaryLoader isLoading={loading} />
+      {/* `fullscreen={false}` — same reasoning as ChartsContent/NorthIndian.jsx,
+          where the full note lives. This tab renders its heading, description and
+          charts progressively while `loading` stays true until the slowest of the
+          eight Ashtakvarga queries above lands, and a fullscreen overlay
+          (position: fixed, inset: 0, z-index 999999, no pointer-events: none)
+          intercepted every tap on content that was already readable behind it. */}
+      <PrimaryLoader isLoading={loading} fullscreen={false} />
 
       <div className={styles.textContainer}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
