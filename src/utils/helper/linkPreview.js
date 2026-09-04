@@ -88,15 +88,59 @@ export const extractDomain = (url) => {
 };
 
 /**
- * Splits text into plain and URL segments so a renderer can turn the URLs into
- * real links *in place*.
+ * Matches Markdown-style links so we can render the *label* as the clickable
+ * text and point it at the real URL — instead of dumping the raw
+ * `[label](url)` syntax on screen.
  *
- * Chat bubbles used to render the message text verbatim and then append a
- * separate clickable preview below it. The URL therefore appeared twice, and the
- * copy inside the sentence — the one a reader actually clicks — was inert text.
+ * Handles three shapes, all of which turn up in AI/CMS content:
  *
- * Trailing punctuation is trimmed off the href because the regex is greedy up to
- * whitespace, so "see https://x.com/a." would otherwise link to a 404.
+ *   1. Well-formed:            `[label](https://x.com/p)`
+ *   2. Escaped parens:         `[label]\(https://x.com/p\)`  (LLMs often escape)
+ *   3. Malformed / nested:     `[label]\([https://x.com/p](https://x.com/p))`
+ *      — the label text itself is a second Markdown link and the whole thing is
+ *      wrapped in an extra pair of parens. This is the "Business Pathfinder"
+ *      case: it read as `Our [Business Pathfinder]\([https://…](https://…))`.
+ *
+ * The label is captured non-greedily and the URL group only accepts a real
+ * `http(s)://…` target so ordinary bracketed prose like `[note] (see below)` is
+ * left untouched. A trailing `)` (from the malformed wrapper) is tolerated and
+ * dropped.
+ */
+const MARKDOWN_LINK_REGEX =
+  /\[([^\][]+?)\]\\?\(\s*(?:\[[^\][]*?\]\\?\()?\s*(https?:\/\/[^\s()\\]+)[^)]*\)?\s*\)?/g;
+
+/**
+ * Strips any leftover Markdown link markup from a label so the visible text is
+ * clean — e.g. a label that is itself `[https://x.com](https://x.com)` collapses
+ * to just the inner text.
+ * @param {string} label
+ * @returns {string}
+ */
+const cleanLinkLabel = (label) => {
+  if (!label) return label;
+  const inner = label.match(/^\s*\[([^\][]+?)\]\\?\(.*\)\s*$/);
+  return (inner ? inner[1] : label).trim();
+};
+
+/**
+ * Splits text into plain, URL, and Markdown-link segments so a renderer can turn
+ * links into real anchors *in place*.
+ *
+ * Two kinds of links are recognised, in priority order:
+ *
+ *   1. Markdown links — `[label](url)` and its escaped / malformed variants —
+ *      which render with `label` as the visible, clickable text.
+ *   2. Bare URLs — `https://…` — which render with the URL itself as the text.
+ *
+ * Chat bubbles used to render the message text verbatim, so a URL either
+ * appeared twice (once inert in the sentence, once in a preview) or, for
+ * Markdown links, showed the raw `[label](url)` syntax. Both are now proper
+ * clickable anchors carrying the original label and target.
+ *
+ * Every URL part exposes `value` (the text to display) and `href` (the target)
+ * separately, so a Markdown link shows its label while a bare URL shows the URL.
+ * Trailing punctuation is trimmed off bare-URL hrefs because the regex is greedy
+ * up to whitespace, so "see https://x.com/a." would otherwise link to a 404.
  *
  * @param {string} text
  * @returns {Array<{ type: 'text'|'url', value: string, href?: string }>}
@@ -104,30 +148,75 @@ export const extractDomain = (url) => {
 export const splitTextByURL = (text) => {
   if (!text || typeof text !== 'string') return [];
 
-  const parts = [];
-  // A fresh regex per call: URL_REGEX is global and shared, so reusing it here
-  // would carry lastIndex across calls and drop matches at random.
-  const pattern = /(https?:\/\/[^\s]+)/g;
-  let lastIndex = 0;
-  let match;
+  // Pass 1: pull out Markdown links, keeping the surrounding text as segments to
+  // be scanned for bare URLs in pass 2. Fresh regex per call — the shared global
+  // patterns carry lastIndex across calls and would drop matches at random.
+  const mdPattern = new RegExp(MARKDOWN_LINK_REGEX.source, 'g');
+  const segments = [];
+  let cursor = 0;
+  let mdMatch;
 
-  while ((match = pattern.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push({ type: 'text', value: text.slice(lastIndex, match.index) });
+  while ((mdMatch = mdPattern.exec(text)) !== null) {
+    if (mdMatch.index > cursor) {
+      segments.push({ kind: 'scan', value: text.slice(cursor, mdMatch.index) });
     }
-
-    const raw = match[0];
-    const trailing = raw.match(/[.,;:!?)\]}'"]+$/)?.[0] || '';
-    const href = trailing ? raw.slice(0, -trailing.length) : raw;
-
-    parts.push({ type: 'url', value: href, href });
-    if (trailing) parts.push({ type: 'text', value: trailing });
-
-    lastIndex = pattern.lastIndex;
+    const label = cleanLinkLabel(mdMatch[1]) || mdMatch[2];
+    segments.push({ kind: 'link', value: label, href: mdMatch[2] });
+    cursor = mdPattern.lastIndex;
+  }
+  if (cursor < text.length) {
+    segments.push({ kind: 'scan', value: text.slice(cursor) });
   }
 
-  if (lastIndex < text.length) {
-    parts.push({ type: 'text', value: text.slice(lastIndex) });
+  // Pass 2: expand the plain segments into text + bare-URL parts.
+  const parts = [];
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+
+  segments.forEach((segment) => {
+    if (segment.kind === 'link') {
+      parts.push({ type: 'url', value: segment.value, href: segment.href });
+      return;
+    }
+
+    const chunk = segment.value;
+    let lastIndex = 0;
+    let match;
+    urlPattern.lastIndex = 0;
+
+    while ((match = urlPattern.exec(chunk)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push({ type: 'text', value: chunk.slice(lastIndex, match.index) });
+      }
+
+      const raw = match[0];
+      const trailing = raw.match(/[.,;:!?)\]}'"]+$/)?.[0] || '';
+      const href = trailing ? raw.slice(0, -trailing.length) : raw;
+
+      parts.push({ type: 'url', value: href, href });
+      if (trailing) parts.push({ type: 'text', value: trailing });
+
+      lastIndex = urlPattern.lastIndex;
+    }
+
+    if (lastIndex < chunk.length) {
+      parts.push({ type: 'text', value: chunk.slice(lastIndex) });
+    }
+  });
+
+  // Guarantee a space between a link and any word-character text glued directly
+  // to it. Malformed Markdown from the model sometimes closes with no separator
+  // (`…business-pathfinder))maps your`), which would otherwise render as
+  // "Business Pathfindermaps". Insert the space the reader expects rather than
+  // trusting the source to have one.
+  for (let i = 0; i < parts.length - 1; i += 1) {
+    const current = parts[i];
+    const next = parts[i + 1];
+    if (current.type === 'url' && next.type === 'text' && /^\w/.test(next.value)) {
+      next.value = ` ${next.value}`;
+    }
+    if (next.type === 'url' && current.type === 'text' && /\w$/.test(current.value)) {
+      current.value = `${current.value} `;
+    }
   }
 
   return parts;
