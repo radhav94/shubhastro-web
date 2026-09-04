@@ -1,4 +1,4 @@
-import { Suspense, useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback, lazy } from "react";
 import styles from "./HomeLayout.module.scss";
 import TopHeader from "../component/TopHeader";
 import { Outlet, useMatches, useLocation, Link } from "react-router-dom";
@@ -13,6 +13,12 @@ import StickyChatFooter from "../screens/private/home/components/chats/StickyCha
 import StickyCallFooter from "../screens/private/home/components/call/StickyCallFooter";
 import StickyReview from "../screens/private/home/components/call/StickyReview";
 import StickyWaitingQueue from "../component/UI/waitingQueue/StickyWaitingQueue";
+
+// Pandit AI floating bubbles — mounted once here (globally) so the "Ask AI
+// Pandit" button on every report/screen has a listener for its `panditai:ask`
+// event. Lazy + idle-deferred so they stay off the first-paint / LCP path.
+const PanditAIBubble = lazy(() => import("../component/panditAI/PanditAIBubble"));
+const PanditAIVoiceBubble = lazy(() => import("../component/panditAI/PanditAIVoiceBubble"));
 
 
 import NoInternet, { useOnlineStatus } from "../component/NoInternet/NoInternet";
@@ -273,7 +279,21 @@ const HomeLayout = () => {
   // Clear aiwow session data when navigating away from aiwow pages
   useAiwowCleanup();
 
-
+  // Mount the Pandit AI floating bubbles once the browser is idle, so they are
+  // absent from the DOM during first paint (kept off the LCP path) but present
+  // on every route thereafter — this is what makes the "Ask AI Pandit" button
+  // on the reports open the chat (it dispatches `panditai:ask`, which the bubble
+  // listens for).
+  const [showBubbles, setShowBubbles] = useState(false);
+  useEffect(() => {
+    const reveal = () => setShowBubbles(true);
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(reveal, { timeout: 2500 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    const timer = setTimeout(reveal, 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   const currentRoute = matches
     .reverse()
@@ -285,6 +305,12 @@ const HomeLayout = () => {
 
   // Hide header/footer in webview mode (?type=webview)
   const isWebview = new URLSearchParams(location.search).get("type") === "webview";
+
+  // The floating Pandit AI pill is only shown on the home ("/") landing. Every
+  // other screen keeps the bubble MOUNTED (so its `panditai:ask` listener stays
+  // alive for the in-page "Ask Pandit AI" buttons on the reports) but suppresses
+  // the visible launcher via `hideBubble`.
+  const isHomePage = location.pathname === "/";
 
   const isOnboardingPage = location.pathname === "/login";
   const isLivePage = location.pathname.startsWith("/live") && !location.pathname.startsWith("/live-chat-policy");
@@ -406,6 +432,20 @@ const HomeLayout = () => {
       <StickyCallFooter />
       {!isLivePage && !isGuestChatPage && <StickyWaitingQueue />}
       <StickyReview />
+
+      {/* Pandit AI bubbles — global, so "Ask AI Pandit" works on every screen.
+          The floating pill is hidden on report screens (gemstone / rashi / face
+          results + muhurat calendar): those have their own in-page "Ask AI
+          Pandit" button, so the floating launcher would be redundant there.
+          The bubbles still mount (the listener stays live) so the in-page button
+          keeps working — only the pill's own launcher is suppressed via
+          `hideAiPanditBubble`. */}
+      {showBubbles && (
+        <Suspense fallback={null}>
+          <PanditAIBubble hideBubble={!isHomePage} />
+          <PanditAIVoiceBubble />
+        </Suspense>
+      )}
     </div>
   );
 };
