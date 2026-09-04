@@ -96,10 +96,25 @@ export const extractDomain = (url) => {
  *
  *   1. Well-formed:            `[label](https://x.com/p)`
  *   2. Escaped parens:         `[label]\(https://x.com/p\)`  (LLMs often escape)
- *   3. Malformed / nested:     `[label]\([https://x.com/p](https://x.com/p))`
+ *   3. Malformed / nested:     `[label]\([label-is-a-link](url))`
  *      — the label text itself is a second Markdown link and the whole thing is
  *      wrapped in an extra pair of parens. This is the "Business Pathfinder"
- *      case: it read as `Our [Business Pathfinder]\([https://…](https://…))`.
+ *      case: it read as `Our [Business Pathfinder]\([URL](URL))`.
+ *
+ * A note on how those examples are written. Tailwind's content scanner reads
+ * this file as raw text (`content: ["./src/**\/*.{js,ts,jsx,tsx}"]` in
+ * tailwind.config.js) — it does not parse JavaScript, so it sees comments too.
+ * A bracketed URL like `[https:` + `//…]` matches Tailwind's arbitrary-property
+ * syntax — an opening bracket, a property name, a colon, a value, a closing
+ * bracket, no spaces — so it emitted a real rule into the bundle:
+ *
+ *     .\[https\:\/\/\2026\] { https: //…; }
+ *
+ * which is not valid CSS. esbuild then warned on every build
+ * (`js-comment-in-css`, "Comments in CSS use /* ... *\/ instead of //") because
+ * it read the `//` as a comment. Harmless at runtime, but it is dead CSS and a
+ * permanent build warning. Placeholders without a `:` cannot be mistaken for an
+ * arbitrary property, so the examples above use `url` and `URL`.
  *
  * The label is captured non-greedily and the URL group only accepts a real
  * `http(s)://…` target so ordinary bracketed prose like `[note] (see below)` is

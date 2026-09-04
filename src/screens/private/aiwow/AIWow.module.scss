@@ -372,18 +372,55 @@
   margin: 0 auto;
 }
 
+/* Empty Result History state.
+
+   This was a bare centred line of text inside a 300x300 rounded translucent
+   card — card-shaped, handler-free, and the only thing on screen in an empty
+   tab, so it got tapped. Now a column with a real CTA that moves the visitor to
+   the features tab. See the note in AIWow.jsx (session 1wl115p). */
 .resultsPlaceholder {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   min-height: 300px;
   margin: 0 auto;
   min-width: 300px;
+  padding: 24px;
   background: rgba(255, 255, 255, 0.4);
   border-radius: 12px;
   color: #6b7280;
   font-size: 1rem;
   font-weight: 500;
+  text-align: center;
+}
+
+.resultsPlaceholderTitle {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.resultsPlaceholderText {
+  margin: 0;
+  max-width: 22rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.resultsPlaceholderCta {
+  margin-top: 10px;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .loadingMore {
