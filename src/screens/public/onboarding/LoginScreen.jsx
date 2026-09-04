@@ -276,7 +276,7 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
               <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="#F75801" strokeWidth="2" strokeLinecap="round"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="#F75801" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-            <span><b>10K+</b> Astrologers Online</span>
+            <b>10K+</b> Astrologers Online
           </div>
 
           {/*
@@ -312,13 +312,11 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
             onClick={handleGetOTP}
             title={`Enter your mobile number to claim ₹${signupBonus}`}
           >
-            <div className={styles.giftBox}>
-              <img
+              <img className={styles.giftBox}
                 src={rsBox}
                 alt="Gift"
                 loading="eager"
               />
-            </div>
             <div className={styles.offerText}>
               <h1>
                 <span className={styles.rupeeSymbol}>₹</span>
@@ -479,11 +477,11 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
                 disabled={truecallerBusy}
                 aria-busy={truecallerBusy}
               >
-                <span className={styles.truecallerIcon} aria-hidden="true">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                {/* <span className={styles.truecallerIcon} aria-hidden="true"> */}
+                  <svg className={styles.truecallerIcon} width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.24.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2z" />
                   </svg>
-                </span>
+                {/* </span> */}
                 {truecallerBusy ? "Verifying with Truecaller..." : "Continue with Truecaller"}
               </button>
             </>
@@ -579,13 +577,11 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
             className={styles.trustItem}
             onClick={() => handleTrustItemClick(`${title} ${sub}`)}
           >
-            <div className={styles.trustIcon}>
-              <img src={img} alt="" />
-            </div>
-            <div>
+              <img src={img} alt="" className={styles.trustIcon} />
+            <p>
               <strong>{title}</strong>
               <span>{sub}</span>
-            </div>
+            </p>
           </button>
         ))}
       </div>
