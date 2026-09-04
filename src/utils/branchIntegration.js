@@ -79,53 +79,18 @@ export const clearBranchUser = () => {
 };
 
 /**
- * Track Branch event
- * Complements branchEvents.js for GTM/GA4 tracking
+ * Track Branch event via common reusable function
+ * Uses window.trackBranchEvent for centralized event handling
  */
 export const trackBranchEvent = (eventName, properties = {}) => {
   try {
-    if (!isBranchAvailable()) {
-      if (IS_DEV) {
-        console.warn("[Branch] SDK not available for event:", eventName);
-        console.warn("[Branch] window.branch:", window.branch);
-      }
-      return;
-    }
-    
-    if (IS_DEV) {
-      console.log("[Branch] Tracking event:", eventName);
-      console.log("[Branch] Properties:", properties);
-    }
-    
-    // Track to Branch.io using track()
-    if (typeof window.branch.track === "function") {
-      window.branch.track(eventName, properties, (err, data) => {
-        if (err) {
-          if (IS_DEV) console.error("[Branch] Track error:", err);
-        } else {
-          if (IS_DEV) console.log("[Branch] ✓ Track response:", data);
-        }
-      });
-    }
-    
-    // Also try using the low-level API if available
-    if (typeof window.branch.logEvent === "function") {
-      window.branch.logEvent(eventName, null, properties);
-      if (IS_DEV) console.log("[Branch] ✓ Also sent via logEvent");
-    }
-    
-    // Try to flush events if method exists
-    if (typeof window.branch.flush === "function") {
-      window.branch.flush((err, data) => {
-        if (!err && IS_DEV) console.log("[Branch] ✓ Events flushed");
-      });
-    }
-    
-    if (IS_DEV) {
-      console.log("[Branch] Event track() and flush called for:", eventName);
+    if (typeof window !== "undefined" && typeof window.trackBranchEvent === "function") {
+      window.trackBranchEvent(eventName, properties);
+    } else if (IS_DEV) {
+      console.warn("[Branch] window.trackBranchEvent not available for event:", eventName);
     }
   } catch (error) {
-    if (IS_DEV) console.error("[Branch] Failed to track event:", error);
+    if (IS_DEV) console.error("[Branch] Failed to call window.trackBranchEvent:", error);
   }
 };
 
@@ -256,6 +221,30 @@ export const addBranchDeepLinkListener = (callback) => {
     if (IS_DEV) console.error("[Branch] Failed to add listener:", error);
   }
 };
+
+// Expose trackBranchEvent globally for use across the app
+if (typeof window !== "undefined") {
+  window.trackBranchEvent = function(eventName, eventData) {
+    console.log("📤 Branch event called:", eventName, eventData);
+
+    if (typeof window.branch === "undefined") {
+      console.warn("⚠️ Branch SDK not available:", eventName);
+      return;
+    }
+
+    window.branch.logEvent(
+      eventName,
+      eventData || {},
+      function(err) {
+        if (err) {
+          console.error("❌ Branch event failed:", eventName, err);
+        } else {
+          console.log("✅ Branch event sent:", eventName);
+        }
+      }
+    );
+  };
+}
 
 export default {
   isBranchAvailable,

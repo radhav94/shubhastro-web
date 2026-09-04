@@ -9,6 +9,7 @@ import { useWalletBalance } from '../../screens/private/wallet/useWalletBalance'
 import { AppIcons } from '../../utils/appImages';
 import Toast from '../toast';
 import { trackEvent } from '../../utils/analytics';
+import { BranchEvents } from '../../utils/branchEvents';
 import styles from './rechargeModal.module.scss';
 
 /**
@@ -90,6 +91,22 @@ const RechargeModal = ({
   const handleSelectPlan = useCallback((plan) => {
     if (!plan) return;
     setSelectedPlan(plan);
+
+    // Track Recharge Pack Selected event
+    BranchEvents.trackRechargePackSelected({
+      page_name: "Recharge",
+      route_name: "recharge",
+      route_path: window.location.pathname,
+      user_type: "logged_in",
+      user_id: localStorage.getItem("shubhtalk_customer_id"),
+      pack_id: plan?._id || null,
+      pack_name: plan?.name || "standard",
+      amount: plan?.actualPrice ?? plan?.amount ?? plan?.price,
+      currency: "INR",
+      source: "recharge_modal",
+      includes_bonus: !!plan?.bonus,
+      bonus_amount: plan?.bonus || 0,
+    });
 
     /*
      * Every amount here comes from the plans API — there is no free-text amount

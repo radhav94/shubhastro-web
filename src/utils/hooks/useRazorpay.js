@@ -3,6 +3,7 @@ import { useCreateOrderMutation, useVerifyPaymentMutation } from "../../redux/ap
 import { useLazyGetWalletBalanceQuery } from "../../redux/api/wallet/walletApi";
 import Toast from "../../component/toast";
 import { trackEvent } from "../analytics";
+import { BranchEvents } from "../branchEvents";
 
 // Constants
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
@@ -388,6 +389,23 @@ export const useRazorpayPayment = () => {
         amount,
         payment_method: PAYMENT_METHOD,
         new_balance: newBalance,
+      });
+
+      // Track Wallet Recharge Successful event
+      BranchEvents.trackWalletRechargeSuccessful({
+        page_name: "Payment Success",
+        route_name: "recharge-payment",
+        route_path: window.location.pathname,
+        user_type: "logged_in",
+        user_id: localStorage.getItem("shubhtalk_customer_id"),
+        pack_id: planData?._id || null,
+        pack_name: planData?.name || "standard",
+        amount: amount,
+        currency: "INR",
+        payment_method: PAYMENT_METHOD,
+        transaction_id: response?.razorpay_payment_id || null,
+        order_id: backendOrderId || null,
+        payment_status: "success",
       });
 
       // Step 4: Dispatch wallet update events
