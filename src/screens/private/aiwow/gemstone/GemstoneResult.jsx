@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-// import { Link } from 'react-router-dom'; // re-add when "Ask Shubh AI" is restored
+
 import { BsChatDots } from 'react-icons/bs';
 import { MdOutlinePhoneInTalk } from 'react-icons/md';
-import { Download, Share2 } from 'lucide-react'; // Sparkles removed with hidden "Ask Shubh AI" button
+import { Download, Share2, Sparkles } from 'lucide-react';
 import styles from './GemstoneResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
@@ -1020,11 +1020,13 @@ const GemstoneResult = () => {
                 >
                   <BsChatDots size={14} aria-hidden="true" /> Chat with astrologer
                 </a>
-                {/* Ask Shubh AI hidden for now
-                <Link to="/ai-wow" className={styles.actionTertiary}>
-                  <Sparkles size={14} aria-hidden="true" /> Ask Shubh AI · Free
-                </Link>
-                */}
+                <button
+                  type="button"
+                  className={styles.actionTertiary}
+                  onClick={() => window.dispatchEvent(new CustomEvent('panditai:ask'))}
+                >
+                  <Sparkles size={14} aria-hidden="true" /> Ask Pandit AI · Free
+                </button>
               </div>
             </div>
           </aside>
