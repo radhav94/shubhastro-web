@@ -39,6 +39,42 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
   const [status, setStatus] = useState("idle"); // idle | invoking | waiting | error
   const isSupported = isTruecallerSupported();
 
+  /*
+   * Inline answer for a re-tap while a run is already in flight.
+   *
+   * Clarity dead clicks (session yh6bcf, Sep 4, mobile Chrome from Facebook):
+   * "attempted to sign in via multiple methods, including Truecaller, but
+   * experienced several dead clicks and navigation loops between login and
+   * homepage" at 00:43 and again at 06:34 — two attempts six minutes apart,
+   * never signed in.
+   *
+   * Two things made a re-tap silent. The button carried native
+   * `disabled={truecallerBusy}` (fixed in LoginScreen.jsx), and the guard below
+   * returned with nothing but a debug log:
+   *
+   *     if (status === "invoking" || status === "waiting") {
+   *       tcLog("aborted_busy", { status });
+   *       return;                       // <- no toast, no UI, nothing
+   *     }
+   *
+   * `TRUECALLER_POLL_TIMEOUT_MS` is 45000, so "waiting" can hold for 45 seconds
+   * while the backend is polled every 3s. For that whole window the most
+   * important control on the login screen answered a tap with nothing at all.
+   *
+   * Rendered inline next to the button rather than toasted: every other message
+   * in this hook is a top-right `react-hot-toast`, which Clarity cannot record
+   * and which on a phone sits far from a button near the bottom of the screen.
+   * `seq` is bumped per tap so an unchanged string still remounts the node —
+   * repeated taps give Clarity a DOM mutation and screen readers re-announce.
+   */
+  const [notice, setNotice] = useState(null);
+  const noticeSeqRef = useRef(0);
+
+  const announce = useCallback((text) => {
+    noticeSeqRef.current += 1;
+    setNotice({ seq: noticeSeqRef.current, text });
+  }, []);
+
   // Timers/abort handles are cleaned up on unmount so a backgrounded login
   // can't keep polling or fire state updates after the screen is gone.
   const pollTimerRef = useRef(null);
@@ -188,10 +224,16 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
     }
     if (status === "invoking" || status === "waiting") {
       tcLog("aborted_busy", { status });
+      announce(
+        status === "invoking"
+          ? "Opening Truecaller — one moment."
+          : "Still waiting for Truecaller to confirm. If the app didn't open, use your mobile number below."
+      );
       return;
     }
 
     const requestId = generateRequestNonce();
+    setNotice(null);
     setStatus("invoking");
     trackEvent("truecaller_login_started", {});
 
@@ -349,7 +391,7 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
     } finally {
       cleanup();
     }
-  }, [cleanup, dispatch, isSupported, onLoggedIn, pollForCompletion, status]);
+  }, [announce, cleanup, dispatch, isSupported, onLoggedIn, pollForCompletion, status]);
 
   return {
     /** Render the Truecaller button only when this is true. */
@@ -362,6 +404,11 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
     /** "idle" | "invoking" | "waiting" | "error" */
     status,
     isBusy: status === "invoking" || status === "waiting",
+    /**
+     * `{ seq, text }` or null — render inline near the button under
+     * `role="status"`. Keyed on `seq` so a repeat tap remounts the node.
+     */
+    notice,
     loginWithTruecaller,
   };
 };

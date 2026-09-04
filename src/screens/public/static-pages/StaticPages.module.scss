@@ -434,13 +434,21 @@
   }
 }
 
-/* Signature Block */
+/* Signature Block
+   Clarity dead clicks (session 5maopk): this block is a facsimile of the
+   printed contract's execution area, not a form, but it was styled like one —
+   a filled grey card holding bold labels above solid dark full-width rules.
+   On mobile `.signatureRow` stacks to a single column, so each label+rule pair
+   rendered at exactly the width and spacing of a mobile text input and got
+   tapped. The card fill is gone and `.signatureLine` is now a dashed rule,
+   which is the paper-form convention and reads as "sign the printout" rather
+   than "type here". See the note in AstrologerOnboardingAgreement.jsx for why
+   these are not being converted into real inputs. */
 .signatureBlock {
   margin-top: 30px;
   padding: 24px;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  background-color: #fafafa;
 }
 
 .signatureRow {
@@ -477,8 +485,8 @@
 .signatureLine {
   display: block;
   width: 100%;
-  height: 1px;
-  background-color: #333;
+  height: 0;
+  border-bottom: 1px dashed #9ca3af;
   margin-top: 20px;
 }
 
