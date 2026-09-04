@@ -909,6 +909,169 @@
   
   <!-- End Google tag (gtag.js) -->
 
+ <!-- Branch.io Script (production only) -->
+<!-- Branch.io Script (production only) -->
+<script>
+(function () {
+    // if (!window.__analyticsHostAllowed__) {
+    //     console.log("[Branch] Analytics host not allowed");
+    //     return;
+    // }
+
+    // Create Branch SDK queue/stub
+    (function(b, r, a, n, c, h, _, s, d, k) {
+        if (!b[n]) {
+            b[n] = {};
+            b[n].q = [];
+
+            for (; s < _.length;) {
+                c = _[s++];
+                k = b[n][c];
+
+                b[n][c] = function(a, c) {
+                    return function(d, e) {
+                        b[n].q.push([c, a, d, e]);
+                        if (!k) return;
+                    };
+                }(c, k);
+            }
+        }
+    })(window, window.branch || {}, 'branch', [
+        "addListener",
+        "applyCode",
+        "banner",
+        "closeBanner",
+        "closeJourney",
+        "creditHistory",
+        "credits",
+        "data",
+        "deepview",
+        "deepviewCta",
+        "first",
+        "getCode",
+        "init",
+        "links",
+        "logout",
+        "redeem",
+        "referrals",
+        "removeListener",
+        "sendSMS",
+        "setIdentity",
+        "track",
+        "validateCode",
+        "trackCommerceEvent",
+        "trackContentEvent",
+        "trackLifecycleEvent",
+        "trackUserEvent",
+        "triggerInstallSearch",
+        "version",
+        "vitals"
+    ], "branch");
+})();
+</script>
+
+<script>
+(function () {
+    console.log("[Branch] 1️⃣ Loading Branch SDK...");
+
+    var script = document.createElement("script");
+    script.src = "https://cdn.branch.io/branch-latest.min.js";
+    script.async = true;
+
+    script.onload = function () {
+        console.log("[Branch] 2️⃣ SDK loaded");
+        console.log("[Branch] window.branch type:", typeof window.branch);
+        console.log("[Branch] window.branch.init type:", typeof window.branch?.init);
+
+        // Get branch key from Vite env (replaced at build time)
+        var branchKey = "%VITE_BRANCH_KEY%";
+        
+        console.log("[Branch] Branch key format:", branchKey);
+        console.log("[Branch] Is placeholder?", branchKey.indexOf("%") !== -1);
+        
+        if (!branchKey || branchKey.indexOf("%") !== -1) {
+            console.error("[Branch] ❌ Branch key not configured:", branchKey);
+            return;
+        }
+
+        console.log("[Branch] 3️⃣ Calling window.branch.init()...");
+        console.log("[Branch] ✅ window.branch exists before init:", !!window.branch);
+
+        var initStartTime = Date.now();
+        var initCalled = false;
+
+        window.branch.init(
+            branchKey,
+            {
+                tracking_disabled: false
+            },
+            function (err, data) {
+                var initTime = Date.now() - initStartTime;
+                console.log("[Branch] ⏱️  Init callback took:", initTime + "ms");
+                
+                initCalled = true;
+                console.log("[Branch] ✅ Init callback CALLED");
+                
+                if (err) {
+                    console.error("[Branch] ❌ INIT ERROR:", err);
+                    console.error("[Branch] ❌ Error details:", JSON.stringify(err));
+                    return;
+                }
+
+                console.log("[Branch] ✅ 4️⃣ Init SUCCESS");
+                console.log("[Branch] ✅ Init data:", data);
+                console.log("[Branch] ✅ window.branch.ready:", window.branch?.ready);
+
+                console.log("[Branch] 5️⃣ Calling window.branch.track()...");
+
+                var trackStartTime = Date.now();
+                window.branch.track(
+                    "TEST_BRANCH_EVENT",
+                    {
+                        event_category: "test",
+                        event_type: "test_event",
+                        test_name: "app_initialized",
+                        environment: "development",
+                        test_timestamp: new Date().toISOString()
+                    },
+                    function(err, result) {
+                        var trackTime = Date.now() - trackStartTime;
+                        console.log("[Branch] ⏱️  Track callback took:", trackTime + "ms");
+                        
+                        if (err) {
+                            console.error("[Branch] ❌ Track error:", err);
+                            console.error("[Branch] ❌ Track error details:", JSON.stringify(err));
+                        } else {
+                            console.log("[Branch] ✅ Track success:", result);
+                        }
+                    }
+                );
+
+                console.log("[Branch] ✅ 6️⃣ Track() called");
+                console.log("[Branch] ✅ Waiting for api2.branch.io network request...");
+            }
+        );
+
+        console.log("[Branch] ✅ init() method was called");
+        
+        // Safety check: log if callback never fires
+        setTimeout(function() {
+            if (!initCalled) {
+                console.error("[Branch] ⚠️  INIT CALLBACK NOT CALLED after 5 seconds!");
+            }
+        }, 5000);
+    };
+
+    script.onerror = function () {
+        console.error("[Branch] ❌ SDK failed to load from CDN");
+    };
+
+    document.head.appendChild(script);
+})();
+</script>
+  <!-- End Branch.io CDN Script -->
+
+
   <!-- Microsoft Clarity (production only) -->
   <script type="text/javascript">
     (function () {

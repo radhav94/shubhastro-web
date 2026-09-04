@@ -98,6 +98,8 @@ import { Toaster, ToastBar, toast } from "react-hot-toast";
 import { Provider } from "react-redux";
 import { store, persistor } from "./store/store.js";
 import { PersistGate } from "redux-persist/integration/react";
+import { trackTestEvent, BranchEvents } from "./utils/branchEvents";
+import { trackBranchEvent, flushBranchEvents } from "./utils/branchIntegration";
 /*
  * The `AgoraProvider` import that used to sit here was removed.
  *
@@ -195,3 +197,55 @@ createRoot(document.getElementById("root")).render(
   // </AgoraProvider>
   // </StrictMode>
 );
+
+// ========================================
+// 🧪 TEST EVENTS ON PAGE LOAD
+// ========================================
+// Call test events when app loads to verify tracking
+// Comment out when not testing
+// 
+// IMPORTANT: GTM and GA4 scripts load deferred with max 4000ms delay
+// (see index.html line ~624-670 for __deferTagScript__ config).
+// So we wait 4500ms to ensure they're loaded before firing test events.
+if (import.meta.env.DEV) {
+  // Wait for GTM/GA4 to be loaded via deferred script loader (max 4000ms)
+  setTimeout(() => {
+    // Debug: Check if GTM/GA4 are ready
+    if (typeof window !== "undefined") {
+      console.log("[TestEvents] Checking if GTM/GA4 are ready...");
+      console.log("[TestEvents] window.dataLayer:", typeof window.dataLayer);
+      console.log("[TestEvents] window.gtag:", typeof window.gtag);
+      console.log("[TestEvents] window.branch:", typeof window.branch);
+    }
+
+    // Test event to verify all systems are tracking
+    trackTestEvent("app_initialized", {
+      environment: "development",
+      app_name: "ShubhTalk",
+      timestamp: new Date().toISOString(),
+    });
+
+    // Test Branch event
+    trackBranchEvent("app_load_test", {
+      page: "index",
+      ready: true,
+    });
+
+    // Test BranchEvents GTM/GA4
+    BranchEvents.trackLandingPageOpen();
+
+    // Flush Branch events to ensure they're sent immediately
+    setTimeout(() => {
+      flushBranchEvents();
+    }, 500);
+
+    console.log("🧪 TEST EVENTS CALLED ON APP LOAD");
+    console.log("✓ Check console for [Analytics] logs (dataLayer push / gtag calls)");
+    console.log("✓ Check Network tab for googletagmanager.com requests");
+    console.log("✓ Check Network tab for google-analytics.com requests");
+    console.log("✓ Check Network tab for branch.io requests");
+    console.log("✓ Check GTM Preview panel for events");
+    console.log("✓ Check Branch Dashboard Liveview for events");
+    console.log("✓ Check GA4 DebugView for events");
+  }, 4500); // Wait 4500ms for GTM/GA4 deferred scripts to load (max wait is 4000ms)
+}
