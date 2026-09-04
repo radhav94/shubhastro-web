@@ -3,6 +3,7 @@ import { useCreateOrderMutation, useVerifyPaymentMutation } from "../../redux/ap
 import { useLazyGetWalletBalanceQuery } from "../../redux/api/wallet/walletApi";
 import Toast from "../../component/toast";
 import { trackEvent } from "../analytics";
+import { BranchEvents } from "../branchEvents";
 
 // Constants
 const RAZORPAY_SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
@@ -246,7 +247,20 @@ export const useRazorpayPayment = () => {
   /**
    * Create order on backend
    */
-  const createPaymentOrder = useCallback(async (planId) => {
+  const createPaymentOrder = useCallback(async (planId, planData) => {
+    // Amount the user intends to recharge, mirrored from the plan the same way
+    // the success/failure events read it, so create-order events are directly
+    // comparable to the rest of the funnel.
+    const intendedAmount = getPlanAmount(planData);
+
+    // Start of the create-order step — lets GA measure the drop-off between
+    // "user committed to pay" and "order actually created", which nothing
+    // reported before.
+    trackEvent("order_create_initiated", {
+      amount: intendedAmount,
+      payment_method: PAYMENT_METHOD,
+    });
+
     try {
       const orderPayload = {
         planId,
@@ -305,6 +319,14 @@ export const useRazorpayPayment = () => {
         throw new Error(ERROR_MESSAGES.INVALID_AMOUNT);
       }
 
+      // Order successfully created and validated — the previously implicit
+      // "create-order succeeded" signal (only inferable from
+      // payment_gateway_opened) is now explicit.
+      trackEvent("order_created", {
+        amount: intendedAmount ?? amount,
+        payment_method: PAYMENT_METHOD,
+      });
+
       return {
         orderId: orderData.order_ID, // Razorpay order ID
         backendOrderId: orderData._id || orderData.id, // Backend order ID for verification
@@ -314,6 +336,19 @@ export const useRazorpayPayment = () => {
         orderData,
       };
     } catch (error) {
+      // Order creation failed before checkout could open. Previously this only
+      // surfaced as a Toast in initiatePayment's catch, so failed orders were
+      // invisible in GA. Reported as payment_failed with an explicit reason so
+      // it stays separable from gateway/checkout failures.
+      const reason =
+        error?.data?.message || error?.message || ERROR_MESSAGES.ORDER_CREATION_FAILED;
+      trackEvent("payment_failed", {
+        amount: intendedAmount,
+        payment_method: PAYMENT_METHOD,
+        reason,
+        stage: "order_create",
+      });
+
       // Handle RTK Query errors
       if (error?.status === "FETCH_ERROR") {
         throw new Error(ERROR_MESSAGES.NETWORK_ERROR);
@@ -388,6 +423,23 @@ export const useRazorpayPayment = () => {
         amount,
         payment_method: PAYMENT_METHOD,
         new_balance: newBalance,
+      });
+
+      // Track Wallet Recharge Successful event
+      BranchEvents.trackWalletRechargeSuccessful({
+        page_name: "Payment Success",
+        route_name: "recharge-payment",
+        route_path: window.location.pathname,
+        user_type: "logged_in",
+        user_id: localStorage.getItem("shubhtalk_customer_id"),
+        pack_id: planData?._id || null,
+        pack_name: planData?.name || "standard",
+        amount: amount,
+        currency: "INR",
+        payment_method: PAYMENT_METHOD,
+        transaction_id: response?.razorpay_payment_id || null,
+        order_id: backendOrderId || null,
+        payment_status: "success",
       });
 
       // Step 4: Dispatch wallet update events
@@ -487,11 +539,42 @@ export const useRazorpayPayment = () => {
    * Get user prefill data
    */
   const getUserPrefillData = useCallback(() => {
-    return {
-      name: localStorage.getItem("shubhtalk_user_name") || "",
-      email: localStorage.getItem("shubhtalk_user_email") || "",
-      contact: localStorage.getItem("shubhtalk_user_phone") || "",
-    };
+    /*
+      The logged-in user is persisted as a JSON object under `shubhtalk_user`
+      (see utils/authStorage.js) with firstName/lastName/email/phoneNumber — the
+      same `phoneNumber` field the TopBar and SideBar display. The old flat keys
+      (shubhtalk_user_name/_email/_phone) were never written by any login path,
+      so prefill.contact was always empty and Razorpay kept showing its own
+      "Enter mobile number to continue" step. Read the real object first; keep
+      the legacy keys only as a fallback.
+    */
+    let user = {};
+    try {
+      user = JSON.parse(localStorage.getItem("shubhtalk_user")) || {};
+    } catch {
+      user = {};
+    }
+
+    const name =
+      [user.firstName, user.lastName].filter(Boolean).join(" ").trim() ||
+      localStorage.getItem("shubhtalk_user_name") ||
+      "";
+
+    const email = user.email || localStorage.getItem("shubhtalk_user_email") || "";
+
+    /*
+      Normalise to E.164 (+91XXXXXXXXXX). phoneNumber is stored variously as
+      "91XXXXXXXXXX", "+91XXXXXXXXXX" or a bare 10-digit number. Razorpay only
+      skips its contact-collection step when the number is complete with a
+      country code, so we strip to the last 10 digits and prepend +91. Left
+      empty when we have no number, so Razorpay falls back to asking.
+    */
+    const rawPhone = user.phoneNumber || localStorage.getItem("shubhtalk_user_phone") || "";
+    const digits = String(rawPhone).replace(/\D/g, "");
+    const tenDigit = digits.length >= 10 ? digits.slice(-10) : "";
+    const contact = tenDigit ? `+91${tenDigit}` : "";
+
+    return { name, email, contact };
   }, []);
 
   /**
@@ -644,7 +727,7 @@ export const useRazorpayPayment = () => {
       validatePaymentInputs({ planId, planData });
 
       // Step 2: Create order on backend
-      const orderData = await createPaymentOrder(planId);
+      const orderData = await createPaymentOrder(planId, planData);
 
       // Step 3: Create Razorpay options
       const razorpayOptions = createRazorpayOptions(

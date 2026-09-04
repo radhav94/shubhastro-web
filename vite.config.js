@@ -53,9 +53,44 @@ function firebaseSwPlugin() {
   };
 }
 
+/**
+ * Vite plugin to inject env vars into index.html
+ * Replaces %VITE_*% placeholders in index.html with actual env values
+ * Uses proper Vite hooks: transformIndexHtml + closeBundle
+ */
+function indexHtmlEnvPlugin() {
+  const envKeys = [
+    "VITE_BRANCH_KEY",
+  ];
+
+  function replacePlaceholders(src) {
+    let result = src;
+    for (const key of envKeys) {
+      result = result.replaceAll(`%${key}%`, process.env[key] || "");
+    }
+    return result;
+  }
+
+  return {
+    name: "index-html-env",
+    // Dev: Use Vite's proper index.html transformation hook
+    transformIndexHtml(html) {
+      return replacePlaceholders(html);
+    },
+    // Build: transform index.html in output
+    closeBundle() {
+      const outPath = path.resolve("dist/index.html");
+      if (fs.existsSync(outPath)) {
+        const content = fs.readFileSync(outPath, "utf-8");
+        fs.writeFileSync(outPath, replacePlaceholders(content));
+      }
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), webhookLoggerPlugin(), firebaseSwPlugin()],
+  plugins: [react(), webhookLoggerPlugin(), firebaseSwPlugin(), indexHtmlEnvPlugin()],
   base: '/',
   build: {
     outDir: 'dist',

@@ -97,10 +97,16 @@ export const trackEvent = (eventName, properties = {}) => {
     // yet, or an extension may have stripped it.
     if (typeof window !== "undefined" && Array.isArray(window.dataLayer)) {
       window.dataLayer.push({ event: eventName, ...payload });
+      if (IS_DEV) console.log("[Analytics] Event pushed to dataLayer:", eventName);
+    } else {
+      if (IS_DEV) console.warn("[Analytics] dataLayer not available:", typeof window.dataLayer);
     }
 
     if (typeof window !== "undefined" && typeof window.gtag === "function") {
       window.gtag("event", eventName, payload);
+      if (IS_DEV) console.log("[Analytics] Event sent via gtag:", eventName);
+    } else {
+      if (IS_DEV) console.warn("[Analytics] gtag not available:", typeof window.gtag);
     }
   } catch (error) {
     if (IS_DEV) {
