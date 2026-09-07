@@ -128,6 +128,16 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
         setShowRechargeBanner(false);
         setMinutesUntilPaid(null);
         setMinBalanceRequired(null);
+        // Also lift the session-ended lock. An `activity` tick means the backend
+        // is billing this room again, so the session is demonstrably alive — and
+        // leaving the flag set keeps the composer hidden in PanditAIBubble, which
+        // is what stranded Clarity session cxqsp4 after it recharged.
+        //
+        // Whether the backend still emits `activity` after ending a chat for low
+        // balance is NOT verified from this repo; if it does not, this branch
+        // simply never runs and the explicit "New chat" button in the banner is
+        // the route back. Clearing it here costs nothing either way.
+        setSessionEndedLowBalance(false);
       }
     };
 
