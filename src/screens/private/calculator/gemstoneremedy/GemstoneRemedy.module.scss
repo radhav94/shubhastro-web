@@ -1,0 +1,774 @@
+@use "../../../../assets/variables/variables" as *;
+
+$brand: #f75801;
+$brand-dark: #d43400;
+$ink: #2d2320;
+$muted: #6b5f5a;
+
+$gradient: linear-gradient(90deg, #{$brand} 0%, #{$brand-dark} 100%);
+
+/* Card surfaces sit on the peach page wash, near-white with a hairline rim —
+   the same treatment as the Rashi / Muhurat report cards. */
+$card-bg: rgba(255, 255, 255, 0.55);
+$card-border: rgba(255, 255, 255, 0.9);
+$card-shadow: 0 2px 14px rgba(191, 118, 66, 0.08);
+
+/*
+  Height of everything fixed above this page (HomeLayout header + CalcBackButton
+  bar) that the sticky sidebar must clear. Matches the Rashi report.
+*/
+$fixed-stack: 157px;
+$fixed-stack-md: 115px;
+$sticky-gap: 8px;
+
+.wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 8px 16px 48px;
+
+  @media (max-width: 560px) {
+    padding-bottom: 90px;
+  }
+}
+
+/* ── PAGE HEAD ─────────────────────────────────────────────────────────── */
+.pageHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 2px 14px;
+}
+
+.pageTitle {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: $ink;
+  margin: 0;
+
+  span {
+    color: $brand;
+  }
+
+  @media (max-width: 560px) {
+    font-size: 1.15rem;
+  }
+}
+
+/* ── LAYOUT ────────────────────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 18px;
+  align-items: start;
+
+  @media (max-width: 960px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* ── CARD (shared surface) ─────────────────────────────────────────────── */
+.card {
+  position: relative;
+  background: $card-bg;
+  border: 1.5px solid $card-border;
+  border-radius: 18px;
+  box-shadow: $card-shadow;
+  padding: 20px 22px;
+
+  @media (max-width: 560px) {
+    padding: 16px;
+    border-radius: 16px;
+  }
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: $ink;
+  margin: 0 0 12px;
+}
+
+.cardTitleIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(191, 118, 66, 0.16);
+  color: $brand;
+  flex-shrink: 0;
+
+  &.iconGold {
+    color: #d99512;
+    border-color: rgba(217, 149, 18, 0.24);
+  }
+
+  &.iconBlue {
+    color: #2f7dd1;
+    border-color: rgba(47, 125, 209, 0.22);
+  }
+
+  &.iconViolet {
+    color: #7c3aed;
+    border-color: rgba(124, 58, 237, 0.22);
+  }
+}
+
+.cardBody {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: $muted;
+}
+
+.cardHint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 0;
+  font-size: 0.76rem;
+  color: #b07a4e;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+/* ── HERO ──────────────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: $card-bg;
+  border: 1.5px solid $card-border;
+  border-radius: 18px;
+  box-shadow: $card-shadow;
+  padding: 22px 24px;
+
+  @media (max-width: 560px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px;
+  }
+}
+
+.heroFlourish,
+.heroFlourishLeft {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: auto;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.heroFlourish {
+  right: 0;
+}
+
+.heroFlourishLeft {
+  left: 0;
+}
+
+.heroGemWrap {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 132px;
+  height: 132px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.9), rgba(255, 244, 236, 0.7));
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.6), 0 4px 16px rgba(191, 118, 66, 0.12);
+  overflow: hidden;
+
+  @media (max-width: 560px) {
+    width: 108px;
+    height: 108px;
+  }
+}
+
+.heroGem {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.heroGemFallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: $gradient;
+  color: #fff;
+}
+
+.heroCopy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #0f9d6b;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.heroTitle {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: $ink;
+  margin: 0 0 8px;
+  line-height: 1.15;
+
+  @media (max-width: 560px) {
+    font-size: 1.4rem;
+  }
+}
+
+.heroText {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: $muted;
+
+  .hl {
+    color: $brand;
+    font-weight: 700;
+  }
+}
+
+/* ── GOOD RESULTS ──────────────────────────────────────────────────────── */
+.resultGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 860px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.resultCard {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(191, 118, 66, 0.14);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.resultIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(247, 88, 1, 0.1);
+  color: $brand;
+  margin-bottom: 10px;
+}
+
+.resultTitle {
+  margin: 0 0 4px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: $ink;
+  line-height: 1.3;
+}
+
+.resultDesc {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: $muted;
+}
+
+/* ── TIME TO WEAR + AUSPICIOUS DAY ─────────────────────────────────────── */
+.wearRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.wearCard {
+  display: flex;
+  flex-direction: column;
+}
+
+.wearBig {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: $ink;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.wearSub {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: $muted;
+}
+
+.wearFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.wearFact {
+  flex: 1 1 auto;
+  min-width: 84px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(191, 118, 66, 0.14);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.wearFactLabel {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #b07a4e;
+  margin-bottom: 3px;
+}
+
+.wearFactValue {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+.mantraBox {
+  margin-top: 14px;
+  background: rgba(247, 88, 1, 0.06);
+  border: 1px solid rgba(247, 88, 1, 0.16);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.mantraLabel {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: $brand-dark;
+  margin-bottom: 4px;
+}
+
+.mantraText {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: $ink;
+  line-height: 1.5;
+}
+
+.wearNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(191, 118, 66, 0.2);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #b07a4e;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+/* ── GEMSTONE CTAs (verify / buy) ──────────────────────────────────────── */
+.ctaRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.ctaCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.ctaBody {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ctaTitle {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: $ink;
+  line-height: 1.2;
+}
+
+.ctaText {
+  margin: 0 0 14px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: $muted;
+}
+
+.ctaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: $gradient;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.28);
+  transition: transform 0.15s;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.ctaArt {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 16px;
+  color: #d99512;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 236, 200, 0.95), rgba(255, 224, 190, 0.6));
+  border: 1px solid rgba(217, 149, 18, 0.2);
+
+  @media (max-width: 560px) {
+    width: 68px;
+    height: 68px;
+  }
+}
+
+/* ── ALTERNATIVE REMEDIES ──────────────────────────────────────────────── */
+.altGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.altCard {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(191, 118, 66, 0.14);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.altIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+  font-size: 1.1rem;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.altTitle {
+  margin: 0 0 4px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+.altDesc {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: $muted;
+}
+
+.checkAnother {
+  width: fit-content;
+  margin: 2px auto 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $brand-dark;
+  padding: 6px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ── SIDEBAR — EXPERT VERIFICATION ─────────────────────────────────────── */
+.sidebar {
+  position: sticky;
+  top: calc(#{$fixed-stack} + #{$sticky-gap});
+
+  @media (max-width: 1180px) {
+    top: calc(#{$fixed-stack-md} + #{$sticky-gap});
+  }
+
+  @media (max-width: 960px) {
+    position: static;
+    top: auto;
+  }
+}
+
+.verifyCard {
+  position: relative;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1.5px solid $card-border;
+  border-radius: 18px;
+  box-shadow: $card-shadow;
+  padding: 18px;
+}
+
+.cardTools {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  gap: 8px;
+}
+
+.toolBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(191, 118, 66, 0.18);
+  color: $brand;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+
+  &:hover {
+    background: #fff;
+    transform: translateY(-1px);
+  }
+}
+
+.verifyBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(217, 149, 18, 0.14);
+  color: #b8820e;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+.verifyHeading {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: $ink;
+  line-height: 1.35;
+  margin: 12px 0 0;
+  /* Room so the download/share tools never overlap the text on the first line. */
+  padding-right: 44px;
+}
+
+.verifyPanel {
+  position: relative;
+  overflow: hidden;
+  margin: 14px 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 237, 224, 0.9), rgba(255, 226, 205, 0.9));
+  border: 1px solid rgba(247, 88, 1, 0.14);
+}
+
+.verifyNote {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #8a5a36;
+  max-width: 78%;
+}
+
+.verifyArt {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 84px;
+  height: auto;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── ACTION BUTTONS ────────────────────────────────────────────────────── */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.actionPrimary,
+.actionSecondary,
+.actionTertiary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.actionPrimary {
+  background: $gradient;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.28);
+}
+
+.actionSecondary {
+  background: #fff;
+  color: $brand-dark;
+  border: 1.5px solid rgba(247, 88, 1, 0.45);
+}
+
+.actionTertiary {
+  background: rgba(255, 255, 255, 0.75);
+  color: $brand-dark;
+  border: 1.5px dashed rgba(247, 88, 1, 0.45);
+}
+
+/* ── MOBILE ACTION BAR (fixed bottom) ──────────────────────────────────── */
+.mobileActionBar {
+  display: none;
+
+  @media (max-width: 560px) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    padding: 10px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(191, 118, 66, 0.14);
+  }
+}
+
+.mobileActionChat,
+.mobileActionCall {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mobileActionChat {
+  background: #fff;
+  color: $brand-dark;
+  border: 1.5px solid rgba(247, 88, 1, 0.45);
+}
+
+.mobileActionCall {
+  background: $gradient;
+  color: #fff;
+}
+
+/* ── EMPTY STATE ───────────────────────────────────────────────────────── */
+.empty {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 40px 16px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: $muted;
+}
