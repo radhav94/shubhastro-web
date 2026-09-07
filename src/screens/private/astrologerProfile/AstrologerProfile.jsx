@@ -49,7 +49,6 @@ import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { trackEvent } from "../../../utils/analytics";
 import { BranchEvents } from "../../../utils/branchEvents";
 import { ProfileManager } from "../../../component/UI/Profile";
-import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { Link } from "react-router-dom";
 import { BookOpen } from "lucide-react";
@@ -1523,8 +1522,31 @@ const AstrologerProfile = () => {
   );
 
   if (isLoading) {
+    /*
+      Lightweight skeleton that mirrors the profile header instead of the 1.6 MB
+      animated GIF loader. The GIF was a large, animated, in-flow element that
+      became the LCP candidate during the whole fetch and was then replaced by a
+      completely different subtree — which is why LCP "never settled" and the
+      swap reflowed the page (CLS). This skeleton paints instantly, reserves the
+      same header space the real content occupies, and swaps in with no reflow.
+    */
     return stateShell(
-      <PrimaryLoader fullscreen={false} message="" />
+      <div className={styles.profileSkeleton} aria-hidden="true">
+        <div className={styles.skelHeaderRow}>
+          <div className={styles.skelAvatar} />
+          <div className={styles.skelLines}>
+            <div className={`${styles.skelLine} ${styles.skelLineWide}`} />
+            <div className={`${styles.skelLine} ${styles.skelLineMed}`} />
+            <div className={`${styles.skelLine} ${styles.skelLineNarrow}`} />
+          </div>
+        </div>
+        <div className={styles.skelStatsRow}>
+          <div className={styles.skelStat} />
+          <div className={styles.skelStat} />
+          <div className={styles.skelStat} />
+        </div>
+        <div className={styles.skelBlock} />
+      </div>
     );
   }
 
@@ -1775,6 +1797,15 @@ const AstrologerProfile = () => {
                   src={displayData.imageUrl}
                   alt={getAstrologerDisplayName(displayData)}
                   className={styles.profileImage}
+                  /* Intrinsic size = the rendered box, so the image reserves its
+                     space and never shifts the header as it decodes (CLS). It is
+                     the page's LCP element, so load it eagerly at high priority
+                     rather than waiting in the normal queue. */
+                  width="120"
+                  height="120"
+                  loading="eager"
+                  fetchpriority="high"
+                  decoding="async"
                   onError={(e) => {
                     e.target.src = getAstrologerDefaultImage(data?.gender);
                   }}
