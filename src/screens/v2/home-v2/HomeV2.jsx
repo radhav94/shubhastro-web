@@ -76,7 +76,8 @@ const COMMUNITY_AVATARS = [
   new URL("../../../assets/images/community-avatar-4.png", import.meta.url).href,
   new URL("../../../assets/images/community-avatar-5.png", import.meta.url).href,
 ];
-const heroBg = "https://assets.shubhastro.ai/images/ai-suite.png";
+// const heroBg = "https://assets.shubhastro.ai/images/ai-suite.png";
+// const heroBg = "../images/ai-suite.png";
 
 /**
  * Hero greeting.
@@ -198,13 +199,9 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   <div className={styles.mahadashaTag}>🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong></div>
                 )}
               </div>
-              <div className={styles.heroBgImg}>
-                {/* <div className={styles.heroBgGlow} /> */}
-                <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
-              </div>
             </div>
             <div className={styles.wowInner}>
-              <div className={styles.wowGlow} />
+              {/* <div className={styles.wowGlow} /> */}
               <div className={styles.wowHeader}>
                 <div className={styles.titleWithBottomDevider}>
                   <h2 className={styles.wowTitle}>{section.sub_title || "Your AI Suite"}</h2>
@@ -220,7 +217,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   const paidLabel = premium ? "Paid" : null;
                   const cardIcon = (
                     <div className={styles.wowIconBox}>
-                      <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                      <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" fetchpriority="high" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                     </div>
                   );
                   // Premium cards open the premium plans modal instead of navigating.
@@ -263,7 +260,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                     <Link key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} to={path} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
                       {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
                       <div className={styles.wowIconBox}>
-                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" fetchpriority="high" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
                       <span className={styles.wowCardTitle}>{item.title}</span>
                     </Link>
@@ -300,7 +297,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                     >
                       {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
                       <div className={styles.wowIconBox}>
-                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" fetchpriority="high" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
                       <span className={styles.wowCardTitle}>{item.title}</span>
                     </div>
@@ -490,10 +487,6 @@ const renderUngroupedHeroSection = (section, props) => {
             <HeroGreeting name={name} onSignIn={() => navigate("/login")} />
             <h1>{section.title ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></> : <>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></>}</h1>
             {currentMahadasha && <div className={styles.mahadashaTag}>🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong></div>}
-          </div>
-          <div className={styles.heroBgImg}>
-            <div className={styles.heroBgGlow} />
-            <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
           </div>
         </section>
       );
