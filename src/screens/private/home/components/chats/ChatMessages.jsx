@@ -294,9 +294,11 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
       );
     }
 
-    // Regular text messages
+    // Regular text messages. `pre-line` so newlines in the text render as line
+    // breaks (e.g. the "Below are my details" intro message, which is sent as a
+    // multi-line string) instead of collapsing onto a single line.
     return (
-      <PrimaryText size={14} color={"#4a4a4a"}>
+      <PrimaryText size={14} color={"#4a4a4a"} style={{ whiteSpace: "pre-line" }}>
         {msg?.text}
       </PrimaryText>
     );

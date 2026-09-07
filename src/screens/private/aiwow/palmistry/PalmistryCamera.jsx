@@ -9,7 +9,6 @@ import { setPalmistryImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
 import { compressImage } from '../../../../utils/helper/compressImage';
-import toast from '../../../../component/toast';
 
 const DEFAULT_CAPTURE_BOUNDS = { left: 0.15, right: 0.85, top: 0.10, bottom: 0.90 };
 
@@ -57,6 +56,45 @@ const PalmistryCamera = () => {
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
   const captureAreaRef = useRef(null); // Reference to capture area div
   const fileInputRef = useRef(null);
+
+  /*
+    Inline answer for a shutter tap, mirroring FaceReadingCamera.
+    This screen is a fullscreen portal with the shutter pinned to the bottom,
+    while react-hot-toast renders top-right — about as far from the thumb as the
+    display allows — and Clarity does not record toasts at all. So the three
+    toast.error() calls this screen used to rely on were invisible to the visitor
+    AND invisible to us in the report, which is why the taps read as dead.
+
+    `seq` is bumped on every announcement so an unchanged string still remounts
+    the node: repeat taps produce DOM mutations session replay can see, and
+    screen readers re-announce instead of staying silent on a duplicate.
+  */
+  const [captureNotice, setCaptureNotice] = useState(null);
+  const noticeSeqRef = useRef(0);
+
+  const announceCaptureNotice = (text) => {
+    noticeSeqRef.current += 1;
+    setCaptureNotice({ seq: noticeSeqRef.current, text });
+  };
+
+  /*
+    Whether the preview is actually showing moving pixels.
+
+    getUserMedia resolving is NOT the same as the video playing. In the Instagram
+    and Facebook in-app WebViews play() is routinely rejected, and the rejection
+    was handled with `console.warn` only — so the stream was live, the model was
+    loaded, and the visitor sat looking at a black frame with hand guidance
+    telling them to "move your right hand closer to the camera". Tapping the
+    shutter then hit cropCurrentFrameToCanvas(), which bails on
+    `!video.videoWidth` and answered with the invisible toast.
+
+    Clarity session gznkj2 (Instagram WebView, arrived from Instagram, skipped
+    onboarding at 00:14, opened the palm scanner at 00:19, tried the camera at
+    00:31) then refreshed the camera page TWICE, at 00:36 and 00:46, before
+    giving up. A refresh ten seconds after a refresh is what "the picture never
+    appeared and nothing told me why" looks like.
+  */
+  const [videoReady, setVideoReady] = useState(false);
 
   // Show the flip button only when the device actually has more than one
   // camera. (Previously it was hidden on any screen >= 769px, which wrongly
@@ -145,7 +183,7 @@ const PalmistryCamera = () => {
     (!handDetected || !isPalmOpen || !isInBounds || isWrongHand || isTooFar || isTooClose);
 
   // Guidance for the current blocked state. Derived in one place so the button
-  // label, the on-screen banner and the tap toast can never contradict.
+  // label, the on-screen banner and the tap notice can never contradict.
   const blockReason = !handsLoaded || detectionUnavailable
     ? null
     : isWrongHand
@@ -306,12 +344,31 @@ const PalmistryCamera = () => {
         const tryPlay = () => {
           const p = videoRef.current?.play();
           if (p && typeof p.catch === 'function') {
-            p.catch((e) => console.warn('Palmistry camera play() failed:', e));
+            p.catch((e) => {
+              console.warn('Palmistry camera play() failed:', e);
+              // Surface it. A rejected play() leaves a permanently black preview,
+              // and staying silent here is what sent gznkj2 into two refreshes.
+              // The upload route below is gated on !videoReady, so it appears
+              // alongside this.
+              announceCaptureNotice(
+                "Your browser blocked the camera preview. Tap the shutter to retry, or upload a photo instead."
+              );
+            });
           }
         };
         videoRef.current.onloadedmetadata = tryPlay;
         videoRef.current.oncanplay = tryPlay;
         tryPlay();
+
+        // `playing` is the event that guarantees frames are actually being
+        // rendered; `play` fires as soon as playback is requested and can beat
+        // videoWidth being populated, so it is not enough on its own.
+        videoRef.current.onplaying = () => {
+          if (videoRef.current?.videoWidth) {
+            setVideoReady(true);
+            setCaptureNotice(null);
+          }
+        };
 
         videoRef.current.onplay = () => {
           // Wait a bit for video to stabilize, then start detection.
@@ -319,6 +376,10 @@ const PalmistryCamera = () => {
           // call unconditionally — and unlike a `handsLoaded` check, it cannot
           // be defeated by this handler's closure being older than the load.
           setTimeout(() => {
+            if (videoRef.current?.videoWidth) {
+              setVideoReady(true);
+              setCaptureNotice(null);
+            }
             startDetection();
           }, 300);
         };
@@ -345,6 +406,9 @@ const PalmistryCamera = () => {
 
   const stopCamera = () => {
     stopDetection();
+    // The preview is gone, so the shutter can no longer produce a crop. Without
+    // this, flipping the camera left videoReady stale-true across the restart.
+    setVideoReady(false);
     
     // Stop all tracks from video element
     if (videoRef.current && videoRef.current.srcObject) {
@@ -365,7 +429,11 @@ const PalmistryCamera = () => {
   const captureImage = () => {
     const cropCanvas = cropCurrentFrameToCanvas();
     if (!cropCanvas) {
-      toast.error('Could not read the camera frame. Please try again.');
+      // Inline, not a toast: this is the exact failure an in-app WebView with a
+      // blocked preview produces, and it was previously answered off-screen.
+      announceCaptureNotice(
+        'The camera preview has not started yet. Give it a moment, or upload a photo instead.'
+      );
       return;
     }
     const croppedImage = cropCanvas.toDataURL('image/jpeg', 0.95);
@@ -376,11 +444,18 @@ const PalmistryCamera = () => {
   // Every tap on the shutter gets a response: either a photo, or an explanation
   // of what to change. Nothing is silently ignored.
   const handleCaptureTap = () => {
+    // The window before the model reports in, or before frames flow, used to
+    // fall through to captureImage() with isBlocked === false — so the shutter
+    // looked live, said "Loading…", and answered a tap with nothing usable.
+    if (!handsLoaded && !detectionUnavailable) {
+      announceCaptureNotice('Still getting the palm scanner ready — one moment.');
+      return;
+    }
     if (!isBlocked || manualCaptureAllowed) {
       captureImage();
       return;
     }
-    toast.error(blockReason || 'Hold your palm inside the box to capture');
+    announceCaptureNotice(blockReason || 'Hold your palm inside the box to capture');
   };
 
   const handleUploadInstead = () => {
@@ -402,7 +477,9 @@ const PalmistryCamera = () => {
         // invisible — the tap would look like it did nothing.
         setError(null);
       })
-      .catch(() => toast.error('Could not read that image. Please try another one.'));
+      .catch(() =>
+        announceCaptureNotice('Could not read that image. Please try another one.')
+      );
   };
 
   const switchCamera = () => {
@@ -651,6 +728,18 @@ const PalmistryCamera = () => {
           // Tapping while blocked now explains why, and after a grace period it
           // captures anyway.
           <div className={styles.captureStack}>
+            {/* Sits directly above the shutter that was tapped. See
+                announceCaptureNotice for why this is not a toast. */}
+            {captureNotice && (
+              <p
+                key={captureNotice.seq}
+                className={styles.captureNotice}
+                role="status"
+                aria-live="polite"
+              >
+                {captureNotice.text}
+              </p>
+            )}
             <button
               className={`${styles.captureButton} ${isBlocked && !manualCaptureAllowed ? styles.disabled : ''}`}
               onClick={handleCaptureTap}
@@ -683,8 +772,15 @@ const PalmistryCamera = () => {
 
             {/* Detection can fail outright on low-end cameras or poor light.
                 Keep the upload route visible here so the user doesn't have to
-                find their way back to the instructions screen to escape. */}
-            {(isBlocked || detectionUnavailable) && (
+                find their way back to the instructions screen to escape.
+
+                `!videoReady` and `!handsLoaded` are part of the condition
+                because those are precisely the states this escape hatch was
+                missing from. isBlocked is false until the model reports in, and
+                a WebView that rejects play() never becomes ready at all — so
+                the one screen state with no picture and no explanation was also
+                the one with no way out except a page refresh. */}
+            {(isBlocked || detectionUnavailable || !handsLoaded || !videoReady) && (
               <button className={styles.uploadFallbackBtn} onClick={handleUploadInstead}>
                 Upload a photo instead
               </button>
