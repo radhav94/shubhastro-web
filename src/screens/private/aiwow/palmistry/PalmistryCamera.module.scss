@@ -371,6 +371,22 @@
   align-items: center;
 }
 
+/* Inline answer to a shutter tap, above the shutter itself. Matches
+   FaceReadingCamera's .captureNotice — the toaster is top-right and this screen
+   is a fullscreen portal with its controls at the bottom, so a toast lands as
+   far from the thumb as the display allows and session replay never sees it. */
+.captureNotice {
+  margin: 0 auto 10px;
+  max-width: 20rem;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
 // Escape hatch shown under the shutter when detection is blocking capture.
 .uploadFallbackBtn {
   margin-top: 0.75rem;
