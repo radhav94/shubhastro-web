@@ -350,6 +350,10 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   opacity: 0.85;
 }
 
+/* A real <button>, not a <div>. It always looked like a chip — rounded pill,
+   visible border, sitting next to the close button — so it got tapped, and as
+   a plain div those taps went nowhere. It now toggles .billingNotice.
+   Appearance is unchanged; only the resets and affordances are new. */
 .freeBadge {
   display: flex;
   align-items: center;
@@ -360,6 +364,27 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   border: 1px solid rgba(255, 255, 255, 0.28);
   color: #fff;
   white-space: nowrap;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+/* Answer to a .freeBadge tap. Full-width strip directly under the header, so
+   it appears immediately below the control that was tapped. */
+.billingNotice {
+  flex-shrink: 0;
+  padding: 9px 20px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #8a4b00;
+  background: #FFF3E6;
+  border-bottom: 1px solid #ffd9b3;
 }
 
 .freeBadgeText {
@@ -785,10 +810,72 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
 }
 
 .rechargeText {
+  /* Let the message take the slack and wrap instead of squeezing the action
+     buttons, which now number up to two plus a dismiss on a narrow phone. */
+  flex: 1;
+  min-width: 0;
   font-size: 12px;
   font-weight: 600;
   color: #d53400;
   line-height: 1.3;
+}
+
+/* Second line of the banner in the session-ended state, naming the way back.
+   Lighter than .rechargeText so the backend's message stays the headline. */
+.rechargeHint {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #8a4b00;
+}
+
+.rechargeActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Outlined, so "Recharge" stays the filled primary action. */
+.rechargeRestartBtn {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border: 1px solid $accent;
+  border-radius: 8px;
+  background: transparent;
+  color: $accent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.15s ease;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.rechargeDismissBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 32px so it clears the minimum comfortable touch target without crowding
+     the two text-bearing controls beside it on a narrow phone. */
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #8a4b00;
+  cursor: pointer;
+
+  &:active {
+    transform: scale(0.94);
+  }
 }
 
 .rechargeNowBtn {

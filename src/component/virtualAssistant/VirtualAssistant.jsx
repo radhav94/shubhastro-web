@@ -38,6 +38,17 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
   const [cameraPreview, setCameraPreview] = useState(null);
   const [isSending, setIsSending] = useState(false);
   const [facingMode, setFacingMode] = useState("environment");
+  // Clarity session x27oi1 (Instagram WebView, paid session with astrologer
+  // "Hari", then rage clicks + dead clicks on "message-related elements" at
+  // 10:21-10:25) landed on this component's send control. Every rejected tap
+  // used to end in a bare `return`, so the visitor got no on-screen answer at
+  // all. Seq-keyed so repeated taps of the SAME reason still re-announce to
+  // screen readers and still repaint - Clarity can see this node, it cannot
+  // see a toast, and the toaster is top-right while this bar sits at the
+  // bottom of a portalled chat panel.
+  const [sendNotice, setSendNotice] = useState(null);
+  const [retryNotice, setRetryNotice] = useState(null);
+  const noticeSeqRef = useRef(0);
   const fileRef = useRef(null);
   const inputRef = useRef(null);
   const videoRef = useRef(null);
@@ -58,24 +69,72 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
     retryMessage,
     messagesEndRef,
     assistantUsage,
+    awaitingReply,
+    replyStalled,
+    checkForReply,
   } = useVirtualAssistant({ astrologerId, isOpen });
 
   const isLimitReached = assistantUsage && assistantUsage.remaining <= 0;
 
+  const showSendNotice = useCallback((message) => {
+    noticeSeqRef.current += 1;
+    setSendNotice({ seq: noticeSeqRef.current, message });
+  }, []);
+
+  // Answer for a Retry that could not be honoured, rendered inside the failed
+  // bubble that was tapped rather than in the top-right toaster. Keyed by
+  // message id so it sits next to the right bubble, and seq-keyed so tapping
+  // the same dead end twice still repaints and still re-announces.
+  const handleRetry = useCallback(
+    (msg) => {
+      const reason = retryMessage(msg);
+      if (!reason) {
+        setRetryNotice(null);
+        return;
+      }
+      noticeSeqRef.current += 1;
+      setRetryNotice({ seq: noticeSeqRef.current, msgId: msg._id, message: reason });
+    },
+    [retryMessage]
+  );
+
   const handleSend = useCallback(() => {
+    // ORDER MATTERS. The `sending` guard has to come first.
+    //
+    // Previously this handler ran straight into `sendText(text); setText("")`
+    // while a request was still in flight. sendText() bails on its own
+    // `if (!text.trim() || sending) return;` guard, but setText("") had
+    // ALREADY executed - so tapping send during the in-flight window silently
+    // ATE the composed message. Nothing sent, nothing shown, input emptied.
+    // The assistant reply is an API round trip, so that window is seconds
+    // long and trivially easy to hit: type reply 2 while reply 1 is landing.
+    if (sending) {
+      showSendNotice("Still delivering your last message. One moment.");
+      return;
+    }
     if (previewFile) {
+      setSendNotice(null);
       sendImage(previewFile);
       setPreview(null);
       setPreviewFile(null);
       setTimeout(() => inputRef.current?.focus(), 0);
       return;
     }
-    if (text.trim()) {
-      sendText(text);
-      setText("");
-      setTimeout(() => inputRef.current?.focus(), 0);
+    // An empty field used to fall out of the bottom of this function with no
+    // return value and no UI change - a textbook dead click, since the button
+    // was never actually disabled in this state (see the old expression:
+    // `sending && !previewFile && !text.trim()` is false whenever sending is
+    // false, so an idle empty composer rendered a fully enabled send button).
+    if (!text.trim()) {
+      showSendNotice("Type a message first, then tap send.");
+      inputRef.current?.focus();
+      return;
     }
-  }, [text, previewFile, sendText, sendImage]);
+    setSendNotice(null);
+    sendText(text);
+    setText("");
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }, [text, previewFile, sendText, sendImage, sending, showSendNotice]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -534,17 +593,63 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
                         )}
                       </div>
                       {msg._failed && (
-                        <button
-                          className={styles.retryBtn}
-                          onClick={() => retryMessage(msg)}
-                        >
-                          <IoRefresh size={14} /> Retry
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            className={styles.retryBtn}
+                            onClick={() => handleRetry(msg)}
+                          >
+                            <IoRefresh size={14} /> Retry
+                          </button>
+                          {retryNotice?.msgId === msg._id && (
+                            <div
+                              key={retryNotice.seq}
+                              className={styles.retryNotice}
+                              role="status"
+                              aria-live="polite"
+                            >
+                              {retryNotice.message}
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
                 );
               })
+            )}
+
+            {/* The message list used to end at the visitor's own bubble with
+                nothing to indicate an answer was pending, so a slow (or
+                never-arriving) reply left a screen full of inert text to tap.
+                This row is the pending state, and when the watch gives up it
+                becomes a real control instead of a dead end. */}
+            {!isLoading && !isLimitReached && (awaitingReply || replyStalled) && (
+              <div className={`${styles.msgRow} ${styles.assistantRow}`}>
+                <div className={styles.replyWait} role="status" aria-live="polite">
+                  {awaitingReply ? (
+                    <>
+                      <span className={styles.replyWaitDots} aria-hidden="true">
+                        <i />
+                        <i />
+                        <i />
+                      </span>
+                      <span>Waiting for a reply</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>No reply yet.</span>
+                      <button
+                        type="button"
+                        className={styles.replyWaitAction}
+                        onClick={checkForReply}
+                      >
+                        Check again
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
             )}
             <div ref={messagesEndRef} />
           </div>
@@ -574,6 +679,17 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
               </button>
             </div>
           ) : (
+          <>
+          {sendNotice && (
+            <div
+              key={sendNotice.seq}
+              className={styles.sendNotice}
+              role="status"
+              aria-live="polite"
+            >
+              {sendNotice.message}
+            </div>
+          )}
           <div className={styles.inputBar}>
             <button
               className={styles.attachBtn}
@@ -588,20 +704,40 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
               autoFocus
               className={styles.textInput}
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => { setText(e.target.value); if (sendNotice) setSendNotice(null); }}
               onKeyDown={handleKeyDown}
               placeholder="Type a message..."
-              disabled={sending}
+              /* No native `disabled` here on purpose. It used to be
+                 `disabled={sending}`, which cost us three separate things on
+                 mobile: (1) a disabled input dispatches no events, so taps on
+                 it register as dead clicks; (2) disabling the FOCUSED field
+                 tears down the on-screen keyboard, and this input carries
+                 autoFocus, so every send collapsed the keyboard and the
+                 visitor had to tap back into it; (3) anything typed during the
+                 in-flight window was dropped. Composing while the previous
+                 message is still landing is now allowed - the send button
+                 holds the queue instead, and it explains itself. */
+              aria-busy={sending || undefined}
             />
             <button
               className={styles.sendBtn}
               onClick={handleSend}
-              disabled={sending && !previewFile && !text.trim()}
+              /* aria-disabled, never native `disabled`: a natively disabled
+                 button fires no click event, which Clarity reports as a dead
+                 click and which leaves the visitor with no explanation. This
+                 stays clickable so handleSend() can answer with .sendNotice.
+                 The old expression was also inverted - `sending && !previewFile
+                 && !text.trim()` is only true when sending with nothing to
+                 send, i.e. it disabled the button in the one state that never
+                 occurs and left it enabled in both states that dead-click. */
+              aria-disabled={sending || (!previewFile && !text.trim())}
+              aria-busy={sending || undefined}
               aria-label="Send message"
             >
               <IoSend size={18} />
             </button>
           </div>
+          </>
           )}
 
           {/* Attach File Modal */}

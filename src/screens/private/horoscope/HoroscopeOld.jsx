@@ -516,6 +516,34 @@ const HoroscopeOld = () => {
   const currentContent = getContent();
 
   const handleTabChange = (tab) => {
+    /*
+      Re-tapping the tab that is ALREADY active used to be a guaranteed dead
+      click. Every statement below was a no-op in that case: setActiveTab() got
+      an identical value so React bailed out of the re-render, the category
+      reset was redundant because 'overview' is already the default, and the
+      navigate() at the bottom targeted the exact URL we were sitting on.
+      Nothing on screen moved, so the tap looked broken.
+
+      Clarity session 1keamh6 is precisely this. A visitor from Google landed
+      on /tomorrow-horoscope/cancer — a URL that getInitialTab() resolves to
+      'Tomorrow', i.e. the Tomorrow pill renders ALREADY highlighted — then
+      tapped "Tomorrow" over and over at 00:33 (rage click + dead click) and
+      abandoned the session eight seconds later.
+
+      The reason anyone re-taps a tab they are already on is that the content
+      underneath never showed up. So give the tap the retry it was actually
+      asking for, and when there IS content, at least move the viewport to it
+      so the tap has a visible consequence.
+    */
+    if (tab === activeTab) {
+      if (contentFailed || !currentData?.response) {
+        retryContent?.();
+      } else {
+        overviewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      return;
+    }
+
     setActiveTab(tab);
     setCameFromOverview(false);
     setSelectedPhase('phase_1');

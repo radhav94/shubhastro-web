@@ -382,6 +382,21 @@
   border-radius: 8px;
   transition: 0.2s ease;
 
+  /* This is a <button> now, so neutralise the UA defaults that a <div> did not
+     have. Everything visible still comes from the rules above and from
+     .selectLabel / .profileName, so the rendering is unchanged - the element
+     just became focusable and announceable. */
+  appearance: none;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 2px;
+  }
+
   &:active {
     transform: scale(0.98);
   }

@@ -388,9 +388,19 @@ const NumerologyWeb = () => {
               />
             </svg>
           </button>
-          <div
+          {/* A real <button>, not a click-handled <div>. This is the only
+              control that can produce a reading on this page — with no profile
+              selected the whole numerology section renders nothing but static
+              encyclopedia copy — and as a bare div it was unreachable by
+              keyboard, absent from the accessibility tree, and announced
+              nothing about opening a dialog. Clarity session 6b4q6o (Chrome
+              desktop) ended with extended time on this page. */}
+          <button
+            type="button"
             className={styles.profileSelector}
             onClick={() => setShowSelectProfile(true)}
+            aria-haspopup="dialog"
+            aria-expanded={showSelectProfile}
           >
             <span className={styles.selectLabel}>Select Profile</span>
             <span className={styles.profileName}>
@@ -416,7 +426,7 @@ const NumerologyWeb = () => {
                 />
               </svg>
             </span>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -439,9 +449,13 @@ const NumerologyWeb = () => {
             />
           </svg>
         </button>
-        <div
+        {/* Mobile copy of the same control — see the desktop one above. */}
+        <button
+          type="button"
           className={styles.profileSelector}
           onClick={() => setShowSelectProfile(true)}
+          aria-haspopup="dialog"
+          aria-expanded={showSelectProfile}
         >
           <span className={styles.selectLabel}>Select Profile</span>
           <span className={styles.profileName}>
@@ -467,7 +481,7 @@ const NumerologyWeb = () => {
               />
             </svg>
           </span>
-        </div>
+        </button>
       </div>
 
       {/* HERO SECTION */}
