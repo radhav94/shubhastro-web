@@ -319,20 +319,15 @@ $sticky-gap: 8px;
   position: relative;
   overflow: hidden;
   /*
-    Desktop grid: left column = coin+sign header (row 1) and the meta (row 2);
-    right column = the attribute block, spanning both rows. This keeps the
-    original three-region look while letting the meta live outside the sign
-    header so it can go full-width on mobile.
+    Desktop: a single flex row — left = coin + sign header (with the meta on one
+    horizontal line beneath the sign name); right = the attribute block, held to
+    a fixed width so the chips never overrun the sign column. Flex (not grid) is
+    what lets the coin sit snug beside the sign header instead of being pushed to
+    the far edge of a wide grid track.
   */
-  display: grid;
-  /* Left column takes the remaining space (coin + sign + meta); right column is
-     a fixed band for the four attribute chips. A fixed right track (rather than
-     `auto`, which grows to its content and overran the left column) is what
-     stops the chips overlapping the meta. */
-  grid-template-columns: minmax(0, 1fr) 360px;
-  column-gap: 24px;
-  row-gap: 14px;
+  display: flex;
   align-items: center;
+  gap: 24px;
   min-height: 208px;
   padding: 20px 22px;
   /* Near-white with the faintest warm wash at the edges, as in the design —
@@ -342,35 +337,37 @@ $sticky-gap: 8px;
   border-radius: 18px;
   box-shadow: 0 2px 14px rgba(191, 118, 66, 0.08);
 
-  /* Left: coin + (sign header with the meta stacked beneath). Right: chips. */
+  /* Left region (coin + sign header + meta) takes the remaining space; right
+     region (attribute chips) is a fixed band. */
   .heroTop {
-    grid-column: 1;
-    grid-row: 1;
-    align-self: center;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .heroAttributes {
-    grid-column: 2;
-    grid-row: 1;
-    align-self: center;
+    flex: 0 0 300px;
   }
 
   /* Keep the content clear of .heroArt, which is absolutely positioned in the
      right-hand corner. Matched to the art's width + its fade, and only applied
      at the widths where the art actually renders. */
-  @media (min-width: 1281px) {
-    padding-right: 250px;
+  @media (min-width: 1181px) {
+    padding-right: 130px;
   }
 
-  /* Tablet: attributes drop below into their own full-width row. */
-  @media (max-width: 1100px) {
-    grid-template-columns: minmax(0, 1fr);
+  @media (min-width: 901px) and (max-width: 1180px) {
+    padding-right: 190px;
+  }
+
+  /* Tablet/mobile: stack the two regions vertically. */
+  @media (max-width: 900px) {
+    flex-direction: column;
+    align-items: stretch;
     gap: 16px;
     min-height: 0;
 
     .heroAttributes {
-      grid-column: 1;
-      grid-row: auto;
+      flex: 1 1 auto;
     }
   }
 
@@ -424,8 +421,8 @@ $sticky-gap: 8px;
 }
 
 .heroCoin {
-  width: 200px;
-  height: 200px;
+  width: 180px;
+  height: 180px;
   object-fit: contain;
   display: block;
 
@@ -526,17 +523,17 @@ $sticky-gap: 8px;
   the block's width and each value broke over two or three lines.
 */
 .heroMeta {
-  display: grid;
-  /* Two columns: Pada + Moon-at on the first row, Current Dasha (when present)
-     spanning the full width beneath them. */
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 22px;
+  /* One horizontal line: Pada · Moon-at · Current Dasha, side by side. Each
+     entry hugs its content and the values never break, per the design. */
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 22px;
   margin: 0;
 
-  /* The dasha chain is the longest value, so it takes the whole row rather than
-     a half-width column. */
-  > div:nth-child(3) {
-    grid-column: 1 / -1;
+  > div {
+    flex: 0 0 auto;
+    min-width: 0;
   }
 
   dt {
@@ -546,6 +543,7 @@ $sticky-gap: 8px;
     font-size: 0.74rem;
     color: #c2703f;
     margin-bottom: 4px;
+    white-space: nowrap;
   }
 
   dd {
@@ -553,9 +551,12 @@ $sticky-gap: 8px;
     font-size: 0.84rem;
     font-weight: 700;
     color: $ink;
+    white-space: nowrap;
   }
 
+  /* Mobile: the fixed row can't fit three entries, so allow wrapping there. */
   @media (max-width: 560px) {
+    flex-wrap: wrap;
     gap: 10px 18px;
   }
 }
@@ -569,7 +570,7 @@ $sticky-gap: 8px;
   padding-left: 22px;
   border-left: 1px solid rgba(196, 130, 90, 0.22);
 
-  @media (max-width: 1100px) {
+  @media (max-width: 900px) {
     padding-left: 0;
     border-left: none;
   }
@@ -630,7 +631,7 @@ $sticky-gap: 8px;
     Lucky Color, Lucky Day), matching the design, instead of wrapping to 3 + 1.
   */
   @media (min-width: 1101px) {
-    grid-template-columns: repeat(4, minmax(70px, 1fr));
+    grid-template-columns: repeat(3, minmax(80px, 1fr));
   }
 
   /*
@@ -656,7 +657,7 @@ $sticky-gap: 8px;
   min-width: 0;
 
   dt {
-    font-size: 0.58rem;
+    font-size: 0.68rem;
     font-weight: 500;
     margin-bottom: 3px;
     /* Colour comes from the .tone* modifier. */
@@ -665,7 +666,7 @@ $sticky-gap: 8px;
 
   dd {
     margin: 0;
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     font-weight: 700;
     color: $ink;
     text-transform: capitalize;
@@ -733,6 +734,115 @@ $sticky-gap: 8px;
   color: #d83f8b;
 }
 
+/* Extra tones used by the Cosmic Profile row. */
+.toneAmber {
+  color: #e08a00;
+}
+
+.toneBlue {
+  color: #2f6fe0;
+}
+
+/* ── YOUR COSMIC PROFILE ───────────────────────────────────────────────── */
+.cosmicSection {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid $panel-border;
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+
+.cosmicHeading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: $ink;
+}
+
+.cosmicHeadingIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #f75801, #d43400);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.cosmicGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.cosmicCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  padding: 14px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.cosmicIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #fff;
+
+  /* Soft tinted tile per tone (explicit rgba — the glyph uses currentColor). */
+  &.toneRed    { background: rgba(235, 33, 36, 0.12); }
+  &.tonePink   { background: rgba(216, 63, 139, 0.12); }
+  &.toneViolet { background: rgba(99, 62, 214, 0.12); }
+  &.toneOrange { background: rgba(233, 80, 52, 0.12); }
+  &.toneAmber  { background: rgba(224, 138, 0, 0.14); }
+  &.toneBlue   { background: rgba(47, 111, 224, 0.12); }
+}
+
+.cosmicIconImg {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.cosmicGlyph {
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.cosmicLabel {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.cosmicValue {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $ink;
+  word-break: break-word;
+}
+
 /* Line-art flourishes in opposite corners. Both are declared before .heroArt and
    sit at z-index 0, so the sign art paints over them and the copy (z-index 1)
    stays above both. */
@@ -768,15 +878,15 @@ $sticky-gap: 8px;
   top: 0;
   right: 0;
   height: 100%;
-  width: 270px;
+  width: 230px;
   object-fit: cover;
   object-position: center right;
   mask-image: linear-gradient(to right, transparent, #000 42%);
   -webkit-mask-image: linear-gradient(to right, transparent, #000 42%);
   pointer-events: none;
 
-  /* Hidden on tablet/desktop-narrow where there's no room in the corner. */
-  @media (max-width: 1280px) {
+  /* Hidden on tablet/mobile where the layout stacks and there's no corner. */
+  @media (max-width: 900px) {
     display: none;
   }
 
@@ -1020,6 +1130,25 @@ $sticky-gap: 8px;
     line-height: 1.5;
     color: $muted;
   }
+}
+
+/* "Your Strengths" — green checkmark bullets instead of dots (see design). */
+.insightListCheck {
+  padding-left: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    color: #2f3a2f;
+  }
+}
+
+.checkIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #16a34a;
 }
 
 /* ── NAKSHATRA + COMPATIBILITY ─────────────────────────────────────────── */
@@ -1444,11 +1573,8 @@ $sticky-gap: 8px;
 }
 
 .actionTertiary {
-  background: rgba(255, 255, 255, 0.75);
-  color: $brand-dark;
-  border: 1.5px dashed rgba(247, 88, 1, 0.45);
-  /* Temporarily hidden — "Ask AI Pandit". Remove this line to bring it back. */
-  display: none;
+  border: 1.5px solid #DF3F014D;
+  color: #d43400;
 }
 
 .checkAnother {
