@@ -95,7 +95,54 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: 'hidden',
+    /*
+      Source maps off for production builds.
+      ======================================
+
+      This was `'hidden'`, which generates the maps but omits the
+      //# sourceMappingURL comment. Two independent reasons to turn it off
+      entirely, one security and one operational:
+
+      1. SECURITY. 'hidden' stops DevTools auto-loading maps; it does not make
+         them unreachable. Map filenames derive mechanically from chunk
+         filenames, and those are listed in index.html, so anyone can fetch them
+         by name. The build was emitting 299 maps totalling 47 MB, including a
+         ~7.2 MB map for the entry chunk — together they reconstruct the original
+         source, including every internal comment. nginx now returns 404 for
+         *.map, but defence in depth means not generating them at all is better
+         than relying on one server rule that a future config change could drop.
+
+      2. BUILD MEMORY. Vite holds map data through the "rendering chunks" phase.
+         A production build OOM'd there with "Ineffective mark-compacts near heap
+         limit" at a ~2 GB heap cap (vite 7.3.3, 4147 modules, died at chunk 220).
+
+         Measured peak RSS for a full build on this machine:
+
+             sourcemap: 'hidden'   3,058,515,968 B  (2.85 GB)  15.73 s
+             sourcemap: false      2,383,626,240 B  (2.22 GB)  12.22 s
+             delta                  -674,889,728 B  (-28%)     -3.5 s
+
+         So maps are a real and large cost. But to be accurate about what this
+         change does and does not achieve: turning them off is NOT sufficient on
+         its own. Capping the heap at 1024 MB still OOMs with maps disabled, so
+         this reduces pressure rather than removing the ceiling. The reliable fix
+         for the OOM is the raised --max-old-space-size in the package.json build
+         scripts; this change buys ~675 MB of headroom on top of it.
+
+      Verified nothing consumes these maps: no Sentry, Bugsnag, Rollbar or
+      Datadog in package.json or src. The inline error reporter in index.html
+      pushes js_error to dataLayer and does not symbolicate.
+
+      If error monitoring is added later, do NOT simply set this back to 'hidden'.
+      Generate maps in a separate CI step, upload them privately to that tool, and
+      keep them out of the deploy artifact.
+
+      Note also that `vite` is pinned as `^7.1.7`, so different machines resolve
+      different patch versions (7.3.0 locally vs 7.3.3 on the failing build).
+      That is worth tightening separately — a caret range on the bundler means
+      build memory behaviour is not reproducible across machines.
+    */
+    sourcemap: false,
     minify: 'esbuild',
     /*
      * Explicit syntax floor.
@@ -166,7 +213,40 @@ export default defineConfig({
     },
   },
   esbuild: {
-    pure: [],
+    /*
+      Strip debug logging from production bundles.
+
+      Measured before this change: 762 `console.log` in src, and 672 surviving
+      into `dist/assets/*.js`. That is not just noise — several flows here log
+      richly for diagnosis (the Truecaller poll logs HTTP statuses and server
+      messages, the STT hook logs mic errors), and some of that describes
+      internal endpoint behaviour to anyone with the console open.
+
+      Why `pure` and not `drop`
+      -------------------------
+      This `esbuild` block is Vite's *transform* config and applies to dev as
+      well as build, because vite.config.js uses the object form of
+      `defineConfig` rather than the function form.
+
+      `pure` marks these calls side-effect-free so the minifier can eliminate
+      them. Minification only runs for production builds (`build.minify:
+      'esbuild'` above), so this is inert in dev and developers keep their
+      console output. That is the whole reason for choosing `pure` here.
+
+      `drop: ['debugger']` is deliberately NOT set. `drop` acts at transform
+      time, so it would strip `debugger` during development too and quietly break
+      breakpoint debugging. Both src and dist currently contain zero `debugger`
+      statements, so there is nothing to remove today. If a policy guard is
+      wanted, convert this file to `defineConfig(({ command }) => ({ … }))` and
+      set `drop` only when `command === 'build'` — a real change, not one to make
+      as a side effect of this one.
+
+      `console.warn` and `console.error` are intentionally kept. They are
+      load-bearing: `[SarvamSTT] Mic access error`, the Truecaller diagnostics,
+      and the inline error reporter in index.html all rely on them, and silently
+      dropping error paths makes production failures unreportable.
+    */
+    pure: ["console.log", "console.debug", "console.info"],
     drop: [],
   },
 });

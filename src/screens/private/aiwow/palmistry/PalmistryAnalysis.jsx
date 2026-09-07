@@ -32,6 +32,34 @@ const PalmistryAnalysis = () => {
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [error, setError] = useState(null);
+
+  /*
+    Inline answer for a blocked tap on this screen's two action buttons.
+
+    Every blocker in handleGenerateAnalysis was answered with Toast only. This is
+    a full-viewport AI-Wow screen with its actions pinned near the bottom, while
+    react-hot-toast renders top-right — and Clarity does not record toasts, so the
+    tap read as dead both to the visitor and in the report. That matters more here
+    than almost anywhere: this is the LAST step of a flow the visitor has already
+    spent minutes on, and the same pattern is already used by FaceReadingCamera,
+    PalmistryCamera and AuraCamera.
+
+    Clarity session phtszy (Instagram WebView): "Use Photo" at 03:12, then
+    "Generate analysis" at 03:25, then the session ended on
+    /ai-wow/ai-palmistry-scanner/capture. Staying on that URL rules out the
+    `!profile` branch, which navigates away — so the tap hit `profileLoading` or
+    `isAnalyzing`, both of which toasted and stayed put.
+
+    `seq` is bumped on every announcement so a repeated reason still remounts the
+    node: replay sees a DOM mutation and screen readers re-announce.
+  */
+  const [actionNotice, setActionNotice] = useState(null);
+  const noticeSeqRef = React.useRef(0);
+
+  const announceActionNotice = (text) => {
+    noticeSeqRef.current += 1;
+    setActionNotice({ seq: noticeSeqRef.current, text });
+  };
   
   // Track component mount status to prevent navigation after unmount
   const isMountedRef = React.useRef(true);
@@ -280,7 +308,7 @@ const PalmistryAnalysis = () => {
   */
   const handleGenerateAnalysis = () => {
     if (isAnalyzing) {
-      Toast.info('Already reading your palm — one moment.');
+      announceActionNotice('Already reading your palm — one moment.');
       return;
     }
     if (analysisComplete) {
@@ -288,10 +316,12 @@ const PalmistryAnalysis = () => {
       return;
     }
     if (profileLoading) {
-      Toast.info('Loading your birth details — one moment.');
+      announceActionNotice('Loading your birth details — one moment.');
       return;
     }
     if (!profile) {
+      // This one navigates, so the page change is the feedback; the notice would
+      // unmount immediately. Keep the toast for the destination screen.
       Toast.error('Select a birth profile first, then generate your reading.');
       navigate(PATH.privateRoutes.AI_WOW?.path || '/ai-wow');
       return;
@@ -304,6 +334,7 @@ const PalmistryAnalysis = () => {
       return;
     }
 
+    setActionNotice(null);
     hasStartedRef.current = true;
     setError(null);
     performAnalysis(palmImage, selectedHand);
@@ -413,6 +444,19 @@ const PalmistryAnalysis = () => {
                 </p>
               </div>
 
+              {/* Above the buttons, so the answer is next to the control that
+                  was tapped. See announceActionNotice. */}
+              {actionNotice && (
+                <p
+                  key={actionNotice.seq}
+                  className={styles.actionNotice}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {actionNotice.text}
+                </p>
+              )}
+
               <div className={styles.actionButtons}>
                 <button
                   className={styles.retakeButton}
@@ -456,11 +500,40 @@ const PalmistryAnalysis = () => {
                 <h3 className={styles.message}>Hold tight as we are analysing your palm</h3>
               </div>
 
+              {actionNotice && (
+                <p
+                  key={actionNotice.seq}
+                  className={styles.actionNotice}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {actionNotice.text}
+                </p>
+              )}
+
+              {/*
+                aria-disabled, not `disabled`. The label already reads
+                "Analysing..." while the work is in flight, but a natively
+                disabled button emits no click at all, so someone tapping it to
+                ask "is this actually going?" got nothing — on the one screen
+                where the wait is longest. It stays tappable and answers.
+              */}
               <button 
                 className={styles.resultButton}
-                onClick={handleShowResult}
-                disabled={!analysisComplete || isNavigating}
-                style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6, cursor: (!analysisComplete || isNavigating) ? 'not-allowed' : 'pointer' }}
+                onClick={() => {
+                  if (isNavigating) {
+                    announceActionNotice('Opening your reading — one moment.');
+                    return;
+                  }
+                  if (!analysisComplete) {
+                    announceActionNotice('Still reading your palm. This can take a few moments.');
+                    return;
+                  }
+                  handleShowResult();
+                }}
+                aria-disabled={!analysisComplete || isNavigating}
+                aria-busy={isAnalyzing || isNavigating || undefined}
+                style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6 }}
               >
                 {analysisComplete ? 'View Result' : 'Analysing...'}
               </button>

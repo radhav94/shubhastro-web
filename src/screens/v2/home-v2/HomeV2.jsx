@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense, Frag
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
+import EmptyState from "../../../component/emptyState/EmptyState";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { getToken } from "../../../utils/token";
 import {
@@ -582,7 +583,12 @@ const HomeV2 = () => {
    * below appends the remaining pages into this same cache entry after paint, so
    * `homeSections` grows from page 1 to the full list.
    */
-  const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery(HOME_FIRST_PAGE_ARG);
+  const {
+    data: newHomeData,
+    isLoading: isHomeLoading,
+    isError: isHomeError,
+    refetch: refetchHome,
+  } = useGetNewHomeDetailsQuery(HOME_FIRST_PAGE_ARG);
   const homeSections = newHomeData?.data?.list;
 
   const [fetchHomeSectionsPage] = useLazyGetNewHomeSectionsQuery();
@@ -1100,8 +1106,56 @@ const HomeV2 = () => {
    * was warming the cache, which the index.html preload of the identical URL
    * already does, so it has been removed rather than left as a false mitigation.
    */
-  if (isHomeLoading || !renderPlan.length) {
+  // Still fetching page 1 — keep the blank full-height placeholder (preserves
+  // the LCP behaviour described above; the hero commits as soon as data lands).
+  if (isHomeLoading) {
     return <div className={styles.page} style={{ minHeight: "100vh" }} />;
+  }
+
+  // Page 1 finished but produced nothing to render — either the request was
+  // rejected (`isHomeError`) or it came back empty. Previously this fell through
+  // to the same blank div as the loading state, so a failed homepage API left
+  // the visitor on a permanently empty page with no way to recover. Show a
+  // recoverable fallback (with a Retry that refetches) instead of a blank page.
+  if (isHomeError || !renderPlan.length) {
+    return (
+      <div
+        className={styles.page}
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <EmptyState
+          message="We couldn't load the homepage"
+          subtext="Please check your connection and try again."
+        />
+        <button
+          type="button"
+          onClick={() => refetchHome()}
+          style={{
+            marginTop: "4px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "10px 22px",
+            borderRadius: "12px",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            fontWeight: 600,
+            color: "#fff",
+            background: "linear-gradient(90deg, #f75801 0%, #d43400 100%)",
+            boxShadow: "0 4px 14px rgba(247, 88, 1, 0.28)",
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   return (

@@ -644,6 +644,78 @@
   </script>
 
   <!--
+    React DevTools: neutralised on the production host only.
+
+    THIS IS NOT A SECURITY BOUNDARY. Read this before treating it as one.
+
+    Disabling the DevTools hook stops the component tree, props and hook state
+    being browsed with the extension. It does not make anything confidential. A
+    user still has, unchanged:
+      - every request and response in the Network tab, Authorization headers included
+      - the whole JS bundle in Sources
+      - localStorage, sessionStorage and every non-HttpOnly cookie
+      - all runtime state, via a breakpoint anywhere
+    Anything that must not reach the user must not be sent to the browser. This
+    only raises the effort bar for casual inspection.
+
+    Why here
+    --------
+    It has to run before react-dom initialises, and this is an inline script in
+    <head>, so it executes long before the module bundle. Placing it in
+    src/main.jsx would be later and less certain, because ES module imports are
+    hoisted and evaluated before the module body.
+
+    Why gated on __analyticsHostAllowed__
+    -------------------------------------
+    Reusing the flag defined immediately above rather than adding a second
+    definition of "is this production". Consequences: on localhost, any preview
+    build, and staging, DevTools keeps working normally, so development and HMR
+    are untouched. `import.meta.env` is not available in index.html, which is why
+    a hostname check is the mechanism.
+
+    Why isDisabled rather than deleting the hook
+    --------------------------------------------
+    `isDisabled` is the flag react-dom itself checks before injecting a renderer,
+    so this is the supported path rather than sabotage. Deleting or replacing the
+    global with a non-object risks a TypeError inside react-dom on a version bump.
+    The no-op methods are there as a belt-and-braces measure for the case where a
+    renderer calls them anyway; they must exist and must not throw.
+
+    The extension injects its hook at document_start, so it usually already
+    exists by the time this runs — hence mutating the existing object when there
+    is one instead of clobbering it. The whole thing is wrapped in try/catch
+    because a future extension version could define these as non-writable
+    properties, and a throw here would abort head parsing and blank the page.
+  -->
+  <script>
+    (function () {
+      if (!window.__analyticsHostAllowed__) return;
+      try {
+        var KEY = "__REACT_DEVTOOLS_GLOBAL_HOOK__";
+        var noop = function () {};
+        var existing = window[KEY];
+        var hook = (existing && typeof existing === "object") ? existing : {};
+
+        hook.isDisabled = true;
+        hook.supportsFiber = true;
+        hook.inject = function () { return null; };
+        hook.onCommitFiberRoot = noop;
+        hook.onCommitFiberUnmount = noop;
+        hook.onPostCommitFiberRoot = noop;
+        if (!hook.renderers) {
+          hook.renderers = (typeof Map === "function") ? new Map() : {};
+        }
+
+        window[KEY] = hook;
+      } catch (e) {
+        /* Never let hardening break the page. Failing open is correct here:
+           the worst case is that DevTools still attaches, which is the status
+           quo, whereas a throw would cost every visitor the whole page. */
+      }
+    })();
+  </script>
+
+  <!--
     Deferred loader for third-party tag scripts. Shared by GTM, gtag and the
     Meta Pixel below.
 
