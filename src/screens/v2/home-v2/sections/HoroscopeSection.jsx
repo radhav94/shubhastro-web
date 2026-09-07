@@ -5,6 +5,7 @@ import {
   useFetchDailyQuery,
   useFetchTomorrowQuery,
   useFetchWeeklyQuery,
+  useFetchMonthQuery,
 } from "../../../../redux/api/horoscope/zodiacApi";
 import { zodiacSignImages } from "../../../private/horoscope/zodiac";
 import styles from "./HoroscopeSection.module.scss";
@@ -30,6 +31,7 @@ const PERIODS = [
   { id: "today", label: "Today" },
   { id: "tomorrow", label: "Tomorrow" },
   { id: "week", label: "Week" },
+  { id: "month", label: "Monthly" },
 ];
 
 /* A per-sign fixed "lucky time" window — the API doesn't return one, so this is
@@ -58,13 +60,33 @@ const scoreLabel = (score) => {
   return "Low";
 };
 
-/* The four pillars shown as bars, mapped to the API's bot_response keys. */
+/* The four pillars shown as bars. `keys` lists the candidate bot_response field
+   names for each — the API's naming varies (relationship vs love, finances vs
+   finance/money), so we try each and use the first that carries a score. */
 const PILLARS = [
-  { key: "relationship", label: "Love", icon: Heart, tone: "Love" },
-  { key: "career", label: "Career", icon: Briefcase, tone: "Career" },
-  { key: "health", label: "Health", icon: Activity, tone: "Health" },
-  { key: "finances", label: "Money", icon: Coins, tone: "Money" },
+  { keys: ["relationship", "love", "relationships"], label: "Love", icon: Heart, tone: "Love" },
+  { keys: ["career", "profession", "work"], label: "Career", icon: Briefcase, tone: "Career" },
+  { keys: ["health", "physique", "wellbeing"], label: "Health", icon: Activity, tone: "Health" },
+  { keys: ["finances", "finance", "money", "wealth"], label: "Money", icon: Coins, tone: "Money" },
 ];
+
+/* Read a pillar's 0–100 score from bot_response, tolerant of key-name and shape
+   differences: the score may be `bot[key].score`, or bot[key] itself may be the
+   number, and keys can arrive in any case. Returns 0 when nothing matches. */
+const pillarScore = (bot, keys) => {
+  if (!bot || typeof bot !== "object") return 0;
+  // Build a lowercase-keyed lookup once per call so casing never blocks a match.
+  const lower = {};
+  for (const k of Object.keys(bot)) lower[k.toLowerCase()] = bot[k];
+  for (const key of keys) {
+    const node = lower[key.toLowerCase()];
+    if (node == null) continue;
+    const raw = typeof node === "object" ? (node.score ?? node.value ?? node.percentage) : node;
+    const num = Number(raw);
+    if (Number.isFinite(num) && num > 0) return Math.max(0, Math.min(100, num));
+  }
+  return 0;
+};
 
 const titleCaseColor = (c) =>
   String(c || "")
@@ -72,33 +94,99 @@ const titleCaseColor = (c) =>
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 
+/* Merge the CMS horoscope section's per-sign content onto the fixed SIGNS list.
+   The API query needs the numeric `id` (which the CMS mirrors as `ID`), and the
+   ruling planet is a fixed astronomical fact, so those stay local. From the CMS
+   payload we take, per sign (matched by slug):
+     - signIllustrationUrl → the large sign visual
+     - signLogoUrl         → the small zodiac-strip icon
+     - sanskritName        → the Hindi/Vedic name
+   each falling back to the bundled art / local value when absent. */
+const buildSigns = (sectionData) => {
+  const content = Array.isArray(sectionData?.content) ? sectionData.content : [];
+  if (!content.length) {
+    return SIGNS.map((s) => ({
+      ...s,
+      img: zodiacSignImages[s.key],
+      icon: zodiacSignImages[s.key],
+    }));
+  }
+  const norm = (v) => String(v || "").trim().toLowerCase();
+  return SIGNS.map((s) => {
+    const match = content.find((c) => {
+      const cand = norm(c.slug) || norm(c.title);
+      return cand === s.key || cand === norm(s.name);
+    });
+    return {
+      ...s,
+      hindi: match?.sanskritName || s.hindi,
+      // Large illustration for the sign visual; small logo for the strip icon.
+      img: match?.signIllustrationUrl || zodiacSignImages[s.key],
+      icon: match?.signLogoUrl || match?.signIllustrationUrl || zodiacSignImages[s.key],
+    };
+  });
+};
+
 const HoroscopeSection = ({ sectionData }) => {
   const [period, setPeriod] = useState("today");
   const [signId, setSignId] = useState(1);
 
-  const sign = SIGNS.find((s) => s.id === signId) || SIGNS[0];
+  // Sign list with images resolved from the CMS payload (falling back to the
+  // bundled zodiac art). Recomputed only when the section content changes.
+  const signs = useMemo(() => buildSigns(sectionData), [sectionData]);
 
-  // Fetch only the active period; the other two are skipped.
+  const sign = signs.find((s) => s.id === signId) || signs[0];
+
+  // Fetch only the active period; the others are skipped.
   const daily = useFetchDailyQuery(signId, { skip: period !== "today" });
   const tomorrow = useFetchTomorrowQuery(signId, { skip: period !== "tomorrow" });
   const weekly = useFetchWeeklyQuery(signId, { skip: period !== "week" });
+  /*
+    Monthly uses a different endpoint and shape from the other three:
+    `horoscope_prediction/monthly/:sign` is a POST keyed on the sign NAME (not the
+    numeric id) and returns `data.prediction` as an array of paragraphs — it does
+    NOT send `bot_response` (the pillar scores) or `lucky_*` fields. So for the
+    Monthly tab we show the prediction text and leave the pillar bars / lucky grid
+    in their neutral state (the API simply doesn't provide those for the month).
+  */
+  const monthly = useFetchMonthQuery(
+    { sign: sign.key, payload: { timezone: 5.5 } },
+    { skip: period !== "month" }
+  );
 
-  const active = period === "today" ? daily : period === "tomorrow" ? tomorrow : weekly;
+  const active =
+    period === "today"
+      ? daily
+      : period === "tomorrow"
+        ? tomorrow
+        : period === "week"
+          ? weekly
+          : monthly;
   const isLoading = active.isLoading || active.isFetching;
   const res = active.data?.response;
   const bot = res?.bot_response || {};
 
+  // TEMP DEBUG: inspect the real bot_response shape / pillar scores.
+  if (typeof window !== "undefined" && !isLoading && res) {
+    console.log("[Horoscope] period:", period, "bot keys:", Object.keys(bot), "bot:", bot);
+  }
+
   const prediction =
-    bot.total_score?.split_response ||
-    bot.career?.split_response ||
-    bot.relationship?.split_response ||
-    "";
+    period === "month"
+      ? (Array.isArray(monthly.data?.prediction)
+          ? monthly.data.prediction.filter(Boolean).join("\n\n")
+          : monthly.data?.prediction || "")
+      : bot.total_score?.split_response ||
+        bot.career?.split_response ||
+        bot.relationship?.split_response ||
+        "";
 
   const dateLabel = useMemo(() => {
     const d = new Date();
     if (period === "tomorrow") d.setDate(d.getDate() + 1);
     const opts = { day: "numeric", month: "short", year: "numeric" };
     if (period === "week") return "This Week";
+    if (period === "month") return d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
     return `${period === "tomorrow" ? "Tomorrow" : "Today"} ${d.toLocaleDateString("en-GB", opts)}`;
   }, [period]);
 
@@ -165,7 +253,7 @@ const HoroscopeSection = ({ sectionData }) => {
           <div className={styles.signVisual}>
             <img
               className={styles.signImg}
-              src={zodiacSignImages[sign.key]}
+              src={sign.img || zodiacSignImages[sign.key]}
               alt={sign.name}
             />
           </div>
@@ -216,12 +304,16 @@ const HoroscopeSection = ({ sectionData }) => {
             <p className={styles.prediction}>{prediction}</p>
           )}
 
+          {/* The Love/Career/Health/Money bars come from bot_response, which the
+              monthly endpoint doesn't return — so they're shown for today/
+              tomorrow/week only. */}
+          {period !== "month" && (
           <div className={styles.bars}>
             {PILLARS.map((pillar) => {
               const Icon = pillar.icon;
-              const score = Math.max(0, Math.min(100, Number(bot[pillar.key]?.score ?? 0)));
+              const score = pillarScore(bot, pillar.keys);
               return (
-                <div className={styles.barRow} key={pillar.key}>
+                <div className={styles.barRow} key={pillar.label}>
                   <span className={styles.barLabel}>
                     <span className={`${styles.barLabelIcon} ${styles[`iconTint${pillar.tone}`]}`}>
                       <Icon size={13} aria-hidden="true" />
@@ -241,6 +333,7 @@ const HoroscopeSection = ({ sectionData }) => {
               );
             })}
           </div>
+          )}
 
           <div className={styles.ctaRow}>
             <Link
@@ -261,7 +354,7 @@ const HoroscopeSection = ({ sectionData }) => {
 
       {/* Zodiac strip */}
       <div className={styles.zodiacStrip} role="tablist" aria-label="Choose zodiac sign">
-        {SIGNS.map((s) => (
+        {signs.map((s) => (
           <button
             key={s.id}
             type="button"
@@ -270,7 +363,7 @@ const HoroscopeSection = ({ sectionData }) => {
             className={`${styles.zodiacItem} ${s.id === signId ? styles.zodiacActive : ""}`}
             onClick={() => setSignId(s.id)}
           >
-            <img className={styles.zodiacIcon} src={zodiacSignImages[s.key]} alt="" aria-hidden="true" />
+            <img className={styles.zodiacIcon} src={s.icon || zodiacSignImages[s.key]} alt="" aria-hidden="true" />
             <p className={styles.zodiacName}>{s.name}</p>
             <p className={styles.zodiacHindi}>{s.hindi}</p>
           </button>
