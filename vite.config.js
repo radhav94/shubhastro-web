@@ -166,7 +166,40 @@ export default defineConfig({
     },
   },
   esbuild: {
-    pure: [],
+    /*
+      Strip debug logging from production bundles.
+
+      Measured before this change: 762 `console.log` in src, and 672 surviving
+      into `dist/assets/*.js`. That is not just noise — several flows here log
+      richly for diagnosis (the Truecaller poll logs HTTP statuses and server
+      messages, the STT hook logs mic errors), and some of that describes
+      internal endpoint behaviour to anyone with the console open.
+
+      Why `pure` and not `drop`
+      -------------------------
+      This `esbuild` block is Vite's *transform* config and applies to dev as
+      well as build, because vite.config.js uses the object form of
+      `defineConfig` rather than the function form.
+
+      `pure` marks these calls side-effect-free so the minifier can eliminate
+      them. Minification only runs for production builds (`build.minify:
+      'esbuild'` above), so this is inert in dev and developers keep their
+      console output. That is the whole reason for choosing `pure` here.
+
+      `drop: ['debugger']` is deliberately NOT set. `drop` acts at transform
+      time, so it would strip `debugger` during development too and quietly break
+      breakpoint debugging. Both src and dist currently contain zero `debugger`
+      statements, so there is nothing to remove today. If a policy guard is
+      wanted, convert this file to `defineConfig(({ command }) => ({ … }))` and
+      set `drop` only when `command === 'build'` — a real change, not one to make
+      as a side effect of this one.
+
+      `console.warn` and `console.error` are intentionally kept. They are
+      load-bearing: `[SarvamSTT] Mic access error`, the Truecaller diagnostics,
+      and the inline error reporter in index.html all rely on them, and silently
+      dropping error paths makes production failures unreportable.
+    */
+    pure: ["console.log", "console.debug", "console.info"],
     drop: [],
   },
 });
