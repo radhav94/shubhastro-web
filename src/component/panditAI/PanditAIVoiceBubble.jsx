@@ -16,6 +16,12 @@ const PanditAIVoiceBubble = () => {
   const [isOpen, setIsOpen] = useState(() => sessionStorage.getItem("panditai_voice_open") === "true");
   const [sharedRoomId, setSharedRoomId] = useState(null);
   const [initialBilling, setInitialBilling] = useState(null);
+  /*
+    Same pill-shaped-badge-with-no-handler dead click as the text bubble
+    (Clarity q4ncy9). Kept in sync deliberately: both headers render the
+    identical "N min free" chip, so both need to answer a tap on it.
+  */
+  const [billingNotice, setBillingNotice] = useState(false);
 
   // Persist open state for reconnect on refresh
   useEffect(() => {
@@ -285,13 +291,19 @@ const PanditAIVoiceBubble = () => {
           </div>
           <div className={styles.headerActions}>
             {isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
-              <div className={styles.freeBadge}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <button
+                type="button"
+                className={styles.freeBadge}
+                onClick={() => setBillingNotice((prev) => !prev)}
+                aria-expanded={billingNotice}
+                aria-label={`${freeMinutesRemaining} minutes free remaining. Tap for details.`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10"/>
                   <polyline points="12 6 12 12 16 14"/>
                 </svg>
                 <span className={styles.freeBadgeText}>{freeMinutesRemaining} min free</span>
-              </div>
+              </button>
             )}
             {!isFreePeriod && remainingPaidTime != null && !sessionEndedLowBalance && (
               <div className={styles.countdownBadge}>
@@ -327,6 +339,15 @@ const PanditAIVoiceBubble = () => {
             </button>
           </div>
         </div>
+
+        {billingNotice && isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
+          <div className={styles.billingNotice} role="status" aria-live="polite">
+            {`Your first ${freeMinutesRemaining} minute${freeMinutesRemaining === 1 ? "" : "s"} with Pandit AI ${freeMinutesRemaining === 1 ? "is" : "are"} free.`}
+            {ratePerMinute
+              ? ` After that, calls cost ₹${ratePerMinute}/min from your wallet.`
+              : " After that, calls are billed from your wallet."}
+          </div>
+        )}
 
         {/* Voice Stage */}
         <div className={styles.voiceStage}>

@@ -105,6 +105,18 @@ const PanditAIBubble = ({ hideBubble = false }) => {
   // clear the flag prematurely.
   const transcribeCountRef = useRef(0);
   const [initialBilling, setInitialBilling] = useState(null);
+  /*
+    Explanation surfaced when the free-minutes badge is tapped.
+
+    The badge is a bordered, fully rounded pill sitting in .headerActions right
+    beside the 42x42 close button — the exact visual language of a tappable
+    chip — but it was a plain <div> with no handler. Clarity session q4ncy9
+    (Facebook in-app WebView, fresh signup that had picked Pandit AI during
+    onboarding) recorded a dead click on it at 02:47, then a page refresh at
+    03:25. Someone watching their free minutes tick down and tapping the
+    counter is asking what happens when it reaches zero, so answer that.
+  */
+  const [billingNotice, setBillingNotice] = useState(false);
   // Guest flow: show the kundli details + OTP form inline (as a message) inside
   // the chat, keeping the normal header and input footer.
   // On a page refresh the chat reopens from persisted state, but this React
@@ -536,13 +548,19 @@ const PanditAIBubble = ({ hideBubble = false }) => {
             </div>
             <div className={styles.headerActions}>
               {isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
-                <div className={styles.freeBadge}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <button
+                  type="button"
+                  className={styles.freeBadge}
+                  onClick={() => setBillingNotice((prev) => !prev)}
+                  aria-expanded={billingNotice}
+                  aria-label={`${freeMinutesRemaining} minutes free remaining. Tap for details.`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="10"/>
                     <polyline points="12 6 12 12 16 14"/>
                   </svg>
                   <span className={styles.freeBadgeText}>{freeMinutesRemaining} min free</span>
-                </div>
+                </button>
               )}
               {!isFreePeriod && remainingPaidTime != null && !sessionEndedLowBalance && (
                 <div className={styles.countdownBadge}>
@@ -582,6 +600,15 @@ const PanditAIBubble = ({ hideBubble = false }) => {
               </button>
             </div>
           </div>
+
+          {billingNotice && isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
+            <div className={styles.billingNotice} role="status" aria-live="polite">
+              {`Your first ${freeMinutesRemaining} minute${freeMinutesRemaining === 1 ? "" : "s"} with Pandit AI ${freeMinutesRemaining === 1 ? "is" : "are"} free.`}
+              {ratePerMinute
+                ? ` After that, chatting costs ₹${ratePerMinute}/min from your wallet.`
+                : " After that, chatting is billed from your wallet."}
+            </div>
+          )}
 
           <div className={styles.messagesArea}>
             {guestMode && (
