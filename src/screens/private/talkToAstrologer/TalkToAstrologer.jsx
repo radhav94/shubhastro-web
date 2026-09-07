@@ -324,6 +324,17 @@ const TalkToAstrologer = () => {
   const [checkResult, setCheckResult] = useState(null);
   const checkSeqRef = useRef(0);
 
+  /*
+    Error state for the FILTERED / category list (/astrologers/:category and any
+    applied filter). The base list already surfaces `isListError` in a "Couldn't
+    load astrologers / Try again" card, but the filtered path fetches through
+    FilterChips' own lazy query, whose failure was only a toast — so a failed
+    category request dropped the visitor on a blank list with no retry. FilterChips
+    now hands us an error object with a `retry()` that replays the same filter.
+  */
+  const [filterError, setFilterError] = useState(null);
+  const [filterRetrying, setFilterRetrying] = useState(false);
+
   const limit = 9;
 
   // const [createChatRoom] = useCreateChatRoomMutation();
@@ -684,6 +695,8 @@ const TalkToAstrologer = () => {
     } = payload || {};
 
     setIsFiltered(true);
+    // A successful apply clears any prior filter-error card.
+    setFilterError(null);
 
     if (!append) {
       // First page OR new filter → reset list
@@ -1405,6 +1418,7 @@ const TalkToAstrologer = () => {
         astroFilterTab={astroFilterTab}
         isFetchingFilterTab={isFetchingFilterTab}
         onFilterLoading={setIsFilterLoading}
+        onFilterError={setFilterError}
       />
 
 
@@ -1650,7 +1664,37 @@ const TalkToAstrologer = () => {
         back to empty. `replace` keeps the Back button pointing wherever the
         visitor actually came from.
       */}
-      {!isFetching && !isFilterLoading && allAstrologers.length === 0 && isFiltered && (
+      {/*
+        Filtered / category path failed to load. Mirrors the base list's
+        "Couldn't load astrologers" card, but retry replays the failed FILTER
+        (via the retry() FilterChips handed us) rather than the base query.
+        Gated on an empty list so a failure while scroll-loading a filtered list
+        leaves the results already on screen alone.
+      */}
+      {filterError && isFiltered && !isFilterLoading && allAstrologers.length === 0 && (
+        <div className={styles.listStateCard}>
+          <h2 className={styles.listStateTitle}>Couldn&apos;t load astrologers</h2>
+          <p className={styles.listStateText}>
+            The list didn&apos;t come through. This is usually a connection hiccup.
+          </p>
+          <button
+            type="button"
+            className={styles.listStateBtn}
+            aria-busy={filterRetrying}
+            onClick={() => {
+              if (filterRetrying) return;
+              setFilterRetrying(true);
+              Promise.resolve(filterError.retry?.()).finally(() =>
+                setFilterRetrying(false)
+              );
+            }}
+          >
+            {filterRetrying ? "Trying…" : "Try again"}
+          </button>
+        </div>
+      )}
+
+      {!filterError && !isFetching && !isFilterLoading && allAstrologers.length === 0 && isFiltered && (
         <div className={styles.listStateCard}>
           <h2 className={styles.listStateTitle}>No astrologers in this category</h2>
           <p className={styles.listStateText}>

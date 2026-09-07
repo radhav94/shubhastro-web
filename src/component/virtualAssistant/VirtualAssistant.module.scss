@@ -223,6 +223,11 @@ $shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   font-size: 14px;
   color: $text-primary;
   line-height: 1.45;
+  /* Preserve newlines in the message text (e.g. the "Below are my details"
+     intro block) so it renders as separate lines instead of collapsing onto
+     one, while still wrapping long values to the bubble width. */
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 .msgImageWrap {
