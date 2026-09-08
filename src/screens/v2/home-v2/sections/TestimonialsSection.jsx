@@ -13,78 +13,6 @@ import {
 } from "lucide-react";
 import styles from "./TestimonialsSection.module.scss";
 
-/* Sample testimonials, used only when the API sends no content. `category` is
-   used to build the filter chips; `type` is the
-   consultation label shown in the card footer. */
-const TESTIMONIALS = [
-  {
-    id: 1,
-    category: "Career",
-    rating: 5,
-    quote:
-      "The astrologer explained my career situation so clearly and gave practical guidance. I felt more confident about my next move.",
-    name: "Riya M.",
-    city: "Mumbai",
-    type: "Career Consultation",
-    date: "12 Aug 2026",
-  },
-  {
-    id: 2,
-    category: "Marriage",
-    rating: 5,
-    quote:
-      "I needed clarity about my marriage timing. The session was detailed and all my doubts were answered patiently.",
-    name: "Neha S.",
-    city: "Pune",
-    type: "Marriage Guidance",
-    date: "8 Aug 2026",
-  },
-  {
-    id: 3,
-    category: "Love",
-    rating: 5,
-    quote:
-      "Honest, warm and to the point. The reading helped me understand my relationship far better than I expected.",
-    name: "Aarav K.",
-    city: "Delhi",
-    type: "Love & Relationship",
-    date: "5 Aug 2026",
-  },
-  {
-    id: 4,
-    category: "Kundli",
-    rating: 5,
-    quote:
-      "My kundli was read in depth and the remedies suggested were simple and practical. Highly recommend.",
-    name: "Ishita R.",
-    city: "Jaipur",
-    type: "Kundli Analysis",
-    date: "2 Aug 2026",
-  },
-  {
-    id: 5,
-    category: "Muhurat",
-    rating: 5,
-    quote:
-      "Got the perfect muhurat for my house warming. Everything went smoothly and the guidance was spot on.",
-    name: "Vikram T.",
-    city: "Ahmedabad",
-    type: "Muhurat Consultation",
-    date: "29 Jul 2026",
-  },
-  {
-    id: 6,
-    category: "Career",
-    rating: 5,
-    quote:
-      "Clear, calm and reassuring. The astrologer helped me decide on a job switch with real confidence.",
-    name: "Sana P.",
-    city: "Hyderabad",
-    type: "Career Consultation",
-    date: "26 Jul 2026",
-  },
-];
-
 /* Bottom trust bar stats. */
 const TRUST = [
   { icon: ShieldCheck, title: "Verified Astrologers", sub: "Carefully screened & background verified" },
@@ -102,6 +30,19 @@ const TRUST = [
  * elsewhere in the app. When the API sends nothing, the sample data below is
  * used so the section is never empty.
  */
+/* Turn whatever date the API sends into "12 Aug 2026". ISO timestamps
+   ("2026-08-12T00:00:00.000Z") were being shown raw in the card footer; a plain
+   already-friendly string (or an unparseable value) is returned unchanged. */
+const formatTestimonialDate = (raw) => {
+  if (!raw) return "";
+  const str = String(raw).trim();
+  // Only try to parse ISO-ish / numeric dates; leave human strings as-is.
+  if (!/^\d{4}-\d{2}-\d{2}/.test(str) && !/^\d+$/.test(str)) return str;
+  const d = new Date(str);
+  if (Number.isNaN(d.getTime())) return str;
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+};
+
 const mapApiTestimonial = (item, index) => {
   const name =
     item.name ||
@@ -111,9 +52,19 @@ const mapApiTestimonial = (item, index) => {
     "ShubhAstro User";
   const ratingRaw =
     typeof item.rating === "object" ? item.rating?.average : item.rating;
+  // The consultation label ("Career Consultation", etc.). The API sends this as
+  // `service`; `category` is a separate (often empty) field.
+  const service =
+    item.service ||
+    item.consultation_type ||
+    item.consultationType ||
+    item.type ||
+    "";
   return {
     id: item.ID || item._id || item.id || `api-${index}`,
-    category: item.category || item.tag || item.type || item.consultation_type || "",
+    // Filter chips key off this. `category` is empty in the payload, so fall
+    // back to the service so the chips still group by consultation type.
+    category: item.category || item.tag || service || "",
     rating: Math.round(Number(ratingRaw ?? item.stars ?? 5)) || 5,
     quote:
       item.review ||
@@ -125,14 +76,20 @@ const mapApiTestimonial = (item, index) => {
       "",
     name,
     city: item.city || item.location || item.place || "",
-    type:
-      item.consultation_type ||
-      item.consultationType ||
-      item.type ||
-      item.category ||
-      "Consultation",
-    date: item.date || item.consultation_date || item.created_at || item.createdAt || "",
-    image: item.image || item.profileImage || item.avatar || item.photo || "",
+    type: service || "Consultation",
+    // `isVerified` drives the "Verified Consultation" badge; default true only
+    // when the field is absent, so an explicit false hides it.
+    verified: item.isVerified !== false,
+    date: formatTestimonialDate(
+      item.date || item.consultation_date || item.created_at || item.createdAt || ""
+    ),
+    image:
+      item.avatarUrl ||
+      item.image ||
+      item.profileImage ||
+      item.avatar ||
+      item.photo ||
+      "",
   };
 };
 
@@ -161,16 +118,18 @@ const TestimonialsSection = ({ sectionData }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const trackRef = useRef(null);
 
-  // Prefer the CMS testimonials (from the home payload); fall back to the sample
-  // set only when the API sends no content, so the section is never empty.
+  // Testimonials come only from the homepage CMS payload — no static/sample
+  // fallback. If the API sends none, the section renders nothing (see guard
+  // below) rather than showing placeholder reviews.
   const allTestimonials = useMemo(() => {
     const apiContent = Array.isArray(sectionData?.content) ? sectionData.content : [];
-    if (apiContent.length === 0) return TESTIMONIALS;
     return apiContent.map(mapApiTestimonial).filter((t) => t.quote);
   }, [sectionData]);
 
   const heading = sectionData?.display_title || sectionData?.title || "";
-  const subheading = sectionData?.sub_title || "";
+  // The descriptive line under the title. Use `description` — `sub_title` is the
+  // short "Real Experiences" badge label and was duplicating the badge here.
+  const subheading = sectionData?.description || "";
 
   // Filter chips: "All" plus every distinct category present in the data. Only
   // shown when there's more than one category to choose between.
@@ -265,6 +224,10 @@ const TestimonialsSection = ({ sectionData }) => {
     [items.length, scrollToCard]
   );
 
+  // No CMS testimonials → render nothing (no static placeholders). Placed after
+  // all hooks so hook order stays stable.
+  if (allTestimonials.length === 0) return null;
+
   return (
     <section className={styles.section} aria-label="Testimonials">
       <span className={styles.watermark} aria-hidden="true" />
@@ -331,7 +294,7 @@ const TestimonialsSection = ({ sectionData }) => {
                   {t.category && <span className={styles.tag}>{t.category}</span>}
                 </div>
 
-                <p className={styles.quote}>{t.quote}</p>
+                <p className={`${styles.quote} notranslate`}>{t.quote}</p>
 
                 <div className={styles.person}>
                   <div className={styles.personLeft}>
@@ -347,9 +310,11 @@ const TestimonialsSection = ({ sectionData }) => {
                       {t.city && <p className={styles.personCity}>{t.city}</p>}
                     </div>
                   </div>
-                  <span className={styles.verified}>
-                    <BadgeCheck size={14} aria-hidden="true" /> Verified Consultation
-                  </span>
+                  {t.verified && (
+                    <span className={styles.verified}>
+                      <BadgeCheck size={14} aria-hidden="true" /> Verified Consultation
+                    </span>
+                  )}
                 </div>
 
                 {(t.type || t.date) && (

@@ -5,7 +5,7 @@ import {
   useFetchDailyQuery,
   useFetchTomorrowQuery,
   useFetchWeeklyQuery,
-  useFetchMonthQuery,
+  useFetchYearlyQuery,
 } from "../../../../redux/api/horoscope/zodiacApi";
 import { zodiacSignImages } from "../../../private/horoscope/zodiac";
 import styles from "./HoroscopeSection.module.scss";
@@ -31,7 +31,7 @@ const PERIODS = [
   { id: "today", label: "Today" },
   { id: "tomorrow", label: "Tomorrow" },
   { id: "week", label: "Week" },
-  { id: "month", label: "Monthly" },
+  { id: "year", label: "Yearly" },
 ];
 
 /* score -> word, matching the design (Strong / Excellent / Good / Average). */
@@ -125,17 +125,15 @@ const HoroscopeSection = ({ sectionData }) => {
   const tomorrow = useFetchTomorrowQuery(signId, { skip: period !== "tomorrow" });
   const weekly = useFetchWeeklyQuery(signId, { skip: period !== "week" });
   /*
-    Monthly uses a different endpoint and shape from the other three:
-    `horoscope_prediction/monthly/:sign` is a POST keyed on the sign NAME (not the
-    numeric id) and returns `data.prediction` as an array of paragraphs — it does
-    NOT send `bot_response` (the pillar scores) or `lucky_*` fields. So for the
-    Monthly tab we show the prediction text and leave the pillar bars / lucky grid
-    in their neutral state (the API simply doesn't provide those for the month).
+    Yearly uses a different endpoint and shape from the daily/weekly ones:
+    `prediction/yearly` returns `response.phase_1..phase_4`, each with its own
+    `period` (e.g. "January to March"), a `prediction`, and per-category
+    sub-objects ({ physique, health, relationship, career, ... } each with a
+    `score` + `prediction`). There's no top-level `bot_response` or `lucky_*`, so
+    the year view builds its prediction from the four phases and its pillar
+    scores by averaging each category across them.
   */
-  const monthly = useFetchMonthQuery(
-    { sign: sign.key, payload: { timezone: 5.5 } },
-    { skip: period !== "month" }
-  );
+  const yearly = useFetchYearlyQuery(signId, { skip: period !== "year" });
 
   const active =
     period === "today"
@@ -144,19 +142,51 @@ const HoroscopeSection = ({ sectionData }) => {
         ? tomorrow
         : period === "week"
           ? weekly
-          : monthly;
+          : yearly;
   const isLoading = active.isLoading || active.isFetching;
   const res = active.data?.response;
+
+  // Ordered list of the year's four phase objects (when the year view is active).
+  const yearPhases = useMemo(() => {
+    if (period !== "year" || !res) return [];
+    return ["phase_1", "phase_2", "phase_3", "phase_4"]
+      .map((k) => res[k])
+      .filter(Boolean);
+  }, [period, res]);
+
+  /*
+    Pillar scores. For daily/weekly they come straight off `bot_response`
+    (bot[key].score). For the year they're the average of each category's score
+    across the four phases, so a single bar represents the whole year.
+  */
   const bot = res?.bot_response || {};
-  // Show the bars with real fills as soon as bot_response has arrived — don't
-  // blank them to 0 on a background refetch (isFetching), only before any data.
-  const showBars = Object.keys(bot).length > 0;
+  const yearScores = useMemo(() => {
+    if (period !== "year" || yearPhases.length === 0) return null;
+    const avg = (key) => {
+      const nums = yearPhases
+        .map((p) => Number(p?.[key]?.score))
+        .filter((n) => Number.isFinite(n));
+      if (!nums.length) return 0;
+      return Math.round(nums.reduce((a, b) => a + b, 0) / nums.length);
+    };
+    return {
+      relationship: avg("relationship"),
+      career: avg("career"),
+      health: avg("health"),
+      finances: avg("finances"),
+    };
+  }, [period, yearPhases]);
+
+  // Show the bars with real fills as soon as data has arrived — don't blank them
+  // to 0 on a background refetch (isFetching), only before any data.
+  const showBars = period === "year" ? yearPhases.length > 0 : Object.keys(bot).length > 0;
 
   const prediction =
-    period === "month"
-      ? (Array.isArray(monthly.data?.prediction)
-          ? monthly.data.prediction.filter(Boolean).join("\n\n")
-          : monthly.data?.prediction || "")
+    period === "year"
+      ? yearPhases
+          .map((p) => (p.period ? `${p.period}\n${p.prediction || ""}` : p.prediction || ""))
+          .filter(Boolean)
+          .join("\n\n")
       : bot.total_score?.split_response ||
         bot.career?.split_response ||
         bot.relationship?.split_response ||
@@ -167,7 +197,7 @@ const HoroscopeSection = ({ sectionData }) => {
     if (period === "tomorrow") d.setDate(d.getDate() + 1);
     const opts = { day: "numeric", month: "short", year: "numeric" };
     if (period === "week") return "This Week";
-    if (period === "month") return d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+    if (period === "year") return `Year ${d.getFullYear()}`;
     return `${period === "tomorrow" ? "Tomorrow" : "Today"} ${d.toLocaleDateString("en-GB", opts)}`;
   }, [period]);
 
@@ -280,14 +310,16 @@ const HoroscopeSection = ({ sectionData }) => {
             <p className={styles.prediction}>{prediction}</p>
           )}
 
-          {/* The Love/Career/Health/Money bars come from bot_response, which the
-              monthly endpoint doesn't return — so they're shown for today/
-              tomorrow/week only. */}
-          {period !== "month" && (
+          {/* Love/Career/Health/Money bars. Daily/weekly read straight off
+              bot_response; the year view uses the per-pillar averages across the
+              four quarters (yearScores). */}
           <div className={styles.bars}>
             {PILLARS.map((pillar) => {
               const Icon = pillar.icon;
-              const score = pillarScore(bot, pillar.keys);
+              const score =
+                period === "year"
+                  ? (yearScores?.[pillar.keys[0]] ?? 0)
+                  : pillarScore(bot, pillar.keys);
               return (
                 <div className={styles.barRow} key={pillar.label}>
                   <span className={styles.barLabel}>
@@ -312,7 +344,6 @@ const HoroscopeSection = ({ sectionData }) => {
               );
             })}
           </div>
-          )}
 
           <div className={styles.ctaRow}>
             <Link

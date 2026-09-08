@@ -22,6 +22,16 @@ $muted: #6b5546;
     padding: 20px 14px;
     border-radius: 18px;
     margin: 20px 0;
+
+    /* Mobile stacking order (per design): header (title + tabs) → zodiac strip
+       → reading card. The strip normally sits below the card in the DOM, so it's
+       pulled above it here via flex order. */
+    display: flex;
+    flex-direction: column;
+
+    .header { order: 1; }
+    .zodiacStrip { order: 2; margin-top: 0; margin-bottom: 14px; }
+    .card { order: 3; }
   }
 }
 
@@ -104,6 +114,13 @@ $muted: #6b5546;
   @media (max-width: 860px) {
     align-self: flex-start;
   }
+
+  /* Full-width row of equal tabs on mobile, matching the design. */
+  @media (max-width: 767px) {
+    display: flex;
+    width: 100%;
+    align-self: stretch;
+  }
 }
 
 .periodBtn {
@@ -119,6 +136,12 @@ $muted: #6b5546;
   transition: all 0.2s ease;
 
   &:hover { color: $brand-dark; }
+
+  @media (max-width: 767px) {
+    flex: 1;
+    padding: 9px 8px;
+    text-align: center;
+  }
 
   &.periodActive {
     background: linear-gradient(90deg, $brand 0%, $brand-dark 100%);
@@ -442,6 +465,23 @@ $muted: #6b5546;
   align-items: center;
   gap: 12px;
   margin-top: auto;
+
+  /* Stack full-width on mobile (Read Full Horoscope → Ask Pandit AI →
+     Discuss Your Horoscope), matching the design. */
+  @media (max-width: 767px) {
+    flex-direction: column;
+    align-items: stretch;
+
+    .ctaPrimary,
+    .ctaSecondary {
+      justify-content: center;
+      width: 100%;
+    }
+
+    .ctaLink {
+      justify-content: center;
+    }
+  }
 }
 
 .ctaPrimary {
@@ -516,8 +556,8 @@ $muted: #6b5546;
   gap: 6px;
   padding: 14px 6px;
   border-radius: 14px;
-  background: #fff;
-  border: 1.5px solid transparent;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -527,7 +567,7 @@ $muted: #6b5546;
 
   &.zodiacActive {
     border-color: $brand;
-    background: #fff7f0;
+    background: #FFF3D6;
     box-shadow: 0 4px 14px rgba(212, 52, 0, 0.15);
   }
 }
