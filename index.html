@@ -399,10 +399,10 @@
 
     What remains cannot be discovered any earlier:
   -->
-  <!-- The font files live on gstatic and are only discovered once the Google
-       Fonts stylesheet has been fetched AND parsed, so the handshake would
-       otherwise start one full round trip late. -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Removed the fonts.gstatic.com preconnect: Poppins is now self-hosted from
+       /fonts (see the @font-face block below), so nothing is fetched from
+       Google's font CDN and the handshake slot is better left for our own
+       origins. -->
   <!-- Hosts the body background artwork (preloaded below) and `heroBg`
        ai-suite.png, the homepage LCP candidate. The hero image URL is a
        hardcoded constant in HomeV2 but is not in the HTML, so it is only
@@ -511,9 +511,9 @@
     `font-weight: 900` (5 uses) and `300` (4 uses). Pre-existing and cosmetic —
     left alone rather than adding two more font files for 9 declarations.
   -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" />
+  <!-- <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" /></noscript>
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" /></noscript> -->
 
   <!--
     Body background preload, split by viewport.
@@ -559,14 +559,81 @@
     blocked on the CDN assets existing — once they do, wire up `image-set()` with
     a PNG fallback rather than re-adding priority here.
   -->
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" media="(min-width: 768px)" />
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" media="(max-width: 767px)" />
+  <!-- <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" media="(min-width: 768px)" /> -->
+  <!-- <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" media="(max-width: 767px)" /> -->
   <!-- Removed: an unconditional high-priority preload of images/ai-suite.png.
        It is the `heroBg` for HomeV2/HomeNew only, so every other route fetched
        it at fetchpriority="high" and never painted it. index.html is shared by
        all routes, so re-add it from the home route (not here) if needed. -->
 
+  <!--
+    Self-hosted Poppins.
+
+    Replaces the Google Fonts <link>s above (now commented out). Those pulled
+    five .woff2 files from fonts.gstatic.com, and a speed report showed four of
+    them as the site's slowest external resources at ~1.02s each: a cross-origin
+    fetch to Google that is only discovered after the Google Fonts CSS is
+    fetched and parsed. The files already live in public/fonts (served from the
+    site root at /fonts/...), so serving them from our own origin removes that
+    third-party round trip and the extra handshake, and lets us preload the
+    weights the first screen needs.
+
+    Weights map to the five the app actually uses (measured in the removed
+    Google comment: 600 x1614, 500 x569, 700 x516, 400 x158, 800 x27). 900 and
+    300 are referenced but were never shipped and already fall back — unchanged.
+
+    font-display: swap keeps text visible immediately in the size-adjusted
+    'Poppins Fallback' below and swaps to Poppins on arrival, so this cannot
+    reintroduce a blank-text (FOIT) delay on the critical path.
+  -->
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-semibold-webfont.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-medium-webfont.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-regular-webfont.woff2" crossorigin />
+
   <style>
+    /* Self-hosted Poppins @font-face — see the note above. woff2 first (smaller,
+       universally supported on this project's browser floor), woff as fallback. */
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/fonts/poppins-regular-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-regular-webfont.woff') format('woff');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/fonts/poppins-medium-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-medium-webfont.woff') format('woff');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/fonts/poppins-semibold-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-semibold-webfont.woff') format('woff');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('/fonts/poppins-bold-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-bold-webfont.woff') format('woff');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 800;
+      font-display: swap;
+      src: url('/fonts/poppins-extrabold-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-extrabold-webfont.woff') format('woff');
+    }
+
     /* Size-adjusted fallback to reduce CLS from font swap */
     @font-face {
       font-family: 'Poppins Fallback';
