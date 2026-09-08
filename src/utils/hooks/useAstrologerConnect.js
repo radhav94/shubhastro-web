@@ -43,6 +43,10 @@ export const useAstrologerConnect = () => {
     recharge: false,
     kundli: false,
   });
+  // Which connection type triggered the recharge modal ("chat" | "audio" |
+  // "video"), so the modal's copy and min-balance rate match what the user
+  // actually tapped instead of always defaulting to "chat".
+  const [rechargeType, setRechargeType] = useState("chat");
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [chatRoomId, setChatRoomId] = useState(null);
 
@@ -260,6 +264,7 @@ export const useAstrologerConnect = () => {
 
         if (checkBalanceStatus === false) {
           console.log("[NormalFlow] ❌ Insufficient balance — opening recharge modal");
+          setRechargeType("chat");
           setOpenModal((prev) => ({ ...prev, recharge: true }));
           return false;
         } else if (checkBalanceStatus === undefined) {
@@ -390,6 +395,7 @@ export const useAstrologerConnect = () => {
       // Check balance status
       if (result?.data?.data?.status === false) {
         console.log("[NormalFlow] ❌ Insufficient balance — opening recharge modal");
+        setRechargeType(type || "audio");
         setOpenModal((prev) => ({ ...prev, recharge: true }));
         return false;
       }
@@ -607,6 +613,7 @@ export const useAstrologerConnect = () => {
     isConnecting,
     openModal,
     setOpenModal,
+    rechargeType,
     selectedAstrologer,
     chatRoomId,
     setChatRoomId,
