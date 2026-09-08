@@ -260,7 +260,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                     <Link key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} to={path} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
                       {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
                       <div className={styles.wowIconBox}>
-                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" fetchpriority="high" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
                       <span className={styles.wowCardTitle}>{item.title}</span>
                     </Link>
