@@ -81,8 +81,11 @@ const SingleBlogDetails = () => {
   // Fallback list for the "Most Popular" sidebar
   const { data: allBlogsData } = useGetBlogQuery({ page: 1, limit: 7 });
 
-  const relatedBlogs = relatedData?.data || [];
-  const allBlogs = allBlogsData?.data || [];
+  // `|| []` builds a fresh array literal on every render whenever the query has
+  // not resolved, which would make it a changing dependency and defeat the
+  // memoisation of `popularBlogs` below. Anchor both to the query results.
+  const relatedBlogs = useMemo(() => relatedData?.data || [], [relatedData?.data]);
+  const allBlogs = useMemo(() => allBlogsData?.data || [], [allBlogsData?.data]);
 
   // The single-blog endpoint may not return `author`; fall back to the
   // matching entry from the list endpoint (which does include author).
@@ -99,14 +102,47 @@ const SingleBlogDetails = () => {
   // rendered a link to the literal path /blog/undefined, which resolves to the
   // "No blog found" branch of this very screen. A card that reads like an article
   // and lands on an empty page is worse than one that was never listed.
-  const popularBlogs = (relatedBlogs.length > 0 ? relatedBlogs : allBlogs)
-    .filter((b) => (b.slug || b._id) && (b.slug || b._id) !== slug && b._id !== singleBLogData?._id)
-    .slice(0, 6);
+  // Memoised because this screen re-renders on interaction, not just on data.
+  // There are seven share toggles on the page (one in the meta row, one per
+  // sidebar card) plus `copied`/`copiedId`, and every one of those setState calls
+  // re-ran this filter over the related/all-blogs lists.
+  const popularBlogs = useMemo(
+    () =>
+      (relatedBlogs.length > 0 ? relatedBlogs : allBlogs)
+        .filter(
+          (b) =>
+            (b.slug || b._id) && (b.slug || b._id) !== slug && b._id !== singleBLogData?._id
+        )
+        .slice(0, 6),
+    [relatedBlogs, allBlogs, slug, singleBLogData?._id]
+  );
 
-  const cleanText = singleBLogData?.body
-    ?.replace(/<[^>]+>/g, " ")
-    ?.replace(/\s+/g, " ")
-    ?.trim();
+  /*
+    Same reason, and this one is the expensive half: two global regexes over the
+    whole article body. This article's body is 18,997 characters, so every share
+    toggle paid a full tag-strip pass plus a whitespace-collapse pass over 19 KB
+    before React could even begin reconciling.
+
+    It also fed `TTSButton`'s `text` prop through a template string rebuilt on
+    each render, so the button saw a new prop value every time even when nothing
+    about the article had changed. Deriving it from the body alone keeps the value
+    stable between renders.
+  */
+  const cleanText = useMemo(
+    () =>
+      singleBLogData?.body
+        ?.replace(/<[^>]+>/g, " ")
+        ?.replace(/\s+/g, " ")
+        ?.trim(),
+    [singleBLogData?.body]
+  );
+
+  // The string handed to TTSButton, stabilised for the same reason.
+  const ttsText = useMemo(
+    () =>
+      [singleBLogData?.title, singleBLogData?.author, cleanText].filter(Boolean).join(". "),
+    [singleBLogData?.title, singleBLogData?.author, cleanText]
+  );
 
   /*
     Route in-article links through React Router.
@@ -340,11 +376,7 @@ const SingleBlogDetails = () => {
               </span>
             </div>
             <div className={styles.metaActions}>
-              <TTSButton
-                text={`${[singleBLogData?.title, singleBLogData?.author, cleanText]
-                  .filter(Boolean)
-                  .join(". ")}`}
-              />
+              <TTSButton text={ttsText} />
               <div
                 className={styles.shareWrap}
                 onPointerDown={(e) => e.stopPropagation()}
