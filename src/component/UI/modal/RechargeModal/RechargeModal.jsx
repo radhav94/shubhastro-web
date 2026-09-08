@@ -29,6 +29,15 @@ const RechargeModal = ({
   // userName-first (helper falls back to firstName + lastName).
   const astrologerName = getAstrologerDisplayName(astrologer) || "Astrologer";
 
+  // Readable phrase for the message — "chat", "an audio call", "a video call" —
+  // so the copy matches what the user tapped and reads naturally.
+  const connectionLabel =
+    connectionType === "video"
+      ? "a video call"
+      : connectionType === "audio"
+        ? "an audio call"
+        : "chat";
+
   const handleRecharge = () => {
     setShowPlansModal(true);
   };
@@ -54,7 +63,7 @@ const RechargeModal = ({
         >
           <PrimaryText isCenter className="pt-4">
             Minimum balance of 5 minutes (₹ {minBalance}) is required to start{" "}
-            {connectionType} with {astrologerName}.
+            {connectionLabel} with {astrologerName}.
           </PrimaryText>
 
           <div className={styles.modalButtons}>
