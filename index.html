@@ -478,6 +478,74 @@
       }
     })();
   </script>
+
+  <!--
+    Same trick for the astrologer listing, which needs it more than the homepage.
+
+    /astrologers has no hero image and no CMS body: every content-bearing element
+    on it comes from one call to astrologers/filterAstrologers. That request could
+    not start until the entry bundle had downloaded, parsed and executed and the
+    route chunk had run, and it is not a fast request. Measured against production
+    on 08 Sep, five identical requests in a row:
+
+        ttfb 0.48s / 1.54s / 4.61s / 0.52s / 0.55s
+        every one "x-cache: Miss from cloudfront"
+
+    99,776 B uncompressed (22,902 B gzipped) carrying 19 records — 9 `result` plus
+    10 `topTenAstrologer` — at 63 fields each. There is a CloudFront distribution
+    in front of it but the response sets no Cache-Control at all, so nothing is
+    ever served from the edge and every visitor pays a fresh origin round trip.
+
+    Starting it here overlaps that round trip with the bundle download instead of
+    queueing it behind it. It does not make the endpoint faster; it stops the two
+    costs being serial.
+
+    Constraints, all mirroring the homepage block above:
+      - exact pathname match. /astrologers/:category and /astrologers/online send
+        different query params (specialties / isActive), so a prefetch keyed to the
+        plain listing must not be adopted there. `=== "/astrologers"` also
+        excludes the trailing-slash form rather than guessing at it.
+      - logged-out only. This is a bare GET with no Authorization header, and the
+        listing may be personalised for a signed-in visitor, so the response is
+        only safe to adopt when RTK Query would not have sent credentials either.
+      - page 1 at limit 9, matching `const limit = 9` in TalkToAstrologer.jsx. The
+        endpoint re-checks both before adopting, so if the two ever drift apart the
+        payload is discarded rather than mismatched.
+      - Content-Type text/plain keeps this a simple CORS request with no preflight,
+        so it costs one round trip and not two.
+    Best effort throughout: any failure just means the endpoint requests normally.
+  -->
+  <script>
+    (function () {
+      try {
+        if (window.location.pathname !== "/astrologers") return;
+        if (
+          localStorage.getItem("shubhtalk_customer_token") ||
+          localStorage.getItem("shubhtalk_astro_token")
+        ) return;
+
+        // Must match `const limit = 9` in
+        // src/screens/private/talkToAstrologer/TalkToAstrologer.jsx.
+        var page = 1;
+        var limit = 9;
+        var promise = fetch(
+          "%VITE_APP_API_BASE_URL%/api/astrologers/filterAstrologers?page=" +
+            page +
+            "&limit=" +
+            limit,
+          { method: "GET", headers: { "Content-Type": "text/plain" } }
+        ).then(function (response) {
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return response.json();
+        });
+
+        promise.catch(function () {});
+        window.__astrologersPrefetch__ = { page: page, limit: limit, promise: promise };
+      } catch (e) {
+        /* prefetch is best effort */
+      }
+    })();
+  </script>
   <!-- <link rel="dns-prefetch" href="https://translate.googleapis.com" /> -->
   <link rel="dns-prefetch" href="https://www.gstatic.com" />
   <link rel="dns-prefetch" href="https://firebaseinstallations.googleapis.com" />
