@@ -15,7 +15,7 @@ $muted: #6b5546;
   margin: 28px 0;
   padding: 32px;
   border-radius: 24px;
-  background: linear-gradient(180deg, #fff6ee 0%, #fce0cb 100%);
+  // background: linear-gradient(180deg, #fff6ee 0%, #fce0cb 100%);
   border: 1px solid rgba(255, 255, 255, 0.8);
 
   @media (max-width: 767px) {
@@ -130,12 +130,14 @@ $muted: #6b5546;
 /* ── Reading card ───────────────────────────────────────────────────────── */
 .card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  /* Equal 50/50 split so both the illustration+details and the prediction+bars
+     get the same room. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 24px;
   padding: 24px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid #fff;
   backdrop-filter: blur(8px);
 
   @media (max-width: 860px) {
@@ -145,75 +147,115 @@ $muted: #6b5546;
   }
 }
 
-/* Left column */
+/* Left column: big illustration on the left, details stacked on the right. */
 .left {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+
+  @media (max-width: 767px) {
+    /* On a narrow card the illustration goes above the details. */
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    text-align: center;
+  }
 }
 
 .signVisual {
-  width: 100%;
+  flex: 0 0 44%;
   display: flex;
   justify-content: center;
-  margin-bottom: 8px;
+  align-items: center;
+  /* Bleed the art to the card's left edge, as in the design. */
+  margin: -12px 0 -12px -12px;
+
+  @media (max-width: 767px) {
+    flex: 0 0 auto;
+    margin: -8px auto 0;
+  }
 }
 
 .signImg {
-  width: 200px;
-  height: 200px;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
   object-fit: contain;
 
   @media (max-width: 767px) {
-    width: 150px;
-    height: 150px;
+    width: 160px;
+  }
+}
+
+/* Details column to the right of the illustration. */
+.leftContent {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  @media (max-width: 767px) {
+    align-items: center;
   }
 }
 
 .dateChip {
   display: inline-flex;
   align-items: center;
-  padding: 5px 14px;
+  padding: 7px 16px;
   border-radius: 999px;
-  border: 1px solid rgba(247, 88, 1, 0.4);
-  background: #fff;
+  border: 1px solid rgba(247, 88, 1, 0.35);
+  background: rgba(255, 255, 255, 0.7);
   color: $brand-dark;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .signName {
   margin: 0;
-  font-size: 2rem;
+  font-size: 2.6rem;
   font-weight: 800;
   color: $ink;
   line-height: 1;
+
+  @media (max-width: 767px) {
+    font-size: 2rem;
+  }
 }
 
 .signHindi {
-  margin: 4px 0 16px;
+  margin: 6px 0 20px;
   font-size: 0.9rem;
   color: $muted;
 }
 
-/* 2x2 lucky facts grid */
+/* Two lucky facts in one rounded container, split by a vertical divider. */
 .luckyGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  align-items: center;
   width: 100%;
-  padding: 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  max-width: 460px;
+  padding: 16px 4px;
+  border-radius: 16px;
+  background: #FFF8F266;
+  border: 1px solid #fff;
 }
 
 .luckyItem {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
+  padding: 0 18px;
+
+  /* Vertical divider between the two boxes. */
+  & + .luckyItem {
+    border-left: 1px solid rgba(191, 118, 66, 0.18);
+  }
 }
 
 .luckyIcon {
@@ -236,8 +278,8 @@ $muted: #6b5546;
 
 .luckyValue {
   margin: 0;
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-size: 0.7rem;
+  font-weight: 600;
   color: $ink;
   display: flex;
   align-items: center;
@@ -261,9 +303,14 @@ $muted: #6b5546;
 }
 
 .quoteMark {
-  color: rgba(212, 52, 0, 0.45);
-  line-height: 0;
-  margin-bottom: 6px;
+  display: block;
+  color: rgba(212, 52, 0, 0.55);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 0.5;
+  height: 22px;
+  margin-bottom: 12px;
 }
 
 .prediction {
@@ -311,26 +358,37 @@ $muted: #6b5546;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
+  width: 30px;
+  height: 30px;
+  /* Round soft-tinted badge, as in the design (was a rounded square). */
+  border-radius: 50%;
   flex-shrink: 0;
 }
 
-/* Outlined pill track — the empty portion shows a thin tinted outline in the
-   pillar's colour (as in the design), not a flat grey bar. The border colour is
-   set per pillar via the trackTint* classes below. */
+/* Pill track — a solid light lane with rounded ends holding the coloured fill
+   (as in the design), not an outlined bar. */
 .barTrack {
-  height: 16px;
+  /* Block box so the inner fill's height:100% / width:% resolve (it's a span). */
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 18px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.85);
+  /* Outline tinted in the pillar's own colour — the .trackTint* class on this
+     element sets `color`, and the border reads it via currentColor (pink /
+     orange / green / amber, matching the fill). */
   border: 1.5px solid currentColor;
   padding: 2px;
   overflow: hidden;
 }
 
 .barFill {
+  /* Must be block — it's a <span>, and an inline element ignores width/height,
+     which is why the fill was invisible (empty tracks). */
+  display: block;
   height: 100%;
+  min-width: 6px;
   border-radius: 999px;
   transition: width 0.6s ease;
 }
@@ -360,11 +418,11 @@ $muted: #6b5546;
 .toneHealth { background: #2f9e44; }
 .toneMoney  { background: #f0a020; }
 
-/* Track outline tint (via currentColor on .barTrack). */
-.trackTintLove   { color: rgba(236, 72, 153, 0.35); }
-.trackTintCareer { color: rgba(224, 123, 0, 0.35); }
-.trackTintHealth { color: rgba(47, 158, 68, 0.35); }
-.trackTintMoney  { color: rgba(240, 160, 32, 0.4); }
+/* Track outline tint (via currentColor on .barTrack) — same hue as the fill. */
+.trackTintLove   { color: rgba(236, 72, 153, 0.55); }
+.trackTintCareer { color: rgba(224, 123, 0, 0.55); }
+.trackTintHealth { color: rgba(47, 158, 68, 0.55); }
+.trackTintMoney  { color: rgba(240, 160, 32, 0.6); }
 
 /* Strength badge (soft fill + coloured text). */
 .badgeLove   { background: rgba(236, 72, 153, 0.12); color: #d6266f; }
@@ -444,13 +502,19 @@ $muted: #6b5546;
 }
 
 .zodiacItem {
-  flex: 1 0 auto;
-  min-width: 84px;
+  /* Every card the same fixed size regardless of the name length, so the row
+     reads as an even grid (Sagittarius no wider than Leo, all equal height).
+     Sized tall enough for the icon + two text lines without clipping. */
+  flex: 0 0 96px;
+  width: 96px;
+  min-height: 118px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 12px 8px;
+  padding: 14px 6px;
   border-radius: 14px;
   background: #fff;
   border: 1.5px solid transparent;
@@ -469,22 +533,33 @@ $muted: #6b5546;
 }
 
 .zodiacIcon {
-  width: 34px;
-  height: 34px;
+  /* Bigger sign logo while the card size stays the same. */
+  width: 44px;
+  height: 44px;
   object-fit: contain;
 }
 
 .zodiacName {
   margin: 0;
-  font-size: 0.78rem;
+  max-width: 100%;
+  font-size: 0.74rem;
   font-weight: 700;
   color: $ink;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .zodiacHindi {
   margin: 0;
+  max-width: 100%;
   font-size: 0.66rem;
   color: $muted;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── Loading skeleton ───────────────────────────────────────────────────── */

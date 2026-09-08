@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, Heart, Briefcase, Activity, Coins, ChevronRight, Clock, Palette, Hash, Orbit } from "lucide-react";
+import { Sparkles, Heart, Briefcase, Activity, Coins, ChevronRight, Palette, Hash } from "lucide-react";
 import {
   useFetchDailyQuery,
   useFetchTomorrowQuery,
@@ -33,23 +33,6 @@ const PERIODS = [
   { id: "week", label: "Week" },
   { id: "month", label: "Monthly" },
 ];
-
-/* A per-sign fixed "lucky time" window — the API doesn't return one, so this is
-   a stable, sign-based value (not random per render). */
-const LUCKY_TIME = {
-  aries: "3:00 PM – 5:00 PM",
-  taurus: "6:00 AM – 8:00 AM",
-  gemini: "10:00 AM – 12:00 PM",
-  cancer: "7:00 PM – 9:00 PM",
-  leo: "12:00 PM – 2:00 PM",
-  virgo: "9:00 AM – 11:00 AM",
-  libra: "4:00 PM – 6:00 PM",
-  scorpio: "8:00 PM – 10:00 PM",
-  sagittarius: "11:00 AM – 1:00 PM",
-  capricorn: "5:00 AM – 7:00 AM",
-  aquarius: "2:00 PM – 4:00 PM",
-  pisces: "6:00 PM – 8:00 PM",
-};
 
 /* score -> word, matching the design (Strong / Excellent / Good / Average). */
 const scoreLabel = (score) => {
@@ -165,11 +148,9 @@ const HoroscopeSection = ({ sectionData }) => {
   const isLoading = active.isLoading || active.isFetching;
   const res = active.data?.response;
   const bot = res?.bot_response || {};
-
-  // TEMP DEBUG: inspect the real bot_response shape / pillar scores.
-  if (typeof window !== "undefined" && !isLoading && res) {
-    console.log("[Horoscope] period:", period, "bot keys:", Object.keys(bot), "bot:", bot);
-  }
+  // Show the bars with real fills as soon as bot_response has arrived — don't
+  // blank them to 0 on a background refetch (isFetching), only before any data.
+  const showBars = Object.keys(bot).length > 0;
 
   const prediction =
     period === "month"
@@ -198,16 +179,16 @@ const HoroscopeSection = ({ sectionData }) => {
 
   const heading = sectionData?.display_title || sectionData?.title;
 
+  // The design's left card shows just two lucky facts — Lucky Number and Lucky
+  // Color — side by side (not the earlier 4-item grid with Lucky Time / Planet).
   const LUCKY = [
-    { icon: Clock, label: "Lucky Time", value: LUCKY_TIME[sign.key] || "—" },
+    { icon: Hash, label: "Lucky Number", value: luckyNumber ?? "—" },
     {
       icon: Palette,
       label: "Lucky Color",
       value: titleCaseColor(luckyColor) || "—",
       color: luckyColorCode,
     },
-    { icon: Hash, label: "Lucky Number", value: luckyNumber ?? "—" },
-    { icon: Orbit, label: "Planet", value: sign.planet },
   ];
 
   return (
@@ -248,7 +229,8 @@ const HoroscopeSection = ({ sectionData }) => {
 
       {/* Reading card */}
       <div className={styles.card}>
-        {/* Left: sign visual + facts */}
+        {/* Left: big sign illustration on the left, details column on the right
+            (date chip → sign name → lucky boxes), as in the design. */}
         <div className={styles.left}>
           <div className={styles.signVisual}>
             <img
@@ -257,42 +239,36 @@ const HoroscopeSection = ({ sectionData }) => {
               alt={sign.name}
             />
           </div>
-          <span className={styles.dateChip}>{dateLabel}</span>
-          <h3 className={styles.signName}>{sign.name}</h3>
-          <p className={styles.signHindi}>{sign.hindi}</p>
 
-          <div className={styles.luckyGrid}>
-            {LUCKY.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div className={styles.luckyItem} key={item.label}>
-                  <span className={styles.luckyIcon}>
-                    <Icon size={16} aria-hidden="true" />
-                  </span>
-                  <div>
-                    <p className={styles.luckyLabel}>{item.label}</p>
-                    <p className={styles.luckyValue}>
-                      {item.color && (
-                        <span
-                          className={styles.colorDot}
-                          style={{ background: item.color }}
-                          aria-hidden="true"
-                        />
-                      )}
-                      {isLoading ? "…" : item.value}
-                    </p>
+          <div className={styles.leftContent}>
+            <span className={styles.dateChip}>{dateLabel}</span>
+            <h3 className={styles.signName}>{sign.name}</h3>
+            <p className={styles.signHindi}>{sign.hindi}</p>
+
+            <div className={styles.luckyGrid}>
+              {LUCKY.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div className={styles.luckyItem} key={item.label}>
+                    <span className={styles.luckyIcon}>
+                      <Icon size={16} aria-hidden="true" />
+                    </span>
+                    <div>
+                      <p className={styles.luckyLabel}>{item.label}</p>
+                      <p className={styles.luckyValue}>
+                        {isLoading ? "…" : item.value}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
         {/* Right: prediction + pillars + CTAs */}
         <div className={styles.right}>
-          <span className={styles.quoteMark} aria-hidden="true">
-            <Sparkles size={18} />
-          </span>
+          <span className={styles.quoteMark} aria-hidden="true">&#8220;&#8220;</span>
 
           {isLoading ? (
             <>
@@ -321,13 +297,16 @@ const HoroscopeSection = ({ sectionData }) => {
                     {pillar.label}
                   </span>
                   <span className={`${styles.barTrack} ${styles[`trackTint${pillar.tone}`]}`}>
+                    {/* Fill to the API score. Only forced to 0 on the very first
+                        load (no data yet); during a background refetch we keep
+                        the current score so the bar never flashes empty. */}
                     <span
                       className={`${styles.barFill} ${styles[`tone${pillar.tone}`]}`}
-                      style={{ width: `${isLoading ? 0 : score}%` }}
+                      style={{ width: `${showBars ? score : 0}%` }}
                     />
                   </span>
                   <span className={`${styles.barValue} ${styles[`badge${pillar.tone}`]}`}>
-                    {isLoading ? "—" : scoreLabel(score)}
+                    {showBars ? scoreLabel(score) : "—"}
                   </span>
                 </div>
               );
