@@ -456,6 +456,66 @@ const PanditAIBubble = ({ hideBubble = false }) => {
   }, [stopListening]);
 
   /*
+    Feedback for a tap on the empty-state invitation ("Ask Pandit AI anything
+    about your life").
+
+    That element fills the entire message area (`flex: 1; width: 100%`) and its
+    whole action was `onClick={() => inputRef.current?.focus()}`. focus() is a
+    silent no-op in two states that are both reachable while it is on screen:
+
+      1. sessionEndedLowBalance — the render below drops the entire input
+         wrapper, so inputRef.current is null and the optional chain swallows the
+         tap. This is the state Clarity session x3ucvh was in: rage clicks on
+         "Ask Pandit AI anything" at 14:20 "leading to a recharge initiation",
+         i.e. the balance had already run out.
+      2. chatDisabled — the input carries `disabled={isLoading || chatDisabled}`,
+         and .focus() on a disabled input does nothing by spec.
+
+    So the biggest target in the panel absorbed taps and changed nothing on
+    screen. This is a gap in the cxqsp4 fix above: that restored a route back to
+    the composer, but nothing was checked here, and this is the element the
+    session was actually hitting.
+
+    Even on the happy path the response is now visible rather than just focus:
+    x3ucvh is an Instagram WebView, where a programmatic .focus() frequently does
+    not raise the keyboard, so focus alone can look identical to nothing
+    happening.
+
+    `seq` keys the line so a second tap in the same state remounts it and replays
+    the animation instead of re-rendering an identical string to no effect.
+  */
+  const [emptyNotice, setEmptyNotice] = useState(null);
+  const emptyNoticeSeqRef = useRef(0);
+
+  const announceEmptyNotice = useCallback((message) => {
+    emptyNoticeSeqRef.current += 1;
+    setEmptyNotice({ seq: emptyNoticeSeqRef.current, message });
+  }, []);
+
+  const handleEmptyStateTap = useCallback(() => {
+    if (sessionEndedLowBalance) {
+      announceEmptyNotice(
+        'This chat ended when the balance ran out. Recharge below, then tap "New chat" to ask again.'
+      );
+      return;
+    }
+    if (chatDisabled) {
+      announceEmptyNotice("Reconnecting to Pandit AI — one moment, then type your question below.");
+      return;
+    }
+    const el = inputRef.current;
+    // Covers the disabled input as well as a missing one: .focus() on a disabled
+    // element is specified to do nothing, so it has to be handled here rather
+    // than attempted and hoped for.
+    if (!el || el.disabled) {
+      announceEmptyNotice("Just a moment — getting the chat ready.");
+      return;
+    }
+    el.focus();
+    announceEmptyNotice("Type your question in the box below.");
+  }, [sessionEndedLowBalance, chatDisabled, announceEmptyNotice]);
+
+  /*
     Escape closes the chat — the keyboard counterpart to tapping the backdrop.
     This is a role="dialog" that covers the page with a fixed overlay, so Escape
     is the expected way out and there was none: the close button was the only
@@ -690,18 +750,35 @@ const PanditAIBubble = ({ hideBubble = false }) => {
 
                 A <button> so it is reachable by keyboard too; the input it focuses
                 is the real control, so the label stays descriptive.
+
+                handleEmptyStateTap rather than a bare focus() call: this element
+                covers the whole message area, and focus() does nothing at all in
+                the ended-session and reconnecting states. See its definition for
+                the Clarity session that rage-clicked it.
               */
-              <button
-                type="button"
-                className={styles.emptyState}
-                onClick={() => inputRef.current?.focus()}
-                aria-label="Ask Pandit AI a question"
-              >
-                <span className={styles.emptyIcon}>
-                  <IoChatbubbleEllipses size={34} />
-                </span>
-                <p>Ask Pandit AI anything about your life</p>
-              </button>
+              <>
+                <button
+                  type="button"
+                  className={styles.emptyState}
+                  onClick={handleEmptyStateTap}
+                  aria-label="Ask Pandit AI a question"
+                >
+                  <span className={styles.emptyIcon}>
+                    <IoChatbubbleEllipses size={34} />
+                  </span>
+                  <p>Ask Pandit AI anything about your life</p>
+                </button>
+                {emptyNotice && (
+                  <p
+                    key={emptyNotice.seq}
+                    className={styles.emptyNotice}
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {emptyNotice.message}
+                  </p>
+                )}
+              </>
               )
             ) : (
               (() => {
