@@ -375,6 +375,17 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   }
 }
 
+/* The zero state. The badge used to unmount the instant free minutes hit 0 —
+   see the note above showFreeBadge in the JSX — so it now stays put and changes
+   wording instead. Dimmed rather than restyled, because it is the same control
+   in a spent state, not a different one; the tap target keeps its exact geometry
+   so a finger already on its way down still lands on something. */
+.freeBadgeSpent {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  opacity: 0.85;
+}
+
 /* Answer to a .freeBadge tap. Full-width strip directly under the header, so
    it appears immediately below the control that was tapped. */
 .billingNotice {
@@ -663,6 +674,25 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   }
 }
 
+/* Why a .retryBtn tap could not go through, shown inside the bubble that was
+   tapped rather than as a toast. The message list scrolls, so a strip under the
+   header can be a screenful away from the finger; and in the portalled
+   full-screen panel this chat renders as, a top-right toast is easy to miss
+   entirely. Keyed on a sequence number in the JSX so a repeat tap in the same
+   state replays this animation instead of re-rendering an identical string. */
+.retryNotice {
+  margin: 8px 0 0;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #8a4b00;
+  background: #fff3e6;
+  border: 1px solid #ffd9b3;
+  border-radius: 10px;
+  animation: fadeIn 0.22s ease both;
+}
+
 /* ==================== EMPTY & SKELETON ==================== */
 // Now a <button> that focuses the chat input — see the note in the JSX. The
 // chrome reset keeps it rendering exactly as it did as a <div>; `width: 100%`
@@ -697,6 +727,26 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
     font-weight: 650;
     line-height: 1.45;
   }
+}
+
+/* Answer to an .emptyState tap — see handleEmptyStateTap in the JSX.
+   .emptyState above takes `flex: 1`, so this lands at the bottom of the message
+   area, directly above the input bar it is talking about. Animated and keyed on a
+   sequence number in the JSX so a repeat tap in the same state visibly replays
+   instead of re-rendering the identical string to no effect. */
+.emptyNotice {
+  flex-shrink: 0;
+  margin: 0 0 4px;
+  padding: 9px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #8a4b00;
+  text-align: center;
+  background: #fff3e6;
+  border: 1px solid #ffd9b3;
+  border-radius: 12px;
+  animation: fadeIn 0.22s ease both;
 }
 
 .emptyIcon {
