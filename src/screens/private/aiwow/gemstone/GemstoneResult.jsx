@@ -1,10 +1,14 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import { BsChatDots } from 'react-icons/bs';
 import { MdOutlinePhoneInTalk } from 'react-icons/md';
-import { Download, Share2, Sparkles } from 'lucide-react';
+import { Download, Share2, Sparkles, Gem } from 'lucide-react';
+// Mounted (hidden pill) so the in-card "Ask Pandit AI" button has a listener for
+// its `panditai:ask` event on this screen — HomeLayout doesn't mount the bubble
+// globally on this branch, so without this the button did nothing.
+const PanditAIBubble = lazy(() => import('../../../../component/panditAI/PanditAIBubble'));
 import styles from './GemstoneResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
@@ -905,6 +909,10 @@ const GemstoneResult = () => {
                   className={`${styles.gemstoneTab} ${selectedGemstoneIndex === index ? styles.active : ''}`}
                   onClick={() => { setSelectedGemstoneIndex(index); setActiveTab('overview'); }}
                 >
+                  {/* Gem glyph only on the selected pill, as in the design. */}
+                  {selectedGemstoneIndex === index && (
+                    <Gem size={16} className={styles.gemstoneTabIcon} aria-hidden="true" />
+                  )}
                   {gemstone.identification.name || `Gemstone ${index + 1}`}
                 </button>
               ))}
@@ -1081,6 +1089,12 @@ const GemstoneResult = () => {
           <MdOutlinePhoneInTalk size={16} aria-hidden="true" /> Call an astrologer
         </a>
       </div>
+
+      {/* Hidden pill — only here for its `panditai:ask` listener so the in-card
+          "Ask Pandit AI · Free" button opens the chat. */}
+      <Suspense fallback={null}>
+        <PanditAIBubble hideBubble />
+      </Suspense>
     </div>
     </>
   );
