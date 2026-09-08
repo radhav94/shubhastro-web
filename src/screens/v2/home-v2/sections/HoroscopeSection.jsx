@@ -367,9 +367,13 @@ const HoroscopeSection = ({ sectionData }) => {
             >
               Read Full Horoscope <ChevronRight size={16} aria-hidden="true" />
             </Link>
-            <Link to="/ai-wow" className={styles.ctaSecondary}>
-              <Sparkles size={14} aria-hidden="true" /> Ask Shubh AI
-            </Link>
+            <button
+              type="button"
+              className={styles.ctaSecondary}
+              onClick={() => window.dispatchEvent(new CustomEvent("panditai:ask"))}
+            >
+              <Sparkles size={14} aria-hidden="true" /> Ask Pandit AI
+            </button>
             <Link to="/chat-with-astrologers" className={styles.ctaLink}>
               Discuss Your Horoscope
             </Link>
