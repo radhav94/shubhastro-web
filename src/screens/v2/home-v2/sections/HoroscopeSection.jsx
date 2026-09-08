@@ -31,7 +31,8 @@ const PERIODS = [
   { id: "today", label: "Today" },
   { id: "tomorrow", label: "Tomorrow" },
   { id: "week", label: "Week" },
-  { id: "year", label: "Yearly" },
+  // Yearly tab hidden for now — the year query/derivation below stays in place
+  // so re-adding it is a one-line change.
 ];
 
 /* score -> word, matching the design (Strong / Excellent / Good / Average). */
@@ -374,7 +375,7 @@ const HoroscopeSection = ({ sectionData }) => {
             >
               <Sparkles size={14} aria-hidden="true" /> Ask Pandit AI
             </button>
-            <Link to="/chat-with-astrologers" className={styles.ctaLink}>
+            <Link to="/astrologers" className={styles.ctaLink}>
               Discuss Your Horoscope
             </Link>
           </div>
