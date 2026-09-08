@@ -102,6 +102,11 @@ const TalkToAstrologer = () => {
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [showFilterAstrologer, setShowFilterAstrologer] = useState(false);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
+  // True while this is a /astrologers/:category URL whose filter has not settled
+  // yet. Consumed by the TOP ASTROLOGERS section far below — see the long note
+  // there for the shift it prevents. Declared here to sit with the other filter
+  // state; categoryFromParams and filterError are assigned further down, so the
+  // actual expression lives at the bottom of the hook body.
 
   const { data: astroFilterTab, isFetchingFilterTab } = useGetAstrologerFilterCategoryTabQuery();
 
@@ -333,6 +338,12 @@ const TalkToAstrologer = () => {
     now hands us an error object with a `retry()` that replays the same filter.
   */
   const [filterError, setFilterError] = useState(null);
+
+  // See the TOP ASTROLOGERS block in the JSX for the reasoning. categoryFromParams
+  // comes from useParams so it is known on the very first render, which is what
+  // makes this able to suppress the mount rather than react to it.
+  const urlCategoryPending =
+    Boolean(categoryFromParams) && !showFilterAstrologer && !filterError;
   const [filterRetrying, setFilterRetrying] = useState(false);
 
   const limit = 9;
@@ -1445,8 +1456,45 @@ const TalkToAstrologer = () => {
         fullscreen overlay would have covered the <h1> that this route relies on
         as its LCP element.
       */}
-      {/* Top Astrologers Section - New Design */}
-      {!showFilterAstrologer && topTenAstrologers.length > 0 && (
+      {/* Top Astrologers Section - New Design
+
+          The `urlCategoryPending` half exists for CLS, and it is specific to
+          /astrologers/:category.
+
+          On a category URL the base (unfiltered) query is NOT skipped on first
+          load: its `skip` is `isFiltered`, and per the note above isFiltered only
+          becomes true once FilterChips' auto-applied category request *resolves*.
+          So the sequence on /astrologers/marriage-relationships was:
+
+            1. static shell paints (h1 + chips) — deliberate, this is the LCP
+            2. base query resolves -> astrodata.data.topTenAstrologer arrives ->
+               topTenAstrologers set -> THIS SECTION MOUNTS: heading, divider and
+               a rail of up to ten cards whose avatar box alone is 100px, several
+               hundred px of height inserted above the main grid
+            3. the same base response fills the grid with UNFILTERED astrologers
+            4. the category filter resolves -> setShowFilterAstrologer(true) ->
+               this section UNMOUNTS and the grid is replaced by the filtered set
+
+          Steps 2 and 4 are two page-scale shifts in opposite directions, and the
+          section is guaranteed to end up hidden on any category URL because
+          applyFilters always finishes with setShowFilterAstrologer(true).
+          Rendering it in between is pure layout churn.
+
+          Clarity URL performance for 08 Sep shows exactly that shape — every
+          category URL is catastrophic while non-category routes are not:
+          marriage-relationships CLS 3.275, love-relationships 2.498,
+          career-business 2.029, against 1.596 for an astrologer profile.
+
+          Deliberately NOT keyed on categoryFromParams alone: if the filter
+          request fails, showFilterAstrologer never flips, and the visitor should
+          still get this section rather than a page with the error card and
+          nothing else. filterError releases the suppression for that case, so the
+          only behaviour that changes is the transient double-shift.
+
+          The step-3 grid swap is a separate shift and is not addressed here —
+          fixing it means skipping the base query when the URL carries a category,
+          which changes this screen's data flow rather than just its markup. */}
+      {!showFilterAstrologer && !urlCategoryPending && topTenAstrologers.length > 0 && (
         <>
           <div className={styles.sectionDivider}>
             <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
