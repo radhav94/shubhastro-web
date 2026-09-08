@@ -6,6 +6,11 @@
   @media screen and (width <= 1180px) {
     padding-top: 53px;
   }
+  /* Clear the fixed bottom action bar (Call/Chat) on mobile so the in-card
+     "Ask Pandit AI" button isn't hidden behind it. */
+  @media (max-width: 1024px) {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
 }
 .headerWrap{
   background: rgba(255, 255, 255, 0.6);
@@ -397,7 +402,9 @@
 
 .sideCard {
   position: relative;
-  overflow: hidden; /* clip the decorative waves to the rounded card */
+  /* clip the decorative waves horizontally, but let content scroll vertically so
+     nothing is cut off (see the desktop max-height below). */
+  overflow: hidden;
   padding: 16px;
   border-radius: 20px;
   background: linear-gradient(160deg, #fdece1 0%, #fbdcc6 100%);
@@ -406,12 +413,22 @@
 
   /* Stick clear below the fixed header stack (TopHeader + top bar 95px + this
      report's own fixed .headerWrap ~55px), with a gap so it never glues to or
-     slips under the header. Shorter stack below 1180px. */
+     slips under the header. Shorter stack below 1180px.
+
+     When the card is taller than the available height it must SCROLL, not clip —
+     otherwise the last action ("Ask Pandit AI") is cut off the bottom with no
+     way to reach it. So the sticky breakpoints switch to overflow-y: auto. */
   @media (min-width: 1025px) {
     position: sticky;
     top: 172px;
     max-height: calc(100vh - 180px);
+    overflow-y: auto;
+    overflow-x: hidden;
     overscroll-behavior-y: contain;
+    /* Scrollable but the scrollbar is hidden (Firefox / IE / WebKit). */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    &::-webkit-scrollbar { display: none; }
   }
 
   @media (min-width: 1025px) and (max-width: 1180px) {
