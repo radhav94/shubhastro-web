@@ -37,6 +37,35 @@ const MessageBubble = memo(({ msg, onRetry }) => {
   // Failed AI replies used to be plain text with nothing to tap, which is what
   // drove the rage clicks seen in Clarity. Offer an explicit retry instead.
   const showRetry = !isUser && msg.isError && typeof onRetry === "function";
+  /*
+    Why the retry answers itself in place.
+
+    retryQuestion returns null when the send went out, or a reason string when it
+    could not (no saved question, still reconnecting, socket down). It used to
+    fire a toast for those cases while having already deleted this bubble, so the
+    tap produced no visible change and removed its own button. See its definition
+    in usePanditAI for Clarity session 2vh07z.
+
+    The notice belongs here rather than in a shared strip at the top of the panel
+    because this is where the finger is — the message list scrolls, and a strip
+    under the header can be a screenful away from the bubble that was tapped.
+    `seq` keys it so tapping again in the same state remounts the line and
+    replays the animation instead of re-rendering an identical string.
+  */
+  const [retryNotice, setRetryNotice] = useState(null);
+  const retrySeqRef = useRef(0);
+
+  const handleRetryTap = () => {
+    const reason = onRetry(msg._id);
+    if (!reason) {
+      // Went through: this bubble is being removed from the list, so there is
+      // nothing to annotate.
+      return;
+    }
+    retrySeqRef.current += 1;
+    setRetryNotice({ seq: retrySeqRef.current, message: reason });
+  };
+
   return (
     <div className={`${styles.msgRow} ${isUser ? styles.userRow : styles.aiRow}`}>
       <div
@@ -72,12 +101,22 @@ const MessageBubble = memo(({ msg, onRetry }) => {
             )
           )}
         </p>
+        {retryNotice && (
+          <p
+            key={retryNotice.seq}
+            className={styles.retryNotice}
+            role="status"
+            aria-live="polite"
+          >
+            {retryNotice.message}
+          </p>
+        )}
         <div className={styles.msgMeta}>
           {showRetry && (
             <button
               type="button"
               className={styles.retryBtn}
-              onClick={() => onRetry(msg._id)}
+              onClick={handleRetryTap}
             >
               <IoRefresh size={13} />
               Try again
@@ -584,6 +623,51 @@ const PanditAIBubble = ({ hideBubble = false }) => {
   // (isTranscribing). This prevents sending the "..." placeholder.
   const canSend = !!text.trim() && !isListening && !sttTranscribing;
 
+  /*
+    Header billing badge visibility — the free badge must not vanish at zero.
+
+    useAIFreeMinutes decides free vs paid on every socket `activity` tick:
+
+      const fmr = data.freeMinutesRemaining ?? data.freeMinutesRemainingToday;
+      if (fmr != null) { setFreeMinutesRemaining(fmr); setIsFreePeriod(fmr > 0);
+                         setRemainingPaidTime(null); }
+      else             { setIsFreePeriod(false); setFreeMinutesRemaining(null); … }
+
+    So the moment the backend reports `freeMinutesRemaining: 0`, three things are
+    true at once: freeMinutesRemaining is 0 (not null), isFreePeriod is false,
+    and remainingPaidTime has been forced to null. Under the previous conditions
+    — free badge `isFreePeriod && fmr != null`, paid badge `!isFreePeriod &&
+    remainingPaidTime != null` — that made BOTH badges false and the header went
+    blank, keeping only the 42x42 close button.
+
+    Two consequences. The pill disappears out from under a finger that is already
+    reaching for it: someone watching "1 min free" count down and tapping the
+    counter to ask what happens at zero finds it gone, and repeat taps land on
+    empty .headerActions space, which is a dead click and then a rage click.
+    Clarity session 2vh07z (Instagram WebView, 43 clicks on ONE page, verified at
+    01:31) rage-clicked the free-minutes area at 02:25, mid free window. And
+    while it stays blank there is no billing indicator at all, even though the
+    free allowance has just run out.
+
+    Fix: decide visibility on `freeMinutesRemaining != null` alone and let
+    isFreePeriod drive only the wording, so zero reads as "Free time used"
+    instead of unmounting. The paid badge additionally requires
+    freeMinutesRemaining == null so the two can never both appear — with the old
+    conditions isFreePeriod already guaranteed that, and it still has to hold.
+
+    The zero state is inferred from this code path, not observed on the wire: the
+    hook's own `fmr > 0` test shows the author expected 0 to arrive, but whether
+    the backend sends 0 or simply omits the field could not be verified here.
+    Either way the header now says something.
+  */
+  const showFreeBadge = freeMinutesRemaining != null && !sessionEndedLowBalance;
+  const freeMinutesExhausted = showFreeBadge && !(freeMinutesRemaining > 0);
+  const showPaidBadge =
+    !isFreePeriod &&
+    freeMinutesRemaining == null &&
+    remainingPaidTime != null &&
+    !sessionEndedLowBalance;
+
   return createPortal(
     <>
       {!isOpen && !hideBubble && (
@@ -642,22 +726,30 @@ const PanditAIBubble = ({ hideBubble = false }) => {
               </div>
             </div>
             <div className={styles.headerActions}>
-              {isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
+              {showFreeBadge && (
                 <button
                   type="button"
-                  className={styles.freeBadge}
+                  className={`${styles.freeBadge} ${
+                    freeMinutesExhausted ? styles.freeBadgeSpent : ""
+                  }`}
                   onClick={() => setBillingNotice((prev) => !prev)}
                   aria-expanded={billingNotice}
-                  aria-label={`${freeMinutesRemaining} minutes free remaining. Tap for details.`}
+                  aria-label={
+                    freeMinutesExhausted
+                      ? "Free time used up. Tap for billing details."
+                      : `${freeMinutesRemaining} minutes free remaining. Tap for details.`
+                  }
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="10"/>
                     <polyline points="12 6 12 12 16 14"/>
                   </svg>
-                  <span className={styles.freeBadgeText}>{freeMinutesRemaining} min free</span>
+                  <span className={styles.freeBadgeText}>
+                    {freeMinutesExhausted ? "Free time used" : `${freeMinutesRemaining} min free`}
+                  </span>
                 </button>
               )}
-              {!isFreePeriod && remainingPaidTime != null && !sessionEndedLowBalance && (
+              {showPaidBadge && (
                 <div className={styles.countdownBadge}>
                   {walletBalance != null && (
                     <span className={styles.countdownBalance}>
@@ -696,12 +788,26 @@ const PanditAIBubble = ({ hideBubble = false }) => {
             </div>
           </div>
 
-          {billingNotice && isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
+          {/* Guard kept identical to the badge's, so the badge can never be on
+              screen with its own explanation unable to open. */}
+          {billingNotice && showFreeBadge && (
             <div className={styles.billingNotice} role="status" aria-live="polite">
-              {`Your first ${freeMinutesRemaining} minute${freeMinutesRemaining === 1 ? "" : "s"} with Pandit AI ${freeMinutesRemaining === 1 ? "is" : "are"} free.`}
-              {ratePerMinute
-                ? ` After that, chatting costs ₹${ratePerMinute}/min from your wallet.`
-                : " After that, chatting is billed from your wallet."}
+              {freeMinutesExhausted ? (
+                <>
+                  {"Your free minutes with Pandit AI are used up for today."}
+                  {ratePerMinute
+                    ? ` Chatting now costs ₹${ratePerMinute}/min from your wallet.`
+                    : " Chatting is now billed from your wallet."}
+                  {walletBalance != null && ` Wallet balance: ₹${walletBalance}.`}
+                </>
+              ) : (
+                <>
+                  {`Your first ${freeMinutesRemaining} minute${freeMinutesRemaining === 1 ? "" : "s"} with Pandit AI ${freeMinutesRemaining === 1 ? "is" : "are"} free.`}
+                  {ratePerMinute
+                    ? ` After that, chatting costs ₹${ratePerMinute}/min from your wallet.`
+                    : " After that, chatting is billed from your wallet."}
+                </>
+              )}
             </div>
           )}
 
