@@ -217,7 +217,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   const paidLabel = premium ? "Paid" : null;
                   const cardIcon = (
                     // <div >
-                      <img className={styles.wowIconBox} src={iconSrc || defaultSquareImg} alt="" width="40" height="40" fetchpriority="high" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                      <img className={styles.wowIconBox} src={iconSrc || defaultSquareImg} alt="" width="40" height="40" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                     // </div>
                   );
                   // Premium cards open the premium plans modal instead of navigating.
@@ -297,7 +297,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                     >
                       {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
                       {/* <div className={styles.wowIconBox}> */}
-                        <img className={styles.wowIconBox} src={iconSrc || defaultSquareImg} alt="" width="40" height="40" fetchpriority="high" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                        <img className={styles.wowIconBox} src={iconSrc || defaultSquareImg} alt="" width="40" height="40" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       {/* </div> */}
                       <span className={styles.wowCardTitle}>{item.title}</span>
                     </div>
