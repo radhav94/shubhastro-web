@@ -4,7 +4,9 @@ $mobile-screen-width: 500px;
 .layout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100dvh;
+  background: radial-gradient(305.26% 108.72% at 88.51% 14.32%, #F4C19E 11.54%, #F3DFCD 45.13%, #F4C19E 70.13%, #F2CBB0 87.42%, #F4C19E 100%);
+
   // background: white;
   // background: linear-gradient(to bottom,#b49f4b 30%, #ffffff 60%, #fff7cc 10%, );
   // background: linear-gradient(to bottom, #606385 10%, white 80%);
