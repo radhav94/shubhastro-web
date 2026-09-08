@@ -1,39 +1,92 @@
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
+import { isEncryptedEnvelope } from "../../../utils/security/cryptoClient";
+
+// Builds the listing URL. Extracted so queryFn below and the prefetch-matching
+// check share one definition of what "the plain first page" means.
+const buildAstrologersUrl = ({
+  page = 1,
+  limit = 6,
+  specialties,
+  isActiveType,
+  isActive,
+}) => {
+  const params = new URLSearchParams({ page, limit });
+
+  // ✅ send only when present
+  if (specialties) {
+    params.append("specialties", specialties);
+  }
+
+  if (isActiveType) {
+    params.append("isActiveType", isActiveType);
+  }
+
+  // ✅ send ONLY when true
+  if (isActive === true) {
+    params.append("isActive", "true");
+  }
+
+  return `astrologers/filterAstrologers?${params.toString()}`;
+};
+
+/*
+ * Hands back the in-flight request the inline script in index.html started, if
+ * and only if it is for exactly the same page this call wants.
+ *
+ * See that script for the measurements. Short version: every content-bearing
+ * element on /astrologers comes from this one endpoint, it never hits the
+ * CloudFront cache because the response sets no Cache-Control, and its TTFB
+ * ranged 0.48s-4.61s across five consecutive production requests. Without this
+ * the request cannot even begin until the entry bundle has executed.
+ *
+ * Deliberately strict. Any filter at all — a category, the online view, page 2,
+ * a different limit — means the prefetched payload is not this page, so it is
+ * left alone and the call goes to the network normally. The handle is deleted on
+ * first read so a later refetch (after login, or a cache invalidation) always
+ * goes to the network rather than replaying a stale list.
+ */
+const consumeAstrologersPrefetch = (arg) => {
+  if (typeof window === "undefined") return null;
+
+  const handle = window.__astrologersPrefetch__;
+  if (!handle) return null;
+
+  const { page = 1, limit = 6, specialties, isActiveType, isActive } = arg || {};
+  if (specialties || isActiveType || isActive === true) return null;
+  if (Number(page) !== handle.page || Number(limit) !== handle.limit) return null;
+
+  delete window.__astrologersPrefetch__;
+  return handle.promise;
+};
 
 export const astrologerApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
     //  GET ALL ASTROLOGERS
     getAstrologers: builder.query({
-      query: ({
-        page = 1,
-        limit = 6,
-        specialties,
-        isActiveType,
-        isActive,
-      }) => {
-        const params = new URLSearchParams({
-          page,
-          limit,
-        });
-    
-        // ✅ send only when present
-        if (specialties) {
-          params.append("specialties", specialties);
+      // queryFn rather than query so the request the inline prefetch already
+      // started can be adopted. Everything it does not cover — any filter, a
+      // later page, a logged-in visitor, a rejected fetch — falls straight
+      // through to the normal baseQuery, so behaviour is unchanged there.
+      async queryFn(arg, _api, _extraOptions, baseQuery) {
+        const prefetched = consumeAstrologersPrefetch(arg);
+        if (prefetched) {
+          try {
+            const body = await prefetched;
+            /*
+             * The inline fetch is a bare GET, so it carries no `x-sgw-sid` and
+             * could not decrypt a secure-gateway envelope. This host answers in
+             * plaintext today; discarding a sealed envelope here means that ever
+             * changing degrades to one wasted request rather than a broken
+             * listing. Same guard as the homepage prefetch.
+             */
+            if (!isEncryptedEnvelope(body)) return { data: body };
+          } catch {
+            // Best effort: fall through so the endpoint's own error handling,
+            // retries and the isError branch in TalkToAstrologer still apply.
+          }
         }
-    
-        if (isActiveType) {
-          params.append("isActiveType", isActiveType);
-        }
-    
-        // ✅ send ONLY when true
-        if (isActive === true) {
-          params.append("isActive", "true");
-        }
-    
-        return {
-          url: `astrologers/filterAstrologers?${params.toString()}`,
-          method: "GET",
-        };
+
+        return baseQuery({ url: buildAstrologersUrl(arg || {}), method: "GET" });
       },
     }),
     

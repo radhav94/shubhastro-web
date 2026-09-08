@@ -7,6 +7,32 @@
   padding: 20px;
 }
 
+/*
+  Reserved box for the CMS round trip — see CmsNotFoundPage's isLoading branch.
+
+  That branch used to render `<div class="container"><PrimaryLoader
+  fullscreen={false} /></div>`, and `.container` sets only max-width, margin and
+  padding. So the whole page was roughly one loader tall, and when the CMS body
+  arrived it inserted a heading, a back button, a divider and the entire article
+  underneath — pushing the footer down by the full height of the page in one
+  shift. On /ai-career-astrologer the body is 5,565 B of HTML, which is several
+  thousand px of rendered text.
+
+  60vh matches .stateWrap in SingleBlogDetails.module.scss, which is the same fix
+  for the same problem on the blog article route and is already in production. It
+  does not need to equal the final content height to help — CLS scores the
+  fraction of the viewport that moves, so covering the viewport is what counts.
+
+  Additive: this is a new class, so the 13 other importers of this stylesheet are
+  untouched.
+*/
+.cmsLoading {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .title {
   font-size: 28px;
   font-weight: bold;
