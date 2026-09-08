@@ -187,7 +187,7 @@
 .ratingBadge {
   width: fit-content;
   display: flex;
-  align-items: center;
+  align-items: end;
   gap: 4px;
   background: #fff8f0;
   // padding: 0px 6px;
@@ -199,6 +199,7 @@
   bottom: -8px;
   left: 50%;
   transform: translateX(-50%);
+  line-height: 18px;
   // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   
   @media (min-width: 1024px) {
@@ -2311,7 +2312,7 @@
 
 .reviewRating {
   display: flex;
-  align-items: center;
+  align-items: end;
   gap: 2px;
   font-size: 14px;
   font-weight: 500;
@@ -2320,6 +2321,7 @@
   padding: 4px 8px;
   border-radius: 40px;
   border: 1.5px solid rgba(255, 255, 255, 0.25);
+  line-height: 9px;
   span{
     text-box-trim: trim-both;
     text-box-edge: cap alphabetic;
