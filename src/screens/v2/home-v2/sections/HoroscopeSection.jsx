@@ -209,6 +209,21 @@ const HoroscopeSection = ({ sectionData }) => {
 
   const heading = sectionData?.display_title || sectionData?.title;
 
+  // "Read Full Horoscope" target — routes to the matching period page for the
+  // selected sign (lowercase slug), e.g. Tomorrow + Aries -> /tomorrow-horoscope/aries.
+  const fullHoroscopeHref = useMemo(() => {
+    const slug = sign.key; // "aries", "taurus", ...
+    const base =
+      period === "tomorrow"
+        ? "/tomorrow-horoscope"
+        : period === "week"
+          ? "/weekly-horoscope"
+          : period === "year"
+            ? "/yearly-horoscope"
+            : "/daily-horoscope";
+    return `${base}/${slug}`;
+  }, [period, sign.key]);
+
   // The design's left card shows just two lucky facts — Lucky Number and Lucky
   // Color — side by side (not the earlier 4-item grid with Lucky Time / Planet).
   const LUCKY = [
@@ -347,7 +362,7 @@ const HoroscopeSection = ({ sectionData }) => {
 
           <div className={styles.ctaRow}>
             <Link
-              to={`/horoscope/daily/${sign.name}-free-horoscope`}
+              to={fullHoroscopeHref}
               className={styles.ctaPrimary}
             >
               Read Full Horoscope <ChevronRight size={16} aria-hidden="true" />
