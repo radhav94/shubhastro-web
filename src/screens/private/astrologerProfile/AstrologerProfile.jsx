@@ -519,6 +519,7 @@ const AstrologerProfile = () => {
     handleCallStart: hookHandleCallStart,
     handleAfterKundliSelect,
     openModal: hookOpenModal,
+    rechargeType: hookRechargeType,
     setOpenModal: hookSetOpenModal,
   } = useAstrologerConnect();
 
@@ -2711,6 +2712,7 @@ const AstrologerProfile = () => {
       <RechargeModal
         astrologer={data}
         isOpen={hookOpenModal.recharge}
+        connectionType={hookRechargeType}
         onClose={() =>
           hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
         }
