@@ -63,7 +63,7 @@
   flex-shrink: 0;
   min-height: 300px;
   @media screen and (width <= 767px) {
-    width: 145px;
+    width: 185px;
     min-height: 277px;
   }
   &:hover{
@@ -389,7 +389,7 @@
     // padding: 8px 10px;
     font-size: 12px;
     height: 34px;
-    img{display: none;}
+    img{ width: 14px; height: 14px; }
   }
 
   @include cta-hit-area;
@@ -440,7 +440,7 @@
     // padding: 8px 10px;
     font-size: 12px;
     height: 34px;
-    img{display: none;}
+    img{ width: 14px; height: 14px; }
   }
 
   @include cta-hit-area;
