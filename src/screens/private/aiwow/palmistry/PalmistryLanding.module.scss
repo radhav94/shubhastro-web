@@ -215,13 +215,27 @@
   }
 }
 
+/* Clarity dead clicks (session vwy4oo, Sep 4, mobile Chrome from Facebook):
+   Clarity reported taps on a "Clear Background" *button*. There is no such
+   button — it is a static `<h3>` from the CHECKLIST array of shot guidelines,
+   inside a plain `<div className={styles.checkItem}>` with no handler.
+
+   It was wearing the page's interactive palette. This rule painted the title in
+   the same `linear-gradient(90deg, #F75801, #D43400)` at `font-weight: 600` that
+   `.cameraButton` uses as its fill and `.uploadButton` uses as its text colour,
+   and `.checkIcon` sits beside it as a filled orange circle with a white tick
+   and a drop shadow. A bold brand-orange label next to a tickable-looking circle
+   is a checklist item you tap to tick off, so it got tapped.
+
+   Neutral heading colour now, matching `.checkTitle` in ClothColorLanding and
+   AuraLanding which already use #1f2937 — so this is the existing in-repo
+   treatment, not a new one. The orange tick circle stays: an icon beside a
+   plain heading is the ordinary "benefits list" pattern and does not read as a
+   control on its own. */
 .checkTitle {
   font-size: 1rem;
   font-weight: 600;
-  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #1f2937;
   margin: 0 0 0.25rem 0;
 }
 

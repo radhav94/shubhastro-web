@@ -22,6 +22,28 @@ const AddProfile = () => {
     longitude: null,
   })
 
+  /*
+   * Bumped when submission is blocked on a place with no coordinates, to bring
+   * the suggestion list back up.
+   *
+   * `reopenSignal` has existed in locationSearchVedic.jsx for a while and is
+   * wired into AddProfileModal and EditProfileModal, but this screen and
+   * kundli/hooks/useProfileManager.js were left answering a blocked submit with
+   * a bare `Toast.error('Please select a valid location from the dropdown')`.
+   * Coordinates are only ever set by picking a suggestion, so that message names
+   * a control that is not on screen — and focusing the input cannot bring it
+   * back, because `focus()` fires no event on an already-focused field, which is
+   * exactly the state someone is in when they tap submit straight after typing.
+   *
+   * Clarity dead clicks (session 1lkvwpx, Sep 4, Facebook in-app browser): five
+   * minutes on this form, 39 clicks, "Please select a valid loc" at 02:34 and
+   * again at 03:56, page refreshes at 03:14 and 04:28, then back to the homepage
+   * without ever completing. Clarity truncated the text, but "select a valid"
+   * matches this string and not GuestDetailsForm's "Please pick a location from
+   * the dropdown", which already scrolls its inline error into view.
+   */
+  const [placeReopenSignal, setPlaceReopenSignal] = useState(0)
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
@@ -84,6 +106,11 @@ const AddProfile = () => {
     }
     if (!formData.latitude || !formData.longitude) {
       Toast.error('Please select a valid location from the dropdown')
+      // Put the dropdown the message refers to back on screen. See the note on
+      // placeReopenSignal above.
+      if (formData.placeOfBirth?.trim()) {
+        setPlaceReopenSignal(n => n + 1)
+      }
       return
     }
 
@@ -240,8 +267,24 @@ const AddProfile = () => {
           <label className={styles.label}>Place of Birth</label>
           <div className={styles.inputWrapper}>
             <LocationSearch
+              reopenSignal={placeReopenSignal}
               value={formData.placeOfBirth}
-              onChange={(e) => handleInputChange('placeOfBirth', e.target.value)}
+              /*
+                Typing clears the coordinates, matching the add form in
+                ProfileModals.jsx and the note in birthPlaceCoords.js. Without
+                this, picking "Delhi" and then editing the text to "Mumbai" kept
+                Delhi's lat/lng: the guard above passed and the kundli was built
+                from the wrong place. Clearing them turns a silently wrong chart
+                into a visible "select a valid location". `LocationSearch` sets
+                the value through `onPlaceSelect`, not `onChange`, so this only
+                fires on real typing.
+              */
+              onChange={(e) => setFormData(prev => ({
+                ...prev,
+                placeOfBirth: e.target.value,
+                latitude: null,
+                longitude: null,
+              }))}
               onPlaceSelect={handlePlaceSelect}
             />
             <MapPin size={20} className={styles.inputIcon} />

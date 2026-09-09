@@ -218,7 +218,6 @@ const HomeIntroPopup = () => {
             alt="Popup Banner"
             width="256"
             height="256"
-            fetchpriority="high"
             decoding="async"
           />
         </button>

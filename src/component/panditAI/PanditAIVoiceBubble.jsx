@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { IoClose } from "react-icons/io5";
@@ -6,6 +6,7 @@ import { Loader2, MousePointerClick, Radio, Volume2 } from "lucide-react";
 import styles from "./PanditAIVoiceBubble.module.scss";
 import usePanditAIVoice from "../../screens/private/panditAIVoice/usePanditAIVoice";
 import useAIFreeMinutes from "./useAIFreeMinutes";
+import { isInAppBrowser } from "../../utils/deviceInfo";
 
 // CDN-hosted — see PanditAIBubble for why this is a constant, not an import.
 const panditAiIcon = "https://assets.shubhastro.ai/images/AiPandit.png";
@@ -15,6 +16,12 @@ const PanditAIVoiceBubble = () => {
   const [isOpen, setIsOpen] = useState(() => sessionStorage.getItem("panditai_voice_open") === "true");
   const [sharedRoomId, setSharedRoomId] = useState(null);
   const [initialBilling, setInitialBilling] = useState(null);
+  /*
+    Same pill-shaped-badge-with-no-handler dead click as the text bubble
+    (Clarity q4ncy9). Kept in sync deliberately: both headers render the
+    identical "N min free" chip, so both need to answer a tap on it.
+  */
+  const [billingNotice, setBillingNotice] = useState(false);
 
   // Persist open state for reconnect on refresh
   useEffect(() => {
@@ -25,12 +32,50 @@ const PanditAIVoiceBubble = () => {
     status,
     toggleListening,
     isSupported,
+    micError,
     connecting,
     roomId,
     endSession,
     markSkipCleanup,
     stopAudio,
   } = usePanditAIVoice({ enabled: isOpen, sharedRoomId });
+
+  /*
+   * Clarity dead clicks (session ypvzho, Sep 4, Instagram in-app browser):
+   * engaged Pandit AI at 01:11, then rapid clicks from 01:17 to 01:48 with a dead
+   * click at 01:28 — 8 clicks, one page, nearly eight minutes and nothing
+   * completed.
+   *
+   * The mic button carried native `disabled={connecting || !isSupported ||
+   * sessionEndedLowBalance}`. `isSupported` is `!!navigator.mediaDevices
+   * ?.getUserMedia` (see useSarvamSTT), and `navigator.mediaDevices` is commonly
+   * absent altogether in embedded in-app browsers — the same constraint the
+   * AI-Wow camera screens already document and handle.
+   *
+   * So in an Instagram WebView the button was natively disabled, dispatching no
+   * click event, while the caption still read "Tap to start" over the heading
+   * "Tap and ask anything". Nothing anywhere said voice was unavailable. The UI
+   * invited the tap and then swallowed it, which is exactly Clarity's "appeared
+   * clickable but did not respond".
+   *
+   * `seq` is bumped per tap so a repeated identical message still remounts the
+   * node: Clarity sees a DOM mutation and screen readers re-announce.
+   */
+  const [micNotice, setMicNotice] = useState(null);
+  const noticeSeqRef = useRef(0);
+
+  const voiceUnavailable = !isSupported;
+
+  const announceMicNotice = useCallback((text) => {
+    noticeSeqRef.current += 1;
+    setMicNotice({ seq: noticeSeqRef.current, text });
+  }, []);
+
+  // Hand off to the Pandit AI text chat — the same event the guest path below
+  // uses. Voice closing always reopens text, so nothing is stranded.
+  const switchToTextChat = useCallback(() => {
+    window.dispatchEvent(new CustomEvent("panditai:ask", { detail: { query: "" } }));
+  }, []);
 
   const {
     remainingPaidTime: hookRemainingPaidTime,
@@ -42,6 +87,28 @@ const PanditAIVoiceBubble = () => {
     ratePerMinute: hookRatePerMinute,
     sessionEndedLowBalance,
   } = useAIFreeMinutes({ isOpen, roomId });
+
+  // Declared after useAIFreeMinutes because it reads sessionEndedLowBalance.
+  const handleMicClick = useCallback(() => {
+    if (voiceUnavailable) {
+      announceMicNotice(
+        isInAppBrowser()
+          ? "Voice needs microphone access, which this app's built-in browser blocks. Use the text chat below, or open shubhastro.ai in Chrome or Safari."
+          : "Voice isn't available on this browser. Use the text chat instead."
+      );
+      return;
+    }
+    if (sessionEndedLowBalance) {
+      announceMicNotice("Your balance ran out. Recharge to continue this voice session.");
+      return;
+    }
+    if (connecting) {
+      announceMicNotice("Still preparing your session — one moment.");
+      return;
+    }
+    setMicNotice(null);
+    toggleListening();
+  }, [announceMicNotice, connecting, sessionEndedLowBalance, toggleListening, voiceUnavailable]);
 
   // Use hook values, fall back to initial billing seeded from the text chat
   // handover so the badge shows instantly while chat:reconnect round-trips.
@@ -146,6 +213,9 @@ const PanditAIVoiceBubble = () => {
   }, [isOpen, handleClose]);
 
   const getStatusText = () => {
+    // Checked before everything else: when the microphone can't exist, "Tap to
+    // start" is an invitation the screen cannot honour.
+    if (voiceUnavailable) return "Voice unavailable";
     if (connecting) return "Connecting...";
     switch (status) {
       case "listening": return "Listening...";
@@ -156,6 +226,7 @@ const PanditAIVoiceBubble = () => {
   };
 
   const getCaptionTitle = () => {
+    if (voiceUnavailable) return "Voice isn't available here";
     if (connecting) return "Preparing your session";
     if (status === "listening") return "Listening to your question";
     if (status === "processing") return "Thinking about your answer";
@@ -165,6 +236,11 @@ const PanditAIVoiceBubble = () => {
   };
 
   const getSubText = () => {
+    if (voiceUnavailable) {
+      return isInAppBrowser()
+        ? "This app's built-in browser blocks microphone access."
+        : "This browser doesn't support microphone recording.";
+    }
     if (connecting) return "Preparing your AI Pandit session.";
     if (status === "listening") return "Speak your question clearly.";
     if (status === "processing") return "Processing your question...";
@@ -215,13 +291,19 @@ const PanditAIVoiceBubble = () => {
           </div>
           <div className={styles.headerActions}>
             {isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
-              <div className={styles.freeBadge}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <button
+                type="button"
+                className={styles.freeBadge}
+                onClick={() => setBillingNotice((prev) => !prev)}
+                aria-expanded={billingNotice}
+                aria-label={`${freeMinutesRemaining} minutes free remaining. Tap for details.`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10"/>
                   <polyline points="12 6 12 12 16 14"/>
                 </svg>
                 <span className={styles.freeBadgeText}>{freeMinutesRemaining} min free</span>
-              </div>
+              </button>
             )}
             {!isFreePeriod && remainingPaidTime != null && !sessionEndedLowBalance && (
               <div className={styles.countdownBadge}>
@@ -258,12 +340,27 @@ const PanditAIVoiceBubble = () => {
           </div>
         </div>
 
+        {billingNotice && isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
+          <div className={styles.billingNotice} role="status" aria-live="polite">
+            {`Your first ${freeMinutesRemaining} minute${freeMinutesRemaining === 1 ? "" : "s"} with Pandit AI ${freeMinutesRemaining === 1 ? "is" : "are"} free.`}
+            {ratePerMinute
+              ? ` After that, calls cost ₹${ratePerMinute}/min from your wallet.`
+              : " After that, calls are billed from your wallet."}
+          </div>
+        )}
+
         {/* Voice Stage */}
         <div className={styles.voiceStage}>
+          {/* `aria-disabled`, not native `disabled`. A disabled button dispatches
+              no click event, so in an in-app browser — where
+              navigator.mediaDevices is absent and `isSupported` is false — every
+              tap on the one control this screen offers was swallowed while the
+              caption still said "Tap to start". See the note at the top. */}
           <button
             className={`${styles.micButton} ${styles[status]}`}
-            onClick={toggleListening}
-            disabled={connecting || !isSupported || sessionEndedLowBalance}
+            onClick={handleMicClick}
+            aria-disabled={connecting || voiceUnavailable || sessionEndedLowBalance}
+            aria-busy={connecting}
             aria-label={getStatusText()}
           >
             <span className={styles.micHalo} />
@@ -279,6 +376,36 @@ const PanditAIVoiceBubble = () => {
           </span>
           <h3>{getCaptionTitle()}</h3>
           <p>{getSubText()}</p>
+
+          {/* Inline, directly under the mic, rather than a top-right toast the
+              user cannot see from here and Clarity cannot record. Keyed on seq so
+              a repeat tap remounts it. */}
+          {micNotice && (
+            <p key={micNotice.seq} className={styles.micNotice} role="status">
+              {micNotice.text}
+            </p>
+          )}
+
+          {/* A refused or missing microphone used to be a bare console.error.
+              See useSarvamSTT. */}
+          {!micNotice && micError && (
+            <p className={styles.micNotice} role="status">
+              {micError}
+            </p>
+          )}
+
+          {/* Without this the voice window was a dead end in an in-app browser:
+              the only control could not work and nothing offered a way on. Text
+              chat needs no microphone and reaches the same AI Pandit. */}
+          {voiceUnavailable && (
+            <button
+              type="button"
+              className={styles.textChatBtn}
+              onClick={switchToTextChat}
+            >
+              Use text chat instead
+            </button>
+          )}
         </div>
 
         {/* Recharge Banner - inline like PanditAI */}

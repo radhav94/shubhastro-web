@@ -7,6 +7,32 @@
   padding: 20px;
 }
 
+/*
+  Reserved box for the CMS round trip — see CmsNotFoundPage's isLoading branch.
+
+  That branch used to render `<div class="container"><PrimaryLoader
+  fullscreen={false} /></div>`, and `.container` sets only max-width, margin and
+  padding. So the whole page was roughly one loader tall, and when the CMS body
+  arrived it inserted a heading, a back button, a divider and the entire article
+  underneath — pushing the footer down by the full height of the page in one
+  shift. On /ai-career-astrologer the body is 5,565 B of HTML, which is several
+  thousand px of rendered text.
+
+  60vh matches .stateWrap in SingleBlogDetails.module.scss, which is the same fix
+  for the same problem on the blog article route and is already in production. It
+  does not need to equal the final content height to help — CLS scores the
+  fraction of the viewport that moves, so covering the viewport is what counts.
+
+  Additive: this is a new class, so the 13 other importers of this stylesheet are
+  untouched.
+*/
+.cmsLoading {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .title {
   font-size: 28px;
   font-weight: bold;
@@ -362,12 +388,51 @@
     line-height: 1.6;
   }
 
+  /*
+    Underlined by default, not colour-only.
+
+    This was `text-decoration: none` with the underline added only on `:hover`.
+    A touch device has no hover, so on mobile every in-body link in a CMS page was
+    distinguished from the prose around it by colour alone (#0066cc) — which is
+    both a WCAG 1.4.1 failure (colour as the sole visual cue) and, more concretely,
+    makes a link hard to aim at: readers tap near it and get nothing, or tap
+    ordinary text believing it is a link.
+
+    SingleBlogDetails.module.scss already made exactly this change for the article
+    body, with the same reasoning. So the same affordance was missing across the
+    whole CMS surface.
+
+    Scope, verified rather than assumed: 13 files import this stylesheet, but only
+    two of them use `.htmlContent` — CmsNotFoundPage (the catch-all that renders
+    EVERY CMS/SEO landing page, including all the muhurat pages) and the
+    CmsAccordion in CmsPageWrapper. The eleven hand-written legal/static screens
+    import this file but never apply `.htmlContent`, so this rule does not reach
+    them and their markup is untouched.
+
+    Clarity session 57ww6z: landed directly on /bhoomi-pujan-muhurat (Samsung
+    Internet, mobile), made exactly one click at 00:13 on a date element, it
+    registered dead, and the visitor left at 00:28. NOTE: I cannot prove from here
+    that the tapped node was an anchor rather than static date text — muhurat
+    bodies are CMS-authored and I have no copy of that document. The mis-aim
+    affordance is fixable and provable; making a plain date string interactive is
+    not, because there is no destination to send it to.
+
+    `:hover` keeps a colour shift so pointer devices still get feedback, and
+    `:focus-visible` matches the blog so keyboard users can see focus.
+  */
   a {
     color: #0066cc;
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    word-break: break-word;
 
     &:hover {
-      text-decoration: underline;
+      color: #004c99;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #0066cc;
+      outline-offset: 2px;
     }
   }
 
@@ -434,13 +499,21 @@
   }
 }
 
-/* Signature Block */
+/* Signature Block
+   Clarity dead clicks (session 5maopk): this block is a facsimile of the
+   printed contract's execution area, not a form, but it was styled like one —
+   a filled grey card holding bold labels above solid dark full-width rules.
+   On mobile `.signatureRow` stacks to a single column, so each label+rule pair
+   rendered at exactly the width and spacing of a mobile text input and got
+   tapped. The card fill is gone and `.signatureLine` is now a dashed rule,
+   which is the paper-form convention and reads as "sign the printout" rather
+   than "type here". See the note in AstrologerOnboardingAgreement.jsx for why
+   these are not being converted into real inputs. */
 .signatureBlock {
   margin-top: 30px;
   padding: 24px;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  background-color: #fafafa;
 }
 
 .signatureRow {
@@ -477,8 +550,8 @@
 .signatureLine {
   display: block;
   width: 100%;
-  height: 1px;
-  background-color: #333;
+  height: 0;
+  border-bottom: 1px dashed #9ca3af;
   margin-top: 20px;
 }
 

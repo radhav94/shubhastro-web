@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense, Frag
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
+import EmptyState from "../../../component/emptyState/EmptyState";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { getToken } from "../../../utils/token";
 import {
@@ -74,7 +75,8 @@ const COMMUNITY_AVATARS = [
   new URL("../../../assets/images/community-avatar-4.png", import.meta.url).href,
   new URL("../../../assets/images/community-avatar-5.png", import.meta.url).href,
 ];
-const heroBg = "https://assets.shubhastro.ai/images/ai-suite.png";
+// const heroBg = "https://assets.shubhastro.ai/images/ai-suite.png";
+// const heroBg = "../images/ai-suite.png";
 
 /**
  * Hero greeting.
@@ -196,21 +198,12 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   <div className={styles.mahadashaTag}>🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong></div>
                 )}
               </div>
-              <div className={styles.heroBgImg}>
-                {/* <div className={styles.heroBgGlow} /> */}
-                <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
-              </div>
             </div>
             <div className={styles.wowInner}>
-              <div className={styles.wowGlow} />
+              {/* <div className={styles.wowGlow} /> */}
               <div className={styles.wowHeader}>
                 <div className={styles.titleWithBottomDevider}>
                   <h2 className={styles.wowTitle}>{section.sub_title || "Your AI Suite"}</h2>
-                  <div className={styles.BottomDevider}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="11" viewBox="0 0 4 5" fill="none">
-                      <path d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z" fill="#030303"/>
-                    </svg>
-                  </div>
                 </div>
                 {/* <button className={styles.wowViewMore} onClick={() => navigate('/ai-wow')}>View More &rsaquo;</button> */}
               </div>
@@ -222,9 +215,9 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   const premium = item.isPaid === true;
                   const paidLabel = premium ? "Paid" : null;
                   const cardIcon = (
-                    <div className={styles.wowIconBox}>
-                      <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
-                    </div>
+                    // <div >
+                      <img className={styles.wowIconBox} src={iconSrc || defaultSquareImg} alt="" width="40" height="40" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                    // </div>
                   );
                   // Premium cards open the premium plans modal instead of navigating.
                   if (premium) {
@@ -266,7 +259,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                     <Link key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} to={path} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
                       {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
                       <div className={styles.wowIconBox}>
-                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" fetchpriority="high" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
                       <span className={styles.wowCardTitle}>{item.title}</span>
                     </Link>
@@ -302,9 +295,9 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                       style={{ cursor: isActionable ? 'pointer' : 'default' }}
                     >
                       {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
-                      <div className={styles.wowIconBox}>
-                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
-                      </div>
+                      {/* <div className={styles.wowIconBox}> */}
+                        <img className={styles.wowIconBox} src={iconSrc || defaultSquareImg} alt="" width="40" height="40" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                      {/* </div> */}
                       <span className={styles.wowCardTitle}>{item.title}</span>
                     </div>
                       );
@@ -494,10 +487,6 @@ const renderUngroupedHeroSection = (section, props) => {
             <h1>{section.title ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></> : <>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></>}</h1>
             {currentMahadasha && <div className={styles.mahadashaTag}>🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong></div>}
           </div>
-          <div className={styles.heroBgImg}>
-            <div className={styles.heroBgGlow} />
-            <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
-          </div>
         </section>
       );
     case "muharat-widget":
@@ -582,7 +571,12 @@ const HomeV2 = () => {
    * below appends the remaining pages into this same cache entry after paint, so
    * `homeSections` grows from page 1 to the full list.
    */
-  const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery(HOME_FIRST_PAGE_ARG);
+  const {
+    data: newHomeData,
+    isLoading: isHomeLoading,
+    isError: isHomeError,
+    refetch: refetchHome,
+  } = useGetNewHomeDetailsQuery(HOME_FIRST_PAGE_ARG);
   const homeSections = newHomeData?.data?.list;
 
   const [fetchHomeSectionsPage] = useLazyGetNewHomeSectionsQuery();
@@ -987,7 +981,7 @@ const HomeV2 = () => {
   const currentMahadasha = mahadashaData?.response?.mahadasha?.find(m => { const now = Date.now(); return new Date(m.start).getTime() <= now && new Date(m.end).getTime() >= now; });
 
   // ─── Connection Hooks ─────────────────────────────────────────────────────
-  const { profiles, isCreating, showAddProfile, showEditProfile, formData, editFormData, setShowAddProfile, setShowEditProfile, setFormData, setEditFormData, handleAddProfile, handleSubmitProfile, handleSubmitEditProfile, formatProfileDisplay } = useProfileManager();
+  const { profiles, isCreating, showAddProfile, showEditProfile, formData, editFormData, setShowAddProfile, setShowEditProfile, setFormData, setEditFormData, handleAddProfile, handleSubmitProfile, handleSubmitEditProfile, formatProfileDisplay, placeReopenSignal } = useProfileManager();
   const { handleChatStart, handleCallStart, openModal: hookOpenModal, setOpenModal: hookSetOpenModal, selectedAstrologer: hookSelectedAstrologer, activeCallAstroRef, hasKundli, kundliRef } = useAstrologerConnect();
   const { connectionType, localSelectedProfile, setLocalSelectedProfile, setSelectedAstrologer: setAstrologerRef } = useAstrologerConnection(activeCallAstroRef, kundliRef.current);
 
@@ -1100,8 +1094,56 @@ const HomeV2 = () => {
    * was warming the cache, which the index.html preload of the identical URL
    * already does, so it has been removed rather than left as a false mitigation.
    */
-  if (isHomeLoading || !renderPlan.length) {
+  // Still fetching page 1 — keep the blank full-height placeholder (preserves
+  // the LCP behaviour described above; the hero commits as soon as data lands).
+  if (isHomeLoading) {
     return <div className={styles.page} style={{ minHeight: "100vh" }} />;
+  }
+
+  // Page 1 finished but produced nothing to render — either the request was
+  // rejected (`isHomeError`) or it came back empty. Previously this fell through
+  // to the same blank div as the loading state, so a failed homepage API left
+  // the visitor on a permanently empty page with no way to recover. Show a
+  // recoverable fallback (with a Retry that refetches) instead of a blank page.
+  if (isHomeError || !renderPlan.length) {
+    return (
+      <div
+        className={styles.page}
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <EmptyState
+          message="We couldn't load the homepage"
+          subtext="Please check your connection and try again."
+        />
+        <button
+          type="button"
+          onClick={() => refetchHome()}
+          style={{
+            marginTop: "4px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "10px 22px",
+            borderRadius: "12px",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            fontWeight: 600,
+            color: "#fff",
+            background: "linear-gradient(90deg, #f75801 0%, #d43400 100%)",
+            boxShadow: "0 4px 14px rgba(247, 88, 1, 0.28)",
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -1156,7 +1198,7 @@ const HomeV2 = () => {
 
       {/* Modals */}
       <Suspense fallback={null}>
-        <ProfileModals profiles={profiles} isCreating={isCreating} showAddProfile={showAddProfile} showEditProfile={showEditProfile} formData={formData} editFormData={editFormData} setShowAddProfile={setShowAddProfile} setShowEditProfile={setShowEditProfile} setFormData={setFormData} setEditFormData={setEditFormData} handleAddProfile={handleAddProfile} handleSubmitProfile={handleSubmitProfile} handleSubmitEditProfile={handleSubmitEditProfile} formatProfileDisplay={formatProfileDisplay} openModal={hookOpenModal} setOpenModal={hookSetOpenModal} selectedAstrologer={hookSelectedAstrologer} localSelectedProfile={localSelectedProfile} setLocalSelectedProfile={setLocalSelectedProfile} onContinue={handleProfileManagerStartCall} connectionType={connectionType} />
+        <ProfileModals profiles={profiles} isCreating={isCreating} showAddProfile={showAddProfile} showEditProfile={showEditProfile} formData={formData} editFormData={editFormData} setShowAddProfile={setShowAddProfile} setShowEditProfile={setShowEditProfile} setFormData={setFormData} setEditFormData={setEditFormData} handleAddProfile={handleAddProfile} handleSubmitProfile={handleSubmitProfile} handleSubmitEditProfile={handleSubmitEditProfile} formatProfileDisplay={formatProfileDisplay} placeReopenSignal={placeReopenSignal} openModal={hookOpenModal} setOpenModal={hookSetOpenModal} selectedAstrologer={hookSelectedAstrologer} localSelectedProfile={localSelectedProfile} setLocalSelectedProfile={setLocalSelectedProfile} onContinue={handleProfileManagerStartCall} connectionType={connectionType} />
         <EmergencySessionModal isOpen={showEmergencyModal} onClose={handleEmergencyClose} astrologer={selectedAstrologer} onChatNow={handleEmergencyChatNow} onCallNow={handleEmergencyCallNow} />
         <MobileAppModal isOpen={showMobileAppModal} onClose={handleMobileAppClose} />
         <SubscriptionModal isOpen={showSubscriptionModal} onClose={() => setShowSubscriptionModal(false)} onSelectPlan={handleFreeUnlock} />

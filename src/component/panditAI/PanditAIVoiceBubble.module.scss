@@ -205,6 +205,9 @@ $surface: #fffaf5;
   opacity: 0.85;
 }
 
+/* A real <button>, not a <div> — it reads as a tappable chip (rounded pill,
+   visible border, sat beside the close button) and was collecting dead clicks.
+   Appearance is unchanged; only the resets and affordances are new. */
 .freeBadge {
   display: flex;
   align-items: center;
@@ -215,6 +218,26 @@ $surface: #fffaf5;
   border: 1px solid rgba(255, 255, 255, 0.28);
   color: #fff;
   white-space: nowrap;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+/* Answer to a .freeBadge tap, directly under the header. */
+.billingNotice {
+  flex-shrink: 0;
+  padding: 9px 20px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #8a4b00;
+  background: #FFF3E6;
+  border-bottom: 1px solid #ffd9b3;
 }
 
 .freeBadgeText {
@@ -260,10 +283,40 @@ $surface: #fffaf5;
   background: transparent;
   cursor: pointer;
 
-  &:disabled {
+  /* Was `disabled` only. Native `disabled` on this button dispatched no click
+     event, so an unsupported microphone made the sole control on the screen
+     silently inert — see PanditAIVoiceBubble.jsx (session ypvzho). Driven by
+     aria-disabled now, with the same appearance. */
+  &:disabled,
+  &[aria-disabled="true"] {
     cursor: not-allowed;
     opacity: 0.6;
   }
+}
+
+/* Inline answer to a mic tap that cannot proceed, and the microphone error from
+   useSarvamSTT. Replaces a silent return and a console.error. */
+.micNotice {
+  margin: 10px auto 0;
+  max-width: 22rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: #b45309;
+  text-align: center;
+}
+
+/* Escape hatch when voice cannot run at all. */
+.textChatBtn {
+  margin: 12px auto 0;
+  display: block;
+  padding: 9px 18px;
+  border: 1.5px solid #F75801;
+  border-radius: 10px;
+  background: #fff;
+  color: #F75801;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .micHalo,

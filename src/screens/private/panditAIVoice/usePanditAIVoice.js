@@ -483,7 +483,7 @@ export default function usePanditAIVoice({ enabled = true, sharedRoomId = null }
     }
   }, []);
 
-  const { isListening, isSupported, startListening, stopListening } = useSarvamSTT({
+  const { isListening, isSupported, error: micError, startListening, stopListening } = useSarvamSTT({
     onResult: handleSTTResult,
     onEnd: handleSTTEnd,
   });
@@ -607,6 +607,8 @@ export default function usePanditAIVoice({ enabled = true, sharedRoomId = null }
     aiResponse,
     toggleListening,
     isSupported,
+    /** Set when the microphone could not be started. See useSarvamSTT. */
+    micError,
     connecting,
     roomId,
     endSession,

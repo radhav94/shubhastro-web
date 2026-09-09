@@ -55,7 +55,7 @@ const CmsNotFoundPage = () => {
 
   if (isLoading) {
     return (
-      <div className={styles.container}>
+      <div className={`${styles.container} ${styles.cmsLoading}`}>
         {/*
           `fullscreen` defaults to true, which is `position: fixed` over the whole
           viewport at z-index 999999 — above the header (2001). This component is
@@ -64,6 +64,10 @@ const CmsNotFoundPage = () => {
           on the header, the nav or the footer hit the overlay and were swallowed.
           The loader belongs in the page flow here, where it reports progress
           without disabling the chrome around it.
+
+          .cmsLoading reserves 60vh around it. Without that the loading page was
+          about one loader tall and the arriving CMS body shifted the footer down
+          by the height of the whole article — see the note on .cmsLoading.
         */}
         <PrimaryLoader fullscreen={false} />
       </div>

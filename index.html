@@ -399,10 +399,10 @@
 
     What remains cannot be discovered any earlier:
   -->
-  <!-- The font files live on gstatic and are only discovered once the Google
-       Fonts stylesheet has been fetched AND parsed, so the handshake would
-       otherwise start one full round trip late. -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Removed the fonts.gstatic.com preconnect: Poppins is now self-hosted from
+       /fonts (see the @font-face block below), so nothing is fetched from
+       Google's font CDN and the handshake slot is better left for our own
+       origins. -->
   <!-- Hosts the body background artwork (preloaded below) and `heroBg`
        ai-suite.png, the homepage LCP candidate. The hero image URL is a
        hardcoded constant in HomeV2 but is not in the HTML, so it is only
@@ -478,14 +478,110 @@
       }
     })();
   </script>
+
+  <!--
+    Same trick for the astrologer listing, which needs it more than the homepage.
+
+    /astrologers has no hero image and no CMS body: every content-bearing element
+    on it comes from one call to astrologers/filterAstrologers. That request could
+    not start until the entry bundle had downloaded, parsed and executed and the
+    route chunk had run, and it is not a fast request. Measured against production
+    on 08 Sep, five identical requests in a row:
+
+        ttfb 0.48s / 1.54s / 4.61s / 0.52s / 0.55s
+        every one "x-cache: Miss from cloudfront"
+
+    99,776 B uncompressed (22,902 B gzipped) carrying 19 records — 9 `result` plus
+    10 `topTenAstrologer` — at 63 fields each. There is a CloudFront distribution
+    in front of it but the response sets no Cache-Control at all, so nothing is
+    ever served from the edge and every visitor pays a fresh origin round trip.
+
+    Starting it here overlaps that round trip with the bundle download instead of
+    queueing it behind it. It does not make the endpoint faster; it stops the two
+    costs being serial.
+
+    Constraints, all mirroring the homepage block above:
+      - exact pathname match. /astrologers/:category and /astrologers/online send
+        different query params (specialties / isActive), so a prefetch keyed to the
+        plain listing must not be adopted there. `=== "/astrologers"` also
+        excludes the trailing-slash form rather than guessing at it.
+      - logged-out only. This is a bare GET with no Authorization header, and the
+        listing may be personalised for a signed-in visitor, so the response is
+        only safe to adopt when RTK Query would not have sent credentials either.
+      - page 1 at limit 9, matching `const limit = 9` in TalkToAstrologer.jsx. The
+        endpoint re-checks both before adopting, so if the two ever drift apart the
+        payload is discarded rather than mismatched.
+      - Content-Type text/plain keeps this a simple CORS request with no preflight,
+        so it costs one round trip and not two.
+    Best effort throughout: any failure just means the endpoint requests normally.
+  -->
+  <script>
+    (function () {
+      try {
+        if (window.location.pathname !== "/astrologers") return;
+        if (
+          localStorage.getItem("shubhtalk_customer_token") ||
+          localStorage.getItem("shubhtalk_astro_token")
+        ) return;
+
+        // Must match `const limit = 9` in
+        // src/screens/private/talkToAstrologer/TalkToAstrologer.jsx.
+        var page = 1;
+        var limit = 9;
+        var promise = fetch(
+          "%VITE_APP_API_BASE_URL%/api/astrologers/filterAstrologers?page=" +
+            page +
+            "&limit=" +
+            limit,
+          { method: "GET", headers: { "Content-Type": "text/plain" } }
+        ).then(function (response) {
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return response.json();
+        });
+
+        promise.catch(function () {});
+        window.__astrologersPrefetch__ = { page: page, limit: limit, promise: promise };
+      } catch (e) {
+        /* prefetch is best effort */
+      }
+    })();
+  </script>
   <!-- <link rel="dns-prefetch" href="https://translate.googleapis.com" /> -->
   <link rel="dns-prefetch" href="https://www.gstatic.com" />
   <link rel="dns-prefetch" href="https://firebaseinstallations.googleapis.com" />
 
-  <!-- Non-render-blocking font load -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Montserrat&family=Open+Sans:wght@400;500;600;700&display=swap" /></noscript>
+  <!--
+    Non-render-blocking font load.
+
+    Poppins only. `Montserrat` and `Open+Sans` used to be requested here too and
+    were never referenced anywhere: `grep -rn "Montserrat\|Open Sans" src`
+    returns zero matches, and every `$font-primary` SCSS variable in the codebase
+    resolves to `"Poppins", sans-serif`.
+
+    That mattered more than it looks. Google Fonts emits one `@font-face` block
+    per weight *per unicode subset* (latin, latin-ext, and for Open Sans also
+    cyrillic, greek, vietnamese…), so three families expanded to 60 blocks.
+    Measured against the same mobile UA:
+
+        before  32,371 B CSS, 60 @font-face blocks
+        after    6,078 B CSS, 15 @font-face blocks   (-26,293 B, -81%)
+
+    To be precise about the win: unused `@font-face` rules do not download font
+    files, so this does not remove 5 font fetches. What it removes is 26 KB of
+    CSS on the critical path plus 45 redundant `@font-face` rules the browser
+    would otherwise parse and keep in its font-matching set.
+
+    All five Poppins weights are kept because all five are used — measured across
+    src: 600 x1614, 500 x569, 700 x485 (+31 `bold`, +11 `font-bold`), 400 x158,
+    800 x27. Do not trim these without re-counting.
+
+    Two weights are referenced but NOT requested and so already fall back:
+    `font-weight: 900` (5 uses) and `300` (4 uses). Pre-existing and cosmetic —
+    left alone rather than adding two more font files for 9 declarations.
+  -->
+  <!-- <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" /></noscript> -->
 
   <!--
     Body background preload, split by viewport.
@@ -511,15 +607,101 @@
     it just stops outranking the script that unblocks the actual LCP element.
     `background-color: #ebecf2` in the inline CSS below covers the gap, so the
     later paint is a colour-to-artwork swap, not a flash of white.
+
+    Applied 2026-09-04: the paragraph above has said "deliberately NOT set to
+    high" for some time, but both tags still carried `fetchpriority="high"`. The
+    reasoning was written and never applied to the markup. Independently
+    re-verified before removing it: per the Largest Contentful Paint API, an
+    element with a `url()` background IS an LCP candidate, but Chromium excludes
+    "elements that cover the full viewport, that are likely considered as
+    background rather than content" (web.dev/articles/lcp). This artwork is
+    `background-size: cover; background-attachment: fixed` on
+    `body.home-v2-page`, i.e. full-viewport, so it cannot be the LCP element and
+    cannot be harmed by dropping to default preload priority.
+
+    Measured payloads over the wire, for the record:
+      main-body-bg-new.png         486,842 B  (desktop, >=768px)
+      main-body-bg-new-mobile.png   98,604 B  (mobile,  <=767px)
+
+    Both are PNG. Converting them to WebP/AVIF is the far larger win and is
+    blocked on the CDN assets existing — once they do, wire up `image-set()` with
+    a PNG fallback rather than re-adding priority here.
   -->
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" fetchpriority="high" media="(min-width: 768px)" />
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" fetchpriority="high" media="(max-width: 767px)" />
+  <!-- <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" media="(min-width: 768px)" /> -->
+  <!-- <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" media="(max-width: 767px)" /> -->
   <!-- Removed: an unconditional high-priority preload of images/ai-suite.png.
        It is the `heroBg` for HomeV2/HomeNew only, so every other route fetched
        it at fetchpriority="high" and never painted it. index.html is shared by
        all routes, so re-add it from the home route (not here) if needed. -->
 
+  <!--
+    Self-hosted Poppins.
+
+    Replaces the Google Fonts <link>s above (now commented out). Those pulled
+    five .woff2 files from fonts.gstatic.com, and a speed report showed four of
+    them as the site's slowest external resources at ~1.02s each: a cross-origin
+    fetch to Google that is only discovered after the Google Fonts CSS is
+    fetched and parsed. The files already live in public/fonts (served from the
+    site root at /fonts/...), so serving them from our own origin removes that
+    third-party round trip and the extra handshake, and lets us preload the
+    weights the first screen needs.
+
+    Weights map to the five the app actually uses (measured in the removed
+    Google comment: 600 x1614, 500 x569, 700 x516, 400 x158, 800 x27). 900 and
+    300 are referenced but were never shipped and already fall back — unchanged.
+
+    font-display: swap keeps text visible immediately in the size-adjusted
+    'Poppins Fallback' below and swaps to Poppins on arrival, so this cannot
+    reintroduce a blank-text (FOIT) delay on the critical path.
+  -->
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-semibold-webfont.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-medium-webfont.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-regular-webfont.woff2" crossorigin />
+
   <style>
+    /* Self-hosted Poppins @font-face — see the note above. woff2 first (smaller,
+       universally supported on this project's browser floor), woff as fallback. */
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/fonts/poppins-regular-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-regular-webfont.woff') format('woff');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/fonts/poppins-medium-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-medium-webfont.woff') format('woff');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/fonts/poppins-semibold-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-semibold-webfont.woff') format('woff');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('/fonts/poppins-bold-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-bold-webfont.woff') format('woff');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 800;
+      font-display: swap;
+      src: url('/fonts/poppins-extrabold-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-extrabold-webfont.woff') format('woff');
+    }
+
     /* Size-adjusted fallback to reduce CLS from font swap */
     @font-face {
       font-family: 'Poppins Fallback';
@@ -551,18 +733,16 @@
       touch-action: manipulation;
     }
 
-    body {
+     body {
       background-color: #ebecf2;
       background-image: url('https://assets.shubhastro.ai/main-body-bg-new.png');
-      background-repeat: repeat-y;
       background-attachment: fixed;
       background-size: 100% 100%;
-      position: relative;
+     
       margin: 0;
       padding: 0;
       min-height: 100dvh!important;
-      font-family: 'Poppins', 'Poppins Fallback', sans-serif;
-    }
+      font-family: 'Poppins', 'Poppins Fallback', sans-serif;}
 
     /*
       This rule is the background for every route. Without this override, only
@@ -595,6 +775,78 @@
     window.__analyticsHostAllowed__ = (function () {
       var host = location.hostname;
       return host === "shubhastro.ai" || host === "www.shubhastro.ai";
+    })();
+  </script>
+
+  <!--
+    React DevTools: neutralised on the production host only.
+
+    THIS IS NOT A SECURITY BOUNDARY. Read this before treating it as one.
+
+    Disabling the DevTools hook stops the component tree, props and hook state
+    being browsed with the extension. It does not make anything confidential. A
+    user still has, unchanged:
+      - every request and response in the Network tab, Authorization headers included
+      - the whole JS bundle in Sources
+      - localStorage, sessionStorage and every non-HttpOnly cookie
+      - all runtime state, via a breakpoint anywhere
+    Anything that must not reach the user must not be sent to the browser. This
+    only raises the effort bar for casual inspection.
+
+    Why here
+    --------
+    It has to run before react-dom initialises, and this is an inline script in
+    <head>, so it executes long before the module bundle. Placing it in
+    src/main.jsx would be later and less certain, because ES module imports are
+    hoisted and evaluated before the module body.
+
+    Why gated on __analyticsHostAllowed__
+    -------------------------------------
+    Reusing the flag defined immediately above rather than adding a second
+    definition of "is this production". Consequences: on localhost, any preview
+    build, and staging, DevTools keeps working normally, so development and HMR
+    are untouched. `import.meta.env` is not available in index.html, which is why
+    a hostname check is the mechanism.
+
+    Why isDisabled rather than deleting the hook
+    --------------------------------------------
+    `isDisabled` is the flag react-dom itself checks before injecting a renderer,
+    so this is the supported path rather than sabotage. Deleting or replacing the
+    global with a non-object risks a TypeError inside react-dom on a version bump.
+    The no-op methods are there as a belt-and-braces measure for the case where a
+    renderer calls them anyway; they must exist and must not throw.
+
+    The extension injects its hook at document_start, so it usually already
+    exists by the time this runs — hence mutating the existing object when there
+    is one instead of clobbering it. The whole thing is wrapped in try/catch
+    because a future extension version could define these as non-writable
+    properties, and a throw here would abort head parsing and blank the page.
+  -->
+  <script>
+    (function () {
+      if (!window.__analyticsHostAllowed__) return;
+      try {
+        var KEY = "__REACT_DEVTOOLS_GLOBAL_HOOK__";
+        var noop = function () {};
+        var existing = window[KEY];
+        var hook = (existing && typeof existing === "object") ? existing : {};
+
+        hook.isDisabled = true;
+        hook.supportsFiber = true;
+        hook.inject = function () { return null; };
+        hook.onCommitFiberRoot = noop;
+        hook.onCommitFiberUnmount = noop;
+        hook.onPostCommitFiberRoot = noop;
+        if (!hook.renderers) {
+          hook.renderers = (typeof Map === "function") ? new Map() : {};
+        }
+
+        window[KEY] = hook;
+      } catch (e) {
+        /* Never let hardening break the page. Failing open is correct here:
+           the worst case is that DevTools still attaches, which is the status
+           quo, whereas a throw would cost every visitor the whole page. */
+      }
     })();
   </script>
 
@@ -910,165 +1162,82 @@
   <!-- End Google tag (gtag.js) -->
 
  <!-- Branch.io Script (production only) -->
-<!-- Branch.io Script (production only) -->
 <script>
-(function () {
-    // if (!window.__analyticsHostAllowed__) {
-    //     console.log("[Branch] Analytics host not allowed");
-    //     return;
-    // }
+// Declare Branch Key variable
+var branchKey = "%VITE_BRANCH_KEY%";
 
-    // Create Branch SDK queue/stub
-    (function(b, r, a, n, c, h, _, s, d, k) {
-        if (!b[n]) {
-            b[n] = {};
-            b[n].q = [];
-
-            for (; s < _.length;) {
-                c = _[s++];
-                k = b[n][c];
-
-                b[n][c] = function(a, c) {
-                    return function(d, e) {
-                        b[n].q.push([c, a, d, e]);
-                        if (!k) return;
-                    };
-                }(c, k);
-            }
+(function(b, r, a, n, c, h, _, s, d, k) {
+    if (!b[n] || !b[n]._q) {
+        for (; s < _.length;) {
+            c(h, _[s++]);
         }
-    })(window, window.branch || {}, 'branch', [
-        "addListener",
-        "applyCode",
-        "banner",
-        "closeBanner",
-        "closeJourney",
-        "creditHistory",
-        "credits",
-        "data",
-        "deepview",
-        "deepviewCta",
-        "first",
-        "getCode",
-        "init",
-        "links",
-        "logout",
-        "redeem",
-        "referrals",
-        "removeListener",
-        "sendSMS",
-        "setIdentity",
-        "track",
-        "validateCode",
-        "trackCommerceEvent",
-        "trackContentEvent",
-        "trackLifecycleEvent",
-        "trackUserEvent",
-        "triggerInstallSearch",
-        "version",
-        "vitals"
-    ], "branch");
-})();
-</script>
 
-<script>
-(function () {
-    console.log("[Branch] 1️⃣ Loading Branch SDK...");
+        d = r.createElement(a);
+        d.async = 1;
+        d.src = "https://cdn.branch.io/branch-latest.min.js";
 
-    var script = document.createElement("script");
-    script.src = "https://cdn.branch.io/branch-latest.min.js";
-    script.async = true;
+        k = r.getElementsByTagName(a)[0];
+        k.parentNode.insertBefore(d, k);
 
-    script.onload = function () {
-        console.log("[Branch] 2️⃣ SDK loaded");
-        console.log("[Branch] window.branch type:", typeof window.branch);
-        console.log("[Branch] window.branch.init type:", typeof window.branch?.init);
+        b[n] = h;
+    }
+})(
+    window,
+    document,
+    "script",
+    "branch",
+    function(b, r) {
+        b[r] = function() {
+            b._q.push([r, arguments]);
+        };
+    },
+    {
+        _q: [],
+        _v: 1
+    },
+    "addListener banner closeBanner closeJourney data deepview deepviewCta first init link logout removeListener setBranchViewData setIdentity track trackCommerceEvent logEvent disableTracking getBrowserFingerprintId crossPlatformIds lastAttributedTouchData setAPIResponseCallback qrCode setRequestMetaData setAPIUrl getAPIUrl setDMAParamsForEEA".split(" "),
+    0
+);
 
-        // Get branch key from Vite env (replaced at build time)
-        var branchKey = "%VITE_BRANCH_KEY%";
-        
-        console.log("[Branch] Branch key format:", branchKey);
-        console.log("[Branch] Is placeholder?", branchKey.indexOf("%") !== -1);
-        
-        if (!branchKey || branchKey.indexOf("%") !== -1) {
-            console.error("[Branch] ❌ Branch key not configured:", branchKey);
+branch.init(
+    branchKey,
+    function(err, data) {
+
+        if (err) {
+            console.error("[Branch] INIT ERROR:", err);
             return;
         }
 
-        console.log("[Branch] 3️⃣ Calling window.branch.init()...");
-        console.log("[Branch] ✅ window.branch exists before init:", !!window.branch);
+        console.log("[Branch] INIT SUCCESS:", data);
 
-        var initStartTime = Date.now();
-        var initCalled = false;
-
-        window.branch.init(
-            branchKey,
+        branch.logEvent(
+            "TEST_BRANCH_EVENT",
             {
-                tracking_disabled: false
+                test: true,
+                source: "react_web",
+                page: window.location.href,
+                timestamp: new Date().toISOString()
             },
-            function (err, data) {
-                var initTime = Date.now() - initStartTime;
-                console.log("[Branch] ⏱️  Init callback took:", initTime + "ms");
-                
-                initCalled = true;
-                console.log("[Branch] ✅ Init callback CALLED");
-                
-                if (err) {
-                    console.error("[Branch] ❌ INIT ERROR:", err);
-                    console.error("[Branch] ❌ Error details:", JSON.stringify(err));
-                    return;
+            function(eventErr, result) {
+
+                if (eventErr) {
+                    console.error(
+                        "[Branch] EVENT ERROR:",
+                        eventErr
+                    );
+                } else {
+                    console.log(
+                        "[Branch] EVENT SUCCESS:",
+                        result
+                    );
                 }
 
-                console.log("[Branch] ✅ 4️⃣ Init SUCCESS");
-                console.log("[Branch] ✅ Init data:", data);
-                console.log("[Branch] ✅ window.branch.ready:", window.branch?.ready);
-
-                console.log("[Branch] 5️⃣ Calling window.branch.track()...");
-
-                var trackStartTime = Date.now();
-                window.branch.track(
-                    "TEST_BRANCH_EVENT",
-                    {
-                        event_category: "test",
-                        event_type: "test_event",
-                        test_name: "app_initialized",
-                        environment: "development",
-                        test_timestamp: new Date().toISOString()
-                    },
-                    function(err, result) {
-                        var trackTime = Date.now() - trackStartTime;
-                        console.log("[Branch] ⏱️  Track callback took:", trackTime + "ms");
-                        
-                        if (err) {
-                            console.error("[Branch] ❌ Track error:", err);
-                            console.error("[Branch] ❌ Track error details:", JSON.stringify(err));
-                        } else {
-                            console.log("[Branch] ✅ Track success:", result);
-                        }
-                    }
-                );
-
-                console.log("[Branch] ✅ 6️⃣ Track() called");
-                console.log("[Branch] ✅ Waiting for api2.branch.io network request...");
             }
         );
-
-        console.log("[Branch] ✅ init() method was called");
-        
-        // Safety check: log if callback never fires
-        setTimeout(function() {
-            if (!initCalled) {
-                console.error("[Branch] ⚠️  INIT CALLBACK NOT CALLED after 5 seconds!");
-            }
-        }, 5000);
-    };
-
-    script.onerror = function () {
-        console.error("[Branch] ❌ SDK failed to load from CDN");
-    };
-
-    document.head.appendChild(script);
-})();
+    }
+);
 </script>
+
   <!-- End Branch.io CDN Script -->
 
 

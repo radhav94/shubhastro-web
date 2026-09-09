@@ -75,8 +75,8 @@ const ComplementaryServicesSection = memo(({ sectionData, styles }) => {
             <h3>{card.title}</h3>
             <p>{card.description}</p>
           </div>
-          <div className={styles.qImgWrap}>
-            <div className={styles.qImgGlow} />
+          {/* <div className={styles.qImgWrap}> */}
+            {/* <div className={styles.qImgGlow} /> */}
             {/*
               alt="" on purpose. This artwork illustrates the card; it carries no
               information the text does not. It used to be alt={card.title},
@@ -92,13 +92,13 @@ const ComplementaryServicesSection = memo(({ sectionData, styles }) => {
               fall back to announcing the filename, which here is a CMS hash like
               "1777449235120-b5559185-8114-4158-a82a-a01….png".
             */}
-            <img
+            <img className={styles.qImgWrap}
               src={card.image_url || card.icon || defaultSquareImg}
               alt=""
               loading="eager"
               fetchPriority="high"
             />
-          </div>
+          {/* </div> */}
         </Link>
       ))}
     </>

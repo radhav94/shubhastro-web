@@ -6,18 +6,57 @@ import { analyzeKarmicDebt } from '../../../../services/appServices/aiWowService
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import RouteLoader from '../../../../component/UI/RouteLoader';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
+import GuestKundliAuthModal from '../../../../component/UI/Profile/GuestKundliAuthModal';
 
 const KarmicDebtTracker = () => {
   const navigate = useNavigate();
-  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  /*
+    Guests used to be ejected from this screen before it rendered.
+
+    `useSelectedKundliProfile()` defaults to `required: true, showToast: true`. For
+    a visitor with no token that is a closed loop: the profiles query is skipped
+    (so it reports isLoading:false and the loading guard does not hold), the
+    localStorage lookup is gated on the same token, and the hook falls straight
+    through to Toast.error + navigate('/ai-wow', { replace: true }) on mount. The
+    destination is the tool menu this visitor just tapped from, so the next tap
+    does the same thing.
+
+    Clarity session je5byb is that loop measured: a guest from Facebook, 10 page
+    views from 8 clicks — more pages than clicks is only possible if navigation
+    happened without one — 54 seconds, gone. The only explanation offered was a
+    toast: top-right, off-screen in a Facebook WebView, and invisible to session
+    replay, so the visitor saw the page simply refuse to open.
+
+    `required: !isGuest` lets a guest see the tool, and the guest modal below
+    collects birth details when they act on it. This is DreamInterpreter's shape
+    (`required: !isGuest, showToast: !isGuest` plus GuestKundliAuthModal at
+    submit), and it is how PalmistryCamera, AuraCamera and PanditAIBubble already
+    treat guests. Safe to do here specifically because the analysis is behind an
+    explicit button rather than an auto-run effect, so nothing fires without a
+    profile.
+  */
+  const isGuest = !localStorage.getItem("shubhtalk_customer_token");
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
+    required: !isGuest,
+    showToast: !isGuest,
+  });
   const { runWithEntitlement, subscriptionModal } = useAIWowSubscriptionGate({ featureName: 'karmic-debt' });
   
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   // Synchronous guard against a rapid double tap firing the API twice.
   const isSubmittingRef = useRef(false);
 
   const handleAnalyze = async () => {
+    // Guest: collect birth details instead of failing. Read the token here rather
+    // than reusing `isGuest` so a login completed in this session (in another tab,
+    // or via the modal) is picked up without a remount.
+    if (!localStorage.getItem("shubhtalk_customer_token")) {
+      setShowGuestAuthModal(true);
+      return;
+    }
+
     if (!profile) {
       Toast.error('Profile not found');
       return;
@@ -79,7 +118,18 @@ const KarmicDebtTracker = () => {
     setAnalysis(null);
   };
 
-  if (profileLoading) {
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    // Deliberately does NOT auto-run the analysis. The modal has already selected
+    // the newly created profile, and the user taps Analyse again — which routes
+    // through runWithEntitlement so the subscription gate is always applied.
+    // Auto-running here would fire the moment the welcome popup closes and skip
+    // that gate. Same reasoning as DreamInterpreter's handleGuestAuthSuccess.
+  };
+
+  // `!isGuest &&` because a guest's profile query is skipped, so this would never
+  // resolve for them — they would sit on a loader instead of seeing the tool.
+  if (!isGuest && profileLoading) {
     // Reserves in-flow height while the profile loads — see RouteLoader.
     return <RouteLoader message="Loading your birth details…" />;
   }
@@ -129,10 +179,20 @@ const KarmicDebtTracker = () => {
               </div>
             )}
 
+            {/*
+              aria-disabled + aria-busy rather than a native `disabled`. The label
+              already says "Analyzing Karmic Debt..." while the request is in
+              flight, but a natively disabled button emits no click event at all,
+              so a tap asking "is this actually running?" produced nothing and
+              reads as a dead click in Clarity. Re-entry is already prevented by
+              isSubmittingRef inside handleAnalyze, so keeping it clickable is
+              safe.
+            */}
             <button 
               className={styles.analyzeButton}
               onClick={handleAnalyze}
-              disabled={isLoading}
+              aria-disabled={isLoading}
+              aria-busy={isLoading || undefined}
             >
               {isLoading ? (
                 <>
@@ -327,6 +387,14 @@ const KarmicDebtTracker = () => {
         )}
       </div>
       {subscriptionModal}
+      {/* Birth details for a guest, collected in place instead of bouncing them
+          back to /ai-wow. See the note on `isGuest` above. */}
+      <GuestKundliAuthModal
+        isOpen={showGuestAuthModal}
+        onClose={() => setShowGuestAuthModal(false)}
+        onSuccess={handleGuestAuthSuccess}
+        title="Add Kundli Details"
+      />
     </div>
   );
 };

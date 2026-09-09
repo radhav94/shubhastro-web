@@ -37,6 +37,35 @@ const MessageBubble = memo(({ msg, onRetry }) => {
   // Failed AI replies used to be plain text with nothing to tap, which is what
   // drove the rage clicks seen in Clarity. Offer an explicit retry instead.
   const showRetry = !isUser && msg.isError && typeof onRetry === "function";
+  /*
+    Why the retry answers itself in place.
+
+    retryQuestion returns null when the send went out, or a reason string when it
+    could not (no saved question, still reconnecting, socket down). It used to
+    fire a toast for those cases while having already deleted this bubble, so the
+    tap produced no visible change and removed its own button. See its definition
+    in usePanditAI for Clarity session 2vh07z.
+
+    The notice belongs here rather than in a shared strip at the top of the panel
+    because this is where the finger is — the message list scrolls, and a strip
+    under the header can be a screenful away from the bubble that was tapped.
+    `seq` keys it so tapping again in the same state remounts the line and
+    replays the animation instead of re-rendering an identical string.
+  */
+  const [retryNotice, setRetryNotice] = useState(null);
+  const retrySeqRef = useRef(0);
+
+  const handleRetryTap = () => {
+    const reason = onRetry(msg._id);
+    if (!reason) {
+      // Went through: this bubble is being removed from the list, so there is
+      // nothing to annotate.
+      return;
+    }
+    retrySeqRef.current += 1;
+    setRetryNotice({ seq: retrySeqRef.current, message: reason });
+  };
+
   return (
     <div className={`${styles.msgRow} ${isUser ? styles.userRow : styles.aiRow}`}>
       <div
@@ -72,12 +101,22 @@ const MessageBubble = memo(({ msg, onRetry }) => {
             )
           )}
         </p>
+        {retryNotice && (
+          <p
+            key={retryNotice.seq}
+            className={styles.retryNotice}
+            role="status"
+            aria-live="polite"
+          >
+            {retryNotice.message}
+          </p>
+        )}
         <div className={styles.msgMeta}>
           {showRetry && (
             <button
               type="button"
               className={styles.retryBtn}
-              onClick={() => onRetry(msg._id)}
+              onClick={handleRetryTap}
             >
               <IoRefresh size={13} />
               Try again
@@ -105,6 +144,18 @@ const PanditAIBubble = ({ hideBubble = false }) => {
   // clear the flag prematurely.
   const transcribeCountRef = useRef(0);
   const [initialBilling, setInitialBilling] = useState(null);
+  /*
+    Explanation surfaced when the free-minutes badge is tapped.
+
+    The badge is a bordered, fully rounded pill sitting in .headerActions right
+    beside the 42x42 close button — the exact visual language of a tappable
+    chip — but it was a plain <div> with no handler. Clarity session q4ncy9
+    (Facebook in-app WebView, fresh signup that had picked Pandit AI during
+    onboarding) recorded a dead click on it at 02:47, then a page refresh at
+    03:25. Someone watching their free minutes tick down and tapping the
+    counter is asking what happens when it reaches zero, so answer that.
+  */
+  const [billingNotice, setBillingNotice] = useState(false);
   // Guest flow: show the kundli details + OTP form inline (as a message) inside
   // the chat, keeping the normal header and input footer.
   // On a page refresh the chat reopens from persisted state, but this React
@@ -157,6 +208,7 @@ const PanditAIBubble = ({ hideBubble = false }) => {
     walletBalance: hookWalletBalance,
     ratePerMinute: hookRatePerMinute,
     sessionEndedLowBalance,
+    dismissRechargeBanner,
   } = useAIFreeMinutes({ isOpen: chatActive, roomId });
 
   // Seed billing/free-minutes from a voice→text handover so the badge shows
@@ -409,6 +461,100 @@ const PanditAIBubble = ({ hideBubble = false }) => {
   }, [stopListening]);
 
   /*
+    Recovery from a low-balance session end.
+
+    When the backend ends the chat with endReason "low-balance",
+    useAIFreeMinutes sets sessionEndedLowBalance and the render below removes
+    the whole composer (input, mic, voice, send) and the follow-up chips. The
+    ONLY thing left is "Recharge".
+
+    sessionEndedLowBalance is cleared in exactly two places: handleChatAccepted
+    (which needs a fresh chat:initiate) and the popup-close reset. So topping the
+    wallet up does not bring the composer back — handleActivity's auto-dismiss
+    only ever clears showRechargeBanner, and `activity` ticks stop once the chat
+    has ended anyway. Until now the only way back was to somehow guess that you
+    had to close the chat and reopen it.
+
+    Clarity session cxqsp4 (Instagram WebView, 62 clicks across ONE page in
+    10:50) hit low balance at 05:55, confirmed a transaction at 08:56, and went
+    on "posing further questions" until 10:50 — tapping at a composer that had
+    been removed and could not come back.
+
+    This does the close/reopen cycle explicitly, which is the existing, proven
+    init path: !isOpen emits chat:end and clears the session, then isOpen emits
+    chat:initiate, the backend answers chat:accepted, and handleChatAccepted
+    resets both sessionEndedLowBalance and showRechargeBanner. The delay is only
+    so the two effects observe distinct isOpen values rather than being coalesced
+    into a no-op.
+  */
+  const handleRestartChat = useCallback(() => {
+    stopListening();
+    setInterimText("");
+    setIsOpen(false);
+    setTimeout(() => setIsOpen(true), 60);
+  }, [stopListening]);
+
+  /*
+    Feedback for a tap on the empty-state invitation ("Ask Pandit AI anything
+    about your life").
+
+    That element fills the entire message area (`flex: 1; width: 100%`) and its
+    whole action was `onClick={() => inputRef.current?.focus()}`. focus() is a
+    silent no-op in two states that are both reachable while it is on screen:
+
+      1. sessionEndedLowBalance — the render below drops the entire input
+         wrapper, so inputRef.current is null and the optional chain swallows the
+         tap. This is the state Clarity session x3ucvh was in: rage clicks on
+         "Ask Pandit AI anything" at 14:20 "leading to a recharge initiation",
+         i.e. the balance had already run out.
+      2. chatDisabled — the input carries `disabled={isLoading || chatDisabled}`,
+         and .focus() on a disabled input does nothing by spec.
+
+    So the biggest target in the panel absorbed taps and changed nothing on
+    screen. This is a gap in the cxqsp4 fix above: that restored a route back to
+    the composer, but nothing was checked here, and this is the element the
+    session was actually hitting.
+
+    Even on the happy path the response is now visible rather than just focus:
+    x3ucvh is an Instagram WebView, where a programmatic .focus() frequently does
+    not raise the keyboard, so focus alone can look identical to nothing
+    happening.
+
+    `seq` keys the line so a second tap in the same state remounts it and replays
+    the animation instead of re-rendering an identical string to no effect.
+  */
+  const [emptyNotice, setEmptyNotice] = useState(null);
+  const emptyNoticeSeqRef = useRef(0);
+
+  const announceEmptyNotice = useCallback((message) => {
+    emptyNoticeSeqRef.current += 1;
+    setEmptyNotice({ seq: emptyNoticeSeqRef.current, message });
+  }, []);
+
+  const handleEmptyStateTap = useCallback(() => {
+    if (sessionEndedLowBalance) {
+      announceEmptyNotice(
+        'This chat ended when the balance ran out. Recharge below, then tap "New chat" to ask again.'
+      );
+      return;
+    }
+    if (chatDisabled) {
+      announceEmptyNotice("Reconnecting to Pandit AI — one moment, then type your question below.");
+      return;
+    }
+    const el = inputRef.current;
+    // Covers the disabled input as well as a missing one: .focus() on a disabled
+    // element is specified to do nothing, so it has to be handled here rather
+    // than attempted and hoped for.
+    if (!el || el.disabled) {
+      announceEmptyNotice("Just a moment — getting the chat ready.");
+      return;
+    }
+    el.focus();
+    announceEmptyNotice("Type your question in the box below.");
+  }, [sessionEndedLowBalance, chatDisabled, announceEmptyNotice]);
+
+  /*
     Escape closes the chat — the keyboard counterpart to tapping the backdrop.
     This is a role="dialog" that covers the page with a fixed overlay, so Escape
     is the expected way out and there was none: the close button was the only
@@ -477,6 +623,51 @@ const PanditAIBubble = ({ hideBubble = false }) => {
   // (isTranscribing). This prevents sending the "..." placeholder.
   const canSend = !!text.trim() && !isListening && !sttTranscribing;
 
+  /*
+    Header billing badge visibility — the free badge must not vanish at zero.
+
+    useAIFreeMinutes decides free vs paid on every socket `activity` tick:
+
+      const fmr = data.freeMinutesRemaining ?? data.freeMinutesRemainingToday;
+      if (fmr != null) { setFreeMinutesRemaining(fmr); setIsFreePeriod(fmr > 0);
+                         setRemainingPaidTime(null); }
+      else             { setIsFreePeriod(false); setFreeMinutesRemaining(null); … }
+
+    So the moment the backend reports `freeMinutesRemaining: 0`, three things are
+    true at once: freeMinutesRemaining is 0 (not null), isFreePeriod is false,
+    and remainingPaidTime has been forced to null. Under the previous conditions
+    — free badge `isFreePeriod && fmr != null`, paid badge `!isFreePeriod &&
+    remainingPaidTime != null` — that made BOTH badges false and the header went
+    blank, keeping only the 42x42 close button.
+
+    Two consequences. The pill disappears out from under a finger that is already
+    reaching for it: someone watching "1 min free" count down and tapping the
+    counter to ask what happens at zero finds it gone, and repeat taps land on
+    empty .headerActions space, which is a dead click and then a rage click.
+    Clarity session 2vh07z (Instagram WebView, 43 clicks on ONE page, verified at
+    01:31) rage-clicked the free-minutes area at 02:25, mid free window. And
+    while it stays blank there is no billing indicator at all, even though the
+    free allowance has just run out.
+
+    Fix: decide visibility on `freeMinutesRemaining != null` alone and let
+    isFreePeriod drive only the wording, so zero reads as "Free time used"
+    instead of unmounting. The paid badge additionally requires
+    freeMinutesRemaining == null so the two can never both appear — with the old
+    conditions isFreePeriod already guaranteed that, and it still has to hold.
+
+    The zero state is inferred from this code path, not observed on the wire: the
+    hook's own `fmr > 0` test shows the author expected 0 to arrive, but whether
+    the backend sends 0 or simply omits the field could not be verified here.
+    Either way the header now says something.
+  */
+  const showFreeBadge = freeMinutesRemaining != null && !sessionEndedLowBalance;
+  const freeMinutesExhausted = showFreeBadge && !(freeMinutesRemaining > 0);
+  const showPaidBadge =
+    !isFreePeriod &&
+    freeMinutesRemaining == null &&
+    remainingPaidTime != null &&
+    !sessionEndedLowBalance;
+
   return createPortal(
     <>
       {!isOpen && !hideBubble && (
@@ -535,16 +726,30 @@ const PanditAIBubble = ({ hideBubble = false }) => {
               </div>
             </div>
             <div className={styles.headerActions}>
-              {isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
-                <div className={styles.freeBadge}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              {showFreeBadge && (
+                <button
+                  type="button"
+                  className={`${styles.freeBadge} ${
+                    freeMinutesExhausted ? styles.freeBadgeSpent : ""
+                  }`}
+                  onClick={() => setBillingNotice((prev) => !prev)}
+                  aria-expanded={billingNotice}
+                  aria-label={
+                    freeMinutesExhausted
+                      ? "Free time used up. Tap for billing details."
+                      : `${freeMinutesRemaining} minutes free remaining. Tap for details.`
+                  }
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="10"/>
                     <polyline points="12 6 12 12 16 14"/>
                   </svg>
-                  <span className={styles.freeBadgeText}>{freeMinutesRemaining} min free</span>
-                </div>
+                  <span className={styles.freeBadgeText}>
+                    {freeMinutesExhausted ? "Free time used" : `${freeMinutesRemaining} min free`}
+                  </span>
+                </button>
               )}
-              {!isFreePeriod && remainingPaidTime != null && !sessionEndedLowBalance && (
+              {showPaidBadge && (
                 <div className={styles.countdownBadge}>
                   {walletBalance != null && (
                     <span className={styles.countdownBalance}>
@@ -582,6 +787,29 @@ const PanditAIBubble = ({ hideBubble = false }) => {
               </button>
             </div>
           </div>
+
+          {/* Guard kept identical to the badge's, so the badge can never be on
+              screen with its own explanation unable to open. */}
+          {billingNotice && showFreeBadge && (
+            <div className={styles.billingNotice} role="status" aria-live="polite">
+              {freeMinutesExhausted ? (
+                <>
+                  {"Your free minutes with Pandit AI are used up for today."}
+                  {ratePerMinute
+                    ? ` Chatting now costs ₹${ratePerMinute}/min from your wallet.`
+                    : " Chatting is now billed from your wallet."}
+                  {walletBalance != null && ` Wallet balance: ₹${walletBalance}.`}
+                </>
+              ) : (
+                <>
+                  {`Your first ${freeMinutesRemaining} minute${freeMinutesRemaining === 1 ? "" : "s"} with Pandit AI ${freeMinutesRemaining === 1 ? "is" : "are"} free.`}
+                  {ratePerMinute
+                    ? ` After that, chatting costs ₹${ratePerMinute}/min from your wallet.`
+                    : " After that, chatting is billed from your wallet."}
+                </>
+              )}
+            </div>
+          )}
 
           <div className={styles.messagesArea}>
             {guestMode && (
@@ -628,18 +856,35 @@ const PanditAIBubble = ({ hideBubble = false }) => {
 
                 A <button> so it is reachable by keyboard too; the input it focuses
                 is the real control, so the label stays descriptive.
+
+                handleEmptyStateTap rather than a bare focus() call: this element
+                covers the whole message area, and focus() does nothing at all in
+                the ended-session and reconnecting states. See its definition for
+                the Clarity session that rage-clicked it.
               */
-              <button
-                type="button"
-                className={styles.emptyState}
-                onClick={() => inputRef.current?.focus()}
-                aria-label="Ask Pandit AI a question"
-              >
-                <span className={styles.emptyIcon}>
-                  <IoChatbubbleEllipses size={34} />
-                </span>
-                <p>Ask Pandit AI anything about your life</p>
-              </button>
+              <>
+                <button
+                  type="button"
+                  className={styles.emptyState}
+                  onClick={handleEmptyStateTap}
+                  aria-label="Ask Pandit AI a question"
+                >
+                  <span className={styles.emptyIcon}>
+                    <IoChatbubbleEllipses size={34} />
+                  </span>
+                  <p>Ask Pandit AI anything about your life</p>
+                </button>
+                {emptyNotice && (
+                  <p
+                    key={emptyNotice.seq}
+                    className={styles.emptyNotice}
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {emptyNotice.message}
+                  </p>
+                )}
+              </>
               )
             ) : (
               (() => {
@@ -766,17 +1011,53 @@ const PanditAIBubble = ({ hideBubble = false }) => {
             </div>
             )}
             {(showRechargeBanner || sessionEndedLowBalance) && (
-              <div className={styles.rechargeBanner}>
+              <div className={styles.rechargeBanner} role="status" aria-live="polite">
                 <span className={styles.rechargeText}>
                   {rechargeBannerMessage || "Low balance! Recharge to continue chatting."}
+                  {sessionEndedLowBalance && (
+                    // The composer is gone in this state, so say so. Without
+                    // this the visitor is looking at a chat that simply stopped
+                    // having somewhere to type.
+                    <span className={styles.rechargeHint}>
+                      Already recharged? Tap “New chat” to start again.
+                    </span>
+                  )}
                 </span>
-                <button
-                  className={styles.rechargeNowBtn}
-                  onClick={() => navigate("/recharge")}
-                  type="button"
-                >
-                  Recharge
-                </button>
+                <div className={styles.rechargeActions}>
+                  {sessionEndedLowBalance && (
+                    <button
+                      className={styles.rechargeRestartBtn}
+                      onClick={handleRestartChat}
+                      type="button"
+                    >
+                      New chat
+                    </button>
+                  )}
+                  <button
+                    className={styles.rechargeNowBtn}
+                    onClick={() => navigate("/recharge")}
+                    type="button"
+                  >
+                    Recharge
+                  </button>
+                  {/* A plain low-balance WARNING does not end the session — the
+                      composer is still there and still usable — so the banner
+                      must be dismissible. dismissRechargeBanner has existed on
+                      the hook all along and PanditAIVoice already wires it to
+                      AIRechargeBanner's onDismiss; only this inline copy of the
+                      banner dropped it. Not offered once the session has ended,
+                      where the banner is the only route back. */}
+                  {!sessionEndedLowBalance && (
+                    <button
+                      className={styles.rechargeDismissBtn}
+                      onClick={dismissRechargeBanner}
+                      type="button"
+                      aria-label="Dismiss low balance notice"
+                    >
+                      <IoClose size={16} />
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>

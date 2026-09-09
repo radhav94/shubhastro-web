@@ -633,6 +633,26 @@ const HoroscopeNew = () => {
   const currentContent = getContent();
 
   const handleTabChange = (tab) => {
+    /*
+      Same dead-click shape as HoroscopeOld (Clarity session 1keamh6, caught on
+      /tomorrow-horoscope/cancer): a tab URL renders its own pill already
+      active, so tapping that pill re-ran a set of no-ops — identical
+      setActiveTab() value, then a navigate() to the URL we were already on —
+      and nothing on screen changed.
+
+      It also billed a "horoscope_time_period_switched" event with
+      from_period === to_period, so every frustrated re-tap logged a period
+      switch that never happened. Bail before both.
+    */
+    if (tab === activeTab) {
+      if (contentFailed || !currentData?.response) {
+        retryContent?.();
+      } else {
+        overviewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      return;
+    }
+
     trackEvent("horoscope_time_period_switched", {
       from_period: activeTab.toLowerCase().replace(/\s+/g, '_'),
       to_period: tab.toLowerCase().replace(/\s+/g, '_'),

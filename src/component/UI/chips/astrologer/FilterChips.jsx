@@ -21,6 +21,7 @@ const FilterChips = ({
   onSelect,
   onApplyFilters,
   onFilterLoading,
+  onFilterError,
   isActiveType,
   isOnlineFromURL,
   setShowFilterAstrologer,
@@ -55,6 +56,9 @@ const FilterChips = ({
   const loadingMoreRef = useRef(false);
   const pageRef = useRef(1);
   const isFilterActiveRef = useRef(false);
+  // Last user-initiated (non-append) applyFilters args, so the parent's
+  // "Try again" card can re-run the exact same filter after a failure.
+  const lastApplyArgsRef = useRef(null);
   // Refs to hold latest filter state for pagination (avoids stale closures)
   const searchTextRef = useRef("");
   const selectedSkillsRef = useRef([]);
@@ -289,16 +293,19 @@ const FilterChips = ({
     already use rather than reading refs in here — direct callers keep passing
     nothing and keep getting live state.
   */
-  const applyFilters = async ({
-    ignoreSearch = false,
-    searchValue,
-    category = "filter",
-    experties: expertiesValue,
-    pageNo = 1,
-    append = false,
-    skills,
-    modalFilters,
-  } = {}) => {
+  const applyFilters = async (applyArgs = {}) => {
+    const {
+      ignoreSearch = false,
+      searchValue,
+      category = "filter",
+      experties: expertiesValue,
+      pageNo = 1,
+      append = false,
+      skills,
+      modalFilters,
+    } = applyArgs;
+    // Remember the last user-initiated filter so a retry can replay it.
+    if (!append) lastApplyArgsRef.current = applyArgs;
     const finalSearchText = ignoreSearch ? "" : (searchValue ?? searchText);
     const finalExperties = expertiesValue ?? experties;
     const finalSkills = skills ?? selectedSkills;
@@ -347,7 +354,10 @@ const FilterChips = ({
       pageRef.current = pageNo;
       setHasMore((response?.data?.result || []).length >= 9);
       setFilterModalOpen(false);
-      
+
+      // Request succeeded — clear any error card the parent was showing.
+      onFilterError?.(null);
+
       // Set showFilterAstrologer to true when filters are applied (not "All")
       setShowFilterAstrologer(true);
     } catch (error) {
@@ -357,6 +367,12 @@ const FilterChips = ({
       // user actually made (not background scroll-loading).
       if (!append) {
         Toast.error("Couldn't load astrologers for that filter. Please try again.");
+        // Hand the parent a recoverable error so it can render the same
+        // "Couldn't load astrologers / Try again" card as the base list. The
+        // retry replays the exact filter that just failed.
+        onFilterError?.({
+          retry: () => applyFilters(lastApplyArgsRef.current || {}),
+        });
       }
     } finally {
       loadingMoreRef.current = false;

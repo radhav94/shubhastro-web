@@ -1,10 +1,12 @@
-import { useEffect, useState, useRef, lazy, Suspense } from "react";
+import { useEffect, useState, useRef, useMemo, Suspense } from "react";
 import { useParams, Link } from "react-router-dom";
 import { LiveListProvider } from "../../../../../context/LiveListContext";
 import { getAstrologerLiveList } from "../../../../../services/appServices/authService";
 import { restoreViewerSession, clearViewerSession } from "../../../../../utils/liveSessionStorage";
 import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
 import { getAstrologerImageUrl } from "../../../../../utils/appImages";
+import { makeRetryableLazy, preloadChunk } from "../../../../../utils/helper/lazyWithRetry";
+import LiveChunkBoundary from "./LiveChunkBoundary";
 import PrimaryLoader from "../../../../../component/UI/PrimaryLoader";
 import styles from "./LivePlayerPage.module.scss";
 
@@ -21,7 +23,33 @@ import styles from "./LivePlayerPage.module.scss";
 // pay an extra round trip either: the import is kicked off alongside the
 // live-list request, so it is usually resolved by the time it renders.
 const importInteractiveLiveStreaming = () => import("./InteractiveLiveStreaming");
-const InteractiveLiveStreaming = lazy(importInteractiveLiveStreaming);
+
+/*
+  Was `lazy(importInteractiveLiveStreaming)` at module scope.
+
+  React.lazy caches the OUTCOME of its import — including a rejection — and never
+  retries. So one failed fetch of this 1,256 kB chunk poisoned the lazy object for
+  the rest of the page's life: every later render re-threw the same stored error,
+  it escaped to the route's errorElement (RouteErrorBoundary, "Something went
+  wrong"), and going back to /live showed that same screen again. Only a full
+  reload cleared it, because that is what discards the object.
+
+  The reported trigger — open /live, press Back — is precisely how the import gets
+  rejected in the first place: navigating away aborts the in-flight module
+  request. Other ordinary causes are a client on a pre-deploy index.html asking
+  for a hashed filename that no longer exists, the Vite dev server re-optimising
+  deps, and plain flaky mobile connections, which is most of this traffic.
+
+  `makeRetryableLazy` returns a FACTORY. Calling it builds a brand-new lazy
+  object, and a new object is the only thing that gets React to attempt an import
+  it has already cached as rejected — remounting the same one just replays the
+  rejection. `chunkKey` in the component below bumps on retry so the factory runs
+  again. The factory also retries the import itself a couple of times before
+  giving up, so most hiccups never reach the boundary at all.
+*/
+const createInteractiveLiveStreaming = makeRetryableLazy(
+  importInteractiveLiveStreaming
+);
 
 // How often to re-check for streams while the "nobody is live" card is showing.
 // Only ever runs on that state and only while the tab is visible, so this is a
@@ -111,6 +139,17 @@ const LivePlayerPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
 
+  // Bumped by LiveChunkBoundary's retry so a fresh lazy component gets built.
+  const [chunkKey, setChunkKey] = useState(0);
+
+  // `chunkKey` is deliberately the only dependency, and eslint calls it
+  // "unnecessary" because the factory closes over nothing. That is the point:
+  // bumping the key is the signal to build a NEW lazy object, which is the only
+  // way React will re-attempt an import it has cached as rejected. Dropping this
+  // dep turns the retry button into a no-op.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const InteractiveLiveStreaming = useMemo(() => createInteractiveLiveStreaming(), [chunkKey]);
+
   /*
     Guests may watch live streams, so there is no login gate here.
 
@@ -131,7 +170,13 @@ const LivePlayerPage = () => {
     // Start fetching the Agora chunk alongside the live list rather than after
     // it, so splitting the player out does not add a round trip for viewers who
     // will actually reach it.
-    importInteractiveLiveStreaming();
+    //
+    // Via preloadChunk because the bare call left the returned promise
+    // unhandled: a preload that fails — which on this route most often means the
+    // visitor navigated away mid-download — became an unhandled rejection in the
+    // console for a failure that does not matter here, since the load that counts
+    // happens when the component renders and is retried there.
+    preloadChunk(importInteractiveLiveStreaming);
 
     const savedSession = restoreViewerSession();
 
@@ -437,9 +482,15 @@ const LivePlayerPage = () => {
           bare loader because this is the longest of the two waits and, with no
           header and no footer on this route, a loader on its own leaves the page
           with nothing to interact with. */}
-      <Suspense fallback={<LiveLoadingGate message="Starting the live player…" />}>
-        <InteractiveLiveStreaming />
-      </Suspense>
+      {/* And a boundary outside the Suspense, so a rejected chunk lands here as a
+          card with a working "Try again" instead of escalating to the route's
+          "Something went wrong". Its retry bumps chunkKey, which rebuilds the
+          lazy component — the only way past React's cached rejection. */}
+      <LiveChunkBoundary styles={styles} onRetry={() => setChunkKey((n) => n + 1)}>
+        <Suspense fallback={<LiveLoadingGate message="Starting the live player…" />}>
+          <InteractiveLiveStreaming />
+        </Suspense>
+      </LiveChunkBoundary>
     </LiveListProvider>
   );
 };

@@ -654,26 +654,61 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   // Keep ref in sync so socket handlers can call latest sendText
   sendTextRef.current = sendText;
 
-  // Re-ask the last question after a failed reply. The user's bubble is still
-  // on screen, so send silently and drop the error bubble being retried.
+  /*
+    Re-ask the last question after a failed reply. The user's bubble is still on
+    screen, so send silently and drop the error bubble being retried.
+
+    Returns null when the retry actually went out, or a reason string when it
+    could not — the caller renders that reason inside the bubble that was
+    tapped. Two things forced this shape:
+
+      1. The order of operations was destructive. The error bubble was filtered
+         out FIRST, then sendText was called. sendText's socket-down branch does
+         nothing but `toast.error("Connection lost…")` + setSending(false), so a
+         retry with no connection removed the bubble, left `sending` false (no
+         typing dots), and answered only with a toast — which Clarity cannot see
+         and which, in a portalled full-screen chat panel inside an in-app
+         WebView, is top-right and easy to miss entirely. Nothing on screen
+         changed, and the "Try again" button had gone with the bubble, so there
+         was no second attempt available either. The 45s response timer stays
+         armed in that branch, so the *only* eventual feedback was three quarters
+         of a minute away.
+
+         Clarity session 2vh07z (Instagram WebView, mobile, 43 clicks across ONE
+         page in 3:28) sent a message at 02:53 that errored, tapped "Try again"
+         at 03:05, and left. Twelve seconds — far inside the 45s window.
+
+      2. The !question branch answered with a toast for the same reason, on the
+         one control added specifically to rescue a dead-end bubble.
+
+    So: check everything that can stop the send BEFORE touching the message
+    list, and report back instead of firing a toast.
+  */
   const retryQuestion = useCallback(
     (errorMessageId) => {
       const question = lastQuestionRef.current;
       // No remembered question — e.g. an error bubble restored from history in a
-      // fresh session, where lastQuestionRef was never populated. Leaving this
-      // as a bare return made "Try again" a dead button on exactly the surface
-      // it was added to rescue.
+      // fresh session, where lastQuestionRef was never populated.
       if (!question) {
-        toast.error("Please ask your question again.");
-        return;
+        return "I don't have that question saved any more — please type it again below.";
+      }
+      if (chatDisabled) {
+        return "Still reconnecting to Pandit AI. Give it a moment, then tap Try again.";
+      }
+      // Mirrors sendText's own connectivity check. Queueing into
+      // pendingMessageRef is no better here: with the socket down the room can
+      // never come up, so it would sit as "Typing…" until the 45s timer fired.
+      if (!voiceSocket.connected) {
+        return "You look offline right now. Check your connection, then tap Try again.";
       }
       setMessages((prev) =>
         errorMessageId ? prev.filter((m) => m._id !== errorMessageId) : prev
       );
       trackEvent("ai_pandit_question_retried", { mode: "text" });
       sendText(question, { silent: true });
+      return null;
     },
-    [sendText]
+    [sendText, chatDisabled]
   );
 
   return {

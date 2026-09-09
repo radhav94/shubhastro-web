@@ -314,10 +314,6 @@ const HomeLayout = () => {
 
   const isOnboardingPage = location.pathname === "/login";
   const isLivePage = location.pathname.startsWith("/live") && !location.pathname.startsWith("/live-chat-policy");
-  // On the guest chat screen the waiting state is shown inline, so suppress the
-  // global sticky waiting popup there (it reappears once the user navigates away).
-  const isGuestChatPage = location.pathname.startsWith("/guest-chat");
-  
   const showTopHeader = showRouteTopHeader && !isOnboardingPage && !isLivePage && !isWebview;
 
   return (
@@ -430,7 +426,11 @@ const HomeLayout = () => {
 
       <StickyChatFooter />
       <StickyCallFooter />
-      {!isLivePage && !isGuestChatPage && <StickyWaitingQueue />}
+      {/* The guest-chat screen used to be excluded here and instead navigated to
+          /astrologers after initiating, so the ringing/waiting card only showed
+          on the listing. It now stays on the guest-chat screen while the request
+          rings, so the sticky queue must render there too. */}
+      {!isLivePage && <StickyWaitingQueue />}
       <StickyReview />
 
       {/* Pandit AI bubbles — global, so "Ask AI Pandit" works on every screen.
