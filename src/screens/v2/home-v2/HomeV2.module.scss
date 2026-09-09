@@ -405,6 +405,24 @@
   color: #030303;
   text-align: left;
   cursor: pointer;
+  /*
+    The padding/negative-margin pair grows the hit box without moving layout —
+    but it also means the padded box now extends 6px past the element's layout
+    box on every side, and the hero <h1> is the very next sibling. Non-positioned
+    siblings hit-test in paint order, so the later element wins: the bottom 6px of
+    this button's own target was resolving to the heading instead of the button.
+
+    Clarity user 1e75ar2 names exactly this pair — "Sign in" AND "Experience
+    Astrology Power[ed by AI]", the h1 directly beneath it — with dead clicks and
+    rage clicks in the same 3-second window (06:04-06:07).
+
+    position + z-index rather than shrinking the padding: it costs no layout
+    change and keeps the enlarged target. `.heroContent` is already z-index 2 and
+    `.heroBanner` z-index 1, so this only orders the button against its own
+    siblings inside that context; the h1 carries no z-index and stays beneath.
+  */
+  position: relative;
+  z-index: 1;
 
   &:focus-visible {
     outline: 2px solid #f75801;
