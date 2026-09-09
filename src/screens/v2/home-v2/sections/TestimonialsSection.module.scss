@@ -40,7 +40,7 @@ $muted: #6b5546;
 .inner {
   position: relative;
   z-index: 1;
-  max-width: 1120px;
+  max-width: 1320px;
   margin: 0 auto;
 }
 
@@ -141,8 +141,13 @@ $muted: #6b5546;
   padding: 24px 0 28px;
   /* Card width + gap drive the slide math (see inline transform). Keep these in
      sync with .card flex-basis and .track gap. */
-  --card-w: 340px;
-  --card-step: calc(var(--card-w) + 18px);
+  /* Card width chosen so the centred card leaves equal room on BOTH sides for
+     one full side card + a peek of the next: side space = (inner 1320 − 360)/2
+     = 480px, and a side card (360) + gap (18) = 378px, leaving ~100px of the
+     2nd card peeking symmetrically each side. The track is centred (left:50% +
+     translate to card centre), so the two sides are always mirror-equal. */
+  --card-w: 430px;
+  --card-step: calc(var(--card-w) + 20px);
 
   @media (max-width: 767px) {
     padding: 14px 0 20px;
@@ -168,7 +173,7 @@ $muted: #6b5546;
                 active card's centre back onto it (see inline transform). */
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
   width: max-content;
   will-change: transform;
 
@@ -224,34 +229,39 @@ $muted: #6b5546;
 .card {
   flex: 0 0 var(--card-w);
   max-width: var(--card-w);
-  /* Fixed height so tall/short reviews don't make cards jump size as they
-     slide through the centre. */
-  min-height: 260px;
+  /* All cards share one rectangular size; the centre card is distinguished only
+     by its peach background + orange border (and a slight scale), as in the
+     reference — not by a different shape. Tall enough to hold a ~4-line quote
+     plus the person row without clipping; the quote clamp is sized to match so
+     text is never cut mid-word. */
+  height: 320px;
+  min-height: 320px;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  border-radius: 18px;
-  /* Clip the full-bleed footer band to the card's rounded corners. */
+  padding: 30px 32px;
+  border-radius: 24px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.4);
-  border: 1.5px solid #fff;
-  box-shadow: 0 6px 20px rgba(191, 118, 66, 0.12);
-  /* Smoothly tween scale/opacity as a card moves in/out of the centre slot. */
+  /* Side card — soft peach gradient (light at top, warmer at the bottom) with a
+     faint light border, as in the reference. */
+  background: linear-gradient(160deg, #fdeee0 0%, #fbdcc4 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 24px rgba(191, 118, 66, 0.12);
   transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1),
     box-shadow 0.55s ease, opacity 0.55s ease, background 0.35s ease,
     border-color 0.35s ease;
 
-  /* Non-centre cards sit slightly smaller + dimmed, and are clickable to slide
-     that direction. */
+  /* Non-centre cards are slightly smaller (scaled) but fully opaque, matching
+     the reference where side cards read clearly; clickable to slide. */
   &:not(.cardActive) {
-    opacity: 0.6;
-    transform: scale(0.88);
+    transform: scale(0.94);
     cursor: pointer;
   }
 
   /* One full-width card per view on mobile; width comes from --card-w so it
-     stays in sync with the slide math. */
+     stays in sync with the slide math. Let height grow to the content (wider
+     card = fewer lines) so nothing crops. */
   @media (max-width: 767px) {
+    height: auto;
     min-height: 240px;
 
     &:not(.cardActive) {
@@ -265,14 +275,19 @@ $muted: #6b5546;
   }
 }
 
-/* Centre / active card — scaled up with the orange gradient border, as in the
-   design. */
+/* Centre / active card — lighter yellow/cream fill with a solid orange border
+   and a slight scale-up, as in the reference. */
 .cardActive {
-  background: #FFF3D6;
+  background: linear-gradient(160deg, #fdf3d0 0%, #fbe9b8 100%);
   border: 2px solid $brand;
-  box-shadow: 0 12px 32px rgba(212, 52, 0, 0.22);
-  transform: scale(1.04);
-  min-height: 344px;
+  border-radius: 26px;
+  box-shadow: 0 16px 40px rgba(212, 52, 0, 0.18);
+  transform: scale(1.05);
+
+  /* Warm brown quote text on the yellow fill, as in the reference. */
+  .quote {
+    color: #6b431c;
+  }
 
   @media (max-width: 767px) {
     transform: none;
@@ -305,30 +320,73 @@ $muted: #6b5546;
   white-space: nowrap;
 }
 
+/* Date shown top-right of the card, on a soft rounded pill as in the reference. */
+.date {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #b06a3a;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 6px 14px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(191, 118, 66, 0.1);
+
+  /* On the active card the pill sits on the yellow fill — tint it faint pink. */
+  .cardActive & {
+    background: rgba(255, 245, 238, 0.85);
+  }
+}
+
 .quote {
   position: relative;
-  margin: 0 0 18px;
-  font-size: 0.8rem;
-  line-height: 1.55;
+  margin: 18px 0;
+  font-size: 14px;
+  line-height: 1.6;
   color: #3f2d22;
   flex: 1;
+  /* Clamp so a long review never pushes the person row out of the fixed-height
+     card. Sized to the space left above the person row so it truncates with an
+     ellipsis on a full line rather than being cut mid-word. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+  text-overflow: ellipsis;
   /* Body text — never underlined/coloured like a link. Some mobile browsers /
-     data-detectors underline sentences in blue; force plain text here. */
-  text-decoration: none;
+     data-detectors wrap sentences (dates, "session", etc.) in a link and
+     underline them blue; force plain text here, including any element the OS
+     detector injects. */
+  text-decoration: none !important;
+  -webkit-text-decoration: none !important;
 
   a,
-  span {
-    color: inherit;
-    text-decoration: none;
+  span,
+  * {
+    color: inherit !important;
+    text-decoration: none !important;
+    -webkit-text-decoration: none !important;
   }
 
+  /* Decorative opening quote mark inline at the START of the sentence (right
+     before the first word), in brand orange. */
   &::before {
     content: "\201C";
-    display: block;
-    font-size: 1.6rem;
-    line-height: 0.5;
-    color: rgba(212, 52, 0, 0.4);
-    margin-bottom: 6px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.4rem;
+    color: $brand;
+    margin-right: 3px;
+    vertical-align: -3px;
+  }
+
+  /* Decorative closing quote mark trailing the text (inline, right after the
+     last word), in brand orange to match the reference. */
+  &::after {
+    content: "\201D";
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.4rem;
+    color: $brand;
+    margin-left: 3px;
+    vertical-align: -3px;
   }
 }
 
@@ -336,48 +394,62 @@ $muted: #6b5546;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding-top: 12px;
-  margin-bottom: 10px;
+  gap: 12px;
+  padding-top: 14px;
+  margin-bottom: 4px;
+
+  /* On the narrow mobile card there isn't room for the name block and the
+     "Verified Consultation" pill side by side — they collided. Stack them:
+     avatar + name/city on the first row, Verified on its own line below. */
+  @media (max-width: 767px) {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
 }
 
 .personLeft {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 }
 
 .avatar {
-  width: 44px;
-  height: 44px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
   background: #f0e0d4;
+  border: 2px solid rgba(255, 255, 255, 0.9);
 }
 
 .personName {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 700;
   color: $ink;
 }
 
 .personCity {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   color: $muted;
 }
 
 .verified {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.72rem;
+  gap: 6px;
+  font-size: 0.82rem;
   font-weight: 600;
   color: #16a34a;
   white-space: nowrap;
+
+  /* Sits on its own line under the name on mobile (see .person wrap). */
+  @media (max-width: 767px) {
+    width: 100%;
+  }
 }
 
 .cardFooter {

@@ -2,25 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Sparkles,
   Star,
-  Quote,
   BadgeCheck,
   ChevronLeft,
   ChevronRight,
-  ShieldCheck,
-  Lock,
-  Users,
-  Headphones,
 } from "lucide-react";
 import styles from "./TestimonialsSection.module.scss";
-
-/* Bottom trust bar stats. */
-const TRUST = [
-  { icon: ShieldCheck, title: "Verified Astrologers", sub: "Carefully screened & background verified" },
-  { icon: Lock, title: "100% Private", sub: "Your conversations are safe & confidential" },
-  { icon: Star, title: "4.8 / 5 Rating", sub: "Average user rating from real consultations" },
-  { icon: Users, title: "10K+ Happy Users", sub: "Across India and beyond" },
-  { icon: Headphones, title: "50+ Astrologers", sub: "Expert astrologers available right now" },
-];
 
 /*
  * Normalise a CMS testimonial item into the shape the card renders. The backend
@@ -126,7 +112,7 @@ const renderHeading = (text) => {
 const Stars = ({ count = 5 }) => (
   <span className={styles.stars} aria-label={`${count} star rating`}>
     {Array.from({ length: count }).map((_, i) => (
-      <Star key={i} size={14} fill="currentColor" strokeWidth={0} aria-hidden="true" />
+      <Star key={i} size={18} fill="currentColor" strokeWidth={0} aria-hidden="true" />
     ))}
   </span>
 );
@@ -312,7 +298,7 @@ const TestimonialsSection = ({ sectionData }) => {
               >
                 <div className={styles.cardTop}>
                   <Stars count={t.rating} />
-                  {t.category && <span className={styles.tag}>{t.category}</span>}
+                  {t.date && <span className={styles.date}>{t.date}</span>}
                 </div>
 
                 <p className={`${styles.quote} notranslate`}>{t.quote}</p>
@@ -333,17 +319,11 @@ const TestimonialsSection = ({ sectionData }) => {
                   </div>
                   {t.verified && (
                     <span className={styles.verified}>
-                      <BadgeCheck size={14} aria-hidden="true" /> Verified Consultation
+                      <BadgeCheck size={16} aria-hidden="true" /> Verified Consultation
                     </span>
                   )}
                 </div>
 
-                {(t.type || t.date) && (
-                  <div className={styles.cardFooter}>
-                    <Quote size={13} aria-hidden="true" />{" "}
-                    {[t.type, t.date].filter(Boolean).join(" · ")}
-                  </div>
-                )}
               </article>
               );
             })}
@@ -375,23 +355,6 @@ const TestimonialsSection = ({ sectionData }) => {
           </div>
         )}
 
-        {/* Trust bar */}
-        <div className={styles.trustBar}>
-          {TRUST.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div className={styles.trustItem} key={item.title}>
-                <span className={styles.trustIcon}>
-                  <Icon size={18} aria-hidden="true" />
-                </span>
-                <div className={styles.trustText}>
-                  <p className={styles.trustTitle}>{item.title}</p>
-                  <p className={styles.trustSub}>{item.sub}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </section>
   );
