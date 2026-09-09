@@ -1,5 +1,32 @@
-import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
+/*
+ * Firebase Cloud Messaging, loaded on demand.
+ *
+ * Why the SDK is behind a dynamic import
+ * --------------------------------------
+ * This module used to `import { initializeApp } from "firebase/app"` and
+ * `getMessaging` from "firebase/messaging" at the top level, and call
+ * initializeApp() at module scope. Five modules import from here —
+ * fcmService, OtpVerification, OTPScreen, useTruecallerLogin,
+ * useGuestChatAuth and GuestKundliAuthModal — and one of those
+ * (GuestKundliAuthModal) sits in the eager graph of the "/" landing screen
+ * via HomeV2 -> useGuestConnectFlow. So the whole Firebase SDK was compiled
+ * into the entry chunk that every first-time visitor blocks on before the
+ * homepage can paint.
+ *
+ * The module-scope initializeApp() call also made the module unshakeable: a
+ * top-level side effect must be preserved even when nothing reads the exports.
+ * Same failure mode, and same fix, as the AgoraProvider import documented in
+ * main.jsx.
+ *
+ * Nothing here is needed for first paint. Every consumer already awaits
+ * requestFCMToken(), and App.jsx defers FCM init to requestIdleCallback behind
+ * a permission/sign-in gate, so moving the SDK behind import() costs the push
+ * path one extra round trip it can absorb and takes it off the LCP path
+ * entirely.
+ *
+ * The support gate deliberately runs BEFORE the import, so browsers that cannot
+ * do web push at all never download the SDK.
+ */
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,27 +39,53 @@ const firebaseConfig = {
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
-const app = initializeApp(firebaseConfig);
+/**
+ * Resolves to { messaging, getToken, onMessage }, or null when messaging is
+ * unavailable in this browser. Memoised so the SDK is fetched and the app
+ * initialised at most once, matching the previous module-scope behaviour.
+ */
+let messagingPromise = null;
 
-// Firebase Messaging requires a secure context (HTTPS or localhost)
-let messaging = null;
-try {
-    const isSecureContext = window.isSecureContext || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    if (isSecureContext && "Notification" in window && "serviceWorker" in navigator) {
-        messaging = getMessaging(app);
-    } else {
-        console.warn("[Firebase] Messaging not available: requires HTTPS or localhost");
-    }
-} catch (err) {
-    console.warn("[Firebase] Failed to initialize messaging:", err.message);
-}
+const loadMessaging = () => {
+    if (messagingPromise) return messagingPromise;
+
+    messagingPromise = (async () => {
+        // Firebase Messaging requires a secure context (HTTPS or localhost).
+        const isSecureContext =
+            window.isSecureContext ||
+            window.location.hostname === "localhost" ||
+            window.location.hostname === "127.0.0.1";
+
+        if (!isSecureContext || !("Notification" in window) || !("serviceWorker" in navigator)) {
+            console.warn("[Firebase] Messaging not available: requires HTTPS or localhost");
+            return null;
+        }
+
+        try {
+            const [{ initializeApp }, { getMessaging, getToken, onMessage }] = await Promise.all([
+                import("firebase/app"),
+                import("firebase/messaging"),
+            ]);
+            const app = initializeApp(firebaseConfig);
+            return { messaging: getMessaging(app), getToken, onMessage };
+        } catch (err) {
+            console.warn("[Firebase] Failed to initialize messaging:", err.message);
+            return null;
+        }
+    })();
+
+    return messagingPromise;
+};
 
 /**
  * Requests notification permission and returns the FCM token.
  * Returns null if permission denied or messaging unsupported.
  */
 export const requestFCMToken = async () => {
-    if (!messaging) return null;
+    const fb = await loadMessaging();
+    if (!fb) return null;
+    const { messaging, getToken } = fb;
+
     try {
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
@@ -82,13 +135,35 @@ export const requestFCMToken = async () => {
 /**
  * Listens for foreground messages and calls the provided callback.
  * Returns an unsubscribe function or no-op if messaging unavailable.
+ *
+ * Stays synchronous-returning even though the SDK now loads asynchronously:
+ * callers treat the return value as an unsubscribe handle they may invoke at
+ * any time, including before the SDK has finished loading. Unsubscribing early
+ * sets a flag that both prevents the listener being attached and tears it down
+ * if the race went the other way.
  */
 export const onForegroundMessage = (callback) => {
-    if (!messaging) return () => {};
-    return onMessage(messaging, (payload) => {
-        console.log("Foreground message received:", payload);
-        callback(payload);
-    });
-};
+    let cancelled = false;
+    let detach = null;
 
-export { messaging };
+    loadMessaging().then((fb) => {
+        if (!fb || cancelled) return;
+        const { messaging, onMessage } = fb;
+        detach = onMessage(messaging, (payload) => {
+            console.log("Foreground message received:", payload);
+            callback(payload);
+        });
+        if (cancelled) {
+            detach();
+            detach = null;
+        }
+    });
+
+    return () => {
+        cancelled = true;
+        if (detach) {
+            detach();
+            detach = null;
+        }
+    };
+};

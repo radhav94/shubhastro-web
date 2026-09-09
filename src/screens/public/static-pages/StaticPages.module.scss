@@ -354,6 +354,73 @@
   }
 }
 
+/*
+  Related-tool CTA on the muhurat SEO landing pages. See CmsNotFoundPage for the
+  evidence: those bodies are entirely inert (zero anchors) yet list bold, comma
+  separated dates that read as selectable, so visitors tapped a date and got
+  nothing (Clarity 57ww6z, 1qpvpk).
+
+  Deliberately not a full-width banner — it reads as the page's one action, above
+  the article, without pushing the copy below the fold. No transform or hover lift,
+  so there is nothing to latch on a touch device.
+*/
+.cmsToolCta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 14px 0 4px;
+  padding: 14px 16px;
+  border: 1px solid rgba(247, 88, 1, 0.28);
+  border-left: 3px solid #f75801;
+  border-radius: 8px;
+  background: rgba(247, 88, 1, 0.04);
+}
+
+.cmsToolCtaText {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #444;
+  text-align: left;
+}
+
+.cmsToolCtaBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 16px;
+  border-radius: 6px;
+  background: #f75801;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    color: #fff;
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}
+
+.cmsToolCtaNote {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #6b6b6b;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cmsToolCtaBtn:hover {
+    background: #d94b00;
+  }
+}
+
 // Dynamic HTML content from CMS
 .htmlContent {
   font-size: 13px;
@@ -409,13 +476,28 @@
     import this file but never apply `.htmlContent`, so this rule does not reach
     them and their markup is untouched.
 
-    Clarity session 57ww6z: landed directly on /bhoomi-pujan-muhurat (Samsung
-    Internet, mobile), made exactly one click at 00:13 on a date element, it
-    registered dead, and the visitor left at 00:28. NOTE: I cannot prove from here
-    that the tapped node was an anchor rather than static date text — muhurat
-    bodies are CMS-authored and I have no copy of that document. The mis-aim
-    affordance is fixable and provable; making a plain date string interactive is
-    not, because there is no destination to send it to.
+    CORRECTION — the note that used to sit here guessed at two things and both
+    guesses were wrong. It said the tapped node might have been an anchor, and it
+    said "there is no destination to send it to". The muhurat CMS documents have
+    since been fetched (GET /api/static-pages?slug=<slug>, all eight):
+
+      - Every muhurat body contains ZERO anchors, so this `a` rule cannot reach
+        them at all. Whatever session 57ww6z tapped on /bhoomi-pujan-muhurat, it
+        was not a link, and this rule did not fix that session.
+      - The tapped node was a static bold date run,
+        `<strong>12 September, 14 September</strong>` inside a `<p>` — Clarity
+        named it by that element's own truncated text.
+      - There IS a destination: /aiwow/muhurat-calendar.
+
+    Clarity 1qpvpk (Sep 9, Chrome PC, from Google) then dead-clicked the November
+    block on the same page, which made it two visitors on two devices. The real
+    cause and the fix now live in CmsNotFoundPage (RELATED_TOOL / .cmsToolCta):
+    the page offered no action anywhere, so it was given one.
+
+    This rule stays because it is still correct on its own terms — CMS pages that
+    DO carry in-body links (the policy set this catch-all also serves) were
+    distinguishing them by colour alone, which is a WCAG 1.4.1 failure on touch.
+    It is simply not the muhurat fix it was once described as.
 
     `:hover` keeps a colour shift so pointer devices still get feedback, and
     `:focus-visible` matches the blog so keyboard users can see focus.
