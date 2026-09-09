@@ -86,8 +86,16 @@ const GemstoneResult = () => {
   const [selectedGemstoneIndex, setSelectedGemstoneIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('overview');
   
-  // Dropdown states for Suitability tab
-  const [openSections, setOpenSections] = useState({});
+  /* Dropdown states for the Suitability / Healing tabs. Default every section to
+     open so on mobile the cards are EXPANDED by default (the visitor can still
+     tap a header to collapse). Desktop always shows content regardless. */
+  const [openSections, setOpenSections] = useState({
+    suitability: true,
+    wearing: true,
+    healing: true,
+    compatibility: true,
+    market: true,
+  });
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
   useEffect(() => {
