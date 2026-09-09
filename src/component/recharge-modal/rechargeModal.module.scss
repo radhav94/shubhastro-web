@@ -173,8 +173,34 @@
   align-items: center;
   justify-content: center;
 
-  &:hover {
-    transform: translateY(-5px);
+  /*
+    Hover lift is for pointers only. On touch, `:hover` latches after a tap in
+    most mobile WebViews, so tapping a plan left the card sitting 5px higher
+    indefinitely — a persistent state change that is not the selection, competing
+    with `.selected` for the reader's attention at exactly the moment they are
+    trying to work out whether the tap registered.
+
+    Clarity user labizw (Facebook in-app WebView, mobile) opened the recharge flow
+    at 07:46 and rage-clicked the ₹99 plan around 08:00. This is the third session
+    on this control class — 1qxymtd on ₹9, and the note in Payment.jsx records an
+    earlier dead click on ₹20 — so repeat taps here are a pattern rather than one
+    visitor.
+
+    `@media (hover: hover) and (pointer: fine)` is the existing house guard for
+    this, already used in NewAstrologerCard, PalmistryCamera, AuraCamera,
+    FaceReadingCamera and ClothColorLanding.
+
+    Note this is polish, not the root cause. The tile is a *selection*, not a
+    payment: it is a correctly built `role="radio"` (see PlanCard) and the footer
+    CTA relabels "Select a Plan" -> "Add Money". Someone interrupted by a low
+    balance who taps ₹99 expects paying to start, and instead arms a second button
+    further down. That mismatch is a payment-flow design decision, not a bug, and
+    is left alone deliberately.
+  */
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-5px);
+    }
   }
 
   &.selected {

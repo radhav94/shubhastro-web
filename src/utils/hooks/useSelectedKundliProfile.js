@@ -219,17 +219,30 @@ const useSelectedKundliProfile = (options = {}) => {
       // Still no profile found
       const errorMsg = storageError || 'No Kundli profile selected';
       setError(errorMsg);
-      
+
       if (required) {
         if (showToast) {
-          Toast.error('Please select a Kundli profile to continue');
+          /*
+            Two different situations were being reported with one sentence.
+
+            An authenticated visitor with no profile selected genuinely can "select
+            a Kundli profile". A GUEST cannot: they have no profiles, no selector,
+            and the query that would list them was skipped (see hasAuthToken), so
+            telling them to select one describes an action that does not exist for
+            them. Say which case it is.
+          */
+          Toast.error(
+            hasAuthToken
+              ? 'Please select a Kundli profile to continue'
+              : 'Add your birth details to use this feature'
+          );
         }
-        
+
         // Redirect to AIWow page to select profile
         console.warn('No profile found, redirecting to:', redirectPath);
         navigate(redirectPath, { replace: true });
       }
-      
+
       setIsLoading(false);
     } catch (err) {
       console.error('Error loading profile:', err);
@@ -259,6 +272,10 @@ const useSelectedKundliProfile = (options = {}) => {
     required,
     showToast,
     redirectPath,
+    // Read by the guest-vs-signed-in branch of the "no profile" message. Listed
+    // so that branch cannot pick a stale value from an earlier render — it is
+    // recomputed each render from the auth token and localStorage.
+    hasAuthToken,
   ]);
 
   /**
@@ -300,6 +317,69 @@ const useSelectedKundliProfile = (options = {}) => {
     profile,
     isLoading,
     error,
+    /*
+      True when the visitor is not signed in at all, so a kundli profile is not
+      merely unselected but impossible.
+
+      Why this exists, and the sequencing that still has to happen
+      -----------------------------------------------------------
+      With `required: true` a guest is bounced on mount: hasAuthToken is false, so
+      useGetAllKundlisQuery is SKIPPED, which reports isLoading:false, and the
+      localStorage lookup is gated on the same token — so the guest falls straight
+      through to the toast + navigate(redirectPath, { replace: true }) above,
+      before anything renders.
+
+      Most consumers point redirectPath at /ai-wow, which is a menu of tools that
+      will each bounce them again. Clarity session je5byb is that loop measured:
+      a guest from Facebook, 10 page views from 8 clicks (more pages than clicks
+      is only possible if navigation happened without one), 54 seconds, gone.
+      The only explanation offered is a toast — top-right, off-screen in a
+      Facebook WebView, and invisible to session replay.
+
+      DreamInterpreter and BusinessPathfinder already avoid this by passing
+      `required: !isGuest` / `required: false` and handling the guest themselves,
+      which is the correct shape.
+
+      CORRECTION to an earlier note here, which named the five *Analysis screens as
+      the bounce points. They are not: none of them is reachable in one tap from
+      the /ai-wow menu — each sits behind a capture-or-upload step — so a guest is
+      stopped long before them. Every consumer was audited; the actual behaviour
+      for a guest is:
+
+        - TalkToKundliChat  — already correct (`required: hasToken` +
+                              GuestKundliAuthModal).
+        - AgenticCalendar, BusinessPathfinder, DreamInterpreter — already correct
+                              (`required: false` / `!isGuest`).
+        - CosmicChat, DailyCosmicBriefing — not this loop: both do a hard
+                              `window.location.href = "/login?skip=welcome"` for a
+                              guest, so they land on login, not back on /ai-wow.
+        - AstroVitals, KarmicDebtTracker — THESE were the loop. Bare
+                              `useSelectedKundliProfile()` (so `required: true`),
+                              no guest handling at all, one tap from the menu.
+                              Both now pass `required: !isGuest` and open
+                              GuestKundliAuthModal from their submit handler.
+        - ClothColorForm, and the six *Analysis screens — still unconditional
+                              `required: true`. Left that way deliberately: they
+                              are mid-flow screens, so a guest reaching one has
+                              already been through a step that handles guests
+                              itself, and giving them a second guest modal here
+                              would be a redundant path with no session behind it.
+
+      DO NOT flip a consumer to `required: false` without also giving it a way to
+      get a profile. All the *Analysis screens guard `!profile` (3-6 guards each) so
+      they would not crash, but a guest would simply sit on a screen that can never
+      proceed — a permanently inert Generate button is worse than a redirect. Both
+      screens converted above pass that test because their analysis is behind an
+      explicit submit, never an auto-run effect, and both mount a
+      GuestKundliAuthModal. That is the same shape PalmistryCamera, AuraCamera and
+      PanditAIBubble already use.
+
+      `needsAuth` is exported for consumers that want to make this decision from
+      the hook rather than re-reading localStorage; the two converted screens read
+      the token directly instead, because they need it before the hook's options
+      are built.
+    */
+    needsAuth: !hasAuthToken,
     refreshProfile,
     clearProfile,
   };

@@ -399,10 +399,10 @@
 
     What remains cannot be discovered any earlier:
   -->
-  <!-- The font files live on gstatic and are only discovered once the Google
-       Fonts stylesheet has been fetched AND parsed, so the handshake would
-       otherwise start one full round trip late. -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Removed the fonts.gstatic.com preconnect: Poppins is now self-hosted from
+       /fonts (see the @font-face block below), so nothing is fetched from
+       Google's font CDN and the handshake slot is better left for our own
+       origins. -->
   <!-- Hosts the body background artwork (preloaded below) and `heroBg`
        ai-suite.png, the homepage LCP candidate. The hero image URL is a
        hardcoded constant in HomeV2 but is not in the HTML, so it is only
@@ -478,6 +478,74 @@
       }
     })();
   </script>
+
+  <!--
+    Same trick for the astrologer listing, which needs it more than the homepage.
+
+    /astrologers has no hero image and no CMS body: every content-bearing element
+    on it comes from one call to astrologers/filterAstrologers. That request could
+    not start until the entry bundle had downloaded, parsed and executed and the
+    route chunk had run, and it is not a fast request. Measured against production
+    on 08 Sep, five identical requests in a row:
+
+        ttfb 0.48s / 1.54s / 4.61s / 0.52s / 0.55s
+        every one "x-cache: Miss from cloudfront"
+
+    99,776 B uncompressed (22,902 B gzipped) carrying 19 records — 9 `result` plus
+    10 `topTenAstrologer` — at 63 fields each. There is a CloudFront distribution
+    in front of it but the response sets no Cache-Control at all, so nothing is
+    ever served from the edge and every visitor pays a fresh origin round trip.
+
+    Starting it here overlaps that round trip with the bundle download instead of
+    queueing it behind it. It does not make the endpoint faster; it stops the two
+    costs being serial.
+
+    Constraints, all mirroring the homepage block above:
+      - exact pathname match. /astrologers/:category and /astrologers/online send
+        different query params (specialties / isActive), so a prefetch keyed to the
+        plain listing must not be adopted there. `=== "/astrologers"` also
+        excludes the trailing-slash form rather than guessing at it.
+      - logged-out only. This is a bare GET with no Authorization header, and the
+        listing may be personalised for a signed-in visitor, so the response is
+        only safe to adopt when RTK Query would not have sent credentials either.
+      - page 1 at limit 9, matching `const limit = 9` in TalkToAstrologer.jsx. The
+        endpoint re-checks both before adopting, so if the two ever drift apart the
+        payload is discarded rather than mismatched.
+      - Content-Type text/plain keeps this a simple CORS request with no preflight,
+        so it costs one round trip and not two.
+    Best effort throughout: any failure just means the endpoint requests normally.
+  -->
+  <script>
+    (function () {
+      try {
+        if (window.location.pathname !== "/astrologers") return;
+        if (
+          localStorage.getItem("shubhtalk_customer_token") ||
+          localStorage.getItem("shubhtalk_astro_token")
+        ) return;
+
+        // Must match `const limit = 9` in
+        // src/screens/private/talkToAstrologer/TalkToAstrologer.jsx.
+        var page = 1;
+        var limit = 9;
+        var promise = fetch(
+          "%VITE_APP_API_BASE_URL%/api/astrologers/filterAstrologers?page=" +
+            page +
+            "&limit=" +
+            limit,
+          { method: "GET", headers: { "Content-Type": "text/plain" } }
+        ).then(function (response) {
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return response.json();
+        });
+
+        promise.catch(function () {});
+        window.__astrologersPrefetch__ = { page: page, limit: limit, promise: promise };
+      } catch (e) {
+        /* prefetch is best effort */
+      }
+    })();
+  </script>
   <!-- <link rel="dns-prefetch" href="https://translate.googleapis.com" /> -->
   <link rel="dns-prefetch" href="https://www.gstatic.com" />
   <link rel="dns-prefetch" href="https://firebaseinstallations.googleapis.com" />
@@ -511,9 +579,9 @@
     `font-weight: 900` (5 uses) and `300` (4 uses). Pre-existing and cosmetic —
     left alone rather than adding two more font files for 9 declarations.
   -->
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" />
+  <!-- <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" /></noscript>
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" /></noscript> -->
 
   <!--
     Body background preload, split by viewport.
@@ -559,14 +627,81 @@
     blocked on the CDN assets existing — once they do, wire up `image-set()` with
     a PNG fallback rather than re-adding priority here.
   -->
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" media="(min-width: 768px)" />
-  <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" media="(max-width: 767px)" />
+  <!-- <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" media="(min-width: 768px)" /> -->
+  <!-- <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" media="(max-width: 767px)" /> -->
   <!-- Removed: an unconditional high-priority preload of images/ai-suite.png.
        It is the `heroBg` for HomeV2/HomeNew only, so every other route fetched
        it at fetchpriority="high" and never painted it. index.html is shared by
        all routes, so re-add it from the home route (not here) if needed. -->
 
+  <!--
+    Self-hosted Poppins.
+
+    Replaces the Google Fonts <link>s above (now commented out). Those pulled
+    five .woff2 files from fonts.gstatic.com, and a speed report showed four of
+    them as the site's slowest external resources at ~1.02s each: a cross-origin
+    fetch to Google that is only discovered after the Google Fonts CSS is
+    fetched and parsed. The files already live in public/fonts (served from the
+    site root at /fonts/...), so serving them from our own origin removes that
+    third-party round trip and the extra handshake, and lets us preload the
+    weights the first screen needs.
+
+    Weights map to the five the app actually uses (measured in the removed
+    Google comment: 600 x1614, 500 x569, 700 x516, 400 x158, 800 x27). 900 and
+    300 are referenced but were never shipped and already fall back — unchanged.
+
+    font-display: swap keeps text visible immediately in the size-adjusted
+    'Poppins Fallback' below and swaps to Poppins on arrival, so this cannot
+    reintroduce a blank-text (FOIT) delay on the critical path.
+  -->
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-semibold-webfont.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-medium-webfont.woff2" crossorigin />
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-regular-webfont.woff2" crossorigin />
+
   <style>
+    /* Self-hosted Poppins @font-face — see the note above. woff2 first (smaller,
+       universally supported on this project's browser floor), woff as fallback. */
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/fonts/poppins-regular-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-regular-webfont.woff') format('woff');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/fonts/poppins-medium-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-medium-webfont.woff') format('woff');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 600;
+      font-display: swap;
+      src: url('/fonts/poppins-semibold-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-semibold-webfont.woff') format('woff');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('/fonts/poppins-bold-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-bold-webfont.woff') format('woff');
+    }
+    @font-face {
+      font-family: 'Poppins';
+      font-style: normal;
+      font-weight: 800;
+      font-display: swap;
+      src: url('/fonts/poppins-extrabold-webfont.woff2') format('woff2'),
+           url('/fonts/poppins-extrabold-webfont.woff') format('woff');
+    }
+
     /* Size-adjusted fallback to reduce CLS from font swap */
     @font-face {
       font-family: 'Poppins Fallback';
@@ -598,18 +733,16 @@
       touch-action: manipulation;
     }
 
-    body {
+     body {
       background-color: #ebecf2;
       background-image: url('https://assets.shubhastro.ai/main-body-bg-new.png');
-      background-repeat: repeat-y;
       background-attachment: fixed;
       background-size: 100% 100%;
-      position: relative;
+     
       margin: 0;
       padding: 0;
       min-height: 100dvh!important;
-      font-family: 'Poppins', 'Poppins Fallback', sans-serif;
-    }
+      font-family: 'Poppins', 'Poppins Fallback', sans-serif;}
 
     /*
       This rule is the background for every route. Without this override, only
@@ -642,6 +775,78 @@
     window.__analyticsHostAllowed__ = (function () {
       var host = location.hostname;
       return host === "shubhastro.ai" || host === "www.shubhastro.ai";
+    })();
+  </script>
+
+  <!--
+    React DevTools: neutralised on the production host only.
+
+    THIS IS NOT A SECURITY BOUNDARY. Read this before treating it as one.
+
+    Disabling the DevTools hook stops the component tree, props and hook state
+    being browsed with the extension. It does not make anything confidential. A
+    user still has, unchanged:
+      - every request and response in the Network tab, Authorization headers included
+      - the whole JS bundle in Sources
+      - localStorage, sessionStorage and every non-HttpOnly cookie
+      - all runtime state, via a breakpoint anywhere
+    Anything that must not reach the user must not be sent to the browser. This
+    only raises the effort bar for casual inspection.
+
+    Why here
+    --------
+    It has to run before react-dom initialises, and this is an inline script in
+    <head>, so it executes long before the module bundle. Placing it in
+    src/main.jsx would be later and less certain, because ES module imports are
+    hoisted and evaluated before the module body.
+
+    Why gated on __analyticsHostAllowed__
+    -------------------------------------
+    Reusing the flag defined immediately above rather than adding a second
+    definition of "is this production". Consequences: on localhost, any preview
+    build, and staging, DevTools keeps working normally, so development and HMR
+    are untouched. `import.meta.env` is not available in index.html, which is why
+    a hostname check is the mechanism.
+
+    Why isDisabled rather than deleting the hook
+    --------------------------------------------
+    `isDisabled` is the flag react-dom itself checks before injecting a renderer,
+    so this is the supported path rather than sabotage. Deleting or replacing the
+    global with a non-object risks a TypeError inside react-dom on a version bump.
+    The no-op methods are there as a belt-and-braces measure for the case where a
+    renderer calls them anyway; they must exist and must not throw.
+
+    The extension injects its hook at document_start, so it usually already
+    exists by the time this runs — hence mutating the existing object when there
+    is one instead of clobbering it. The whole thing is wrapped in try/catch
+    because a future extension version could define these as non-writable
+    properties, and a throw here would abort head parsing and blank the page.
+  -->
+  <script>
+    (function () {
+      if (!window.__analyticsHostAllowed__) return;
+      try {
+        var KEY = "__REACT_DEVTOOLS_GLOBAL_HOOK__";
+        var noop = function () {};
+        var existing = window[KEY];
+        var hook = (existing && typeof existing === "object") ? existing : {};
+
+        hook.isDisabled = true;
+        hook.supportsFiber = true;
+        hook.inject = function () { return null; };
+        hook.onCommitFiberRoot = noop;
+        hook.onCommitFiberUnmount = noop;
+        hook.onPostCommitFiberRoot = noop;
+        if (!hook.renderers) {
+          hook.renderers = (typeof Map === "function") ? new Map() : {};
+        }
+
+        window[KEY] = hook;
+      } catch (e) {
+        /* Never let hardening break the page. Failing open is correct here:
+           the worst case is that DevTools still attaches, which is the status
+           quo, whereas a throw would cost every visitor the whole page. */
+      }
     })();
   </script>
 

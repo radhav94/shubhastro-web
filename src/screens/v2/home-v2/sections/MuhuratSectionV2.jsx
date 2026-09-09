@@ -115,9 +115,9 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
               {/* </div> */}
               {m.name}
             </div>
-            <p className={styles.muhuratTime}>
+            {/* <p className={styles.muhuratTime}> */}
               {m.end ? `${m.start} to ${m.end}` : m.start}
-            </p>
+            {/* </p> */}
           </div>
         ))}
       </div>

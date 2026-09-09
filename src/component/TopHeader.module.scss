@@ -491,9 +491,84 @@ button.headerNavLink {
   font-weight: 600;
   font-size: 0.85rem;
 }
-.headerNavLink:hover,.headerNavLink.active {
+
+/*
+  Claim the inert strip between the "Quick Links" label and the first link.
+
+  This submenu never got the hit-area treatment its sibling nav has. Compare:
+  `.headerNavigation .headerNavLink::after` above expands every main-nav link
+  across its 0.4rem margins because "aiming at a 13.6px label and missing by a
+  few pixels landed on the inert <nav> instead of the link".
+
+  In here the geometry is different but the failure is identical. Submenu links
+  carry `padding: 0.4rem 1rem` and no margin, and the flex container sets no
+  `gap`, so adjacent links abut and there is nothing between *them* to miss. The
+  one exception is the start of the row: `.quickNavText` has `margin-right: 10px`
+  and is itself inert (a plain span, no handler), so there is a contiguous
+  ~10px dead strip immediately before "Match Making".
+
+  A click that lands there resolves to the <nav>, and Clarity names an element by
+  its text — which is why user vttx5q's dead click is reported as
+  "Quick Links Match Making Nu[merology]", the container's concatenated text
+  rather than any one child. A click on the label itself would have been reported
+  as the label.
+
+  This corrects an earlier read of the same session that blamed the decorative
+  chevron inside the label for looking clickable. The chevron has no pointer
+  cursor and no hover state; the container-level element name is the tell that
+  the click missed every child instead.
+
+  ::before rather than widening the link: a transparent overlay changes no
+  layout and no paint, so the row and the hover/active underline keep their
+  exact current geometry. Adjacent-sibling selector so it binds to whatever
+  element follows the label — the links here are a mix of <a> and <button>, which
+  makes :first-of-type unreliable.
+*/
+.headerNavigationSubmenu .quickNavText + .headerNavLink::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -10px;
+  width: 10px;
+}
+/*
+  Hover and active used to share one rule — identical colour, identical 1px
+  underline. That made the active state carry no information at all: a reader
+  already on /blog hovering the "Blog" link saw exactly what they would see
+  hovering any other link, so nothing on screen said "you are already here".
+
+  Which is why the link gets clicked. Clarity user khu0xq entered on /blog and
+  made "multiple clicks on the Blog link" before giving up and opening an
+  article. A NavLink whose target equals the current URL is not navigation:
+  React Router has no state change to make, so the tap is inert by definition.
+  Nothing can be added to the click to fix that — the fix is to stop the reader
+  needing to try, which means making "you are here" unmistakable.
+
+  Same conclusion the blog list itself already reached: the note on `headingText`
+  in BlogHeader.jsx says of its own dead-clicked heading, "Making the text honest
+  removes the reason to reach for it." And the logo dead clicks (1ww075q and
+  three earlier sessions) were resolved the same way, by adding aria-current
+  rather than inventing an action.
+
+  Only the colour and the border *colour* change, never the border width — the
+  base rule already sets `border-bottom: 1px solid transparent`, so both states
+  paint into space that is always reserved and neither can shift the nav row.
+
+  Desktop only, deliberately. The mobile drawer copy of this rule has the same
+  hover/active collision, but its links carry `onClick={handleDrawerNavClick}`,
+  which closes the drawer — so a same-page tap there already produces visible
+  feedback and is not a dead click. Left alone rather than risking the 6px
+  border-left shift in that rule.
+*/
+.headerNavLink:hover {
   color: #2c1b0e;
-  border-bottom: 1px solid #F75801;
+  border-bottom-color: rgba(247, 88, 1, 0.4);
+}
+
+.headerNavLink.active {
+  color: #F75801;
+  border-bottom-color: #F75801;
 }
 .mobileDrawer .headerNavLink:hover,.mobileDrawer .headerNavLink.active {
   color: #2c1b0e;

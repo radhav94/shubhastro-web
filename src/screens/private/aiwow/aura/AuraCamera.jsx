@@ -7,7 +7,7 @@ import { useAutoCapture } from '../../../../utils/hooks/useAutoCapture';
 import { setAuraImage } from '../../../../redux/aiwow/aiwowSlice';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import usePreventPinchZoom from '../../../../utils/hooks/usePreventPinchZoom';
-import toast from '../../../../component/toast';
+import { compressImage } from '../../../../utils/helper/compressImage';
 
 // How long a detection block persists before we let the user shoot anyway.
 // Mirrors PalmistryCamera's MANUAL_OVERRIDE_AFTER_MS.
@@ -39,6 +39,26 @@ const AuraCamera = () => {
   const [isFrontCamera, setIsFrontCamera] = useState(true);
   const [videoReady, setVideoReady] = useState(false); // ⭐ Track video ready state
   const captureAreaRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  /*
+    Inline answer for a shutter tap, same pattern as PalmistryCamera and
+    FaceReadingCamera. This screen fills the viewport with its controls pinned to
+    the bottom, while react-hot-toast renders top-right, and Clarity does not
+    record toasts at all — so the two toast.error() calls this screen relied on
+    were invisible to the visitor and invisible in the report.
+
+    `seq` is bumped on every announcement so repeating the same reason still
+    remounts the node: session replay sees a DOM mutation and screen readers
+    re-announce instead of going quiet on a duplicate string.
+  */
+  const [captureNotice, setCaptureNotice] = useState(null);
+  const noticeSeqRef = useRef(0);
+
+  const announceCaptureNotice = (text) => {
+    noticeSeqRef.current += 1;
+    setCaptureNotice({ seq: noticeSeqRef.current, text });
+  };
 
   const {
     modelsLoaded,
@@ -231,7 +251,9 @@ const AuraCamera = () => {
     if (!cropCanvas) {
       // Was a bare return. The frame is not croppable when the video has no
       // dimensions yet, which is indistinguishable from a broken shutter.
-      toast.error('Camera is still warming up — try that again in a second.');
+      announceCaptureNotice(
+        'The camera preview has not started yet. Give it a moment, or upload a photo instead.'
+      );
       return;
     }
     setCapturedImage(cropCanvas.toDataURL('image/jpeg', 0.95));
@@ -251,6 +273,14 @@ const AuraCamera = () => {
     blocker on tap, and after a grace period take the shot anyway. Aura analysis
     reads colour around the subject rather than facial landmarks, so a frame the
     detector was unsure about is still worth submitting.
+
+    The "no upload fallback on this screen" the paragraph above complains about is
+    now fixed rather than just noted — see handleUploadInstead. Clarity session
+    1pgldv8 (Facebook in-app WebView, 02:44 AM) submitted the aura form at 04:54
+    and then cycled through "capture attempts and further uploads" across 31 page
+    views. Face detection at 2:44 in the morning is exactly the indefinite block
+    this comment describes, and leaving the screen to find an upload route is
+    what produced the page churn.
   */
   const captureBlocked = modelsLoaded && !faceDetected;
   const [manualCaptureAllowed, setManualCaptureAllowed] = useState(false);
@@ -263,11 +293,46 @@ const AuraCamera = () => {
 
   // Every tap gets a response: a photo, or a reason.
   const handleCaptureTap = () => {
+    // Before the models report in, captureBlocked is false, so a tap used to
+    // fall through to captureImage() while the button still read "Loading...".
+    if (!modelsLoaded) {
+      announceCaptureNotice('Still getting the aura scanner ready — one moment.');
+      return;
+    }
     if (!captureBlocked || manualCaptureAllowed) {
       captureImage();
       return;
     }
-    toast.error('No face detected yet — move into the frame and find brighter light.');
+    announceCaptureNotice(
+      'No face detected yet — move into the frame and find brighter light.'
+    );
+  };
+
+  // The upload route this screen never had. Same pipeline as a captured frame:
+  // compress to a data URL, drop it into capturedImage, and let the existing
+  // Retake / Use Photo confirm step handle the rest.
+  const handleUploadInstead = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    // Reset so picking the same file twice still fires onChange.
+    event.target.value = '';
+    compressImage(file)
+      .then((dataUrl) => {
+        stopCamera();
+        setCapturedImage(dataUrl);
+        setCaptureNotice(null);
+        // The error branch returns before the preview renders, so a stale
+        // `error` would keep the error screen up with the photo accepted but
+        // invisible — the tap would look like it did nothing.
+        setError(null);
+      })
+      .catch(() =>
+        announceCaptureNotice('Could not read that image. Please try another one.')
+      );
   };
 
   // Auto-capture the sharpest frame once a face is steady in the frame.
@@ -423,31 +488,70 @@ const AuraCamera = () => {
 
       <div className={styles.controls}>
         {!capturedImage ? (
-          // aria-disabled, not `disabled` — the dimming still conveys the state,
-          // but the tap has to reach handleCaptureTap to be answered.
-          <button
-            type="button"
-            className={`${styles.captureButton} ${captureBlocked && !manualCaptureAllowed ? styles.disabled : ''}`}
-            onClick={handleCaptureTap}
-            aria-disabled={captureBlocked && !manualCaptureAllowed}
-            aria-label={captureBlocked ? 'No face detected yet' : 'Capture aura photo'}
-          >
-            <div className={styles.captureIcon}>
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={captureBlocked && !manualCaptureAllowed ? "0.5" : "1"}/>
-                <circle cx="20" cy="20" r="14" fill="white" opacity={captureBlocked && !manualCaptureAllowed ? "0.5" : "1"}/>
-              </svg>
-            </div>
-            <span className={styles.captureText}>
-              {!modelsLoaded
-                ? 'Loading...'
-                : faceDetected
-                  ? 'Capture'
-                  : manualCaptureAllowed
-                    ? 'Capture anyway'
-                    : 'No Face Detected'}
-            </span>
-          </button>
+          // Stacks the shutter above the upload escape hatch. `.controls` is a
+          // flex row, so the column wrapper is what keeps them from sitting
+          // side by side.
+          <div className={styles.captureStack}>
+            {/* Sits directly above the shutter that was tapped. See
+                announceCaptureNotice for why this is not a toast. */}
+            {captureNotice && (
+              <p
+                key={captureNotice.seq}
+                className={styles.captureNotice}
+                role="status"
+                aria-live="polite"
+              >
+                {captureNotice.text}
+              </p>
+            )}
+
+            {/* aria-disabled, not `disabled` — the dimming still conveys the
+                state, but the tap has to reach handleCaptureTap to be answered. */}
+            <button
+              type="button"
+              className={`${styles.captureButton} ${captureBlocked && !manualCaptureAllowed ? styles.disabled : ''}`}
+              onClick={handleCaptureTap}
+              aria-disabled={captureBlocked && !manualCaptureAllowed}
+              aria-label={captureBlocked ? 'No face detected yet' : 'Capture aura photo'}
+            >
+              <div className={styles.captureIcon}>
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                  <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="3" opacity={captureBlocked && !manualCaptureAllowed ? "0.5" : "1"}/>
+                  <circle cx="20" cy="20" r="14" fill="white" opacity={captureBlocked && !manualCaptureAllowed ? "0.5" : "1"}/>
+                </svg>
+              </div>
+              <span className={styles.captureText}>
+                {!modelsLoaded
+                  ? 'Loading...'
+                  : faceDetected
+                    ? 'Capture'
+                    : manualCaptureAllowed
+                      ? 'Capture anyway'
+                      : 'No Face Detected'}
+              </span>
+            </button>
+
+            {/* Shown in exactly the states that previously had no way forward:
+                detection blocking, models not in yet, or a preview that never
+                started (a WebView that rejects play()). */}
+            {(captureBlocked || !modelsLoaded || !videoReady) && (
+              <button
+                type="button"
+                className={styles.uploadFallbackBtn}
+                onClick={handleUploadInstead}
+              >
+                Upload a photo instead
+              </button>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+          </div>
         ) : (
           <div className={styles.actionButtons}>
             <button className={styles.retakeButton} onClick={retakePhoto}>
