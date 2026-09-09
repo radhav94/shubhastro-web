@@ -448,12 +448,25 @@ export const ChatProvider = ({ children }) => {
   useEffect(() => {
     if (!userIdLocal) return;
 
+    // The legacy `message:recieved` (typo) and the structured `message:received`
+    // event can BOTH fire for the same message. Dedupe so we only show one
+    // banner per message. Keyed by messageId/_id; falls back to a text+time key
+    // for legacy payloads that carry no id.
+    const notifiedIds = new Set();
+    const notifyKey = (data) =>
+      data.messageId || data._id || `${data.message || data.response || ""}|${data.type || "message"}`;
+
     const handleGlobalMessage = (data) => {
       // Only show notification for astrologer messages (not user's own)
       if (data.sender === "user") return;
 
       // Skip Pandit AI messages — handled inline by PanditAIBubble
       if (isPanditAIEvent(data)) return;
+
+      // Dedupe: skip if we've already shown a banner for this message.
+      const key = notifyKey(data);
+      if (notifiedIds.has(key)) return;
+      notifiedIds.add(key);
 
       // Hide product/remedy notifications when mall is disabled
       if (data.type === "products" && !isShubhMallEnabled()) return;
@@ -508,10 +521,15 @@ export const ChatProvider = ({ children }) => {
       ), { duration: 4000, position: isOnLivePage ? "top-center" : "top-right" });
     };
 
+    // Listen to BOTH the legacy (typo) event and the new structured event so
+    // the banner shows regardless of which the server emits; dedup above stops
+    // a double banner when both fire for the same message.
     voiceSocket.on("message:recieved", handleGlobalMessage);
+    voiceSocket.on("message:received", handleGlobalMessage);
 
     return () => {
       voiceSocket.off("message:recieved", handleGlobalMessage);
+      voiceSocket.off("message:received", handleGlobalMessage);
     };
   }, [userIdLocal]);
 
