@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Sparkles,
   Star,
@@ -105,6 +105,24 @@ const avatarFor = (name) => {
   return `data:image/svg+xml,${svg}`;
 };
 
+/*
+  Render the section title with its LAST sentence highlighted in brand orange
+  (e.g. "Real Guidance. <accent>Real Experiences.</accent>"). Splits on the
+  first sentence-ending period so the CMS `display_title` gets the same accent
+  as the hardcoded fallback. If there's no period, the whole title is accented.
+*/
+const renderHeading = (text) => {
+  const match = /^(.*?[.!?])\s+(.+)$/.exec(text.trim());
+  if (!match) {
+    return <span className={styles.titleAccent}>{text}</span>;
+  }
+  return (
+    <>
+      {match[1]} <span className={styles.titleAccent}>{match[2]}</span>
+    </>
+  );
+};
+
 const Stars = ({ count = 5 }) => (
   <span className={styles.stars} aria-label={`${count} star rating`}>
     {Array.from({ length: count }).map((_, i) => (
@@ -114,9 +132,6 @@ const Stars = ({ count = 5 }) => (
 );
 
 const TestimonialsSection = ({ sectionData }) => {
-  const [activeFilter, setActiveFilter] = useState("All");
-  const [activeIndex, setActiveIndex] = useState(0);
-  const trackRef = useRef(null);
 
   // Testimonials come only from the homepage CMS payload — no static/sample
   // fallback. If the API sends none, the section renders nothing (see guard
@@ -131,97 +146,101 @@ const TestimonialsSection = ({ sectionData }) => {
   // short "Real Experiences" badge label and was duplicating the badge here.
   const subheading = sectionData?.description || "";
 
-  // Filter chips: "All" plus every distinct category present in the data. Only
-  // shown when there's more than one category to choose between.
-  const filters = useMemo(() => {
-    const cats = Array.from(
-      new Set(allTestimonials.map((t) => t.category).filter(Boolean))
-    );
-    return ["All", ...cats];
-  }, [allTestimonials]);
+  // No category filtering — the carousel shows every testimonial from the CMS.
+  const items = allTestimonials;
+  const len = items.length;
 
-  const items = useMemo(
-    () =>
-      activeFilter === "All"
-        ? allTestimonials
-        : allTestimonials.filter((t) => t.category === activeFilter),
-    [activeFilter, allTestimonials]
-  );
+  /*
+    Seamless infinite slider. Instead of re-ordering cards each tick (which made
+    them "jump" because React swapped DOM nodes), we render the SAME row of
+    cards and slide it left/right via translateX so the active card lands in the
+    centre. To loop without a backwards jerk at the ends, the list is rendered
+    THREE times (prev clones · real · next clones). `pos` walks continuously;
+    when it drifts into a clone region we snap it back by one real-list length
+    with the transition disabled, so the motion looks endless.
 
-  // Reset scroll + active card whenever the filter changes.
+    `pos` is the index into the tripled list currently centred. It starts in the
+    middle copy so there's a full copy of runway on each side.
+  */
+  const [pos, setPos] = useState(len); // centre copy start
+  const [animate, setAnimate] = useState(true);
+
+  // Re-centre to the middle copy whenever the list length changes.
   useEffect(() => {
-    setActiveIndex(0);
-    if (trackRef.current) trackRef.current.scrollLeft = 0;
-  }, [activeFilter]);
+    setAnimate(false);
+    setPos(len);
+    // Re-enable the transition on the next frame so the reset itself doesn't
+    // animate.
+    const id = requestAnimationFrame(() => setAnimate(true));
+    return () => cancelAnimationFrame(id);
+  }, [len]);
 
-  // Throttle scroll work to one run per animation frame. The handler measures
-  // layout (offsetLeft/Width), so running it on every scroll event forced a
-  // reflow + re-render dozens of times per second during a smooth scroll — that
-  // burst is what made the arrows feel like they took seconds to respond.
-  const rafRef = useRef(0);
+  // The real testimonial currently centred (used for dots + active styling).
+  const activeIndex = len ? ((pos % len) + len) % len : 0;
 
-  const measureNearest = useCallback(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const cards = track.querySelectorAll("[data-card]");
-    if (!cards.length) return;
-    const center = track.scrollLeft + track.clientWidth / 2;
-    let nearest = 0;
-    let best = Infinity;
-    for (let i = 0; i < cards.length; i += 1) {
-      const card = cards[i];
-      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-      const dist = Math.abs(cardCenter - center);
-      if (dist < best) {
-        best = dist;
-        nearest = i;
-      }
-    }
-    // Only re-render when the centred card actually changed.
-    setActiveIndex((prev) => (prev === nearest ? prev : nearest));
-  }, []);
-
-  const handleScroll = useCallback(() => {
-    if (rafRef.current) return; // already scheduled this frame
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = 0;
-      measureNearest();
-    });
-  }, [measureNearest]);
-
-  useEffect(() => () => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-  }, []);
-
-  const scrollToCard = useCallback((index) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const card = track.querySelectorAll("[data-card]")[index];
-    if (!card) return;
-    // Update the active card immediately so the arrow/dot feels instant, rather
-    // than waiting for the smooth-scroll animation's onScroll to catch up.
-    setActiveIndex(index);
-    track.scrollTo({
-      left: card.offsetLeft - (track.clientWidth - card.offsetWidth) / 2,
-      behavior: "smooth",
-    });
-  }, []);
-
-  // Mirror activeIndex in a ref so rapid arrow clicks step from the latest
-  // position rather than a stale closure value (state hasn't re-rendered yet
-  // between two quick clicks).
-  const activeIndexRef = useRef(0);
-  activeIndexRef.current = activeIndex;
-
+  // Advance/retreat the centre by one card. Always animates.
   const step = useCallback(
     (dir) => {
-      const next = Math.min(
-        Math.max(activeIndexRef.current + dir, 0),
-        items.length - 1
-      );
-      scrollToCard(next);
+      if (len <= 1) return;
+      setAnimate(true);
+      setPos((p) => p + dir);
     },
-    [items.length, scrollToCard]
+    [len]
+  );
+
+  // Jump directly to a specific real index (from the dots) via the shortest
+  // path within the current copy.
+  const goTo = useCallback(
+    (realIdx) => {
+      if (len <= 1) return;
+      setAnimate(true);
+      setPos((p) => {
+        const cur = ((p % len) + len) % len;
+        return p + (realIdx - cur);
+      });
+    },
+    [len]
+  );
+
+  /*
+    After a slide finishes, if we've walked into a clone copy, silently re-centre
+    into the middle copy (same visual position, transition off) so there's
+    always runway left and right — the seamless-loop trick.
+  */
+  const handleTransitionEnd = useCallback(() => {
+    if (len <= 1) return;
+    if (pos < len || pos >= len * 2) {
+      setAnimate(false);
+      setPos(len + (((pos % len) + len) % len));
+    }
+  }, [pos, len]);
+
+  // Re-enable animation the frame after a silent re-centre.
+  useEffect(() => {
+    if (animate) return undefined;
+    const id = requestAnimationFrame(() => setAnimate(true));
+    return () => cancelAnimationFrame(id);
+  }, [animate]);
+
+  /*
+    Auto-play: slide to the next card every few seconds, looping forever. Paused
+    while the user hovers/touches the carousel, and skipped when there's only
+    one card.
+  */
+  const [paused, setPaused] = useState(false);
+  useEffect(() => {
+    if (paused || len <= 1) return undefined;
+    const id = setInterval(() => {
+      setAnimate(true);
+      setPos((p) => p + 1);
+    }, 4000);
+    return () => clearInterval(id);
+  }, [paused, len]);
+
+  // Tripled list (prev · real · next) that the track renders.
+  const tripled = useMemo(
+    () => (len ? [...items, ...items, ...items] : []),
+    [items, len]
   );
 
   // No CMS testimonials → render nothing (no static placeholders). Placed after
@@ -240,7 +259,7 @@ const TestimonialsSection = ({ sectionData }) => {
           </span>
           <h2 className={styles.title}>
             {heading ? (
-              heading
+              renderHeading(heading)
             ) : (
               <>
                 Real Guidance. <span className={styles.titleAccent}>Real Experiences.</span>
@@ -251,28 +270,16 @@ const TestimonialsSection = ({ sectionData }) => {
             {subheading ||
               "See how people use ShubhAstro to get clarity and make better decisions with trusted astrology guidance."}
           </p>
-
-          {/* Filter chips — only when there's more than one category. */}
-          {filters.length > 1 && (
-            <div className={styles.filters} role="tablist" aria-label="Filter testimonials">
-              {filters.map((f) => (
-                <button
-                  key={f}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeFilter === f}
-                  className={`${styles.filterChip} ${activeFilter === f ? styles.filterActive : ""}`}
-                  onClick={() => setActiveFilter(f)}
-                >
-                  {f}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
-        {/* Carousel */}
-        <div className={styles.carousel}>
+        {/* Carousel — auto-plays; pauses while the user is interacting. */}
+        <div
+          className={styles.carousel}
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onTouchStart={() => setPaused(true)}
+          onTouchEnd={() => setPaused(false)}
+        >
           <button
             type="button"
             className={`${styles.arrow} ${styles.arrowPrev}`}
@@ -282,12 +289,26 @@ const TestimonialsSection = ({ sectionData }) => {
             <ChevronLeft size={20} aria-hidden="true" />
           </button>
 
-          <div className={styles.track} ref={trackRef} onScroll={handleScroll}>
-            {items.map((t, i) => (
+          <div className={styles.viewport}>
+            <div
+              className={styles.track}
+              onTransitionEnd={handleTransitionEnd}
+              style={{
+                transform: `translate3d(calc(-1 * (${pos} * var(--card-step) + var(--card-w) / 2)), 0, 0)`,
+                transition: animate
+                  ? "transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1)"
+                  : "none",
+              }}
+            >
+            {tripled.map((t, i) => {
+              const isActive = i === pos;
+              return (
               <article
-                key={t.id}
+                key={i}
                 data-card
-                className={`${styles.card} ${i === activeIndex ? styles.cardActive : ""}`}
+                className={`${styles.card} ${isActive ? styles.cardActive : ""}`}
+                aria-hidden={isActive ? undefined : true}
+                onClick={isActive ? undefined : () => step(i > pos ? 1 : -1)}
               >
                 <div className={styles.cardTop}>
                   <Stars count={t.rating} />
@@ -324,7 +345,9 @@ const TestimonialsSection = ({ sectionData }) => {
                   </div>
                 )}
               </article>
-            ))}
+              );
+            })}
+            </div>
           </div>
 
           <button
@@ -345,7 +368,7 @@ const TestimonialsSection = ({ sectionData }) => {
                 key={t.id}
                 type="button"
                 className={`${styles.dot} ${i === activeIndex ? styles.dotActive : ""}`}
-                onClick={() => scrollToCard(i)}
+                onClick={() => goTo(i)}
                 aria-label={`Go to testimonial ${i + 1}`}
               />
             ))}

@@ -79,11 +79,7 @@ $muted: #6b5546;
 }
 
 .titleAccent {
-  background: linear-gradient(90deg, $brand 0%, $brand-dark 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  color: $brand;
 }
 
 .subtitle {
@@ -138,29 +134,46 @@ $muted: #6b5546;
   margin-top: 24px;
 }
 
-.track {
-  display: flex;
-  gap: 18px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  /* Generous side padding so the first/last card clears the arrows in the
-     gutter (arrows sit at ~0 with a 38px width), and the scaled active card
-     isn't clipped top/bottom. scroll-padding keeps snap-centering correct with
-     that padding present. */
-  padding: 16px 52px 24px;
-  scroll-padding-inline: 52px;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* Viewport clips the sliding track; `--card-step` (card width + gap) is what
+   the JS translate uses to move exactly one card per step. */
+.viewport {
+  overflow: hidden;
+  padding: 24px 0 28px;
+  /* Card width + gap drive the slide math (see inline transform). Keep these in
+     sync with .card flex-basis and .track gap. */
+  --card-w: 340px;
+  --card-step: calc(var(--card-w) + 18px);
 
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Mobile: one full card per view, no gutter for arrows (they're hidden). */
   @media (max-width: 767px) {
-    padding: 14px 4px 20px;
-    scroll-padding-inline: 4px;
+    padding: 14px 0 20px;
+    /* One card per view. The carousel's real available width is:
+         100vw
+         − page padding  (HomeV2 .page: 16px each side under 1180px)
+         − section padding (this .section on mobile: 16px each side)
+       = 100vw − 64px. Basing the card on that (rather than just the section
+       padding) is what stops the card overflowing the viewport and getting
+       CUT. A touch more is trimmed for the scrollbar / rounding safety. */
+    --card-w: calc(100vw - 68px);
+    --card-step: calc(var(--card-w) + 12px);
+  }
+}
+
+.track {
+  /* Sliding carousel: one long row of cards translated horizontally so the
+     active card sits dead-centre. Smooth because the SAME DOM nodes move (the
+     transition is applied inline in JS); the list is tripled for a seamless
+     infinite loop with no end-jerk. */
+  position: relative;
+  left: 50%; /* track's left edge at viewport centre; translateX pulls the
+                active card's centre back onto it (see inline transform). */
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: max-content;
+  will-change: transform;
+
+  @media (max-width: 767px) {
+    gap: 12px;
   }
 }
 
@@ -209,22 +222,46 @@ $muted: #6b5546;
 
 /* ── Card ───────────────────────────────────────────────────────────────── */
 .card {
-  scroll-snap-align: center;
-  flex: 0 0 340px;
-  max-width: 340px;
+  flex: 0 0 var(--card-w);
+  max-width: var(--card-w);
+  /* Fixed height so tall/short reviews don't make cards jump size as they
+     slide through the centre. */
+  min-height: 260px;
   display: flex;
   flex-direction: column;
   padding: 20px;
   border-radius: 18px;
+  /* Clip the full-bleed footer band to the card's rounded corners. */
+  overflow: hidden;
   background: rgba(255, 255, 255, 0.4);
   border: 1.5px solid #fff;
   box-shadow: 0 6px 20px rgba(191, 118, 66, 0.12);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  /* Smoothly tween scale/opacity as a card moves in/out of the centre slot. */
+  transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 0.55s ease, opacity 0.55s ease, background 0.35s ease,
+    border-color 0.35s ease;
 
-  /* One full card per view on mobile (no peek of the next). */
+  /* Non-centre cards sit slightly smaller + dimmed, and are clickable to slide
+     that direction. */
+  &:not(.cardActive) {
+    opacity: 0.6;
+    transform: scale(0.88);
+    cursor: pointer;
+  }
+
+  /* One full-width card per view on mobile; width comes from --card-w so it
+     stays in sync with the slide math. */
   @media (max-width: 767px) {
-    flex: 0 0 100%;
-    max-width: 100%;
+    min-height: 240px;
+
+    &:not(.cardActive) {
+      /* Faded fully out so NO sliver of the neighbouring card peeks past the
+         active one and looks "cut". Opacity (not visibility) so it still fades
+         smoothly in/out while sliding through the centre. Keeps its slot in the
+         row so the slide distance stays correct. */
+      opacity: 0;
+      transform: none;
+    }
   }
 }
 
@@ -235,6 +272,7 @@ $muted: #6b5546;
   border: 2px solid $brand;
   box-shadow: 0 12px 32px rgba(212, 52, 0, 0.22);
   transform: scale(1.04);
+  min-height: 344px;
 
   @media (max-width: 767px) {
     transform: none;
@@ -270,7 +308,7 @@ $muted: #6b5546;
 .quote {
   position: relative;
   margin: 0 0 18px;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   line-height: 1.55;
   color: #3f2d22;
   flex: 1;
@@ -300,6 +338,7 @@ $muted: #6b5546;
   justify-content: space-between;
   gap: 10px;
   padding-top: 12px;
+  margin-bottom: 10px;
 }
 
 .personLeft {
@@ -344,12 +383,25 @@ $muted: #6b5546;
 .cardFooter {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px dashed rgba(212, 52, 0, 0.2);
-  font-size: 0.75rem;
-  color: $muted;
+  gap: 8px;
+  /* Full-width footer band: bleed past the card's 20px padding to the edges,
+     sit on a tinted peach strip with a solid divider on top, and round the
+     card's bottom corners. `margin-top: auto` pins it to the card's bottom so
+     the band is flush with the lower edge regardless of quote length. */
+  margin: auto -20px -20px;
+  padding: 14px 20px;
+  border-top: 1px solid rgba(212, 52, 0, 0.16);
+  border-radius: 0 0 18px 18px;
+  background: #FFF0E6;
+  font-size: 0.76rem;
+  font-weight: 400;
+  color: $brand-dark;
+
+  /* Sparkle / quote icon in brand orange. */
+  svg {
+    color: $brand;
+    flex-shrink: 0;
+  }
 }
 
 /* ── Dots ───────────────────────────────────────────────────────────────── */
@@ -437,7 +489,7 @@ $muted: #6b5546;
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.6);
   color: $brand-dark;
   box-shadow: 0 2px 8px rgba(191, 118, 66, 0.18);
 }
