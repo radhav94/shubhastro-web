@@ -25,6 +25,9 @@ import { transliterateToLatin } from "./translateText";
 import AIRechargeBanner from "./AIRechargeBanner";
 import AISessionStatus from "./AISessionStatus";
 import { splitTextByURL } from "../../utils/helper/linkPreview";
+import { IoArrowUndo } from "react-icons/io5";
+import MessageTicks from "../UI/chat/MessageTicks";
+import ReplyPreview from "../UI/chat/ReplyPreview";
 
 // Served from the CDN rather than bundled, so it isn't emitted into /assets and
 // isn't re-downloaded per deploy hash. The CDN copy is also the optimised one
@@ -32,8 +35,10 @@ import { splitTextByURL } from "../../utils/helper/linkPreview";
 const panditAiIcon = "https://assets.shubhastro.ai/images/AiPandit.png";
 
 // Memoized message bubble to avoid re-rendering the entire list on new messages
-const MessageBubble = memo(({ msg, onRetry }) => {
+const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo }) => {
   const isUser = msg.sender === "user";
+  const canReply =
+    typeof onReply === "function" && !msg.isError && (msg.messageId || msg._id);
   // Failed AI replies used to be plain text with nothing to tap, which is what
   // drove the rage clicks seen in Clarity. Offer an explicit retry instead.
   const showRetry = !isUser && msg.isError && typeof onRetry === "function";
@@ -73,6 +78,9 @@ const MessageBubble = memo(({ msg, onRetry }) => {
           msg.isError ? styles.failedBubble : ""
         }`}
       >
+        {msg.replyTo && (
+          <ReplyPreview reply={msg.replyTo} variant="bubble" onJumpTo={onJumpTo} />
+        )}
         {/*
           Linkified rather than printed flat. Readings routinely reference a
           page ("see your full kundli at https://…"), and as plain text that URL
@@ -123,8 +131,20 @@ const MessageBubble = memo(({ msg, onRetry }) => {
             </button>
           )}
           <span className={styles.msgTime}>{msg.time}</span>
+          {isUser && <MessageTicks status={msg.status} variant="onLight" />}
         </div>
       </div>
+      {canReply && (
+        <button
+          type="button"
+          className={styles.replyBtn}
+          onClick={() => onReply(msg)}
+          aria-label="Reply to this message"
+          title="Reply"
+        >
+          <IoArrowUndo size={14} />
+        </button>
+      )}
     </div>
   );
 });
@@ -172,6 +192,12 @@ const PanditAIBubble = ({ hideBubble = false }) => {
   // Set when send is tapped while speech-to-text is still running, so the tap
   // can be completed once the transcription settles instead of being dropped.
   const pendingSendRef = useRef(false);
+  // The message the user is currently composing a reply to (null = normal send).
+  const [replyingTo, setReplyingTo] = useState(null);
+  // messageId -> DOM node + the message briefly flashed after jumping to it.
+  const messageNodesRef = useRef({});
+  const [highlightedId, setHighlightedId] = useState(null);
+  const highlightTimerRef = useRef(null);
   const lang = "en-IN";
 
   // Persist open state for reconnect on refresh
@@ -383,10 +409,41 @@ const PanditAIBubble = ({ hideBubble = false }) => {
     if (!outgoing) return false;
     stopListening();
     setInterimText("");
-    sendText(outgoing);
+    // Thread the reply snapshot so the bubble quotes what it answers and the
+    // backend gets replyToId.
+    const replySnapshot = replyingTo
+      ? {
+          messageId: replyingTo.messageId || replyingTo._id,
+          content: replyingTo.text,
+          role: replyingTo.sender === "user" ? "user" : "assistant",
+        }
+      : null;
+    sendText(outgoing, replySnapshot ? { replyTo: replySnapshot } : {});
     setText("");
+    setReplyingTo(null);
     return true;
-  }, [text, sendText, stopListening]);
+  }, [text, sendText, stopListening, replyingTo]);
+
+  const handleReply = useCallback((message) => {
+    setReplyingTo(message);
+    requestAnimationFrame(() => inputRef.current?.focus());
+  }, []);
+
+  const jumpToMessage = useCallback((messageId) => {
+    const node = messageId && messageNodesRef.current[messageId];
+    if (!node) return;
+    node.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedId(messageId);
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = setTimeout(() => setHighlightedId(null), 1600);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    },
+    []
+  );
 
   const handleSend = useCallback(() => {
     /*
@@ -896,11 +953,30 @@ const PanditAIBubble = ({ hideBubble = false }) => {
                     <div className={styles.dateHeader}>
                       <span className={styles.dateText}>{getDateLabel(date)}</span>
                     </div>
-                    {msgs.map((msg) => (
-                      <div key={msg._id} ref={msg._id === lastAiId ? lastAiMsgRef : undefined}>
-                        <MessageBubble msg={msg} onRetry={retryQuestion} />
+                    {msgs.map((msg) => {
+                      const mid = msg.messageId || msg._id;
+                      const isHighlighted = mid && mid === highlightedId;
+                      return (
+                      <div
+                        key={msg._id}
+                        ref={(node) => {
+                          if (msg._id === lastAiId) lastAiMsgRef.current = node;
+                          if (mid) {
+                            if (node) messageNodesRef.current[mid] = node;
+                            else delete messageNodesRef.current[mid];
+                          }
+                        }}
+                        className={isHighlighted ? styles.highlightedMsg : undefined}
+                      >
+                        <MessageBubble
+                          msg={msg}
+                          onRetry={retryQuestion}
+                          onReply={handleReply}
+                          onJumpTo={jumpToMessage}
+                        />
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ));
               })()
@@ -950,6 +1026,19 @@ const PanditAIBubble = ({ hideBubble = false }) => {
 
           {!guestMode && (
           <div className={styles.inputBar}>
+            {replyingTo && (
+              <div className={styles.replyComposer}>
+                <ReplyPreview
+                  reply={{
+                    messageId: replyingTo.messageId || replyingTo._id,
+                    role: replyingTo.sender === "user" ? "user" : "assistant",
+                    content: replyingTo.text,
+                  }}
+                  variant="composer"
+                  onCancel={() => setReplyingTo(null)}
+                />
+              </div>
+            )}
             {!sessionEndedLowBalance && (
             <div className={styles.inputWrapper}>
               <input
