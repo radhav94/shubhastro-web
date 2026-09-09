@@ -59,6 +59,11 @@ const makeAiErrorMessage = (text) => ({
     .toUpperCase(),
 });
 
+// Delivery-status ordering so a later event never downgrades an earlier one
+// (e.g. an out-of-order message:status shouldn't undo a read_ack).
+const STATUS_RANK = { sending: 0, sent: 1, delivered: 2, read: 3 };
+const rankStatus = (status) => STATUS_RANK[status] ?? 0;
+
 const getLanguageMeta = (language) =>
   LANGUAGE_META[language] || {
     code: language?.split("-")?.[0] || DEFAULT_LANGUAGE.code,
@@ -151,8 +156,20 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       historyLoadedRef.current = true;
       const mapped = [...historyData.data].reverse().map((msg) => ({
         _id: msg._id,
+        messageId: msg.messageId || msg._id,
+        seq: typeof msg.seq === "number" ? msg.seq : undefined,
         text: msg.message,
         sender: msg.sender === "user" ? "user" : "ai",
+        // History user messages default to "read" (they've long been seen);
+        // fall back to the server-provided status when present.
+        status: msg.sender === "user" ? msg.status || "read" : msg.status || "sent",
+        replyTo: msg.replyTo
+          ? {
+              messageId: msg.replyTo.messageId,
+              content: msg.replyTo.message ?? msg.replyTo.content,
+              role: msg.replyTo.sender === "user" ? "user" : "assistant",
+            }
+          : null,
         createdAt: msg.createdAt,
         time: new Date(msg.createdAt).toLocaleTimeString([], {
           hour: "2-digit",
@@ -419,7 +436,12 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         const pending = pendingMessageRef.current;
         if (pending) {
           pendingMessageRef.current = null;
-          sendTextRef.current?.(pending.text, { silent: pending.echoed });
+          sendTextRef.current?.(pending.text, {
+            silent: pending.echoed,
+            clientMsgId: pending.clientMsgId,
+            replyTo: pending.replyTo,
+            replyToId: pending.replyToId,
+          });
         } else {
           // Send default "Hi" message with kundli id when chat is accepted with no pending input
           sendTextRef.current?.("Hi", { kundliId: selectedKundli?._id || null, silent: true });
@@ -441,7 +463,12 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         const pending = pendingMessageRef.current;
         if (pending) {
           pendingMessageRef.current = null;
-          sendTextRef.current?.(pending.text, { silent: pending.echoed });
+          sendTextRef.current?.(pending.text, {
+            silent: pending.echoed,
+            clientMsgId: pending.clientMsgId,
+            replyTo: pending.replyTo,
+            replyToId: pending.replyToId,
+          });
         }
       }
     };
@@ -463,11 +490,26 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       const text = data.message || data.response;
       const failed = isFailureReply(data, text);
 
+      // Keep the internal _id unique and client-generated exactly as before
+      // (React keys + lastAiMsgRef scroll depend on it). The server id, when
+      // present, is stored separately for delivery/reply metadata only.
+      const serverMessageId = data.messageId || data._id || null;
+      // Incoming reply snapshot: { messageId, message, sender, type }.
+      const incomingReplyTo = data.replyTo
+        ? {
+            messageId: data.replyTo.messageId,
+            content: data.replyTo.message ?? data.replyTo.content,
+            role: data.replyTo.sender === "user" ? "user" : "assistant",
+          }
+        : null;
+
       const msg = {
         _id: `msg-${Date.now()}-${Math.random()}`,
+        messageId: serverMessageId,
         text,
         sender: "ai",
         isError: failed,
+        replyTo: incomingReplyTo,
         createdAt: new Date().toISOString(),
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
@@ -477,6 +519,23 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       };
       setMessages((prev) => [...prev, msg]);
       setSending(false);
+
+      // Receiver got the message → tell the backend it's delivered, and since
+      // the chat panel is open and in view, immediately mark it read too.
+      // Only when we actually have a server id, so we never emit placeholders.
+      const activeRoomId = roomIdRef.current;
+      if (activeRoomId && voiceSocket.connected && !failed && serverMessageId) {
+        voiceSocket.emit("message:delivered", {
+          roomId: activeRoomId,
+          messageIds: [serverMessageId],
+        });
+        if (typeof data.seq === "number") {
+          voiceSocket.emit("message:read", {
+            roomId: activeRoomId,
+            lastReadSeq: data.seq,
+          });
+        }
+      }
       trackEvent(
         failed ? "ai_pandit_response_failed" : "ai_pandit_response_received",
         { mode: "text" }
@@ -523,10 +582,76 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       setSending(false);
     };
 
+    // Delivery-tick lifecycle for the user's own messages.
+    //   message:ack       → server saved it            → single grey tick (sent)
+    //   message:status    → receiver got it            → double grey tick (delivered)
+    //   message:read_ack  → receiver read it (up to seq) → double blue tick (read)
+    // AI Pandit's backend auto-marks the user's message delivered + read, so
+    // all three fire for this feature with no extra work.
+    const handleAck = (d) => {
+      if (d?.roomId && roomIdRef.current && d.roomId !== roomIdRef.current) return;
+      setMessages((prev) =>
+        prev.map((m) => {
+          // Correlate by clientMsgId (preferred) or the server messageId.
+          const matches =
+            (d?.clientMsgId && m.clientMsgId === d.clientMsgId) ||
+            (d?.messageId && m.messageId === d.messageId);
+          if (!matches || m.sender !== "user") return m;
+          return {
+            ...m,
+            messageId: d.messageId || m.messageId,
+            // Never downgrade a status that's already further along.
+            status: rankStatus(m.status) >= rankStatus("sent") ? m.status : (d.status || "sent"),
+          };
+        })
+      );
+    };
+
+    const handleStatus = (d) => {
+      if (d?.roomId && roomIdRef.current && d.roomId !== roomIdRef.current) return;
+      const ids = d?.messageIds || (d?.messageId ? [d.messageId] : []);
+      const newStatus = d?.status || "delivered";
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.sender !== "user") return m;
+          const matches =
+            (d?.clientMsgId && m.clientMsgId === d.clientMsgId) ||
+            (m.messageId && ids.includes(m.messageId));
+          if (!matches) return m;
+          return rankStatus(newStatus) > rankStatus(m.status)
+            ? { ...m, status: newStatus }
+            : m;
+        })
+      );
+    };
+
+    const handleReadAck = (d) => {
+      if (d?.roomId && roomIdRef.current && d.roomId !== roomIdRef.current) return;
+      const lastReadSeq = d?.lastReadSeq;
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.sender !== "user") return m;
+          // Mark read up to lastReadSeq when a seq is present; otherwise mark
+          // all outstanding user messages read (AI Pandit acks the latest send).
+          const withinRead =
+            typeof lastReadSeq === "number" && typeof m.seq === "number"
+              ? m.seq <= lastReadSeq
+              : true;
+          if (!withinRead) return m;
+          return rankStatus("read") > rankStatus(m.status)
+            ? { ...m, status: "read" }
+            : m;
+        })
+      );
+    };
+
     voiceSocket.on("chat:room", handleChatRoom);
     voiceSocket.on("chat:accepted", handleChatAccepted);
     voiceSocket.on("chat:reconnected", handleReconnected);
     voiceSocket.on("message:recieved", handleMessage);
+    voiceSocket.on("message:ack", handleAck);
+    voiceSocket.on("message:status", handleStatus);
+    voiceSocket.on("message:read_ack", handleReadAck);
     voiceSocket.on("chat:rejected", handleRejected);
     voiceSocket.on("chat:ended", handleChatEnded);
     voiceSocket.on("error", handleError);
@@ -549,6 +674,9 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       voiceSocket.off("chat:accepted", handleChatAccepted);
       voiceSocket.off("chat:reconnected", handleReconnected);
       voiceSocket.off("message:recieved", handleMessage);
+      voiceSocket.off("message:ack", handleAck);
+      voiceSocket.off("message:status", handleStatus);
+      voiceSocket.off("message:read_ack", handleReadAck);
       voiceSocket.off("chat:rejected", handleRejected);
       voiceSocket.off("chat:ended", handleChatEnded);
       voiceSocket.off("error", handleError);
@@ -568,12 +696,25 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
 
       setFollowupQuestions([]);
 
+      // Client-generated id so message:ack can correlate the server messageId
+      // back to this optimistic bubble and flip its tick sent → delivered → read.
+      const clientMsgId = options.clientMsgId || `user-${Date.now()}-${Math.random()}`;
+      // Snapshot of the message being replied to (rendered inside the bubble).
+      const replyTo = options.replyTo || null;
+      const replyToId = options.replyToId || replyTo?.messageId || null;
+
       const currentRoomId = roomIdRef.current;
       if (!currentRoomId) {
         if (trimmedText) {
           // `echoed` records whether the bubble is already on screen, so the
           // flush below doesn't render the same question twice.
-          pendingMessageRef.current = { text: trimmedText, echoed: !options.silent };
+          pendingMessageRef.current = {
+            text: trimmedText,
+            echoed: !options.silent,
+            clientMsgId,
+            replyTo,
+            replyToId,
+          };
           lastQuestionRef.current = trimmedText;
 
           /*
@@ -590,9 +731,12 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
             setMessages((prev) => [
               ...prev,
               {
-                _id: `user-${Date.now()}`,
+                _id: clientMsgId,
+                clientMsgId,
                 text: trimmedText,
                 sender: "user",
+                status: "sending",
+                replyTo,
                 createdAt: new Date().toISOString(),
                 time: new Date()
                   .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true })
@@ -614,9 +758,12 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
 
       if (trimmedText && !options.silent) {
         const userMsg = {
-          _id: `user-${Date.now()}`,
+          _id: clientMsgId,
+          clientMsgId,
           text: trimmedText,
           sender: "user",
+          status: "sending",
+          replyTo,
           createdAt: new Date().toISOString(),
           time: new Date().toLocaleTimeString([], {
             hour: "2-digit",
@@ -642,7 +789,20 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           targetLanguage: selectedLanguage.code,
           targetLanguageName: selectedLanguage.name,
           kundliId,
+          // Delivery-tick + reply metadata (backend threads these through).
+          clientMsgId,
+          replyToId,
         });
+        // The socket accepted it → advance the optimistic bubble off the clock
+        // to a single tick immediately, so it never lingers on "sending" while
+        // the AI composes. message:ack/status/read_ack then upgrade it.
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.clientMsgId === clientMsgId && m.sender === "user" && rankStatus(m.status) < rankStatus("sent")
+              ? { ...m, status: "sent" }
+              : m
+          )
+        );
       } else {
         toast.error("Connection lost. Please try again.");
         setSending(false);

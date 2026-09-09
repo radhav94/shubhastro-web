@@ -1,0 +1,34 @@
+.ticks {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  flex-shrink: 0;
+
+  svg {
+    display: block;
+  }
+}
+
+// Single / double grey tick (sent, delivered) — on a dark/coloured bubble
+.grey {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+// Single / double grey tick — on a light bubble with dark text
+.greyOnLight {
+  color: rgba(60, 45, 35, 0.45);
+}
+
+// Blue double tick (read)
+.read {
+  color: #34b7f1;
+}
+
+// Clock icon while the message is still being sent
+.sending {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sendingOnLight {
+  color: rgba(60, 45, 35, 0.4);
+}

@@ -54,3 +54,7 @@ export { default as DeleteConfirmationModal } from "../component/UI/modal/delete
   Its one consumer (FaceReadingResult) imports it directly from
   ../component/UI/charts/PieChart, keeping chart.js in that lazy route's chunk.
 */
+
+//chat
+export { default as MessageTicks } from "../component/UI/chat/MessageTicks";
+export { default as ReplyPreview } from "../component/UI/chat/ReplyPreview";
