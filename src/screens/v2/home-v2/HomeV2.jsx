@@ -27,14 +27,13 @@ import { useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscripti
 // CSS background can never be discovered from the initial HTML nor given
 // fetchpriority. Loading them after first paint takes them out of the LCP race
 // entirely so real content wins it.
-const PanditAIBubble = lazy(() => import("../../../component/panditAI/PanditAIBubble"));
-const PanditAIVoiceBubble = lazy(() => import("../../../component/panditAI/PanditAIVoiceBubble"));
+
 import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
-import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, AstrologersByCategorySection, DiscoverMoreSectionV2, LiveSessionCard } from "./sections";
+import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, AstrologersByCategorySection, DiscoverMoreSectionV2, LiveSessionCard, HoroscopeSection, TestimonialsSection } from "./sections";
 
 // Below-the-fold components (static — shared with many other pages)
 import ProfileModals from "../../private/kundli/components/ProfileModals";
@@ -599,19 +598,8 @@ const HomeV2 = () => {
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const pendingWowPathRef = useRef(null);
 
-  // Mount the floating Pandit AI launchers only once the browser is idle, so
-  // they are absent from the DOM while the LCP candidate is being decided.
-  const [showFloatingBubbles, setShowFloatingBubbles] = useState(false);
-  useEffect(() => {
-    const reveal = () => setShowFloatingBubbles(true);
-    if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(reveal, { timeout: 2500 });
-      return () => window.cancelIdleCallback?.(id);
-    }
-    // Safari has no requestIdleCallback.
-    const timer = setTimeout(reveal, 1200);
-    return () => clearTimeout(timer);
-  }, []);
+  // The Pandit AI floating bubbles are now mounted globally in HomeLayout (so
+  // "Ask AI Pandit" works on every route), so they're no longer mounted here.
 
   // ─── Data Fetching ────────────────────────────────────────────────────────
   const dispatch = useDispatch();
@@ -1223,6 +1211,20 @@ const HomeV2 = () => {
           }
         })}
 
+        {/* Daily Horoscope + Testimonials — both driven by the CMS "horoscope"
+            and "testimonials" sections in the home payload; rendered once all
+            sections have paged in so they sit at the end of the home feed. */}
+        {!hasMoreSections && (
+          <>
+            <HoroscopeSection
+              sectionData={(homeSections || []).find((s) => s?.display_type === "horoscope")}
+            />
+            <TestimonialsSection
+              sectionData={(homeSections || []).find((s) => s?.display_type === "testimonials")}
+            />
+          </>
+        )}
+
         {/*
           Trigger for the next page of CMS sections. Zero-height and aria-hidden:
           it carries no content, it only tells the IntersectionObserver above that
@@ -1253,12 +1255,9 @@ const HomeV2 = () => {
         astrologer={hookSelectedAstrologer}
         connectionType={pendingConnectionType || "chat"}
       />
-      {showFloatingBubbles && (
-        <Suspense fallback={null}>
-          <PanditAIBubble />
-          <PanditAIVoiceBubble />
-        </Suspense>
-      )}
+      {/* Pandit AI bubbles are now mounted globally in HomeLayout, so they are
+          not rendered here — that would double-mount them (two `panditai:ask`
+          listeners) on the home page. */}
       <HomeIntroPopup />
     </>
   );

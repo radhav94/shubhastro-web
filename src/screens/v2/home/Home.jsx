@@ -14,7 +14,7 @@ import { renderSection, sortSectionsByOrder } from "./utils/sectionMapper";
 import styles from "./Home.module.scss";
 import {ProfileManager} from "../../../component/UI/Profile";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
-import PanditAIBubble from "../../../component/panditAI/PanditAIBubble";
+
 import { getToken } from "../../../utils/token";
 
 const Home = () => {
@@ -254,7 +254,8 @@ const Home = () => {
 
 
 
-      <PanditAIBubble />
+      {/* PanditAIBubble is now mounted globally in HomeLayout, so it's not
+          rendered here (avoids a double-mount / duplicate panditai:ask listener). */}
 
       {/* Connect Astrologer Popup - COMMENTED OUT: Now skipping popup and directly initiating connections */}
       {/* {isConnectPopupOpen && selectedAstrologer && (
