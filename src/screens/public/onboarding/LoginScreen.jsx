@@ -334,7 +334,7 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
                 <span className={styles.rupeeSymbol}>₹</span>
                 {signupBonus}
               </h1>
-              <p className={styles.rechargeLabel}>RECHARGE</p>
+              <p className={styles.rechargeLabel}>FREE RECHARGE BONUS</p>
               <p className={styles.forNewSignups}>FOR NEW SIGN UPS</p>
             </div>
           </div>

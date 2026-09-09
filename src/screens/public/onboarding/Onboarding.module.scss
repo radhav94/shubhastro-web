@@ -1846,7 +1846,7 @@
   background-repeat: no-repeat;
   background-size: cover;
   box-shadow: 0px 0px 5px #0002;
-  padding: 10px 36px 36px 36px;
+  padding: 10px 16px;
   gap: 0px;
   position: relative;
   overflow: hidden;
@@ -1854,9 +1854,6 @@
     gap: 10px;
     padding: 16px;
     width: 94%;
-  }
-  @media (height <= 641px) {
-    padding: 10px 16px 10px 16px;
   }
 }
 
@@ -1879,7 +1876,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 420px;
+  width: 520px;
   max-width: 100%;
 
   @media (width <= 900px) {
@@ -1923,8 +1920,8 @@
 }
 
 .giftBox {
-  width: 150px;
-  height: 150px;
+  width: 100px;
+  height: 100px;
   flex-shrink: 0;
 
   img {
@@ -1933,9 +1930,13 @@
     object-fit: contain;
   }
 
-  @media (max-width: 480px) {
-    width: 90px;
-    height: 90px;
+  @media (max-width: 767px) {
+    width: 80px;
+    height: 80px;
+  }
+  @media (max-width: 360px) {
+    width: 70px;
+    height: 70px;
   }
 }
 
@@ -1965,7 +1966,7 @@
 }
 
 .rechargeLabel {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 600;
   color: #F75801;
   margin: 0;
@@ -1975,7 +1976,12 @@
   text-box-edge: cap alphabetic;
 
   @media (max-width: 767px) {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    line-height: 24px;
+  }
+  @media (max-width: 390px) {
+    font-size: 1.2rem;
+    line-height: 20px;
   }
 }
 
@@ -1986,20 +1992,16 @@
   margin: 4px 0 0;
   letter-spacing: 1px;
   @media (max-width: 767px) {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 }
 
 .featureBadges {
   display: flex;
-  // justify-content: space-around;
-  // gap: 20px;
-  margin: 4px 0 0px 0;
   width: 100%;
   position: relative;
-  padding-top: 30px;
+  padding-top: 20px;
   @media (max-width: 767px) {
-    margin: 0px;
     padding-top: 21px;
   }
 }
@@ -2099,7 +2101,7 @@
   height: 52px;
   margin-top: 8px;
   width: 100%;
-  max-width: 420px;
+  // max-width: 520px;
   transition: border-color 0.2s;
 
   &:focus-within {
@@ -2236,7 +2238,7 @@
   justify-content: center;
   gap: 8px;
   width: 100%;
-  max-width: 420px;
+  // max-width: 420px;
   height: 52px;
   padding: 0 24px;
   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
