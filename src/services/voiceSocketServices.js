@@ -52,6 +52,14 @@ const CALL_EVENTS = [
   "warning",
   "error",
   "message:recieved",
+  // WhatsApp-style chat protocol (server → client)
+  "message:ack",
+  "message:received",
+  "message:status",
+  "message:read_ack",
+  "message:undelivered_batch",
+  "message:starred",
+  "message:unstarred",
   "return_call_room",
   "live:astrologer_status",
   "live:blocked",
@@ -297,4 +305,38 @@ voiceSocket.on("call:room", (data) => {
 });
 voiceSocket.on("chat:room", (data) => {
   if (data?.roomId) claimRoom(data.roomId, "chat");
+});
+
+/* ================= WHATSAPP-STYLE CHAT: OFFLINE DELIVERY ================= */
+// When this client reconnects after being offline, the server pushes all
+// messages that were sent while we were away via `message:undelivered_batch`.
+// We MUST confirm delivery for them immediately (guide §8) so the sender's
+// ticks advance to ✓✓. This is a global concern — it must fire regardless of
+// which page is mounted — so it lives here at the socket-service level.
+//
+// The per-room chat UI (useChatWindow) separately listens to the same event to
+// render the messages; this handler only handles the delivery ACK side-effect.
+voiceSocket.on("message:undelivered_batch", (data) => {
+  const messages = data?.messages || [];
+  if (!messages.length) return;
+
+  // Group message ids by room, then confirm delivery per room.
+  const byRoom = messages.reduce((acc, msg) => {
+    const roomId = msg?.roomId;
+    const id = msg?._id || msg?.messageId;
+    if (!roomId || !id) return acc;
+    (acc[roomId] = acc[roomId] || []).push(id);
+    return acc;
+  }, {});
+
+  Object.entries(byRoom).forEach(([roomId, messageIds]) => {
+    if (!messageIds.length) return;
+    console.log(
+      "[VoiceSocket] 📦 undelivered_batch → confirming delivery for",
+      messageIds.length,
+      "message(s) in room",
+      roomId,
+    );
+    voiceSocket.emit("message:delivered", { roomId, messageIds });
+  });
 });

@@ -515,6 +515,11 @@ $floating-button-gap: 14px;
   min-width: 80px;
   padding: $spacing-xl $spacing-xxxl;
   padding-bottom: $message-gap;
+  /* Reserve space in the top-right for the action (⋮) trigger so it never
+     overlaps the message text — on ANY device. Declared on the base bubble
+     (not just sender/receiver) so responsive `padding` overrides below keep
+     the reservation instead of resetting it. */
+  padding-right: 36px;
   border-radius: 18px;
   display: flex;
   flex-direction: column;
@@ -576,6 +581,235 @@ $floating-button-gap: 14px;
 .checkmark {
   font-size: 16px;
   color: $text-timestamp;
+}
+
+/* ✓✓ blue read tick */
+.checkRead {
+  color: #34b7f1;
+}
+
+/* ⚠ failed send tick */
+.checkFailed {
+  color: #e53935;
+}
+
+.retryButton {
+  background: none;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* ==================== REPLY QUOTE (inside bubble) ==================== */
+.replyQuote {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  background: rgba(247, 88, 1, 0.06);
+  border-left: 3px solid #f75801;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+
+  .replyQuoteSender {
+    font-size: 12px;
+    font-weight: 600;
+    color: #f75801;
+  }
+
+  .replyQuoteText {
+    font-size: 12px;
+    color: $text-timestamp;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+}
+
+.starBadge {
+  font-size: 11px;
+  color: #f5b301;
+}
+
+/* ==================== MESSAGE ACTION MENU (reply / star) ==================== */
+.msgActionsWrap {
+  position: absolute;
+  /* Anchor the trigger to the TOP of the bubble (not vertically centered), so
+     on tall messages it stays up top instead of floating in the middle.
+     No `transform` here — it would become the containing block for the
+     fixed-position backdrop and stop it from covering the viewport. */
+  top: 4px;
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Sender bubbles sit on the right; put the trigger just outside their LEFT
+   edge so it never overlaps the message text. */
+/* Sent messages: keep the trigger on the RIGHT. The sender avatar sits just
+   outside the bubble on the right, so there's no room outside — place it in the
+   bubble's top-right corner instead (the bubble reserves top-right padding
+   below so text never slides under it). */
+.senderBubble .msgActionsWrap {
+  right: 4px;
+}
+
+/* Received messages: same as sent — trigger in the bubble's top-right corner. */
+.receiverBubble .msgActionsWrap {
+  right: 4px;
+}
+
+.msgActionTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.06);
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  line-height: 1;
+  font-size: 16px;
+  font-weight: 700;
+  color: $text-primary;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, background 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.msgBubble:hover .msgActionTrigger {
+  opacity: 1;
+}
+
+/* Touch devices have no hover — keep the trigger clearly visible. */
+@media (hover: none) {
+  .msgActionTrigger {
+    opacity: 0.85;
+  }
+}
+
+.msgActionBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.msgActionMenu {
+  position: absolute;
+  top: 28px;
+  z-index: 50;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  min-width: 130px;
+  display: flex;
+  flex-direction: column;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    padding: 8px 10px;
+    font-size: 13px;
+    color: $text-primary;
+    cursor: pointer;
+    border-radius: 6px;
+    text-align: left;
+
+    &:hover {
+      background: rgba(247, 88, 1, 0.08);
+    }
+
+    svg {
+      color: #f75801;
+      font-size: 13px;
+    }
+  }
+}
+
+/* Open the menu toward screen center so it never overflows the viewport edge.
+   Sent bubbles hug the RIGHT edge → open the menu leftward (right-aligned).
+   Received bubbles hug the LEFT edge → open the menu rightward (left-aligned),
+   otherwise a short bubble near the left edge clips the menu off-screen. */
+.senderBubble .msgActionMenu {
+  right: 0;
+}
+
+.receiverBubble .msgActionMenu {
+  left: 0;
+}
+
+/* Briefly flash a message that was scrolled to from a reply preview */
+.messageHighlight {
+  animation: replyFlash 1.4s ease;
+}
+
+@keyframes replyFlash {
+  0%, 100% { background: transparent; }
+  30% { background: rgba(247, 88, 1, 0.12); }
+}
+
+/* ==================== REPLY COMPOSE BAR (above input) ==================== */
+.replyComposeBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #fff5ee;
+  border-left: 3px solid #f75801;
+  border-radius: 8px;
+  margin: 0 12px 6px;
+  padding: 8px 10px;
+}
+
+.replyComposeContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.replyComposeSender {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f75801;
+}
+
+.replyComposeText {
+  font-size: 13px;
+  color: $text-timestamp;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.replyComposeClose {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: $text-timestamp;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 2px 6px;
 }
 
 /* ==================== MEDIA MESSAGE TYPES ==================== */
@@ -1532,11 +1766,10 @@ $floating-button-gap: 14px;
     max-width: 85%;
     padding: $spacing-lg $spacing-xl;
     padding-bottom: $message-gap;
+    /* Keep reserving room for the action trigger — the shorthand `padding`
+       above resets it, so re-declare it here for mobile. */
+    padding-right: 36px;
     min-width: 70px;
-  }
-
-  .senderBubble {
-    // padding-right: 50px; /* Mobile: smaller space for timestamp */
   }
 
   .msgTime {
