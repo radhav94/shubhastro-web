@@ -340,3 +340,89 @@ voiceSocket.on("message:undelivered_batch", (data) => {
     voiceSocket.emit("message:delivered", { roomId, messageIds });
   });
 });
+
+/* ============ WHATSAPP-STYLE CHAT: LIVE DELIVERY CONFIRMATION ============ */
+// A live message the other party sends arrives via `message:received` (guide
+// §3/§4). The recipient MUST immediately emit `message:delivered` so the
+// sender's tick advances to ✓✓ (delivered).
+//
+// The per-room chat UI (useChatWindow) already confirms delivery when the chat
+// screen is mounted, but a message can arrive while the customer is on ANY
+// other page — that's the case where only the notification banner shows. In
+// that situation nothing was confirming delivery, so the sender's tick stalled
+// at ✓ (sent). This global handler closes that gap: it fires regardless of
+// which page is mounted. Delivery ACKs are idempotent server-side, so the
+// occasional double-confirm (global + mounted chat window) is harmless.
+//
+// We only confirm delivery for the OTHER party's messages — never for the echo
+// of our own sent message.
+//
+// IMPORTANT: the server currently pushes the LEGACY `message:recieved` (typo)
+// event to off-screen clients (it's what drives the global notification
+// banner), and only sometimes the structured `message:received`. We therefore
+// confirm delivery on BOTH so the sender's tick advances even when only the
+// legacy event fires. A short-lived dedupe set prevents a double emit when both
+// events fire for the same message (harmless anyway — the server ACK is
+// idempotent — but avoids redundant traffic).
+const confirmedDeliveryGlobal = new Set();
+
+// Resolve the room id for an incoming message. The structured event carries
+// `roomId`, but the legacy `message:recieved` payload sometimes omits it — fall
+// back to the active chat session and finally the persisted chat state so a
+// message received while off the chat screen can still be confirmed.
+const resolveRoomId = (data) => {
+  if (data?.roomId) return data.roomId;
+  if (activeChatSession?.roomId) return activeChatSession.roomId;
+  try {
+    const persisted = JSON.parse(localStorage.getItem("shubhtalk_active_chat") || "null");
+    if (persisted?.roomId) return persisted.roomId;
+  } catch {
+    /* ignore malformed persisted state */
+  }
+  return null;
+};
+
+const confirmDeliveryFromIncoming = (data) => {
+  if (!data) return;
+  const role = localStorage.getItem("shubhtalk_role");
+  const myRole = role === "ASTROLOGER" ? "astrologer" : "user";
+  // Skip the echo of our own message; only ACK messages from the other party.
+  if (data.sender === myRole) return;
+
+  const roomId = resolveRoomId(data);
+  const messageId = data.messageId || data._id;
+
+  // Diagnostic: surfaces the actual payload shape so we can see WHY a delivery
+  // ACK is/ isn't emitted for a given incoming message.
+  console.log("[VoiceSocket] 📨 incoming message payload:", {
+    sender: data.sender,
+    roomId,
+    messageId,
+    hasRoomId: !!data.roomId,
+    keys: Object.keys(data || {}),
+  });
+
+  if (!roomId || !messageId) {
+    console.warn(
+      "[VoiceSocket] ⚠️ cannot confirm delivery — missing",
+      !roomId ? "roomId" : "",
+      !messageId ? "messageId" : "",
+    );
+    return;
+  }
+
+  // Dedupe repeat emits for the same message id.
+  if (confirmedDeliveryGlobal.has(messageId)) return;
+  confirmedDeliveryGlobal.add(messageId);
+
+  console.log(
+    "[VoiceSocket] 📨 incoming message → confirming delivery for message",
+    messageId,
+    "in room",
+    roomId,
+  );
+  voiceSocket.emit("message:delivered", { roomId, messageIds: [messageId] });
+};
+
+voiceSocket.on("message:received", confirmDeliveryFromIncoming);
+voiceSocket.on("message:recieved", confirmDeliveryFromIncoming);

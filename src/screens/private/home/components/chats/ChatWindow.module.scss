@@ -515,11 +515,6 @@ $floating-button-gap: 14px;
   min-width: 80px;
   padding: $spacing-xl $spacing-xxxl;
   padding-bottom: $message-gap;
-  /* Reserve space in the top-right for the action (⋮) trigger so it never
-     overlaps the message text — on ANY device. Declared on the base bubble
-     (not just sender/receiver) so responsive `padding` overrides below keep
-     the reservation instead of resetting it. */
-  padding-right: 36px;
   border-radius: 18px;
   display: flex;
   flex-direction: column;
@@ -641,120 +636,62 @@ $floating-button-gap: 14px;
   color: #f5b301;
 }
 
-/* ==================== MESSAGE ACTION MENU (reply / star) ==================== */
-.msgActionsWrap {
+/* ==================== MESSAGE REPLY ACTION (hover) ==================== */
+/* A single circular reply button that sits just OUTSIDE the bubble and fades
+   in when the row is hovered. Replaces the old ⋮ trigger + dropdown menu. */
+.replyAction {
   position: absolute;
-  /* Anchor the trigger to the TOP of the bubble (not vertically centered), so
-     on tall messages it stays up top instead of floating in the middle.
-     No `transform` here — it would become the containing block for the
-     fixed-position backdrop and stop it from covering the viewport. */
-  top: 4px;
-  display: flex;
-  align-items: flex-start;
-}
-
-/* Sender bubbles sit on the right; put the trigger just outside their LEFT
-   edge so it never overlaps the message text. */
-/* Sent messages: keep the trigger on the RIGHT. The sender avatar sits just
-   outside the bubble on the right, so there's no room outside — place it in the
-   bubble's top-right corner instead (the bubble reserves top-right padding
-   below so text never slides under it). */
-.senderBubble .msgActionsWrap {
-  right: 4px;
-}
-
-/* Received messages: same as sent — trigger in the bubble's top-right corner. */
-.receiverBubble .msgActionsWrap {
-  right: 4px;
-}
-
-.msgActionTrigger {
+  bottom: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.06);
+  width: 30px;
+  height: 30px;
   border: none;
   border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  line-height: 1;
-  font-size: 16px;
-  font-weight: 700;
-  color: $text-primary;
+  background: #fdece1;
+  color: #f75801;
   cursor: pointer;
-  opacity: 0.55;
-  transition: opacity 0.15s ease, background 0.15s ease;
+  /* Hidden until hover; pointer-events off so it can't be clicked while faded. */
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.85);
+  transition: opacity 0.15s ease, transform 0.15s ease, background 0.15s ease;
+
+  svg {
+    font-size: 14px;
+  }
 
   &:hover,
   &:focus-visible {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.1);
+    background: #fadfce;
   }
 }
 
-.msgBubble:hover .msgActionTrigger {
+/* Received bubbles hug the LEFT → place the reply icon just outside the RIGHT. */
+.receiverBubble .replyAction {
+  right: -38px;
+}
+
+/* Sent bubbles hug the RIGHT → place the reply icon just outside the LEFT. */
+.senderBubble .replyAction {
+  left: -38px;
+}
+
+/* Reveal on hover of the whole message row. */
+.messageWrapper:hover .replyAction {
   opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
 }
 
-/* Touch devices have no hover — keep the trigger clearly visible. */
+/* Touch devices have no hover — keep the reply icon visible and tappable. */
 @media (hover: none) {
-  .msgActionTrigger {
-    opacity: 0.85;
+  .replyAction {
+    opacity: 0.9;
+    pointer-events: auto;
+    transform: scale(1);
   }
-}
-
-.msgActionBackdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-}
-
-.msgActionMenu {
-  position: absolute;
-  top: 28px;
-  z-index: 50;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
-  padding: 4px;
-  min-width: 130px;
-  display: flex;
-  flex-direction: column;
-
-  button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: none;
-    border: none;
-    padding: 8px 10px;
-    font-size: 13px;
-    color: $text-primary;
-    cursor: pointer;
-    border-radius: 6px;
-    text-align: left;
-
-    &:hover {
-      background: rgba(247, 88, 1, 0.08);
-    }
-
-    svg {
-      color: #f75801;
-      font-size: 13px;
-    }
-  }
-}
-
-/* Open the menu toward screen center so it never overflows the viewport edge.
-   Sent bubbles hug the RIGHT edge → open the menu leftward (right-aligned).
-   Received bubbles hug the LEFT edge → open the menu rightward (left-aligned),
-   otherwise a short bubble near the left edge clips the menu off-screen. */
-.senderBubble .msgActionMenu {
-  right: 0;
-}
-
-.receiverBubble .msgActionMenu {
-  left: 0;
 }
 
 /* Briefly flash a message that was scrolled to from a reply preview */

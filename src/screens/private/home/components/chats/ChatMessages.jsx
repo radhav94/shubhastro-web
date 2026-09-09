@@ -41,7 +41,6 @@ const TickIndicator = ({ status }) => {
 const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, customerName, onScroll, isLoadingMore, onMessageAction, onReply, onRetry, onReplyPreviewClick }) => {
   const [iframeSrc, setIframeSrc] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [actionMenuFor, setActionMenuFor] = useState(null); // key of message with open action menu
   const navigate = useNavigate();
 
   const getFileIcon = (filename) => {
@@ -347,7 +346,6 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
             {msgs.map((msg, i) => {
               const msgKey = msg.clientMsgId || msg.messageId || `${date}-${i}-${msg.time}`;
               const isFailed = msg.status === MESSAGE_STATUS.FAILED;
-              const menuOpen = actionMenuFor === msgKey;
               // Reply / star only make sense once the message has a server id.
               const canAct = !!msg.messageId;
               return (
@@ -443,31 +441,17 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
                     )}
                   </div>
 
-                  {/* Message action trigger + menu (reply) */}
+                  {/* Reply action — revealed on bubble hover (no extra menu) */}
                   {canAct && (
-                    <div className={styles.msgActionsWrap}>
-                      <button
-                        type="button"
-                        className={styles.msgActionTrigger}
-                        aria-label="Message options"
-                        onClick={() => setActionMenuFor(menuOpen ? null : msgKey)}
-                      >
-                        ⋮
-                      </button>
-                      {menuOpen && (
-                        <>
-                          <div className={styles.msgActionBackdrop} onClick={() => setActionMenuFor(null)} />
-                          <div className={styles.msgActionMenu}>
-                            <button
-                              type="button"
-                              onClick={() => { onReply?.(msg); setActionMenuFor(null); }}
-                            >
-                              <FaReply /> Reply
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                    <button
+                      type="button"
+                      className={styles.replyAction}
+                      aria-label="Reply"
+                      title="Reply"
+                      onClick={() => onReply?.(msg)}
+                    >
+                      <FaReply />
+                    </button>
                   )}
                 </div>
                 {msg.isSender && (
