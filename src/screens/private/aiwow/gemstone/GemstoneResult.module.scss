@@ -377,7 +377,10 @@
   }
   .sidebar {
     grid-column: 2;
-    grid-row: 2 / span 2;
+    /* Align the "Your Gemstone" card with the tab CONTENT (Personalized
+       Insights), i.e. start on the same row as .main (row 3) rather than up at
+       the tabs pill (row 2). */
+    grid-row: 3;
   }
 
   @media (max-width: 1024px) {
@@ -398,6 +401,7 @@
 
 .sidebar {
   align-self: stretch;
+  margin-top: 30px;
 }
 
 .sideCard {
