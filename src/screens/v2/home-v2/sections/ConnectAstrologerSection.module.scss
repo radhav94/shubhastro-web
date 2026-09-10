@@ -1,0 +1,444 @@
+$brand: #f75801;
+$brand-dark: #d43400;
+$ink: #1c1109;
+$muted: #6b5546;
+
+.banner {
+  position: relative;
+  overflow: hidden;
+  margin: 28px 0;
+  padding: 36px 40px;
+  border-radius: 24px;
+  /* Peach gradient fill with the decorative wave art overlaid in the top-right
+     and bottom-left corners (same assets as the old banner). The gradient is a
+     `background` (paints under the images), the PNGs are `background-image`. */
+  background: linear-gradient(120deg, #fdf1e7 0%, #fbe0cb 100%);
+  background-image: url("../../../../assets/images/dont-wait-top-bg.png"),
+    url("../../../../assets/images/dont-wait-bottom-bg.png"),
+    linear-gradient(120deg, #fdf1e7 0%, #fbe0cb 100%);
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-position: top right, bottom left, center;
+  background-size: auto, auto, cover;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+
+  display: grid;
+  /* Left copy 60%, best-match card 40% (fr units so the gap is subtracted
+     correctly and the columns can shrink). */
+  grid-template-columns: minmax(0, 60fr) minmax(0, 40fr);
+  gap: 40px;
+  align-items: center;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 24px 18px;
+    border-radius: 18px;
+    margin: 20px 0;
+  }
+}
+
+/* ── Left column ────────────────────────────────────────────────────────── */
+.left {
+  min-width: 0;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: #fff;
+  color: $ink;
+  font-size: 0.74rem;
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(191, 118, 66, 0.12);
+  margin-bottom: 16px;
+
+  svg { color: $brand; }
+}
+
+.heading {
+  margin: 0 0 10px;
+  font-size: 1.9rem;
+  line-height: 1.15;
+  font-weight: 800;
+  color: $ink;
+
+  @media (max-width: 767px) {
+    font-size: 1.4rem;
+  }
+}
+
+.headingAccent {
+  color: $brand;
+}
+
+.desc {
+  margin: 0 0 18px;
+  max-width: 460px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: $muted;
+
+  @media (max-width: 767px) {
+    font-size: 0.82rem;
+  }
+}
+
+/* Category filter pills. */
+.cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid #f1d6c2;
+  background: #fff;
+  color: $ink;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: $brand;
+  }
+}
+
+.catActive {
+  background: linear-gradient(90deg, $brand 0%, $brand-dark 100%);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(212, 52, 0, 0.28);
+}
+
+/* Stat strip: avatar cluster + count + specialise line. */
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  max-width: 655px;
+
+  @media (max-width: 767px) {
+    gap: 12px;
+    padding: 12px;
+  }
+}
+
+.statAvatars {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.statAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  background: #f0e0d4;
+
+  &:not(:first-child) {
+    margin-left: -16px;
+  }
+
+  @media (max-width: 767px) {
+    width: 40px;
+    height: 40px;
+
+    &:not(:first-child) {
+      margin-left: -12px;
+    }
+  }
+}
+
+.statCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-left: -16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #fff;
+  color: $brand-dark;
+  font-size: 0.78rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(191, 118, 66, 0.15);
+
+  @media (max-width: 767px) {
+    width: 40px;
+    height: 40px;
+    margin-left: -12px;
+    font-size: 0.68rem;
+  }
+}
+
+.statText {
+  flex: 1;
+  min-width: 0;
+}
+
+.statTitle {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+.statTitle .accent {
+  color: $brand;
+}
+
+.statSub {
+  margin: 2px 0 0;
+  font-size: 0.74rem;
+  color: $muted;
+}
+
+.statMeta {
+  margin: 4px 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.statMetaDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+
+/* ── Right column: best-match card ──────────────────────────────────────── */
+.right {
+  min-width: 0;
+}
+
+.matchLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: $brand;
+  white-space: nowrap;
+
+  svg { color: $brand; flex-shrink: 0; }
+
+  /* Divider line trailing the label, as in the reference. */
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #f0ddce;
+    margin-left: 4px;
+  }
+}
+
+.matchLabel .accent {
+  color: $brand;
+}
+
+.card {
+  padding: 20px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid #f3e2d6;
+  box-shadow: 0 10px 28px rgba(191, 118, 66, 0.12);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cardAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top;
+  flex-shrink: 0;
+  background: #f0e0d4;
+}
+
+.cardInfo {
+  min-width: 0;
+  flex: 1;
+}
+
+.cardName {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+.cardSpecs {
+  margin: 2px 0 6px;
+  font-size: 0.8rem;
+  color: $muted;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Rating · price meta line (★ 4.9 · ₹25/min). */
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $ink;
+}
+
+.cardMetaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  /* Dot separator between meta items. */
+  & + .cardMetaItem::before {
+    content: "·";
+    margin-right: 8px;
+    color: $muted;
+    font-weight: 400;
+  }
+}
+
+.cardStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.online {
+  color: #16a34a;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.offline {
+  color: #6b7280;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+}
+
+.cardStatusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.cardActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.chatBtn,
+.callBtn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 46px;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  /* Mobile: shorter, non-bold buttons. */
+  @media (max-width: 767px) {
+    height: 40px;
+    font-weight: 400;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.chatBtn {
+  background: #fff;
+  border: 1.5px solid $brand;
+  color: $brand;
+}
+
+.callBtn {
+  background: linear-gradient(90deg, $brand 0%, $brand-dark 100%);
+  border: none;
+  color: #fff;
+}
+
+/* Trust row — inside the card, under a top divider, with vertical dividers
+   between the three items (as in the reference). */
+.trust {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #f0ddce;
+}
+
+.trustItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: $ink;
+
+  svg { flex-shrink: 0; }
+
+  /* Vertical divider between items. */
+  & + .trustItem {
+    border-left: 1px solid #f0ddce;
+  }
+
+  @media (max-width: 767px) {
+    padding: 0 10px;
+    font-size: 0.78rem;
+    gap: 7px;
+  }
+}

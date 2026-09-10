@@ -119,6 +119,21 @@ const buildSigns = (sectionData) => {
   });
 };
 
+/* Render `text` with every occurrence of `word` (case-insensitive) wrapped in
+   the orange .titleAccent span — used so the CMS title accents "Horoscope"
+   like the hardcoded fallback. */
+const accentWord = (text, word) => {
+  const str = String(text || "");
+  const parts = str.split(new RegExp(`(${word})`, "ig"));
+  return parts.map((part, i) =>
+    part.toLowerCase() === word.toLowerCase() ? (
+      <span key={i} className={styles.titleAccent}>{part}</span>
+    ) : (
+      part
+    )
+  );
+};
+
 const HoroscopeSection = ({ sectionData }) => {
   const [period, setPeriod] = useState("today");
   const [signId, setSignId] = useState(1);
@@ -255,7 +270,7 @@ const HoroscopeSection = ({ sectionData }) => {
           </span>
           <h2 className={styles.title}>
             {heading ? (
-              heading
+              accentWord(heading, "Horoscope")
             ) : (
               <>
                 Your Daily <span className={styles.titleAccent}>Horoscope</span> Reading

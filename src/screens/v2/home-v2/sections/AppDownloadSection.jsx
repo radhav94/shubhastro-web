@@ -3,11 +3,13 @@ import {
   APP_STORE_URL,
 } from "../../../../utils/helper/appStoreLinks";
 import { trackEvent } from "../../../../utils/analytics";
-// The whole right-side visual — both phone mockups and the two floating feature
-// cards ("Daily guidance" / "Personalized Insights") — baked into one image.
-import appVisual from "../../../../assets/home/app-visual.png";
-import appVisualMobile from "../../../../assets/home/app-visual-mobile.png";
 import styles from "./AppDownloadSection.module.scss";
+
+// The whole right-side visual — both phone mockups and the two floating feature
+// cards ("Daily guidance" / "Personalized Insights") — baked into one image,
+// served from the CDN (desktop + mobile crops).
+const appVisual = "https://assets.shubhastro.ai/images/desktop-get-app.png";
+const appVisualMobile = "https://assets.shubhastro.ai/images/mobile-get-app.png";
 
 /*
   Home "download the app" hero banner.
