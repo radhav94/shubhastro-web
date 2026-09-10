@@ -205,17 +205,15 @@
       }
     }
 
+    /*  Wider & Premium Card.
+        The card styling lives directly on the <Link> now — the inner
+        `.rechargeAmount` div was removed, so the anchor IS the card. Every
+        property (dimensions, border, hover, active, child text styles) moved
+        here from the old `.rechargeAmount` rule; layout is unchanged. */
     .linkWrapper {
+      display: block;
+      width: 100%;
       text-decoration: none;
-      width: 100%;
-    }
-
-    .rechargeAmountWrapper {
-      width: 100%;
-    }
-
-    /*  Wider & Premium Card */
-    .rechargeAmount {
       border: 1px solid var(--cta-border-50, rgba(229, 99, 41, 0.50));
       background: var(--card-2, #FFF5EC);
       border-radius: 14px;
@@ -225,22 +223,6 @@
       transition: 0.25s ease;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
       min-height: 91px;
-
-      .planName {
-        font-size: 12px;
-        font-weight: 600;
-        color: #888;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        margin-bottom: 4px;
-      }
-
-      .strikePrice {
-        font-size: 13px;
-        color: #aaa;
-        text-decoration: line-through;
-        display: block;
-      }
 
       .price {
         font-size: 18px;

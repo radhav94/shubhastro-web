@@ -373,11 +373,11 @@
   
 }
 
-.horoscope-old-page .category-item {
+/* .horoscope-old-page .category-item {
   height: 120px;
   width: 100%;
   
-}
+} */
 
 .horoscope-old-page .category-card {
   border-radius: var(--Radius-4, 12px);
@@ -385,8 +385,8 @@
   background: #FFF4E3;
   backdrop-filter: blur(12px);
   padding: 0;
+  height: 120px;
   width: 100%;
-  height: 100%;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
@@ -973,7 +973,7 @@
 }
 
 @media screen and (width <= 1024px) {
-.horoscope-old-page .category-item {
+.horoscope-old-page .category-card {
     height: 80px;
     width: 90px;
     flex-shrink: 0;
