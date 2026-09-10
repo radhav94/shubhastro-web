@@ -6,7 +6,7 @@ import AudioMessageWrapper from "./AudioMessageWrapper";
 import { GrReactjs } from "react-icons/gr";
 import { IoCheckmark, IoCheckmarkDone, IoTimeOutline, IoAlertCircleOutline } from "react-icons/io5";
 import { FaFileAlt, FaStar, FaReply } from "react-icons/fa";
-import { MESSAGE_STATUS } from "../../../../../utils/helper/chatProtocol";
+import { MESSAGE_STATUS, replyPreviewLabel } from "../../../../../utils/helper/chatProtocol";
 import PdfIcon from "../../../../../assets/chat/PDF.svg";
 import DocIcon from "../../../../../assets/chat/DOC.svg";
 import XlsIcon from "../../../../../assets/chat/XLS.svg";
@@ -375,15 +375,7 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
                         {msg.replyTo.sender === "user" ? "You" : (astrologerName || "Astrologer")}
                       </span>
                       <span className={styles.replyQuoteText}>
-                        {msg.replyTo.type === "image"
-                          ? "📷 Photo"
-                          : msg.replyTo.type === "audio"
-                            ? "🎤 Voice message"
-                            : msg.replyTo.type === "attachment"
-                              ? "📎 Attachment"
-                              : msg.replyTo.type === "kundli"
-                                ? (msg.replyTo.kundliName ? `${msg.replyTo.kundliName}'s Kundli` : "Kundli")
-                                : msg.replyTo.message}
+                        {replyPreviewLabel(msg.replyTo)}
                       </span>
                     </button>
                   )}

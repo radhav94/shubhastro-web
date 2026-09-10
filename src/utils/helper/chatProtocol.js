@@ -114,5 +114,59 @@ export const normalizeReplyTo = (replyTo) => {
     // the name instead of the id (falls back gracefully when absent).
     kundliName: replyTo.kundliName ?? null,
     kundliId: replyTo.kundliId ?? null,
+    // Gift replies keep the parsed gift payload so the quoted preview can show
+    // the gift name (a rendered gift message stores it on `giftData`, not in the
+    // raw `message` string). Falls back gracefully when absent.
+    giftData: replyTo.giftData ?? null,
   };
+};
+
+/**
+ * Turns a reply target (a locally-built message with `text`, or a normalized
+ * `replyTo` snapshot with `message`) into a short, human-readable label for the
+ * quoted preview shown in the compose bar and on the message bubble.
+ *
+ * Non-text messages carry structured payloads in their body: gifts and file
+ * attachments store JSON, so the raw body is not fit to show (that's why a
+ * gift reply used to render `{"text":"...","giftData":{...}}`). This centralizes
+ * the per-type labelling so both preview locations stay in sync.
+ */
+export const replyPreviewLabel = (replyTo) => {
+  if (!replyTo) return "";
+  // Accept both shapes: normalized snapshot (`message`) and raw local msg (`text`).
+  const body = replyTo.message ?? replyTo.text ?? "";
+  switch (replyTo.type) {
+    case "image":
+      return "📷 Photo";
+    case "video":
+      return "🎥 Video";
+    case "audio":
+      return "🎤 Voice message";
+    case "attachment": {
+      // File attachments store `{ url, fileName }`; show the file name if present.
+      try {
+        const parsed = JSON.parse(body);
+        return parsed?.fileName ? `📎 ${parsed.fileName}` : "📎 Attachment";
+      } catch {
+        return "📎 Attachment";
+      }
+    }
+    case "kundli":
+      return replyTo.kundliName ? `${replyTo.kundliName}'s Kundli` : "Kundli";
+    case "gift": {
+      // A rendered gift message keeps the gift name on `giftData.giftName` (the
+      // raw body was already parsed away into `text` + `giftData`). Prefer that;
+      // otherwise parse the JSON body `{ text, giftData: { giftName } }`.
+      if (replyTo.giftData?.giftName) return `🎁 ${replyTo.giftData.giftName}`;
+      try {
+        const parsed = JSON.parse(body);
+        const name = parsed?.giftData?.giftName;
+        return name ? `🎁 ${name}` : "🎁 Gift";
+      } catch {
+        return "🎁 Gift";
+      }
+    }
+    default:
+      return body;
+  }
 };

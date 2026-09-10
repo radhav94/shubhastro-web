@@ -70,7 +70,7 @@ class SocketService {
   }
 
   // USER SEND
-  sendMessage({ roomId, userId, astrologerId, message, kundliId, type = "message" }) {
+  sendMessage({ roomId, userId, astrologerId, message, kundliId, type = "message", replyToId = null }) {
     try {
       if (!voiceSocket.connected)
         throw new Error("Socket not connected, try again.");
@@ -83,6 +83,7 @@ class SocketService {
         astrologerId,
         message,
         type,
+        ...(replyToId ? { replyToId } : {}),
       });
 
       return { success: true };
