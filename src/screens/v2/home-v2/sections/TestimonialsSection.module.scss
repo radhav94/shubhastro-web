@@ -367,26 +367,28 @@ $muted: #6b5546;
     -webkit-text-decoration: none !important;
   }
 
-  /* Decorative opening quote mark inline at the START of the sentence (right
-     before the first word), in brand orange. */
+  /* Decorative opening quote mark — the tabler quote glyph image, inline at the
+     START of the sentence (right before the first word). */
   &::before {
-    content: "\201C";
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 1.4rem;
-    color: $brand;
-    margin-right: 3px;
+    content: "";
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 5px;
     vertical-align: -3px;
+    background: url("../../../../assets/images/quote-mark.png") no-repeat center / contain;
   }
 
-  /* Decorative closing quote mark trailing the text (inline, right after the
-     last word), in brand orange to match the reference. */
+  /* Closing quote mark — same glyph rotated 180°, trailing the text. */
   &::after {
-    content: "\201D";
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 1.4rem;
-    color: $brand;
-    margin-left: 3px;
+    content: "";
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-left: 5px;
     vertical-align: -3px;
+    background: url("../../../../assets/images/quote-mark.png") no-repeat center / contain;
+    transform: rotate(180deg);
   }
 }
 
