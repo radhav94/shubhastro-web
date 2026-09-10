@@ -43,7 +43,7 @@ import RechargeModal from "../../../../../component/recharge-modal/RechargeModal
 import useAstrologerAvailability from "../../../../../utils/hooks/useAstrologerAvailability";
 
 import { getAstrologerImageUrl } from "../../../../../utils/appImages";
-import { sortBySeq, MESSAGE_STATUS, normalizeReplyTo } from "../../../../../utils/helper/chatProtocol";
+import { sortBySeq, MESSAGE_STATUS, normalizeReplyTo, replyPreviewLabel } from "../../../../../utils/helper/chatProtocol";
 const ChatWindow = () => {
   const messagesRef = useRef(null);
   const chatPageRef = useRef(null);
@@ -263,6 +263,24 @@ const ChatWindow = () => {
   const [message, setMessage] = useState("");
   // Message the user is currently replying to (null = normal compose).
   const [replyTarget, setReplyTarget] = useState(null);
+
+  // Mirror of `replyTarget` for async send paths (attachments, voice, gift).
+  // Those callers run inside promises/modals that closed over a stale value, so
+  // they read the ref instead of the state to pick up the reply active at the
+  // moment the user actually hit send.
+  const replyTargetRef = useRef(null);
+  useEffect(() => {
+    replyTargetRef.current = replyTarget;
+  }, [replyTarget]);
+
+  // Consume the current reply target: return the { replyTo } send options (or an
+  // empty object) and clear the reply so the compose bar resets after the send.
+  const consumeReplyOptions = useCallback(() => {
+    const target = replyTargetRef.current;
+    if (!target?.messageId) return {};
+    setReplyTarget(null);
+    return { replyTo: target };
+  }, []);
 
   // Scroll to a quoted message when the user taps a reply preview.
   const scrollToMessage = useCallback((messageId) => {
@@ -627,9 +645,12 @@ const ChatWindow = () => {
 
   const handleSend = (kundli = null) => {
     if (kundli?._id) {
-      isUserSide ? sendMessage(kundli._id, 'kundli', kundli?._id) : astroReply(kundli._id);
+      // Attach the reply target (if any) so a shared Kundli can also be a reply.
+      const kundliReplyOptions = replyTarget?.messageId ? { replyTo: replyTarget } : {};
+      isUserSide ? sendMessage(kundli._id, 'kundli', kundli?._id, kundliReplyOptions) : astroReply(kundli._id);
 
       setMessage("");
+      setReplyTarget(null);
       return;
     }
 
@@ -712,6 +733,9 @@ const ChatWindow = () => {
 
   const [getS3SignedUrl] = useGetS3SignedUrlMutation();
   const sendVoiceMessage = async (blob = null, duration, mimeType) => {
+    // Capture + clear the reply target now (before the async upload) so the
+    // voice note is delivered as a reply and the compose bar resets immediately.
+    const sendOptions = consumeReplyOptions();
     // Upload in background — don't block the chat UI
     (async () => {
       try {
@@ -729,7 +753,7 @@ const ChatWindow = () => {
         // (bytes are unchanged).
         const uploadBlob = new Blob([blob], { type: fileType });
         await uploadFileToS3(uploadUrl, uploadBlob);
-        sendMessage(audioUrl, "audio");
+        sendMessage(audioUrl, "audio", null, sendOptions);
       } catch (err) {
         console.error("Voice upload failed:", err);
         Toast.error("Failed to send voice message");
@@ -739,6 +763,10 @@ const ChatWindow = () => {
   };
 
   const sendFiles = async (blob, meta) => {
+    // Capture + clear the reply target up front so the attachment is delivered
+    // as a reply even though the S3 upload below is async, and the compose bar
+    // resets right away.
+    const sendOptions = consumeReplyOptions();
     // Extract file extension from original name for proper S3 key
     const ext = meta?.name?.split('.').pop();
     const fileType = ext && ext !== meta?.name ? `application/${ext}` : blob.type;
@@ -757,7 +785,7 @@ const ChatWindow = () => {
     const messagePayload = attachType === "image" || attachType === "video" || attachType === "audio"
       ? fileUrl
       : JSON.stringify({ url: fileUrl, fileName: meta?.name || `file.${ext}` });
-    sendMessage(messagePayload, attachType);
+    sendMessage(messagePayload, attachType, null, sendOptions);
     setMessage("");
     console.log("FILE UPLOADED URL:", fileUrl);
   };
@@ -988,15 +1016,7 @@ const ChatWindow = () => {
                       {replyTarget.isSender ? "You" : (astrologerName || fullName || "Astrologer")}
                     </span>
                     <span className={styles.replyComposeText}>
-                      {replyTarget.type === "image"
-                        ? "📷 Photo"
-                        : replyTarget.type === "audio"
-                          ? "🎤 Voice message"
-                          : replyTarget.type === "attachment"
-                            ? "📎 Attachment"
-                            : replyTarget.type === "kundli"
-                              ? (replyTarget.kundliName ? `${replyTarget.kundliName}'s Kundli` : "Kundli")
-                              : replyTarget.text}
+                      {replyPreviewLabel(replyTarget)}
                     </span>
                   </div>
                   <button
@@ -1129,6 +1149,8 @@ const ChatWindow = () => {
           // Refresh wallet balance when modal closes
           refreshWallet();
         }}
+        replyTo={replyTarget}
+        onReplySent={() => setReplyTarget(null)}
         astrologerId={astrologerId}
         astrologerName={fullName}
         roomId={roomId}

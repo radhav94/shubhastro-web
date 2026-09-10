@@ -881,6 +881,20 @@ const AgoraVoiceCalling = ({ callData }) => {
       endCall();
     };
 
+    // CallContext fires this when a SYSTEM-ended call's reconnect fails/times out.
+    // Cancel our grace-period timer (so no stray "Unable to reconnect" toast) and
+    // tear the call down cleanly. CallContext already showed the "Call ended."
+    // toast and opened the review.
+    const handleGlobalCallEnded = () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      setIsReconnecting(false);
+      endCall();
+    };
+    window.addEventListener("global:call:ended", handleGlobalCallEnded);
+
     voiceSocket.on("call:ended", handleCallEnded);
     // voiceSocket.on("call:canceled", handleCallCanceled);
     voiceSocket.on("call:rejected", handleCallRejected);
@@ -907,6 +921,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     voiceSocket.on("call:switch_canceled", handleSwitchCanceled);
 
     return () => {
+      window.removeEventListener("global:call:ended", handleGlobalCallEnded);
       voiceSocket.off("call:ended", handleCallEnded);
       // voiceSocket.off("call:canceled", handleCallCanceled);
       voiceSocket.off("call:rejected", handleCallRejected);
