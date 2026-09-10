@@ -28,6 +28,8 @@
  * do web push at all never download the SDK.
  */
 
+import { isInAppBrowser } from "../utils/deviceInfo";
+
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -58,6 +60,41 @@ const loadMessaging = () => {
 
         if (!isSecureContext || !("Notification" in window) || !("serviceWorker" in navigator)) {
             console.warn("[Firebase] Messaging not available: requires HTTPS or localhost");
+            return null;
+        }
+
+        /*
+         * Never attempt web push inside an embedded browser.
+         *
+         * App.jsx already refuses to call initializeFCM() when isInAppBrowser()
+         * is true, and documents why: in Instagram's / Facebook's Android
+         * WebView both Notification.requestPermission() and
+         * serviceWorker.register() are proxied to native over the host app's
+         * injected JS bridge, Meta's browser does not support web push, and the
+         * call into Java fails.
+         *
+         * But that gate only covered the boot path. Five other call sites reach
+         * requestFCMToken() directly and none of them checked —
+         * GuestKundliAuthModal, OTPScreen, OtpVerification, useTruecallerLogin
+         * and useGuestChatAuth — i.e. every sign-in and guest-auth flow. Those
+         * are exactly the paths an Instagram visitor takes, so the boot gate was
+         * being bypassed by the traffic it was written for.
+         *
+         * Centralising it here rather than at the five call sites means a new
+         * caller cannot forget it.
+         *
+         * Two things this buys beyond not calling a bridge that must fail:
+         * the permission prompt is never attempted where it cannot be granted,
+         * and the Firebase SDK chunk is never downloaded at all for in-app
+         * browser visitors — a meaningful share of traffic here, since it is
+         * mostly Instagram and Facebook ad clicks.
+         *
+         * null is the established "messaging unavailable" return; every caller
+         * already handles it, because it is also what a permission denial
+         * returns.
+         */
+        if (isInAppBrowser()) {
+            console.warn("[Firebase] Messaging skipped: in-app browser cannot support web push");
             return null;
         }
 
