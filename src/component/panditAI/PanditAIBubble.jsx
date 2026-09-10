@@ -950,8 +950,33 @@ const PanditAIBubble = ({ hideBubble = false }) => {
 
           {!guestMode && (
           <div className={styles.inputBar}>
+            {/*
+              The wrapper answers taps the disabled input cannot.
+
+              `.textInput` carries a real `disabled` attribute while
+              `isLoading || chatDisabled`, and a disabled control neither fires
+              a pointer event nor lets one bubble — so tapping the composer
+              during connect, history load or a reconnect did nothing whatsoever.
+              `.textInput:disabled` now sets `pointer-events: none` so the tap
+              lands here instead and gets an answer.
+
+              Buttons are excluded: mic, voice and send are `aria-disabled`
+              precisely so they keep handling their own taps, and they must not
+              be shadowed by this.
+            */}
             {!sessionEndedLowBalance && (
-            <div className={styles.inputWrapper}>
+            <div
+              className={styles.inputWrapper}
+              onClick={(e) => {
+                if (!(isLoading || chatDisabled)) return;
+                if (e.target.closest("button")) return;
+                Toast.info(
+                  chatDisabled
+                    ? "Still reconnecting. Please try again in a moment."
+                    : "Getting your chat ready — one moment."
+                );
+              }}
+            >
               <input
                 ref={inputRef}
                 className={styles.textInput}
