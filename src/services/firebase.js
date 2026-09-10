@@ -78,6 +78,37 @@ const loadMessaging = () => {
 };
 
 /**
+ * Ensures our own /firebase-messaging-sw.js is registered AND active, and
+ * resolves to its registration.
+ *
+ * Why this exists
+ * ---------------
+ * getToken() needs an active service worker. When it is called without an
+ * explicit `serviceWorkerRegistration`, Firebase falls back to auto-registering
+ * its own worker and racing its activation in the same tick as the token
+ * request. That was masked while initializeApp()/getMessaging() ran at module
+ * scope (the eager landing-page import warmed the worker long before any
+ * login), but now that the SDK is loaded on demand the very first
+ * requestFCMToken() during first-time login runs before any worker is active,
+ * so getToken() intermittently returns null / rejects and no token ever reaches
+ * the verify-OTP payload — the device is never registered for push.
+ *
+ * Registering here and awaiting `navigator.serviceWorker.ready` gives getToken()
+ * a settled registration to use, removing the race regardless of call ordering.
+ */
+const ensureServiceWorker = async () => {
+    if (!("serviceWorker" in navigator)) return undefined;
+    try {
+        await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+        // ready resolves only once a worker for this scope is active.
+        return await navigator.serviceWorker.ready;
+    } catch (err) {
+        console.warn("[Firebase] Service worker registration failed:", err?.message);
+        return undefined;
+    }
+};
+
+/**
  * Requests notification permission and returns the FCM token.
  * Returns null if permission denied or messaging unsupported.
  */
@@ -93,7 +124,11 @@ export const requestFCMToken = async () => {
             return null;
         }
 
-        const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+        const serviceWorkerRegistration = await ensureServiceWorker();
+        const token = await getToken(messaging, {
+            vapidKey: VAPID_KEY,
+            ...(serviceWorkerRegistration ? { serviceWorkerRegistration } : {}),
+        });
         if (token) {
             console.log("FCM Token received");
             return token;
@@ -118,7 +153,11 @@ export const requestFCMToken = async () => {
                 for (const reg of registrations) {
                     await reg.update();
                 }
-                const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                const serviceWorkerRegistration = await ensureServiceWorker();
+                const token = await getToken(messaging, {
+                    vapidKey: VAPID_KEY,
+                    ...(serviceWorkerRegistration ? { serviceWorkerRegistration } : {}),
+                });
                 if (token) {
                     console.log("FCM Token received after DB reset");
                     return token;
