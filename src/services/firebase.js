@@ -28,7 +28,7 @@
  * do web push at all never download the SDK.
  */
 
-import { isInAppBrowser } from "../utils/deviceInfo";
+//import { isInAppBrowser } from "../utils/deviceInfo";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -93,10 +93,10 @@ const loadMessaging = () => {
          * already handles it, because it is also what a permission denial
          * returns.
          */
-        if (isInAppBrowser()) {
-            console.warn("[Firebase] Messaging skipped: in-app browser cannot support web push");
-            return null;
-        }
+        // if (isInAppBrowser()) {
+        //     console.warn("[Firebase] Messaging skipped: in-app browser cannot support web push");
+        //     return null;
+        // }
 
         try {
             const [{ initializeApp }, { getMessaging, getToken, onMessage }] = await Promise.all([
