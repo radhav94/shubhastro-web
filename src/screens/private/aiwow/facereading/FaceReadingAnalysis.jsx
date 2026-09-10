@@ -249,7 +249,30 @@ const FaceReadingAnalysis = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={handleBack} disabled={isAnalyzing}>
+          {/*
+            aria-disabled, not `disabled`.
+
+            A disabled control fires no click at all, so while the analysis was
+            running the back arrow — the only visible way off a screen that can
+            sit on "Analysing facial features" for a while — silently absorbed
+            every tap. Dead click on an exit affordance, which is the worst
+            place for one: the visitor concludes the page is stuck.
+
+            Same treatment as "View Result" below: stays tappable, and says why
+            it is not going anywhere yet. The block itself is unchanged.
+          */}
+          <button
+            className={styles.backButton}
+            onClick={() => {
+              if (isAnalyzing) {
+                announceActionNotice('Still reading your face — one moment.');
+                return;
+              }
+              handleBack();
+            }}
+            aria-disabled={isAnalyzing}
+            aria-label="Go back"
+          >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

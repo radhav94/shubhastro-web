@@ -74,9 +74,9 @@ const loadMessaging = () => {
          * call into Java fails.
          *
          * But that gate only covered the boot path. Five other call sites reach
-         * requestFCMToken() directly and none of them checked â€”
+         * requestFCMToken() directly and none of them checked —
          * GuestKundliAuthModal, OTPScreen, OtpVerification, useTruecallerLogin
-         * and useGuestChatAuth â€” i.e. every sign-in and guest-auth flow. Those
+         * and useGuestChatAuth — i.e. every sign-in and guest-auth flow. Those
          * are exactly the paths an Instagram visitor takes, so the boot gate was
          * being bypassed by the traffic it was written for.
          *
@@ -86,7 +86,7 @@ const loadMessaging = () => {
          * Two things this buys beyond not calling a bridge that must fail:
          * the permission prompt is never attempted where it cannot be granted,
          * and the Firebase SDK chunk is never downloaded at all for in-app
-         * browser visitors â€” a meaningful share of traffic here, since it is
+         * browser visitors — a meaningful share of traffic here, since it is
          * mostly Instagram and Facebook ad clicks.
          *
          * null is the established "messaging unavailable" return; every caller

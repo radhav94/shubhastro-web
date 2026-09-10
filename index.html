@@ -403,11 +403,12 @@
        /fonts (see the @font-face block below), so nothing is fetched from
        Google's font CDN and the handshake slot is better left for our own
        origins. -->
-  <!-- Hosts the body background artwork (preloaded below) and `heroBg`
-       ai-suite.png, the homepage LCP candidate. The hero image URL is a
-       hardcoded constant in HomeV2 but is not in the HTML, so it is only
-       requested after the bundle executes and React renders — a warm connection
-       is worth a slot. -->
+  <!-- Hosts the body background artwork (preloaded below) and ai-suite.png, the
+       measured homepage LCP element. That URL lives in a CSS module, so the
+       preload scanner cannot see it; the path-gated preload further down now
+       requests it during head parse instead of waiting for React to render the
+       element. This preconnect is what makes that preload cheap — it warms the
+       TLS handshake before the tag is appended. -->
   <link rel="preconnect" href="https://assets.shubhastro.ai" />
   <!-- App API origin: on the LCP path of every route. crossorigin is required
        for RTK Query's CORS fetches to reuse the connection, and it matches the
@@ -629,10 +630,81 @@
   -->
   <!-- <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new.png" media="(min-width: 768px)" /> -->
   <!-- <link rel="preload" as="image" href="https://assets.shubhastro.ai/main-body-bg-new-mobile.png" media="(max-width: 767px)" /> -->
-  <!-- Removed: an unconditional high-priority preload of images/ai-suite.png.
-       It is the `heroBg` for HomeV2/HomeNew only, so every other route fetched
-       it at fetchpriority="high" and never painted it. index.html is shared by
-       all routes, so re-add it from the home route (not here) if needed. -->
+  <!--
+    LCP image preload for "/" only.
+
+    History: an unconditional high-priority preload of images/ai-suite.png used
+    to live here and was removed, correctly — the asset is only painted by
+    HomeV2/HomeNew, so every other route fetched it at fetchpriority="high" and
+    never used it. The note left behind said to re-add it "from the home route",
+    but that is not possible in a way that helps: the whole point of a preload is
+    to be found by the HTML preload scanner during parse, and anything the home
+    route can do runs after the entry bundle has already downloaded and executed.
+
+    So it comes back here, path-gated, which is the same shape as the two API
+    prefetch blocks above.
+
+    Why it is needed at all
+    -----------------------
+    MEASURED on the live site and on two local production builds, 375px viewport:
+    the homepage LCP element is the `.centerCard` div, whose background is this
+    file. Phase breakdown of a 496ms LCP:
+
+        TTFB              20ms    4.0%
+        Load delay       430ms   86.7%   <-- this
+        Resource load      9ms    1.8%
+        Render delay      37ms    7.5%
+
+    The image is 15,776 B and downloads in 9ms; its bytes are irrelevant. What
+    costs 430ms is that a CSS-module background URL cannot be seen by the preload
+    scanner, so the request does not start until the entry bundle has downloaded,
+    parsed, executed and rendered the element — measured start time 450ms.
+    Preloading moves that discovery to HTML parse time and takes the LCP element
+    off the JavaScript-dependent chain entirely.
+
+    A correction worth recording, because a comment in HomeV2.module.scss
+    (.heroBgImg, ~line 511) states the opposite and drove a change
+    -----------------------------------------------------------------
+    That comment says the asset was converted from an <img> to a CSS background
+    so that it would stop registering as the LCP element, on the premise that "a
+    small background-image inside this card is not treated as an LCP candidate".
+    That premise is incorrect. Per the Largest Contentful Paint API an element
+    with a url() background IS a candidate; the only relevant exclusion is the
+    full-viewport case (which is what legitimately exempts main-body-bg-new.png
+    in the note above, and does not apply to a 230x230 card).
+
+    The conversion therefore did not remove the element from LCP — it is still
+    the measured LCP element — it only hid it from the preload scanner, which
+    made LCP worse. This preload restores what that change cost. Converting the
+    element back to an <img fetchpriority="high"> would make it natively
+    discoverable and let this tag be dropped again, but that touches positioned
+    layout, so it is left as a follow-up rather than bundled in here.
+
+    fetchpriority="high" is deliberate, and is NOT in tension with the
+    "deliberately NOT high" reasoning on the body background above. That artwork
+    is 486 KB, same-origin-adjacent in the connection pool, and provably not the
+    LCP element. This one is 15.8 KB, is the LCP element, and is served from
+    assets.shubhastro.ai — a different origin from the entry bundle, so it is not
+    competing with the JS for the same connections.
+  -->
+  <script>
+    (function () {
+      try {
+        if (window.location.pathname !== "/") return;
+
+        var link = document.createElement("link");
+        link.rel = "preload";
+        link.as = "image";
+        link.href = "https://assets.shubhastro.ai/images/ai-suite.png";
+        // Property, not setAttribute: harmless on engines that lack it, and the
+        // browsers that do support it read it off the property.
+        link.fetchPriority = "high";
+        document.head.appendChild(link);
+      } catch (e) {
+        /* preload is best effort — the stylesheet still requests the image */
+      }
+    })();
+  </script>
 
   <!--
     Self-hosted Poppins.
@@ -937,9 +1009,18 @@
        *
        * @param {string} label  Name used in debug logs, e.g. "GTM".
        * @param {function} loadScript  Injects the third-party script element.
+       * @param {object} [opts]  Optional.
+       * @param {boolean} [opts.requireAllowedHost=true]  When false, schedule on
+       *   every host instead of production only. Exists for Branch, which has
+       *   never been host-gated — it is deliberately not given one here, because
+       *   adding a gate would stop it loading on dev and stage and that is a
+       *   behaviour change unrelated to load timing. Everything else leaves this
+       *   alone and stays production-only.
        */
-      window.__deferTagScript__ = function (label, loadScript) {
-        if (!window.__analyticsHostAllowed__) {
+      window.__deferTagScript__ = function (label, loadScript, opts) {
+        var requireAllowedHost = !opts || opts.requireAllowedHost !== false;
+
+        if (requireAllowedHost && !window.__analyticsHostAllowed__) {
           log(label, "Skipped — host not allowed (" + location.hostname + ")");
           return;
         }
@@ -1166,20 +1247,54 @@
 // Declare Branch Key variable
 var branchKey = "%VITE_BRANCH_KEY%";
 
+/*
+  Branch SDK download deferred; the queueing stub below is NOT.
+
+  MEASURED before this change: cdn.branch.io/branch-latest.min.js started at
+  t=28ms, then app.link/_r at 38ms (251ms), api2.branch.io/v1/pageview at 39ms
+  (258ms), /v2/event/custom at 39ms (250ms) and again at 290ms (472ms). Five
+  requests plus SDK execution, all inside a ~496ms LCP window, on the same
+  connection budget as the entry bundle that first paint is blocked on. Branch
+  was the single busiest third party before LCP.
+
+  The vendor stub below is left exactly as Branch ships it and still runs at
+  parse time. It defines window.branch with every SDK method as a queueing
+  shim (`b._q.push([method, arguments])`), so the branch.init(...) and
+  branch.logEvent(...) calls further down still execute in their original order
+  and are replayed in full when the SDK arrives. No event is dropped and no
+  attribution parameter is lost — deep-link params live in the URL, which does
+  not change while we wait.
+
+  Only the script download moves. `requireAllowedHost: false` keeps Branch
+  loading on every host, which is its behaviour today; the "(production only)"
+  in the heading above has never been true for this tag and this change is not
+  the place to make it true.
+*/
 (function(b, r, a, n, c, h, _, s, d, k) {
     if (!b[n] || !b[n]._q) {
         for (; s < _.length;) {
             c(h, _[s++]);
         }
 
-        d = r.createElement(a);
-        d.async = 1;
-        d.src = "https://cdn.branch.io/branch-latest.min.js";
-
-        k = r.getElementsByTagName(a)[0];
-        k.parentNode.insertBefore(d, k);
-
         b[n] = h;
+
+        var inject = function () {
+            d = r.createElement(a);
+            d.async = 1;
+            d.src = "https://cdn.branch.io/branch-latest.min.js";
+
+            k = r.getElementsByTagName(a)[0];
+            k.parentNode.insertBefore(d, k);
+        };
+
+        if (typeof b.__deferTagScript__ === "function") {
+            b.__deferTagScript__("Branch", inject, { requireAllowedHost: false });
+        } else {
+            /* Defensive: if the scheduler block above ever moves or fails to
+               parse, load Branch the way it loaded before rather than not at
+               all. Attribution matters more than the timing win. */
+            inject();
+        }
     }
 })(
     window,
@@ -1248,16 +1363,49 @@ branch.init(
       // set above rather than repeating the hostname comparison, so GTM, gtag
       // and Clarity can never disagree about which hosts are measured.
       if (!window.__analyticsHostAllowed__) return;
-      (function(c,l,a,r,i,t,y){
+
+      /*
+        Split into two halves so deferring the download costs no data.
+
+        MEASURED before this change: clarity.ms/tag/... started at t=28ms and took
+        118ms, scripts.clarity.ms/clarity.js followed at 148ms, c.gif at 291ms and
+        n.clarity.ms/collect at 435ms (359ms) — four requests plus the recorder's
+        own main-thread work, all inside a ~496ms LCP window, competing with the
+        entry bundle for exactly the render that LCP is waiting on.
+
+        The stub below stays SYNCHRONOUS and must not be deferred. It is the
+        queueing shim: window.clarity(...) pushes onto .q until the real script
+        arrives and replays it. The inline error reporter near the top of this
+        file calls window.clarity('set', ...) on the very first error, so if the
+        stub were deferred too, early errors would land on the floor. With the
+        stub in place from parse time, nothing is lost — the queue just flushes a
+        little later.
+
+        Only the remote script is deferred, exactly as with gtm.js above.
+
+        One honest trade: Clarity takes a DOM snapshot when it initialises and
+        records mutations from that point, so mutations during the first second
+        or so are no longer captured. The snapshot, the session, the event queue
+        and all custom tags survive; what is lost is replay of the initial render
+        the recorder was itself slowing down.
+      */
+      (function(c,a){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      })(window, "clarity");
+
+      window.__deferTagScript__("Clarity", function () {
         // `crossOrigin` so exceptions thrown inside Clarity's own script report
         // a real message and stack rather than "Script error.".
         // Verified: GET https://www.clarity.ms/tag/xeickgmcun with an Origin
         // header returns `Access-Control-Allow-Origin: *`. (An earlier HEAD
         // probe returned 405, which is why this was left off previously.)
-        t=l.createElement(r);t.async=1;t.crossOrigin="anonymous";t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "xeickgmcun");
+        var t = document.createElement("script");
+        t.async = 1;
+        t.crossOrigin = "anonymous";
+        t.src = "https://www.clarity.ms/tag/xeickgmcun";
+        var y = document.getElementsByTagName("script")[0];
+        y.parentNode.insertBefore(t, y);
+      });
     })();
   </script>
   <!-- End Microsoft Clarity -->

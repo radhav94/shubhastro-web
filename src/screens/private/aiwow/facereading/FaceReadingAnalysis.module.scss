@@ -60,6 +60,20 @@
     opacity: 0.6;
     cursor: not-allowed;
   }
+
+  /*
+    The back arrow now uses aria-disabled while an analysis runs, because a
+    native `disabled` fires no click and swallowed every tap on the one control
+    that lets you leave the screen. `:disabled` above no longer matches it, so
+    without this the button lost its dimming and looked fully available.
+
+    `cursor` deliberately stays `pointer` here: the control does respond, and
+    'not-allowed' on something that answers you is a lie. Same reasoning already
+    documented on the primary buttons of this screen.
+  */
+  &[aria-disabled='true'] {
+    opacity: 0.6;
+  }
 }
 
 .headerTitle {
