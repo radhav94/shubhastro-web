@@ -403,6 +403,45 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
+
+  /*
+    Same treatment as .headerNavigation above, for the same reason.
+
+    That fix gave the main nav `pointer-events: none` with pointer events
+    restored on its children, because the container stretched far past its last
+    link and every pixel of that empty run hit-tested as the <nav> itself —
+    a dead click Clarity names with the container's whole concatenated text.
+
+    This row was left out of that pass and has the identical geometry:
+    `min-width: 1440px` on a bar whose links end well before that, measured
+    live at 491px of empty area to the right of the last quick link, all of it
+    resolving to this <nav> and reported as
+    "QuickLinksMatchMakingNumerologyHor…".
+
+    Mirrors the sibling exactly, including restoring pointer events on every
+    direct child rather than on .headerNavLink, so a link added here later
+    stays clickable without knowing about this rule.
+  */
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+
+  /*
+    ...with one deliberate exception. `.quickNavText` is a decorative label —
+    a plain span with no handler — sitting in bold at the head of a row of real
+    links. Restoring pointer events on it would just move the dead click onto
+    the label instead of the container. It is inert, so let clicks pass through
+    it too.
+
+    This does not affect the `.quickNavText + .headerNavLink::before` overlay
+    below: that pseudo-element belongs to the *link*, which keeps its pointer
+    events, so the 10px strip after the label stays claimed by "Match Making".
+  */
+  .quickNavText {
+    pointer-events: none;
+  }
   // background: #fff;
   position: relative;
   position: sticky;
