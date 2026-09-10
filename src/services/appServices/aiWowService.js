@@ -1008,13 +1008,16 @@ export const startKundliChat = async (kundliData) => {
  * Send a message in Kundli chat session
  * @param {string} sessionId - Active session ID
  * @param {string} message - User's message
+ * @param {string|null} replyToMessageId - messageId of the message being replied to
  * @returns {Promise} API response with AI's reply
  */
-export const sendKundliChatMessage = async (sessionId, message) => {
+export const sendKundliChatMessage = async (sessionId, message, replyToMessageId = null) => {
   try {
     const response = await privatePost(
       'companion-suite/kundli-chat/message',
-      { sessionId, message }
+      replyToMessageId
+        ? { sessionId, message, replyToMessageId }
+        : { sessionId, message }
     );
 
     return {
@@ -1323,13 +1326,18 @@ export const startCosmicChat = async (kundliData) => {
  * Send a message in Cosmic Chat session
  * @param {string} sessionId - Active session ID
  * @param {string} message - User's message
+ * @param {string|null} replyToMessageId - messageId of the message being replied to
  * @returns {Promise} API response with AI's cosmic guidance
  */
-export const sendCosmicChatMessage = async (sessionId, message) => {
+export const sendCosmicChatMessage = async (sessionId, message, replyToMessageId = null) => {
   try {
     const response = await privatePost(
       'wow-suite/cosmic-chat/message',
-      { sessionId, message }
+      // Only include replyToMessageId when replying, so a normal send keeps the
+      // original minimal payload.
+      replyToMessageId
+        ? { sessionId, message, replyToMessageId }
+        : { sessionId, message }
     );
 
     return {

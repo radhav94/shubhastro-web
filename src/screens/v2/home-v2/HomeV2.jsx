@@ -259,7 +259,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                     <Link key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} to={path} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
                       {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
                       <div className={styles.wowIconBox}>
-                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" fetchpriority="high" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
                       <span className={styles.wowCardTitle}>{item.title}</span>
                     </Link>
@@ -333,7 +333,37 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                 <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title}</h3>
                 {aiServicesItems[0]?.description && <p>{aiServicesItems[0].description}</p>}
                 {target && aiServicesItems[0]?.action_btn && <button type="button" className={styles.featureCta} onClick={(e) => { e.stopPropagation(); navigate(target); }}>{aiServicesItems[0].action_btn}</button>}
-                {(aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon) && <img src={aiServicesItems[0].image_url_web || aiServicesItems[0].icon} alt="" width="120" height="120" className={styles.laalKitaabImgLeft} loading="lazy" />}
+                {/*
+                  NOT lazy, and high priority: Lighthouse names this exact image
+                  as the homepage LCP element —
+
+                    section._heroRow > div._leftCards > div._qCardLaal
+                      > img._laalKitaabImgLeft
+
+                  and the phase split was decisive:
+
+                    TTFB          789.4ms  38%
+                    Load Delay    756.4ms  36%   <-- this
+                    Load Time      32.3ms   2%
+                    Render Delay  495.0ms  24%
+                                 2,070ms total
+
+                  Load Time is 32ms, so the file is not the problem — the problem
+                  is entirely *when* the request starts. `loading="lazy"` defers
+                  the fetch until layout has confirmed the element intersects the
+                  viewport, which on the LCP element buys nothing (it is in the
+                  first viewport by definition) and costs most of that 756ms.
+                  Chrome's own guidance is never to lazy-load the LCP element.
+
+                  fetchPriority high because the src comes from CMS data
+                  (aiServicesItems), so it cannot be preloaded from the HTML — it
+                  is only discoverable after /api/homepage resolves, and by then
+                  it is competing with everything the bundle is doing. The inline
+                  __homepagePrefetch__ in index.html already shortens the API half
+                  of that wait; this makes the browser act on the URL the moment
+                  it has it.
+                */}
+                {(aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon) && <img src={aiServicesItems[0].image_url_web || aiServicesItems[0].icon} alt="" width="120" height="120" className={styles.laalKitaabImgLeft} fetchPriority="high" decoding="async" />}
               </div>
             );
           })()}
@@ -359,7 +389,10 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                       {aiServicesItems[1]?.description && <p>{aiServicesItems[1].description}</p>}
                     </div>
                     {target && aiServicesItems[1]?.action_btn && <button type="button" className={styles.fcCtaLight} onClick={(e) => { e.stopPropagation(); navigate(target); }}>{aiServicesItems[1].action_btn}</button>}
-                    {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon) && <img src={aiServicesItems[1].image_url_web || aiServicesItems[1].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
+                    {/* Inside .heroRow, i.e. the first viewport, so lazy only
+                        delays it. No fetchPriority though — that is reserved for
+                        the LCP element above, which this must not compete with. */}
+                    {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon) && <img src={aiServicesItems[1].image_url_web || aiServicesItems[1].icon} alt="" width="100" height="100" className={styles.fcCardImg} decoding="async" />}
                   </div>
                 );
               })()}
@@ -377,7 +410,8 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                       {aiServicesItems[2]?.description && <p>{aiServicesItems[2].description}</p>}
                     </div>
                     {target && aiServicesItems[2]?.action_btn && <button type="button" className={styles.panditTalkBtn} onClick={(e) => { e.stopPropagation(); navigate(target); }}>{aiServicesItems[2].action_btn}</button>}
-                    {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon) && <img src={aiServicesItems[2].image_url_web || aiServicesItems[2].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
+                    {/* Same reasoning as the sibling card above. */}
+                    {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon) && <img src={aiServicesItems[2].image_url_web || aiServicesItems[2].icon} alt="" width="100" height="100" className={styles.fcCardImg} decoding="async" />}
                   </div>
                 );
               })()}
@@ -403,13 +437,18 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
               {aiServicesItems[3]?.action_btn && <button type="button" className={styles.liveCommunityBtn} onClick={(e) => { e.stopPropagation(); onLiveCommunityClick(aiServicesItems[3]); }}>{aiServicesItems[3].action_btn}</button>}
               <div className={styles.avatarCluster}>
                 <div className={styles.avatarClusterInner}>
+                  {/* Also inside .heroRow. At 200x187 this is the largest of the
+                      hero card images, so if the Laal Kitaab card is ever absent
+                      from the CMS payload this is the likely next LCP candidate —
+                      another reason not to leave it lazy. Priority still stays
+                      with the LCP element above. */}
                   {aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon ? (
               <img
                 src={aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon}
                 alt=""
                 width="200"
                 height="187"
-                loading="lazy"
+                decoding="async"
               />
             ) : null}
                 </div>

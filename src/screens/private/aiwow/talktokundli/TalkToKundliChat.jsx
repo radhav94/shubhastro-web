@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './TalkToKundliChat.module.scss';
-import { Toast } from '../../../../component';
+import { Toast, MessageTicks, ReplyPreview } from '../../../../component';
+import { IoArrowUndo } from 'react-icons/io5';
 import { startKundliChat, sendKundliChatMessage } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
@@ -29,6 +30,8 @@ const TalkToKundliChat = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+  // The message the user is currently composing a reply to (null = normal send).
+  const [replyingTo, setReplyingTo] = useState(null);
   const [suggestedQuestions, setSuggestedQuestions] = useState([
     "What career path is best suited for me?",
     "When is a good time for marriage?",
@@ -39,6 +42,24 @@ const TalkToKundliChat = () => {
   const messagesContainerRef = useRef(null);
   const scrollAreaRef = useRef(null);
   const inputRef = useRef(null);
+  // messageId -> DOM node, so a reply quote can scroll to its original message.
+  const messageNodesRef = useRef({});
+  // The message briefly flashed after jumping to it.
+  const [highlightedId, setHighlightedId] = useState(null);
+  const highlightTimerRef = useRef(null);
+
+  const jumpToMessage = (messageId) => {
+    const node = messageId && messageNodesRef.current[messageId];
+    if (!node) return;
+    node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setHighlightedId(messageId);
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = setTimeout(() => setHighlightedId(null), 1600);
+  };
+
+  useEffect(() => () => {
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+  }, []);
 
   // Start session when profile is loaded
   useEffect(() => {
@@ -104,8 +125,11 @@ const TalkToKundliChat = () => {
         // Add welcome message from API
         const welcomeMessage = {
           id: Date.now(),
+          messageId: sessionData.welcomeMessageId || `welcome-${Date.now()}`,
           type: 'ai',
           text: sessionData.welcomeMessage || sessionData.message || `Hello ${profile.name}! I'm your personal astrology AI assistant. I have analyzed your birth chart and I'm ready to answer your questions about your life, career, relationships, and future. What would you like to know?`,
+          status: 'sent',
+          replyTo: null,
           timestamp: new Date()
         };
         setMessages([welcomeMessage]);
@@ -138,19 +162,39 @@ const TalkToKundliChat = () => {
     if (!raw.trim() || !sessionId || isLoading) return;
 
     const messageToSend = raw.trim();
+    // Capture the reply target for this send, then clear the composer chip.
+    const replyTarget = replyingTo;
+    const localId = Date.now();
     const userMessage = {
-      id: Date.now(),
+      id: localId,
+      messageId: null,
       type: 'user',
       text: messageToSend,
+      // Show the blue (read) tick right away — per the backend, user messages
+      // are always delivered+read, so there's no reason to hold on the clock
+      // while the AI composes its (separate) reply.
+      status: 'read',
+      replyTo: replyTarget
+        ? {
+            messageId: replyTarget.messageId,
+            role: replyTarget.type === 'user' ? 'user' : 'assistant',
+            content: replyTarget.text,
+          }
+        : null,
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
+    setReplyingTo(null);
     setIsLoading(true);
 
     try {
-      const result = await sendKundliChatMessage(sessionId, messageToSend);
+      const result = await sendKundliChatMessage(
+        sessionId,
+        messageToSend,
+        replyTarget?.messageId || null
+      );
 
       if (result.success) {
         const responseData = result.data;
@@ -159,37 +203,77 @@ const TalkToKundliChat = () => {
                               responseData?.message || 
                               'I apologize, but I could not process your request. Please try again.';
 
+        // Reconcile the optimistic user bubble with the server's messageId and
+        // status. Per the backend, user messages come back as "read" (blue tick).
+        const serverUserMsg = responseData?.userMessage;
+        setMessages(prev =>
+          prev.map(m =>
+            m.id === localId
+              ? {
+                  ...m,
+                  messageId: serverUserMsg?.messageId || m.messageId,
+                  status: serverUserMsg?.status || 'read',
+                  replyTo: serverUserMsg?.replyTo || m.replyTo,
+                }
+              : m
+          )
+        );
+
         const aiMessage = {
           id: Date.now() + 1,
+          messageId:
+            responseData?.assistantMessage?.messageId ||
+            responseData?.messageId ||
+            `ai-${Date.now()}`,
           type: 'ai',
           text: aiResponseText,
+          status: responseData?.assistantMessage?.status || 'sent',
+          replyTo: null,
           timestamp: new Date()
         };
 
         setMessages(prev => [...prev, aiMessage]);
       } else {
-        // Error already handled by service and interceptor
+        // Send failed — mark the user bubble sent (it did leave the client) and
+        // surface an AI error bubble.
+        setMessages(prev =>
+          prev.map(m => (m.id === localId ? { ...m, status: 'sent' } : m))
+        );
         const errorMessage = {
           id: Date.now() + 1,
+          messageId: `ai-err-${Date.now()}`,
           type: 'ai',
           text: 'I apologize, but I encountered an error. Please try asking your question again.',
+          status: 'sent',
+          replyTo: null,
           timestamp: new Date()
         };
         setMessages(prev => [...prev, errorMessage]);
       }
     } catch (error) {
       console.error('Failed to send message:', error);
-      
+
+      setMessages(prev =>
+        prev.map(m => (m.id === localId ? { ...m, status: 'sent' } : m))
+      );
       const errorMessage = {
         id: Date.now() + 1,
+        messageId: `ai-err-${Date.now()}`,
         type: 'ai',
         text: 'I apologize, but I encountered an error. Please try asking your question again.',
+        status: 'sent',
+        replyTo: null,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleReply = (message) => {
+    setReplyingTo(message);
+    requestAnimationFrame(() => inputRef.current?.focus());
   };
 
   const handleKeyDown = (e) => {
@@ -265,24 +349,57 @@ const TalkToKundliChat = () => {
             </div>
           )}
 
-          {messages.map((message) => (
+          {messages.map((message) => {
+            const isUser = message.type === 'user';
+            const isHighlighted =
+              message.messageId && message.messageId === highlightedId;
+            return (
             <div
               key={message.id}
+              ref={(node) => {
+                if (message.messageId) {
+                  if (node) messageNodesRef.current[message.messageId] = node;
+                  else delete messageNodesRef.current[message.messageId];
+                }
+              }}
               className={`${styles.messageWrapper} ${
-                message.type === 'user' ? styles.userMessage : styles.aiMessage
-              }`}
+                isUser ? styles.userMessage : styles.aiMessage
+              } ${isHighlighted ? styles.highlighted : ''}`}
             >
               <div className={styles.messageBubble}>
+                {message.replyTo && (
+                  <ReplyPreview
+                    reply={message.replyTo}
+                    variant="bubble"
+                    onJumpTo={jumpToMessage}
+                  />
+                )}
                 <p className={styles.messageText}>{message.text}</p>
-                <span className={styles.messageTime}>
-                  {message.timestamp.toLocaleTimeString('en-US', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
+                <span className={styles.messageMeta}>
+                  <span className={styles.messageTime}>
+                    {message.timestamp.toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                  {isUser && <MessageTicks status={message.status} />}
                 </span>
               </div>
+              {/* Reply affordance — only for messages that carry a server id. */}
+              {message.messageId && (
+                <button
+                  type="button"
+                  className={styles.replyButton}
+                  onClick={() => handleReply(message)}
+                  aria-label="Reply to this message"
+                  title="Reply"
+                >
+                  <IoArrowUndo size={15} />
+                </button>
+              )}
             </div>
-          ))}
+            );
+          })}
 
           {/* Only once there is something to reply to. The typing dots mean "the
               AI is composing a response"; during session start there is no
@@ -332,6 +449,19 @@ const TalkToKundliChat = () => {
 
       {/* Input */}
       <div className={styles.inputContainer}>
+        {replyingTo && (
+          <div className={styles.replyComposer}>
+            <ReplyPreview
+              reply={{
+                messageId: replyingTo.messageId,
+                role: replyingTo.type === 'user' ? 'user' : 'assistant',
+                content: replyingTo.text,
+              }}
+              variant="composer"
+              onCancel={() => setReplyingTo(null)}
+            />
+          </div>
+        )}
         <div className={styles.inputWrapper}>
           <textarea
             ref={inputRef}

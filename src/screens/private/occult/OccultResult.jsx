@@ -232,7 +232,6 @@ const OccultResult = () => {
             <div className={styles.summaryCell}><span className={styles.summaryCellLabel}>Total Doshas Detected</span><span className={styles.summaryCellValue}>{summary.totalDoshasDetected}</span></div>
             <div className={styles.summaryCell}><span className={styles.summaryCellLabel}>Doshas Clear</span><span className={styles.summaryCellValue}>{summary.doshasClear}</span></div>
             <div className={styles.summaryCell}><span className={styles.summaryCellLabel}>Overall Intensity</span><span className={styles.summaryCellValue}>{summary.overallOccultIntensity}</span></div>
-            <div className={styles.summaryCell}><span className={styles.summaryCellLabel}>Analysis Model</span><span className={styles.summaryCellValue}>{summary.analysisModel}</span></div>
           </div>
         </div>
       )}

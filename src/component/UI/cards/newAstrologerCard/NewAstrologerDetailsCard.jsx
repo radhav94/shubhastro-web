@@ -14,6 +14,7 @@ import { resolveLiveChannelForAstrologer } from "../../../../utils/helper/resolv
 import { getAstrologerAvailability } from "../../../../utils/helper/astrologerAvailability";
 import toast from "../../../toast";
 import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
+const newStar = "/images/new-start.png";
 
 const NewAstrologerDetailsCard = ({
   astrologer,
@@ -181,7 +182,8 @@ const NewAstrologerDetailsCard = ({
           </span>
           {astrologer?.rating > 0 && (
             <span className={styles.detailsRatingInline}>
-              <Star size={12} fill="#FFB246" stroke="#FFB246" />
+              {/* <Star size={12} fill="#FFB246" stroke="#FFB246" /> */}
+              <img width="11" height="11" src={newStar} alt="star" />
               {astrologer.rating.toFixed(1)}
             </span>
           )}
