@@ -508,11 +508,44 @@
   z-index: 1;
   pointer-events: none;
 
-  /* The AI-suite hero is now a CSS background rather than an <img>. A small
-     background-image inside this card is not treated as an LCP candidate, so it
-     no longer registers as the homepage's Largest Contentful Paint element (an
-     <img> did). Same asset, same visual — `contain`/`center` reproduce the
-     previous object-fit: contain on the 230x230 box. */
+  /* The AI-suite hero is a CSS background rather than an <img>. Same asset,
+     same visual — `contain`/`center` reproduce the previous object-fit: contain
+     on the 230x230 box.
+
+     CORRECTION — read this before "restoring" anything here.
+
+     This comment used to claim the conversion was made so the element would
+     "no longer register as the homepage's Largest Contentful Paint element",
+     on the premise that a small background-image inside a card is not treated
+     as an LCP candidate. THAT PREMISE IS WRONG. Per the Largest Contentful
+     Paint API an element with a url() background IS a candidate. The only
+     relevant exclusion is the full-viewport case — elements Chromium judges to
+     be page backdrops rather than content — which is what legitimately exempts
+     main-body-bg-new.png (background-size: cover; background-attachment: fixed
+     on body.home-v2-page) and does not apply to a 230x230 card.
+
+     Measured on the live site and on two local production builds at a 375px
+     viewport: ai-suite.png is still the homepage LCP element. So the conversion
+     did not take it out of the metric. What it actually did was hide the URL
+     from the HTML preload scanner, because a CSS-module background cannot be
+     discovered until the entry bundle has downloaded, parsed, executed and
+     rendered this element. Request start moved out to 450ms, which made LCP
+     worse, not better:
+
+         TTFB              20ms    4.0%
+         Load delay       430ms   86.7%   <-- caused by this
+         Resource load      9ms    1.8%   (the file is only 15,776 B)
+         Render delay      37ms    7.5%
+
+     Mitigated in index.html by a path-gated `rel=preload as=image
+     fetchpriority=high` for "/" only, which brings discovery back to head-parse
+     time (measured 450ms -> 87ms). Do not delete that tag while this stays a
+     background image.
+
+     If you want to remove the preload, convert this back to an
+     <img fetchpriority="high"> instead. That makes the LCP element natively
+     discoverable by the preload scanner and is the better end state; it just
+     touches positioned layout, so it was not bundled into the preload fix. */
   background-image: url("https://assets.shubhastro.ai/images/ai-suite.png");
   background-size: contain;
   background-repeat: no-repeat;

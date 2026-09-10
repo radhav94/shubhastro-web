@@ -100,6 +100,7 @@ import { store, persistor } from "./store/store.js";
 import { PersistGate } from "redux-persist/integration/react";
 import { trackTestEvent, BranchEvents } from "./utils/branchEvents";
 import { trackBranchEvent, flushBranchEvents } from "./utils/branchIntegration";
+import { ensureSession } from "./utils/security/cryptoClient";
 /*
  * The `AgoraProvider` import that used to sit here was removed.
  *
@@ -135,6 +136,52 @@ if (window.visualViewport) {
   };
   window.visualViewport.addEventListener('resize', updateToastPosition);
   window.visualViewport.addEventListener('scroll', updateToastPosition);
+}
+
+/*
+ * Warm the secure-gateway session in parallel with the first React render.
+ *
+ * Every /sgw-backed endpoint — the whole astro API (horoscope, kundli,
+ * panchang), plus static-pages — is fenced behind an ephemeral ECDH handshake.
+ * ensureSession() was only ever called lazily, by secureBaseQuery, at the
+ * moment the first secure query fired. That put a full extra round trip in
+ * series AFTER React had already rendered, on the critical path to the first
+ * content on those pages.
+ *
+ * MEASURED on /tomorrow-horoscope/libra against production, warm cache, so the
+ * bundle cost is ~0 and the serialisation is the only thing left:
+ *
+ *     assets (cached)                     50 -  74ms
+ *     sgw/__sgw/handshake                489 - 535ms
+ *     western/daily-horoscope            545 - 662ms   <- could not start until
+ *                                                         the handshake finished
+ *     content in DOM                    ~682ms
+ *
+ * The handshake did not begin until 489ms for no reason other than nothing had
+ * asked for it yet. Starting it here overlaps it with bundle evaluation and
+ * React's first render instead, so by the time a screen dispatches its query
+ * the session usually already exists and the request goes straight out. It does
+ * not make the handshake faster; it stops it and the render being serial.
+ *
+ * Costs nothing in bytes: cryptoClient is already in the entry chunk, via
+ * privateRequestNew -> secureBaseQuery.
+ *
+ * Safe to call speculatively. ensureSession() dedupes through its `inFlight`
+ * promise, so the real query that follows joins this handshake rather than
+ * starting a second one, and a failure here is not fatal — secureBaseQuery
+ * still calls ensureSession() itself and retries once on a gateway 428. The
+ * catch is only so a rejection never surfaces as an unhandled rejection, which
+ * the inline reporter in index.html would otherwise log as an app error.
+ *
+ * Not awaited: React must mount immediately regardless.
+ */
+try {
+  ensureSession().catch(() => {
+    /* best effort — secureBaseQuery re-establishes the session on demand */
+  });
+} catch {
+  /* crypto.subtle missing (insecure context / very old WebView) — the normal
+     lazy path surfaces it exactly as it did before. */
 }
 
 createRoot(document.getElementById("root")).render(
