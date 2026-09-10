@@ -1,0 +1,273 @@
+$brand: #f75801;
+$brand-dark: #d43400;
+$ink: #1c1109;
+$muted: #6b5546;
+
+/* Outer band — light peach with a faint zodiac watermark; holds the darker
+   inner card. */
+.section {
+  position: relative;
+  overflow: hidden;
+  // margin: 28px 0;
+  // padding: 40px;
+  // background: #ffffff39;
+  // border-radius: 30px;
+  // border: 1.5px solid #fff;
+
+  @media (max-width: 767px) {
+    padding: 20px 12px;
+    margin: 20px 0;
+  }
+}
+
+/* Faint zodiac-wheel watermark across the whole outer band (decorative). */
+.watermark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240' fill='none' stroke='%23d43400' stroke-width='1'%3E%3Ccircle cx='120' cy='120' r='110'/%3E%3Ccircle cx='120' cy='120' r='84'/%3E%3Ccircle cx='120' cy='120' r='58'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left -60px center;
+  background-size: 420px 420px;
+  z-index: 0;
+}
+
+/* Inner rounded card that carries the content (darker peach fill). */
+.card {
+  position: relative;
+  z-index: 1;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 28px 48px 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgb(255 255 255 / 40%);
+  border: 1.5px solid #fff;
+
+  @media (max-width: 900px) {
+    padding: 32px 24px 0;
+  }
+
+  @media (max-width: 767px) {
+    padding: 28px 18px 0;
+    border-radius: 18px;
+  }
+}
+
+/* Desktop: 2 columns × 2 rows — left column holds the kicker/title (top) and
+   the blurb/badges (bottom); the visual fills the right column across both
+   rows and bleeds to the card's bottom edge. */
+.inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  column-gap: 32px;
+
+  .copyHead {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .copyBody {
+    grid-column: 1;
+    grid-row: 2;
+    /* Sit right under the headline (top of the row) — NOT pushed to the bottom
+       of the tall visual row, which was leaving a big empty gap. */
+    align-self: start;
+    padding-bottom: 48px;
+  }
+  .visual {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  /* Mobile/tablet: single column, stacked in the order
+     kicker/title → visual → blurb/badges (matches the reference). Kicks in at
+     900px so the whole narrow range uses the stacked mobile visual. */
+  @media (max-width: 900px) {
+    display: flex;
+    flex-direction: column;
+
+    .copyHead {
+      order: 1;
+    }
+    .visual {
+      order: 2;
+    }
+    .copyBody {
+      order: 3;
+      padding-bottom: 28px;
+    }
+  }
+}
+
+/* ── Left copy ──────────────────────────────────────────────────────────── */
+.copyHead,
+.copyBody {
+  min-width: 0;
+}
+
+.kicker {
+  display: inline-block;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: $ink;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.title {
+  margin: 0 0 16px;
+  font-size: 50px;
+  line-height: 1.1;
+  font-weight: 700;
+  color: $ink;
+
+  @media (max-width: 1180px) {
+    font-size: 2.1rem;
+  }
+
+  @media (max-width: 767px) {
+    font-size: 2.0rem;
+  }
+}
+
+.titleAccent {
+  color: $brand;
+}
+
+.blurb {
+  margin: 0 0 26px;
+  max-width: 520px;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: $muted;
+
+  @media (max-width: 767px) {
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+  }
+}
+
+.stores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+
+  /* Mobile: keep both badges on one line (side by side), sharing the width. */
+  @media (max-width: 767px) {
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+}
+
+/* Black store badge, matching the reference. */
+.storeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: #111;
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Mobile: shrink to share the row so both fit on one line. */
+  @media (max-width: 767px) {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 10px;
+  }
+}
+
+.storeText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  text-align: left;
+}
+
+.storeLabel {
+  font-size: 0.62rem;
+  font-weight: 500;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.storeName {
+  font-size: 1.05rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  @media (max-width: 767px) {
+    font-size: 0.9rem;
+  }
+}
+
+/* ── Right visual (phones + floating cards) ─────────────────────────────── */
+/* ── Right visual (single baked-in image: phones + floating cards) ──────── */
+/* Bleeds to the card's bottom edge (the card has padding-bottom: 0). */
+.visual {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.visualImg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 680px;
+  object-fit: contain;
+
+  @media (max-width: 900px) {
+    max-width: 560px;
+  }
+}
+
+/* Desktop visual only; hidden on mobile. Pulled up past the card's top padding
+   (−28px) so the zodiac circle baked into the image touches the card's top
+   line, and sized to fill the full card height (bleeding to the bottom). */
+.visualDesktop {
+  max-width: none;
+  width: auto;
+  height: 100%;
+  max-height: 520px;
+  margin-top: -28px;
+  margin-left: auto;
+  object-fit: contain;
+  object-position: bottom right;
+
+  @media (max-width: 900px) {
+    display: none;
+  }
+}
+
+/* Mobile visual only; hidden above mobile. Sits centred between the headline
+   and the blurb (see .inner ordering), a touch narrower than full width. */
+.visualMobile {
+  display: none;
+
+  @media (max-width: 900px) {
+    display: block;
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+}
