@@ -781,8 +781,7 @@ const HoroscopeOld = () => {
 
           <div className="category-cards">
             {categories.map((category) => (
-              <div key={category.id} className="category-item">
-                <button
+                <button key={category.id}
                   className={`category-card ${activeCategory === category.id ? 'active' : ''}`}
                   onClick={() => {
                     setCameFromOverview(false);
@@ -793,7 +792,6 @@ const HoroscopeOld = () => {
                   <img className="categoryImages" src={getCategoryImage(category.id)} alt={category.label} />
                   {/* <span className="roundedShadowBottom"></span> */}
                 </button>
-              </div>
             ))}
           </div>
 

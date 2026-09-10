@@ -97,7 +97,6 @@ const MatchDetailsV2 = () => {
         <div className={styles.containerCom}>
           <div className={styles.matchErrorCard} role="alert">
             <p className={styles.matchErrorText}>{failureReason}</p>
-            <div className={styles.matchErrorActions}>
               {formData && (
                 <button type="button" className={styles.matchErrorRetry} onClick={() => refetch()}>
                   Try again
@@ -110,7 +109,6 @@ const MatchDetailsV2 = () => {
               >
                 Choose profiles
               </button>
-            </div>
           </div>
         </div>
       </div>

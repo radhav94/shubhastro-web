@@ -19,7 +19,7 @@ import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/Del
 import ProfileListingModal from "../../../component/UI/Profile/ProfileListingModal";
 import bondIcon from "../../../assets/icons/destiny-icon.svg";
 import matchMakingImg from "../../../assets/images/match-making-top-img.svg";
-import matchMakingImgBottom from "../../../assets/images/match-making-bottom-img.svg";
+import matchMakingImgBottom from "../../../assets/images/match-making-bottom-img.png";
 import { ProfileManager } from "../../../component/UI/Profile";
 import BackButton from "../../../component/UI/BackButton/BackButton";
 // import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
