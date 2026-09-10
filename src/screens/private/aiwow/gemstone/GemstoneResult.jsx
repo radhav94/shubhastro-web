@@ -65,16 +65,20 @@ import insightAdviceIcon from '../../../../assets/gemstone-details/insight-advic
 // Match an insight (by its API key) to the right design icon. Falls back to the
 // generic "advice" bulb for any insight key the design didn't cover.
 const INSIGHT_ICONS = {
-  birthchartcompatibility: insightBirthChartIcon,
-  planetarybenefit: insightPlanetaryIcon,
-  planetarybenefits: insightPlanetaryIcon,
+  // Icons were swapped between pairs of cards. Corrected:
+  //  - Birth Chart Compatibility ⇄ Life Path Alignment
+  //  - Planetary Benefit        ⇄ Personalized Advice
+  //  - Dosha Remedies + Recommended For User were already correct.
+  birthchartcompatibility: insightRecommendedIcon,
+  lifepathalignment: insightBirthChartIcon,
+  planetarybenefit: insightAdviceIcon,
+  planetarybenefits: insightAdviceIcon,
+  personalizedadvice: insightPlanetaryIcon,
+  advice: insightPlanetaryIcon,
   dosharemedies: insightDoshaIcon,
   dosharemedy: insightDoshaIcon,
-  lifepathalignment: insightLifePathIcon,
-  recommendedforuser: insightRecommendedIcon,
-  recommended: insightRecommendedIcon,
-  personalizedadvice: insightAdviceIcon,
-  advice: insightAdviceIcon,
+  recommendedforuser: insightLifePathIcon,
+  recommended: insightLifePathIcon,
 };
 const getInsightIcon = (key) =>
   INSIGHT_ICONS[String(key || '').toLowerCase().replace(/[^a-z]/g, '')] || insightAdviceIcon;
