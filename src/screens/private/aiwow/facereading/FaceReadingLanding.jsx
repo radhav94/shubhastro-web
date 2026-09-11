@@ -139,17 +139,28 @@ const FaceReadingLanding = () => {
           <h2 className={styles.instructionsTitle}>Before you start</h2>
 
           <div className={styles.middleContent}>
-            <div className={styles.imageWrapper}>
+            {/* Tappable, because the corner brackets around it are viewfinder
+                framing and it was being tapped as the capture control — see the
+                note on .imageWrapper in the SCSS (Clarity 15hum1k). Same action
+                as the "Use Camera" CTA below; handleCamera holds the guards.
+                The corners are <span aria-hidden> so this is valid button
+                content and they stay out of the accessibility tree. */}
+            <button
+              type="button"
+              className={styles.imageWrapper}
+              onClick={handleCamera}
+              aria-label="Use camera to take your photo"
+            >
               <img 
                 src={getAIWowInstructionImage('faceReading', gender)} 
                 alt="Face example" 
                 className={styles.faceImage}
               />
-              <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
-              <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
-              <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
-              <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
-            </div>
+              <span className={styles.frameCorner} style={{ top: 0, left: 0 }} aria-hidden="true" />
+              <span className={styles.frameCorner} style={{ top: 0, right: 0 }} aria-hidden="true" />
+              <span className={styles.frameCorner} style={{ bottom: 0, left: 0 }} aria-hidden="true" />
+              <span className={styles.frameCorner} style={{ bottom: 0, right: 0 }} aria-hidden="true" />
+            </button>
 
             <div>
               <div style={{ position: 'relative' }}>

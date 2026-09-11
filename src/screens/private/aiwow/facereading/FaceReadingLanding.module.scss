@@ -130,13 +130,46 @@
   }
 }
 
+/* A real <button>, not a <div>. The four 60px orange corner brackets around this
+   image are the standard viewfinder framing device, and at 250px square on mobile
+   it is the largest thing on the screen, so it was being tapped as if it were the
+   capture control — and did nothing at all.
+
+   Clarity session 15hum1k (Instagram WebView, mobile, 9 pages on 18 clicks) dead
+   clicked it at 00:09, before touching either CTA. Clarity named the element
+   "Face example", which is this image's own alt text — an <img> with no
+   interactive ancestor, so the tap had nowhere to go.
+
+   There is direct precedent one route away: FaceReadingCamera already made its
+   real viewfinder tappable, on the reasoning that it is "the largest target on
+   the screen, and the one a phone user reaches for". This is the same affordance
+   drawn on a still image, so it now triggers the same action as the "Use Camera"
+   CTA. The guards stay correct because they live inside handleCamera, not on the
+   button.
+
+   Layout is untouched — the properties below are only the button resets. */
 .imageWrapper {
   position: relative;
+  display: block;
   width: 100%;
   max-width: 300px;
   margin: 0 auto;
   aspect-ratio: 1;
-  
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 3px;
+  }
+
   img {
     width: 100%;
     height: 100%;
