@@ -84,10 +84,25 @@
   font-weight: 500;
   cursor: pointer;
 
-  &:disabled {
+  /* The button no longer uses native `disabled`, so this rule stopped matching.
+     Kept for the aria state instead. `cursor` stays `pointer`: the control is
+     still live — it answers with an inline notice — and `not-allowed` on a
+     responsive control is a lie. */
+  &[aria-disabled="true"] {
     opacity: 0.5;
-    cursor: not-allowed;
   }
+}
+
+/* Answer to a Logout tap that arrived while another removal was in flight. */
+.deviceLimitNotice {
+  margin: 0 0 12px;
+  padding: 9px 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #8a4b00;
+  background: #fff3e6;
+  border: 1px solid #ffd9b3;
+  border-radius: 8px;
 }
 
 .closeBtn {

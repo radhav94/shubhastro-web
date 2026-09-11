@@ -129,6 +129,8 @@ const GuestChatFlow = () => {
   // Field wrappers, keyed by field name, so a blocked submit can scroll the
   // first invalid field into view instead of failing silently off-screen.
   const fieldRefs = useRef({});
+  // Bumped to ask LocationSearchVedic to put its suggestion list back on screen.
+  const [placeReopenSignal, setPlaceReopenSignal] = useState(0);
 
   const pushMessage = (text, isSender, extra = {}) =>
     setMessages((m) => [
@@ -377,6 +379,17 @@ const GuestChatFlow = () => {
         node.querySelector("input, button")?.focus({ preventScroll: true });
       }
       if (firstInvalid) Toast.error(e[firstInvalid]);
+
+      /*
+        "Tap a city from the suggestions" needs the suggestions to be on screen.
+        focus() above cannot do it: LocationSearchVedic re-opens from its own
+        `onFocus`, and focus() fires no event on an already-focused element —
+        the normal state right after typing on a phone. Same wiring as
+        GuestDetailsForm; see the longer note there (Clarity wxnjlw).
+      */
+      if (firstInvalid === "birthPlace" && form.birthPlace.trim()) {
+        setPlaceReopenSignal((n) => n + 1);
+      }
 
       // Recorded so it's possible to tell, from analytics alone, whether repeat
       // taps on this button are validation or a failing OTP send — and which
@@ -934,6 +947,7 @@ const GuestChatFlow = () => {
           <IoLocationOutline className={styles.leftIcon} />
           <LocationSearch
             value={form.birthPlace}
+            reopenSignal={placeReopenSignal}
             onChange={(e) => setField("birthPlace", e.target.value)}
             onPlaceSelect={(place) => {
               setForm((f) => ({
