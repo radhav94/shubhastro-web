@@ -543,6 +543,17 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  line-height: 1;
+
+  svg {
+    flex-shrink: 0;
+    margin-bottom: 3px;
+  }
 
   @include cta-hit-area;
 
@@ -953,9 +964,7 @@
     // padding: 8px 10px;
     font-size: 12px;
     height: 34px;
-    img{
-      display: none;
-    }
+    img{ width: 14px; height: 14px; }
   }
 
   @include cta-hit-area;
@@ -1006,9 +1015,7 @@
     // padding: 8px 10px;
     font-size: 12px;
     height: 34px;
-    img{
-      display: none;
-    }
+    img{ width: 14px; height: 14px; }
   }
 
   @include cta-hit-area;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Star } from "lucide-react";
+import { Star, Siren } from "lucide-react";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -225,7 +225,7 @@ const NewAstrologerDetailsCard = ({
           ) : !isOnline && hasEmergency ? (
             <div className={styles.emergencyButtonWrapper}>
               <button className={styles.emergencySingleBtn} onClick={() => setShowEmergencyModal(true)}>
-                Emergency
+                <Siren size={14} aria-hidden="true" /> Emergency
               </button>
               {emergencyMinRate > 0 && (
                 <p className={styles.detailsPriceText}>

@@ -3,7 +3,7 @@ import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import styles from "./TopHeader.module.scss";
 import { PATH } from "../utils/routes/Paths";
-import { User } from "lucide-react";
+import { User, X } from "lucide-react";
 import { getUserFromStorage } from "../utils/authStorage";
 import ShubhTalkLogo from "../assets/images/ShubhAstrologo.png";
 import ShubhTalkLogoMobile from "../assets/images/mobile-shubh-astro-logo.png";
@@ -365,16 +365,29 @@ const TopHeader = () => {
   })();
         
 
-  // If in iframe mode, show minimal header with only language and close button
+  // If in iframe mode (the "View Kundli" modal), render a minimal sticky header
+  // whose only job is a reliable close control. The parent window hosts the
+  // modal and listens for a CLOSE_KUNDLI_MODAL message (see IframeModal.jsx), so
+  // posting it up closes the modal from inside the iframe — on iOS the parent's
+  // own corner button competes with Safari chrome and is easy to miss.
   if (isIframeMode) {
     return (
-      null
-      // <header className={styles.iframeHeader}>
-      //   <div className={styles.iframeHeaderContent}>
-      //     Language Dropdown
-      //     <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} />
-      //   </div>
-      // </header>
+      <header className={styles.iframeHeader}>
+        <button
+          type="button"
+          className={styles.iframeCloseBtn}
+          aria-label="Close Kundli"
+          onClick={() => {
+            try {
+              window.parent?.postMessage({ type: "CLOSE_KUNDLI_MODAL" }, "*");
+            } catch {
+              // Cross-origin parent (shouldn't happen — same origin) — ignore.
+            }
+          }}
+        >
+          <X size={22} />
+        </button>
+      </header>
     );
   }
 

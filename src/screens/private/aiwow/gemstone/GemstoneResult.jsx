@@ -32,11 +32,11 @@ import detailIcon3 from '../../../../assets/gemstone-details/icon-3.png';
 import detailIcon4 from '../../../../assets/gemstone-details/icon-4.png';
 import detailIcon5 from '../../../../assets/gemstone-details/icon-5.png';
 import detailIcon6 from '../../../../assets/gemstone-details/icon-6.png';
-import detailIcon7 from '../../../../assets/gemstone-details/icon-7.png';
-import detailIcon8 from '../../../../assets/gemstone-details/icon-8.png';
 import detailIcon9 from '../../../../assets/gemstone-details/icon-9.png';
 import detailIcon10 from '../../../../assets/gemstone-details/icon-10.png';
 import detailIcon11 from '../../../../assets/gemstone-details/icon-11.png';
+import zodiacSignIcon from '../../../../assets/gemstone-details/zodiac-signs.png';
+import rulingPlanetIcon from '../../../../assets/gemstone-details/ruling-planet.png';
 import detailsHeaderIcon from '../../../../assets/gemstone-details/icon-details-header.png';
 
 // Identification (banner) fact icons — from the design (tabler icon set).
@@ -365,7 +365,7 @@ const GemstoneResult = () => {
     }
     if (d.details.color && (d.details.color.primary || d.details.color.secondary)) {
       detailItems.push({
-        key: 'color', title: 'Color', icon: detailIcon2,
+        key: 'color', title: 'Color', icon: detailIcon3,
         rows: [
           { label: 'Primary', value: d.details.color.primary },
           { label: 'Secondary', value: d.details.color.secondary },
@@ -374,7 +374,7 @@ const GemstoneResult = () => {
     }
     if (d.details.clarity && (d.details.clarity.grade || d.details.clarity.inclusions?.length)) {
       detailItems.push({
-        key: 'clarity', title: 'Clarity', icon: detailIcon3,
+        key: 'clarity', title: 'Clarity', icon: detailIcon5,
         rows: [
           { label: 'Grade', value: d.details.clarity.grade },
           d.details.clarity.inclusions?.length > 0
@@ -394,7 +394,7 @@ const GemstoneResult = () => {
     }
     if (d.details.estimatedCarat && (d.details.estimatedCarat.range || d.details.estimatedCarat.approximate)) {
       detailItems.push({
-        key: 'carat', title: 'Carat Weight', icon: detailIcon5,
+        key: 'carat', title: 'Carat Weight', icon: detailIcon2,
         rows: [
           { label: 'Range', value: d.details.estimatedCarat.range },
           d.details.estimatedCarat.approximate
@@ -419,13 +419,13 @@ const GemstoneResult = () => {
     const astroItems = [];
     if (d.astrological.rulingPlanet) {
       astroItems.push({
-        key: 'planet', title: 'Ruling Planet', tint: '#f59e0b', icon: detailIcon7,
+        key: 'planet', title: 'Ruling Planet', tint: '#f59e0b', icon: rulingPlanetIcon,
         badge: d.astrological.rulingPlanet.planet, desc: d.astrological.rulingPlanet.influence,
       });
     }
     if (d.astrological.zodiacSigns) {
       astroItems.push({
-        key: 'zodiac', title: 'Zodiac Signs', tint: '#8b5cf6', icon: detailIcon8,
+        key: 'zodiac', title: 'Zodiac Signs', tint: '#8b5cf6', icon: zodiacSignIcon,
         badge: d.astrological.zodiacSigns.primary,
         desc: d.astrological.zodiacSigns.secondary?.length > 0
           ? `Also: ${d.astrological.zodiacSigns.secondary.join(', ')}` : '',

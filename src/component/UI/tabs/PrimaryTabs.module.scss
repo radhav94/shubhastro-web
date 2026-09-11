@@ -26,7 +26,12 @@
   padding: 16px 0px;
   // background-color: #f5f5f5;
   flex-wrap: wrap;
-  width: 100vw;
+  // Was 100vw (a legacy full-bleed trick whose negative-margin companions below
+  // are commented out). Inside the narrow "View Kundli" iframe, 100vw overflows
+  // the overflow:hidden .tabsContainer and the tab row gets clipped — on iOS the
+  // whole tab bar could vanish. 100% fits the padded container so the mobile
+  // horizontal scroll works as intended.
+  width: 100%;
   // margin-left: calc(-50vw + 50%);
   // padding-left: calc(50vw - 50% + 15px);
   // padding-right: calc(50vw - 50% + 15px);
