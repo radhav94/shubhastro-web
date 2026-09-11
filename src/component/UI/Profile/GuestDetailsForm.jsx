@@ -74,6 +74,8 @@ const GuestDetailsForm = ({
   const [errors, setErrors] = useState({});
   // Field wrappers, so a failed submit can bring the offending one into view.
   const fieldRefs = useRef({});
+  // Bumped to ask LocationSearchVedic to put its suggestion list back on screen.
+  const [placeReopenSignal, setPlaceReopenSignal] = useState(0);
 
   const setField = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -124,6 +126,33 @@ const GuestDetailsForm = ({
       if (node) {
         node.scrollIntoView({ behavior: "smooth", block: "center" });
         node.querySelector("input, button")?.focus({ preventScroll: true });
+      }
+
+      /*
+        Put the dropdown back on screen when the blocker is the place field, and
+        the place is typed but has no coordinates.
+
+        This is the one validation failure whose message names a control that is
+        not on screen: coordinates are only ever set by picking a suggestion, so
+        "Please pick a location from the dropdown" is unactionable with no list
+        showing. The focus() call above cannot supply it — LocationSearchVedic
+        re-opens from its own `onFocus`, and focus() fires no event on an element
+        that already has focus, which is exactly where a phone visitor is when
+        they tap Continue straight after typing. So the button appeared to do
+        nothing and got tapped again; Clarity wxnjlw (Instagram WebView, mobile,
+        28 clicks on one page) logged the repeat as a dead click at 00:51 and it
+        resolved only once the visitor got the list up and picked a place at 00:55.
+
+        reopenSignal has existed in locationSearchVedic.jsx for a while and is
+        already wired in AddProfileModal, EditProfileModal, AddProfile and
+        ProfileModals — this form was simply never connected to it.
+
+        Gated on birthPlace being the FIRST invalid field so a dropdown does not
+        pop open further down the page while we are scrolling the user to an
+        earlier problem.
+      */
+      if (firstInvalid === "birthPlace" && form.birthPlace.trim()) {
+        setPlaceReopenSignal((n) => n + 1);
       }
 
       // Lets analytics separate repeat taps caused by validation from ones
@@ -303,16 +332,22 @@ const GuestDetailsForm = ({
           <LocationSearch
             dropUp
             value={form.birthPlace}
+            reopenSignal={placeReopenSignal}
             onChange={(e) => setField("birthPlace", e.target.value)}
-            onPlaceSelect={(place) =>
+            onPlaceSelect={(place) => {
               setForm((f) => ({
                 ...f,
                 birthPlace: place.address,
                 latitude: place.lat,
                 longitude: place.lng,
                 timezone: place.timezone ?? 5.5,
-              }))
-            }
+              }));
+              // This writes through setForm rather than setField, so it has to
+              // clear the error itself — otherwise "Please pick a location from
+              // the dropdown" stayed on screen after the user had done exactly
+              // that, and only cleared on the next submit.
+              setErrors((e) => ({ ...e, birthPlace: undefined }));
+            }}
           />
         </div>
         {errors.birthPlace && <span className={styles.err}>{errors.birthPlace}</span>}
