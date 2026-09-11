@@ -306,6 +306,12 @@ const HomeLayout = () => {
   // Hide header/footer in webview mode (?type=webview)
   const isWebview = new URLSearchParams(location.search).get("type") === "webview";
 
+  // Iframe mode (?iframe=true) — used by the in-chat "View Kundli" modal. The
+  // TopHeader renders its own minimal iframe header (with a close button), so
+  // the layout must not render the full fixed TopHeader NOR reserve its .topGap
+  // spacer — that empty band pushes the Kundli tabs off-screen on iOS.
+  const isIframe = new URLSearchParams(location.search).get("iframe") === "true";
+
   // The floating Pandit AI pill is only shown on the home ("/") landing. Every
   // other screen keeps the bubble MOUNTED (so its `panditai:ask` listener stays
   // alive for the in-page "Ask Pandit AI" buttons on the reports) but suppresses
@@ -314,7 +320,7 @@ const HomeLayout = () => {
 
   const isOnboardingPage = location.pathname === "/login";
   const isLivePage = location.pathname.startsWith("/live") && !location.pathname.startsWith("/live-chat-policy");
-  const showTopHeader = showRouteTopHeader && !isOnboardingPage && !isLivePage && !isWebview;
+  const showTopHeader = showRouteTopHeader && !isOnboardingPage && !isLivePage && !isWebview && !isIframe;
 
   return (
     <div className={styles.layout}>
@@ -336,9 +342,9 @@ const HomeLayout = () => {
 
       {/* Scrollable Content */}
       <div className={styles.contentWrapper} style={!isOnline ? { background: 'transparent' } : {}}>
-        <div className={showHeader && !isWebview ? styles.topGap : ""}></div>
+        <div className={showHeader && !isWebview && !isIframe ? styles.topGap : ""}></div>
 
-        {showHeader && !isWebview && <Breadcrumb />}
+        {showHeader && !isWebview && !isIframe && <Breadcrumb />}
 
         {/*
           The fallback reserves the route's height.
