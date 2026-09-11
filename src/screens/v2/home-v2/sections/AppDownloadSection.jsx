@@ -62,6 +62,7 @@ const AppDownloadSection = ({ sectionData }) => {
         {/* Kicker + headline. On mobile the visual sits between this and the
             blurb/badges (see .inner ordering); on desktop both copy blocks are
             in the left column with the visual on the right. */}
+        {/* <div className={styles.right}> */}
         <div className={styles.copyHead}>
           <span className={styles.kicker}>{kicker}</span>
 
@@ -121,6 +122,7 @@ const AppDownloadSection = ({ sectionData }) => {
             </a>
           </div>
         </div>
+        {/* </div> */}
 
         {/* Visual — one baked-in image (phones + floating cards). Desktop and
             mobile use different crops; only one shows per breakpoint. */}

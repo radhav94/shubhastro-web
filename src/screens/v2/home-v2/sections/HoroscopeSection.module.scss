@@ -13,13 +13,13 @@ $muted: #6b5546;
   position: relative;
   overflow: hidden;
   margin: 28px 0;
-  padding: 32px;
+  padding: 16px;
   border-radius: 24px;
   // background: linear-gradient(180deg, #fff6ee 0%, #fce0cb 100%);
   border: 1px solid rgba(255, 255, 255, 0.8);
 
   @media (max-width: 767px) {
-    padding: 20px 14px;
+    // padding: 20px 14px;
     border-radius: 18px;
     margin: 20px 0;
 
@@ -62,7 +62,7 @@ $muted: #6b5546;
   background: #fff;
   color: $brand-dark;
   font-size: 0.6rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   box-shadow: 0 2px 8px rgba(191, 118, 66, 0.15);
@@ -71,13 +71,13 @@ $muted: #6b5546;
 
 .title {
   margin: 0 0 6px;
-  font-size: 2.1rem;
-  font-weight: 800;
+  font-size: 1.8rem;
+  font-weight: 600;
   line-height: 1.1;
   color: $ink;
 
   @media (max-width: 767px) {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
 }
 
@@ -239,8 +239,8 @@ $muted: #6b5546;
 
 .signName {
   margin: 10px 0px 20px 0px;
-  font-size: 2.6rem;
-  font-weight: 800;
+  font-size: 2rem;
+  font-weight: 600;
   color: $ink;
   line-height: 1;
 
@@ -358,9 +358,9 @@ $muted: #6b5546;
   color: rgba(212, 52, 0, 0.55);
   font-family: Georgia, "Times New Roman", serif;
   font-size: 2.2rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 0.5;
-  height: 22px;
+  height: 5px;
   margin-bottom: 12px;
 }
 
@@ -537,7 +537,7 @@ $muted: #6b5546;
   background: linear-gradient(90deg, $brand 0%, $brand-dark 100%);
   color: #fff;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: none;
 
@@ -567,7 +567,7 @@ $muted: #6b5546;
   color: $brand-dark;
   font-family: inherit;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: none;
 
@@ -586,7 +586,7 @@ $muted: #6b5546;
   border: none;
   color: $brand-dark;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -661,7 +661,7 @@ $muted: #6b5546;
   margin: 0;
   max-width: 100%;
   font-size: 0.74rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $ink;
   text-align: center;
   white-space: nowrap;

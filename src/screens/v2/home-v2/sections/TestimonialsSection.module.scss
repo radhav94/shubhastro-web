@@ -12,13 +12,12 @@ $muted: #6b5546;
   position: relative;
   overflow: hidden;
   margin: 28px 0;
-  padding: 48px 32px 32px;
+  padding: 25px 16px 16px 16px;
   border-radius: 24px;
   background: linear-gradient(180deg, #fff5ec 0%, #fbd9c0 100%);
   border: 1px solid rgba(255, 255, 255, 0.8);
 
   @media (max-width: 767px) {
-    padding: 32px 16px 20px;
     border-radius: 18px;
     margin: 20px 0;
   }
@@ -59,7 +58,7 @@ $muted: #6b5546;
   background: #fff;
   color: $brand-dark;
   font-size: 0.62rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   box-shadow: 0 2px 8px rgba(191, 118, 66, 0.15);
@@ -68,13 +67,13 @@ $muted: #6b5546;
 
 .title {
   margin: 0 0 12px;
-  font-size: 2.4rem;
-  font-weight: 800;
+  font-size: 1.8rem;
+  font-weight: 600;
   line-height: 1.1;
   color: $ink;
 
   @media (max-width: 767px) {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
   }
 }
 
@@ -311,7 +310,7 @@ $muted: #6b5546;
   display: inline-flex;
   align-items: center;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $brand-dark;
   /* Soft peach pill — background + padding + rounded corners, as in the design. */
   background: rgba(247, 88, 1, 0.1);
@@ -429,7 +428,7 @@ $muted: #6b5546;
 .personName {
   margin: 0;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $ink;
 }
 
@@ -575,7 +574,7 @@ $muted: #6b5546;
 .trustTitle {
   margin: 0;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $ink;
 }
 
