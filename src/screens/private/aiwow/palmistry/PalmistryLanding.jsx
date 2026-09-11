@@ -174,17 +174,26 @@ const PalmistryLanding = () => {
         <h2 className={styles.sectionTitle}>Before you start</h2>
 
         <div className={styles.instructionsCard}>
-          <div className={styles.imageWrapper}>
+          {/* Tappable — viewfinder framing that was collecting dead clicks.
+              See the note on .imageWrapper in the SCSS (Clarity 15hum1k). Same
+              action as the "Use Camera" CTA below; requireHand() inside
+              handleCamera still blocks it until a hand is chosen. */}
+          <button
+            type="button"
+            className={styles.imageWrapper}
+            onClick={handleCamera}
+            aria-label="Use camera to take your photo"
+          >
             <img
               src={getAIWowInstructionImage('palmistry')}
               alt="Palm example"
               className={styles.palmImage}
             />
-            <div className={styles.frameCorner} style={{ top: 0, left: 0 }}></div>
-            <div className={styles.frameCorner} style={{ top: 0, right: 0 }}></div>
-            <div className={styles.frameCorner} style={{ bottom: 0, left: 0 }}></div>
-            <div className={styles.frameCorner} style={{ bottom: 0, right: 0 }}></div>
-          </div>
+            <span className={styles.frameCorner} style={{ top: 0, left: 0 }} aria-hidden="true" />
+            <span className={styles.frameCorner} style={{ top: 0, right: 0 }} aria-hidden="true" />
+            <span className={styles.frameCorner} style={{ bottom: 0, left: 0 }} aria-hidden="true" />
+            <span className={styles.frameCorner} style={{ bottom: 0, right: 0 }} aria-hidden="true" />
+          </button>
 
           <div className={styles.instructionsBody}>
             <span className={styles.ttsButton}>

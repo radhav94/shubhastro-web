@@ -858,12 +858,25 @@ export default function useChat({
       return;
     }
 
+    // Give the astrologer's message a client id + timestamp so it can
+    // participate in the delivery/read tick lifecycle. Previously astroReply
+    // added a bubble with no `clientMsgId`, `dateTime`, `seq`, or `status`, so:
+    //   - TickIndicator hit its `default` case and rendered a static neutral
+    //     double-tick that never advanced, and
+    //   - the customer's `message:read_ack` (which matches sent messages by
+    //     `seq` OR the `lastReadAt` timestamp watermark) could never match it,
+    //     because there was no `seq` AND no `dateTime` to compare against.
+    // That's why the astrologer's own messages never showed delivered/read.
+    const clientMsgId = newClientMsgId();
+    const nowIso = new Date().toISOString();
+
     voiceSocket.emit("astrologer_sent_message", {
       sender: astrologerId,
       roomId,
       userId,
       astrologerId,
       message: text,
+      clientMsgId,
     });
 
     addMessage({
@@ -871,6 +884,11 @@ export default function useChat({
       sender: "astro",
       isSender: !isUserSide,
       time: formatTime(),
+      // Protocol fields so the tick lifecycle works (single tick now → grey
+      // ✓✓ on the customer's `message:delivered` → blue ✓✓ on `message:read`).
+      clientMsgId,
+      dateTime: nowIso,
+      status: MESSAGE_STATUS.SENT,
     });
   };
 

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Sparkles,
   Star,
   BadgeCheck,
   ChevronLeft,
@@ -240,9 +239,6 @@ const TestimonialsSection = ({ sectionData }) => {
       <div className={styles.inner}>
         {/* Header */}
         <div className={styles.header}>
-          <span className={styles.badge}>
-            <Sparkles size={12} aria-hidden="true" /> Real Experiences
-          </span>
           <h2 className={styles.title}>
             {heading ? (
               renderHeading(heading)

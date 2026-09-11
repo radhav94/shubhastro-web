@@ -33,6 +33,13 @@ export const ChatProvider = ({ children }) => {
   const timerRef = useRef(null);
   const activeChatRef = useRef(null);
   const lastAstrologerInfoRef = useRef(null);
+  const isReconnectingRef = useRef(false);
+
+  // Keep reconnecting ref in sync so the reconnect timeout can bail out early
+  // if the reconnect already resolved.
+  useEffect(() => {
+    isReconnectingRef.current = isReconnecting;
+  }, [isReconnecting]);
 
   // Keep ref in sync with state, and remember last astrologer info
   useEffect(() => {
@@ -141,6 +148,25 @@ export const ChatProvider = ({ children }) => {
     }
   }, [persistChatState, clearPersistedChatState]);
 
+  /* ================= CHAT-ENDED NOTIFICATION ================= */
+  // Surfaces the end-of-chat notification to the user. Used when a SYSTEM
+  // chat:ended reconnect attempt fails (astrologer genuinely offline) — the
+  // WaitingQueueContext global handler skips SYSTEM ends, so without this the
+  // user would get no feedback that the astrologer went offline.
+  const notifyChatEnded = useCallback((data = {}) => {
+    if (data?.astrologerId === PANDIT_AI_ID) return;
+
+    setActiveChat(null);
+    stopTimer();
+    setChatSeconds(0);
+
+    rht("Astrologer is offline. Chat ended.", { icon: "⚠️" });
+
+    // Let page-level components (ChatWindow) disable input and open feedback.
+    window.dispatchEvent(new CustomEvent("global:chat:ended", { detail: data }));
+    window.dispatchEvent(new Event("walletBalanceUpdated"));
+  }, [setActiveChat]);
+
   /* ================= RECONNECTION (gated by RECONNECTION_ENABLED) ================= */
   const reconnectToChat = useCallback((fallbackChat = null) => {
     if (!RECONNECTION_ENABLED) {
@@ -210,8 +236,17 @@ export const ChatProvider = ({ children }) => {
       console.log("[ChatReconnect]   → event data:", JSON.stringify(data));
       console.log("[ChatReconnect]   → message:", data?.message);
       console.log("[ChatReconnect]   → reason:", data?.reason);
-      console.log("[ChatReconnect]   → Treating as chat ended, clearing state");
+      console.log("[ChatReconnect]   → Treating as chat ended, notifying user & clearing state");
       cleanupAll();
+      // The SYSTEM chat:ended → reconnect path (useChatWindow) is silent by design;
+      // when that reconnect fails the astrologer is genuinely gone (offline). Surface
+      // the end-of-chat notification here so the user isn't left with no feedback.
+      notifyChatEnded({
+        ...data,
+        endedBy: "ASTROLOGER",
+        astrologerId: reconnectChat.astrologerId,
+        roomId: reconnectChat.roomId,
+      });
       clearPersistedChatState();
     };
 
@@ -278,8 +313,14 @@ export const ChatProvider = ({ children }) => {
           startTimer();
         }
       } else {
-        console.log("[ChatReconnect] 💀 Chat is no longer active — clearing state");
+        console.log("[ChatReconnect] 💀 Chat is no longer active — notifying user & clearing state");
         console.log("[ChatReconnect]   → reason:", data?.reason);
+        notifyChatEnded({
+          ...data,
+          endedBy: "ASTROLOGER",
+          astrologerId: reconnectChat.astrologerId,
+          roomId: reconnectChat.roomId,
+        });
         clearPersistedChatState();
       }
     };
@@ -290,12 +331,21 @@ export const ChatProvider = ({ children }) => {
 
     // Timeout — if backend doesn't respond in 30s, give up
     setTimeout(() => {
-      console.log("[ChatReconnect] ⏰ 30s timeout reached — giving up");
+      // If the reconnect already resolved, the listeners were cleaned up; don't
+      // fire a spurious "ended" notification on top of a successful reconnect.
+      if (!isReconnectingRef.current) return;
+      console.log("[ChatReconnect] ⏰ 30s timeout reached — giving up, notifying user");
       voiceSocket.offAny(debugAnyEvent);
       cleanupAll();
+      notifyChatEnded({
+        endedBy: "ASTROLOGER",
+        astrologerId: reconnectChat.astrologerId,
+        roomId: reconnectChat.roomId,
+        reason: "reconnect_timeout",
+      });
       clearPersistedChatState();
     }, 30000);
-  }, [restoreChatState, clearPersistedChatState, persistChatState, setActiveChat]);
+  }, [restoreChatState, clearPersistedChatState, persistChatState, setActiveChat, notifyChatEnded]);
 
   /* ================= SOCKET CONNECTION & ACTIVITY ================= */
   useEffect(() => {
@@ -394,12 +444,10 @@ export const ChatProvider = ({ children }) => {
         }
       } else if (data && data.active === false) {
         console.log("[ChatContext] ❌ Auto-reconnect failed, chat ended:", data?.reason);
-        // Chat ended during disconnect - clear state
-        // Dispatch global:chat:ended BEFORE clearing activeChat so ChatWindow
-        // can set openFeedback and prevent redirect
-        window.dispatchEvent(new CustomEvent("global:chat:ended", { detail: { ...data, astrologerId: activeChatRef.current?.astrologerId } }));
-        setActiveChat(null);
-        stopTimer();
+        // Chat ended during disconnect (astrologer offline) — notify the user.
+        // notifyChatEnded shows the offline toast, clears state, and dispatches
+        // global:chat:ended so ChatWindow opens feedback and disables input.
+        notifyChatEnded({ ...data, astrologerId: activeChatRef.current?.astrologerId });
       }
     };
 

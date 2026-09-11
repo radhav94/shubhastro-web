@@ -18,15 +18,16 @@ import walletBlc from "../../../assets/images/wallet-icon.png";
  * state and no spinner, the gap between tap and navigation looked like nothing
  * happening — which is what Clarity logged as a dead click on the ₹20 option.
  */
-const RechargePack = ({ actualPrice, discountedPrice, Active }) => (
-  <div className={styles.rechargeAmountWrapper}>
-    <div className={`${styles.rechargeAmount} ${Active ? styles.active : ""}`}>
-      <div className={styles.price}>₹ {actualPrice}</div>
-      {discountedPrice > 0 && (
-        <span className={styles.extra}>Bonus ₹ {discountedPrice}</span>
-      )}
-    </div>
-  </div>
+const RechargePack = ({ actualPrice, discountedPrice }) => (
+  // Card content only. The card styling + active state now live on the parent
+  // <Link className={styles.linkWrapper}> (see Payment.module.scss), so the card
+  // is a single element (the anchor) instead of an anchor wrapping a styled div.
+  <>
+    <div className={styles.price}>₹ {actualPrice}</div>
+    {discountedPrice > 0 && (
+      <span className={styles.extra}>Bonus ₹ {discountedPrice}</span>
+    )}
+  </>
 );
 
 const Payment = () => {
@@ -202,7 +203,7 @@ const Payment = () => {
                 to="/recharge/payment"
                 state={{ planId: pack?._id, returnUrl }}
                 key={pack._id}
-                className={styles.linkWrapper}
+                className={`${styles.linkWrapper} ${pendingPlanId === pack._id ? styles.active : ""}`}
                 aria-busy={pendingPlanId === pack._id}
                 onClick={() => {
                   // Paint the pressed state before the lazy route chunk starts
@@ -211,7 +212,7 @@ const Payment = () => {
                   trackEvent("recharge_amount_selected", { amount: pack?.actualPrice, is_preset: true });
                 }}
               >
-                <RechargePack {...pack} Active={pendingPlanId === pack._id} />
+                <RechargePack {...pack} />
               </Link>
             ))}
           </div>

@@ -33,7 +33,7 @@ import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
-import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, AstrologersByCategorySection, DiscoverMoreSectionV2, LiveSessionCard, HoroscopeSection, TestimonialsSection } from "./sections";
+import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, AstrologersByCategorySection, DiscoverMoreSectionV2, LiveSessionCard, HoroscopeSection, TestimonialsSection, AppDownloadSection } from "./sections";
 
 // Below-the-fold components (static — shared with many other pages)
 import ProfileModals from "../../private/kundli/components/ProfileModals";
@@ -1211,19 +1211,56 @@ const HomeV2 = () => {
           }
         })}
 
-        {/* Daily Horoscope + Testimonials — both driven by the CMS "horoscope"
-            and "testimonials" sections in the home payload; rendered once all
-            sections have paged in so they sit at the end of the home feed. */}
-        {!hasMoreSections && (
-          <>
-            <HoroscopeSection
-              sectionData={(homeSections || []).find((s) => s?.display_type === "horoscope")}
-            />
-            <TestimonialsSection
-              sectionData={(homeSections || []).find((s) => s?.display_type === "testimonials")}
-            />
-          </>
-        )}
+        {/* Daily Horoscope + Testimonials — driven by the CMS "horoscope" and
+            "testimonials" sections in the home payload. Rendered once all
+            sections have paged in so they sit at the end of the feed. Each is
+            shown only if its section exists in the payload, and the two are
+            ordered by the API's `list_order` (so the CMS controls which comes
+            first). */}
+        {!hasMoreSections && (() => {
+          const horoscopeSection = (homeSections || []).find(
+            (s) => s?.slug === "horoscope" || s?.display_type === "horoscope"
+          );
+          const testimonialsSection = (homeSections || []).find(
+            (s) => s?.slug === "testimonials" || s?.display_type === "testimonials"
+          );
+
+          const orderOf = (s) =>
+            Number.isFinite(Number(s?.list_order)) ? Number(s.list_order) : Infinity;
+
+          const blocks = [];
+          if (horoscopeSection) {
+            blocks.push({
+              key: "horoscope",
+              order: orderOf(horoscopeSection),
+              node: <HoroscopeSection key="horoscope" sectionData={horoscopeSection} />,
+            });
+          }
+          if (testimonialsSection) {
+            blocks.push({
+              key: "testimonials",
+              order: orderOf(testimonialsSection),
+              node: <TestimonialsSection key="testimonials" sectionData={testimonialsSection} />,
+            });
+          }
+
+          // Neither present → render nothing.
+          if (blocks.length === 0) return null;
+
+          // Respect the CMS order; ties keep declaration order (horoscope first).
+          blocks.sort((a, b) => a.order - b.order);
+
+          return <>{blocks.map((b) => b.node)}</>;
+        })()}
+
+        {/* App download promo banner — driven by the CMS "get-app" section;
+            only shown when that section is present in the payload. */}
+        {!hasMoreSections && (() => {
+          const getAppSection = (homeSections || []).find(
+            (s) => s?.slug === "get-app" || s?.display_type === "get-app"
+          );
+          return getAppSection ? <AppDownloadSection sectionData={getAppSection} /> : null;
+        })()}
 
         {/*
           Trigger for the next page of CMS sections. Zero-height and aria-hidden:

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, Heart, Briefcase, Activity, Coins, ChevronRight, Palette, Hash } from "lucide-react";
+import { Sparkles, ChevronRight } from "lucide-react";
 import {
   useFetchDailyQuery,
   useFetchTomorrowQuery,
@@ -8,6 +8,14 @@ import {
   useFetchYearlyQuery,
 } from "../../../../redux/api/horoscope/zodiacApi";
 import { zodiacSignImages } from "../../../private/horoscope/zodiac";
+import luckyNumberIcon from "../../../../assets/horoscope/lucky-number.png";
+import luckyColorIcon from "../../../../assets/horoscope/lucky-color.png";
+import pillarLoveIcon from "../../../../assets/horoscope/pillar-love.png";
+import pillarCareerIcon from "../../../../assets/horoscope/pillar-career.png";
+import pillarHealthIcon from "../../../../assets/horoscope/pillar-health.png";
+import pillarMoneyIcon from "../../../../assets/horoscope/pillar-money.png";
+import readFullIcon from "../../../../assets/horoscope/read-full.png";
+import discussUserIcon from "../../../../assets/horoscope/discuss-user.png";
 import styles from "./HoroscopeSection.module.scss";
 
 /* The 12 signs in API order (id = the `zodiac` query param), with Hindi (Vedic)
@@ -48,10 +56,10 @@ const scoreLabel = (score) => {
    names for each — the API's naming varies (relationship vs love, finances vs
    finance/money), so we try each and use the first that carries a score. */
 const PILLARS = [
-  { keys: ["relationship", "love", "relationships"], label: "Love", icon: Heart, tone: "Love" },
-  { keys: ["career", "profession", "work"], label: "Career", icon: Briefcase, tone: "Career" },
-  { keys: ["health", "physique", "wellbeing"], label: "Health", icon: Activity, tone: "Health" },
-  { keys: ["finances", "finance", "money", "wealth"], label: "Money", icon: Coins, tone: "Money" },
+  { keys: ["relationship", "love", "relationships"], label: "Love", img: pillarLoveIcon, tone: "Love" },
+  { keys: ["career", "profession", "work"], label: "Career", img: pillarCareerIcon, tone: "Career" },
+  { keys: ["health", "physique", "wellbeing"], label: "Health", img: pillarHealthIcon, tone: "Health" },
+  { keys: ["finances", "finance", "money", "wealth"], label: "Money", img: pillarMoneyIcon, tone: "Money" },
 ];
 
 /* Read a pillar's 0–100 score from bot_response, tolerant of key-name and shape
@@ -109,6 +117,21 @@ const buildSigns = (sectionData) => {
       icon: match?.signLogoUrl || match?.signIllustrationUrl || zodiacSignImages[s.key],
     };
   });
+};
+
+/* Render `text` with every occurrence of `word` (case-insensitive) wrapped in
+   the orange .titleAccent span — used so the CMS title accents "Horoscope"
+   like the hardcoded fallback. */
+const accentWord = (text, word) => {
+  const str = String(text || "");
+  const parts = str.split(new RegExp(`(${word})`, "ig"));
+  return parts.map((part, i) =>
+    part.toLowerCase() === word.toLowerCase() ? (
+      <span key={i} className={styles.titleAccent}>{part}</span>
+    ) : (
+      part
+    )
+  );
 };
 
 const HoroscopeSection = ({ sectionData }) => {
@@ -228,9 +251,9 @@ const HoroscopeSection = ({ sectionData }) => {
   // The design's left card shows just two lucky facts — Lucky Number and Lucky
   // Color — side by side (not the earlier 4-item grid with Lucky Time / Planet).
   const LUCKY = [
-    { icon: Hash, label: "Lucky Number", value: luckyNumber ?? "—" },
+    { img: luckyNumberIcon, label: "Lucky Number", value: luckyNumber ?? "—" },
     {
-      icon: Palette,
+      img: luckyColorIcon,
       label: "Lucky Color",
       value: titleCaseColor(luckyColor) || "—",
       color: luckyColorCode,
@@ -247,7 +270,7 @@ const HoroscopeSection = ({ sectionData }) => {
           </span>
           <h2 className={styles.title}>
             {heading ? (
-              heading
+              accentWord(heading, "Horoscope")
             ) : (
               <>
                 Your Daily <span className={styles.titleAccent}>Horoscope</span> Reading
@@ -293,11 +316,10 @@ const HoroscopeSection = ({ sectionData }) => {
 
             <div className={styles.luckyGrid}>
               {LUCKY.map((item) => {
-                const Icon = item.icon;
                 return (
                   <div className={styles.luckyItem} key={item.label}>
                     <span className={styles.luckyIcon}>
-                      <Icon size={16} aria-hidden="true" />
+                      <img src={item.img} alt="" className={styles.luckyIconImg} aria-hidden="true" />
                     </span>
                     <div>
                       <p className={styles.luckyLabel}>{item.label}</p>
@@ -331,7 +353,6 @@ const HoroscopeSection = ({ sectionData }) => {
               four quarters (yearScores). */}
           <div className={styles.bars}>
             {PILLARS.map((pillar) => {
-              const Icon = pillar.icon;
               const score =
                 period === "year"
                   ? (yearScores?.[pillar.keys[0]] ?? 0)
@@ -340,7 +361,7 @@ const HoroscopeSection = ({ sectionData }) => {
                 <div className={styles.barRow} key={pillar.label}>
                   <span className={styles.barLabel}>
                     <span className={`${styles.barLabelIcon} ${styles[`iconTint${pillar.tone}`]}`}>
-                      <Icon size={13} aria-hidden="true" />
+                      <img src={pillar.img} alt="" className={styles.barLabelIconImg} aria-hidden="true" />
                     </span>
                     {pillar.label}
                   </span>
@@ -366,6 +387,7 @@ const HoroscopeSection = ({ sectionData }) => {
               to={fullHoroscopeHref}
               className={styles.ctaPrimary}
             >
+              <img src={readFullIcon} alt="" className={styles.ctaIcon} aria-hidden="true" />
               Read Full Horoscope <ChevronRight size={16} aria-hidden="true" />
             </Link>
             <button
@@ -376,6 +398,7 @@ const HoroscopeSection = ({ sectionData }) => {
               <Sparkles size={14} aria-hidden="true" /> Ask Pandit AI
             </button>
             <Link to="/astrologers" className={styles.ctaLink}>
+              <img src={discussUserIcon} alt="" className={styles.ctaLinkIcon} aria-hidden="true" />
               Discuss Your Horoscope
             </Link>
           </div>

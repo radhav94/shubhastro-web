@@ -61,7 +61,7 @@ const DUMMY_COMBOS = [
   },
 ];
 
-const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, userId, socketSendFn }) => {
+const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, userId, socketSendFn, replyTo, onReplySent }) => {
   const navigate = useNavigate();
   const { data, isLoading } = useGetAllGiftsQuery();
   const [sendGift, { isLoading: isSending }] = useSendGiftMutation();
@@ -133,12 +133,18 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
           giftData: giftDataToSend
         });
       
+        // If the gift is a reply to a message, forward the quoted message id so
+        // the server stores a reply snapshot (any message type can be a reply).
+        const replyToId = replyTo?.messageId || replyTo?._id || null;
+
         // Send the gift message through socket with type "gift"
         // Use custom socketSendFn if provided (for voice/video calls using voiceSocket),
         // otherwise fall back to socketService (for regular chat)
         let sendResult;
         if (socketSendFn) {
-          sendResult = socketSendFn(giftMessage, "gift");
+          // The chat hook's sendMessage(text, type, kundliID, options) accepts a
+          // { replyTo } options object as its 4th arg.
+          sendResult = socketSendFn(giftMessage, "gift", null, replyTo ? { replyTo } : {});
         } else {
           sendResult = socketService.sendMessage({
             roomId,
@@ -146,9 +152,13 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
             astrologerId,
             message: giftMessage,
             type: "gift",
-            kundliId: null
+            kundliId: null,
+            ...(replyToId ? { replyToId } : {}),
           });
         }
+
+        // Clear the reply target in the parent once the gift reply is emitted.
+        if (replyToId) onReplySent?.();
 
         // Check if there was an error sending the message
         if (sendResult?.error) {

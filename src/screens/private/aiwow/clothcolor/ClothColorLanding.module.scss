@@ -246,6 +246,12 @@
   }
 }
 
+/* A real <button>, not a <div> — the corner brackets make this read as a
+   viewfinder, so it collected taps that went nowhere. See the long note on
+   .imageWrapper in FaceReadingLanding.module.scss (Clarity 15hum1k); the same
+   markup is used on all six AI Wow landings. It now does what the "Use Camera"
+   CTA does. `display: flex` and the tinted background are kept as they were —
+   the added properties are only the button resets. */
 .imageWrapper {
   position: relative;
   border-radius: 0.75rem;
@@ -257,6 +263,20 @@
   justify-content: center;
   max-width: 280px;
   margin: 0 auto;
+  width: 100%;
+  padding: 0;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #F75801;
+    outline-offset: 3px;
+  }
 }
 
 .clothesImage {
