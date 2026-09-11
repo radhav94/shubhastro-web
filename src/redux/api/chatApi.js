@@ -57,9 +57,13 @@ export const chatApi = privateRequestNew.injectEndpoints({
     }),
 
     getChatHistory: builder.query({
-      query: ({ userId, page = 1, limit = 30 }) => ({
+      query: ({ userId, page = 1, limit = 30, isAssistant = true }) => ({
         url: `chat/messages/inbox/${userId}`,
-        params: { page, limit },
+        // isAssistant=true is required for the Virtual Assistant window: opening
+        // the chat (this GET) is what the backend uses to auto-mark the other
+        // party's messages delivered + read, which flips the sender's ticks to
+        // blue. No separate "mark read" API is needed (guide §1).
+        params: { page, limit, isAssistant },
       }),
       // Cache key is just userId so all pages merge into one entry
       serializeQueryArgs: ({ queryArgs }) => queryArgs.userId,
@@ -84,11 +88,24 @@ export const chatApi = privateRequestNew.injectEndpoints({
 
     // Virtual Assistant - send message
     sendVirtualAssistantMessage: builder.mutation({
-      query: ({ astrologerId, type, sender, message, kundliId, kundliName }) => ({
+      query: ({ astrologerId, type, sender, message, kundliId, kundliName, replyToId, parentType = "chat" }) => ({
         url: "chat/messages/create",
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: { astrologerId, type, sender, message, kundliId, kundliName, isAssistant: true },
+        // replyToId is optional (guide §2): only sent when this message is a
+        // reply. An invalid/foreign replyToId is safely ignored by the backend.
+        // parentType defaults to "chat" per the guide's create payload example.
+        body: {
+          astrologerId,
+          type,
+          sender,
+          message,
+          kundliId,
+          kundliName,
+          parentType,
+          isAssistant: true,
+          ...(replyToId ? { replyToId } : {}),
+        },
       }),
     }),
 

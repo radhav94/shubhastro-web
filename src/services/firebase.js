@@ -5,9 +5,9 @@
  * --------------------------------------
  * This module used to `import { initializeApp } from "firebase/app"` and
  * `getMessaging` from "firebase/messaging" at the top level, and call
- * initializeApp() at module scope. Five modules import from here —
+ * initializeApp() at module scope. Five modules import from here â€”
  * fcmService, OtpVerification, OTPScreen, useTruecallerLogin,
- * useGuestChatAuth and GuestKundliAuthModal — and one of those
+ * useGuestChatAuth and GuestKundliAuthModal â€” and one of those
  * (GuestKundliAuthModal) sits in the eager graph of the "/" landing screen
  * via HomeV2 -> useGuestConnectFlow. So the whole Firebase SDK was compiled
  * into the entry chunk that every first-time visitor blocks on before the
@@ -115,37 +115,6 @@ const loadMessaging = () => {
 };
 
 /**
- * Ensures our own /firebase-messaging-sw.js is registered AND active, and
- * resolves to its registration.
- *
- * Why this exists
- * ---------------
- * getToken() needs an active service worker. When it is called without an
- * explicit `serviceWorkerRegistration`, Firebase falls back to auto-registering
- * its own worker and racing its activation in the same tick as the token
- * request. That was masked while initializeApp()/getMessaging() ran at module
- * scope (the eager landing-page import warmed the worker long before any
- * login), but now that the SDK is loaded on demand the very first
- * requestFCMToken() during first-time login runs before any worker is active,
- * so getToken() intermittently returns null / rejects and no token ever reaches
- * the verify-OTP payload — the device is never registered for push.
- *
- * Registering here and awaiting `navigator.serviceWorker.ready` gives getToken()
- * a settled registration to use, removing the race regardless of call ordering.
- */
-const ensureServiceWorker = async () => {
-    if (!("serviceWorker" in navigator)) return undefined;
-    try {
-        await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-        // ready resolves only once a worker for this scope is active.
-        return await navigator.serviceWorker.ready;
-    } catch (err) {
-        console.warn("[Firebase] Service worker registration failed:", err?.message);
-        return undefined;
-    }
-};
-
-/**
  * Requests notification permission and returns the FCM token.
  * Returns null if permission denied or messaging unsupported.
  */
@@ -161,11 +130,7 @@ export const requestFCMToken = async () => {
             return null;
         }
 
-        const serviceWorkerRegistration = await ensureServiceWorker();
-        const token = await getToken(messaging, {
-            vapidKey: VAPID_KEY,
-            ...(serviceWorkerRegistration ? { serviceWorkerRegistration } : {}),
-        });
+        const token = await getToken(messaging, { vapidKey: VAPID_KEY });
         if (token) {
             console.log("FCM Token received");
             return token;
@@ -176,7 +141,7 @@ export const requestFCMToken = async () => {
     } catch (error) {
         // Handle IndexedDB version mismatch (stale service worker)
         if (error?.name === "VersionError") {
-            console.warn("FCM IndexedDB version conflict — clearing and retrying");
+            console.warn("FCM IndexedDB version conflict â€” clearing and retrying");
             try {
                 const databases = await indexedDB.databases();
                 const fcmDbs = databases.filter(db => db.name?.includes("firebase-messaging"));
@@ -190,11 +155,7 @@ export const requestFCMToken = async () => {
                 for (const reg of registrations) {
                     await reg.update();
                 }
-                const serviceWorkerRegistration = await ensureServiceWorker();
-                const token = await getToken(messaging, {
-                    vapidKey: VAPID_KEY,
-                    ...(serviceWorkerRegistration ? { serviceWorkerRegistration } : {}),
-                });
+                const token = await getToken(messaging, { vapidKey: VAPID_KEY });
                 if (token) {
                     console.log("FCM Token received after DB reset");
                     return token;
@@ -208,38 +169,61 @@ export const requestFCMToken = async () => {
     }
 };
 
-/**
- * Listens for foreground messages and calls the provided callback.
- * Returns an unsubscribe function or no-op if messaging unavailable.
+/*
+ * Foreground-message fan-out.
  *
- * Stays synchronous-returning even though the SDK now loads asynchronously:
- * callers treat the return value as an unsubscribe handle they may invoke at
- * any time, including before the SDK has finished loading. Unsubscribing early
- * sets a flag that both prevents the listener being attached and tears it down
- * if the race went the other way.
+ * IMPORTANT: @firebase/messaging's onMessage() stores a SINGLE handler
+ * (messaging.onMessageHandler = nextOrObserver) — calling it twice OVERWRITES
+ * the first. So we must never call the SDK's onMessage more than once, or the
+ * last subscriber silently steals every foreground push from the earlier ones
+ * (this is exactly how the fcmService notification toast disappeared once a
+ * second subscriber — the Virtual Assistant auto-refresh — was added).
+ *
+ * Instead we register the SDK handler exactly once and dispatch each payload to
+ * a Set of subscribers. Every consumer gets every message, and unsubscribing
+ * only removes that consumer.
  */
-export const onForegroundMessage = (callback) => {
-    let cancelled = false;
-    let detach = null;
+const foregroundSubscribers = new Set();
+let foregroundHandlerAttached = false;
+
+const ensureForegroundHandler = () => {
+    if (foregroundHandlerAttached) return;
+    foregroundHandlerAttached = true;
 
     loadMessaging().then((fb) => {
-        if (!fb || cancelled) return;
-        const { messaging, onMessage } = fb;
-        detach = onMessage(messaging, (payload) => {
-            console.log("Foreground message received:", payload);
-            callback(payload);
-        });
-        if (cancelled) {
-            detach();
-            detach = null;
+        if (!fb) {
+            // Messaging unavailable — allow a later retry if the SDK becomes
+            // available (it won't in practice, but keep the flag honest).
+            foregroundHandlerAttached = false;
+            return;
         }
+        const { messaging, onMessage } = fb;
+        onMessage(messaging, (payload) => {
+            console.log("Foreground message received:", payload);
+            foregroundSubscribers.forEach((cb) => {
+                try {
+                    cb(payload);
+                } catch (err) {
+                    console.warn("[Firebase] foreground subscriber threw:", err);
+                }
+            });
+        });
     });
+};
+
+/**
+ * Listens for foreground messages and calls the provided callback.
+ * Returns an unsubscribe function.
+ *
+ * Multiple callers are supported: each receives every foreground push. The
+ * underlying SDK handler is attached only once (see the note above on why a
+ * second onMessage() call would clobber the first).
+ */
+export const onForegroundMessage = (callback) => {
+    foregroundSubscribers.add(callback);
+    ensureForegroundHandler();
 
     return () => {
-        cancelled = true;
-        if (detach) {
-            detach();
-            detach = null;
-        }
+        foregroundSubscribers.delete(callback);
     };
 };

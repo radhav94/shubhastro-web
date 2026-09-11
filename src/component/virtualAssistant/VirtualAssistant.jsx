@@ -7,13 +7,17 @@ import {
   IoAttach,
   IoRefresh,
   IoChatbubbleEllipses,
+  IoCheckmark,
   IoCheckmarkDone,
+  IoTimeOutline,
+  IoAlertCircleOutline,
   IoDownload,
 } from "react-icons/io5";
-import { FaFileAlt } from "react-icons/fa";
+import { FaFileAlt, FaReply } from "react-icons/fa";
 import { GrReactjs } from "react-icons/gr";
 import styles from "./VirtualAssistant.module.scss";
 import useVirtualAssistant from "./useVirtualAssistant";
+import { MESSAGE_STATUS, replyPreviewLabel } from "../../utils/helper/chatProtocol";
 import dayjs from "dayjs";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
 import IframeModal from "../../screens/private/home/components/chats/IframeModal";
@@ -26,8 +30,35 @@ import PdfIcon from "../../assets/chat/PDF.svg";
 import DocIcon from "../../assets/chat/DOC.svg";
 import XlsIcon from "../../assets/chat/XLS.svg";
 
+// WhatsApp-style delivery ticks driven by each message's status (guide §1/§4):
+//   pending   → clock         (sending)
+//   sent      → single grey ✓ (stored on server, not yet delivered)
+//   delivered → double grey ✓✓
+//   read      → double blue ✓✓
+//   failed    → alert (tap to retry)
+const TickIndicator = ({ status }) => {
+  switch (status) {
+    case MESSAGE_STATUS.PENDING:
+      return <IoTimeOutline className={styles.checkmark} title="Sending" />;
+    case MESSAGE_STATUS.FAILED:
+      return <IoAlertCircleOutline className={`${styles.checkmark} ${styles.checkFailed}`} title="Failed — tap to retry" />;
+    case MESSAGE_STATUS.SENT:
+      return <IoCheckmark className={styles.checkmark} title="Sent" />;
+    case MESSAGE_STATUS.DELIVERED:
+      return <IoCheckmarkDone className={styles.checkmark} title="Delivered" />;
+    case MESSAGE_STATUS.READ:
+      return <IoCheckmarkDone className={`${styles.checkmark} ${styles.checkRead}`} title="Read" />;
+    default:
+      // Legacy messages with no status → neutral double tick as before.
+      return <IoCheckmarkDone className={styles.checkmark} />;
+  }
+};
+
 const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpen, setIsOpen, onConnect }) => {
   const [text, setText] = useState("");
+  // The message the composer is currently replying to (guide §2). Cleared on
+  // send or when the user dismisses the quoted preview.
+  const [replyTarget, setReplyTarget] = useState(null);
   const [preview, setPreview] = useState(null);
   const [previewFile, setPreviewFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -114,7 +145,8 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
     }
     if (previewFile) {
       setSendNotice(null);
-      sendImage(previewFile);
+      sendImage(previewFile, { replyTo: replyTarget });
+      setReplyTarget(null);
       setPreview(null);
       setPreviewFile(null);
       setTimeout(() => inputRef.current?.focus(), 0);
@@ -131,10 +163,11 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
       return;
     }
     setSendNotice(null);
-    sendText(text);
+    sendText(text, { replyTo: replyTarget });
+    setReplyTarget(null);
     setText("");
     setTimeout(() => inputRef.current?.focus(), 0);
-  }, [text, previewFile, sendText, sendImage, sending, showSendNotice]);
+  }, [text, previewFile, sendText, sendImage, sending, showSendNotice, replyTarget]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -142,6 +175,39 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
       handleSend();
     }
   };
+
+  // Build a lightweight reply target from the tapped message. normalizeReplyTo
+  // (in the hook) accepts this shape, so text/image/kundli/gift previews all
+  // resolve correctly. Focus the composer so the reply flow feels continuous.
+  const handleReply = useCallback((msg) => {
+    setReplyTarget({
+      messageId: msg._id,
+      message: msg.message,
+      sender: msg.sender,
+      type: msg.type,
+      kundliName: msg.kundliName,
+      kundliId: msg.kundliId,
+    });
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }, []);
+
+  const cancelReply = useCallback(() => setReplyTarget(null), []);
+
+  // Tapping a quoted reply jumps to the original message it quotes. Each row
+  // carries a `data-msg-id`; find it within the chat window, scroll it into
+  // view and briefly highlight it. No-op when the original isn't on screen.
+  const jumpToMessage = useCallback((messageId) => {
+    if (!messageId) return;
+    const container = chatWindowRef.current;
+    if (!container) return;
+    const target = container.querySelector(
+      `[data-msg-id="${CSS.escape(String(messageId))}"]`
+    );
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    target.classList.add(styles.messageHighlight);
+    setTimeout(() => target.classList.remove(styles.messageHighlight), 1600);
+  }, []);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -357,11 +423,43 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
                 return (
                   <div
                     key={msg._id}
+                    data-msg-id={msg._id}
                     className={`${styles.msgRow} ${isUser ? styles.userRow : styles.assistantRow}`}
                   >
                     <div
                       className={`${styles.bubble} ${isUser ? styles.userBubble : styles.assistantBubble} ${msg._failed ? styles.failedBubble : ""}`}
                     >
+                      {/* Quoted reply preview (guide §2 "Reading a reply").
+                          Clickable: jumps to the original message it quotes. */}
+                      {msg.replyTo && (msg.replyTo.message || msg.replyTo.type) && (
+                        <div
+                          className={styles.replyQuote}
+                          role={msg.replyTo.messageId ? "button" : undefined}
+                          tabIndex={msg.replyTo.messageId ? 0 : undefined}
+                          onClick={
+                            msg.replyTo.messageId
+                              ? () => jumpToMessage(msg.replyTo.messageId)
+                              : undefined
+                          }
+                          onKeyDown={
+                            msg.replyTo.messageId
+                              ? (e) => {
+                                  if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    jumpToMessage(msg.replyTo.messageId);
+                                  }
+                                }
+                              : undefined
+                          }
+                        >
+                          <span className={styles.replyQuoteSender}>
+                            {msg.replyTo.sender === "user" ? "You" : (astrologerName || "Assistant")}
+                          </span>
+                          <span className={styles.replyQuoteText}>
+                            {replyPreviewLabel(msg.replyTo)}
+                          </span>
+                        </div>
+                      )}
                       {msg.type === "image" ? (
                         <div
                           role="button"
@@ -589,7 +687,7 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
                           {formatTime(msg.createdAt)}
                         </span>
                         {isUser && !msg._failed && (
-                          <IoCheckmarkDone className={styles.checkmark} />
+                          <TickIndicator status={msg.status} />
                         )}
                       </div>
                       {msg._failed && (
@@ -612,6 +710,21 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
                             </div>
                           )}
                         </>
+                      )}
+
+                      {/* Reply action (guide §2 "Sending a reply"). Shown on
+                          settled messages only — not optimistic/failed ones,
+                          which have no server _id to reply to. */}
+                      {!msg._failed && !msg._optimistic && (
+                        <button
+                          type="button"
+                          className={styles.replyAction}
+                          aria-label="Reply"
+                          title="Reply"
+                          onClick={() => handleReply(msg)}
+                        >
+                          <FaReply />
+                        </button>
                       )}
                     </div>
                   </div>
@@ -688,6 +801,28 @@ const VirtualAssistant = ({ astrologerId, astrologerName, astrologerImage, isOpe
               aria-live="polite"
             >
               {sendNotice.message}
+            </div>
+          )}
+          {/* Compose-bar reply preview (guide §2). Shows the quoted message the
+              next send will reply to; dismissable to cancel the reply. */}
+          {replyTarget && (
+            <div className={styles.replyComposeBar}>
+              <div className={styles.replyComposeInfo}>
+                <span className={styles.replyQuoteSender}>
+                  {replyTarget.sender === "user" ? "You" : (astrologerName || "Assistant")}
+                </span>
+                <span className={styles.replyQuoteText}>
+                  {replyPreviewLabel(replyTarget)}
+                </span>
+              </div>
+              <button
+                type="button"
+                className={styles.replyComposeCancel}
+                onClick={cancelReply}
+                aria-label="Cancel reply"
+              >
+                <IoClose size={16} />
+              </button>
             </div>
           )}
           <div className={styles.inputBar}>
