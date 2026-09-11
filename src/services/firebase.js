@@ -74,9 +74,9 @@ const loadMessaging = () => {
          * call into Java fails.
          *
          * But that gate only covered the boot path. Five other call sites reach
-         * requestFCMToken() directly and none of them checked —
+         * requestFCMToken() directly and none of them checked â€”
          * GuestKundliAuthModal, OTPScreen, OtpVerification, useTruecallerLogin
-         * and useGuestChatAuth — i.e. every sign-in and guest-auth flow. Those
+         * and useGuestChatAuth â€” i.e. every sign-in and guest-auth flow. Those
          * are exactly the paths an Instagram visitor takes, so the boot gate was
          * being bypassed by the traffic it was written for.
          *
@@ -86,7 +86,7 @@ const loadMessaging = () => {
          * Two things this buys beyond not calling a bridge that must fail:
          * the permission prompt is never attempted where it cannot be granted,
          * and the Firebase SDK chunk is never downloaded at all for in-app
-         * browser visitors — a meaningful share of traffic here, since it is
+         * browser visitors â€” a meaningful share of traffic here, since it is
          * mostly Instagram and Facebook ad clicks.
          *
          * null is the established "messaging unavailable" return; every caller
@@ -169,61 +169,38 @@ export const requestFCMToken = async () => {
     }
 };
 
-/*
- * Foreground-message fan-out.
- *
- * IMPORTANT: @firebase/messaging's onMessage() stores a SINGLE handler
- * (messaging.onMessageHandler = nextOrObserver) — calling it twice OVERWRITES
- * the first. So we must never call the SDK's onMessage more than once, or the
- * last subscriber silently steals every foreground push from the earlier ones
- * (this is exactly how the fcmService notification toast disappeared once a
- * second subscriber — the Virtual Assistant auto-refresh — was added).
- *
- * Instead we register the SDK handler exactly once and dispatch each payload to
- * a Set of subscribers. Every consumer gets every message, and unsubscribing
- * only removes that consumer.
- */
-const foregroundSubscribers = new Set();
-let foregroundHandlerAttached = false;
-
-const ensureForegroundHandler = () => {
-    if (foregroundHandlerAttached) return;
-    foregroundHandlerAttached = true;
-
-    loadMessaging().then((fb) => {
-        if (!fb) {
-            // Messaging unavailable — allow a later retry if the SDK becomes
-            // available (it won't in practice, but keep the flag honest).
-            foregroundHandlerAttached = false;
-            return;
-        }
-        const { messaging, onMessage } = fb;
-        onMessage(messaging, (payload) => {
-            console.log("Foreground message received:", payload);
-            foregroundSubscribers.forEach((cb) => {
-                try {
-                    cb(payload);
-                } catch (err) {
-                    console.warn("[Firebase] foreground subscriber threw:", err);
-                }
-            });
-        });
-    });
-};
-
 /**
  * Listens for foreground messages and calls the provided callback.
- * Returns an unsubscribe function.
+ * Returns an unsubscribe function or no-op if messaging unavailable.
  *
- * Multiple callers are supported: each receives every foreground push. The
- * underlying SDK handler is attached only once (see the note above on why a
- * second onMessage() call would clobber the first).
+ * Stays synchronous-returning even though the SDK now loads asynchronously:
+ * callers treat the return value as an unsubscribe handle they may invoke at
+ * any time, including before the SDK has finished loading. Unsubscribing early
+ * sets a flag that both prevents the listener being attached and tears it down
+ * if the race went the other way.
  */
 export const onForegroundMessage = (callback) => {
-    foregroundSubscribers.add(callback);
-    ensureForegroundHandler();
+    let cancelled = false;
+    let detach = null;
+
+    loadMessaging().then((fb) => {
+        if (!fb || cancelled) return;
+        const { messaging, onMessage } = fb;
+        detach = onMessage(messaging, (payload) => {
+            console.log("Foreground message received:", payload);
+            callback(payload);
+        });
+        if (cancelled) {
+            detach();
+            detach = null;
+        }
+    });
 
     return () => {
-        foregroundSubscribers.delete(callback);
+        cancelled = true;
+        if (detach) {
+            detach();
+            detach = null;
+        }
     };
 };
