@@ -1,40 +1,45 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useEffect, useMemo, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { skipToken } from "@reduxjs/toolkit/query";
 import {
-  Info,
-  Star,
-  Clock,
-  CalendarDays,
-  ShieldCheck,
   Sparkles,
   Download,
   Share2,
-  Gem,
-  Target,
-  TrendingUp,
-  Scale,
-  ChevronRight,
-  Search,
-  ShoppingCart,
-  Shuffle,
+  Flower2,
 } from "lucide-react";
 import { BsChatDots } from "react-icons/bs";
 import { MdOutlinePhoneInTalk } from "react-icons/md";
-import { createPortal } from "react-dom";
 
 import { useGetGemStoneReportQuery } from "../../../../redux/api/kundli/planetApi";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
+import { setForm } from "../../../../redux/kundliform/formSlice";
 import TTSButton from "../../../../component/UI/TTSButton";
 import CalcReportLoader from "../CalcReportLoader";
 import CalcBackButton from "../CalcBackButton";
 import RecommendedAstrologersModal from "../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal";
 import useRecommendationOffer from "../../../../utils/hooks/useRecommendationOffer";
 import { Toast } from "../../../../component";
-import ganpatiArt from "../../../../assets/images/muhurat/ganpati.png";
 import heroFlourish from "../../../../assets/images/rashi/decor/hero-flourish.png";
 import heroFlourishLeft from "../../../../assets/images/rashi/decor/hero-flourish-left.png";
+// Section-header + essential-tile icons (from the design).
+import hdrEssentials from "../../../../assets/gemstone-remedy/hdr-essentials.png";
+import hdrBenefits from "../../../../assets/gemstone-remedy/hdr-benefits.png";
+import hdrHealth from "../../../../assets/gemstone-remedy/hdr-health.png";
+import hdrAlternate from "../../../../assets/gemstone-remedy/hdr-alternate.png";
+import hdrAvoid from "../../../../assets/gemstone-remedy/hdr-avoid.png";
+import hdrFlaws from "../../../../assets/gemstone-remedy/hdr-flaws.png";
+import hdrTime from "../../../../assets/gemstone-remedy/hdr-time.png";
+import essPlanet from "../../../../assets/gemstone-remedy/ess-planet.png";
+import essOtherName from "../../../../assets/gemstone-remedy/ess-othername.png";
+import essFinger from "../../../../assets/gemstone-remedy/ess-finger.png";
+import essWeight from "../../../../assets/gemstone-remedy/ess-weight.png";
+import essDay from "../../../../assets/gemstone-remedy/ess-day.png";
+import essMetal from "../../../../assets/gemstone-remedy/ess-metal.png";
+import chipAlternateIcon from "../../../../assets/gemstone-remedy/chip-alternate.png";
+import chipAvoidIcon from "../../../../assets/gemstone-remedy/chip-avoid.png";
+import hdrMethods from "../../../../assets/gemstone-remedy/hdr-methods.png";
+import artSunrise from "../../../../assets/gemstone-remedy/art-sunrise.png";
+import artYantra from "../../../../assets/gemstone-remedy/art-yantra.png";
 import styles from "./GemstoneRemedy.module.scss";
 
 /*
@@ -53,28 +58,6 @@ import styles from "./GemstoneRemedy.module.scss";
   inventing a precise clock time the API never returned.
 */
 
-/*
-  The design shows five benefit tiles with distinct icons. `good_results` from
-  the API is a free-form list whose length and wording vary by gemstone, so the
-  icons are assigned by position (cycling if there are more than five) — they are
-  decorative accents, not a fixed taxonomy, so order never changes the meaning.
-*/
-const RESULT_ICONS = [ShieldCheck, Target, Sparkles, TrendingUp, Scale];
-
-// A small hosted gemstone illustration keyed by the stone name, with a graceful
-// fallback: the response carries no image, so we resolve one from the name and
-// fall back to a generic gem glyph tile if it can't be loaded.
-const GEM_IMAGE_BASE = "https://assets.shubhastro.ai/images/gemstones";
-
-const slugifyGem = (name) =>
-  String(name || "")
-    .toLowerCase()
-    .replace(/\(.*?\)/g, "")
-    .replace(/['’]/g, "")
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
 const titleCase = (value) =>
   String(value || "")
     .split(/\s+/)
@@ -83,27 +66,84 @@ const titleCase = (value) =>
     .join(" ");
 
 const GemstoneRemedy = () => {
-  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // The report is for signed-in users only. A guest who lands here directly is
-  // sent to the Kundli form, where the sign-up flow runs on submit.
-  const isLoggedIn = Boolean(localStorage.getItem("shubhtalk_customer_token"));
-  useEffect(() => {
-    if (!isLoggedIn) navigate("/kundli", { replace: true });
-  }, [isLoggedIn, navigate]);
-
+  // Data flow mirrors the in-Kundli Gemstones tab exactly: read the birth form
+  // from Redux (`state.form.kundliPayload`), turn it into the shared vedic
+  // params, and hit the same `gem-suggestion` endpoint. No login gate — the
+  // report shows whatever the shared Kundli form already produced.
   const kundliPayload = useSelector((state) => state?.form?.kundliPayload);
   const userDetails = useSelector((state) => state?.form?.userDetails);
 
-  const queryArgs = useMemo(
-    () => (kundliPayload ? buildVedicParam(kundliPayload) : null),
-    [kundliPayload]
-  );
+  // The active profile is held in the `kundli` slice and is switched from the
+  // global header profile switcher (TopHeader -> setSelectedKundli). When that
+  // changes we want this report to re-fetch. The global switcher does NOT touch
+  // the `form` slice, so we drive the query directly off `selectedKundli` when
+  // it's present, and keep the `form` slice mirrored (for the name heading and
+  // consistency with the in-Kundli tab). The saved kundli record already stores
+  // hour in 24-hour form, so we build the vedic params from it without a
+  // meridiem.
+  const selectedKundli = useSelector((state) => state?.kundli?.selectedKundli);
 
-  const { data, isLoading } = useGetGemStoneReportQuery(
-    queryArgs || skipToken,
-    { skip: !queryArgs || !isLoggedIn }
-  );
+  // Mirror the selected profile into the shared `form` slice so `userDetails`
+  // (used for the "<Name>'s Gemstone Remedy" heading) stays in sync.
+  useEffect(() => {
+    if (!selectedKundli) return;
+    const months = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ];
+    const meridiem = selectedKundli.hour >= 12 ? "PM" : "AM";
+    const hour12 =
+      selectedKundli.hour > 12
+        ? selectedKundli.hour - 12
+        : selectedKundli.hour === 0
+          ? 12
+          : selectedKundli.hour;
+
+    dispatch(
+      setForm({
+        name: selectedKundli.name,
+        gender:
+          selectedKundli.gender === "male"
+            ? "Male"
+            : selectedKundli.gender === "female"
+              ? "Female"
+              : "Others",
+        day: String(selectedKundli.day),
+        month: months[selectedKundli.month - 1],
+        year: String(selectedKundli.year),
+        hour: String(hour12),
+        minute: String(selectedKundli.min),
+        meridiem,
+        birthPlace: selectedKundli.place,
+        latitude: selectedKundli.lat,
+        longitude: selectedKundli.lon,
+        timezone: selectedKundli.tzone ?? 5.5,
+      })
+    );
+  }, [selectedKundli, dispatch]);
+
+  // Build the query args. Prefer the freshly selected profile (reacts instantly
+  // to the header switcher); fall back to whatever the shared form last held.
+  const queryArgs = useMemo(() => {
+    if (selectedKundli && selectedKundli.day != null) {
+      // Saved kundli records store hour in 24-hour form -> no meridiem.
+      return buildVedicParam({
+        day: selectedKundli.day,
+        month: selectedKundli.month,
+        year: selectedKundli.year,
+        hour: selectedKundli.hour,
+        min: selectedKundli.min,
+        lat: selectedKundli.lat,
+        lon: selectedKundli.lon,
+        tzone: selectedKundli.tzone ?? 5.5,
+      });
+    }
+    return kundliPayload ? buildVedicParam(kundliPayload) : null;
+  }, [selectedKundli, kundliPayload]);
+
+  const { data, isLoading } = useGetGemStoneReportQuery(queryArgs || skipToken);
 
   const gem = data?.response;
 
@@ -115,19 +155,45 @@ const GemstoneRemedy = () => {
   // prompt; after that a Back press leaves the report normally.
   const backOfferShownRef = useRef(false);
 
-  const [gemImgFailed, setGemImgFailed] = useState(false);
-
   const firstName = String(userDetails?.name || "").trim().split(/\s+/)[0] || "";
-
-  const gemImage = useMemo(() => {
-    if (gemImgFailed || !gem?.name) return "";
-    const slug = slugifyGem(gem.name);
-    return slug ? `${GEM_IMAGE_BASE}/${slug}.png` : "";
-  }, [gem?.name, gemImgFailed]);
 
   const goodResults = useMemo(
     () => (Array.isArray(gem?.good_results) ? gem.good_results.filter(Boolean) : []),
     [gem?.good_results]
+  );
+
+  // Redesigned sections all map straight to the gem-suggestion response fields.
+  const healthAssociations = useMemo(
+    () => (Array.isArray(gem?.diseases_cure) ? gem.diseases_cure.filter(Boolean) : []),
+    [gem?.diseases_cure]
+  );
+  const alternates = useMemo(
+    () => (Array.isArray(gem?.substitute) ? gem.substitute.filter(Boolean) : []),
+    [gem?.substitute]
+  );
+  const avoidWith = useMemo(
+    () => (Array.isArray(gem?.not_to_wear_with) ? gem.not_to_wear_with.filter(Boolean) : []),
+    [gem?.not_to_wear_with]
+  );
+  const flaws = useMemo(
+    () =>
+      (Array.isArray(gem?.flaw_results) ? gem.flaw_results : []).filter(
+        (f) => f?.flaw_type || f?.flaw_effects
+      ),
+    [gem?.flaw_results]
+  );
+  // The six "Gemstone Essentials" tiles (only those the API actually returned).
+  const essentials = useMemo(
+    () =>
+      [
+        { icon: essPlanet, label: "Planet", value: gem?.planet },
+        { icon: essOtherName, label: "Other Name", value: gem?.other_name },
+        { icon: essFinger, label: "Finger", value: gem?.finger },
+        { icon: essWeight, label: "Weight", value: gem?.weight },
+        { icon: essDay, label: "Day", value: titleCase(gem?.day) },
+        { icon: essMetal, label: "Metal", value: gem?.metal },
+      ].filter((e) => e.value),
+    [gem]
   );
 
   const ttsScript = useMemo(() => {
@@ -169,7 +235,6 @@ const GemstoneRemedy = () => {
   // No PDF pipeline here, so use the browser's print dialog ("Save as PDF").
   const handleDownload = () => window.print();
 
-  if (!isLoggedIn) return <CalcReportLoader />;
   if (!queryArgs || isLoading) return <CalcReportLoader />;
   if (!gem) return <div className={styles.empty}>No gemstone recommendation found</div>;
 
@@ -204,275 +269,180 @@ const GemstoneRemedy = () => {
       </div>
 
       <div className={styles.layout}>
-        {/* ── MAIN COLUMN ─────────────────────────────────────────────── */}
-        <div className={styles.main}>
-          {/* HERO — gemstone image + "Recommended for you" */}
+        {/* HERO lives in its own group (direct child of .layout) so that on
+            mobile the Expert Verification sidebar can sit directly beneath the
+            hero, above Gemstone Essentials and the rest of the report. On
+            desktop this group sits in the left column above .main. */}
+        <div className={styles.topGroup}>
+          {/* HERO — gem image + name + description (horizontal card) */}
           <section className={styles.hero}>
-            <img
-              src={heroFlourish}
-              alt=""
-              aria-hidden="true"
-              className={styles.heroFlourish}
-            />
-            <img
-              src={heroFlourishLeft}
-              alt=""
-              aria-hidden="true"
-              className={styles.heroFlourishLeft}
-            />
-
-            <div className={styles.heroGemWrap}>
-              {gemImage ? (
-                <img
-                  src={gemImage}
-                  alt={gem.name || "Recommended gemstone"}
-                  className={styles.heroGem}
-                  onError={() => setGemImgFailed(true)}
-                  loading="lazy"
-                />
-              ) : (
-                <span className={styles.heroGemFallback} aria-hidden="true">
-                  <Gem size={44} />
-                </span>
-              )}
-            </div>
+            <img src={heroFlourish} alt="" aria-hidden="true" className={styles.heroFlourish} />
+            <img src={heroFlourishLeft} alt="" aria-hidden="true" className={styles.heroFlourishLeft} />
 
             <div className={styles.heroCopy}>
-              <span className={styles.heroBadge}>Personalized Recommendation</span>
-              <h2 className={styles.heroTitle}>Recommended for you</h2>
-              <p className={styles.heroText}>
-                Based on your Kundli
-                {gem.planet ? (
-                  <>
-                    , <strong className={styles.hl}>{gem.planet}</strong> is in a
-                    challenging placement, and wearing{" "}
-                  </>
-                ) : (
-                  ", wearing "
-                )}
-                <strong className={styles.hl}>{gem.name}</strong>
-                {gem.other_name ? ` (${gem.other_name})` : ""} is advised to
-                strengthen it.
-              </p>
+              <h2 className={styles.heroTitle}>
+                {gem.name}
+                {gem.other_name ? <span className={styles.heroOther}> ({gem.other_name})</span> : null}
+              </h2>
+              {gem.description && <p className={styles.heroText}>{gem.description}</p>}
             </div>
           </section>
+        </div>
 
-          {/* ABOUT */}
-          <section className={styles.card}>
-            <h3 className={styles.cardTitle}>
-              <span className={styles.cardTitleIcon}>
-                <Info size={16} aria-hidden="true" />
-              </span>
-              About {gem.name}
-              {gem.other_name ? ` (${gem.other_name})` : ""}
-            </h3>
-            {gem.description && <p className={styles.cardBody}>{gem.description}</p>}
-            <p className={styles.cardHint}>
-              <Info size={13} aria-hidden="true" /> For the best results, choose a
-              gemstone that is suitable for your chart and free from significant
-              flaws.
-            </p>
-          </section>
-
-          {/* GOOD RESULTS */}
-          {goodResults.length > 0 && (
+        {/* ── MAIN COLUMN ─────────────────────────────────────────────── */}
+        <div className={styles.main}>
+          {/* GEMSTONE ESSENTIALS — icon stat tiles */}
+          {essentials.length > 0 && (
             <section className={styles.card}>
               <h3 className={styles.cardTitle}>
-                <span className={`${styles.cardTitleIcon} ${styles.iconGold}`}>
-                  <Star size={16} aria-hidden="true" />
-                </span>
-                Good Results
+                <img src={hdrEssentials} alt="" aria-hidden="true" className={styles.cardTitleImg} />
+                Gemstone Essentials
               </h3>
-              <div className={styles.resultGrid}>
-                {goodResults.map((result, index) => {
-                  const ResultIcon = RESULT_ICONS[index % RESULT_ICONS.length];
-                  const [title, ...rest] = String(result).split(/[:\-–—]/);
-                  const desc = rest.join(":").trim();
-                  return (
-                    <div className={styles.resultCard} key={`${result}-${index}`}>
-                      <span className={styles.resultIcon}>
-                        <ResultIcon size={16} aria-hidden="true" />
-                      </span>
-                      <p className={styles.resultTitle}>{title.trim()}</p>
-                      {desc && <p className={styles.resultDesc}>{desc}</p>}
-                    </div>
-                  );
-                })}
+              <div className={styles.essentials}>
+                {essentials.map((e) => (
+                  <div className={styles.essential} key={e.label}>
+                    <img src={e.icon} alt="" aria-hidden="true" className={styles.essentialIcon} />
+                    <span className={styles.essentialLabel}>{e.label}</span>
+                    <span className={styles.essentialValue}>{e.value}</span>
+                  </div>
+                ))}
               </div>
             </section>
           )}
 
-          {/* TIME TO WEAR + AUSPICIOUS MUHURAT */}
-          <div className={styles.wearRow}>
-            <section className={`${styles.card} ${styles.wearCard}`}>
-              <h3 className={styles.cardTitle}>
-                <span className={`${styles.cardTitleIcon} ${styles.iconBlue}`}>
-                  <Clock size={16} aria-hidden="true" />
-                </span>
-                Time to Wear
-              </h3>
-              {wearDay && <p className={styles.wearBig}>{wearDay}</p>}
-              {gem.time_to_wear_short && (
-                <p className={styles.wearSub}>{gem.time_to_wear_short}</p>
-              )}
-              <div className={styles.wearFacts}>
-                {gem.finger && (
-                  <div className={styles.wearFact}>
-                    <span className={styles.wearFactLabel}>Finger</span>
-                    <span className={styles.wearFactValue}>{gem.finger}</span>
+          {/* POTENTIAL BENEFITS + TRADITIONAL HEALTH ASSOCIATIONS */}
+          {(goodResults.length > 0 || healthAssociations.length > 0) && (
+            <div className={styles.pairRow}>
+              {goodResults.length > 0 && (
+                <section className={styles.card}>
+                  <h3 className={styles.cardTitle}>
+                    <img src={hdrBenefits} alt="" aria-hidden="true" className={styles.cardTitleImg} />
+                    Potential Benefits
+                  </h3>
+                  <div className={styles.chips}>
+                    {goodResults.map((r, i) => (
+                      <span className={`${styles.chip} ${styles.chipGreen}`} key={`b-${i}`}>{r}</span>
+                    ))}
                   </div>
-                )}
-                {gem.metal && (
-                  <div className={styles.wearFact}>
-                    <span className={styles.wearFactLabel}>Metal</span>
-                    <span className={styles.wearFactValue}>{gem.metal}</span>
+                </section>
+              )}
+
+              {healthAssociations.length > 0 && (
+                <section className={styles.card}>
+                  <h3 className={styles.cardTitle}>
+                    <img src={hdrHealth} alt="" aria-hidden="true" className={styles.cardTitleImg} />
+                    Traditional Health Associations
+                  </h3>
+                  <div className={styles.chips}>
+                    {healthAssociations.map((r, i) => (
+                      <span className={`${styles.chip} ${styles.chipPink}`} key={`h-${i}`}>{r}</span>
+                    ))}
                   </div>
-                )}
-                {gem.weight && (
-                  <div className={styles.wearFact}>
-                    <span className={styles.wearFactLabel}>Weight</span>
-                    <span className={styles.wearFactValue}>{gem.weight}</span>
-                  </div>
-                )}
-              </div>
-              {gem.time_to_wear && (
-                <p className={styles.wearNote}>
-                  <Sparkles size={13} aria-hidden="true" /> {gem.time_to_wear}
-                </p>
+                </section>
               )}
-            </section>
-
-            <section className={`${styles.card} ${styles.wearCard}`}>
-              <h3 className={styles.cardTitle}>
-                <span className={`${styles.cardTitleIcon} ${styles.iconGold}`}>
-                  <CalendarDays size={16} aria-hidden="true" />
-                </span>
-                Your Auspicious Day
-              </h3>
-              {wearDay ? (
-                <p className={styles.wearBig}>{wearDay}</p>
-              ) : (
-                <p className={styles.wearBig}>—</p>
-              )}
-              <p className={styles.wearSub}>Most favourable day to begin wearing</p>
-              {gem.mantra && (
-                <div className={styles.mantraBox}>
-                  <span className={styles.mantraLabel}>Mantra</span>
-                  <p className={styles.mantraText}>{gem.mantra}</p>
-                </div>
-              )}
-              <p className={styles.wearNote}>
-                <Sparkles size={13} aria-hidden="true" /> Wear with faith and follow
-                the recommended time for the best results.
-              </p>
-            </section>
-          </div>
-
-          {/* ── GEMSTONE CTAs: verify an owned stone / buy a certified one ── */}
-          <div className={styles.ctaRow}>
-            <section className={`${styles.card} ${styles.ctaCard}`}>
-              <div className={styles.ctaBody}>
-                <h3 className={styles.ctaTitle}>Already own this gemstone?</h3>
-                <p className={styles.ctaText}>
-                  Verify it with our Gemstone Authenticity scanner.
-                </p>
-                <button
-                  type="button"
-                  className={styles.ctaBtn}
-                  onClick={() => navigate("/gemstone-authenticity")}
-                >
-                  Verify My Gemstone <ChevronRight size={15} aria-hidden="true" />
-                </button>
-              </div>
-              <span className={styles.ctaArt} aria-hidden="true">
-                <Search size={40} />
-              </span>
-            </section>
-
-            <section className={`${styles.card} ${styles.ctaCard}`}>
-              <div className={styles.ctaBody}>
-                <h3 className={styles.ctaTitle}>Ready to get your gemstone?</h3>
-                <p className={styles.ctaText}>
-                  Connect with certified sellers for original and high quality
-                  {gem.name ? ` ${gem.name}` : " gemstones"}.
-                </p>
-                <button
-                  type="button"
-                  className={styles.ctaBtn}
-                  onClick={() =>
-                    navigate(
-                      `/shop?q=${encodeURIComponent(gem.name || "gemstone")}`
-                    )
-                  }
-                >
-                  Get from Certified Seller{" "}
-                  <ChevronRight size={15} aria-hidden="true" />
-                </button>
-              </div>
-              <span className={styles.ctaArt} aria-hidden="true">
-                <ShoppingCart size={40} />
-              </span>
-            </section>
-          </div>
-
-          {/* ── ALTERNATIVE REMEDIES ─────────────────────────────────────── */}
-          <section className={styles.card}>
-            <h3 className={styles.cardTitle}>
-              <span className={`${styles.cardTitleIcon} ${styles.iconViolet}`}>
-                <Shuffle size={16} aria-hidden="true" />
-              </span>
-              Prefer an Alternative Remedy?
-            </h3>
-            <p className={styles.cardBody}>
-              If you do not wish to wear a gemstone, you can try these remedies.
-            </p>
-            <div className={styles.altGrid}>
-              {[
-                {
-                  icon: "🕉",
-                  title: "Mantra",
-                  desc: gem.planet
-                    ? `Regular chanting of ${gem.planet} mantra helps strengthen positive energies.`
-                    : "Regular chanting of the ruling planet's mantra helps strengthen positive energies.",
-                },
-                {
-                  icon: "₹",
-                  title: "Charity",
-                  desc: gem.day
-                    ? `Charity on ${titleCase(gem.day)}s helps reduce the ill effects of ${gem.planet || "the planet"}.`
-                    : `Charity on the recommended day helps reduce the ill effects of ${gem.planet || "the planet"}.`,
-                },
-                {
-                  icon: "◎",
-                  title: "Rudraksha",
-                  desc: gem.planet
-                    ? `${gem.planet} related Rudraksha may help bring stability and spiritual growth.`
-                    : "A suitable Rudraksha may help bring stability and spiritual growth.",
-                },
-              ].map((alt) => (
-                <div className={styles.altCard} key={alt.title}>
-                  <span className={styles.altIcon} aria-hidden="true">
-                    {alt.icon}
-                  </span>
-                  <p className={styles.altTitle}>{alt.title}</p>
-                  <p className={styles.altDesc}>{alt.desc}</p>
-                </div>
-              ))}
             </div>
-          </section>
+          )}
 
-          <button
-            type="button"
-            className={styles.checkAnother}
-            onClick={() => navigate("/kundli")}
-          >
-            View full Kundli <ChevronRight size={15} aria-hidden="true" />
-          </button>
+          {/* ALTERNATE GEMSTONES + AVOID WEARING WITH */}
+          {(alternates.length > 0 || avoidWith.length > 0) && (
+            <div className={styles.pairRow}>
+              {alternates.length > 0 && (
+                <section className={styles.card}>
+                  <h3 className={styles.cardTitle}>
+                    <img src={hdrAlternate} alt="" aria-hidden="true" className={styles.cardTitleImg} />
+                    Alternate Gemstones
+                  </h3>
+                  <div className={styles.chips}>
+                    {alternates.map((r, i) => (
+                      <span className={`${styles.chip} ${styles.chipViolet}`} key={`a-${i}`}>
+                        <img src={chipAlternateIcon} alt="" aria-hidden="true" className={styles.chipIcon} />
+                        {r}
+                      </span>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {avoidWith.length > 0 && (
+                <section className={styles.card}>
+                  <h3 className={styles.cardTitle}>
+                    <img src={hdrAvoid} alt="" aria-hidden="true" className={styles.cardTitleImg} />
+                    Avoid Wearing With
+                  </h3>
+                  <div className={styles.chips}>
+                    {avoidWith.map((r, i) => (
+                      <span className={`${styles.chip} ${styles.chipOrange}`} key={`av-${i}`}>
+                        <img src={chipAvoidIcon} alt="" aria-hidden="true" className={styles.chipIcon} />
+                        {r}
+                      </span>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+          )}
+
+          {/* FLAW TO LOOK OUT FOR — table */}
+          {flaws.length > 0 && (
+            <section className={styles.card}>
+              <h3 className={styles.cardTitle}>
+                <img src={hdrFlaws} alt="" aria-hidden="true" className={styles.cardTitleImg} />
+                Flaw to Look Out For
+              </h3>
+              <div className={styles.flawTable}>
+                <div className={`${styles.flawRow} ${styles.flawHead}`}>
+                  <span className={styles.flawType}>Flaw Type</span>
+                  <span className={styles.flawEffect}>Flaw Effects</span>
+                </div>
+                {flaws.map((f, i) => (
+                  <div className={styles.flawRow} key={`fl-${i}`}>
+                    <span className={styles.flawType}>{f.flaw_type}</span>
+                    <span className={styles.flawEffect}>{f.flaw_effects}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* TIME TO WEAR — full-width, with sunrise art on the right */}
+          {(gem.time_to_wear || gem.time_to_wear_short || wearDay) && (
+            <section className={`${styles.card} ${styles.artCard}`}>
+              <img src={artSunrise} alt="" aria-hidden="true" className={styles.artImg} />
+              <div className={styles.artBody}>
+                <h3 className={styles.cardTitle}>
+                  <img src={hdrTime} alt="" aria-hidden="true" className={styles.cardTitleImg} />
+                  Time to Wear
+                </h3>
+                {(gem.time_to_wear_short || wearDay) && (
+                  <p className={styles.timeBig}>{gem.time_to_wear_short || `During ${wearDay}`}</p>
+                )}
+                {gem.time_to_wear && <p className={styles.timeText}>{gem.time_to_wear}</p>}
+              </div>
+            </section>
+          )}
+
+          {/* METHODS (How to Wear) — full-width, with Om-yantra art on the right */}
+          {gem.methods && (
+            <section className={`${styles.card} ${styles.artCard}`}>
+              <img src={artYantra} alt="" aria-hidden="true" className={styles.artImg} />
+              <div className={styles.artBody}>
+                <h3 className={styles.cardTitle}>
+                  <img src={hdrMethods} alt="" aria-hidden="true" className={styles.cardTitleImg} />
+                  Methods
+                </h3>
+                <p className={styles.timeText}>{gem.methods}</p>
+              </div>
+            </section>
+          )}
+
         </div>
 
         {/* ── SIDEBAR — EXPERT VERIFICATION ───────────────────────────── */}
         <aside className={styles.sidebar}>
           <div className={styles.verifyCard}>
+            <img src={heroFlourish} alt="" aria-hidden="true" className={styles.verifyFlourish} />
+            <img src={heroFlourishLeft} alt="" aria-hidden="true" className={styles.verifyFlourishLeft} />
+
             <div className={styles.cardTools}>
               <button
                 type="button"
@@ -494,23 +464,23 @@ const GemstoneRemedy = () => {
               </button>
             </div>
 
-            <span className={styles.verifyBadge}>★ Expert Verification</span>
+            <span className={styles.verifyBadge}>
+              <Sparkles size={13} aria-hidden="true" /> Expert Verification
+            </span>
 
             <h2 className={styles.verifyHeading}>
               Want an astrologer to verify this recommendation?
             </h2>
 
-            <div className={styles.verifyPanel}>
-              <p className={styles.verifyNote}>
-                Connect with an experienced astrologer before choosing or wearing
-                your gemstone.
-              </p>
-              <img
-                src={ganpatiArt}
-                alt=""
-                aria-hidden="true"
-                className={styles.verifyArt}
-              />
+            <p className={styles.verifyNote}>
+              Connect with an experienced astrologer before choosing or wearing
+              your gemstone.
+            </p>
+
+            <div className={styles.verifyDivider} aria-hidden="true">
+              <span className={styles.verifyDividerLine} />
+              <Flower2 size={16} className={styles.verifyDividerIcon} />
+              <span className={styles.verifyDividerLine} />
             </div>
 
             <div className={styles.actions}>
@@ -546,33 +516,31 @@ const GemstoneRemedy = () => {
         </aside>
       </div>
 
-      {/* Mobile-only pinned actions — the sidebar Call/Chat are hidden on mobile.
-          Portaled to <body> so `position: fixed` measures against the viewport. */}
-      {createPortal(
-        <div className={styles.mobileActionBar}>
-          <a
-            href="/chat-with-astrologers"
-            className={styles.mobileActionChat}
-            onClick={(event) => {
-              event.preventDefault();
-              recommendation.open("chat");
-            }}
-          >
-            <BsChatDots size={16} aria-hidden="true" /> Chat with astrologer
-          </a>
-          <a
-            href="/astrologers"
-            className={styles.mobileActionCall}
-            onClick={(event) => {
-              event.preventDefault();
-              recommendation.open("audio");
-            }}
-          >
-            <MdOutlinePhoneInTalk size={16} aria-hidden="true" /> Call an astrologer
-          </a>
-        </div>,
-        document.body
-      )}
+      {/* Mobile-only fixed action bar. The sidebar's Call/Chat buttons are
+          hidden on mobile; these pinned buttons take their place so the two
+          primary actions stay reachable while scrolling the report. */}
+      <div className={styles.mobileActionBar}>
+        <a
+          href="/chat-with-astrologers"
+          className={styles.mobileActionChat}
+          onClick={(event) => {
+            event.preventDefault();
+            recommendation.open("chat");
+          }}
+        >
+          <BsChatDots size={16} aria-hidden="true" /> Chat with astrologer
+        </a>
+        <a
+          href="/astrologers"
+          className={styles.mobileActionCall}
+          onClick={(event) => {
+            event.preventDefault();
+            recommendation.open("audio");
+          }}
+        >
+          <MdOutlinePhoneInTalk size={16} aria-hidden="true" /> Call an astrologer
+        </a>
+      </div>
 
       <RecommendedAstrologersModal
         isOpen={recommendation.isOpen}
