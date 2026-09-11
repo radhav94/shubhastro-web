@@ -15,7 +15,6 @@ $muted: #6b5546;
   // border: 1.5px solid #fff;
 
   @media (max-width: 767px) {
-    padding: 20px 12px;
     margin: 20px 0;
   }
 }
@@ -38,19 +37,20 @@ $muted: #6b5546;
   position: relative;
   z-index: 1;
   max-width: 1440px;
+  // height: 422px;
   margin: 0 auto;
-  padding: 28px 48px 0;
+  padding: 0px 48px 0;
   border-radius: 24px;
   overflow: hidden;
   background: rgb(255 255 255 / 40%);
   border: 1.5px solid #fff;
 
   @media (max-width: 900px) {
-    padding: 32px 24px 0;
+    padding: 0px 24px 0;
   }
 
   @media (max-width: 767px) {
-    padding: 28px 18px 0;
+    padding: 0px 18px 0;
     border-radius: 18px;
   }
 }
@@ -68,6 +68,10 @@ $muted: #6b5546;
   .copyHead {
     grid-column: 1;
     grid-row: 1;
+    padding-top: 60px;
+    @media (width <= 1024px) {
+      padding-top: 20px;
+    }
   }
   .copyBody {
     grid-column: 1;
@@ -75,13 +79,22 @@ $muted: #6b5546;
     /* Sit right under the headline (top of the row) — NOT pushed to the bottom
        of the tall visual row, which was leaving a big empty gap. */
     align-self: start;
-    padding-bottom: 48px;
+    // padding-bottom: 48px;
   }
   .visual {
     grid-column: 2;
     grid-row: 1 / span 2;
   }
-
+  .right{
+    // height: 100dvh;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 60px 0 30px 0;
+    @media (max-width: 767px) {
+    padding: 30px 0 30px 0;
+  }
+  }
   /* Mobile/tablet: single column, stacked in the order
      kicker/title → visual → blurb/badges (matches the reference). Kicks in at
      900px so the whole narrow range uses the stacked mobile visual. */
@@ -123,18 +136,17 @@ $muted: #6b5546;
 
 .title {
   margin: 0 0 16px;
-  font-size: 50px;
-  line-height: 1.1;
+  font-size: 2rem;
   font-weight: 700;
   color: $ink;
 
-  @media (max-width: 1180px) {
-    font-size: 2.1rem;
+  @media (max-width: 767px) {
+    font-size: 1.4rem;
   }
 
-  @media (max-width: 767px) {
-    font-size: 2.0rem;
-  }
+  // @media (max-width: 767px) {
+  //   font-size: 2.0rem;
+  // }
 }
 
 .titleAccent {
@@ -206,11 +218,14 @@ $muted: #6b5546;
   opacity: 0.85;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  @media (width <= 767px) {
+    font-size: 0.5rem;
+  }
 }
 
 .storeName {
   font-size: 1.05rem;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
 
   @media (max-width: 767px) {
@@ -223,7 +238,7 @@ $muted: #6b5546;
 /* Bleeds to the card's bottom edge (the card has padding-bottom: 0). */
 .visual {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
   min-width: 0;
   align-self: stretch;
@@ -248,8 +263,8 @@ $muted: #6b5546;
   max-width: none;
   width: auto;
   height: 100%;
-  max-height: 520px;
-  margin-top: -28px;
+  max-height: 420px;
+  // margin-top: -28px;
   margin-left: auto;
   object-fit: contain;
   object-position: bottom right;
