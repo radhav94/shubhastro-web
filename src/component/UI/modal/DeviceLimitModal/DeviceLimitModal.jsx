@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { createPortal } from "react-dom";
 import { useLogoutDeviceMutation } from "../../../../redux/api/device/deviceApi";
@@ -8,8 +8,35 @@ import styles from "./DeviceLimitModal.module.scss";
 
 const DeviceLimitModal = ({ isOpen, onClose, onDeviceUpdated, devices = [] }) => {
   const dispatch = useDispatch();
-  const [logoutDevice, { isLoading }] = useLogoutDeviceMutation();
+  const [logoutDevice] = useLogoutDeviceMutation();
   const [removingId, setRemovingId] = useState(null);
+
+  /*
+    Seq-keyed inline notice rather than a toast. This modal is centred and
+    full-screen; the toaster is top-right and Clarity cannot see it either way, so
+    a blocked tap needs an answer inside the dialog. The seq forces a re-render
+    even when the same message repeats, so a second tap visibly re-announces.
+  */
+  const [notice, setNotice] = useState(null);
+  const noticeSeq = useRef(0);
+  const announce = useCallback((text) => {
+    noticeSeq.current += 1;
+    setNotice({ seq: noticeSeq.current, text });
+  }, []);
+
+  /*
+    Escape closes, but only when the caller actually gave us an onClose — see the
+    note on that prop below. Registered before the early return so hook order is
+    stable across open/closed renders.
+  */
+  useEffect(() => {
+    if (!isOpen || !onClose) return;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !devices.length) {
     console.log("🔕 DeviceLimitModal: isOpen =", isOpen, "devices.length =", devices.length);
@@ -19,6 +46,24 @@ const DeviceLimitModal = ({ isOpen, onClose, onDeviceUpdated, devices = [] }) =>
   console.log("✅ DeviceLimitModal: RENDERING with", devices.length, "devices");
 
   const handleRemove = async (device_id) => {
+    /*
+      The guard lives here, not on the button, because the button no longer uses
+      native `disabled`. Previously every Logout carried `disabled={isLoading}`,
+      and isLoading is the shared mutation flag, so the first tap deadened every
+      row at once — including the one just tapped. A disabled button dispatches no
+      click event, so those taps were swallowed with nothing said and nothing for
+      Clarity to attribute them to.
+    */
+    if (removingId !== null) {
+      announce(
+        removingId === device_id
+          ? "Still logging that device out — one moment."
+          : "Another device is already being logged out — one moment.",
+      );
+      return;
+    }
+
+    setNotice(null);
     setRemovingId(device_id);
     try {
       const response = await logoutDevice({ device_id }).unwrap();
@@ -127,9 +172,34 @@ const DeviceLimitModal = ({ isOpen, onClose, onDeviceUpdated, devices = [] }) =>
   };
 
   return createPortal(
-    <div className={styles.overlay}>
+    /*
+      The overlay closes the dialog when the caller supplied onClose.
+
+      This modal had no way out at all: no close control, no overlay dismiss, no
+      Escape. It renders on /login the moment OTP verification reports the device
+      limit, so a visitor who did not want to sign a device out had nothing to tap
+      — every tap on the overlay or the dialog body was a dead click, on the
+      signup critical path.
+
+      onClose was not missing from the design. It is declared in this component's
+      props and all three call sites pass a working handler
+      (Onboarding.jsx, HomeLayout.jsx, GuestKundliAuthModal.jsx), and .closeBtn
+      was already written in the stylesheet — the prop was simply never called and
+      the button never rendered. So this wires up behaviour the callers already
+      expect rather than inventing an escape hatch.
+
+      Guarded on onClose so a caller that deliberately wants a hard wall still
+      gets one instead of silently gaining a dismiss.
+    */
+    <div
+      className={styles.overlay}
+      onClick={onClose ? (e) => { if (e.target === e.currentTarget) onClose(); } : undefined}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="deviceLimitTitle"
+    >
       <div className={styles.modal}>
-        <h3 className={styles.title}>Device Limit Reached</h3>
+        <h3 className={styles.title} id="deviceLimitTitle">Device Limit Reached</h3>
         <p className={styles.subtitle}>
           You are logged in on the maximum number of devices. Remove a device to continue.
         </p>
@@ -144,10 +214,15 @@ const DeviceLimitModal = ({ isOpen, onClose, onDeviceUpdated, devices = [] }) =>
                 </span>
                 {device.date && <span className={styles.deviceDate}>{formatDate(device.date)}</span>}
               </div>
+              {/* `aria-disabled`, never native `disabled` — see handleRemove.
+                  aria-busy is scoped to the row actually being removed so the
+                  spinner text does not appear on all of them at once. */}
               <button
+                type="button"
                 className={styles.removeBtn}
                 onClick={() => handleRemove(device.device_id)}
-                disabled={isLoading}
+                aria-disabled={removingId !== null}
+                aria-busy={removingId === device.device_id}
                 title={device.currentDevice ? "Logging out this device will completely logout" : ""}
               >
                 {removingId === device.device_id ? "..." : "Logout"}
@@ -155,6 +230,19 @@ const DeviceLimitModal = ({ isOpen, onClose, onDeviceUpdated, devices = [] }) =>
             </div>
           ))}
         </div>
+
+        {notice && (
+          <p key={notice.seq} className={styles.deviceLimitNotice} role="status" aria-live="polite">
+            {notice.text}
+          </p>
+        )}
+
+        {/* .closeBtn was already in the stylesheet and never rendered. */}
+        {onClose && (
+          <button type="button" className={styles.closeBtn} onClick={onClose}>
+            Not now
+          </button>
+        )}
       </div>
     </div>,
     document.body

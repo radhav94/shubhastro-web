@@ -2212,6 +2212,7 @@ const AstrologerProfile = () => {
               {reviewsLoading ? (
                 <div className={styles.reviewsLoading}>Loading reviews...</div>
               ) : allReviews.length > 0 ? (
+                <>
                 <div ref={reviewsListRef} className={`${styles.reviewsList} ${styles.scrollable}`}>
                   {allReviews.map((review) => (
                     <div key={review._id} className={styles.reviewCard}>
@@ -2242,27 +2243,40 @@ const AstrologerProfile = () => {
                   {loadingMore && (
                     <div className={styles.reviewsLoading}>Loading more...</div>
                   )}
-
-                  {/*
-                    Pagination was scroll-only: handleLoadMoreReviews existed but
-                    nothing rendered a control for it, so more reviews arrived
-                    only by scrolling this inner `max-height: 500px` box. A nested
-                    scroller inside the page scroller is easy to miss on a phone
-                    and worse in an in-app browser, so page 2 onwards was
-                    effectively unreachable — visitors read the first few reviews
-                    and tapped at them instead. An explicit control also gives the
-                    keyboard a way to reach the rest.
-                  */}
-                  {!loadingMore && reviewPage < reviewTotalPages && (
-                    <button
-                      type="button"
-                      className={styles.loadMoreReviewsBtn}
-                      onClick={handleLoadMoreReviews}
-                    >
-                      Load more reviews
-                    </button>
-                  )}
                 </div>
+
+                {/*
+                  Pagination was scroll-only: handleLoadMoreReviews existed but
+                  nothing rendered a control for it, so more reviews arrived
+                  only by scrolling the inner `max-height: 500px` box. A nested
+                  scroller inside the page scroller is easy to miss on a phone
+                  and worse in an in-app browser, so page 2 onwards was
+                  effectively unreachable — visitors read the first few reviews
+                  and tapped at them instead. An explicit control also gives the
+                  keyboard a way to reach the rest.
+
+                  This button sits OUTSIDE .reviewsList. It used to be the last
+                  child of that scroller, which meant the control added to rescue
+                  people from a hard-to-find nested scroller could itself only be
+                  found by scrolling it — the fix inherited the bug it was for.
+                  In normal page flow it is reachable by the page scroll everyone
+                  already uses.
+
+                  Clarity 1mfr270 (Chrome mobile) is the shape of the original
+                  problem: three dead clicks at 00:32-00:33 on one review card —
+                  the reviewer name, and the star and number inside .reviewRating
+                  — then the visitor left at 00:42.
+                */}
+                {!loadingMore && reviewPage < reviewTotalPages && (
+                  <button
+                    type="button"
+                    className={styles.loadMoreReviewsBtn}
+                    onClick={handleLoadMoreReviews}
+                  >
+                    Load more reviews
+                  </button>
+                )}
+                </>
               ) : (
                 <div className={styles.noReviews}>
                   No reviews yet. Be the first to review!

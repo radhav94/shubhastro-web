@@ -2324,8 +2324,13 @@
 // Explicit pagination for the reviews scroller, which was scroll-only — see the
 // note in AstrologerProfile.jsx.
 .loadMoreReviewsBtn {
+  /* `display: block` + auto side margins, because this moved out of
+     .reviewsList and is no longer a flex child — `align-self` alone would stop
+     centring it. Kept as well so it still centres if it is ever nested back
+     inside a flex container. */
+  display: block;
   align-self: center;
-  margin: 4px 0 8px;
+  margin: 4px auto 8px;
   padding: 10px 20px;
   border: 1.5px solid #E89B3C;
   border-radius: 999px;
