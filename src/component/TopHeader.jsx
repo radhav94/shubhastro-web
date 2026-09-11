@@ -205,9 +205,23 @@ const TopHeader = () => {
    * That is correct — the logo promises the homepage and the homepage is already
    * on screen at the top, so there is genuinely nothing to do. Every option for
    * making the metric go away (forcing a reload, navigating elsewhere, faking a
-   * repaint) is worse for the user than a no-op. Two separate sessions have now
-   * been investigated down to this same point; if the metric is noisy, exclude
-   * this element in Clarity rather than inventing behaviour here.
+   * repaint) is worse for the user than a no-op.
+   *
+   * FOUR separate sessions have now been investigated down to this same point:
+   *   - yh6bcf  Chrome mobile
+   *   - 6b4q6o  Chrome desktop, logo at 00:02
+   *   - 1ww075q Edge desktop, from Bing, logo at 00:04, left at 00:21
+   * In every case the click lands within the first few seconds of arriving on
+   * "/", i.e. necessarily still at scroll 0 — so the scroll branch could not have
+   * produced a repaint either, and the report is accurate: nothing happened,
+   * because there is nothing to do.
+   *
+   * ACTION REQUIRED IS NOT IN THIS FILE. Either exclude this element in the
+   * Clarity dashboard (dead-click exclusion is dashboard-side; it cannot be set
+   * from application code), or ship the branch — note that `handleLogoClick` is
+   * NOT in origin/production, so the deployed logo is inert from ANY scroll
+   * offset, not just from the top. Every further session that reports this
+   * element will arrive back at this comment.
    *
    * Navigation from any other route is fine and is not this case: ScrollToTop
    * handles PUSH by scrolling to 0 instantly, so the page visibly changes.
@@ -233,6 +247,63 @@ const TopHeader = () => {
     if (e.currentTarget.getAttribute("href") === currentPathname) {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
+  };
+
+  /*
+   * Desktop nav links — the same same-URL problem as the logo and the drawer
+   * rows, and the one place in this header where it was never handled.
+   *
+   * A NavLink pointing at the route you are already on performs no navigation:
+   * react-router short-circuits it, so there is no repaint, no scroll and no
+   * feedback of any kind.
+   *
+   * Clarity 1e75ar2 (Sep 10, Chrome PC, 4 clicks / 2 pages): arrived on
+   * /numerology at 00:01 from an astrologer profile, clicked the "Numerology"
+   * link in the Quick Links row repeatedly at 00:04, then hid the page at 00:06
+   * and never came back. The main-nav Numerology link is commented out, so the
+   * element was the submenu one.
+   *
+   * Delegated on the <nav> rather than added to each link, for the reason already
+   * given for the drawer: one handler covers every row in both the main nav and
+   * the Quick Links submenu, including any added later. CalculatorsDropdown's
+   * toggle is a <button>, so `closest("a[href]")` misses it and it is unaffected.
+   *
+   * Why the toast branch exists. Scroll-to-top alone would NOT have answered this
+   * session, and the logo comment above already worked out why: the click lands a
+   * few seconds after arriving, so the page is necessarily still at scroll 0 and
+   * scrollTo(0) repaints nothing. So scroll when there is somewhere to scroll to,
+   * and otherwise say plainly that this is already the current page. Same shape
+   * as BlogHeader's applyParams, which acknowledges same-URL taps with a toast
+   * plus scroll-to-top. The label is read off the link, so this stays correct for
+   * every row without a lookup table.
+   *
+   * A toast is used rather than an inline role="status" node because there is
+   * nowhere in a single-line nav to put one without shifting the header layout.
+   * The point here is to stop the user re-clicking, and they can see a toast.
+   *
+   * This is a different fix from the .active/:hover split in
+   * TopHeader.module.scss (session khu0xq). That made "you are already here"
+   * legible; it did not give the tap a result. Both are needed.
+   *
+   * Modified and middle clicks are left alone so "open in a new tab" keeps
+   * working — same reasoning as handleLogoClick.
+   */
+  const handleNavAreaClick = (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
+    const link = e.target.closest("a[href]");
+    if (!link || !e.currentTarget.contains(link)) return;
+    if (link.getAttribute("href") !== currentPathname) return;
+
+    e.preventDefault();
+
+    if (window.scrollY > 0) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    const label = link.textContent.trim();
+    Toast.info(label ? `You're already on ${label}.` : "You're already on this page.");
   };
 
   const handleLogout = async () => {
@@ -397,10 +468,16 @@ const TopHeader = () => {
                 prominent, most obviously clickable element in the header was
                 completely inert. Scrolling back to the top is what a site logo
                 is expected to do there, and it makes the click visible. */}
+            {/* aria-current="page" when this link points at the route already
+                on screen. It does not and should not make the click "do"
+                anything — see handleLogoClick for why inventing a response is
+                the wrong trade — but "you are already here" is a real fact that
+                was not being communicated to assistive tech at all. */}
             <Link
               to="/"
               className={styles.logoHeader}
               aria-label="ShubhAstro home"
+              aria-current={currentPathname === "/" ? "page" : undefined}
               onClick={handleLogoClick}
             >
               <img src={ShubhTalkLogo} alt="Shubh Talk Logo" width="150" height="27" />
@@ -410,6 +487,7 @@ const TopHeader = () => {
               to="/"
               className={styles.logoHeaderMobile}
               aria-label="ShubhAstro home"
+              aria-current={currentPathname === "/" ? "page" : undefined}
               onClick={handleLogoClick}
             >
               <img src={ShubhTalkLogoMobile} alt="Shubh Talk Logo" width="32" height="32" />
@@ -417,7 +495,7 @@ const TopHeader = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className={styles.headerNavigation}>
+          <nav className={styles.headerNavigation} onClick={handleNavAreaClick}>
             <NavLink
               to="/tarot"
               className={({ isActive }) =>
@@ -641,7 +719,7 @@ const TopHeader = () => {
       </header>
     </div>
       <div className={styles.headerNavigationSubmenuWrap}>
-        <nav className={styles.headerNavigationSubmenu}>
+        <nav className={styles.headerNavigationSubmenu} onClick={handleNavAreaClick}>
                 <span className={styles.quickNavText}>Quick Links 
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
                 </span>

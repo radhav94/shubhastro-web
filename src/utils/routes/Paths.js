@@ -1,4 +1,50 @@
-import { lazy } from "react";
+import { lazy, Suspense, createElement } from "react";
+import CircleSpinner from "../../component/UI/CircleSpinner";
+
+/*
+ * Suspense boundary for the top-level public/open routes.
+ *
+ * App.jsx maps openRoutes and publicRoutes as top-level router siblings: they
+ * render outside HomeLayout, so they do not inherit HomeLayout's <Suspense>
+ * around <Outlet />. Now that those screens are lazy() (see the notes on their
+ * declarations below), a boundary is required — without one they suspend all
+ * the way up to the app-level <Suspense fallback={<PrimaryLoader isLoading />}>
+ * in App.jsx, which is a fullscreen blocking loader on /login, one of the
+ * highest-traffic pages. That is the exact prerequisite called out in the
+ * policy note further down this file.
+ *
+ * It lives here rather than in App.jsx so the boundary travels with the split
+ * that needs it: anything added to publicRoutes/openRoutes gets it for free,
+ * with no matching edit in the router.
+ *
+ * The fallback holds a viewport's worth of height so swapping in the real
+ * screen does not shift layout and count towards CLS — same reasoning as
+ * HomeLayout's `.routeFallback`. CircleSpinner is already in the entry chunk
+ * (HomeLayout imports it), so this adds no bytes.
+ */
+const publicRouteFallback = createElement(
+  "div",
+  {
+    style: {
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  },
+  createElement(CircleSpinner)
+);
+
+const withPublicSuspense = (Component) => {
+  const Wrapped = (props) =>
+    createElement(
+      Suspense,
+      { fallback: publicRouteFallback },
+      createElement(Component, props)
+    );
+  Wrapped.displayName = `withPublicSuspense(${Component.displayName || "Route"})`;
+  return Wrapped;
+};
 
 /*
  * Route-level code splitting policy for this file.
@@ -30,7 +76,10 @@ import { lazy } from "react";
  * <Outlet /> (HomeLayout.jsx), so lazy is safe there.
  */
 import NotFound from "../../screens/private/NotFound/NotFound";
-import ComingSoon from "../../screens/public/coming-soon/ComingSoon";
+// Route-split: /coming-soon is navigation-only, and it was dragging formik and
+// yup into the entry chunk for every visitor. Rendered inside the openRoutes
+// Suspense boundary in App.jsx, so lazy is safe here.
+const ComingSoon = withPublicSuspense(lazy(() => import("../../screens/public/coming-soon/ComingSoon")));
 
 // Route-level code splitting for the Agora call screens.
 //
@@ -42,11 +91,31 @@ import ComingSoon from "../../screens/public/coming-soon/ComingSoon";
 // so lazy components are safe here.
 const VideoCalling = lazy(() => import("../../component/call/VideoCall"));
 const AgoraVoiceCalling = lazy(() => import("../../component/call/VoiceCall"));
-import Onboarding from "../../screens/public/onboarding/Onboarding";
-import Register from "../../screens/public/Register";
-import ForgotPassword from "../../screens/public/ForgotPassword";
-import OtpVerification from "../../screens/public/OtpVerification";
-import VerifyPassword from "../../screens/public/VerifyPassword";
+/*
+ * The publicRoutes screens, now route-split.
+ *
+ * These were the last group of navigation-only screens still joining the entry
+ * chunk. They were not cheap passengers: Onboarding pulls LoginScreen, OTPScreen
+ * and useTruecallerLogin; OtpVerification pulls react-otp-input; and the whole
+ * group carried the login/OTP surface into the bundle that every visitor blocks
+ * on before the "/" landing screen can paint.
+ *
+ * The blocker recorded in the policy note at the top of this file — that App.jsx
+ * maps these as top-level router siblings with no nearby Suspense boundary, so
+ * lazifying them would suspend up to the app-level fullscreen PrimaryLoader —
+ * has been addressed: App.jsx now wraps the openRoutes and publicRoutes elements
+ * in its own `publicRouteFallback` boundary, which reserves viewport height
+ * instead of blanking the app.
+ *
+ * NotFound is deliberately left static below: CmsNotFoundPage imports it
+ * directly and is itself eager from App.jsx, so lazifying it here would add a
+ * Suspense hop without removing a single byte from the entry chunk.
+ */
+const Onboarding = withPublicSuspense(lazy(() => import("../../screens/public/onboarding/Onboarding")));
+const Register = withPublicSuspense(lazy(() => import("../../screens/public/Register")));
+const ForgotPassword = withPublicSuspense(lazy(() => import("../../screens/public/ForgotPassword")));
+const OtpVerification = withPublicSuspense(lazy(() => import("../../screens/public/OtpVerification")));
+const VerifyPassword = withPublicSuspense(lazy(() => import("../../screens/public/VerifyPassword")));
 const Horoscope = lazy(() => import("../../screens/private/horoscope/Horoscope"));
 const Kundli = lazy(() => import("../../screens/private/kundli/Kundali"));
 const Numerology = lazy(() => import("../../screens/private/numerology/Numerology"));

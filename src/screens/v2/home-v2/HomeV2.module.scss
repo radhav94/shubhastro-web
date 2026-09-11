@@ -246,13 +246,13 @@
   justify-content: center;
   position: relative;
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    position: relative;
-    z-index: 1;
-  }
+  // img {
+  //   width: 100%;
+  //   height: 100%;
+  //   object-fit: contain;
+  //   position: relative;
+  //   z-index: 1;
+  // }
 
   @media (max-width: 1280px) {
     width: 90px;
@@ -260,8 +260,8 @@
   }
 
   @media (max-width: 767px) {
-    width: 100%;
-    height: 90px;
+    // width: 100%;
+    // height: 90px;
     align-self: center;
     margin-top: auto;
   }
@@ -286,21 +286,6 @@
   @media (max-width: 820px) {
     /* Let children participate directly in heroRow flex ordering */
     display: contents;
-  }
-}
-
-.centerCard {
-  padding: 16px;
-  border-radius: 16px;
-  position: relative;
-  background: transparent;
-  overflow: hidden;
-
-  // @media (max-width: 820px) {
-  //   // order: 2;
-  // }
-  @media (width <= 767px) {
-    padding: 12px;
   }
 }
 
@@ -420,6 +405,24 @@
   color: #030303;
   text-align: left;
   cursor: pointer;
+  /*
+    The padding/negative-margin pair grows the hit box without moving layout —
+    but it also means the padded box now extends 6px past the element's layout
+    box on every side, and the hero <h1> is the very next sibling. Non-positioned
+    siblings hit-test in paint order, so the later element wins: the bottom 6px of
+    this button's own target was resolving to the heading instead of the button.
+
+    Clarity user 1e75ar2 names exactly this pair — "Sign in" AND "Experience
+    Astrology Power[ed by AI]", the h1 directly beneath it — with dead clicks and
+    rage clicks in the same 3-second window (06:04-06:07).
+
+    position + z-index rather than shrinking the padding: it costs no layout
+    change and keeps the enlarged target. `.heroContent` is already z-index 2 and
+    `.heroBanner` z-index 1, so this only orders the button against its own
+    siblings inside that context; the h1 carries no z-index and stays beneath.
+  */
+  position: relative;
+  z-index: 1;
 
   &:focus-visible {
     outline: 2px solid #f75801;
@@ -497,25 +500,59 @@
 // }
 .heroBgImg {
   width: 230px;
-  height: auto;
+  height: 230px;
   position: absolute;
   right: -29px;
   top: -26px;
-  -o-object-fit: contain;
-  object-fit: contain;
   opacity: 1;
   z-index: 1;
   pointer-events: none;
 
+  /* The AI-suite hero is a CSS background rather than an <img>. Same asset,
+     same visual — `contain`/`center` reproduce the previous object-fit: contain
+     on the 230x230 box.
+
+     CORRECTION — read this before "restoring" anything here.
+
+     This comment used to claim the conversion was made so the element would
+     "no longer register as the homepage's Largest Contentful Paint element",
+     on the premise that a small background-image inside a card is not treated
+     as an LCP candidate. THAT PREMISE IS WRONG. Per the Largest Contentful
+     Paint API an element with a url() background IS a candidate. The only
+     relevant exclusion is the full-viewport case — elements Chromium judges to
+     be page backdrops rather than content — which is what legitimately exempts
+     main-body-bg-new.png (background-size: cover; background-attachment: fixed
+     on body.home-v2-page) and does not apply to a 230x230 card.
+
+     Measured on the live site and on two local production builds at a 375px
+     viewport: ai-suite.png is still the homepage LCP element. So the conversion
+     did not take it out of the metric. What it actually did was hide the URL
+     from the HTML preload scanner, because a CSS-module background cannot be
+     discovered until the entry bundle has downloaded, parsed, executed and
+     rendered this element. Request start moved out to 450ms, which made LCP
+     worse, not better:
+
+         TTFB              20ms    4.0%
+         Load delay       430ms   86.7%   <-- caused by this
+         Resource load      9ms    1.8%   (the file is only 15,776 B)
+         Render delay      37ms    7.5%
+
+     Mitigated in index.html by a path-gated `rel=preload as=image
+     fetchpriority=high` for "/" only, which brings discovery back to head-parse
+     time (measured 450ms -> 87ms). Do not delete that tag while this stays a
+     background image.
+
+     If you want to remove the preload, convert this back to an
+     <img fetchpriority="high"> instead. That makes the LCP element natively
+     discoverable by the preload scanner and is the better end state; it just
+     touches positioned layout, so it was not bundled into the preload fix. */
+  background-image: url("https://assets.shubhastro.ai/images/ai-suite.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+
   @media (width <= 1180px) {
     width: 200px;
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    z-index: 1;
   }
 }
 
@@ -1210,11 +1247,21 @@
   border-radius: 14px;
   padding: 12px 14px;
   border: 1px solid #FFFFFF;
+
+  font-size: 13px;
+  color: #424242;
+  margin: 0;
+  // padding-left: 2px;
+
+  
   @media (width <= 1180px) {
     padding: 10px 14px;
   }
   @media (width <= 820px) {
     padding: 12px 6px;
+  }
+  @media (width <= 390px) {
+    font-size: 12px;
   }
 
   &:last-child {
@@ -1265,15 +1312,15 @@
   }
 }
 
-.muhuratTime {
-  font-size: 13px;
-  color: #424242;
-  margin: 0;
-  padding-left: 2px;
-  @media (width <= 390px) {
-    font-size: 12px;
-  }
-}
+// .muhuratTime {
+//   font-size: 13px;
+//   color: #424242;
+//   margin: 0;
+//   padding-left: 2px;
+//   @media (width <= 390px) {
+//     font-size: 12px;
+//   }
+// }
 
 /* ═══════════════════════════════════════════════════════
    SECTION 2 — FEATURE CARDS
@@ -3882,10 +3929,6 @@
     height: 60px;
   }
 
-  .centerCard {
-    border-radius: 16px;
-  }
-
   // .heroBanner { padding: 20px 16px 12px;}
   // .heroBanner h1 {
   //   font-size: 22px;
@@ -4074,10 +4117,6 @@
   //   top: 0;
   // }
 
-  .centerCard {
-    overflow: hidden;
-  }
-
   /* WOW cards — show 2.5 cards on mobile as scroll hint */
   // .wowCard {
   //   flex: 0 0 42vw;
@@ -4149,7 +4188,7 @@
     height: 70px;
 
     @media (max-width: 767px) {
-      width: 100%;
+      width: 90px;
       height: 90px;
     }
   }
@@ -4391,12 +4430,30 @@
 
 /* centerCard keeps the glass look */
 .centerCard {
-  background: #FFFFFF66 !important;
-  border: 1.5px solid #FFFFFF !important;
-  border-radius: 20px !important;
-  box-shadow: none !important;
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
+  background-color: #FFFFFF66;
+  border: 1.5px solid #FFFFFF;
+  // border-radius: 20px;
+  box-shadow: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  background-image: url("https://assets.shubhastro.ai/images/ai-suite.png");
+  background-size: 200px 200px;
+  background-repeat: no-repeat;
+  background-position: top right;
+
+  padding: 16px;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+
+  // @media (max-width: 820px) {
+  //   // order: 2;
+  // }
+  @media (width <= 767px) {
+    padding: 12px;
+    background-size: 110px 110px;
+  }
 }
 
 .rightPanel {
@@ -4665,22 +4722,26 @@
 }
 
 /* ═══ HomeV2 body background ═══ */
-:global(body.home-v2-page) {
-  // background-image: url("https://assets.shubhastro.ai/images/1778659648-1576013064.png") !important;
-  background-image: url("https://assets.shubhastro.ai/main-body-bg-new.png");
-  background-attachment: fixed;
-  // background-color: #ebecf2 !important;
-  position: relative !important;
-  background-repeat: repeat-y;
-  background-size: cover;
-  @media (width <= 767px) {
-    background-image: url("https://assets.shubhastro.ai/main-body-bg-new-mobile.png");
-  }
-}
+// body{
+//   background-color: #ebecf2;
+//   background-image: url("https://assets.shubhastro.ai/main-body-bg-new.png");
+//   background-attachment: fixed;
+//   position: relative;
+//   background-repeat: repeat-y;
+//   background-size: cover;
 
-:global(body.home-v2-page::before) {
-  display: none !important;
-}
+//   margin: 0;
+//   padding: 0;
+//   min-height: 100dvh;
+//   font-family: 'Poppins', 'Poppins Fallback', sans-serif;
+//   @media (width <= 767px) {
+//     background-image: url("https://assets.shubhastro.ai/main-body-bg-new-mobile.png");
+//   }
+// }
+
+// :global(body.home-v2-page::before) {
+//   display: none !important;
+// }
 
 /* ═══ HomeV2 — Astrologer section crystal glass ═══ */
 .astrologerSection {

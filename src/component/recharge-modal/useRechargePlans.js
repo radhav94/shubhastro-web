@@ -122,9 +122,34 @@ export const useRechargePlans = (skip = false) => {
     }
   }, [apiRefetch]);
 
+  /*
+    `isLoading` means "there is nothing to show yet", not "a request is in
+    flight". It used to be `isLoading || isFetching`, and in RechargeModal that
+    single flag gates BOTH the plans grid and the footer:
+
+      {!isLoading && !error && plans.length > 0 && ( ...plansContainer... )}
+      {!isLoading && !error && plans.length > 0 && ( ...modalFooter... )}
+
+    So every revalidation unmounted the amount tiles and the "Add Money" button
+    and swapped in skeletons. That happens on each open, twice: `skip` flips to
+    false and `refetchOnMountOrArgChange: true` fetches, then the modal's own open
+    effect calls refetch() again. A tap landing in either skeleton window hits
+    .skeletonCard, which has no handler — a dead click, and then repeat taps on
+    the amount as the grid flickers under the finger. Worst on a slow in-app
+    WebView, which is where Clarity labizw (FacebookApp, mobile) was.
+
+    Keying it on `plans.length === 0` keeps the already-loaded tiles interactive
+    while fresh data is fetched, so the sheet only ever shows skeletons when it
+    genuinely has no amounts. `plans` is component state that survives close/open,
+    so a reopen shows the previous amounts immediately.
+
+    The error path is unchanged: the error effect clears `plans`, so a failed
+    revalidation still falls through to the error UI rather than leaving stale
+    tiles on screen.
+  */
   return {
     plans,
-    isLoading: isLoading || isFetching,
+    isLoading: (isLoading || isFetching) && plans.length === 0,
     error,
     refetch,
   };

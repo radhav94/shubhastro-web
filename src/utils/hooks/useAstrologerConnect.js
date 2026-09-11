@@ -43,6 +43,10 @@ export const useAstrologerConnect = () => {
     recharge: false,
     kundli: false,
   });
+  // Which connection type triggered the recharge modal ("chat" | "audio" |
+  // "video"), so the modal's copy and min-balance rate match what the user
+  // actually tapped instead of always defaulting to "chat".
+  const [rechargeType, setRechargeType] = useState("chat");
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [chatRoomId, setChatRoomId] = useState(null);
 
@@ -92,9 +96,10 @@ export const useAstrologerConnect = () => {
   );
 
   // Fetch user's kundli profiles for validation
-  const { data: kundliData, isLoading: isValidating } = useGetAllKundlisQuery(undefined, {
-    skip: !token || !userIdLocal,
-  });
+  const { data: kundliData, isLoading: isValidating, isFetching: isFetchingKundlis } =
+    useGetAllKundlisQuery(undefined, {
+      skip: !token || !userIdLocal,
+    });
 
   const profiles = kundliData?.data || [];
 
@@ -167,17 +172,56 @@ export const useAstrologerConnect = () => {
       return false;
     }
 
-    // Check if user has at least one kundli profile
-    const hasKundli = profiles.length > 0;
+    /*
+      A kundli selected in Redux counts, and a list that has not arrived yet is
+      not the same thing as an empty one.
+
+      This used to be `profiles.length > 0` alone, which contradicted the rest of
+      this hook: getSelectedKundli() and handleAfterKundliSelect BOTH treat
+      `headerSelectedKundli` as their first choice and only fall back to
+      `profiles`. So the connection would have proceeded perfectly well on the
+      Redux selection, but this gate refused it and — worse — navigated the
+      visitor to the profile screen with `requiresCreation`, telling someone who
+      has a profile to go and create one.
+
+      The guest chat flow hits this dead on. useGuestChatAuth creates the self
+      kundli via createKundli, dispatches setSelectedKundli(createdProfile), and
+      calls `privateRequestNew.util.resetApiState()` immediately before flipping
+      the session. That reset destroys the cache entry, so useGetAllKundlisQuery
+      starts a fresh FIRST load and `profiles` is [] for the whole round trip —
+      while the freshly created profile is already sitting in Redux.
+
+      Clarity session 1q4dliv (Chrome mobile, Google → /chat-to-astrologer)
+      completed the whole guest form — gender at 01:01, location at 02:22,
+      verification — then "attempted multiple chat initiations" at 03:21 and
+      03:33 and left without a conversation.
+
+      So: honour the Redux selection, and when there is genuinely nothing
+      selected AND the list is still in flight, hold the visitor where they are
+      instead of bouncing them out of the connect flow.
+    */
+    const hasKundli = !!headerSelectedKundli?._id || profiles.length > 0;
 
     if (!hasKundli) {
+      if (isValidating || isFetchingKundlis) {
+        Toast.info("One moment — loading your profile.");
+        return false;
+      }
       Toast.error("Please create your Kundli before starting chat or call.");
       navigate(PATH.privateRoutes.PROFILE.path, { state: { requiresCreation: true } });
       return false;
     }
 
     return true;
-  }, [token, userIdLocal, profiles, navigate]);
+  }, [
+    token,
+    userIdLocal,
+    profiles,
+    navigate,
+    headerSelectedKundli,
+    isValidating,
+    isFetchingKundlis,
+  ]);
 
   // Chat handler
   const handleChatStart = useCallback(async (astro, checkBalance = true, isEmergency = false) => {
@@ -220,6 +264,7 @@ export const useAstrologerConnect = () => {
 
         if (checkBalanceStatus === false) {
           console.log("[NormalFlow] ❌ Insufficient balance — opening recharge modal");
+          setRechargeType("chat");
           setOpenModal((prev) => ({ ...prev, recharge: true }));
           return false;
         } else if (checkBalanceStatus === undefined) {
@@ -350,6 +395,7 @@ export const useAstrologerConnect = () => {
       // Check balance status
       if (result?.data?.data?.status === false) {
         console.log("[NormalFlow] ❌ Insufficient balance — opening recharge modal");
+        setRechargeType(type || "audio");
         setOpenModal((prev) => ({ ...prev, recharge: true }));
         return false;
       }
@@ -567,6 +613,7 @@ export const useAstrologerConnect = () => {
     isConnecting,
     openModal,
     setOpenModal,
+    rechargeType,
     selectedAstrologer,
     chatRoomId,
     setChatRoomId,

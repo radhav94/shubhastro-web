@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense, Frag
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import SeoHelmet from "../../../component/SeoHelmet";
+import EmptyState from "../../../component/emptyState/EmptyState";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { getToken } from "../../../utils/token";
 import {
@@ -26,14 +27,13 @@ import { useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscripti
 // CSS background can never be discovered from the initial HTML nor given
 // fetchpriority. Loading them after first paint takes them out of the LCP race
 // entirely so real content wins it.
-const PanditAIBubble = lazy(() => import("../../../component/panditAI/PanditAIBubble"));
-const PanditAIVoiceBubble = lazy(() => import("../../../component/panditAI/PanditAIVoiceBubble"));
+
 import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
-import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, AstrologersByCategorySection, DiscoverMoreSectionV2, LiveSessionCard } from "./sections";
+import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, AstrologersByCategorySection, DiscoverMoreSectionV2, LiveSessionCard, HoroscopeSection, TestimonialsSection, AppDownloadSection } from "./sections";
 
 // Below-the-fold components (static — shared with many other pages)
 import ProfileModals from "../../private/kundli/components/ProfileModals";
@@ -75,7 +75,8 @@ const COMMUNITY_AVATARS = [
   new URL("../../../assets/images/community-avatar-4.png", import.meta.url).href,
   new URL("../../../assets/images/community-avatar-5.png", import.meta.url).href,
 ];
-const heroBg = "https://assets.shubhastro.ai/images/ai-suite.png";
+// const heroBg = "https://assets.shubhastro.ai/images/ai-suite.png";
+// const heroBg = "../images/ai-suite.png";
 
 /**
  * Hero greeting.
@@ -197,13 +198,9 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   <div className={styles.mahadashaTag}>🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong></div>
                 )}
               </div>
-              <div className={styles.heroBgImg}>
-                {/* <div className={styles.heroBgGlow} /> */}
-                <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
-              </div>
             </div>
             <div className={styles.wowInner}>
-              <div className={styles.wowGlow} />
+              {/* <div className={styles.wowGlow} /> */}
               <div className={styles.wowHeader}>
                 <div className={styles.titleWithBottomDevider}>
                   <h2 className={styles.wowTitle}>{section.sub_title || "Your AI Suite"}</h2>
@@ -218,9 +215,9 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                   const premium = item.isPaid === true;
                   const paidLabel = premium ? "Paid" : null;
                   const cardIcon = (
-                    <div className={styles.wowIconBox}>
-                      <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
-                    </div>
+                    // <div >
+                      <img className={styles.wowIconBox} src={iconSrc || defaultSquareImg} alt="" width="40" height="40" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                    // </div>
                   );
                   // Premium cards open the premium plans modal instead of navigating.
                   if (premium) {
@@ -262,7 +259,7 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                     <Link key={`${item.ID || item.slug}-${i}`} className={styles.wowCard} to={path} onClick={(e) => handleWowCardClick(item, e)} style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
                       {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
                       <div className={styles.wowIconBox}>
-                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
                       </div>
                       <span className={styles.wowCardTitle}>{item.title}</span>
                     </Link>
@@ -298,9 +295,9 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                       style={{ cursor: isActionable ? 'pointer' : 'default' }}
                     >
                       {paidLabel && <span className={styles.wowPaidRibbon}>{paidLabel}</span>}
-                      <div className={styles.wowIconBox}>
-                        <img src={iconSrc || defaultSquareImg} alt="" width="40" height="40" loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
-                      </div>
+                      {/* <div className={styles.wowIconBox}> */}
+                        <img className={styles.wowIconBox} src={iconSrc || defaultSquareImg} alt="" width="40" height="40" onError={(e) => { e.target.onerror = null; e.target.src = defaultSquareImg; }} />
+                      {/* </div> */}
                       <span className={styles.wowCardTitle}>{item.title}</span>
                     </div>
                       );
@@ -336,7 +333,37 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                 <h3>{aiServicesItems[0]?.display_title || aiServicesItems[0]?.title}</h3>
                 {aiServicesItems[0]?.description && <p>{aiServicesItems[0].description}</p>}
                 {target && aiServicesItems[0]?.action_btn && <button type="button" className={styles.featureCta} onClick={(e) => { e.stopPropagation(); navigate(target); }}>{aiServicesItems[0].action_btn}</button>}
-                {(aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon) && <img src={aiServicesItems[0].image_url_web || aiServicesItems[0].icon} alt="" width="120" height="120" className={styles.laalKitaabImgLeft} loading="lazy" />}
+                {/*
+                  NOT lazy, and high priority: Lighthouse names this exact image
+                  as the homepage LCP element —
+
+                    section._heroRow > div._leftCards > div._qCardLaal
+                      > img._laalKitaabImgLeft
+
+                  and the phase split was decisive:
+
+                    TTFB          789.4ms  38%
+                    Load Delay    756.4ms  36%   <-- this
+                    Load Time      32.3ms   2%
+                    Render Delay  495.0ms  24%
+                                 2,070ms total
+
+                  Load Time is 32ms, so the file is not the problem — the problem
+                  is entirely *when* the request starts. `loading="lazy"` defers
+                  the fetch until layout has confirmed the element intersects the
+                  viewport, which on the LCP element buys nothing (it is in the
+                  first viewport by definition) and costs most of that 756ms.
+                  Chrome's own guidance is never to lazy-load the LCP element.
+
+                  fetchPriority high because the src comes from CMS data
+                  (aiServicesItems), so it cannot be preloaded from the HTML — it
+                  is only discoverable after /api/homepage resolves, and by then
+                  it is competing with everything the bundle is doing. The inline
+                  __homepagePrefetch__ in index.html already shortens the API half
+                  of that wait; this makes the browser act on the URL the moment
+                  it has it.
+                */}
+                {(aiServicesItems[0]?.image_url_web || aiServicesItems[0]?.icon) && <img src={aiServicesItems[0].image_url_web || aiServicesItems[0].icon} alt="" width="120" height="120" className={styles.laalKitaabImgLeft} fetchPriority="high" decoding="async" />}
               </div>
             );
           })()}
@@ -362,7 +389,10 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                       {aiServicesItems[1]?.description && <p>{aiServicesItems[1].description}</p>}
                     </div>
                     {target && aiServicesItems[1]?.action_btn && <button type="button" className={styles.fcCtaLight} onClick={(e) => { e.stopPropagation(); navigate(target); }}>{aiServicesItems[1].action_btn}</button>}
-                    {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon) && <img src={aiServicesItems[1].image_url_web || aiServicesItems[1].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
+                    {/* Inside .heroRow, i.e. the first viewport, so lazy only
+                        delays it. No fetchPriority though — that is reserved for
+                        the LCP element above, which this must not compete with. */}
+                    {(aiServicesItems[1]?.image_url_web || aiServicesItems[1]?.icon) && <img src={aiServicesItems[1].image_url_web || aiServicesItems[1].icon} alt="" width="100" height="100" className={styles.fcCardImg} decoding="async" />}
                   </div>
                 );
               })()}
@@ -380,7 +410,8 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
                       {aiServicesItems[2]?.description && <p>{aiServicesItems[2].description}</p>}
                     </div>
                     {target && aiServicesItems[2]?.action_btn && <button type="button" className={styles.panditTalkBtn} onClick={(e) => { e.stopPropagation(); navigate(target); }}>{aiServicesItems[2].action_btn}</button>}
-                    {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon) && <img src={aiServicesItems[2].image_url_web || aiServicesItems[2].icon} alt="" width="100" height="100" className={styles.fcCardImg} loading="lazy" />}
+                    {/* Same reasoning as the sibling card above. */}
+                    {(aiServicesItems[2]?.image_url_web || aiServicesItems[2]?.icon) && <img src={aiServicesItems[2].image_url_web || aiServicesItems[2].icon} alt="" width="100" height="100" className={styles.fcCardImg} decoding="async" />}
                   </div>
                 );
               })()}
@@ -406,13 +437,18 @@ const HeroGroupLayout = ({ sections, styles, navigate, name, currentMahadasha, h
               {aiServicesItems[3]?.action_btn && <button type="button" className={styles.liveCommunityBtn} onClick={(e) => { e.stopPropagation(); onLiveCommunityClick(aiServicesItems[3]); }}>{aiServicesItems[3].action_btn}</button>}
               <div className={styles.avatarCluster}>
                 <div className={styles.avatarClusterInner}>
+                  {/* Also inside .heroRow. At 200x187 this is the largest of the
+                      hero card images, so if the Laal Kitaab card is ever absent
+                      from the CMS payload this is the likely next LCP candidate —
+                      another reason not to leave it lazy. Priority still stays
+                      with the LCP element above. */}
                   {aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon ? (
               <img
                 src={aiServicesItems[3]?.image_url_web || aiServicesItems[3]?.icon}
                 alt=""
                 width="200"
                 height="187"
-                loading="lazy"
+                decoding="async"
               />
             ) : null}
                 </div>
@@ -490,10 +526,6 @@ const renderUngroupedHeroSection = (section, props) => {
             <h1>{section.title ? <>{section.title.replace(" AI", "")} <span className={styles.ai}>AI</span></> : <>Experience Astrology<br />Powered by <span className={styles.ai}>AI</span></>}</h1>
             {currentMahadasha && <div className={styles.mahadashaTag}>🪐 Current Mahadasha: <strong>{currentMahadasha.name}</strong></div>}
           </div>
-          <div className={styles.heroBgImg}>
-            <div className={styles.heroBgGlow} />
-            <img src={heroBg} alt="" loading="eager" fetchPriority="high" width="350" height="350" decoding="async" />
-          </div>
         </section>
       );
     case "muharat-widget":
@@ -566,19 +598,8 @@ const HomeV2 = () => {
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const pendingWowPathRef = useRef(null);
 
-  // Mount the floating Pandit AI launchers only once the browser is idle, so
-  // they are absent from the DOM while the LCP candidate is being decided.
-  const [showFloatingBubbles, setShowFloatingBubbles] = useState(false);
-  useEffect(() => {
-    const reveal = () => setShowFloatingBubbles(true);
-    if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(reveal, { timeout: 2500 });
-      return () => window.cancelIdleCallback?.(id);
-    }
-    // Safari has no requestIdleCallback.
-    const timer = setTimeout(reveal, 1200);
-    return () => clearTimeout(timer);
-  }, []);
+  // The Pandit AI floating bubbles are now mounted globally in HomeLayout (so
+  // "Ask AI Pandit" works on every route), so they're no longer mounted here.
 
   // ─── Data Fetching ────────────────────────────────────────────────────────
   const dispatch = useDispatch();
@@ -589,7 +610,12 @@ const HomeV2 = () => {
    * below appends the remaining pages into this same cache entry after paint, so
    * `homeSections` grows from page 1 to the full list.
    */
-  const { data: newHomeData, isLoading: isHomeLoading } = useGetNewHomeDetailsQuery(HOME_FIRST_PAGE_ARG);
+  const {
+    data: newHomeData,
+    isLoading: isHomeLoading,
+    isError: isHomeError,
+    refetch: refetchHome,
+  } = useGetNewHomeDetailsQuery(HOME_FIRST_PAGE_ARG);
   const homeSections = newHomeData?.data?.list;
 
   const [fetchHomeSectionsPage] = useLazyGetNewHomeSectionsQuery();
@@ -1107,8 +1133,56 @@ const HomeV2 = () => {
    * was warming the cache, which the index.html preload of the identical URL
    * already does, so it has been removed rather than left as a false mitigation.
    */
-  if (isHomeLoading || !renderPlan.length) {
+  // Still fetching page 1 — keep the blank full-height placeholder (preserves
+  // the LCP behaviour described above; the hero commits as soon as data lands).
+  if (isHomeLoading) {
     return <div className={styles.page} style={{ minHeight: "100vh" }} />;
+  }
+
+  // Page 1 finished but produced nothing to render — either the request was
+  // rejected (`isHomeError`) or it came back empty. Previously this fell through
+  // to the same blank div as the loading state, so a failed homepage API left
+  // the visitor on a permanently empty page with no way to recover. Show a
+  // recoverable fallback (with a Retry that refetches) instead of a blank page.
+  if (isHomeError || !renderPlan.length) {
+    return (
+      <div
+        className={styles.page}
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <EmptyState
+          message="We couldn't load the homepage"
+          subtext="Please check your connection and try again."
+        />
+        <button
+          type="button"
+          onClick={() => refetchHome()}
+          style={{
+            marginTop: "4px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "10px 22px",
+            borderRadius: "12px",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+            fontWeight: 600,
+            color: "#fff",
+            background: "linear-gradient(90deg, #f75801 0%, #d43400 100%)",
+            boxShadow: "0 4px 14px rgba(247, 88, 1, 0.28)",
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -1136,6 +1210,57 @@ const HomeV2 = () => {
               return null;
           }
         })}
+
+        {/* Daily Horoscope + Testimonials — driven by the CMS "horoscope" and
+            "testimonials" sections in the home payload. Rendered once all
+            sections have paged in so they sit at the end of the feed. Each is
+            shown only if its section exists in the payload, and the two are
+            ordered by the API's `list_order` (so the CMS controls which comes
+            first). */}
+        {!hasMoreSections && (() => {
+          const horoscopeSection = (homeSections || []).find(
+            (s) => s?.slug === "horoscope" || s?.display_type === "horoscope"
+          );
+          const testimonialsSection = (homeSections || []).find(
+            (s) => s?.slug === "testimonials" || s?.display_type === "testimonials"
+          );
+
+          const orderOf = (s) =>
+            Number.isFinite(Number(s?.list_order)) ? Number(s.list_order) : Infinity;
+
+          const blocks = [];
+          if (horoscopeSection) {
+            blocks.push({
+              key: "horoscope",
+              order: orderOf(horoscopeSection),
+              node: <HoroscopeSection key="horoscope" sectionData={horoscopeSection} />,
+            });
+          }
+          if (testimonialsSection) {
+            blocks.push({
+              key: "testimonials",
+              order: orderOf(testimonialsSection),
+              node: <TestimonialsSection key="testimonials" sectionData={testimonialsSection} />,
+            });
+          }
+
+          // Neither present → render nothing.
+          if (blocks.length === 0) return null;
+
+          // Respect the CMS order; ties keep declaration order (horoscope first).
+          blocks.sort((a, b) => a.order - b.order);
+
+          return <>{blocks.map((b) => b.node)}</>;
+        })()}
+
+        {/* App download promo banner — driven by the CMS "get-app" section;
+            only shown when that section is present in the payload. */}
+        {!hasMoreSections && (() => {
+          const getAppSection = (homeSections || []).find(
+            (s) => s?.slug === "get-app" || s?.display_type === "get-app"
+          );
+          return getAppSection ? <AppDownloadSection sectionData={getAppSection} /> : null;
+        })()}
 
         {/*
           Trigger for the next page of CMS sections. Zero-height and aria-hidden:
@@ -1167,12 +1292,9 @@ const HomeV2 = () => {
         astrologer={hookSelectedAstrologer}
         connectionType={pendingConnectionType || "chat"}
       />
-      {showFloatingBubbles && (
-        <Suspense fallback={null}>
-          <PanditAIBubble />
-          <PanditAIVoiceBubble />
-        </Suspense>
-      )}
+      {/* Pandit AI bubbles are now mounted globally in HomeLayout, so they are
+          not rendered here — that would double-mount them (two `panditai:ask`
+          listeners) on the home page. */}
       <HomeIntroPopup />
     </>
   );

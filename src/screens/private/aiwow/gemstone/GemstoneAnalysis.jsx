@@ -25,7 +25,36 @@ const GemstoneAnalysis = () => {
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [error, setError] = useState(null);
-  
+
+  /*
+    Inline answer for a blocked tap on this screen's two action buttons.
+
+    Both were rendered with a native `disabled`, and handleGenerateAnalysis
+    answered every blocker with a bare `return`. A natively disabled button emits
+    no click event at all, so a tap on it produced nothing: no feedback for the
+    visitor, and in Clarity it scores as a dead click with nothing to attribute it
+    to. That is worst here, on the LAST step of a flow the visitor has already
+    spent minutes on — capture or upload a photo, then this.
+
+    Ported from PalmistryAnalysis, which was converted first against Clarity
+    session phtszy ("Use Photo" at 03:12, "Generate analysis" at 03:25, session
+    over) and is the settled pattern: aria-disabled keeps the inert look while the
+    button still fires, and the reason is written next to the control rather than
+    sent to a toast. react-hot-toast renders top-right while these actions sit
+    near the bottom of a full-viewport screen, and Clarity cannot see toasts at
+    all.
+
+    `seq` is bumped on every announcement so a repeated reason still remounts the
+    node: replay sees a DOM mutation and screen readers re-announce.
+  */
+  const [actionNotice, setActionNotice] = useState(null);
+  const noticeSeqRef = useRef(0);
+
+  const announceActionNotice = (text) => {
+    noticeSeqRef.current += 1;
+    setActionNotice({ seq: noticeSeqRef.current, text });
+  };
+
   const isMountedRef = useRef(true);
   const abortControllerRef = useRef(null);
   const hasStartedRef = useRef(false);
@@ -149,9 +178,41 @@ const GemstoneAnalysis = () => {
     }
   };
 
+  /*
+    Every blocker used to be a bare `return`, behind a button that was also
+    natively disabled — so the tap neither fired nor explained itself. Each one
+    now names itself. `profileLoading` is a state the visitor can wait out, so it
+    says so and stays put; the other two are already navigating elsewhere by the
+    time they are reachable, so the page change is the feedback.
+  */
   const handleGenerateAnalysis = () => {
-    if (isAnalyzing || analysisComplete) return;
-    if (!gemstoneImage || !profile) return;
+    if (isAnalyzing) {
+      announceActionNotice('Already reading your gemstone — one moment.');
+      return;
+    }
+    if (analysisComplete) {
+      handleShowResult();
+      return;
+    }
+    if (profileLoading) {
+      announceActionNotice('Loading your birth details — one moment.');
+      return;
+    }
+    if (!profile) {
+      // useSelectedKundliProfile is used here with `required: true`, so by the
+      // time this is reachable it has already toasted and started a replace-
+      // navigation to /ai-wow. Don't toast twice; just don't swallow the tap.
+      announceActionNotice('Taking you back to pick your birth details.');
+      return;
+    }
+    if (!gemstoneImage) {
+      // The mount effect normally redirects before this can be reached; if the
+      // image went missing afterwards, go back to capture rather than ignore the
+      // tap. The route change is the feedback.
+      handleRetakePicture();
+      return;
+    }
+    setActionNotice(null);
     hasStartedRef.current = true;
     setError(null);
     performAnalysis(gemstoneImage);
@@ -186,7 +247,31 @@ const GemstoneAnalysis = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={handleBack} disabled={isAnalyzing}>
+          {/*
+            aria-disabled, not `disabled`. Matches FaceReadingAnalysis, which was
+            fixed first; this screen carried the identical defect.
+
+            A disabled control fires no click at all, so while the analysis was
+            running the back arrow — the only visible way off a screen that can
+            sit on its progress state for a while — silently absorbed every tap.
+            A dead click on an exit affordance is the worst kind: the visitor
+            concludes the page is stuck.
+
+            Stays tappable and says why it is not going anywhere yet. handleBack
+            itself is unchanged.
+          */}
+          <button
+            className={styles.backButton}
+            onClick={() => {
+              if (isAnalyzing) {
+                announceActionNotice('Still examining your gemstone — one moment.');
+                return;
+              }
+              handleBack();
+            }}
+            aria-disabled={isAnalyzing}
+            aria-label="Go back"
+          >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -266,6 +351,19 @@ const GemstoneAnalysis = () => {
                 </p>
               </div>
 
+              {/* Above the buttons, so the answer is next to the control that
+                  was tapped. See announceActionNotice. */}
+              {actionNotice && (
+                <p
+                  key={actionNotice.seq}
+                  className={styles.actionNotice}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {actionNotice.text}
+                </p>
+              )}
+
               <div className={styles.actionButtons}>
                 <button
                   className={styles.retakeButton}
@@ -273,11 +371,18 @@ const GemstoneAnalysis = () => {
                 >
                   Retake picture
                 </button>
+                {/*
+                  aria-disabled, not `disabled`. The dimming stays so the state is
+                  still visible, but the button keeps firing so
+                  handleGenerateAnalysis can explain the blocker. `cursor` is back
+                  to pointer for the same reason — 'not-allowed' on a control that
+                  does respond would be a lie, and it does nothing on touch anyway.
+                */}
                 <button
                   className={styles.resultButton}
                   onClick={handleGenerateAnalysis}
-                  disabled={!profile || profileLoading}
-                  style={{ opacity: (!profile || profileLoading) ? 0.6 : 1, cursor: (!profile || profileLoading) ? 'not-allowed' : 'pointer' }}
+                  aria-disabled={!profile || profileLoading}
+                  style={{ opacity: (!profile || profileLoading) ? 0.6 : 1 }}
                 >
                   Generate analysis
                 </button>
@@ -301,11 +406,40 @@ const GemstoneAnalysis = () => {
                 <h3 className={styles.message}>Hold tight as we are analysing your gemstone</h3>
               </div>
 
+              {actionNotice && (
+                <p
+                  key={actionNotice.seq}
+                  className={styles.actionNotice}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {actionNotice.text}
+                </p>
+              )}
+
+              {/*
+                aria-disabled, not `disabled`. The label already reads
+                "Analysing..." while the work is in flight, but a natively disabled
+                button emits no click at all, so someone tapping it to ask "is this
+                actually going?" got nothing — during the longest wait in the flow.
+                It stays tappable and answers.
+              */}
               <button 
                 className={styles.resultButton}
-                onClick={handleShowResult}
-                disabled={!analysisComplete || isNavigating}
-                style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6, cursor: (!analysisComplete || isNavigating) ? 'not-allowed' : 'pointer' }}
+                onClick={() => {
+                  if (isNavigating) {
+                    announceActionNotice('Opening your reading — one moment.');
+                    return;
+                  }
+                  if (!analysisComplete) {
+                    announceActionNotice('Still reading your gemstone. This can take a few moments.');
+                    return;
+                  }
+                  handleShowResult();
+                }}
+                aria-disabled={!analysisComplete || isNavigating}
+                aria-busy={isAnalyzing || isNavigating || undefined}
+                style={{ opacity: (analysisComplete && !isNavigating) ? 1 : 0.6 }}
               >
                 {analysisComplete ? 'View Result' : 'Analysing...'}
               </button>

@@ -201,7 +201,7 @@ export const renderStandaloneSection = (section, options = {}) => {
       return <LiveTrackingSection key={key} sectionData={section} styles={styles} />;
 
     case "connect-astrologer":
-      return <ConnectAstrologerSection key={key} sectionData={section} styles={styles} />;
+      return <ConnectAstrologerSection key={key} sectionData={section} styles={styles} onConnect={onConnect} />;
 
     // Hero/three-col types rendered standalone (when not grouped)
     // These are handled by the parent component with their specific layouts

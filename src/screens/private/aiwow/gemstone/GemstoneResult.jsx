@@ -1,10 +1,14 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import { BsChatDots } from 'react-icons/bs';
 import { MdOutlinePhoneInTalk } from 'react-icons/md';
-import { Download, Share2, Sparkles } from 'lucide-react';
+import { Download, Share2, Sparkles, Gem } from 'lucide-react';
+// Mounted (hidden pill) so the in-card "Ask Pandit AI" button has a listener for
+// its `panditai:ask` event on this screen — HomeLayout doesn't mount the bubble
+// globally on this branch, so without this the button did nothing.
+const PanditAIBubble = lazy(() => import('../../../../component/panditAI/PanditAIBubble'));
 import styles from './GemstoneResult.module.scss';
 import { Toast } from '../../../../component';
 import { PATH } from '../../../../utils/routes/Paths';
@@ -61,16 +65,20 @@ import insightAdviceIcon from '../../../../assets/gemstone-details/insight-advic
 // Match an insight (by its API key) to the right design icon. Falls back to the
 // generic "advice" bulb for any insight key the design didn't cover.
 const INSIGHT_ICONS = {
-  birthchartcompatibility: insightBirthChartIcon,
-  planetarybenefit: insightPlanetaryIcon,
-  planetarybenefits: insightPlanetaryIcon,
+  // Icons were swapped between pairs of cards. Corrected:
+  //  - Birth Chart Compatibility ⇄ Life Path Alignment
+  //  - Planetary Benefit        ⇄ Personalized Advice
+  //  - Dosha Remedies + Recommended For User were already correct.
+  birthchartcompatibility: insightRecommendedIcon,
+  lifepathalignment: insightBirthChartIcon,
+  planetarybenefit: insightAdviceIcon,
+  planetarybenefits: insightAdviceIcon,
+  personalizedadvice: insightPlanetaryIcon,
+  advice: insightPlanetaryIcon,
   dosharemedies: insightDoshaIcon,
   dosharemedy: insightDoshaIcon,
-  lifepathalignment: insightLifePathIcon,
-  recommendedforuser: insightRecommendedIcon,
-  recommended: insightRecommendedIcon,
-  personalizedadvice: insightAdviceIcon,
-  advice: insightAdviceIcon,
+  recommendedforuser: insightLifePathIcon,
+  recommended: insightLifePathIcon,
 };
 const getInsightIcon = (key) =>
   INSIGHT_ICONS[String(key || '').toLowerCase().replace(/[^a-z]/g, '')] || insightAdviceIcon;
@@ -82,8 +90,16 @@ const GemstoneResult = () => {
   const [selectedGemstoneIndex, setSelectedGemstoneIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('overview');
   
-  // Dropdown states for Suitability tab
-  const [openSections, setOpenSections] = useState({});
+  /* Dropdown states for the Suitability / Healing tabs. Default every section to
+     open so on mobile the cards are EXPANDED by default (the visitor can still
+     tap a header to collapse). Desktop always shows content regardless. */
+  const [openSections, setOpenSections] = useState({
+    suitability: true,
+    wearing: true,
+    healing: true,
+    compatibility: true,
+    market: true,
+  });
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
   useEffect(() => {
@@ -224,12 +240,31 @@ const GemstoneResult = () => {
           </h3>
           <div className={styles.personalizedGrid}>
             {Object.entries(d.personalized).map(([key, value]) => {
-              if (!value) return null;
+              // `false` is a real value here (e.g. "Recommended For User: No"),
+              // so only skip null/undefined/empty-string — not boolean false.
+              if (value === null || value === undefined || value === '') return null;
 
               const title = key
                 .replace(/([A-Z])/g, ' $1')
                 .replace(/^./, s => s.toUpperCase())
                 .trim();
+
+              // Handle booleans — show Yes/No, not true/false.
+              if (typeof value === 'boolean') {
+                const boolText = value ? 'Yes' : 'No';
+                return (
+                  <div className={styles.personalizedCard} key={key} style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
+                      <TTSButton text={`${title}. ${boolText}`} />
+                    </span>
+                    <h4 className={styles.boxTitle}>
+                      <img src={getInsightIcon(key)} alt="" className={styles.insightIcon} />
+                      {title}
+                    </h4>
+                    <p className={styles.boxDesc}>{boolText}</p>
+                  </div>
+                );
+              }
 
               // Handle arrays
               if (Array.isArray(value)) {
@@ -288,16 +323,25 @@ const GemstoneResult = () => {
               }
 
               // Handle strings/numbers
+              // Strings/numbers. Also normalise the string forms "true"/"false"
+              // (some fields arrive as strings) to Yes/No.
+              const raw = String(value).trim();
+              const displayValue =
+                raw.toLowerCase() === 'true'
+                  ? 'Yes'
+                  : raw.toLowerCase() === 'false'
+                    ? 'No'
+                    : raw;
               return (
                 <div className={styles.personalizedCard} key={key} style={{ position: 'relative' }}>
                   <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                    <TTSButton text={`${title}. ${String(value)}`} />
+                    <TTSButton text={`${title}. ${displayValue}`} />
                   </span>
                   <h4 className={styles.boxTitle}>
                     <img src={getInsightIcon(key)} alt="" className={styles.insightIcon} />
                     {title}
                   </h4>
-                  <p className={styles.boxDesc}>{String(value)}</p>
+                  <p className={styles.boxDesc}>{displayValue}</p>
                 </div>
               );
             })}
@@ -905,6 +949,10 @@ const GemstoneResult = () => {
                   className={`${styles.gemstoneTab} ${selectedGemstoneIndex === index ? styles.active : ''}`}
                   onClick={() => { setSelectedGemstoneIndex(index); setActiveTab('overview'); }}
                 >
+                  {/* Gem glyph only on the selected pill, as in the design. */}
+                  {selectedGemstoneIndex === index && (
+                    <Gem size={16} className={styles.gemstoneTabIcon} aria-hidden="true" />
+                  )}
                   {gemstone.identification.name || `Gemstone ${index + 1}`}
                 </button>
               ))}
@@ -982,12 +1030,26 @@ const GemstoneResult = () => {
                 {/* Identification chips (name / hindi / scientific / natural). */}
                 {(() => {
                   const id = currentGemstone?.identification || {};
+                  /*
+                    Drop empty values AND de-duplicate by value: the API often
+                    returns the same string for name and hindiName (e.g. both
+                    "Tourmaline"), which rendered two identical pills that read as
+                    a bug. Keep the first occurrence, skip repeats (case-insensitive).
+                  */
+                  const seen = new Set();
                   const chips = [
                     id.name && { label: id.name, tone: 'violet' },
                     id.hindiName && { label: id.hindiName, tone: 'orange' },
                     id.scientificName && { label: id.scientificName, tone: 'gold' },
                     { label: id.isNatural ? 'Natural' : 'Treated', tone: 'pink' },
-                  ].filter(Boolean);
+                  ]
+                    .filter(Boolean)
+                    .filter((chip) => {
+                      const key = String(chip.label).trim().toLowerCase();
+                      if (!key || seen.has(key)) return false;
+                      seen.add(key);
+                      return true;
+                    });
                   return chips.length > 0 ? (
                     <div className={styles.sideChips}>
                       {chips.map((chip, i) => (
@@ -1081,6 +1143,12 @@ const GemstoneResult = () => {
           <MdOutlinePhoneInTalk size={16} aria-hidden="true" /> Call an astrologer
         </a>
       </div>
+
+      {/* Hidden pill — only here for its `panditai:ask` listener so the in-card
+          "Ask Pandit AI · Free" button opens the chat. */}
+      <Suspense fallback={null}>
+        <PanditAIBubble hideBubble />
+      </Suspense>
     </div>
     </>
   );

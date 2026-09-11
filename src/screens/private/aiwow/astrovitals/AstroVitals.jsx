@@ -5,13 +5,62 @@ import { Toast } from '../../../../component';
 import { syncAstroVitals } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';
 import RouteLoader from '../../../../component/UI/RouteLoader';
+import GuestKundliAuthModal from '../../../../component/UI/Profile/GuestKundliAuthModal';
 
 const AstroVitals = () => {
   const navigate = useNavigate();
-  const { profile, isLoading: profileLoading } = useSelectedKundliProfile();
+  /*
+    Guests used to be ejected from this screen before it rendered.
+
+    `useSelectedKundliProfile()` defaults to `required: true, showToast: true`. For
+    a visitor with no token that is a closed loop: the profiles query is skipped
+    (so it reports isLoading:false and the loading guard does not hold), the
+    localStorage lookup is gated on the same token, and the hook falls straight
+    through to Toast.error + navigate('/ai-wow', { replace: true }) on mount. The
+    destination is the tool menu this visitor just tapped from, so the next tap
+    does the same thing.
+
+    Clarity session je5byb is that loop measured: a guest from Facebook, 10 page
+    views from 8 clicks — more pages than clicks is only possible if navigation
+    happened without one — 54 seconds, gone. The only explanation offered was a
+    toast: top-right, off-screen in a Facebook WebView, and invisible to session
+    replay, so the visitor saw the page simply refuse to open.
+
+    `required: !isGuest` lets a guest see and fill the form, and the guest modal
+    below collects birth details on submit. This is DreamInterpreter's shape
+    (`required: !isGuest, showToast: !isGuest` plus GuestKundliAuthModal at
+    submit), and it is how PalmistryCamera, AuraCamera and PanditAIBubble already
+    treat guests. Safe here specifically because the analysis is behind an explicit
+    form submit rather than an auto-run effect, so nothing fires without a profile.
+  */
+  const isGuest = !localStorage.getItem("shubhtalk_customer_token");
+  const { profile, isLoading: profileLoading } = useSelectedKundliProfile({
+    required: !isGuest,
+    showToast: !isGuest,
+  });
   
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
+  const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  /*
+    Inline reason for a blocked submit.
+
+    The two states the submit button used to be natively disabled for — a request
+    already in flight, and the required readings not filled in — are answered here
+    instead of in a toast. react-hot-toast renders top-right while this form's
+    button is at the bottom of a scrolling page, and Clarity cannot see toasts at
+    all, so a blocked tap read as dead in both the session and the report.
+
+    `seq` is bumped per announcement so repeating the same reason still remounts
+    the node: replay sees a DOM mutation and screen readers re-announce.
+  */
+  const [submitNotice, setSubmitNotice] = useState(null);
+  const submitNoticeSeqRef = useRef(0);
+
+  const announceSubmitNotice = (text) => {
+    submitNoticeSeqRef.current += 1;
+    setSubmitNotice({ seq: submitNoticeSeqRef.current, text });
+  };
   // Synchronous guard against a rapid double tap firing the API twice.
   const isSubmittingRef = useRef(false);
 
@@ -46,15 +95,32 @@ const AstroVitals = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Guest: collect birth details instead of failing. Read the token here rather
+    // than reusing `isGuest` so a login completed in this session (in another tab,
+    // or via the modal) is picked up without a remount.
+    if (!localStorage.getItem("shubhtalk_customer_token")) {
+      setShowGuestAuthModal(true);
+      return;
+    }
+
     if (!profile) {
       Toast.error('Profile not available');
       return;
     }
 
-    if (!heartRate || !stressLevel) {
-      Toast.error('Please enter heart rate and stress level');
+    if (isLoading) {
+      announceSubmitNotice('Already analysing your vitals — one moment.');
       return;
     }
+
+    if (!heartRate || !stressLevel) {
+      // Inline rather than a toast: this is the state the button was disabled for,
+      // so the answer belongs beside the button and above the fields it names.
+      announceSubmitNotice('Enter your heart rate and stress level to continue.');
+      return;
+    }
+
+    setSubmitNotice(null);
 
     const hr = parseInt(heartRate);
     const stress = parseInt(stressLevel);
@@ -167,7 +233,17 @@ const AstroVitals = () => {
     }
   };
 
-  if (profileLoading) {
+  const handleGuestAuthSuccess = () => {
+    setShowGuestAuthModal(false);
+    // Deliberately does NOT auto-submit. The modal has already selected the newly
+    // created profile; the user taps Analyse again with the readings they entered
+    // still in the form. Auto-submitting would fire the moment the welcome popup
+    // closes. Same reasoning as DreamInterpreter's handleGuestAuthSuccess.
+  };
+
+  // `!isGuest &&` because a guest's profile query is skipped, so this would never
+  // resolve for them — they would sit on a loader instead of seeing the form.
+  if (!isGuest && profileLoading) {
     // Reserves in-flow height while the profile loads — see RouteLoader.
     return <RouteLoader message="Loading your birth details…" />;
   }
@@ -318,10 +394,32 @@ const AstroVitals = () => {
               <span className={styles.hint}>1 = Poor, 10 = Excellent</span>
             </div>
 
+            {/* Reason for a blocked submit, next to the button that was tapped.
+                See announceSubmitNotice. */}
+            {submitNotice && (
+              <p
+                key={submitNotice.seq}
+                className={styles.submitNotice}
+                role="status"
+                aria-live="polite"
+              >
+                {submitNotice.text}
+              </p>
+            )}
+
+            {/*
+              aria-disabled + aria-busy rather than a native `disabled`. This was
+              disabled until heart rate and stress level were both filled — so the
+              button that a visitor taps to find out what is missing was the one
+              control that could not tell them, because a disabled button emits no
+              click at all. It now fires and handleSubmit names the gap. Re-entry
+              while a request is in flight is already blocked by isSubmittingRef.
+            */}
             <button 
               type="submit" 
               className={styles.submitButton}
-              disabled={isLoading || !heartRate || !stressLevel}
+              aria-disabled={isLoading || !heartRate || !stressLevel}
+              aria-busy={isLoading || undefined}
             >
               {isLoading ? (
                 <>
@@ -488,6 +586,14 @@ const AstroVitals = () => {
           </div>
         )}
       </div>
+      {/* Birth details for a guest, collected in place instead of bouncing them
+          back to /ai-wow. See the note on `isGuest` above. */}
+      <GuestKundliAuthModal
+        isOpen={showGuestAuthModal}
+        onClose={() => setShowGuestAuthModal(false)}
+        onSuccess={handleGuestAuthSuccess}
+        title="Add Kundli Details"
+      />
     </div>
   );
 };

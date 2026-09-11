@@ -102,6 +102,11 @@ const TalkToAstrologer = () => {
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [showFilterAstrologer, setShowFilterAstrologer] = useState(false);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
+  // True while this is a /astrologers/:category URL whose filter has not settled
+  // yet. Consumed by the TOP ASTROLOGERS section far below — see the long note
+  // there for the shift it prevents. Declared here to sit with the other filter
+  // state; categoryFromParams and filterError are assigned further down, so the
+  // actual expression lives at the bottom of the hook body.
 
   const { data: astroFilterTab, isFetchingFilterTab } = useGetAstrologerFilterCategoryTabQuery();
 
@@ -323,6 +328,23 @@ const TalkToAstrologer = () => {
   const [checking, setChecking] = useState(false);
   const [checkResult, setCheckResult] = useState(null);
   const checkSeqRef = useRef(0);
+
+  /*
+    Error state for the FILTERED / category list (/astrologers/:category and any
+    applied filter). The base list already surfaces `isListError` in a "Couldn't
+    load astrologers / Try again" card, but the filtered path fetches through
+    FilterChips' own lazy query, whose failure was only a toast — so a failed
+    category request dropped the visitor on a blank list with no retry. FilterChips
+    now hands us an error object with a `retry()` that replays the same filter.
+  */
+  const [filterError, setFilterError] = useState(null);
+
+  // See the TOP ASTROLOGERS block in the JSX for the reasoning. categoryFromParams
+  // comes from useParams so it is known on the very first render, which is what
+  // makes this able to suppress the mount rather than react to it.
+  const urlCategoryPending =
+    Boolean(categoryFromParams) && !showFilterAstrologer && !filterError;
+  const [filterRetrying, setFilterRetrying] = useState(false);
 
   const limit = 9;
 
@@ -684,6 +706,8 @@ const TalkToAstrologer = () => {
     } = payload || {};
 
     setIsFiltered(true);
+    // A successful apply clears any prior filter-error card.
+    setFilterError(null);
 
     if (!append) {
       // First page OR new filter → reset list
@@ -1405,6 +1429,7 @@ const TalkToAstrologer = () => {
         astroFilterTab={astroFilterTab}
         isFetchingFilterTab={isFetchingFilterTab}
         onFilterLoading={setIsFilterLoading}
+        onFilterError={setFilterError}
       />
 
 
@@ -1431,55 +1456,48 @@ const TalkToAstrologer = () => {
         fullscreen overlay would have covered the <h1> that this route relies on
         as its LCP element.
       */}
-      {/* Top Astrologers Section - New Design */}
-      {!showFilterAstrologer && topTenAstrologers.length > 0 && (
+      {/* Top Astrologers Section - New Design
+
+          The `urlCategoryPending` half exists for CLS, and it is specific to
+          /astrologers/:category.
+
+          On a category URL the base (unfiltered) query is NOT skipped on first
+          load: its `skip` is `isFiltered`, and per the note above isFiltered only
+          becomes true once FilterChips' auto-applied category request *resolves*.
+          So the sequence on /astrologers/marriage-relationships was:
+
+            1. static shell paints (h1 + chips) — deliberate, this is the LCP
+            2. base query resolves -> astrodata.data.topTenAstrologer arrives ->
+               topTenAstrologers set -> THIS SECTION MOUNTS: heading, divider and
+               a rail of up to ten cards whose avatar box alone is 100px, several
+               hundred px of height inserted above the main grid
+            3. the same base response fills the grid with UNFILTERED astrologers
+            4. the category filter resolves -> setShowFilterAstrologer(true) ->
+               this section UNMOUNTS and the grid is replaced by the filtered set
+
+          Steps 2 and 4 are two page-scale shifts in opposite directions, and the
+          section is guaranteed to end up hidden on any category URL because
+          applyFilters always finishes with setShowFilterAstrologer(true).
+          Rendering it in between is pure layout churn.
+
+          Clarity URL performance for 08 Sep shows exactly that shape — every
+          category URL is catastrophic while non-category routes are not:
+          marriage-relationships CLS 3.275, love-relationships 2.498,
+          career-business 2.029, against 1.596 for an astrologer profile.
+
+          Deliberately NOT keyed on categoryFromParams alone: if the filter
+          request fails, showFilterAstrologer never flips, and the visitor should
+          still get this section rather than a page with the error card and
+          nothing else. filterError releases the suppression for that case, so the
+          only behaviour that changes is the transient double-shift.
+
+          The step-3 grid swap is a separate shift and is not addressed here —
+          fixing it means skipping the base query when the URL carries a category,
+          which changes this screen's data flow rather than just its markup. */}
+      {!showFilterAstrologer && !urlCategoryPending && topTenAstrologers.length > 0 && (
         <>
           <div className={styles.sectionDivider}>
             <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
-            <div className={styles.dividerContainer}>
-              <div className={styles.dividerLine}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="104"
-                  height="1"
-                  viewBox="0 0 104 1"
-                  fill="none"
-                >
-                  <path
-                    d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z"
-                    fill="#030303"
-                  />
-                </svg>
-              </div>
-              <span className={styles.dividerMoon}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="15"
-                  height="16"
-                  viewBox="0 0 4 5"
-                  fill="none"
-                >
-                  <path
-                    d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
-                    fill="#030303"
-                  />
-                </svg>
-              </span>
-              <div className={styles.dividerLine}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="104"
-                  height="1"
-                  viewBox="0 0 104 1"
-                  fill="none"
-                >
-                  <path
-                    d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z"
-                    fill="#030303"
-                  />
-                </svg>
-              </div>
-            </div>
           </div>
 
           <div className={styles.topAstrologersGrid}>
@@ -1528,50 +1546,6 @@ const TalkToAstrologer = () => {
 
       <div className={styles.sectionDivider}>
         <h2 className={styles.sectionTitle}>EXPLORE ASTROLOGERS</h2>
-        <div className={styles.dividerContainer}>
-          <div className={styles.dividerLine}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="104"
-              height="1"
-              viewBox="0 0 104 1"
-              fill="none"
-            >
-              <path
-                d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z"
-                fill="#030303"
-              />
-            </svg>
-          </div>
-          <span className={styles.dividerMoon}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="15"
-              height="16"
-              viewBox="0 0 4 5"
-              fill="none"
-            >
-              <path
-                d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
-                fill="#030303"
-              />
-            </svg>
-          </span>
-          <div className={styles.dividerLine}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="104"
-              height="1"
-              viewBox="0 0 104 1"
-              fill="none"
-            >
-              <path
-                d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z"
-                fill="#030303"
-              />
-            </svg>
-          </div>
-        </div>
       </div>
 
       <div className={styles.cardsContainer}>
@@ -1650,7 +1624,37 @@ const TalkToAstrologer = () => {
         back to empty. `replace` keeps the Back button pointing wherever the
         visitor actually came from.
       */}
-      {!isFetching && !isFilterLoading && allAstrologers.length === 0 && isFiltered && (
+      {/*
+        Filtered / category path failed to load. Mirrors the base list's
+        "Couldn't load astrologers" card, but retry replays the failed FILTER
+        (via the retry() FilterChips handed us) rather than the base query.
+        Gated on an empty list so a failure while scroll-loading a filtered list
+        leaves the results already on screen alone.
+      */}
+      {filterError && isFiltered && !isFilterLoading && allAstrologers.length === 0 && (
+        <div className={styles.listStateCard}>
+          <h2 className={styles.listStateTitle}>Couldn&apos;t load astrologers</h2>
+          <p className={styles.listStateText}>
+            The list didn&apos;t come through. This is usually a connection hiccup.
+          </p>
+          <button
+            type="button"
+            className={styles.listStateBtn}
+            aria-busy={filterRetrying}
+            onClick={() => {
+              if (filterRetrying) return;
+              setFilterRetrying(true);
+              Promise.resolve(filterError.retry?.()).finally(() =>
+                setFilterRetrying(false)
+              );
+            }}
+          >
+            {filterRetrying ? "Trying…" : "Try again"}
+          </button>
+        </div>
+      )}
+
+      {!filterError && !isFetching && !isFilterLoading && allAstrologers.length === 0 && isFiltered && (
         <div className={styles.listStateCard}>
           <h2 className={styles.listStateTitle}>No astrologers in this category</h2>
           <p className={styles.listStateText}>
@@ -1784,50 +1788,6 @@ const TalkToAstrologer = () => {
             <br />
             LET US MATCH YOU.
           </h2>
-          <div className={styles.dividerContainer}>
-            <div className={styles.dividerLine}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="104"
-                height="1"
-                viewBox="0 0 104 1"
-                fill="none"
-              >
-                <path
-                  d="M103.803 0.406393C103.803 0.630933 101.504 0.812789 98.669 0.812789C95.8336 0.812789 0 0.630933 0 0.406393C0 0.181853 95.8342 0 98.669 0C101.504 0 103.803 0.181853 103.803 0.406393Z"
-                  fill="#030303"
-                />
-              </svg>
-            </div>
-            <span className={styles.dividerMoon}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="15"
-                height="16"
-                viewBox="0 0 4 5"
-                fill="none"
-              >
-                <path
-                  d="M3.39392 4.18679C3.03602 4.50885 2.58016 4.7032 2.08582 4.7032C0.934798 4.7032 0 3.64991 0 2.35021C0 1.05329 0.934798 0 2.08582 0C2.18869 0 2.2891 0.00867403 2.38704 0.0232501C1.91056 0.452549 1.60687 1.11403 1.60687 1.85706C1.60687 3.04084 2.38458 4.02125 3.39392 4.18679Z"
-                  fill="#030303"
-                />
-              </svg>
-            </span>
-            <div className={styles.dividerLine}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="104"
-                height="1"
-                viewBox="0 0 104 1"
-                fill="none"
-              >
-                <path
-                  d="M-4.48009e-06 0.406393C-4.48009e-06 0.630933 2.29856 0.812789 5.13401 0.812789C7.96946 0.812789 103.803 0.630933 103.803 0.406393C103.803 0.181853 7.96885 0 5.13401 0C2.29856 0 -4.48009e-06 0.181853 -4.48009e-06 0.406393Z"
-                  fill="#030303"
-                />
-              </svg>
-            </div>
-          </div>
 
           {isLoadingRecommended ? (
             <div className={styles.loaderWrapper}>

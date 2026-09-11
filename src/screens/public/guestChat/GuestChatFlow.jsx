@@ -207,8 +207,12 @@ const GuestChatFlow = () => {
           console.error("Guest balance check failed:", err);
         }
       }
+      // Stay on the guest-chat screen and ring here (phase = "waiting"); the
+      // sticky waiting/ringing card shows over it and this screen's own
+      // chat:accepted / chat:rejected handlers open the chat or recover. It used
+      // to navigate to /astrologers, which unmounted those handlers and dropped
+      // the guest on the listing with the generic waiting popup.
       initiateChat();
-      navigate("/astrologers", { replace: true });
     };
     window.addEventListener("welcome-bonus-closed", onBonusClosed);
     window.addEventListener("welcome-back-closed", onBackClosed);
@@ -498,19 +502,17 @@ const GuestChatFlow = () => {
     } catch (err) {
       console.error("Guest balance check failed:", err);
     }
-    // Balance OK: initiate the chat request and move to the astrologers page
-    // (the request continues in the background via the global waiting queue).
-    // This is the real end of the funnel, so the draft can go now.
+    // Balance OK: initiate the chat request and ring in place. This is the real
+    // end of the funnel, so the draft can go now. The guest stays on this screen
+    // (phase = "waiting") with the ringing card over it; chat:accepted opens the
+    // chat. It used to navigate to /astrologers and hand off to the global queue.
     clearGuestDraft();
     initiateChat();
-    navigate("/astrologers", { replace: true });
   };
 
-  // Recharge completed → initiate the chat and move to the astrologers page
-  // (the request continues in the background via the waiting queue).
+  // Recharge completed → initiate the chat and ring in place on this screen.
   const handleRechargeSuccess = () => {
     initiateChat();
-    navigate("/astrologers", { replace: true });
   };
 
   // Recharge popup dismissed without recharging → go to the astrologers page.
