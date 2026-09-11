@@ -7,7 +7,7 @@ $muted: #6b5546;
   position: relative;
   overflow: hidden;
   margin: 28px 0;
-  padding: 36px 40px;
+  padding: 16px;
   border-radius: 24px;
   /* Peach gradient fill with the decorative wave art overlaid in the top-right
      and bottom-left corners (same assets as the old banner). The gradient is a
@@ -31,7 +31,7 @@ $muted: #6b5546;
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
     gap: 24px;
-    padding: 24px 18px;
+    padding: 16px;
     border-radius: 18px;
     margin: 20px 0;
   }
@@ -60,9 +60,8 @@ $muted: #6b5546;
 
 .heading {
   margin: 0 0 10px;
-  font-size: 1.9rem;
-  line-height: 1.15;
-  font-weight: 800;
+  font-size: 1.8rem;
+  font-weight: 600;
   color: $ink;
 
   @media (max-width: 767px) {
@@ -108,6 +107,9 @@ $muted: #6b5546;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
+  @media (width <= 767px) {
+    padding: 5px 10px;
+  }
 
   &:hover {
     border-color: $brand;
@@ -135,6 +137,7 @@ $muted: #6b5546;
   @media (max-width: 767px) {
     gap: 12px;
     padding: 12px;
+    flex-direction: column;
   }
 }
 
@@ -178,7 +181,7 @@ $muted: #6b5546;
   border: 2px solid #fff;
   color: $brand-dark;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 600;
   box-shadow: 0 2px 8px rgba(191, 118, 66, 0.15);
 
   @media (max-width: 767px) {
@@ -197,7 +200,7 @@ $muted: #6b5546;
 .statTitle {
   margin: 0;
   font-size: 0.86rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $ink;
 }
 
@@ -240,7 +243,7 @@ $muted: #6b5546;
   width: 100%;
   margin-bottom: 16px;
   font-size: 0.92rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $brand;
   white-space: nowrap;
 
@@ -292,7 +295,7 @@ $muted: #6b5546;
 .cardName {
   margin: 0;
   font-size: 1.05rem;
-  font-weight: 700;
+  font-weight: 600;
   color: $ink;
 }
 
@@ -437,8 +440,8 @@ $muted: #6b5546;
   }
 
   @media (max-width: 767px) {
-    padding: 0 10px;
-    font-size: 0.78rem;
+    padding: 0 5px;
+    font-size: 0.7rem;
     gap: 7px;
   }
 }
