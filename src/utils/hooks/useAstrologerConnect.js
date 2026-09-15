@@ -13,6 +13,7 @@ import { useGetAllKundlisQuery } from "../../services/appServices/kundliServices
 import Toast from "../../component/toast";
 import { useMediaPermission } from "./useMediaPermission";
 import { trackEvent } from "../analytics";
+import { preloadChunk } from "../helper/lazyWithRetry";
 
 export const useAstrologerConnect = () => {
   const navigate = useNavigate();
@@ -367,6 +368,35 @@ export const useAstrologerConnect = () => {
       Toast.info("Connecting you now — one moment.");
       return false;
     }
+
+    /*
+      Warm the call screen's chunk now, not when we navigate to it.
+
+      The call screens depend on the Agora RTC SDK, which the build places in the
+      VideoCallChat chunk (~1,387 kB raw / ~377 kB gzip) — a STATIC import of the
+      VoiceCall/VideoCall chunks, so the route cannot render until it arrives too.
+      Until now that was first requested at navigation time, i.e. after the
+      astrologer accepted, which is also the moment server-side billing starts. On Android over cellular that fetch
+      sometimes loses the race and rejects, and because billing does not depend on
+      it the customer ends up on RouteErrorBoundary's "Loading Issue" page with
+      the meter running. See the note on lazyWithRetry in Paths.js.
+
+      Everything between here and navigation — the media-permission check (which
+      can show a browser prompt), the balance call, and then the whole ringing
+      window while the astrologer decides — is dead time the download can use. By
+      the time the route renders the module is normally already in the module map,
+      so React.lazy resolves synchronously and there is no fetch left to fail.
+
+      preloadChunk swallows rejection deliberately: this is a warm-up, and the
+      real load still happens (with retries) when the component renders. Kept as a
+      separate specifier from the one in Paths.js on purpose — Vite resolves both
+      to the same chunk, so this warms exactly what the route will ask for.
+    */
+    preloadChunk(() =>
+      type === "video"
+        ? import("../../component/call/VideoCall")
+        : import("../../component/call/VoiceCall")
+    );
 
     try {
     // Check media permissions before proceeding
