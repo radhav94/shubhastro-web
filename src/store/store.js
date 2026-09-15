@@ -62,6 +62,38 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
+
+  /*
+    Redux DevTools, development only.
+
+    RTK's own default is `devTools = true` — unconditionally, with no NODE_ENV
+    gate (see `devTools = true` in @reduxjs/toolkit/dist/redux-toolkit.modern.mjs,
+    v2.10.0). This is a common misreading: because plain Redux's
+    `composeWithDevTools` is usually wrapped in a NODE_ENV check by hand, people
+    assume configureStore does the same. It does not. Verified in the shipped
+    production bundle, where the minified configureStore reads
+    `devTools:i=!0 ... i&&(v=Wi({trace:!1,...}))` — i.e. the DevTools enhancer was
+    being installed on www.shubhastro.ai.
+
+    What that exposed to any browser with the DevTools extension installed:
+      - `state.auth.token`, the session token (authSlice keeps it in the store)
+      - every RTK Query cache entry, which holds PLAINTEXT API responses — the
+        secure gateway encrypts in transit but the client decrypts before the
+        data reaches the cache, so the store is the one place it sits in the clear
+      - the ability to dispatch arbitrary actions into a live session
+
+    `import.meta.env.DEV` rather than `process.env.NODE_ENV`: this is a Vite
+    build, DEV is a real boolean, and it is the flag already used elsewhere
+    (main.jsx guards its boot-time test events with it). It is statically
+    replaced at build time, so the enhancer is dropped from the production
+    bundle rather than merely skipped at runtime.
+
+    Note this only turns off the DEVTOOLS BRIDGE. Redux Toolkit itself stays —
+    it is the entire state and data-fetching layer here (ten RTK Query APIs plus
+    six slices), so it cannot be "switched off" for production.
+  */
+  devTools: import.meta.env.DEV,
+
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
