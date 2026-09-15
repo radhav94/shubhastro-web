@@ -2139,7 +2139,7 @@ const Profile = () => {
                                       <span className={styles.orderDate}>
                                         <Calendar size={15} className={styles.metaIcon} />{" "}
                                         {dayjs(order.date).format(
-                                          "DD MMM, YYYY",
+                                          "DD MMM YYYY",
                                         )}
                                       </span>
                                       <span className={styles.orderTime}>
@@ -2398,7 +2398,7 @@ const Profile = () => {
                                 transaction?.displayProfile?.name}
                             </h4>
                             <span className={styles.txnMeta}>
-                              {dayjs(transaction.createdAt).format("DD MMM, YYYY • hh:mm A")} • TXN #{transaction._id?.slice(-4)}
+                              {dayjs(transaction.createdAt).format("DD MMM YYYY • hh:mm A")} • TXN #{transaction._id?.slice(-4)}
                             </span>
                           </div>
                         </div>

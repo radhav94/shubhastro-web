@@ -355,6 +355,7 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
    a plain div those taps went nowhere. It now toggles .billingNotice.
    Appearance is unchanged; only the resets and affordances are new. */
 .freeBadge {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -368,6 +369,28 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
+
+  /* Making it a <button> fixed the handler but not the geometry: 12px text plus
+     6px padding and a 1px border is a ~29px-tall pill, against the 42px .closeBtn
+     sitting 8px away. Clarity xqccph (Instagram WebView) and 1qrekx6 (Facebook
+     WebView) both recorded a dead click here whose element name concatenated
+     `.headerName` ("Pandit AI") with the chip's own text ("N min free") — a name
+     only .header can produce, the signature of a tap that missed every
+     interactive child and landed on the inert title bar.
+     So the hit area is grown to the house 44px minimum with an overlay instead of
+     by resizing the chip, keeping the visual pill and the header's rhythm exactly
+     as they are. Vertical only: it expands into .header's own padding, which has
+     nothing interactive in it, whereas widening it would eat into the 8px gap and
+     start stealing taps from .closeBtn. */
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
+  }
 
   &:focus-visible {
     outline: 2px solid #fff;

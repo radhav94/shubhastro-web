@@ -107,6 +107,13 @@ export default function useChat({
   const [isMessageDisabled, setIsMessageDisabled] = useState(false);
   const systemReconnectInFlightRef = useRef(false);
   const [hightLightText, setHighLightText] = useState("");
+  // Mirror of hightLightText for the connect effect's onError handler to read
+  // WITHOUT the effect depending on the state. See the deps note on that effect:
+  // hightLightText changes on every sendMessage, and having it in the array made
+  // the whole connect/onConnected block re-run per message — which re-fired the
+  // one-time intro + kundli auto-share and sent both twice.
+  const hightLightTextRef = useRef("");
+  hightLightTextRef.current = hightLightText;
 
   // Typing indicator via new activity:update / activity contract
   const { isTyping, handleTextChange, handleMessageSent } = useTypingIndicator({ roomId, sender: "user" });
@@ -291,7 +298,9 @@ export default function useChat({
               const profileIdToUse = profile?._id || kundliId;
 
               if (profileIdToUse) {
-                sendMessage(profileIdToUse, "kundli", profileIdToUse);
+                // Pass the profile's name so the card label does not depend on
+                // the backend echoing it back. See the note in sendMessage.
+                sendMessage(profileIdToUse, "kundli", profileIdToUse, { kundliName: profile?.name || null });
               } else if (retries > 0) {
                 setTimeout(() => sendKundliWhenReady(retries - 1), 500);
               }
@@ -318,7 +327,7 @@ export default function useChat({
           return;
         }
 
-        console.log("ErrMsg::",hightLightText)
+        console.log("ErrMsg::",hightLightTextRef.current)
 
         showErrorWithHighlight(errMsg);
 
@@ -572,7 +581,16 @@ export default function useChat({
       voiceSocket.off("warning", handleWarning);
       voiceSocket.off("chat:ended", handleChatEndedFromServer);
     };
-  }, [roomId, activeChat, activeCall, reconnectToChat, hightLightText, updateMessageByClientMsgId, updateMessageByMessageId, markSentMessagesReadUpToSeq]);
+    // `hightLightText` intentionally removed from this dependency array — the
+    // double-send fix from the incoming branch. It re-ran the effect on every
+    // sendMessage (setHighLightText), re-firing the one-time intro + kundli
+    // auto-share ("Below are my details" / "…'s Kundli" arriving twice); it is
+    // now read via hightLightTextRef in onError instead.
+    //
+    // The three message-feature deps are from this branch; both kept, they are
+    // independent and those callbacks are stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId, activeChat, activeCall, reconnectToChat, updateMessageByClientMsgId, updateMessageByMessageId, markSentMessagesReadUpToSeq]);
 
   // Listen for global chat:ended event (fired from WaitingQueueContext)
   // Handles page-level actions: disabling input and showing feedback modal
@@ -666,6 +684,10 @@ export default function useChat({
     const clientMsgId = newClientMsgId();
     const replyTo = options?.replyTo || null;
     const replyToId = replyTo?.messageId || replyTo?._id || options?.replyToId || null;
+    // Kundli display name for the outgoing payload — folded into `options` here
+    // because this branch's sendMessage takes an options object as arg 4, where
+    // the incoming branch passed the name positionally. See the payload note below.
+    const kundliName = options?.kundliName || null;
 
     const payload = {
       sender: "user",
@@ -677,6 +699,23 @@ export default function useChat({
       type,
       clientMsgId,
       ...(replyToId ? { replyToId } : {}),
+      /*
+        Carry the kundli's display name in the outgoing payload.
+
+        The card label (ChatMessages.jsx) reads `msg.kundliName` and falls back
+        to "View Kundli" when it is empty. Every rendered message comes from the
+        server echo (message:recieved), and a kundli message was previously sent
+        as id ONLY — so the label depended entirely on the backend resolving
+        id -> name and echoing `kundliName` back. That is exactly why it looked
+        right against the local dev backend but wrong against
+        session.shubhastro.ai's: same client, different socket server, and only
+        one of them echoes the name.
+
+        The client already holds the name at send time (profile.name in the
+        auto-share, kundli.name in the picker), so send it. Only attached for
+        kundli messages; a plain text/audio message has no kundliName.
+      */
+      ...(type === "kundli" && kundliName ? { kundliName } : {}),
     };
 
     // Optimistic UI: show the message immediately as pending (⏱ / no tick).

@@ -139,7 +139,18 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 1rem;
-  align-items: start;
+  /*
+    `stretch`, not `start`. These cards have variable-height content: a session
+    with a per-channel breakdown renders an extra Audio/Video/Chat + Total block
+    (see .channelBreakdown in Profile.jsx), while a single-channel session shows
+    one amount line and is shorter. With `align-items: start` each grid item took
+    its own natural height, so cards in the same row came out different sizes —
+    the reported "random" card heights on the order history page. `stretch` makes
+    every item fill the tallest cell in its row; paired with height:100% on
+    .orderCard below and a column flex layout, the shorter cards simply grow their
+    whitespace so all cards in a row match.
+  */
+  align-items: stretch;
   @media (width <= 1170px) {
     grid-template-columns: 1fr 1fr;
   }
@@ -716,6 +727,21 @@
   // padding: 0.75rem;
   // margin-bottom: 1rem;
   // box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  /*
+    Fill the grid cell so every card in a row is the same height (grid now
+    stretches — see .orderCardMain). Column flex with the top pushed and the
+    bottom anchored: shorter cards absorb the difference as whitespace between
+    the details and the rating/Consult-Again row, rather than ending early.
+    Visual styling above is unchanged.
+  */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .orderCardTop {
+    flex: 1;
+  }
 }
 
 .orderCardTop {

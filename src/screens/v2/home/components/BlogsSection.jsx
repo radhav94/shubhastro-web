@@ -19,7 +19,7 @@ export function formatDateToReadable(input) {
   } else {
     date = dayjs(input);
   }
-  return date.isValid() ? date.format("DD MMM, YYYY") : input;
+  return date.isValid() ? date.format("DD MMM YYYY") : input;
 }
 
 const BlogsSection = ({ blogData = [], title, showMore, gridRef, onScrollableChange }) => {

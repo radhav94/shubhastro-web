@@ -80,6 +80,11 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     handleAfterKundliSelect: hookHandleAfterKundliSelect,
     openModal: hookOpenModal,
     setOpenModal: hookSetOpenModal,
+    // The connection the user actually tapped (chat / audio / video). The hook
+    // sets this to "chat" on the chat path and to the call type on the call
+    // path (see setRechargeType in useAstrologerConnect), so the recharge popup
+    // can show the right rate and wording.
+    rechargeType: hookRechargeType,
     kundliRef
   } = useAstrologerConnect();
 
@@ -452,7 +457,11 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
           hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
         }
         astrologer={selectedAstrologer}
-        connectionType="chat"
+        // Was hardcoded "chat", so tapping Call still showed the chat rate and
+        // "start chat" wording (e.g. ₹40 = 5 x chat rate for an audio call
+        // priced differently). Use what the user actually tapped; falls back to
+        // "chat" for the same default the modal already uses.
+        connectionType={hookRechargeType || "chat"}
       />
 
       {/* Connect Astrologer Popup */}

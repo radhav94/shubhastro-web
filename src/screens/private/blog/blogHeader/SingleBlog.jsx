@@ -372,7 +372,7 @@ const SingleBlogDetails = () => {
                 <span className={styles.author}>{blogAuthor}</span>
               )}
               <span className={styles.date}>
-                {dayjs(singleBLogData.publishDate).format("DD MMM, YYYY")}
+                {dayjs(singleBLogData.publishDate).format("DD MMM YYYY")}
               </span>
             </div>
             <div className={styles.metaActions}>
@@ -465,7 +465,7 @@ const SingleBlogDetails = () => {
                     <h3 className={styles.popularItemTitle}>{blog.title}</h3>
                     <div className={styles.popularMeta}>
                       <span className={styles.popularDate}>
-                        {dayjs(blog.publishDate).format("DD MMM, YYYY")}
+                        {dayjs(blog.publishDate).format("DD MMM YYYY")}
                       </span>
                       {/*
                         Pointer-only, deliberately. This whole card is a <Link>,
