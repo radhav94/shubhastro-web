@@ -39,7 +39,36 @@
   border-radius: 24px 24px 0 0;
   width: 100%;
   max-width: 500px;
+
+  /*
+    `dvh` after `vh`, deliberately, as progressive enhancement.
+
+    `vh` is the LAYOUT viewport, which does not shrink when the soft keyboard
+    opens. This sheet holds six or seven required fields with the
+    "Continue & Get ₹99 Bonus" button last, so at 92vh the bottom of the sheet —
+    the button included — sits behind the keyboard. `overflow: auto` below does
+    not rescue it: the box itself extends past the visible area, so scrolling to
+    the end still leaves the button under the keyboard. A visitor who cannot see
+    the button taps where they think it is, which is a dead click, and it repeats.
+
+    Exactly the failure already documented and fixed for this same button in
+    GuestChatFlow.jsx (see the note above scrollActiveFieldIntoView), including
+    its point that in-app browsers are worse because they take another slice of
+    viewport for their own chrome.
+
+    Clarity irnaie (Instagram WebView, mobile, 12:17) is that shape on this
+    sheet, opened over the palmistry camera: "Continue & Get ₹99 Bonus" tapped at
+    01:17, 02:23 and 03:05 — roughly a minute apart, consistent with fixing one
+    field per attempt — never completing, then a return at 11:43 and no further
+    engagement.
+
+    `dvh` tracks the dynamic viewport, so the sheet shrinks to what is actually
+    visible and the internal scroll can reach the button. Browsers without `dvh`
+    ignore this line and keep today's behaviour, so there is no regression on the
+    safari13 / chrome79 floor the build target pins.
+  */
   max-height: 92vh;
+  max-height: 92dvh;
   display: flex;
   flex-direction: column;
   animation: slideUp 0.3s ease-out;

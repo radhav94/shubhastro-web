@@ -1,5 +1,6 @@
 import { lazy, Suspense, createElement } from "react";
 import CircleSpinner from "../../component/UI/CircleSpinner";
+import { lazyWithRetry } from "../helper/lazyWithRetry";
 
 /*
  * Suspense boundary for the top-level public/open routes.
@@ -89,8 +90,42 @@ const ComingSoon = withPublicSuspense(lazy(() => import("../../screens/public/co
 // into the main bundle for every visitor, including those who never place a
 // call. Route elements are rendered inside the app-level <Suspense> in App.jsx,
 // so lazy components are safe here.
-const VideoCalling = lazy(() => import("../../component/call/VideoCall"));
-const AgoraVoiceCalling = lazy(() => import("../../component/call/VoiceCall"));
+/*
+  `lazyWithRetry`, not bare `lazy`, on the two call screens — these are the only
+  routes in this file where a failed chunk fetch costs the customer money.
+
+  Reported failure: on Android web, connecting to an astrologer sometimes shows
+  the "Loading Issue" page while the call is connected and the wallet is
+  debiting. That page is RouteErrorBoundary's chunk-error variant
+  (`isChunkError` -> errorTitle = 'Loading Issue'), so the trigger is this
+  dynamic import rejecting.
+
+  Why it happens here and reads as "random": VoiceCall's own chunk is small
+  (~30 kB) but it statically imports VideoCallChat, and VoiceCall.jsx also
+  imports `agora-rtc-sdk-ng` directly — so the built VoiceCall chunk lists
+  VideoCallChat-*.js among its static imports, and that is the largest chunk in
+  the app (~1,387 kB raw / ~377 kB gzip). Resolving this route therefore requires
+  BOTH to arrive. They are fetched at the moment the call is being set up, on
+  mobile, often on cellular — and a chunk request rejects for ordinary reasons,
+  not just outages (aborted in-flight request, a stale index.html asking for a
+  hashed filename a new deploy removed, flaky radio). Whether it lands is a race,
+  which is exactly the reported randomness.
+
+  Why it costs money: billing is started server-side off the socket handshake
+  when the astrologer accepts. That is independent of whether this React chunk
+  arrived, so a failed import leaves the meter running behind an error page.
+  RouteErrorBoundary then auto-reloads once, which also tears down the Agora
+  client and the socket while the server still considers the call live.
+
+  `lazyWithRetry` retries twice with a 600ms backoff before rejecting, so a
+  single transient failure no longer escalates to the error route. Identical
+  behaviour on success; it only changes the failure path. It does NOT touch
+  billing or call logic — see the notes in the ticket for the two follow-ups that
+  do (debit on customer-connected rather than astrologer-accepted, and not
+  auto-reloading mid-call).
+*/
+const VideoCalling = lazyWithRetry(() => import("../../component/call/VideoCall"));
+const AgoraVoiceCalling = lazyWithRetry(() => import("../../component/call/VoiceCall"));
 /*
  * The publicRoutes screens, now route-split.
  *
