@@ -5,6 +5,7 @@ import {
   BlogSectionV2,
   LiveTrackingSection,
   ConnectAstrologerSection,
+  TalkToAstrologerBanner,
 } from "./sections";
 
 const MySessionsSection = lazy(() => import("./MySessionsSection"));
@@ -201,7 +202,11 @@ export const renderStandaloneSection = (section, options = {}) => {
       return <LiveTrackingSection key={key} sectionData={section} styles={styles} />;
 
     case "connect-astrologer":
-      return <ConnectAstrologerSection key={key} sectionData={section} styles={styles} onConnect={onConnect} />;
+      // Only the legacy banner is shown for now; the newer ConnectAstrologerSection
+      // is hidden until it's ready to go live. Both are driven by the same
+      // `connect-astrologer` section data, so switching back is a one-line change.
+      return <TalkToAstrologerBanner key={key} sectionData={section} styles={styles} />;
+      // <ConnectAstrologerSection key={key} sectionData={section} styles={styles} onConnect={onConnect} />
 
     // Hero/three-col types rendered standalone (when not grouped)
     // These are handled by the parent component with their specific layouts
