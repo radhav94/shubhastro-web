@@ -65,7 +65,8 @@ const OrderDetails = () => {
   );
 
   const { data: chatData, isLoading: isLoadingMessages, error, isFetching } = useGetChatHistoryQuery(
-    { userId: astrologerId, page },
+    // isAssistant:false — order detail shows the real astrologer conversation.
+    { userId: astrologerId, page, isAssistant: false },
     { refetchOnMountOrArgChange: true }
   );
 

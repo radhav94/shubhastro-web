@@ -65,8 +65,14 @@ export const chatApi = privateRequestNew.injectEndpoints({
         // blue. No separate "mark read" API is needed (guide §1).
         params: { page, limit, isAssistant },
       }),
-      // Cache key is just userId so all pages merge into one entry
-      serializeQueryArgs: ({ queryArgs }) => queryArgs.userId,
+      // Cache key is userId + isAssistant so all pages merge into one entry,
+      // but the Virtual Assistant inbox (isAssistant=true) and the real
+      // astrologer chat (isAssistant=false) for the SAME astrologer id do NOT
+      // share a cache entry. Keying on userId alone made whichever consumer
+      // populated the cache first win, so the real chat window rendered the
+      // assistant's messages (or nothing) instead of the actual conversation.
+      serializeQueryArgs: ({ queryArgs }) =>
+        `${queryArgs.userId}|${queryArgs.isAssistant ?? true}`,
       merge: (currentCache, newData, { arg }) => {
         if (arg.page === 1) return newData;
         // Deduplicate by _id and append older messages
