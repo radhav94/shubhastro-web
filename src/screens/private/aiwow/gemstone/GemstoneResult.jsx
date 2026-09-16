@@ -32,11 +32,11 @@ import detailIcon3 from '../../../../assets/gemstone-details/icon-3.png';
 import detailIcon4 from '../../../../assets/gemstone-details/icon-4.png';
 import detailIcon5 from '../../../../assets/gemstone-details/icon-5.png';
 import detailIcon6 from '../../../../assets/gemstone-details/icon-6.png';
-import detailIcon7 from '../../../../assets/gemstone-details/icon-7.png';
-import detailIcon8 from '../../../../assets/gemstone-details/icon-8.png';
 import detailIcon9 from '../../../../assets/gemstone-details/icon-9.png';
 import detailIcon10 from '../../../../assets/gemstone-details/icon-10.png';
 import detailIcon11 from '../../../../assets/gemstone-details/icon-11.png';
+import zodiacSignIcon from '../../../../assets/gemstone-details/zodiac-signs.png';
+import rulingPlanetIcon from '../../../../assets/gemstone-details/ruling-planet.png';
 import detailsHeaderIcon from '../../../../assets/gemstone-details/icon-details-header.png';
 
 // Identification (banner) fact icons — from the design (tabler icon set).
@@ -44,6 +44,7 @@ import factNameIcon from '../../../../assets/gemstone-details/fact-name.png';
 import factHindiIcon from '../../../../assets/gemstone-details/fact-hindi.png';
 import factScientificIcon from '../../../../assets/gemstone-details/fact-scientific.png';
 import factNaturalIcon from '../../../../assets/gemstone-details/fact-natural.png';
+import scanCompleteIcon from '../../../../assets/gemstone-details/scan-complete.png';
 
 // Suitability tab icons — check badge for the header, Om for the ritual mantra.
 import suitCheckIcon from '../../../../assets/gemstone-details/suit-check.png';
@@ -65,16 +66,20 @@ import insightAdviceIcon from '../../../../assets/gemstone-details/insight-advic
 // Match an insight (by its API key) to the right design icon. Falls back to the
 // generic "advice" bulb for any insight key the design didn't cover.
 const INSIGHT_ICONS = {
-  birthchartcompatibility: insightBirthChartIcon,
-  planetarybenefit: insightPlanetaryIcon,
-  planetarybenefits: insightPlanetaryIcon,
+  // Icons were swapped between pairs of cards. Corrected:
+  //  - Birth Chart Compatibility ⇄ Life Path Alignment
+  //  - Planetary Benefit        ⇄ Personalized Advice
+  //  - Dosha Remedies + Recommended For User were already correct.
+  birthchartcompatibility: insightRecommendedIcon,
+  lifepathalignment: insightBirthChartIcon,
+  planetarybenefit: insightAdviceIcon,
+  planetarybenefits: insightAdviceIcon,
+  personalizedadvice: insightPlanetaryIcon,
+  advice: insightPlanetaryIcon,
   dosharemedies: insightDoshaIcon,
   dosharemedy: insightDoshaIcon,
-  lifepathalignment: insightLifePathIcon,
-  recommendedforuser: insightRecommendedIcon,
-  recommended: insightRecommendedIcon,
-  personalizedadvice: insightAdviceIcon,
-  advice: insightAdviceIcon,
+  recommendedforuser: insightLifePathIcon,
+  recommended: insightLifePathIcon,
 };
 const getInsightIcon = (key) =>
   INSIGHT_ICONS[String(key || '').toLowerCase().replace(/[^a-z]/g, '')] || insightAdviceIcon;
@@ -361,7 +366,7 @@ const GemstoneResult = () => {
     }
     if (d.details.color && (d.details.color.primary || d.details.color.secondary)) {
       detailItems.push({
-        key: 'color', title: 'Color', icon: detailIcon2,
+        key: 'color', title: 'Color', icon: detailIcon3,
         rows: [
           { label: 'Primary', value: d.details.color.primary },
           { label: 'Secondary', value: d.details.color.secondary },
@@ -370,7 +375,7 @@ const GemstoneResult = () => {
     }
     if (d.details.clarity && (d.details.clarity.grade || d.details.clarity.inclusions?.length)) {
       detailItems.push({
-        key: 'clarity', title: 'Clarity', icon: detailIcon3,
+        key: 'clarity', title: 'Clarity', icon: detailIcon5,
         rows: [
           { label: 'Grade', value: d.details.clarity.grade },
           d.details.clarity.inclusions?.length > 0
@@ -390,7 +395,7 @@ const GemstoneResult = () => {
     }
     if (d.details.estimatedCarat && (d.details.estimatedCarat.range || d.details.estimatedCarat.approximate)) {
       detailItems.push({
-        key: 'carat', title: 'Carat Weight', icon: detailIcon5,
+        key: 'carat', title: 'Carat Weight', icon: detailIcon2,
         rows: [
           { label: 'Range', value: d.details.estimatedCarat.range },
           d.details.estimatedCarat.approximate
@@ -415,13 +420,13 @@ const GemstoneResult = () => {
     const astroItems = [];
     if (d.astrological.rulingPlanet) {
       astroItems.push({
-        key: 'planet', title: 'Ruling Planet', tint: '#f59e0b', icon: detailIcon7,
+        key: 'planet', title: 'Ruling Planet', tint: '#f59e0b', icon: rulingPlanetIcon,
         badge: d.astrological.rulingPlanet.planet, desc: d.astrological.rulingPlanet.influence,
       });
     }
     if (d.astrological.zodiacSigns) {
       astroItems.push({
-        key: 'zodiac', title: 'Zodiac Signs', tint: '#8b5cf6', icon: detailIcon8,
+        key: 'zodiac', title: 'Zodiac Signs', tint: '#8b5cf6', icon: zodiacSignIcon,
         badge: d.astrological.zodiacSigns.primary,
         desc: d.astrological.zodiacSigns.secondary?.length > 0
           ? `Also: ${d.astrological.zodiacSigns.secondary.join(', ')}` : '',
@@ -923,9 +928,7 @@ const GemstoneResult = () => {
                   className={styles.bannerImage}
                 />
                 <span className={styles.scanComplete}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <img src={scanCompleteIcon} alt="" aria-hidden="true" className={styles.scanCompleteIcon} />
                   Stone Scan Complete
                 </span>
               </div>

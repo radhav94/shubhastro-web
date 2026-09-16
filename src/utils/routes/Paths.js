@@ -234,6 +234,7 @@ const NumerologyCalc = lazy(() => import("../../screens/private/calculator/numer
 const NumerologyReport = lazy(() => import("../../screens/private/calculator/numerology/NumerologyReport"));
 const RashiCalc = lazy(() => import("../../screens/private/calculator/rashi/RashiCalc"));
 const RashiReport = lazy(() => import("../../screens/private/calculator/rashi/RashiReport"));
+const GemstoneRemedy = lazy(() => import("../../screens/private/calculator/gemstoneremedy/GemstoneRemedy"));
 const RisingSign = lazy(() => import("../../screens/private/calculator/risingsign/RisingSign"));
 const RisingSignReport = lazy(() => import("../../screens/private/calculator/risingsign/RisingSignReport"));
 const MulankCalc = lazy(() => import("../../screens/private/calculator/mulank/MulankCalc"));
@@ -719,6 +720,10 @@ export const PATH = {
     RASHI_REPORT: {
       path: "/rashi-calculator/report",
       element: RashiReport,
+    },
+    GEMSTONE_REMEDY: {
+      path: "/gemstone-remedy",
+      element: GemstoneRemedy,
     },
     DASHA_CALC: {
       path: "/dasha-calculator",

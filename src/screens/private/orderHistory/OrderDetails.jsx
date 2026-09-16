@@ -65,7 +65,8 @@ const OrderDetails = () => {
   );
 
   const { data: chatData, isLoading: isLoadingMessages, error, isFetching } = useGetChatHistoryQuery(
-    { userId: astrologerId, page },
+    // isAssistant:false — order detail shows the real astrologer conversation.
+    { userId: astrologerId, page, isAssistant: false },
     { refetchOnMountOrArgChange: true }
   );
 
@@ -156,7 +157,17 @@ const OrderDetails = () => {
           minute: "2-digit",
           hour12: true,
         }),
-        status: "read",
+        // Use the real per-message status the server now returns (sent /
+        // delivered / read) instead of hardcoding "read". Falls back to "read"
+        // for legacy messages persisted before status tracking existed, so an
+        // old transcript still shows the settled double-blue tick it always did.
+        status: msg.status || "read",
+        deliveredAt: msg.deliveredAt,
+        readAt: msg.readAt,
+        // Quoted-reply snapshot (guide §2). Rendered as a preview above the
+        // bubble; normalized by ChatWindow so text/image/kundli/gift all label
+        // correctly.
+        replyTo: msg.replyTo || null,
         type: msg.type,
         createdAt: msg.createdAt,
         kundliName: msg?.kundliName,

@@ -580,6 +580,7 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
 
 .msgRow {
   display: flex;
+  align-items: center;
   animation: fadeIn 0.22s ease;
 }
 
@@ -589,6 +590,61 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
 
 .aiRow {
   justify-content: flex-start;
+}
+
+// Reply affordance beside a bubble — revealed on hover / focus.
+.replyBtn {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: 0 6px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: #8a7a6d;
+  cursor: pointer;
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    color: #f75801;
+    background: #ffffff;
+  }
+}
+
+.msgRow:hover .replyBtn,
+.replyBtn:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .replyBtn {
+    opacity: 0.5;
+  }
+}
+
+.replyComposer {
+  padding: 0 4px 6px;
+}
+
+// Brief flash on the message a reply-quote jumps to.
+.highlightedMsg .msgBubble {
+  animation: replyJumpFlash 1.6s ease;
+}
+
+@keyframes replyJumpFlash {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(247, 88, 1, 0);
+  }
+  15%,
+  55% {
+    box-shadow: 0 0 0 3px rgba(247, 88, 1, 0.6);
+  }
 }
 
 @keyframes fadeIn {

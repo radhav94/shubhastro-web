@@ -104,6 +104,63 @@
   opacity: 0.8;
 }
 
+// Read → double blue tick (guide §1). Full opacity so the blue reads clearly.
+.messageStatusRead {
+  color: #34b7f1;
+  opacity: 1;
+}
+
+// Quoted reply preview above a bubble (guide §2 "Reading a reply").
+.replyQuote {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  border-left: 3px solid #f75801;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  max-width: 100%;
+  overflow: hidden;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 1px;
+  }
+}
+
+// Brief highlight on the original message when a reply quote jumps to it.
+.messageHighlight {
+  animation: replyJumpHighlight 1.6s ease;
+}
+
+@keyframes replyJumpHighlight {
+  0% {
+    background: rgba(247, 88, 1, 0.22);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+.replyQuoteSender {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f75801;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.replyQuoteText {
+  font-size: 12px;
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 // Received Message (Left Side - Astrologer)
 .receivedMessageWrapper {
   display: flex;

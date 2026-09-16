@@ -1,5 +1,6 @@
-import { memo, useId, useState } from "react";
+import { memo, useState } from "react";
 import { BookOpen } from "lucide-react";
+import emergencyIcon from "../../../../assets/icons/emergency-icon.png";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { AppIcons, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../utils/appImages";
@@ -22,13 +23,6 @@ const NewAstrologerCard = memo(({
   priority = false,
 }) => {
   const navigate = useNavigate();
-  // The rating star SVG was exported from Figma with a hardcoded
-  // `id="clip0_4961_937"`. This card is rendered in lists, so a listing page
-  // emitted that same id once per card — duplicate element ids are invalid HTML,
-  // and `url(#id)` resolves to the first match in document order, so every
-  // card's clip pointed at the first card's clipPath. It only looked right
-  // because the clipPaths happen to be identical.
-  const starClipId = `astroCardStarClip-${useId()}`;
   const isOnline = astrologer?.isActive === true;
   const { isLive, roomId: liveRoomId } = useAstrologerLiveStatus(astrologer?._id, astrologer?.astrologerLiveStatus);
   const activeTypes = astrologer?.isActiveType || [];
@@ -219,7 +213,7 @@ const NewAstrologerCard = memo(({
               className={styles.emergencySingleBtn}
               onClick={() => onEmergencyClick?.(astrologer)}
             >
-              Emergency
+              <img src={emergencyIcon} alt="" aria-hidden="true" /> Emergency
             </button>
             {emergencyMinRate > 0 && (
               <p className={styles.priceText}>

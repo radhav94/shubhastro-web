@@ -8,6 +8,7 @@ import AudioMessageWrapper from "../../../home/components/chats/AudioMessageWrap
 import IframeModal from "../../../home/components/chats/IframeModal";
 import { buildKundliLink } from "../../../../../utils/helper/kundliMessage";
 import { splitTextByURL } from "../../../../../utils/helper/linkPreview";
+import { MESSAGE_STATUS, normalizeReplyTo, replyPreviewLabel } from "../../../../../utils/helper/chatProtocol";
 import toast from "../../../../../component/toast";
 import styles from "./ChatWindow.module.scss";
 
@@ -55,6 +56,38 @@ const detectURL = (text) => {
   return match ? match[0] : null;
 };
 
+// Delivery ticks for a sent message in the read-only transcript (guide §1):
+//   sent      → single grey ✓
+//   delivered → double grey ✓✓
+//   read      → double blue ✓✓
+// The transcript has no pending/failed states (everything here is persisted),
+// so those collapse to a settled double tick.
+const StatusTicks = ({ status }) => {
+  if (status === MESSAGE_STATUS.SENT) {
+    return (
+      <span className={styles.messageStatus} aria-label="Message sent">
+        <Check size={14} />
+      </span>
+    );
+  }
+  if (status === MESSAGE_STATUS.DELIVERED) {
+    return (
+      <span className={styles.messageStatus} aria-label="Message delivered">
+        <CheckCheck size={14} />
+      </span>
+    );
+  }
+  // read (and legacy) → double blue tick.
+  return (
+    <span
+      className={`${styles.messageStatus} ${styles.messageStatusRead}`}
+      aria-label="Message read"
+    >
+      <CheckCheck size={14} />
+    </span>
+  );
+};
+
 const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
   const chatContainerRef = useRef(null);
   const observerRef = useRef(null);
@@ -92,6 +125,59 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
     setKundliModal(null);
   }, []);
 
+  // Tapping a quoted reply jumps to the original message it quotes (WhatsApp
+  // behaviour). Each message wrapper carries a `data-msg-id`, so we find the
+  // original by id within the transcript, scroll it into view, and briefly
+  // highlight it. No-op if the original isn't in the currently loaded pages
+  // (older messages may not be fetched yet).
+  const jumpToMessage = useCallback((messageId) => {
+    if (!messageId) return;
+    const container = chatContainerRef.current;
+    if (!container) return;
+    const target = container.querySelector(
+      `[data-msg-id="${CSS.escape(String(messageId))}"]`
+    );
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    target.classList.add(styles.messageHighlight);
+    setTimeout(() => target.classList.remove(styles.messageHighlight), 1600);
+  }, []);
+
+  // Quoted reply preview shown above a message bubble (guide §2 "Reading a
+  // reply"). Normalizes the server snapshot so every message type labels
+  // correctly (📷 Photo, 🎁 Gift, kundli name, etc.). Clickable: jumps to the
+  // original message being quoted.
+  const renderReplyQuote = useCallback(
+    (message) => {
+      const replyTo = normalizeReplyTo(message.replyTo);
+      if (!replyTo || (!replyTo.message && !replyTo.type)) return null;
+      const targetId = replyTo.messageId;
+      return (
+        <div
+          className={styles.replyQuote}
+          role={targetId ? "button" : undefined}
+          tabIndex={targetId ? 0 : undefined}
+          onClick={targetId ? () => jumpToMessage(targetId) : undefined}
+          onKeyDown={
+            targetId
+              ? (e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    jumpToMessage(targetId);
+                  }
+                }
+              : undefined
+          }
+        >
+          <span className={styles.replyQuoteSender}>
+            {replyTo.sender === "user" ? "You" : "Astrologer"}
+          </span>
+          <span className={styles.replyQuoteText}>{replyPreviewLabel(replyTo)}</span>
+        </div>
+      );
+    },
+    [jumpToMessage]
+  );
 
   // Render message content based on type
   const renderMessageContent = useCallback(
@@ -345,35 +431,24 @@ const ChatWindow = ({ chatSessions, onLoadMore, hasMore, isLoading }) => {
                   : "div";
 
                 return (
-                  <MessageWrapper key={message.id}>
+                  <MessageWrapper key={message.id} data-msg-id={message.id}>
                     {isSender ? (
                       // Sent Message (Right Side)
                       <div className={styles.sentMessageWrapper}>
                         <div className={styles.sentBubble}>
+                          {renderReplyQuote(message)}
                           {renderMessageContent(message)}
                         </div>
                         <div className={styles.messageMeta}>
                           <span className={styles.time}>{message.time}</span>
-                          <span
-                            className={styles.messageStatus}
-                            aria-label={
-                              message.status === "read"
-                                ? "Message read"
-                                : "Message sent"
-                            }
-                          >
-                            {message.status === "read" ? (
-                              <CheckCheck size={14} />
-                            ) : (
-                              <Check size={14} />
-                            )}
-                          </span>
+                          <StatusTicks status={message.status} />
                         </div>
                       </div>
                     ) : (
                       // Received Message (Left Side)
                       <div className={styles.receivedMessageWrapper}>
                         <div className={styles.receivedBubble}>
+                          {renderReplyQuote(message)}
                           {renderMessageContent(message)}
                         </div>
                         <span className={styles.receivedTime}>
@@ -452,6 +527,9 @@ ChatWindow.propTypes = {
           type: PropTypes.string,
           status: PropTypes.string,
           fileSize: PropTypes.number,
+          replyTo: PropTypes.object,
+          deliveredAt: PropTypes.string,
+          readAt: PropTypes.string,
         })
       ).isRequired,
     })

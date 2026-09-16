@@ -5,9 +5,9 @@
  * --------------------------------------
  * This module used to `import { initializeApp } from "firebase/app"` and
  * `getMessaging` from "firebase/messaging" at the top level, and call
- * initializeApp() at module scope. Five modules import from here —
+ * initializeApp() at module scope. Five modules import from here â€”
  * fcmService, OtpVerification, OTPScreen, useTruecallerLogin,
- * useGuestChatAuth and GuestKundliAuthModal — and one of those
+ * useGuestChatAuth and GuestKundliAuthModal â€” and one of those
  * (GuestKundliAuthModal) sits in the eager graph of the "/" landing screen
  * via HomeV2 -> useGuestConnectFlow. So the whole Firebase SDK was compiled
  * into the entry chunk that every first-time visitor blocks on before the
@@ -74,9 +74,9 @@ const loadMessaging = () => {
          * call into Java fails.
          *
          * But that gate only covered the boot path. Five other call sites reach
-         * requestFCMToken() directly and none of them checked —
+         * requestFCMToken() directly and none of them checked â€”
          * GuestKundliAuthModal, OTPScreen, OtpVerification, useTruecallerLogin
-         * and useGuestChatAuth — i.e. every sign-in and guest-auth flow. Those
+         * and useGuestChatAuth â€” i.e. every sign-in and guest-auth flow. Those
          * are exactly the paths an Instagram visitor takes, so the boot gate was
          * being bypassed by the traffic it was written for.
          *
@@ -86,7 +86,7 @@ const loadMessaging = () => {
          * Two things this buys beyond not calling a bridge that must fail:
          * the permission prompt is never attempted where it cannot be granted,
          * and the Firebase SDK chunk is never downloaded at all for in-app
-         * browser visitors — a meaningful share of traffic here, since it is
+         * browser visitors â€” a meaningful share of traffic here, since it is
          * mostly Instagram and Facebook ad clicks.
          *
          * null is the established "messaging unavailable" return; every caller
@@ -141,7 +141,7 @@ export const requestFCMToken = async () => {
     } catch (error) {
         // Handle IndexedDB version mismatch (stale service worker)
         if (error?.name === "VersionError") {
-            console.warn("FCM IndexedDB version conflict — clearing and retrying");
+            console.warn("FCM IndexedDB version conflict â€” clearing and retrying");
             try {
                 const databases = await indexedDB.databases();
                 const fcmDbs = databases.filter(db => db.name?.includes("firebase-messaging"));

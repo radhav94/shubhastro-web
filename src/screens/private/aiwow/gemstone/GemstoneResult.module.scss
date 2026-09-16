@@ -256,7 +256,7 @@
 .bannerFactLabel {
   font-size: 0.68rem;
   font-weight: 600;
-  color: #9a6a48;
+  color: #62564E;
 }
 
 .bannerFactValue {
@@ -363,6 +363,17 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
+/* Circle-check image icon, tinted green to match the "Stone Scan Complete"
+   label. */
+.scanCompleteIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  object-fit: contain;
+  // Recolour a dark/mono icon to the label green (#16a34a).
+  filter: brightness(0) saturate(100%) invert(52%) sepia(72%) saturate(430%) hue-rotate(93deg) brightness(93%) contrast(88%);
+}
+
 /* ── Two-column layout: report on the left, sticky recommendation card on the
    right (matches the Rashi / Face / Muhurat reports). ── */
 .layout {
@@ -410,7 +421,7 @@
 
 .sidebar {
   align-self: stretch;
-  // margin-top: 30px;
+  // margin-top: 14px;
 }
 
 .sideCard {
@@ -959,11 +970,15 @@
       backdrop-filter: blur(12px);
       border-radius: 16px;
       padding: 16px;
-      // margin-top: 16px;
   .personalizedGrid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+    /* Desktop (report is a two-column layout, so 3-up only kicks in once the
+       single-column breakpoint is past and the content column is wide). */
+    @media (width >= 1025px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
     @media (width <= 767px) {
         grid-template-columns: repeat(1, 1fr);
     }
@@ -1092,7 +1107,7 @@
 
 // ─── DETAILS TAB (redesigned card) ─────────────────────────────────────────
 .detailCard {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.4);
   border: 1.5px solid #ffffff;
   backdrop-filter: blur(12px);
   border-radius: 20px;
@@ -1142,18 +1157,39 @@
 }
 
 .detailItemsGrid {
+  // Two open columns with a subtle divider between them — no per-item boxes,
+  // matching the reference. Uses column-gap only; the dividers come from the
+  // items themselves (see .detailItem below).
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  column-gap: 28px;
+  row-gap: 0;
 
-  @media (max-width: 560px) { grid-template-columns: 1fr; }
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
 }
 
 .detailItem {
-  background: rgba(255, 255, 255, 0.55);
-  border: 1.5px solid #ffffff;
-  border-radius: 14px;
-  padding: 14px;
+  // Borderless / no background — the old card look ("box box") is gone. A thin
+  // bottom rule separates stacked items; the right column gets a left rule so
+  // the two columns read as separated.
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 1);
+
+  @media (min-width: 561px) {
+    &:nth-child(even) {
+      padding-left: 28px;
+      border-left: 1px solid rgba(255, 255, 255, 1);
+    }
+    // No bottom rule on the last row of each column.
+    &:nth-last-child(-n + 2) { border-bottom: none; }
+  }
+
+  @media (max-width: 560px) {
+    &:last-child { border-bottom: none; }
+  }
 }
 
 .detailItemHead {
@@ -1184,34 +1220,40 @@
   color: #1f2937;
 }
 
+/*
+  Reference layout: values read inline as "Label: Value | Label: Value" on one
+  flowing line rather than a two-column label/value list. Markup is unchanged —
+  the ": " and " | " separators are added via CSS so the icons and their
+  positions stay exactly where they are.
+*/
 .detailItemRows {
-  display: flex;
-  flex-direction: column;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 .detailItemRow {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(191, 118, 66, 0.14);
+  display: inline;
 
-  &:last-child { border-bottom: none; }
+  // Separate consecutive rows with a pipe on the same flowing line.
+  & + &::before {
+    content: "|";
+    margin: 0 8px;
+    color: rgba(107, 114, 128, 0.5);
+  }
 }
 
 .detailItemLabel {
-  font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 400;
   color: #6b7280;
-  flex-shrink: 0;
+
+  &::after {
+    content: ":\00a0";
+  }
 }
 
 .detailItemValue {
-  font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 700;
   color: #1f2937;
-  text-align: right;
   word-break: break-word;
 }
 
@@ -1224,27 +1266,47 @@
 
 // Astrological Properties — icon + title + tinted badge + description rows
 .astroList {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  // Two columns side by side (like the reference), with a subtle divider down
+  // the middle. Collapses to a single column on narrow screens.
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 28px;
+  row-gap: 0;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
 }
 
 .astroRow {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(191, 118, 66, 0.14);
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 1);
 
+  // In a 2-column grid the last row of each column shouldn't show a divider.
+  // On desktop that's the last two items; on mobile only the very last.
   &:last-child { border-bottom: none; }
+
+  @media (min-width: 641px) {
+    // Right column gets a left divider so the two columns read as separated.
+    &:nth-child(even) {
+      padding-left: 28px;
+      border-left: 1px solid rgba(255, 255, 255, 1);
+    }
+    // Drop the bottom border on the final row of each column.
+    &:nth-last-child(-n + 2) { border-bottom: none; }
+  }
 }
 
 .astroRowIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
 
   img {

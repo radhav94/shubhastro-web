@@ -259,9 +259,22 @@ $shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   font-weight: 500;
 }
 
+/* Delivery ticks (guide §1): sent/delivered are grey, read is blue, failed is
+   red. Kept neutral-grey by default so a plain double-tick reads as delivered
+   rather than as a success/confirmation colour. */
 .checkmark {
-  color: #4caf50;
+  color: #8a8a8a;
   font-size: 14px;
+}
+
+/* Read → double blue tick (WhatsApp convention). */
+.checkRead {
+  color: #34b7f1;
+}
+
+/* Failed → red alert glyph, paired with the retry affordance. */
+.checkFailed {
+  color: #e53935;
 }
 
 .retryBtn {
@@ -814,4 +827,122 @@ $shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   &:active {
     transform: scale(0.98);
   }
+}
+
+/* ==================== REPLY-TO-MESSAGE (guide §2) ==================== */
+
+/* Quoted preview shown above a message bubble's content (like WhatsApp). */
+.replyQuote {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  border-left: 3px solid #f75801;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  max-width: 100%;
+  overflow: hidden;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 1px;
+  }
+}
+
+/* Brief highlight on the original message when a reply quote jumps to it. */
+.messageHighlight .bubble {
+  animation: replyJumpHighlight 1.6s ease;
+}
+
+@keyframes replyJumpHighlight {
+  0% {
+    box-shadow: 0 0 0 3px rgba(247, 88, 1, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(247, 88, 1, 0);
+  }
+}
+
+.replyQuoteSender {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f75801;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.replyQuoteText {
+  font-size: 12px;
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Reply action button, revealed on bubble hover (no extra context menu). */
+.replyAction {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: #f75801;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.bubble:hover .replyAction,
+.replyAction:focus-visible {
+  opacity: 1;
+}
+
+/* Touch devices have no hover; keep the reply action reachable. */
+@media (hover: none) {
+  .replyAction {
+    opacity: 0.65;
+  }
+}
+
+/* Compose-bar reply preview: the message the next send will reply to. */
+.replyComposeBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin: 0 8px 6px;
+  border-left: 3px solid #f75801;
+  border-radius: 8px;
+  background: #fff5ec;
+}
+
+.replyComposeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.replyComposeCancel {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #757575;
+  cursor: pointer;
+  padding: 2px;
 }

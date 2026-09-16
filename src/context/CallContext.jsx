@@ -2,6 +2,7 @@ import { useContext, useState, useRef, useEffect, useCallback } from "react";
 import { voiceSocket, registerCallSession, clearCallSession } from "../services/voiceSocketServices";
 import { trackEvent } from "../utils/analytics";
 import { getAstrologerDisplayName } from "../utils/helper/string.utils";
+import Toast from "../component/toast";
 import { CallContext } from "./callContextInstance";
 
 // 🔑 LocalStorage keys for call persistence
@@ -33,6 +34,7 @@ export const CallProvider = ({ children }) => {
   const [callSeconds, setCallSeconds] = useState(0);
   const timerRef = useRef(null);
   const activeCallRef = useRef(null);
+  const isReconnectingRef = useRef(false);
   // Pending live call — persists across navigation when user leaves /live while waiting
   const [pendingLiveCall, setPendingLiveCall] = useState(null);
   // Ref to always hold the latest callSeconds for use in closures (e.g. handleCallUpgrade)
@@ -48,6 +50,12 @@ export const CallProvider = ({ children }) => {
   useEffect(() => {
     callSecondsRef.current = callSeconds;
   }, [callSeconds]);
+
+  // Keep reconnecting ref in sync so the reconnect timeout can bail early
+  // if the reconnect already resolved.
+  useEffect(() => {
+    isReconnectingRef.current = isReconnecting;
+  }, [isReconnecting]);
 
   const startTimer = () => {
     if (timerRef.current) return;
@@ -163,6 +171,39 @@ export const CallProvider = ({ children }) => {
     }
   }, [persistCallState, clearPersistedCallState]);
 
+  /* ================= CALL-ENDED NOTIFICATION ================= */
+  // Surfaces the end-of-call notification to the user. Used when a SYSTEM
+  // call:ended reconnect attempt fails (astrologer genuinely offline / session
+  // ended during the disconnect). The mounted call component keeps a
+  // grace-period timer running on SYSTEM ends; the "global:call:ended" event
+  // lets it cancel that timer and tear down without showing a bare
+  // "Unable to reconnect" error.
+  const notifyCallEnded = useCallback((endedCall = null) => {
+    const call = endedCall || activeCallRef.current;
+
+    stopTimer();
+    setCallSeconds(0);
+
+    Toast.success("Call ended.");
+
+    if (call) {
+      setReviewData({
+        astrologerID: call?.astrologerID || call?.astrologerId,
+        fullName: call?.callerName || call?.astrologerName,
+        profileImage: call?.profileImgUrl,
+        roomId: call?.roomId,
+        gender: call?.gender,
+      });
+      setOpenReview(true);
+    }
+
+    window.dispatchEvent(new Event("walletBalanceUpdated"));
+    // Tell any mounted call component to cancel its reconnect grace-period timer
+    // and tear down cleanly.
+    window.dispatchEvent(new CustomEvent("global:call:ended", { detail: { roomId: call?.roomId } }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   /* ================= RECONNECTION (gated by RECONNECTION_ENABLED) ================= */
   const reconnectToCall = useCallback((fallbackCall = null) => {
     if (!RECONNECTION_ENABLED) {
@@ -234,8 +275,12 @@ export const CallProvider = ({ children }) => {
       console.log("[CallReconnect]   → event data:", JSON.stringify(data));
       console.log("[CallReconnect]   → message:", data?.message);
       console.log("[CallReconnect]   → reason:", data?.reason);
-      console.log("[CallReconnect]   → Treating as call ended, clearing state");
+      console.log("[CallReconnect]   → Treating as call ended, notifying user & clearing state");
       cleanupAll();
+      // Reconnect failed → the SYSTEM call:ended was a genuine end. Notify the
+      // user rather than leaving the call component's grace-period timer to
+      // eventually fire a bare "Unable to reconnect" error.
+      notifyCallEnded(reconnectCall);
       clearPersistedCallState();
     };
 
@@ -309,19 +354,12 @@ export const CallProvider = ({ children }) => {
           setCallSeconds(secs);
         }
       } else {
-        console.log("[CallReconnect] 💀 Call is no longer active — clearing state");
+        console.log("[CallReconnect] 💀 Call is no longer active — notifying user & clearing state");
         console.log("[CallReconnect]   → reason:", data?.reason);
-        // Show review when call ended during disconnect
-        if (reconnectCall) {
-          setReviewData({
-            astrologerID: reconnectCall?.astrologerID || reconnectCall?.astrologerId,
-            fullName: reconnectCall?.callerName,
-            profileImage: reconnectCall?.profileImgUrl,
-            roomId: reconnectCall?.roomId,
-            gender: reconnectCall?.gender,
-          });
-          setOpenReview(true);
-        }
+        // Server confirmed the call is genuinely over (astrologer offline /
+        // session ended during the disconnect). Surface the end-of-call
+        // notification instead of silently waiting for the grace-period timeout.
+        notifyCallEnded(reconnectCall);
         clearPersistedCallState();
       }
     };
@@ -332,12 +370,16 @@ export const CallProvider = ({ children }) => {
 
     // Timeout — if backend doesn't respond in 30s, give up
     setTimeout(() => {
-      console.log("[CallReconnect] ⏰ 30s timeout reached — giving up");
+      // Bail out if the reconnect already resolved (listeners cleaned up) so we
+      // don't fire a spurious "call ended" on top of a successful reconnect.
+      if (!isReconnectingRef.current) return;
+      console.log("[CallReconnect] ⏰ 30s timeout reached — giving up, notifying user");
       voiceSocket.offAny(debugAnyEvent);
       cleanupAll();
+      notifyCallEnded(reconnectCall);
       clearPersistedCallState();
     }, 30000);
-  }, [restoreCallState, clearPersistedCallState, persistCallState, setActiveCall]);
+  }, [restoreCallState, clearPersistedCallState, persistCallState, setActiveCall, notifyCallEnded]);
 
   /* ================= SOCKET CONNECTION ================= */
   useEffect(() => {
@@ -489,19 +531,12 @@ export const CallProvider = ({ children }) => {
         }
       } else {
         console.log("[CallContext] ❌ Auto-reconnect failed, call ended:", data?.reason);
-        // Call ended during disconnect - show review before clearing state
-        if (activeCall) {
-          setReviewData({
-            astrologerID: activeCall?.astrologerID || activeCall?.astrologerId,
-            fullName: activeCall?.callerName,
-            profileImage: activeCall?.profileImgUrl,
-            roomId: activeCall?.roomId,
-            gender: activeCall?.gender,
-          });
-          setOpenReview(true);
-        }
+        // Call ended during disconnect (astrologer offline) — notify the user.
+        // notifyCallEnded shows the "Call ended." toast, opens review, refreshes
+        // wallet, and dispatches global:call:ended so the mounted call component
+        // cancels its grace-period timer and tears down.
+        notifyCallEnded(activeCallRef.current);
         setActiveCall(null);
-        stopTimer();
       }
     };
 

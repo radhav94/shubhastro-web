@@ -536,13 +536,33 @@
   padding: 10px 12px;
   border: none;
   border-radius: 50px;
-  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  background: var(--system-colors-error, #E4342F);
   color: #fff;
   font-family: "Poppins", sans-serif;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  line-height: 1;
+
+  svg {
+    flex-shrink: 0;
+    margin-bottom: 3px;
+  }
+
+  // Emergency icon is an image on the orange gradient — size it like the other
+  // CTA icons and force it white to match the button text.
+  img {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    filter: brightness(0) invert(1);
+  }
 
   @include cta-hit-area;
 
@@ -953,9 +973,7 @@
     // padding: 8px 10px;
     font-size: 12px;
     height: 34px;
-    img{
-      display: none;
-    }
+    img{ width: 14px; height: 14px; }
   }
 
   @include cta-hit-area;
@@ -1006,9 +1024,7 @@
     // padding: 8px 10px;
     font-size: 12px;
     height: 34px;
-    img{
-      display: none;
-    }
+    img{ width: 14px; height: 14px; }
   }
 
   @include cta-hit-area;

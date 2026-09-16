@@ -4,8 +4,9 @@ import styles from "./ChatWindow.module.scss";
 import { PrimaryText, Toast } from "../../../../../component";
 import AudioMessageWrapper from "./AudioMessageWrapper";
 import { GrReactjs } from "react-icons/gr";
-import { IoCheckmarkDone } from "react-icons/io5";
-import { FaFileAlt } from "react-icons/fa";
+import { IoCheckmark, IoCheckmarkDone, IoTimeOutline, IoAlertCircleOutline } from "react-icons/io5";
+import { FaFileAlt, FaStar, FaReply } from "react-icons/fa";
+import { MESSAGE_STATUS, replyPreviewLabel } from "../../../../../utils/helper/chatProtocol";
 import PdfIcon from "../../../../../assets/chat/PDF.svg";
 import DocIcon from "../../../../../assets/chat/DOC.svg";
 import XlsIcon from "../../../../../assets/chat/XLS.svg";
@@ -17,7 +18,27 @@ import LinkPreview from "./LinkPreview";
 import { detectURL, splitTextByURL } from "../../../../../utils/helper/linkPreview";
 import { getAttachmentDisplayName } from "../../../../../utils/helper/getAttachmentDisplayName";
 
-const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, customerName, onScroll, isLoadingMore, onMessageAction }) => {
+// WhatsApp-style delivery tick. Only rendered for the current user's own
+// messages (guide §10).
+const TickIndicator = ({ status }) => {
+  switch (status) {
+    case MESSAGE_STATUS.PENDING:
+      return <IoTimeOutline className={styles.checkmark} title="Sending" />;
+    case MESSAGE_STATUS.FAILED:
+      return <IoAlertCircleOutline className={`${styles.checkmark} ${styles.checkFailed}`} title="Failed — tap to retry" />;
+    case MESSAGE_STATUS.SENT:
+      return <IoCheckmark className={styles.checkmark} title="Sent" />;
+    case MESSAGE_STATUS.DELIVERED:
+      return <IoCheckmarkDone className={styles.checkmark} title="Delivered" />;
+    case MESSAGE_STATUS.READ:
+      return <IoCheckmarkDone className={`${styles.checkmark} ${styles.checkRead}`} title="Read" />;
+    default:
+      // Legacy messages with no status → show a neutral double tick as before.
+      return <IoCheckmarkDone className={styles.checkmark} />;
+  }
+};
+
+const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, customerName, onScroll, isLoadingMore, onMessageAction, onReply, onRetry, onReplyPreviewClick }) => {
   const [iframeSrc, setIframeSrc] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const navigate = useNavigate();
@@ -322,9 +343,15 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
                 {date} • {msgs[0]?.time || ''}
               </span>
             </div>
-            {msgs.map((msg, i) => (
+            {msgs.map((msg, i) => {
+              const msgKey = msg.clientMsgId || msg.messageId || `${date}-${i}-${msg.time}`;
+              const isFailed = msg.status === MESSAGE_STATUS.FAILED;
+              // Reply / star only make sense once the message has a server id.
+              const canAct = !!msg.messageId;
+              return (
               <div
-                key={`${date}-${i}-${msg.time}`}
+                key={msgKey}
+                data-message-id={msg.messageId || undefined}
                 className={styles.messageWrapper}
               >
                 {!msg.isSender && (
@@ -337,6 +364,22 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
                     msg.isSender ? styles.senderBubble : styles.receiverBubble
                   }`}
                 >
+                  {/* Quoted reply preview (guide §6) */}
+                  {msg.replyTo && (msg.replyTo.message || msg.replyTo.type) && (
+                    <button
+                      type="button"
+                      className={styles.replyQuote}
+                      onClick={() => onReplyPreviewClick?.(msg.replyTo.messageId)}
+                    >
+                      <span className={styles.replyQuoteSender}>
+                        {msg.replyTo.sender === "user" ? "You" : (astrologerName || "Astrologer")}
+                      </span>
+                      <span className={styles.replyQuoteText}>
+                        {replyPreviewLabel(msg.replyTo)}
+                      </span>
+                    </button>
+                  )}
+
                   <div className={styles.bubbleContent}>
                     {msg.actionLabel ? (
                       <span
@@ -372,11 +415,36 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
                     )}
                   </div>
                   <div className={styles.msgTimeWrapper}>
+                    {msg.starred && <FaStar className={styles.starBadge} title="Starred" />}
                     <span className={styles.msgTime}>{msg.time}</span>
                     {msg.isSender && (
-                      <IoCheckmarkDone className={styles.checkmark} />
+                      isFailed ? (
+                        <button
+                          type="button"
+                          className={styles.retryButton}
+                          onClick={() => onRetry?.(msg)}
+                          title="Failed to send — tap to retry"
+                        >
+                          <TickIndicator status={msg.status} />
+                        </button>
+                      ) : (
+                        <TickIndicator status={msg.status} />
+                      )
                     )}
                   </div>
+
+                  {/* Reply action — revealed on bubble hover (no extra menu) */}
+                  {canAct && (
+                    <button
+                      type="button"
+                      className={styles.replyAction}
+                      aria-label="Reply"
+                      title="Reply"
+                      onClick={() => onReply?.(msg)}
+                    >
+                      <FaReply />
+                    </button>
+                  )}
                 </div>
                 {msg.isSender && (
                   <div className={styles.msgAvatarSender}>
@@ -384,7 +452,8 @@ const ChatMessages = ({ messages, isTyping, messagesRef, astrologerName, custome
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         ))}
 

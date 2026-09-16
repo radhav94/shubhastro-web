@@ -9,4 +9,7 @@ export { default as MuhuratSectionV2 } from "./MuhuratSectionV2";
 export { default as BlogSectionV2 } from "./BlogSectionV2";
 export { default as LiveTrackingSection } from "./LiveTrackingSection";
 export { default as ConnectAstrologerSection } from "./ConnectAstrologerSection";
+export { default as HoroscopeSection } from "./HoroscopeSection";
+export { default as TestimonialsSection } from "./TestimonialsSection";
+export { default as AppDownloadSection } from "./AppDownloadSection";
 export { default as SectionTitle } from "./shared/SectionTitle";

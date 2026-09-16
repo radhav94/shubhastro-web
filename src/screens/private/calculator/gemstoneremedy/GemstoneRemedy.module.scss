@@ -1,0 +1,1077 @@
+@use "../../../../assets/variables/variables" as *;
+
+$brand: #f75801;
+$brand-dark: #d43400;
+$ink: #2d2320;
+$muted: #6b5f5a;
+
+$gradient: linear-gradient(90deg, #{$brand} 0%, #{$brand-dark} 100%);
+
+/* Card surfaces sit on the peach page wash, near-white with a hairline rim —
+   the same treatment as the Rashi / Muhurat report cards. */
+$card-bg: rgba(255, 255, 255, 0.4);
+$card-border: rgba(255, 255, 255, 1);
+$card-shadow: 0 2px 14px rgba(191, 118, 66, 0.08);
+
+/*
+  Height of everything fixed above this page (HomeLayout header + CalcBackButton
+  bar) that the sticky sidebar must clear. Matches the Rashi report.
+*/
+$fixed-stack: 157px;
+$fixed-stack-md: 115px;
+$sticky-gap: 8px;
+
+.wrapper {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 8px 16px 48px;
+
+  @media (max-width: 560px) {
+    padding-bottom: 90px;
+  }
+}
+
+/* ── PAGE HEAD ─────────────────────────────────────────────────────────── */
+.pageHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 2px 14px;
+}
+
+.pageTitle {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: $ink;
+  margin: 0;
+
+  span {
+    color: $brand;
+  }
+
+  @media (max-width: 560px) {
+    font-size: 1.15rem;
+  }
+}
+
+/* ── LAYOUT ────────────────────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 18px;
+  align-items: start;
+
+  /* Desktop: hero group above the main content in the left column; the
+     sidebar sits in the right column spanning both rows. */
+  .topGroup {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .main {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .sidebar {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  @media (max-width: 960px) {
+    grid-template-columns: minmax(0, 1fr);
+
+    /* Mobile order: hero first, then the Expert Verification card, then
+       Gemstone Essentials and the rest of the report. */
+    .topGroup {
+      grid-column: 1;
+      grid-row: auto;
+      order: 1;
+    }
+
+    .sidebar {
+      grid-column: 1;
+      grid-row: auto;
+      order: 2;
+    }
+
+    .main {
+      grid-column: 1;
+      grid-row: auto;
+      order: 3;
+    }
+  }
+}
+
+/* Hero group — a flex column so the hero keeps consistent spacing, matching
+   the gap used inside .main. */
+.topGroup {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* ── CARD (shared surface) ─────────────────────────────────────────────── */
+.card {
+  position: relative;
+  background: $card-bg;
+  border: 1.5px solid $card-border;
+  border-radius: 18px;
+  box-shadow: $card-shadow;
+  padding: 20px 22px;
+
+  @media (max-width: 560px) {
+    padding: 16px;
+    border-radius: 16px;
+  }
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $ink;
+  margin: 0 0 14px;
+}
+
+/* Design section-header icon (soft tinted rounded-square tile, baked into the
+   PNG). */
+.cardTitleImg {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.cardTitleIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(191, 118, 66, 0.16);
+  color: $brand;
+  flex-shrink: 0;
+
+  &.iconGold {
+    color: #d99512;
+    border-color: rgba(217, 149, 18, 0.24);
+  }
+
+  &.iconBlue {
+    color: #2f7dd1;
+    border-color: rgba(47, 125, 209, 0.22);
+  }
+
+  &.iconViolet {
+    color: #7c3aed;
+    border-color: rgba(124, 58, 237, 0.22);
+  }
+}
+
+.cardBody {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: $muted;
+}
+
+.cardHint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 0;
+  font-size: 0.76rem;
+  color: #b07a4e;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+/* ── HERO ──────────────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: $card-bg;
+  border: 1.5px solid $card-border;
+  border-radius: 18px;
+  box-shadow: $card-shadow;
+  padding: 22px 24px;
+
+  @media (max-width: 560px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px;
+  }
+}
+
+.heroFlourish,
+.heroFlourishLeft {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: auto;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.heroFlourish {
+  right: 0;
+}
+
+.heroFlourishLeft {
+  left: 0;
+}
+
+.heroCopy {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #0f9d6b;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.heroTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  color: $ink;
+  margin: 0 0 10px;
+  line-height: 1.1;
+
+  @media (max-width: 560px) {
+    font-size: 1.5rem;
+  }
+}
+
+.heroOther {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: $muted;
+}
+
+.heroText {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: $muted;
+
+  .hl {
+    color: $brand;
+    font-weight: 700;
+  }
+}
+
+/* ── GOOD RESULTS ──────────────────────────────────────────────────────── */
+.resultGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 860px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.resultCard {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(191, 118, 66, 0.14);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.resultIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(247, 88, 1, 0.1);
+  color: $brand;
+  margin-bottom: 10px;
+}
+
+.resultTitle {
+  margin: 0 0 4px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: $ink;
+  line-height: 1.3;
+}
+
+.resultDesc {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: $muted;
+}
+
+/* ── TIME TO WEAR + AUSPICIOUS DAY ─────────────────────────────────────── */
+.wearRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.wearCard {
+  display: flex;
+  flex-direction: column;
+}
+
+.wearBig {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: $ink;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.wearSub {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: $muted;
+}
+
+.wearFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.wearFact {
+  flex: 1 1 auto;
+  min-width: 84px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(191, 118, 66, 0.14);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.wearFactLabel {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #b07a4e;
+  margin-bottom: 3px;
+}
+
+.wearFactValue {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+.mantraBox {
+  margin-top: 14px;
+  background: rgba(247, 88, 1, 0.06);
+  border: 1px solid rgba(247, 88, 1, 0.16);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.mantraLabel {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: $brand-dark;
+  margin-bottom: 4px;
+}
+
+.mantraText {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: $ink;
+  line-height: 1.5;
+}
+
+.wearNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(191, 118, 66, 0.2);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #b07a4e;
+
+  svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+/* ── GEMSTONE CTAs (verify / buy) ──────────────────────────────────────── */
+.ctaRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.ctaCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.ctaBody {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ctaTitle {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: $ink;
+  line-height: 1.2;
+}
+
+.ctaText {
+  margin: 0 0 14px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: $muted;
+}
+
+.ctaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: $gradient;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.28);
+  transition: transform 0.15s;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.ctaArt {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 16px;
+  color: #d99512;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 236, 200, 0.95), rgba(255, 224, 190, 0.6));
+  border: 1px solid rgba(217, 149, 18, 0.2);
+
+  @media (max-width: 560px) {
+    width: 68px;
+    height: 68px;
+  }
+}
+
+/* ── ALTERNATIVE REMEDIES ──────────────────────────────────────────────── */
+.altGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.altCard {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(191, 118, 66, 0.14);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.altIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+  font-size: 1.1rem;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.altTitle {
+  margin: 0 0 4px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $ink;
+}
+
+.altDesc {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: $muted;
+}
+
+.checkAnother {
+  width: fit-content;
+  margin: 2px auto 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $brand-dark;
+  padding: 6px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ── SIDEBAR — EXPERT VERIFICATION ─────────────────────────────────────── */
+.sidebar {
+  position: sticky;
+  top: calc(#{$fixed-stack} + #{$sticky-gap});
+
+  @media (max-width: 1180px) {
+    top: calc(#{$fixed-stack-md} + #{$sticky-gap});
+  }
+
+  @media (max-width: 960px) {
+    position: static;
+    top: auto;
+  }
+}
+
+.verifyCard {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  box-shadow: 0 8px 26px rgba(191, 118, 66, 0.16);
+  padding: 22px;
+
+  @media (max-width: 560px) {
+    padding: 18px;
+    border-radius: 18px;
+  }
+}
+
+/* Soft corner flourishes baked into the peach card (top-left / bottom-left). */
+.verifyFlourish,
+.verifyFlourishLeft {
+  position: absolute;
+  height: 55%;
+  width: auto;
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.verifyFlourish {
+  top: 0;
+  right: 0;
+}
+
+.verifyFlourishLeft {
+  bottom: 0;
+  left: 0;
+}
+
+.cardTools {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+
+.toolBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  color: $brand-dark;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+
+  &:hover {
+    background: #fff;
+    transform: translateY(-1px);
+  }
+}
+
+.verifyBadge {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 249, 235, 0.92);
+  color: #b8820e;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 149, 18, 0.22);
+
+  svg {
+    color: #d99512;
+  }
+}
+
+.verifyHeading {
+  position: relative;
+  z-index: 1;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: $ink;
+  line-height: 1.25;
+  margin: 16px 0 0;
+
+  @media (max-width: 560px) {
+    font-size: 1.3rem;
+  }
+}
+
+.verifyNote {
+  position: relative;
+  z-index: 1;
+  margin: 12px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #7a5638;
+}
+
+/* Dotted divider with a centered lotus/flower glyph. */
+.verifyDivider {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.verifyDividerLine {
+  flex: 1 1 auto;
+  height: 0;
+  border-top: 1.5px dashed rgba(217, 149, 18, 0.4);
+}
+
+.verifyDividerIcon {
+  flex-shrink: 0;
+  color: #d99512;
+}
+
+/* ── ACTION BUTTONS ────────────────────────────────────────────────────── */
+.actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.actionPrimary,
+.actionSecondary,
+.actionTertiary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  border-radius: 999px;
+  padding: 15px 16px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.actionPrimary {
+  background: $gradient;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(247, 88, 1, 0.3);
+
+  /* Hidden on mobile — Call lives in the fixed bottom action bar there. */
+  @media (max-width: 560px) {
+    display: none;
+  }
+}
+
+.actionSecondary {
+  background: #fff;
+  color: $brand-dark;
+  border: 1.5px solid rgba(247, 88, 1, 0.55);
+
+  /* Hidden on mobile — Chat lives in the fixed bottom action bar there. */
+  @media (max-width: 560px) {
+    display: none;
+  }
+}
+
+.actionTertiary {
+  color: $brand-dark;
+  border: 1.5px solid rgba(247, 88, 1, 0.35);
+}
+
+/* ── MOBILE ACTION BAR (fixed bottom) ──────────────────────────────────── */
+.mobileActionBar {
+  display: none;
+
+  @media (max-width: 560px) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    /* Extra bottom padding (plus the device safe-area) so the buttons never
+       clip against the screen edge. */
+    padding: 10px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(247, 88, 1, 0.15);
+    box-shadow: 0 -4px 18px rgba(191, 118, 66, 0.12);
+  }
+}
+
+.mobileActionChat,
+.mobileActionCall {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 13px 8px;
+  border-radius: 26px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  /* Icon shouldn't shrink; the label can ellipsize on very narrow screens
+     rather than clipping the button. */
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.mobileActionChat {
+  background: #fff;
+  color: $brand-dark;
+  border: 1.5px solid rgba(247, 88, 1, 0.5);
+}
+
+.mobileActionCall {
+  background: $gradient;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(247, 88, 1, 0.3);
+}
+
+/* ── EMPTY STATE ───────────────────────────────────────────────────────── */
+.empty {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 40px 16px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: $muted;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   REDESIGN SECTIONS (match the reference layout)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Two cards side by side (Benefits+Health, Alternates+Avoid). */
+.pairRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Gemstone Essentials — icon stat tiles ─────────────────────────────── */
+.essentials {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.essential {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 16px 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid #fff;
+}
+
+.essentialIcon {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  margin-bottom: 2px;
+}
+
+.essentialLabel {
+  font-size: 0.76rem;
+  color: $muted;
+}
+
+.essentialValue {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $ink;
+}
+
+/* ── Chips (Benefits / Health / Alternates / Avoid) ────────────────────── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  border: 1px solid transparent;
+}
+
+/* Leading icon inside a chip (Alternate Gemstones pills). */
+.chipIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.chipGreen {
+  color: #315E4B;
+  background: #F3FAF6;
+  border-color: #bbf7d0;
+}
+
+.chipPink {
+  color: #7A4258;
+  background: #FFF7FA;
+  border-color: #F1C3D3;
+}
+
+.chipViolet {
+  color: #6D5BD0;
+  background: #FCFAFF;
+  border: 1.5px solid #DDD5F5;
+}
+
+.chipOrange {
+ color: #8A463C;
+ background: #FFF7F5;
+ border: 1.5px solid #F2C3BA
+}
+
+/* ── Flaw table ────────────────────────────────────────────────────────── */
+.flawTable {
+  border: 1px solid rgba(191, 118, 66, 0.16);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.flawRow {
+  display: grid;
+  grid-template-columns: 40% 60%;
+
+  & + .flawRow {
+    border-top: 1px solid rgba(191, 118, 66, 0.14);
+  }
+}
+
+.flawHead {
+  background: #FFF1EF;
+
+  .flawType,
+  .flawEffect {
+    font-weight: 600;
+    color: #D9534F;
+    font-size: 0.82rem;
+  }
+}
+
+.flawType,
+.flawEffect {
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  color: $muted;
+}
+
+.flawType {
+  font-weight: 600;
+  color: $ink;
+  border-right: 1px solid rgba(191, 118, 66, 0.14);
+}
+
+@media (max-width: 480px) {
+  .flawRow {
+    grid-template-columns: 44% 56%;
+  }
+  .flawType,
+  .flawEffect {
+    padding: 10px 12px;
+    font-size: 0.78rem;
+  }
+}
+
+/* ── Time to Wear (full-width) ─────────────────────────────────────────── */
+.timeBig {
+  margin: 4px 0 10px;
+  font-size: 30px;
+  // font-weight: 800;
+  color: $ink;
+  line-height: 1.15;
+
+  @media (max-width: 560px) {
+    font-size: 1.35rem;
+  }
+}
+
+.timeText {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: $muted;
+}
+
+/* ── Time to Wear / Methods — full-width cards with decorative art at the
+   bottom-right (sunrise / Om-yantra). ─────────────────────────────────── */
+.artCard {
+  position: relative;
+  overflow: hidden;
+}
+
+.artImg {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 70%;
+  width: auto;
+  max-width: 46%;
+  object-fit: contain;
+  object-position: bottom right;
+  pointer-events: none;
+  z-index: 0;
+
+  @media (max-width: 560px) {
+    height: 55%;
+    max-width: 55%;
+    opacity: 0.8;
+  }
+}
+
+.artBody {
+  position: relative;
+  z-index: 1;
+  /* Keep the text clear of the art on the right. */
+  padding-right: 12%;
+
+  @media (max-width: 560px) {
+    padding-right: 0;
+  }
+}

@@ -43,6 +43,7 @@ import RechargeModal from "../../../../../component/recharge-modal/RechargeModal
 import useAstrologerAvailability from "../../../../../utils/hooks/useAstrologerAvailability";
 
 import { getAstrologerImageUrl } from "../../../../../utils/appImages";
+import { sortBySeq, MESSAGE_STATUS, normalizeReplyTo, replyPreviewLabel } from "../../../../../utils/helper/chatProtocol";
 const ChatWindow = () => {
   const messagesRef = useRef(null);
   const chatPageRef = useRef(null);
@@ -242,7 +243,11 @@ const ChatWindow = () => {
     chatSeconds,
     isMessageDisabled,
     remainingTime,
-    handleChatEndedFromServer
+    handleChatEndedFromServer,
+    retryMessage,
+    starMessage,
+    unstarMessage,
+    markMessagesRead,
   } = useChat({
     userId,
     astrologerId,
@@ -256,6 +261,47 @@ const ChatWindow = () => {
   });
 
   const [message, setMessage] = useState("");
+  // Message the user is currently replying to (null = normal compose).
+  const [replyTarget, setReplyTarget] = useState(null);
+
+  // Mirror of `replyTarget` for async send paths (attachments, voice, gift).
+  // Those callers run inside promises/modals that closed over a stale value, so
+  // they read the ref instead of the state to pick up the reply active at the
+  // moment the user actually hit send.
+  const replyTargetRef = useRef(null);
+  useEffect(() => {
+    replyTargetRef.current = replyTarget;
+  }, [replyTarget]);
+
+  // Consume the current reply target: return the { replyTo } send options (or an
+  // empty object) and clear the reply so the compose bar resets after the send.
+  const consumeReplyOptions = useCallback(() => {
+    const target = replyTargetRef.current;
+    if (!target?.messageId) return {};
+    setReplyTarget(null);
+    return { replyTo: target };
+  }, []);
+
+  // Scroll to a quoted message when the user taps a reply preview.
+  const scrollToMessage = useCallback((messageId) => {
+    if (!messageId || !messagesRef.current) return;
+    const el = messagesRef.current.querySelector(`[data-message-id="${messageId}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add(styles.messageHighlight);
+      setTimeout(() => el.classList.remove(styles.messageHighlight), 1500);
+    }
+  }, []);
+
+  // Star / unstar toggler driven from the message action menu.
+  const handleToggleStar = useCallback(
+    (msg) => {
+      if (!msg?.messageId) return;
+      if (msg.starred) unstarMessage?.(msg.messageId);
+      else starMessage?.(msg.messageId);
+    },
+    [starMessage, unstarMessage]
+  );
 
   const {
     waitingPopup: localWaitingPopup,
@@ -284,8 +330,11 @@ const ChatWindow = () => {
   const prevScrollHeightRef = useRef(null);
 
   const { data, isFetching: isHistoryFetching } = useGetChatHistoryQuery(
-    { userId: astrologerId, page: historyPage },
-    { refetchOnMountOrArgChange: true }
+    // isAssistant:false — this is the real astrologer conversation, NOT the
+    // Virtual Assistant inbox. Without it the query defaults to isAssistant=true
+    // and the persisted chat history stops loading.
+    { userId: astrologerId, page: historyPage, isAssistant: false },
+    { skip: !astrologerId, refetchOnMountOrArgChange: true }
   );
   const history = data?.data || [];
   const pagination = data?.pagination || {};
@@ -307,12 +356,14 @@ const ChatWindow = () => {
         }
       }
       
+      const isSender = isUserSide
+        ? item.sender === "user"
+        : item.sender === "astrologer";
+
       return {
         text: messageText,
         type: item?.type,
-        isSender: isUserSide
-          ? item.sender === "user"
-          : item.sender === "astrologer",
+        isSender,
         time: new Date(item.createdAt).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -323,12 +374,20 @@ const ChatWindow = () => {
         kundliName: item?.kundliName,
         suggestedProducts: item?.suggestedProducts,
         kundliId: item?.kundliId,
+        // Protocol fields from persisted history. Old messages have no seq/status
+        // (guide §13): treat them as already `read` and let seq fall back to time.
+        messageId: item?._id,
+        clientMsgId: item?.clientMsgId,
+        seq: typeof item?.seq === "number" ? item.seq : undefined,
+        status: isSender ? (item?.status || MESSAGE_STATUS.READ) : undefined,
+        replyTo: normalizeReplyTo(item?.replyTo),
+        starred: !!item?.starred,
       };
     });
 
 
     const socket = messages.map((msg, idx) => ({
-      id: `socket-${idx}-${msg.time}`,
+      id: msg.clientMsgId || msg.messageId || `socket-${idx}-${msg.time}`,
       text: msg.text,
       isSender: msg.sender,
       time: msg.time,
@@ -339,21 +398,145 @@ const ChatWindow = () => {
       kundliName: msg?.kundliName,
       suggestedProducts: msg?.suggestedProducts,
       kundliId: msg?.kundliId,
+      // Protocol fields
+      messageId: msg?.messageId,
+      clientMsgId: msg?.clientMsgId,
+      seq: typeof msg?.seq === "number" ? msg.seq : undefined,
+      status: msg?.status,
+      replyTo: normalizeReplyTo(msg?.replyTo),
+      starred: !!msg?.starred,
     }));
 
 
     // A message can arrive both over the socket (live echo) and from the history
-    // API (once persisted), which would render it twice. Drop socket messages
-    // that already exist in history, matched by type + text + sender + minute.
-    const msgKey = (m) =>
+    // API (once persisted), which would render it twice. Prefer stable ids
+    // (messageId / clientMsgId) for dedup; fall back to the legacy fuzzy key
+    // (type + text + sender + minute) for old messages that have neither.
+    const historyIds = new Set();
+    historyMsgs.forEach((m) => {
+      if (m.messageId) historyIds.add(`id:${m.messageId}`);
+      if (m.clientMsgId) historyIds.add(`cid:${m.clientMsgId}`);
+    });
+    const fuzzyKey = (m) =>
       `${m.type || "message"}|${m.text}|${m.isSender ? 1 : 0}|${dayjs(m.dateTime).format("YYYY-MM-DD HH:mm")}`;
-    const historyKeys = new Set(historyMsgs.map(msgKey));
-    const dedupedSocket = socket.filter((m) => !historyKeys.has(msgKey(m)));
+    const historyFuzzy = new Set(historyMsgs.map(fuzzyKey));
 
-    return [...historyMsgs, ...dedupedSocket].sort(
-      (a, b) => new Date(a.dateTime) - new Date(b.dateTime)
-    );
+    const dedupedSocket = socket.filter((m) => {
+      if (m.messageId && historyIds.has(`id:${m.messageId}`)) return false;
+      if (m.clientMsgId && historyIds.has(`cid:${m.clientMsgId}`)) return false;
+      // Only apply the fuzzy fallback when there's no stable id to trust.
+      if (!m.messageId && !m.clientMsgId && historyFuzzy.has(fuzzyKey(m))) return false;
+      return true;
+    });
+
+    // Order by server-assigned seq (ascending); messages without a seq fall back
+    // to their timestamp (guide §9).
+    return sortBySeq([...historyMsgs, ...dedupedSocket]);
   }, [history, messages, isUserSide]);
+
+  // Emit a read receipt for the highest seq of the OTHER party's messages when
+  // the chat page is visible (guide §5). This runs both when new messages
+  // arrive AND when the tab/window regains visibility — otherwise a message
+  // that lands while the tab is hidden never gets a read receipt, because the
+  // effect below early-returns on hidden and never re-runs on refocus (the
+  // visibility change isn't a React dependency). markMessagesRead has its own
+  // monotonic guard, so re-invoking it is safe (no duplicate/backwards emits).
+  // Tracks other-party message ids we've already sent `message:delivered` for,
+  // so re-runs of the read-receipt effect don't re-emit duplicates.
+  const confirmedDeliveryIdsRef = useRef(new Set());
+  const emitReadReceiptRef = useRef(() => {});
+  emitReadReceiptRef.current = (immediate = false) => {
+    // NOTE: read receipts are intentionally NOT gated by `isMessageDisabled`.
+    // `isMessageDisabled` means "the user can't SEND/type" (session ended, not
+    // yet reconnected, no active live chat), which is a different concern from
+    // "the user has SEEN these messages". When a customer reopens a chat where
+    // the astrologer sent messages while they were offline, there is no live
+    // `activeChat`, so `isMessageDisabled` stays true — previously that blocked
+    // the read receipt entirely and the astrologer's ticks stalled at
+    // sent/delivered. Acknowledging reads only requires the messages to be
+    // visible on screen, so we gate on visibility alone.
+    if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+    // Highest seq AND latest timestamp among the OTHER party's messages. Live
+    // socket messages frequently lack a numeric seq, so the timestamp is the
+    // reliable watermark that makes refocus receipts work without a reload.
+    let otherPartyMaxSeq = 0;
+    let otherPartyMaxAt = 0;
+    // Collect ids of the other party's messages we haven't confirmed delivery
+    // for yet. Messages loaded purely from REST history (e.g. sent while the
+    // customer was offline) never went through the live `message:received` /
+    // `undelivered_batch` socket handlers, so their delivery was never
+    // confirmed and the astrologer's ticks stay on a single "sent" tick. We
+    // confirm delivery here, once, before reporting the read watermark.
+    const toConfirmDelivery = [];
+    for (const m of finalMsgs) {
+      if (m.isSender) continue;
+      if (typeof m.seq === "number" && m.seq > otherPartyMaxSeq) otherPartyMaxSeq = m.seq;
+      const at = m.dateTime ? new Date(m.dateTime).getTime() : 0;
+      if (at > otherPartyMaxAt) otherPartyMaxAt = at;
+      const id = m.messageId;
+      if (id && !confirmedDeliveryIdsRef.current.has(id)) {
+        toConfirmDelivery.push(id);
+      }
+    }
+    if (toConfirmDelivery.length && roomId && voiceSocket.connected) {
+      toConfirmDelivery.forEach((id) => confirmedDeliveryIdsRef.current.add(id));
+      voiceSocket.emit("message:delivered", { roomId, messageIds: toConfirmDelivery });
+    }
+    if (otherPartyMaxSeq > 0 || otherPartyMaxAt > 0) {
+      markMessagesRead?.(otherPartyMaxSeq, { immediate, lastReadAt: otherPartyMaxAt });
+    }
+  };
+
+  // Fire on message/history changes (live receipts while the tab is focused).
+  useEffect(() => {
+    emitReadReceiptRef.current();
+  }, [finalMsgs, isMessageDisabled]);
+
+  // Re-fire once the socket (re)connects. History can finish loading BEFORE the
+  // socket is connected — in that case the delivered/read emits above are
+  // skipped (voiceSocket.connected is false and flushReadReceipt queues the
+  // read). Re-running on `connect` ensures the astrologer's ticks advance to
+  // delivered/read as soon as we're back online, without needing a refocus.
+  useEffect(() => {
+    const onConnect = () => emitReadReceiptRef.current(true);
+    voiceSocket.on("connect", onConnect);
+    return () => voiceSocket.off("connect", onConnect);
+  }, []);
+
+  // First-connect flush: when the customer joins this chat with the astrologer
+  // for the first time in this session, immediately confirm delivery AND report
+  // the read watermark for whatever the astrologer already sent (including
+  // messages sent while the customer was offline, loaded from history). This
+  // runs once per room, as soon as the room is established and history has
+  // finished its initial load — so the astrologer's ticks advance the moment
+  // the customer opens the conversation, not only on a later focus/message.
+  const firstConnectDoneRef = useRef(null);
+  useEffect(() => {
+    if (!roomId) return;
+    // Wait for the first history load to settle so finalMsgs contains the
+    // astrologer's existing messages.
+    if (isHistoryFetching) return;
+    // Only fire once per room.
+    if (firstConnectDoneRef.current === roomId) return;
+    firstConnectDoneRef.current = roomId;
+    emitReadReceiptRef.current(true);
+  }, [roomId, isHistoryFetching, finalMsgs.length]);
+
+  // Fire when the tab/window comes back to the foreground, so messages that
+  // arrived while hidden get their read receipt as soon as the user returns.
+  // Emit immediately (skip the debounce) — background timers get throttled, so
+  // a deferred emit could be dropped or arrive late.
+  useEffect(() => {
+    const flush = () => {
+      if (document.visibilityState === "visible") emitReadReceiptRef.current(true);
+    };
+    document.addEventListener("visibilitychange", flush);
+    window.addEventListener("focus", flush);
+    return () => {
+      document.removeEventListener("visibilitychange", flush);
+      window.removeEventListener("focus", flush);
+    };
+  }, []);
 
   // Load older messages when scrolling to top
   const handleMessagesScroll = useCallback(() => {
@@ -465,18 +648,24 @@ const ChatWindow = () => {
 
   const handleSend = (kundli = null) => {
     if (kundli?._id) {
-      isUserSide ? sendMessage(kundli._id, 'kundli', kundli?._id) : astroReply(kundli._id);
+      // Attach the reply target (if any) so a shared Kundli can also be a reply.
+      const kundliReplyOptions = replyTarget?.messageId ? { replyTo: replyTarget } : {};
+      isUserSide ? sendMessage(kundli._id, 'kundli', kundli?._id, kundliReplyOptions) : astroReply(kundli._id);
 
       setMessage("");
+      setReplyTarget(null);
       return;
     }
 
     if (!message.trim()) return;
-    isUserSide ? sendMessage(message) : astroReply(message);
+    // Attach the reply target (if any) so the server stores a quoted snapshot.
+    const sendOptions = replyTarget?.messageId ? { replyTo: replyTarget } : {};
+    isUserSide ? sendMessage(message, "message", null, sendOptions) : astroReply(message);
     if (isUserSide) {
       trackEvent("session_message_sent", { astrologer_id: astroID || activeChat?.astrologerId, session_id: activeChat?.roomId });
     }
     setMessage("");
+    setReplyTarget(null);
   };
 
   const user = getUserFromStorage();
@@ -547,6 +736,9 @@ const ChatWindow = () => {
 
   const [getS3SignedUrl] = useGetS3SignedUrlMutation();
   const sendVoiceMessage = async (blob = null, duration, mimeType) => {
+    // Capture + clear the reply target now (before the async upload) so the
+    // voice note is delivered as a reply and the compose bar resets immediately.
+    const sendOptions = consumeReplyOptions();
     // Upload in background — don't block the chat UI
     (async () => {
       try {
@@ -564,7 +756,7 @@ const ChatWindow = () => {
         // (bytes are unchanged).
         const uploadBlob = new Blob([blob], { type: fileType });
         await uploadFileToS3(uploadUrl, uploadBlob);
-        sendMessage(audioUrl, "audio");
+        sendMessage(audioUrl, "audio", null, sendOptions);
       } catch (err) {
         console.error("Voice upload failed:", err);
         Toast.error("Failed to send voice message");
@@ -574,6 +766,10 @@ const ChatWindow = () => {
   };
 
   const sendFiles = async (blob, meta) => {
+    // Capture + clear the reply target up front so the attachment is delivered
+    // as a reply even though the S3 upload below is async, and the compose bar
+    // resets right away.
+    const sendOptions = consumeReplyOptions();
     // Extract file extension from original name for proper S3 key
     const ext = meta?.name?.split('.').pop();
     const fileType = ext && ext !== meta?.name ? `application/${ext}` : blob.type;
@@ -592,7 +788,7 @@ const ChatWindow = () => {
     const messagePayload = attachType === "image" || attachType === "video" || attachType === "audio"
       ? fileUrl
       : JSON.stringify({ url: fileUrl, fileName: meta?.name || `file.${ext}` });
-    sendMessage(messagePayload, attachType);
+    sendMessage(messagePayload, attachType, null, sendOptions);
     setMessage("");
     console.log("FILE UPLOADED URL:", fileUrl);
   };
@@ -801,6 +997,10 @@ const ChatWindow = () => {
               customerName={user?.firstName}
               onScroll={handleMessagesScroll}
               isLoadingMore={isHistoryFetching && historyPage > 1}
+              onReply={(msg) => setReplyTarget(msg)}
+              onToggleStar={handleToggleStar}
+              onRetry={(msg) => retryMessage?.(msg.clientMsgId)}
+              onReplyPreviewClick={scrollToMessage}
             />
 
             <FloatingActions
@@ -811,19 +1011,41 @@ const ChatWindow = () => {
           </div>
 
           {(!isMessageDisabled || isCallActive) && (
-            <ChatInput
-              value={message}
-              onChange={(e) => {
-                setMessage(e.target.value);
-                handleTextChange();
-              }}
-              onSend={handleSend}
-              isMessageDisabled={isMessageDisabled && !isCallActive}
-              onChatEnd={handleChatEnd}
-              setOpen={setOpenFeedback}
-              sendVoiceMessage={sendVoiceMessage}
-              sendFiles={sendFiles}
-            />
+            <>
+              {replyTarget && (
+                <div className={styles.replyComposeBar}>
+                  <div className={styles.replyComposeContent}>
+                    <span className={styles.replyComposeSender}>
+                      {replyTarget.isSender ? "You" : (astrologerName || fullName || "Astrologer")}
+                    </span>
+                    <span className={styles.replyComposeText}>
+                      {replyPreviewLabel(replyTarget)}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.replyComposeClose}
+                    onClick={() => setReplyTarget(null)}
+                    aria-label="Cancel reply"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+              <ChatInput
+                value={message}
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  handleTextChange();
+                }}
+                onSend={handleSend}
+                isMessageDisabled={isMessageDisabled && !isCallActive}
+                onChatEnd={handleChatEnd}
+                setOpen={setOpenFeedback}
+                sendVoiceMessage={sendVoiceMessage}
+                sendFiles={sendFiles}
+              />
+            </>
           )}
 
           {/* {!isVideoCallActive && (
@@ -930,6 +1152,8 @@ const ChatWindow = () => {
           // Refresh wallet balance when modal closes
           refreshWallet();
         }}
+        replyTo={replyTarget}
+        onReplySent={() => setReplyTarget(null)}
         astrologerId={astrologerId}
         astrologerName={fullName}
         roomId={roomId}

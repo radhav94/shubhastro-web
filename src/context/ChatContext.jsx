@@ -33,6 +33,13 @@ export const ChatProvider = ({ children }) => {
   const timerRef = useRef(null);
   const activeChatRef = useRef(null);
   const lastAstrologerInfoRef = useRef(null);
+  const isReconnectingRef = useRef(false);
+
+  // Keep reconnecting ref in sync so the reconnect timeout can bail out early
+  // if the reconnect already resolved.
+  useEffect(() => {
+    isReconnectingRef.current = isReconnecting;
+  }, [isReconnecting]);
 
   // Keep ref in sync with state, and remember last astrologer info
   useEffect(() => {
@@ -141,6 +148,25 @@ export const ChatProvider = ({ children }) => {
     }
   }, [persistChatState, clearPersistedChatState]);
 
+  /* ================= CHAT-ENDED NOTIFICATION ================= */
+  // Surfaces the end-of-chat notification to the user. Used when a SYSTEM
+  // chat:ended reconnect attempt fails (astrologer genuinely offline) — the
+  // WaitingQueueContext global handler skips SYSTEM ends, so without this the
+  // user would get no feedback that the astrologer went offline.
+  const notifyChatEnded = useCallback((data = {}) => {
+    if (data?.astrologerId === PANDIT_AI_ID) return;
+
+    setActiveChat(null);
+    stopTimer();
+    setChatSeconds(0);
+
+    rht("Astrologer is offline. Chat ended.", { icon: "⚠️" });
+
+    // Let page-level components (ChatWindow) disable input and open feedback.
+    window.dispatchEvent(new CustomEvent("global:chat:ended", { detail: data }));
+    window.dispatchEvent(new Event("walletBalanceUpdated"));
+  }, [setActiveChat]);
+
   /* ================= RECONNECTION (gated by RECONNECTION_ENABLED) ================= */
   const reconnectToChat = useCallback((fallbackChat = null) => {
     if (!RECONNECTION_ENABLED) {
@@ -210,8 +236,17 @@ export const ChatProvider = ({ children }) => {
       console.log("[ChatReconnect]   → event data:", JSON.stringify(data));
       console.log("[ChatReconnect]   → message:", data?.message);
       console.log("[ChatReconnect]   → reason:", data?.reason);
-      console.log("[ChatReconnect]   → Treating as chat ended, clearing state");
+      console.log("[ChatReconnect]   → Treating as chat ended, notifying user & clearing state");
       cleanupAll();
+      // The SYSTEM chat:ended → reconnect path (useChatWindow) is silent by design;
+      // when that reconnect fails the astrologer is genuinely gone (offline). Surface
+      // the end-of-chat notification here so the user isn't left with no feedback.
+      notifyChatEnded({
+        ...data,
+        endedBy: "ASTROLOGER",
+        astrologerId: reconnectChat.astrologerId,
+        roomId: reconnectChat.roomId,
+      });
       clearPersistedChatState();
     };
 
@@ -278,8 +313,14 @@ export const ChatProvider = ({ children }) => {
           startTimer();
         }
       } else {
-        console.log("[ChatReconnect] 💀 Chat is no longer active — clearing state");
+        console.log("[ChatReconnect] 💀 Chat is no longer active — notifying user & clearing state");
         console.log("[ChatReconnect]   → reason:", data?.reason);
+        notifyChatEnded({
+          ...data,
+          endedBy: "ASTROLOGER",
+          astrologerId: reconnectChat.astrologerId,
+          roomId: reconnectChat.roomId,
+        });
         clearPersistedChatState();
       }
     };
@@ -290,12 +331,21 @@ export const ChatProvider = ({ children }) => {
 
     // Timeout — if backend doesn't respond in 30s, give up
     setTimeout(() => {
-      console.log("[ChatReconnect] ⏰ 30s timeout reached — giving up");
+      // If the reconnect already resolved, the listeners were cleaned up; don't
+      // fire a spurious "ended" notification on top of a successful reconnect.
+      if (!isReconnectingRef.current) return;
+      console.log("[ChatReconnect] ⏰ 30s timeout reached — giving up, notifying user");
       voiceSocket.offAny(debugAnyEvent);
       cleanupAll();
+      notifyChatEnded({
+        endedBy: "ASTROLOGER",
+        astrologerId: reconnectChat.astrologerId,
+        roomId: reconnectChat.roomId,
+        reason: "reconnect_timeout",
+      });
       clearPersistedChatState();
     }, 30000);
-  }, [restoreChatState, clearPersistedChatState, persistChatState, setActiveChat]);
+  }, [restoreChatState, clearPersistedChatState, persistChatState, setActiveChat, notifyChatEnded]);
 
   /* ================= SOCKET CONNECTION & ACTIVITY ================= */
   useEffect(() => {
@@ -394,12 +444,10 @@ export const ChatProvider = ({ children }) => {
         }
       } else if (data && data.active === false) {
         console.log("[ChatContext] ❌ Auto-reconnect failed, chat ended:", data?.reason);
-        // Chat ended during disconnect - clear state
-        // Dispatch global:chat:ended BEFORE clearing activeChat so ChatWindow
-        // can set openFeedback and prevent redirect
-        window.dispatchEvent(new CustomEvent("global:chat:ended", { detail: { ...data, astrologerId: activeChatRef.current?.astrologerId } }));
-        setActiveChat(null);
-        stopTimer();
+        // Chat ended during disconnect (astrologer offline) — notify the user.
+        // notifyChatEnded shows the offline toast, clears state, and dispatches
+        // global:chat:ended so ChatWindow opens feedback and disables input.
+        notifyChatEnded({ ...data, astrologerId: activeChatRef.current?.astrologerId });
       }
     };
 
@@ -448,12 +496,25 @@ export const ChatProvider = ({ children }) => {
   useEffect(() => {
     if (!userIdLocal) return;
 
+    // The legacy `message:recieved` (typo) and the structured `message:received`
+    // event can BOTH fire for the same message. Dedupe so we only show one
+    // banner per message. Keyed by messageId/_id; falls back to a text+time key
+    // for legacy payloads that carry no id.
+    const notifiedIds = new Set();
+    const notifyKey = (data) =>
+      data.messageId || data._id || `${data.message || data.response || ""}|${data.type || "message"}`;
+
     const handleGlobalMessage = (data) => {
       // Only show notification for astrologer messages (not user's own)
       if (data.sender === "user") return;
 
       // Skip Pandit AI messages — handled inline by PanditAIBubble
       if (isPanditAIEvent(data)) return;
+
+      // Dedupe: skip if we've already shown a banner for this message.
+      const key = notifyKey(data);
+      if (notifiedIds.has(key)) return;
+      notifiedIds.add(key);
 
       // Hide product/remedy notifications when mall is disabled
       if (data.type === "products" && !isShubhMallEnabled()) return;
@@ -508,10 +569,15 @@ export const ChatProvider = ({ children }) => {
       ), { duration: 4000, position: isOnLivePage ? "top-center" : "top-right" });
     };
 
+    // Listen to BOTH the legacy (typo) event and the new structured event so
+    // the banner shows regardless of which the server emits; dedup above stops
+    // a double banner when both fire for the same message.
     voiceSocket.on("message:recieved", handleGlobalMessage);
+    voiceSocket.on("message:received", handleGlobalMessage);
 
     return () => {
       voiceSocket.off("message:recieved", handleGlobalMessage);
+      voiceSocket.off("message:received", handleGlobalMessage);
     };
   }, [userIdLocal]);
 

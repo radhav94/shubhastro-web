@@ -943,6 +943,20 @@ const VideoCalling = ({ callData }) => {
       safeEndCall();
     };
 
+    // CallContext fires this when a SYSTEM-ended call's reconnect fails/times out.
+    // Cancel our grace-period timer (so no stray "Unable to reconnect" toast) and
+    // tear the call down cleanly. CallContext already showed the "Call ended."
+    // toast and opened the review.
+    const handleGlobalCallEnded = () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+      setIsReconnecting(false);
+      safeEndCall();
+    };
+    window.addEventListener("global:call:ended", handleGlobalCallEnded);
+
     voiceSocket.on("call:ended", handleCallEnded);
     voiceSocket.on("disconnect", handleDisconnect);
     voiceSocket.on("connect", handleSocketReconnect);
@@ -970,6 +984,7 @@ const VideoCalling = ({ callData }) => {
     voiceSocket.on("call:switch_canceled", handleSwitchCanceled);
 
     return () => {
+      window.removeEventListener("global:call:ended", handleGlobalCallEnded);
       voiceSocket.off("call:ended", handleCallEnded);
       voiceSocket.off("disconnect", handleDisconnect);
       voiceSocket.off("connect", handleSocketReconnect);
