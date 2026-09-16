@@ -10,6 +10,7 @@ import {
 import { zodiacSignImages } from "../../../private/horoscope/zodiac";
 import luckyNumberIcon from "../../../../assets/horoscope/lucky-number.png";
 import luckyColorIcon from "../../../../assets/horoscope/lucky-color.png";
+import quoteMarkIcon from "../../../../assets/images/quote-mark.png";
 import pillarLoveIcon from "../../../../assets/horoscope/pillar-love.png";
 import pillarCareerIcon from "../../../../assets/horoscope/pillar-career.png";
 import pillarHealthIcon from "../../../../assets/horoscope/pillar-health.png";
@@ -336,7 +337,7 @@ const HoroscopeSection = ({ sectionData }) => {
 
         {/* Right: prediction + pillars + CTAs */}
         <div className={styles.right}>
-          <span className={styles.quoteMark} aria-hidden="true">&#8220;&#8220;</span>
+          <img src={quoteMarkIcon} alt="" aria-hidden="true" className={styles.quoteMark} />
 
           {isLoading ? (
             <>

@@ -352,7 +352,7 @@ $sticky-gap: 8px;
      right-hand corner. Matched to the art's width + its fade, and only applied
      at the widths where the art actually renders. */
   @media (min-width: 1181px) {
-    padding-right: 130px;
+    padding-right: 80px;
   }
 
   @media (min-width: 901px) and (max-width: 1180px) {
@@ -603,11 +603,9 @@ $sticky-gap: 8px;
   width: 21px;
   height: 21px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #34d399, #10b981);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  // The tile art (green background + glyph) is baked into the image now, so no
+  // gradient/background here — just size and fit the artwork.
+  object-fit: contain;
   flex-shrink: 0;
 }
 
@@ -1252,19 +1250,72 @@ $sticky-gap: 8px;
   gap: 6px;
 
   span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(247, 88, 1, 0.2);
     color: $brand-dark;
     font-size: 0.68rem;
     font-weight: 600;
-    padding: 4px 9px;
-    border-radius: 7px;
+    padding: 5px 11px;
+    border-radius: 999px;
+
+    svg {
+      flex-shrink: 0;
+    }
   }
 }
 
 /* API sends these lowercase ("manushya", "mongoose"). */
 .tagCap {
   text-transform: capitalize;
+}
+
+/* Image-based pill icon (e.g. the Gana yin-yang), sized to match the inline
+   lucide icons. Tinted blue to match the Gana pill. */
+.tagIconImg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+/* Tinted attribute pills — each with its own soft background, border and icon
+   colour, matching the design. */
+.tagAmber {
+  background: #fef6e7 !important;
+  border-color: #f6d48a !important;
+  color: #b8820e !important;
+  svg { color: #e0a112; }
+}
+
+.tagBlue {
+  background: #eef5fd !important;
+  border-color: #bcd9f5 !important;
+  color: #2f7dd1 !important;
+  svg { color: #2f7dd1; }
+}
+
+.tagGreen {
+  background: #f0faf4 !important;
+  border-color: #bbe7cd !important;
+  color: #1f9d5b !important;
+  svg { color: #22b866; }
+}
+
+.tagOrange {
+  background: #fff2ea !important;
+  border-color: #f7c6a6 !important;
+  color: #d43400 !important;
+  svg { color: #f75801; }
+}
+
+.tagViolet {
+  background: #f6f2fd !important;
+  border-color: #d8c8f4 !important;
+  color: #7c3aed !important;
+  svg { color: #8b5cf6; }
 }
 
 .compatList {

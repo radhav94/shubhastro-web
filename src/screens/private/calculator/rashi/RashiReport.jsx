@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
+  Atom,
   CheckCircle2,
   ChevronRight,
   Clock,
@@ -10,10 +11,12 @@ import {
   Gem,
   MapPin,
   Moon,
+  PawPrint,
   Phone,
   Share2,
   Sparkles,
   Star,
+  Sun,
 } from "lucide-react";
 import heroFlourish from "../../../../assets/images/rashi/decor/hero-flourish.png";
 import heroFlourishLeft from "../../../../assets/images/rashi/decor/hero-flourish-left.png";
@@ -27,6 +30,9 @@ import secGrowth from "../../../../assets/images/rashi/icons/sec-growth.png";
 import secLove from "../../../../assets/images/rashi/icons/sec-love.png";
 import secCareer from "../../../../assets/images/rashi/icons/sec-career.png";
 import secNakshatra from "../../../../assets/images/rashi/icons/sec-nakshatra.png";
+import ganaIcon from "../../../../assets/images/rashi/icons/gana-yin-yang.png";
+import heroSymbolIcon from "../../../../assets/images/rashi/icons/hero-symbol.png";
+import symbolIcon from "../../../../assets/images/rashi/icons/symbol-pyramid.png";
 import secCompatible from "../../../../assets/images/rashi/icons/sec-compatible.png";
 import cardPersonality from "../../../../assets/images/rashi/decor/card-personality.png";
 import cardStrengths from "../../../../assets/images/rashi/decor/card-strengths.png";
@@ -481,9 +487,12 @@ const RashiReport = () => {
               <div className={styles.heroAttributes}>
                 {e.symbol && (
                   <span className={styles.heroSymbol}>
-                    <span className={styles.heroSymbolIcon} aria-hidden="true">
-                      <Gem size={14} strokeWidth={2.2} />
-                    </span>
+                    <img
+                      src={heroSymbolIcon}
+                      alt=""
+                      aria-hidden="true"
+                      className={styles.heroSymbolIcon}
+                    />
                     {e.symbol}
                   </span>
                 )}
@@ -656,12 +665,35 @@ const RashiReport = () => {
                     )}
                     <div className={styles.tagRow}>
                       {/* Deity is now shown as the pill over the god image. */}
-                      {e.nakshatraSymbol && <span>Symbol: {e.nakshatraSymbol}</span>}
-                      {e.gana && <span className={styles.tagCap}>Gana: {e.gana}</span>}
-                      {toText(e.nature) && <span>Nature: {toText(e.nature)}</span>}
-                      {e.nakshatraLord && <span>Lord: {e.nakshatraLord}</span>}
+                      {e.nakshatraSymbol && (
+                        <span className={styles.tagAmber}>
+                          <img src={symbolIcon} alt="" aria-hidden="true" className={styles.tagIconImg} />
+                          Symbol: {e.nakshatraSymbol}
+                        </span>
+                      )}
+                      {e.gana && (
+                        <span className={`${styles.tagBlue} ${styles.tagCap}`}>
+                          <img src={ganaIcon} alt="" aria-hidden="true" className={styles.tagIconImg} />
+                          Gana: {e.gana}
+                        </span>
+                      )}
+                      {toText(e.nature) && (
+                        <span className={styles.tagGreen}>
+                          <Atom size={13} aria-hidden="true" />
+                          Nature: {toText(e.nature)}
+                        </span>
+                      )}
+                      {e.nakshatraLord && (
+                        <span className={styles.tagOrange}>
+                          <Sun size={13} aria-hidden="true" />
+                          Lord: {e.nakshatraLord}
+                        </span>
+                      )}
                       {e.animalSymbol && (
-                        <span className={styles.tagCap}>Animal: {e.animalSymbol}</span>
+                        <span className={`${styles.tagViolet} ${styles.tagCap}`}>
+                          <PawPrint size={13} aria-hidden="true" />
+                          Animal: {e.animalSymbol}
+                        </span>
                       )}
                     </div>
                   </div>

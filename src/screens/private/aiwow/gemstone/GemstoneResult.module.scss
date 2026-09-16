@@ -256,7 +256,7 @@
 .bannerFactLabel {
   font-size: 0.68rem;
   font-weight: 600;
-  color: #9a6a48;
+  color: #62564E;
 }
 
 .bannerFactValue {
@@ -361,6 +361,17 @@
   font-weight: 600;
   white-space: nowrap;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* Circle-check image icon, tinted green to match the "Stone Scan Complete"
+   label. */
+.scanCompleteIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  object-fit: contain;
+  // Recolour a dark/mono icon to the label green (#16a34a).
+  filter: brightness(0) saturate(100%) invert(52%) sepia(72%) saturate(430%) hue-rotate(93deg) brightness(93%) contrast(88%);
 }
 
 /* ── Two-column layout: report on the left, sticky recommendation card on the

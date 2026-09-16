@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Star,
   BadgeCheck,
@@ -213,6 +213,28 @@ const TestimonialsSection = ({ sectionData }) => {
     one card.
   */
   const [paused, setPaused] = useState(false);
+
+  // Touch-swipe: capture the start X and step on a sufficient horizontal drag.
+  const touchRef = useRef({ startX: 0, startY: 0 });
+  const handleTouchStart = useCallback((e) => {
+    setPaused(true);
+    const t = e.touches[0];
+    touchRef.current = { startX: t.clientX, startY: t.clientY };
+  }, []);
+  const handleTouchEnd = useCallback(
+    (e) => {
+      setPaused(false);
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchRef.current.startX;
+      const dy = t.clientY - touchRef.current.startY;
+      // Only trigger a horizontal swipe when the gesture is more horizontal
+      // than vertical — avoids hijacking normal page scrolls.
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        step(dx < 0 ? 1 : -1);
+      }
+    },
+    [step]
+  );
   useEffect(() => {
     if (paused || len <= 1) return undefined;
     const id = setInterval(() => {
@@ -259,8 +281,8 @@ const TestimonialsSection = ({ sectionData }) => {
           className={styles.carousel}
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
-          onTouchStart={() => setPaused(true)}
-          onTouchEnd={() => setPaused(false)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           <button
             type="button"

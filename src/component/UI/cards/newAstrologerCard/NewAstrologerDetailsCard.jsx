@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Star, Siren } from "lucide-react";
+import { Star } from "lucide-react";
+import emergencyIcon from "../../../../assets/icons/emergency-icon.png";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -225,7 +226,7 @@ const NewAstrologerDetailsCard = ({
           ) : !isOnline && hasEmergency ? (
             <div className={styles.emergencyButtonWrapper}>
               <button className={styles.emergencySingleBtn} onClick={() => setShowEmergencyModal(true)}>
-                <Siren size={14} aria-hidden="true" /> Emergency
+                <img src={emergencyIcon} alt="" aria-hidden="true" /> Emergency
               </button>
               {emergencyMinRate > 0 && (
                 <p className={styles.detailsPriceText}>

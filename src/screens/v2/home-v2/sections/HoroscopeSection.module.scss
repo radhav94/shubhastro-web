@@ -355,13 +355,13 @@ $muted: #6b5546;
 
 .quoteMark {
   display: block;
-  color: rgba(212, 52, 0, 0.55);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 2.2rem;
-  font-weight: 600;
-  line-height: 0.5;
-  height: 5px;
-  margin-bottom: 12px;
+  width: 30px;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 10px;
+  opacity: 0.55;
+  // Recolour a dark/mono quote glyph to the brand orange (#d43400).
+  filter: brightness(0) saturate(100%) invert(23%) sepia(83%) saturate(3200%) hue-rotate(6deg) brightness(95%) contrast(105%);
 }
 
 .prediction {

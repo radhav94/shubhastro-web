@@ -5,14 +5,6 @@ import { MdOutlinePhoneInTalk } from "react-icons/md";
 import {
   Sparkles,
   CheckCircle2,
-  Star,
-  AlertTriangle,
-  Briefcase,
-  Heart,
-  Compass,
-  Orbit,
-  ScanFace,
-  Lightbulb,
   Download,
   Share2,
 } from "lucide-react";
@@ -22,6 +14,37 @@ import RecommendedAstrologersModal from "../../../../component/UI/modal/Recommen
 import useRecommendationOffer from "../../../../utils/hooks/useRecommendationOffer";
 import sideDecorTR from "../../../../assets/images/facereading/side-decor-tr.png";
 import sideDecorBL from "../../../../assets/images/facereading/side-decor-bl.png";
+import chipStrengthIcon from "../../../../assets/face-report/strength.png";
+import chipFaceShapeIcon from "../../../../assets/face-report/face-shape.png";
+import chipDominantPlanetIcon from "../../../../assets/face-report/dominant-planet.png";
+import chipZodiacIcon from "../../../../assets/face-report/zodiac-alignment.png";
+/*
+  Icons shifted one position forward: the last artwork (sec-spiritual) now heads
+  "Over All", and every other section takes the icon that previously sat one
+  card before it.
+*/
+import secOverallIcon from "../../../../assets/face-report/sec-spiritual.png";
+import secStrengthsIcon from "../../../../assets/face-report/sec-overall.png";
+import secChallengesIcon from "../../../../assets/face-report/sec-strengths.png";
+import secCareerIcon from "../../../../assets/face-report/sec-challenges.png";
+import secUniqueIcon from "../../../../assets/face-report/sec-career.png";
+import secLifeAdviceIcon from "../../../../assets/face-report/sec-unique.png";
+import secRelationshipIcon from "../../../../assets/face-report/sec-lifeadvice.png";
+import secSpiritualIcon from "../../../../assets/face-report/sec-relationship.png";
+import panelPersonalityIcon from "../../../../assets/face-report/panel-personality.png";
+import panelAuraIcon from "../../../../assets/face-report/panel-aura.png";
+import panelCosmicIcon from "../../../../assets/face-report/panel-cosmic.png";
+import dominantPlanetCardIcon from "../../../../assets/face-report/dominant-planet-card.png";
+import zodiacAlignmentCardIcon from "../../../../assets/face-report/zodiac-alignment-card.png";
+import elementalEnergyCardIcon from "../../../../assets/face-report/elemental-energy-card.png";
+import spiritualPathCardIcon from "../../../../assets/face-report/spiritual-path-card.png";
+import panelFeaturesIcon from "../../../../assets/face-report/panel-features.png";
+import panelInsightsIcon from "../../../../assets/face-report/panel-insights.png";
+import insBirthChartIcon from "../../../../assets/face-report/ins-birthchart.png";
+import insPlanetaryIcon from "../../../../assets/face-report/ins-planetary.png";
+import insKarmaIcon from "../../../../assets/face-report/ins-karma.png";
+import insLifePathIcon from "../../../../assets/face-report/ins-lifepath.png";
+import insRemediesIcon from "../../../../assets/face-report/ins-remedies.png";
 import styles from "./FaceReport.module.scss";
 
 /** "analyticalMind" -> "Analytical Mind" */
@@ -120,14 +143,18 @@ const AuraDonut = ({ slices }) => {
  * tile on the left and a read-aloud control on the right of every section, and
  * both have to share that baseline.
  */
-const Panel = ({ id, icon, tone, title, tts, children, wide }) => {
+const Panel = ({ id, icon, iconImg, tone, title, tts, children, wide }) => {
   const Icon = icon;
   return (
     <section className={`${styles.panel} ${wide ? styles.panelWide : ""}`} id={id}>
       <div className={styles.panelHead}>
         <h3 className={styles.panelTitle}>
-          <span className={`${styles.panelIcon} ${styles[tone] || ""}`}>
-            <Icon size={14} aria-hidden="true" />
+          <span className={`${styles.panelIcon} ${iconImg ? styles.panelIconBare : styles[tone] || ""}`}>
+            {iconImg ? (
+              <img src={iconImg} alt="" aria-hidden="true" className={styles.panelIconImg} />
+            ) : (
+              <Icon size={14} aria-hidden="true" />
+            )}
           </span>
           {title}
         </h3>
@@ -145,11 +172,15 @@ const Panel = ({ id, icon, tone, title, tts, children, wide }) => {
   body copy for attention and made the cards hard to scan. Carrying the meaning
   on the icon alone keeps the labels one weight, as in the design.
 */
-const SubTitle = ({ icon, tone, children }) => {
+const SubTitle = ({ icon, iconImg, tone, children }) => {
   const Icon = icon;
   return (
     <h4 className={styles.subTitle}>
-      {Icon && <Icon size={13} className={styles[tone]} aria-hidden="true" />}
+      {iconImg ? (
+        <img src={iconImg} alt="" aria-hidden="true" className={styles.subTitleIconImg} />
+      ) : (
+        Icon && <Icon size={13} className={styles[tone]} aria-hidden="true" />
+      )}
       {children}
     </h4>
   );
@@ -333,25 +364,25 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
     topTrait && {
       label: "Strength",
       value: titleise(topTrait.key),
-      icon: Sparkles,
+      iconImg: chipStrengthIcon,
       tone: "toneViolet",
     },
     (facialFeatures.faceShape?.shape || facialFeatures.faceShape?.shapeType) && {
       label: "Face Shape",
       value: facialFeatures.faceShape.shape || facialFeatures.faceShape.shapeType,
-      icon: ScanFace,
+      iconImg: chipFaceShapeIcon,
       tone: "toneOrange",
     },
     cosmicConnections.dominantPlanet?.planet && {
       label: "Dominant Planet",
       value: cosmicConnections.dominantPlanet.planet,
-      icon: Orbit,
+      iconImg: chipDominantPlanetIcon,
       tone: "toneGold",
     },
     cosmicConnections.zodiacAlignment?.sign && {
       label: "Zodiac Alignment",
       value: cosmicConnections.zodiacAlignment.sign,
-      icon: Compass,
+      iconImg: chipZodiacIcon,
       tone: "toneRed",
     },
   ].filter(Boolean);
@@ -384,15 +415,18 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
           {bannerChips.length > 0 && (
             <dl className={styles.metaChips}>
               {bannerChips.map((chip) => {
-                // Assigned to a capitalised local: the eslint config exempts
-                // uppercase variables but not parameters, so `chip.icon` cannot be
-                // destructured as a component in the callback signature.
+                // Icon can be a custom image (chip.iconImg) or a lucide
+                // component (chip.icon, capitalised local for JSX).
                 const ChipIcon = chip.icon;
                 return (
                   <div key={chip.label}>
                     <dt>
                       <span className={`${styles.chipIcon} ${styles[chip.tone]}`}>
-                        <ChipIcon size={12} aria-hidden="true" />
+                        {chip.iconImg ? (
+                          <img src={chip.iconImg} alt="" aria-hidden="true" className={styles.chipIconImg} />
+                        ) : (
+                          <ChipIcon size={12} aria-hidden="true" />
+                        )}
                       </span>
                       {chip.label}
                     </dt>
@@ -451,7 +485,7 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
           {shows("all") && (
             <Panel
               id="overall"
-              icon={Sparkles}
+              iconImg={secOverallIcon}
               tone="toneViolet"
               title="Over All"
               tts={sectionTts.overall}
@@ -460,19 +494,19 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
               <div className={styles.triGrid}>
                 {overallReading.strengths?.length > 0 && (
                   <div className={styles.subCard}>
-                    <SubTitle icon={Star} tone="inkGold">Strengths</SubTitle>
+                    <SubTitle iconImg={secStrengthsIcon}>Strengths</SubTitle>
                     <Bullets items={overallReading.strengths} />
                   </div>
                 )}
                 {overallReading.challenges?.length > 0 && (
                   <div className={styles.subCard}>
-                    <SubTitle icon={AlertTriangle} tone="inkOrange">Challenges</SubTitle>
+                    <SubTitle iconImg={secChallengesIcon}>Challenges</SubTitle>
                     <Bullets items={overallReading.challenges} />
                   </div>
                 )}
                 {overallReading.careerSuggestions?.length > 0 && (
                   <div className={styles.subCard}>
-                    <SubTitle icon={Briefcase} tone="inkGreen">Career Suggestions</SubTitle>
+                    <SubTitle iconImg={secCareerIcon}>Career Suggestions</SubTitle>
                     <Bullets items={overallReading.careerSuggestions} />
                   </div>
                 )}
@@ -481,25 +515,25 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
               <div className={styles.duoGrid}>
                 {data?.uniqueTraits?.length > 0 && (
                   <div className={styles.subCard}>
-                    <SubTitle icon={Sparkles} tone="inkViolet">Unique Traits</SubTitle>
+                    <SubTitle iconImg={secLifeAdviceIcon}>Unique Traits</SubTitle>
                     <Bullets items={data.uniqueTraits} />
                   </div>
                 )}
                 {overallReading.lifeAdvice && (
                   <div className={styles.subCard}>
-                    <SubTitle icon={Lightbulb} tone="inkGold">Life Advice</SubTitle>
+                    <SubTitle iconImg={secUniqueIcon}>Life Advice</SubTitle>
                     <p className={styles.body}>{overallReading.lifeAdvice}</p>
                   </div>
                 )}
                 {overallReading.relationshipInsights && (
                   <div className={styles.subCard}>
-                    <SubTitle icon={Heart} tone="inkPink">Relationship Insights</SubTitle>
+                    <SubTitle iconImg={secRelationshipIcon}>Relationship Insights</SubTitle>
                     <p className={styles.body}>{overallReading.relationshipInsights}</p>
                   </div>
                 )}
                 {overallReading.spiritualGuidance && (
                   <div className={styles.subCard}>
-                    <SubTitle icon={Orbit} tone="inkViolet">Spiritual Guidance</SubTitle>
+                    <SubTitle iconImg={secSpiritualIcon}>Spiritual Guidance</SubTitle>
                     <p className={styles.body}>{overallReading.spiritualGuidance}</p>
                   </div>
                 )}
@@ -511,14 +545,14 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
           {shows("personality") && personality.length > 0 && (
             <Panel
               id="personality"
-              icon={Sparkles}
+              iconImg={panelPersonalityIcon}
               tone="tonePink"
               title="Personality"
               tts={sectionTts.personality}
             >
-              <div className={styles.duoGrid}>
+              <div className={styles.traitGrid}>
                 {personality.map(([key, value]) => (
-                  <div key={key} className={styles.subCard}>
+                  <div key={key} className={styles.traitCell}>
                     <h4 className={styles.traitHead}>
                       {titleise(key)}
                       {value.level && (
@@ -539,7 +573,7 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
             {shows("aura") && auraSlices.length > 0 && (
               <Panel
                 id="aura"
-                icon={Orbit}
+                iconImg={panelAuraIcon}
                 tone="toneGold"
                 title="Aura"
                 tts={sectionTts.aura}
@@ -575,7 +609,7 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
             {shows("cosmic") && Object.keys(cosmicConnections).length > 0 && (
               <Panel
                 id="cosmic"
-                icon={Orbit}
+                iconImg={panelCosmicIcon}
                 tone="toneRed"
                 title="Cosmic"
                 tts={sectionTts.cosmic}
@@ -584,8 +618,9 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
                   {cosmicConnections.dominantPlanet?.planet && (
                     <div className={styles.subCard}>
                       <h4 className={styles.traitHead}>
+                        <img src={dominantPlanetCardIcon} alt="" aria-hidden="true" className={styles.subTitleIconImg} />
                         Dominant Planet
-                        <span className={`${styles.levelChip} ${styles.levelStrong}`}>
+                        <span className={`${styles.levelChip} ${styles.cosmicPillPlanet}`}>
                           {cosmicConnections.dominantPlanet.planet}
                         </span>
                       </h4>
@@ -605,8 +640,9 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
                   {cosmicConnections.zodiacAlignment?.sign && (
                     <div className={styles.subCard}>
                       <h4 className={styles.traitHead}>
+                        <img src={zodiacAlignmentCardIcon} alt="" aria-hidden="true" className={styles.subTitleIconImg} />
                         Zodiac Alignment
-                        <span className={`${styles.levelChip} ${styles.levelGood}`}>
+                        <span className={`${styles.levelChip} ${styles.cosmicPillZodiac}`}>
                           {cosmicConnections.zodiacAlignment.sign}
                         </span>
                       </h4>
@@ -626,8 +662,9 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
                   {cosmicConnections.elementalEnergy?.element && (
                     <div className={styles.subCard}>
                       <h4 className={styles.traitHead}>
+                        <img src={elementalEnergyCardIcon} alt="" aria-hidden="true" className={styles.subTitleIconImg} />
                         Elemental Energy
-                        <span className={`${styles.levelChip} ${styles.levelVeryGood}`}>
+                        <span className={`${styles.levelChip} ${styles.cosmicPillElement}`}>
                           {cosmicConnections.elementalEnergy.element}
                         </span>
                       </h4>
@@ -643,7 +680,10 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
 
                   {cosmicConnections.spiritualPath?.path && (
                     <div className={styles.subCard}>
-                      <h4 className={styles.traitHead}>Spiritual Path</h4>
+                      <h4 className={styles.traitHead}>
+                        <img src={spiritualPathCardIcon} alt="" aria-hidden="true" className={styles.subTitleIconImg} />
+                        Spiritual Path
+                      </h4>
                       <p className={styles.body}>{cosmicConnections.spiritualPath.path}</p>
                       {cosmicConnections.spiritualPath.guidance && (
                         <p className={styles.bodyMuted}>
@@ -668,12 +708,12 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
           {shows("features") && features.length > 0 && (
             <Panel
               id="features"
-              icon={ScanFace}
+              iconImg={panelFeaturesIcon}
               tone="toneOrange"
               title="Features"
               tts={sectionTts.features}
             >
-              <div className={styles.duoGrid}>
+              <div className={styles.featuresGrid}>
                 {features.map(([key, value]) => (
                   <div key={key} className={styles.subCard}>
                     <h4 className={styles.traitHead}>
@@ -697,28 +737,28 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
           {shows("insights") && Object.keys(personalizedInsights).length > 0 && (
             <Panel
               id="insights"
-              icon={Lightbulb}
+              iconImg={panelInsightsIcon}
               tone="toneGold"
               title="Insights"
               tts={sectionTts.insights}
             >
               <div className={styles.triGrid}>
                 {[
-                  ["birthChartCorrelation", "Birth Chart Correlation"],
-                  ["planetaryInfluenceOnFace", "Planetary Influence on Face"],
-                  ["karmaReflection", "Karma Reflection"],
-                  ["lifePathAlignment", "Life Path Alignment"],
-                ].map(([key, label]) =>
+                  ["birthChartCorrelation", "Birth Chart Correlation", insBirthChartIcon],
+                  ["planetaryInfluenceOnFace", "Planetary Influence on Face", insPlanetaryIcon],
+                  ["karmaReflection", "Karma Reflection", insKarmaIcon],
+                  ["lifePathAlignment", "Life Path Alignment", insLifePathIcon],
+                ].map(([key, label, iconImg]) =>
                   personalizedInsights[key] ? (
-                    <div key={key} className={styles.subCard}>
-                      <SubTitle tone="inkBlue">{label}</SubTitle>
+                    <div key={key} className={`${styles.subCard} ${styles.insightCard}`}>
+                      <SubTitle iconImg={iconImg}>{label}</SubTitle>
                       <p className={styles.body}>{personalizedInsights[key]}</p>
                     </div>
                   ) : null
                 )}
                 {personalizedInsights.remedies?.length > 0 && (
-                  <div className={styles.subCard}>
-                    <SubTitle tone="inkViolet">Astrological Remedies</SubTitle>
+                  <div className={`${styles.subCard} ${styles.insightCard}`}>
+                    <SubTitle iconImg={insRemediesIcon}>Astrological Remedies</SubTitle>
                     <Bullets items={personalizedInsights.remedies} />
                   </div>
                 )}
