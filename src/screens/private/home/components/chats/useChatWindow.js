@@ -405,6 +405,11 @@ export default function useChat({
               messageId: m.messageId || messageId,
               seq: typeof m.seq === "number" ? m.seq : data.seq,
               replyTo: m.replyTo || normalizeReplyTo(data.replyTo),
+              // Keep the name the optimistic entry already carried; only take
+              // the echo's when we don't have one. Backends that don't echo
+              // `kundliName` would otherwise blank out the label ("View Kundli")
+              // on merge even though the client sent the name.
+              kundliName: m.kundliName || data?.kundliName,
             };
           });
         }
@@ -736,6 +741,13 @@ export default function useChat({
       type,
       giftData,
       kundliId: payload.kundliId,
+      // Carry the kundli name onto the optimistic entry too. The card label
+      // reads `kundliName` and falls back to "View Kundli" when empty; without
+      // this the message rendered "View Kundli" until (and unless) a server echo
+      // carrying the name replaced it — and the echo-merge below only backfilled
+      // protocol fields, so a matched entry kept the empty name for good. The
+      // client already holds the name here, so seed it now.
+      kundliName,
       clientMsgId,
       messageId: null,
       seq: undefined,
@@ -773,6 +785,9 @@ export default function useChat({
         type: msg.type || "message",
         clientMsgId,
         ...(msg.replyTo?.messageId ? { replyToId: msg.replyTo.messageId } : {}),
+        // Re-send the kundli name so a retried kundli share keeps its label
+        // instead of falling back to "View Kundli". Mirrors the send path.
+        ...(msg.type === "kundli" && msg.kundliName ? { kundliName: msg.kundliName } : {}),
       };
 
       updateMessageByClientMsgId(clientMsgId, { status: MESSAGE_STATUS.PENDING });
