@@ -459,6 +459,23 @@
   margin: 0 0 0.75rem 0;
 }
 
+/* Blocked-tap answer for Use Camera / Upload Photo before a hand is chosen.
+   Louder than .handHint (accent colour, tinted background) because it is a
+   response to an action the user just took, not passive helper text. Sits
+   directly above .buttonGroup so the answer appears where the tap happened. */
+.handNotice {
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #D43400;
+  background: rgba(247, 88, 1, 0.08);
+  border: 1px solid rgba(247, 88, 1, 0.25);
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  margin: 0 auto 0.75rem;
+  max-width: 700px;
+}
+
 .buttonGroup {
   display: grid;
   grid-template-columns: 1fr 1fr;
