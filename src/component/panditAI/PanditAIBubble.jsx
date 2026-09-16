@@ -35,7 +35,7 @@ import ReplyPreview from "../UI/chat/ReplyPreview";
 const panditAiIcon = "https://assets.shubhastro.ai/images/AiPandit.png";
 
 // Memoized message bubble to avoid re-rendering the entire list on new messages
-const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo }) => {
+const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInternal }) => {
   const isUser = msg.sender === "user";
   const canReply =
     typeof onReply === "function" && !msg.isError && (msg.messageId || msg._id);
@@ -104,6 +104,20 @@ const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo }) => {
               >
                 {part.value}
               </a>
+            ) : part.type === "internal" ? (
+              // A Markdown link to an in-app route (`[कुंडली](/kundli)`). Was
+              // inert plain text — the dead click in Clarity gx75h1. A real
+              // <button> so it is keyboard reachable; onNavigateInternal closes
+              // this portal panel first, then routes with react-router (no new
+              // tab, no full reload).
+              <button
+                key={`in-${part.href}-${index}`}
+                type="button"
+                className={`${styles.inlineLink} ${styles.namedLink}`}
+                onClick={() => onNavigateInternal?.(part.href)}
+              >
+                {part.value}
+              </button>
             ) : (
               <span key={`t-${index}`}>{part.value}</span>
             )
@@ -516,6 +530,20 @@ const PanditAIBubble = ({ hideBubble = false }) => {
     setInterimText("");
     setIsOpen(false);
   }, [stopListening]);
+
+  /*
+    A tap on an internal-feature link inside an AI reply (`[कुंडली](/kundli)`).
+    The chat is a fullscreen portal, so we close it first — otherwise the route
+    changes behind an open panel and the tap looks like it did nothing, the very
+    problem this link is meant to fix. Then navigate within the SPA.
+  */
+  const handleInternalNavigate = useCallback((path) => {
+    if (!path) return;
+    stopListening();
+    setInterimText("");
+    setIsOpen(false);
+    navigate(path);
+  }, [stopListening, navigate]);
 
   /*
     Recovery from a low-balance session end.
@@ -973,6 +1001,7 @@ const PanditAIBubble = ({ hideBubble = false }) => {
                           onRetry={retryQuestion}
                           onReply={handleReply}
                           onJumpTo={jumpToMessage}
+                          onNavigateInternal={handleInternalNavigate}
                         />
                       </div>
                       );
