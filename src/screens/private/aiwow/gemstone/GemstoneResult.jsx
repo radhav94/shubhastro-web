@@ -44,6 +44,7 @@ import factNameIcon from '../../../../assets/gemstone-details/fact-name.png';
 import factHindiIcon from '../../../../assets/gemstone-details/fact-hindi.png';
 import factScientificIcon from '../../../../assets/gemstone-details/fact-scientific.png';
 import factNaturalIcon from '../../../../assets/gemstone-details/fact-natural.png';
+import scanCompleteIcon from '../../../../assets/gemstone-details/scan-complete.png';
 
 // Suitability tab icons — check badge for the header, Om for the ritual mantra.
 import suitCheckIcon from '../../../../assets/gemstone-details/suit-check.png';
@@ -927,9 +928,7 @@ const GemstoneResult = () => {
                   className={styles.bannerImage}
                 />
                 <span className={styles.scanComplete}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <img src={scanCompleteIcon} alt="" aria-hidden="true" className={styles.scanCompleteIcon} />
                   Stone Scan Complete
                 </span>
               </div>

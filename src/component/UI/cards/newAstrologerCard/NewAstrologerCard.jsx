@@ -1,5 +1,6 @@
 import { memo, useState } from "react";
-import { BookOpen, Siren } from "lucide-react";
+import { BookOpen } from "lucide-react";
+import emergencyIcon from "../../../../assets/icons/emergency-icon.png";
 import styles from "./NewAstrologerCard.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { AppIcons, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../utils/appImages";
@@ -212,7 +213,7 @@ const NewAstrologerCard = memo(({
               className={styles.emergencySingleBtn}
               onClick={() => onEmergencyClick?.(astrologer)}
             >
-              <Siren size={14} aria-hidden="true" /> Emergency
+              <img src={emergencyIcon} alt="" aria-hidden="true" /> Emergency
             </button>
             {emergencyMinRate > 0 && (
               <p className={styles.priceText}>

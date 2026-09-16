@@ -194,14 +194,29 @@ $hair: rgba(191, 118, 66, 0.16);
 
 /* Small tinted square per chip, so the four are distinguishable at a glance. */
 .chipIcon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   color: #fff;
+
+  /* When the chip uses a custom image icon, drop the tinted tile so the icon
+     shows in its own colours. The tone-* class still sets a gradient
+     background; override it here for the image case. */
+  &:has(.chipIconImg) {
+    background: none !important;
+  }
+}
+
+/* Custom image icons — shown at their original colours (no tile background, no
+   recolour filter). */
+.chipIconImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .toneViolet { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
@@ -556,30 +571,159 @@ $hair: rgba(191, 118, 66, 0.16);
   background: linear-gradient(135deg, $brand, $brand-dark);
 }
 
+/* When the panel uses a custom image icon, drop the tinted tile so the artwork
+   shows in its own colours. */
+.panelIconBare {
+  background: none !important;
+}
+
+.panelIconImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Image icon inside a sub-card heading — shown at its original colours. */
+.subTitleIconImg {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .triGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  // Three cards on one row (Strengths / Challenges / Career), as in the design.
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
+
+  @media (max-width: 860px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (max-width: 560px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .duoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  // Two cards per row (Unique/Life Advice, then Relationship/Spiritual) — as in
+  // the design — rather than auto-fitting 3-4 across on wide screens.
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+  margin-top: 14px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Features: two-column grid of cards with a single white divider line running
+   down the centre between the two columns. */
+.featuresGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 28px;
+  row-gap: 14px;
+
+  /* Centre white line between the columns. */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background: #ffffff;
+    pointer-events: none;
+  }
+
+  /* Last row of cards (Jawline / Face Shape) shouldn't show the bottom rule. */
+  .subCard:nth-last-child(-n + 2) {
+    border-bottom: none;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 0;
+
+    &::before { display: none; }
+
+    /* Single column: only the very last card drops its rule. */
+    .subCard:nth-last-child(-n + 2) { border-bottom: 1.5px solid #fff; }
+    .subCard:last-child { border-bottom: none; }
+  }
+}
+
+/* Personality: open two-column layout (no per-item boxes) with a subtle divider
+   between the columns and between stacked rows — matching the design. */
+.traitGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 40px;
+  row-gap: 0;
+
+  @media (max-width: 640px) {
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 0;
+  }
+}
+
+.traitCell {
+  padding: 16px 0;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 1);
+
+  @media (min-width: 641px) {
+    // Right column gets a left divider so the two columns read as separated.
+    &:nth-child(even) {
+      padding-left: 40px;
+      border-left: 1.5px solid rgba(255, 255, 255, 1);
+    }
+    // No bottom rule on the last row of each column.
+    &:nth-last-child(-n + 2) { border-bottom: none; }
+  }
+
+  @media (max-width: 640px) {
+    &:last-child { border-bottom: none; }
+  }
 }
 
 .stack {
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  /* Last stacked card (e.g. Spiritual Path in Cosmic) drops its bottom rule. */
+  .subCard:last-child {
+    border-bottom: none;
+  }
 }
 
 .subCard {
   padding: 14px;
-  border-radius: 13px;
-  background: rgba(255, 255, 255, 0.4);
-  border: 1px solid #fff;
+  // border-radius: 13px;
+  // background: rgba(255, 255, 255, 0.4);
+  border-bottom: 1.5px solid #fff;
   min-width: 0;
+}
+
+/* Insights cards render as full soft boxes (border on all sides + rounded +
+   translucent fill), matching the design — not the bottom-rule-only look. */
+.insightCard {
+  border: 1.5px solid #fff;
+  border-radius: 16px;
+  // background: rgba(255, 255, 255, 0.4);
+}
+
+/* Over All cards (in the tri/duo grids) render as the same soft boxes as
+   Insights, rather than the bottom-rule-only look. */
+.triGrid .subCard,
+.duoGrid .subCard {
+  border: 1.5px solid #fff;
+  border-radius: 16px;
+  // background: rgba(255, 255, 255, 0.4);
 }
 
 /*
@@ -667,15 +811,21 @@ $hair: rgba(191, 118, 66, 0.16);
   }
 }
 
-.levelExcellent { background: #f3e8ff; color: #7c3aed; }
-.levelVeryGood  { background: #dcfce7; color: #15803d; }
-.levelStrong    { background: #ffedd5; color: #c2410c; }
-.levelGood      { background: #fff1cc; color: #b45309; }
+.levelExcellent { background: #FDF4FF; color: #A21CAF; }
+.levelVeryGood  { background: #fff1cc; color: #C37A14; }
+.levelStrong    { background: #FDF4FF; color: #A21CAF; }
+.levelGood      { background: #EDF3F8; color: #526B82; }
 .levelModerate  { background: #dbeafe; color: #1d4ed8; }
 
+/* Cosmic cards — each pill gets its own colour + background so the four cards
+   read as distinct (Planet / Zodiac / Element). */
+.cosmicPillPlanet  { background: #FFF3D6; color: #C37A14; }
+.cosmicPillZodiac  { background: #FBEBDD; color: #B56A3A; }
+.cosmicPillElement { background: #FFF0E6; color: #E66B32; }
+
 .levelShape {
-  background: #fdece2;
-  color: #b03a1a;
+  background: #F5EEE8;
+  color: #526B82;
 
   &::before {
     display: none;
