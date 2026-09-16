@@ -330,8 +330,11 @@ const ChatWindow = () => {
   const prevScrollHeightRef = useRef(null);
 
   const { data, isFetching: isHistoryFetching } = useGetChatHistoryQuery(
-    { userId: astrologerId, page: historyPage },
-    { refetchOnMountOrArgChange: true }
+    // isAssistant:false — this is the real astrologer conversation, NOT the
+    // Virtual Assistant inbox. Without it the query defaults to isAssistant=true
+    // and the persisted chat history stops loading.
+    { userId: astrologerId, page: historyPage, isAssistant: false },
+    { skip: !astrologerId, refetchOnMountOrArgChange: true }
   );
   const history = data?.data || [];
   const pagination = data?.pagination || {};

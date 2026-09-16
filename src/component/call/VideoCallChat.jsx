@@ -69,7 +69,8 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
 
   // Get chat history
   const { data } = useGetChatHistoryQuery(
-    { userId: astrologerId },
+    // isAssistant:false — real astrologer conversation, not the VA inbox.
+    { userId: astrologerId, isAssistant: false },
     { refetchOnMountOrArgChange: true },
   );
   const history = data?.data || [];
