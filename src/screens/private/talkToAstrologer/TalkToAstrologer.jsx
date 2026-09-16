@@ -191,6 +191,9 @@ const TalkToAstrologer = () => {
     handleAfterKundliSelect: hookHandleAfterKundliSelect,
     openModal: hookOpenModal,
     setOpenModal: hookSetOpenModal,
+    // The connection the user tapped, set by the hook's connect handlers, so the
+    // recharge popup shows the right rate/wording instead of always "chat".
+    rechargeType: hookRechargeType,
     kundliRef,
     hasKundli,
     // Lets the Chat/Call button that was tapped show that the request is in
@@ -1831,7 +1834,7 @@ const TalkToAstrologer = () => {
         isOpen={openModal.recharge}
         onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
         astrologer={selectedAstrologer}
-        connectionType="chat"
+        connectionType={pendingConnectionType || "chat"}
       />
 
       {/* Recharge modal from hook for popup flow */}
@@ -1841,7 +1844,7 @@ const TalkToAstrologer = () => {
           hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
         }
         astrologer={selectedAstrologer}
-        connectionType="chat"
+        connectionType={hookRechargeType || "chat"}
       />
 
       {/* Kundli modal - using ProfileModals like Home page */}
@@ -1892,7 +1895,7 @@ const TalkToAstrologer = () => {
         isOpen={openModal.recharge}
         onClose={() => setOpenModal((prev) => ({ ...prev, recharge: false }))}
         astrologer={selectedAstrologer}
-        connectionType="chat"
+        connectionType={pendingConnectionType || "chat"}
       />
 
       {/* Recharge modal from hook for popup flow */}
@@ -1902,7 +1905,7 @@ const TalkToAstrologer = () => {
           hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
         }
         astrologer={selectedAstrologer}
-        connectionType="chat"
+        connectionType={hookRechargeType || "chat"}
       />
 
       {/* Recommend CTA temporarily hidden per request */}

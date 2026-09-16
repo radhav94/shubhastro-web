@@ -35,7 +35,18 @@
     min-width: 0;
     padding: 30px 16px 20px;
     max-height: calc(100vh - 32px);
-    overflow: hidden;
+    // Was `overflow: hidden`, which was the dead click in Clarity session
+    // 31xzve. The plan cards are tall (min-height 376px) and the modal is capped
+    // at the viewport height, so on a short phone screen (MobileSafari here) the
+    // plan CTA — "Subscribe" / "Unlock Now" — sat clipped below the modal's
+    // bottom edge. The grid only scrolls horizontally, and the modal itself did
+    // not scroll at all, so there was no way to reach the button: taps landed in
+    // the only visible region, the "Choose Your Subscription" header, and died.
+    // Match the desktop rule and let the modal scroll vertically so the CTA is
+    // always reachable. -webkit-overflow-scrolling keeps it smooth on iOS.
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

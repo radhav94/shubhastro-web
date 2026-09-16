@@ -518,6 +518,36 @@ const NavbarItem = ({ title, path, children }) => {
 
   const [open, setOpen] = useState(false);
 
+  /*
+    Clicking a parent nav item used to be a dead click.
+
+    `onClick` was `!children ? navigate(path) : undefined`, so ANY item with a
+    submenu did nothing on click — the dropdown only appeared on hover
+    (onMouseEnter). Two problems this caused, both visible in Clarity session
+    dvgh7i (desktop, rapid clicks on "Tarot" and "Astrologers" at 48:47–48:54):
+
+      • "Tarot" carries a real `path` (TAROT_CARD_V2) AND children, yet the
+        children being truthy meant its own destination was unreachable by click.
+        A user clicking the label to open the Tarot page got nothing.
+      • "Astrologers" is a path-less parent. On a touchscreen or after the
+        pointer has already left, hover never fires, so the submenu never opens
+        and the item is completely inert.
+
+    Now every parent responds to a click: if it has its own `path`, navigate to
+    it (hover still previews the children); if it is a pure grouping parent,
+    toggle the submenu so a click opens it instead of doing nothing.
+  */
+  const handleItemClick = () => {
+    if (path) {
+      navigate(path);
+      setOpen(false);
+      return;
+    }
+    if (children) {
+      setOpen((prev) => !prev);
+    }
+  };
+
   return (
     <li
       className={`${children ? styles.dropdown : ""} ${
@@ -525,7 +555,7 @@ const NavbarItem = ({ title, path, children }) => {
       } ${open ? styles.open : ""}`}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
-      onClick={!children ? () => navigate(path) : undefined}
+      onClick={handleItemClick}
     >
       <div className={styles.navItemLabel}>
         <PrimaryText size_14>{title}</PrimaryText>

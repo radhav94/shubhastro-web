@@ -118,6 +118,32 @@ const PanditAIVoiceBubble = () => {
   const freeMinutesRemaining = hookFreeMinutesRemaining ?? initialBilling?.freeMinutesRemaining ?? null;
   const isFreePeriod = hookIsFreePeriod || (hookFreeMinutesRemaining == null && (initialBilling?.isFreePeriod ?? false));
 
+  /*
+    Header billing badge visibility. Mirrors showFreeBadge/showPaidBadge in
+    PanditAIBubble.jsx — see the long note there for the derivation.
+
+    useAIFreeMinutes is shared by both bubbles, and its `activity` handler, on
+    `freeMinutesRemaining: 0`, sets freeMinutesRemaining to 0 (not null),
+    isFreePeriod to false, and forces remainingPaidTime to null. Under the old
+    conditions here — free badge `isFreePeriod && freeMinutesRemaining != null`,
+    paid badge `!isFreePeriod && remainingPaidTime != null` — both went false at
+    once and the header blanked to the 42x42 close button. That is the defect
+    fixed in the text bubble for Clarity 2vh07z: the pill vanishes out from under
+    a finger already reaching for it, so the tap lands on empty .headerActions and
+    the follow-up becomes a rage click.
+
+    Visibility now rests on `freeMinutesRemaining != null` alone, with isFreePeriod
+    driving only the wording. The paid badge additionally requires
+    freeMinutesRemaining == null so the two can never both render.
+  */
+  const showFreeBadge = freeMinutesRemaining != null && !sessionEndedLowBalance;
+  const freeMinutesExhausted = showFreeBadge && !(freeMinutesRemaining > 0);
+  const showPaidBadge =
+    !isFreePeriod &&
+    freeMinutesRemaining == null &&
+    remainingPaidTime != null &&
+    !sessionEndedLowBalance;
+
   // Once the hook produces real session state, drop the seed so it can't keep
   // showing a stale free badge after billing switches to paid.
   useEffect(() => {
@@ -290,22 +316,30 @@ const PanditAIVoiceBubble = () => {
             </div>
           </div>
           <div className={styles.headerActions}>
-            {isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
+            {showFreeBadge && (
               <button
                 type="button"
-                className={styles.freeBadge}
+                className={`${styles.freeBadge} ${
+                  freeMinutesExhausted ? styles.freeBadgeSpent : ""
+                }`}
                 onClick={() => setBillingNotice((prev) => !prev)}
                 aria-expanded={billingNotice}
-                aria-label={`${freeMinutesRemaining} minutes free remaining. Tap for details.`}
+                aria-label={
+                  freeMinutesExhausted
+                    ? "Free time used up. Tap for billing details."
+                    : `${freeMinutesRemaining} minutes free remaining. Tap for details.`
+                }
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10"/>
                   <polyline points="12 6 12 12 16 14"/>
                 </svg>
-                <span className={styles.freeBadgeText}>{freeMinutesRemaining} min free</span>
+                <span className={styles.freeBadgeText}>
+                  {freeMinutesExhausted ? "Free time used" : `${freeMinutesRemaining} min free`}
+                </span>
               </button>
             )}
-            {!isFreePeriod && remainingPaidTime != null && !sessionEndedLowBalance && (
+            {showPaidBadge && (
               <div className={styles.countdownBadge}>
                 {walletBalance != null && (
                   <span className={styles.countdownBalance}>
@@ -340,12 +374,26 @@ const PanditAIVoiceBubble = () => {
           </div>
         </div>
 
-        {billingNotice && isFreePeriod && freeMinutesRemaining != null && !sessionEndedLowBalance && (
+        {/* Guard kept identical to the badge's, so the badge can never be on
+            screen with its own explanation unable to open. */}
+        {billingNotice && showFreeBadge && (
           <div className={styles.billingNotice} role="status" aria-live="polite">
-            {`Your first ${freeMinutesRemaining} minute${freeMinutesRemaining === 1 ? "" : "s"} with Pandit AI ${freeMinutesRemaining === 1 ? "is" : "are"} free.`}
-            {ratePerMinute
-              ? ` After that, calls cost ₹${ratePerMinute}/min from your wallet.`
-              : " After that, calls are billed from your wallet."}
+            {freeMinutesExhausted ? (
+              <>
+                {"Your free minutes with Pandit AI are used up for today."}
+                {ratePerMinute
+                  ? ` Calling now costs ₹${ratePerMinute}/min from your wallet.`
+                  : " Calling is now billed from your wallet."}
+                {walletBalance != null && ` Wallet balance: ₹${walletBalance}.`}
+              </>
+            ) : (
+              <>
+                {`Your first ${freeMinutesRemaining} minute${freeMinutesRemaining === 1 ? "" : "s"} with Pandit AI ${freeMinutesRemaining === 1 ? "is" : "are"} free.`}
+                {ratePerMinute
+                  ? ` After that, calls cost ₹${ratePerMinute}/min from your wallet.`
+                  : " After that, calls are billed from your wallet."}
+              </>
+            )}
           </div>
         )}
 

@@ -157,7 +157,7 @@ const RelationalBlogsSection = ({ blogs = [], title, subtitle }) => {
                         } else {
                           date = dayjs(dateValue);
                         }
-                        return date.isValid() ? date.format("DD MMM, YYYY") : dateValue;
+                        return date.isValid() ? date.format("DD MMM YYYY") : dateValue;
                       })()
                     : ""}
                 </p>

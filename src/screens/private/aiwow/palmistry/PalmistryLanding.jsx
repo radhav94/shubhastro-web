@@ -1,4 +1,7 @@
 import React, { useRef, useState } from 'react';
+// Toast import kept for the image-read failure path below; the blocked-tap
+// "choose a hand first" path is now an inline notice, not a toast — see
+// handHint/requireHand.
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styles from './PalmistryLanding.module.scss';
@@ -60,8 +63,32 @@ const PalmistryLanding = () => {
   const [selectedHand, setSelectedHand] = useState(null);
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
 
+  /*
+    Inline answer for a blocked "Use Camera" / "Upload Photo" tap.
+
+    These buttons stay tappable before a hand is chosen (a hard `disabled`
+    swallows the tap with no explanation). Previously requireHand() answered the
+    blocked tap with Toast.info(...), but the toaster is mounted
+    position="top-right" (main.jsx) while these CTAs sit near the bottom of a
+    long mobile page — so on a phone the only thing that changed was off-screen,
+    and Clarity does not record toasts at all. That is the dead click in Clarity
+    session mkkdqi: "Use Camera" tapped at 00:43 before a hand was picked, then
+    "Right Hand" at 00:47 once the user worked out the missing step on their own.
+
+    Seq-keyed so tapping a blocked button twice still repaints the node (session
+    replay can see it) and screen readers re-announce even when the text repeats.
+  */
+  const [handNotice, setHandNotice] = useState(null);
+  const noticeSeqRef = useRef(0);
+
+  const announceHandNotice = (text) => {
+    noticeSeqRef.current += 1;
+    setHandNotice({ seq: noticeSeqRef.current, text });
+  };
+
   const handleHandSelect = (hand) => {
     setSelectedHand(hand);
+    setHandNotice(null); // the missing step is now satisfied; clear the prompt
     // Keep the store in step with the UI so the camera/analysis screens always
     // read the hand that is actually highlighted here.
     dispatch(setPalmistrySelectedHand(hand));
@@ -92,7 +119,8 @@ const PalmistryLanding = () => {
    */
   const requireHand = () => {
     if (!selectedHand) {
-      Toast.info('Choose your left or right hand first.');
+      // Inline, not a toast — see announceHandNotice above.
+      announceHandNotice('Choose your left or right hand first, then tap Use Camera or Upload Photo.');
       return false;
     }
     return true;
@@ -304,6 +332,21 @@ const PalmistryLanding = () => {
 
           {!selectedHand && (
             <p className={styles.handHint}>Select a hand to enable upload or camera.</p>
+          )}
+
+          {/* Answer for a blocked Use Camera / Upload Photo tap, rendered right
+              above the buttons that were tapped rather than in the top-right
+              toaster the phone user never sees. Keyed on seq so a repeated
+              blocked tap replays and re-announces. */}
+          {handNotice && (
+            <p
+              key={handNotice.seq}
+              className={styles.handNotice}
+              role="status"
+              aria-live="polite"
+            >
+              {handNotice.text}
+            </p>
           )}
 
           <div className={styles.buttonGroup}>

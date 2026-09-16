@@ -35,6 +35,61 @@ const ERROR_MESSAGES = {
  */
 const PAYMENT_METHOD = "razorpay";
 
+/*
+ * Current-location lookup for the tax invoice.
+ *
+ * Per the FE guide: the invoice "Address" should show the user's CURRENT
+ * location (city/state/pincode) rather than the DOB birthplace. We fetch it
+ * from ipapi.co on the device and pass it to orders/create as `currentLocation`;
+ * the backend saves it on the order and renders the invoice.
+ *
+ * Field mapping (ipapi.co -> our key): city->city, region->state, postal->pincode.
+ *
+ * Deliberately best-effort and non-blocking:
+ *   - `currentLocation` is optional; the guide says a missing object falls back
+ *     to the birthplace and nothing breaks. So any failure (offline, ipapi.co
+ *     down, ad-blocker, rate limit — the free tier caps requests) must not stop
+ *     a payment. We resolve to null and simply omit the key.
+ *   - A 2.5s timeout via AbortController so a slow IP lookup never delays the
+ *     Razorpay open, which is the revenue path.
+ *   - Empty fields are dropped (the guide notes `postal` is often empty), and if
+ *     nothing usable comes back we send nothing rather than an empty object.
+ *   - No credentials: this is a plain public GET to a third party, so it must
+ *     not carry our auth. `fetch` here (not secureAxios/RTK) keeps it off the
+ *     gateway and out of the session.
+ */
+const LOCATION_LOOKUP_URL = "https://ipapi.co/json/";
+const LOCATION_LOOKUP_TIMEOUT_MS = 2500;
+
+const fetchCurrentLocation = async () => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LOCATION_LOOKUP_TIMEOUT_MS);
+  try {
+    const res = await fetch(LOCATION_LOOKUP_URL, {
+      signal: controller.signal,
+      credentials: "omit",
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    // ipapi.co returns { error: true, reason } on rate-limit rather than an
+    // HTTP error, so guard on the shape too.
+    if (!data || data.error) return null;
+    const loc = {};
+    if (data.city) loc.city = String(data.city).trim();
+    if (data.region) loc.state = String(data.region).trim();
+    if (data.postal) loc.pincode = String(data.postal).trim();
+    // Send nothing rather than an empty object if the lookup gave us no usable
+    // field — keeps the payload clean and lets the backend fall back cleanly.
+    return Object.keys(loc).length ? loc : null;
+  } catch {
+    // AbortError (timeout) and network failures both land here — non-fatal.
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
 /**
  * Recharge amount in rupees, taken from the plan the user chose.
  *
@@ -262,11 +317,19 @@ export const useRazorpayPayment = () => {
     });
 
     try {
+      // Best-effort current location for the invoice address. Never throws (see
+      // fetchCurrentLocation); on failure it is null and the key is omitted, so
+      // the backend falls back to the DOB birthplace.
+      const currentLocation = await fetchCurrentLocation();
+
       const orderPayload = {
         planId,
         paymentGateway: "RAZORPAY",
         device: "web",
         country: "INDIA",
+        // Only include the key when we actually have a location — matches the
+        // guide's "optional; if not sent, invoice falls back to birthplace".
+        ...(currentLocation && { currentLocation }),
       };
 
       const orderResponse = await createOrder(orderPayload).unwrap();

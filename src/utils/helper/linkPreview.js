@@ -125,6 +125,27 @@ const MARKDOWN_LINK_REGEX =
   /\[([^\][]+?)\]\\?\(\s*(?:\[[^\][]*?\]\\?\()?\s*(https?:\/\/[^\s()\\]+)[^)]*\)?\s*\)?/g;
 
 /**
+ * Markdown links that point at an *internal* app route rather than an absolute
+ * URL — `[label](/kundli)`, `[Palmistry](/ai-wow/ai-palmistry-scanner)`, etc.
+ *
+ * MARKDOWN_LINK_REGEX deliberately only matches an `http(s)://` target, so
+ * every one of these fell through to plain text. That is a dead click: Pandit AI
+ * routinely recommends a feature and links it with a site-relative path, and in
+ * Hindi replies especially ("aap [कुंडली](/kundli) ka use karein…") the label
+ * reads as the obvious thing to tap. Clarity session gx75h1 recorded exactly
+ * that — a dead click on the reply text right before "ka use karein. Aapke
+ * part…", which is the tail of a sentence wrapped around one of these links.
+ *
+ * The target must start with a single `/` (a real in-app path) and must NOT be
+ * `//` (protocol-relative, i.e. off-site) so ordinary prose like `[a](b)` or a
+ * bare `[note](see below)` is left untouched. Escaped parens and the malformed
+ * double-wrap the model sometimes emits are tolerated the same way the absolute
+ * pattern tolerates them.
+ */
+const INTERNAL_MARKDOWN_LINK_REGEX =
+  /\[([^\][]+?)\]\\?\(\s*(\/(?!\/)[^\s()\\]*)\s*\)?/g;
+
+/**
  * Strips any leftover Markdown link markup from a label so the visible text is
  * clean — e.g. a label that is itself `[https://x.com](https://x.com)` collapses
  * to just the inner text.
@@ -157,8 +178,13 @@ const cleanLinkLabel = (label) => {
  * Trailing punctuation is trimmed off bare-URL hrefs because the regex is greedy
  * up to whitespace, so "see https://x.com/a." would otherwise link to a 404.
  *
+ * `type: 'internal'` parts are Markdown links to an in-app route (`href` is a
+ * site-relative path like `/kundli`); the renderer should navigate with the
+ * router rather than opening a new tab. Consumers that don't special-case it can
+ * treat it like plain text — the `value` (label) still reads correctly.
+ *
  * @param {string} text
- * @returns {Array<{ type: 'text'|'url', value: string, href?: string }>}
+ * @returns {Array<{ type: 'text'|'url'|'internal', value: string, href?: string }>}
  */
 export const splitTextByURL = (text) => {
   if (!text || typeof text !== 'string') return [];
@@ -183,13 +209,46 @@ export const splitTextByURL = (text) => {
     segments.push({ kind: 'scan', value: text.slice(cursor) });
   }
 
+  // Pass 1b: within the leftover `scan` segments, pull out Markdown links that
+  // point at an internal app route (`[label](/path)`). Done after the absolute
+  // pass so an `http(s)://` link is never re-interpreted as internal, and only
+  // over `scan` segments so we never touch an already-resolved link's label.
+  const internalPattern = new RegExp(INTERNAL_MARKDOWN_LINK_REGEX.source, 'g');
+  const expandedSegments = [];
+
+  segments.forEach((segment) => {
+    if (segment.kind !== 'scan') {
+      expandedSegments.push(segment);
+      return;
+    }
+    const chunk = segment.value;
+    internalPattern.lastIndex = 0;
+    let subCursor = 0;
+    let intMatch;
+    while ((intMatch = internalPattern.exec(chunk)) !== null) {
+      if (intMatch.index > subCursor) {
+        expandedSegments.push({ kind: 'scan', value: chunk.slice(subCursor, intMatch.index) });
+      }
+      const label = cleanLinkLabel(intMatch[1]) || intMatch[2];
+      expandedSegments.push({ kind: 'internal', value: label, href: intMatch[2] });
+      subCursor = internalPattern.lastIndex;
+    }
+    if (subCursor < chunk.length) {
+      expandedSegments.push({ kind: 'scan', value: chunk.slice(subCursor) });
+    }
+  });
+
   // Pass 2: expand the plain segments into text + bare-URL parts.
   const parts = [];
   const urlPattern = /(https?:\/\/[^\s]+)/g;
 
-  segments.forEach((segment) => {
+  expandedSegments.forEach((segment) => {
     if (segment.kind === 'link') {
       parts.push({ type: 'url', value: segment.value, href: segment.href });
+      return;
+    }
+    if (segment.kind === 'internal') {
+      parts.push({ type: 'internal', value: segment.value, href: segment.href });
       return;
     }
 
@@ -223,13 +282,14 @@ export const splitTextByURL = (text) => {
   // (`…business-pathfinder))maps your`), which would otherwise render as
   // "Business Pathfindermaps". Insert the space the reader expects rather than
   // trusting the source to have one.
+  const isLinkPart = (p) => p.type === 'url' || p.type === 'internal';
   for (let i = 0; i < parts.length - 1; i += 1) {
     const current = parts[i];
     const next = parts[i + 1];
-    if (current.type === 'url' && next.type === 'text' && /^\w/.test(next.value)) {
+    if (isLinkPart(current) && next.type === 'text' && /^\w/.test(next.value)) {
       next.value = ` ${next.value}`;
     }
-    if (next.type === 'url' && current.type === 'text' && /\w$/.test(current.value)) {
+    if (isLinkPart(next) && current.type === 'text' && /\w$/.test(current.value)) {
       current.value = `${current.value} `;
     }
   }

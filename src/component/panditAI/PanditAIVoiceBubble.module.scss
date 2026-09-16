@@ -209,6 +209,7 @@ $surface: #fffaf5;
    visible border, sat beside the close button) and was collecting dead clicks.
    Appearance is unchanged; only the resets and affordances are new. */
 .freeBadge {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -223,10 +224,35 @@ $surface: #fffaf5;
   -webkit-appearance: none;
   cursor: pointer;
 
+  /* Kept in step with .freeBadge in PanditAIBubble.module.scss — see the longer
+     note there (Clarity xqccph / 1qrekx6). Same ~29px pill, same inert .header
+     around it, so the same 44px overlay. Vertical only, so it cannot reach
+     .closeBtn. */
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
+  }
+
   &:focus-visible {
     outline: 2px solid #fff;
     outline-offset: 2px;
   }
+}
+
+/* The zero state, matching .freeBadgeSpent in PanditAIBubble.module.scss. The
+   badge used to unmount the instant free minutes hit 0 — see the note above
+   showFreeBadge in the JSX — so it now stays put and changes wording instead.
+   Dimmed rather than restyled; the tap target keeps its exact geometry so a
+   finger already on its way down still lands on something. */
+.freeBadgeSpent {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  opacity: 0.85;
 }
 
 /* Answer to a .freeBadge tap, directly under the header. */
