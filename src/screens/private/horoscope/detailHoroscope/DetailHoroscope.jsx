@@ -3,7 +3,7 @@ import HoroScopeBanner from "../horoscopeComp/HoroScopeBanner";
 import { useLocation, useNavigate } from "react-router-dom";
 import Astrologers from "../../home/components/astrologers/Astrologers";
 import Blogs from "../../home/components/blogs/Blogs";
-import { ContentCard } from "../../../../component";
+import ContentCard from "../../../../component/UI/cards/ContentCard";
 import { appColors } from "../../../../utils/theme";
 import { HoroTimmingList } from "../horoscopeComp/MoreHscope";
 

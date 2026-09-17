@@ -1,5 +1,6 @@
 import React from "react";
-import { ContentCard, WorkInProgressCard } from "../../../component";
+import ContentCard from "../../../component/UI/cards/ContentCard";
+import WorkInProgressCard from "../../../component/UI/cards/WorkInProgressCard";
 import InternalBanner from "../../../component/UI/cards/internalBanner/InternalBanner";
 import { appColors } from "../../../utils/theme";
 import { usePanchang } from "./usePanchang";

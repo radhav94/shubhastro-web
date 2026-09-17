@@ -10,7 +10,7 @@ import { getUserFromStorage } from "../../../../utils/authStorage";
 import Toast from "../../../../component/toast";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import PostImageSlider from "./PostImageSlider";
-import { DeleteConfirmationModal } from "../../../../component";
+import DeleteConfirmationModal from "../../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
 import { getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
 
 const YourFeed = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces = [], onCommunityClick }) => {

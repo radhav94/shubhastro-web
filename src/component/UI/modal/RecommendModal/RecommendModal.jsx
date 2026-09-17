@@ -5,7 +5,8 @@ import NewAstrologerDetailsCard from "../../cards/newAstrologerCard/NewAstrologe
 import styles from "./recommendModal.module.scss";
 import { IoClose } from "react-icons/io5";
 import { useEffect, useRef, useState } from "react";
-import { Toast, RechargeModal } from "../../..";
+import { Toast } from "../../..";
+import RechargeModal from "../RechargeModal/RechargeModal";
 import { useCall } from "../../../../context/CallContext";
 import { useWalletBalance } from "../../../../screens/private/wallet/useWalletBalance";
 import { getToken } from "../../../../utils/token";

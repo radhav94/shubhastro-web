@@ -17,7 +17,7 @@ import { getDeviceInfo, getDeviceType } from "../../../utils/deviceInfo";
 import { trackEvent } from "../../../utils/analytics";
 import { BranchEvents } from "../../../utils/branchEvents";
 import { clearOtpResume } from "./otpResume";
-// import onboardingBg from "../../../assets/images/onboarding.png";
+// import onboardingBg from "../../../assets/images/onboarding.jpg";
 import onboardingBg from "../../../assets/images/new-login-bg-2.jpeg";
 // import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
 import LanguageSelector from "../../../component/LanguageSelector";

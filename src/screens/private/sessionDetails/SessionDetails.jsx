@@ -1,5 +1,6 @@
 import React from "react";
-import { PrimaryText, WorkInProgressCard } from "../../../component";
+import { PrimaryText } from "../../../component";
+import WorkInProgressCard from "../../../component/UI/cards/WorkInProgressCard";
 import PrimaryTabs from "../../../component/UI/tabs/PrimaryTabs";
 import styles from "./SessionDetails.module.scss";
 

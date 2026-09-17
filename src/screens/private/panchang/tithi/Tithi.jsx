@@ -1,7 +1,8 @@
 import React from "react";
 
 import InternalBanner from "../../../../component/UI/cards/internalBanner/InternalBanner";
-import { ContentCard, PanchangInputCard } from "../../../../component";
+import ContentCard from "../../../../component/UI/cards/ContentCard";
+import PanchangInputCard from "../../../../component/UI/cards/panchangInput/PanchangInputCard";
 import { appColors } from "../../../../utils/theme";
 import Astrologers from "../../home/components/astrologers/Astrologers";
 import Blogs from "../../home/components/blogs/Blogs";

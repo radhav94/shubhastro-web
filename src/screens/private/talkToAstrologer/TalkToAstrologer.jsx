@@ -1,13 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  AstrologerCard,
-  DetailsModal,
-  PrimaryText,
-  RechargeModal,
-  Title,
-  Toast,
-} from "../../../component";
+import { PrimaryText, Title, Toast } from "../../../component";
+import AstrologerCard from "../../../component/UI/cards/AstrologersCard";
+import DetailsModal from "../../../component/UI/modal/detailsModal/DetailsModal";
+import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import styles from "./TalkToAstrologer.module.scss";
 import { useNavigate, useLocation, useParams, useNavigationType } from "react-router-dom";
 import { useTalkToAstrologer } from "./useTalkToAstrologer";
@@ -1547,11 +1543,106 @@ const TalkToAstrologer = () => {
         </>
       )}
 
+      {/*
+        Reserve the TOP ASTROLOGERS rail while the first page is in flight.
+
+        Placed here, above the "EXPLORE ASTROLOGERS" heading, because that is
+        where the real block renders — it must reserve the space in the position
+        the real content will occupy, not merely the right amount of it.
+
+        It has to be reserved at all because it mounts from the SAME base
+        response that fills the grid below, and it inserts ABOVE that grid. With
+        only the grid reserved this route's CLS moved the wrong way,
+        0.182 -> 0.227: a reserved grid puts real-looking cards inside the
+        viewport, and the rail then shifts every one of them down ~383px, which
+        is a far larger impact fraction than when the grid below was still 0px.
+        Reserving one without the other is worse than reserving neither.
+
+        Gated on `!categoryFromParams` because that is exactly when the rail will
+        appear: on /astrologers/:category the real block is suppressed (see
+        `urlCategoryPending` at the TOP ASTROLOGERS block above), so reserving
+        space there would create the opposite shift when it collapsed.
+        `categoryFromParams` comes from useParams, so it is known on the first
+        render.
+
+        The heading is the real one rather than a placeholder bar — it is static
+        text that does not depend on the response, so showing it early costs
+        nothing and reserves its own height.
+      */}
+      {allAstrologers.length === 0 && (isFetching || isFilterLoading) && !filterError && !categoryFromParams && (
+        <>
+          <div className={styles.sectionDivider}>
+            <h2 className={styles.sectionTitle}>TOP ASTROLOGERS FOR YOU</h2>
+          </div>
+          <div className={styles.topAstrologersGrid} aria-hidden="true">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={`rail-skeleton-${i}`} className={styles.railSkeletonCard} />
+            ))}
+          </div>
+        </>
+      )}
+
       {/* Explore Astrologers Section - Original Design */}
 
       <div className={styles.sectionDivider}>
         <h2 className={styles.sectionTitle}>EXPLORE ASTROLOGERS</h2>
       </div>
+
+      {/*
+        Reserve the grid's height while the first page is in flight.
+
+        `.cardsContainer` is a CSS grid whose only children are the astrologer
+        cards, so with an empty `allAstrologers` it is 0px tall. The nine cards
+        then arrive at once and expand it by ~1766px on mobile, which pushes
+        `.footerWrapper` down the page. Lighthouse's `layout-shifts` culprit
+        list attributed 0.144 + 0.036 of this route's 0.182 CLS to exactly that
+        element, and it is the part that raising HomeLayout's route-level
+        placeholder did NOT fix (that only recovered 0.025 of it — see the note
+        on `.routeFallback` in HomeLayout.module.scss).
+
+        `limit` is the page size the query actually asks for, so the count is
+        tied to the request rather than hard-coded; the skeleton reserves the
+        same number of rows the response will fill. `.skeletonCard` carries the
+        measured per-card height for each breakpoint.
+
+        Both flags are needed. `isFetching` covers the base list. Loading a
+        category URL goes through FilterChips instead, which flips
+        `isFilterLoading` at the *start* of its request, and on that path the
+        base query is skipped — so without it /astrologers/:category would still
+        render a 0px grid. `filterError` suppresses the skeleton once a filter
+        request has failed, so the error card below is not preceded by nine
+        placeholders that will never fill.
+      */}
+      {allAstrologers.length === 0 && (isFetching || isFilterLoading) && !filterError && (
+        <>
+          {/*
+            The TOP ASTROLOGERS rail is reserved too, and it has to be.
+
+            It mounts from the SAME base response that fills the grid below, and
+            it inserts ABOVE that grid — so reserving only the grid moved this
+            route's CLS the wrong way, 0.182 -> 0.227: the reserved grid puts
+            real-looking cards inside the viewport, and the rail then shifts all
+            of them down ~383px. Reserving one without the other is worse than
+            reserving neither.
+
+            Gated on `!categoryFromParams` because that is exactly when the rail
+            will appear. On /astrologers/:category the real block is suppressed
+            (see `urlCategoryPending` at the TOP ASTROLOGERS block below), so
+            reserving space for it there would create the opposite shift when the
+            space collapsed. `categoryFromParams` comes from useParams, so this
+            is known on the first render.
+
+            The heading is the real one, not a placeholder bar: it is static text
+            that does not depend on the response, so showing it early costs
+            nothing and reserves its own 24px.
+          */}
+          <div className={styles.cardsContainer} aria-hidden="true">
+            {Array.from({ length: limit }, (_, i) => (
+              <div key={`astro-skeleton-${i}`} className={styles.skeletonCard} />
+            ))}
+          </div>
+        </>
+      )}
 
       <div className={styles.cardsContainer}>
         {allAstrologers?.map((astro, index) => (
