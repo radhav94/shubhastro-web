@@ -522,6 +522,8 @@ const AstrologerProfile = () => {
     handleAfterKundliSelect,
     openModal: hookOpenModal,
     rechargeType: hookRechargeType,
+    rechargeRequiredAmount: hookRechargeRequiredAmount,
+    rechargePricePerMinute: hookRechargePricePerMinute,
     setOpenModal: hookSetOpenModal,
   } = useAstrologerConnect();
 
@@ -2697,12 +2699,12 @@ const AstrologerProfile = () => {
           delete: true,
         }}
       />
-
-      {/* Recharge Modal */}
       <RechargeModal
         astrologer={data}
         isOpen={hookOpenModal.recharge}
         connectionType={hookRechargeType}
+        requiredAmount={hookRechargeRequiredAmount}
+        pricePerMinute={hookRechargePricePerMinute}
         onClose={() =>
           hookSetOpenModal((prev) => ({ ...prev, recharge: false }))
         }

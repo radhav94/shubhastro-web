@@ -85,6 +85,8 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     // path (see setRechargeType in useAstrologerConnect), so the recharge popup
     // can show the right rate and wording.
     rechargeType: hookRechargeType,
+    rechargeRequiredAmount: hookRechargeRequiredAmount,
+    rechargePricePerMinute: hookRechargePricePerMinute,
     kundliRef
   } = useAstrologerConnect();
 
@@ -462,6 +464,8 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
         // priced differently). Use what the user actually tapped; falls back to
         // "chat" for the same default the modal already uses.
         connectionType={hookRechargeType || "chat"}
+        requiredAmount={hookRechargeRequiredAmount}
+        pricePerMinute={hookRechargePricePerMinute}
       />
 
       {/* Connect Astrologer Popup */}
