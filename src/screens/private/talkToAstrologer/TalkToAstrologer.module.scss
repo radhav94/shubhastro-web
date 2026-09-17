@@ -236,6 +236,123 @@
   width: 100%;
   min-width: 0;
 }
+
+/*
+  Placeholder occupying exactly one astrologer card's worth of space.
+
+  Rendered into `.cardsContainer` (same grid, so it inherits the 1/2/3-column
+  layout and the 16px gap) while the first page of astrologers is in flight.
+  Without it the grid is 0px tall until the API answers and then expands by nine
+  cards, shoving `.footerWrapper` down the page — measured as 0.144 + 0.036 of
+  /talk-to-astrologer's 0.182 CLS (Lighthouse 12.8.2, mobile, simulated
+  throttling, read from the `layout-shifts` culprit list).
+
+  The two heights MUST match `.detailsCard` in
+  component/UI/cards/newAstrologerCard/NewAstrologerCard.module.scss — 194px
+  from 768px up, 182px below it, both measured on the rendered page rather than
+  derived. See the note there before changing either number; a skeleton that
+  reserves the wrong height just moves the shift rather than removing it.
+
+  Deliberately plain: a soft surface and a shimmer, no fake avatar/text bars.
+  The point is to hold the space, and inventing card-shaped detail invites the
+  two to drift apart on the next design change.
+*/
+.skeletonCard {
+  min-height: 194px;
+  border-radius: 12px;
+  border: 1px solid #fff;
+  background: rgba(255, 255, 255, 0.4);
+  position: relative;
+  overflow: hidden;
+
+  @media (width <= 767px) {
+    min-height: 182px;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.55) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: translateX(-100%);
+    animation: skeletonShimmer 1.4s ease-in-out infinite;
+  }
+
+  /* Respect a reduced-motion preference: keep the reserved space, drop the
+     animation. */
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      animation: none;
+    }
+  }
+}
+
+/*
+  Placeholder for one card in the TOP ASTROLOGERS rail.
+
+  Rendered inside `.topAstrologersGrid` itself, so it inherits that rail's flex
+  layout, 16px gap, 10px bottom padding and 48px bottom margin, and the reserved
+  block is geometrically identical to the real one by construction.
+
+  The box mirrors `.astrologerCard` in
+  component/UI/cards/newAstrologerCard/NewAstrologerCard.module.scss — 190x300
+  from 768px up, 185x277 below, `flex-shrink: 0` — which already states both
+  explicitly. Measured rail heights on the rendered page: 310px desktop and
+  287px mobile (card + the rail's 10px padding), plus the 48px margin.
+
+  Why this is needed on top of `.skeletonCard`: reserving only the main grid made
+  this route's CLS WORSE, 0.182 -> 0.227. With the grid reserved, several cards
+  sit inside the viewport, and this rail then mounts ABOVE them from the same API
+  response and shifts every one of them down ~383px — a much larger impact
+  fraction than when the grid below was still 0px tall. Reserving one without the
+  other is worse than reserving neither.
+*/
+.railSkeletonCard {
+  width: 190px;
+  min-height: 300px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  border: 1px solid #fff;
+  background: rgba(255, 255, 255, 0.4);
+  position: relative;
+  overflow: hidden;
+
+  @media screen and (width <= 767px) {
+    width: 185px;
+    min-height: 277px;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.55) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: translateX(-100%);
+    animation: skeletonShimmer 1.4s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      animation: none;
+    }
+  }
+}
+
+@keyframes skeletonShimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
 .notSureCard {
   min-width: 190px;
   max-width: 190px;

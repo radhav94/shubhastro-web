@@ -615,9 +615,39 @@
   min-width: 0;
   position: relative;
   border: 1px solid #fff;
+  /*
+    Both breakpoints carry an EXPLICIT height, and they are load-bearing.
+
+    The mobile case used to be `min-height: auto`, i.e. content-driven. That
+    made the card's height unknowable from CSS, which in turn made it impossible
+    to reserve space for a list of these cards before the data arrives — and
+    that missing reservation is what /talk-to-astrologer's CLS was. Its
+    `.cardsContainer` grid collapses to 0px while `allAstrologers` is empty,
+    then expands by nine cards, which pushes `.footerWrapper` down: measured
+    0.144 + 0.036 of layout shift out of a 0.182 total (Lighthouse 12.8.2,
+    mobile, simulated throttling, `layout-shifts` culprit list).
+
+    182px is not a guess. Measured on the rendered page against a production
+    build, at all three of this grid's breakpoints, nine cards each:
+
+        375px viewport   1 column    every card 182px   container 1766px
+                                     (= 9x182 + 8x16 gap)
+        768px viewport   2 columns   every card 194px
+        1280px viewport  3 columns   every card 194px
+
+    The height is uniform because the card's rows are fixed (a 100px/90px image
+    box plus fixed-height name, rating, language and button rows) — the content
+    does not drive it in practice. `min-height` is a floor, not a cap, so a card
+    that somehow needs more room still gets it; this only stops the height being
+    *unknown*.
+
+    TalkToAstrologer.module.scss `.skeletonCard` mirrors these two numbers.
+    Change them together or the skeleton will reserve the wrong height and
+    reintroduce the shift it exists to prevent.
+  */
   min-height: 194px;
   @media (width <= 767px) {
-    min-height: auto;
+    min-height: 182px;
   }
 
   &:hover {

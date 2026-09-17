@@ -3,12 +3,9 @@ import { useCallback, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import styles from "./Astrologers.module.scss";
-import {
-  AstrologerCard,
-  RechargeModal,
-  Title,
-  Toast,
-} from "../../../../../component";
+import { Title, Toast } from "../../../../../component";
+import AstrologerCard from "../../../../../component/UI/cards/AstrologersCard";
+import RechargeModal from "../../../../../component/UI/modal/RechargeModal/RechargeModal";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
 import { useGetAstrologersQuery } from "../../../../../redux/api/astrologer/astrologerApi";
 import { getToken } from "../../../../../utils/token";

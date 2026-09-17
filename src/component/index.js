@@ -1,3 +1,45 @@
+/*
+ * Leaf-component barrel.
+ *
+ * SCOPE — read before adding an export
+ * ------------------------------------
+ * Only cheap, dependency-free presentational leaves belong here. Anything that
+ * pulls a form library, a chart library, a date picker, a modal tree or a large
+ * stylesheet must be imported from its own module by the screens that use it.
+ *
+ * Why, measured
+ * -------------
+ * `src/context/WaitingQueueContext.jsx` imports `Toast` from this file, and
+ * WaitingQueueContext is mounted by App.jsx, so this module is in the entry
+ * chunk that every visitor on every route downloads and parses before anything
+ * renders.
+ *
+ * Rollup will drop an unused re-export only if the module behind it is
+ * side-effect free. Every component here imports a `*.module.scss`, and a CSS
+ * import IS a side effect, so the modules behind these re-exports could not be
+ * shaken out — importing `Toast` retained the whole barrel. Attributing the
+ * entry chunk's modules through the bundle graph, the heavy re-exports that
+ * used to live here cost (rendered, pre-minify):
+ *
+ *     yup                     72,201 B   via DetailsModal
+ *     lodash-es (119 modules) 69,079 B   via formik
+ *     formik                  43,313 B   via Checkbox / Input
+ *     AddProfileModal         29,638 B
+ *     DetailsModal            12,499 B
+ *     ProfileListingModal     11,498 B
+ *     RechargeModal           11,346 B
+ *
+ * — roughly 250 kB of raw JS in the critical path of ~180 routes, for three
+ * form controls and a set of modals that only a handful of screens ever open.
+ * Neither formik nor yup is used anywhere in the app's first render.
+ *
+ * The heavy members were not deleted, they moved to direct imports at their
+ * (few) call sites, so they now land in those screens' own lazy route chunks.
+ * `git log` on this file has the codemod that did it.
+ *
+ * PieChart is deliberately NOT re-exported here either — see below.
+ */
+
 export { default as Title } from "../component/UI/Title";
 
 export { default as Breadcrumb } from "../component/BreadCrumb";
@@ -8,53 +50,28 @@ export { default as ErrorText } from "../component/ErrorText";
 export { default as Toast } from "../component/toast";
 export { default as ErrorBoundary } from "../component/ErrorBoundary";
 
-//UI releated component
-
-//cards
-export { default as AstrologerCard } from "../component/UI/cards/AstrologersCard";
-export { default as ChatAstrologerCard } from "../component/UI/cards/ChatAstrologerCard";
-export { default as PanchangInputCard } from "../component/UI/cards/panchangInput/PanchangInputCard";
-export { default as BlogCard } from "../component/UI/cards/BlogCard";
-export { default as NewsCard } from "../component/UI/cards/NewsCard";
-export { default as ImageTextCard } from "../component/UI/cards/ImageTextCard";
-export { default as WorkInProgressCard } from "../component/UI/cards/WorkInProgressCard";
-export { default as LiveAstroCard } from "../component/UI/cards/LiveAstroCard";
-export { default as ContentCard } from "../component/UI/cards/ContentCard";
-export { default as MoreBlogsCarousel } from "../component/UI/cards/MoreBlogsCarousel";
-export { default as PopularBlogsSection } from "../component/UI/cards/PopularBlogsSection";
-export { default as RelationalBlogsSection } from "../component/UI/cards/RelationalBlogsSection";
-export { default as TrendingBlogsCarousel } from "../component/UI/cards/TrendingBlogsCarousel";
-
-//formic control
-export { default as Checkbox } from "../component/formikcontrols/checkbox/Checkbox";
-export { default as Input } from "../component/formikcontrols/input/Input";
-
-//model
-export { default as DetailsModal } from "../component/UI/modal/detailsModal/DetailsModal";
-export { default as RechargeAlertModel } from "../component/UI/modal/rechargeAlertModel/ReachargeAlertModel";
-export { default as RechargeModal } from "../component/UI/modal/RechargeModal/RechargeModal";
-export { default as LiveModal } from "../component/UI/modal/liveModal/LiveModal";
-export { default as WheelDatePicker } from "../component/UI/WheelDatePicker/WheelDatePicker";
-
-//profile
-export { default as AddProfileModal } from "../component/UI/Profile/AddProfileModal";
-export { default as EditProfileModal } from "../component/UI/Profile/EditProfileModal";
-export { default as ProfileListingModal } from "../component/UI/Profile/ProfileListingModal";
-export { default as DeleteConfirmationModal } from "../component/UI/modal/deleteModal/DeleteConfirmationModal";
-
 /*
-  PieChart is deliberately NOT re-exported here.
+  Everything below was previously re-exported here and is now imported directly
+  by its consumers. Listed so a future reader can see what moved and does not
+  re-add it by reflex:
 
-  It does `import { Chart } from 'chart.js/auto'`, which registers every
-  controller as a side effect and so cannot be tree-shaken. 26 files import this
-  barrel, several of them eagerly, so re-exporting PieChart pulled all ~196 KB
-  of chart.js into the entry chunk for every visitor — including the homepage,
-  which has no charts.
+    cards          AstrologerCard, ChatAstrologerCard, PanchangInputCard,
+                   BlogCard, NewsCard, ImageTextCard, WorkInProgressCard,
+                   LiveAstroCard, ContentCard, MoreBlogsCarousel,
+                   PopularBlogsSection, RelationalBlogsSection,
+                   TrendingBlogsCarousel
+    formik         Checkbox, Input            (pull formik + lodash-es)
+    modals         DetailsModal (pulls yup), RechargeAlertModel, RechargeModal,
+                   LiveModal, DeleteConfirmationModal
+    profile        AddProfileModal (pulls formik + yup), EditProfileModal,
+                   ProfileListingModal
+    pickers        WheelDatePicker
+    chat           MessageTicks, ReplyPreview
 
-  Its one consumer (FaceReadingResult) imports it directly from
-  ../component/UI/charts/PieChart, keeping chart.js in that lazy route's chunk.
+  PieChart was never here: it does `import { Chart } from 'chart.js/auto'`,
+  which registers every controller as a side effect and so cannot be
+  tree-shaken — re-exporting it pulled ~196 KB of chart.js into the entry chunk
+  for every visitor, including the homepage, which has no charts. Its one
+  consumer (FaceReadingResult) imports it directly from
+  ../component/UI/charts/PieChart.
 */
-
-//chat
-export { default as MessageTicks } from "../component/UI/chat/MessageTicks";
-export { default as ReplyPreview } from "../component/UI/chat/ReplyPreview";

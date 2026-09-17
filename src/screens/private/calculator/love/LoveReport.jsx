@@ -4,8 +4,6 @@ import { useLoveCalculatorMutation } from "../../../../redux/api/calculator/calc
 import { useEffect, useState } from "react";
 import styles from "./LoveReport.module.scss";
 import { PrimaryText } from "../../../../component";
-import DividerWithImage from "../../../../component/UI/DividerWithImage";
-import ShubhTalkLogo from "../../../../assets/icons/logo.png";
 import CalcReportLoader from "../CalcReportLoader";
 import CalcBackButton from "../CalcBackButton";
 import ConnectCard from "../../../../component/UI/cards/connectCard/ConnectCard";

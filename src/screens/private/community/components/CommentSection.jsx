@@ -8,7 +8,7 @@ import {
 } from "../../../../redux/api/community/communityApi";
 import Toast from "../../../../component/toast";
 import { getUserFromStorage } from "../../../../utils/authStorage";
-import { DeleteConfirmationModal } from "../../../../component";
+import DeleteConfirmationModal from "../../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
 import { trackEvent } from "../../../../utils/analytics";
 
 const getTimeAgo = (dateStr) => {

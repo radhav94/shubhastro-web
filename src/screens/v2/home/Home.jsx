@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Toast, RechargeModal } from "../../../component";
+import { Toast } from "../../../component";
+import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { useGetHomeDetailsQuery } from "../../../services/appServices/homeServices";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import { useProfileManager } from "../../private/kundli/hooks/useProfileManager";

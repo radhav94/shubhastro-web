@@ -11,12 +11,10 @@ import {
   useDeleteKundliMutation,
 } from "../../../services/appServices/kundliServicesNew";
 import { useLazyGetNumerologyPredictionQuery } from "../../../services/appServices/numerologyServices";
-import {
-  Toast,
-  AddProfileModal,
-  ProfileListingModal,
-  DeleteConfirmationModal,
-} from "../../../component";
+import { Toast } from "../../../component";
+import AddProfileModal from "../../../component/UI/Profile/AddProfileModal";
+import ProfileListingModal from "../../../component/UI/Profile/ProfileListingModal";
+import DeleteConfirmationModal from "../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
 import EditProfileModal from "../../../component/UI/Profile/EditProfileModal";
 import PrimaryLoader from "../../../component/UI/PrimaryLoader";
 import { ProfileManager } from "../../../component/UI/Profile";

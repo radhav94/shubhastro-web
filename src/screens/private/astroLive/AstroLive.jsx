@@ -1,11 +1,8 @@
 import React from "react";
-import {
-  LiveAstroCard,
-  LiveModal,
-  PrimaryText,
-  Title,
-  WorkInProgressCard,
-} from "../../../component";
+import { PrimaryText, Title } from "../../../component";
+import LiveAstroCard from "../../../component/UI/cards/LiveAstroCard";
+import LiveModal from "../../../component/UI/modal/liveModal/LiveModal";
+import WorkInProgressCard from "../../../component/UI/cards/WorkInProgressCard";
 import { AppImages } from "../../../utils/appImages";
 
 import styles from "./AstroLive.module.scss";

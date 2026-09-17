@@ -12,7 +12,7 @@ import { setForm } from "../../../../redux/kundliform/formSlice";
 import { setSelectedKundli, clearSelectedKundli } from "../../../../redux/kundli/kundliSlice";
 import { trackEvent } from "../../../../utils/analytics";
 
-import { PanchangInputCard } from "../../../../component";
+import PanchangInputCard from "../../../../component/UI/cards/panchangInput/PanchangInputCard";
 import PanchangCards from "../../../../component/UI/cards/PanchangCards";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import BasicContent from "../../kundli/BasicContent/BasicContent";

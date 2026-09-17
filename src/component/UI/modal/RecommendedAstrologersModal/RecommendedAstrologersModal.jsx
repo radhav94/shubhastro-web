@@ -11,7 +11,8 @@ import { useAstrologerConnect } from "../../../../utils/hooks/useAstrologerConne
 import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 import { getAstrologerImageUrl } from "../../../../utils/appImages";
 import ProfileManager from "../../Profile/ProfileManager";
-import { RechargeModal, Toast } from "../../..";
+import { Toast } from "../../..";
+import RechargeModal from "../RechargeModal/RechargeModal";
 import PrimaryLoader from "../../PrimaryLoader";
 import styles from "./RecommendedAstrologersModal.module.scss";
 

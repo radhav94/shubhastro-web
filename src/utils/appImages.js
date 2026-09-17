@@ -158,8 +158,8 @@ import Hero from "../assets/images/navratri-hero.jpg";
 import Astro1 from "../assets/images/astrologer-1.jpg";
 import Astro2 from "../assets/images/astrologer-2.jpg";
 import Astro3 from "../assets/images/astrologer-3.jpg";
-import BgAstro from "../assets/images/bg_astro.png";
-import Marriage from "../assets/images/marriage.png";
+import BgAstro from "../assets/images/bg_astro.jpg";
+import Marriage from "../assets/images/marriage.jpg";
 import KundaliRead from "../assets/images/kundli_read.png";
 import Love from "../assets/images/love.png";
 import Vastu from "../assets/images/vastu.png";
@@ -254,12 +254,12 @@ import ClothesIcon from "../assets/aiwow/Group 1410084720.svg";
 import AuraIcon from "../assets/aiwow/Vector.svg";
 
 // AI WOW Instruction Images
-import FaceReadingInstruction from "../assets/aiwow/face-reading-1.png";
-import PalmistryInstruction from "../assets/aiwow/palmistry-1.png";
+import FaceReadingInstruction from "../assets/aiwow/face-reading-1.jpg";
+import PalmistryInstruction from "../assets/aiwow/palmistry-1.jpg";
 import SignatureInstruction from "../assets/aiwow/signature-1.png";
-import GemstoneInstruction from "../assets/aiwow/gemstone-1.png";
-import ClothColorInstruction from "../assets/aiwow/cloth-color-1.png";
-import AuraInstruction from "../assets/aiwow/face-reading-1.png"; // Using face reading image as placeholder
+import GemstoneInstruction from "../assets/aiwow/gemstone-1.jpg";
+import ClothColorInstruction from "../assets/aiwow/cloth-color-1.jpg";
+import AuraInstruction from "../assets/aiwow/face-reading-1.jpg"; // Using face reading image as placeholder
 
 // AI WOW Gender-specific Instruction Images
 import AuraMale from "../assets/aiwow/aura-male.png";
@@ -267,7 +267,7 @@ import AuraFemale from "../assets/aiwow/aura-female.png";
 import ClothMale from "../assets/aiwow/cloth-male.png";
 import ClothFemale from "../assets/aiwow/cloth-female.png";
 import FaceMale from "../assets/aiwow/face-male.png";
-import FaceFemale from "../assets/aiwow/face-female.png";
+import FaceFemale from "../assets/aiwow/face-female.jpg";
 
 const aiWowIcons = {
   vastu: VastuIcon,
