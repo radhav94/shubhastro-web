@@ -16,7 +16,7 @@ import Toast from "../../../../component/toast";
 import { getUserFromStorage } from "../../../../utils/authStorage";
 import PrimaryLoader from "../../../../component/UI/PrimaryLoader";
 import PostImageSlider from "./PostImageSlider";
-import { DeleteConfirmationModal } from "../../../../component";
+import DeleteConfirmationModal from "../../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
 
 const YourPosts = ({ trendingAstrologers = [], sectionContent = [], joinedSpaces = [], onCommunityClick }) => {
   const navigate = useNavigate();

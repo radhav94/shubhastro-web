@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import styles from "./BlogHeader.module.scss";
-import { BlogCard } from "../../../../component";
+import BlogCard from "../../../../component/UI/cards/BlogCard";
 import Pagination from "../../../../component/pagination/Pagination";
 import toast from "../../../../component/toast";
 import { useGetBlogQuery, useGetBlogCategoriesQuery } from "../../../../services/appServices/blogService";

@@ -1,7 +1,32 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { useDispatch } from "react-redux";
-import AddProfileModal from "./AddProfileModal";
-import GuestDetailsForm from "./GuestDetailsForm";
+/*
+  Lazy, not static.
+
+  AddProfileModal imports formik and yup (and formik pulls 119 lodash-es
+  modules) — measured at 43 kB + 72 kB + 69 kB of raw JS. This modal is
+  referenced from ~40 screens, several of which sit in the entry chunk (HomeV2
+  and useGuestConnectFlow, both reachable from App.jsx), so a static import put
+  all of that on the critical path of every route for a form that is only shown
+  after a guest taps an AI-Wow card.
+
+  Safe to defer: the form is only rendered once `showKundliStep` is true (the
+  visitor has already interacted), and AddProfileModal itself does
+  `if (!isOpen) return null` and gates every effect on `isOpen`, so mounting it
+  on demand rather than keeping a closed copy mounted is behaviourally
+  identical. The Suspense boundary is local so consumers that have no boundary
+  of their own still work; `fallback={null}` matches what a closed modal
+  already rendered.
+*/
+const AddProfileModal = lazy(() => import("./AddProfileModal"));
+/*
+  Lazy for the same reason as AddProfileModal above: GuestDetailsForm statically
+  imports DateTimePicker, which put 12,534 B (the form) + 21,525 B (the picker)
+  of raw JS in the entry chunk. It is only rendered in the `inline` variant —
+  the kundli form shown as a message inside the Pandit AI chat — and only once
+  `showKundliStep` is true, so nothing before a user interaction needs it.
+*/
+const GuestDetailsForm = lazy(() => import("./GuestDetailsForm"));
 import OtpModal from "./OtpModal";
 import DeviceLimitModal from "../modal/DeviceLimitModal/DeviceLimitModal";
 import { Toast } from "../../index";
@@ -435,9 +460,13 @@ const GuestKundliAuthModal = ({
     <>
       {inline ? (
         showKundliStep && (
-          <GuestDetailsForm submitting={sendingOtp} onSubmit={handleInlineSubmit} />
+          <Suspense fallback={null}>
+            <GuestDetailsForm submitting={sendingOtp} onSubmit={handleInlineSubmit} />
+          </Suspense>
         )
       ) : (
+        showKundliStep && (
+        <Suspense fallback={null}>
         <AddProfileModal
           isOpen={showKundliStep}
           onClose={handleClose}
@@ -451,6 +480,8 @@ const GuestKundliAuthModal = ({
           closeOnOverlayClick={false}
           inline={inline}
         />
+        </Suspense>
+        )
       )}
 
       <OtpModal

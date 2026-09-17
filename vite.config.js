@@ -88,9 +88,128 @@ function indexHtmlEnvPlugin() {
   };
 }
 
+/**
+ * Strip HTML comments from index.html in production builds.
+ *
+ * index.html in this repo is heavily annotated — the comments explain why each
+ * preconnect, preload, deferred-tag and storage shim is shaped the way it is,
+ * and they are worth keeping in source. They are not worth shipping: measured
+ * on the pre-change build, index.html was 70,192 B with 28,070 B of it (40%)
+ * HTML comments, i.e. ~7 kB gzipped of pure documentation delivered ahead of
+ * every other resource on every single page view.
+ *
+ * That sits at the very front of the critical path. The preload scanner cannot
+ * see a `<link rel=preload>` until it has parsed past everything before it, and
+ * several of the tags this file relies on (the font preloads, the conditional
+ * LCP-image preload, the API prefetches) sit *after* multi-kilobyte comment
+ * blocks. Removing the comments moves those discoveries earlier and shrinks the
+ * document the browser must receive before it can start on anything else.
+ *
+ * Why the hand-rolled scan instead of one regex over the whole file
+ * ----------------------------------------------------------------
+ * `<!--` and `-->` are not comment delimiters inside <script> or <style>. A
+ * bare `s.replace(/<!--[\s\S]*?-->/g, '')` across this file would start a
+ * "comment" at a `<!--` appearing in JS and run to the next `-->` anywhere
+ * after it, deleting live code in between. So the document is walked block by
+ * block and comments are only removed in the segments that are actually markup;
+ * the contents of script/style/pre/textarea are copied through untouched.
+ *
+ * Conditional comments (`<!--[if ...]>`) are preserved for the same reason a
+ * browser treats them specially — they are markup, not annotation. There are
+ * currently none in this file; the guard is so adding one later is not silently
+ * deleted.
+ *
+ * Build-only (`apply: 'build'`): the dev server keeps the comments so they are
+ * visible in the browser's view-source while developing. `order: 'post'` runs
+ * it after Vite has injected the hashed script/stylesheet tags, so nothing it
+ * emits is affected.
+ */
+function stripHtmlCommentsPlugin() {
+  // Regions whose text is not markup and must be copied through verbatim.
+  const RAW_TEXT = ["script", "style", "pre", "textarea"];
+
+  function strip(html) {
+    // Collected as segments so the blank-line collapsing at the end can be
+    // applied to the markup only. Running it over the whole document would
+    // reformat the inline scripts' own source, which is not this plugin's job
+    // and made the output impossible to diff against the previous build.
+    const parts = [];
+    let markup = "";
+    const flush = () => {
+      if (markup) {
+        parts.push(markup.replace(/\n[ \t]*(?:\n[ \t]*)+/g, "\n"));
+        markup = "";
+      }
+    };
+    let i = 0;
+
+    while (i < html.length) {
+      // Is a raw-text element opening here? If so, copy it whole.
+      let raw = null;
+      if (html[i] === "<") {
+        for (const tag of RAW_TEXT) {
+          if (html.slice(i + 1, i + 1 + tag.length).toLowerCase() !== tag) continue;
+          const after = html[i + 1 + tag.length];
+          // Must be a real tag boundary, so <scripting> does not match "script".
+          if (after === ">" || after === " " || after === "\n" || after === "\t" || after === "/") {
+            raw = tag;
+            break;
+          }
+        }
+      }
+      if (raw) {
+        const close = html.toLowerCase().indexOf("</" + raw, i);
+        if (close === -1) {
+          // Unterminated — copy the remainder rather than risk mangling it.
+          markup += html.slice(i);
+          break;
+        }
+        const end = html.indexOf(">", close);
+        const stop = end === -1 ? html.length : end + 1;
+        flush();
+        parts.push(html.slice(i, stop));
+        i = stop;
+        continue;
+      }
+
+      if (html.startsWith("<!--", i)) {
+        const end = html.indexOf("-->", i);
+        if (end === -1) {
+          markup += html.slice(i);
+          break;
+        }
+        const body = html.slice(i, end + 3);
+        // Keep downlevel-revealed / conditional comments; drop annotations.
+        if (body.startsWith("<!--[if") || body.startsWith("<!--<![endif]")) {
+          markup += body;
+        }
+        i = end + 3;
+        continue;
+      }
+
+      markup += html[i];
+      i += 1;
+    }
+
+    flush();
+    return parts.join("");
+  }
+
+  return {
+    name: "strip-html-comments",
+    apply: "build",
+    transformIndexHtml: {
+      order: "post",
+      handler(html) {
+        return strip(html);
+      },
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), webhookLoggerPlugin(), firebaseSwPlugin(), indexHtmlEnvPlugin()],
+  plugins: [react(), webhookLoggerPlugin(), firebaseSwPlugin(), indexHtmlEnvPlugin(), stripHtmlCommentsPlugin()],
   base: '/',
   build: {
     outDir: 'dist',
@@ -191,6 +310,47 @@ export default defineConfig({
             return 'router-vendor';
           }
         },
+        /*
+          `output.experimentalMinChunkSize` was tried here and REVERTED. Do not
+          re-add it without reading this.
+
+          The problem it was meant to solve is real and still open: the build
+          emits 314 JS chunks, 102 of them under 2 KB, the smallest being 52-200 B
+          (a `logo` chunk of 52 B, `capitalize` at 106 B, single lucide icons at
+          ~150 B). Loading /talk-to-astrologer issues 60+ asset requests, many of
+          them these fragments, and on a phone each costs a request slot and a
+          round trip that dwarfs its payload.
+
+          Measured effect of the setting (entry sizes gzipped):
+
+              threshold   entry JS   entry CSS   chunks   <2 KB
+              (none)       226,303      40,977      314     102
+              1,000        226,228      41,330      298      68
+              2,000        226,315      41,559      281      46
+              4,000        227,795      41,907      244      25
+             10,000        242,766      53,584      185      24
+
+          2,000 looked like a good trade — 50 fewer chunks for +594 B on the
+          critical path. It broke routes.
+
+          What happens: Rollup merges a small CSS-importing module into an
+          unrelated chunk, and the merged chunk is named after whichever module
+          came first — so the app grew an `assets/Cake-*.js` chunk (named after
+          the lucide Cake icon) that now also owns an `assets/Cake-*.css`.
+          Vite's `__vitePreload` helper then fails to load that stylesheet and
+          rejects with "Unable to preload CSS for /assets/Cake-*.css", which
+          propagates as a render error and lands the visitor on
+          RouteErrorBoundary. Reproduced on /numerology, against a preview of the
+          production build, with the stylesheet itself returning HTTP 200 — so it
+          is Vite's chunk->CSS bookkeeping for merged chunks, not a missing file.
+          The same route on a build without the setting logs nothing.
+
+          The fragmentation is therefore worth fixing a different way — an
+          explicit `manualChunks` rule that groups the known leaf families (lucide
+          icons, the tiny shared formatters) into one or two named chunks, where
+          the grouping is chosen rather than inferred and no CSS-owning module
+          gets pulled in. That is a separate change with its own verification.
+        */
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]'

@@ -29,22 +29,102 @@ import { useLazyGetSubscriptionStatusQuery } from "../../../redux/api/subscripti
 // entirely so real content wins it.
 
 import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
-import RechargeModal from "../../../component/recharge-modal/RechargeModal";
+/*
+  Lazy, with an idle prefetch — see `useEffect` below.
+
+  RechargeModal drags the whole payment path into whatever chunk imports it:
+  PaymentDetailsModal -> useRazorpay (20,384 B) plus PlanCard and the modal
+  itself, 33,530 B of raw JS in total. HomeV2 is in the entry chunk, so every
+  visitor on every route paid for it whether or not they ever recharge.
+
+  It is NOT gated on `isOpen` at the call site the way the modals above are.
+  RechargeModal's own guard is `if (!isOpen && successAmount === null) return
+  null` — it deliberately keeps rendering after `isOpen` goes false so it can
+  show the post-payment success state. Unmounting it on close would therefore
+  destroy the success screen, which is the one screen in this flow a user has
+  just paid to see. Hence the sticky `rechargeEverMounted` flag: null until the
+  first open (which is what it rendered anyway), then mounted for the rest of
+  the page's life, exactly as before.
+*/
+const RechargeModal = lazy(() => import("../../../component/recharge-modal/RechargeModal"));
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
 import { ComplementaryServicesSection, AiServicesSection, MuhuratSectionV2, AstrologersByCategorySection, DiscoverMoreSectionV2, LiveSessionCard, HoroscopeSection, TestimonialsSection, AppDownloadSection } from "./sections";
 
-// Below-the-fold components (static — shared with many other pages)
-import ProfileModals from "../../private/kundli/components/ProfileModals";
+/*
+  On-demand modals.
+  ================
+
+  All four used to be static imports, and all four were rendered unconditionally
+  with an `isOpen` prop — so every visitor on every route downloaded and parsed
+  them (HomeV2 is deliberately part of the entry chunk; see the code-splitting
+  policy note in utils/routes/Paths.js) in order to render nothing. Measured
+  weight in the entry chunk, rendered/pre-minify:
+
+      ProfileModals           21,314 B  (+ DateTimePicker 21,525 B, LocationSearch)
+      SubscriptionModal       18,762 B
+      MobileAppModal           ~2 kB
+
+  Deferring them is behaviour-preserving rather than a trade-off, because each
+  one already rendered nothing until opened:
+
+    * MobileAppModal          `if (!isOpen) return null`
+    * EmergencySessionModal   `if (!isOpen || !astrologer) return null` (mount
+                              gated only; the import stays static, see below)
+    * SubscriptionModal       `if (!isOpen) return null`, and both of its RTK
+                              queries are declared `skip: !isOpen`, so no API
+                              call moves
+    * ProfileModals           has no single `isOpen`; its body is three
+                              independent `{showX && …}` branches, so gating the
+                              mount on the same flags renders exactly what the
+                              component itself would have rendered
+
+  The mount conditions below therefore duplicate each component's own internal
+  guard. Do not relax them without checking that guard still exists.
+
+  They sit inside the existing <Suspense fallback={null}> in the modal block —
+  `null` is what a closed modal rendered anyway, so there is no new fallback UI
+  and nothing can shift layout while a chunk arrives.
+*/
+const ProfileModals = lazy(() => import("../../private/kundli/components/ProfileModals"));
+/*
+  EmergencySessionModal stays STATIC — do not convert it to lazy().
+
+  Nine other modules import it statically, and several of them (the astrologer
+  cards rendered by HomeV2's own sections) are in the entry chunk, so it lands
+  there regardless. A lazy() here bought no split and only produced Vite's
+  "dynamic import will not move module into another chunk" warning. The mount is
+  still gated below, which is free.
+*/
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
-import MobileAppModal from "../../private/aiwow/components/MobileAppModal";
-// Statically imported on purpose. Eight other modules (the AI-Wow result
-// screens, useAIWowSubscriptionGate and the user Profile screen) import this
-// statically, so it lands in the main chunk regardless — a lazy() here bought
-// no split and only made Vite warn about the mixed import.
-import SubscriptionModal from "../../../component/UI/modal/SubscriptionModal/SubscriptionModal";
-import { GuestKundliAuthModal } from "../../../component/UI/Profile";
+const MobileAppModal = lazy(() => import("../../private/aiwow/components/MobileAppModal"));
+/*
+  Lazy. The previous note here said a lazy() bought no split because eight other
+  modules import SubscriptionModal statically — but all eight (the AI-Wow result
+  screens, useAIWowSubscriptionGate and the user Profile screen) are themselves
+  behind lazy() route boundaries in utils/routes/Paths.js. HomeV2 was the only
+  static importer inside the entry chunk, so it alone was what pinned the modal
+  there; with this edge cut, Rollup emits it as a chunk shared by those routes.
+  Verified against the bundle's module graph, not assumed.
+*/
+const SubscriptionModal = lazy(() => import("../../../component/UI/modal/SubscriptionModal/SubscriptionModal"));
+/*
+  Direct module path, not the `component/UI/Profile` barrel.
+
+  HomeV2 is deliberately kept in the entry chunk (see the code-splitting policy
+  note in utils/routes/Paths.js), so anything it imports is downloaded and
+  parsed by every visitor on every route. Pulling this one name through the
+  barrel re-exported AddProfileModal alongside it, and AddProfileModal imports
+  formik and yup — which brought formik (43 kB), yup (72 kB) and formik's
+  lodash-es dependency (119 modules, 69 kB) into the critical path of the whole
+  app for a modal that only opens when a guest taps an AI-Wow card.
+
+  Rollup cannot shake those re-exports out: every component behind them imports
+  a `*.module.scss`, and a CSS import is a side effect, so the modules must be
+  retained even when the export is unused.
+*/
+import GuestKundliAuthModal from "../../../component/UI/Profile/GuestKundliAuthModal";
 
 /*
  * Identity of a CMS section, used to drop anything already held while paging.
@@ -590,6 +670,11 @@ const HomeV2 = () => {
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  /*
+    Sticky: RechargeModal must survive `isOpen` going false so its success state
+    can render (see the import note). Set on the first open and never cleared.
+  */
+  const [rechargeEverMounted, setRechargeEverMounted] = useState(false);
   const [pendingServiceItem, setPendingServiceItem] = useState(null);
   // Which premium suite card is waiting on its subscription-status request, so the
   // card can show a pressed/busy state instead of looking unresponsive.
@@ -1113,6 +1198,41 @@ const HomeV2 = () => {
 
   const handleRechargeClose = useCallback(() => hookSetOpenModal((prev) => ({ ...prev, recharge: false })), [hookSetOpenModal]);
 
+  /*
+    Mount RechargeModal on first open, and warm its chunk while the browser is
+    idle so the first open does not wait on a network request.
+
+    The prefetch is the point of doing this rather than plain lazy(). Recharging
+    is a paid action, and "make the button feel slower so a bundle graph looks
+    tidier" is not a trade worth making — so the chunk is requested once the
+    page has settled, well before anyone can reach the wallet. By the time
+    `recharge` flips true the module is in the module cache and lazy() resolves
+    synchronously on the next microtask; the <Suspense fallback={null}> below is
+    only there for the case where a very fast tap beats the idle callback.
+
+    requestIdleCallback is used where available so this never competes with
+    first paint or the homepage API; Safari has no requestIdleCallback, hence
+    the setTimeout fallback (same pattern as the FCM init in App.jsx).
+  */
+  useEffect(() => {
+    if (hookOpenModal.recharge) setRechargeEverMounted(true);
+  }, [hookOpenModal.recharge]);
+
+  useEffect(() => {
+    if (rechargeEverMounted) return;
+    const warm = () => {
+      import("../../../component/recharge-modal/RechargeModal").catch(() => {
+        /* best effort — lazy() will fetch it again on open */
+      });
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(warm, { timeout: 4000 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    const t = setTimeout(warm, 3000);
+    return () => clearTimeout(t);
+  }, [rechargeEverMounted]);
+
   // ─── Shared props for group renderers ─────────────────────────────────────
   const heroProps = { styles, navigate, name, currentMahadasha, handleWowCardClick, getWowCardPath, onlineCount, onPaidCardClick: handlePaidCardClick, pendingPaidCardId, onLiveCommunityClick: handleLiveCommunityClick, onRequireGuestAuth: handleRequireGuestAuth };
   const standaloneOptions = { styles, onConnect: handleConnectClick, navigate, userId: user?.id };
@@ -1274,10 +1394,18 @@ const HomeV2 = () => {
 
       {/* Modals */}
       <Suspense fallback={null}>
+        {(showAddProfile || showEditProfile) && (
         <ProfileModals profiles={profiles} isCreating={isCreating} showAddProfile={showAddProfile} showEditProfile={showEditProfile} formData={formData} editFormData={editFormData} setShowAddProfile={setShowAddProfile} setShowEditProfile={setShowEditProfile} setFormData={setFormData} setEditFormData={setEditFormData} handleAddProfile={handleAddProfile} handleSubmitProfile={handleSubmitProfile} handleSubmitEditProfile={handleSubmitEditProfile} formatProfileDisplay={formatProfileDisplay} placeReopenSignal={placeReopenSignal} openModal={hookOpenModal} setOpenModal={hookSetOpenModal} selectedAstrologer={hookSelectedAstrologer} localSelectedProfile={localSelectedProfile} setLocalSelectedProfile={setLocalSelectedProfile} onContinue={handleProfileManagerStartCall} connectionType={connectionType} />
+        )}
+        {showEmergencyModal && selectedAstrologer && (
         <EmergencySessionModal isOpen={showEmergencyModal} onClose={handleEmergencyClose} astrologer={selectedAstrologer} onChatNow={handleEmergencyChatNow} onCallNow={handleEmergencyCallNow} />
+        )}
+        {showMobileAppModal && (
         <MobileAppModal isOpen={showMobileAppModal} onClose={handleMobileAppClose} />
+        )}
+        {showSubscriptionModal && (
         <SubscriptionModal isOpen={showSubscriptionModal} onClose={() => setShowSubscriptionModal(false)} onSelectPlan={handleFreeUnlock} />
+        )}
         <GuestKundliAuthModal
           isOpen={showGuestAuthModal}
           onClose={() => { setShowGuestAuthModal(false); pendingWowPathRef.current = null; }}
@@ -1286,12 +1414,16 @@ const HomeV2 = () => {
         {/* Guest call/video flow (AI Wow-style details + OTP, then initiate call) */}
         {guestConnectModal}
       </Suspense>
-      <RechargeModal
-        isOpen={hookOpenModal.recharge}
-        onClose={handleRechargeClose}
-        astrologer={hookSelectedAstrologer}
-        connectionType={pendingConnectionType || "chat"}
-      />
+      {rechargeEverMounted && (
+        <Suspense fallback={null}>
+          <RechargeModal
+            isOpen={hookOpenModal.recharge}
+            onClose={handleRechargeClose}
+            astrologer={hookSelectedAstrologer}
+            connectionType={pendingConnectionType || "chat"}
+          />
+        </Suspense>
+      )}
       {/* Pandit AI bubbles are now mounted globally in HomeLayout, so they are
           not rendered here — that would double-mount them (two `panditai:ask`
           listeners) on the home page. */}

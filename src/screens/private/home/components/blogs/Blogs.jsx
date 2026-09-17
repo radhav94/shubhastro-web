@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Styles from "./Blogs.module.scss";
-import { BlogCard, Title } from "../../../../../component";
+import { Title } from "../../../../../component";
+import BlogCard from "../../../../../component/UI/cards/BlogCard";
 import { Link, useNavigate } from "react-router-dom";
 import { PATH } from "../../../../../utils/routes/Paths";
 

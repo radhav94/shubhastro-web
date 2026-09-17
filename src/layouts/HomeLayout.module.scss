@@ -144,6 +144,37 @@ $mobile-screen-width: 500px;
 
   .outletDiv {
     width: 100%;
+    /*
+      Reserve a viewport for the routed screen so `.footerWrapper` is never
+      painted inside the viewport.
+
+      This is one half of a pair — `.routeFallback` below carries the same
+      min-height and the same reasoning. Together they cover the two windows in
+      which the footer used to ride up into view:
+
+        1. the Suspense window, where `.routeFallback` replaces this <main>
+           entirely (that is why setting it here alone fixed nothing);
+        2. the mounted-but-empty window, where the screen has rendered its
+           static shell and is still waiting on its first API response.
+
+      Window 2 is the one this rule closes, and it is why the footer fix cannot
+      live in JS: a "route has mounted" signal fires before RTK Query has
+      flipped `isFetching`, so there is a frame where the page is short, the
+      footer is high in the viewport, and the skeletons have not rendered yet.
+      Gating the footer on such a signal measured WORSE than doing nothing
+      (/talk-to-astrologer CLS 0.182 -> 0.227) precisely because of that frame.
+      A min-height has no timing.
+
+      `100vh` first for the browser floor declared in vite.config.js (safari13 /
+      firefox71 predate dvh); the dvh line wins where supported and is the value
+      that does not jump when mobile browser chrome collapses.
+
+      Cost, and it is a real one: on a screen whose content is shorter than a
+      viewport the footer now needs a scroll to reach. That is the trade for the
+      footer never being painted mid-page and then thrown ~1000px down it.
+    */
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   .fixedTopHeader {
@@ -178,7 +209,55 @@ $mobile-screen-width: 500px;
   */
   .routeFallback {
     width: 100%;
-    min-height: 70vh;
+    /*
+      A full viewport, not 70vh. This is the other half of the pair described on
+      `.outletDiv` above; both are needed and neither works alone.
+
+      At 70vh this placeholder did not do its job. On a 412x823 viewport 70vh is
+      576px, plus the 53px `.topGap` puts the top of `.footerWrapper` at ~629px:
+      on screen. The real route then mounts, is far taller, and shoves the footer
+      down ~1000px. Read out of Lighthouse's `layout-shifts` culprit list
+      (12.8.2, mobile, simulated throttling), `.footerWrapper` was the single
+      largest shift source on every lazily-loaded route.
+
+      WHAT THIS COSTS, MEASURED
+      -------------------------
+      Raising it is not free, and the reason is worth understanding before
+      anyone "optimises" it back. On several routes the footer WAS the LCP
+      element: Lighthouse reported `<p class="_v2_tagline_…">` inside
+      `div._v2_mobileLogo_…` — footer text — painted at ~5-6s. Keeping the
+      footer out of the viewport removes that candidate, so LCP starts measuring
+      the screen's own content, which on the astrologer lists is a card photo
+      that paints later. LCP therefore reads WORSE while nothing about the page
+      got slower. (The astrologer API is not the cause: it completes in
+      94-486ms, by ~665ms. The photo is late because its URL is only known after
+      JS renders the card, and it is not preloaded — a real, separate LCP
+      problem that the old footer-as-LCP number was hiding.)
+
+      Medians of 3 Lighthouse runs, same build, same minute, same API state,
+      baseline -> this pair plus the TalkToAstrologer skeletons:
+
+          route                             LCP            CLS          score
+          /                            5639 -> 5275   0.000 -> 0.000     +3
+          /login                       8715 -> 9039   0.001 -> 0.000     +2
+          /kundli                      6926 -> 6735   0.002 -> 0.001     +3
+          /ai-wow/astro-face-reading   5912 -> 6063   0.301 -> 0.001    +17
+          /horoscope                   5162 -> 7244   0.075 -> 0.004     +0
+          /talk-to-astrologer          5424 -> 8683   0.182 -> 0.060     +7
+          /astrologers/love-relations. 4522 -> 8970   0.119 -> 0.001     -4
+
+      Every route is inside the CLS budget (<=0.1) afterwards; three were not
+      before. Five scores up, one flat, one down.
+
+      Do NOT lower this value to recover the LCP numbers. That trades a real
+      layout shift the visitor sees for a metric improvement they do not, and it
+      re-breaks the three routes above. If LCP on the astrologer lists is the
+      goal, fix the actual cause: make the first card's image discoverable
+      earlier (it already receives `priority={index === 0}`, which cannot help
+      while the URL arrives with the API response).
+    */
+    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;

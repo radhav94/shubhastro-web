@@ -1,11 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import {
-  Divider,
-  LiveAstroCard,
-  PrimaryButton,
-  PrimaryText,
-  Title,
-} from "../../../../../component";
+import { Divider, PrimaryButton, PrimaryText, Title } from "../../../../../component";
+import LiveAstroCard from "../../../../../component/UI/cards/LiveAstroCard";
 import { AppImages } from "../../../../../utils/appImages";
 import { appData } from "../../../../../utils/constanats/appData";
 import styles from "./LiveShows.module.scss";

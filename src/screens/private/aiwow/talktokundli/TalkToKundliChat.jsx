@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './TalkToKundliChat.module.scss';
-import { Toast, MessageTicks, ReplyPreview } from '../../../../component';
+import { Toast } from "../../../../component";
+import MessageTicks from "../../../../component/UI/chat/MessageTicks";
+import ReplyPreview from "../../../../component/UI/chat/ReplyPreview";
 import { IoArrowUndo } from 'react-icons/io5';
 import { startKundliChat, sendKundliChatMessage } from '../../../../services/appServices/aiWowService';
 import useSelectedKundliProfile from '../../../../utils/hooks/useSelectedKundliProfile';

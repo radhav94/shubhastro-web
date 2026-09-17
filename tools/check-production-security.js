@@ -146,17 +146,54 @@ const BENIGN_IDENTIFIERS = [
   /SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED/,
   /ILLEGAL_AES_PASSWORD/,
   /^ERR_[A-Z0-9_]*PASSWORD/,
+  /*
+    Route-table keys from src/utils/routes/Paths.js:
+
+        FORGOT_PASSWORD: { path: "/forgot-password", element: ForgotPassword },
+        VERIFY_PASSWORD: { path: "/verify-password/:id", element: VerifyPassword },
+
+    Object property names, so esbuild does not mangle them and they ship in the
+    entry chunk. There is no value attached to either — the screens they name
+    collect a password from the user and POST it; nothing is embedded at build
+    time. Verified by reading the declarations, not inferred from the names.
+  */
+  /^FORGOT_PASSWORD$/,
+  /^VERIFY_PASSWORD$/,
 ];
+/*
+  Every match, not just the first.
+
+  This loop used to be `src.match(SECRET_NAME_RE)` — no /g flag, so it returned
+  only the FIRST matching identifier in each chunk, and one benign hit silenced
+  the entire file. That is not a theoretical gap. React's internal
+  `SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED` sits in the allowlist above and
+  is present in almost any chunk containing React, so for as long as it happened
+  to appear before a real finding, that finding was never examined and the build
+  passed.
+
+  It was caught by accident: a bundle-splitting change moved React's sentinel out
+  of the entry chunk, and the check immediately "started failing" on
+  FORGOT_PASSWORD — an identifier that had been shipping in that same chunk all
+  along, 108 bytes from VERIFY_PASSWORD, which had never been looked at either.
+  Nothing about the payload changed; only which match came first.
+
+  So: scan all matches, de-duplicate, drop the benign ones, and report what is
+  left. This strictly widens detection — an identifier hidden behind a benign
+  one is now reported instead of skipped.
+*/
+const SECRET_NAME_RE_ALL = new RegExp(SECRET_NAME_RE.source, "g");
 for (const f of jsFiles.concat(htmlFiles)) {
   const src = fs.readFileSync(f, "utf8");
-  const m = src.match(SECRET_NAME_RE);
-  if (!m) continue;
-  if (BENIGN_IDENTIFIERS.some((re) => re.test(m[0]))) continue;
-  errors.push(
-    `secret-like identifier "${m[0]}" in ${rel(f)} (value withheld). Confirm ` +
-      `whether a real credential shipped; if so ROTATE it and move the operation ` +
-      `server-side.`
+  const found = [...new Set(src.match(SECRET_NAME_RE_ALL) || [])].filter(
+    (name) => !BENIGN_IDENTIFIERS.some((re) => re.test(name))
   );
+  for (const name of found) {
+    errors.push(
+      `secret-like identifier "${name}" in ${rel(f)} (value withheld). Confirm ` +
+        `whether a real credential shipped; if so ROTATE it and move the operation ` +
+        `server-side.`
+    );
+  }
 }
 
 /* 5. HTML integrity — the three defects described at the top. */

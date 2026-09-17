@@ -1,5 +1,5 @@
 import styles from "./Onboarding.module.scss";
-import onboardingBg from "../../../assets/images/onboarding.png";
+import onboardingBg from "../../../assets/images/onboarding.jpg";
 
 const WelcomeScreen = ({ onNext }) => {
   return (

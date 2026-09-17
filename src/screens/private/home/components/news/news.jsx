@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Styles from "./News.module.scss";
-import { NewsCard, Title } from "../../../../../component";
+import { Title } from "../../../../../component";
+import NewsCard from "../../../../../component/UI/cards/NewsCard";
 import { Link, useNavigate } from "react-router-dom";
 import { PATH } from "../../../../../utils/routes/Paths";
 

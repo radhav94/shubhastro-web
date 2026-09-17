@@ -6,7 +6,7 @@ import { FiChevronLeft, FiChevronRight, FiPlus, FiMinus, FiCalendar, FiX, FiEdit
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { useGetEPoojaDetailQuery, useGetProductReviewsQuery, useAddToCartMutation, useGetCartQuery, useUpdateCartItemMutation, useCreateProductReviewMutation, useUpdateProductReviewMutation, useDeleteProductReviewMutation, useGetProductSuggestionsQuery } from "../../../../redux/api/astromall/epooja/epoojaBookingApi";
 import Toast from "../../../../component/toast";
-import { DeleteConfirmationModal } from "../../../../component";
+import DeleteConfirmationModal from "../../../../component/UI/modal/deleteModal/DeleteConfirmationModal";
 import AstromallCartSidebar from "../components/AstromallCartSidebar";
 import AddressPopup from "../components/AddressPopup";
 import { DefaultImages } from "../../../../utils/appImages";
