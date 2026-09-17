@@ -142,7 +142,8 @@ const LalKitab = () => {
     doGenerate(selectedProfile);
   };
 
-  const infoText = "Laal Kitab is a unique system of astrology that provides simple yet powerful remedies for planetary afflictions. Unlike traditional Vedic astrology, Laal Kitab focuses on practical remedies that can be performed in daily life to mitigate negative planetary effects.";
+  // const infoText = "Laal Kitab is a unique system of astrology that provides simple yet powerful remedies for planetary afflictions. Unlike traditional Vedic astrology, Laal Kitab focuses on practical remedies that can be performed in daily life to mitigate negative planetary effects.";
+  const infoText = "Lal Kitab, also written as Laal Kitab, is an astrology system associated with planetary analysis, houses, karmic influences, palmistry and practical remedies known as upayas. It is especially known for simple, everyday remedial practices intended to address challenging planetary influences identified through a person's birth chart.";
 
   return (
     <>
@@ -249,13 +250,14 @@ const LalKitab = () => {
       <div className={styles.infoSection}>
         <div className={styles.infoHeader}>
           <h2 className={styles.infoTitle}>
-            What is <span className={styles.orange}>Laal Kitab?</span>
+            What is <span className={styles.orange}>Lal Kitab (Laal Kitab)</span> in Astrology?
           </h2>
           <TTSButton text={`What is Laal Kitab? ${infoText}`} />
         </div>
         <p className={styles.infoText}>{infoText}</p>
 
         {/* Feature cards */}
+        <h2 className={styles.infoTitleSixCard}>Key Features of Lal Kitab Astrology</h2>
         <div className={styles.featureGrid}>
           {features.map((f, i) => (
             <div key={i} className={styles.featureCard}>
