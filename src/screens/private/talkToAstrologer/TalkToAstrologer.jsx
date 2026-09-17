@@ -194,6 +194,8 @@ const TalkToAstrologer = () => {
     // The connection the user tapped, set by the hook's connect handlers, so the
     // recharge popup shows the right rate/wording instead of always "chat".
     rechargeType: hookRechargeType,
+    rechargeRequiredAmount: hookRechargeRequiredAmount,
+    rechargePricePerMinute: hookRechargePricePerMinute,
     kundliRef,
     hasKundli,
     // Lets the Chat/Call button that was tapped show that the request is in
@@ -1845,6 +1847,8 @@ const TalkToAstrologer = () => {
         }
         astrologer={selectedAstrologer}
         connectionType={hookRechargeType || "chat"}
+        requiredAmount={hookRechargeRequiredAmount}
+        pricePerMinute={hookRechargePricePerMinute}
       />
 
       {/* Kundli modal - using ProfileModals like Home page */}
@@ -1906,6 +1910,8 @@ const TalkToAstrologer = () => {
         }
         astrologer={selectedAstrologer}
         connectionType={hookRechargeType || "chat"}
+        requiredAmount={hookRechargeRequiredAmount}
+        pricePerMinute={hookRechargePricePerMinute}
       />
 
       {/* Recommend CTA temporarily hidden per request */}

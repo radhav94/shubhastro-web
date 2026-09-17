@@ -48,6 +48,9 @@ export const useAstrologerConnect = () => {
   // "video"), so the modal's copy and min-balance rate match what the user
   // actually tapped instead of always defaulting to "chat".
   const [rechargeType, setRechargeType] = useState("chat");
+  // Balance-check figures from getBalance, so the recharge modal can show the
+  // real required amount and per-minute rate instead of a hardcoded "5 min".
+  const [balanceInfo, setBalanceInfo] = useState({ requiredAmount: null, pricePerMinute: null });
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [chatRoomId, setChatRoomId] = useState(null);
 
@@ -266,6 +269,10 @@ export const useAstrologerConnect = () => {
         if (checkBalanceStatus === false) {
           console.log("[NormalFlow] ❌ Insufficient balance — opening recharge modal");
           setRechargeType("chat");
+          setBalanceInfo({
+            requiredAmount: result?.data?.data?.requiredAmount ?? null,
+            pricePerMinute: result?.data?.data?.pricePerMinute ?? null,
+          });
           setOpenModal((prev) => ({ ...prev, recharge: true }));
           return false;
         } else if (checkBalanceStatus === undefined) {
@@ -426,6 +433,10 @@ export const useAstrologerConnect = () => {
       if (result?.data?.data?.status === false) {
         console.log("[NormalFlow] ❌ Insufficient balance — opening recharge modal");
         setRechargeType(type || "audio");
+        setBalanceInfo({
+          requiredAmount: result?.data?.data?.requiredAmount ?? null,
+          pricePerMinute: result?.data?.data?.pricePerMinute ?? null,
+        });
         setOpenModal((prev) => ({ ...prev, recharge: true }));
         return false;
       }
@@ -644,6 +655,10 @@ export const useAstrologerConnect = () => {
     openModal,
     setOpenModal,
     rechargeType,
+    // Required rupees + per-minute rate from the balance check, for the recharge
+    // modal's "Minimum balance of N minutes (₹X)" copy.
+    rechargeRequiredAmount: balanceInfo.requiredAmount,
+    rechargePricePerMinute: balanceInfo.pricePerMinute,
     selectedAstrologer,
     chatRoomId,
     setChatRoomId,
