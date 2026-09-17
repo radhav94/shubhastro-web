@@ -5,11 +5,21 @@ import PaymentSuccessModal from "../WelcomeBonusModal/PaymentSuccessModal";
 import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 import styles from "./RechargeModal.module.scss";
 
+// Fallback minimum when the backend balance check hasn't supplied a
+// `requiredAmount` — the historic business rule was "5 minutes' worth".
+const DEFAULT_MIN_MINUTES = 5;
+
 const RechargeModal = ({
   isOpen,
   onClose,
   astrologer,
   connectionType = "chat",
+  // From the balance-check API (getBalance): the exact rupees the user must have
+  // to start, and the astrologer's per-minute rate for this session type. When
+  // provided, both the amount and the minutes shown are derived from these
+  // instead of the hardcoded "5 minutes (₹ rate*5)".
+  requiredAmount = null,
+  pricePerMinute = null,
 }) => {
   const [showPlansModal, setShowPlansModal] = useState(false);
   const [successAmount, setSuccessAmount] = useState(null);
@@ -25,7 +35,20 @@ const RechargeModal = ({
         ? astrologer?.price?.videoCallRate?.amount
         : astrologer?.price?.audioRate?.amount;
 
-  const minBalance = (rate || 1) * 5;
+  // Per-minute rate: prefer the value the balance API returned, else the
+  // astrologer's rate for this connection type.
+  const perMinute = Number(pricePerMinute) > 0 ? Number(pricePerMinute) : (rate || 1);
+
+  // Required rupees to start: the API's `requiredAmount` when known, otherwise
+  // the historic "5 minutes' worth" fallback.
+  const minBalance =
+    Number(requiredAmount) > 0 ? Number(requiredAmount) : perMinute * DEFAULT_MIN_MINUTES;
+
+  // Minutes that `minBalance` buys at this rate, so the copy stays consistent
+  // with the amount (e.g. ₹150 at ₹30/min reads "5 minutes"). Rounded down since
+  // it's a minimum the balance guarantees.
+  const minMinutes =
+    perMinute > 0 ? Math.max(1, Math.floor(minBalance / perMinute)) : DEFAULT_MIN_MINUTES;
   // userName-first (helper falls back to firstName + lastName).
   const astrologerName = getAstrologerDisplayName(astrologer) || "Astrologer";
 
@@ -84,7 +107,7 @@ const RechargeModal = ({
           onClick={(e) => e.stopPropagation()}
         >
           <PrimaryText isCenter className="pt-4">
-            Minimum balance of 5 minutes (₹ {minBalance}) is required to start{" "}
+            Minimum balance of {minMinutes} {minMinutes === 1 ? "minute" : "minutes"} (₹ {minBalance}) is required to start{" "}
             {connectionLabel} with {astrologerName}.
           </PrimaryText>
 
