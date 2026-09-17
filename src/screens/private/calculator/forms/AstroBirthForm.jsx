@@ -21,6 +21,12 @@ const AstroBirthForm = ({
   const dispatch = useDispatch();
   const selectedKundli = useSelector((state) => state.kundli?.selectedKundli);
 
+  // "Select Profile" only makes sense for a signed-in user with saved profiles.
+  // For a guest, ProfileManager renders its OWN GuestKundliAuthModal — and the
+  // calculator pages (e.g. RashiCalc) already render a guest sign-up gate, so a
+  // guest opening this would see the sign-up popup twice. Gate it on auth.
+  const isLoggedIn = Boolean(localStorage.getItem("shubhtalk_customer_token"));
+
   // Pre-fill from Redux selectedKundli on mount or when it changes
   useEffect(() => {
     if (localStorage.getItem("shubhtalk_customer_token") && selectedKundli) {
@@ -71,21 +77,25 @@ const AstroBirthForm = ({
             />
             {errors?.name && <p className={styles.error}>{errors.name}</p>}
 
-            {/* Select Profile below name */}
-            <button
-              type="button"
-              className={styles.selectProfileBtnMobile}
-              onClick={() => setShowProfileModal(true)}
-            >
-              Select Profile +
-            </button>
-            <button
-              type="button"
-              className={styles.selectProfileBtn}
-              onClick={() => setShowProfileModal(true)}
-            >
-              Select Profile +
-            </button>
+            {/* Select Profile below name — signed-in users only (see isLoggedIn). */}
+            {isLoggedIn && (
+              <>
+                <button
+                  type="button"
+                  className={styles.selectProfileBtnMobile}
+                  onClick={() => setShowProfileModal(true)}
+                >
+                  Select Profile +
+                </button>
+                <button
+                  type="button"
+                  className={styles.selectProfileBtn}
+                  onClick={() => setShowProfileModal(true)}
+                >
+                  Select Profile +
+                </button>
+              </>
+            )}
           </div>
 
           {/* Gender */}
@@ -203,13 +213,17 @@ const AstroBirthForm = ({
         </div>
       </form>
 
-      <ProfileManager
-        isOpen={showProfileModal}
-        onClose={() => setShowProfileModal(false)}
-        onProfileSelect={handleProfileSelect}
-        title="Select Profile"
-        enabledOperations={{ list: true, add: true, edit: true, delete: true }}
-      />
+      {/* Signed-in only: for a guest this would open a SECOND sign-up popup on
+          top of the calculator's own guest gate. */}
+      {isLoggedIn && (
+        <ProfileManager
+          isOpen={showProfileModal}
+          onClose={() => setShowProfileModal(false)}
+          onProfileSelect={handleProfileSelect}
+          title="Select Profile"
+          enabledOperations={{ list: true, add: true, edit: true, delete: true }}
+        />
+      )}
     </>
   );
 };
