@@ -16,7 +16,15 @@ import ConnectAstrologerPopup from "../v2/components/ui/ConnectAstrologerPopup";
 import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal";
 import { useAstrologerConnect } from "../../../utils/hooks/useAstrologerConnect";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
-import RechargeModal from "../../../component/recharge-modal/RechargeModal";
+/*
+  The minimum-balance prompt, not the bare wallet sheet.
+
+  This imported component/recharge-modal/RechargeModal, which ignores
+  `astrologer` and titles itself "ADD MONEY TO WALLET" — so the
+  "Recharge Modal for insufficient balance" below dropped the user into a plans
+  list without saying how much was required or why. See the note in HomeV2.
+*/
+import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeModal";
 import { useChat } from "../../../context/ChatContext";
 import { useCall } from "../../../context/CallContext";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
@@ -40,7 +48,7 @@ const OrderDetails = () => {
   const [chatRoomIdLocal, setChatRoomIdLocal] = useState(null);
   const [callRoomIdLocal, setCallRoomIdLocal] = useState(null);
 
-  const { handleChatStart, handleCallStart, openModal: hookOpenModal, setOpenModal: hookSetOpenModal, selectedAstrologer: hookSelectedAstrologer, lastConnectionType: hookLastConnectionType, lastIsEmergency: hookLastIsEmergency, hasKundli } = useAstrologerConnect();
+  const { handleChatStart, handleCallStart, openModal: hookOpenModal, setOpenModal: hookSetOpenModal, selectedAstrologer: hookSelectedAstrologer, lastConnectionType: hookLastConnectionType, lastIsEmergency: hookLastIsEmergency, hasKundli, rechargeType: hookRechargeType, rechargeRequiredAmount: hookRechargeRequiredAmount, rechargePricePerMinute: hookRechargePricePerMinute } = useAstrologerConnect();
   const { setWaitingList, resetChatFlow, setActiveChatRoomId, setActiveChat, setChatSeconds, waitingList: chatWaiting } = useChat();
   const { setWaitingList: setCallWaitingList, resetCallFlow, setActiveCallRoomId, setActiveCall, setOpenReview, setReviewData, waitingList: callWaiting } = useCall();
   const { cancelAllExcept, removePendingConnection, removePendingByAstrologer, cancelAll, assignRoomId } = useWaitingQueue();
@@ -645,6 +653,9 @@ const OrderDetails = () => {
         isOpen={hookOpenModal.recharge}
         onClose={() => hookSetOpenModal((prev) => ({ ...prev, recharge: false }))}
         astrologer={hookSelectedAstrologer}
+        connectionType={hookRechargeType || hookLastConnectionType || "chat"}
+        requiredAmount={hookRechargeRequiredAmount}
+        pricePerMinute={hookRechargePricePerMinute}
       />
     </div>
   );

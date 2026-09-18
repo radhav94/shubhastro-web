@@ -334,6 +334,14 @@ const Home = () => {
           setShowEmergencyModal(false);
           handleCallStart(astro, "audio", true);
         }}
+        /* The modal shows a Video button whenever the astrologer has an emergency
+           videoCallRate. Without this the tap hit `onVideoNow?.()` === undefined,
+           so the sheet just closed: no balance check, no "Minimum balance …"
+           prompt, no connect. */
+        onVideoNow={(astro) => {
+          setShowEmergencyModal(false);
+          handleCallStart(astro, "video", true);
+        }}
       />
     </div>
   );

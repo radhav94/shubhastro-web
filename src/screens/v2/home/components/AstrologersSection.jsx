@@ -77,6 +77,20 @@ const AstrologersSection = memo(({ title, astrologers, onConnect, gridRef, hideS
                         astrologer={emergencyAstrologer}
                         onChatNow={(astro) => onConnect(astro, "chat", true)}
                         onCallNow={(astro) => onConnect(astro, "audio", true)}
+                        /*
+                          EmergencySessionModal renders a Video button whenever the
+                          astrologer has an emergency videoCallRate, but invokes it as
+                          `onVideoNow?.(astrologer)`. With no handler the tap resolved to
+                          undefined and the sheet just closed — no balance check, so no
+                          "Minimum balance of N minutes (₹X) …" prompt and no connect.
+
+                          This is the homepage path (AstrologerGridSection renders this
+                          section, and it owns its own emergency modal rather than taking
+                          handlers from the screen), which is why the bug showed up only
+                          on the home page while the astrologer profile and /astrologers
+                          pages — which wire their own modals — worked.
+                        */
+                        onVideoNow={(astro) => onConnect(astro, "video", true)}
                     />
                 </Suspense>
             )}

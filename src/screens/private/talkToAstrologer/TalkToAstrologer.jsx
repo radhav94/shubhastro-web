@@ -2055,6 +2055,12 @@ const TalkToAstrologer = () => {
         astrologer={selectedAstrologer}
         onChatNow={(astro) => handleConnectClick(astro, "chat", true)}
         onCallNow={(astro) => handleConnectClick(astro, "audio", true)}
+        /* EmergencySessionModal renders a Video button whenever the astrologer
+           has an emergency videoCallRate, but calls `onVideoNow?.(astrologer)`.
+           Without this prop that tap resolved to undefined and the modal simply
+           closed — no balance check, so no "Minimum balance …" prompt and no
+           connect attempt, while Chat and Call worked. */
+        onVideoNow={(astro) => handleConnectClick(astro, "video", true)}
       />
 
       {/* Two-Way Accept: Stacked toast banners for secondary rings during active call */}

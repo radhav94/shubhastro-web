@@ -332,6 +332,11 @@ const MySessionsSection = ({ userId, navigate, styles }) => {
             astrologer={emergencyAstrologer}
             onChatNow={(astro) => handleChatStart(astro, true, true)}
             onCallNow={(astro) => handleCallStart(astro, lastConnectionType === "video" ? "video" : "audio", true)}
+            /* The modal shows a Video button whenever the astrologer has an
+               emergency videoCallRate. Without this the tap hit
+               `onVideoNow?.()` === undefined, so the sheet just closed: no
+               balance check, no "Minimum balance …" prompt, no connect. */
+            onVideoNow={(astro) => handleCallStart(astro, "video", true)}
           />
         </Suspense>
       )}
