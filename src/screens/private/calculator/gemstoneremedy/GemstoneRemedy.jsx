@@ -213,9 +213,7 @@ const GemstoneRemedy = () => {
     }
   };
 
-  // No PDF pipeline here, so use the browser's print dialog ("Save as PDF").
-  const handleDownload = () => window.print();
-
+  const handleDownload = () => "";
   if (!queryArgs || isLoading) return <CalcReportLoader />;
   if (!gem) return <div className={styles.empty}>No gemstone recommendation found</div>;
 
@@ -415,9 +413,6 @@ const GemstoneRemedy = () => {
         {/* ── SIDEBAR — EXPERT VERIFICATION ───────────────────────────── */}
         <aside className={styles.sidebar}>
           <div className={styles.verifyCard}>
-            <img src={heroFlourish} alt="" aria-hidden="true" className={styles.verifyFlourish} />
-            <img src={heroFlourishLeft} alt="" aria-hidden="true" className={styles.verifyFlourishLeft} />
-
             <div className={styles.cardTools}>
               <button
                 type="button"
