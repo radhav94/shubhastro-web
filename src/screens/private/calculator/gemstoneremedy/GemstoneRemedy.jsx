@@ -413,9 +413,6 @@ const GemstoneRemedy = () => {
         {/* ── SIDEBAR — EXPERT VERIFICATION ───────────────────────────── */}
         <aside className={styles.sidebar}>
           <div className={styles.verifyCard}>
-            <img src={heroFlourish} alt="" aria-hidden="true" className={styles.verifyFlourish} />
-            <img src={heroFlourishLeft} alt="" aria-hidden="true" className={styles.verifyFlourishLeft} />
-
             <div className={styles.cardTools}>
               <button
                 type="button"
