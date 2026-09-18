@@ -2795,6 +2795,14 @@ const Profile = () => {
           activeAstroRef.current = astro;
           handleCallStart(astro, "audio", true);
         }}
+        /* Without this the modal's Video button (shown whenever the astrologer has
+           an emergency videoCallRate) hit `onVideoNow?.()` === undefined: the sheet
+           closed with no balance check and no "Minimum balance …" prompt. */
+        onVideoNow={(astro) => {
+          setShowEmergencyModal(false);
+          activeAstroRef.current = astro;
+          handleCallStart(astro, "video", true);
+        }}
       />
 
       <SubscriptionModal isOpen={showSubscriptionModal} onClose={() => setShowSubscriptionModal(false)} />
