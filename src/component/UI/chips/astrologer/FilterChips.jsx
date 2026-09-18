@@ -133,7 +133,17 @@ const FilterChips = ({
     }
   }, [selectedType, astroFilterTab]);
 
-  // Update active state when selectedType prop changes from parent (but not on every render)
+  // Update active state when the `selectedType` prop changes from the parent.
+  //
+  // Depends on `selectedType` ONLY. It used to also depend on `astroFilterTab`,
+  // whose reference changes on every parent render (it's derived, not
+  // memoised). Combined with the `else` branch unconditionally calling
+  // setActiveChips([]) / setSelectedSkills([]) / … — each a *new* array/string
+  // that React treats as a state change — that produced a render→effect→render
+  // loop and the "Maximum update depth exceeded" crash whenever the parent
+  // re-rendered rapidly (e.g. the sticky chat timer ticking after backing out
+  // of a session). Reacting only to `selectedType` breaks the loop; the guards
+  // below also avoid redundant no-op updates.
   useEffect(() => {
     if (selectedType && selectedType !== "All") {
       setActive(selectedType);
@@ -153,20 +163,23 @@ const FilterChips = ({
       });
     } else if (!selectedType || selectedType === "All") {
       // When selectedType becomes undefined/empty (user clicked to unselect)
-      // Immediately clear the active state instead of waiting for parent re-render
-      setActive("all");
-      setActiveChips([]);
-      setEexperties("");
-      setSelectedSkills([]);
-      setSelectedGender("");
-      setSelectedSort("");
-      setSearchText("");
-      setPage(1);
+      // reset to the default state — but only touch each piece of state when it
+      // isn't already cleared, so this can't spin into an update loop if the
+      // effect re-runs.
+      setActive((prev) => (prev === "all" ? prev : "all"));
+      setActiveChips((prev) => (prev.length === 0 ? prev : []));
+      setEexperties((prev) => (prev === "" ? prev : ""));
+      setSelectedSkills((prev) => (prev.length === 0 ? prev : []));
+      setSelectedGender((prev) => (prev === "" ? prev : ""));
+      setSelectedSort((prev) => (prev === "" ? prev : ""));
+      setSearchText((prev) => (prev === "" ? prev : ""));
+      setPage((prev) => (prev === 1 ? prev : 1));
       pageRef.current = 1;
-      setHasMore(true);
+      setHasMore((prev) => (prev === true ? prev : true));
       isFilterActiveRef.current = false;
     }
-  }, [selectedType, astroFilterTab]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedType]);
 
   const openFilterModal = () => {
     setFilterModalOpen(true);

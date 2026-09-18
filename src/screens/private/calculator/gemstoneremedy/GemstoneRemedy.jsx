@@ -5,7 +5,6 @@ import {
   Sparkles,
   Download,
   Share2,
-  Flower2,
 } from "lucide-react";
 import { BsChatDots } from "react-icons/bs";
 import { MdOutlinePhoneInTalk } from "react-icons/md";
@@ -13,7 +12,7 @@ import { MdOutlinePhoneInTalk } from "react-icons/md";
 import { useGetGemStoneReportQuery } from "../../../../redux/api/kundli/planetApi";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { setForm } from "../../../../redux/kundliform/formSlice";
-import TTSButton from "../../../../component/UI/TTSButton";
+import verifyDividerImg from "../../../../assets/gemstone-remedy/verify-divider.png";
 import CalcReportLoader from "../CalcReportLoader";
 import CalcBackButton from "../CalcBackButton";
 import RecommendedAstrologersModal from "../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal";
@@ -73,7 +72,6 @@ const GemstoneRemedy = () => {
   // params, and hit the same `gem-suggestion` endpoint. No login gate — the
   // report shows whatever the shared Kundli form already produced.
   const kundliPayload = useSelector((state) => state?.form?.kundliPayload);
-  const userDetails = useSelector((state) => state?.form?.userDetails);
 
   // The active profile is held in the `kundli` slice and is switched from the
   // global header profile switcher (TopHeader -> setSelectedKundli). When that
@@ -155,8 +153,6 @@ const GemstoneRemedy = () => {
   // prompt; after that a Back press leaves the report normally.
   const backOfferShownRef = useRef(false);
 
-  const firstName = String(userDetails?.name || "").trim().split(/\s+/)[0] || "";
-
   const goodResults = useMemo(
     () => (Array.isArray(gem?.good_results) ? gem.good_results.filter(Boolean) : []),
     [gem?.good_results]
@@ -195,21 +191,6 @@ const GemstoneRemedy = () => {
       ].filter((e) => e.value),
     [gem]
   );
-
-  const ttsScript = useMemo(() => {
-    if (!gem) return "";
-    return [
-      firstName ? `${firstName}, here is your gemstone remedy.` : "Your gemstone remedy.",
-      gem.name && `Recommended gemstone: ${gem.name}.`,
-      gem.planet && `It is worn to strengthen ${gem.planet}.`,
-      gem.description,
-      goodResults.length ? `Good results: ${goodResults.join(", ")}.` : "",
-      gem.time_to_wear && `Time to wear: ${gem.time_to_wear}`,
-      gem.mantra && `Mantra: ${gem.mantra}`,
-    ]
-      .filter(Boolean)
-      .join(" ");
-  }, [gem, firstName, goodResults]);
 
   // Share via the native sheet, falling back to copying the URL.
   const handleShare = async () => {
@@ -261,12 +242,6 @@ const GemstoneRemedy = () => {
         }}
       />
 
-      <div className={styles.pageHead}>
-        <h1 className={styles.pageTitle}>
-          {firstName ? `${firstName}'s ` : ""}Gemstone <span>Remedy</span>
-        </h1>
-        <TTSButton text={ttsScript} />
-      </div>
 
       <div className={styles.layout}>
         {/* HERO lives in its own group (direct child of .layout) so that on
@@ -477,11 +452,7 @@ const GemstoneRemedy = () => {
               your gemstone.
             </p>
 
-            <div className={styles.verifyDivider} aria-hidden="true">
-              <span className={styles.verifyDividerLine} />
-              <Flower2 size={16} className={styles.verifyDividerIcon} />
-              <span className={styles.verifyDividerLine} />
-            </div>
+            <img src={verifyDividerImg} alt="" aria-hidden="true" className={styles.verifyDivider} />
 
             <div className={styles.actions}>
               <a

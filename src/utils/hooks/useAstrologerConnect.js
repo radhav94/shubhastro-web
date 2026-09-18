@@ -532,6 +532,17 @@ export const useAstrologerConnect = () => {
       console.log("[NormalFlow] ❌ Astrologer not selected — aborting");
       return Toast.error("Astrologer not selected");
     }
+    // Defense-in-depth live guard: a live astrologer can't take chat/call, so
+    // emitting here would create a roomId:null queue entry that never gets a
+    // room and decays into a "Cancelling…" popup. The per-screen guards and the
+    // balance-based check can miss this (balance check is optional and reads a
+    // stale flag), so block the emit/queue-add outright when the astrologer is
+    // marked live.
+    if (selectedAstrologer?.astrologerLiveStatus?.isLive) {
+      console.log("[NormalFlow] ❌ Astrologer is live — not initiating session");
+      Toast.error("Currently unavailable during live stream.");
+      return;
+    }
     if (!userIdLocal) {
       console.log("[NormalFlow] ❌ User ID missing — aborting");
       return Toast.error("User ID Missing");
