@@ -46,7 +46,23 @@ import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow"
   first open (which is what it rendered anyway), then mounted for the rest of
   the page's life, exactly as before.
 */
-const RechargeModal = lazy(() => import("../../../component/recharge-modal/RechargeModal"));
+/*
+  This must be the minimum-balance prompt (UI/modal/RechargeModal), NOT the bare
+  wallet sheet (component/recharge-modal/RechargeModal).
+
+  It used to import the latter, which takes only `{ isOpen, onClose, onSuccess,
+  title, showSuccessPopup }` and defaults its title to "ADD MONEY TO WALLET". The
+  `astrologer` and `connectionType` passed at the call site below were silently
+  ignored, so a failed balance check on the homepage dropped the visitor straight
+  into a plans list with no explanation of how much was needed or why — while the
+  astrologer profile page, which imports the prompt, said "Minimum balance of N
+  minutes (₹X) is required to start …".
+
+  The prompt renders the wallet sheet itself once the user taps Recharge, so
+  nothing is lost by going through it, and lazy-loading it still defers the whole
+  payment path (it imports the sheet statically).
+*/
+const RechargeModal = lazy(() => import("../../../component/UI/modal/RechargeModal/RechargeModal"));
 
 // Dynamic section rendering
 import { sortSections, sortContentByOrder, buildRenderPlan, renderStandaloneSection } from "./sectionRendererV2";
@@ -668,6 +684,10 @@ const HomeV2 = () => {
   const [selectedAstrologer, setSelectedAstrologer] = useState(null);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
+  // Whether the pending (kundli-select) connect was an emergency one. Without
+  // this the flag was dropped and profile selection reconnected as a NORMAL
+  // session — normal rates, normal availability rules.
+  const [pendingIsEmergency, setPendingIsEmergency] = useState(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   /*
@@ -1106,16 +1126,20 @@ const HomeV2 = () => {
 
   // ─── Connection Hooks ─────────────────────────────────────────────────────
   const { profiles, isCreating, showAddProfile, showEditProfile, formData, editFormData, setShowAddProfile, setShowEditProfile, setFormData, setEditFormData, handleAddProfile, handleSubmitProfile, handleSubmitEditProfile, formatProfileDisplay, placeReopenSignal } = useProfileManager();
-  const { handleChatStart, handleCallStart, openModal: hookOpenModal, setOpenModal: hookSetOpenModal, selectedAstrologer: hookSelectedAstrologer, activeCallAstroRef, hasKundli, kundliRef } = useAstrologerConnect();
+  const { handleChatStart, handleCallStart, openModal: hookOpenModal, setOpenModal: hookSetOpenModal, selectedAstrologer: hookSelectedAstrologer, activeCallAstroRef, hasKundli, kundliRef, rechargeType: hookRechargeType, rechargeRequiredAmount: hookRechargeRequiredAmount, rechargePricePerMinute: hookRechargePricePerMinute } = useAstrologerConnect();
   const { connectionType, localSelectedProfile, setLocalSelectedProfile, setSelectedAstrologer: setAstrologerRef } = useAstrologerConnection(activeCallAstroRef, kundliRef.current);
 
   const handleProfileManagerStartCall = useCallback(() => {
     if (selectedAstrologer && pendingConnectionType) {
-      if (pendingConnectionType === "chat") handleChatStart(selectedAstrologer);
-      else handleCallStart(selectedAstrologer, "audio");
+      // Carry BOTH the real call type and the emergency flag through. This used to
+      // hardcode "audio" and omit isEmergency, so finishing profile selection
+      // started a normal audio session no matter what the visitor had tapped.
+      if (pendingConnectionType === "chat") handleChatStart(selectedAstrologer, true, pendingIsEmergency);
+      else handleCallStart(selectedAstrologer, pendingConnectionType === "video" ? "video" : "audio", pendingIsEmergency);
       setPendingConnectionType(null);
+      setPendingIsEmergency(false);
     }
-  }, [selectedAstrologer, pendingConnectionType, handleChatStart, handleCallStart]);
+  }, [selectedAstrologer, pendingConnectionType, pendingIsEmergency, handleChatStart, handleCallStart]);
 
   const handleConnectClick = useCallback(async (astrologer, connType, isEmergency = false) => {
     // Guest flows (no login redirect):
@@ -1135,15 +1159,34 @@ const HomeV2 = () => {
     if (hasKundli) {
       let result;
       if (connType === "chat") result = await handleChatStart(astrologer, true, isEmergency);
-      else result = await handleCallStart(astrologer, "audio", isEmergency);
+      /*
+        `connType` was ignored here and "audio" hardcoded, so a Video tap — the
+        emergency sheet's Video button included — ran the balance check against the
+        AUDIO rate and audio availability. For an astrologer whose emergency offer
+        is video (luckac80), that check does not fail the way a video check would,
+        so the "Minimum balance of N minutes (₹X) …" prompt never opened and the
+        connect quietly went nowhere. The astrologer profile page always passed
+        "video" explicitly, which is why it behaved correctly.
+      */
+      else result = await handleCallStart(astrologer, connType === "video" ? "video" : "audio", isEmergency);
       if (result?.emergencyAvailable) { setShowEmergencyModal(true); return; }
-    } else { setPendingConnectionType(connType); hookSetOpenModal(prev => ({ ...prev, kundli: true })); }
+    } else {
+      setPendingConnectionType(connType);
+      setPendingIsEmergency(isEmergency);
+      hookSetOpenModal(prev => ({ ...prev, kundli: true }));
+    }
   }, [requireAuth, hasKundli, handleChatStart, handleCallStart, setAstrologerRef, hookSetOpenModal, navigate, openGuestConnect]);
 
   // ─── Memoized modal handlers ──────────────────────────────────────────────
   const handleEmergencyClose = useCallback(() => setShowEmergencyModal(false), []);
   const handleEmergencyChatNow = useCallback((a) => handleConnectClick(a, "chat", true), [handleConnectClick]);
   const handleEmergencyCallNow = useCallback((a) => handleConnectClick(a, "audio", true), [handleConnectClick]);
+  /* EmergencySessionModal shows a Video button whenever the astrologer has an
+     emergency videoCallRate, but calls `onVideoNow?.(astrologer)`. With no
+     handler passed the tap resolved to undefined and the sheet just closed — no
+     balance check, so no "Minimum balance …" prompt and no connect attempt,
+     while Chat and Call worked. */
+  const handleEmergencyVideoNow = useCallback((a) => handleConnectClick(a, "video", true), [handleConnectClick]);
   const handleMobileAppClose = useCallback(() => setShowMobileAppModal(false), []);
   const handlePaidCardClick = useCallback(async (item) => {
     // AR Vastu Scanner is an app-only feature — show its modal directly, with no
@@ -1221,7 +1264,7 @@ const HomeV2 = () => {
   useEffect(() => {
     if (rechargeEverMounted) return;
     const warm = () => {
-      import("../../../component/recharge-modal/RechargeModal").catch(() => {
+      import("../../../component/UI/modal/RechargeModal/RechargeModal").catch(() => {
         /* best effort — lazy() will fetch it again on open */
       });
     };
@@ -1398,7 +1441,7 @@ const HomeV2 = () => {
         <ProfileModals profiles={profiles} isCreating={isCreating} showAddProfile={showAddProfile} showEditProfile={showEditProfile} formData={formData} editFormData={editFormData} setShowAddProfile={setShowAddProfile} setShowEditProfile={setShowEditProfile} setFormData={setFormData} setEditFormData={setEditFormData} handleAddProfile={handleAddProfile} handleSubmitProfile={handleSubmitProfile} handleSubmitEditProfile={handleSubmitEditProfile} formatProfileDisplay={formatProfileDisplay} placeReopenSignal={placeReopenSignal} openModal={hookOpenModal} setOpenModal={hookSetOpenModal} selectedAstrologer={hookSelectedAstrologer} localSelectedProfile={localSelectedProfile} setLocalSelectedProfile={setLocalSelectedProfile} onContinue={handleProfileManagerStartCall} connectionType={connectionType} />
         )}
         {showEmergencyModal && selectedAstrologer && (
-        <EmergencySessionModal isOpen={showEmergencyModal} onClose={handleEmergencyClose} astrologer={selectedAstrologer} onChatNow={handleEmergencyChatNow} onCallNow={handleEmergencyCallNow} />
+        <EmergencySessionModal isOpen={showEmergencyModal} onClose={handleEmergencyClose} astrologer={selectedAstrologer} onChatNow={handleEmergencyChatNow} onCallNow={handleEmergencyCallNow} onVideoNow={handleEmergencyVideoNow} />
         )}
         {showMobileAppModal && (
         <MobileAppModal isOpen={showMobileAppModal} onClose={handleMobileAppClose} />
@@ -1420,7 +1463,13 @@ const HomeV2 = () => {
             isOpen={hookOpenModal.recharge}
             onClose={handleRechargeClose}
             astrologer={hookSelectedAstrologer}
-            connectionType={pendingConnectionType || "chat"}
+            /* `rechargeType` is what the hook recorded when the balance check
+               actually failed (chat / audio / video), so it beats the local
+               pendingConnectionType, which is only set on the kundli-select
+               branch and stays null on the direct-connect path. */
+            connectionType={hookRechargeType || pendingConnectionType || "chat"}
+            requiredAmount={hookRechargeRequiredAmount}
+            pricePerMinute={hookRechargePricePerMinute}
           />
         </Suspense>
       )}

@@ -223,6 +223,13 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
           setShowEmergencyModal(false);
           onCallAgain(session, "audio", true);
         }}
+        /* Without this the modal's Video button (shown whenever the astrologer has
+           an emergency videoCallRate) hit `onVideoNow?.()` === undefined: the sheet
+           closed with no balance check and no "Minimum balance …" prompt. */
+        onVideoNow={() => {
+          setShowEmergencyModal(false);
+          onCallAgain(session, "video", true);
+        }}
       />
     </div>
   );
