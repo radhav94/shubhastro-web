@@ -28,6 +28,7 @@ import Toast from "../../../../../component/toast";
 import { useCreateChatRoomMutation } from "../../../../../redux/api/chatApi";
 import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
 import { useMediaPermission } from "../../../../../utils/hooks/useMediaPermission";
+import LiveSignupPromptModal from "./LiveSignupPromptModal";
 import { GuestKundliAuthModal } from "../../../../../component/UI/Profile";
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
@@ -655,9 +656,12 @@ const LiveView = (props) => {
   const isAstrologerLive = isLiveConnected;
   const viewerCount = participantCount || (safeRemoteUsers?.length || 0) + 1;
 
-  // Guests can watch the live stream but must sign up before chatting. Opened
-  // when a guest tries to send a live-chat message.
+  // Guests can watch the live stream but must sign up before chatting.
+  // `showGuestAuthModal` = the lightweight prompt shown when a guest tries to
+  // send a message; `showGuestSignupModal` = the full sign-up popup
+  // (GuestKundliAuthModal) opened from the prompt's "Sign Up Free" button.
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
+  const [showGuestSignupModal, setShowGuestSignupModal] = useState(false);
 
   const {
     messagesEndRef,
@@ -2018,10 +2022,22 @@ const LiveView = (props) => {
           />
 
           {/* Guests can watch but must sign up before sending a live-chat
-              message. Opened from useLiveViewLogic's onGuestBlocked. */}
-          <GuestKundliAuthModal
+              message. Opened from useLiveViewLogic's onGuestBlocked — a
+              lightweight prompt whose "Sign Up Free" opens the full sign-up
+              popup and "Log In" routes to /login. */}
+          <LiveSignupPromptModal
             isOpen={showGuestAuthModal}
             onClose={() => setShowGuestAuthModal(false)}
+            onSignup={() => {
+              setShowGuestAuthModal(false);
+              setShowGuestSignupModal(true);
+            }}
+          />
+
+          {/* Full sign-up flow (kundli details + OTP), opened from the prompt. */}
+          <GuestKundliAuthModal
+            isOpen={showGuestSignupModal}
+            onClose={() => setShowGuestSignupModal(false)}
           />
 
           <LiveListModal

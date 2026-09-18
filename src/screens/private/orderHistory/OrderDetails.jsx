@@ -389,6 +389,16 @@ const OrderDetails = () => {
   };
 
   const handleConsultAgain = () => {
+    // Guard against a live astrologer. Without this the connect popup opens and
+    // a session is emitted; a live astrologer can't take chat/call, so no room
+    // arrives and the waiting entry decays into a "Cancelling…" state. The card
+    // already blocks this — mirror it here so the popup never opens when live.
+    if (isAstrologerLive) {
+      Toast.info(
+        "This astrologer is in a live session right now. Join the live stream or try again once it ends."
+      );
+      return;
+    }
     if (!astrologer?.isActive && astrologer?.isEmergencyAvailable) {
       setShowEmergencyModal(true);
     } else {
