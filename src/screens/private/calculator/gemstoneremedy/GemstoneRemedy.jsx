@@ -213,9 +213,7 @@ const GemstoneRemedy = () => {
     }
   };
 
-  // No PDF pipeline here, so use the browser's print dialog ("Save as PDF").
-  const handleDownload = () => window.print();
-
+  const handleDownload = () => "";
   if (!queryArgs || isLoading) return <CalcReportLoader />;
   if (!gem) return <div className={styles.empty}>No gemstone recommendation found</div>;
 

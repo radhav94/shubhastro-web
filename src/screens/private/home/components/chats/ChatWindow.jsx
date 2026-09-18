@@ -374,12 +374,20 @@ const ChatWindow = () => {
         kundliName: item?.kundliName,
         suggestedProducts: item?.suggestedProducts,
         kundliId: item?.kundliId,
-        // Protocol fields from persisted history. Old messages have no seq/status
-        // (guide §13): treat them as already `read` and let seq fall back to time.
+        // Protocol fields from persisted history. Messages that predate the
+        // read-receipt feature carry no (or a stale sent/delivered) status, so
+        // their real read state was never tracked. They ARE historical/persisted
+        // and the reader has since moved on, so show the sender's own history
+        // messages as `read` (blue) — except genuinely un-sent ones
+        // (pending/failed), which keep their status so a retry affordance shows.
         messageId: item?._id,
         clientMsgId: item?.clientMsgId,
         seq: typeof item?.seq === "number" ? item.seq : undefined,
-        status: isSender ? (item?.status || MESSAGE_STATUS.READ) : undefined,
+        status: isSender
+          ? (item?.status === MESSAGE_STATUS.PENDING || item?.status === MESSAGE_STATUS.FAILED
+              ? item.status
+              : MESSAGE_STATUS.READ)
+          : undefined,
         replyTo: normalizeReplyTo(item?.replyTo),
         starred: !!item?.starred,
       };
