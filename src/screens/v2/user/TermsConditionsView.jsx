@@ -20,7 +20,7 @@ const TermsConditionsView = () => {
 
       <div className={styles.content}>
         <div className={styles.updateInfo}>
-          <p className={styles.updateText}>Last Updated: 20 January 2024, 10:00 AM</p>
+          <p className={styles.updateText}>Last Updated: 18th September 2026</p>
         </div>
 
         <div className={styles.section}>
@@ -86,7 +86,14 @@ const TermsConditionsView = () => {
         </div>
 
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>6. Intellectual Property</h2>
+          <h2 className={styles.sectionTitle}>6. Whatsapp Consent</h2>
+          <p className={styles.paragraph}>
+             By signing up, you agree to receive updates, offers and promotional communications from ShubhAstro on WhatsApp.
+          </p>
+        </div>
+
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>7. Intellectual Property</h2>
           <p className={styles.paragraph}>
             All content, including text, graphics, logos, and software, is the property of
             ShubhAstro or its licensors. You may not reproduce, distribute, or create derivative
@@ -95,7 +102,7 @@ const TermsConditionsView = () => {
         </div>
 
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>7. Limitation of Liability</h2>
+          <h2 className={styles.sectionTitle}>8. Limitation of Liability</h2>
           <p className={styles.paragraph}>
             ShubhAstro is not liable for any direct, indirect, incidental, or consequential
             damages arising from your use of the Platform. Services are provided "as is" without
@@ -104,7 +111,7 @@ const TermsConditionsView = () => {
         </div>
 
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>8. Termination</h2>
+          <h2 className={styles.sectionTitle}>9. Termination</h2>
           <p className={styles.paragraph}>
             We reserve the right to suspend or terminate your account at any time for violation
             of these Terms or for any other reason at our discretion.
@@ -112,7 +119,7 @@ const TermsConditionsView = () => {
         </div>
 
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>9. Changes to Terms</h2>
+          <h2 className={styles.sectionTitle}>10. Changes to Terms</h2>
           <p className={styles.paragraph}>
             We may update these Terms from time to time. Continued use of the Platform after
             changes constitutes acceptance of the updated Terms.
@@ -120,7 +127,7 @@ const TermsConditionsView = () => {
         </div>
 
         <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>10. Contact Us</h2>
+          <h2 className={styles.sectionTitle}>11. Contact Us</h2>
           <p className={styles.paragraph}>
             For questions about these Terms, please contact us at{" "}
             <a href="mailto:connect@pittiegroup.com" className={styles.link}>
