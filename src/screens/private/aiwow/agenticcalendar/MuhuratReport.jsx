@@ -21,6 +21,13 @@ import slotArt1 from "../../../../assets/images/muhurat/slot-1.png";
 import slotArt2 from "../../../../assets/images/muhurat/slot-2.png";
 import slotArt3 from "../../../../assets/images/muhurat/slot-3.png";
 import ganpatiArt from "../../../../assets/images/muhurat/ganpati.png";
+import favMuhuratIcon from "../../../../assets/images/muhurat/fav-1.png";
+import excellentIcon from "../../../../assets/images/muhurat/fav-2.png";
+import beforeEveningIcon from "../../../../assets/images/muhurat/fav-3.png";
+import afterEveningIcon from "../../../../assets/images/muhurat/fav-4.png";
+import avoidRahuIcon from "../../../../assets/images/muhurat/avoid-rahu.png";
+import avoidGulikaIcon from "../../../../assets/images/muhurat/avoid-gulika.png";
+import avoidYamakantaIcon from "../../../../assets/images/muhurat/avoid-yamakanta.png";
 import styles from "./MuhuratReport.module.scss";
 
 /*
@@ -106,51 +113,101 @@ const dayOffsetLabel = (value) => {
 
 /** One favourable window. Collapsed to the essentials, with the engine's own
  *  long-form explanation available on demand rather than always on screen. */
-const SlotRow = ({ timing, passed = false }) => {
+/**
+ * Parse the START time of a window like "6:30 PM - 7:15 PM" (or "18:30-19:15")
+ * into minutes-since-midnight. Returns null when it can't be parsed.
+ */
+const parseStartMinutes = (range) => {
+  const first = String(range || "").split(/[-–—]/)[0]?.trim();
+  if (!first) return null;
+  const m = first.match(/(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)?/i);
+  if (!m) return null;
+  let h = Number(m[1]);
+  const min = Number(m[2] || 0);
+  const mer = (m[3] || "").toLowerCase().replace(/\./g, "");
+  if (mer === "pm" && h !== 12) h += 12;
+  else if (mer === "am" && h === 12) h = 0;
+  if (!Number.isFinite(h) || !Number.isFinite(min)) return null;
+  return h * 60 + min;
+};
+
+// 6:30 PM as minutes-since-midnight.
+const EVENING_CUTOFF_MIN = 18 * 60 + 30;
+
+const SlotRow = ({ timing, passed = false, dateLabel = "" }) => {
   const [open, setOpen] = useState(false);
   const explanation = timing?.details?.fullExplanation;
   const choghadiya = timing?.details?.choghadiya;
+  // Excellent windows get their own icon; every OTHER window gets a
+  // before/after-6:30 PM icon based on its start time.
+  const isExcellent = String(timing?.quality || "").trim().toLowerCase() === "excellent";
+  const startMin = parseStartMinutes(timing?.bestTimeRange);
+  const timeOfDayIcon =
+    isExcellent || startMin == null
+      ? null
+      : startMin < EVENING_CUTOFF_MIN
+        ? beforeEveningIcon
+        : afterEveningIcon;
+
+  // The leading icon for this row's circular tile: Excellent windows use their
+  // own mark; every other window uses the before/after-6:30 PM icon.
+  const leadingIcon = isExcellent ? excellentIcon : timeOfDayIcon;
 
   return (
     <li className={`${styles.slot} ${passed ? styles.slotPassed : ""}`}>
-      <div className={styles.slotHead}>
-        <span className={styles.slotTime}>{timing.bestTimeRange}</span>
-        {timing.quality && (
-          <span className={`${styles.qualityChip} ${qualityClass(timing.quality)}`}>
-            {timing.quality}
+      <div className={styles.slotRow}>
+        {leadingIcon && (
+          <span className={styles.slotIconTile} aria-hidden="true">
+            <img src={leadingIcon} alt="" className={styles.slotIconImg} />
           </span>
         )}
-        {choghadiya && <span className={styles.choghadiyaChip}>{choghadiya}</span>}
-        {passed && (
-          <span className={styles.passedChip}>
-            <FiClock size={12} aria-hidden="true" /> Passed
-          </span>
-        )}
+        <div className={styles.slotBody}>
+          <div className={styles.slotHead}>
+            <span className={styles.slotTime}>{timing.bestTimeRange}</span>
+            {timing.quality && (
+              <span className={`${styles.qualityChip} ${qualityClass(timing.quality)}`}>
+                {timing.quality}
+              </span>
+            )}
+            {choghadiya && <span className={styles.choghadiyaChip}>{choghadiya}</span>}
+            {passed && (
+              <span className={styles.passedChip}>
+                <FiClock size={12} aria-hidden="true" /> Passed
+              </span>
+            )}
+          </div>
+
+          {dateLabel && (
+            <p className={styles.slotDateLine}>
+              <FiCalendar size={12} aria-hidden="true" /> {dateLabel}
+            </p>
+          )}
+
+          {/* `reason` is the personalised line (it references the user's own
+              chart); `qualityReason` explains the grade. */}
+          {timing.reason && <p className={styles.slotNote}>{timing.reason}</p>}
+          {timing.qualityReason && <p className={styles.slotWhy}>{timing.qualityReason}</p>}
+
+          {explanation && (
+            <>
+              <button
+                type="button"
+                className={styles.moreBtn}
+                onClick={() => setOpen((prev) => !prev)}
+                aria-expanded={open}
+              >
+                {open ? "Hide details" : "Why this time"}
+                <FiChevronDown
+                  size={13}
+                  className={open ? styles.moreIconOpen : styles.moreIcon}
+                  aria-hidden="true"
+                />
+              </button>
+              {open && <p className={styles.slotExplain}>{explanation}</p>}
+            </>
+          )}
+        </div>
       </div>
-
-      {/* `reason` is the personalised line (it references the user's own chart);
-          `qualityReason` explains the grade. Both are the engine's wording. */}
-      {timing.reason && <p className={styles.slotNote}>{timing.reason}</p>}
-      {timing.qualityReason && <p className={styles.slotWhy}>{timing.qualityReason}</p>}
-
-      {explanation && (
-        <>
-          <button
-            type="button"
-            className={styles.moreBtn}
-            onClick={() => setOpen((prev) => !prev)}
-            aria-expanded={open}
-          >
-            {open ? "Hide details" : "Why this time"}
-            <FiChevronDown
-              size={13}
-              className={open ? styles.moreIconOpen : styles.moreIcon}
-              aria-hidden="true"
-            />
-          </button>
-          {open && <p className={styles.slotExplain}>{explanation}</p>}
-        </>
-      )}
     </li>
   );
 };
@@ -234,11 +291,23 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
     const days = active?.days || [];
     if (!days.length) return { today: null, nextDay: null };
 
-    // Only the "Today" view splits into today (Favorable Muhurats) vs tomorrow
-    // (Next Favorable Window). Every other period keeps the first/second-day
-    // behaviour so ranges and single-day requests are unaffected.
+    // Range / single-day (non-"Today") view: show EVERY favourable window across
+    // ALL dates in "Favorable Muhurats", not just the first date. The API
+    // returns one window per date across a range (e.g. 21st/24th/28th/30th), so
+    // reading only days[0]/days[1] dropped the rest. Flatten every day's timings
+    // (each tagged with its own date) into a single list; there is no separate
+    // "Next Favorable Window" outside the Today flow.
     if (!isTodayView || !fromIso) {
-      return { today: days[0] || null, nextDay: days[1] || null };
+      if (days.length <= 1) {
+        return { today: days[0] || null, nextDay: null };
+      }
+      const allTimings = days.flatMap((d) =>
+        (d.timings || []).map((t) => ({ ...t, _date: d.date }))
+      );
+      return {
+        today: { date: days[0].date, timings: allTimings, multiDate: true },
+        nextDay: null,
+      };
     }
 
     const primary = days.find((d) => d.date === fromIso) || null;
@@ -277,7 +346,20 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
     return { today: primary, nextDay: later };
   }, [active, byEvent, fromIso, isTodayView]);
 
-  const best = today?.timings?.[0] || null;
+  // "Best Muhurat" always shows the rank-1 window for the active event across
+  // ALL its dates — not just the first window in whatever panel order. Lowest
+  // rank wins; ties break on the higher muhuratScore.
+  const best = useMemo(() => {
+    const allTimings = (active?.days || []).flatMap((d) =>
+      (d.timings || []).map((t) => ({ ...t, _date: d.date }))
+    );
+    if (!allTimings.length) return null;
+    return [...allTimings].sort((a, b) => {
+      const rankDiff = (a.rank ?? 99) - (b.rank ?? 99);
+      if (rankDiff !== 0) return rankDiff;
+      return (b.muhuratScore ?? 0) - (a.muhuratScore ?? 0);
+    })[0];
+  }, [active]);
 
   /*
     Avoid windows come with the analysis, keyed by date — no second request and
@@ -287,26 +369,38 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
   */
   const avoidPeriods = useMemo(() => {
     const windows = analysis?.avoidWindows || [];
+    if (!windows.length) return [];
+
     /*
-      Matched strictly on date, with no "first entry" fallback. In range mode the
-      API returns one window set per date, in neither sorted nor tab order
-      (25-30 Aug came back as 27, 26, 28), and each event lands on a different
-      date — so falling back to windows[0] would quietly show one day's Rahu Kaal
-      against another day's muhurat. Better to show no avoid panel than the wrong
-      day's.
+      In a multi-date range every day's avoid windows are shown (matching the
+      "Favorable Muhurats" panel, which now lists every date). For a single-day /
+      Today view we show just that day's windows, matched strictly on date.
+
+      The windows arrive in neither sorted nor tab order (25/24/21 above), so
+      sort by date first, then expand each day into its three periods, each
+      tagged with its own date.
     */
-    const forDay = windows.find((w) => String(w?.date || "").slice(0, 10) === today?.date);
-    if (!forDay) return [];
-    return [
-      { label: "Rahu Kaal", range: forDay.rahuKaal, note: forDay.rahuKaalDescription },
-      { label: "Gulika Kaal", range: forDay.gulikaKaal, note: forDay.gulikaKaalDescription },
-      {
-        label: "Yamakanta Kaal",
-        range: forDay.yamakantaKaal,
-        note: forDay.yamakantaKaalDescription,
-      },
-    ].filter((p) => p.range);
-  }, [analysis?.avoidWindows, today?.date]);
+    const daysToShow = today?.multiDate
+      ? [...windows].sort((a, b) =>
+          String(a?.date || "").localeCompare(String(b?.date || ""))
+        )
+      : windows.filter((w) => String(w?.date || "").slice(0, 10) === today?.date);
+
+    return daysToShow.flatMap((w) => {
+      const day = String(w?.date || "").slice(0, 10);
+      return [
+        { label: "Rahu Kaal", range: w.rahuKaal, note: w.rahuKaalDescription, iconImg: avoidRahuIcon, date: day },
+        { label: "Gulika Kaal", range: w.gulikaKaal, note: w.gulikaKaalDescription, iconImg: avoidGulikaIcon, date: day },
+        {
+          label: "Yamakanta Kaal",
+          range: w.yamakantaKaal,
+          note: w.yamakantaKaalDescription,
+          iconImg: avoidYamakantaIcon,
+          date: day,
+        },
+      ].filter((p) => p.range);
+    });
+  }, [analysis?.avoidWindows, today?.date, today?.multiDate]);
 
   /*
     Share falls back to the clipboard: navigator.share is unavailable on desktop
@@ -317,7 +411,7 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
     if (!active) return;
     const text = [
       `Best muhurat for ${active.name}`,
-      best?.bestTimeRange && `${best.bestTimeRange} on ${formatDate(today?.date)}`,
+      best?.bestTimeRange && `${best.bestTimeRange} on ${formatDate(best?._date || best?.bestDate || today?.date)}`,
       best?.quality && `Rated ${best.quality}`,
     ]
       .filter(Boolean)
@@ -404,23 +498,34 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
             {today?.timings?.length > 0 && (
               <section className={styles.panel}>
                 <h3 className={styles.panelTitle}>
-                  <Sparkles size={16} className={styles.iconGood} aria-hidden="true" />
+                  <img src={favMuhuratIcon} alt="" aria-hidden="true" className={styles.panelTitleIcon} />
                   Favorable Muhurats
                 </h3>
                 <p className={styles.panelSub}>
-                  {formatDate(today.date)}
-                  {dayOffsetLabel(today.date) ? ` (${dayOffsetLabel(today.date)})` : ""} ·{" "}
-                  {today.timings.length}{" "}
-                  {/* A date range returns a single best window per event, a
-                      single-day request returns three — so this count is not
-                      always plural. */}
-                  {today.timings.length === 1 ? "auspicious window" : "auspicious windows"}
+                  {today.multiDate ? (
+                    <>
+                      {today.timings.length}{" "}
+                      {today.timings.length === 1 ? "auspicious window" : "auspicious windows"}{" "}
+                      across your selected dates
+                    </>
+                  ) : (
+                    <>
+                      {formatDate(today.date)}
+                      {dayOffsetLabel(today.date) ? ` (${dayOffsetLabel(today.date)})` : ""} ·{" "}
+                      {today.timings.length}{" "}
+                      {/* A date range returns a single best window per event, a
+                          single-day request returns three — so this count is not
+                          always plural. */}
+                      {today.timings.length === 1 ? "auspicious window" : "auspicious windows"}
+                    </>
+                  )}
                 </p>
                 <ul className={styles.slotList}>
                   {today.timings.map((timing) => (
                     <SlotRow
-                      key={`${timing.bestTimeRange}-${timing.rank}`}
+                      key={`${timing._date || today.date}-${timing.bestTimeRange}-${timing.rank}`}
                       timing={timing}
+                      dateLabel={formatDate(timing._date || today.date)}
                       passed={isTodayView && isWindowPassed(timing.bestTimeRange, today.date)}
                     />
                   ))}
@@ -438,33 +543,48 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
                     on a different day, so "avoid 2:15 PM" is meaningless without
                     saying which day it belongs to. */}
                 <p className={styles.panelSub}>
-                  {formatDate(today?.date)} · times to avoid new beginnings
+                  {today?.multiDate
+                    ? "Times to avoid across your selected dates"
+                    : `${formatDate(today?.date)} · times to avoid new beginnings`}
                 </p>
                 <ul className={styles.slotList}>
-                  {avoidPeriods.map((period) => (
-                    <li key={period.label} className={styles.slot}>
-                      <div className={styles.slotHead}>
-                        <span className={styles.slotTime}>{period.range}</span>
-                        <span className={`${styles.qualityChip} ${styles.qualityAvoid}`}>
-                          {period.label}
-                        </span>
-                      </div>
-                      {period.note && <p className={styles.slotNote}>{period.note}</p>}
-                    </li>
-                  ))}
+                  {avoidPeriods.map((period) => {
+                    return (
+                      <li key={`${period.date}-${period.label}`} className={styles.slot}>
+                        <div className={styles.slotRow}>
+                          <span className={styles.slotIconTile} aria-hidden="true">
+                            <img src={period.iconImg} alt="" className={styles.slotIconImg} />
+                          </span>
+                          <div className={styles.slotBody}>
+                            <div className={styles.slotHead}>
+                              <span className={styles.slotTime}>{period.range}</span>
+                              <span className={`${styles.qualityChip} ${styles.qualityAvoid}`}>
+                                {period.label}
+                              </span>
+                            </div>
+                            {period.date && (
+                              <p className={styles.slotDateLine}>
+                                <FiCalendar size={12} aria-hidden="true" /> {formatDate(period.date)}
+                              </p>
+                            )}
+                            {period.note && <p className={styles.slotNote}>{period.note}</p>}
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               </section>
             )}
           </div>
 
           {/*
-            Next Favorable Window.
-            - Today view: always shown (per requirement) — with tomorrow's
-              windows when available, or an empty note otherwise.
-            - Other views: only when the analysis covered a second date, so a
-              single-day request doesn't re-present the same day's windows.
+            Next Favorable Window — shown ONLY in the "Today" view (with
+            tomorrow's windows when available, or the empty note otherwise). In
+            range / other views every window already sits in "Favorable
+            Muhurats", so this section is not rendered there at all — even empty.
           */}
-          {(isTodayView || nextDay?.timings?.length > 0) && (
+          {isTodayView && (
             <section className={styles.nextPanel}>
               <h3 className={styles.panelTitle}>
                 <FiCalendar size={16} className={styles.iconNext} aria-hidden="true" />
@@ -534,9 +654,10 @@ const MuhuratReport = ({ analysis, customOccasions = [], locationLabel, onDownlo
             <span className={styles.bestBadge}>★ Best Muhurat</span>
 
             <p className={styles.bestMeta}>
-              {today?.date && (
+              {(best?._date || best?.bestDate || today?.date) && (
                 <span>
-                  <FiCalendar size={12} aria-hidden="true" /> {formatDate(today.date)}
+                  <FiCalendar size={12} aria-hidden="true" />{" "}
+                  {formatDate(best?._date || best?.bestDate || today?.date)}
                 </span>
               )}
               {locationLabel && (
