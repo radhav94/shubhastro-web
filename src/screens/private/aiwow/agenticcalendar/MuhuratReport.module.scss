@@ -115,7 +115,7 @@ $panel: rgba(255, 255, 255, 0.72);
 /* ── Layout ───────────────────────────────────────────────────────────── */
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) 380px;
   grid-template-rows: auto 1fr;
   /* Banner top-left, panels below it, sidebar spanning the right column. */
   grid-template-areas:
@@ -235,6 +235,19 @@ $panel: rgba(255, 255, 255, 0.72);
   box-shadow: 0 2px 12px rgba(191, 118, 66, 0.07);
 }
 
+/* Favorable Muhurats / Avoid Periods: cap the panel height and scroll the list
+   inside so a long range (many dates) doesn't stretch the card down the page.
+   Title + subtitle stay fixed; only .slotList scrolls. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  max-height: 520px;
+
+  @media (max-width: 767px) {
+    max-height: 460px;
+  }
+}
+
 .panelTitle {
   display: flex;
   align-items: center;
@@ -243,6 +256,15 @@ $panel: rgba(255, 255, 255, 0.72);
   font-size: 0.95rem;
   font-weight: 700;
   color: $ink;
+}
+
+/* Image icon before a panel title (e.g. Favorable Muhurats), sized like the
+   lucide title icons. */
+.panelTitleIcon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 .panelSub {
@@ -271,10 +293,85 @@ $panel: rgba(255, 255, 255, 0.72);
   display: flex;
   flex-direction: column;
   gap: 14px;
+
+  /* Scroll the windows inside the fixed-height panel (see .panel). `min-height:
+     0` lets a flex child actually shrink so overflow can kick in. A little
+     right padding keeps the scrollbar off the cards. */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(191, 118, 66, 0.35) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(191, 118, 66, 0.3);
+    border-radius: 999px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 .slot {
   min-width: 0;
+}
+
+/* Row = leading circular icon tile + content column (time/label, date, note),
+   matching the design. */
+.slotRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.slotIconTile {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff3ea;
+  color: #f75801;
+  overflow: hidden;
+}
+
+/* Avoid-period tiles read as a warning. */
+.slotIconTileBad {
+  background: #fdecec;
+  color: #ef4444;
+}
+
+.slotIconImg {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.slotBody {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Date shown under the time as a small calendar line (design), not a chip. */
+.slotDateLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 4px 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b7280;
+
+  svg {
+    flex-shrink: 0;
+  }
 }
 
 .slotHead {
@@ -282,6 +379,14 @@ $panel: rgba(255, 255, 255, 0.72);
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+/* Shown before the time only for "Excellent" muhurat windows. */
+.slotExcellentIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 .slotTime {
@@ -326,8 +431,9 @@ $panel: rgba(255, 255, 255, 0.72);
 }
 
 .qualityVeryGood {
-  background: #dcfce7;
-  color: #15803d;
+  background: #FFF5DE;
+  border: 1px solid #EBCF8D;
+  color: #C37A14;
 }
 
 .qualityGood {
@@ -344,6 +450,18 @@ $panel: rgba(255, 255, 255, 0.72);
 .choghadiyaChip {
   background: #fdece2;
   color: #b03a1a;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Date chip — shown on each window in a multi-date range so the reader knows
+   which day the timing belongs to. */
+.slotDate {
+  background: #eef2ff;
+  color: #4338ca;
   border-radius: 999px;
   padding: 3px 9px;
   font-size: 0.64rem;
@@ -503,7 +621,7 @@ $panel: rgba(255, 255, 255, 0.72);
   position: relative;
   overflow: hidden;
   padding: 18px;
-  border-radius: 18px;
+  border-radius: 15px;
   background: rgba($color: #fff, $alpha: 0.4);
   border: 1.5px solid rgba(255, 255, 255, 0.95);
   box-shadow: 0 2px 14px rgba(191, 118, 66, 0.1);
@@ -584,7 +702,7 @@ $panel: rgba(255, 255, 255, 0.72);
   gap: 4px 10px;
   margin: 12px 0 0;
   /* Left clear of the tool buttons above. */
-  padding-right: 70px;
+  padding-right: 0px;
   font-size: 0.72rem;
   font-weight: 600;
   color: #a06a45;
