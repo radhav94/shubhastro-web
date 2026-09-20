@@ -2736,6 +2736,19 @@
   &:hover {
     transform: translateY(-2px);
   }
+
+  /* While the update is in flight the button carries `disabled`. Without this it
+     kept cursor:pointer and the hover lift, so a button that could no longer be
+     pressed still advertised itself as pressable, and the tap it swallowed had no
+     visible answer. Suppress both and dim it so the wait is legible. */
+  &:disabled {
+    opacity: 0.6;
+    cursor: progress;
+    transform: none;
+  }
+  &:disabled:hover {
+    transform: none;
+  }
 }
 @media (width <= 820px) {
   .addMinutesButton{

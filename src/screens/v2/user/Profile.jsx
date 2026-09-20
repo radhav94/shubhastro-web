@@ -402,6 +402,12 @@ const Profile = () => {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [editEmailValue, setEditEmailValue] = useState("");
   const [emailError, setEmailError] = useState("");
+  /*
+    In-flight flag for the email update. Without it the button awaited the network
+    round trip with no disabled state and no label change, so it read as inert and a
+    second tap fired a duplicate updateUserProfile call.
+  */
+  const [emailSaving, setEmailSaving] = useState(false);
   const [profileToEdit, setProfileToEdit] = useState(null);
   const [profileToDelete, setProfileToDelete] = useState(null);
 
@@ -2882,7 +2888,14 @@ const Profile = () => {
             </p>
             <button
               className={styles.emailModalBtn}
+              /* Not `disabled` while idle — only while the request is actually in
+                 flight, so the button never looks inert before it has work to do.
+                 aria-busy announces the wait, and the label changes so the tap has a
+                 visible consequence during the round trip. */
+              disabled={emailSaving}
+              aria-busy={emailSaving}
               onClick={async () => {
+                if (emailSaving) return; // re-entry guard: no duplicate updates
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!editEmailValue.trim()) {
                   setEmailError("Please enter an email address");
@@ -2892,6 +2905,8 @@ const Profile = () => {
                   setEmailError("Please enter a valid email address");
                   return;
                 }
+                setEmailSaving(true);
+                setEmailError("");
                 try {
                   await updateUserProfile({ email: editEmailValue });
                   dispatch(setEmail(editEmailValue));
@@ -2904,10 +2919,12 @@ const Profile = () => {
                   Toast.success("Email updated successfully");
                 } catch (err) {
                   setEmailError(err?.response?.data?.message || "Failed to update email");
+                } finally {
+                  setEmailSaving(false);
                 }
               }}
             >
-              Update Email
+              {emailSaving ? "Updating…" : "Update Email"}
             </button>
           </div>
         </div>

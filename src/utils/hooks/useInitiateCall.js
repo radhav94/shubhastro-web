@@ -31,7 +31,15 @@ export const useInitiateCall = () => {
     if (!lastSelectedKundli?._id) {
       Toast.error("Please select a Kundli first");
       // Navigate back to astrologer page to select Kundli
-      navigate("/call-with-astrologers/", {
+      /*
+        `/call-with-astrologers/` is not a declared route. It fell through to the
+        `path: "*"` catch-all (CmsNotFoundPage), which looks the slug up in the CMS,
+        finds nothing, and renders NotFound — so the one recovery path out of "no
+        kundli selected" landed the visitor on a 404 instead of the astrologer list
+        they were told to go pick from. `/astrologers` is the real listing route
+        (Paths.js privateRoutes), and it carries the same `rejoinAstro` state.
+      */
+      navigate("/astrologers", {
         state: { rejoinAstro: astro }
       });
       return;
