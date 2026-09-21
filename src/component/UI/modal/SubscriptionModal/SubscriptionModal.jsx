@@ -10,6 +10,7 @@ import welcomeBg from "../../../../assets/images/welcome-bonus-bg.webp";
 import welcomeBgMobile from "../../../../assets/images/welcome-bonus-bg-mobile.webp";
 import welcomeIcon from "../../../../assets/images/welcome-bonus-icon.webp";
 import RechargeModal from "../../../recharge-modal/RechargeModal";
+import { isSubscriptionEnabled } from "../../../../utils/featureConfig";
 
 // Build the "What's included" rows straight from the API response — the
 // marketing bullets in `metadata.highlights`. No derived defaults; whatever the
@@ -89,7 +90,13 @@ const getPurchaseFailureReason = (res) => {
   and get out of the way of a redirect to /recharge; recharging now happens inside
   this modal, so ending the flow at that point is exactly the wrong thing to do.
 */
-const SubscriptionModal = ({ isOpen, onClose, onSelectPlan, onPurchased, variant = "basic", plans, featureName = "" }) => {
+const SubscriptionModal = ({ isOpen: isOpenProp, onClose, onSelectPlan, onPurchased, variant = "basic", plans, featureName = "" }) => {
+  // Env kill-switch: when the subscription feature is turned off
+  // (VITE_SUBSCRIPTION_ENABLED="false") the modal never opens, no matter what
+  // the caller passes. Forcing the local `isOpen` false here (rather than an
+  // early return) keeps all the hooks below mounted, so the Rules of Hooks hold
+  // and the queries stay skipped (`skip: !isOpen`).
+  const isOpen = isOpenProp && isSubscriptionEnabled();
   const isExtended = variant === "extended";
 
   // Extended plans are returned inline by the generate/report response. When the

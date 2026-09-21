@@ -43,22 +43,52 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
   useEffect(() => {
     if (!roomId || !userId || !astrologerId) return;
 
+    // Prune stale "initial messages sent" flags so the per-room localStorage
+    // keys don't accumulate forever. A live session never runs for a day, so
+    // anything older than 24h belongs to a finished room and is safe to drop.
+    try {
+      const PREFIX = "shubhtalk_chat_init_";
+      const MAX_AGE_MS = 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+        const key = localStorage.key(i);
+        if (!key || !key.startsWith(PREFIX)) continue;
+        // Skip the current room's key regardless of age.
+        if (key === `${PREFIX}${roomId}`) continue;
+        const ts = Number(localStorage.getItem(key));
+        if (!Number.isFinite(ts) || now - ts > MAX_AGE_MS) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch {
+      // localStorage unavailable (private mode / quota) — pruning is best-effort.
+    }
+
     // Function to send initial messages (only once per room, survives reconnect)
     const sendInitialMessages = () => {
       if (hasInitializedRef.current) return;
       if (!kundliId) return;
       if (!voiceSocket.connected) return;
 
-      // Check if we already sent initial messages for this room (persists across remounts/reconnects)
+      // Check if we already sent initial messages for this room.
+      //
+      // This MUST use localStorage, not sessionStorage: killing the tab or the
+      // whole browser clears sessionStorage, so a user who reconnected to the
+      // same live video session got the greeting + kundli auto-sent a second
+      // time. localStorage survives a tab/browser kill, so the "already sent"
+      // flag is still there on rejoin and the duplicates are suppressed. The key
+      // is per-roomId, so distinct sessions stay independent.
       const sentKey = `shubhtalk_chat_init_${roomId}`;
-      if (sessionStorage.getItem(sentKey)) {
+      if (localStorage.getItem(sentKey)) {
         console.log("[VideoCallChat] ⏭️ Initial messages already sent for room:", roomId, "— skipping");
         hasInitializedRef.current = true;
         return;
       }
 
       hasInitializedRef.current = true;
-      sessionStorage.setItem(sentKey, "true");
+      // Timestamp value (not just "true") so stale keys from old rooms can be
+      // pruned below without keeping a localStorage entry per session forever.
+      localStorage.setItem(sentKey, String(Date.now()));
       
       // Send greeting message
       setTimeout(() => {
