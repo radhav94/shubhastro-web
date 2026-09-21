@@ -72,6 +72,12 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
   const location = useLocation();
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  // Bumped every time a fresh code is requested (mount + each resend). The Web
+  // OTP listener is keyed off this so a NEW navigator.credentials.get() is armed
+  // for each SMS — otherwise the request fired on mount has already resolved (or
+  // aborted) by the time the resent message arrives, and tapping "Allow" on it
+  // has nothing listening, so the code is never copied in.
+  const [otpSession, setOtpSession] = useState(0);
   const handleContinueRef = useRef(null);
   const isSubmittingRef = useRef(false);
   const inputRef = useRef(null);
@@ -112,22 +118,36 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     };
   }, []);
 
-  // Web OTP API - auto-read OTP from SMS
+  // Web OTP API - auto-read OTP from SMS.
+  //
+  // Re-armed on every `otpSession` change (mount + each resend) so a live
+  // request is always waiting when the SMS lands and the user taps
+  // "Allow Chrome to read the message and copy code".
   useEffect(() => {
-    if ("OTPCredential" in window) {
-      const ac = new AbortController();
-      navigator.credentials
-        .get({ otp: { transport: ["sms"] }, signal: ac.signal })
-        .then((otpCredential) => {
-          if (otpCredential?.code) {
-            setOtp(otpCredential.code);
-            // Auto-submit is handled by the otp length useEffect below
-          }
-        })
-        .catch(() => {});
-      return () => ac.abort();
-    }
-  }, []);
+    if (!("OTPCredential" in window)) return;
+
+    const ac = new AbortController();
+    navigator.credentials
+      .get({ otp: { transport: ["sms"] }, signal: ac.signal })
+      .then((otpCredential) => {
+        // Normalise exactly like manual entry: keep digits only and clamp to 6.
+        // A raw `code` with any stray character would set a value the boxes and
+        // the length-based auto-submit both reject, so "Allow" would appear to
+        // do nothing even though the credential was read.
+        const code = String(otpCredential?.code || "")
+          .replace(/[^0-9]/g, "")
+          .slice(0, 6);
+        if (code) {
+          setOtp(code);
+          // Reflect the copied code in the visible boxes and drop the keyboard;
+          // auto-submit is handled by the otp-length effect below.
+          inputRef.current?.blur();
+        }
+      })
+      .catch(() => {});
+
+    return () => ac.abort();
+  }, [otpSession]);
 
 
 
@@ -440,6 +460,9 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
 
       if (response.data.success && response.data.statusCode === 200) {
         toast.success("OTP resent successfully");
+        // Re-arm the Web OTP listener for the freshly sent SMS so tapping
+        // "Allow" on the new message copies the new code in.
+        setOtpSession((s) => s + 1);
       } else {
         toast.error(response.data.message || "Failed to resend OTP");
       }

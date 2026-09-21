@@ -319,6 +319,13 @@
   margin-bottom: 20px;
 }
 
+/* When the subscription feature is off the Membership card is not rendered, so
+   the row holds only the Balance card. Collapse to a single column instead of
+   leaving an empty half. */
+.balanceMembershipRowSingle {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .balanceMembershipItem {
   min-width: 0;
   display: flex;

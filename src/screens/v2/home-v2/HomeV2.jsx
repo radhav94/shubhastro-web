@@ -6,6 +6,7 @@ import SeoHelmet from "../../../component/SeoHelmet";
 import EmptyState from "../../../component/emptyState/EmptyState";
 import { getUserFromStorage } from "../../../utils/authStorage";
 import { getToken } from "../../../utils/token";
+import { isSubscriptionEnabled } from "../../../utils/featureConfig";
 import {
   homeApi,
   useGetNewHomeDetailsQuery,
@@ -1210,6 +1211,13 @@ const HomeV2 = () => {
     }
     // Logged-in users: check subscription before opening the paid feature.
     if (!requireAuth()) return;
+    // Env kill-switch: with the subscription feature off there is no paywall to
+    // clear (the modal never opens), so treat a paid card like a normal suite
+    // card and open the feature directly.
+    if (!isSubscriptionEnabled()) {
+      handleWowCardClick(item);
+      return;
+    }
     // Remember which service was requested so "Unlock Now" (free plan) can open it.
     setPendingServiceItem(item);
     // Nothing appears on screen until this request resolves, so mark the card as
