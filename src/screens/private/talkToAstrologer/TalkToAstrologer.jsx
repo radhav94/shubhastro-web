@@ -110,6 +110,9 @@ const TalkToAstrologer = () => {
 
   // NEW: Store the connection type when opening ProfileManager
   const [pendingConnectionType, setPendingConnectionType] = useState(null);
+  // Carried alongside it so an emergency request stays an emergency request
+  // across the kundli step — see handleProfileManagerStartCall.
+  const [pendingIsEmergency, setPendingIsEmergency] = useState(false);
 
   const location = useLocation(); //  get current URL
   // const isChatMode = location.pathname === "/astrologers";
@@ -748,14 +751,22 @@ const TalkToAstrologer = () => {
     if (selectedAstrologer && pendingConnectionType) {
       // Call the appropriate handler based on connection type
       // This ensures all validations (balance check, online check) are performed
+      /*
+        Same two omissions as handleConnectClick had. "video" was not handled, so
+        a visitor with no kundli who tapped Video in the emergency modal, added a
+        profile and pressed Start got nothing at all. And the emergency flag was
+        dropped on every path, so a session that began as an emergency request was
+        resumed as a normal one after the kundli step — wrong rate, wrong queue.
+      */
       if (pendingConnectionType === "chat") {
-        hookHandleChatStart(selectedAstrologer);
-      } else if (pendingConnectionType === "audio") {
-        hookHandleCallStart(selectedAstrologer, "audio");
+        hookHandleChatStart(selectedAstrologer, true, pendingIsEmergency);
+      } else if (pendingConnectionType === "audio" || pendingConnectionType === "video") {
+        hookHandleCallStart(selectedAstrologer, pendingConnectionType, pendingIsEmergency);
       }
 
       // Clear the pending connection type
       setPendingConnectionType(null);
+      setPendingIsEmergency(false);
     }
 
     // OLD LOGIC (commented out): This was bypassing validations
@@ -793,8 +804,26 @@ const TalkToAstrologer = () => {
       let result;
       if (connectionType === "chat") {
         result = await hookHandleChatStart(astrologer, true, isEmergency);
-      } else if (connectionType === "audio") {
-        result = await hookHandleCallStart(astrologer, "audio", isEmergency);
+      } else if (connectionType === "audio" || connectionType === "video") {
+        /*
+          "video" has to be handled here, not just "audio".
+
+          Only the emergency modal ever asks for a video connection on this
+          screen — NewAstrologerCard's own buttons emit "chat" and "audio" only,
+          while both EmergencySessionModal instances that reach this handler (the
+          one at the bottom of this file and the one inside
+          NewAstrologerDetailsCard) call onVideoNow -> onConnect(astro, "video",
+          true). This branch used to test `connectionType === "audio"` exactly, so
+          "video" matched neither arm, `result` stayed undefined, and the function
+          fell out of the bottom having done nothing: no balance check, no
+          "Minimum balance ..." prompt, no connect attempt, no error. Chat and
+          Call from the same modal worked, so Video looked broken on /astrologers
+          specifically for emergency-enabled astrologers.
+
+          handleCallStart already takes the call type as its second argument, so
+          the type is forwarded rather than pinned to "audio".
+        */
+        result = await hookHandleCallStart(astrologer, connectionType, isEmergency);
       }
       if (result?.emergencyAvailable) {
         setShowEmergencyModal(true);
@@ -802,6 +831,7 @@ const TalkToAstrologer = () => {
       }
     } else {
       setPendingConnectionType(connectionType);
+      setPendingIsEmergency(isEmergency);
       hookSetOpenModal((prev) => ({ ...prev, kundli: true }));
     }
   };

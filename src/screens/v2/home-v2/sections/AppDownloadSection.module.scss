@@ -178,6 +178,20 @@ $muted: #6b5546;
   }
 }
 
+/* Shown only when an in-app browser intercepted a store tap, so a tap that the
+   WebView would otherwise swallow has a visible answer under the badges. */
+.storeNotice {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #f8e7dc;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  padding: 8px 10px;
+  max-width: 420px;
+}
+
 /* Black store badge, matching the reference. */
 .storeBtn {
   display: inline-flex;

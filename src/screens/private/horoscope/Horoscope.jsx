@@ -673,6 +673,28 @@ const HoroscopeNew = () => {
     }
   };
 
+  /*
+    Yearly quarter strip ("January to March", "April to June", ...). Same dead
+    click handleTabChange above fixes for the outer period tabs, one strip lower:
+    this one was a bare `setSelectedPhase(phase)`, so re-tapping the quarter
+    already on screen passed React an identical value, it bailed out of the
+    re-render, and nothing moved. Caught on the HoroscopeOld twin in Clarity
+    session 1ky12vr ("April to June" at 06:54); fixed in both so the two yearly
+    screens do not drift apart.
+  */
+  const handlePhaseChange = (phase) => {
+    if (phase === selectedPhase) {
+      if (contentFailed || !currentData?.response) {
+        retryContent?.();
+      } else {
+        overviewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      return;
+    }
+
+    setSelectedPhase(phase);
+  };
+
   const handleZodiacClick = (zodiac) => {
     setTempSelectedZodiac(zodiac.toLowerCase());
   };
@@ -956,14 +978,18 @@ const HoroscopeNew = () => {
 
           {activeTab === 'This Year' && yearlyData?.response && (
             <div className="time-tabs-wrapper pill-tabs-wrapper">
-              <div className="time-tabs pill-tabs">
+              {/* role="tablist" so the role="tab" pills below are valid ARIA. */}
+              <div className="time-tabs pill-tabs" role="tablist" aria-label="Yearly quarter">
                 {['phase_1', 'phase_2', 'phase_3', 'phase_4'].map((phase, idx) => {
                   const period = yearlyData.response[phase]?.period;
                   return (
                     <button
                       key={phase}
+                      type="button"
+                      role="tab"
+                      aria-selected={selectedPhase === phase}
                       className={`time-tab pill-tab ${selectedPhase === phase ? 'active' : ''}`}
-                      onClick={() => setSelectedPhase(phase)}
+                      onClick={() => handlePhaseChange(phase)}
                     >
                       {period || `Q${idx + 1}`}
                     </button>

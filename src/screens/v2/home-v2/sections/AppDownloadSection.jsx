@@ -1,7 +1,10 @@
+import { useRef, useState } from "react";
 import {
   PLAY_STORE_URL,
   APP_STORE_URL,
+  IN_APP_BROWSER_STORE_HINT,
 } from "../../../../utils/helper/appStoreLinks";
+import { isInAppBrowser } from "../../../../utils/deviceInfo";
 import { trackEvent } from "../../../../utils/analytics";
 import styles from "./AppDownloadSection.module.scss";
 
@@ -43,6 +46,38 @@ const renderHeadline = (text) => {
 const AppDownloadSection = ({ sectionData }) => {
   const trackStoreClick = (store) =>
     trackEvent("app_store_click", { store, location: "home_app_banner" });
+
+  /*
+    Answer for a store tap that the in-app browser would swallow.
+
+    See IN_APP_BROWSER_STORE_HINT in utils/helper/appStoreLinks for the mechanism
+    and the Clarity session. Seq-keyed so a second tap re-renders the line and
+    screen readers re-announce, matching the inline-notice pattern used by the
+    AI-WOW camera screens and the Pandit AI composer.
+  */
+  const [storeNotice, setStoreNotice] = useState(null);
+  const noticeSeqRef = useRef(0);
+
+  /*
+    In an in-app browser, take over the navigation: `target="_blank"` has no tab
+    to fall back into and the Play Store handoff is often refused, so the anchor
+    silently does nothing. Navigating the current tab reaches the Play Store web
+    listing instead, which offers its own "open in app" control. Outside an in-app
+    browser the anchor is left completely alone.
+  */
+  const handleStoreClick = (store, url) => (event) => {
+    trackStoreClick(store);
+    if (!isInAppBrowser()) return;
+
+    event.preventDefault();
+    noticeSeqRef.current += 1;
+    setStoreNotice({ seq: noticeSeqRef.current, text: IN_APP_BROWSER_STORE_HINT });
+    try {
+      window.location.href = url;
+    } catch {
+      /* Navigation refused outright — the notice above is the answer. */
+    }
+  };
 
   // Copy from the CMS "get-app" section, falling back to the default text.
   const kicker = sectionData?.sub_title || "Astrology Guidance, Anytime";
@@ -91,7 +126,7 @@ const AppDownloadSection = ({ sectionData }) => {
               target="_blank"
               rel="noopener noreferrer"
               className={styles.storeBtn}
-              onClick={() => trackStoreClick("app_store")}
+              onClick={handleStoreClick("app_store", APP_STORE_URL || PLAY_STORE_URL)}
             >
               <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
                 <path d="M17.05 20.28C16.03 21.23 14.96 21.08 13.93 20.63C12.85 20.17 11.85 20.15 10.71 20.63C9.28 21.25 8.52 21.07 7.62 20.28C2.79 15.25 3.51 7.59 9.05 7.31C10.4 7.38 11.34 8.05 12.13 8.11C13.31 7.87 14.44 7.18 15.7 7.27C17.21 7.39 18.35 7.99 19.1 9.07C15.98 10.94 16.72 15.05 19.58 16.2C19.01 17.7 18.27 19.19 17.04 20.29L17.05 20.28ZM12.03 7.25C11.88 5.02 13.69 3.18 15.77 3C16.06 5.58 13.43 7.5 12.03 7.25Z" />
@@ -107,7 +142,7 @@ const AppDownloadSection = ({ sectionData }) => {
               target="_blank"
               rel="noopener noreferrer"
               className={styles.storeBtn}
-              onClick={() => trackStoreClick("google_play")}
+              onClick={handleStoreClick("google_play", PLAY_STORE_URL)}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M3 20.5V3.5C3 2.91 3.34 2.39 3.84 2.15L13.69 12L3.84 21.85C3.34 21.6 3 21.09 3 20.5Z" fill="#4CAF50" />
@@ -121,6 +156,19 @@ const AppDownloadSection = ({ sectionData }) => {
               </span>
             </a>
           </div>
+
+          {/* Shown only when an in-app browser intercepted the tap, directly under
+              the badges that were tapped. See handleStoreClick. */}
+          {storeNotice && (
+            <p
+              key={storeNotice.seq}
+              className={styles.storeNotice}
+              role="status"
+              aria-live="polite"
+            >
+              {storeNotice.text}
+            </p>
+          )}
         </div>
         {/* </div> */}
 
