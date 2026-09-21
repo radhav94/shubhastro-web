@@ -352,7 +352,7 @@ $sticky-gap: 8px;
      right-hand corner. Matched to the art's width + its fade, and only applied
      at the widths where the art actually renders. */
   @media (min-width: 1181px) {
-    padding-right: 80px;
+    padding-right: 110px;
   }
 
   @media (min-width: 901px) and (max-width: 1180px) {
@@ -402,8 +402,11 @@ $sticky-gap: 8px;
   z-index: 1;
   min-width: 0;
 
+  /* Mobile: coin + sign block on the top row; the meta grid below spans full
+     width from the card's left edge (under the coin) — see .heroMeta. */
   @media (max-width: 560px) {
-    gap: 14px;
+    gap: 12px;
+    align-items: flex-start;
   }
 }
 
@@ -432,8 +435,8 @@ $sticky-gap: 8px;
   }
 
   @media (max-width: 560px) {
-    width: 104px;
-    height: 104px;
+    width: 72px;
+    height: 72px;
   }
 }
 
@@ -499,6 +502,13 @@ $sticky-gap: 8px;
   align-items: center;
   gap: 10px;
   margin: 10px 0 12px;
+
+  /* Keep the sign name + read-aloud clear of the artwork tucked into the
+     card's top-right corner on mobile (see .heroArt). */
+  @media (max-width: 560px) {
+    padding-right: 120px;
+    margin: 6px 0 10px;
+  }
 }
 
 .heroSign {
@@ -523,16 +533,21 @@ $sticky-gap: 8px;
   the block's width and each value broke over two or three lines.
 */
 .heroMeta {
-  /* One horizontal line: Pada · Moon-at · Current Dasha, side by side. Each
-     entry hugs its content and the values never break, per the design. */
+  /* Pada · Moon-at · Current Dasha, side by side. The row is allowed to WRAP:
+     a longer profile (a long Nakshatra name, or a three-planet dasha chain like
+     "Rahu › Mercury › Rahu") pushes the trailing entries onto a second line
+     inside the sign column, instead of overflowing the column and sliding under
+     the sign artwork pinned to the card's right edge. */
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
-  gap: 22px;
+  flex-wrap: wrap;
+  gap: 12px 22px;
   margin: 0;
 
   > div {
-    flex: 0 0 auto;
+    /* Hug content but allow shrinking so an entry can wrap its own value rather
+       than force the whole row wider than the column. */
+    flex: 0 1 auto;
     min-width: 0;
   }
 
@@ -551,13 +566,52 @@ $sticky-gap: 8px;
     font-size: 0.84rem;
     font-weight: 700;
     color: $ink;
-    white-space: nowrap;
+    /* Value stays on one line when it fits, but may wrap on a long chain so it
+       never spills past the column edge onto the artwork. */
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
-  /* Mobile: the fixed row can't fit three entries, so allow wrapping there. */
+  /* Mobile: a two-column grid (Pada/Nakshatra | Moon-at, then Current Dasha
+     below) instead of a wrapping single row — matches the design and keeps the
+     three meta blocks readable on a narrow screen. */
   @media (max-width: 560px) {
-    flex-wrap: wrap;
-    gap: 10px 18px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 20px;
+    row-gap: 16px;
+
+    /* The meta sits inside .heroSignHeader (to the right of the coin), but the
+       design wants it to start from the card's LEFT edge — below the coin —
+       spanning the FULL width. Pull it left by the coin width + gap so it lines
+       up under the coin. `margin-top` clears the coin (72px) so the meta drops
+       BELOW the coin/sign row instead of overlapping it. */
+    margin-left: -75px;   // coin (72px) + .heroTop gap (12px)
+    margin-top: 42px;
+
+    > div {
+      flex: initial;
+      min-width: 0;
+    }
+
+    /* Centre divider between the two columns (Pada/Nakshatra | Moon at), as in
+       the design. The 2nd item in each row gets a left hairline. */
+    > div:nth-child(even) {
+      padding-left: 20px;
+      border-left: 1px solid rgba(191, 118, 66, 0.22);
+    }
+
+    dt {
+      /* Let the label wrap on a narrow column instead of forcing width. */
+      white-space: normal;
+    }
+
+    dd {
+      /* Values can be long on a narrow column (e.g. "Shravana Nakshatra"), so
+         let them wrap instead of forcing an overflow. */
+      white-space: normal;
+      word-break: break-word;
+    }
   }
 }
 
@@ -581,13 +635,13 @@ $sticky-gap: 8px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
+  background: #E8FFF3;
   border: 1px solid rgba(16, 185, 129, 0.22);
   border-radius: 12px;
   padding: 7px 16px 7px 7px;
   font-size: 0.7rem;
   font-weight: 600;
-  color: $ink;
+  color: #16A34A;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
 
   /* Mobile: the symbol pill spans the full card width, matching the design. */
@@ -889,20 +943,28 @@ $sticky-gap: 8px;
   }
 
   /*
-    Mobile: show the sign artwork as a normal centred block beneath the sign
-    header (coin + sign + meta), sitting above the attribute chips.
+    Mobile: sign artwork tucked into the card's TOP-RIGHT corner (as in the
+    design) rather than a large centred block. Small and absolute so the coin +
+    sign header + meta flow full-width beneath/around it.
   */
+  /* Mobile: artwork tucked into the card's TOP-RIGHT corner, spanning the sign
+     header row (as in the design). It only sits over the top block; the meta
+     row below it is full-width and clear of the art. */
   @media (max-width: 560px) {
     display: block;
-    position: static;
-    order: 2;                 // after .heroTop (coin/sign), before .heroAttributes
-    width: 180px;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    order: 0;
+    width: 118px;
     height: auto;
-    margin: 4px auto 0;
+    max-height: 118px;
+    margin: 0;
     object-fit: contain;
-    object-position: center;
+    object-position: top right;
     mask-image: none;
     -webkit-mask-image: none;
+    z-index: 0;
   }
 }
 
@@ -975,12 +1037,12 @@ $sticky-gap: 8px;
   of the three cards.
 */
 .todayCardWarm h3 {
-  background: #fdf0cf;
-  color: #b45309;
+  background: #E8F7F5;
+  color: #0F766E;
 }
 
 .todayCardPink h3 {
-  background: #ffe3e0;
+  background: #FEF3C7;
   color: #e0452c;
 }
 
@@ -1539,29 +1601,40 @@ $sticky-gap: 8px;
     gap: 12px;
   }
 
-  /* Each row: coloured icon image + "Label : Value" text on one line. */
+  /* Each row: coloured icon image + "Label : Value" text. The row height grows
+     with its content (e.g. a long Place of Birth that wraps to two lines) so a
+     longer profile can never push its value onto the row below and overlap it.
+     The icon aligns to the top so it stays beside the first line rather than
+     drifting to the vertical centre of a tall, wrapped value. */
   dl > div {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
+    min-width: 0;
   }
 }
 
-/* Coloured circular icon image in front of each detail row. */
+/* Coloured circular icon image in front of each detail row. Nudged down a touch
+   so it sits on the text baseline of the first line, not its very top. */
 .detailIcon {
   width: 22px;
   height: 22px;
   object-fit: contain;
   flex-shrink: 0;
   display: block;
+  margin-top: 1px;
 }
 
 .detailText {
+  flex: 1;
   font-size: 0.85rem;
   font-weight: 400;
+  line-height: 1.4;
   color: $ink;
   min-width: 0;
-  word-break: break-word;
+  /* Break only where needed (long place names, no spaces) instead of mid-word,
+     so the value wraps cleanly under itself without spilling past the card. */
+  overflow-wrap: anywhere;
 }
 
 .sidebarNote {
