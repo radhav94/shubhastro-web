@@ -114,8 +114,18 @@ const Home = () => {
       // This ensures all validations (balance check, online check) are performed
       if (pendingConnectionType === "chat") {
         handleChatStart(selectedAstrologer);
-      } else if (pendingConnectionType === "audio" || pendingConnectionType === "call") {
-        handleCallStart(selectedAstrologer, "audio");
+      } else if (
+        pendingConnectionType === "audio" ||
+        pendingConnectionType === "call" ||
+        pendingConnectionType === "video"
+      ) {
+        // Same omission as handleConnectClick: without the "video" arm, a visitor
+        // with no kundli who tapped Video, added a profile and pressed Start got
+        // nothing back.
+        handleCallStart(
+          selectedAstrologer,
+          pendingConnectionType === "video" ? "video" : "audio"
+        );
       }
       
       // Clear the pending connection type
@@ -147,8 +157,24 @@ const Home = () => {
       let result;
       if (connectionType === "chat") {
         result = await handleChatStart(astrologer, true, isEmergency);
-      } else if (connectionType === "audio" || connectionType === "call") {
-        result = await handleCallStart(astrologer, "audio", isEmergency);
+      } else if (
+        connectionType === "audio" ||
+        connectionType === "call" ||
+        connectionType === "video"
+      ) {
+        /*
+          "video" reaches here from the emergency sheet inside AstrologersSection,
+          which calls onConnect(astro, "video", true). It matched none of the arms
+          before, so `result` stayed undefined and the tap did nothing — no balance
+          check, no "Minimum balance ..." prompt, no connect. The page-level
+          EmergencySessionModal below was fine because it calls handleCallStart
+          directly; only the grid's own sheet went through this dispatch.
+
+          The call type is forwarded rather than pinned to "audio", otherwise a
+          video request would silently connect as audio and bill at the audio rate.
+        */
+        const callType = connectionType === "video" ? "video" : "audio";
+        result = await handleCallStart(astrologer, callType, isEmergency);
       }
       if (result?.emergencyAvailable) {
         setShowEmergencyModal(true);

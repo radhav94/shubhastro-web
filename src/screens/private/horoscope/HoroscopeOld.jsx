@@ -564,6 +564,42 @@ const HoroscopeOld = () => {
     }
   };
 
+  /*
+    The yearly quarter strip ("January to March", "April to June", ...). Same
+    no-op defect handleTabChange above already fixes for the outer period tabs,
+    just one strip lower — this inner one was left on a bare
+    `setSelectedPhase(phase)`, so re-tapping the quarter you are already reading
+    handed React an identical value, it bailed out of the re-render, and nothing
+    on screen moved.
+
+    Clarity session 1ky12vr is this tap. A Chrome-mobile visitor from Kuwait
+    arrived via Google, worked down through the Sade Sati calculator, then landed
+    on /yearly-horoscope and pressed "April to June" at 06:54 — a quarter whose
+    pill was already highlighted.
+
+    Re-tapping a quarter means "show me this quarter", and unlike the outer tabs
+    the four pills all read as plain date ranges rather than as a selection, so
+    it is easy to lose track of which one is live. Answer it the way the outer
+    strip does: retry if the fetch is what failed, otherwise bring the prediction
+    panel into view. The panel sits below the pills and the categories, so on a
+    phone that scroll is a real, visible consequence.
+
+    Not `disabled` on the active pill — a disabled button fires no event at all,
+    which is the same silence with worse semantics.
+  */
+  const handlePhaseChange = (phase) => {
+    if (phase === selectedPhase) {
+      if (contentFailed || !currentData?.response) {
+        retryContent?.();
+      } else {
+        overviewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      return;
+    }
+
+    setSelectedPhase(phase);
+  };
+
   const handleZodiacClick = (zodiac) => {
     setTempSelectedZodiac(zodiac.toLowerCase());
   };
@@ -762,14 +798,19 @@ const HoroscopeOld = () => {
 
           {activeTab === 'This Year' && yearlyData?.response && (
             <div className="time-tabs-wrapper pill-tabs-wrapper">
-              <div className="time-tabs pill-tabs">
+              {/* role="tablist" so the role="tab" pills below are valid ARIA —
+                  a tab without a tablist parent is worse than no role at all. */}
+              <div className="time-tabs pill-tabs" role="tablist" aria-label="Yearly quarter">
                 {['phase_1', 'phase_2', 'phase_3', 'phase_4'].map((phase, idx) => {
                   const period = yearlyData.response[phase]?.period;
                   return (
                     <button
                       key={phase}
+                      type="button"
+                      role="tab"
+                      aria-selected={selectedPhase === phase}
                       className={`time-tab pill-tab ${selectedPhase === phase ? 'active' : ''}`}
-                      onClick={() => setSelectedPhase(phase)}
+                      onClick={() => handlePhaseChange(phase)}
                     >
                       {period || `Q${idx + 1}`}
                     </button>

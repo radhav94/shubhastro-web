@@ -34,4 +34,33 @@ export const APP_STORE_URL = null;
 export const IOS_UNAVAILABLE_MESSAGE =
   "The iOS app isn't out yet. It's available on Android today, and works right here in your browser meanwhile.";
 
+/*
+  Why the store buttons cannot rely on `target="_blank"` inside an in-app browser.
+
+  A play.google.com link is not an ordinary navigation: Android resolves it to the
+  Play Store app via an intent handoff. Instagram's and Facebook's in-app WebViews
+  routinely refuse that handoff, and because the anchor is `target="_blank"` there
+  is no tab for the fallback web page to land in either — so the tap produces
+  nothing at all. Ordinary web links in the same WebView are unaffected, which is
+  why this fails while the footer's outbound brand links work.
+
+  Clarity session 1d5d1ka is exactly this: an Instagram Reels visitor tapped Google
+  Play at 01:06, nothing happened, tapped again at 01:14, and then went on to open
+  three ordinary outbound links successfully at 02:30-02:44. The onClick analytics
+  fired on both taps, so the click was registered while no navigation occurred.
+
+  Note this is a DIFFERENT cause from the App Store rage clicks recorded above:
+  that one was a 404 URL, this one is a blocked handoff. Repointing the URL cannot
+  fix it.
+
+  Mitigation used by the consumers: when isInAppBrowser() is true, navigate the
+  CURRENT tab instead of opening a new one. Same-tab navigation to play.google.com
+  renders the Play Store web listing inside the WebView, which then offers its own
+  "open in app" affordance — a real destination instead of silence. The consumers
+  also surface this line so a tap that still goes nowhere is explained rather than
+  dead.
+*/
+export const IN_APP_BROWSER_STORE_HINT =
+  "This app's built-in browser can block the Play Store from opening. If nothing happens, tap the \u22ef menu and choose \"Open in Chrome\".";
+
 export const isAppStoreLive = () => Boolean(APP_STORE_URL);

@@ -1,15 +1,37 @@
+/*
+  VimshottariCard is read-only: it renders a Maha Dasha's year range and planet
+  and nothing more — no onClick, no href, no expandable body. The drill-down into
+  Antardasha / Pratyantardasha lives in AdditionalPlanetaryInfo, not here.
+
+  This card used to carry `transition: all .3s ease` plus a
+  `:hover { transform: translateY(-2px); box-shadow: ... }` lift. A lift-and-shadow
+  on hover is the visual language of a button, and it is worse than a static
+  false affordance on a phone: mobile WebKit and Chromium apply :hover on tap, so
+  touching the card physically raised it and dropped a shadow, then nothing
+  happened. The tap got motion feedback and no outcome, which reads as a broken
+  control rather than as plain text.
+
+  It also sits in the worst possible neighbourhood for that. Every sibling
+  surface in this Kundli section opens on tap — YogaCard, the Prediction
+  accordions, AccordionSection, PlanetaryCard — so a reader working down the
+  Dasha list has been trained that a card like this expands.
+
+  Clarity session upijkv is one: an Instagram in-app visitor on mobile spent
+  eight and a half minutes across the free Kundli, working through the chart
+  types including Dasha.
+
+  Same defect AdditionalPlanetaryInfo already fixed for its Pratyantardasha rows
+  (cursor: pointer + hover + :active on rows that could not drill down), and the
+  same remedy: drop the affordance so the element reads as the data it is. Not
+  adding a drill-down here — that view already exists elsewhere, and inventing a
+  second one would be a redesign, not a fix.
+*/
 .dashaCard {
   background: #f5f5f5;
   border-radius: 16px;
   padding: 2rem;
   margin-bottom: 1.5rem;
   text-align: center;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
 
   @media (max-width: 768px) {
     padding: 1.5rem;
