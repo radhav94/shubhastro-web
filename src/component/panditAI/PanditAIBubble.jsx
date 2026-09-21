@@ -640,6 +640,49 @@ const PanditAIBubble = ({ hideBubble = false }) => {
   }, [sessionEndedLowBalance, chatDisabled, announceEmptyNotice]);
 
   /*
+    Answer to a followup chip tapped while it cannot be sent.
+
+    The chip row was already gated and dimmed for the blocked states, but the
+    blocked branches only called Toast. That is the wrong channel here for three
+    reasons: react-hot-toast is mounted top-right in main.jsx, which on a phone is
+    the far corner from the thumb holding the chat; the chat is a full-height
+    portal, so the toast can land over or behind the Instagram in-app browser
+    chrome; and Clarity scores a click by what changed near it, so a toast-only
+    response is recorded as a dead click no matter how correct it is.
+
+    The chip also stays exactly where it was — `sendText` is what clears
+    `followupQuestions`, and these branches return before reaching it. So the
+    target is still under the finger, unchanged, with `:active { transform:
+    scale(0.96) }` giving it a press animation and nothing else. Tap, press
+    feedback, no outcome, chip still there: that is a rage click waiting to
+    happen, and Clarity session dcqkm8 is one. An Instagram Reels visitor on
+    mobile hammered the "Rishta ka…" prompts between 03:11 and 03:41, logged as
+    both dead and rage clicks, then spent ten more minutes without getting the
+    conversation moving.
+
+    Put the reason inline, immediately above the chips, so the thing that changes
+    is adjacent to the thing that was tapped. `seq` keys the line so a second tap
+    in the same state remounts and replays the animation rather than re-rendering
+    an identical string to no effect — same device as emptyNotice and retryNotice.
+  */
+  const [followupNotice, setFollowupNotice] = useState(null);
+  const followupNoticeSeqRef = useRef(0);
+
+  const announceFollowupNotice = useCallback((message) => {
+    followupNoticeSeqRef.current += 1;
+    setFollowupNotice({ seq: followupNoticeSeqRef.current, message });
+  }, []);
+
+  /*
+    Retire the notice once the state it describes is over, so the row never reads
+    "Pandit AI is still answering" next to chips that are live again — a stale
+    blocker message is its own reason not to tap.
+  */
+  useEffect(() => {
+    if (!sending && !chatDisabled) setFollowupNotice(null);
+  }, [sending, chatDisabled]);
+
+  /*
     Escape closes the chat — the keyboard counterpart to tapping the backdrop.
     This is a role="dialog" that covers the page with a fixed overlay, so Escape
     is the expected way out and there was none: the close button was the only
@@ -1029,6 +1072,16 @@ const PanditAIBubble = ({ hideBubble = false }) => {
           */}
           {!guestMode && !sessionEndedLowBalance && followupQuestions.length > 0 && (
             <div className={styles.followupSection}>
+              {followupNotice && (
+                <p
+                  key={followupNotice.seq}
+                  className={styles.followupNotice}
+                  role="status"
+                  aria-live="polite"
+                >
+                  {followupNotice.message}
+                </p>
+              )}
               {followupQuestions.map((q, idx) => (
                 <button
                   key={idx}
@@ -1037,13 +1090,18 @@ const PanditAIBubble = ({ hideBubble = false }) => {
                   aria-disabled={sending || chatDisabled}
                   onClick={() => {
                     if (chatDisabled) {
-                      Toast.error("Still reconnecting. Please try again in a moment.");
+                      announceFollowupNotice(
+                        "Reconnecting to Pandit AI — this question will send once you're back online."
+                      );
                       return;
                     }
                     if (sending) {
-                      Toast.info("Pandit AI is still replying — one moment.");
+                      announceFollowupNotice(
+                        "Pandit AI is still answering your last question — one moment."
+                      );
                       return;
                     }
+                    setFollowupNotice(null);
                     sendText(q);
                   }}
                 >

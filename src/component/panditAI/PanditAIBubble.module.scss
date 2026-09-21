@@ -886,6 +886,25 @@ $send-gradient: linear-gradient(135deg, #ff8a5b 0%, #f15a24 58%, #d23a0c 100%);
   flex-shrink: 0;
 }
 
+/* Reason a followup chip could not be sent — see announceFollowupNotice in the
+   JSX. .followupSection is a wrap flex row, so `width: 100%` gives this its own
+   line directly above the chips: the change lands next to the element that was
+   tapped, which a top-right toast does not. Keyed on a sequence number in the JSX
+   so a repeat tap in the same state replays the animation. */
+.followupNotice {
+  width: 100%;
+  margin: 0;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #8a4b00;
+  background: #fff3e6;
+  border: 1px solid #ffd9b3;
+  border-radius: 10px;
+  animation: fadeIn 0.22s ease both;
+}
+
 .followupBtn {
   padding: 8px 14px;
   border-radius: 18px;
