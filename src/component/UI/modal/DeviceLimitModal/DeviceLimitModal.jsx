@@ -6,7 +6,7 @@ import { logout } from "../../../../redux/auth/authSlice";
 import Toast from "../../../toast";
 import styles from "./DeviceLimitModal.module.scss";
 
-const DeviceLimitModal = ({ isOpen, onClose, onDeviceUpdated, devices = [] }) => {
+const DeviceLimitModal = ({ isOpen, onClose, onDeviceUpdated, devices = [], dismissible = false }) => {
   const dispatch = useDispatch();
   const [logoutDevice] = useLogoutDeviceMutation();
   const [removingId, setRemovingId] = useState(null);
@@ -25,18 +25,69 @@ const DeviceLimitModal = ({ isOpen, onClose, onDeviceUpdated, devices = [] }) =>
   }, []);
 
   /*
-    Escape closes, but only when the caller actually gave us an onClose — see the
-    note on that prop below. Registered before the early return so hook order is
-    stable across open/closed renders.
+    Escape closes ONLY when the caller opts into dismissal via `dismissible`.
+
+    This popup is a hard gate: the user must remove a device to proceed. It is
+    shown AFTER auth tokens are persisted to storage, so any user-initiated
+    dismissal (Escape, backdrop click, the "Not now" button) let the user bypass
+    the device limit and end up logged in over it. Dismissal is therefore
+    opt-in and off by default; `onClose` is still called by the device-removed
+    resolution path, which is not a user dismissal.
+
+    Registered before the early return so hook order is stable across
+    open/closed renders.
   */
   useEffect(() => {
-    if (!isOpen || !onClose) return;
+    if (!isOpen || !onClose || !dismissible) return;
     const onKeyDown = (e) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, dismissible]);
+
+  /*
+    Navigation lock while the device limit is an unresolved HARD gate.
+
+    Requirement: as long as "Device Limit Reached" is showing, the user must not
+    be able to leave for any page — they can only clear it by removing a device.
+    The full-screen overlay already swallows clicks on the page behind it, so the
+    remaining escape routes are:
+
+      • the browser Back / Forward buttons, and
+      • any programmatic route change elsewhere in the app.
+
+    We trap the History stack: push one sentinel entry when the gate opens, and
+    on every `popstate` (a Back/Forward press, or a route change that pops our
+    sentinel) push it straight back. The user stays pinned on the current entry
+    until the modal is resolved and this effect tears down.
+
+    A dismissible instance (`dismissible === true`) is a soft popup and is left
+    free to navigate.
+  */
+  useEffect(() => {
+    if (!isOpen || dismissible) return;
+
+    // Sentinel entry so the first Back press pops onto something we own rather
+    // than actually leaving the page.
+    window.history.pushState({ deviceLimitLock: true }, "");
+
+    const onPopState = () => {
+      // Re-pin: undo the pop by pushing the sentinel again.
+      window.history.pushState({ deviceLimitLock: true }, "");
+    };
+    window.addEventListener("popstate", onPopState);
+
+    // Also lock body scroll so the page underneath can't be scrolled/interacted
+    // with while the gate is up.
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isOpen, dismissible]);
 
   if (!isOpen || !devices.length) {
     console.log("🔕 DeviceLimitModal: isOpen =", isOpen, "devices.length =", devices.length);
@@ -193,7 +244,11 @@ const DeviceLimitModal = ({ isOpen, onClose, onDeviceUpdated, devices = [] }) =>
     */
     <div
       className={styles.overlay}
-      onClick={onClose ? (e) => { if (e.target === e.currentTarget) onClose(); } : undefined}
+      onClick={
+        onClose && dismissible
+          ? (e) => { if (e.target === e.currentTarget) onClose(); }
+          : undefined
+      }
       role="dialog"
       aria-modal="true"
       aria-labelledby="deviceLimitTitle"
@@ -237,8 +292,10 @@ const DeviceLimitModal = ({ isOpen, onClose, onDeviceUpdated, devices = [] }) =>
           </p>
         )}
 
-        {/* .closeBtn was already in the stylesheet and never rendered. */}
-        {onClose && (
+        {/* Manual "Not now" escape hatch — only when the caller opts into
+            dismissal. Off by default so the device limit stays a hard gate the
+            user can only clear by removing a device. */}
+        {onClose && dismissible && (
           <button type="button" className={styles.closeBtn} onClick={onClose}>
             Not now
           </button>

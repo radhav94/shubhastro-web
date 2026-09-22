@@ -25,7 +25,7 @@ import { LuPencilLine } from "react-icons/lu";
 import { FaCheck, FaUser } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import dayjs from "dayjs";
 import { useGetTransactionsQuery, useGetInvoiceMutation } from "../../../services/appServices/transactionService";
 import { useGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
@@ -838,6 +838,34 @@ const Profile = () => {
       }
     }
   }, [cachedTransactions, currentPage, shouldFetch]);
+
+  /*
+    Client-side ordering safety net for the DATE-based sorts.
+
+    Rows are appended page by page into `allLoadedTransactions` in whatever order
+    the API returns them. When the pages aren't strictly globally ordered by
+    date, a newer transaction (e.g. 10 Aug) could land on a later page and end up
+    rendered below an older one (06 Aug). Sorting here by `createdAt` guarantees a
+    consistent chronological order across all loaded pages.
+
+    Only the date orderings are re-sorted here — the default (no explicit sort)
+    and "latestFirst" show newest → oldest, "oldestFirst" shows oldest → newest.
+    Price/duration sorts are left in the server's order, since those aren't
+    date-based and the backend is the source of truth for them.
+  */
+  const sortedTransactions = useMemo(() => {
+    const list = allLoadedTransactions;
+    const dateSorts = ["", "latestFirst", "oldestFirst"];
+    if (!dateSorts.includes(txnAppliedSortBy)) return list;
+
+    const oldestFirst = txnAppliedSortBy === "oldestFirst";
+    const ts = (t) => {
+      const v = new Date(t?.createdAt).getTime();
+      return Number.isFinite(v) ? v : 0;
+    };
+    // Copy before sorting — never mutate the state array in place.
+    return [...list].sort((a, b) => (oldestFirst ? ts(a) - ts(b) : ts(b) - ts(a)));
+  }, [allLoadedTransactions, txnAppliedSortBy]);
 
   // Infinite scroll handler for transactions
   const handleTransactionScroll = (e) => {
@@ -2383,7 +2411,7 @@ const Profile = () => {
             >
               {allLoadedTransactions.length > 0 ? (
                 <>
-                  {allLoadedTransactions.map((transaction) => {
+                  {sortedTransactions.map((transaction) => {
                     const txnType = (() => {
                       const desc = (transaction.description || "").toLowerCase();
                       if (desc.includes("gift")) return { label: "Gift Sent", icon: "🎁", color: "#F75801" };
