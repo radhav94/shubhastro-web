@@ -53,6 +53,7 @@ import RechargeModal from "../../../component/UI/modal/RechargeModal/RechargeMod
 import { Link } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 import { AppIcons, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../utils/appImages";
+import SeoHelmet from "../../../component/SeoHelmet";
 import AstrologerLiveBadge from "../../../component/UI/astrologerLiveBadge/AstrologerLiveBadge";
 import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
 import { resolveLiveChannelForAstrologer } from "../../../utils/helper/resolveLiveChannel";
@@ -205,6 +206,38 @@ const AstrologerProfile = () => {
   );
 
   const data = astrologerData?.data;
+
+  /*
+    SEO meta for this astrologer, built only from fields the API actually sends.
+
+    The astrologer endpoint returns camelCase meta fields (metaTitle,
+    metaDescription, metaTags), while SeoHelmet reads the snake_case keys
+    (meta_title / meta_description / meta_keywords), so we map them here.
+
+    A key is included ONLY when it has a real value — an empty/blank metaTitle or
+    metaDescription is left out so updateMeta falls back to the site defaults
+    rather than blanking the tag. Returns null when the API gave us nothing at
+    all, so SeoHelmet's own `!data` guard keeps the page on its defaults.
+  */
+  const seoData = useMemo(() => {
+    if (!data) return null;
+
+    const clean = (v) => (typeof v === "string" && v.trim() ? v.trim() : "");
+    const title = clean(data.metaTitle);
+    const description = clean(data.metaDescription);
+    const keywords = Array.isArray(data.metaTags)
+      ? data.metaTags.filter((t) => typeof t === "string" && t.trim())
+      : clean(data.metaTags);
+
+    const hasKeywords = Array.isArray(keywords) ? keywords.length > 0 : !!keywords;
+    if (!title && !description && !hasKeywords) return null;
+
+    const out = {};
+    if (title) out.meta_title = title;
+    if (description) out.meta_description = description;
+    if (hasKeywords) out.meta_keywords = keywords;
+    return out;
+  }, [data]);
 
   // The real ObjectId. Anything that talks to an id-only endpoint (chat
   // history, follow status, live status, analytics) must use this, never the URL
@@ -1609,6 +1642,11 @@ const AstrologerProfile = () => {
 
   return (
     <div className={styles.profilePage}>
+      {/* Per-astrologer SEO meta. Only overrides the site defaults when the API
+          actually returned meta fields (see seoData); the astrologer's photo is
+          used for og:image / twitter:image. */}
+      {seoData && <SeoHelmet data={seoData} image={getAstrologerImageUrl(data, "large")} />}
+
       {/* Top Header */}
       <header className={styles.topHeaderWrap}>
         <div className={styles.topHeader}>
