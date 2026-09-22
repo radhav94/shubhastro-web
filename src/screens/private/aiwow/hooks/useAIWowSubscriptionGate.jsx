@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/SubscriptionModal';
 import { subscriptionApi, useGetSubscriptionStatusQuery, useLazyGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
 import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from '../../../../utils/subscription/featureGating';
+import { isSubscriptionEnabled } from '../../../../utils/featureConfig';
 import { trackEvent } from '../../../../utils/analytics';
 import { SUBSCRIPTION_EVENTS, trackSubscriptionEvent } from '../../../../utils/subscriptionAnalytics';
 
@@ -148,6 +149,15 @@ export const useAIWowSubscriptionGate = ({ featureName = 'ai-report' } = {}) => 
    */
   const runWithEntitlement = useCallback(async (generateFn) => {
     const gId = `${String(featureName).replace(/\s+/g, '-').toLowerCase()}-generate`;
+
+    // ── Env kill-switch ────────────────────────────────────────────────────
+    // When the subscription feature is turned off (VITE_SUBSCRIPTION_ENABLED=
+    // "false") there is no plans popup to clear an entitlement block — the modal
+    // never opens. So skip all gating: run the generate call once and hand its
+    // result straight back, treating every user as entitled.
+    if (!isSubscriptionEnabled()) {
+      return generateFn();
+    }
 
     // ── Proactive subscription check (BEFORE any generation runs) ──────────
     // Product rule: a report may only be generated when the user has an active

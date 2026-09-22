@@ -66,7 +66,7 @@ import StickyReview from "../../private/home/components/call/StickyReview";
 import { trackEvent } from "../../../utils/analytics";
 import { SUBSCRIPTION_EVENTS, trackSubscriptionEvent } from "../../../utils/subscriptionAnalytics";
 import MallHistoryContent from "../../private/shubhAstroMallHistory/MallHistoryContent";
-import { isShubhMallEnabled } from "../../../utils/featureConfig";
+import { isShubhMallEnabled, isSubscriptionEnabled } from "../../../utils/featureConfig";
 import {
   useCreateKundliMutation,
   useDeleteKundliMutation,
@@ -1789,7 +1789,11 @@ const Profile = () => {
         </div>
       </div>
 
-      <div className={styles.balanceMembershipRow}>
+      <div
+        className={`${styles.balanceMembershipRow} ${
+          isSubscriptionEnabled() ? "" : styles.balanceMembershipRowSingle
+        }`}
+      >
         <div className={styles.balanceMembershipItem}>
           {/* Balance Card */}
           <div
@@ -1839,8 +1843,13 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className={styles.balanceMembershipItem}>
-          <MembershipCard
+        {/* Membership card is hidden entirely when the subscription feature is
+            turned off via VITE_SUBSCRIPTION_ENABLED — there is nothing to
+            subscribe to, so the "Unlock Premium" upsell (and the active-plan
+            view) should not appear. The Balance card then sits alone in the row. */}
+        {isSubscriptionEnabled() && (
+          <div className={styles.balanceMembershipItem}>
+            <MembershipCard
                   hasSubscription={hasActiveSubscription}
                   autoRenew={!!subData?.subscription?.autoRenew}
                   planName={subPlanName}
@@ -1853,7 +1862,8 @@ const Profile = () => {
                   isCancelling={isCancellingSubscription}
                   onSubscribe={() => setShowSubscriptionModal(true)}
                 />
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Email & Following Row */}

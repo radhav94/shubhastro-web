@@ -20,6 +20,31 @@ export const isShubhMallEnabled = () => {
 };
 
 /**
+ * Check if the subscription feature (the SubscriptionModal + AI-Wow entitlement
+ * gate) is enabled. Controlled by VITE_SUBSCRIPTION_ENABLED.
+ *
+ * Defaults to TRUE when unset or blank — an existing environment that has never
+ * heard of this flag must keep behaving exactly as it does today. Only an
+ * explicit "false" turns it off.
+ *
+ * When OFF:
+ *   - SubscriptionModal renders nothing anywhere it is mounted.
+ *   - useAIWowSubscriptionGate treats every user as entitled, so AI-Wow report
+ *     generation is never blocked (otherwise hiding the modal would trap those
+ *     flows behind a block that can never be cleared).
+ *
+ * @returns {boolean}
+ */
+export const isSubscriptionEnabled = () => {
+  const value = import.meta.env.VITE_SUBSCRIPTION_ENABLED;
+  // Default ON: only a deliberate "false" disables it.
+  if (value === undefined || value === null || String(value).trim() === "") {
+    return true;
+  }
+  return String(value).trim() !== "false";
+};
+
+/**
  * Check if Truecaller one-tap login is enabled.
  * Controlled by VITE_TRUECALLER_ENABLED env variable.
  *
