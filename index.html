@@ -474,6 +474,80 @@
 
         promise.catch(function () {});
         window.__homepagePrefetch__ = { slug: slug, limit: limit, promise: promise };
+
+        /*
+          Preload the homepage LCP image the moment the API answers.
+
+          Lighthouse names the LCP element as the first card image in the hero
+          left column:
+
+            section._heroRow > div._leftCards > div._qCardLaal
+              > img._laalKitaabImgLeft
+
+          and the phase split says the wait is in two places, not one:
+
+            TTFB           816.1ms  13%
+            Load Delay    2002.8ms  31%   <-- this block
+            Load Time     2988.1ms  47%   <-- the asset, see below
+            Render Delay   582.1ms   9%
+
+          HomeV2 already marks that <img> fetchpriority="high" and never lazy,
+          which is everything the element itself can do. It does not help with
+          Load Delay, because the src is CMS data: the browser cannot know the
+          URL until /api/homepage has resolved AND the bundle has parsed,
+          executed and rendered the element. That second half is what the 2.0s
+          is — the request starts around 2.8s.
+
+          The response is already in hand far earlier than that: the fetch above
+          starts during head parse. So read the URL straight off it and inject
+          the preload, which moves the image request from "after React renders"
+          to "as soon as the API answers".
+
+          Coupling, stated plainly: this mirrors HomeV2's own selection —
+          `sorted.find(s => s.display_type === "ai-services")`, then
+          sortContentByOrder(content)[0], then `image_url_web || icon`.
+          sortContentByOrder is sortByListOrder, i.e. ascending `list_order`
+          with a 0 default, replicated below. If the CMS shape changes this
+          silently preloads nothing (or, at worst, one wrong image — a wasted
+          request, not a broken page), and the app still renders exactly as it
+          does today.
+
+          NOT the whole fix. The asset is a 500x500 PNG served with a .webp
+          extension (content-type: image/png), 57,056 B, painted into a 120x120
+          box. Re-encoded as real WebP at 240x240 it is 15,630 B — 73% smaller —
+          which is the Load Time half. That is a CMS re-upload, not a code
+          change, so it cannot be done here.
+        */
+        promise.then(function (body) {
+          try {
+            var list = body && body.data && body.data.list;
+            if (!Array.isArray(list)) return;
+
+            var section = null;
+            for (var i = 0; i < list.length; i++) {
+              if (list[i] && list[i].display_type === "ai-services") { section = list[i]; break; }
+            }
+            if (!section || !Array.isArray(section.content) || !section.content.length) return;
+
+            var items = section.content.slice().sort(function (a, b) {
+              return ((a && a.list_order) || 0) - ((b && b.list_order) || 0);
+            });
+            var first = items[0];
+            if (!first) return;
+
+            var href = first.image_url_web || first.icon;
+            if (!href || typeof href !== "string") return;
+
+            var link = document.createElement("link");
+            link.rel = "preload";
+            link.as = "image";
+            link.href = href;
+            link.fetchPriority = "high";
+            document.head.appendChild(link);
+          } catch (e) {
+            /* best effort — the <img> still requests it when React renders */
+          }
+        });
       } catch (e) {
         /* prefetch is best effort */
       }
