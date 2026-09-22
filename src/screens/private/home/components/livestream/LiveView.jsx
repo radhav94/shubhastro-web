@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { LocalUser, RemoteUser } from "agora-rtc-react";
 import { IoMic, IoMicOff, IoCallSharp, IoHourglass } from "react-icons/io5";
@@ -424,8 +424,23 @@ const LiveView = (props) => {
   });
   const profiles = kundliData?.data || [];
 
-  // Normalize socket messages (message → text, userType → role, userName → sender)
-  const normalizedMessages = messages
+  /*
+   * Memoised: this maps the ENTIRE message history, and parses JSON for every
+   * gift message in it, so leaving it in the render body re-did that work on
+   * every single render of this component.
+   *
+   * That matters here more than usual. `messages` is appended to by the socket
+   * with no cap (useLiveChat: `setMessages(prev => [...prev, msg])`), so on a
+   * busy stream the array only grows, and this component re-renders constantly
+   * for reasons unrelated to chat — video state, call state, gifts, timers.
+   * Every one of those renders paid the full O(n) normalise plus JSON.parse
+   * before the browser could paint, which is the shape of an INP problem:
+   * Clarity measured INP 2248ms on /live, against a 200ms target and the worst
+   * in the report.
+   *
+   * Keyed on `messages` alone — nothing else in here is read from state.
+   */
+  const normalizedMessages = useMemo(() => messages
     ?.map((m) => {
       // Handle gift messages
       if (m.type === "gift") {
@@ -487,7 +502,7 @@ const LiveView = (props) => {
         role: m.role || m.userType,
         sender: m.sender || m.userName,
       };
-    }) || [];
+    }) || [], [messages]);
   const displayMessages = normalizedMessages;
 
   const reelRef = useRef(null);
