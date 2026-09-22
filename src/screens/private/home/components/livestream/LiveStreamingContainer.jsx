@@ -148,6 +148,26 @@ const LiveStreamingContainer = ({ client }) => {
     });
   }, [currentLive?.channel]);
 
+  /*
+    Reset the resolved host name/avatar refs whenever the watched channel
+    changes.
+
+    These refs are populated by LiveView (via onHostAvatarResolved /
+    onHostNameResolved) with the sized avatar of the CURRENT host, and they are
+    the highest-precedence source for the "session ended" modal. If they are not
+    cleared when a new astrologer goes live on the same page, the previous host's
+    value survives — so when Kavi's stream ends we cache Kavi's avatar, Ahilya
+    then goes live, and if her session ends before LiveView re-reports, the stale
+    Kavi avatar wins the `||` chain and is shown for Ahilya. Clearing on channel
+    change makes the ended modal fall back to the current room's own data
+    (currentLiveEntry.imageUrl / the socket payload) until LiveView reports the
+    new host, so a stale host can never leak across sessions.
+  */
+  useEffect(() => {
+    resolvedHostNameRef.current = "";
+    resolvedHostAvatarRef.current = "";
+  }, [channel]);
+
   // Session ended modal state
   const [endedInfo, setEndedInfo] = useState(null);
   const endedTimerRef = useRef(null);
