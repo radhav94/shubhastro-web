@@ -11,6 +11,7 @@ import { startIncomingSound, stopIncomingSound } from "../utils/incomingSound";
 import { claimRoom, releaseRoom } from "../utils/tabSession";
 import { GUEST_AUTO_ACCEPT_KEY, GUEST_FANOUT_RESOLVED_KEY, GUEST_FANOUT_RESOLVED_WINDOW_MS } from "../screens/public/guestChat/guestChatConstants";
 import { getAstrologerDisplayName } from "../utils/helper/string.utils";
+import { BranchEvents } from "../utils/branchEvents";
 
 // LocalStorage key for persistence
 const QUEUE_STORAGE_KEY = "shubhtalk_waiting_queue";
@@ -882,7 +883,40 @@ export const WaitingQueueProvider = ({ children }) => {
       stopChatTimer();
       setChatSeconds(0);
       clearChatSession();
+
+      /*
+        Consultation Completed — chat.
+
+        Reported here rather than in ChatWindow because chat has two end
+        paths — the visitor's own End Chat (confirmEndChat -> handleDisconnect)
+        and the server's chat:ended — and both funnel through this handler.
+        Reporting at either call site would have missed one or double-counted.
+
+        Guarded on the start marker this line removes anyway, so it fires at
+        most once per session: whichever path arrives first reports and clears,
+        and a second delivery finds nothing and no-ops. That marker is also the
+        session start time, so the duration comes from it directly.
+
+        Pandit AI and endedBy === "SYSTEM" are already filtered above, which is
+        correct — neither is a completed paid consultation.
+      */
+      const chatStartedAt = Number(localStorage.getItem("shubhtalk_chat_start_time")) || 0;
       localStorage.removeItem("shubhtalk_chat_start_time");
+      if (chatStartedAt) {
+        BranchEvents.trackConsultationCompleted({
+          page_name: "Chat Ended",
+          route_name: "chat",
+          route_path: window.location.pathname,
+          user_type: "logged_in",
+          user_id: localStorage.getItem("shubhtalk_customer_id"),
+          astrologer_id: data?.astrologerId,
+          consultation_id: endedRoomId,
+          consultation_type: "chat",
+          actual_duration_minutes: Math.max(0, Math.round((Date.now() - chatStartedAt) / 60000)),
+          scheduled_duration_minutes: 0,
+          completion_status: "completed",
+        });
+      }
 
       // Show toast notification
       Toast.success("Chat ended.");
