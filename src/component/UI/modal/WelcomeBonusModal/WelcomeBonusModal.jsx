@@ -6,6 +6,7 @@ import welcomeBg from "../../../../assets/images/welcome-bonus-bg.webp";
 import welcomeBgMobile from "../../../../assets/images/welcome-bonus-bg-mobile.webp";
 import welcomeIcon from "../../../../assets/images/welcome-bonus-icon.webp";
 import { useWalletBalance } from "../../../../screens/private/wallet/useWalletBalance";
+import { BranchEvents } from "../../../../utils/branchEvents";
 
 const WelcomeBonusModal = () => {
   const location = useLocation();
@@ -20,6 +21,34 @@ const WelcomeBonusModal = () => {
   const checkAndShowBonus = () => {
     if (localStorage.getItem("shubhtalk_show_welcome_bonus") === "true") {
       localStorage.removeItem("shubhtalk_show_welcome_bonus");
+
+      /*
+        Promo Eligible.
+
+        BranchEvents.trackPromoEligible and trackPromoCredited both existed with
+        no caller anywhere, so the welcome bonus — the one promotion in the
+        product — was invisible in Branch and GA4 alike.
+
+        Reported here rather than at the four places that grant the bonus
+        (GuestKundliAuthModal, useGuestChatAuth, GuidanceScreen,
+        BirthDetailsScreen). They all set this same flag and this is its only
+        consumer, so one report here covers every path and cannot drift out of
+        sync when a fifth path is added. Same reasoning as reporting chat
+        completion from WaitingQueueContext rather than at each end path.
+
+        Inside the flag check, which already removes the key, so this fires once
+        per granted bonus even though checkAndShowBonus runs on mount, on every
+        navigation and on the show-welcome-bonus event.
+      */
+      BranchEvents.trackPromoEligible({
+        page_name: "Welcome Bonus",
+        route_name: "welcome-bonus",
+        route_path: window.location.pathname,
+        promo_id: "welcome_bonus",
+        promo_type: "welcome_bonus",
+        user_id: localStorage.getItem("shubhtalk_customer_id"),
+      });
+
       setIsOpen(true);
     }
   };
@@ -39,6 +68,37 @@ const WelcomeBonusModal = () => {
       refreshWallet();
     }
   }, [isOpen, refreshWallet]);
+
+  /*
+    Promo Credited — distinct from eligible above.
+
+    Eligible means the visitor qualified; credited means the money is actually
+    in the wallet. Reported off the balance rather than the modal opening,
+    because the open effect only *starts* refreshWallet() — reporting there
+    would send promo_amount 0 for anyone whose balance had not yet arrived.
+
+    `reported` latches so the balance settling in more than one step (the
+    cached value, then the refreshed one) does not send the event twice.
+  */
+  const [promoCreditedReported, setPromoCreditedReported] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen || promoCreditedReported) return;
+    const credited = Number(balance) || 0;
+    if (credited <= 0) return;
+
+    setPromoCreditedReported(true);
+    BranchEvents.trackPromoCredited({
+      page_name: "Welcome Bonus",
+      route_name: "welcome-bonus",
+      route_path: window.location.pathname,
+      promo_id: "welcome_bonus",
+      promo_type: "welcome_bonus",
+      promo_amount: credited,
+      currency: "INR",
+      user_id: localStorage.getItem("shubhtalk_customer_id"),
+    });
+  }, [isOpen, balance, promoCreditedReported]);
 
   /*
     Auto-hide.
