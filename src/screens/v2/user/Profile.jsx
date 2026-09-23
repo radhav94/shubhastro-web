@@ -87,6 +87,7 @@ import {
 } from "../../../utils/helper/string.utils";
 import { getAstrologerImageUrl, getAstrologerDefaultImage } from "../../../utils/appImages";
 import { openDeferredTab } from "../../../utils/helper/openDeferredTab";
+import { BranchEvents } from "../../../utils/branchEvents";
 
 // "Consult Again" button that disables in real time when the astrologer is live.
 // Uses useAstrologerLiveStatus so it reacts to the live socket event even when
@@ -1408,6 +1409,20 @@ const Profile = () => {
         try {
           const regResponse = await registerUser(registrationPayload);
           console.log("✅ Registration successful:", regResponse);
+
+          // Registration Completed — reported wherever the registerUser API
+          // succeeds. This branch only runs for someone who skipped onboarding
+          // and is adding their own Self profile (see the isRegister /
+          // isSelfProfile / isAlreadyRegistered guard above), i.e. a genuine
+          // first registration. De-duped per user inside
+          // trackRegistrationCompleted.
+          BranchEvents.trackRegistrationCompleted({
+            page_name: "Profile",
+            route_name: "profile",
+            route_path: window.location.pathname,
+            registration_method: "phone",
+            user_id: localStorage.getItem("shubhtalk_customer_id"),
+          });
           
           // Update localStorage with registration data
           const updatedUserData = {

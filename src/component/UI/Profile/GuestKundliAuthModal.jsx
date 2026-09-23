@@ -41,6 +41,7 @@ import { useCreateKundliMutation, useLazyGetAllKundlisQuery } from "../../../ser
 import { privateRequestNew, setApiErrorToastSilenced } from "../../../services/appServices/privateRequestNew";
 import { getDeviceInfo, getDeviceType } from "../../../utils/deviceInfo";
 import { trackEvent } from "../../../utils/analytics";
+import { BranchEvents } from "../../../utils/branchEvents";
 
 /**
  * Guest authentication flow for AI Wow services.
@@ -147,6 +148,16 @@ const GuestKundliAuthModal = ({
     };
 
     await AuthServices.registerUser(registerPayload, { skipToast: true });
+
+    // Registration Completed — reported wherever registerUser succeeds.
+    // De-duped per user inside trackRegistrationCompleted.
+    BranchEvents.trackRegistrationCompleted({
+      page_name: "Guest Kundli Auth",
+      route_name: "guest-kundli-auth",
+      route_path: window.location.pathname,
+      registration_method: "phone",
+      user_id: localStorage.getItem("shubhtalk_customer_id"),
+    });
 
     // Trigger the welcome-bonus popup shown to newly registered users.
     localStorage.setItem("shubhtalk_show_welcome_bonus", "true");
