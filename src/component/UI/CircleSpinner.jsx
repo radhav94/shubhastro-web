@@ -1,21 +1,17 @@
 import React from "react";
 
-// import spinner from "../../assets/gif/spinner-new.gif";
-// import spinner from "../../assets/gif/Spinner-5.gif";
-import spinner from "../../assets/gif/loading.gif";
+import styles from "./CircleSpinner.module.scss";
 
+/*
+ * Route-transition spinner.
+ *
+ * Was an <img> pointing at a 94 KB / 360-frame GIF; see CircleSpinner.module.scss
+ * for why that was replaced with CSS and why the 90px box is load-bearing.
+ */
 const CircleSpinner = () => {
   return (
-    <span>
-      <img
-        src={spinner}
-        alt="circle-spinner"
-        style={{
-          mixBlendMode: "multiply",
-          height: "70px",
-          padding: "10px",
-        }}
-      />
+    <span className={styles.wrap} role="status" aria-label="Loading">
+      <span className={styles.ring} />
     </span>
   );
 };

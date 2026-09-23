@@ -225,6 +225,38 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           
           trackEvent("otp_verified_success", { user_id: userData._id, mobile_number: formData.phoneNumber });
 
+          /*
+            Registration Completed — first signup only.
+
+            BranchEvents.trackRegistrationCompleted existed but had exactly one
+            caller, Register.jsx, and /register is only reachable from
+            LiveSignupPromptModal. Real signups come through here, so the Branch
+            dashboard never saw a "Registration Completed" event at all; the
+            closest thing it had was "OTP Verified", which fires for returning
+            logins too and so could not be used to count new users.
+
+            `isRegister === false` is the backend's new-user marker — see the
+            note in GuestKundliAuthModal, which uses the same test. Compared as a
+            String because the flag arrives stringified in some responses, and a
+            bare `!userData.isRegister` would then be false for the literal
+            "false" and miss every new user. The registered branch further down
+            reads the raw value for navigation, which is unchanged.
+
+            Placed here, next to trackOtpVerified, because both describe the same
+            moment and `userData` is in scope; the branch below leaves via
+            navigate(), so anything after it would not reliably run.
+          */
+          if (String(userData?.isRegister) === "false") {
+            BranchEvents.trackRegistrationCompleted({
+              page_name: "OTP Verification",
+              route_name: "verify-otp",
+              route_path: window.location.pathname,
+              registration_method: "phone",
+              user_id: userData._id,
+              phone: formData.phoneNumber,
+            });
+          }
+
           // Set role FIRST before setting tokens
           localStorage.setItem("shubhtalk_role", "CUSTOMER");
 

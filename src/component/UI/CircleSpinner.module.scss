@@ -1,0 +1,54 @@
+/*
+  CSS replacement for the animated GIF this component used to render.
+
+  It was `loading.gif`: 94,321 bytes, 150x84, 360 frames at 33fps — eleven
+  seconds of animation for a route-transition spinner painted 70px tall. Vite
+  emits it as a URL from the entry chunk, and HomeLayout's Suspense fallback
+  renders on every lazy route, so the download landed inside the window the
+  fallback exists to cover: on a slow connection the spinner itself was part of
+  why the wait was long.
+
+  Unlike PrimaryLoader's LOADING-ANIMATION.gif, nothing here is a brand asset —
+  this is the generic "route is loading" indicator — so it costs nothing to
+  express in CSS and saves the whole 94 KB on every route change.
+
+  Geometry is deliberately preserved. The old markup was an <img> at
+  `height: 70px; padding: 10px`, i.e. a ~90px in-flow box, and HomeLayout's
+  `.routeFallback` comment is explicit that the footer riding up into view is a
+  CLS problem it solved by reserving that height. `.wrap` is fixed at 90x90 so
+  this swap cannot reintroduce the shift.
+*/
+.wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+}
+
+.ring {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  /* Brand orange, matching the meta theme-color in index.html. */
+  border: 3px solid rgba(247, 88, 1, 0.18);
+  border-top-color: #f75801;
+  animation: circleSpinnerSpin 0.8s linear infinite;
+}
+
+@keyframes circleSpinnerSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/*
+  Slowed rather than stopped. The rotation is the only thing telling the reader
+  the app is still working; a frozen ring reads as a broken page, which is worse
+  for someone who asked for less motion than a gentle one.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .ring {
+    animation-duration: 2.4s;
+  }
+}

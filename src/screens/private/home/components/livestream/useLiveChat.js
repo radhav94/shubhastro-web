@@ -4,6 +4,35 @@ import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
 import Toast from "../../../../../component/toast";
 import { SOCKET_URL, SOCKET_PATH } from "../../../../../utils/apiConfig";
 
+/*
+ * Cap on retained live-chat messages.
+ *
+ * `messages` was appended to without limit, so on a long stream the array grew
+ * for the whole session. Two costs, both paid on the main thread while the
+ * viewer is trying to interact:
+ *
+ *   - LiveView derives `normalizedMessages` from this array, mapping all of it
+ *     and JSON.parsing every gift message. That is memoised now, but a new
+ *     message invalidates the memo, so the work is still O(total messages) on
+ *     each one — unbounded growth makes each message more expensive than the
+ *     last.
+ *   - The rendered list is the same array, so React reconciles every retained
+ *     message on each update.
+ *
+ * Clarity measured INP 2248ms on /live, the worst in the report against a
+ * 200ms target. Bounding the array bounds both costs.
+ *
+ * 200 is well past what the overlay can show — it is a live chat feed pinned to
+ * the newest message, not a scrollback archive — so this trims history the
+ * viewer had no way to reach. Applied to the initial `live:recent_messages`
+ * payload as well, since the server decides how much history to send and this
+ * hook should not be at the mercy of that number.
+ */
+const MAX_LIVE_MESSAGES = 200;
+
+const capMessages = (list) =>
+  list.length > MAX_LIVE_MESSAGES ? list.slice(-MAX_LIVE_MESSAGES) : list;
+
 export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onStreamEnded, onSessionStarted, onSessionEnded, onRoomNotFound, onBlocked, onUserBlocked, onReportSubmitted }) => {
   const socketRef = useRef(null);
   const currentRoomRef = useRef(null);
@@ -99,22 +128,22 @@ export const useLiveChat = ({ roomId, userId, userName, onAstrologerStatus, onSt
 
     socket.on("live:recent_messages", (data) => {
       console.log("LiveChat → Recent messages loaded:", data.messages?.length || 0);
-      setMessages(data.messages || []);
+      setMessages(capMessages(data.messages || []));
     });
 
     socket.on("live:message", (msg) => {
       console.log("LiveChat → Message received:", msg);
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => capMessages([...prev, msg]));
     });
 
     socket.on("live:user_joined", (data) => {
       setParticipantCount(data.participantCount);
-      setMessages((prev) => [...prev, {
+      setMessages((prev) => capMessages([...prev, {
         id: `join_${Date.now()}_${data.userId}`,
         type: "system",
         text: `${data.userName || "Someone"} joined`,
         timestamp: new Date().toISOString(),
-      }]);
+      }]));
     });
 
     socket.on("live:user_left", (data) => {
