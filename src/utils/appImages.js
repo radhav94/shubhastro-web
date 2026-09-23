@@ -255,7 +255,19 @@ import AuraIcon from "../assets/aiwow/Vector.svg";
 
 // AI WOW Instruction Images
 import FaceReadingInstruction from "../assets/aiwow/face-reading-1.jpg";
-import PalmistryInstruction from "../assets/aiwow/palmistry-1.jpg";
+/*
+  WebP at the size it is actually painted.
+
+  Was palmistry-1.jpg: 94,832 bytes, 1024x1024, rendered into a 180x180 box —
+  2.84x oversized even at DPR 2. It is also the measured LCP element of
+  /ai-wow/ai-palmistry-scanner (1716ms against production), so its weight is
+  on the critical path rather than merely wasteful. Re-cut to 360x360 and
+  encoded WebP q82: 5,848 bytes, 94% smaller.
+
+  Same treatment as signature-1 next to it; see that note for why WebP pays
+  here and not for the flat-colour CMS icons.
+*/
+import PalmistryInstruction from "../assets/aiwow/palmistry-1.webp";
 /*
   WebP at the size it is actually painted.
 
