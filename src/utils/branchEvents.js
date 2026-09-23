@@ -175,6 +175,33 @@ export const BranchEvents = {
    * @param {Object} params - { user_id: string, signup_method: string }
    */
   trackRegistrationCompleted: (params = {}) => {
+    /*
+      Fires at most once per user.
+
+      This is reported from every place that calls the registerUser API —
+      BirthDetailsScreen, GuidanceScreen, Register, GuestKundliAuthModal,
+      useGuestChatAuth and Profile — because those are the paths a visitor can
+      actually complete registration through, and no single one of them covers
+      all of them. Several can run for the same person in one session (a guest
+      who registers through the chat modal and later lands on an onboarding
+      step), so without a guard the same signup would be counted repeatedly and
+      the Branch and GA4 numbers would both be inflated.
+
+      Keyed on the customer id rather than a bare boolean so a second person
+      signing up on the same device still reports. Reporting is allowed through
+      if storage is unavailable or the id is not yet written — a duplicate is a
+      better failure than a silent miss, and the id is set before every caller
+      reaches this point.
+    */
+    const dedupeKey = "shubhtalk_registration_tracked";
+    const trackedFor = params.user_id || localStorage.getItem("shubhtalk_customer_id") || "";
+    try {
+      if (trackedFor && localStorage.getItem(dedupeKey) === String(trackedFor)) return;
+      if (trackedFor) localStorage.setItem(dedupeKey, String(trackedFor));
+    } catch {
+      /* storage blocked — report anyway rather than lose the signup */
+    }
+
     const eventParams = {
       event_category: "onboarding",
       event_type: "registration_completed",

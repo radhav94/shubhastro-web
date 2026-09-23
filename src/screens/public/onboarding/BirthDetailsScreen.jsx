@@ -156,6 +156,16 @@ const BirthDetailsScreen = ({
         
         // Track Profile Completed event
         const userId = localStorage.getItem("shubhtalk_customer_id");
+
+        // Registration Completed — reported wherever the registerUser API
+        // succeeds. De-duped per user inside trackRegistrationCompleted.
+        BranchEvents.trackRegistrationCompleted({
+          page_name: "Birth Details",
+          route_name: "birth-details",
+          route_path: window.location.pathname,
+          registration_method: "phone",
+          user_id: userId,
+        });
         BranchEvents.trackProfileCompleted({
           page_name: "Birth Details",
           route_name: "birth-details",

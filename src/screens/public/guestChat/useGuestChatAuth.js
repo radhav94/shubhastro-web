@@ -13,6 +13,7 @@ import {
 } from "../../../services/appServices/kundliServicesNew";
 import { privateRequestNew, setApiErrorToastSilenced } from "../../../services/appServices/privateRequestNew";
 import { trackEvent } from "../../../utils/analytics";
+import { BranchEvents } from "../../../utils/branchEvents";
 
 /**
  * Guest authentication used by the guest chat flow.
@@ -96,6 +97,17 @@ export const useGuestChatAuth = () => {
     };
 
     await AuthServices.registerUser(registerPayload, { skipToast: true });
+
+    // Registration Completed — reported wherever registerUser succeeds.
+    // De-duped per user inside trackRegistrationCompleted.
+    BranchEvents.trackRegistrationCompleted({
+      page_name: "Guest Chat Auth",
+      route_name: "guest-chat-auth",
+      route_path: window.location.pathname,
+      registration_method: "phone",
+      user_id: localStorage.getItem("shubhtalk_customer_id"),
+    });
+
     localStorage.setItem("shubhtalk_show_welcome_bonus", "true");
 
     try {
