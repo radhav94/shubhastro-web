@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useWalletBalance } from "./useWalletBalance";
 import { FaSync } from "react-icons/fa";
 import { trackEvent } from "../../../utils/analytics";
+import { BranchEvents } from "../../../utils/branchEvents";
 
 const PAYMENT = "payment";
 const WALLET = "wallet";
@@ -25,11 +26,32 @@ const WalletTranscations = () => {
     isFetching: isFetchingWallet,
   } = useWalletBalance();
 
-  // Track wallet screen open + transaction history view (once on mount).
-  // No disable directive needed: trackEvent is a module import, not a dependency.
+  /*
+    Track wallet screen open + transaction history view (once on mount).
+    No disable directive needed: these are module imports, not dependencies.
+
+    The screen-view goes through BranchEvents.trackWalletScreenViewed rather
+    than a bare trackEvent. That method existed with no caller anywhere, so
+    Branch had no wallet screen event at all while GA4 had one under the
+    ad-hoc name `wallet_screen_opened` — the same action reported under two
+    names, one of which reached only one sink.
+
+    NOTE: this renames the GA4 event from `wallet_screen_opened` to
+    `wallet_screen_viewed`. Any GA4 report or audience keyed on the old name
+    needs updating. The alternative — firing both — would have double-counted
+    wallet views in GA4, which is the worse failure.
+
+    `current_balance` is whatever useWalletBalance has at mount, which is the
+    persisted value on a warm load and 0 on a cold one; the fetch it kicks off
+    resolves after this. Reported as-is rather than deferred, because this is a
+    screen-view event and belongs at mount.
+  */
   useEffect(() => {
-    trackEvent("wallet_screen_opened", {});
+    BranchEvents.trackWalletScreenViewed({
+      current_balance: Number(balance) || 0,
+    });
     trackEvent("transaction_history_viewed", {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /*
