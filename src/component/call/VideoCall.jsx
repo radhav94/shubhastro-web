@@ -4,6 +4,7 @@ import AgoraRTC from "agora-rtc-sdk-ng";
 import { AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
 import { getWorstNetworkQuality } from "../../agora/networkQuality";
 import { getAstrologerDisplayName } from "../../utils/helper/string.utils";
+import { BranchEvents } from "../../utils/branchEvents";
 import {
   IoMic,
   IoMicOff,
@@ -568,6 +569,29 @@ const VideoCalling = ({ callData }) => {
         }
 
         startTimer();
+
+        /*
+          Consultation Started — video.
+
+          VoiceCall has fired this since it was written; VideoCall and
+          ChatWindow never did, so Branch only ever saw the audio third of
+          consultations and any attribution built on it under-counted the
+          other two. Same shape and same placement as VoiceCall's (immediately
+          after startTimer, i.e. once the session is actually running), with
+          consultation_type "video".
+        */
+        BranchEvents.trackConsultationStarted({
+          page_name: "Video Call",
+          route_name: "video-call",
+          route_path: window.location.pathname,
+          user_type: "logged_in",
+          user_id: localStorage.getItem("shubhtalk_customer_id"),
+          astrologer_id: activeCall?.astrologerId,
+          astrologer_name: callerName || getAstrologerDisplayName(lastRequestedAstro),
+          consultation_id: roomId,
+          consultation_type: "video",
+          source: "listing",
+        });
       } catch (err) {
         if (didCancelStart || cleanupRef.current || endCallRef.current) {
           return;
@@ -731,6 +755,28 @@ const VideoCalling = ({ callData }) => {
     if (!isDowngradingToAudio.current) {
       const currentCall = activeCallRef.current;
       console.log("[VideoCall] 🔚 safeEndCall — roomId:", roomId, "activeCall:", currentCall ? { astrologerID: currentCall.astrologerID, callerName: currentCall.callerName } : "null");
+
+      /*
+        Consultation Completed — video. Inside the isDowngradingToAudio guard
+        on purpose: a video->audio downgrade is the same consultation
+        continuing in VoiceCall, not one ending, and VoiceCall will report its
+        completion. Mirrors VoiceCall's own isUpgradingToVideo guard so an
+        upgrade/downgrade pair produces exactly one completed event.
+      */
+      BranchEvents.trackConsultationCompleted({
+        page_name: "Call Ended",
+        route_name: "video-call",
+        route_path: window.location.pathname,
+        user_type: "logged_in",
+        user_id: localStorage.getItem("shubhtalk_customer_id"),
+        astrologer_id: currentCall?.astrologerId,
+        astrologer_name: currentCall?.callerName || callerName,
+        consultation_id: roomId,
+        consultation_type: "video",
+        actual_duration_minutes: Math.round(callSeconds / 60),
+        scheduled_duration_minutes: 0,
+        completion_status: "completed",
+      });
 
       setReviewData({
         astrologerID: currentCall?.astrologerID || currentCall?.astrologerId,

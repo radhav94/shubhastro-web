@@ -9,6 +9,7 @@ import { useCall } from "../../../../../context/CallContext";
 import { showErrorWithHighlight } from "../../../../../utils/showErrorWithHighlight";
 import { format12HourTime } from "../../../../../utils/dateFormat/dateTime";
 import useTypingIndicator from "./useTypingIndicator";
+import { BranchEvents } from "../../../../../utils/branchEvents";
 import {
   MESSAGE_STATUS,
   mergeStatus,
@@ -237,6 +238,30 @@ export default function useChat({
           // Store chat start time for elapsed time calculation (if not already set)
           // Use localStorage so it persists across page refreshes
           if (!localStorage.getItem("shubhtalk_chat_start_time")) {
+            /*
+              Consultation Started — chat.
+
+              VoiceCall has reported this since it was written; VideoCall and
+              chat never did, so Branch only saw the audio share of
+              consultations. Fired inside this guard rather than beside
+              startTimer() because the surrounding effect re-runs on socket
+              reconnects and on refresh, and this key is the existing
+              once-per-session marker — it is set here and removed by
+              WaitingQueueContext when the chat ends, so a reconnect mid-chat
+              finds it already set and does not re-fire.
+            */
+            BranchEvents.trackConsultationStarted({
+              page_name: "Chat",
+              route_name: "chat",
+              route_path: window.location.pathname,
+              user_type: "logged_in",
+              user_id: userId,
+              astrologer_id: astrologerId,
+              consultation_id: roomId,
+              consultation_type: "chat",
+              source: "listing",
+            });
+
             localStorage.setItem(
               "shubhtalk_chat_start_time",
               String(Date.now()),
