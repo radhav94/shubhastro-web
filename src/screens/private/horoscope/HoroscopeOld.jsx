@@ -1,5 +1,5 @@
 import { ChevronLeft } from 'lucide-react';
-import { useNavigate, useParams, useLocation, useNavigation } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   useFetchWesternDailyQuery, 
@@ -515,39 +515,6 @@ const HoroscopeOld = () => {
 
   const currentContent = getContent();
 
-  /*
-    Pending state for a tab switch, so the tap has something to paint.
-
-    Each period tab is its own SEO route, so handleTabChange below ends in a
-    navigate(). App.jsx uses createBrowserRouter, so React Router runs that as a
-    transition and React deliberately withholds the paint until the new route's
-    data is ready. Nothing on screen changed in the meantime, so the browser
-    measured "interaction to next paint" across the whole round trip.
-
-    Measured on /daily-horoscope/scorpio against production:
-
-      input delay           1ms
-      processing           40ms
-      presentation delay ~527ms   <-- this
-      long tasks            0
-      total               568ms   (Clarity reports INP 504ms for these URLs)
-
-    The main thread was free the whole time; the paint simply never came. For
-    contrast, tapping a category card on the same page — local state, no
-    navigate — measured 56ms.
-
-    useNavigation().state flips to "loading" as soon as the navigation starts,
-    outside the deferred render, which is exactly what it exists for. Reading it
-    here gives the browser a frame to paint immediately on tap.
-
-    Deliberately a dim-and-wait rather than a skeleton: the content for the
-    previous tab is still perfectly good and readable for the ~500ms the fetch
-    takes, and tearing it out to show placeholder blocks would look worse than
-    the problem it fixes. This only needs *a* visual change, not a big one.
-  */
-  const navigation = useNavigation();
-  const isTabPending = navigation.state === 'loading';
-
   const handleTabChange = (tab) => {
     /*
       Re-tapping the tab that is ALREADY active used to be a guaranteed dead
@@ -870,8 +837,7 @@ const HoroscopeOld = () => {
           </div>
 
           <div
-            className={`horoscope-content${isTabPending ? ' horoscope-content--pending' : ''}`}
-            aria-busy={isTabPending || undefined}
+            className="horoscope-content"
             ref={overviewRef}
             key={`${activeTab}-${selectedPhase}-${activeCategory}-${selectedZodiac}-${(currentContent.title || '')}-${(currentContent.content || '').slice(0, 24)}`}
           >
