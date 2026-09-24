@@ -1232,3 +1232,25 @@
   font-weight: 600;
   color: #1a1a1a;
 }
+
+/*
+  Tab-switch pending state. See the useNavigation note in HoroscopeOld.jsx:
+  a period tab is a route change, React Router runs it as a transition, and
+  React holds the paint until the new data lands — measured as ~527ms of
+  presentation delay on an interaction that was otherwise doing no work.
+
+  This gives that tap a frame to paint straight away. Deliberately small: the
+  previous tab's content stays readable while the next one loads, so this dims
+  rather than replaces. Transition is on opacity only, so it composites off the
+  main thread and cannot itself delay the paint it exists to produce.
+*/
+.horoscope-content--pending {
+  opacity: 0.55;
+  transition: opacity 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .horoscope-content--pending {
+    transition: none;
+  }
+}
