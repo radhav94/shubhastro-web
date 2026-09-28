@@ -7,7 +7,7 @@ import { useChat as useChatContext } from "../../../../../context/ChatContext"
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
 import { useCall } from "../../../../../context/CallContext";
 import { showErrorWithHighlight } from "../../../../../utils/showErrorWithHighlight";
-import { format12HourTime } from "../../../../../utils/dateFormat/dateTime";
+import { buildIntroMessage } from "../../../../../utils/helper/introMessage";
 import useTypingIndicator from "./useTypingIndicator";
 import { BranchEvents } from "../../../../../utils/branchEvents";
 import {
@@ -19,75 +19,11 @@ import {
   MAX_SEND_RETRIES,
 } from "../../../../../utils/helper/chatProtocol";
 
-// Month names for turning a profile's numeric `month` (1–12) into "September".
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
-// First word of the astrologer's display name, e.g. "Prathamesh M" -> "Prathamesh".
-const firstWord = (value) => String(value || "").trim().split(/\s+/)[0] || "";
-
-const capitalize = (value) => {
-  const str = String(value || "").trim();
-  return str ? str[0].toUpperCase() + str.slice(1) : "";
-};
-
-// Format a profile DOB as "16-September-1993". `month` is 1–12.
-const formatProfileDob = (profile) => {
-  const day = Number(profile?.day);
-  const month = Number(profile?.month);
-  const year = Number(profile?.year);
-  if (!day || !month || !year || month < 1 || month > 12) return "";
-  return `${day}-${MONTH_NAMES[month - 1]}-${year}`;
-};
-
 /*
-  Build the customer's intro message sent as the first chat line, e.g.
-
-    Hi Ravi,
-    Below are my details:
-    Name: Prathamesh M
-    Gender: Male
-    DOB: 16-September-1993
-    TOB: 10:44 PM
-    POB: Mumbai, Maharashtra, India
-
-  Only the lines the selected profile can actually fill are included; if there is
-  no profile yet we fall back to the plain "Hi <astrologer>" greeting so the chat
-  never opens with an empty details block.
+  buildIntroMessage moved to utils/helper/introMessage — audio and video sessions
+  need the same Name/Gender/DOB/TOB/POB block, so it can no longer be private to
+  the chat hook.
 */
-const buildIntroMessage = (astrologerName, profile) => {
-  const greetName = firstWord(astrologerName);
-  const greeting = `Hi ${greetName}`.trim();
-
-  if (!profile || !profile.name) return greeting;
-
-  const dob = formatProfileDob(profile);
-  /*
-    TOB is always included. Profiles store the birth time as numeric `hour` (24h)
-    + `min`; when the exact time is unknown the profile forms save the system
-    default 00:00, and we send that (as "12:00 AM") rather than omitting the line
-    — TOB is a required field in this details block. `format12HourTime` derives
-    the AM/PM from the 24-hour hour.
-  */
-  const tob = format12HourTime(
-    Number.isFinite(Number(profile.hour)) ? profile.hour : 0,
-    Number.isFinite(Number(profile.min)) ? profile.min : 0
-  );
-
-  const lines = [
-    greeting.endsWith(",") ? greeting : `${greeting},`,
-    "Below are my details:",
-    profile.name && `Name: ${profile.name}`,
-    profile.gender && `Gender: ${capitalize(profile.gender)}`,
-    dob && `DOB: ${dob}`,
-    `TOB: ${tob}`,
-    profile.place && `POB: ${profile.place}`,
-  ].filter(Boolean);
-
-  return lines.join("\n");
-};
 
 export default function useChat({
   userId,

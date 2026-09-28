@@ -38,6 +38,7 @@ import {
 import { useGuestChatAuth } from "./useGuestChatAuth";
 import { trackEvent } from "../../../utils/analytics";
 import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
+import { isAdultDob, maxSignupDob, UNDERAGE_ERROR } from "../../../utils/helper/age";
 import chat from "../../private/home/components/chats/ChatWindow.module.scss";
 import styles from "./GuestChatFlow.module.scss";
 import {
@@ -328,7 +329,11 @@ const GuestChatFlow = () => {
       case "identity":
         return f.identity ? undefined : "Please select your gender";
       case "dob":
-        return f.dob ? undefined : "Please select your date of birth";
+        if (!f.dob) return "Please select your date of birth";
+        // These details register the account, so this DOB is the account
+        // holder's — see utils/helper/age.
+        if (!isAdultDob(f.dob)) return UNDERAGE_ERROR;
+        return undefined;
       case "time":
         if (f.unknownBirthTime) return undefined;
         return f.time ? undefined : "Please select your birth time";
@@ -901,7 +906,8 @@ const GuestChatFlow = () => {
               portal
               selected={form.dob}
               onChange={(d) => setField("dob", d)}
-              maxDate={new Date()}
+              /* Registration form: an underage date is not selectable. */
+              maxDate={maxSignupDob()}
               placeholder="DD/MM/YYYY"
             />
           </div>

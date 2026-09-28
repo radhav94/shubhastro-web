@@ -43,6 +43,8 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
     userId,
     isUserSide,
     kundliId,
+    // Full profile for the opening details message — the id alone cannot build it.
+    kundliProfile,
     chatRoomId,
     astrologerName,
   } = videoCallData || {};
@@ -53,6 +55,7 @@ const VideoCallChat = ({ isOpen, onClose, videoCallData, sendMessageRef }) => {
     astrologerId,
     roomId: chatRoomId,
     kundliId,
+    kundliProfile,
     isActive: isOpen,
     astrologerName,
   });

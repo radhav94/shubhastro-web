@@ -13,6 +13,7 @@ import LocationSearch from "../../../utils/location/locationSearchVedic";
 import Toast from "../../toast";
 import { trackEvent } from "../../../utils/analytics";
 import { validatePersonName } from "../../../utils/regex";
+import { isAdultDob, maxSignupDob, UNDERAGE_ERROR } from "../../../utils/helper/age";
 import styles from "./GuestDetailsForm.module.scss";
 import {
   getSignupBonusLabel,
@@ -96,6 +97,8 @@ const GuestDetailsForm = ({
       e.mobileNumber = "Enter a valid 10-digit mobile number";
     if (!form.identity) e.identity = "Please select your gender";
     if (!form.dob) e.dob = "Please select your date of birth";
+    // This form registers the account, so the DOB is the account holder's.
+    else if (!isAdultDob(form.dob)) e.dob = UNDERAGE_ERROR;
     if (!form.unknownBirthTime && !form.time) e.time = "Please select your birth time";
     if (!form.birthPlace.trim()) e.birthPlace = "Please select your place of birth";
     else if (!form.latitude || !form.longitude)
@@ -279,7 +282,8 @@ const GuestDetailsForm = ({
               portal
               selected={form.dob}
               onChange={(d) => setField("dob", d)}
-              maxDate={new Date()}
+              /* Registration form: an underage date is not selectable. */
+              maxDate={maxSignupDob()}
               placeholder="DD/MM/YYYY"
             />
           </div>

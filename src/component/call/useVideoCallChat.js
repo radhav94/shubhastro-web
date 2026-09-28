@@ -1,11 +1,25 @@
 import { useEffect, useState, useRef } from "react";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { Toast } from "../index";
+import { buildIntroMessage } from "../../utils/helper/introMessage";
 
-export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astrologerName }) => {
+export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, kundliProfile, astrologerName }) => {
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const hasInitializedRef = useRef(false);
+
+  /*
+    The selected kundli profile, read through a ref.
+
+    The opening message carries the customer's birth details (see
+    buildIntroMessage), and the profile list is fetched — it can resolve after
+    this hook's effect has already run and the socket has connected. A ref lets
+    the retry below pick up the profile when it lands without putting the object
+    in the effect's dependency array, which would re-run the whole listener setup
+    on every identity change.
+  */
+  const kundliProfileRef = useRef(kundliProfile);
+  kundliProfileRef.current = kundliProfile;
 
   const formatTime = () =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }).toUpperCase();
@@ -90,10 +104,30 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, astro
       // pruned below without keeping a localStorage entry per session forever.
       localStorage.setItem(sentKey, String(Date.now()));
       
-      // Send greeting message
-      setTimeout(() => {
-        sendViaSocket(`Hi ${astrologerName || ""}`, "message");
-      }, 500);
+      /*
+        Greeting + the customer's birth details (Name / Gender / DOB / TOB / POB),
+        the same opening message the chat flow sends — see
+        utils/helper/introMessage and useChatWindow's init block.
+
+        This used to be a bare `Hi <name>`, so an astrologer on an audio or video
+        session had none of the details a reading starts from and had to ask for
+        them out loud while the session was being billed.
+
+        The profile can resolve after the socket connects, so wait briefly for it
+        (same retry shape as the chat flow) and fall back to the plain greeting
+        rather than sending an empty details block.
+      */
+      const sendIntroWhenReady = (retries = 10) => {
+        const profile = kundliProfileRef.current;
+        if (profile?.name) {
+          sendViaSocket(buildIntroMessage(astrologerName, profile), "message");
+        } else if (retries > 0) {
+          setTimeout(() => sendIntroWhenReady(retries - 1), 300);
+        } else {
+          sendViaSocket(buildIntroMessage(astrologerName, null), "message");
+        }
+      };
+      setTimeout(() => sendIntroWhenReady(), 500);
 
       // Send Kundli. Send the bare kundliId as the message (origin-independent);
       // the kundliId also travels in the payload. Renderers rebuild the link
