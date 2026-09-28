@@ -396,7 +396,32 @@ const TalkToAstrologer = () => {
       ...(isActiveOnline === true && { isActive: true }),
     },
     {
-      skip: isFiltered, // Skip normal API when in filtered mode
+      /*
+        Also skipped for a /astrologers/:category URL, not just once the filter
+        has settled.
+
+        `isFiltered` starts false on every mount, so on a category URL this
+        unfiltered query fired on the first render, before FilterChips had
+        rebuilt the filter from the slug and flipped it. Measured on
+        /astrologers/marriage-relationships: two filterAstrologers requests
+        leave at the same moment —
+
+          skills=marriage-relationships&page=1&limit=9   128 KB, ends 828ms
+          page=1&limit=9                                 123 KB, ends 775ms
+
+        The unfiltered one is 123 KB of astrologers this page will never show.
+        It also lands FIRST, so the list renders with the wrong astrologers and
+        is then replaced when the real one arrives — the document height moved
+        3315 -> 3127 at 847ms in that same trace, i.e. a visible reflow. Clarity
+        reports CLS 3.317 for this URL.
+
+        Keyed off the URL rather than the filter state because the URL is known
+        synchronously on the first render, which is the whole point. The
+        isFiltered machinery is deliberately left alone; a failed category
+        request still lands on the filterError card with its retry, which is the
+        existing behaviour for that case.
+      */
+      skip: isFiltered || Boolean(categoryFromParams),
       /*
         Serve a recent result from cache instead of hitting the network on every
         mount. This screen is bounced in and out of constantly (listing ->

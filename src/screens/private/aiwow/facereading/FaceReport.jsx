@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { BsChatDots } from "react-icons/bs";
 import { MdOutlinePhoneInTalk } from "react-icons/md";
@@ -271,6 +271,57 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
   const [activeTab, setActiveTab] = useState("all");
   const shows = (id) => activeTab === "all" || activeTab === id;
 
+  /*
+    Only offer a tab when there is a panel behind it.
+
+    TABS is a static list, but every panel below is gated on its own data being
+    non-empty (`personality.length > 0`, `auraSlices.length > 0`, and so on).
+    Selecting a tab hides every panel except that one — so choosing a tab whose
+    data the API omitted hid everything and rendered a completely blank report
+    body. Tap, screen empties, nothing to do but tap again.
+
+    This is the exact defect FaceReadingResult had already fixed once: it kept a
+    TAB_SECTIONS list filtered through hasContent(), because these keys are
+    destructured with `= {}` defaults and `{}` is truthy. When the tab bar moved
+    into this component the panels brought their own guards with them but the tab
+    *filtering* did not, so the bar went back to advertising sections that are not
+    there.
+
+    Clarity session l19hmf is that tap: an Instagram visitor finished a face
+    reading, subscribed at 02:22, then produced repeated dead clicks on the Aura
+    tab at 02:44 — auraSlices is empty whenever the API returns no aura colour
+    carrying a `percentage`.
+
+    "Over All" is always offered: it is the default, and it renders the banner and
+    summary that exist for every reading.
+  */
+  const tabHasContent = {
+    all: true,
+    personality: personality.length > 0,
+    aura: auraSlices.length > 0,
+    cosmic: Object.keys(cosmicConnections).length > 0,
+    features: features.length > 0,
+    insights: Object.keys(personalizedInsights).length > 0,
+  };
+
+  const visibleTabs = useMemo(
+    () => TABS.filter((tab) => tabHasContent[tab.id]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [personality.length, auraSlices.length, features.length, cosmicConnections, personalizedInsights]
+  );
+
+  /*
+    If the reading that is on screen has no panel for the selected tab — possible
+    when a re-fetch returns a thinner payload than the one the user was reading —
+    fall back to "Over All" rather than leaving them on a blank body.
+  */
+  useEffect(() => {
+    if (activeTab !== "all" && !tabHasContent[activeTab]) {
+      setActiveTab("all");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, personality.length, auraSlices.length, features.length]);
+
   // Same two-stage recommendation popup the Rashi report uses: Call/Chat open a
   // matched astrologer list first, and only escalate to the discounted offer on
   // dismiss. Keeps the CTA behaviour identical across reports.
@@ -466,7 +517,9 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
           ("Your Personality") can sit directly beneath the tabs.
         */}
         <div className={styles.tabs} role="tablist">
-          {TABS.map((tab) => (
+          {/* visibleTabs, not TABS: a tab whose section the API omitted used to
+              open a blank report body. See the note on tabHasContent above. */}
+          {visibleTabs.map((tab) => (
             <button
               key={tab.id}
               type="button"

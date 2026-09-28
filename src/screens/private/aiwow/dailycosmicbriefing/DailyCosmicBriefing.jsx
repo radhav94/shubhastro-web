@@ -29,9 +29,29 @@ const DailyCosmicBriefing = () => {
     const token = localStorage.getItem("shubhtalk_customer_token");
     if (!token) {
       localStorage.setItem("shubhtalk_redirect_after_login", "/aiwow/daily-cosmic-briefing");
-      window.location.href = "/login?skip=welcome";
+      /*
+        Client-side, not window.location.href.
+
+        The hard assignment reloaded the document, so a guest landing here paid
+        the whole app boot twice: entry chunk, vendors and React parsed and
+        executed once for this screen, thrown away, then again for /login. It
+        was also an outlier — 33 call sites in src navigate to /login through
+        the router and only a handful assign location.href, and navigationHelper
+        itself prefers navigate({ replace: true }) and falls back to
+        location.href only when the router is not available yet. It is available
+        here; useNavigate is already in this component.
+
+        It also made this URL's field metrics meaningless. The first document is
+        torn down mid-load, so whatever LCP and CLS were recorded against
+        /ai-wow/cosmic-chat describe a page that was destroyed while loading —
+        which is the likeliest reading of Clarity's CLS 4.242 sitting next to an
+        LCP of 0.588s.
+
+        replace: true so Back does not return to this gate and bounce again.
+      */
+      navigate("/login?skip=welcome", { replace: true });
     }
-  }, []);
+  }, [navigate]);
 
   const [briefing, setBriefing] = useState(null);
   const [isLoading, setIsLoading] = useState(true);

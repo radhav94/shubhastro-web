@@ -28,6 +28,36 @@ const TarotCardSelectionPage = () => {
   // Each entry: { position, card, slot } where slot is the fixed assignment (1-based)
   const [selections, setSelections] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+
+  /*
+    Answer to a "Show Reading" tap that cannot proceed yet.
+
+    The button is deliberately never `disabled` (see the note on it below), and it
+    already explained itself — but it did so with toast.info, and that is the
+    wrong channel here. The toaster is mounted position="top-right" in main.jsx
+    while this CTA sits under a fan of cards at the bottom of the screen, so the
+    only thing that changed was in the opposite corner. More decisively, Clarity
+    does not record toasts at all, so a toast-only response is logged as a dead
+    click no matter how correct the message is.
+
+    The button also does not move on a blocked tap, so the target stays under the
+    cursor for another go. Clarity session 211xd4 ended on this flow — a desktop
+    visitor opened a reading at 08:50 and then sat on the tarot page — and picking
+    fewer cards than a multi-card reading needs (3 for Love Triangle, 2 for the
+    breakup readings) is the obvious way to arrive here.
+
+    Render the reason inline, directly above the button, so the change is adjacent
+    to the thing that was tapped. `seq` keys the line so a second tap in the same
+    state remounts it and replays the animation instead of re-rendering an
+    identical string to no effect — same device as the Pandit AI follow-up chips.
+  */
+  const [ctaNotice, setCtaNotice] = useState(null)
+  const ctaNoticeSeqRef = useRef(0)
+
+  const announceCtaNotice = (message) => {
+    ctaNoticeSeqRef.current += 1
+    setCtaNotice({ seq: ctaNoticeSeqRef.current, message })
+  }
   const [isShuffling, setIsShuffling] = useState(false)
   const [animationReady, setAnimationReady] = useState(false)
   const containerRef = useRef(null)
@@ -149,16 +179,17 @@ const TarotCardSelectionPage = () => {
 
   const handleShowReading = async () => {
     if (isLoading) {
-      toast.info('Opening your reading…')
+      announceCtaNotice('Opening your reading…')
       return
     }
     if (selections.length !== maxCards) {
       const remaining = maxCards - selections.length
-      toast.info(
+      announceCtaNotice(
         `Pick ${remaining} more card${remaining === 1 ? '' : 's'} to see your reading.`
       )
       return
     }
+    setCtaNotice(null)
     setIsLoading(true)
     try {
       // Sort by slot to ensure correct order regardless of selection sequence
@@ -355,6 +386,20 @@ const TarotCardSelectionPage = () => {
             )
           })}
         </div>
+
+        {/* Sits directly above the CTA, so the answer to a blocked tap is where
+            the cursor already is. See announceCtaNotice for why this is not a
+            toast. */}
+        {isMultiCardReading && ctaNotice && (
+          <p
+            key={ctaNotice.seq}
+            className={styles.ctaNotice}
+            role="status"
+            aria-live="polite"
+          >
+            {ctaNotice.message}
+          </p>
+        )}
 
         {isMultiCardReading && (
           <button

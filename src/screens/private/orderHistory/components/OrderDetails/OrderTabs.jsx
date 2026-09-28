@@ -25,10 +25,17 @@ const OrderTabs = ({ activeTab, onTabChange }) => {
 
   return (
     <div className={styles.tabsContainer}>
-      <div className={styles.tabsWrapper} ref={tabsRef}>
+      {/* role="tablist" so the role="tab" buttons below are valid ARIA — a tab
+          with no tablist parent is worse than no role at all. The active-tab
+          re-tap is handled by the caller (see handleTabChange in
+          OrderDetails.jsx), which owns the content ref. */}
+      <div className={styles.tabsWrapper} ref={tabsRef} role="tablist" aria-label="Order history">
         {tabs.map((tab) => (
           <button
             key={tab}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab}
             ref={activeTab === tab ? activeTabRef : null}
             className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
             onClick={() => onTabChange(tab)}
