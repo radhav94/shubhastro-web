@@ -138,3 +138,23 @@ export const isShubhMallRoute = (path) => {
     (mallPath) => path === mallPath || path.startsWith(mallPath + "/") || path.startsWith(mallPath + "?")
   );
 };
+
+/**
+ * Whether the "Your First Session Is 100% Free" promo popup is enabled.
+ * Controlled by VITE_FREE_SESSION_ENABLED.
+ *
+ * Defaults to false when unset or blank, like isShubhMallEnabled() — an
+ * environment that has not been told about the offer must not start advertising
+ * a free session the backend may not honour there.
+ *
+ * Note this only controls the popup. Whether the first session is actually free
+ * is decided server-side, so turning this on in an environment that does not
+ * grant it promises something the app will not deliver.
+ *
+ * @returns {boolean}
+ */
+export const isFreeSessionEnabled = () => {
+  const value = import.meta.env.VITE_FREE_SESSION_ENABLED;
+  if (!value || String(value).trim() === "") return false;
+  return String(value).trim() === "true";
+};

@@ -39,6 +39,7 @@ const ClothColorResult = () => {
     isAlreadyDownloaded, downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload,
     showSubscriptionModal, setShowSubscriptionModal, subscriptionModalVariant, extendedPlans,
+    isSharedView,
   } = useAIWowDownload({ resultData: downloadResultData });
 
   useEffect(() => {
@@ -379,6 +380,8 @@ const ClothColorResult = () => {
             </svg>
           </button>
           <h1 className={styles.title}>{featureTitle}</h1>
+          {/* Owner-only: the PDF is paid for from the owner's wallet. */}
+          {!isSharedView && (
           <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -387,6 +390,7 @@ const ClothColorResult = () => {
             </svg>
             {isDownloading ? "Downloading..." : "Download"}
           </button>
+          )}
         </div>
       </header>
 

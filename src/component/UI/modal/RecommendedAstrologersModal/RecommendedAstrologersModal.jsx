@@ -10,6 +10,8 @@ import { useGetRecommendedAstrologersQuery } from "../../../../redux/api/astrolo
 import { useAstrologerConnect } from "../../../../utils/hooks/useAstrologerConnect";
 import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 import { getAstrologerImageUrl } from "../../../../utils/appImages";
+import { useFreeSession } from "../../../../utils/hooks/useFreeSession";
+import FreeSessionRate from "../../FreeSessionRate/FreeSessionRate";
 import ProfileManager from "../../Profile/ProfileManager";
 import { Toast } from "../../..";
 import RechargeModal from "../RechargeModal/RechargeModal";
@@ -82,6 +84,8 @@ const RecommendedAstrologersModal = ({
   returnTo = null,
 }) => {
   const isOffer = variant === "offer";
+  // First-session-free offer — label only, see featureConfig.
+  const freeSession = useFreeSession();
   const trackRef = useRef(null);
 
   const { data, isLoading, isFetching } = useGetRecommendedAstrologersQuery(
@@ -502,7 +506,14 @@ const RecommendedAstrologersModal = ({
                         )}
 
                         <div className={styles.priceBlock}>
-                          {isOffer && discount ? (
+                          {/* First session free supersedes both stages: there is
+                              nothing to discount off a free session. */}
+                          {freeSession ? (
+                            <FreeSessionRate
+                              className={styles.nowPrice}
+                              amount={discount ? discount.was : rate?.amount ?? 0}
+                            />
+                          ) : isOffer && discount ? (
                             /*
                               Laid out across rather than down: the discount
                               detail sits beside the price, not stacked under it,

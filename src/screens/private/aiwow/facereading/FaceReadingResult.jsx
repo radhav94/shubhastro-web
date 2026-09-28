@@ -40,7 +40,17 @@ const FaceReadingResult = () => {
   // mount — i.e. the first press opens the discounted-astrologer offer instead
   // of leaving, exactly like the browser Back does. The modal handles leaving
   // the report once the offer is closed.
-  const handleBack = () => window.history.back();
+  const handleBack = () => {
+    // A visitor who opened a share link has no history to go back to, so send
+    // them to the feature instead of pressing a button that does nothing.
+    // `isSharedView` is declared below; this only runs on click, by which time
+    // it is initialised.
+    if (isSharedView) {
+      navigate('/ai-wow/astro-face-reading');
+      return;
+    }
+    window.history.back();
+  };
   const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -65,7 +75,13 @@ const FaceReadingResult = () => {
     isAlreadyDownloaded, downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload,
     showSubscriptionModal, setShowSubscriptionModal, subscriptionModalVariant, extendedPlans,
+    isSharedView,
   } = useAIWowDownload({ resultData: downloadResultData });
+
+  // Share link target. The shared payload carries no ids, so on a shared view
+  // FaceReport falls back to the historyId from SharedResultContext.
+  const historyId = reduxResult?.historyId || reduxResult?._id || reduxResult?.id ||
+    reduxResult?.data?.historyId || reduxResult?.data?._id || reduxResult?.data?.id || null;
 
   useEffect(() => {
     console.log('FaceReadingResult - Loading result:', {
@@ -160,6 +176,8 @@ const FaceReadingResult = () => {
           </svg>
         </button>
         <h1 className={styles.title}>{featureTitle}</h1>
+        {/* Owner-only: the PDF is paid for from the owner's wallet. */}
+        {!isSharedView && (
         <button className={styles.downloadButton} onClick={handleDownloadClick} disabled={isDownloading}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -168,6 +186,7 @@ const FaceReadingResult = () => {
           </svg>
           {isDownloading ? "Downloading..." : "Download"}
         </button>
+        )}
         </div>
       </header>
 
@@ -181,7 +200,8 @@ const FaceReadingResult = () => {
       <FaceReport
         data={analysisData}
         faceImage={faceImage}
-        onDownload={handleDownloadClick}
+        onDownload={isSharedView ? undefined : handleDownloadClick}
+        historyId={historyId}
       />
 
       <DownloadReportModal

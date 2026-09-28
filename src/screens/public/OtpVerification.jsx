@@ -10,6 +10,7 @@ import { saveUserToStorage } from "../../utils/authStorage";
 import { requestFCMToken } from "../../services/firebase";
 import { clearGuestKundliProfiles } from "../../utils/helper/cookies";
 import { trackEvent } from "../../utils/analytics";
+import { resolveFreeSessionStatus } from "../../utils/auth/freeSessionStatus";
 
 const OtpVerification = () => {
   const navigate = useNavigate();
@@ -153,6 +154,10 @@ const handleVerifyOtp = async (event) => {
         localStorage.removeItem("selectedKundliProfile");
         trackEvent("login_otp_verified", { user_id: _id });
         trackEvent("login_success", { user_id: _id });
+
+        // Free-session eligibility for the offer labels. Not awaited — see
+        // utils/auth/freeSessionStatus.
+        resolveFreeSessionStatus(userData);
       }
 
       if (type === "ASTROLOGER") {

@@ -5,6 +5,7 @@ import { saveUserToStorage } from "../../../utils/authStorage";
 import { requestFCMToken } from "../../../services/firebase";
 import { clearGuestKundliProfiles } from "../../../utils/helper/cookies";
 import { loginSuccess } from "../../../redux/auth/authSlice";
+import { resolveFreeSessionStatus } from "../../../utils/auth/freeSessionStatus";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import {
@@ -244,6 +245,10 @@ export const useGuestChatAuth = () => {
         window.dispatchEvent(new Event("auth-change"));
         trackEvent("login_otp_verified", { user_id: _id });
         trackEvent("login_success", { user_id: _id });
+
+        // Free-session eligibility for the offer labels. Not awaited — see
+        // utils/auth/freeSessionStatus.
+        resolveFreeSessionStatus(userData);
 
         if (createdProfile?._id) {
           dispatch(setSelectedKundliProfile(createdProfile));

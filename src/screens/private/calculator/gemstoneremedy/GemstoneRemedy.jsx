@@ -1,21 +1,29 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
 import {
   Sparkles,
   Download,
   Share2,
+  Loader2,
 } from "lucide-react";
 import { BsChatDots } from "react-icons/bs";
 import { MdOutlinePhoneInTalk } from "react-icons/md";
 
 import { useGetGemStoneReportQuery } from "../../../../redux/api/kundli/planetApi";
+import { useLazyGetGemstoneRemedyPdfQuery } from "../../../../services/appServices/kundliServicesNew";
+import { downloadFile, toastDownloadOutcome } from "../../../../utils/helper/downloadFile";
+import { navigateToLogin } from "../../../../utils/navigationHelper";
 import { buildVedicParam } from "../../../../utils/VedicParams.js/vedicParams";
 import { setForm } from "../../../../redux/kundliform/formSlice";
 import verifyDividerImg from "../../../../assets/gemstone-remedy/verify-divider.png";
 import CalcReportLoader from "../CalcReportLoader";
 import CalcBackButton from "../CalcBackButton";
 import RecommendedAstrologersModal from "../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal";
+import DownloadReportModal from "../../aiwow/components/DownloadReportModal";
+import { useWalletBalance } from "../../wallet/useWalletBalance";
+import { useGetChargesQuery } from "../../../../redux/api/aiwow/aiwowApi";
 import useRecommendationOffer from "../../../../utils/hooks/useRecommendationOffer";
 import { Toast } from "../../../../component";
 import heroFlourish from "../../../../assets/images/rashi/decor/hero-flourish.png";
@@ -66,6 +74,7 @@ const titleCase = (value) =>
 
 const GemstoneRemedy = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Data flow mirrors the in-Kundli Gemstones tab exactly: read the birth form
   // from Redux (`state.form.kundliPayload`), turn it into the shared vedic
@@ -149,6 +158,59 @@ const GemstoneRemedy = () => {
   // discounted one once. See useRecommendationOffer.
   const recommendation = useRecommendationOffer();
 
+  // Server-rendered gemstone-remedy PDF (see handleDownload).
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [getGemstoneRemedyPdf] = useLazyGetGemstoneRemedyPdfQuery();
+
+  // Paid-download confirmation, same as the Kundli report: the price comes from
+  // the service-charges list and the deduction happens server-side when the PDF
+  // is generated, so the modal only has to state the cost and the balance.
+  const { balance: walletBalance, refreshWallet } = useWalletBalance();
+  const { data: chargesData } = useGetChargesQuery();
+
+  // Kundlis whose PDF we generated in this session. A cache hit never charges,
+  // so a repeat download is genuinely free and the modal should say so.
+  const [generatedKundliIds, setGeneratedKundliIds] = useState({});
+
+  // Exact-slug lookup only (mirrors Kundali.jsx). The shared keyword fallback in
+  // findChargeAmount would happily match the AI-Wow "Gemstone" scan report and
+  // quote its price here, so it is deliberately not used.
+  const downloadCost = useMemo(() => {
+    // Undefined while the charges call is in flight -> modal shows "Loading...".
+    if (!Array.isArray(chargesData?.data)) return null;
+    const slug = "gemstone-remedy-report";
+    for (const section of chargesData.data) {
+      if (!Array.isArray(section?.list)) continue;
+      const match = section.list.find((c) => c?.slug?.toLowerCase() === slug);
+      if (match) return match.amount ?? match.pdfDownloadCharge ?? 0;
+    }
+    // No price row configured yet — the endpoint is free until ops adds one.
+    return 0;
+  }, [chargesData]);
+
+  // Switching profile from the header switcher swaps the whole report, so a
+  // confirmation opened for the previous profile must not carry over: the modal
+  // would still read "Free" from that profile's generated PDF while the confirm
+  // would render — and charge for — a different, ungenerated one. Close it and
+  // make the user press Download again on the report they are now looking at.
+  const openModalKundliIdRef = useRef(null);
+  useEffect(() => {
+    if (showDownloadModal) return;
+    openModalKundliIdRef.current = null;
+  }, [showDownloadModal]);
+  useEffect(() => {
+    if (!showDownloadModal) return;
+    const currentId = selectedKundli?._id ?? null;
+    if (openModalKundliIdRef.current === null) {
+      openModalKundliIdRef.current = currentId;
+      return;
+    }
+    if (openModalKundliIdRef.current !== currentId) {
+      setShowDownloadModal(false);
+    }
+  }, [showDownloadModal, selectedKundli?._id]);
+
   // The in-page back button shows the discounted offer once as an exit-intent
   // prompt; after that a Back press leaves the report normally.
   const backOfferShownRef = useRef(false);
@@ -213,7 +275,89 @@ const GemstoneRemedy = () => {
     }
   };
 
-  const handleDownload = () => "";
+  // The download icon only opens the paid-confirmation modal; the actual call
+  // happens on confirm. Needs a *saved* kundli id, so guests and unsaved (temp_)
+  // profiles are sent to sign-in / the profile switcher instead.
+  const handleDownloadClick = () => {
+    if (isDownloadingPdf) {
+      Toast.error("Your report is still being prepared. Please wait a moment.");
+      return;
+    }
+
+    if (!localStorage.getItem("shubhtalk_customer_token")) {
+      Toast.error("Please log in to download your gemstone remedy report");
+      navigateToLogin(`${window.location.pathname}${window.location.search}`);
+      return;
+    }
+
+    const kundliId = selectedKundli?._id;
+    if (!kundliId || String(kundliId).startsWith("temp_")) {
+      Toast.error("Please select a saved profile to download the report");
+      return;
+    }
+
+    setShowDownloadModal(true);
+  };
+
+  // Download the server-rendered gemstone-remedy PDF. Same shape as the Kundli
+  // PDF: one authenticated GET deducts the charge (once, on a fresh render) and
+  // returns an S3 URL, which `downloadFile` saves as a blob — or opens, inside
+  // in-app webviews that can't save. The first render takes a few seconds; later
+  // calls hit the server-side cache, return at once and cost nothing.
+  const handleDownload = async () => {
+    // Pin the profile for the whole call, so a header profile switch mid-render
+    // can't relabel the file that is already on its way.
+    const kundliId = selectedKundli?._id;
+    const kundliName = selectedKundli?.name;
+    if (!kundliId) {
+      Toast.error("Please select a saved profile to download the report");
+      return;
+    }
+
+    setIsDownloadingPdf(true);
+    try {
+      const result = await getGemstoneRemedyPdf({ kundliId }).unwrap();
+
+      if (result?.success && result?.data) {
+        // The PDF now exists server-side, so any later download is a free cache
+        // hit. Record that and re-read the wallet, which the render may have
+        // debited.
+        setGeneratedKundliIds((prev) => ({ ...prev, [kundliId]: true }));
+        refreshWallet();
+        setShowDownloadModal(false);
+
+        const outcome = await downloadFile(
+          result.data,
+          `Gemstone_Remedy_${kundliName || "report"}.pdf`
+        );
+        toastDownloadOutcome(outcome, "PDF");
+      } else {
+        Toast.error(result?.message || "Failed to load PDF");
+      }
+    } catch (error) {
+      console.error("Gemstone remedy PDF fetch error:", error);
+
+      const message = error?.data?.message || error?.message || "";
+
+      // Priced like the Kundli PDF (free today, but the endpoint is built to
+      // charge). Send the user to recharge when the wallet is short.
+      if (error?.status === 400 && /insufficient balance/i.test(message)) {
+        Toast.error(message || "Insufficient balance. Redirecting to recharge...");
+        setShowDownloadModal(false);
+        setTimeout(() => {
+          const currentUrl = window.location.pathname + window.location.search;
+          navigate(`/recharge?returnUrl=${encodeURIComponent(currentUrl)}`);
+        }, 1500);
+      } else if (error?.status === 404) {
+        Toast.error(message || "Gemstone remedy not found for this profile");
+      } else {
+        Toast.error(message || "Could not generate the PDF. Please try again.");
+      }
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
+
   if (!queryArgs || isLoading) return <CalcReportLoader />;
   if (!gem) return <div className={styles.empty}>No gemstone recommendation found</div>;
 
@@ -417,11 +561,17 @@ const GemstoneRemedy = () => {
               <button
                 type="button"
                 className={styles.toolBtn}
-                onClick={handleDownload}
-                aria-label="Download report"
-                title="Download"
+                onClick={handleDownloadClick}
+                disabled={isDownloadingPdf}
+                aria-label={isDownloadingPdf ? "Preparing report" : "Download report"}
+                aria-busy={isDownloadingPdf}
+                title={isDownloadingPdf ? "Preparing..." : "Download"}
               >
-                <Download size={15} aria-hidden="true" />
+                {isDownloadingPdf ? (
+                  <Loader2 size={15} aria-hidden="true" className={styles.toolBtnSpinner} />
+                ) : (
+                  <Download size={15} aria-hidden="true" />
+                )}
               </button>
               <button
                 type="button"
@@ -507,6 +657,28 @@ const GemstoneRemedy = () => {
           <MdOutlinePhoneInTalk size={16} aria-hidden="true" /> Call an astrologer
         </a>
       </div>
+
+      {/* Paid-download confirmation. One language only — the server renders the
+          gemstone remedy in English regardless of what is passed — so the
+          language grid is hidden. */}
+      <DownloadReportModal
+        isOpen={showDownloadModal}
+        onClose={() => {
+          if (isDownloadingPdf) return;
+          setShowDownloadModal(false);
+        }}
+        onDownload={handleDownload}
+        featureName="Gemstone Remedy Report"
+        downloadCost={downloadCost}
+        walletBalance={walletBalance ?? 0}
+        isDownloading={isDownloadingPdf}
+        showLanguageSelection={false}
+        generatedLanguages={
+          selectedKundli?._id && generatedKundliIds[selectedKundli._id]
+            ? { en: true }
+            : undefined
+        }
+      />
 
       <RecommendedAstrologersModal
         isOpen={recommendation.isOpen}

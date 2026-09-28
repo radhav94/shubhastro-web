@@ -8,6 +8,7 @@ import { downloadFile } from '../../../../utils/helper/downloadFile';
 import { useGetSubscriptionStatusQuery } from '../../../../redux/api/subscription/subscriptionApi';
 import { getSubscriptionErrorReason, SUBSCRIPTION_REASON } from '../../../../utils/subscription/featureGating';
 import { extractExtendedPlans } from './useAIWowSubscriptionGate';
+import { useSharedResultView } from '../../../../context/SharedResultContext';
 
 /**
  * Extracts the history ID from a result object, checking multiple possible locations.
@@ -91,18 +92,27 @@ export const useAIWowDownload = ({ resultData, toastId, downloadFileName }) => {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadedPdfUrl, setDownloadedPdfUrl] = useState(null);
 
+  /*
+   * On /shared/:historyId the result belongs to someone else and the visitor may
+   * be a guest, so every query this hook owns is skipped: charges/history/
+   * subscription are account data, and the download itself charges a wallet the
+   * visitor does not have. The screens hide their download buttons in shared
+   * view as well; this keeps the network side honest even if one forgets to.
+   */
+  const { isSharedView } = useSharedResultView();
+
   // Shared queries — RTK Query deduplicates identical args across components
   const [downloadReportPdf] = useDownloadReportPdfMutation();
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
 
   const customerToken = typeof window !== 'undefined' ? localStorage.getItem('shubhtalk_customer_token') : null;
-  const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken });
+  const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken || isSharedView });
   const hasActiveSubscription = !!subscriptionStatus?.data?.hasActiveSubscription;
 
   // Always fetch charges: every AI-Wow report download shows the payment popup
   // and charges on the first download (even for subscribers), per product
   // requirement. Re-downloading the same generated report stays free.
-  const { data: chargesData } = useGetChargesQuery(undefined);
+  const { data: chargesData } = useGetChargesQuery(undefined, { skip: isSharedView });
 
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscriptionModalVariant, setSubscriptionModalVariant] = useState('basic');
@@ -117,7 +127,7 @@ export const useAIWowDownload = ({ resultData, toastId, downloadFileName }) => {
   const kundliId = selectedProfile?._id || selectedProfile?.id || '';
   const { data: historyData } = useGetAiHistoryQuery(
     { kundliId, page: 1, limit: 10 },
-    { skip: !kundliId }
+    { skip: !kundliId || isSharedView }
   );
 
   const historyId = useMemo(() => extractHistoryId(resultData), [resultData]);
@@ -286,6 +296,8 @@ export const useAIWowDownload = ({ resultData, toastId, downloadFileName }) => {
   }, [historyId, id, fileName, downloadReportPdf, refreshWallet, downloadPrice, openSubscriptionModal, featureName]);
 
   const handleDownloadClick = useCallback(() => {
+    // Shared view: not the visitor's report, and no wallet to charge.
+    if (isSharedView) return;
     /*
      * In-flight guard. This used to rely entirely on callers setting
      * `disabled={isDownloading}` on their button, which is not a safe place for
@@ -304,7 +316,7 @@ export const useAIWowDownload = ({ resultData, toastId, downloadFileName }) => {
     refreshWallet();
     trackEvent('shubh_ai_payment_initiated', { feature_name: featureName, price: downloadPrice });
     setShowDownloadModal(true);
-  }, [isDownloading, refreshWallet, downloadPrice, featureName]);
+  }, [isSharedView, isDownloading, refreshWallet, downloadPrice, featureName]);
 
   return {
     // State
@@ -320,6 +332,9 @@ export const useAIWowDownload = ({ resultData, toastId, downloadFileName }) => {
     setShowSubscriptionModal,
     subscriptionModalVariant,
     extendedPlans,
+    // True when the report is being viewed through a share link — callers use it
+    // to hide their download button (and any other owner-only action).
+    isSharedView,
 
     // Handlers
     handleDownloadClick,

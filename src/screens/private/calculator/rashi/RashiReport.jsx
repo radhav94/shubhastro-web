@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
   Atom,
-  CheckCircle2,
+  Check,
   ChevronRight,
   Clock,
   Crown,
@@ -34,6 +34,7 @@ import ganaIcon from "../../../../assets/images/rashi/icons/gana-yin-yang.png";
 import heroSymbolIcon from "../../../../assets/images/rashi/icons/hero-symbol.png";
 import symbolIcon from "../../../../assets/images/rashi/icons/symbol-pyramid.png";
 import secCompatible from "../../../../assets/images/rashi/icons/sec-compatible.png";
+import secCosmicProfile from "../../../../assets/images/rashi/icons/sec-cosmic-profile.png";
 import cardPersonality from "../../../../assets/images/rashi/decor/card-personality.png";
 import cardStrengths from "../../../../assets/images/rashi/decor/card-strengths.png";
 import cardGrowth from "../../../../assets/images/rashi/decor/card-growth.png";
@@ -174,6 +175,9 @@ const InsightCard = ({ icon, decor, title, lines, variant, cornerArt, listStyle 
   const items = toLines(lines);
   if (!items.length) return null;
   const isCheck = listStyle === "check";
+  // "bullet" forces the list shape even when the API sends a single sentence,
+  // so the card never silently falls back to a plain paragraph.
+  const asList = isCheck || listStyle === "bullet" || items.length > 1;
   return (
     <section className={`${styles.insightCard} ${variant ? styles[variant] : ""}`}>
       {/* Per-card swirl in the bottom-left corner. Comes pre-tinted to the card's
@@ -185,13 +189,23 @@ const InsightCard = ({ icon, decor, title, lines, variant, cornerArt, listStyle 
         <img src={icon} alt="" className={styles.insightIcon} />
         {title}
       </h3>
-      {items.length === 1 && !isCheck ? (
+      {!asList ? (
         <p className={styles.insightText}>{items[0]}</p>
       ) : (
-        <ul className={`${styles.insightList} ${isCheck ? styles.insightListCheck : ""}`}>
+        <ul
+          className={`${styles.insightList} ${
+            isCheck ? styles.insightListCheck : styles.insightListBullet
+          }`}
+        >
           {items.map((item) => (
             <li key={item}>
-              {isCheck && <CheckCircle2 size={14} className={styles.checkIcon} aria-hidden="true" />}
+              {isCheck && (
+                /* Design uses a filled green tile with a white tick, not an
+                   outline circle — hence the badge wrapper. */
+                <span className={styles.checkIcon} aria-hidden="true">
+                  <Check size={11} strokeWidth={3.5} />
+                </span>
+              )}
               {item}
             </li>
           ))}
@@ -535,9 +549,13 @@ const RashiReport = () => {
           {cosmicProfile.length > 0 && (
             <section className={styles.cosmicSection}>
               <h3 className={styles.cosmicHeading}>
-                <span className={styles.cosmicHeadingIcon} aria-hidden="true">
-                  <Sparkles size={16} strokeWidth={2.2} />
-                </span>
+                {/* Design export — tile and glyph are baked into the image. */}
+                <img
+                  src={secCosmicProfile}
+                  alt=""
+                  aria-hidden="true"
+                  className={styles.cosmicHeadingIcon}
+                />
                 Your Cosmic Profile
               </h3>
 
@@ -615,6 +633,7 @@ const RashiReport = () => {
               decor={cardGrowth}
               title="Growth Areas"
               lines={e.snapshot?.growthAreas}
+              listStyle="bullet"
             />
             <InsightCard
               icon={secLove}

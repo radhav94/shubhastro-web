@@ -813,15 +813,13 @@ $sticky-gap: 8px;
   color: $ink;
 }
 
+/* Design's own export — tile background and glyph are part of the image, so
+   there is no gradient or colour to apply here. */
 .cosmicHeadingIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   width: 30px;
   height: 30px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, #f75801, #d43400);
-  color: #fff;
+  object-fit: contain;
   flex-shrink: 0;
 }
 
@@ -1192,6 +1190,30 @@ $sticky-gap: 8px;
   }
 }
 
+/* Dot bullets drawn with ::before rather than list-style, so the dot size,
+   colour and the gap to the text all match the design. */
+.insightListBullet {
+  padding-left: 4px;
+  list-style: none;
+  gap: 9px;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+
+    &::before {
+      content: "";
+      flex-shrink: 0;
+      width: 4px;
+      height: 4px;
+      margin-top: 0.5em;
+      border-radius: 50%;
+      background: currentColor;
+    }
+  }
+}
+
 /* "Your Strengths" — green checkmark bullets instead of dots (see design). */
 .insightListCheck {
   padding-left: 0;
@@ -1205,10 +1227,18 @@ $sticky-gap: 8px;
   }
 }
 
+/* Filled green tile with a white tick, matching the design export. */
 .checkIcon {
   flex-shrink: 0;
-  margin-top: 2px;
-  color: #16a34a;
+  margin-top: 1px;
+  width: 15px;
+  height: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: #16a34a;
+  color: #fff;
 }
 
 /* ── NAKSHATRA + COMPATIBILITY ─────────────────────────────────────────── */
@@ -1391,7 +1421,7 @@ $sticky-gap: 8px;
   li {
     p {
       margin: 4px 0 0;
-      font-size: 0.72rem;
+      font-size: 13px;
       line-height: 1.5;
       color: $muted;
     }
@@ -1404,8 +1434,8 @@ $sticky-gap: 8px;
   gap: 8px;
 
   img {
-    width: 26px;
-    height: 26px;
+    width: 48px;
+    height: 48px;
     object-fit: contain;
   }
 

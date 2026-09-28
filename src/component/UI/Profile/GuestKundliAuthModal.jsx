@@ -35,6 +35,7 @@ import { saveUserToStorage } from "../../../utils/authStorage";
 import { requestFCMToken } from "../../../services/firebase";
 import { clearGuestKundliProfiles } from "../../../utils/helper/cookies";
 import { loginSuccess } from "../../../redux/auth/authSlice";
+import { resolveFreeSessionStatus } from "../../../utils/auth/freeSessionStatus";
 import { setSelectedKundliProfile } from "../../../redux/aiwow/aiwowSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { useCreateKundliMutation, useLazyGetAllKundlisQuery } from "../../../services/appServices/kundliServicesNew";
@@ -378,6 +379,10 @@ const GuestKundliAuthModal = ({
       window.dispatchEvent(new Event("auth-change"));
       trackEvent("login_otp_verified", { user_id: _id });
       trackEvent("login_success", { user_id: _id });
+
+      // Free-session eligibility for the offer labels. Not awaited — see
+      // utils/auth/freeSessionStatus.
+      resolveFreeSessionStatus(userData);
 
       // Select the newly created profile so downstream screens can use it.
       if (createdProfile?._id) {

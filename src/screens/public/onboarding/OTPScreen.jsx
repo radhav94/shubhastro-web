@@ -11,6 +11,7 @@ import {
 import { loginSuccess, setEmail } from "../../../redux/auth/authSlice";
 import { requestFCMToken } from "../../../services/firebase";
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
+import { resolveFreeSessionStatus } from "../../../utils/auth/freeSessionStatus";
 import { clearSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import { clearGuestKundliProfiles } from "../../../utils/helper/cookies";
 import { getDeviceInfo, getDeviceType } from "../../../utils/deviceInfo";
@@ -276,6 +277,14 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           if (userData?.email) {
             dispatch(setEmail(userData.email));
           }
+
+          /*
+            Resolve whether this user still has their free first session, from
+            the login payload or the profile endpoint. Not awaited: login
+            navigation must not wait on a promo label, and every consumer treats
+            "not yet known" as "fall back to the env flag".
+          */
+          resolveFreeSessionStatus(userData);
 
           updateFormData({
             otp: otpValue,

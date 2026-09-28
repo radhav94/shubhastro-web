@@ -25,6 +25,7 @@ import NoInternet, { useOnlineStatus } from "../component/NoInternet/NoInternet"
 import { useAiwowCleanup } from "../utils/hooks/useAiwowCleanup";
 import WelcomeBonusModal from "../component/UI/modal/WelcomeBonusModal/WelcomeBonusModal";
 import WelcomeBackModal from "../component/UI/modal/WelcomeBonusModal/WelcomeBackModal";
+import FreeSessionModal from "../component/UI/modal/FreeSessionModal/FreeSessionModal";
 import DeviceLimitModal from "../component/UI/modal/DeviceLimitModal/DeviceLimitModal";
 
 // Wrapper that checks localStorage for device limit flag
@@ -421,6 +422,10 @@ const HomeLayout = () => {
 
       {/* Welcome-back popup — shown to returning users after they log in */}
       <WelcomeBackModal />
+
+      {/* First-session-free promo — landing page only, once per session, and
+          only when VITE_FREE_SESSION_ENABLED is on. */}
+      <FreeSessionModal />
 
       {/* Device limit popup — shown when max_device_reached is true */}
       <DeviceLimitModalWrapper />

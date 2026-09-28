@@ -665,6 +665,23 @@ $sticky-gap: 8px;
     background: #fff;
     transform: translateY(-1px);
   }
+
+  /* While the PDF renders server-side (a few seconds on the first call). */
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.toolBtnSpinner {
+  animation: toolBtnSpin 0.9s linear infinite;
+}
+
+@keyframes toolBtnSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .verifyBadge {

@@ -15,6 +15,8 @@ import { resolveLiveChannelForAstrologer } from "../../../../utils/helper/resolv
 import { getAstrologerAvailability } from "../../../../utils/helper/astrologerAvailability";
 import toast from "../../../toast";
 import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
+import FreeSessionRate from "../../FreeSessionRate/FreeSessionRate";
+import { useFreeSession } from "../../../../utils/hooks/useFreeSession";
 const newStar = "/images/new-start.png";
 
 const NewAstrologerDetailsCard = ({
@@ -36,6 +38,8 @@ const NewAstrologerDetailsCard = ({
   // When the astrologer is live streaming, chat and call are not available.
   const { chatPrice, callPrice, chatEnabled, callEnabled, chatReason, callReason } =
     getAstrologerAvailability(astrologer, isLive);
+  // First-session-free offer — label only. See NewAstrologerCard.
+  const freeSession = useFreeSession();
   const hasEmergency = astrologer?.isEmergencyAvailable && (
     astrologer?.emergencyPrice?.chatRate?.amount > 0 ||
     astrologer?.emergencyPrice?.audioRate?.amount > 0
@@ -260,7 +264,11 @@ const NewAstrologerDetailsCard = ({
                 </button>
                 <p className={styles.detailsPriceText}>
                   {chatPrice > 0 ? (
-                    astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
+                    /* First session free wins over a discount — see the same
+                       branch in NewAstrologerCard. */
+                    freeSession ? (
+                      <FreeSessionRate amount={chatPrice} />
+                    ) : astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
                       <>
                         <span className={styles.detailsOriginalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.detailsPriceAmount}>{chatPrice}</span> min
                       </>
@@ -293,7 +301,9 @@ const NewAstrologerDetailsCard = ({
                 </button>
                 <p className={styles.detailsPriceText}>
                   {callPrice > 0 ? (
-                    astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
+                    freeSession ? (
+                      <FreeSessionRate amount={callPrice} />
+                    ) : astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
                       <>
                         <span className={styles.detailsOriginalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.detailsPriceAmount}>{callPrice}</span> min
                       </>
