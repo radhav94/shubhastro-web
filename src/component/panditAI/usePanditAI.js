@@ -11,6 +11,7 @@ import {
 } from "../../redux/api/chatApi";
 import toast from "../toast";
 import { trackEvent } from "../../utils/analytics";
+import { notifySessionEnded } from "../../utils/auth/freeSessionStatus";
 
 export const PANDIT_AI_ID = "6928390dc00d56953b586c04";
 const DEFAULT_LANGUAGE = {
@@ -376,6 +377,25 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       });
       trackEvent("ai_pandit_session_ended", { mode: "text" });
     }
+
+    /*
+      A Pandit AI session spends the user's free first session, so on close the
+      astrologer cards must stop advertising "Free" and show the real per-minute
+      price — re-read eligibility from the profile.
+
+      Keyed on `currentRoomId`, i.e. a session actually existed, and NOT on the
+      emit branch above: the room may already have ended server-side (free minutes
+      exhausted, or the server closed it), in which case that branch does not run
+      but the session still happened. Conversely this effect also runs on mount
+      while the bubble is closed — with no room there was no session, and firing
+      then would mean a profile read on every page load that mounts the bubble.
+
+      Fire-and-forget: the watcher debounces, and the refresh itself no-ops for
+      guests and once the answer is already false.
+      See utils/hooks/useFreeSessionWatcher.
+    */
+    if (currentRoomId) notifySessionEnded();
+
     setRoomId(null);
     panditAIRoomId = null;
     initiatedRef.current = false;
@@ -394,6 +414,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
           userId: userIdLocal,
           astrologerId: PANDIT_AI_ID,
         });
+        // Same reason as the close path above — the free session is spent.
+        notifySessionEnded();
       }
       setRoomId(null);
       panditAIRoomId = null;

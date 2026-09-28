@@ -17,7 +17,45 @@ const extractHistoryId = (result) =>
   result?.historyId || result?._id || result?.id ||
   result?.data?.historyId || result?.data?._id || result?.data?.id || null;
 
-/**
+/*
+ * Features whose charges slug does not follow from their display name.
+ *
+ * The lookup below derives `<feature-name>-report` from whatever name the caller
+ * passes, which works while the product name and the charges slug agree. The
+ * Muhurat Calendar is the exception: the charges entry is keyed
+ * `agentic-calendar-report` (the feature's original name, still used by its API
+ * path `companion-suite/agentic-calendar/analyze`), while the route, the
+ * subscription gate and the AI-history list all call it "Muhurat Calendar".
+ *
+ * So the report screen resolved its price only because it hardcodes
+ * `featureName: 'Agentic-Calendar'`, and the AI-Wow history list — which passes
+ * the name the history API returns — derived `muhurat-calendar-report`, missed,
+ * and left the download modal's cost stuck on "Loading..." with the button
+ * unusable.
+ *
+ * Keyed by the name with separators collapsed to single hyphens, so "Muhurat
+ * Calendar", "muhurat-calendar" and "Muhurat Calendar Report" all land here.
+ */
+const CHARGE_SLUG_BY_FEATURE = {
+  // Muhurat Calendar — charges keyed by the feature's original name.
+  'muhurat-calendar': 'agentic-calendar-report',
+  'muhurat-calendar-report': 'agentic-calendar-report',
+  'agentic-calendar': 'agentic-calendar-report',
+  'agentic-calendar-report': 'agentic-calendar-report',
+
+  /*
+    Astro Face Reading — charges slug is `Face-Analysis-report` (confirmed). The
+    result screen already derives it (it sends `face-analysis`), but the AI-Wow
+    history list sends the display name, which derives
+    `astro-face-reading-report` and misses. Slug comparison is case-insensitive
+    (both sides are lowercased below), so the capitals in the API's slug do not
+    matter here.
+  */
+  'astro-face-reading': 'face-analysis-report',
+  'astro-face-reading-report': 'face-analysis-report',
+  'face-reading': 'face-analysis-report',
+};
+
 /**
  * Finds the matching download charge from the charges API response by feature.
  * Response shape: { data: [{ title, list: [{ title, slug, amount, ... }] }] }
@@ -25,7 +63,11 @@ const extractHistoryId = (result) =>
 export const findChargeAmount = (charges, featureName) => {
   if (!Array.isArray(charges) || !featureName) return null;
   const normalized = featureName.trim().toLowerCase();
-  const exactSlug = normalized.replace(/\s+/g, '-') + '-report';
+  const hyphenated = normalized.replace(/[\s-]+/g, '-');
+  const exactSlug =
+    CHARGE_SLUG_BY_FEATURE[hyphenated] ||
+    CHARGE_SLUG_BY_FEATURE[`${hyphenated}-report`] ||
+    `${hyphenated}-report`;
   /*
     Split on hyphens as well as whitespace.
     

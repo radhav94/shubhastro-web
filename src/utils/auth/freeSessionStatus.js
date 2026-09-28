@@ -71,6 +71,119 @@ const write = (value) => {
 /** Called on logout: the next user's eligibility is their own. */
 export const clearFreeSessionStatus = () => write(null);
 
+/*
+ * Local "a session just ended" signal, for flows that end a session without the
+ * server echoing an end event back to us (Pandit AI emits chat:end itself).
+ * useFreeSessionWatcher listens for this alongside the socket's end events.
+ */
+export const SESSION_ENDED_EVENT = "shubhtalk:session-ended";
+
+/**
+ * Announce that a session has ended, so eligibility is re-read from the profile.
+ *
+ * Call this from any flow that ends a session itself instead of waiting for the
+ * server's end event (Pandit AI text and voice both do). Safe to call more than
+ * once per session — the watcher debounces and refreshFreeSessionStatus no-ops
+ * once the answer is already false.
+ */
+export const notifySessionEnded = () => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(SESSION_ENDED_EVENT));
+};
+
+/**
+ * Record that the free first session has been used, without waiting for the
+ * backend to say so.
+ *
+ * Called when a session actually STARTS (the astrologer accepted — chat, audio,
+ * video or Pandit AI). The offer is one session total, so from that moment the
+ * user no longer has a free one and the cards must quote the real per-minute
+ * price.
+ *
+ * Why the client concludes this instead of only trusting the profile flag:
+ * reported case — a user started a free session, dropped it part-way, returned to
+ * the listing and was still shown "Free" on every astrologer; the next attempt
+ * then failed the wallet check with "insufficient balance". So the backend had
+ * already counted the session while the label had not caught up. Waiting for the
+ * flag meant advertising a free session that would be refused — the worst of the
+ * two ways to be wrong.
+ *
+ * Trade-off, stated plainly: if the backend does NOT count a particular session
+ * against the offer, this hides the offer earlier than it should. It self-heals —
+ * the value is cleared on logout and re-resolved from the profile at the next
+ * login — but within this session the user would see paid prices. That is the
+ * safer direction: a price that turns out to be free is a pleasant surprise; a
+ * "Free" label that charges is a complaint.
+ */
+export const markFreeSessionConsumed = () => {
+  if (readFreeSessionStatus() === false) return;
+  write(false);
+};
+
+// One profile read at a time: several end events can describe one session.
+let refreshInFlight = null;
+
+/**
+ * Re-read eligibility from the profile API.
+ *
+ * Needed because the backend flips `isFirstSessionFree` to false once the user
+ * has actually had a session — chat, audio, video or Pandit AI. Without this the
+ * value cached at login stays `true` for the rest of the visit, so the cards keep
+ * promising a free session the user has already used.
+ *
+ * Skipped once the answer is already `false`: it never goes back to true within a
+ * session, so there is nothing left to learn. Also skipped for guests.
+ *
+ * @returns {Promise<boolean|null>} the fresh value, or null when unknown
+ */
+export const refreshFreeSessionStatus = async () => {
+  if (typeof window === "undefined") return null;
+  if (!localStorage.getItem("shubhtalk_customer_token")) return null;
+  // Already used up — no request can change that.
+  if (readFreeSessionStatus() === false) return false;
+  if (refreshInFlight) return refreshInFlight;
+
+  const id = getProfileId();
+  if (!id) return null;
+
+  refreshInFlight = (async () => {
+    try {
+      const response = await getProfile(id, { skipToast: true });
+      const value = extractFirstSessionFree(response);
+
+      /*
+        Dev-only, and worth keeping: responses come through the encrypting secure
+        gateway, so the Network tab shows ciphertext — there is no other way to see
+        what the profile actually said about this flag. Distinguishes the three
+        outcomes that look identical on screen: the server still says `true`, the
+        server stopped sending the field (value null, cache untouched), or the
+        request failed. Stripped from production builds (esbuild `pure`).
+      */
+      if (import.meta.env.DEV) {
+        console.log("[freeSession] profile read →", {
+          isFirstSessionFree: value,
+          fieldPresent: value !== null,
+          cachedBefore: readFreeSessionStatus(),
+        });
+      }
+
+      // Only cache a real answer; a profile without the field leaves it unknown
+      // (see the note at the top of this file).
+      if (value !== null) write(value);
+      return value;
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.log("[freeSession] profile read failed →", err?.response?.status || err?.message);
+      }
+      return null;
+    } finally {
+      refreshInFlight = null;
+    }
+  })();
+
+  return refreshInFlight;
+};
+
 /**
  * Resolve and cache eligibility for a user who just logged in.
  *
