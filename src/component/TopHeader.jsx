@@ -341,8 +341,37 @@ const TopHeader = () => {
   // The badge is only rendered for logged-in users, so `requireAuth()` returning
   // falsy here means the session expired. Send the user somewhere instead of
   // swallowing the tap.
+  /*
+   * Same-URL dead click, and the one place in this header it was never handled.
+   * handleLogoClick, handleDrawerNavClick and handleNavAreaClick all guard the
+   * "you are already on this route" case; the wallet chip did not.
+   *
+   * `navigate("/recharge")` while already on /recharge is a PUSH to the identical
+   * URL: no remount, no scroll, no repaint. The chip sits in a fixed header that
+   * is visible on the recharge page itself, so it is *the* element within reach
+   * when you are waiting for a balance to move.
+   *
+   * And re-tapping it is not a mis-tap — it is a refresh request. Clarity session
+   * q4kzpk is exactly that: a logged-in visitor started a recharge from their
+   * profile, then hit this chip three times (05:17, 06:44, 07:39) with page
+   * reloads in between, because the balance was not updating and reloading was
+   * the only thing that appeared to work. Three dead clicks on one element spread
+   * over two minutes is an intent signal, not noise.
+   *
+   * So answer the intent: refetch the balance (refreshWallet busts the RTK Query
+   * cache, so the number can actually change) and scroll the page up to the
+   * recharge form. Both are visible consequences, and the refetch is the thing
+   * the user was manually reloading to get.
+   */
   const handleWalletClick = () => {
     if (!requireAuth()) return;
+
+    if (currentPathname === PATH.privateRoutes.RECHARGE.path) {
+      refreshWallet();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     navigate(PATH.privateRoutes.RECHARGE.path);
   };
 
@@ -618,7 +647,13 @@ const TopHeader = () => {
                 }}
                 role="button"
                 tabIndex={0}
-                aria-label="Wallet balance - tap to recharge"
+                /* The action differs by route (see handleWalletClick), so the
+                   accessible name has to say which one it is. */
+                aria-label={
+                  currentPathname === PATH.privateRoutes.RECHARGE.path
+                    ? "Wallet balance - tap to refresh"
+                    : "Wallet balance - tap to recharge"
+                }
               >
                 <img src={headerCoin} className={styles.coinImg} alt="coin icon" width="20" height="20" />
                 <span className={styles.walletAmount}>

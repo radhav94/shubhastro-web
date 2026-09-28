@@ -42,6 +42,34 @@ const OrderDetails = () => {
   );
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+
+  /*
+    Re-tapping the tab you are already on.
+
+    OrderTabs passed setActiveTab straight through, so a tap on the active tab
+    handed React an identical value, React bailed out of the re-render, and
+    nothing moved. OrderTabs' own scroll effect is keyed on [activeTab] and
+    therefore does not run either — and the active tab is already centred, so
+    even if it did there would be nothing to see.
+
+    Call / Chat is the only real control on this screen, and the reason to tap the
+    tab you are on is that the conversation below it did not appear to load. That
+    is the shape of Clarity session x59z9v: an Instagram in-app visitor spent
+    16:09 to 19:54 here, repeatedly working the order history.
+
+    A re-tap means "show me this", so bring the panel into view. `nearest` keeps
+    an already-visible panel from jumping, which matches handleTabChange in
+    HoroscopeOld.
+  */
+  const tabContentRef = useRef(null);
+
+  const handleTabChange = (tab) => {
+    if (tab === activeTab) {
+      tabContentRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      return;
+    }
+    setActiveTab(tab);
+  };
   const [isConnectPopupOpen, setIsConnectPopupOpen] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [connectionType, setConnectionType] = useState(null);
@@ -592,8 +620,8 @@ const OrderDetails = () => {
         astrologer={astrologerInfo || { name: "Consultation", experience: "" }}
         onBack={handleBack}
       />
-      <OrderTabs activeTab={activeTab} onTabChange={setActiveTab} />
-      <div className={styles.tabContent}>{renderTabContent()}</div>
+      <OrderTabs activeTab={activeTab} onTabChange={handleTabChange} />
+      <div className={styles.tabContent} ref={tabContentRef}>{renderTabContent()}</div>
 
       <ConnectAstrologerPopup
         isOpen={isConnectPopupOpen}
