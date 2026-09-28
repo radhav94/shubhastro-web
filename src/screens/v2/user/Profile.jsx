@@ -416,7 +416,23 @@ const Profile = () => {
   // RTK Query hooks for profile operations
   const [createKundli, { isLoading: isCreatingProfile }] =
     useCreateKundliMutation();
-  const [deleteKundli] = useDeleteKundliMutation();
+  /*
+    isLoading was being discarded here, and DeleteConfirmationModal was rendered
+    without it — so during the DELETE round trip the modal kept both buttons
+    enabled and the confirm button still read "Delete". Nothing acknowledged the
+    tap, so a slow request looks like a broken button: the visitor taps Delete
+    again (firing duplicate DELETE calls for the same id) and then reloads.
+
+    Clarity session lahh7p is that shape — an Instagram in-app visitor spent
+    11:02 to 16:22 on this page "trying repeated actions and refreshes", and an
+    in-app browser is exactly where the round trip is slowest.
+
+    The modal already supports this (isLoading -> "Deleting...", both buttons
+    disabled) and the cancel-subscription modal in this same file already passes
+    it. This was the one caller that did not.
+  */
+  const [deleteKundli, { isLoading: isDeletingProfile }] =
+    useDeleteKundliMutation();
   const [editKundli] = useEditKundliMutation();
 
   // Use the astrologer connect hook
@@ -1569,6 +1585,11 @@ const Profile = () => {
       console.error("No profile ID to delete");
       return;
     }
+
+    // Belt-and-braces alongside the modal's `disabled`: a fast double-tap can
+    // land both taps before React re-renders with isLoading, and deleting the
+    // same id twice is not something to leave to timing.
+    if (isDeletingProfile) return;
 
     console.log("=== DELETE PROFILE DEBUG ===");
     console.log("Profile ID to delete:", profileToDelete);
@@ -2927,6 +2948,7 @@ const Profile = () => {
         message="Are you sure you want to delete this profile? This action cannot be undone."
         onCancel={handleCancelDelete}
         onConfirm={confirmDeleteProfile}
+        isLoading={isDeletingProfile}
       />
 
       {/* Email Edit Modal */}

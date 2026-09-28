@@ -38,7 +38,7 @@ import { createPortal } from "react-dom";
 import { ChevronLeft } from "lucide-react";
 import { clearViewerSession } from "../../../../../utils/liveSessionStorage";
 import { AppImages, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../../utils/appImages";
-import astrologerOfflineBg from "../../../../../assets/images/live-streaming-no-astro-background.webp";
+import astrologerOfflineBg from "../../../../../assets/images/live-streaming-no-astro-background.png";
 import {
   useCheckFollowingStatusQuery,
   useFollowAstrologerByIdMutation,

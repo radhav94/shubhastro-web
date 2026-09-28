@@ -87,7 +87,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("landing_page_open", eventParams);
-    trackToBranch("Landing Page", eventParams);
+    trackToBranch("landing_page_open", eventParams);
     trackEvent("landing_page_open", eventParams);
   },
 
@@ -111,7 +111,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("signup_started", eventParams);
-    trackToBranch("Signup Started", eventParams);
+    trackToBranch("signup_started", eventParams);
     trackEvent("signup_started", eventParams);
   },
 
@@ -138,7 +138,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("otp_sent", eventParams);
-    trackToBranch("OTP Sent", eventParams);
+    trackToBranch("otp_sent", eventParams);
     trackEvent("otp_sent", eventParams);
   },
 
@@ -165,7 +165,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("otp_verified", eventParams);
-    trackToBranch("OTP Verified", eventParams);
+    trackToBranch("otp_verified", eventParams);
     trackEvent("otp_verified", eventParams);
   },
 
@@ -217,7 +217,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("registration_completed", eventParams);
-    trackToBranch("Registration Completed", eventParams);
+    trackToBranch("registration_completed", eventParams);
     trackEvent("registration_completed", eventParams);
   },
 
@@ -244,7 +244,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("profile_completed", eventParams);
-    trackToBranch("Profile Completed", eventParams);
+    trackToBranch("profile_completed", eventParams);
     trackEvent("profile_completed", eventParams);
   },
 
@@ -273,7 +273,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("promo_eligible", eventParams);
-    trackToBranch("Promo Eligible", eventParams);
+    trackToBranch("promo_eligible", eventParams);
     trackEvent("promo_eligible", eventParams);
   },
 
@@ -302,7 +302,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("promo_credited", eventParams);
-    trackToBranch("Promo Credited", eventParams);
+    trackToBranch("promo_credited", eventParams);
     trackEvent("promo_credited", eventParams);
   },
 
@@ -337,7 +337,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("astrologer_listing_viewed", eventParams);
-    trackToBranch("Astrologer Listing Viewed", eventParams);
+    trackToBranch("view_astrologer_list", eventParams);
     trackEvent("astrologer_listing_viewed", eventParams);
   },
 
@@ -367,7 +367,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("astrologer_profile_viewed", eventParams);
-    trackToBranch("Astrologer Profile Viewed", eventParams);
+    trackToBranch("view_astrologer_profile", eventParams);
     trackEvent("astrologer_profile_viewed", eventParams);
   },
 
@@ -394,7 +394,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("wallet_screen_viewed", eventParams);
-    trackToBranch("Wallet Screen Viewed", eventParams);
+    trackToBranch("view_wallet", eventParams);
     trackEvent("wallet_screen_viewed", eventParams);
   },
 
@@ -425,7 +425,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("recharge_pack_selected", eventParams);
-    trackToBranch("Recharge Pack Selected", eventParams);
+    trackToBranch("select_recharge_pack", eventParams);
     trackEvent("recharge_pack_selected", eventParams);
   },
 
@@ -456,7 +456,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("wallet_recharge_initiated", eventParams);
-    trackToBranch("Actual Wallet Recharge Initiated", eventParams);
+    trackToBranch("begin_recharge", eventParams);
     trackEvent("wallet_recharge_initiated", eventParams);
   },
 
@@ -488,7 +488,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("wallet_recharge_successful", eventParams);
-    trackToBranch("Actual Wallet Recharge Successful", eventParams);
+    trackToBranch("wallet_recharge_success", eventParams);
     trackEvent("wallet_recharge_successful", eventParams);
   },
 
@@ -521,7 +521,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("consultation_started", eventParams);
-    trackToBranch("Consultation Started", eventParams);
+    trackToBranch("consultation_started", eventParams);
     trackEvent("consultation_started", eventParams);
   },
 
@@ -557,7 +557,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("consultation_completed", eventParams);
-    trackToBranch("Consultation Completed", eventParams);
+    trackToBranch("consultation_completed", eventParams);
     trackEvent("consultation_completed", eventParams);
   },
 };

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './FaceReadingLanding.module.scss';
@@ -14,9 +14,103 @@ import { trackEvent } from '../../../../utils/analytics';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import toast from '../../../../component/toast';
+import { preloadChunk } from '../../../../utils/helper/lazyWithRetry';
 
 const FaceReadingLanding = () => {
   const navigate = useNavigate();
+
+  /*
+    Warm the face-detection payload while the visitor reads this screen.
+
+    This screen navigates straight to /camera, and that route needs a lot
+    before it can do anything, all of it discovered in series:
+
+      useFaceDetection chunk       234 -> 510ms   140 KB
+      model manifests              776 -> 933ms
+      tiny_face_detector shard     935 -> 1496ms  189 KB
+      face_landmark_68 shard       936 -> 1329ms  348 KB
+
+    Measured against production. The model fetches cannot even begin until the
+    chunk has landed and run loadFromUri, so 561 KB of weights start arriving
+    three hops deep. Clarity reports 4.088s LCP for /camera and 5.192s for this
+    landing on real devices.
+
+    Both models are load-bearing — the landmark set is used for the face extent,
+    the in-circle test and the mesh overlay — so this is about when they arrive,
+    not whether they are needed.
+
+    Deliberately at idle and with rel=prefetch, the lowest priority the browser
+    has: this screen has its own LCP to make first, and warming must never
+    compete with it. By the time the visitor has read the instructions and
+    tapped through, the camera route finds all of it in cache.
+  */
+  useEffect(() => {
+    const MODEL_FILES = [
+      '/models/tiny_face_detector_model-weights_manifest.json',
+      '/models/tiny_face_detector_model-shard1',
+      '/models/face_landmark_68_model-weights_manifest.json',
+      '/models/face_landmark_68_model-shard1',
+    ];
+
+    let links = [];
+    const warm = () => {
+      preloadChunk(() => import('../../../../utils/hooks/useFaceDetection'));
+      try {
+        links = MODEL_FILES.map((href) => {
+          const link = document.createElement('link');
+          link.rel = 'prefetch';
+          link.as = 'fetch';
+          link.href = href;
+          /*
+            No crossOrigin. These are same-origin files under /models, and
+            face-api's loadFromUri fetches them in same-origin mode. Setting
+            crossOrigin='anonymous' here makes the prefetch a CORS-mode request,
+            which lands in the cache under a key the later fetch does not match
+            — observed as 8 requests for 4 files, i.e. the warm downloaded 561 KB
+            and then the camera downloaded it all again.
+          */
+          document.head.appendChild(link);
+          return link;
+        });
+      } catch {
+        /* best effort — the camera route still fetches these itself */
+      }
+    };
+
+    /*
+      Wait for `load` before even scheduling the idle callback.
+
+      Measured without it: warming began at 459ms while this screen's own LCP
+      landed at 476ms — idle fires very early on a fast connection, so the warm
+      was starting just ahead of the paint it must never delay. rel=prefetch is
+      the lowest priority the browser has and would probably not have cost
+      anything measurable, but being strict here is free. Same ordering as
+      __deferTagScript__ in index.html: load, then idle, with a ceiling.
+    */
+    let idleId = null;
+    let timer = null;
+
+    const schedule = () => {
+      if (typeof window.requestIdleCallback === 'function') {
+        idleId = window.requestIdleCallback(warm, { timeout: 2500 });
+      } else {
+        timer = setTimeout(warm, 1500);
+      }
+    };
+
+    if (document.readyState === 'complete') {
+      schedule();
+    } else {
+      window.addEventListener('load', schedule, { once: true });
+    }
+
+    return () => {
+      window.removeEventListener('load', schedule);
+      if (idleId !== null) window.cancelIdleCallback?.(idleId);
+      if (timer) clearTimeout(timer);
+      links.forEach((l) => l.remove());
+    };
+  }, []);
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
