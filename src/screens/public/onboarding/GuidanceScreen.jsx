@@ -12,6 +12,7 @@ import { useGetExpertiseFiltersQuery } from "../../../redux/api/astrologer/astro
 import { setEmail } from "../../../redux/auth/authSlice";
 import { trackEvent } from "../../../utils/analytics";
 import { BranchEvents } from "../../../utils/branchEvents";
+import { isAdultDob, UNDERAGE_ERROR } from "../../../utils/helper/age";
 
 // Static mapping for icon and color by slug (API doesn't provide these)
 const slugStyleMap = {
@@ -82,6 +83,23 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
         console.error("❌ No authentication token found");
         toast.error("Please complete login and OTP verification first");
         setLoading(false);
+        return;
+      }
+
+      /*
+        Age backstop. The DOB was entered and validated on BirthDetailsScreen,
+        but this screen is where it is actually posted to users/registerUser — and
+        it can auto-submit (see the `autoSubmit` prop), so a birthDate that
+        reached formData another way (a restored draft, a skipped step) would
+        otherwise register an underage account with nothing on screen to stop it.
+        Send them back to the step that owns the field.
+      */
+      if (!isAdultDob(formData.birthDate)) {
+        toast.error(UNDERAGE_ERROR);
+        setLoading(false);
+        // Step 1 is BirthDetailsScreen, which owns the field — sending them back
+        // there is the only place the date can be corrected.
+        onStepChange?.(1);
         return;
       }
 

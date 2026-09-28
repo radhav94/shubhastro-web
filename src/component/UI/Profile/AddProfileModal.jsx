@@ -20,6 +20,7 @@ import ProfileListingModal from "./ProfileListingModal";
 import { relationOption } from "../../../utils/constanats/appData";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
 import { personNameRegex, PERSON_NAME_ERROR, PERSON_NAME_MIN, PERSON_NAME_MIN_ERROR } from "../../../utils/regex";
+import { isAdultDob, maxSignupDob, UNDERAGE_ERROR } from "../../../utils/helper/age";
 import giftImg from "../../../assets/images/welcome-bonus-icon.webp";
 import {
   getSignupBonusLabel,
@@ -277,12 +278,30 @@ const AddProfileModal = ({
     // Two different failures, two different messages. "Required" is only true
     // when the box is genuinely empty; text that would not parse gets told what
     // is actually wrong with it.
-    birthDate: Yup.string().when("birthDateRaw", {
-      is: (raw) => !!String(raw || "").trim(),
-      then: (schema) =>
-        schema.required("Enter a valid birth date as DD/MM/YYYY (not in the future)"),
-      otherwise: (schema) => schema.required("Birth date is required"),
-    }),
+    /*
+      The 18+ rule is scoped to the SELF profile — the account holder — and
+      nothing else. Profiles for other people are routinely minors (a kundli for
+      a child is the whole point of the feature), so the rule must not leak onto
+      them.
+
+      Two ways this form represents "self":
+        - `relation === "self"`, the normal case from Profile / ProfileManager.
+        - `showMobileField`, which GuestKundliAuthModal sets when this form is
+          the signup form; `relation` is hidden there and the details entered
+          become the account holder's (posted as `dateOfBirth` to
+          users/registerUser).
+    */
+    birthDate: Yup.string()
+      .when("birthDateRaw", {
+        is: (raw) => !!String(raw || "").trim(),
+        then: (schema) =>
+          schema.required("Enter a valid birth date as DD/MM/YYYY (not in the future)"),
+        otherwise: (schema) => schema.required("Birth date is required"),
+      })
+      .when("relation", {
+        is: (relation) => showMobileField || String(relation || "").toLowerCase() === "self",
+        then: (schema) => schema.test("adult", UNDERAGE_ERROR, (value) => isAdultDob(value)),
+      }),
     birthTime: Yup.string().when("unknownBirthTime", {
       is: false,
       then: (schema) => schema.required("Birth time is required"),
@@ -682,7 +701,16 @@ const AddProfileModal = ({
                           // a stale date the user could no longer see.
                           setFieldValue("birthDate", "");
                         }}
-                        maxDate={new Date()}
+                        /*
+                          Clamped only for the self/account-holder case. For any
+                          other relation every past date stays selectable — see
+                          the birthDate schema.
+                        */
+                        maxDate={
+                          showMobileField || values.relation?.toLowerCase() === "self"
+                            ? maxSignupDob()
+                            : new Date()
+                        }
                         placeholder="DD/MM/YYYY"
                       />
                     </div>

@@ -6,6 +6,7 @@ import styles from "./AddProfileModal.module.scss";
 import { relationOption } from "../../../utils/constanats/appData";
 import DateTimePicker from "../dateTimePicker/DateTimePicker";
 import { personNameRegex, PERSON_NAME_ERROR, PERSON_NAME_MIN, PERSON_NAME_MIN_ERROR } from "../../../utils/regex";
+import { isAdultDob, maxSignupDob, UNDERAGE_ERROR } from "../../../utils/helper/age";
 
 const EditProfileModal = ({
   isOpen,
@@ -90,7 +91,20 @@ const EditProfileModal = ({
           return true;
         }
       ),
-    birthDate: Yup.string().required("Birth date is required"),
+    /*
+      18+ applies to the SELF profile only, and it has to be re-checked on edit —
+      not just at signup. Two ways an underage self profile could otherwise
+      appear here: changing the self profile's birth date to a minor one, and
+      switching an existing minor profile's relation TO "Self". Both are keyed on
+      the relation being submitted, not the one loaded, so the second case is
+      covered. Every other relation keeps accepting any past date.
+    */
+    birthDate: Yup.string()
+      .required("Birth date is required")
+      .when("relation", {
+        is: (relation) => String(relation || "").toLowerCase() === "self",
+        then: (schema) => schema.test("adult", UNDERAGE_ERROR, (value) => isAdultDob(value)),
+      }),
     birthTime: Yup.string().when("unknownBirthTime", {
       is: false,
       then: (schema) => schema.required("Birth time is required"),
@@ -391,6 +405,14 @@ const EditProfileModal = ({
                       if (!rawText) setDateInputError("");
                     }}
                     onError={(err) => setDateInputError(err)}
+                    /*
+                      Clamped to 18+ only while the relation is Self (the account
+                      holder). Any other relation keeps the full past range —
+                      minor profiles are valid there.
+                    */
+                    maxDate={
+                      values.relation?.toLowerCase() === "self" ? maxSignupDob() : new Date()
+                    }
                     placeholder="DD/MM/YYYY"
                   />
                   {dateInputError ? (

@@ -8,6 +8,7 @@ import { registerUser } from "../../services/appServices/authService";
 import { BranchEvents } from "../../utils/branchEvents";
 import LocationSearch from "../../utils/location/locationSearchVedic";
 import { validatePersonName } from "../../utils/regex";
+import { isAdultDob, UNDERAGE_ERROR } from "../../utils/helper/age";
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
 const months = [
@@ -91,6 +92,22 @@ const Register = () => {
         !birthPlace
       ) {
         setError("Please fill in all required fields.");
+        setLoading(false);
+        return;
+      }
+
+      /*
+        Age gate. This form registers the account, so the DOB is the account
+        holder's — accounts below MIN_SIGNUP_AGE are not allowed. Checked before
+        the name rules so the blocking reason is the one the user can least
+        guess at from the field itself.
+
+        Note the `years` option list starts at currentYear - 1, which allowed a
+        1-year-old to be selected; that array was never validation.
+      */
+      const dobForAge = `${year}-${String(getMonthNumber(month)).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      if (!isAdultDob(dobForAge)) {
+        setError(UNDERAGE_ERROR);
         setLoading(false);
         return;
       }

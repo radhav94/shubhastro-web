@@ -59,6 +59,24 @@ export const aiwowApi = privateRequestNew.injectEndpoints({
       keepUnusedDataFor: 300,
     }),
 
+    /*
+     * Public read of a shared result. No auth: this is what a share link opens,
+     * and the visitor is usually neither the owner nor logged in. The backend
+     * strips private data (name, DOB, birth place, photo, internal ids) and
+     * returns { featureType, data, historyCreatedAt }.
+     *
+     * Registered in PUBLIC_ENDPOINTS + SILENT_ENDPOINTS in privateRequestNew so
+     * a 401 does not bounce a guest to login and the 404 for an unavailable
+     * link is rendered inline instead of toasted.
+     */
+    getSharedAiResult: builder.query({
+      query: (historyId) => ({
+        url: `ai-history/shared/${historyId}`,
+        method: "GET",
+        headers: { accept: "application/json" },
+      }),
+    }),
+
     // Fetch PDF URL for a given history item (handles payment deduction server-side)
     downloadReportPdf: builder.mutation({
       query: ({ historyId, language }) => {
@@ -81,5 +99,6 @@ export const {
   useGetChargesQuery,
   useLazyGetChargesQuery,
   useGetBusinessPathfinderOptionsQuery,
+  useGetSharedAiResultQuery,
   useDownloadReportPdfMutation,
 } = aiwowApi;

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import toast from "react-hot-toast";
 import { BsChatDots } from "react-icons/bs";
 import { MdOutlinePhoneInTalk } from "react-icons/md";
 import {
@@ -12,6 +11,7 @@ import TTSButton from "../../../../component/UI/TTSButton";
 import { PATH } from "../../../../utils/routes/Paths";
 import RecommendedAstrologersModal from "../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal";
 import useRecommendationOffer from "../../../../utils/hooks/useRecommendationOffer";
+import useAIWowShare from "../hooks/useAIWowShare";
 import sideDecorTR from "../../../../assets/images/facereading/side-decor-tr.png";
 import sideDecorBL from "../../../../assets/images/facereading/side-decor-bl.png";
 import chipStrengthIcon from "../../../../assets/face-report/strength.png";
@@ -215,8 +215,10 @@ const TABS = [
  * @param {Object} props.data - the analysis payload
  * @param {string} [props.faceImage]
  * @param {Function} [props.onDownload]
+ * @param {string} [props.historyId] - id of the saved report, used to build the
+ *   share link. Omitted on a shared view, where it comes from context instead.
  */
-const FaceReport = ({ data, faceImage, onDownload }) => {
+const FaceReport = ({ data, faceImage, onDownload, historyId }) => {
   const {
     overallReading = {},
     personalityAnalysis = {},
@@ -388,23 +390,15 @@ const FaceReport = ({ data, faceImage, onDownload }) => {
   };
 
   /*
-    Web Share where the browser has it, clipboard otherwise. Desktop Chrome has
-    no share sheet, so without the fallback the button would do nothing there.
+    Shares /shared/<historyId>, not this page's URL. The old link opened the
+    owner's own result route, which reads the reading from the sender's browser
+    session — so the recipient landed on the feature with no report in it.
   */
-  const handleShare = async () => {
-    const url = typeof window === "undefined" ? "" : window.location.href;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: "My AI Face Reading", url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      toast.success("Link copied");
-    } catch {
-      // A cancelled share sheet rejects too, so this stays silent rather than
-      // reporting a failure the user caused deliberately.
-    }
-  };
+  const { share: handleShare } = useAIWowShare({
+    historyId,
+    title: "My AI Face Reading",
+    text: "Check out my AI face reading on ShubhAstro.",
+  });
 
   /*
     Banner facts. Each carries its own icon tint so the four read as distinct at a

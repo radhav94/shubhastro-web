@@ -26,12 +26,21 @@ export const setApiErrorToastSilenced = (endpoint, silenced) => {
 };
 
 // Endpoints that should be accessible without authentication (no login redirect on 401)
-const PUBLIC_ENDPOINTS = ["getAstrologerById", "getAstrologers", "getRecommendedAstrologers"];
+// getSharedAiResult: an AI-Wow share link is opened by guests, and a stale token
+// in a visitor's localStorage must not turn that into a login redirect.
+const PUBLIC_ENDPOINTS = ["getAstrologerById", "getAstrologers", "getRecommendedAstrologers", "getSharedAiResult"];
 
 // Endpoints that should not show toast errors (silent failures)
 // getKundliById: a missing/deleted shared kundli returns 404; the Kundli view
 // handles that inline ("Kundli not available"), so suppress the generic toast.
-const SILENT_ENDPOINTS = ["getStaticPageBySlug", "getKundliById"];
+// getGemstoneRemedyPdf: the report screen surfaces every failure itself
+// (missing remedy -> 404, low balance -> 400 + recharge redirect), so the
+// generic toast here would only duplicate it.
+// getSharedAiResult: an expired/invalid share link 404s and the shared-result
+// page shows its own "result not available" screen.
+// getUserProfile: a user with no profile yet returns 404, and the only caller
+// (the free-session label) handles that by falling back to the env flag.
+const SILENT_ENDPOINTS = ["getStaticPageBySlug", "getKundliById", "getGemstoneRemedyPdf", "getSharedAiResult", "getUserProfile"];
 
 // ERROR HANDLER
 const handleApiError = (error, endpoint) => {

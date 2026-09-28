@@ -19,6 +19,8 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { ErrorText, PrimaryText } from "../../../component";
 import toast from "../../../component/toast";
 import { unavailableReason } from "../../../utils/helper/astrologerAvailability";
+import FreeSessionRate from "../../../component/UI/FreeSessionRate/FreeSessionRate";
+import { useFreeSession } from "../../../utils/hooks/useFreeSession";
 import {
   getAstrologerDisplayName,
   getAstrologerProfilePath,
@@ -86,6 +88,7 @@ const newStar = "/images/new-start.png";
 // session type, and has a price for it. Extracted into a component so the
 // live-status hook can be used per astrologer inside the list.
 const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
+  const freeSession = useFreeSession();
   const isOnline = astrologer?.isActive === true;
   const { isLive } = useAstrologerLiveStatus(astrologer?._id, astrologer?.astrologerLiveStatus);
   const activeTypes = astrologer?.isActiveType || [];
@@ -132,7 +135,10 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
           <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
         </button>
         <p className={styles.priceText}>
-          {astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
+          {/* First session free wins over a discount — see NewAstrologerCard. */}
+          {freeSession ? (
+            <FreeSessionRate amount={chatPrice} />
+          ) : astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
             <>
               <span className={styles.originalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{chatPrice}</span> min
             </>
@@ -159,7 +165,9 @@ const TopAstrologerActions = ({ astrologer, onChat, onCall }) => {
           <img src={AppIcons.CallMinutesIcon} alt="" /> Call
         </button>
         <p className={styles.priceText}>
-          {astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
+          {freeSession ? (
+            <FreeSessionRate amount={callPrice} />
+          ) : astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
             <>
               <span className={styles.originalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{callPrice}</span> min
             </>
@@ -181,6 +189,8 @@ const AstrologerProfile = () => {
   // userName, plus every previously shared link). The lookup endpoint accepts
   // both, so it's passed through untouched.
   const { id: astrologerParam } = useParams();
+  // First-session-free offer — changes the quoted rate only, see featureConfig.
+  const freeSession = useFreeSession();
   const navigate = useNavigate();
   /*
     The router's location, which this file previously never obtained — every
@@ -2520,9 +2530,15 @@ const AstrologerProfile = () => {
                   <div className={styles.optionInfo}>
                     <span className={styles.optionLabel}>Chat</span>
                     <span className={styles.optionPrice}>
-                      ₹{data?.price?.chatRate?.amount || 0}/ min
-                      {data?.price?.chatRate?.isDiscountActive && data?.price?.chatRate?.beforeDiscountPrice && (
-                        <span className={styles.originalPrice}>₹{data?.price?.chatRate?.beforeDiscountPrice}/ min</span>
+                      {freeSession ? (
+                        <FreeSessionRate amount={data?.price?.chatRate?.amount || 0} unit="/ min" />
+                      ) : (
+                        <>
+                          ₹{data?.price?.chatRate?.amount || 0}/ min
+                          {data?.price?.chatRate?.isDiscountActive && data?.price?.chatRate?.beforeDiscountPrice && (
+                            <span className={styles.originalPrice}>₹{data?.price?.chatRate?.beforeDiscountPrice}/ min</span>
+                          )}
+                        </>
                       )}
                     </span>
                   </div>
@@ -2545,9 +2561,15 @@ const AstrologerProfile = () => {
                   <div className={styles.optionInfo}>
                     <span className={styles.optionLabel}>Audio Call</span>
                     <span className={styles.optionPrice}>
-                      ₹{data?.price?.audioRate?.amount || 0}/ min
-                      {data?.price?.audioRate?.isDiscountActive && data?.price?.audioRate?.beforeDiscountPrice && (
-                        <span className={styles.originalPrice}>₹{data?.price?.audioRate?.beforeDiscountPrice}/ min</span>
+                      {freeSession ? (
+                        <FreeSessionRate amount={data?.price?.audioRate?.amount || 0} unit="/ min" />
+                      ) : (
+                        <>
+                          ₹{data?.price?.audioRate?.amount || 0}/ min
+                          {data?.price?.audioRate?.isDiscountActive && data?.price?.audioRate?.beforeDiscountPrice && (
+                            <span className={styles.originalPrice}>₹{data?.price?.audioRate?.beforeDiscountPrice}/ min</span>
+                          )}
+                        </>
                       )}
                     </span>
                   </div>
@@ -2570,9 +2592,15 @@ const AstrologerProfile = () => {
                   <div className={styles.optionInfo}>
                     <span className={styles.optionLabel}>Video Call</span>
                     <span className={styles.optionPrice}>
-                      ₹{data?.price?.videoCallRate?.amount || 0}/ min
-                      {data?.price?.videoCallRate?.isDiscountActive && data?.price?.videoCallRate?.beforeDiscountPrice && (
-                        <span className={styles.originalPrice}>₹{data?.price?.videoCallRate?.beforeDiscountPrice}/ min</span>
+                      {freeSession ? (
+                        <FreeSessionRate amount={data?.price?.videoCallRate?.amount || 0} unit="/ min" />
+                      ) : (
+                        <>
+                          ₹{data?.price?.videoCallRate?.amount || 0}/ min
+                          {data?.price?.videoCallRate?.isDiscountActive && data?.price?.videoCallRate?.beforeDiscountPrice && (
+                            <span className={styles.originalPrice}>₹{data?.price?.videoCallRate?.beforeDiscountPrice}/ min</span>
+                          )}
+                        </>
                       )}
                     </span>
                   </div>

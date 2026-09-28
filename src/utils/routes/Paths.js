@@ -319,6 +319,10 @@ const AuraLanding = lazy(() => import("../../screens/private/aiwow/aura/AuraLand
 const AuraCamera = lazy(() => import("../../screens/private/aiwow/aura/AuraCamera"));
 const AuraAnalysis = lazy(() => import("../../screens/private/aiwow/aura/AuraAnalysis"));
 const AuraResult = lazy(() => import("../../screens/private/aiwow/aura/AuraResult"));
+// Guest-viewable page behind every AI-Wow share link. Lives with the private
+// routes because that group carries no auth check (see App.jsx) — it only needs
+// HomeLayout's Suspense boundary, which the routes below all render inside.
+const SharedAIResult = lazy(() => import("../../screens/public/sharedResult/SharedAIResult"));
 
 const SingleCallHistory = lazy(() => import("../../screens/private/orderHistory/components/Call/SingleCallHistory"));
 const SingleChatHistory = lazy(() => import("../../screens/private/orderHistory/components/Chat/SingleChatHistory"));
@@ -1077,6 +1081,19 @@ export const PATH = {
       path: ["/ai-wow/aura-photography/result", "/aura-photography/result"],
       element: AuraResult,
       header: false,
+    },
+
+    /*
+     * Shared AI-Wow result. Deliberately outside the PrivateRoute allow-list in
+     * App.jsx: a share link has to open for guests, and PublicRoute is the wrong
+     * guard too (it redirects logged-in users to "/"), so this group — which
+     * applies no auth check — is where it belongs.
+     */
+    SHARED_AI_RESULT: {
+      path: "/shared/:historyId",
+      element: SharedAIResult,
+      header: false,
+      footer: false,
     },
 
     //Compatibility

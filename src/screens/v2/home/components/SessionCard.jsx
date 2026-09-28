@@ -10,8 +10,12 @@ import EmergencySessionModal from "../../../../component/UI/modal/EmergencySessi
 import { useGetAstrologerByIdQuery } from "../../../../redux/api/astrologer/astrologerApi";
 import useAstrologerLiveStatus from "../../../../hooks/useAstrologerLiveStatus";
 import { getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
+import FreeSessionRate from "../../../../component/UI/FreeSessionRate/FreeSessionRate";
+import { useFreeSession } from "../../../../utils/hooks/useFreeSession";
 
 const SessionCard = ({ session, onCallAgain, isLoading }) => {
+  // First-session-free offer — label only, see featureConfig.
+  const freeSession = useFreeSession();
   const navigate = useNavigate();
   const isOnline = session?.isActive === true;
   const { isLive, roomId: liveRoomId } = useAstrologerLiveStatus(session?._id, session?.astrologerLiveStatus);
@@ -175,7 +179,13 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
                     <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
                   </button>
                   <p className={styles.sessionPriceText}>
-                    <span className={styles.sessionPriceAmount}>₹{session?.price?.chatRate?.amount || session?.chatRate || 0}</span>/min
+                    {freeSession ? (
+                      <FreeSessionRate amount={session?.price?.chatRate?.amount || session?.chatRate || 0} />
+                    ) : (
+                      <>
+                        <span className={styles.sessionPriceAmount}>₹{session?.price?.chatRate?.amount || session?.chatRate || 0}</span>/min
+                      </>
+                    )}
                   </p>
                 </div>
               )}
@@ -189,7 +199,13 @@ const SessionCard = ({ session, onCallAgain, isLoading }) => {
                     <img src={AppIcons.CallMinutesIcon} alt="" /> Call
                   </button>
                   <p className={styles.sessionPriceText}>
-                    <span className={styles.sessionPriceAmount}>₹{session?.price?.audioRate?.amount || session?.callRate || 0}</span>/min
+                    {freeSession ? (
+                      <FreeSessionRate amount={session?.price?.audioRate?.amount || session?.callRate || 0} />
+                    ) : (
+                      <>
+                        <span className={styles.sessionPriceAmount}>₹{session?.price?.audioRate?.amount || session?.callRate || 0}</span>/min
+                      </>
+                    )}
                   </p>
                 </div>
               )}

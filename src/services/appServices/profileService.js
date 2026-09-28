@@ -59,3 +59,34 @@ export const extractIsRegistered = (profileResponse) => {
 
   return value === true || value === "true" || value === 1;
 };
+
+/**
+ * Whether the user still has their free first session, per the Profile API.
+ *
+ * Deliberately TRI-state, and the null case is the important one:
+ *
+ *   true  -> eligible; show the free-session labels
+ *   false -> already used it; show normal rates even while the offer is running
+ *   null  -> the API did not send the field at all
+ *
+ * `null` is kept distinct from `false` so a caller can retry (a later profile
+ * read may carry the field) rather than caching a "no" it never received. It
+ * grants nothing on its own: only an explicit `true` shows the offer.
+ *
+ * Accepts either an axios response or an already-unwrapped RTK Query body.
+ *
+ * @param {Object} profileResponse
+ * @returns {boolean|null}
+ */
+export const extractFirstSessionFree = (profileResponse) => {
+  const profile =
+    profileResponse?.data?.data ?? profileResponse?.data ?? profileResponse ?? {};
+
+  const value =
+    profile.isFirstSessionFree ??
+    profile.is_first_session_free ??
+    profile.firstSessionFree;
+
+  if (value === undefined || value === null) return null;
+  return value === true || value === "true" || value === 1;
+};

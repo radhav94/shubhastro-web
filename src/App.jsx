@@ -12,6 +12,7 @@ import PublicRoute from "./utils/routes/PublicRoute";
 import PrivateRoute from "./utils/routes/PrivateRoute";
 import MixedRoute from "./utils/routes/MixedRoute";
 import { isShubhMallEnabled, isShubhMallRoute } from "./utils/featureConfig";
+import { useFreeSessionWatcher } from "./utils/hooks/useFreeSessionWatcher";
 import { useEffect, Suspense, useMemo } from "react";
 import { CallProvider } from "./context/CallContext";
 import { ChatProvider } from "./context/ChatContext";
@@ -303,6 +304,13 @@ function App() {
     const timer = setTimeout(start, 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  /*
+    Re-read free-session eligibility whenever a session ends. Mounted here because
+    a session can end from any screen (call UI, chat, live, Pandit AI) — see
+    utils/hooks/useFreeSessionWatcher.
+  */
+  useFreeSessionWatcher();
 
   useEffect(() => {
     // Google Maps autocomplete z-index fix

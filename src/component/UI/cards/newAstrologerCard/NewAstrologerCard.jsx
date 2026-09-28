@@ -9,6 +9,8 @@ import { resolveLiveChannelForAstrologer } from "../../../../utils/helper/resolv
 import toast from "../../../toast";
 import { unavailableReason } from "../../../../utils/helper/astrologerAvailability";
 import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
+import FreeSessionRate from "../../FreeSessionRate/FreeSessionRate";
+import { useFreeSession } from "../../../../utils/hooks/useFreeSession";
 // Served from public/ at the site root — referenced by URL, not imported.
 const newStart = "/images/new-start.png";
 
@@ -28,6 +30,15 @@ const NewAstrologerCard = memo(({
   const activeTypes = astrologer?.isActiveType || [];
   const chatPrice = Number(astrologer?.price?.chatRate?.amount) || 0;
   const callPrice = Number(astrologer?.price?.audioRate?.amount) || 0;
+  /*
+    First-session-free offer: the env flag AND this user's own eligibility
+    (`isFirstSessionFree` on the profile). Read once per card rather than inside
+    each rate line; the underlying query is shared across every card in the list.
+    It changes only the rate LABEL — the session still connects through the same
+    balance check, because whether it is actually free is settled server-side.
+    See utils/hooks/useFreeSession.
+  */
+  const freeSession = useFreeSession();
   // When the astrologer is live streaming, chat and call are not available.
   const chatTypeActive = activeTypes.includes("all") || activeTypes.includes("chat");
   const callTypeActive = activeTypes.includes("all") || activeTypes.includes("audio");
@@ -241,7 +252,11 @@ const NewAstrologerCard = memo(({
               </button>
               <p className={styles.priceText}>
                 {chatPrice > 0 ? (
-                  astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
+                  /* First session free wins over a discount: quoting a reduced
+                     rate next to "Free" reads as two conflicting offers. */
+                  freeSession ? (
+                    <FreeSessionRate amount={chatPrice} />
+                  ) : astrologer?.price?.chatRate?.isDiscountActive && astrologer?.price?.chatRate?.beforeDiscountPrice ? (
                     <>
                       <span className={styles.originalPrice}>₹{astrologer?.price?.chatRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{chatPrice}</span> min
                     </>
@@ -272,7 +287,9 @@ const NewAstrologerCard = memo(({
               </button>
               <p className={styles.priceText}>
                 {callPrice > 0 ? (
-                  astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
+                  freeSession ? (
+                    <FreeSessionRate amount={callPrice} />
+                  ) : astrologer?.price?.audioRate?.isDiscountActive && astrologer?.price?.audioRate?.beforeDiscountPrice ? (
                     <>
                       <span className={styles.originalPrice}>₹{astrologer?.price?.audioRate?.beforeDiscountPrice}</span>/<span className={styles.priceAmount}>{callPrice}</span> min
                     </>

@@ -7,6 +7,8 @@ import styles from "./PanditAIVoiceBubble.module.scss";
 import usePanditAIVoice from "../../screens/private/panditAIVoice/usePanditAIVoice";
 import useAIFreeMinutes from "./useAIFreeMinutes";
 import { isInAppBrowser } from "../../utils/deviceInfo";
+import Toast from "../toast";
+import { notifySessionEnded } from "../../utils/auth/freeSessionStatus";
 
 // CDN-hosted — see PanditAIBubble for why this is a constant, not an import.
 const panditAiIcon = "https://assets.shubhastro.ai/images/AiPandit.png";
@@ -220,6 +222,14 @@ const PanditAIVoiceBubble = () => {
     } else {
       // Standalone voice session — end it fully
       endSession?.();
+      /*
+        A voice session spends the free first session too, so re-read eligibility
+        and let the astrologer cards drop the "Free" label for the real price.
+        Only on this branch: the shared-room branch above hands the session back
+        to the text chat rather than ending it.
+        See utils/hooks/useFreeSessionWatcher.
+      */
+      notifySessionEnded();
       setIsOpen(false);
       setSharedRoomId(null);
       // Always reopen text chat when voice closes
@@ -286,21 +296,18 @@ const PanditAIVoiceBubble = () => {
   return createPortal(
     <>
       {/*
-        This was `<div className={styles.overlay} />` with no handler — a
-        transparent `position: fixed; inset: 0; z-index: 9990` layer over the
-        whole page. So while the voice window was open, the page stayed fully
-        visible behind it and every tap outside the window did nothing: not one
-        dead element but a dead page, for as long as voice mode lasted.
+        An outside tap deliberately does NOT close this — same reasoning as the
+        text chat's backdrop (see PanditAIBubble): closing ends the session, and
+        for voice that also tears down the mic stream mid-answer. A stray tap
+        beside the window should not end a consultation the user is paying for.
 
-        PanditAIBubble already documents and fixes exactly this on its own
-        backdrop; the voice bubble was never given the same treatment. Tapping a
-        backdrop to dismiss is the near-universal convention, so that is what it
-        does — and handleClose already routes back to the text chat, so nothing is
-        lost by closing this way.
+        The layer still blocks page clicks while the session runs, and answers the
+        tap with a hint so it is not a dead click. The ✕ (and Escape) are the
+        deliberate exits.
       */}
       <div
         className={styles.overlay}
-        onClick={handleClose}
+        onClick={() => Toast.info("Tap ✕ to close Pandit AI")}
         aria-hidden="true"
       />
       <div className={styles.chatWindow} role="dialog" aria-label="AI Pandit Voice">

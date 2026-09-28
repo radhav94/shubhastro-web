@@ -230,6 +230,26 @@ export const kundliApi = privateRequestNew.injectEndpoints({
         params: { id: kundliId, language: language || "en" },
       }),
     }),
+
+    // Gemstone-remedy PDF for a saved kundli. Mirrors `kundli-pdf`: returns
+    // `{ success, message, data: <s3Url> }` and never streams the file. The PDF
+    // is cached per kundli server-side, so repeat calls are cheap and return the
+    // same URL instantly; only `force: true` re-renders (and can re-charge), so
+    // a plain download button must never send it.
+    //
+    // `language` keys the server cache only — the PDF always renders in English
+    // today — so we pass "en" and let a future translated version cache apart.
+    getGemstoneRemedyPdf: builder.query({
+      query: ({ kundliId, language, force } = {}) => ({
+        url: `kundlis/gemstone-remedy-pdf`,
+        method: "GET",
+        params: {
+          id: kundliId,
+          language: language || "en",
+          ...(force ? { force: true } : {}),
+        },
+      }),
+    }),
   }),
 });
 
@@ -243,6 +263,8 @@ export const {
   useEditKundliMutation,
   useGetKundliPdfQuery,
   useLazyGetKundliPdfQuery,
+  useGetGemstoneRemedyPdfQuery,
+  useLazyGetGemstoneRemedyPdfQuery,
 } = kundliApi;
 
 export const useAddKundliMutation = useCreateKundliMutation;

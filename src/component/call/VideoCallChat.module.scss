@@ -102,6 +102,12 @@
   word-wrap: break-word;
   font-size: 0.875rem;
   line-height: 1.5;
+  /*
+    The session's opening message is multi-line (Name / Gender / DOB / TOB / POB),
+    and without this the newlines collapse into one run-on line. The chat screen's
+    bubble already does this — see ChatMessages.
+  */
+  white-space: pre-line;
 
   span {
     display: block;

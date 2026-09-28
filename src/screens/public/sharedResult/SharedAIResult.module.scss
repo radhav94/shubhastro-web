@@ -1,0 +1,55 @@
+/* States shown before (or instead of) the module's own result screen. */
+.loaderWrap {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stateWrap {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.stateCard {
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #f0e2d6;
+  border-radius: 16px;
+  padding: 28px 22px;
+  box-shadow: 0 10px 30px rgba(247, 88, 1, 0.08);
+}
+
+.stateTitle {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2b2b2b;
+}
+
+.stateBody {
+  margin: 0 0 20px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #6b6b6b;
+}
+
+.stateCta {
+  display: inline-block;
+  padding: 11px 24px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f75801, #d43400);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    opacity: 0.92;
+  }
+}

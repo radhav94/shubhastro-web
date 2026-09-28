@@ -18,6 +18,7 @@ import SubscriptionModal from '../../../../component/UI/modal/SubscriptionModal/
 import RecommendedAstrologersModal from '../../../../component/UI/modal/RecommendedAstrologersModal/RecommendedAstrologersModal';
 import useRecommendationOffer from '../../../../utils/hooks/useRecommendationOffer';
 import { useAIWowDownload } from '../hooks/useAIWowDownload';
+import useAIWowShare from '../hooks/useAIWowShare';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 
 // Decorative corner flourishes — the same wave art used on the Rashi / Muhurat
@@ -83,6 +84,58 @@ const INSIGHT_ICONS = {
 };
 const getInsightIcon = (key) =>
   INSIGHT_ICONS[String(key || '').toLowerCase().replace(/[^a-z]/g, '')] || insightAdviceIcon;
+
+// Compose the whole "Personalized Insights" section into one spoken string, so a
+// single read-aloud on the section heading covers every card (previously each
+// card carried its own TTS button). Mirrors the per-type formatting the cards
+// render: booleans -> Yes/No, arrays joined, nested objects flattened to
+// "Label: value".
+const titleCase = (k) =>
+  String(k).replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()).trim();
+
+const buildPersonalizedInsightsSpeech = (personalized) => {
+  if (!personalized || typeof personalized !== 'object') return 'Personalized Insights';
+
+  const parts = ['Personalized Insights.'];
+
+  Object.entries(personalized).forEach(([key, value]) => {
+    if (value === null || value === undefined || value === '') return;
+    const title = titleCase(key);
+
+    if (typeof value === 'boolean') {
+      parts.push(`${title}. ${value ? 'Yes' : 'No'}`);
+      return;
+    }
+    if (Array.isArray(value)) {
+      if (value.length === 0) return;
+      parts.push(
+        `${title}. ${value
+          .map((item) => (typeof item === 'string' ? item : JSON.stringify(item)))
+          .join('. ')}`
+      );
+      return;
+    }
+    if (typeof value === 'object') {
+      const inner = Object.entries(value)
+        .filter(([, v]) => v)
+        .map(([k, v]) => {
+          const label = titleCase(k);
+          return Array.isArray(v) ? `${label}: ${v.join(', ')}` : `${label}: ${String(v)}`;
+        })
+        .join('. ');
+      if (inner) parts.push(`${title}. ${inner}`);
+      return;
+    }
+
+    // Strings/numbers, normalising "true"/"false" to Yes/No like the cards do.
+    const raw = String(value).trim();
+    const display =
+      raw.toLowerCase() === 'true' ? 'Yes' : raw.toLowerCase() === 'false' ? 'No' : raw;
+    parts.push(`${title}. ${display}`);
+  });
+
+  return parts.join(' ');
+};
 
 const GemstoneResult = () => {
   const navigate = useNavigate();
@@ -162,7 +215,11 @@ const GemstoneResult = () => {
     isAlreadyDownloaded, downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload,
     showSubscriptionModal, setShowSubscriptionModal, subscriptionModalVariant, extendedPlans,
+    isSharedView,
   } = useAIWowDownload({ resultData: downloadResultData });
+
+  const historyId = reduxResult?.historyId || reduxResult?._id || reduxResult?.id ||
+    reduxResult?.data?.historyId || reduxResult?.data?._id || reduxResult?.data?.id || null;
 
   useEffect(() => {
     if (reduxResult) {
@@ -198,24 +255,16 @@ const GemstoneResult = () => {
     setLoading(false);
   }, [reduxResult, reduxImage, navigate]);
 
-  // Share the report via the native share sheet, falling back to copying the URL.
-  const handleShare = async () => {
-    const shareData = {
-      title: `${featureTitle} Report`,
-      text: 'Check your Gemstone Authenticity report on ShubhAstro.',
-      url: window.location.href,
-    };
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        return;
-      }
-      await navigator.clipboard.writeText(window.location.href);
-      Toast.success('Link copied to clipboard');
-    } catch {
-      // User dismissed the share sheet, or the API is unavailable — ignore.
-    }
-  };
+  /*
+    Shares /shared/<historyId> so the recipient actually sees this report. The
+    old link was this page's URL, which reads the result from the sender's own
+    browser session and therefore showed the recipient an empty feature.
+  */
+  const { share: handleShare } = useAIWowShare({
+    historyId,
+    title: `${featureTitle} Report`,
+    text: 'Check my Gemstone Authenticity report on ShubhAstro.',
+  });
 
   // ─── Dropdown Arrow Component ───
   const Arrow = ({ isOpen }) => (
@@ -238,6 +287,11 @@ const GemstoneResult = () => {
           <h3 className={styles.sectionTitle}>
             <img src={insightsHeaderIcon} alt="" className={styles.sectionTitleIcon} aria-hidden="true" />
             Personalized Insights
+            {/* One read-aloud for the WHOLE section, on the heading — not one per
+                card. Its text is composed from every insight entry below. */}
+            <span className={styles.sectionTitleTts}>
+              <TTSButton text={buildPersonalizedInsightsSpeech(d.personalized)} />
+            </span>
           </h3>
           <div className={styles.personalizedGrid}>
             {Object.entries(d.personalized).map(([key, value]) => {
@@ -254,10 +308,7 @@ const GemstoneResult = () => {
               if (typeof value === 'boolean') {
                 const boolText = value ? 'Yes' : 'No';
                 return (
-                  <div className={styles.personalizedCard} key={key} style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                      <TTSButton text={`${title}. ${boolText}`} />
-                    </span>
+                  <div className={styles.personalizedCard} key={key}>
                     <h4 className={styles.boxTitle}>
                       <img src={getInsightIcon(key)} alt="" className={styles.insightIcon} />
                       {title}
@@ -271,10 +322,7 @@ const GemstoneResult = () => {
               if (Array.isArray(value)) {
                 if (value.length === 0) return null;
                 return (
-                  <div className={styles.personalizedCard} key={key} style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                      <TTSButton text={`${title}. ${value.map(item => typeof item === 'string' ? item : JSON.stringify(item)).join('. ')}`} />
-                    </span>
+                  <div className={styles.personalizedCard} key={key}>
                     <h4 className={styles.boxTitle}>
                       <img src={getInsightIcon(key)} alt="" className={styles.insightIcon} />
                       {title}
@@ -291,14 +339,7 @@ const GemstoneResult = () => {
               // Handle objects
               if (typeof value === 'object') {
                 return (
-                  <div className={styles.personalizedCard} key={key} style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                      <TTSButton text={`${title}. ${Object.entries(value).filter(([, v]) => v).map(([k, v]) => {
-                        const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
-                        if (Array.isArray(v)) return label + ': ' + v.join(', ');
-                        return label + ': ' + String(v);
-                      }).join('. ')}`} />
-                    </span>
+                  <div className={styles.personalizedCard} key={key}>
                     <h4 className={styles.boxTitle}>
                       <img src={getInsightIcon(key)} alt="" className={styles.insightIcon} />
                       {title}
@@ -334,10 +375,7 @@ const GemstoneResult = () => {
                     ? 'No'
                     : raw;
               return (
-                <div className={styles.personalizedCard} key={key} style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', top: '8px', right: '8px', display: 'inline-flex', zIndex: 10, pointerEvents: 'auto' }}>
-                    <TTSButton text={`${title}. ${displayValue}`} />
-                  </span>
+                <div className={styles.personalizedCard} key={key}>
                   <h4 className={styles.boxTitle}>
                     <img src={getInsightIcon(key)} alt="" className={styles.insightIcon} />
                     {title}
@@ -995,6 +1033,8 @@ const GemstoneResult = () => {
 
               {/* Download + share actions, top-right of the card. */}
               <div className={styles.sideCardActions}>
+                {/* Owner-only: the PDF is paid for from the owner's wallet. */}
+                {!isSharedView && (
                 <button
                   type="button"
                   className={styles.sideIconBtn}
@@ -1005,6 +1045,7 @@ const GemstoneResult = () => {
                 >
                   <Download size={16} aria-hidden="true" />
                 </button>
+                )}
                 <button
                   type="button"
                   className={styles.sideIconBtn}

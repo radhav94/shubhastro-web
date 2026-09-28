@@ -45,6 +45,17 @@ export const navigateToLogin = (currentPath) => {
     localStorage.removeItem("shubhtalk_customer_token");
     localStorage.removeItem("shubhtalk_customer_id");
     localStorage.removeItem("shubhtalk_customer_wallet");
+    /*
+      Free-session eligibility belongs to the user who logged in, not the device.
+      The key is removed inline rather than by calling
+      clearFreeSessionStatus() from utils/auth/freeSessionStatus: this module is
+      imported by privateRequestNew, and freeSessionStatus reaches the axios
+      client, which imports this module back — that cycle left privateRequestNew
+      half-initialised and crashed the app at boot with "Cannot access
+      'privateRequestNew' before initialization" from the first
+      injectEndpoints module to evaluate. Keep this a plain removeItem.
+    */
+    localStorage.removeItem("shubhtalk_first_session_free");
   }
 
   localStorage.removeItem("shubhtalk_role");
