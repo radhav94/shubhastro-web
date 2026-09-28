@@ -593,6 +593,29 @@
   }
 }
 
+/*
+  The four "Explore your destiny" cards are read-only copy: an icon, a title and
+  a sentence describing what the scan covers. They are plain <div>s with no
+  onClick, no href and nothing to open — the capability they describe happens
+  during the scan, not on a separate page.
+
+  They used to carry `transition: all .2s` plus a
+  `:hover { transform: translateY(-2px); box-shadow: ... }` lift. That is the
+  visual language of a button, and on a phone it is worse than a static false
+  affordance: mobile WebKit and Chromium apply :hover on tap, so touching a card
+  physically raised it and dropped a shadow, then nothing happened. The tap got
+  motion feedback and no outcome, which reads as a broken control.
+
+  The "Relationship" card is the one that invites the tap hardest — "Evaluate
+  relationship compatibility by analysing the palm prints of two individuals"
+  sounds like a feature you open, not a description of this one. Clarity session
+  4fgl4b is that tap: an Instagram Reels visitor on mobile rage-clicked the
+  relationship card at 03:11 after already fighting the capture flow.
+
+  Same defect and same remedy as VimshottariCard (see the note in
+  Vimshottari.module.scss): drop the affordance so the card reads as the copy it
+  is. Not adding a handler — there is no destination to add.
+*/
 .featureCard {
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(12px);
@@ -600,12 +623,6 @@
   padding: 1.25rem;
   min-height: 140px;
   border: 1.5px solid rgba(255, 255, 255, 1);
-  transition: all 0.2s;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(247, 88, 1, 0.15);
-  }
 
   @media (min-width: 768px) {
     padding: 1rem;

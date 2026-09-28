@@ -101,6 +101,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { trackTestEvent, BranchEvents } from "./utils/branchEvents";
 import { trackBranchEvent, flushBranchEvents } from "./utils/branchIntegration";
 import { ensureSession } from "./utils/security/cryptoClient";
+import { initWebVitals } from "./utils/webVitals";
 /*
  * The `AgoraProvider` import that used to sit here was removed.
  *
@@ -183,6 +184,20 @@ try {
   /* crypto.subtle missing (insecure context / very old WebView) — the normal
      lazy path surfaces it exactly as it did before. */
 }
+
+/*
+  Field Core Web Vitals -> GA4.
+
+  Started before render, but it does no work here: initWebVitals only registers a
+  `load` listener and then waits for idle before dynamically importing the
+  web-vitals attribution build. Calling it early costs nothing and guarantees the
+  listener exists before `load` can fire on a fast connection.
+
+  This is the replacement for measuring INP from tooling, which in a hidden or
+  headless tab is throttled to about one frame per second and reports the frame
+  gap rather than the app's work. See utils/webVitals.js.
+*/
+initWebVitals();
 
 createRoot(document.getElementById("root")).render(
   // <StrictMode>

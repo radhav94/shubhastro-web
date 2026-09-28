@@ -394,12 +394,10 @@
   padding: 1.25rem;
   min-height: 140px;
   border: 1.5px solid rgba(255, 255, 255, 1);
-  transition: all 0.2s;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(247, 88, 1, 0.15);
-  }
+  /* No hover lift: these cards are read-only copy with no onClick. A
+     button-like lift that mobile applies on tap gives motion feedback and no
+     outcome. See the full note in PalmistryLanding.module.scss (session 4fgl4b). */
 
   @media (min-width: 768px) {
     padding: 1rem;
