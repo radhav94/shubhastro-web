@@ -100,6 +100,7 @@ const AuraResult = () => {
     isAlreadyDownloaded, downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload,
     showSubscriptionModal, setShowSubscriptionModal, subscriptionModalVariant, extendedPlans,
+    isSharedView,
   } = useAIWowDownload({ resultData: downloadResultData });
 
   useEffect(() => {
@@ -250,6 +251,8 @@ const AuraResult = () => {
             </svg>
             </button>
           <h1 className={styles.title}>{featureTitle}</h1>
+          {/* Owner-only: the PDF is paid for from the owner's wallet. */}
+          {!isSharedView && (
           <button className={styles.downloadBtn} onClick={handleDownloadClick} disabled={isDownloading}>
             <svg 
               width="18" 
@@ -267,6 +270,7 @@ const AuraResult = () => {
             </svg>
             {isDownloading ? "Downloading..." : "Download"}
           </button>
+          )}
         </div>
       </header>
 

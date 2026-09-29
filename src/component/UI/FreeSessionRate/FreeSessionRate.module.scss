@@ -1,0 +1,18 @@
+.wrap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+/* Muted and struck: it is context for the offer, not the price to read. */
+.was {
+  color: #8a8a8a;
+  font-weight: 400;
+  text-decoration: line-through;
+}
+
+.free {
+  color: #1a1a1a;
+  font-weight: 600;
+}

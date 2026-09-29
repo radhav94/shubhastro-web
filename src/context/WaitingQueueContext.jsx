@@ -251,6 +251,33 @@ export const WaitingQueueProvider = ({ children }) => {
   }, [persist]);
 
   /*
+   * Drop the most recent request the server has not answered yet.
+   *
+   * "Not answered" means no roomId: entries get theirs from call:room / chat:room,
+   * so a roomId-less entry is one whose initiate is still in flight. It is added
+   * optimistically the moment the screen emits, which is what makes a rejected
+   * initiate show as "Ringing…" with a Cancel button that addresses nothing.
+   *
+   * Removes one entry by id rather than everything for that astrologer — the same
+   * astrologer may legitimately have a second request (e.g. a chat) that the
+   * server did answer.
+   */
+  const dropUnansweredRequest = useCallback(() => {
+    const current = pendingConnectionsRef.current;
+    const target = [...current].reverse().find((c) => !c.roomId);
+    if (!target) return null;
+
+    setPendingConnections((prev) => {
+      const next = prev.filter((c) => c.id !== target.id);
+      if (next.length === prev.length) return prev;
+      persist(next);
+      if (next.length === 0) clearGuestFanoutFlags();
+      return next;
+    });
+    return target;
+  }, [persist]);
+
+  /*
    * Safety net for a deferred cancel whose room event never arrives (socket drop,
    * server error). Without this the entry would sit on screen reading
    * "Cancelling…" indefinitely, which is a worse outcome than the silent removal
@@ -1080,17 +1107,49 @@ export const WaitingQueueProvider = ({ children }) => {
     voiceSocket.on("call:accepted", handleGlobalCallAccepted);
     voiceSocket.on("chat:ended", handleGlobalChatEnded);
 
-    // 409 — Astrologer is starting a live session, remove failed pending connection
+    /*
+     * The server refused to start the session. Withdraw the optimistic entry.
+     *
+     * This used to act only on statusCode 409 (astrologer going live). Every
+     * other refusal — insufficient balance being the common one — left the
+     * roomId-less entry on screen: the user saw the error toast AND an
+     * astrologer "Ringing…" with a Cancel button, for a request the server had
+     * already thrown away. Reported from the live screen, where a 0-balance call
+     * showed "User has insufficient balance" and a Waitlist row at the same time.
+     *
+     * Any error code now drops the entry. The trade-off: an unrelated `error`
+     * arriving in the short window while an initiate is unanswered would withdraw
+     * that request locally. A request the server never confirmed is the safer
+     * thing to lose — the alternative is a permanent ghost row (it is persisted
+     * to localStorage, so it also survives a reload) whose Cancel addresses a
+     * room that does not exist.
+     *
+     * The toast stays 409-only: the screens that own the connect flow already
+     * toast `error` themselves, and this would double it.
+     */
     const handleInitiationError = (err) => {
+      const dropped = dropUnansweredRequest();
+
       if (err?.statusCode === 409) {
         Toast.error(err?.message || "Astrologer is unavailable right now. Please try again shortly.");
-        // Remove the most recently added pending connection (no roomId yet — failed before call:room/chat:room)
-        const current = pendingConnectionsRef.current;
-        const lastPending = current[current.length - 1];
-        if (lastPending && !lastPending.roomId) {
-          removePendingByAstrologer(lastPending.astrologer?._id);
-        }
       }
+
+      /*
+       * Screens keep their own copy of the waiting UI (LiveView's waiting modal /
+       * toast / callRoomId), which this context cannot reach. Tell them the
+       * request is gone so they can clear it; without this the live screen keeps
+       * its waiting overlay and hides its call button.
+       */
+      window.dispatchEvent(
+        new CustomEvent("session:initiation-failed", {
+          detail: {
+            statusCode: err?.statusCode,
+            message: err?.message,
+            astrologerId: dropped?.astrologer?._id || null,
+            type: dropped?.type || null,
+          },
+        })
+      );
     };
     voiceSocket.on("error", handleInitiationError);
 

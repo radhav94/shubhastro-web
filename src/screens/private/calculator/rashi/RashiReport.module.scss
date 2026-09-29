@@ -813,15 +813,13 @@ $sticky-gap: 8px;
   color: $ink;
 }
 
+/* Design's own export — tile background and glyph are part of the image, so
+   there is no gradient or colour to apply here. */
 .cosmicHeadingIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   width: 30px;
   height: 30px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, #f75801, #d43400);
-  color: #fff;
+  object-fit: contain;
   flex-shrink: 0;
 }
 
@@ -1192,6 +1190,30 @@ $sticky-gap: 8px;
   }
 }
 
+/* Dot bullets drawn with ::before rather than list-style, so the dot size,
+   colour and the gap to the text all match the design. */
+.insightListBullet {
+  padding-left: 4px;
+  list-style: none;
+  gap: 9px;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+
+    &::before {
+      content: "";
+      flex-shrink: 0;
+      width: 4px;
+      height: 4px;
+      margin-top: 0.5em;
+      border-radius: 50%;
+      background: currentColor;
+    }
+  }
+}
+
 /* "Your Strengths" — green checkmark bullets instead of dots (see design). */
 .insightListCheck {
   padding-left: 0;
@@ -1205,16 +1227,26 @@ $sticky-gap: 8px;
   }
 }
 
+/* Filled green tile with a white tick, matching the design export. */
 .checkIcon {
   flex-shrink: 0;
-  margin-top: 2px;
-  color: #16a34a;
+  margin-top: 1px;
+  width: 15px;
+  height: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: #16a34a;
+  color: #fff;
 }
 
 /* ── NAKSHATRA + COMPATIBILITY ─────────────────────────────────────────── */
 .bottomRow {
   display: grid;
-  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+  /* Compatibility column gets a little more room than before so the larger
+     rashi names and reasons don't wrap awkwardly on desktop. */
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 
@@ -1380,21 +1412,30 @@ $sticky-gap: 8px;
   svg { color: #8b5cf6; }
 }
 
+/* Matches the design mock at every breakpoint: coin glyph + large orange rashi
+   name, reason underneath, and a hairline rule separating each entry. The rule
+   is on `li + li` so the first row keeps its flush spacing under the title. */
 .compatList {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
 
   li {
     p {
-      margin: 4px 0 0;
-      font-size: 0.72rem;
+      margin: 8px 0 0;
+      font-size: 0.88rem;
       line-height: 1.5;
       color: $muted;
     }
+  }
+
+  li + li {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(247, 88, 1, 0.22);
   }
 }
 
@@ -1404,15 +1445,85 @@ $sticky-gap: 8px;
   gap: 8px;
 
   img {
-    width: 26px;
-    height: 26px;
+    width: 48px;
+    height: 48px;
     object-fit: contain;
   }
 
   span {
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.2;
     color: $brand-dark;
+  }
+}
+
+/* Mobile-only treatment: each rashi becomes its own soft tile with the coin on
+   the left and name + reason stacked beside it. The DOM stays as it is for
+   desktop (coin + name on one line, reason underneath) — `display: contents`
+   on .compatHead promotes the coin and the name to grid items of the <li> so
+   the same markup can take both shapes. */
+@media (max-width: 620px) {
+  .compatList {
+    gap: 16px;
+  }
+
+  .compatList li {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 12px;
+    align-items: center;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    border-radius: 14px;
+  }
+
+  /* Undo the wide-view divider spacing so every tile keeps identical padding
+     and the same soft border on all four sides. */
+  .compatList li + li {
+    margin-top: 0;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.75);
+  }
+
+  /* Hairline rule floating in the gap between tiles. Absolutely positioned so
+     it never becomes a grid item. */
+  .compatList li + li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    top: -9px;
+    height: 1px;
+    background: rgba(247, 88, 1, 0.22);
+  }
+
+  .compatHead {
+    display: contents;
+  }
+
+  .compatHead img {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    align-self: center;
+    width: 56px;
+    height: 56px;
+  }
+
+  .compatHead span {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .compatList li p {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 2px 0 0;
+    font-size: 12px;
   }
 }
 

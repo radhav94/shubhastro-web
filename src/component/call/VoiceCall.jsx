@@ -4,6 +4,7 @@ import AgoraRTC from "agora-rtc-sdk-ng";
 import { AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
 import { getWorstNetworkQuality } from "../../agora/networkQuality";
 import { getAstrologerDisplayName } from "../../utils/helper/string.utils";
+import { resolveKundliProfile } from "../../utils/helper/introMessage";
 import { trackEvent } from "../../utils/analytics";
 import { BranchEvents } from "../../utils/branchEvents";
 import {
@@ -994,14 +995,33 @@ const AgoraVoiceCalling = ({ callData }) => {
     return getAstrologerDisplayName(lastRequestedAstro) || callerName || "";
   }, [lastRequestedAstro, callerName]);
 
+  /*
+    The full profile behind effectiveKundliId. The in-call chat opens with the
+    customer's birth details (Name / Gender / DOB / TOB / POB), which needs the
+    profile object, not just its id.
+  */
+  // Plain expression, not a hook: this component returns early above, so every
+  // hook added here compounds the existing conditional-hook problem. A find over
+  // a handful of profiles costs nothing per render.
+  const kundliProfile = resolveKundliProfile({
+    selectedKundli,
+    lastSelectedKundli,
+    profiles,
+    kundliId: effectiveKundliId,
+  });
+
   const chatData = useMemo(() => ({
     userId: activeCall?.userId,
     astrologerId: activeCall?.astrologerId,
     chatRoomId: activeCall?.roomId,
     kundliId: effectiveKundliId,
+    kundliProfile,
     isUserSide: activeCall?.isUserSide,
     astrologerName: astrologerName,
-  }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.roomId, effectiveKundliId, activeCall?.isUserSide, astrologerName]);
+    // Keyed on the profile's id rather than the object so chatData keeps a stable
+    // identity across renders (kundliProfile is recomputed each time).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.roomId, effectiveKundliId, kundliProfile?._id, activeCall?.isUserSide, astrologerName]);
 
   const toggleCamera = async () => {
 

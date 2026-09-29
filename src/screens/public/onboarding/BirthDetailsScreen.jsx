@@ -12,13 +12,17 @@ import { registerUser } from "../../../services/appServices/authService";
 import { useCreateKundliMutation } from "../../../services/appServices/kundliServicesNew";
 import { trackEvent } from "../../../utils/analytics";
 import { BranchEvents } from "../../../utils/branchEvents";
+import { isAdultDob, maxSignupDob, UNDERAGE_ERROR } from "../../../utils/helper/age";
 import { setEmail, logout } from "../../../redux/auth/authSlice";
 
 // Validation schema
 const validationSchema = Yup.object({
   birthDate: Yup.string()
     .required("Birth date is required")
-    .matches(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+    .matches(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format")
+    // This screen registers the account, so the date belongs to the account
+    // holder — see utils/helper/age.
+    .test("adult", UNDERAGE_ERROR, (value) => isAdultDob(value)),
   /*
     Birth time, when "Don't know" is unticked.
 
@@ -379,6 +383,10 @@ const BirthDetailsScreen = ({
                     });
                   }
                 }}
+                // Underage dates are not selectable at all. The schema test
+                // still exists for a value that arrives another way (a restored
+                // draft, a typed date).
+                maxDate={maxSignupDob()}
                 placeholder="DD/MM/YYYY"
               />
               <ErrorMessage name="birthDate">
@@ -520,6 +528,17 @@ const BirthDetailsScreen = ({
               if (!values.birthDate) {
                 e.preventDefault();
                 showFormHint("Please select your date of birth.");
+                return;
+              }
+              /*
+                Repeated from the schema on purpose: this click handler answers
+                the first blocker it finds and returns, so a schema-only rule
+                would be reported by the generic "check the details above"
+                fallback at the bottom instead of saying what is wrong.
+              */
+              if (!isAdultDob(values.birthDate)) {
+                e.preventDefault();
+                showFormHint(UNDERAGE_ERROR);
                 return;
               }
               if (needsBirthTime) {

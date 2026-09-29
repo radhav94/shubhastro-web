@@ -829,9 +829,19 @@ const PanditAIBubble = ({ hideBubble = false }) => {
             long as the chat stayed open, which is exactly the "opened Pandit AI,
             then a dead click seconds later" pattern in the recordings.
 
-            Tapping a backdrop to dismiss is the near-universal convention, so
-            that is what it does now — every outside tap goes from doing nothing
-            to doing the expected thing.
+            An outside tap deliberately does NOT close this any more.
+
+            Backdrop-to-dismiss is the normal convention, and it was the
+            behaviour here, but closing the Pandit AI window ends the session:
+            handleClose leads to chat:end, which spends the free minutes and, on a
+            paid session, stops something the user is being billed for. A stray
+            tap next to the window — easy on a phone, where the window does not
+            fill the screen — was enough to end a consultation. The ✕ (and Escape)
+            are the deliberate exits.
+
+            The layer still swallows page clicks, which is the point of a modal
+            while a session runs; the tap is answered with a hint rather than
+            being silently ignored, so it is not a dead click.
 
             Safe against the portalled date picker: #rdp-portal is z-index
             100000, above this layer, so the calendar receives its own clicks and
@@ -839,7 +849,7 @@ const PanditAIBubble = ({ hideBubble = false }) => {
           */}
           <div
             className={styles.overlay}
-            onClick={handleClose}
+            onClick={() => Toast.info("Tap ✕ to close Pandit AI")}
             aria-hidden="true"
           />
           <div className={`${styles.chatWindow} notranslate`} role="dialog" aria-label="Pandit AI Chat" translate="no">

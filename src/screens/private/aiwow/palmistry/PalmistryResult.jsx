@@ -88,6 +88,7 @@ const PalmistryResult = () => {
     isAlreadyDownloaded, downloadPrice, walletBalance,
     handleDownloadClick, handleConfirmDownload, handleDirectDownload,
     showSubscriptionModal, setShowSubscriptionModal, subscriptionModalVariant, extendedPlans,
+    isSharedView,
   } = useAIWowDownload({ resultData: downloadResultData });
 
   const toggleLine = (lineName) => {
@@ -311,7 +312,9 @@ const PalmistryResult = () => {
         <h1 className={styles.title}>{featureTitle}</h1>
         {/* aria-disabled, not `disabled`: a disabled button fires no click, so a
             tap during the download went unacknowledged. handleDownloadClick
-            already refuses to start a second one. */}
+            already refuses to start a second one.
+            Hidden on a shared view — the PDF is paid for from the owner's wallet. */}
+        {!isSharedView && (
         <button
           className={styles.downloadButton}
           onClick={handleDownloadClick}
@@ -325,6 +328,7 @@ const PalmistryResult = () => {
           </svg>
           {isDownloading ? "Downloading..." : "Download"}
         </button>
+        )}
         </div>
       </header>
 

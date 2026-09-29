@@ -2,6 +2,7 @@ import { loginSuccess, setEmail } from "../../redux/auth/authSlice";
 import { privateRequestNew } from "../../services/appServices/privateRequestNew";
 import { clearSelectedKundli } from "../../redux/kundli/kundliSlice";
 import { clearGuestKundliProfiles } from "../helper/cookies";
+import { resolveFreeSessionStatus } from "./freeSessionStatus";
 
 /**
  * Persist a successful CUSTOMER login.
@@ -70,6 +71,14 @@ export const completeCustomerLogin = (userData, dispatch) => {
   );
 
   if (userData?.email) dispatch(setEmail(userData.email));
+
+  /*
+    Free-session eligibility for the offer labels, from the login payload or the
+    profile endpoint. Not awaited: this function is synchronous by contract (its
+    callers branch on the returned value immediately) and a promo label must
+    never delay login.
+  */
+  resolveFreeSessionStatus(userData);
 
   // Device limit: stored in sessionStorage for an immediate popup and in
   // localStorage so it survives a refresh. DeviceLimitModal reads these.

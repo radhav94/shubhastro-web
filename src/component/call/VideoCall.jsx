@@ -4,6 +4,7 @@ import AgoraRTC from "agora-rtc-sdk-ng";
 import { AUDIO_ENCODER_CONFIG } from "../../agora/agoraConfig";
 import { getWorstNetworkQuality } from "../../agora/networkQuality";
 import { getAstrologerDisplayName } from "../../utils/helper/string.utils";
+import { resolveKundliProfile } from "../../utils/helper/introMessage";
 import { BranchEvents } from "../../utils/branchEvents";
 import {
   IoMic,
@@ -1310,14 +1311,30 @@ const VideoCalling = ({ callData }) => {
     return null;
   }, [selectedKundli, activeCall?.kundliId, lastSelectedKundli, profiles]);
 
+  /*
+    Full profile behind effectiveKundliId — the in-call chat's opening message
+    carries the customer's birth details and needs the object, not the id. Plain
+    expression rather than a hook: this component returns early above (see the
+    note in VoiceCall).
+  */
+  const kundliProfile = resolveKundliProfile({
+    selectedKundli,
+    lastSelectedKundli,
+    profiles,
+    kundliId: effectiveKundliId,
+  });
+
   const chatData = useMemo(() => ({
     userId: activeCall?.userId,
     astrologerId: activeCall?.astrologerId,
     chatRoomId: activeCall?.roomId,
     kundliId: effectiveKundliId,
+    kundliProfile,
     isUserSide: activeCall?.isUserSide,
     astrologerName: astrologerName,
-  }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.chatRoomId, effectiveKundliId, activeCall?.isUserSide, astrologerName]);
+    // Keyed on the profile's id, not the object — see VoiceCall.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [activeCall?.userId, activeCall?.astrologerId, activeCall?.chatRoomId, effectiveKundliId, kundliProfile?._id, activeCall?.isUserSide, astrologerName]);
 
   // Ref to store sendMessage function from VideoCallChat
   const sendChatMessageRef = useRef(null);

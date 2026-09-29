@@ -847,8 +847,20 @@ const LiveView = (props) => {
     }
 
     try {
-      // 5. Check wallet balance only — astrologer is already live, no need to check availability
-      const result = await getBalance({ astrologerId, type: "call" });
+      /*
+        5. Check wallet balance only — astrologer is already live, no need to
+        check availability.
+
+        `type: "audio"`, not "call". preSessionBalanceCheck takes the session
+        type ("audio" | "video" | "chat") and this value goes straight into its
+        query string; "call" is not a session type, so the server could not price
+        the request and the check passed for a user with no balance. The
+        rejection then arrived later on the socket, by which point this handler
+        had already emitted call:initiate and put a "Ringing…" entry in the
+        waiting queue. Every other caller passes the session type — see
+        useAstrologerConnect / useInitiateCall.
+      */
+      const result = await getBalance({ astrologerId, type: "audio" });
 
       if (result?.data?.data?.status === false) {
         const bal = result?.data?.data || {};
@@ -923,7 +935,8 @@ const LiveView = (props) => {
     setShowWaitingModal(true);
     setShowWaitingToast(true);
     setWaitingList(5);
-    Toast.success("Voice call request sent");
+    // No success toast here — the server has not answered yet. It is reported
+    // from the call:room handler, which is the confirmation. See there.
   };
 
   // Handle call initiation from popup (with choice)
@@ -1033,7 +1046,8 @@ const LiveView = (props) => {
     });
 
     setShowCallPopup(false);
-    Toast.success(`${type === "audio" ? "Voice" : "Video"} call request sent`);
+    // Success is reported from the call:room handler once the server confirms —
+    // see the note there.
   };
 
   // Reset call state
@@ -1222,6 +1236,20 @@ const LiveView = (props) => {
       setShowWaitingModal(true);
       setShowWaitingToast(true);
       assignRoomId(data?.roomId, data?.type || "audio", data?.waitingTime || 5);
+
+      /*
+        "Request sent" belongs HERE, not next to the emit.
+
+        Both call handlers used to toast success immediately after
+        voiceSocket.emit("call:initiate"), with no ack and nothing awaited — so a
+        user with no wallet balance was told their call request had been sent, and
+        then got "User has insufficient balance" for the same tap. The room event
+        is the server's confirmation that the request actually exists; a refused
+        initiate answers with `error` instead and now lands on
+        session:initiation-failed (see below).
+      */
+      const requestedType = data?.type || "audio";
+      Toast.success(`${requestedType === "video" ? "Video" : "Voice"} call request sent`);
     };
 
     const handleCallAccepted = async ({ roomId, token: agoraToken, channelName, type, remainingTime, isSwitch }) => {
@@ -1418,6 +1446,35 @@ const LiveView = (props) => {
     const handleWaitlistAccepted = () => {};
     window.addEventListener("waitlist:accepted", handleWaitlistAccepted);
 
+    /*
+      The server refused the initiate (insufficient balance, astrologer going
+      live, …). WaitingQueueContext has already withdrawn the queue entry; this
+      screen owns the rest of the waiting UI, and without clearing it the overlay
+      stays up and the call button stays hidden behind
+      `shouldShowWaitingIndicator`.
+    */
+    const handleInitiationFailed = (event) => {
+      setShowWaitingModal(false);
+      setShowWaitingPopup(false);
+      setShowWaitingToast(false);
+      setCallRoomId(null);
+      clearPendingLiveCallState();
+
+      /*
+        Say why. This screen registers no `error` listener of its own, and the
+        screens that do (the astrologer list, the profile) are not mounted on
+        /live — so a refused request could clear itself with nothing on screen
+        explaining it. 409 is skipped because WaitingQueueContext already toasts
+        that one; the Toast helper also collapses an identical message inside
+        350ms, so a second reporter in the same tick cannot double it.
+      */
+      const { statusCode, message } = event?.detail || {};
+      if (statusCode !== 409) {
+        Toast.error(message || "Could not start the call. Please try again.");
+      }
+    };
+    window.addEventListener("session:initiation-failed", handleInitiationFailed);
+
     return () => {
       voiceSocket.off("call:room", handleCallRoom);
       voiceSocket.off("call:accepted", handleCallAccepted);
@@ -1430,6 +1487,7 @@ const LiveView = (props) => {
       voiceSocket.off("chat:astrologer_accepted", handleAstrologerAcceptedScroll);
       voiceSocket.off("warning", handleWarning);
       window.removeEventListener("waitlist:accepted", handleWaitlistAccepted);
+      window.removeEventListener("session:initiation-failed", handleInitiationFailed);
     };
   }, [
     userIdLocal,

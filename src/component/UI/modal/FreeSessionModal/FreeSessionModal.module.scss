@@ -1,0 +1,191 @@
+$orange: #f75801;
+$orange-dark: #d43400;
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  /* Below the welcome-bonus / device-limit popups (99999) so a promo can never
+     cover a message the visitor has to act on. */
+  z-index: 9990;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.modal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 720px;
+  padding: 22px 28px 22px 18px;
+  border-radius: 22px;
+  background: linear-gradient(140deg, #fff 0%, #fff7f1 100%);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+}
+
+.closeBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  color: #444;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.12);
+  }
+}
+
+.art {
+  flex: 0 0 46%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    display: block;
+  }
+}
+
+.body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.logo {
+  width: 132px;
+  height: auto;
+  display: block;
+  margin: 0 0 14px;
+}
+
+.kicker {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.headline {
+  margin: 2px 0 8px;
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1.05;
+  color: $orange;
+}
+
+.sub {
+  margin: 0 0 18px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #6b6b6b;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.chatBtn,
+.callBtn {
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chatBtn {
+  border: 1.5px solid $orange;
+  background: #fff;
+  color: $orange;
+
+  &:hover {
+    background: #fff3ea;
+  }
+}
+
+.callBtn {
+  border: none;
+  background: linear-gradient(135deg, $orange, $orange-dark);
+  color: #fff;
+
+  &:hover {
+    opacity: 0.93;
+  }
+}
+
+/* Mobile: single column, copy first, artwork between the copy and the CTAs —
+   the order in the mobile reference. */
+@media (max-width: 720px) {
+  .modal {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    max-width: 340px;
+    padding: 20px 18px 20px;
+    text-align: left;
+  }
+
+  .art {
+    order: 2;
+    flex: 0 0 auto;
+    margin: 4px 0 16px;
+
+    img {
+      max-width: 210px;
+    }
+  }
+
+  .body {
+    display: contents;
+  }
+
+  .logo {
+    order: 0;
+    width: 118px;
+    margin-bottom: 10px;
+  }
+
+  .kicker {
+    order: 0;
+    font-size: 1.05rem;
+  }
+
+  .headline {
+    order: 0;
+    font-size: 2.15rem;
+  }
+
+  .sub {
+    order: 0;
+    margin-bottom: 0;
+    font-size: 0.78rem;
+  }
+
+  .actions {
+    order: 3;
+    flex-direction: column;
+  }
+}

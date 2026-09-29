@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, memo } from "react";
 import Toast from "../../toast";
 import { trackEvent } from "../../../utils/analytics";
+import { useWebOtpAutofill } from "../../../utils/hooks/useWebOtpAutofill";
 import styles from "./OtpModal.module.scss";
 
 // Isolated timer to prevent re-rendering the OTP inputs every second
@@ -69,6 +70,30 @@ const OtpModal = ({
   const inputRef = useRef(null);
 
   const isOtpComplete = otp.length === 6;
+
+  /*
+    Android Chrome SMS autofill (WebOTP).
+
+    This modal is the OTP step for BOTH guest flows — GuestKundliAuthModal and
+    GuestChatFlow — and it had `autocomplete="one-time-code"` only, which fills on
+    iOS Safari and does nothing on Android. Without a pending WebOTP request
+    Chrome does not even offer "Allow Chrome to read the message and copy code",
+    so guests on mWeb had to type the code by hand.
+
+    `enabled: isOpen` matters: only one WebOTP request can be pending per
+    document, so a mounted-but-hidden modal would steal it from whichever OTP UI
+    the user is actually looking at. The auto-submit effect below then treats the
+    filled code exactly like a typed one.
+  */
+  useWebOtpAutofill({
+    enabled: isOpen,
+    // Re-arm when the modal reopens (a new code was requested).
+    rearmKey: isOpen ? 1 : 0,
+    onCode: (code) => {
+      setOtp(code);
+      inputRef.current?.blur();
+    },
+  });
 
   const displayNumber =
     typeof phoneNumber === "string" && phoneNumber.startsWith("91")

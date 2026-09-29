@@ -62,6 +62,7 @@ import { useGetSubscriptionStatusQuery, useCancelSubscriptionMutation } from "..
 import profileWallet from "../../../assets/images/profile-wallet.jpg";
 import emailIconSet from "../../../assets/images/icon_set (1).png";
 import { Toast } from "../../../component/index";
+import { isAdultDob, UNDERAGE_ERROR } from "../../../utils/helper/age";
 import StickyReview from "../../private/home/components/call/StickyReview";
 import { trackEvent } from "../../../utils/analytics";
 import { SUBSCRIPTION_EVENTS, trackSubscriptionEvent } from "../../../utils/subscriptionAnalytics";
@@ -1401,7 +1402,17 @@ const Profile = () => {
       
       if (isRegister === false && isSelfProfile && !isAlreadyRegistered) {
         console.log("📝 User not registered and adding Self profile, calling registration API first...");
-        
+
+        /*
+          This branch registers the account from a Self profile, so the 18+ rule
+          applies here even though the form itself (AddProfileModal without
+          showMobileField) allows minor DOBs for other relations.
+        */
+        if (!isAdultDob(formData.birthDate)) {
+          Toast.error(UNDERAGE_ERROR);
+          throw new Error("Underage registration blocked");
+        }
+
         // Prepare registration payload from profile data
         const dateObj = new Date(formData.birthDate);
         const phoneNumber = user?.phoneNumber || localStorage.getItem("shubhtalk_customer_phone") || "";

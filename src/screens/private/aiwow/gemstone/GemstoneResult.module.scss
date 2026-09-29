@@ -386,7 +386,11 @@
   /* Desktop: the (optional gemstone selector +) tab bar and the tab content
      stack in the left column; the sidebar sits in the right column, starting
      level with the tab content. */
-  .gemstoneTabs { grid-column: 1; grid-row: 1; }
+  /* justify-self: start so the pill shrinks to its tabs instead of stretching
+     across the whole 1fr column — a grid item defaults to justify-self:stretch,
+     which is why the translucent background ran the full row width past the last
+     tab even though the container is inline-flex. */
+  .gemstoneTabs { grid-column: 1; grid-row: 1; justify-self: start; }
   .tabs {
     grid-column: 1;
     grid-row: 2;
@@ -408,7 +412,7 @@
 
     /* Mobile: tabs pill first, then the "Your Gemstone" card, then the report
        content below both. */
-    .gemstoneTabs { grid-column: 1; grid-row: auto; order: 1; }
+    .gemstoneTabs { grid-column: 1; grid-row: auto; order: 1; justify-self: start; }
     .tabs   { grid-column: 1; grid-row: auto; order: 2; }
     .sidebar { grid-column: 1; grid-row: auto; order: 3; }
     .main   { grid-column: 1; grid-row: auto; order: 4; }
@@ -715,7 +719,7 @@
   align-items: center;
   gap: 4px;
   margin-bottom: 16px;
-  padding: 8px;
+  padding: 2px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.9);
@@ -764,6 +768,12 @@
     font-weight: 600;
     background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
     box-shadow: 0 3px 10px rgba(212, 52, 0, 0.28);
+    /* Hug the icon + name so the filled pill ends where the name ends, instead
+       of carrying the wide 26px side padding the plain text tabs use (which left
+       a stretch of empty orange after the label). Tighter gap for the same
+       reason. */
+    padding: 11px 18px;
+    gap: 6px;
   }
 
   /* the divider disappears next to the active (filled) pill */
@@ -784,19 +794,24 @@
 .tabs {
   display: flex;
   align-items: center;
-  gap: 26px;
+  /* Spread the tabs evenly across the full row (as in the design) rather than
+     bunching them on the left. */
+  // justify-content: space-between;
+  gap: 40px;
   margin: 0 0 18px;
   padding: 0 4px;
   /* Full-width white baseline the tabs sit on; the active tab's orange
      underline (below) rides on top of it — as in the design. */
   border-bottom: 2px solid #ffffff;
+  width: 100%;
   max-width: 100%;
   overflow-x: auto;
 
   &::-webkit-scrollbar { display: none; }
 
+  /* Narrow screens can't spread all four labels, so fall back to a left-aligned
+     scrollable row. */
   @media (max-width: 1024px) {
-    width: 100%;
     justify-content: flex-start;
   }
 }
@@ -815,21 +830,28 @@
   transition: color 0.2s;
 
   /* Underline indicator — rides on top of the white baseline, orange when
-     active. `bottom: -2px` so it overlays the 2px white row border exactly. */
+     active. Pinned to THIS tab's own edges (left:0 / right:0), so the coloured
+     segment is exactly as wide as the label and never runs along the rest of the
+     white line. `bottom: -2px` so it overlays the 2px white row border exactly. */
   &::after {
     content: "";
     position: absolute;
     left: 0;
     right: 0;
     bottom: -2px;
-    height: 2px;
-    border-radius: 2px 2px 0 0;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
     background: transparent;
     transition: background 0.2s;
   }
 
-  &:hover {
-    color: #d43400;
+  /* Only apply hover recolour on real hover-capable pointers. On touch, a tap
+     leaves the :hover state stuck, which is why a non-active tab (e.g. "Healing")
+     stayed orange after being tapped. */
+  @media (hover: hover) {
+    &:hover:not(.active) {
+      color: #d43400;
+    }
   }
 
   &.active {
@@ -917,6 +939,15 @@
   gap: 10px;
 }
 
+/* Single read-aloud for the whole Personalized Insights section — pushed to the
+   far end of the heading row. */
+.sectionTitleTts {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .sectionTitleIcon {
   width: 32px;
   height: 32px;
@@ -983,7 +1014,7 @@
         grid-template-columns: repeat(1, 1fr);
     }
     .personalizedCard{
-      background: rgba(255, 255, 255, 0.4);
+      // background: rgba(255, 255, 255, 0.4);
       border: 1.5px solid #ffffff;
       backdrop-filter: blur(12px);
       border-radius: 16px;
@@ -1044,7 +1075,7 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   color: #1f2937;
   margin: 0 0 6px 0;
   letter-spacing: 0.2px;
@@ -1053,8 +1084,8 @@
 /* Design icon shown before each Personalized Insight title (ships its own soft
    tinted circle background). */
 .insightIcon {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -1074,7 +1105,7 @@
 }
 
 .boxDesc {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
   color: #4b5563;
   margin: 4px 0 0 0;
@@ -1215,8 +1246,8 @@
 }
 
 .detailItemTitle {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   color: #1f2937;
 }
 
@@ -1252,7 +1283,7 @@
 }
 
 .detailItemValue {
-  font-weight: 700;
+  font-weight: 400;
   color: #1f2937;
   word-break: break-word;
 }
@@ -1329,8 +1360,8 @@
 }
 
 .astroRowTitle {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   color: #1f2937;
 }
 
@@ -1346,7 +1377,7 @@
 
 .astroRowDesc {
   margin: 4px 0 0 0;
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.5;
   color: #4b5563;
 }
@@ -1430,9 +1461,9 @@
 .suitBox {
   flex: 1;
   min-width: 160px;
-  background: rgba(255, 255, 255, 0.2);
+  // background: rgba(255, 255, 255, 0.2);
   border: 1.5px solid #ffffff;
-  backdrop-filter: blur(12px);
+  // backdrop-filter: blur(12px);
   border-radius: 8px;
   padding: 10px 12px;
 
@@ -1530,7 +1561,7 @@
   // .tabContent { padding: 24px; }
   .tab { font-size: 13px; padding: 11px 13px; }
   .cardTitle,.sectionTitle { font-size: 16px; }
-  .boxTitle { font-size: 13px; }
+  .boxTitle { font-size: 17px; }
   .label, .value { font-size: 13px; }
   .infoRow { padding: 6px 0; }
   .dropdownTitle { font-size: 15px; }

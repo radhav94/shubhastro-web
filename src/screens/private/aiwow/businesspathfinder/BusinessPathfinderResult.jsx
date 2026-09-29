@@ -11,11 +11,19 @@ import { useGetSubscriptionStatusQuery } from '../../../../redux/api/subscriptio
 import remedyMortarImg from '../../../../assets/images/remedy-mortar.png';
 import { trackEvent } from '../../../../utils/analytics';
 import { downloadFile, toastDownloadOutcome } from '../../../../utils/helper/downloadFile';
+import { useSharedResultView } from '../../../../context/SharedResultContext';
 
-const BusinessPathfinderResult = () => {
+/**
+ * @param {Object} props
+ * @param {Object} [props.result] - report payload. Normally arrives in
+ *   location.state after generating; the shared-result page passes it directly
+ *   because a guest opening /shared/:historyId has no such navigation state.
+ */
+const BusinessPathfinderResult = ({ result: providedResult }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const result = location.state?.result;
+  const { isSharedView } = useSharedResultView();
+  const result = providedResult || location.state?.result;
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -35,12 +43,13 @@ const BusinessPathfinderResult = () => {
   const { balance: walletBalance, refreshWallet } = useWalletBalance();
 
   const customerToken = typeof window !== 'undefined' ? localStorage.getItem('shubhtalk_customer_token') : null;
-  const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken });
+  const { data: subscriptionStatus } = useGetSubscriptionStatusQuery(undefined, { skip: !customerToken || isSharedView });
   const hasActiveSubscription = !!subscriptionStatus?.data?.hasActiveSubscription;
 
   // Charges only matter for non-subscribed users; subscribed users download
-  // directly with no popup, so skip the charges API for them.
-  const { data: chargesData } = useGetChargesQuery(undefined, { skip: hasActiveSubscription });
+  // directly with no popup, so skip the charges API for them. Also skipped on a
+  // shared view, where the download card is hidden entirely.
+  const { data: chargesData } = useGetChargesQuery(undefined, { skip: hasActiveSubscription || isSharedView });
   const charges = chargesData?.data || null;
 
   // Derive "already downloaded" from AI history so it persists across refresh.
@@ -48,7 +57,7 @@ const BusinessPathfinderResult = () => {
   const kundliId = selectedProfile?._id || selectedProfile?.id || '';
   const { data: historyData } = useGetAiHistoryQuery(
     { kundliId, page: 1, limit: 10 },
-    { skip: !kundliId }
+    { skip: !kundliId || isSharedView }
   );
 
   const historyId = reportId;
@@ -378,7 +387,8 @@ const BusinessPathfinderResult = () => {
           </div>
         )}
 
-        {/* Download Report */}
+        {/* Download Report — owner-only: it charges the owner's wallet. */}
+        {!isSharedView && (
         <div className={styles.downloadCard}>
           <div className={styles.downloadLeft}>
             <h4>Download Your Report</h4>
@@ -401,6 +411,7 @@ const BusinessPathfinderResult = () => {
             </button>
           </div>
         </div>
+        )}
 
         {/* Download Modal */}
         <DownloadReportModal

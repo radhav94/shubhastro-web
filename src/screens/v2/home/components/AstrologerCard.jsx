@@ -3,9 +3,13 @@ import styles from "../Home.module.scss";
 import { Link } from "react-router-dom";
 import { AppIcons, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../../utils/appImages";
 import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../../utils/helper/string.utils";
+import FreeSessionRate from "../../../../component/UI/FreeSessionRate/FreeSessionRate";
+import { useFreeSession } from "../../../../utils/hooks/useFreeSession";
 
 const AstrologerCard = ({ astrologer, onConnect }) => {
-  
+  // First-session-free offer — label only, see featureConfig.
+  const freeSession = useFreeSession();
+
   return (
     <div className={styles.astrologerCard}>
       <Link to={getAstrologerProfilePath(astrologer)} className={styles.cardLink}>
@@ -68,7 +72,13 @@ const AstrologerCard = ({ astrologer, onConnect }) => {
             <img src={AppIcons.ChatMinutesIcon} alt="" /> Chat
           </button>
           <p className={styles.priceText}>
-            <span className={styles.priceAmount}>₹{astrologer?.price?.chatRate?.amount || 0}</span>/min
+            {freeSession ? (
+              <FreeSessionRate amount={astrologer?.price?.chatRate?.amount || 0} />
+            ) : (
+              <>
+                <span className={styles.priceAmount}>₹{astrologer?.price?.chatRate?.amount || 0}</span>/min
+              </>
+            )}
           </p>
         </div>
         <div className={styles.buttonWrapper}>
@@ -79,7 +89,13 @@ const AstrologerCard = ({ astrologer, onConnect }) => {
             <img src={AppIcons.CallMinutesIcon} alt="" /> Call
           </button>
           <p className={styles.priceText}>
-            <span className={styles.priceAmount}>₹{astrologer?.price?.audioRate?.amount || 0}</span>/min
+            {freeSession ? (
+              <FreeSessionRate amount={astrologer?.price?.audioRate?.amount || 0} />
+            ) : (
+              <>
+                <span className={styles.priceAmount}>₹{astrologer?.price?.audioRate?.amount || 0}</span>/min
+              </>
+            )}
           </p>
         </div>
       </div>
