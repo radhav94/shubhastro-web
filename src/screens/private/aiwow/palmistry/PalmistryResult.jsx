@@ -174,37 +174,44 @@ const PalmistryResult = () => {
   ];
 
   /*
-   * Switching tabs used to be a bare setActiveTab, which left two things wrong.
+   * Switching tabs must not move the page (SHB-2075).
    *
-   * 1. Vertical. `.tabsContainer` is `position: sticky; top: 57px`, so the strip
-   *    stays put while the reader scrolls down through a long section. Tapping
-   *    another tab swapped the panel but kept the scroll offset, so the new
-   *    section rendered from its top — far above the viewport — and the reader
-   *    was dropped into the middle of it, or onto whatever the browser clamped
-   *    to when the new panel was shorter. Near the finger nothing appeared to
-   *    change, which is what invites the repeat taps.
+   * The previous handler always called
+   * `tabsAnchorRef.scrollIntoView({ block: 'start' })`. That aligns the tab
+   * strip with the top edge of the *viewport* — but the site header
+   * (`.fixedTopHeader` in HomeLayout) is `position: fixed` and covers the top
+   * 95px (53px at <=1180px). So every tap scrolled the page down and parked the
+   * tab strip underneath the fixed header, and the user had to scroll back up
+   * to reach the tabs again. The `event.currentTarget.scrollIntoView(...)` used
+   * for the horizontal strip could also nudge the window vertically.
    *
-   * 2. Horizontal. Five tabs with `white-space: nowrap` overflow a phone, and
-   *    the strip is `overflow-x: auto`. "Career & Life" is the fourth of five,
-   *    so it is typically clipped — and the only feedback for selecting it was
-   *    an active style on a tab half off-screen.
-   *
-   * Same remedy as the FAQ category pills and the planetary Show More: put the
-   * state change where the user is looking.
+   * Now:
+   *  - Horizontal: scroll only the strip itself (`scrollTo({ left })`), which
+   *    can never move the window.
+   *  - Vertical: leave the page alone while the tab strip is visible. Only when
+   *    the reader has scrolled past it (strip hidden under the fixed header) do
+   *    we bring it back, and `scroll-margin-top` on `.tabsContainerWrap` (same
+   *    value as the reserved header height) keeps it just below the header
+   *    instead of beneath it.
    */
   const handleTabChange = useCallback((tabId, event) => {
     setActiveTab(tabId);
 
-    // Bring the chosen tab fully into the strip. `block: "nearest"` so this
-    // never fights the vertical scroll below.
-    event?.currentTarget?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    const strip = tabStripRef.current;
+    const tabEl = event?.currentTarget;
+    if (strip && tabEl && strip.scrollWidth > strip.clientWidth) {
+      const left = tabEl.offsetLeft - (strip.clientWidth - tabEl.offsetWidth) / 2;
+      strip.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
+    }
 
-    // Start the new section at its beginning. Anchoring on the non-sticky
-    // wrapper avoids hard-coding the sticky offset: aligning it to the top of
-    // the viewport leaves the strip at the top with the panel directly below.
-    requestAnimationFrame(() => {
-      tabsAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    const anchor = tabsAnchorRef.current;
+    if (!anchor) return;
+    const headerOffset = parseFloat(window.getComputedStyle(anchor).scrollMarginTop) || 0;
+    if (anchor.getBoundingClientRect().top < headerOffset) {
+      requestAnimationFrame(() => {
+        anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
   }, []);
 
   // Show loader while fetching
