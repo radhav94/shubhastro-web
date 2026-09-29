@@ -105,14 +105,23 @@ const lookup = (map, value) => {
  * @returns {string|null} icon URL, or null to let the card show its fallback
  */
 export const resolveFeatureIcon = (iconMap, item) => {
-  const direct = item?.featureIcon || item?.icon || item?.featureImage || item?.image;
+  const direct = item?.featureIcon || item?.icon;
   if (typeof direct === "string" && direct.trim()) return direct;
 
-  if (!iconMap) return null;
-  return (
-    lookup(iconMap, item?.featureName) ||
-    lookup(iconMap, item?.featureType) ||
-    lookup(iconMap, item?.slug) ||
-    null
-  );
+  /*
+   * `image` / `featureImage` are deliberately NOT treated as the module logo up
+   * front: on photo-based modules (face reading, palmistry, aura, gemstone,
+   * signature, clothes colour) the history record's image field is the user's
+   * uploaded photo, not the feature icon. Use them only when the CMS has no
+   * match at all.
+   */
+  const fromCms = iconMap
+    ? lookup(iconMap, item?.featureName) ||
+      lookup(iconMap, item?.featureType) ||
+      lookup(iconMap, item?.slug)
+    : null;
+  if (fromCms) return fromCms;
+
+  const fallback = item?.featureImage;
+  return typeof fallback === "string" && fallback.trim() ? fallback : null;
 };

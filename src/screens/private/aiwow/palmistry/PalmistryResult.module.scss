@@ -786,6 +786,12 @@
 }
 .tabsContainerWrap{
   background: rgba(255, 255, 255, 0.6);
+  // Keep the strip clear of the fixed site header when it is scrolled back
+  // into view on tab change. Mirrors `.container` padding-top / HomeLayout `.topGap`.
+  scroll-margin-top: 95px;
+  @media screen and (width <= 1180px) {
+    scroll-margin-top: 53px;
+  }
 }
 .tabsContainer {
   position: sticky;

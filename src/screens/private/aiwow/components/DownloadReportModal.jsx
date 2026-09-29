@@ -27,6 +27,9 @@ const DownloadReportModal = ({
   languages,
   generatedLanguages,
   showLanguageSelection = true,
+  // True once the price lookup has finished without a match (SHB-2076: older
+  // history records). Shown as "Unavailable" instead of an endless "Loading...".
+  isCostUnavailable = false,
 }) => {
   const [selectedLang, setSelectedLang] = useState("en");
 
@@ -38,13 +41,16 @@ const DownloadReportModal = ({
   const isLangFree = generatedLanguages && selectedLang in generatedLanguages && !!generatedLanguages[selectedLang];
   const isFreeDownload = isLangFree || downloadCost === 0;
   const effectiveCost = isFreeDownload ? 0 : downloadCost;
-  const isLoadingCost = downloadCost === null || downloadCost === undefined;
+  const isCostMissing = downloadCost === null || downloadCost === undefined;
+  const isLoadingCost = isCostMissing && !isCostUnavailable;
 
-  const canAfford = isFreeDownload || isLoadingCost || walletBalance >= downloadCost;
+  const canAfford = isFreeDownload || isCostMissing || walletBalance >= downloadCost;
   const deductionText = isFreeDownload
     ? "Already generated — Free download"
     : isLoadingCost
       ? "Loading price..."
+      : isCostMissing
+        ? "Price unavailable for this report right now. Please try again later."
       : canAfford
         ? `₹${downloadCost} will be deducted from your wallet`
         : `Insufficient balance. Please recharge ₹${downloadCost - walletBalance} more`;
@@ -68,6 +74,10 @@ const DownloadReportModal = ({
     if (isDownloading) return;
     if (isLoadingCost) {
       Toast.info("Still checking the download price — one moment.");
+      return;
+    }
+    if (isCostMissing) {
+      Toast.error("Couldn't fetch the price for this report. Please try again later.");
       return;
     }
     if (!canAfford) {
@@ -109,7 +119,7 @@ const DownloadReportModal = ({
           <div className={styles.costRow}>
             <div>
               <span className={styles.costLabel}>Download Cost</span>
-              <span className={styles.costValue}>{isFreeDownload ? "Free" : isLoadingCost ? "Loading..." : `₹${downloadCost}`}</span>
+              <span className={styles.costValue}>{isFreeDownload ? "Free" : isLoadingCost ? "Loading..." : isCostMissing ? "Unavailable" : `₹${downloadCost}`}</span>
             </div>
             <div className={styles.balanceBlock}>
               <span className={styles.costLabel}>Your Balance</span>
@@ -164,10 +174,10 @@ const DownloadReportModal = ({
               loading" and "not enough balance" are dimmed via aria-disabled so
               the tap still reaches handleDownload and gets an explanation. */}
           <button
-            className={`${styles.downloadBtn} ${(!canAfford || isLoadingCost || isDownloading) ? styles.disabledBtn : ""}`}
+            className={`${styles.downloadBtn} ${(!canAfford || isCostMissing || isDownloading) ? styles.disabledBtn : ""}`}
             onClick={handleDownload}
             disabled={isDownloading}
-            aria-disabled={!canAfford || isLoadingCost || isDownloading}
+            aria-disabled={!canAfford || isCostMissing || isDownloading}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 16L7 11H10V4H14V11H17L12 16Z" />
