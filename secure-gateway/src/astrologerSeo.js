@@ -22,13 +22,16 @@
  * string substitution, not a template engine, and nothing here should be able to
  * change how the app loads.
  *
- * Only four fields are read from the astrologer payload (metaTitle,
- * metaDescription, metaTags, profileImages). That response also carries the
- * astrologer's phone number, KYC document URLs and earnings; none of it is read
- * and none of it may ever be written into the HTML.
+ * Only public profile fields are read from the astrologer payload: metaTitle,
+ * metaDescription, metaTags, profileImages, plus (for the SHB-2058 template
+ * fallback in astrologerMetaTemplates.js) userName/firstName/lastName,
+ * specialties, expertise, languagePreferences and experience. That response
+ * also carries the astrologer's phone number, KYC document URLs and earnings;
+ * none of it is read and none of it may ever be written into the HTML.
  */
 
 import { readFile } from "node:fs/promises";
+import { buildAstrologerMeta } from "./astrologerMetaTemplates.js";
 
 /** Astrologer lookup. `change=true` is required by the endpoint (400 without it). */
 const astrologerUrl = (apiBase, param) =>
@@ -63,8 +66,9 @@ const clean = (value) => (typeof value === "string" && value.trim() ? value.trim
 export const extractAstrologerMeta = (astrologer) => {
   if (!astrologer || typeof astrologer !== "object") return null;
 
-  const title = clean(astrologer.metaTitle);
-  const description = clean(astrologer.metaDescription);
+  // Admin-authored metaTitle/metaDescription first, generated from the profile
+  // otherwise — the same function the SPA uses, so both emit identical strings.
+  const { title, description } = buildAstrologerMeta(astrologer);
   const keywords = Array.isArray(astrologer.metaTags)
     ? astrologer.metaTags.filter((t) => typeof t === "string" && t.trim()).join(", ")
     : clean(astrologer.metaTags);

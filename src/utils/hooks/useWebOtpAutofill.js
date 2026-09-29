@@ -21,8 +21,11 @@ import { useEffect, useRef } from "react";
  *    app and coming back is the normal path here, and a request that errored in
  *    the meantime would otherwise leave the prompt doing nothing.
  *  - The SMS must carry the origin binding as its last line:
- *        @<host> #<code>      e.g.  @shubhastro.ai #123456
- *    with the host matching the page origin exactly (apex vs www counts).
+ *        @<host> #<code>      e.g.  @www.shubhastro.ai #123456
+ *    with the host matching the page origin exactly (apex vs www counts:
+ *    prod serves both shubhastro.ai and www.shubhastro.ai without a redirect,
+ *    and an SMS bound to one never fills on the other; dev is
+ *    session.shubhastro.ai).
  *    Without it Chrome never offers the prompt — that part is the SMS template,
  *    not something this hook can fix.
  *

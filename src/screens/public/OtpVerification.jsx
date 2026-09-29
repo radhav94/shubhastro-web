@@ -37,7 +37,10 @@ const OtpVerification = () => {
     code". The auto-submit effect below then picks the filled code up exactly as
     it does for a manual entry.
   */
-  useWebOtpAutofill({ onCode: setOtp });
+  // Bumped per successful resend so a fresh request is armed for the new SMS
+  // (a request that already settled would leave "Allow" copying nothing).
+  const [otpSession, setOtpSession] = useState(0);
+  useWebOtpAutofill({ onCode: setOtp, rearmKey: otpSession });
 
   // Auto-submit when OTP is fully filled (e.g., SMS autofill on iOS)
   useEffect(() => {
@@ -257,6 +260,7 @@ const handleVerifyOtp = async (event) => {
     await AuthServices.loginWithPhone(payload);
 
     Toast.success("OTP resent successfully");
+    setOtpSession((n) => n + 1);
 
     setIsTimerActive(true);
     setCounter(120);

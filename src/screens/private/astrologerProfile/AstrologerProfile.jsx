@@ -56,6 +56,9 @@ import { Link } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 import { AppIcons, getAstrologerDefaultImage, getAstrologerImageUrl } from "../../../utils/appImages";
 import SeoHelmet from "../../../component/SeoHelmet";
+// SHB-2058 title/description templates, shared with the gateway's server-side
+// injection so crawlers and the SPA get identical strings.
+import { buildAstrologerMeta } from "../../../../secure-gateway/src/astrologerMetaTemplates.js";
 import AstrologerLiveBadge from "../../../component/UI/astrologerLiveBadge/AstrologerLiveBadge";
 import useAstrologerLiveStatus from "../../../hooks/useAstrologerLiveStatus";
 import { resolveLiveChannelForAstrologer } from "../../../utils/helper/resolveLiveChannel";
@@ -224,17 +227,22 @@ const AstrologerProfile = () => {
     metaDescription, metaTags), while SeoHelmet reads the snake_case keys
     (meta_title / meta_description / meta_keywords), so we map them here.
 
-    A key is included ONLY when it has a real value — an empty/blank metaTitle or
-    metaDescription is left out so updateMeta falls back to the site defaults
-    rather than blanking the tag. Returns null when the API gave us nothing at
-    all, so SeoHelmet's own `!data` guard keeps the page on its defaults.
+    Title/description: an admin-authored metaTitle / metaDescription wins;
+    otherwise they are generated from the profile (name, specialties,
+    experience, languages) via ASTROLOGER_META_TEMPLATES
+    (secure-gateway/src/astrologerMetaTemplates.js) — SHB-2058. Previously an
+    astrologer without admin meta got the generic site title.
+
+    A key is included ONLY when it has a real value so updateMeta falls back to
+    the site defaults rather than blanking the tag. Returns null when there is
+    nothing at all, so SeoHelmet's own `!data` guard keeps the page on its
+    defaults.
   */
   const seoData = useMemo(() => {
     if (!data) return null;
 
     const clean = (v) => (typeof v === "string" && v.trim() ? v.trim() : "");
-    const title = clean(data.metaTitle);
-    const description = clean(data.metaDescription);
+    const { title, description } = buildAstrologerMeta(data);
     const keywords = Array.isArray(data.metaTags)
       ? data.metaTags.filter((t) => typeof t === "string" && t.trim())
       : clean(data.metaTags);

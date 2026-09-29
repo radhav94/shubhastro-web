@@ -67,6 +67,9 @@ const OtpModal = ({
   inline = false,
 }) => {
   const [otp, setOtp] = useState("");
+  // Bumped after every successful resend so a fresh WebOTP request is armed for
+  // the new SMS (see useWebOtpAutofill below).
+  const [otpSession, setOtpSession] = useState(0);
   const inputRef = useRef(null);
 
   const isOtpComplete = otp.length === 6;
@@ -87,8 +90,14 @@ const OtpModal = ({
   */
   useWebOtpAutofill({
     enabled: isOpen,
-    // Re-arm when the modal reopens (a new code was requested).
-    rearmKey: isOpen ? 1 : 0,
+    /*
+      Re-armed on reopen (via `enabled`) AND on every resend. It used to be
+      `isOpen ? 1 : 0`, which never changes while the modal stays open, so once
+      the first request had settled — the user dismissed Chrome's sheet, or it
+      resolved for the first SMS — a resent code had nothing listening and
+      "Allow" copied nothing. OTPScreen already re-arms per resend; this matches.
+    */
+    rearmKey: otpSession,
     onCode: (code) => {
       setOtp(code);
       inputRef.current?.blur();
@@ -178,6 +187,7 @@ const OtpModal = ({
   const handleResend = async () => {
     await onResend?.();
     setOtp("");
+    setOtpSession((n) => n + 1);
     setTimeout(() => inputRef.current?.focus(), 50);
   };
 

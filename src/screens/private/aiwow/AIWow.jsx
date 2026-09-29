@@ -181,10 +181,23 @@ const AIWow = () => {
   // slightly different slug) — that wrongly showed "Free" in the modal while the
   // backend still debited the wallet. Returning `null` when unresolved makes the
   // modal show "Loading..." (and block download) instead of a false "Free".
-  const getDownloadCost = (featureName) => {
-    if (!charges || !featureName) return null;
-    return findChargeAmount(charges, featureName);
+  //
+  // SHB-2076: older history records (e.g. early August) either have no
+  // `featureName` or carry a name that no longer matches a charges slug, so the
+  // lookup missed and the modal's price sat on "Loading..." forever. Fall back
+  // to `featureType` (e.g. "face-analysis" -> "face-analysis-report"), and once
+  // charges have loaded report an unresolved price as `undefined` (unavailable)
+  // rather than `null` (still loading).
+  const getDownloadCost = (featureName, featureType) => {
+    if (!charges) return null;
+    for (const key of [featureName, featureType]) {
+      if (!key) continue;
+      const amount = findChargeAmount(charges, key);
+      if (amount !== null && amount !== undefined) return amount;
+    }
+    return undefined;
   };
+  const modalDownloadCost = getDownloadCost(downloadModal.featureName, downloadModal.featureType);
 
   useEffect(() => {
     if (isFetching) return;
@@ -345,7 +358,7 @@ const AIWow = () => {
     } else {
       // Paid — open the download modal
       refreshWallet();
-      setDownloadModal({ open: true, featureId: item.featureId, id: item._id, featureName: item.featureName });
+      setDownloadModal({ open: true, featureId: item.featureId, id: item._id, featureName: item.featureName, featureType: item.featureType });
     }
   };
 
@@ -648,7 +661,8 @@ const AIWow = () => {
           onClose={() => setDownloadModal({ open: false, featureId: null, featureName: "" })}
           onDownload={handleConfirmDownload}
           featureName={downloadModal.featureName}
-          downloadCost={getDownloadCost(downloadModal.featureName)}
+          downloadCost={modalDownloadCost ?? null}
+          isCostUnavailable={modalDownloadCost === undefined}
           walletBalance={walletBalance ?? 0}
           isDownloading={isDownloading}
           showLanguageSelection={false}
