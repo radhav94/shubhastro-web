@@ -14,16 +14,36 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Handle background notifications
+// Handle background notifications.
+//
+// IMPORTANT — why this returns early on `payload.notification`:
+// the SDK's own push handler already displays any push that carries a
+// `notification` block *before* it calls this hook. Its onPush() reads:
+//
+//     if (!!internalPayload.notification) { await showNotification(...) }
+//     if (!!messaging.onBackgroundMessageHandler) { handler(payload) }
+//
+// so calling showNotification() here again for the same push produced two
+// system notifications for one event. The SDK's copy is also the better one:
+// it keeps the internal FCM payload in notification.data, which is what
+// onNotificationClick() needs to open `fcmOptions.link` / `click_action`.
+// Our copy had no such data, so tapping it did nothing.
+//
+// The hook is kept only for data-only pushes (no `notification` block), which
+// the SDK never displays on its own.
 messaging.onBackgroundMessage((payload) => {
-    console.log("Background message received:", payload);
+    if (payload.notification) return;
 
-    const { title, body, icon, image } = payload.notification || {};
+    const data = payload.data || {};
+    const title = data.title || "ShubhTalk";
 
-    self.registration.showNotification(title || "ShubhTalk", {
-        body: body || "You have a new notification",
-        icon: icon || "/vite.svg",
-        image,
-        data: payload.data,
+    self.registration.showNotification(title, {
+        body: data.body || "You have a new notification",
+        icon: data.icon || "/images/mobile-shubh-astro-logo.svg",
+        image: data.image,
+        // Collapses repeat pushes for the same conversation/event instead of
+        // stacking them.
+        tag: data.tag || data.notificationId || data.chatId || undefined,
+        data,
     });
 });
