@@ -20,6 +20,7 @@ import { trackEvent } from "../../../utils/analytics";
 import { downloadFile } from "../../../utils/helper/downloadFile";
 import { openDeferredTab } from "../../../utils/helper/openDeferredTab";
 import { findChargeAmount } from "./hooks/useAIWowDownload";
+import { buildFeatureIconMap, resolveFeatureIcon } from "./utils/featureIcons";
 
 // Reusable Section Title with Divider (same as Explore page, auto-width)
 const SectionTitleWithDivider = ({ title, description, styles }) => (
@@ -75,6 +76,14 @@ const AIWow = () => {
 
   const profiles = data?.data || [];
   const aiwowSections = aiwowData?.data?.list || [];
+  /*
+    Icon lookup for the Result History rows, built from the same ai-suites
+    payload that feeds the feature grid above — see utils/featureIcons.
+  */
+  const featureIconMap = useMemo(
+    () => buildFeatureIconMap(aiwowData?.data?.list),
+    [aiwowData]
+  );
   const rawHistoryList = historyData?.data?.history || [];
   const charges = chargesData?.data || null;
 
@@ -578,7 +587,9 @@ const AIWow = () => {
                       key={item._id}
                       item={{
                         featureName: item.featureName || "AI Analysis",
-                        featureIcon: null,
+                        // CMS icon for this feature (same source as the cards in
+                        // the Shubh AI tab) instead of the shared ✦ glyph.
+                        featureIcon: resolveFeatureIcon(featureIconMap, item),
                         status: (item.status || "completed").toLowerCase(),
                         date: item.createdAt
                           ? new Date(item.createdAt).toLocaleString("en-IN", {

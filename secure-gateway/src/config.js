@@ -33,6 +33,26 @@ export const ALLOWED_ORIGINS = String(env.SGW_ALLOWED_ORIGINS || "")
   .map((o) => o.trim())
   .filter(Boolean);
 
+/*
+ * Server-rendered meta for astrologer profile pages (see astrologerSeo.js).
+ *
+ * Off unless SGW_SPA_INDEX points at the built index.html — the gateway cannot
+ * serve HTML it cannot read, and an unset path must not turn into a broken route.
+ * In production that is the same dist root nginx serves from, e.g.
+ *   SGW_SPA_INDEX=/var/www/shubhtalk-web-v2/dist/index.html
+ */
+export const SPA_INDEX_PATH = env.SGW_SPA_INDEX || "";
+
+// Origin used to build og:url / canonical for those pages. The request's own Host
+// is not trusted for this: behind nginx it can be an internal name, and a
+// canonical pointing at an internal host is worse than one pointing at the
+// default.
+export const SEO_SITE_ORIGIN = String(env.SGW_SITE_ORIGIN || "https://www.shubhastro.ai").replace(/\/+$/, "");
+
+// How long a fetched astrologer's meta is reused (ms). Admin edits appear after
+// this; the upstream call is slow and uncached, so it must not run per request.
+export const SEO_CACHE_TTL_MS = Number(env.SGW_SEO_TTL_MS || 5 * 60 * 1000);
+
 export const ROUTES = [
   {
     prefix: "/main",

@@ -11,6 +11,7 @@ import { requestFCMToken } from "../../services/firebase";
 import { clearGuestKundliProfiles } from "../../utils/helper/cookies";
 import { trackEvent } from "../../utils/analytics";
 import { resolveFreeSessionStatus } from "../../utils/auth/freeSessionStatus";
+import { useWebOtpAutofill } from "../../utils/hooks/useWebOtpAutofill";
 
 const OtpVerification = () => {
   const navigate = useNavigate();
@@ -27,6 +28,16 @@ const OtpVerification = () => {
   const [isVerifying, setIsVerifying] = useState(false);
 
   const isOtpComplete = otp.length === 6;
+
+  /*
+    Android Chrome SMS autofill. This screen had `autocomplete="one-time-code"`
+    and nothing else, which fills on iOS Safari but does nothing on Android —
+    there the code only arrives through the WebOTP API, and with no request
+    pending Chrome never even offers "Allow Chrome to read the message and copy
+    code". The auto-submit effect below then picks the filled code up exactly as
+    it does for a manual entry.
+  */
+  useWebOtpAutofill({ onCode: setOtp });
 
   // Auto-submit when OTP is fully filled (e.g., SMS autofill on iOS)
   useEffect(() => {

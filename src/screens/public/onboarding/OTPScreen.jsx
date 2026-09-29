@@ -18,6 +18,7 @@ import { getDeviceInfo, getDeviceType } from "../../../utils/deviceInfo";
 import { trackEvent } from "../../../utils/analytics";
 import { BranchEvents } from "../../../utils/branchEvents";
 import { clearOtpResume } from "./otpResume";
+import { useWebOtpAutofill } from "../../../utils/hooks/useWebOtpAutofill";
 // import onboardingBg from "../../../assets/images/onboarding.jpg";
 import onboardingBg from "../../../assets/images/new-login-bg-2.jpeg";
 // import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
@@ -119,36 +120,27 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
     };
   }, []);
 
-  // Web OTP API - auto-read OTP from SMS.
-  //
-  // Re-armed on every `otpSession` change (mount + each resend) so a live
-  // request is always waiting when the SMS lands and the user taps
-  // "Allow Chrome to read the message and copy code".
-  useEffect(() => {
-    if (!("OTPCredential" in window)) return;
+  /*
+    Web OTP — auto-read the code from the SMS on Android Chrome.
 
-    const ac = new AbortController();
-    navigator.credentials
-      .get({ otp: { transport: ["sms"] }, signal: ac.signal })
-      .then((otpCredential) => {
-        // Normalise exactly like manual entry: keep digits only and clamp to 6.
-        // A raw `code` with any stray character would set a value the boxes and
-        // the length-based auto-submit both reject, so "Allow" would appear to
-        // do nothing even though the credential was read.
-        const code = String(otpCredential?.code || "")
-          .replace(/[^0-9]/g, "")
-          .slice(0, 6);
-        if (code) {
-          setOtp(code);
-          // Reflect the copied code in the visible boxes and drop the keyboard;
-          // auto-submit is handled by the otp-length effect below.
-          inputRef.current?.blur();
-        }
-      })
-      .catch(() => {});
+    The inline implementation this replaces lived only here, so the other two OTP
+    surfaces (OtpModal, used by both guest flows, and /otp-verification) offered no
+    autofill at all. Shared hook now, so all three behave the same and re-arm the
+    same way; see utils/hooks/useWebOtpAutofill for the Android specifics.
 
-    return () => ac.abort();
-  }, [otpSession]);
+    Re-armed on every `otpSession` change (mount + each resend) so a live request
+    is always waiting when the SMS lands and the user taps "Allow Chrome to read
+    the message and copy code".
+  */
+  useWebOtpAutofill({
+    rearmKey: otpSession,
+    onCode: (code) => {
+      setOtp(code);
+      // Drop the keyboard so the filled boxes are visible; auto-submit is handled
+      // by the otp-length effect below.
+      inputRef.current?.blur();
+    },
+  });
 
 
 

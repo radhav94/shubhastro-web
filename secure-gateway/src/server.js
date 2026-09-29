@@ -17,6 +17,7 @@ import { PORT, HOST, ROUTES } from "./config.js";
 import { handshakeRouter } from "./handshake.js";
 import { mountProxies } from "./proxy.js";
 import { corsMiddleware } from "./cors.js";
+import { seoRouter } from "./seoRouter.js";
 
 const app = express();
 app.disable("x-powered-by");
@@ -41,6 +42,13 @@ app.get("/__sgw/health", (req, res) => {
 
 // Handshake first (parses its own JSON body).
 app.use(handshakeRouter);
+
+/*
+ * Server-rendered meta for astrologer profiles. Ahead of the proxies so its
+ * /__sgw/ path is resolved before any prefix matching, and it needs no body
+ * parser (GET only). Registers nothing when SGW_SPA_INDEX is unset.
+ */
+app.use(seoRouter());
 
 // Then the streaming proxies.
 const mounted = mountProxies(app);
