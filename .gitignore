@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Environment variables (contains secrets — must not be committed)
+.env
+.env-cmdrc
+.env-cmdrc.*
