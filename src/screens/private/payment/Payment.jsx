@@ -33,10 +33,12 @@ const RechargePack = ({ actualPrice, discountedPrice }) => (
 );
 
 /*
- * "Best Value" highlight (Figma 4787:30559). Driven by the plan data only — the
- * plans API does not currently send such a flag, so until it does no card is
- * highlighted. Any of these field names is honoured.
+ * "Best Value" highlight (Figma 4787:30559). Intended to be driven by the plan
+ * data, but the plans API does not currently send such a flag. Kept for when it
+ * does — the render currently highlights the first card as a design-only stub
+ * (see the map below). Any of these field names will be honoured once wired.
  */
+// eslint-disable-next-line no-unused-vars
 const isBestValuePlan = (plan) =>
   plan?.isBestValue === true ||
   plan?.bestValue === true ||
@@ -209,12 +211,19 @@ const Payment = () => {
           </div>
         ) : (
           <div className={styles.rechargeFlex}>
-            {allPlans?.map((pack) => (
+            {allPlans?.map((pack, index) => {
+              // DESIGN-ONLY: highlight the first card as "Best Value" so the
+              // active styling (orange border, crown tag, filled bonus pill) is
+              // visible now. The real signal will come from the plan data via
+              // isBestValuePlan(pack) — swap `index === 0` for that once the API
+              // sends the flag. Until then this is a static visual stub.
+              const isBest = index === 0;
+              return (
               <Link
                 to="/recharge/payment"
                 state={{ planId: pack?._id, returnUrl }}
                 key={pack._id}
-                className={`${styles.linkWrapper} ${isBestValuePlan(pack) ? styles.bestValue : ""} ${pendingPlanId === pack._id ? styles.active : ""}`}
+                className={`${styles.linkWrapper} ${isBest ? styles.bestValue : ""} ${pendingPlanId === pack._id ? styles.active : ""}`}
                 aria-busy={pendingPlanId === pack._id}
                 onClick={() => {
                   // Paint the pressed state before the lazy route chunk starts
@@ -223,7 +232,7 @@ const Payment = () => {
                   trackEvent("recharge_amount_selected", { amount: pack?.actualPrice, is_preset: true });
                 }}
               >
-                {isBestValuePlan(pack) && (
+                {isBest && (
                   <span className={styles.bestValueTag}>
                     <img src={crownIcon} alt="" width={16} height={16} />
                     Best Value
@@ -231,7 +240,8 @@ const Payment = () => {
                 )}
                 <RechargePack {...pack} />
               </Link>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
