@@ -71,11 +71,24 @@ $hair: rgba(191, 118, 66, 0.16);
 }
 
 /* ── Banner ───────────────────────────────────────────────────────────── */
+/*
+  Two-column grid on desktop: the copy and the meta chips share the left column
+  (chips on the row beneath the copy), and the photo occupies the right column
+  spanning both rows. A grid rather than a flex row because the chips must sit
+  UNDER the copy on desktop yet be a sibling of the photo, so that on mobile they
+  can be re-ordered to fall AFTER the photo — which flex `order` can only do
+  between siblings.
+*/
 .banner {
   position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "copy  photo"
+    "chips photo";
+  align-items: start;
+  column-gap: 22px;
+  row-gap: 18px;
   padding: 22px 24px;
   // border-radius: 20px;
   // background: linear-gradient(120deg, #fff6ef 0%, #ffe6d5 100%);
@@ -83,14 +96,23 @@ $hair: rgba(191, 118, 66, 0.16);
   // box-shadow: 0 3px 18px rgba(191, 118, 66, 0.12);
 
   @media (max-width: 860px) {
+    /* Single column, ordered copy → photo → chips (chips after the photo,
+       mobile only). Flex `order` handles the reorder now that all three are
+       siblings. */
+    display: flex;
     flex-direction: column;
+    align-items: stretch;
     top: 20px;
   }
 }
 
 .bannerCopy {
-  flex: 1;
+  grid-area: copy;
   min-width: 0;
+
+  @media (max-width: 860px) {
+    order: 1;
+  }
 }
 
 .kicker {
@@ -146,10 +168,18 @@ $hair: rgba(191, 118, 66, 0.16);
 }
 
 .metaChips {
+  grid-area: chips;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin: 18px 0 0;
+  margin: 0;
+
+  /* On mobile the chips fall after the photo — the row-gap that spaced them on
+     desktop is gone here, so restore a top margin. */
+  @media (max-width: 860px) {
+    order: 3;
+    margin-top: 18px;
+  }
 
   > div {
     background: rgba(255, 255, 255, 0.4);
@@ -235,6 +265,7 @@ $hair: rgba(191, 118, 66, 0.16);
   centres both against the same line whatever their widths.
 */
 .bannerPhoto {
+  grid-area: photo;
   position: relative;
   flex-shrink: 0;
   margin: 0;
@@ -305,6 +336,7 @@ $hair: rgba(191, 118, 66, 0.16);
   }
 
   @media (max-width: 860px) {
+    order: 2;
     align-self: center;
   }
 }
