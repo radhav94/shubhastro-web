@@ -28,6 +28,8 @@ const ChatHeader = ({
   isEnding = false,
   profileImgUrl,
   gender = "male",
+  isFreeSession = false,
+  isFreeSessionEnded = false,
 }) => {
   const [imgError, setImgError] = useState(false);
 
@@ -69,7 +71,18 @@ const ChatHeader = ({
       </div>
 
       <div className={styles.headerRight}>
-     {!isVideoCallActive && <ChatFooter remainingTime={remainingTime} onRecharge={onRecharge} walletBalance={walletBalance} onChatEnd={onChatEnd} isChatActive={isChatActive} isEnding={isEnding}/>}
+     {!isVideoCallActive && (
+       <ChatFooter
+         remainingTime={remainingTime}
+         onRecharge={onRecharge}
+         walletBalance={walletBalance}
+         onChatEnd={onChatEnd}
+         isChatActive={isChatActive}
+         isEnding={isEnding}
+         isFreeSession={isFreeSession}
+         isFreeSessionEnded={isFreeSessionEnded}
+       />
+     )}
         {/* <div className={styles.walletBadge}>
           <FaWallet className={styles.walletIcon} />
           <span className={styles.walletAmount}>₹{walletBalance}</span>

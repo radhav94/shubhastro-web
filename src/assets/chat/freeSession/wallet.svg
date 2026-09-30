@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="tabler-icon-wallet">
+<path id="Vector" d="M25.5 12V7.5C25.5 7.10218 25.342 6.72064 25.0607 6.43934C24.7794 6.15804 24.3978 6 24 6H9C8.20435 6 7.44129 6.31607 6.87868 6.87868C6.31607 7.44129 6 8.20435 6 9M25.5 12H9C8.20435 12 7.44129 11.6839 6.87868 11.1213C6.31607 10.5587 6 9.79565 6 9M25.5 12H27C27.3978 12 27.7794 12.158 28.0607 12.4393C28.342 12.7206 28.5 13.1022 28.5 13.5V18M6 9V27C6 27.7956 6.31607 28.5587 6.87868 29.1213C7.44129 29.6839 8.20435 30 9 30H27C27.3978 30 27.7794 29.842 28.0607 29.5607C28.342 29.2794 28.5 28.8978 28.5 28.5V24M30 18V24H24C23.2044 24 22.4413 23.6839 21.8787 23.1213C21.3161 22.5587 21 21.7956 21 21C21 20.2044 21.3161 19.4413 21.8787 18.8787C22.4413 18.3161 23.2044 18 24 18H30Z" stroke="url(#paint0_linear_0_476)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_476" x1="6" y1="18" x2="30" y2="18" gradientUnits="userSpaceOnUse">
+<stop stop-color="#F75801"/>
+<stop offset="1" stop-color="#D43400"/>
+</linearGradient>
+</defs>
+</svg>
