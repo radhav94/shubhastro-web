@@ -432,6 +432,27 @@ const AIWow = () => {
     }
   };
 
+  /*
+    Tapping a Result History card. Never calls fetchPdfUrl for a report that is
+    still paid: that endpoint is what charges the wallet, so a stray tap must
+    not buy a PDF. Paid reports go through the Download flow (price modal);
+    free ones open straight away.
+  */
+  const handleViewResult = (item) => {
+    const existingPdfUrl = item.pdfPath || item[`${item.featureType}PdfPath`];
+    if (existingPdfUrl) {
+      // URL is already known, so open inside the tap — no popup blocker.
+      const tab = window.open(existingPdfUrl, "_blank", "noopener");
+      if (!tab) window.location.assign(existingPdfUrl);
+      return;
+    }
+    if (paidToFreeIds[item._id]) {
+      handleViewResultPdf(item.featureId);
+      return;
+    }
+    handleDownloadPdf(item);
+  };
+
   const handleResultHistory = () =>{
     if (isGuest) {
       startGuestAuth(() => {
@@ -618,7 +639,7 @@ const AIWow = () => {
                         isPaid: !item.pdfPath && !item[`${item.featureType}PdfPath`] && !paidToFreeIds[item._id],
                         price: null,
                         charges,
-                        onViewResult: () => handleViewResultPdf(item.featureId),
+                        onViewResult: () => handleViewResult(item),
                         onDownload: () => handleDownloadPdf(item),
                       }}
                     />
