@@ -962,6 +962,7 @@ const Kundali = () => {
               tabs={tabsData}
               initialActiveIndex={activeTabIndex}
               onTabChange={handleTabChange}
+              showServiceCards={false}
             />
           )}
         </div>
