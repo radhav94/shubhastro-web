@@ -1,0 +1,188 @@
+/*
+ * Placement of the free first-session UI on the AUDIO call screen
+ * (VoiceCall.jsx + FreeCallEndedScreen.jsx). The pieces themselves come from
+ * chats/freeSession/FreeSessionUI and keep their own (shared) styles — nothing
+ * here changes how they look in the chat. Descendant element selectors are used
+ * where a call-only tweak of a shared piece is needed, since its class names are
+ * hashed per module.
+ */
+
+/* ---------- badge + countdown strip, under the action buttons ---------- */
+.freeStrip {
+  position: relative;
+  z-index: 20;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding: 4px 16px 10px;
+
+  @media (width <= 767px) {
+    padding: 2px 12px 8px;
+  }
+}
+
+.freeHeader {
+  max-width: 100%;
+  padding: 6px 6px 6px 14px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+
+  /* The strip has the row to itself (unlike the chat header, which also holds
+     the name, avatar and End), so keep "1st Free Call" readable on phones. */
+  @media (width <= 480px) {
+    padding: 4px 4px 4px 10px;
+
+    > div > div {
+      display: flex;
+    }
+  }
+}
+
+/* ---------- centre: make room for the strip / banner ---------- */
+.voiceCenterFree {
+  /* The centre is sized by its padding-bottom (room for the fixed controls);
+     on short screens shrink the avatar so the badge strip still fits. */
+  @media (max-height: 760px) {
+    img {
+      max-width: 120px;
+      max-height: 120px;
+    }
+
+    > div > div:first-child {
+      width: 120px;
+      height: 120px;
+    }
+  }
+
+  @media (max-height: 620px) {
+    img {
+      max-width: 88px;
+      max-height: 88px;
+    }
+
+    > div > div:first-child {
+      width: 88px;
+      height: 88px;
+    }
+  }
+}
+
+/* The banner sits in the fixed bottom controls, above the buttons; add its
+   height to the space the centre keeps free so the avatar is not hidden. */
+.voiceCenterFree.voiceCenterWithBanner {
+  padding-bottom: 250px;
+
+  @media (width <= 767px) {
+    padding-bottom: 280px;
+  }
+  @media (width <= 400px) {
+    padding-bottom: 330px;
+  }
+
+  /* Short phones (e.g. 320x568, 375x667): banner + gift row + controls leave
+     no room for the avatar in the final minute, and the badge strip already
+     shows the countdown — so show only the timer line here rather than let the
+     banner cover the avatar. */
+  @media (width <= 767px) and (max-height: 700px) {
+    > div > div:first-child,
+    h1 {
+      display: none;
+    }
+  }
+}
+
+/* ---------- "ending soon" banner, docked above the call controls ---------- */
+.bannerDock {
+  pointer-events: auto;
+  max-width: 1100px;
+  margin: 0 auto 14px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+  /* Desktop / tablet: "Send Gift" floats at the right edge just above the
+     controls (VoiceCall .giftWrapMain) — keep the banner clear of it. */
+  @media (width >= 768px) {
+    margin-left: 130px;
+    margin-right: 130px;
+  }
+  @media (width >= 1360px) {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* The chat's banner is full width; here it is narrower, so trim the copy
+     and let the button size to its label. */
+  @media (width <= 1180px) {
+    p {
+      font-size: 15px;
+    }
+
+    /* Never squeeze the button below its label (the chevron overlapped the
+       text at ~414px); the copy wraps instead. */
+    button {
+      width: auto;
+      flex-shrink: 0;
+    }
+  }
+  @media (width <= 767px) {
+    margin-bottom: 10px;
+    border-radius: 12px;
+
+    p {
+      font-size: 13px;
+    }
+  }
+}
+
+/* ---------- locked end state (FreeCallEndedScreen) ---------- */
+.endedThumb {
+  width: 40px;
+  height: 40px;
+  margin-left: 12px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.endedCenter {
+  padding-bottom: 150px;
+
+  @media (width <= 1024px) {
+    padding-bottom: 210px;
+  }
+  @media (width <= 400px) {
+    padding-bottom: 250px;
+  }
+  @media (max-height: 700px) {
+    img {
+      max-width: 110px;
+      max-height: 110px;
+    }
+
+    > div > div:first-child {
+      width: 110px;
+      height: 110px;
+    }
+  }
+}
+
+.endedAvatar {
+  border-color: #e0e0e0;
+  filter: grayscale(0.35);
+}
+
+.lockDock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  padding: 16px;
+
+  @media (width <= 1024px) {
+    padding: 0;
+  }
+}

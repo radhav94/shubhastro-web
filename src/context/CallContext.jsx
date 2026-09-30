@@ -29,6 +29,13 @@ export const CallProvider = ({ children }) => {
   const [isReconnecting, setIsReconnecting] = useState(false);
   const [isMicOn, setIsMicOn] = useState(true);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
+  /*
+    Free first-session audio call that has just ended (snapshot of the astrologer
+    it was with), so VideoCallContainer can keep the locked end state on screen —
+    "continue this call at ₹X/min" with Recharge / Explore — after activeCall is
+    cleared and VoiceCall unmounts. Set by VoiceCall's cleanup; null otherwise.
+  */
+  const [endedFreeCall, setEndedFreeCall] = useState(null);
 
   const [waitingList, setWaitingList] = useState(false);
   const [callSeconds, setCallSeconds] = useState(0);
@@ -45,6 +52,8 @@ export const CallProvider = ({ children }) => {
   // Keep ref in sync so closures always have the latest value
   useEffect(() => {
     activeCallRef.current = activeCall;
+    // A new call replaces any free-call end screen still showing.
+    if (activeCall) setEndedFreeCall(null);
   }, [activeCall]);
 
   useEffect(() => {
@@ -690,6 +699,8 @@ export const CallProvider = ({ children }) => {
     setIsMicOn,
     isSpeakerOn,
     setIsSpeakerOn,
+    endedFreeCall,
+    setEndedFreeCall,
   };
 
   return (

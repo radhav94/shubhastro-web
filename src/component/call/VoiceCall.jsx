@@ -46,12 +46,23 @@ import SwitchWaitingPopup from "../UI/switchWaiting/SwitchWaitingPopup";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
 import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
 import useAstrologerAvailability from "../../utils/hooks/useAstrologerAvailability";
+import { isFreeSessionCall, payloadSaysFree } from "../../utils/auth/freeSessionRoom";
+import {
+  FreeSessionHeader,
+  FreeSessionEndingBanner,
+  LowBalancePopup,
+} from "../../screens/private/home/components/chats/freeSession/FreeSessionUI";
+import {
+  FREE_SESSION_WARNING_SECONDS,
+  getAudioCallRateOffer,
+} from "../../screens/private/home/components/chats/freeSession/freeSessionUtils";
+import freeStyles from "./FreeCall.module.scss";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
 
 const AgoraVoiceCalling = ({ callData }) => {
-  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow, isCallMinimized, setIsCallMinimized, reconnectToCall, isMicOn, setIsMicOn, isSpeakerOn, setIsSpeakerOn } = useCall();
+  const { activeCall, setActiveCall, lastRequestedAstro, lastSelectedKundli, setOpenReview, setReviewData, callSeconds, setCallSeconds, startTimer, stopTimer, setWaitingList, resetCallFlow, isCallMinimized, setIsCallMinimized, reconnectToCall, isMicOn, setIsMicOn, isSpeakerOn, setIsSpeakerOn, setEndedFreeCall } = useCall();
   const { activeChat, lastRequestedAstro: chatLastRequestedAstro } = useChatContext();
   const selectedKundli = useSelector((state) => state.kundli.selectedKundli);
   const navigate = useNavigate();
@@ -74,6 +85,13 @@ const AgoraVoiceCalling = ({ callData }) => {
     { id: activeCall?.astrologerId },
     { skip: !activeCall?.astrologerId }
   );
+
+  // Free first-session call state (see "FREE FIRST SESSION" below). Declared
+  // before the early return so it adds nothing to the existing conditional-hook
+  // problem further down.
+  const [freeLowBalanceDismissed, setFreeLowBalanceDismissed] = useState(false);
+  const freeTimerStartedRef = useRef(false);
+  const freeCallEndRef = useRef(null);
 
   if (!activeCall || activeCall.callType !== "audio") {
     return null;
@@ -203,6 +221,50 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [suggestedRemedyData, setSuggestedRemedyData] = useState({ entries: [], suggestedProducts: [], messages: [] });
   const [hasNewRemedy, setHasNewRemedy] = useState(false);
   const [showEndCallConfirm, setShowEndCallConfirm] = useState(false);
+
+  /* ================= FREE FIRST SESSION (audio only) ================= */
+  /*
+    Same journey as the chat (Figma "Web Free chat user journey"): badge +
+    countdown, the low-balance popup and "ending soon" banner in the last
+    FREE_SESSION_WARNING_SECONDS, and a locked end state offering to continue at
+    the discounted audio rate.
+
+    "Is this the free call" cannot be read from isFirstSessionFree here — it is
+    already false by the time this mounts (useFreeSessionWatcher marks the offer
+    consumed at call:accepted). The watcher records this call's roomId just
+    before doing so (utils/auth/freeSessionRoom). An explicit free flag on the
+    call data is honoured too. This component only renders audio calls, and the
+    watcher never records video, so video calls never get any of this.
+  */
+  const isFreeCall = isFreeSessionCall(roomId) || payloadSaysFree(activeCall);
+  // Latched once the countdown has really run (callSeconds starts at 0 until
+  // remainingTime arrives), so "00:00 End" only shows when the time ran out.
+  if (isFreeCall && callSeconds > 0) freeTimerStartedRef.current = true;
+  const isFreeCallEndingSoon =
+    isFreeCall && joined && callSeconds > 0 && callSeconds <= FREE_SESSION_WARNING_SECONDS;
+  const isFreeCallTimeUp = isFreeCall && freeTimerStartedRef.current && callSeconds <= 0;
+
+  // Read by cleanup(), which may be the closure from the first render (it runs
+  // from the mount effect's teardown), so keep the latest values in a ref.
+  freeCallEndRef.current = isFreeCall
+    ? {
+        roomId,
+        astrologerId: activeCall?.astrologerId,
+        callerName,
+        profileImage: getAstrologerImageUrl(astroForImage, "large"),
+        thumbImage: getAstrologerImageUrl(astroForImage, "small"),
+        gender: astroForImage.gender,
+        role: lastRequestedAstro?.role || chatLastRequestedAstro?.role,
+        experience: experience || lastRequestedAstro?.experience || chatLastRequestedAstro?.experience,
+        offer: getAudioCallRateOffer(astrologerFullData?.data || lastRequestedAstro),
+      }
+    : null;
+
+  // Popup / banner: recharge in place — the call keeps running underneath.
+  const handleFreeCallRecharge = () => {
+    setFreeLowBalanceDismissed(true);
+    setIsRechargeModalOpen(true);
+  };
 
   /* ================= CHAT NOTIFICATION ================= */
   // Keep activeCallRef in sync so socket handlers always have current values
@@ -626,6 +688,15 @@ const AgoraVoiceCalling = ({ callData }) => {
       // Preserve activeCall during audio -> video switches even if this component
       // unmounts before the upgrade flag or ref has fully propagated.
       if (!skipEmit && activeCallRef.current?.callType !== "video" && persistedCallType !== "video") {
+        /*
+          Free call over: keep its locked end state on screen (rendered by
+          VideoCallContainer once activeCall is cleared) instead of the call UI
+          simply vanishing. The review modal still opens on top of it as usual.
+          Not when a chat is still running — that chat is the live session.
+        */
+        if (freeCallEndRef.current && !hasOngoingChat()) {
+          setEndedFreeCall(freeCallEndRef.current);
+        }
         setActiveCall(null);
       }
       
@@ -1340,6 +1411,18 @@ const AgoraVoiceCalling = ({ callData }) => {
             </button>
           </div>
 
+          {/* Free first session: gift badge + countdown (Figma 4787:30165) */}
+          {isFreeCall && (
+            <div className={freeStyles.freeStrip}>
+              <FreeSessionHeader
+                title="1st Free Call"
+                remainingSeconds={callSeconds}
+                isEnded={isFreeCallTimeUp}
+                className={freeStyles.freeHeader}
+              />
+            </div>
+          )}
+
           {/* Network / signal quality indicator */}
           {joined && (
             <span
@@ -1352,7 +1435,7 @@ const AgoraVoiceCalling = ({ callData }) => {
           )}
 
           {/* Voice Center (Avatar & Timer) */}
-          <div className={styles.voiceCenter}>
+          <div className={`${styles.voiceCenter} ${isFreeCall ? freeStyles.voiceCenterFree : ""} ${isFreeCallEndingSoon ? freeStyles.voiceCenterWithBanner : ""}`}>
               <div className={styles.voiceCenterWrap}>
                 <div className={styles.avatarContainer}>
                   <span className={styles.ripple}></span>
@@ -1400,6 +1483,13 @@ const AgoraVoiceCalling = ({ callData }) => {
 
           {/* Bottom Controls */}
           <div className={styles.bottomControls}>
+            {/* Free first session: last minute (Figma 4787:30349) — above the
+                controls, never over them. */}
+            {isFreeCallEndingSoon && (
+              <div className={freeStyles.bannerDock}>
+                <FreeSessionEndingBanner onRecharge={handleFreeCallRecharge} />
+              </div>
+            )}
             <div className={styles.controlGrid}>
               <div className={`${styles.controlItem} ${styles.giftWrapMain}`}>
                 <button
@@ -1509,6 +1599,15 @@ const AgoraVoiceCalling = ({ callData }) => {
           });
           return { success: true };
         }}
+      />
+
+      {/* Free first session: low wallet balance popup, once (Figma 4787:30251) */}
+      <LowBalancePopup
+        isOpen={isFreeCallEndingSoon && !freeLowBalanceDismissed && !isRechargeModalOpen}
+        remainingSeconds={callSeconds}
+        onClose={() => setFreeLowBalanceDismissed(true)}
+        onRemindLater={() => setFreeLowBalanceDismissed(true)}
+        onRecharge={handleFreeCallRecharge}
       />
 
       {/* Recharge Modal */}
