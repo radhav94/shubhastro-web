@@ -14,9 +14,10 @@ import styles from "./FreeSessionModal.module.scss";
 /*
  * "Your First Session Is 100% Free" promo popup.
  *
- * Gated on VITE_FREE_SESSION_ENABLED (see utils/featureConfig) so the offer can
- * be switched per environment without a code change. With the flag off this
- * renders nothing and costs nothing beyond the mount.
+ * Gated purely on the API now (via useFreeSession → isFirstSessionFree). The
+ * VITE_FREE_SESSION_ENABLED env flag is no longer a gate. If this visitor is not
+ * eligible per the backend, this renders nothing and costs nothing beyond the
+ * mount.
  *
  * Shown on the landing page only, once per page load. Not on every visit to "/"
  * within a load: this component stays mounted across SPA navigation, so without
