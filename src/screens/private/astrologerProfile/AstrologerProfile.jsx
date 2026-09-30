@@ -2599,16 +2599,13 @@ const AstrologerProfile = () => {
                     <BiVideo className={styles.optionIcon} />
                   <div className={styles.optionInfo}>
                     <span className={styles.optionLabel}>Video Call</span>
+                    {/* First-session-free does NOT cover video calls: the offer
+                        applies to chat and audio only, so video always quotes its
+                        real per-minute rate even for an eligible user. */}
                     <span className={styles.optionPrice}>
-                      {freeSession ? (
-                        <FreeSessionRate amount={data?.price?.videoCallRate?.amount || 0} unit="/ min" />
-                      ) : (
-                        <>
-                          ₹{data?.price?.videoCallRate?.amount || 0}/ min
-                          {data?.price?.videoCallRate?.isDiscountActive && data?.price?.videoCallRate?.beforeDiscountPrice && (
-                            <span className={styles.originalPrice}>₹{data?.price?.videoCallRate?.beforeDiscountPrice}/ min</span>
-                          )}
-                        </>
+                      ₹{data?.price?.videoCallRate?.amount || 0}/ min
+                      {data?.price?.videoCallRate?.isDiscountActive && data?.price?.videoCallRate?.beforeDiscountPrice && (
+                        <span className={styles.originalPrice}>₹{data?.price?.videoCallRate?.beforeDiscountPrice}/ min</span>
                       )}
                     </span>
                   </div>

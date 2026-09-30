@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { IoClose } from "react-icons/io5";
-import { BsChatDots } from "react-icons/bs";
-import { MdOutlinePhoneInTalk } from "react-icons/md";
-import freeSessionArt from "../../../../assets/images/free-session-art.png";
+// Chat-bubble artwork from the Figma "Web Free chat user journey" — the same
+// image on desktop (node 4787:29898) and mobile (node 4561:71688).
+import freeSessionChatArt from "../../../../assets/images/free-session-chat-art.webp";
+import chatIcon from "../../../../assets/icons/free-session-chat.svg";
+import callIcon from "../../../../assets/icons/free-session-call-add.svg";
+import closeIcon from "../../../../assets/icons/free-session-close.svg";
 import brandLogo from "../../../../assets/images/ShubhAstrologo.png";
 import { useFreeSession } from "../../../../utils/hooks/useFreeSession";
 import { trackEvent } from "../../../../utils/analytics";
@@ -123,32 +125,36 @@ const FreeSessionModal = () => {
       }}
     >
       <div className={styles.modal} role="dialog" aria-modal="true" aria-label="Your first session is 100% free">
-        <button type="button" className={styles.closeBtn} onClick={handleClose} aria-label="Close">
-          <IoClose size={20} />
-        </button>
-
-        {/* Artwork first in the DOM: it leads on desktop (left column) and the
-            mobile layout reorders it below the copy with `order`, so the heading
-            stays the first thing a screen reader reaches in both. */}
-        <div className={styles.art}>
-          <img src={freeSessionArt} alt="" aria-hidden="true" />
+        {/* Header row: brand on the left, close on the right (Figma 4787:29874). */}
+        <div className={styles.header}>
+          <img src={brandLogo} alt="ShubhAstro" className={styles.logo} />
+          <button type="button" className={styles.closeBtn} onClick={handleClose} aria-label="Close">
+            <img src={closeIcon} alt="" aria-hidden="true" width="32" height="32" />
+          </button>
         </div>
 
-        <div className={styles.body}>
-          <img src={brandLogo} alt="ShubhAstro" className={styles.logo} />
-          <p className={styles.kicker}>Your First Session Is</p>
-          <h2 className={styles.headline}>100% Free</h2>
-          <p className={styles.sub}>Talk To Expert Astrologers, Get Clarity For Your Life.</p>
+        <div className={styles.content}>
+          {/* Artwork leads on both layouts: the left column on desktop, above the
+              copy on mobile (Figma "Free chat popup2", 4561:71664). */}
+          <div className={styles.art}>
+            <img src={freeSessionChatArt} alt="" aria-hidden="true" />
+          </div>
 
-          <div className={styles.actions}>
-            <button type="button" className={styles.chatBtn} onClick={() => go("chat")}>
-              <BsChatDots size={16} aria-hidden="true" />
-              Chat Now
-            </button>
-            <button type="button" className={styles.callBtn} onClick={() => go("call")}>
-              <MdOutlinePhoneInTalk size={17} aria-hidden="true" />
-              Call Now
-            </button>
+          <div className={styles.body}>
+            <p className={styles.kicker}>Your First Session Is</p>
+            <h2 className={styles.headline}>100% Free</h2>
+            <p className={styles.sub}>Talk To Expert Astrologers, Get Clarity For Your Life.</p>
+
+            <div className={styles.actions}>
+              <button type="button" className={styles.chatBtn} onClick={() => go("chat")}>
+                <img src={chatIcon} alt="" aria-hidden="true" width="30" height="30" />
+                <span className={styles.chatLabel}>Chat Now</span>
+              </button>
+              <button type="button" className={styles.callBtn} onClick={() => go("call")}>
+                <img src={callIcon} alt="" aria-hidden="true" width="25" height="25" />
+                Call Now
+              </button>
+            </div>
           </div>
         </div>
       </div>
