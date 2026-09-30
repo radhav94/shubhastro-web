@@ -5,7 +5,7 @@ import { useChat } from "../../../../context/ChatContext";
 import { useCall } from "../../../../context/CallContext";
 import { useWaitingQueue } from "../../../../context/WaitingQueueContext";
 import { Toast } from "../../../../component";
-import { isPanditAIChatActive, isPanditAIEvent } from "../../../../component/panditAI/usePanditAI";
+import { isPanditAIChatActive, isPanditAIEvent, isPanditAIErrorEvent } from "../../../../component/panditAI/usePanditAI";
 import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
 
 export const useAstrologerConnection = (externalAstroRef = null, selectedKundli) => {
@@ -359,6 +359,10 @@ export const useAstrologerConnection = (externalAstroRef = null, selectedKundli)
     };
 
     const handleSocketError = (err) => {
+      // Pandit AI shares this socket; its errors (e.g. insufficient balance for
+      // Pandit AI) are handled in its own chat and must not toast here or reset
+      // this screen's flow — that reset zeroed the live chat/call timer.
+      if (isPanditAIErrorEvent(err)) return;
       console.log("[NormalFlow] ⚠️ Socket error event received");
       console.log("[NormalFlow]   → message:", err?.message);
 

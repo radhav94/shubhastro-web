@@ -20,6 +20,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import styles from "./VoiceCall.module.scss";
 import { voiceSocket } from "../../services/voiceSocketServices";
+import { isPanditAIEvent } from "../panditAI/usePanditAI";
 import { useCall } from "../../context/CallContext";
 import { useChat as useChatContext } from "../../context/ChatContext";
 import GiftModal from "./GiftModal";
@@ -48,15 +49,14 @@ import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDispla
 import useAstrologerAvailability from "../../utils/hooks/useAstrologerAvailability";
 import { isFreeSessionCall, payloadSaysFree } from "../../utils/auth/freeSessionRoom";
 import {
-  FreeSessionHeader,
-  FreeSessionEndingBanner,
-  LowBalancePopup,
-} from "../../screens/private/home/components/chats/freeSession/FreeSessionUI";
+  FreeCallScreen,
+  FreeCallEndingBanner,
+  FreeCallLowBalancePopup,
+} from "./FreeCallUI";
 import {
   FREE_SESSION_WARNING_SECONDS,
   getAudioCallRateOffer,
 } from "../../screens/private/home/components/chats/freeSession/freeSessionUtils";
-import freeStyles from "./FreeCall.module.scss";
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID;
 const CHAT_STORAGE_KEY = "shubhtalk_active_chat";
@@ -92,6 +92,11 @@ const AgoraVoiceCalling = ({ callData }) => {
   const [freeLowBalanceDismissed, setFreeLowBalanceDismissed] = useState(false);
   const freeTimerStartedRef = useRef(false);
   const freeCallEndRef = useRef(null);
+  // Free call "Call duration": wall-clock join time and the last value shown.
+  const freeJoinedAtRef = useRef(0);
+  const freeDurationRef = useRef(0);
+  // Largest remaining time seen for this free call = the free allowance.
+  const freeAllowanceRef = useRef(0);
 
   if (!activeCall || activeCall.callType !== "audio") {
     return null;
@@ -244,6 +249,89 @@ const AgoraVoiceCalling = ({ callData }) => {
     isFreeCall && joined && callSeconds > 0 && callSeconds <= FREE_SESSION_WARNING_SECONDS;
   const isFreeCallTimeUp = isFreeCall && freeTimerStartedRef.current && callSeconds <= 0;
 
+  /*
+    "Call duration" (Figma 4886:78101): real connected time, from the moment
+    the audio joined, on the wall clock.
+
+    It used to be derived as "free allowance seen − seconds left", which tied it
+    to the countdown: that countdown ticks one setInterval step at a time (so it
+    lags when the tab is throttled) and is periodically re-synced to the
+    server's remainingTime by `activity` events — every re-sync made the
+    duration jump, and it ended short whenever the server's clock ran ahead of
+    ours (e.g. "02:50" when the free time was up). Wall-clock time from join is
+    what the user actually talked for, and it counts up one second at a time.
+
+    The join time is kept per room in sessionStorage so a refresh-resume keeps
+    counting instead of restarting at 0. Frozen once the free time is up.
+  */
+  if (isFreeCall && roomId && joined && !freeJoinedAtRef.current) {
+    const joinedKey = `shubhtalk_free_call_joined_${roomId}`;
+    let joinedAt = 0;
+    try {
+      joinedAt = Number(sessionStorage.getItem(joinedKey)) || 0;
+    } catch {
+      /* storage unavailable — count from this mount */
+    }
+    if (!joinedAt) {
+      joinedAt = Date.now();
+      try {
+        sessionStorage.setItem(joinedKey, String(joinedAt));
+      } catch {
+        /* ignore */
+      }
+    }
+    freeJoinedAtRef.current = joinedAt;
+  }
+  /*
+    The free allowance (the largest remaining time seen, e.g. 180s), kept per
+    room so a refresh-resume doesn't lose it. The server starts its free clock a
+    moment before the audio connects, so wall-clock talk time ends a second or
+    two short of it ("02:58"). Duration is therefore capped at the allowance,
+    and when the free time actually runs out it shows the full allowance
+    ("03:00") — what the free session promised. A call ended early by the user
+    still shows the real time talked.
+  */
+  if (isFreeCall && roomId) {
+    const allowanceKey = `shubhtalk_free_call_allowance_${roomId}`;
+    if (!freeAllowanceRef.current) {
+      try {
+        freeAllowanceRef.current = Number(sessionStorage.getItem(allowanceKey)) || 0;
+      } catch {
+        /* storage unavailable */
+      }
+    }
+    if (callSeconds > freeAllowanceRef.current) {
+      freeAllowanceRef.current = callSeconds;
+      try {
+        sessionStorage.setItem(allowanceKey, String(callSeconds));
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+  if (isFreeCall && !isFreeCallTimeUp && freeJoinedAtRef.current) {
+    const elapsed = Math.max(0, Math.floor((Date.now() - freeJoinedAtRef.current) / 1000));
+    freeDurationRef.current = freeAllowanceRef.current
+      ? Math.min(elapsed, freeAllowanceRef.current)
+      : elapsed;
+  }
+  // "Ran out" = the countdown reached (or is within a few seconds of) zero —
+  // the server's clock is slightly ahead of ours, so it usually ends the call
+  // with 1–3s still showing here.
+  const FREE_CALL_END_SLACK_SECONDS = 5;
+  const freeTimeRanOut =
+    isFreeCall && freeTimerStartedRef.current && callSeconds <= FREE_CALL_END_SLACK_SECONDS;
+  const freeCallDuration = !isFreeCall
+    ? 0
+    : isFreeCallTimeUp && freeAllowanceRef.current
+      ? freeAllowanceRef.current
+      : freeDurationRef.current;
+  // Final value handed to the ended screen when the call is torn down.
+  const freeCallFinalDuration =
+    freeTimeRanOut && freeAllowanceRef.current
+      ? Math.max(freeDurationRef.current, freeAllowanceRef.current)
+      : freeCallDuration;
+
   // Read by cleanup(), which may be the closure from the first render (it runs
   // from the mount effect's teardown), so keep the latest values in a ref.
   freeCallEndRef.current = isFreeCall
@@ -257,6 +345,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         role: lastRequestedAstro?.role || chatLastRequestedAstro?.role,
         experience: experience || lastRequestedAstro?.experience || chatLastRequestedAstro?.experience,
         offer: getAudioCallRateOffer(astrologerFullData?.data || lastRequestedAstro),
+        durationSeconds: freeCallFinalDuration,
       }
     : null;
 
@@ -287,6 +376,8 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   const showChatNotification = useCallback((data) => {
     if (data.sender === "user") return;
+    // A Pandit AI reply is not a message from this call's astrologer.
+    if (isPanditAIEvent(data)) return;
     // Hide product notifications when mall is disabled
     if (data.type === "products" && !isShubhMallEnabled()) return;
     
@@ -790,6 +881,8 @@ const AgoraVoiceCalling = ({ callData }) => {
     };
 
     const handleWarning = (msg) => {
+      // Pandit AI's own low-balance warning is shown inside Pandit AI.
+      if (isPanditAIEvent(msg)) return;
       if (msg?.message?.includes("Low balance alert")) {
         setShowRechargeButton(true);
       }
@@ -867,8 +960,29 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   /* ================= SOCKET ================= */
   useEffect(() => {
+    /*
+      call:ended / call:rejected / call:reconnected are socket-wide, and this
+      effect is registered once ([] deps). Nothing here checked the room, so an
+      event about ANOTHER room — a withdrawn or timed-out request to a second
+      astrologer, a previous session, the chat running alongside — was taken as
+      this call ending: "Call ended." toast + local teardown, while the server
+      kept the real call running (a refresh restored it via session:active_list).
+      VideoCall already guards call:ended this way. Read the live roomId from the
+      ref: the closure's `socketRoomId` is the first render's.
+
+      Only ignored when the payload names a different room, so a payload without
+      roomId behaves exactly as before.
+    */
+    const isOtherRoom = (data) => {
+      const ownRoomId = activeCallRef.current?.roomId || socketRoomId;
+      return !!(data?.roomId && ownRoomId && data.roomId !== ownRoomId);
+    };
 
     const handleCallEnded = (data) => {
+      if (isOtherRoom(data)) {
+        console.log("[VoiceCall] Ignoring call:ended for another room —", data.roomId);
+        return;
+      }
       if (data?.endedBy === "SYSTEM") {
         if (isUpgradingToVideo.current || cleanupRef.current) {
           return;
@@ -921,7 +1035,8 @@ const AgoraVoiceCalling = ({ callData }) => {
       cleanup(isUpgradingToVideo.current);
     };
 
-    const handleCallReconnected = () => {
+    const handleCallReconnected = (data) => {
+      if (isOtherRoom(data)) return;
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
@@ -930,7 +1045,6 @@ const AgoraVoiceCalling = ({ callData }) => {
     };
 
     const handleCallRejected = (data) => {
-      
       // Check if this is a video switch rejection
       if (data?.switchRejected && data?.type === "audio") {
         console.log("🔄 Video switch rejected - resuming audio call");
@@ -947,6 +1061,12 @@ const AgoraVoiceCalling = ({ callData }) => {
         return;
       }
       
+      // A rejection of some other request must not end (and call:end) this call.
+      if (isOtherRoom(data)) {
+        console.log("[VoiceCall] Ignoring call:rejected for another room —", data.roomId);
+        return;
+      }
+
       // If it's a regular call rejection (not a switch), end the call
       console.log("📞 Regular call rejection - ending call");
       setIsSwitching(false);
@@ -957,7 +1077,8 @@ const AgoraVoiceCalling = ({ callData }) => {
     // Cancel our grace-period timer (so no stray "Unable to reconnect" toast) and
     // tear the call down cleanly. CallContext already showed the "Call ended."
     // toast and opened the review.
-    const handleGlobalCallEnded = () => {
+    const handleGlobalCallEnded = (e) => {
+      if (isOtherRoom(e?.detail)) return;
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
@@ -1186,6 +1307,43 @@ const AgoraVoiceCalling = ({ callData }) => {
     setWaitingList(null);
   };
 
+  // Rendered inside whichever full view is showing (paid or free), so it is
+  // always visible.
+  const chatNotificationBanner = chatNotification && (
+    <div style={{ position: 'fixed', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 99999, width: 'fit-content', maxWidth: '90vw' }}>
+      <ChatNotificationBanner
+        senderName={chatNotification.senderName}
+        message={chatNotification.message}
+        imageUrl={chatNotification.image}
+        gender={chatNotification.gender}
+        onClose={() => setChatNotification(null)}
+        onClick={() => {
+          setChatNotification(null);
+          if (chatNotification.type === "products") {
+            setIsRemedyPanelOpen(true);
+            setHasNewRemedy(false);
+          } else {
+            setIsMinimized(true);
+            navigate(`/chat-to-astrologer/${chatNotification.astrologerId}`, {
+              state: {
+                userId: activeCall?.userId,
+                astrologerId: activeCall?.astrologerId,
+                roomId: activeCall?.roomId,
+                fullName: callerName,
+                isUserSide: activeCall?.isUserSide,
+                kundliId: activeCall?.kundliId,
+                astrologerName: callerName,
+                astroID: activeCall?.astrologerID,
+                experience: activeCall?.experience || lastRequestedAstro?.experience,
+                profileImgUrl: activeCall?.profileImgUrl || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
+              }
+            });
+          }
+        }}
+      />
+    </div>
+  );
+
   return (
     <>
       {/* Switch Waiting Popup */}
@@ -1230,44 +1388,74 @@ const AgoraVoiceCalling = ({ callData }) => {
         </div>
       )}
 
+      {/* FULL VIEW — free first-session call (Figma 4886:78101 / 4886:77924).
+          The paid layout below is unchanged; the panels that the free layout
+          has no buttons for stay mounted so a notification can still open them. */}
+      {!isMinimized && isFreeCall && (
+        <FreeCallScreen
+          callerName={callerName}
+          experience={experience || lastRequestedAstro?.experience || chatLastRequestedAstro?.experience}
+          thumbImage={getAstrologerImageUrl(astroForImage, "small")}
+          profileImage={getAstrologerImageUrl(astroForImage, "large")}
+          gender={astroForImage.gender}
+          remainingSeconds={callSeconds}
+          isEnded={isFreeCallTimeUp}
+          status={
+            isReconnecting || isNetworkLost ? "Reconnecting..." : joined ? "Connected" : "Connecting…"
+          }
+          statusTone={joined && !isReconnecting && !isNetworkLost ? "connected" : "pending"}
+          durationSeconds={freeCallDuration}
+          onBack={() => setIsMinimized(true)}
+          // No Virtual Assistant / View History / Send Gift during the free
+          // session (on request): they come back on the regular call screen
+          // once the free time is over. FreeCallScreen still supports them via
+          // `actions` and `controls.onSendGift` if they are wanted again.
+          controls={{
+            micOn,
+            speakerOn,
+            onToggleMic: () => setMicOn((m) => !m),
+            onToggleSpeaker: () => setSpeakerOn((s) => !s),
+            onEndCall: requestEndCall,
+          }}
+          bottom={isFreeCallEndingSoon ? <FreeCallEndingBanner onRecharge={handleFreeCallRecharge} /> : null}
+        >
+          {chatNotificationBanner}
+          <VideoCallChat
+            isOpen={isChatOpen}
+            onClose={() => setIsChatOpen(false)}
+            videoCallData={chatData}
+            sendMessageRef={sendChatMessageRef}
+          />
+          <SuggestedRemedyPanel
+            isOpen={isRemedyPanelOpen}
+            onClose={() => setIsRemedyPanelOpen(false)}
+            remedyData={suggestedRemedyData}
+            onProductClick={() => {
+              setIsRemedyPanelOpen(false);
+              setIsMinimized(true);
+            }}
+          />
+          <ProfileManager
+            isOpen={showProfileModal}
+            onClose={handleCloseProfileModal}
+            onProfileSelect={handleProfileSelect}
+            selectedProfileId={selectedProfile?._id}
+            title="Select Profile"
+            enabledOperations={{
+              list: true,
+              add: true,
+              edit: true,
+              delete: true,
+            }}
+          />
+        </FreeCallScreen>
+      )}
+
       {/* FULL VIEW */}
-      {!isMinimized && (
+      {!isMinimized && !isFreeCall && (
         <div className={styles.fullscreenWrapper}>
           {/* Chat Notification Banner - rendered INSIDE fullscreen so it's always visible */}
-          {chatNotification && (
-            <div style={{ position: 'fixed', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 99999, width: 'fit-content', maxWidth: '90vw' }}>
-              <ChatNotificationBanner
-                senderName={chatNotification.senderName}
-                message={chatNotification.message}
-                imageUrl={chatNotification.image}
-                gender={chatNotification.gender}
-                onClose={() => setChatNotification(null)}
-                onClick={() => {
-                  setChatNotification(null);
-                  if (chatNotification.type === "products") {
-                    setIsRemedyPanelOpen(true);
-                    setHasNewRemedy(false);
-                  } else {
-                    setIsMinimized(true);
-                    navigate(`/chat-to-astrologer/${chatNotification.astrologerId}`, {
-                      state: {
-                        userId: activeCall?.userId,
-                        astrologerId: activeCall?.astrologerId,
-                        roomId: activeCall?.roomId,
-                        fullName: callerName,
-                        isUserSide: activeCall?.isUserSide,
-                        kundliId: activeCall?.kundliId,
-                        astrologerName: callerName,
-                        astroID: activeCall?.astrologerID,
-                        experience: activeCall?.experience || lastRequestedAstro?.experience,
-                        profileImgUrl: activeCall?.profileImgUrl || lastRequestedAstro?.profileImgUrl || lastRequestedAstro?.imageUrl,
-                      }
-                    });
-                  }
-                }}
-              />
-            </div>
-          )}
+          {chatNotificationBanner}
           {/* Header */}
           <div className={styles.headerWrap}>
             <div className={styles.header}>
@@ -1411,18 +1599,6 @@ const AgoraVoiceCalling = ({ callData }) => {
             </button>
           </div>
 
-          {/* Free first session: gift badge + countdown (Figma 4787:30165) */}
-          {isFreeCall && (
-            <div className={freeStyles.freeStrip}>
-              <FreeSessionHeader
-                title="1st Free Call"
-                remainingSeconds={callSeconds}
-                isEnded={isFreeCallTimeUp}
-                className={freeStyles.freeHeader}
-              />
-            </div>
-          )}
-
           {/* Network / signal quality indicator */}
           {joined && (
             <span
@@ -1435,7 +1611,7 @@ const AgoraVoiceCalling = ({ callData }) => {
           )}
 
           {/* Voice Center (Avatar & Timer) */}
-          <div className={`${styles.voiceCenter} ${isFreeCall ? freeStyles.voiceCenterFree : ""} ${isFreeCallEndingSoon ? freeStyles.voiceCenterWithBanner : ""}`}>
+          <div className={styles.voiceCenter}>
               <div className={styles.voiceCenterWrap}>
                 <div className={styles.avatarContainer}>
                   <span className={styles.ripple}></span>
@@ -1483,13 +1659,6 @@ const AgoraVoiceCalling = ({ callData }) => {
 
           {/* Bottom Controls */}
           <div className={styles.bottomControls}>
-            {/* Free first session: last minute (Figma 4787:30349) — above the
-                controls, never over them. */}
-            {isFreeCallEndingSoon && (
-              <div className={freeStyles.bannerDock}>
-                <FreeSessionEndingBanner onRecharge={handleFreeCallRecharge} />
-              </div>
-            )}
             <div className={styles.controlGrid}>
               <div className={`${styles.controlItem} ${styles.giftWrapMain}`}>
                 <button
@@ -1601,8 +1770,8 @@ const AgoraVoiceCalling = ({ callData }) => {
         }}
       />
 
-      {/* Free first session: low wallet balance popup, once (Figma 4787:30251) */}
-      <LowBalancePopup
+      {/* Free first session: low wallet balance popup, once (Figma 4886:77824) */}
+      <FreeCallLowBalancePopup
         isOpen={isFreeCallEndingSoon && !freeLowBalanceDismissed && !isRechargeModalOpen}
         remainingSeconds={callSeconds}
         onClose={() => setFreeLowBalanceDismissed(true)}

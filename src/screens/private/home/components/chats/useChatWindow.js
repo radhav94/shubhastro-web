@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import socketService from "../../../../../services/socketService";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import { isPanditAIEvent } from "../../../../../component/panditAI/usePanditAI";
 import toast from "../../../../../component/toast";
 import { useChat as useChatContext } from "../../../../../context/ChatContext"
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
@@ -136,6 +137,11 @@ export default function useChat({
   console.log("::",messages,"/",error)
 
   const handleChatEndedFromServer = (data) => {
+    // chat:ended is socket-wide: ignore Pandit AI's session and any other room,
+    // otherwise a SYSTEM end elsewhere triggers a reconnect of THIS chat (whose
+    // failure path reports it ended). Unchanged when the payload has no roomId.
+    if (isPanditAIEvent(data)) return;
+    if (data?.roomId && roomId && data.roomId !== roomId && data.roomId !== activeChat?.roomId) return;
     // SYSTEM ends are treated as transient transport failures; attempt reconnect
     // instead of tearing down the active chat session.
     if (data?.endedBy === 'SYSTEM') {
@@ -521,6 +527,8 @@ export default function useChat({
     };
 
     const handleWarning = (msg) => {
+      // Pandit AI's low-balance warning belongs to Pandit AI, not this chat.
+      if (isPanditAIEvent(msg)) return;
       toast.warning(msg.message);
     }
 

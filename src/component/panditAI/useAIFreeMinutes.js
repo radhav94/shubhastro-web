@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { voiceSocket } from "../../services/voiceSocketServices";
 import { useLazyGetWalletBalanceQuery } from "../../redux/api/wallet/walletApi";
 import { trackEvent } from "../../utils/analytics";
+import { isForeignToPanditAI, panditAIOwnsError } from "./usePanditAI";
 
 /**
  * Hook that manages the AI free-minutes state machine.
@@ -84,8 +85,11 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
     };
 
     const handleActivity = (data) => {
-      // Only process if this is for our room or is an AI session event
-      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      // Only process if this is for our room or is an AI session event.
+      // `activity` is also the astrologer chat/call billing tick; applying it
+      // here flipped Pandit AI to "paid" with the astrologer session's wallet
+      // and remaining time.
+      if (isForeignToPanditAI(data, roomIdRef.current)) return;
 
       // Free vs paid is decided purely by presence of `freeMinutesRemaining`.
       // Present  -> still in the 5-minute free window (counts down 4→3→2→1).
@@ -142,7 +146,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
     };
 
     const handleInsufficientBalance = (data) => {
-      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      if (isForeignToPanditAI(data, roomIdRef.current)) return;
 
       setShowRechargeBanner(true);
       // Prefer the backend-provided message; fall back to a default.
@@ -168,7 +172,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
     // Low-balance "warning" (paid mode) — show the alert without ending the
     // session. Backend sends e.g. "Low balance alert! Remaining time: 1 min."
     const handleWarning = (data) => {
-      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      if (isForeignToPanditAI(data, roomIdRef.current)) return;
       if (data?.message) {
         setShowRechargeBanner(true);
         setRechargeBannerMessage(data.message);
@@ -176,7 +180,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
     };
 
     const handleChatEnded = (data) => {
-      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      if (isForeignToPanditAI(data, roomIdRef.current)) return;
 
       setRemainingPaidTime(null);
       setFreeMinutesRemaining(null);
@@ -189,7 +193,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
     };
 
     const handleFreeWindowRenewed = (data) => {
-      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      if (isForeignToPanditAI(data, roomIdRef.current)) return;
 
       setFreeWindowRenewed(true);
       setIsFreePeriod(true);
@@ -200,7 +204,7 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
     };
 
     const handleReconnected = (data) => {
-      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      if (isForeignToPanditAI(data, roomIdRef.current)) return;
 
       // Full state refresh from reconnect
       const fmr = data.freeMinutesRemaining ?? data.freeMinutesRemainingToday;
@@ -224,6 +228,9 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
     };
 
     const handleError = (data) => {
+      // Only Pandit AI's own errors — an insufficient-balance error about the
+      // astrologer chat/call must not end this session's composer.
+      if (!panditAIOwnsError(data, roomIdRef.current)) return;
       if (data?.message?.toLowerCase().includes("insufficient balance")) {
         setShowRechargeBanner(true);
         setSessionEndedLowBalance(true);

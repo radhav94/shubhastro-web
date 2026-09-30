@@ -5,6 +5,7 @@ import { useCall } from "../../../../../context/CallContext";
 import { useChat } from "../../../../../context/ChatContext";
 import { useGetBalanceMutation } from "../../../../../redux/api/wallet/walletApi";
 import { useMediaPermission } from "../../../../../utils/hooks/useMediaPermission";
+import { isPanditAIErrorEvent } from "../../../../../component/panditAI/usePanditAI";
 
 const useChatSocket = ({
   userId,
@@ -248,6 +249,10 @@ const useChatSocket = ({
     };
 
     const handleSocketError = (err) => {
+      // Pandit AI shares this socket; its errors (e.g. insufficient balance for
+      // Pandit AI) are handled in its own chat and must not toast here or reset
+      // this screen's flow — that reset zeroed the live chat/call timer.
+      if (isPanditAIErrorEvent(err)) return;
       console.log("⚠️ SOCKET ERROR:", err);
       
       if (err?.message === "Call has already ended") {

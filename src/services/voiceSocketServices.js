@@ -162,6 +162,15 @@ export const clearChatSession = () => {
 };
 
 /**
+ * Read-only views of the sessions registered for auto-reconnect. Used to tell
+ * which live session a socket-wide event (activity, warning, error, *:ended)
+ * belongs to — the socket is shared by the astrologer chat, the call and
+ * Pandit AI, and most server events are broadcast to every listener.
+ */
+export const getActiveChatSession = () => activeChatSession;
+export const getActiveCallSession = () => activeCallSession;
+
+/**
  * Get current reconnection state
  */
 export const getReconnectionState = () => ({

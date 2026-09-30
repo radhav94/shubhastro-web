@@ -1,5 +1,6 @@
 import { useContext, useState, useRef, useEffect, useCallback } from "react";
-import { voiceSocket, registerCallSession, clearCallSession } from "../services/voiceSocketServices";
+import { voiceSocket, registerCallSession, clearCallSession, getActiveChatSession } from "../services/voiceSocketServices";
+import { isPanditAIEvent, isPanditAIErrorEvent } from "../component/panditAI/usePanditAI";
 import { trackEvent } from "../utils/analytics";
 import { getAstrologerDisplayName } from "../utils/helper/string.utils";
 import Toast from "../component/toast";
@@ -280,6 +281,12 @@ export const CallProvider = ({ children }) => {
 
     // Treat any error/rejection during reconnect as "call no longer active"
     const onReconnectError = (data) => {
+      // …except one that is plainly not about this call: Pandit AI's error, or a
+      // rejection/error naming another room. Those used to end the call here.
+      if (isPanditAIErrorEvent(data) || (data?.roomId && data.roomId !== reconnectCall.roomId)) {
+        console.log("[CallReconnect] ⏭️ Ignoring error/rejection not about this call:", data?.roomId);
+        return;
+      }
       console.log("[CallReconnect] ❌ Got error/rejection during reconnect:");
       console.log("[CallReconnect]   → event data:", JSON.stringify(data));
       console.log("[CallReconnect]   → message:", data?.message);
@@ -407,9 +414,25 @@ export const CallProvider = ({ children }) => {
       };
       voiceSocket.connect();
     }
+    /*
+      `activity` is the billing tick of EVERY live session on this socket — the
+      call, an astrologer chat alongside it, and Pandit AI. Taking another
+      session's remainingTime re-timed this call to that session's clock; for
+      the free call that meant the countdown hit 0 and the screen showed the
+      locked "00:00 End" state while the call was still running (a refresh
+      re-synced it). Only a tick positively identified as another session's is
+      skipped; one without a roomId is applied as before.
+    */
+    const isOtherSessionActivity = (data) => {
+      if (isPanditAIEvent(data)) return true;
+      const ownRoomId = activeCallRef.current?.roomId;
+      const chatRoomId = getActiveChatSession()?.roomId;
+      return !!(data?.roomId && ownRoomId && data.roomId !== ownRoomId && data.roomId === chatRoomId);
+    };
+
     const handleActivity = (data) => {
       console.log("[CallContext] activity event:", data);
-      if (data?.remainingTime && data.remainingTime > 0) {
+      if (data?.remainingTime && data.remainingTime > 0 && !isOtherSessionActivity(data)) {
         // Server sync every minute - update remaining time and ensure timer is running
         setCallSeconds(Math.floor(data.remainingTime * 60));
         
@@ -516,6 +539,10 @@ export const CallProvider = ({ children }) => {
     // This fires when socket reconnects and auto-emits call:reconnect
     const handleAutoReconnected = (data) => {
       console.log("[CallContext] 🔄 call:reconnected (auto-reconnect):", JSON.stringify(data));
+
+      // A reconnect answer for another room says nothing about this call.
+      const ownRoomId = activeCallRef.current?.roomId;
+      if (data?.roomId && ownRoomId && data.roomId !== ownRoomId) return;
       
       if (data && data.active) {
         console.log("[CallContext] ✅ Auto-reconnect successful, call still active");

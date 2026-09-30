@@ -15,6 +15,10 @@ import { BranchEvents } from "../../../utils/branchEvents";
 import { isAdultDob, maxSignupDob, UNDERAGE_ERROR } from "../../../utils/helper/age";
 import { setEmail, logout } from "../../../redux/auth/authSlice";
 import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
+// Gender icons from the Figma "Enter Your Details" form (node 4886:74879).
+import genderMaleIcon from "../../../assets/icons/onboarding/gender-male.svg";
+import genderFemaleIcon from "../../../assets/icons/onboarding/gender-female.svg";
+import genderOthersIcon from "../../../assets/icons/onboarding/gender-others.svg";
 
 /*
  * Name + gender, for the single-page "Enter Your Details" form (desktop web,
@@ -34,9 +38,9 @@ const profileFieldsSchema = {
 };
 
 const GENDER_OPTIONS = [
-  { value: "Male", label: "Male", icon: "♂" },
-  { value: "Female", label: "Female", icon: "♀" },
-  { value: "Others", label: "Others", icon: "⚥" },
+  { value: "Male", label: "Male", icon: genderMaleIcon },
+  { value: "Female", label: "Female", icon: genderFemaleIcon },
+  { value: "Others", label: "Others", icon: genderOthersIcon },
 ];
 
 // Validation schema
@@ -473,7 +477,7 @@ const BirthDetailsScreen = ({
                 // still exists for a value that arrives another way (a restored
                 // draft, a typed date).
                 maxDate={maxSignupDob()}
-                placeholder="DD/MM/YYYY"
+                placeholder={withProfileFields ? "Enter your birth date" : "DD/MM/YYYY"}
               />
               <ErrorMessage name="birthDate">
                 {(msg) => <span className={styles.errorText}>{msg}</span>}
@@ -585,9 +589,14 @@ const BirthDetailsScreen = ({
                       onClick={() => setFieldValue("identity", opt.value)}
                     >
                       <span>{opt.label}</span>
-                      <span className={styles.detailsGenderIcon} aria-hidden="true">
-                        {opt.icon}
-                      </span>
+                      <img
+                        src={opt.icon}
+                        alt=""
+                        aria-hidden="true"
+                        width="24"
+                        height="24"
+                        className={styles.detailsGenderIcon}
+                      />
                     </button>
                   ))}
                 </div>

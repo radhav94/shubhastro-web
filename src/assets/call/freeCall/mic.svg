@@ -1,0 +1,8 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="1">
+<circle id="Ellipse 6371" cx="30" cy="30" r="30" fill="white"/>
+<g id="tabler-icon-microphone">
+<path id="Vector" d="M23 28C23 29.8565 23.7375 31.637 25.0503 32.9497C26.363 34.2625 28.1435 35 30 35M30 35C31.8565 35 33.637 34.2625 34.9497 32.9497C36.2625 31.637 37 29.8565 37 28M30 35V39M26 39H34M27 23C27 22.2044 27.3161 21.4413 27.8787 20.8787C28.4413 20.3161 29.2044 20 30 20C30.7956 20 31.5587 20.3161 32.1213 20.8787C32.6839 21.4413 33 22.2044 33 23V28C33 28.7956 32.6839 29.5587 32.1213 30.1213C31.5587 30.6839 30.7956 31 30 31C29.2044 31 28.4413 30.6839 27.8787 30.1213C27.3161 29.5587 27 28.7956 27 28V23Z" stroke="#030303" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>

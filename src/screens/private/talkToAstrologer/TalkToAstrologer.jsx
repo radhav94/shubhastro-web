@@ -46,6 +46,7 @@ import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import AstrologerRingModal from "../../../component/UI/modal/AstrologerRingModal/AstrologerRingModal";
 import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
 import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
+import { isPanditAIErrorEvent } from "../../../component/panditAI/usePanditAI";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -1307,6 +1308,10 @@ const TalkToAstrologer = () => {
 
     /* ERROR */
     const handleSocketError = (err) => {
+      // Pandit AI shares this socket; its errors (e.g. insufficient balance for
+      // Pandit AI) are handled in its own chat and must not toast here or reset
+      // this screen's flow — that reset zeroed the live chat/call timer.
+      if (isPanditAIErrorEvent(err)) return;
       if (err?.message === "Call has already ended") {
         // Only clear the active session, not pending connections
         setActiveCall(null);
