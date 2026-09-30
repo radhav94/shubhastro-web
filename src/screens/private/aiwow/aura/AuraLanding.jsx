@@ -14,9 +14,11 @@ import { trackEvent } from '../../../../utils/analytics';
 import { useGetAiWowPageDataQuery } from '../../../../redux/api/aiwow/aiwowApi';
 import { GuestKundliAuthModal } from '../../../../component/UI/Profile';
 import { Toast } from '../../../../component';
+import useSafeBack from '../../../../utils/hooks/useSafeBack';
 
 const AuraLanding = () => {
   const navigate = useNavigate();
+  const goBack = useSafeBack();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
@@ -101,7 +103,7 @@ const AuraLanding = () => {
     <div className={styles.container}>
       <header className={styles.headerWrap}>
         <div className={styles.header}>
-          <button className={styles.backButton} onClick={() => navigate(-1)}>
+          <button className={styles.backButton} onClick={goBack}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

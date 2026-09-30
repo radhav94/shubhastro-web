@@ -260,11 +260,19 @@
       padding-top: 12px;
     }
 
+    /* The month/year <select>s below already show the current month, and a
+       bold "September 2026" title beside them made users miss the dropdowns
+       and tap "Previous Month" dozens of times to reach their birth year
+       (Clarity rage clicks). Hide the title so the dropdowns are the header. */
     .react-datepicker__current-month {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1a1a1a;
-      margin-bottom: 8px;
+      display: none;
+    }
+
+    .react-datepicker__header__dropdown {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 40px 10px;
     }
 
     .react-datepicker__day-name {
@@ -310,18 +318,23 @@
     /* Month & Year dropdowns */
     .react-datepicker__month-dropdown-container,
     .react-datepicker__year-dropdown-container {
-      margin: 0 4px;
+      margin: 0;
     }
 
+    /* Sized as obvious, tappable controls (>=36px, chevron, brand border) so
+       picking a year is the natural move instead of paging month by month. */
     .react-datepicker__month-dropdown-container select,
     .react-datepicker__year-dropdown-container select {
-      padding: 4px 8px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
+      appearance: none;
+      -webkit-appearance: none;
+      min-height: 36px;
+      padding: 6px 28px 6px 10px;
+      border: 1px solid #F75801;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
       color: #1a1a1a;
-      background: #fff;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23F75801' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;
       cursor: pointer;
       outline: none;
 
@@ -333,6 +346,8 @@
     /* Navigation arrows */
     .react-datepicker__navigation {
       top: 12px;
+      width: 36px;
+      height: 36px;
     }
 
     .react-datepicker__navigation-icon::before {

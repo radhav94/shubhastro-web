@@ -14,9 +14,11 @@ import LocationSearch from '../../../../utils/location/locationSearchVedic';
 import useUserLocation from '../../../../utils/hooks/useUserLocation';
 import { trackEvent } from '../../../../utils/analytics';
 import useAIWowSubscriptionGate from '../hooks/useAIWowSubscriptionGate';
+import useSafeBack from '../../../../utils/hooks/useSafeBack';
 
 const BusinessPathfinder = () => {
   const navigate = useNavigate();
+  const goBack = useSafeBack();
   const dispatch = useDispatch();
   const { profile: rawProfile, isLoading: profileLoading } = useSelectedKundliProfile({ required: false });
   const token = localStorage.getItem('shubhtalk_customer_token');
@@ -236,7 +238,7 @@ const BusinessPathfinder = () => {
       {/* Header - outside container */}
       <div className={styles.pageHeader}>
         <div className={styles.pageHeaderInner}>
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>
+        <button className={styles.backBtn} onClick={goBack}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
