@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { voiceSocket } from "../../services/voiceSocketServices";
-import { isFreeSessionEnabled } from "../featureConfig";
 import {
   refreshFreeSessionStatus,
   markFreeSessionConsumed,
@@ -49,8 +48,10 @@ const CONFIRM_DELAY_MS = 6000;
 
 export const useFreeSessionWatcher = () => {
   useEffect(() => {
-    // Nothing reads the value when the offer is off, so don't watch for it.
-    if (!isFreeSessionEnabled()) return undefined;
+    // Eligibility is API-driven now (isFirstSessionFree), so this always runs.
+    // It self-gates: refreshFreeSessionStatus() no-ops for guests and once the
+    // answer is already false, and room tagging below only happens when the
+    // cached status is true (or the payload says free).
 
     /*
       Once per page load, on top of the session-end refreshes below.

@@ -103,19 +103,19 @@ $chip-bg: #FCE8D8;
   align-items: center;
   gap: 4px;
   padding: 4px 22px;
-  min-height: 48px;
+  min-height: 36px;
   border: 1px solid $brand;
   border-radius: 100px;
   background: $brand-gradient;
   color: #fff;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 22px;
   white-space: nowrap;
 
   img {
-    width: 32px;
-    height: 32px;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
   }
 

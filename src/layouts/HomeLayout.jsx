@@ -424,7 +424,7 @@ const HomeLayout = () => {
       <WelcomeBackModal />
 
       {/* First-session-free promo — landing page only, once per session, and
-          only when VITE_FREE_SESSION_ENABLED is on. */}
+          only when the API says this user is eligible (isFirstSessionFree). */}
       <FreeSessionModal />
 
       {/* Device limit popup — shown when max_device_reached is true */}

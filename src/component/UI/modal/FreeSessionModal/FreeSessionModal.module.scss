@@ -27,7 +27,7 @@ $orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 10px;
   width: 100%;
   max-width: 871px;
   padding: 18px;
@@ -113,7 +113,7 @@ $orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
 
 .kicker {
   margin: 0 0 -8px;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 500;
   line-height: normal;
   color: $heading;
@@ -121,7 +121,7 @@ $orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
 
 .headline {
   margin: 0 0 -8px;
-  font-size: 84px;
+  font-size: 74px;
   font-weight: 600;
   line-height: normal;
   background: $orange-gradient;
@@ -151,19 +151,19 @@ $orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
   align-items: center;
   justify-content: center;
   gap: 5px;
-  height: 56px;
+  height: 46px;
   padding: 0 40px;
   border-radius: 999px;
-  font-size: 20px;
+  // font-size: 20px;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-
-  img {
-    display: block;
-    flex-shrink: 0;
-  }
+  font-size: 16px;
+    img{
+      width: 25px;
+      height: 25px;
+    }
 }
 
 .chatBtn {
@@ -223,9 +223,7 @@ $orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
 
   .chatBtn,
   .callBtn {
-    height: 48px;
     padding: 0 22px;
-    font-size: 17px;
   }
 }
 
@@ -236,7 +234,7 @@ $orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
  */
 @media (max-width: 720px) {
   .modal {
-    gap: 18px;
+    // gap: 18px;
     max-width: 354px;
     max-height: calc(100vh - 32px);
     max-height: calc(100dvh - 32px);
@@ -265,7 +263,7 @@ $orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
   }
 
   .headline {
-    font-size: 58px;
+    font-size: 48px;
   }
 
   .sub {
@@ -276,18 +274,21 @@ $orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
   }
 
   .actions {
-    flex-direction: column;
+    // flex-direction: column;
     gap: 12px;
   }
 
   .chatBtn,
   .callBtn {
-    flex: 0 0 auto;
-    width: 100%;
-    height: 56px;
-    padding: 0 24px;
+    flex: unset;
+    padding: 0 16px;
     gap: 8px;
-    font-size: 20px;
+    font-size: 16px;
+    width: 100%;
+    img{
+      width: 20px;
+      height: 20px;
+    }
   }
 }
 
@@ -324,7 +325,7 @@ $orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
  */
 @media (max-width: 720px) and (max-height: 760px) {
   .modal {
-    gap: 12px;
+    // gap: 12px;
     padding-bottom: 20px;
   }
 
@@ -367,7 +368,7 @@ $orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
 
 @media (min-width: 721px) and (max-height: 520px) {
   .modal {
-    gap: 10px;
+    // gap: 10px;
     padding: 14px 18px;
   }
 
