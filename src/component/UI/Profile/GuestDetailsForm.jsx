@@ -73,6 +73,11 @@ const GuestDetailsForm = ({
 }) => {
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
+  // What is wrong with a typed-but-unaccepted birth date ("Enter the full date
+  // as DD/MM/YYYY", the age rule, ...). form.dob stays null in that case, so
+  // without this, submit could only say "Please select your date of birth"
+  // under a field the user had visibly filled in.
+  const [dobInputError, setDobInputError] = useState("");
   // Field wrappers, so a failed submit can bring the offending one into view.
   const fieldRefs = useRef({});
   // Bumped to ask LocationSearchVedic to put its suggestion list back on screen.
@@ -96,7 +101,7 @@ const GuestDetailsForm = ({
     if (!/^[6-9]\d{9}$/.test(form.mobileNumber || ""))
       e.mobileNumber = "Enter a valid 10-digit mobile number";
     if (!form.identity) e.identity = "Please select your gender";
-    if (!form.dob) e.dob = "Please select your date of birth";
+    if (!form.dob) e.dob = dobInputError || "Please select your date of birth";
     // This form registers the account, so the DOB is the account holder's.
     else if (!isAdultDob(form.dob)) e.dob = UNDERAGE_ERROR;
     if (!form.unknownBirthTime && !form.time) e.time = "Please select your birth time";
@@ -130,6 +135,15 @@ const GuestDetailsForm = ({
         node.scrollIntoView({ behavior: "smooth", block: "center" });
         node.querySelector("input, button")?.focus({ preventScroll: true });
       }
+
+      /*
+        Say it out loud as well. Scrolling alone is no feedback when the field is
+        already on screen — Clarity qmyvfb: the Birth Date error sat right above
+        the button, each tap changed nothing visible, and the visitor rage-tapped
+        "Continue & Get ₹99 Bonus" until they left. A fixed id makes repeat taps
+        replace the toast instead of stacking them.
+      */
+      if (firstInvalid) Toast.error(e[firstInvalid], { id: "guest-details-invalid" });
 
       /*
         Put the dropdown back on screen when the blocker is the place field, and
@@ -282,8 +296,14 @@ const GuestDetailsForm = ({
               portal
               selected={form.dob}
               onChange={(d) => setField("dob", d)}
+              /* Routes the picker's message into errors.dob, so one line shows. */
+              onError={(msg) => {
+                setDobInputError(msg);
+                setErrors((e) => ({ ...e, dob: msg || undefined }));
+              }}
               /* Registration form: an underage date is not selectable. */
               maxDate={maxSignupDob()}
+              maxDateError={UNDERAGE_ERROR}
               placeholder="DD/MM/YYYY"
             />
           </div>
