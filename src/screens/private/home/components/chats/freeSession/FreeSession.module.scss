@@ -473,12 +473,10 @@ $chip-bg: #FCE8D8;
   justify-content: space-between;
   gap: 24px;
   padding: 14px;
-  border-radius: 20px;
+  border-radius: 20px 20px 0 0;
   background: $card-orange;
 
   @media (width <= 1024px) {
-    // flex-direction: column;
-    // align-items: stretch;
     gap: 12px;
     border-radius: 16px 16px 0 0;
   }
@@ -486,7 +484,6 @@ $chip-bg: #FCE8D8;
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-    border-radius: 16px 16px 0 0;
   }
 }
 
