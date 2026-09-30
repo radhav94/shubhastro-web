@@ -1,7 +1,16 @@
 import styles from "./ChatWindow.module.scss";
 import walletIcon from "../../../../../assets/images/wallet-icon.svg";
+import { FreeSessionHeader } from "./freeSession/FreeSessionUI";
 
-const ChatFooter = ({ remainingTime = 0, onRecharge, onChatEnd, isChatActive, isEnding = false }) => {
+const ChatFooter = ({
+  remainingTime = 0,
+  onRecharge,
+  onChatEnd,
+  isChatActive,
+  isEnding = false,
+  isFreeSession = false,
+  isFreeSessionEnded = false,
+}) => {
   // Format time as HH:MM:SS or MM:SS
   const formatTime = (sec) => {
     const totalSec = Math.max(0, Math.floor(Number(sec) || 0));
@@ -17,7 +26,16 @@ const ChatFooter = ({ remainingTime = 0, onRecharge, onChatEnd, isChatActive, is
 
   return (
     <div className={styles.chatFooter}>
-      {isChatActive && (<div className={styles.timerText}>
+      {/*
+        Free first session (Figma 4787:30179): gift badge + orange timer pill
+        instead of "Chat Ends in". Stays after the session runs out, reading
+        "00:00 End", because the locked footer below still refers to it.
+      */}
+      {isFreeSession && (
+        <FreeSessionHeader remainingSeconds={remainingTime} isEnded={isFreeSessionEnded || !isChatActive} />
+      )}
+
+      {isChatActive && !isFreeSession && (<div className={styles.timerText}>
         Chat Ends in <span className={styles.timerHighlight}>{formatTime(remainingTime)}</span>
       </div>)}
 
@@ -36,9 +54,9 @@ const ChatFooter = ({ remainingTime = 0, onRecharge, onChatEnd, isChatActive, is
         End
       </button>)}
 
-      {isChatActive && <span className={styles.dividerLine}></span>}
+      {isChatActive && !isFreeSession && <span className={styles.dividerLine}></span>}
 
-      {isChatActive && (
+      {isChatActive && !isFreeSession && (
         <button className={styles.rechargeButton} onClick={onRecharge}>
           {/* <span>
             <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34" fill="none">

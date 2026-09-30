@@ -4,8 +4,14 @@ import { isFreeSessionEnabled } from "../featureConfig";
 import {
   refreshFreeSessionStatus,
   markFreeSessionConsumed,
+  readFreeSessionStatus,
   SESSION_ENDED_EVENT,
 } from "../auth/freeSessionStatus";
+import {
+  rememberFreeSessionRoom,
+  rememberFreeSessionCall,
+  payloadSaysFree,
+} from "../auth/freeSessionRoom";
 
 /*
  * Keeps free-session eligibility honest for the rest of the visit.
@@ -116,16 +122,48 @@ export const useFreeSessionWatcher = () => {
       markFreeSessionConsumed();
       scheduleRefresh();
     };
-    voiceSocket.on("chat:accepted", handleSessionStarted);
-    voiceSocket.on("call:accepted", handleSessionStarted);
+
+    /*
+      Chat only: before the offer is marked spent, remember whether THIS room is
+      the free session, so the chat screen can show the free-session header,
+      "ending soon" banner and locked footer (see utils/auth/freeSessionRoom).
+      Must run before markFreeSessionConsumed — afterwards the flag reads false.
+    */
+    const handleChatStarted = (data) => {
+      if (data?.roomId && (readFreeSessionStatus() === true || payloadSaysFree(data))) {
+        rememberFreeSessionRoom(data.roomId);
+      }
+      handleSessionStarted();
+    };
+    /*
+      Audio calls, same idea: remember the call's roomId so VoiceCall can show
+      the "1st Free Call" badge, the last-minute popup/banner and the locked end
+      state. VIDEO is never free (the offer covers chat and audio only), and a
+      mid-call switch (audio <-> video) is not a new session, so neither is
+      recorded. Must run before markFreeSessionConsumed, as above.
+    */
+    const handleCallStarted = (data) => {
+      const isAudio = data?.type === "audio";
+      if (
+        isAudio &&
+        data?.roomId &&
+        !data?.isSwitch &&
+        (readFreeSessionStatus() === true || payloadSaysFree(data))
+      ) {
+        rememberFreeSessionCall(data.roomId);
+      }
+      handleSessionStarted();
+    };
+    voiceSocket.on("chat:accepted", handleChatStarted);
+    voiceSocket.on("call:accepted", handleCallStarted);
 
     return () => {
       clearTimeout(timer);
       clearTimeout(confirmTimer);
       voiceSocket.off("call:ended", scheduleRefresh);
       voiceSocket.off("chat:ended", scheduleRefresh);
-      voiceSocket.off("chat:accepted", handleSessionStarted);
-      voiceSocket.off("call:accepted", handleSessionStarted);
+      voiceSocket.off("chat:accepted", handleChatStarted);
+      voiceSocket.off("call:accepted", handleCallStarted);
       window.removeEventListener(SESSION_ENDED_EVENT, scheduleRefresh);
     };
   }, []);

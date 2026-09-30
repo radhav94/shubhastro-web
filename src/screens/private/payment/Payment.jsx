@@ -5,7 +5,8 @@ import { useGetAllPlansQuery } from "../../../redux/api/plansApi/plansApi";
 import { getToken } from "../../../utils/token";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { trackEvent } from "../../../utils/analytics";
-import walletBlc from "../../../assets/images/wallet-icon.png";
+import walletIcon from "../../../assets/chat/freeSession/wallet.svg";
+import crownIcon from "../../../assets/chat/freeSession/crown.svg";
 
 /*
  * `Active` drives the `.active` box-shadow in Payment.module.scss, but no caller
@@ -22,13 +23,26 @@ const RechargePack = ({ actualPrice, discountedPrice }) => (
   // Card content only. The card styling + active state now live on the parent
   // <Link className={styles.linkWrapper}> (see Payment.module.scss), so the card
   // is a single element (the anchor) instead of an anchor wrapping a styled div.
+  // Figma 4787:30554: "₹100" with a "+₹5 Bonus" pill underneath.
   <>
-    <div className={styles.price}>₹ {actualPrice}</div>
+    <div className={styles.price}>₹{actualPrice}</div>
     {discountedPrice > 0 && (
-      <span className={styles.extra}>Bonus ₹ {discountedPrice}</span>
+      <span className={styles.extra}>+₹{discountedPrice} Bonus</span>
     )}
   </>
 );
+
+/*
+ * "Best Value" highlight (Figma 4787:30559). Driven by the plan data only — the
+ * plans API does not currently send such a flag, so until it does no card is
+ * highlighted. Any of these field names is honoured.
+ */
+const isBestValuePlan = (plan) =>
+  plan?.isBestValue === true ||
+  plan?.bestValue === true ||
+  plan?.isPopular === true ||
+  plan?.isRecommended === true ||
+  /best\s*value/i.test(String(plan?.tag || plan?.label || plan?.badge || ""));
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -135,15 +149,12 @@ const Payment = () => {
                     : `Wallet balance ${balance !== null ? `₹${Math.round(balance)}` : "₹0"}. Tap to refresh`
                 }
               >
-                <img
-                  src={walletBlc}
-                  alt=""
-                  width={30}
-                  height={30}
-                />
-                Wallet Balance
+                <span className={styles.walletIconWrap}>
+                  <img src={walletIcon} alt="" width={36} height={36} />
+                </span>
+                Current Balance
                 <span className={styles.dangerColor}>
-                  {isFetching ? "..." : balance !== null ? `₹ ${Math.round(balance)}` : "₹ 0"}
+                  {isFetching ? "..." : balance !== null ? `₹${Math.round(balance)}` : "₹0"}
                 </span>
               </button>
             </div>
@@ -174,7 +185,7 @@ const Payment = () => {
           </svg>
         </Link> */}
 
-        <div className={styles.rechargeHeader}>Add Money to Wallet</div>
+        <div className={styles.rechargeHeader}>All Recharge Plans</div>
 
         {/*
           The grid previously rendered nothing at all while the plans request was
@@ -203,7 +214,7 @@ const Payment = () => {
                 to="/recharge/payment"
                 state={{ planId: pack?._id, returnUrl }}
                 key={pack._id}
-                className={`${styles.linkWrapper} ${pendingPlanId === pack._id ? styles.active : ""}`}
+                className={`${styles.linkWrapper} ${isBestValuePlan(pack) ? styles.bestValue : ""} ${pendingPlanId === pack._id ? styles.active : ""}`}
                 aria-busy={pendingPlanId === pack._id}
                 onClick={() => {
                   // Paint the pressed state before the lazy route chunk starts
@@ -212,6 +223,12 @@ const Payment = () => {
                   trackEvent("recharge_amount_selected", { amount: pack?.actualPrice, is_preset: true });
                 }}
               >
+                {isBestValuePlan(pack) && (
+                  <span className={styles.bestValueTag}>
+                    <img src={crownIcon} alt="" width={16} height={16} />
+                    Best Value
+                  </span>
+                )}
                 <RechargePack {...pack} />
               </Link>
             ))}
