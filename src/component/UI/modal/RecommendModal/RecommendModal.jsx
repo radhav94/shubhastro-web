@@ -24,6 +24,7 @@ import { useProfileManager } from "../../../../screens/private/kundli/hooks/useP
 import { useDispatch } from "react-redux";
 import ProfileManager from "../../Profile/ProfileManager";
 import { getAstrologerDisplayName } from "../../../../utils/helper/string.utils";
+import { isPanditAIErrorEvent } from "../../../panditAI/usePanditAI";
 
 const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) => {
   const dispatch = useDispatch();
@@ -335,6 +336,10 @@ const RecommendModal = ({ open, onClose, mode = "chat", setOpen, onConnect }) =>
 
     /* ERROR */
     const handleSocketError = (err) => {
+      // Pandit AI shares this socket; its errors (e.g. insufficient balance for
+      // Pandit AI) are handled in its own chat and must not toast here or reset
+      // this screen's flow — that reset zeroed the live chat/call timer.
+      if (isPanditAIErrorEvent(err)) return;
       if (err?.message === "Call has already ended") {
         resetCallState();
         return;

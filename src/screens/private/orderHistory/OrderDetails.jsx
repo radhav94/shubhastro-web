@@ -31,6 +31,7 @@ import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
 import { getAstrologerImageUrl } from "../../../utils/appImages";
+import { isPanditAIErrorEvent } from "../../../component/panditAI/usePanditAI";
 
 const OrderDetails = () => {
   const { astrologerId } = useParams();
@@ -336,6 +337,10 @@ const OrderDetails = () => {
     // request looked like it was still connecting forever. AstrologerProfile and
     // Profile both handle it; this screen did not.
     const handleSocketError = (err) => {
+      // Pandit AI shares this socket; its errors (e.g. insufficient balance for
+      // Pandit AI) are handled in its own chat and must not toast here or reset
+      // this screen's flow — that reset zeroed the live chat/call timer.
+      if (isPanditAIErrorEvent(err)) return;
       Toast.error(err?.message || "Connection error");
       resetChatFlow();
       resetCallFlow();

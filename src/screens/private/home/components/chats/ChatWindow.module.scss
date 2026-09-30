@@ -216,18 +216,6 @@ $floating-button-gap: 14px;
   }
 }
 
-/* Free first session: the header's right side carries the wider "1st Free
-   Chat" badge + timer pill (Figma 4787:30179), so move the call buttons clear
-   of it. Phones are unaffected — the container is static there. */
-.callButtonsFree {
-  @media (min-width: 768px) {
-    right: max(calc(50% - 720px + 600px), 600px);
-  }
-  @media (min-width: 768px) and (max-width: 1024px) {
-    right: 560px;
-  }
-}
-
 .voiceCallButton,
 .videoCallButton {
   width: 40px;

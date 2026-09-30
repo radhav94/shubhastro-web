@@ -1017,9 +1017,11 @@ const ChatWindow = () => {
             isFreeSessionEnded={isFreeSessionEnded}
           />
 
-          {/* Call Buttons Below Header */}
-          {(astroAvailability.call || astroAvailability.video) && !isFreeSessionEnded && (
-            <div className={`${styles.callButtonsContainer} ${isFreeSession ? styles.callButtonsFree : ""}`}>
+          {/* Call Buttons Below Header. Hidden for the whole free first session
+              (running or ended): the free offer is a chat, and switching to a
+              call from here would leave the free flow mid-session. */}
+          {(astroAvailability.call || astroAvailability.video) && !isFreeSession && (
+            <div className={styles.callButtonsContainer}>
               {astroAvailability.call && (
                 <button
                   className={styles.voiceCallButton}

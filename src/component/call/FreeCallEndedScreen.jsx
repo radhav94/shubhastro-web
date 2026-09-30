@@ -1,27 +1,20 @@
 import { useNavigate } from "react-router-dom";
-import { IoArrowBack } from "react-icons/io5";
-import styles from "./VoiceCall.module.scss";
-import freeStyles from "./FreeCall.module.scss";
 import { useCall } from "../../context/CallContext";
-import { capitalizeWords } from "../../utils/capitalize";
-import { getAstrologerDefaultImage } from "../../utils/appImages";
 import { getUserFromStorage } from "../../utils/authStorage";
 import { PATH } from "../../utils/routes/Paths";
-import {
-  FreeSessionHeader,
-  FreeSessionLockBar,
-} from "../../screens/private/home/components/chats/freeSession/FreeSessionUI";
+import { FreeCallScreen, FreeCallLockBar } from "./FreeCallUI";
 
 /*
- * Locked end state of the user's free first-session AUDIO call (Figma "Web Free
- * chat user journey", 4787:30449, adapted to the call screen).
+ * Locked end state of the user's free first-session AUDIO call (Figma
+ * 4886:78009 "User 1st call lock"): the same call screen — header at
+ * "00:00 End", ring avatar, name, status and the final duration — without the
+ * Mute / End Call / Speaker controls, and a bottom bar offering to continue at
+ * the discounted audio rate.
  *
  * VoiceCall unmounts as soon as the call ends (activeCall is cleared), so this
  * is rendered by VideoCallContainer from the snapshot VoiceCall leaves in
- * CallContext (`endedFreeCall`). It keeps the call screen's look — header,
- * avatar — with the free badge at "00:00 End", and in place of the call
- * controls offers to continue at the discounted audio rate. The post-call
- * review modal (StickyReview) still opens on top of it, as after any call.
+ * CallContext (`endedFreeCall`). The post-call review modal (StickyReview)
+ * still opens on top of it, as after any call.
  */
 const FreeCallEndedScreen = () => {
   const { endedFreeCall, setEndedFreeCall } = useCall();
@@ -35,9 +28,9 @@ const FreeCallEndedScreen = () => {
     profileImage,
     thumbImage,
     gender,
-    role,
     experience,
     offer,
+    durationSeconds,
   } = endedFreeCall;
 
   const dismiss = () => setEndedFreeCall(null);
@@ -57,58 +50,21 @@ const FreeCallEndedScreen = () => {
     navigate("/");
   };
 
-  const onImgError = (e) => {
-    e.currentTarget.src = getAstrologerDefaultImage(gender);
-  };
-
-  const roleLabel = role ? role.charAt(0).toUpperCase() + role.slice(1).toLowerCase() : "Astrologer";
-
   return (
-    <div className={styles.fullscreenWrapper} role="dialog" aria-label="Free call ended">
-      <div className={styles.headerWrap}>
-        <div className={`${styles.header} ${freeStyles.endedHeader}`}>
-          <button className={styles.backBtn} onClick={dismiss} aria-label="Close">
-            <IoArrowBack size={24} />
-          </button>
-          <img
-            src={thumbImage || getAstrologerDefaultImage(gender)}
-            alt={callerName}
-            width={40}
-            height={40}
-            onError={onImgError}
-            className={freeStyles.endedThumb}
-          />
-          <div className={styles.astrologerInfo}>
-            <h3 className={styles.astrologerName}>{capitalizeWords(callerName)}</h3>
-            <p className={styles.astrologerExp}>
-              {roleLabel} • Exp. {experience || "0"} Years
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className={freeStyles.freeStrip}>
-        <FreeSessionHeader title="1st Free Call" isEnded className={freeStyles.freeHeader} />
-      </div>
-
-      <div className={`${styles.voiceCenter} ${freeStyles.endedCenter}`}>
-        <div className={styles.voiceCenterWrap}>
-          <div className={styles.avatarContainer}>
-            <img
-              className={`${styles.avatar} ${freeStyles.endedAvatar}`}
-              src={profileImage || getAstrologerDefaultImage(gender)}
-              alt={callerName}
-              onError={onImgError}
-            />
-          </div>
-          <h1 className={styles.callerNameTitle}>{capitalizeWords(callerName)}</h1>
-          <span className={styles.totalTime}>Your free call has ended</span>
-        </div>
-      </div>
-
-      <div className={freeStyles.lockDock}>
-        <FreeSessionLockBar
-          sessionLabel="call"
+    <FreeCallScreen
+      ariaLabel="Free call ended"
+      callerName={callerName}
+      experience={experience}
+      thumbImage={thumbImage}
+      profileImage={profileImage}
+      gender={gender}
+      isEnded
+      status="Call ended"
+      statusTone="ended"
+      durationSeconds={durationSeconds}
+      onBack={dismiss}
+      bottom={
+        <FreeCallLockBar
           userName={getUserFromStorage()?.firstName}
           profileImgUrl={thumbImage}
           gender={gender}
@@ -116,8 +72,8 @@ const FreeCallEndedScreen = () => {
           onExplore={handleExplore}
           onRecharge={handleRecharge}
         />
-      </div>
-    </div>
+      }
+    />
   );
 };
 

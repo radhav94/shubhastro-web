@@ -2,8 +2,10 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import {
   voiceSocket,
-  registerChatSession,
-  clearChatSession,
+  registerChatSession as registerSharedChatSession,
+  clearChatSession as clearSharedChatSession,
+  getActiveChatSession,
+  getActiveCallSession,
 } from "../../services/voiceSocketServices";
 import {
   useCreateChatRoomMutation,
@@ -77,17 +79,128 @@ let panditAIChatActive = false;
 let panditAIRoomId = null;
 // Flag to prevent session end when switching to voice mode
 let panditAIVoiceHandover = false;
+/*
+  Every Pandit AI room this tab has used. `panditAIRoomId` is cleared the moment
+  the bubble closes, but the server's replies to that close (chat:ended, a last
+  activity/warning) arrive afterwards. Without remembering the room, those late
+  events no longer look like Pandit AI and the astrologer-side handlers treat
+  them as the live astrologer chat ending ("Chat ended." while it is running).
+*/
+const knownPanditAIRooms = new Set();
+const rememberPanditAIRoom = (roomId) => {
+  if (roomId) knownPanditAIRooms.add(roomId);
+};
+/*
+  Set while a Pandit AI request (initiate / reconnect / message) is waiting for
+  the server. Server `error` events usually carry no roomId, so this is the only
+  way to tell "the server refused Pandit AI" apart from an error about the
+  astrologer chat or call running at the same time.
+*/
+let panditAIAwaitingSince = 0;
+const PANDIT_AI_AWAIT_WINDOW_MS = 45000;
+const markPanditAIAwaiting = () => { panditAIAwaitingSince = Date.now(); };
+const clearPanditAIAwaiting = () => { panditAIAwaitingSince = 0; };
+const isPanditAIAwaiting = () =>
+  panditAIAwaitingSince > 0 && Date.now() - panditAIAwaitingSince < PANDIT_AI_AWAIT_WINDOW_MS;
+
 export const isPanditAIChatActive = () => panditAIChatActive;
 export const setPanditAIChatActive = (active, roomId = null) => {
   panditAIChatActive = active;
-  if (roomId !== null) panditAIRoomId = roomId;
+  if (roomId !== null) {
+    panditAIRoomId = roomId;
+    rememberPanditAIRoom(roomId);
+  } else if (active) {
+    // Voice mode calls this right before emitting chat:initiate.
+    markPanditAIAwaiting();
+  }
 };
 export const setPanditAIVoiceHandover = (value) => { panditAIVoiceHandover = value; };
 export const getPanditAIRoomId = () => panditAIRoomId;
+export const isKnownPanditAIRoom = (roomId) =>
+  !!roomId && (roomId === panditAIRoomId || knownPanditAIRooms.has(roomId));
 export const isPanditAIEvent = (data = {}) =>
   data?.astrologerId === PANDIT_AI_ID ||
   data?.sender === PANDIT_AI_ID ||
-  (data?.roomId && data.roomId === panditAIRoomId);
+  isKnownPanditAIRoom(data?.roomId);
+
+const idOf = (value) => (value && typeof value === "object" ? value._id : value) || null;
+const eventAstrologerId = (data) =>
+  idOf(data?.astrologerId) || idOf(data?.recieverDetail?._id) || null;
+
+// Rooms of the astrologer chat / call that are live alongside Pandit AI.
+const otherLiveSessionRooms = () => {
+  const rooms = [];
+  const chat = getActiveChatSession();
+  const call = getActiveCallSession();
+  if (chat?.roomId && chat.astrologerId !== PANDIT_AI_ID) rooms.push(chat.roomId);
+  if (call?.roomId) rooms.push(call.roomId);
+  return rooms.filter((r) => !isKnownPanditAIRoom(r));
+};
+
+/**
+ * True when a socket-wide event is positively about some OTHER session (the
+ * astrologer chat or call), so Pandit AI must not act on it.
+ *
+ * The old per-handler guard was `data.roomId && ownRoom && data.roomId !== ownRoom`,
+ * which is disabled whenever Pandit AI's own room is not known yet — i.e. the
+ * whole time it is opening. During that window every astrologer-chat event
+ * (activity, warning, insufficient_balance, chat:ended) was applied to Pandit AI.
+ */
+export const isForeignToPanditAI = (data = {}, ownRoomId = null) => {
+  const astroId = eventAstrologerId(data);
+  if (astroId && astroId !== PANDIT_AI_ID) return true;
+  const room = data?.roomId;
+  if (!room) return false;
+  const own = ownRoomId || panditAIRoomId;
+  if (own) return room !== own;
+  if (astroId === PANDIT_AI_ID) return false;
+  return otherLiveSessionRooms().includes(room);
+};
+
+/**
+ * True when a server `error` event is Pandit AI's (so astrologer-side screens
+ * must not toast it or reset their flow/timers because of it).
+ */
+export const isPanditAIErrorEvent = (err = {}) => {
+  const astroId = eventAstrologerId(err);
+  if (astroId) return astroId === PANDIT_AI_ID;
+  if (err?.roomId) return isKnownPanditAIRoom(err.roomId);
+  return isPanditAIAwaiting();
+};
+
+/**
+ * Whether Pandit AI's own `error` handlers should act on this error. Positive
+ * attribution first; an error with nothing to attribute it by is still taken
+ * (previous behaviour) unless another live session could be its source.
+ */
+export const panditAIOwnsError = (err = {}, ownRoomId = null) => {
+  if (isPanditAIErrorEvent(err)) return true;
+  if (isForeignToPanditAI(err, ownRoomId)) return false;
+  return otherLiveSessionRooms().length === 0;
+};
+
+/*
+  voiceSocketServices keeps ONE chat-session slot for auto-reconnect. Pandit AI
+  used to overwrite it with its own room while an astrologer chat was running,
+  and clear it again on close — after which the astrologer chat was no longer
+  re-joined on a socket reconnect (the server then ended it) and incoming
+  messages without a roomId were attributed to the Pandit AI room. Pandit AI
+  re-joins its own room on "connect" (see handleSocketReconnect below), so it
+  only takes the slot when it is free, and only releases it if it holds it.
+*/
+const registerChatSession = (session) => {
+  const current = getActiveChatSession();
+  if (current?.roomId && current.astrologerId !== PANDIT_AI_ID && !isKnownPanditAIRoom(current.roomId)) {
+    return;
+  }
+  registerSharedChatSession(session);
+};
+const clearChatSession = () => {
+  const current = getActiveChatSession();
+  if (!current || current.astrologerId === PANDIT_AI_ID || isKnownPanditAIRoom(current.roomId)) {
+    clearSharedChatSession();
+  }
+};
 
 export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   const [messages, setMessages] = useState([]);
@@ -138,6 +251,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
   const setRoomId = useCallback((id) => {
     roomIdRef.current = id;
     if (id) {
+      rememberPanditAIRoom(id);
       sessionStorage.setItem("panditai_roomId", id);
     } else {
       sessionStorage.removeItem("panditai_roomId");
@@ -271,6 +385,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       if (savedRoomId) {
         panditAIChatActive = true;
         panditAIRoomId = savedRoomId;
+        rememberPanditAIRoom(savedRoomId);
+        markPanditAIAwaiting();
         registerChatSession({
           roomId: savedRoomId,
           userId: userIdLocal,
@@ -297,6 +413,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       }
 
       panditAIChatActive = true;
+      markPanditAIAwaiting();
       voiceSocket.emit("chat:initiate", {
         userId: userIdLocal,
         astrologerId: PANDIT_AI_ID,
@@ -316,6 +433,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
         console.log("[PanditAI] Socket reconnected, emitting chat:reconnect");
         panditAIChatActive = true;
         panditAIRoomId = currentRoomId;
+        markPanditAIAwaiting();
         registerChatSession({
           roomId: currentRoomId,
           userId: userIdLocal,
@@ -331,6 +449,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       } else if (!chatEndedRef.current) {
         // No roomId yet, re-initiate
         panditAIChatActive = true;
+        markPanditAIAwaiting();
         voiceSocket.emit("chat:initiate", {
           userId: userIdLocal,
           astrologerId: PANDIT_AI_ID,
@@ -359,6 +478,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
 
     // Reset typing indicator when closed
     setSending(false);
+    clearPanditAIAwaiting();
 
     // If voice mode is taking over, don't end the session
     if (panditAIVoiceHandover) {
@@ -432,6 +552,8 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     if (!isOpen) return;
 
     const handleChatRoom = (data) => {
+      // chat:room is also the reply to an astrologer chat request.
+      if (isForeignToPanditAI(data, roomIdRef.current)) return;
       if (data?.roomId) {
         setRoomId(data.roomId);
         panditAIRoomId = data.roomId;
@@ -445,7 +567,10 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     };
 
     const handleChatAccepted = (data) => {
+      // An astrologer accepting a chat while this bubble is open is not ours.
+      if (isForeignToPanditAI(data, roomIdRef.current)) return;
       if (data?.roomId) {
+        clearPanditAIAwaiting();
         setRoomId(data.roomId);
         panditAIRoomId = data.roomId;
         registerChatSession({
@@ -472,9 +597,10 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     };
 
     const handleReconnected = (data) => {
-      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      if (isForeignToPanditAI(data, roomIdRef.current)) return;
       console.log("[PanditAI] Chat reconnected:", data?.roomId);
       if (data?.roomId) {
+        clearPanditAIAwaiting();
         setRoomId(data.roomId);
         panditAIRoomId = data.roomId;
         panditAIChatActive = true;
@@ -508,6 +634,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       if (data.sender === "user") return;
 
       clearResponseTimer();
+      clearPanditAIAwaiting();
 
       const text = data.message || data.response;
       const failed = isFailureReply(data, text);
@@ -565,8 +692,16 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
     };
 
     const handleError = (err) => {
+      /*
+        The socket is shared with the astrologer chat/call, and the server
+        broadcasts `error` to every listener. An error belonging to the other
+        session used to tear this chat down (room cleared, "couldn't reach my
+        readings" bubble) while Pandit AI itself was fine.
+      */
+      if (err?.code !== "CONTENT_BLOCKED" && !panditAIOwnsError(err, roomIdRef.current)) return;
       console.error("[PanditAI] Socket error:", err);
       clearResponseTimer();
+      clearPanditAIAwaiting();
       // CONTENT_BLOCKED — remove the user's message (unsend it)
       if (err?.code === "CONTENT_BLOCKED") {
         setMessages((prev) => prev.slice(0, -1));
@@ -587,14 +722,18 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       }
     };
 
-    const handleRejected = () => {
+    const handleRejected = (data) => {
+      if (isForeignToPanditAI(data, roomIdRef.current)) return;
+      clearPanditAIAwaiting();
       panditAIRoomId = null;
       panditAIChatActive = false;
     };
 
     const handleChatEnded = (data) => {
-      if (data?.roomId && roomIdRef.current && data.roomId !== roomIdRef.current) return;
+      // The astrologer chat ending must not wipe this conversation.
+      if (isForeignToPanditAI(data, roomIdRef.current)) return;
       chatEndedRef.current = true;
+      clearPanditAIAwaiting();
       clearResponseTimer();
       setRoomId(null);
       panditAIRoomId = null;
@@ -798,6 +937,7 @@ export default function usePanditAI({ isOpen, lang = "en-IN" }) {
       }
 
       if (voiceSocket.connected) {
+        markPanditAIAwaiting();
         const kundliId = options.kundliId !== undefined ? options.kundliId : (selectedKundli?._id || null);
         voiceSocket.emit("chat:message", {
           sender: "user",
