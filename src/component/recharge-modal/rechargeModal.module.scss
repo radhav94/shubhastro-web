@@ -22,8 +22,9 @@
 
 // Modal Container
 .modalContainer {
-  background: linear-gradient(90deg, #fefefee6, #fff8ece6);
+  // background: linear-gradient(90deg, #fefefee6, #fff8ece6);
   // backdrop-filter: blur(8px);
+  background: #fff;
   border-radius: 20px;
   width: 100%;
   max-width: 900px;
@@ -56,6 +57,7 @@
   color: #111827;
   margin: 0;
   letter-spacing: 0.3px;
+  margin-block: 24px 10px;
 }
 
 .closeButton {
@@ -158,16 +160,17 @@
   padding: 10px 0;
 }
 
-// Plan Card — matching /recharge page style
+// Plan Card — matched to the /recharge page card (Payment.module.scss .linkWrapper):
+// deeper cream background, transparent border that turns orange when selected,
+// gradient price and an outlined bonus pill.
 .planCard {
-  border: 1px solid rgba(229, 99, 41, 0.50);
-  background: #FFF5EC;
-  border-radius: 14px;
-  padding: 16px 10px;
+  border: 2px solid transparent;
+  background: #FFF3D6;
+  border-radius: 12px;
+  padding: 12px 6px;
   text-align: center;
   cursor: pointer;
   transition: 0.25s ease;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
   min-height: 91px;
   display: flex;
   align-items: center;
@@ -203,11 +206,16 @@
     }
   }
 
+  // Selected = the page's "Best Value" treatment: orange border and a filled
+  // gradient bonus pill.
   &.selected {
     border-color: #f75801;
-    border-width: 2px;
-    background: #fff0e6;
-    box-shadow: 0 8px 24px rgba(247, 88, 1, 0.2);
+
+    .extraAmount {
+      background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+      border-color: #F75801;
+      color: #fff;
+    }
   }
 
   &:focus {
@@ -231,18 +239,32 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
+// Gradient price, matching .price on the recharge page.
 .mainPrice {
-  font-size: 20px;
-  font-weight: 600;
-  color: #030303;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: normal;
+  background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
+// Outlined bonus pill, matching .extra on the recharge page. Fills with the
+// gradient when the card is selected (see .planCard.selected above).
 .extraAmount {
-  font-size: 14px;
+  display: inline-block;
+  padding: 5px 12px;
+  border: 1px solid #F75801;
+  border-radius: 100px;
+  background-color: #FFF3D6;
+  font-size: 13px;
   font-weight: 600;
+  line-height: normal;
+  white-space: nowrap;
   color: #F75801;
 }
 
@@ -449,17 +471,19 @@
   }
 
   .planCard {
-    padding: 12px 8px;
+    padding: 12px 6px;
     min-height: 75px;
-    border-radius: 10px;
+    border-radius: 12px;
   }
 
   .mainPrice {
     font-size: 18px;
   }
 
+  // Matches the recharge page's mobile bonus pill.
   .extraAmount {
-    font-size: 12px;
+    padding: 4px 6px;
+    font-size: 10px;
   }
 
   .loadingContainer {
