@@ -849,10 +849,14 @@ const Profile = () => {
       if (currentPage === 1) {
         setAllLoadedTransactions(cachedTransactions);
       } else {
-        setAllLoadedTransactions((prev) => [
-          ...prev,
-          ...cachedTransactions,
-        ]);
+        // `currentPage` changes before the next page has arrived, so this effect
+        // runs once with the PREVIOUS page's data still in `cachedTransactions`
+        // and again when the real page lands. Appending both showed every
+        // transaction twice while scrolling. Skip rows that are already loaded.
+        setAllLoadedTransactions((prev) => {
+          const loaded = new Set(prev.map((t) => t._id));
+          return [...prev, ...cachedTransactions.filter((t) => !loaded.has(t._id))];
+        });
       }
     }
   }, [cachedTransactions, currentPage, shouldFetch]);

@@ -86,6 +86,15 @@ const reportFirstError = (errors) => {
   return true;
 };
 
+// Releases focus from a text field when the tap landed on plain header text.
+const blurActiveField = (e) => {
+  if (e.target.closest("button, a, input, select, textarea")) return;
+  const el = document.activeElement;
+  if (el && el !== document.body && el.matches?.("input, textarea, select")) {
+    el.blur();
+  }
+};
+
 const ScrollToError = ({ errors, submitCount, isValidating, reportedSubmitRef }) => {
   // Formik hands back a fresh `errors` object on every validation pass, and
   // validateOnBlur is on — so keying the effect on `errors` alone would re-run it
@@ -497,7 +506,15 @@ const AddProfileModal = ({
       onClick={handleOverlayClick}
     >
       <div className={styles.sideSheet} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.sheetHeader}>
+        {/*
+          Tapping the heading or the line under it now puts the field being
+          edited down, which on a phone is how a visitor gets the keyboard out of
+          the way. The header is plain text, so that tap did nothing — Clarity
+          rms878 logged a dead click on "Add Kundli Details" at 00:55, between
+          two bursts of typing. The grabber and the ✕ are buttons and are left to
+          close the sheet as before.
+        */}
+        <div className={styles.sheetHeader} onClick={blurActiveField}>
           {/* The grabber bar was a bare <div>: it is the universal "drag or tap
               me to dismiss" affordance on a bottom sheet, and it did nothing.
               Same defect, same fix as the zodiac sheet on the horoscope screens —

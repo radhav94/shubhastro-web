@@ -89,21 +89,54 @@ const GuestDetailsForm = ({
     e.currentTarget.parentElement?.querySelector('button[tabindex="-1"]')?.click();
   };
 
+  /*
+    One rule per field so name and mobile can also be checked on blur, right
+    next to the field. Validation used to run only on submit, so a mistyped
+    number surfaced after the guest had filled all six fields: Clarity 1luhtsx
+    (Instagram WebView, Android) entered the number at 00:43, completed the rest
+    of the form, and only learned it was invalid on tapping Continue at 01:36 —
+    then spent until 02:07 fixing it. GuestChatFlow had the same gap and the
+    same fix.
+  */
+  const validateField = (key) => {
+    switch (key) {
+      case "name":
+        return validatePersonName(form.name, { requiredError: "Please enter your name" }) || undefined;
+      case "mobileNumber":
+        return /^[6-9]\d{9}$/.test(form.mobileNumber || "")
+          ? undefined
+          : "Enter a valid 10-digit mobile number";
+      case "identity":
+        return form.identity ? undefined : "Please select your gender";
+      case "dob":
+        if (!form.dob) return "Please select your date of birth";
+        // This form registers the account, so the DOB is the account holder's.
+        if (!isAdultDob(form.dob)) return UNDERAGE_ERROR;
+        return undefined;
+      case "time":
+        return !form.unknownBirthTime && !form.time ? "Please select your birth time" : undefined;
+      case "birthPlace":
+        if (!form.birthPlace.trim()) return "Please select your place of birth";
+        if (!form.latitude || !form.longitude) return "Please pick a location from the dropdown";
+        return undefined;
+      default:
+        return undefined;
+    }
+  };
+
   const validate = () => {
     const e = {};
-    const nameErr = validatePersonName(form.name, { requiredError: "Please enter your name" });
-    if (nameErr) e.name = nameErr;
-    if (!/^[6-9]\d{9}$/.test(form.mobileNumber || ""))
-      e.mobileNumber = "Enter a valid 10-digit mobile number";
-    if (!form.identity) e.identity = "Please select your gender";
-    if (!form.dob) e.dob = "Please select your date of birth";
-    // This form registers the account, so the DOB is the account holder's.
-    else if (!isAdultDob(form.dob)) e.dob = UNDERAGE_ERROR;
-    if (!form.unknownBirthTime && !form.time) e.time = "Please select your birth time";
-    if (!form.birthPlace.trim()) e.birthPlace = "Please select your place of birth";
-    else if (!form.latitude || !form.longitude)
-      e.birthPlace = "Please pick a location from the dropdown";
+    FIELD_ORDER.forEach((key) => {
+      const message = validateField(key);
+      if (message) e[key] = message;
+    });
     return e;
+  };
+
+  // Surface a problem the moment the user leaves the field.
+  const handleBlur = (key) => {
+    const message = validateField(key);
+    setErrors((e) => ({ ...e, [key]: message }));
   };
 
   const handleSubmit = () => {
@@ -198,6 +231,7 @@ const GuestDetailsForm = ({
             className={styles.input}
             value={form.name}
             onChange={(e) => setField("name", e.target.value)}
+            onBlur={() => handleBlur("name")}
             placeholder="Enter your name"
           />
         </div>
@@ -232,6 +266,7 @@ const GuestDetailsForm = ({
             onChange={(e) =>
               setField("mobileNumber", e.target.value.replace(/[^0-9]/g, "").slice(0, 10))
             }
+            onBlur={() => handleBlur("mobileNumber")}
             placeholder="Enter mobile number"
           />
         </div>

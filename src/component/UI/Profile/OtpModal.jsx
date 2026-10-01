@@ -198,7 +198,23 @@ const OtpModal = ({
       className={`${styles.modalOverlay} ${inline ? styles.inline : ""}`}
       onClick={closeOnOverlayClick && !inline ? onClose : undefined}
     >
-      <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
+      {/*
+        A tap on the sheet's plain text — the title, the "sent via SMS to" line,
+        the "Resend OTP in 0:42" countdown — puts the cursor back in the code
+        field, as tapping the six boxes already does. Those lines did nothing, and
+        they are where a visitor taps while waiting for the SMS: Clarity 1hmllnz
+        (Facebook, mobile) shows a cluster of taps on the countdown at 05:04 with
+        empty boxes, a dead click, then the title at 05:11 before closing the
+        sheet. Buttons are left to do their own job.
+      */}
+      <div
+        className={styles.sheet}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (e.target.closest("button, input, a")) return;
+          inputRef.current?.focus();
+        }}
+      >
         <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
           ×
         </button>
