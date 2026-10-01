@@ -112,7 +112,7 @@ $orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
 }
 
 .kicker {
-  margin: 0 0 -8px;
+  // margin: 0 0 -8px;
   font-size: 28px;
   font-weight: 500;
   line-height: normal;
@@ -120,10 +120,10 @@ $orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
 }
 
 .headline {
-  margin: 0 0 -8px;
+  // margin: 0 0 -8px;
   font-size: 74px;
   font-weight: 600;
-  line-height: normal;
+  line-height: 1.5;
   background: $orange-gradient;
   -webkit-background-clip: text;
   background-clip: text;
