@@ -643,3 +643,82 @@ $chip-bg: #FCE8D8;
     }
   }
 }
+
+/* ==================== "CONTINUES ON WALLET" NOTICE ==================== */
+/* Last minute of a free session the wallet can carry on: the ending banner's
+   strip, but informational — dark copy, one line where it fits, no CTA. */
+.continueNotice {
+  padding-top: 12px;
+  padding-bottom: 12px;
+
+  @media (width <= 1180px) {
+    padding: 10px 16px;
+  }
+}
+
+.continueNotice .endingBannerInner {
+  gap: 10px;
+  min-width: 0;
+
+  @media (width <= 1180px) {
+    justify-content: center;
+  }
+  /* Keep icon + copy side by side on the narrowest phones (the ending
+     banner stacks there because it has a button to fit). */
+  @media (width <= 400px) {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+  }
+}
+
+.continueNoticeIcon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+
+  @media (width <= 767px) {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.continueNoticeText {
+  margin: 0;
+  min-width: 0;
+  color: $secondary-text;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+
+  @media (width <= 767px) {
+    font-size: 13px;
+  }
+}
+
+.continueNoticeLead {
+  color: $heading;
+  font-weight: 600;
+}
+
+.continueNoticeTime {
+  @include gradient-text;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.continueNoticeSep {
+  margin: 0 8px;
+
+  @media (width <= 767px) {
+    display: none;
+  }
+}
+
+/* Phones: the "continues at ₹X/min" half on its own line. */
+.continueNoticeRest {
+  @media (width <= 767px) {
+    display: block;
+  }
+}

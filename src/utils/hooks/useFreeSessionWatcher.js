@@ -9,8 +9,15 @@ import {
 import {
   rememberFreeSessionRoom,
   rememberFreeSessionCall,
+  rememberFreeSessionMeta,
+  freeSessionCallId,
   payloadSaysFree,
+  isEmergencySession,
+  clearEmergencyRequest,
+  isLiveSession,
+  clearLiveRequest,
 } from "../auth/freeSessionRoom";
+import { resolveFreeAllowanceSeconds } from "../../screens/private/home/components/chats/freeSession/freeSessionUtils";
 
 /*
  * Keeps free-session eligibility honest for the rest of the visit.
@@ -38,6 +45,14 @@ import {
  * after closing a session, and until this resolves those still say "Free".
  */
 const REFRESH_DELAY_MS = 1200;
+
+// Astrologer of an accepted payload (shapes vary across chat / call events).
+const sessionAstrologerIdOf = (data) =>
+  data?.astrologerId?._id ||
+  data?.astrologerId ||
+  data?.astrologerDetail?._id ||
+  data?.astrologer?._id ||
+  null;
 
 /*
  * Second, confirming read — only when the first one still says the user has a
@@ -125,14 +140,48 @@ export const useFreeSessionWatcher = () => {
     };
 
     /*
+      A session requested from an astrologer's LIVE STREAM (SHB-2148).
+
+      It is never recorded as the free session: it is requested from the live
+      room, wallet-checked up front (LiveView) and billed at the live rate, so
+      it must not show the free UI or end on the locked free-call screen.
+
+      Nor is the free offer spent locally — same rule as emergency sessions: the
+      offer is "the first session at the free rate", which a paid live session
+      is not. The profile is re-read instead, so if the backend DOES count a
+      live session as using up the offer, `isFirstSessionFree` follows it.
+      (Backend to confirm which it is.)
+    */
+    const handleLiveSessionStarted = (data) => {
+      if (!data?.isSwitch) clearLiveRequest(sessionAstrologerIdOf(data));
+      scheduleRefresh();
+    };
+
+    /*
       Chat only: before the offer is marked spent, remember whether THIS room is
       the free session, so the chat screen can show the free-session header,
       "ending soon" banner and locked footer (see utils/auth/freeSessionRoom).
       Must run before markFreeSessionConsumed — afterwards the flag reads false.
     */
     const handleChatStarted = (data) => {
+      // Emergency sessions are always paid: not the free session, and they
+      // must not use up the free offer either. Just re-read the profile.
+      if (isEmergencySession(data)) {
+        clearEmergencyRequest();
+        scheduleRefresh();
+        return;
+      }
+      // Live-stream sessions are never the free session either (SHB-2148) —
+      // see handleLiveSessionStarted.
+      if (isLiveSession(data)) {
+        handleLiveSessionStarted(data);
+        return;
+      }
       if (data?.roomId && (readFreeSessionStatus() === true || payloadSaysFree(data))) {
         rememberFreeSessionRoom(data.roomId);
+        // Start time + free allowance (when the payload has one) so the free
+        // part can be timed on its own — see freeSessionUtils.getFreeSecondsLeft.
+        rememberFreeSessionMeta(data.roomId, resolveFreeAllowanceSeconds(data));
       }
       handleSessionStarted();
     };
@@ -144,6 +193,18 @@ export const useFreeSessionWatcher = () => {
       recorded. Must run before markFreeSessionConsumed, as above.
     */
     const handleCallStarted = (data) => {
+      // Emergency calls (audio or video) are always paid — see handleChatStarted.
+      if (isEmergencySession(data)) {
+        if (!data?.isSwitch) clearEmergencyRequest();
+        scheduleRefresh();
+        return;
+      }
+      // A call placed from a live stream (SHB-2148): not the free call, so no
+      // free badge / countdown and no locked FreeCallEndedScreen at the end.
+      if (isLiveSession(data)) {
+        handleLiveSessionStarted(data);
+        return;
+      }
       const isAudio = data?.type === "audio";
       if (
         isAudio &&
@@ -152,6 +213,7 @@ export const useFreeSessionWatcher = () => {
         (readFreeSessionStatus() === true || payloadSaysFree(data))
       ) {
         rememberFreeSessionCall(data.roomId);
+        rememberFreeSessionMeta(freeSessionCallId(data.roomId), resolveFreeAllowanceSeconds(data));
       }
       handleSessionStarted();
     };

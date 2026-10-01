@@ -88,7 +88,8 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
       // into the onboarding wizard for profile setup — unless the device limit
       // popup needs to show, which only renders on Home.
       if (isRegistered || deviceLimitReached) {
-        navigate(resolvePostLoginRedirect(PATH.privateRoutes.HOME.path), { replace: true });
+        // Post-login landing page is the astrologers list (not home).
+        navigate(resolvePostLoginRedirect(PATH.privateRoutes.ASTROLOGERS_LIST.path || "/astrologers"), { replace: true });
         return;
       }
 

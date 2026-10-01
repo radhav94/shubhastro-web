@@ -57,9 +57,49 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
 
   // No local countdown — just display what the backend sends via activity events
 
+  // Latest wallet/rate for deriving a paid timer when an event omits one.
+  const walletBalanceRef = useRef(walletBalance);
+  walletBalanceRef.current = walletBalance;
+  const ratePerMinuteRef = useRef(ratePerMinute);
+  ratePerMinuteRef.current = ratePerMinute;
+
   // Socket event handlers
   useEffect(() => {
     if (!isOpen) return;
+
+    /*
+      Put the session in the paid state (SHB-2116): free badge off, paid badge
+      (balance, ₹/min, remaining time) on. Used when a session starts or resumes
+      with no free minutes left.
+
+      The paid badge needs a remaining time. If the event carries none, derive it
+      from wallet ÷ rate (whole minutes, in seconds — the same unit as the
+      backend's `remainingTime`). If even that is impossible, keep the zero free
+      count so the header still says "Free time used" rather than going blank
+      (see the badge notes in PanditAIBubble) until the first `activity` tick.
+    */
+    const applyPaidState = (data, fmr) => {
+      setIsFreePeriod(false);
+      const rawBalance =
+        data?.walletBalance !== undefined && data?.walletBalance !== null
+          ? data.walletBalance
+          : walletBalanceRef.current;
+      // Unknown balance (null) must not read as ₹0 and show a 00:00 timer.
+      const balance = rawBalance === null || rawBalance === undefined ? NaN : Number(rawBalance);
+      const rate = Number(
+        data?.ratePerMinute || data?.astrologer?.price?.chatRate?.amount || ratePerMinuteRef.current
+      );
+      let remaining = data?.remainingTime;
+      if ((remaining === undefined || remaining === null) && rate > 0 && Number.isFinite(balance)) {
+        remaining = Math.max(0, Math.floor(balance / rate)) * 60;
+        setRemainingPaidTime(remaining);
+      }
+      if (remaining !== undefined && remaining !== null) {
+        setFreeMinutesRemaining(null);
+      } else {
+        setFreeMinutesRemaining(fmr !== undefined && fmr !== null ? fmr : null);
+      }
+    };
 
     const handleChatAccepted = (data) => {
       if (data?.astrologerId !== "6928390dc00d56953b586c04") return;
@@ -70,17 +110,38 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       // Free chat starts at 5 minutes (backend sends `freeMinutesRemaining`).
       const fmr = data.freeMinutesRemaining ?? data.freeMinutesRemainingToday;
       const freeMin = fmr !== undefined && fmr !== null ? fmr : 5;
-      setFreeMinutesRemaining(freeMin);
-      setIsFreePeriod(freeMin > 0);
       if (data.freeMinutesUsedToday !== undefined) setFreeMinutesUsed(data.freeMinutesUsedToday);
       if (data.walletBalance !== undefined) setWalletBalance(data.walletBalance);
       if (data.ratePerMinute !== undefined) setRatePerMinute(data.ratePerMinute);
-      if (data.remainingTime !== undefined) {
-        setRemainingPaidTime(data.remainingTime);
-      }
       // Extract ratePerMinute from astrologer pricing if not directly provided
       if (!data.ratePerMinute && data.astrologer?.price?.chatRate?.amount) {
         setRatePerMinute(data.astrologer.price.chatRate.amount);
+      }
+      if (data.remainingTime !== undefined) {
+        setRemainingPaidTime(data.remainingTime);
+      }
+
+      /*
+        SHB-2116 — a NEW chat after today's free minutes are used up.
+
+        chat:accepted reports `freeMinutesRemaining: 0` for such a user. That
+        used to be stored as-is, and the header's free badge renders 0 as "Free
+        time used" while the paid badge (balance · ₹/min · timer) requires
+        freeMinutesRemaining == null. So a new paid chat opened on "Free time
+        used" and stayed there until the first `activity` tick, which is what
+        flips freeMinutesRemaining to null. A page refresh "fixed" it, presumably
+        because the chat:reconnect payload carries no free count for a paid
+        session (inferred from the reported behaviour, not seen on the wire).
+
+        A session that STARTS with zero free minutes is a paid session from its
+        first second, so put it in the paid state straight away. Users who still
+        have free minutes (fmr > 0) are untouched.
+      */
+      if (freeMin > 0) {
+        setFreeMinutesRemaining(freeMin);
+        setIsFreePeriod(true);
+      } else {
+        applyPaidState(data, freeMin);
       }
     };
 
@@ -208,13 +269,6 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
 
       // Full state refresh from reconnect
       const fmr = data.freeMinutesRemaining ?? data.freeMinutesRemainingToday;
-      if (fmr !== undefined && fmr !== null) {
-        setFreeMinutesRemaining(fmr);
-        setIsFreePeriod(fmr > 0);
-      } else {
-        setIsFreePeriod(false);
-        setFreeMinutesRemaining(null);
-      }
       if (data.freeMinutesUsedToday !== undefined) setFreeMinutesUsed(data.freeMinutesUsedToday);
       if (data.freeMinutesAllocated !== undefined) setFreeMinutesAllocated(data.freeMinutesAllocated);
       if (data.dayKeyIST) setDayKeyIST(data.dayKeyIST);
@@ -224,6 +278,14 @@ export default function useAIFreeMinutes({ isOpen, roomId }) {
       // Extract ratePerMinute from astrologer pricing if not directly provided
       if (!data.ratePerMinute && data.astrologer?.price?.chatRate?.amount) {
         setRatePerMinute(data.astrologer.price.chatRate.amount);
+      }
+      if (fmr !== undefined && fmr !== null && fmr > 0) {
+        setFreeMinutesRemaining(fmr);
+        setIsFreePeriod(true);
+      } else {
+        // Absent or 0 -> paid. Same normalisation as chat:accepted (SHB-2116),
+        // so a reconnect and a fresh chat land on the same header.
+        applyPaidState(data, fmr);
       }
     };
 

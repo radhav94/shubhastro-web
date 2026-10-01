@@ -21,6 +21,7 @@ import { useLiveList } from "../../../../../context/LiveListContext";
 import { useCall } from "../../../../../context/CallContext";
 import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import { rememberLiveRequest } from "../../../../../utils/auth/freeSessionRoom";
 import { ownsRoom } from "../../../../../utils/tabSession";
 import WaitingModal from "../../../../../component/UI/modal/waitingModal/WaitingModal";
 import WaitlistModal from "../../../../../component/UI/modal/waitlistModal/WaitlistModal";
@@ -898,6 +899,9 @@ const LiveView = (props) => {
     callingChannelRef.current = props.channel;
     localStorage.setItem("selectedAstroId", astrologerId);
 
+    // Remembered so the accepted call is never taken for the free session
+    // (SHB-2148) — the accepted payload does not echo `isLive`.
+    rememberLiveRequest(astrologerId);
     voiceSocket.emit("call:initiate", {
       userId: userIdLocal,
       astrologerId,
@@ -1013,6 +1017,9 @@ const LiveView = (props) => {
     setWaitingList(5);
 
     // Emit socket event to initiate call
+    // Remembered so the accepted call is never taken for the free session
+    // (SHB-2148) — the accepted payload does not echo `isLive`.
+    rememberLiveRequest(astrologerId);
     voiceSocket.emit("call:initiate", {
       userId: userIdLocal,
       astrologerId,
@@ -2195,6 +2202,7 @@ const LiveView = (props) => {
                     removePendingConnection(roomId);
                     // Re-initiate call/chat
                     const initiateEvent = type === "chat" ? "chat:initiate" : "call:initiate";
+                    rememberLiveRequest(conn?.astrologer?._id || astrologerId);
                     voiceSocket.emit(initiateEvent, {
                       userId,
                       astrologerId: conn?.astrologer?._id || astrologerId,

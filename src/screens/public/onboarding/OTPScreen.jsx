@@ -347,13 +347,14 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
                 navigate(redirectPath);
               }, 500);
             } else {
-              // No redirect path, go to home
-              console.log("ℹ️ No valid redirect path, going to home");
+              // No redirect path: back to the page that sent them, else the
+              // astrologers list (the post-login landing page, not home).
+              console.log("ℹ️ No valid redirect path, going to astrologers");
               console.log("📍 redirectPath value:", redirectPath);
               // toast.success("Welcome back!");
               setTimeout(() => {
-                console.log("🚀 Executing navigate to home");
-                navigate(location?.state?.from || PATH.privateRoutes.HOME.path,{ replace: true });
+                console.log("🚀 Executing navigate to astrologers");
+                navigate(location?.state?.from || PATH.privateRoutes.ASTROLOGERS_LIST.path || "/astrologers", { replace: true });
               }, 500);
             }
           } else {

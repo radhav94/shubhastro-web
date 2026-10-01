@@ -1345,3 +1345,77 @@ $chip-bg: #FCE8D8;
     outline-offset: 3px;
   }
 }
+
+/* ==================== "CONTINUES ON WALLET" NOTICE ==================== */
+/* Last minute of a free call the wallet can carry on: the ending banner's
+   strip (same place, same background), informational only — no button. */
+.continueNotice {
+  padding-top: 12px;
+  padding-bottom: 12px;
+
+  @media (width <= 1180px) {
+    padding: 10px 16px;
+  }
+}
+
+.continueInner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.continueIcon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+
+  @media (width <= 767px) {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.continueText {
+  margin: 0;
+  min-width: 0;
+  color: $secondary-text;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+
+  @media (width <= 767px) {
+    font-size: 13px;
+  }
+}
+
+.continueLead {
+  color: $heading;
+  font-weight: 600;
+}
+
+.continueTime {
+  @include gradient-text;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.continueSep {
+  margin: 0 8px;
+
+  @media (width <= 767px) {
+    display: none;
+  }
+}
+
+/* Phones: the "continues at ₹X/min" half on its own line. */
+.continueRest {
+  @media (width <= 767px) {
+    display: block;
+  }
+}

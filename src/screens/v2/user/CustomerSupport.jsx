@@ -9,6 +9,20 @@ import Toast from "../../../component/toast";
 import styles from "./CustomerSupport.module.scss";
 import { trackEvent } from "../../../utils/analytics";
 
+// Pull the server's reason out of an RTK Query rejection (`err.data` is the
+// decrypted JSON body). Backends here send it as `message`, `error` (string) or
+// `error.message`; anything non-string is ignored so the caller can fall back.
+const getTicketErrorMessage = (err) => {
+  const data = err?.data;
+  const candidates = [
+    data?.message,
+    typeof data?.error === "string" ? data.error : data?.error?.message,
+    data?.data?.message,
+  ];
+  const found = candidates.find((m) => typeof m === "string" && m.trim());
+  return found ? found.trim() : "";
+};
+
 const CustomerSupport = () => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
@@ -273,10 +287,17 @@ const CustomerSupport = () => {
       };
 
       setMessages((prev) => [...prev, botResponse]);
-    } catch {
+    } catch (err) {
       // privateRequestNew raises its own toast; this keeps the reason next to the
       // button so a retry isn't a guess. The modal and the typed text stay put.
-      setTicketError("Couldn't submit your ticket. Please check your connection and try again.");
+      // When the server refused the ticket (e.g. SHB-2097: a ticket already exists
+      // for this session after a refund was approved), show its own message —
+      // a generic "check your connection" would send the visitor retrying a
+      // request that will never succeed.
+      setTicketError(
+        getTicketErrorMessage(err) ||
+          "Couldn't submit your ticket. Please check your connection and try again."
+      );
     } finally {
       setIsSubmittingTicket(false);
     }

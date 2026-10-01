@@ -488,8 +488,11 @@ const Onboarding = () => {
           localStorage.removeItem("shubhtalk_redirect_after_login");
           navigate(redirectPath);
         } else {
-          // Fall back to the page that sent us here before defaulting to home.
-          navigate(fromPath || PATH.privateRoutes.HOME.path || "/");
+          // Fall back to the page that sent us here; otherwise a newly
+          // registered user lands on the astrologers list (not home), so the
+          // next step — picking an astrologer for the free session — is right
+          // in front of them.
+          navigate(fromPath || PATH.privateRoutes.ASTROLOGERS_LIST.path || "/astrologers");
         }
       }}
     />,

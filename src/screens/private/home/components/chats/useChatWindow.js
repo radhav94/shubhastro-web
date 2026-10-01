@@ -35,7 +35,11 @@ export default function useChat({
   setOpenFeedback,
   astrologerName,
   fullName,
-  refreshKey = 0
+  refreshKey = 0,
+  // Ref to `(warning) => boolean`: true skips the toast. The free first
+  // session handles its own wallet messaging (see ChatWindow), so the
+  // server's paid low-balance warning must not fire on top of it.
+  suppressWarningRef = null,
 }) {
   const { startTimer, stopTimer, chatSeconds, setActiveChat, activeChat, reconnectToChat } = useChatContext();
   const { activeCall, openReview } = useCall();
@@ -312,6 +316,7 @@ export default function useChat({
         // setHighLightText("")
       },
       onWarn: (msg) => {
+        if (suppressWarningRef?.current?.(msg)) return;
         toast.warning(msg + " warning" || "Something went wrong");
       },
     });
@@ -529,6 +534,7 @@ export default function useChat({
     const handleWarning = (msg) => {
       // Pandit AI's low-balance warning belongs to Pandit AI, not this chat.
       if (isPanditAIEvent(msg)) return;
+      if (suppressWarningRef?.current?.(msg)) return;
       toast.warning(msg.message);
     }
 
