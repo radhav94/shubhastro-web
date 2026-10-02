@@ -2442,3 +2442,54 @@ $floating-button-gap: 14px;
   background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
   color: #fff;
 }
+
+/* ==================== FREE FIRST SESSION — phones (Figma 5055:78397) ====================
+ * While the free session is running the header splits into two rows, as in
+ * the mobile design: back + avatar + name/exp on top, and the full-width
+ * "Free tag" card (gift, "1st Free Chat" / "Free session active", divider,
+ * timer pill) under it. The card itself is styled in
+ * freeSession/FreeSession.module.scss. Paid chats keep the one-row header.
+ */
+@media (max-width: 767px) {
+  .header.headerFree {
+    flex-wrap: wrap;
+    align-content: flex-start;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    padding: 8px;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .header.headerFree .headerLeft {
+    flex: 1 1 100%;
+    gap: 12px;
+  }
+
+  .header.headerFree .backIcon {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border-width: 0.667px;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .header.headerFree .headerAvatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header.headerFree .headerRight {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .header.headerFree .headerRight .chatFooter {
+    width: 100%;
+  }
+}

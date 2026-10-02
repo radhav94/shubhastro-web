@@ -861,24 +861,23 @@ $chip-bg: #FCE8D8;
     flex: 1 1 auto;
   }
 
-  @media (width <= 400px) {
-    gap: 8px;
+  /* Phones: stack full width, primary action on top — side by side the
+     labels ran out of their buttons at 375px. */
+  @media (width <= 480px) {
+    flex-direction: column-reverse;
+    gap: 10px;
 
-    .remindBtn {
-      padding: 12px 8px;
-      font-size: 14px;
+    .remindBtn,
+    .rechargeBtn {
+      flex: 0 0 auto;
+      width: 100%;
+      height: 48px;
     }
 
     .rechargeBtn {
-      gap: 6px;
-      padding: 12px 10px;
-      font-size: 14px;
+      justify-content: center;
+      gap: 10px;
     }
-  }
-
-  /* Smallest phones: stack, primary action on top. */
-  @media (width <= 340px) {
-    flex-direction: column-reverse;
   }
 }
 
@@ -1417,5 +1416,178 @@ $chip-bg: #FCE8D8;
 .continueRest {
   @media (width <= 767px) {
     display: block;
+  }
+}
+
+
+/* ==================== PHONES — Figma "User 1st call" mobile (5055:78397) ====================
+ * The header splits into two rows: back + avatar + name/exp on top, and a
+ * full-width cream "Free tag" card under it (gift, "1st Free Call" /
+ * "Free session active", divider, and a timer pill that fills the rest).
+ * The ending banner shows only "Your free session will end soon" beside a
+ * pill Recharge Now button. Desktop/tablet (> 767px) is unchanged.
+ */
+@media (width <= 767px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .headerLeft {
+    gap: 12px;
+  }
+
+  .backBtn {
+    width: 24px;
+    height: 24px;
+    border-width: 0.667px;
+
+    img {
+      width: 5.25px;
+      height: 9.33px;
+    }
+  }
+
+  .headerAvatar {
+    display: block;
+    width: 32px;
+    height: 32px;
+  }
+
+  .headerInfo {
+    gap: 4px;
+  }
+
+  .headerName {
+    font-size: 16px;
+    line-height: 16px;
+    letter-spacing: -0.32px;
+  }
+
+  .headerExp {
+    font-size: 12px;
+    line-height: 12px;
+    letter-spacing: -0.24px;
+  }
+
+  /* The "Free tag" card. */
+  .headerRight {
+    width: 100%;
+    gap: 36px;
+    margin-block: 0;
+    padding: 4px 8px;
+    border: 1px solid $brand;
+    border-radius: 8px;
+    background: #fff3d6;
+  }
+
+  .badge {
+    flex-shrink: 0;
+    gap: 6px;
+  }
+
+  .badgeIcon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .badgeText {
+    display: flex;
+    gap: 0;
+  }
+
+  .badgeTitle {
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .badgeSubtitle {
+    font-size: 10px;
+  }
+
+  .divider {
+    display: flex;
+    height: 27px;
+
+    img {
+      width: 27px;
+    }
+  }
+
+  .timerPill {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+    gap: 4px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: normal;
+
+    img {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  /* Ending banner: one short line + pill button, side by side. */
+  .endingBanner {
+    padding: 10px 12px;
+  }
+
+  .endingInner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .endingText {
+    font-size: 16px;
+    font-weight: 500;
+    text-align: left;
+  }
+
+  .endingTextMore {
+    display: none;
+  }
+
+  .endingBtn {
+    flex-shrink: 0;
+    width: auto;
+    height: auto;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 100px;
+    font-size: 14px;
+
+    .rechargeLabel {
+      gap: 4px;
+    }
+
+    .rechargeLabel img {
+      width: 18px;
+      height: 18px;
+    }
+
+    .rechargeChevron {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+/* Narrow phones: tighter gaps so the tag stays on one line. */
+@media (width <= 360px) {
+  .headerRight {
+    gap: 16px;
+  }
+
+  .endingText {
+    font-size: 14px;
   }
 }

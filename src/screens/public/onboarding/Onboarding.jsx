@@ -27,6 +27,7 @@ const BirthDetailsScreen = lazy(() => import("./BirthDetailsScreen"));
 import OTPScreen from "./OTPScreen";
 import LoginScreen from "./LoginScreen";
 import { draftToOnboardingFormData } from "../guestChat/guestChatConstants";
+import { isReturnTarget, POST_LOGIN_LANDING_PATH } from "../../../utils/auth/completeCustomerLogin";
 import { loadOtpResume, saveOtpResume, clearOtpResume } from "./otpResume";
 
 /**
@@ -154,10 +155,8 @@ const Onboarding = () => {
    * `/login` is excluded for the same reason the localStorage check excludes it:
    * returning here would loop.
    */
-  const fromPath =
-    typeof location.state?.from === "string" && location.state.from !== "/login"
-      ? location.state.from
-      : null;
+  // Home and /login are not pages to "return" to — see isReturnTarget.
+  const fromPath = isReturnTarget(location.state?.from) ? location.state.from : null;
 
   const isPersonalizeFlow = searchParams.get("step") === "personalize";
   const skipGuidance = searchParams.get("skip") === "welcome" || isPersonalizeFlow;
@@ -483,16 +482,15 @@ const Onboarding = () => {
           "shubhtalk_redirect_after_login",
         );
 
-        if (redirectPath && redirectPath !== "/login") {
-          // Clear the redirect path
-          localStorage.removeItem("shubhtalk_redirect_after_login");
+        if (redirectPath) localStorage.removeItem("shubhtalk_redirect_after_login");
+        if (isReturnTarget(redirectPath)) {
           navigate(redirectPath);
         } else {
           // Fall back to the page that sent us here; otherwise a newly
           // registered user lands on the astrologers list (not home), so the
           // next step — picking an astrologer for the free session — is right
           // in front of them.
-          navigate(fromPath || PATH.privateRoutes.ASTROLOGERS_LIST.path || "/astrologers");
+          navigate(fromPath || POST_LOGIN_LANDING_PATH);
         }
       }}
     />,

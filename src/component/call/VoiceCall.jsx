@@ -93,6 +93,9 @@ const AgoraVoiceCalling = ({ callData }) => {
   // before the early return so it adds nothing to the existing conditional-hook
   // problem further down.
   const [freeLowBalanceDismissed, setFreeLowBalanceDismissed] = useState(false);
+  // The "free session will end soon" bottom bar appears only after the user
+  // picks "Remind Me Later" or closes (✕) the low-balance popup — not alongside it.
+  const [freeLowBalanceRemindLater, setFreeLowBalanceRemindLater] = useState(false);
   const freeTimerStartedRef = useRef(false);
   const freeCallEndRef = useRef(null);
   // Free call "Call duration": wall-clock join time and the last value shown.
@@ -1487,9 +1490,9 @@ const AgoraVoiceCalling = ({ callData }) => {
           bottom={
             !isFreeCallEndingSoon ? null : freeCallPhase.canContinue ? (
               <FreeCallContinueNotice remainingSeconds={freeSecondsLeft} ratePerMinute={freeCallRatePerMinute} />
-            ) : (
+            ) : freeLowBalanceRemindLater ? (
               <FreeCallEndingBanner onRecharge={handleFreeCallRecharge} />
-            )
+            ) : null
           }
         >
           {chatNotificationBanner}
@@ -1847,8 +1850,14 @@ const AgoraVoiceCalling = ({ callData }) => {
       <FreeCallLowBalancePopup
         isOpen={isFreeCallEndingSoon && !freeCallPhase.canContinue && !freeLowBalanceDismissed && !isRechargeModalOpen}
         remainingSeconds={freeSecondsLeft}
-        onClose={() => setFreeLowBalanceDismissed(true)}
-        onRemindLater={() => setFreeLowBalanceDismissed(true)}
+        onClose={() => {
+          setFreeLowBalanceDismissed(true);
+          setFreeLowBalanceRemindLater(true);
+        }}
+        onRemindLater={() => {
+          setFreeLowBalanceDismissed(true);
+          setFreeLowBalanceRemindLater(true);
+        }}
         onRecharge={handleFreeCallRecharge}
       />
 

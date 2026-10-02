@@ -89,7 +89,7 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
       // popup needs to show, which only renders on Home.
       if (isRegistered || deviceLimitReached) {
         // Post-login landing page is the astrologers list (not home).
-        navigate(resolvePostLoginRedirect(PATH.privateRoutes.ASTROLOGERS_LIST.path || "/astrologers"), { replace: true });
+        navigate(resolvePostLoginRedirect(), { replace: true });
         return;
       }
 

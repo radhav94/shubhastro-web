@@ -34,7 +34,7 @@ const ChatHeader = ({
   const [imgError, setImgError] = useState(false);
 
   return (
-    <div className={styles.header}>
+    <div className={`${styles.header} ${isFreeSession ? styles.headerFree : ""}`.trim()}>
       <div className={styles.headerLeft}>
         {/*
           A real <button>: this was an <svg> carrying the onClick. It is styled

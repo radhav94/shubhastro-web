@@ -181,6 +181,9 @@ const ChatWindow = () => {
   }, [isChatActive, roomId]);
   const isFreeSessionEndedRef = useRef(false);
   const [lowBalanceDismissed, setLowBalanceDismissed] = useState(false);
+  // The "free session will end soon" bottom bar appears only after the user
+  // picks "Remind Me Later" or closes (✕) the low-balance popup — not alongside it.
+  const [lowBalanceRemindLater, setLowBalanceRemindLater] = useState(false);
   // Set below, once the free-session phase is known; read by useChat's
   // `warning` handlers.
   const suppressWarningRef = useRef(() => false);
@@ -1155,7 +1158,7 @@ const ChatWindow = () => {
             />
           )}
 
-          {isFreeSessionEndingSoon && !freePhase.canContinue && (
+          {isFreeSessionEndingSoon && !freePhase.canContinue && lowBalanceRemindLater && (
             <FreeSessionEndingBanner onRecharge={handleFreeSessionRecharge} />
           )}
 
@@ -1328,8 +1331,14 @@ const ChatWindow = () => {
       <LowBalancePopup
         isOpen={isFreeSessionEndingSoon && !freePhase.canContinue && !lowBalanceDismissed && !isRechargeModalOpen}
         remainingSeconds={freePhase.freeSecondsLeft}
-        onClose={() => setLowBalanceDismissed(true)}
-        onRemindLater={() => setLowBalanceDismissed(true)}
+        onClose={() => {
+          setLowBalanceDismissed(true);
+          setLowBalanceRemindLater(true);
+        }}
+        onRemindLater={() => {
+          setLowBalanceDismissed(true);
+          setLowBalanceRemindLater(true);
+        }}
         onRecharge={handleFreeSessionRecharge}
       />
 

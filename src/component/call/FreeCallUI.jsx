@@ -322,7 +322,9 @@ export const FreeCallEndingBanner = ({ onRecharge }) => (
   <div className={styles.endingBanner} role="status">
     <div className={styles.endingInner}>
       <p className={styles.endingText}>
-        Your free session will end soon Recharge to continue the consultation without interruption.
+        Your free session will end soon
+        {/* Phones show only the first sentence (Figma 5055:78411). */}
+        <span className={styles.endingTextMore}> Recharge to continue the consultation without interruption.</span>
       </p>
       <RechargeNowButton onClick={onRecharge} className={styles.endingBtn} />
     </div>
