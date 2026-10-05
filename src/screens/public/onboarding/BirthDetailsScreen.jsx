@@ -143,6 +143,9 @@ const BirthDetailsScreen = ({
     here because preventDefault stops the submit, so it never increments.
   */
   const [hint, setHint] = useState(null);
+  // Why the typed birth date is not usable yet (half-typed, impossible, under
+  // 18). Shown in place of the Formik error so the field has one message.
+  const [dobTypingError, setDobTypingError] = useState("");
   const showFormHint = (text) =>
     setHint((prev) => ({ text, seq: (prev?.seq || 0) + 1 }));
 
@@ -474,15 +477,34 @@ const BirthDetailsScreen = ({
                     });
                   }
                 }}
+                /*
+                  SHB-2159: editing the box after picking a date. A typed date
+                  that does not parse, or is under 18, never reaches onChange,
+                  so the form kept the date picked earlier — the account was
+                  created with that older date while the box showed another.
+                  Any edit that differs from the stored date clears it; a valid
+                  date sets it again through onChange right after.
+                */
+                onRawChange={(text) => {
+                  const [y, m, d] = (values.birthDate || "").split("-");
+                  const stored = values.birthDate ? `${d}/${m}/${y}` : "";
+                  if (values.birthDate && text !== stored) setFieldValue("birthDate", "");
+                }}
+                onError={setDobTypingError}
+                maxDateError={UNDERAGE_ERROR}
                 // Underage dates are not selectable at all. The schema test
                 // still exists for a value that arrives another way (a restored
                 // draft, a typed date).
                 maxDate={maxSignupDob()}
                 placeholder={withProfileFields ? "Enter your birth date" : "DD/MM/YYYY"}
               />
-              <ErrorMessage name="birthDate">
-                {(msg) => <span className={styles.errorText}>{msg}</span>}
-              </ErrorMessage>
+              {dobTypingError ? (
+                <span className={styles.errorText}>{dobTypingError}</span>
+              ) : (
+                <ErrorMessage name="birthDate">
+                  {(msg) => <span className={styles.errorText}>{msg}</span>}
+                </ErrorMessage>
+              )}
             </div>
 
             <div className={styles.formGroup}>
@@ -676,7 +698,7 @@ const BirthDetailsScreen = ({
               }
               if (!values.birthDate) {
                 e.preventDefault();
-                showFormHint("Please select your date of birth.");
+                showFormHint(dobTypingError || "Please select your date of birth.");
                 return;
               }
               /*

@@ -146,15 +146,14 @@ export const useFreeSessionWatcher = () => {
       room, wallet-checked up front (LiveView) and billed at the live rate, so
       it must not show the free UI or end on the locked free-call screen.
 
-      Nor is the free offer spent locally — same rule as emergency sessions: the
-      offer is "the first session at the free rate", which a paid live session
-      is not. The profile is re-read instead, so if the backend DOES count a
-      live session as using up the offer, `isFirstSessionFree` follows it.
-      (Backend to confirm which it is.)
+      It DOES use up the free offer, though (SHB-2168): after a paid live call
+      the backend billed the next "free" session in full, while the listing
+      still advertised it as free. So it is marked spent locally, like any other
+      session start, and the profile re-read behind that.
     */
     const handleLiveSessionStarted = (data) => {
       if (!data?.isSwitch) clearLiveRequest(sessionAstrologerIdOf(data));
-      scheduleRefresh();
+      handleSessionStarted();
     };
 
     /*

@@ -1,4 +1,12 @@
 import { privateRequestNew } from "../../../services/appServices/privateRequestNew";
+import { getCurrentLang } from "../../../utils/VedicParams.js/vedicParams";
+
+/** "YYYY-MM-DD" (calculator form) -> "DD/MM/YYYY" (Rashi API). */
+const toApiDob = (dob) => {
+  if (!dob) return "";
+  const [year, month, day] = String(dob).split("-");
+  return day && month && year ? `${day}/${month}/${year}` : String(dob);
+};
 
 export const aiwowApi = privateRequestNew.injectEndpoints({
   endpoints: (builder) => ({
@@ -77,6 +85,48 @@ export const aiwowApi = privateRequestNew.injectEndpoints({
       }),
     }),
 
+    /*
+     * Rashi Calculator report (SHB-2071). Replaces the old astro proxy
+     * `extended-horoscope/find-moon-sign`: this endpoint also saves the result
+     * to AI history, which is what makes the report downloadable through
+     * `ai-history/pdf` like Face Reading / Gemstone / Muhurat. Returns the same
+     * moon-sign data (incl. `enriched`) plus the record's `_id`.
+     *
+     * A query (not a mutation) on purpose: RTK caches it per birth details, so
+     * re-renders and remounts of the report do not create duplicate history
+     * entries; a different person/date is a different cache entry.
+     */
+    generateRashiReport: builder.query({
+      query: (form = {}) => ({
+        url: "companion-suite/rashi-calculator",
+        method: "POST",
+        // Must be set here: privateRequestNew defaults Content-Type to
+        // text/plain, and the server then ignores the JSON body ("dob, tob, lat
+        // and lon are required").
+        headers: { accept: "application/json", "Content-Type": "application/json" },
+        body: form.kundliId
+          ? { kundliId: form.kundliId }
+          : {
+              dob: toApiDob(form.dob),
+              tob: form.tob,
+              lat: form.lat != null ? String(form.lat) : undefined,
+              lon: form.lng != null ? String(form.lng) : undefined,
+              tz: 5.5,
+              lang: getCurrentLang(),
+            },
+      }),
+      // Keyed on what the report depends on (not name/gender/place text). An
+      // object, so RTK still prefixes the endpoint name to the cache key.
+      serializeQueryArgs: ({ queryArgs = {} }) => ({
+        kundliId: queryArgs.kundliId || null,
+        dob: queryArgs.dob,
+        tob: queryArgs.tob,
+        lat: queryArgs.lat,
+        lng: queryArgs.lng,
+        lang: getCurrentLang(),
+      }),
+    }),
+
     // Fetch PDF URL for a given history item (handles payment deduction server-side)
     downloadReportPdf: builder.mutation({
       query: ({ historyId, language }) => {
@@ -101,4 +151,5 @@ export const {
   useGetBusinessPathfinderOptionsQuery,
   useGetSharedAiResultQuery,
   useDownloadReportPdfMutation,
+  useGenerateRashiReportQuery,
 } = aiwowApi;

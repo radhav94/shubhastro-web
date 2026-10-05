@@ -12,6 +12,7 @@ import { clearGuestKundliProfiles } from "../../utils/helper/cookies";
 import { trackEvent } from "../../utils/analytics";
 import { resolveFreeSessionStatus } from "../../utils/auth/freeSessionStatus";
 import { useWebOtpAutofill } from "../../utils/hooks/useWebOtpAutofill";
+import { setBranchUser } from "../../utils/branchIntegration";
 
 const OtpVerification = () => {
   const navigate = useNavigate();
@@ -162,6 +163,8 @@ const handleVerifyOtp = async (event) => {
       if (type === "CUSTOMER") {
         localStorage.setItem("shubhtalk_role", "CUSTOMER");
         localStorage.setItem("shubhtalk_customer_id", _id);
+        // Branch identity at login.
+        setBranchUser(_id);
         localStorage.setItem("shubhtalk_customer_token", accessToken);
         
         // Clear any cached profile data from previous user

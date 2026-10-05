@@ -145,6 +145,42 @@ const ControlButton = ({ icon, label, onClick, pressed, off = false }) => (
   </div>
 );
 
+
+/*
+ * SHB-2164: the free call screens are a full-screen fixed overlay, but on a
+ * phone a swipe on them still scrolled the page underneath (the address bar
+ * collapsed and the screen moved), so the end screen read as "scrollable".
+ * Pin the page while the overlay is up and restore its scroll position after
+ * — the same mobile-safe lock AddProfileModal uses.
+ */
+const useLockPageScroll = () => {
+  useEffect(() => {
+    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    const { body } = document;
+    const html = document.documentElement;
+    const prev = {
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+      overflow: body.style.overflow,
+      htmlOverflow: html.style.overflow,
+    };
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+    html.style.overflow = "hidden";
+    return () => {
+      body.style.position = prev.position;
+      body.style.top = prev.top;
+      body.style.width = prev.width;
+      body.style.overflow = prev.overflow;
+      html.style.overflow = prev.htmlOverflow;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+};
+
 /**
  * The whole free-call screen. `controls` (mic/speaker/end) is omitted in the
  * ended state; `bottom` is the full-width banner or the lock bar, laid out in
@@ -170,7 +206,9 @@ export const FreeCallScreen = ({
   bottom = null,
   children,
   ariaLabel,
-}) => (
+}) => {
+  useLockPageScroll();
+  return (
   <div
     className={`${styles.screen} ${bottom ? styles.hasBottom : ""} ${controls ? "" : styles.noControls}`}
     role={ariaLabel ? "dialog" : undefined}
@@ -264,7 +302,8 @@ export const FreeCallScreen = ({
     {bottom}
     {children}
   </div>
-);
+  );
+};
 
 /* ---------------- 4886:77824 — low wallet balance popup ---------------- */
 export const FreeCallLowBalancePopup = ({ isOpen, remainingSeconds = 0, onClose, onRemindLater, onRecharge }) => {
