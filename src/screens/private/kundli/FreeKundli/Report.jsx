@@ -63,7 +63,18 @@ const Report = ({ data }) => {
   return (
     <div>
       {/* 🔥 Show Name + DOB same as BasicContent UI */}
-      <div className="flex mb-4">
+      {/*
+        Tapping the name and birth date opens the profile picker, the same one the
+        Select Profile bar at the top opens. Clarity 9hjgsg logged a dead click at
+        08:10 on this line ("Name (DD - MM - YYYY)") on the Rudraksha tab: it looks
+        like the profile being viewed and was plain text. Mouse/touch only — it is
+        not given button semantics, since the bar above already is the keyboard route.
+      */}
+      <div
+        className="flex mb-4"
+        style={{ cursor: "pointer" }}
+        onClick={() => window.dispatchEvent(new CustomEvent("kundli:select-profile"))}
+      >
         <PrimaryText isSemiBold size_16>
           {userDetails?.name?.charAt(0).toUpperCase() +
             userDetails?.name?.slice(1)}

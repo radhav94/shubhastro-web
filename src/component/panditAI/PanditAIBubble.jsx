@@ -35,7 +35,7 @@ import ReplyPreview from "../UI/chat/ReplyPreview";
 const panditAiIcon = "https://assets.shubhastro.ai/images/AiPandit.png";
 
 // Memoized message bubble to avoid re-rendering the entire list on new messages
-const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInternal }) => {
+const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInternal, awaitingReply }) => {
   const isUser = msg.sender === "user";
   const canReply =
     typeof onReply === "function" && !msg.isError && (msg.messageId || msg._id);
@@ -71,12 +71,32 @@ const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInterna
     setRetryNotice({ seq: retrySeqRef.current, message: reason });
   };
 
+  /*
+    A tap on the visitor's own latest message while Pandit AI is still working on
+    it. The bubble used to be inert, so a visitor checking "did my question go
+    through?" got no answer for as long as the reply took. Clarity 48ht8u (Instagram,
+    mobile) logged seven dead clicks on "When will I get married…" between 04:08
+    and 04:29, then the retry line at 04:46. Same words and same in-place pattern
+    as the suggestion chips (followupNotice), and the line goes when the reply
+    lands because it is shown only while `awaitingReply` is true.
+  */
+  const [waitNotice, setWaitNotice] = useState(null);
+  const waitSeqRef = useRef(0);
+
+  const handleBubbleTap = (e) => {
+    if (!isUser || !awaitingReply) return;
+    if (e.target.closest("a, button")) return;
+    waitSeqRef.current += 1;
+    setWaitNotice({ seq: waitSeqRef.current });
+  };
+
   return (
     <div className={`${styles.msgRow} ${isUser ? styles.userRow : styles.aiRow}`}>
       <div
         className={`${styles.msgBubble} ${isUser ? styles.userBubble : styles.aiBubble} ${
           msg.isError ? styles.failedBubble : ""
         }`}
+        onClick={handleBubbleTap}
       >
         {msg.replyTo && (
           <ReplyPreview reply={msg.replyTo} variant="bubble" onJumpTo={onJumpTo} />
@@ -131,6 +151,16 @@ const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInterna
             aria-live="polite"
           >
             {retryNotice.message}
+          </p>
+        )}
+        {awaitingReply && waitNotice && (
+          <p
+            key={waitNotice.seq}
+            className={styles.retryNotice}
+            role="status"
+            aria-live="polite"
+          >
+            Pandit AI is still answering your last question — one moment.
           </p>
         )}
         <div className={styles.msgMeta}>
@@ -1054,6 +1084,7 @@ const PanditAIBubble = ({ hideBubble = false }) => {
                 // Find the last AI message to attach scroll ref
                 const allMsgs = Object.values(messageGroups).flat();
                 const lastAiId = [...allMsgs].reverse().find((m) => m.sender !== "user")?._id;
+                const lastUserId = [...allMsgs].reverse().find((m) => m.sender === "user")?._id;
                 return Object.entries(messageGroups).map(([date, msgs], groupIndex) => (
                   <div key={`${date}-${groupIndex}`} className={styles.messageGroup}>
                     <div className={styles.dateHeader}>
@@ -1080,6 +1111,7 @@ const PanditAIBubble = ({ hideBubble = false }) => {
                           onReply={handleReply}
                           onJumpTo={jumpToMessage}
                           onNavigateInternal={handleInternalNavigate}
+                          awaitingReply={sending && msg._id === lastUserId}
                         />
                       </div>
                       );

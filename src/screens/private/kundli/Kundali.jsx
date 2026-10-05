@@ -233,6 +233,16 @@ const Kundali = () => {
     setShowSelectProfile(true);
   }, [isLoggedIn, isDirectKundliView, tempProfiles.length, selectedProfile]);
 
+  // The "Name (DD - MM - YYYY)" line inside the Free Report asks for the same
+  // picker as the Select Profile bar above it (see Report.jsx). The bar is hidden
+  // in direct view, so there is nothing to open there.
+  useEffect(() => {
+    if (isDirectKundliView) return undefined;
+    const open = () => setShowSelectProfile(true);
+    window.addEventListener("kundli:select-profile", open);
+    return () => window.removeEventListener("kundli:select-profile", open);
+  }, [isDirectKundliView]);
+
   // In direct view, fetch the kundli by id. This resolves shared kundlis that
   // don't belong to the current user (e.g. one shared in chat), which the
   // owner-scoped list (`kundlis/all`) can never contain. It also lets us tell

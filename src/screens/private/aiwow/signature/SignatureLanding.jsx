@@ -19,6 +19,7 @@ const SignatureLanding = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+  const buttonGroupRef = useRef(null);
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const pendingActionRef = useRef(null);
 
@@ -45,6 +46,10 @@ const SignatureLanding = () => {
 
   const handleCamera = () => {
     navigate('/ai-wow/signature-analysis/camera', { replace: true });
+  };
+
+  const scrollToActions = () => {
+    buttonGroupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   const handleUpload = () => {
@@ -112,7 +117,7 @@ const SignatureLanding = () => {
       <div className={styles.content}>
         {/* Instructions Section - At Top */}
         <div className={styles.instructionsWrapper}>
-          <h2 className={styles.instructionsTitle}>Before you start</h2>
+          <h2 className={styles.instructionsTitle} onClick={scrollToActions}>Before you start</h2>
 
           <div className={styles.middleContent}>
             {/* Tappable — viewfinder framing that was collecting dead clicks.
@@ -140,7 +145,7 @@ const SignatureLanding = () => {
                 <span style={{ position: 'absolute', top: '0', right: '0', display: 'flex' }}>
                   <TTSButton text={`Highlight Signature. Emphasize the signature area to draw attention to authenticity. Adjust Contrast. Enhance contrast to make the signature more legible against the background. Add Annotations. Include notes or markers to indicate specific features of the signature. Disclaimer. This signature analysis is for informational purposes only, not a substitute for professional authentication. Analysis is AI-driven.`} />
                 </span>
-                <div className={styles.checklistSection}>
+                <div className={styles.checklistSection} onClick={scrollToActions}>
                   <div className={styles.checkItem}>
                     <div className={styles.checkIcon}>
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -185,7 +190,7 @@ const SignatureLanding = () => {
                   </p>
                 </div>
 
-                <div className={styles.buttonGroup}>
+                <div className={styles.buttonGroup} ref={buttonGroupRef}>
                   <button 
                     className={styles.uploadButton}
                     onClick={handleUpload}
@@ -215,11 +220,11 @@ const SignatureLanding = () => {
         {/* Feature Cards Section - Below */}
         <div className={styles.featuresWrapper}>
           <h2 className={styles.featuresTitle}>What you'll discover</h2>
-          <p className={styles.featuresDescription}>
+          <p className={styles.featuresDescription} onClick={scrollToActions}>
             Unlock the secrets of your inner self with our AI Signature Analysis, which deciphers the unique patterns in your signature to reveal insights about your personality, strengths, and potential.
           </p>
 
-          <div className={styles.featuresGrid}>
+          <div className={styles.featuresGrid} onClick={scrollToActions}>
             {features.map((feature, index) => (
               <div key={index} className={styles.featureCard}>
                 <div className={styles.iconWrapper}>

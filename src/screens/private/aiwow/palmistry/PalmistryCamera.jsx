@@ -458,6 +458,31 @@ const PalmistryCamera = () => {
     announceCaptureNotice(blockReason || 'Hold your palm inside the box to capture');
   };
 
+  /*
+    A tap on the live preview itself. Clarity 14ph78l (Google, mobile) logged
+    dead clicks at 00:41, 00:42 and 00:46 on this screen, none of them on a
+    labelled control — the visitor was tapping the picture. Only the shutter
+    answered, so the preview was inert.
+
+    This never captures (that stays with the shutter and auto-capture). It just
+    says what the screen is waiting for, in the same words and the same notice as
+    a shutter tap. When nothing is blocking, auto-capture is already running and
+    there is nothing to add.
+  */
+  const handlePreviewTap = () => {
+    if (!handsLoaded && !detectionUnavailable) {
+      announceCaptureNotice('Still getting the palm scanner ready — one moment.');
+      return;
+    }
+    if (!videoReady) {
+      announceCaptureNotice(
+        'The camera preview has not started yet. Give it a moment, or upload a photo instead.'
+      );
+      return;
+    }
+    if (isBlocked && blockReason) announceCaptureNotice(blockReason);
+  };
+
   const handleUploadInstead = () => {
     fileInputRef.current?.click();
   };
@@ -643,7 +668,10 @@ const PalmistryCamera = () => {
         )}
       </div>
 
-      <div className={`${styles.cameraWrapper} ${capturedImage ? styles.cameraWrapperCaptured : ''}`}>
+      <div
+        className={`${styles.cameraWrapper} ${capturedImage ? styles.cameraWrapperCaptured : ''}`}
+        onClick={capturedImage ? undefined : handlePreviewTap}
+      >
         {!capturedImage ? (
           <>
             <video

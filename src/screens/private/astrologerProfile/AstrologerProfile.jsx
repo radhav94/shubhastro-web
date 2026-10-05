@@ -1190,6 +1190,7 @@ const AstrologerProfile = () => {
 
   // Scroll target for the Rating stat tile.
   const reviewsSectionRef = useRef(null);
+  const aboutSectionRef = useRef(null);
 
   // Infinite scroll for reviews
   const reviewsListRef = useRef(null);
@@ -1673,7 +1674,17 @@ const AstrologerProfile = () => {
             <button className={styles.backBtn} onClick={handleBackOut} aria-label="Go back">
               <IoChevronBack />
             </button>
-            <h2 className={styles.headerTitle}>Profile</h2>
+            {/* Tapping the title takes a long profile back to the top, which is
+                what a fixed header title is tapped for on a phone. It was plain
+                text: Clarity 1njcfgs logged dead clicks on "Profile" at 10:29 and
+                10:40 on an astrologer page. Not on the loading shell above —
+                there is nothing to scroll while it shows. */}
+            <h2
+              className={styles.headerTitle}
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              Profile
+            </h2>
           </div>
           <div className={styles.headerActions}>
             {hasChatHistory && (
@@ -1933,15 +1944,35 @@ const AstrologerProfile = () => {
 
             {/* Stats Section */}
             <div className={styles.statsSection}>
-              <div className={styles.statItem}>
+              {/*
+                Experience jumps to About, where the astrologer's background is
+                written up. Clarity 16di744 (mobile) logged a dead click on this
+                tile at 00:45 — Clarity names the element by its text, "N+" then
+                "Experience" — right after landing on the profile. Same pattern as
+                the Rating tile below. Consultations stays a plain figure: there
+                is no section it summarises.
+              */}
+              <button
+                type="button"
+                className={`${styles.statItem} ${styles.statItemLink}`}
+                onClick={() =>
+                  // About only renders when the astrologer wrote a bio; fall
+                  // back to the next section down so the tap always lands.
+                  (aboutSectionRef.current || hoursSectionRef.current)?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  })
+                }
+                aria-label={`${displayData.experience}+ years experience. Jump to About`}
+              >
                 <img
                   src={ExperienceIcon}
-                  alt="Experience"
+                  alt=""
                   className={styles.statIcon}
                 />
                   {displayData.experience}+
                 <div className={styles.statLabel}>Experience</div>
-              </div>
+              </button>
               <div className={styles.statDivider}></div>
               <div className={styles.statItem}>
                 <img
@@ -2078,7 +2109,7 @@ const AstrologerProfile = () => {
 
             {/* About Section */}
             {displayData.description && (
-            <div className={styles.aboutSection}>
+            <div className={styles.aboutSection} ref={aboutSectionRef}>
               <h3 className={styles.aboutTitle}>About</h3>
 
               {displayData.description && (

@@ -74,7 +74,18 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
 
   return (
     <div className={styles.rightPanel}>
-      <div className={styles.muhuratHeader}>
+      {/*
+        The title opens the calendar as well, like the cards under it. It was
+        plain text: Clarity ry3oby (first seconds of a visit) shows "Today's
+        Muhurat" tapped five times in under four seconds, each tap only selecting
+        the text. Mouse and touch only — the cards below already carry the
+        keyboard route, and a heading should not be announced as a button.
+      */}
+      <div
+        className={styles.muhuratHeader}
+        onClick={() => navigate("/aiwow/muhurat-calendar")}
+        style={{ cursor: "pointer" }}
+      >
         {/* h2/h3, not h4/h5. This widget sits in the hero row next to the "Your
             AI Suite" <h2>, and on mobile the .desktopOnly cards between them are
             hidden, so the outline jumped h2 → h4 right here. Sizes come from

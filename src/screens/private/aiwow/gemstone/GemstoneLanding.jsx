@@ -20,6 +20,7 @@ const GemstoneLanding = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+  const buttonGroupRef = useRef(null);
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const pendingActionRef = useRef(null);
   // compressImage re-encodes through a canvas and waits up to 8s before falling
@@ -62,6 +63,10 @@ const GemstoneLanding = () => {
       return;
     }
     navigate('/ai-wow/gemstone-authenticity/camera', { replace: true });
+  };
+
+  const scrollToActions = () => {
+    buttonGroupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   const handleUpload = () => {
@@ -137,7 +142,7 @@ const GemstoneLanding = () => {
       <div className={styles.content}>
         {/* Instructions Section - At Top */}
         <div className={styles.instructionsWrapper}>
-          <h2 className={styles.instructionsTitle}>Before you start</h2>
+          <h2 className={styles.instructionsTitle} onClick={scrollToActions}>Before you start</h2>
 
           <div className={styles.middleContent}>
             {/* Tappable — viewfinder framing that was collecting dead clicks.
@@ -166,7 +171,7 @@ const GemstoneLanding = () => {
                 <span style={{ position: 'absolute', top: '0', right: '0', display: 'flex' }}>
                   <TTSButton text={`Verify Certification. Ensure the gemstone comes with a valid certification from a recognized authority. Inspect Clarity. Evaluate the clarity of the gemstone to determine its quality and authenticity. Examine Cut Quality. Assess the cut of the gemstone for precision and craftsmanship, which contribute to its value. Disclaimer. This gemstone authenticity check is for informational purposes only and should not replace professional appraisal. Our analysis is powered by advanced AI.`} />
                 </span>
-                <div className={styles.checklistSection}>
+                <div className={styles.checklistSection} onClick={scrollToActions}>
                   <div className={styles.checkItem}>
                     <div className={styles.checkIcon}>
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -211,7 +216,7 @@ const GemstoneLanding = () => {
                   </p>
                 </div>
 
-                <div className={styles.buttonGroup}>
+                <div className={styles.buttonGroup} ref={buttonGroupRef}>
                   <button
                     type="button"
                     className={styles.uploadButton}
@@ -246,11 +251,11 @@ const GemstoneLanding = () => {
         {/* Feature Cards Section - Below */}
         <div className={styles.featuresWrapper}>
           <h2 className={styles.featuresTitle}>What you'll discover</h2>
-          <p className={styles.featuresDescription}>
+          <p className={styles.featuresDescription} onClick={scrollToActions}>
             Unlock the value of your gemstones with our AI Gemstone Authenticity Check, which analyzes the unique characteristics of your gemstone to reveal insights about its quality, rarity, and potential market value.
           </p>
 
-          <div className={styles.featuresGrid}>
+          <div className={styles.featuresGrid} onClick={scrollToActions}>
             {features.map((feature, index) => (
               <div key={index} className={styles.featureCard}>
                 <div className={styles.iconWrapper}>

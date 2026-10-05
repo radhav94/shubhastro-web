@@ -606,10 +606,10 @@ const AddProfileModal = ({
                   reportedSubmitRef={reportedSubmitRef}
                 />
                 <div className={styles.formGroup}>
-                  <label>Name <span className={styles.required}>*</span></label>
+                  <label htmlFor="profile-form-name">Name <span className={styles.required}>*</span></label>
                   <div className={styles.iconField}>
                     <IoPersonOutline className={styles.leftIcon} />
-                    <Field type="text" name="name" placeholder="Enter your name" />
+                    <Field id="profile-form-name" type="text" name="name" placeholder="Enter your name" />
                   </div>
                   <ErrorMessage name="name" component="div" className={styles.errorText} />
                 </div>
@@ -617,7 +617,14 @@ const AddProfileModal = ({
                 {/* Mobile number */}
                 {showMobileField && (
                   <div className={styles.formGroup}>
-                    <label>Mobile Number <span className={styles.required}>*</span></label>
+                    {/*
+                      Linked to its input. The label was plain text, so a tap on
+                      "Mobile Number *" — the line a visitor reads before typing —
+                      did nothing; Clarity 7ragbn (Instagram, mobile) logged a dead
+                      click on it at 00:35, right after the sign-up sheet opened
+                      from "Call". Name above gets the same treatment.
+                    */}
+                    <label htmlFor="profile-form-mobile-number">Mobile Number <span className={styles.required}>*</span></label>
                     <div className={styles.mobileWrap}>
                       {/*
                         The country code is fixed at +91: validation is
@@ -637,6 +644,7 @@ const AddProfileModal = ({
                         +91
                       </button>
                       <Field
+                        id="profile-form-mobile-number"
                         type="tel"
                         name="mobileNumber"
                         placeholder="Enter 10-digit mobile number"

@@ -7,7 +7,7 @@ import { useChat } from "../../../context/ChatContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
 import { stopIncomingSound } from "../../../utils/incomingSound";
 import toast from "../../toast";
-import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
+import { getAstrologerDisplayName, getAstrologerProfilePath } from "../../../utils/helper/string.utils";
 import styles from "./StickyWaitingQueue.module.scss";
 
 /**
@@ -253,7 +253,19 @@ const StickyWaitingQueue = () => {
                       onClick={() => {
                         if (conn.fromLive && conn.liveChannelId) {
                           navigate(`/live/${conn.liveChannelId}`);
+                          return;
                         }
+                        /*
+                          A request started from a listing had no handler here, so
+                          tapping the name did nothing. Clarity gut5xs (Android
+                          Chrome) logged a dead click on "Jayant" at 06:06 in this
+                          widget, two seconds before the "Join Chat" tap. Open the
+                          astrologer's profile — the same kind of jump the live
+                          rows make — and stay put when there is no id to build a
+                          profile address from.
+                        */
+                        const profilePath = getAstrologerProfilePath(conn.astrologer);
+                        if (profilePath && profilePath !== "/astrologers") navigate(profilePath);
                       }}
                     >
                       {name}
