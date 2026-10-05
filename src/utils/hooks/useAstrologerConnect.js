@@ -7,7 +7,9 @@ import { voiceSocket } from "../../services/voiceSocketServices";
 import { useCall } from "../../context/CallContext";
 import { useChat } from "../../context/ChatContext";
 import { useWaitingQueue } from "../../context/WaitingQueueContext";
-import { useGetBalanceMutation } from "../../redux/api/wallet/walletApi";
+import { useGetBalanceMutation, useLazyGetWalletBalanceQuery } from "../../redux/api/wallet/walletApi";
+import { readFreeSessionStatus } from "../auth/freeSessionStatus";
+import { rememberEmergencyRequest, clearEmergencyRequest, clearLiveRequest } from "../auth/freeSessionRoom";
 import { useCreateChatRoomMutation } from "../../redux/api/chatApi";
 import { useGetAllKundlisQuery } from "../../services/appServices/kundliServicesNew";
 import Toast from "../../component/toast";
@@ -138,6 +140,59 @@ export const useAstrologerConnect = () => {
   activeChatRef.current = activeChat;
 
   const [getBalance] = useGetBalanceMutation();
+  const [getWalletBalance] = useLazyGetWalletBalanceQuery();
+
+  /*
+    Emergency chat / call / video is never covered by the free first session —
+    it is always paid from the wallet, even while `isFirstSessionFree` is true.
+    The pre-session check (`wallets/preSessionBalanceCheck`) has been answering
+    `status: true` for free-eligible users regardless, so an emergency session
+    could start with an empty wallet. For a free-eligible user starting an
+    emergency session, re-check the wallet here: balance must cover the
+    server's `requiredAmount` (or price/min × the recharge modal's 5-minute
+    minimum). Not enough → the usual recharge modal, and nothing is initiated.
+    Users who aren't free-eligible are unaffected (the server check stands).
+  */
+  const EMERGENCY_MIN_MINUTES = 5;
+  const emergencyHasBalance = useCallback(async (balanceData, rechargeType) => {
+    if (readFreeSessionStatus() !== true) return true;
+
+    const pricePerMinute = Number(balanceData?.pricePerMinute) || 0;
+    const requiredAmount =
+      Number(balanceData?.requiredAmount) > 0
+        ? Number(balanceData.requiredAmount)
+        : pricePerMinute * EMERGENCY_MIN_MINUTES;
+
+    let wallet = [balanceData?.balance, balanceData?.walletBalance, balanceData?.currentBalance]
+      .map(Number)
+      .find((n) => Number.isFinite(n));
+    if (wallet === undefined) {
+      try {
+        const res = await getWalletBalance().unwrap();
+        const n = Number(res?.balance ?? res?.data?.balance ?? res?.data ?? res);
+        wallet = Number.isFinite(n) ? n : undefined;
+      } catch {
+        wallet = undefined;
+      }
+    }
+
+    // Unknown balance or price: we can't prove it's enough, so don't start a
+    // paid emergency session on a guess — ask them to check / recharge.
+    const enough = wallet !== undefined && requiredAmount > 0 ? wallet >= requiredAmount : false;
+    if (!enough) {
+      console.log("[NormalFlow] ❌ Emergency session needs wallet balance (free session doesn't apply)", {
+        wallet,
+        requiredAmount,
+      });
+      setRechargeType(rechargeType);
+      setBalanceInfo({
+        requiredAmount: requiredAmount > 0 ? requiredAmount : null,
+        pricePerMinute: pricePerMinute > 0 ? pricePerMinute : null,
+      });
+      setOpenModal((prev) => ({ ...prev, recharge: true }));
+    }
+    return enough;
+  }, [getWalletBalance]);
   const [createChatRoom] = useCreateChatRoomMutation();
   const { checkPermission } = useMediaPermission();
 
@@ -283,6 +338,16 @@ export const useAstrologerConnect = () => {
           Toast.error("Couldn't verify availability right now. Please try again.");
           return false;
         }
+
+        if (isEmergency) {
+          if (!(await emergencyHasBalance(result?.data?.data, "chat"))) return false;
+          rememberEmergencyRequest(astro?._id);
+        } else {
+          // A normal request: drop any leftover emergency / live-stream marker
+          // so this session can still be the free one.
+          clearEmergencyRequest();
+          clearLiveRequest(astro?._id);
+        }
         
         // Check if astrologer is online for chat
         // API returns availability fields flat in data (not nested under .availability)
@@ -345,7 +410,7 @@ export const useAstrologerConnect = () => {
     // initialization". The body only reads it at invocation time, by which point
     // it exists. (This is why the file already carries exhaustive-deps warnings.)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getBalance, setLastRequestedAstro, validateBeforeConnection, beginConnect, endConnect]);
+  }, [getBalance, emergencyHasBalance, setLastRequestedAstro, validateBeforeConnection, beginConnect, endConnect]);
 
   // Call handler
   const handleCallStart = useCallback(async (astro, type, isEmergency = false) => {
@@ -441,6 +506,14 @@ export const useAstrologerConnect = () => {
         return false;
       }
 
+      if (isEmergency) {
+        if (!(await emergencyHasBalance(result?.data?.data, type || "audio"))) return false;
+        rememberEmergencyRequest(astro?._id);
+      } else {
+        clearEmergencyRequest();
+        clearLiveRequest(astro?._id);
+      }
+
       // Check if astrologer is online for the specific call type (audio/video)
       // API returns availability fields flat in data (not nested under .availability)
       const balanceData = result?.data?.data || {};
@@ -498,7 +571,7 @@ export const useAstrologerConnect = () => {
     // handleAfterKundliSelect omitted deliberately — see the note on
     // handleChatStart's dependency array.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getBalance, setLastRequestedCallAstro, validateBeforeConnection, beginConnect, endConnect]);
+  }, [getBalance, emergencyHasBalance, setLastRequestedCallAstro, validateBeforeConnection, beginConnect, endConnect]);
 
   // After kundli selection
   const handleAfterKundliSelect = useCallback(async (selectedAstrologer, connectionType = null, isEmergency = false) => {

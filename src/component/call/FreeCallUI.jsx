@@ -88,7 +88,7 @@ const FreeCallHeader = ({ callerName, experience, thumbImage, gender, remainingS
           <img src={giftIcon} alt="" width="36" height="36" className={styles.badgeIcon} />
           <div className={styles.badgeText}>
             <span className={styles.badgeTitle}>1st Free Call</span>
-            <span className={styles.badgeSubtitle}>Free session active</span>
+            <span className={styles.badgeSubtitle}>{isEnded ? "Free session ended" : "Free session active"}</span>
           </div>
         </div>
         <span className={styles.divider} aria-hidden="true">
@@ -322,21 +322,78 @@ export const FreeCallEndingBanner = ({ onRecharge }) => (
   <div className={styles.endingBanner} role="status">
     <div className={styles.endingInner}>
       <p className={styles.endingText}>
-        Your free session will end soon Recharge to continue the consultation without interruption.
+        Your free session will end soon
+        {/* Phones show only the first sentence (Figma 5055:78411). */}
+        <span className={styles.endingTextMore}> Recharge to continue the consultation without interruption.</span>
       </p>
       <RechargeNowButton onClick={onRecharge} className={styles.endingBtn} />
     </div>
   </div>
 );
 
+/* ---------------- last minute, wallet covers the rate: calm notice instead ---------------- */
+/* Takes the ending banner's place when the call will carry on, paid from the
+   wallet, once the free time is over — informational, no Recharge push. */
+const formatRate = (n) => {
+  const v = Number(n);
+  return Number.isInteger(v) ? String(v) : v.toFixed(1);
+};
+
+export const FreeCallContinueNotice = ({ remainingSeconds = 0, ratePerMinute }) => (
+  <div className={`${styles.endingBanner} ${styles.continueNotice}`} role="note">
+    <div className={styles.continueInner}>
+      <img src={clockOrange} alt="" width="24" height="24" className={styles.continueIcon} />
+      <p className={styles.continueText}>
+        <span className={styles.continueLead}>
+          Your free session ends in <span className={styles.continueTime}>{formatClock(remainingSeconds)}</span>
+        </span>
+        <span className={styles.continueSep} aria-hidden="true">·</span>
+        <span className={styles.continueRest}>
+          The call will continue
+          {ratePerMinute ? (
+            <>
+              {" "}at <span className={styles.nowrap}>₹{formatRate(ratePerMinute)}/min</span>
+            </>
+          ) : null}{" "}
+          from your wallet
+        </span>
+      </p>
+    </div>
+  </div>
+);
+
 /* ---------------- 4886:78009 — locked bar once the free time is over ---------------- */
-export const FreeCallLockBar = ({ userName, profileImgUrl, gender, offer, onExplore, onRecharge }) => {
+/* `canContinue` + `onContinue`: the wallet already covers the rate (the server
+   ended the free call anyway), so offer to call again rather than recharge. */
+export const FreeCallLockBar = ({
+  userName,
+  profileImgUrl,
+  gender,
+  offer,
+  onExplore,
+  onRecharge,
+  canContinue = false,
+  onContinue,
+}) => {
   const name = (userName || "").trim();
   const greeting = name ? `Hi ${name}` : "Hi";
   const fmt = (n) => Number(n).toFixed(1);
+  const showContinue = canContinue && typeof onContinue === "function";
 
   let message;
-  if (offer?.was) {
+  if (showContinue) {
+    message = (
+      <>
+        {greeting}, your free call has ended. Continue from your wallet
+        {offer?.now ? (
+          <>
+            {" "}at <span className={styles.nowrap}>₹ {fmt(offer.now)}/min</span>
+            {offer?.was && <span className={styles.lockOldPrice}>₹{fmt(offer.was)}/min</span>}
+          </>
+        ) : null}
+      </>
+    );
+  } else if (offer?.was) {
     message = (
       <>
         {greeting} lets continue this call at discounted price{" "}
@@ -364,7 +421,14 @@ export const FreeCallLockBar = ({ userName, profileImgUrl, gender, offer, onExpl
         <button type="button" className={styles.exploreBtn} onClick={onExplore}>
           <span>Explore Website</span>
         </button>
-        <RechargeNowButton onClick={onRecharge} className={styles.lockRecharge} />
+        {showContinue ? (
+          <button type="button" className={`${styles.rechargeBtn} ${styles.lockRecharge}`} onClick={onContinue}>
+            <span className={styles.rechargeLabel}>Continue Call</span>
+            <img src={chevronRight} alt="" width="16" height="16" className={styles.rechargeChevron} />
+          </button>
+        ) : (
+          <RechargeNowButton onClick={onRecharge} className={styles.lockRecharge} />
+        )}
       </div>
     </div>
   );

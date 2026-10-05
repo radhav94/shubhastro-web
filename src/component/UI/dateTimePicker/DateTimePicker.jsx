@@ -48,7 +48,7 @@ const MINUTES = Array.from({ length: 60 }, (_, i) => i);
 const PERIODS = ["AM", "PM"];
 
 /* ───── Custom 12-hour Time Picker ───── */
-const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholder, dropUp = false, openOnClick = false }) => {
+const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholder, dropUp = false, openOnClick = false, iconOnly = false }) => {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -454,16 +454,18 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
           catches the area beside it. Same arrangement, and the same stylesheet
           rules, as the date field — no new CSS.
         */}
-        <button
-          type="button"
-          className={styles.calendarOverlay}
-          onClick={() => {
-            if (timeBlock.blocked) return timeBlock.explain();
-            if (!disabled) setOpen(true);
-          }}
-          tabIndex={-1}
-          aria-hidden="true"
-        />
+        {!iconOnly && (
+          <button
+            type="button"
+            className={styles.calendarOverlay}
+            onClick={() => {
+              if (timeBlock.blocked) return timeBlock.explain();
+              if (!disabled) setOpen(true);
+            }}
+            tabIndex={-1}
+            aria-hidden="true"
+          />
+        )}
         <button
           type="button"
           className={styles.calendarBtn}
@@ -586,6 +588,10 @@ const DateTimePicker = ({
   dropUp = false,
   // When true, clicking the input opens the picker and disables manual typing
   openOnClick = false,
+  // When true, ONLY the calendar / clock icon opens the picker — no invisible
+  // hit area over the right third of the input (SHB-2154: on signup the
+  // calendar opened when tapping to the left of the icon).
+  iconOnly = false,
   // When true, the calendar renders in a body-level portal (avoids clipping
   // inside scrollable/overflow-hidden containers like modals)
   portal = false,
@@ -636,6 +642,7 @@ const DateTimePicker = ({
           placeholder={placeholder || "Select time"}
           dropUp={dropUp}
           openOnClick={openOnClick}
+          iconOnly={iconOnly}
         />
       </div>
     );
@@ -888,13 +895,15 @@ const DateTimePicker = ({
             A button rather than a div: same reason as everywhere else, though it
             stays out of the tab order and hidden from assistive tech because the
             real calendar button next to it does the same job. */}
-        <button
-          type="button"
-          className={styles.calendarOverlay}
-          onClick={openCalendar}
-          tabIndex={-1}
-          aria-hidden="true"
-        />
+        {!iconOnly && (
+          <button
+            type="button"
+            className={styles.calendarOverlay}
+            onClick={openCalendar}
+            tabIndex={-1}
+            aria-hidden="true"
+          />
+        )}
         <button
           type="button"
           className={styles.calendarBtn}

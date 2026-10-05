@@ -35,7 +35,7 @@ export const FreeSessionHeader = ({ remainingSeconds = 0, isEnded = false, title
       <img src={giftIcon} alt="" width="36" height="36" className={styles.badgeIcon} />
       <div className={styles.badgeText}>
         <span className={styles.badgeTitle}>{title}</span>
-        <span className={styles.badgeSubtitle}>Free session active</span>
+        <span className={styles.badgeSubtitle}>{isEnded ? "Free session ended" : "Free session active"}</span>
       </div>
     </div>
     <span className={styles.badgeDivider} aria-hidden="true" />
@@ -111,6 +111,39 @@ export const FreeSessionEndingBanner = ({ onRecharge }) => (
   </div>
 );
 
+/*
+ * Last minute of a free session whose wallet CAN pay for it to carry on:
+ * a calm, non-blocking notice in the banner's place — no popup, no recharge
+ * push, because nothing is going to stop. `sessionLabel` is "chat" or "call".
+ */
+const formatRate = (n) => {
+  const v = Number(n);
+  return Number.isInteger(v) ? String(v) : v.toFixed(1);
+};
+
+export const FreeSessionContinueNotice = ({ remainingSeconds = 0, ratePerMinute, sessionLabel = "chat" }) => (
+  <div className={`${styles.endingBanner} ${styles.continueNotice}`} role="note">
+    <div className={styles.endingBannerInner}>
+      <img src={clockOrange} alt="" width="24" height="24" className={styles.continueNoticeIcon} />
+      <p className={styles.continueNoticeText}>
+        <span className={styles.continueNoticeLead}>
+          Your free session ends in <span className={styles.continueNoticeTime}>{formatClock(remainingSeconds)}</span>
+        </span>
+        <span className={styles.continueNoticeSep} aria-hidden="true">·</span>
+        <span className={styles.continueNoticeRest}>
+          The {sessionLabel} will continue
+          {ratePerMinute ? (
+            <>
+              {" "}at <span className={styles.lockPrice}>₹{formatRate(ratePerMinute)}/min</span>
+            </>
+          ) : null}{" "}
+          from your wallet
+        </span>
+      </p>
+    </div>
+  </div>
+);
+
 /* Screen 11 — replaces the input bar once the free session has run out.
    `sessionLabel` is the noun in "lets continue this …" ("chat" by default,
    "call" on the audio call screen). */
@@ -123,14 +156,31 @@ export const FreeSessionLockBar = ({
   onRecharge,
   sessionLabel = "chat",
   className = "",
+  // The wallet already covers the rate (the server ended the free session
+  // anyway): offer to start again from the profile instead of a recharge.
+  canContinue = false,
+  onContinue,
 }) => {
   const [imgError, setImgError] = useState(false);
   const name = (userName || "").trim();
   const greeting = name ? `Hi ${name}` : "Hi";
   const fmt = (n) => Number(n).toFixed(1);
+  const showContinue = canContinue && typeof onContinue === "function";
 
   let message;
-  if (offer?.was) {
+  if (showContinue) {
+    message = (
+      <>
+        {greeting}, your free {sessionLabel} has ended. Continue from your wallet
+        {offer?.now ? (
+          <>
+            {" "}at <span className={styles.lockPrice}>₹ {fmt(offer.now)}/min</span>
+            {offer?.was && <span className={styles.lockOldPrice}>₹{fmt(offer.was)}/min</span>}
+          </>
+        ) : null}
+      </>
+    );
+  } else if (offer?.was) {
     message = (
       <>
         {greeting} lets continue this {sessionLabel} at discounted price{" "}
@@ -163,7 +213,14 @@ export const FreeSessionLockBar = ({
         <button type="button" className={styles.exploreBtn} onClick={onExplore}>
           <span>Explore Website</span>
         </button>
-        <RechargeNowButton onClick={onRecharge} className={styles.pillShape} />
+        {showContinue ? (
+          <button type="button" className={`${styles.rechargeNowBtn} ${styles.pillShape}`} onClick={onContinue}>
+            <span className={styles.rechargeNowLabel}>Continue {sessionLabel === "call" ? "Call" : "Chat"}</span>
+            <img src={chevronRight} alt="" width="16" height="16" className={styles.rechargeNowChevron} />
+          </button>
+        ) : (
+          <RechargeNowButton onClick={onRecharge} className={styles.pillShape} />
+        )}
       </div>
     </div>
   );

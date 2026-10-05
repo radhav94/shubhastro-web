@@ -45,11 +45,13 @@ import useAstrologerAvailability from "../../../../../utils/hooks/useAstrologerA
 import { getAstrologerImageUrl } from "../../../../../utils/appImages";
 import { isFreeSessionRoom } from "../../../../../utils/auth/freeSessionRoom";
 import {
+  FreeSessionContinueNotice,
   FreeSessionEndingBanner,
   FreeSessionLockBar,
   LowBalancePopup,
 } from "./freeSession/FreeSessionUI";
-import { FREE_SESSION_WARNING_SECONDS, getChatRateOffer } from "./freeSession/freeSessionUtils";
+import { canContinueOnWallet, getChatRateOffer, getRatePerMinute, isLowBalanceWarning } from "./freeSession/freeSessionUtils";
+import { useFreeSessionPhase } from "./freeSession/useFreeSessionPhase";
 import { sortBySeq, MESSAGE_STATUS, normalizeReplyTo, replyPreviewLabel } from "../../../../../utils/helper/chatProtocol";
 const ChatWindow = () => {
   const messagesRef = useRef(null);
@@ -81,8 +83,13 @@ const ChatWindow = () => {
 
   // Astrologer availability (chat/call/video) for the connected session.
   // Used to hide the Voice/Video buttons when the astrologer disabled them.
+  // `availabilityRefreshKey` flips when a free first session carries on as
+  // paid (set further down, where freePhase is known) so call/video
+  // availability is re-checked for the paid part — see useAstrologerAvailability.
+  const [availabilityRefreshKey, setAvailabilityRefreshKey] = useState(0);
   const astroAvailability = useAstrologerAvailability(astrologerId, {
     enabled: !!isUserSide,
+    refreshKey: availabilityRefreshKey,
   });
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showProfileManagerModal, setShowProfileManagerModal] = useState(false);
@@ -90,7 +97,12 @@ const ChatWindow = () => {
   const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
   const [showEndChatConfirm, setShowEndChatConfirm] = useState(false);
-  const { activeChat, isReconnecting } = useChatContext();
+  const {
+    activeChat,
+    isReconnecting,
+    setChatSeconds: setChatContextSeconds,
+    startTimer: startChatTimer,
+  } = useChatContext();
 
   // Fetch astrologer profile to get the correct/up-to-date avatar
   const { data: astrologerProfileData } = useGetAstrologerByIdQuery(
@@ -167,10 +179,14 @@ const ChatWindow = () => {
   useEffect(() => {
     if (isChatActive && roomId && isFreeSessionRoom(roomId)) setIsFreeSession(true);
   }, [isChatActive, roomId]);
-  const isFreeSessionEnded = isFreeSession && !isChatActive;
   const isFreeSessionEndedRef = useRef(false);
-  isFreeSessionEndedRef.current = isFreeSessionEnded;
   const [lowBalanceDismissed, setLowBalanceDismissed] = useState(false);
+  // The "free session will end soon" bottom bar appears only after the user
+  // picks "Remind Me Later" or closes (✕) the low-balance popup — not alongside it.
+  const [lowBalanceRemindLater, setLowBalanceRemindLater] = useState(false);
+  // Set below, once the free-session phase is known; read by useChat's
+  // `warning` handlers.
+  const suppressWarningRef = useRef(() => false);
 
   // Fetch kundli profiles
   const { data: profilesData } = useGetAllKundlisQuery();
@@ -284,15 +300,52 @@ const ChatWindow = () => {
     astrologerName,
     fullName,
     refreshKey,
+    suppressWarningRef,
   });
 
   /*
-    No numeric low-balance threshold exists for chat (the server's "warning"
-    event only toasts), so the popup and banner use the last
-    FREE_SESSION_WARNING_SECONDS (60s) of the free session, as in the design.
+    Balance-aware free session (see freeSession/useFreeSessionPhase).
+
+    The free minutes running out only ends the chat when the wallet cannot pay
+    for it to carry on. When it can (balance covers the astrologer's chat rate),
+    the last minute shows a calm "continues at ₹X/min" notice instead of the
+    low-balance popup + recharge banner, and at 00:00 the screen simply becomes
+    the normal paid chat — timer, End button, call/video buttons — with nothing
+    ended client-side. When it cannot, today's flow is unchanged (popup and
+    banner in the last FREE_SESSION_WARNING_SECONDS, then the locked footer);
+    a recharge in that last minute is picked up live.
   */
-  const isFreeSessionEndingSoon =
-    isFreeSession && !!isChatActive && chatSeconds > 0 && chatSeconds <= FREE_SESSION_WARNING_SECONDS;
+  const chatRateOffer = getChatRateOffer(astrologerProfileData?.data);
+  const chatRatePerMinute = getRatePerMinute(chatRateOffer);
+  const freePhase = useFreeSessionPhase({
+    isFree: isFreeSession,
+    sessionKey: roomId,
+    roomId,
+    isActive: !!isChatActive,
+    sessionSeconds: chatSeconds,
+    balance,
+    ratePerMinute: chatRatePerMinute,
+    seedSessionSeconds: (secs) => {
+      setChatContextSeconds?.(secs);
+      startChatTimer?.();
+    },
+  });
+  // Locked footer: the free session is over and never became a paid one.
+  const isFreeSessionEnded = isFreeSession && !isChatActive && !freePhase.isPaidConfirmed;
+
+  // Free part over (carried on paid, or ended) → re-check call/video
+  // availability once, so the Voice/Video buttons reflect the paid session.
+  const freePartOver = isFreeSession && !freePhase.isFreePhase;
+  useEffect(() => {
+    if (freePartOver) setAvailabilityRefreshKey((k) => k + 1);
+  }, [freePartOver]);
+  isFreeSessionEndedRef.current = isFreeSessionEnded;
+  // Free badge / free countdown / no End or call buttons.
+  const showFreeSessionUI = freePhase.isFreePhase || isFreeSessionEnded;
+  const isFreeSessionEndingSoon = freePhase.isEndingSoon;
+  // The paid low-balance toast would double up on the free popup (and is
+  // simply wrong when the wallet can continue), so only the free UI speaks.
+  suppressWarningRef.current = (msg) => freePhase.isFreePhase && isLowBalanceWarning(msg);
 
   const [message, setMessage] = useState("");
   // Message the user is currently replying to (null = normal compose).
@@ -886,6 +939,12 @@ const ChatWindow = () => {
     setIsRechargeModalOpen(true);
   };
 
+  // Locked footer, wallet already covers the rate: start again from the
+  // astrologer's profile (the free session itself is over server-side).
+  const handleContinueAfterFree = () => {
+    navigate(astrologerId ? `/astrologer/${astrologerId}` : PATH.privateRoutes.Chat_With_ASTROLOGER.path);
+  };
+
   // Locked footer: the session is over, so go to the recharge page, and come
   // back to this astrologer's profile (where a new chat can be started).
   const handleLockedRecharge = () => {
@@ -981,7 +1040,22 @@ const ChatWindow = () => {
     if (chatSeconds > 0) {
       timerStartedRef.current = true;
     }
-    if (chatSeconds === 0 && remainingTime > 0 && timerStartedRef.current) {
+    // Free session carrying on paid, before the server has re-timed it: the
+    // countdown hitting 0 is the free part (or our wallet estimate) running
+    // out, not the session — the server owns ending it.
+    const awaitingPaidSync =
+      isFreeSession && freePhase.hasSwitchedToPaid && !freePhase.isPaidConfirmed;
+    /*
+      Never auto-end the FREE first-session chat on the client. Whether it
+      carries on paid (wallet balance) or ends (no balance) is the server's
+      call — it ends the chat itself when it can't continue. Ending it here
+      when the countdown hit 0 killed chats that should have carried on: the
+      carry-on check needs the astrologer's chat rate, and whenever that wasn't
+      loaded (or came in another shape) it read as "can't continue" and this
+      sent chat:end — even with balance in the wallet.
+    */
+    if (isFreeSession) return;
+    if (chatSeconds === 0 && remainingTime > 0 && timerStartedRef.current && !awaitingPaidSync) {
       // Timer has counted down to 0, automatically end the chat
       handleDisconnect();
     }
@@ -1005,7 +1079,7 @@ const ChatWindow = () => {
             disabled={!!activeCall}
             walletBalance={balance || 0}
             experience={experience}
-            remainingTime={chatSeconds > 0 ? chatSeconds : 0}
+            remainingTime={showFreeSessionUI ? freePhase.freeSecondsLeft : chatSeconds > 0 ? chatSeconds : 0}
             onRecharge={handleRecharge}
             isVideoCallActive={isVideoCallActive}
             onChatEnd={handleChatEnd}
@@ -1013,14 +1087,17 @@ const ChatWindow = () => {
             isEnding={isEnding || waitingPopup}
             profileImgUrl={profileImgUrl}
             gender={gender}
-            isFreeSession={isFreeSession}
+            isFreeSession={showFreeSessionUI}
             isFreeSessionEnded={isFreeSessionEnded}
           />
 
-          {/* Call Buttons Below Header. Hidden for the whole free first session
-              (running or ended): the free offer is a chat, and switching to a
-              call from here would leave the free flow mid-session. */}
-          {(astroAvailability.call || astroAvailability.video) && !isFreeSession && (
+          {/* Call Buttons Below Header. Hidden only while the free part of the
+              first session is RUNNING (the free offer is a chat, and switching
+              to a call would leave the free flow mid-session). Once the free
+              part is over they come back — whether the chat carried on as paid
+              or ended/locked — so the user can continue with a call; tapping
+              them goes through the normal balance check / recharge prompt. */}
+          {(astroAvailability.call || astroAvailability.video) && !freePhase.isFreePhase && (
             <div className={styles.callButtonsContainer}>
               {astroAvailability.call && (
                 <button
@@ -1073,7 +1150,15 @@ const ChatWindow = () => {
             />
           </div>
 
-          {isFreeSessionEndingSoon && (
+          {isFreeSessionEndingSoon && freePhase.canContinue && (
+            <FreeSessionContinueNotice
+              remainingSeconds={freePhase.freeSecondsLeft}
+              ratePerMinute={chatRatePerMinute}
+              sessionLabel="chat"
+            />
+          )}
+
+          {isFreeSessionEndingSoon && !freePhase.canContinue && lowBalanceRemindLater && (
             <FreeSessionEndingBanner onRecharge={handleFreeSessionRecharge} />
           )}
 
@@ -1082,9 +1167,13 @@ const ChatWindow = () => {
               userName={user?.firstName}
               profileImgUrl={profileImgUrl}
               gender={gender}
-              offer={getChatRateOffer(astrologerProfileData?.data)}
+              offer={chatRateOffer}
               onExplore={() => navigate("/")}
               onRecharge={handleLockedRecharge}
+              // Starting a NEW paid chat: the usual 5-minute minimum, not the
+              // 1-minute in-session carry-on rule.
+              canContinue={canContinueOnWallet(balance, chatRatePerMinute)}
+              onContinue={handleContinueAfterFree}
             />
           )}
 
@@ -1240,10 +1329,16 @@ const ChatWindow = () => {
 
       {/* Free session: low wallet balance popup (Figma 4787:30251) */}
       <LowBalancePopup
-        isOpen={isFreeSessionEndingSoon && !lowBalanceDismissed && !isRechargeModalOpen}
-        remainingSeconds={chatSeconds}
-        onClose={() => setLowBalanceDismissed(true)}
-        onRemindLater={() => setLowBalanceDismissed(true)}
+        isOpen={isFreeSessionEndingSoon && !freePhase.canContinue && !lowBalanceDismissed && !isRechargeModalOpen}
+        remainingSeconds={freePhase.freeSecondsLeft}
+        onClose={() => {
+          setLowBalanceDismissed(true);
+          setLowBalanceRemindLater(true);
+        }}
+        onRemindLater={() => {
+          setLowBalanceDismissed(true);
+          setLowBalanceRemindLater(true);
+        }}
         onRecharge={handleFreeSessionRecharge}
       />
 

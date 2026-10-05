@@ -5,6 +5,7 @@ import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import { useCall } from "../../../context/CallContext";
 import { useChat } from "../../../context/ChatContext";
 import { voiceSocket } from "../../../services/voiceSocketServices";
+import { rememberLiveRequest } from "../../../utils/auth/freeSessionRoom";
 import { stopIncomingSound } from "../../../utils/incomingSound";
 import toast from "../../toast";
 import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
@@ -171,6 +172,8 @@ const StickyWaitingQueue = () => {
         },
       }),
     };
+    // A live re-request is never the free session (SHB-2148) — see freeSessionRoom.
+    if (conn.fromLive) rememberLiveRequest(conn.astrologer?._id);
     voiceSocket.emit(initiateEvent, initiatePayload);
     addPendingConnection({
       id: `${conn.astrologer?._id}-${conn.type}-${Date.now()}`,

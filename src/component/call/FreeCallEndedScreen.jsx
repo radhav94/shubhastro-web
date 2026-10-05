@@ -3,6 +3,11 @@ import { useCall } from "../../context/CallContext";
 import { getUserFromStorage } from "../../utils/authStorage";
 import { PATH } from "../../utils/routes/Paths";
 import { FreeCallScreen, FreeCallLockBar } from "./FreeCallUI";
+import { useWalletBalance } from "../../screens/private/wallet/useWalletBalance";
+import {
+  canContinueOnWallet,
+  getRatePerMinute,
+} from "../../screens/private/home/components/chats/freeSession/freeSessionUtils";
 
 /*
  * Locked end state of the user's free first-session AUDIO call (Figma
@@ -19,6 +24,8 @@ import { FreeCallScreen, FreeCallLockBar } from "./FreeCallUI";
 const FreeCallEndedScreen = () => {
   const { endedFreeCall, setEndedFreeCall } = useCall();
   const navigate = useNavigate();
+  // Live: a recharge on this screen turns "Recharge Now" into "Continue Call".
+  const { balance } = useWalletBalance();
 
   if (!endedFreeCall) return null;
 
@@ -43,6 +50,14 @@ const FreeCallEndedScreen = () => {
       : PATH.privateRoutes.Chat_With_ASTROLOGER.path;
     dismiss();
     navigate(`${PATH.privateRoutes.RECHARGE.path}?returnUrl=${encodeURIComponent(returnUrl)}`);
+  };
+
+  // The wallet already covers the audio rate: the free call is over, so start
+  // a new (paid) one from the astrologer's profile — no recharge needed.
+  const canContinue = canContinueOnWallet(balance, getRatePerMinute(offer));
+  const handleContinue = () => {
+    dismiss();
+    navigate(astrologerId ? `/astrologer/${astrologerId}` : PATH.privateRoutes.Chat_With_ASTROLOGER.path);
   };
 
   const handleExplore = () => {
@@ -71,6 +86,8 @@ const FreeCallEndedScreen = () => {
           offer={offer}
           onExplore={handleExplore}
           onRecharge={handleRecharge}
+          canContinue={canContinue}
+          onContinue={handleContinue}
         />
       }
     />

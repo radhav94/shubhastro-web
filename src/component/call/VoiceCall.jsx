@@ -47,14 +47,17 @@ import SwitchWaitingPopup from "../UI/switchWaiting/SwitchWaitingPopup";
 import { isShubhMallEnabled } from "../../utils/featureConfig";
 import { getAttachmentDisplayName } from "../../utils/helper/getAttachmentDisplayName";
 import useAstrologerAvailability from "../../utils/hooks/useAstrologerAvailability";
-import { isFreeSessionCall, payloadSaysFree } from "../../utils/auth/freeSessionRoom";
+import { isFreeSessionCall, payloadSaysFree, payloadSaysLive, freeSessionCallId } from "../../utils/auth/freeSessionRoom";
 import {
   FreeCallScreen,
   FreeCallEndingBanner,
+  FreeCallContinueNotice,
   FreeCallLowBalancePopup,
 } from "./FreeCallUI";
+import { useFreeSessionPhase } from "../../screens/private/home/components/chats/freeSession/useFreeSessionPhase";
 import {
-  FREE_SESSION_WARNING_SECONDS,
+  getRatePerMinute,
+  isLowBalanceWarning,
   getAudioCallRateOffer,
 } from "../../screens/private/home/components/chats/freeSession/freeSessionUtils";
 
@@ -90,6 +93,9 @@ const AgoraVoiceCalling = ({ callData }) => {
   // before the early return so it adds nothing to the existing conditional-hook
   // problem further down.
   const [freeLowBalanceDismissed, setFreeLowBalanceDismissed] = useState(false);
+  // The "free session will end soon" bottom bar appears only after the user
+  // picks "Remind Me Later" or closes (✕) the low-balance popup — not alongside it.
+  const [freeLowBalanceRemindLater, setFreeLowBalanceRemindLater] = useState(false);
   const freeTimerStartedRef = useRef(false);
   const freeCallEndRef = useRef(null);
   // Free call "Call duration": wall-clock join time and the last value shown.
@@ -97,6 +103,44 @@ const AgoraVoiceCalling = ({ callData }) => {
   const freeDurationRef = useRef(0);
   // Largest remaining time seen for this free call = the free allowance.
   const freeAllowanceRef = useRef(0);
+  // Read by the socket `warning` handler (registered once) — see below.
+  const freeCallSuppressWarningRef = useRef(() => false);
+  // The user pressed End Call (vs. the server ending the call).
+  const userEndedCallRef = useRef(false);
+
+  /*
+    Balance-aware free call (see chats/freeSession/useFreeSessionPhase). Called
+    here, before the early return below, so it is not a conditional hook. When
+    the wallet covers the audio rate, the last minute shows a calm "continues at
+    ₹X/min" notice (no low-balance popup / recharge banner) and at 00:00 the
+    screen switches to the normal paid call layout — nothing is ended
+    client-side. Otherwise the free flow is unchanged.
+  */
+  const freeCallRoomId = callData?.roomId;
+  // A call placed from a live stream is never the free call (SHB-2148): no
+  // free UI, and no locked FreeCallEndedScreen when it ends. The watcher no
+  // longer tags it; this also covers a room tagged before that fix.
+  const isFreeCallSession =
+    !!activeCall &&
+    activeCall.callType === "audio" &&
+    !payloadSaysLive(activeCall) && // origin "live" / isLive / liveRoomDetails
+    (isFreeSessionCall(freeCallRoomId) || payloadSaysFree(activeCall));
+  const { balance: freeCallBalance } = useWalletBalance();
+  const freeCallRateOffer = getAudioCallRateOffer(astrologerFullData?.data || lastRequestedAstro);
+  const freeCallRatePerMinute = getRatePerMinute(freeCallRateOffer);
+  const freeCallPhase = useFreeSessionPhase({
+    isFree: isFreeCallSession,
+    sessionKey: freeSessionCallId(freeCallRoomId),
+    roomId: activeCall?.roomId || freeCallRoomId,
+    isActive: isFreeCallSession,
+    sessionSeconds: callSeconds,
+    balance: freeCallBalance,
+    ratePerMinute: freeCallRatePerMinute,
+    seedSessionSeconds: (secs) => {
+      setCallSeconds(secs);
+      startTimer();
+    },
+  });
 
   if (!activeCall || activeCall.callType !== "audio") {
     return null;
@@ -241,13 +285,26 @@ const AgoraVoiceCalling = ({ callData }) => {
     call data is honoured too. This component only renders audio calls, and the
     watcher never records video, so video calls never get any of this.
   */
-  const isFreeCall = isFreeSessionCall(roomId) || payloadSaysFree(activeCall);
+  /*
+    `isFreeCall` = the FREE UI is showing: this is the free call and it has not
+    carried on as a paid one. Once it has (wallet covered the rate when the
+    free time ran out), the regular call layout below takes over — Virtual
+    Assistant, View History and Send Gift come back.
+  */
+  const isFreeCall = isFreeCallSession && freeCallPhase.isFreePhase;
+  // Free part of the countdown (equals callSeconds unless the backend sends a
+  // separate free allowance — see freeSessionUtils.getFreeSecondsLeft).
+  const freeSecondsLeft = freeCallPhase.freeSecondsLeft;
   // Latched once the countdown has really run (callSeconds starts at 0 until
   // remainingTime arrives), so "00:00 End" only shows when the time ran out.
-  if (isFreeCall && callSeconds > 0) freeTimerStartedRef.current = true;
-  const isFreeCallEndingSoon =
-    isFreeCall && joined && callSeconds > 0 && callSeconds <= FREE_SESSION_WARNING_SECONDS;
-  const isFreeCallTimeUp = isFreeCall && freeTimerStartedRef.current && callSeconds <= 0;
+  if (isFreeCall && freeSecondsLeft > 0) freeTimerStartedRef.current = true;
+  const isFreeCallEndingSoon = joined && freeCallPhase.isEndingSoon;
+  // Free time over and the wallet could not carry the call on.
+  const isFreeCallTimeUp = freeCallPhase.isFreeTimeUp;
+  // Only the free UI speaks about the wallet during the free part: the paid
+  // "Low balance alert" toast (and its Recharge button) would double up on the
+  // popup, and is wrong when the wallet can continue.
+  freeCallSuppressWarningRef.current = (msg) => isFreeCall && isLowBalanceWarning(msg);
 
   /*
     "Call duration" (Figma 4886:78101): real connected time, from the moment
@@ -264,7 +321,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     The join time is kept per room in sessionStorage so a refresh-resume keeps
     counting instead of restarting at 0. Frozen once the free time is up.
   */
-  if (isFreeCall && roomId && joined && !freeJoinedAtRef.current) {
+  if (isFreeCallSession && roomId && joined && !freeJoinedAtRef.current) {
     const joinedKey = `shubhtalk_free_call_joined_${roomId}`;
     let joinedAt = 0;
     try {
@@ -291,6 +348,8 @@ const AgoraVoiceCalling = ({ callData }) => {
     ("03:00") — what the free session promised. A call ended early by the user
     still shows the real time talked.
   */
+  // Only while the free UI is up: after a paid switch callSeconds is the
+  // wallet's time, not the free allowance.
   if (isFreeCall && roomId) {
     const allowanceKey = `shubhtalk_free_call_allowance_${roomId}`;
     if (!freeAllowanceRef.current) {
@@ -300,10 +359,10 @@ const AgoraVoiceCalling = ({ callData }) => {
         /* storage unavailable */
       }
     }
-    if (callSeconds > freeAllowanceRef.current) {
-      freeAllowanceRef.current = callSeconds;
+    if (freeSecondsLeft > freeAllowanceRef.current) {
+      freeAllowanceRef.current = freeSecondsLeft;
       try {
-        sessionStorage.setItem(allowanceKey, String(callSeconds));
+        sessionStorage.setItem(allowanceKey, String(freeSecondsLeft));
       } catch {
         /* ignore */
       }
@@ -320,8 +379,8 @@ const AgoraVoiceCalling = ({ callData }) => {
   // with 1–3s still showing here.
   const FREE_CALL_END_SLACK_SECONDS = 5;
   const freeTimeRanOut =
-    isFreeCall && freeTimerStartedRef.current && callSeconds <= FREE_CALL_END_SLACK_SECONDS;
-  const freeCallDuration = !isFreeCall
+    isFreeCall && freeTimerStartedRef.current && freeSecondsLeft <= FREE_CALL_END_SLACK_SECONDS;
+  const freeCallDuration = !isFreeCallSession
     ? 0
     : isFreeCallTimeUp && freeAllowanceRef.current
       ? freeAllowanceRef.current
@@ -334,7 +393,14 @@ const AgoraVoiceCalling = ({ callData }) => {
 
   // Read by cleanup(), which may be the closure from the first render (it runs
   // from the mount effect's teardown), so keep the latest values in a ref.
-  freeCallEndRef.current = isFreeCall
+  //
+  // No snapshot (so no locked "free call ended" screen) once the call is a
+  // confirmed paid call — it ends like any paid call. A call that switched to
+  // paid but ended before the server billed it is still the free call ending
+  // (flagged `switchedToPaid`, so a user-pressed End Call skips it).
+  const keepFreeCallEndSnapshot =
+    isFreeCallSession && !freeCallPhase.isPaidConfirmed;
+  freeCallEndRef.current = keepFreeCallEndSnapshot
     ? {
         roomId,
         astrologerId: activeCall?.astrologerId,
@@ -344,8 +410,9 @@ const AgoraVoiceCalling = ({ callData }) => {
         gender: astroForImage.gender,
         role: lastRequestedAstro?.role || chatLastRequestedAstro?.role,
         experience: experience || lastRequestedAstro?.experience || chatLastRequestedAstro?.experience,
-        offer: getAudioCallRateOffer(astrologerFullData?.data || lastRequestedAstro),
+        offer: freeCallRateOffer,
         durationSeconds: freeCallFinalDuration,
+        switchedToPaid: freeCallPhase.hasSwitchedToPaid,
       }
     : null;
 
@@ -785,8 +852,9 @@ const AgoraVoiceCalling = ({ callData }) => {
           simply vanishing. The review modal still opens on top of it as usual.
           Not when a chat is still running — that chat is the live session.
         */
-        if (freeCallEndRef.current && !hasOngoingChat()) {
-          setEndedFreeCall(freeCallEndRef.current);
+        const freeEnd = freeCallEndRef.current;
+        if (freeEnd && !(freeEnd.switchedToPaid && userEndedCallRef.current) && !hasOngoingChat()) {
+          setEndedFreeCall(freeEnd);
         }
         setActiveCall(null);
       }
@@ -800,6 +868,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     // Don't emit call:end if we're upgrading to video
     if (!isUpgradingToVideo.current) {
       const currentCall = activeCallRef.current;
+      userEndedCallRef.current = true;
       
       // Track Consultation Completed event
       BranchEvents.trackConsultationCompleted({
@@ -883,6 +952,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     const handleWarning = (msg) => {
       // Pandit AI's own low-balance warning is shown inside Pandit AI.
       if (isPanditAIEvent(msg)) return;
+      if (freeCallSuppressWarningRef.current?.(msg)) return;
       if (msg?.message?.includes("Low balance alert")) {
         setShowRechargeButton(true);
       }
@@ -1363,7 +1433,7 @@ const AgoraVoiceCalling = ({ callData }) => {
         >
           <div className={styles.miniHeader}>
             <span>
-              {capitalizeWords(callerName)} • {joined ? formatTime(callSeconds) : "Calling…"}
+              {capitalizeWords(callerName)} • {joined ? formatTime(isFreeCall ? freeSecondsLeft : callSeconds) : "Calling…"}
             </span>
             <button onClick={() => {
               if (activeCall?.origin === "live") {
@@ -1398,7 +1468,7 @@ const AgoraVoiceCalling = ({ callData }) => {
           thumbImage={getAstrologerImageUrl(astroForImage, "small")}
           profileImage={getAstrologerImageUrl(astroForImage, "large")}
           gender={astroForImage.gender}
-          remainingSeconds={callSeconds}
+          remainingSeconds={freeSecondsLeft}
           isEnded={isFreeCallTimeUp}
           status={
             isReconnecting || isNetworkLost ? "Reconnecting..." : joined ? "Connected" : "Connecting…"
@@ -1417,7 +1487,13 @@ const AgoraVoiceCalling = ({ callData }) => {
             onToggleSpeaker: () => setSpeakerOn((s) => !s),
             onEndCall: requestEndCall,
           }}
-          bottom={isFreeCallEndingSoon ? <FreeCallEndingBanner onRecharge={handleFreeCallRecharge} /> : null}
+          bottom={
+            !isFreeCallEndingSoon ? null : freeCallPhase.canContinue ? (
+              <FreeCallContinueNotice remainingSeconds={freeSecondsLeft} ratePerMinute={freeCallRatePerMinute} />
+            ) : freeLowBalanceRemindLater ? (
+              <FreeCallEndingBanner onRecharge={handleFreeCallRecharge} />
+            ) : null
+          }
         >
           {chatNotificationBanner}
           <VideoCallChat
@@ -1772,10 +1848,16 @@ const AgoraVoiceCalling = ({ callData }) => {
 
       {/* Free first session: low wallet balance popup, once (Figma 4886:77824) */}
       <FreeCallLowBalancePopup
-        isOpen={isFreeCallEndingSoon && !freeLowBalanceDismissed && !isRechargeModalOpen}
-        remainingSeconds={callSeconds}
-        onClose={() => setFreeLowBalanceDismissed(true)}
-        onRemindLater={() => setFreeLowBalanceDismissed(true)}
+        isOpen={isFreeCallEndingSoon && !freeCallPhase.canContinue && !freeLowBalanceDismissed && !isRechargeModalOpen}
+        remainingSeconds={freeSecondsLeft}
+        onClose={() => {
+          setFreeLowBalanceDismissed(true);
+          setFreeLowBalanceRemindLater(true);
+        }}
+        onRemindLater={() => {
+          setFreeLowBalanceDismissed(true);
+          setFreeLowBalanceRemindLater(true);
+        }}
         onRecharge={handleFreeCallRecharge}
       />
 

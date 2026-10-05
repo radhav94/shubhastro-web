@@ -457,6 +457,7 @@ const BirthDetailsScreen = ({
               <label>Birth Date{requiredMark}</label>
               <DateTimePicker
                 mode="date"
+                iconOnly
                 selected={values.birthDate ? new Date(values.birthDate) : null}
                 onChange={(date) => {
                   if (date) {
@@ -496,6 +497,7 @@ const BirthDetailsScreen = ({
               </label>
               <DateTimePicker
                 mode="time"
+                iconOnly
                 selected={values.birthTime ? (() => { const [h, m] = values.birthTime.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
                 onChange={(date) => {
                   if (date) {

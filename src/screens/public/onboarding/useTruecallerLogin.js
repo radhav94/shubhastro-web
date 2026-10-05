@@ -34,6 +34,54 @@ import {
  * @param {Function} options.onLoggedIn - called with ({ userData, isRegistered,
  *   deviceLimitReached }) once the session is persisted. The caller navigates.
  */
+/*
+ * SHB-2111 — web push (FCM) token for the Truecaller login.
+ *
+ * The OTP login asks for the token right before verifyOtp and sends it as
+ * `fcmTokens`; the Truecaller login sends the same field on
+ * POST users/truecaller/session. Getting it must never stall the login: on a
+ * first visit `requestFCMToken()` shows the browser's notification prompt and
+ * resolves only when the user answers it, which held the Truecaller sheet back
+ * indefinitely (and an external-app deep link opened long after the tap can be
+ * blocked by the browser). So:
+ *   - permission already "denied" / API missing -> no token, no wait;
+ *   - otherwise wait at most FCM_TOKEN_WAIT_MS, then continue without one.
+ * The permission state and outcome are logged (no token value) so a missing
+ * token on a real device is diagnosable from the Truecaller log.
+ */
+const FCM_TOKEN_WAIT_MS = 8000;
+
+const getFcmTokenForLogin = async () => {
+  const permission =
+    typeof Notification !== "undefined" ? Notification.permission : "unsupported";
+  if (permission === "denied" || permission === "unsupported") {
+    tcLog("fcm_token", { obtained: false, permission, skipped: true });
+    return null;
+  }
+
+  const startedAt = Date.now();
+  let timer = null;
+  const timedOut = new Promise((resolve) => {
+    timer = setTimeout(() => resolve("__timeout__"), FCM_TOKEN_WAIT_MS);
+  });
+  const result = await Promise.race([
+    requestFCMToken().catch(() => null),
+    timedOut,
+  ]);
+  clearTimeout(timer);
+
+  const token = result === "__timeout__" ? null : result;
+  tcLog("fcm_token", {
+    obtained: !!token,
+    permission,
+    permissionAfter:
+      typeof Notification !== "undefined" ? Notification.permission : "unsupported",
+    timedOut: result === "__timeout__",
+    elapsedMs: Date.now() - startedAt,
+  });
+  return token || null;
+};
+
 const useTruecallerLogin = ({ onLoggedIn } = {}) => {
   const dispatch = useDispatch();
   const [status, setStatus] = useState("idle"); // idle | invoking | waiting | error
@@ -240,17 +288,32 @@ const useTruecallerLogin = ({ onLoggedIn } = {}) => {
     try {
       // Attach device/FCM details to the pending request so the session the
       // callback creates has them (the callback itself carries none).
-      const fcmTokens = await requestFCMToken().catch(() => null);
-      tcLog("fcm_token", { obtained: !!fcmTokens });
+      const fcmTokens = await getFcmTokenForLogin();
       let sessionRouteMissing = false;
+      // Same device/FCM fields, names and format the OTP login sends to
+      // verifyOtp (OTPScreen.handleContinue): `fcmTokens` is the raw token
+      // string, plus `deviceType` / `deviceInfo`.
+      const sessionPayload = {
+        requestId,
+        type: "CUSTOMER",
+        deviceInfo: getDeviceInfo(),
+        deviceType: getDeviceType(),
+        ...(fcmTokens ? { fcmTokens } : {}),
+      };
       try {
-        const sessionRes = await createTruecallerSession({
-          requestId,
-          type: "CUSTOMER",
-          deviceInfo: getDeviceInfo(),
-          deviceType: getDeviceType(),
-          ...(fcmTokens ? { fcmTokens } : {}),
-        });
+        let sessionRes;
+        try {
+          sessionRes = await createTruecallerSession(sessionPayload);
+        } catch (firstErr) {
+          // SHB-2111: this request is the ONLY place the web push token reaches
+          // the Truecaller login (the server-side callback carries none), so a
+          // single network blip/5xx used to silently log the user in with no
+          // notification token. Retry once; a 4xx is a real answer, not a blip.
+          const firstStatus = firstErr?.response?.status;
+          if (firstStatus && firstStatus < 500) throw firstErr;
+          tcLog("session_create_retry", { httpStatus: firstStatus ?? null });
+          sessionRes = await createTruecallerSession(sessionPayload);
+        }
         tcLog("session_create_ok", {
           httpStatus: sessionRes?.status,
           bodySuccess: sessionRes?.data?.success ?? null,
