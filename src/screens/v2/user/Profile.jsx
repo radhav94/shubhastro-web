@@ -224,6 +224,23 @@ const OrderAstrologerAvatar = ({ astrologer }) => {
   );
 };
 
+
+/*
+ * Order total for a history card (SHB-2171).
+ *
+ * A session that switches mode (chat -> audio -> video) comes back with a
+ * `channelBreakdown` row per mode, but `amount` is only one of them — the card
+ * showed "Chat ₹10 · Audio ₹15 · Video ₹16 · Total ₹10". When there is a
+ * breakdown the total is its sum; otherwise the API amount as before.
+ */
+const orderTotal = (breakdown, fallback) => {
+  if (Array.isArray(breakdown) && breakdown.length > 0) {
+    const sum = breakdown.reduce((acc, ch) => acc + (Number(ch?.amount) || 0), 0);
+    return Math.round(sum * 100) / 100;
+  }
+  return Number(fallback) || 0;
+};
+
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -592,7 +609,7 @@ const Profile = () => {
           },
           date: item?.timestamp || new Date(),
           duration:`${formatDuration(Math.round(item?.totalDuration)) || 0}`,
-          amount: item?.amount || 0,
+          amount: orderTotal(item?.channelBreakdown, item?.amount),
           channelBreakdown: item?.channelBreakdown || [],
           rate: 0,
           status: item?.status || "completed",
@@ -629,7 +646,7 @@ const Profile = () => {
           },
           date: firstChat?.createdAt || room?.createdAt || new Date(),
           duration: `${formatDuration(Math.round(room?.totalDuration)) || 0}`,
-          amount: room?.amount || 0,
+          amount: orderTotal(room?.channelBreakdown, room?.amount),
           channelBreakdown: room?.channelBreakdown || [],
           rate: room?.rate || 0,
           status: "completed",
