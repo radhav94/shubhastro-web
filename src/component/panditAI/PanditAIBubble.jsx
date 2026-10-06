@@ -34,6 +34,25 @@ import ReplyPreview from "../UI/chat/ReplyPreview";
 // (4,275 bytes vs 17,728 for the local file).
 const panditAiIcon = "https://assets.shubhastro.ai/images/AiPandit.png";
 
+/*
+  Absolute links to our own site ("https://www.shubhastro.ai/ai-wow/business-
+  pathfinder") are routed in-app like `[label](/path)` links, instead of
+  opening a new tab. A new tab has no history, so the page's back arrow did
+  nothing — Clarity 9jmnr6 rage-tapped it for ~15s — and the visitor also lost
+  the chat they were in. Returns the in-app path, or null for external links.
+*/
+const toSameSitePath = (href) => {
+  try {
+    const url = new URL(href, window.location.origin);
+    const host = url.hostname.replace(/^www\./, "");
+    const sameSite =
+      url.origin === window.location.origin || host === "shubhastro.ai";
+    return sameSite ? `${url.pathname}${url.search}${url.hash}` : null;
+  } catch {
+    return null;
+  }
+};
+
 // Memoized message bubble to avoid re-rendering the entire list on new messages
 const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInternal, awaitingReply }) => {
   const isUser = msg.sender === "user";
@@ -109,7 +128,7 @@ const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInterna
         */}
         <p className={styles.msgText}>
           {splitTextByURL(msg.text).map((part, index) =>
-            part.type === "url" ? (
+            part.type === "url" && !toSameSitePath(part.href) ? (
               <a
                 key={`${part.value}-${index}`}
                 href={part.href}
@@ -124,7 +143,7 @@ const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInterna
               >
                 {part.value}
               </a>
-            ) : part.type === "internal" ? (
+            ) : part.type === "internal" || part.type === "url" ? (
               // A Markdown link to an in-app route (`[कुंडली](/kundli)`). Was
               // inert plain text — the dead click in Clarity gx75h1. A real
               // <button> so it is keyboard reachable; onNavigateInternal closes
@@ -134,7 +153,11 @@ const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInterna
                 key={`in-${part.href}-${index}`}
                 type="button"
                 className={`${styles.inlineLink} ${styles.namedLink}`}
-                onClick={() => onNavigateInternal?.(part.href)}
+                onClick={() =>
+                  onNavigateInternal?.(
+                    part.type === "url" ? toSameSitePath(part.href) : part.href
+                  )
+                }
               >
                 {part.value}
               </button>
@@ -295,6 +318,17 @@ const PanditAIBubble = ({ hideBubble = false }) => {
       setInitialBilling(null);
     }
   }, [hookFreeMinutesRemaining, hookRemainingPaidTime]);
+
+  // SHB-2116: the seed belongs to ONE voice→text handover. If it was never
+  // replaced (e.g. the handed-over chat closed before an event arrived) it
+  // survived into the next chat, whose header then showed the old session's
+  // free/paid state — e.g. a stale `freeMinutesRemaining: 0` = "Free time used"
+  // — until a refresh. Closing the chat ends that session, so drop it then. The
+  // reopen handler sets the seed and opens in the same batch, so a real
+  // handover is unaffected.
+  useEffect(() => {
+    if (!isOpen) setInitialBilling(null);
+  }, [isOpen]);
 
   // Group messages by date for date separators
   const messageGroups = useMemo(() => {

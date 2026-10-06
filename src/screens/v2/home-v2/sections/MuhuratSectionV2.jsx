@@ -92,9 +92,11 @@ const MuhuratSectionV2 = memo(({ sectionData, styles }) => {
             .rightPanel h2 / .muhuratTop h3 in HomeV2.module.scss. */}
         <h2>{sectionData?.display_title || sectionData?.title || "TODAY'S MUHURAT"}</h2>
         {!userLocation.isDefault && userLocation.locationName && (
-          <span className={styles.muhuratLocation}>
-            <IoLocationOutline />
-            {userLocation.locationName.split(",")[0]}
+          <span className={styles.muhuratLocation} title={userLocation.locationName}>
+            <IoLocationOutline aria-hidden="true" />
+            <span className={styles.muhuratLocationText}>
+              {userLocation.locationName.split(",")[0]}
+            </span>
           </span>
         )}
       </div>

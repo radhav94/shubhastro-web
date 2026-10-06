@@ -82,6 +82,7 @@ import GiftModal from "../../../component/call/GiftModal";
 import VirtualAssistant from "../../../component/virtualAssistant/VirtualAssistant";
 import { useGetChatHistoryQuery } from "../../../redux/api/chatApi";
 import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionModal/EmergencySessionModal";
+import { isPanditAIErrorEvent } from "../../../component/panditAI/usePanditAI";
 
 const newStar = "/images/new-start.png";
 
@@ -1114,6 +1115,10 @@ const AstrologerProfile = () => {
     };
 
     const handleSocketError = (err) => {
+      // Pandit AI shares this socket; its errors (e.g. insufficient balance for
+      // Pandit AI) are handled in its own chat and must not toast here or reset
+      // this screen's flow — that reset zeroed the live chat/call timer.
+      if (isPanditAIErrorEvent(err)) return;
       toast.error(err?.message || "Connection error");
 
       localStorage.removeItem("waitingState");
@@ -2630,16 +2635,13 @@ const AstrologerProfile = () => {
                     <BiVideo className={styles.optionIcon} />
                   <div className={styles.optionInfo}>
                     <span className={styles.optionLabel}>Video Call</span>
+                    {/* First-session-free does NOT cover video calls: the offer
+                        applies to chat and audio only, so video always quotes its
+                        real per-minute rate even for an eligible user. */}
                     <span className={styles.optionPrice}>
-                      {freeSession ? (
-                        <FreeSessionRate amount={data?.price?.videoCallRate?.amount || 0} unit="/ min" />
-                      ) : (
-                        <>
-                          ₹{data?.price?.videoCallRate?.amount || 0}/ min
-                          {data?.price?.videoCallRate?.isDiscountActive && data?.price?.videoCallRate?.beforeDiscountPrice && (
-                            <span className={styles.originalPrice}>₹{data?.price?.videoCallRate?.beforeDiscountPrice}/ min</span>
-                          )}
-                        </>
+                      ₹{data?.price?.videoCallRate?.amount || 0}/ min
+                      {data?.price?.videoCallRate?.isDiscountActive && data?.price?.videoCallRate?.beforeDiscountPrice && (
+                        <span className={styles.originalPrice}>₹{data?.price?.videoCallRate?.beforeDiscountPrice}/ min</span>
                       )}
                     </span>
                   </div>

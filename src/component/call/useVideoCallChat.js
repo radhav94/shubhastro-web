@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { voiceSocket } from "../../services/voiceSocketServices";
+import { isPanditAIEvent, isPanditAIErrorEvent } from "../panditAI/usePanditAI";
 import { Toast } from "../index";
 import { buildIntroMessage } from "../../utils/helper/introMessage";
 
@@ -148,6 +149,9 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, kundl
     };
 
     const handleAddMessage = (data) => {
+      // Pandit AI replies arrive on the same socket event; they are not part of
+      // this call's chat.
+      if (isPanditAIEvent(data)) return;
       const isSenderUser = data.sender === "user";
       addMessage({
         text: data.message,
@@ -163,6 +167,9 @@ export const useVideoCallChat = ({ userId, astrologerId, roomId, kundliId, kundl
 
 
     const handleError = (err) => {
+      // Pandit AI's errors (e.g. its insufficient-balance refusal) are shown by
+      // Pandit AI; toasting them here reads as a problem with this call.
+      if (isPanditAIErrorEvent(err)) return;
       Toast.error(err.message || "Something went wrong");
       setError(err.message);
     };

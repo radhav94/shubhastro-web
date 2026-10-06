@@ -21,6 +21,7 @@ import EmergencySessionModal from "../../../../../component/UI/modal/EmergencySe
 import ProfileModals from "../../../kundli/components/ProfileModals";
 import { useProfileManager } from "../../../kundli/hooks/useProfileManager";
 import { getAstrologerDisplayName } from "../../../../../utils/helper/string.utils";
+import { isPanditAIErrorEvent } from "../../../../../component/panditAI/usePanditAI";
 
 const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
   const dispatch = useDispatch();
@@ -320,6 +321,10 @@ const Astrologers = ({ title, astrologers = [], onClickView, onProfile }) => {
     };
 
     const handleSocketError = (err) => {
+      // Pandit AI shares this socket; its errors (e.g. insufficient balance for
+      // Pandit AI) are handled in its own chat and must not toast here or reset
+      // this screen's flow — that reset zeroed the live chat/call timer.
+      if (isPanditAIErrorEvent(err)) return;
       if (err?.message === "Call has already ended") {
         return;
       }

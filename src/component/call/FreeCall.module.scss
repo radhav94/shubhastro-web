@@ -1,0 +1,1596 @@
+/*
+ * The user's free first-session AUDIO call screen (FreeCallUI.jsx), Figma
+ * PJeUB9MXHPwrkJiWD7gAT2: 4886:78101 running, 4886:77824 low-balance popup,
+ * 4886:77924 ending soon, 4886:78009 ended / locked.
+ *
+ * Call-only styles. The free chat has its own (chats/freeSession) and is not
+ * touched; paid calls keep VoiceCall.module.scss.
+ */
+
+$brand-gradient: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+$bar-gradient: linear-gradient(90deg, rgba(254, 254, 254, 0.7) 0%, rgba(255, 248, 236, 0.7) 100%);
+$brand: #F75801;
+$heading: #030303;
+$secondary-text: #62564E;
+$card-orange: #FFF3D6;
+$chip-bg: #FCE8D8;
+
+@mixin gradient-text {
+  background: $brand-gradient;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ==================== SCREEN ==================== */
+.screen {
+  /* Scale of the 289px zodiac ring (the Figma size is 1). */
+  --ring-scale: 1;
+  --stack-gap: 32px;
+
+  position: fixed;
+  inset: 0;
+  /* Same layer as the paid call screen (.fullscreenWrapper). */
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  /* A swipe on the overlay must not scroll / bounce the page behind (SHB-2164). */
+  overscroll-behavior: none;
+  background: #F7F7F7;
+  font-family: "Poppins", sans-serif;
+  color: $heading;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  @media (max-height: 760px) {
+    --ring-scale: 0.8;
+    --stack-gap: 24px;
+  }
+  @media (max-height: 660px) {
+    --ring-scale: 0.62;
+    --stack-gap: 18px;
+  }
+  @media (max-height: 580px) {
+    --ring-scale: 0.5;
+    --stack-gap: 14px;
+  }
+}
+
+/* A banner / lock bar takes height from the centre on phones. */
+@media (width <= 767px) and (max-height: 860px) {
+  .screen.hasBottom {
+    --ring-scale: 0.72;
+    --stack-gap: 22px;
+  }
+}
+@media (width <= 767px) and (max-height: 700px) {
+  .screen.hasBottom {
+    --ring-scale: 0.55;
+    --stack-gap: 14px;
+  }
+}
+@media (width <= 767px) and (max-height: 600px) {
+  .screen.hasBottom {
+    --ring-scale: 0.42;
+    --stack-gap: 10px;
+  }
+}
+
+/* Ended: no controls, so the ring can keep more of its size. */
+@media (width <= 767px) and (max-height: 860px) {
+  .screen.hasBottom.noControls {
+    --ring-scale: 0.8;
+  }
+}
+@media (width <= 767px) and (max-height: 700px) {
+  .screen.hasBottom.noControls {
+    --ring-scale: 0.62;
+  }
+}
+@media (width <= 767px) and (max-height: 600px) {
+  .screen.hasBottom.noControls {
+    --ring-scale: 0.5;
+  }
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bgImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  opacity: 0.4;
+}
+
+.bgGlow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: none;
+  transform: translate(-50%, -50%);
+}
+
+/* ==================== HEADER ==================== */
+.header {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  background: $bar-gradient;
+
+  @media (width <= 767px) {
+    padding: 12px 16px;
+  }
+  @media (width <= 480px) {
+    gap: 8px;
+    padding: 12px;
+  }
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+
+  @media (width <= 480px) {
+    gap: 8px;
+  }
+}
+
+.backBtn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0.889px solid $brand;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+
+  img {
+    display: block;
+    transform: rotate(180deg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $brand;
+    outline-offset: 2px;
+  }
+}
+
+.headerUser {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.headerAvatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top;
+
+  @media (width <= 767px) {
+    width: 40px;
+    height: 40px;
+  }
+  @media (width <= 480px) {
+    width: 36px;
+    height: 36px;
+  }
+  @media (width <= 360px) {
+    display: none;
+  }
+}
+
+.headerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+
+  > span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.headerName {
+  color: $heading;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.4px;
+
+  @media (width <= 767px) {
+    font-size: 16px;
+    letter-spacing: -0.32px;
+  }
+  @media (width <= 480px) {
+    font-size: 15px;
+    line-height: 18px;
+  }
+}
+
+.headerExp {
+  color: $secondary-text;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+
+  @media (width <= 767px) {
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: -0.24px;
+  }
+}
+
+.headerRight {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  /* The two-line badge is ~52px tall; in Figma it overhangs the 48px row
+     (header stays 80px) and the pill stretches to it. */
+  margin-block: -2px;
+
+  @media (width <= 1024px) {
+    gap: 20px;
+  }
+  @media (width <= 767px) {
+    gap: 12px;
+  }
+  @media (width <= 480px) {
+    gap: 8px;
+  }
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badgeIcon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+
+  @media (width <= 767px) {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.badgeText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap;
+
+  /* Phones: the gift icon + pill are the compact form of the badge. */
+  @media (width <= 480px) {
+    display: none;
+  }
+}
+
+.badgeTitle {
+  @include gradient-text;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: normal;
+
+  @media (width <= 767px) {
+    font-size: 15px;
+  }
+}
+
+.badgeSubtitle {
+  color: $secondary-text;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: normal;
+
+  @media (width <= 767px) {
+    font-size: 11px;
+  }
+}
+
+.divider {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 0;
+  height: 48px;
+
+  img {
+    display: block;
+    max-width: none;
+    flex-shrink: 0;
+    transform: rotate(90deg);
+  }
+
+  @media (width <= 767px) {
+    height: 40px;
+  }
+  @media (width <= 480px) {
+    display: none;
+  }
+}
+
+.timerPill {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 22px;
+  border: 1px solid $brand;
+  border-radius: 12px;
+  background: $brand-gradient;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 22px;
+  white-space: nowrap;
+
+  img {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+  }
+
+  @media (width <= 1024px) {
+    padding: 4px 16px;
+    font-size: 18px;
+  }
+  @media (width <= 767px) {
+    padding: 4px 12px;
+    border-radius: 10px;
+    font-size: 15px;
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+  }
+  @media (width <= 480px) {
+    min-height: 36px;
+    padding: 4px 10px;
+    font-size: 14px;
+    line-height: 18px;
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+/* ==================== CENTRE ==================== */
+.main {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  @media (max-height: 660px) {
+    padding: 12px 16px;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--stack-gap);
+  width: 289px;
+  max-width: 100%;
+  /* Centred in the space left between the header and the bottom bar. */
+  margin: auto;
+}
+
+/* Desktop running call: the Figma places the block 52px under the header. */
+@media (width >= 1024px) and (min-height: 761px) {
+  .screen:not(.noControls) .content {
+    margin-top: 28px;
+  }
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* 289px ring in Figma coordinates, scaled as a whole so every layer keeps its
+   size and position relative to the others. */
+.ringBox {
+  position: relative;
+  flex-shrink: 0;
+  width: calc(289px * var(--ring-scale));
+  height: calc(289px * var(--ring-scale));
+  margin-bottom: calc(-10px * var(--ring-scale));
+}
+
+.ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 289px;
+  height: 289px;
+  transform: scale(var(--ring-scale));
+  transform-origin: 0 0;
+
+  > img,
+  .ringBg > img {
+    position: absolute;
+    display: block;
+    max-width: none;
+  }
+}
+
+.ringBg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+}
+
+.ringZodiac {
+  inset: 0;
+  width: 289px;
+  height: 289px;
+  object-fit: cover;
+  opacity: 0.8;
+}
+
+.ringGlow {
+  top: 84.185px;
+  left: 84.185px;
+}
+
+.ringOuter {
+  top: 53px;
+  left: 53px;
+}
+
+.ringInner {
+  top: 57px;
+  left: 57px;
+}
+
+.ringPhoto {
+  top: 67px;
+  left: 67px;
+  width: 154.337px;
+  height: 154.337px;
+  border-radius: 50%;
+  /* Solid backing: the default avatar is a transparent PNG, and without this
+     the green ripple underneath tinted it. */
+  background: #fbe3d2;
+  object-fit: cover;
+  object-position: top;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 176px;
+  max-width: 100%;
+  text-align: center;
+
+  @media (max-height: 660px) {
+    gap: 8px;
+  }
+}
+
+.name {
+  margin: 0;
+  color: $heading;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  overflow-wrap: anywhere;
+
+  @media (max-height: 580px) {
+    font-size: 20px;
+    line-height: 26px;
+  }
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: $heading;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+  white-space: nowrap;
+
+  img {
+    flex-shrink: 0;
+  }
+}
+
+.status_pending img {
+  animation: freeCallDotPulse 1.2s ease-in-out infinite;
+}
+
+.status_ended img {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
+@keyframes freeCallDotPulse {
+  50% { opacity: 0.3; }
+}
+
+.duration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 84px;
+}
+
+.durationValue {
+  color: $heading;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  font-variant-numeric: tabular-nums;
+
+  @media (max-height: 580px) {
+    font-size: 20px;
+    line-height: 26px;
+  }
+}
+
+.durationLabel {
+  color: $secondary-text;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: normal;
+}
+
+/* ---------- Mute / End Call / Speaker ---------- */
+.controls {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 52px;
+
+  /* Four buttons (Mute, End Call, Speaker, Send Gift) must fit a 320px phone. */
+  @media (width <= 480px) {
+    gap: 32px;
+  }
+  @media (width <= 400px) {
+    gap: 22px;
+  }
+  @media (width <= 360px) {
+    gap: 12px;
+  }
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 60px;
+}
+
+.controlBtn {
+  position: relative;
+  display: block;
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+
+  img {
+    display: block;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $brand;
+    outline-offset: 3px;
+  }
+}
+
+/* Muted mic / speaker off: strike the icon through. */
+.controlOff::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 2px;
+  border-radius: 2px;
+  background: $heading;
+  box-shadow: 0 0 0 1.5px #fff;
+  transform: translate(-50%, -50%) rotate(45deg);
+  pointer-events: none;
+}
+
+.controlLabel {
+  color: $heading;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: normal;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ==================== SHARED: Recharge Now button ==================== */
+.rechargeBtn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  min-width: 0;
+  padding: 12px;
+  border: none;
+  border-radius: 100px;
+  background: $brand-gradient;
+  color: #fff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(212, 52, 0, 0.25);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $brand;
+    outline-offset: 2px;
+  }
+}
+
+.rechargeLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  img {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.rechargeChevron {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+/* ==================== LOW WALLET BALANCE POPUP ==================== */
+.popupOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(3, 3, 3, 0.5);
+  font-family: "Poppins", sans-serif;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}
+
+.popup {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+  max-width: 428px;
+  max-height: calc(100dvh - 32px);
+  padding: 24px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-radius: 20px;
+  background: #fff url("../../assets/call/freeCall/popup-bg.jpg") center top / cover no-repeat;
+
+  @media (width <= 480px) {
+    padding: 22px 16px 20px;
+  }
+}
+
+.popupClose {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  img {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.popupBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+}
+
+.popupHead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.popupIllustration {
+  width: 103.5px;
+  height: 69px;
+  object-fit: cover;
+}
+
+.popupTexts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  text-align: center;
+}
+
+.popupTitle {
+  @include gradient-text;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: normal;
+
+  @media (width <= 480px) {
+    font-size: 20px;
+  }
+}
+
+.popupText {
+  margin: 0;
+  color: $heading;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 22px;
+}
+
+.popupTimer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: $chip-bg;
+
+  img {
+    width: 24px;
+    height: 24px;
+  }
+
+  span {
+    @include gradient-text;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: normal;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.popupActions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+
+  .remindBtn {
+    flex: 1 1 auto;
+  }
+
+  .rechargeBtn {
+    flex: 1 1 auto;
+  }
+
+  /* Phones: stack full width, primary action on top — side by side the
+     labels ran out of their buttons at 375px. */
+  @media (width <= 480px) {
+    flex-direction: column-reverse;
+    gap: 10px;
+
+    .remindBtn,
+    .rechargeBtn {
+      flex: 0 0 auto;
+      width: 100%;
+      height: 48px;
+    }
+
+    .rechargeBtn {
+      justify-content: center;
+      gap: 10px;
+    }
+  }
+}
+
+.remindBtn {
+  min-width: 0;
+  height: 48px;
+  padding: 12px;
+  border: 1px solid $brand;
+  border-radius: 100px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+  white-space: nowrap;
+  cursor: pointer;
+
+  span {
+    @include gradient-text;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $brand;
+    outline-offset: 2px;
+  }
+}
+
+/* ==================== "ENDING SOON" BANNER (bottom, full width) ==================== */
+.endingBanner {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 155px;
+  overflow: hidden;
+  background: $bar-gradient;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    width: 135px;
+    height: 180px;
+    background: url("../../assets/chat/freeSession/banner-corner.png") center / cover no-repeat;
+    pointer-events: none;
+  }
+  &::before {
+    left: 0;
+    transform: scaleX(-1);
+  }
+  &::after {
+    right: 0;
+  }
+
+  /* Keep the copy on one line at 1366 — just clear of the 135px corner art. */
+  @media (width <= 1400px) {
+    padding: 14px 138px;
+  }
+
+  @media (width <= 1180px) {
+    padding: 12px 16px;
+
+    &::before,
+    &::after {
+      display: none;
+    }
+  }
+}
+
+.endingInner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+
+  @media (width <= 1180px) {
+    gap: 16px;
+    width: 100%;
+    justify-content: space-between;
+  }
+  @media (width <= 480px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+}
+
+.endingText {
+  @include gradient-text;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: normal;
+
+  @media (width <= 1024px) {
+    font-size: 16px;
+  }
+  @media (width <= 767px) {
+    font-size: 14px;
+  }
+  @media (width <= 480px) {
+    font-size: 13px;
+    text-align: center;
+  }
+}
+
+.endingBtn {
+  width: 220.5px;
+  height: 52px;
+
+  @media (width <= 767px) {
+    width: auto;
+    height: 44px;
+    gap: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+
+    .rechargeLabel img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+  @media (width <= 480px) {
+    width: 100%;
+    height: 40px;
+  }
+}
+
+/* ==================== LOCKED BAR (ended) ==================== */
+.lockBar {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 20px;
+  background: $card-orange;
+
+  @media (width <= 1024px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 16px 16px 0 0;
+  }
+}
+
+.lockInfo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  flex: 0 1 auto;
+
+  @media (width <= 480px) {
+    gap: 10px;
+  }
+}
+
+.lockAvatar {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top;
+
+  @media (width <= 1024px) {
+    width: 48px;
+    height: 48px;
+  }
+  @media (width <= 480px) {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.lockText {
+  margin: 0;
+  color: $heading;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: -0.48px;
+
+  @media (width <= 1366px) {
+    font-size: 20px;
+    letter-spacing: -0.4px;
+  }
+  @media (width <= 767px) {
+    font-size: 16px;
+    letter-spacing: -0.32px;
+  }
+  @media (width <= 480px) {
+    font-size: 14px;
+    letter-spacing: -0.28px;
+  }
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.lockOldPrice {
+  margin-left: 8px;
+  font-weight: 400;
+  text-transform: lowercase;
+  text-decoration: line-through;
+  text-decoration-color: $secondary-text;
+  text-decoration-thickness: 1px;
+  white-space: nowrap;
+}
+
+.lockActions {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  min-width: 0;
+
+  > * {
+    flex: 1 1 0;
+    height: 52px;
+  }
+
+  @media (width <= 1024px) {
+    gap: 12px;
+
+    > * {
+      height: 48px;
+    }
+  }
+  @media (width <= 480px) {
+    gap: 8px;
+
+    > * {
+      height: 44px;
+    }
+  }
+}
+
+.exploreBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 12px;
+  border: none;
+  border-radius: 100px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+  white-space: nowrap;
+  cursor: pointer;
+
+  span {
+    @include gradient-text;
+  }
+
+  &:hover span {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $brand;
+    outline-offset: 2px;
+  }
+
+  @media (width <= 480px) {
+    padding: 10px 8px;
+    font-size: 14px;
+  }
+}
+
+/* Phones: "Explore Website" keeps its text width, "Recharge Now" takes the rest. */
+@media (width <= 480px) {
+  .lockActions > .exploreBtn {
+    flex: 0 1 auto;
+  }
+}
+
+.lockRecharge {
+  @media (width <= 360px) {
+    .rechargeChevron {
+      display: none;
+    }
+  }
+  @media (width <= 480px) {
+    gap: 8px;
+    padding: 10px;
+    font-size: 14px;
+
+    .rechargeLabel {
+      gap: 6px;
+    }
+
+    .rechargeLabel img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+/* ---------------- Shortcut pills under the header ----------------
+ * Virtual Assistant / View History — not in the Figma frames, kept on request
+ * so a free call has the same shortcuts as a paid one. Same pill look as the
+ * paid screen's .actionBtn (VoiceCall.module.scss).
+ */
+.actions {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (max-width: 480px) {
+    gap: 8px;
+    padding: 10px 12px 0;
+  }
+}
+
+.actionBtn {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 25px;
+  border: none;
+  border-radius: 50px;
+  background: #fefefe;
+  color: #030303;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    background: #fff3ea;
+    box-shadow: 0 2px 8px rgba(212, 52, 0, 0.12);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px 16px;
+    font-size: 13px;
+  }
+}
+
+.actionBadge {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f75801;
+}
+
+/* ---------------- Green "live" ripple ----------------
+ * A copy of the paid screen's .avatarContainer .ripple (VoiceCall.module.scss):
+ * four solid rgba(75,160,29,0.2) discs, 2s ease-out, 0.3s apart, each growing
+ * from the photo's size to 2.5x while fading out. Centred on the 154px photo
+ * inside the 289px ring and painted after the ring art, before the photo.
+ */
+.rippleWrap {
+  position: absolute;
+  top: 67px;
+  left: 67px;
+  width: 154.337px;
+  height: 154.337px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  /* The paid screen uses 0.2 on a grey page; on this peach page that mixes to
+     beige, so the disc is a stronger, cooler green to still read as green. */
+  background: rgba(60, 170, 60, 0.42);
+  animation: freeCallRipple 2s ease-out infinite;
+
+  &:nth-child(1) { animation-delay: 0s; }
+  &:nth-child(2) { animation-delay: 0.3s; }
+  &:nth-child(3) { animation-delay: 0.6s; }
+  &:nth-child(4) { animation-delay: 0.9s; }
+}
+
+@keyframes freeCallRipple {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* Steady green halo on the photo itself while live, so there is always a
+   visible green edge even between ripple pulses. */
+.ringLive .ringPhoto {
+  box-shadow: 0 0 0 6px rgba(60, 170, 60, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ripple {
+    animation: none;
+    opacity: 0.4;
+    transform: scale(1.5);
+
+    &:nth-child(n + 2) {
+      display: none;
+    }
+  }
+}
+
+/* Send Gift: green round button, the same colour as the paid screen's
+   .controlBtn.sendGiftBg (#4CAF50), with a white gift icon. */
+.giftBtn {
+  display: grid;
+  place-items: center;
+  background: #4caf50;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+
+  svg {
+    display: block;
+    fill: currentColor;
+  }
+
+  &:hover {
+    background: #43a047;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #4caf50;
+    outline-offset: 3px;
+  }
+}
+
+/* ==================== "CONTINUES ON WALLET" NOTICE ==================== */
+/* Last minute of a free call the wallet can carry on: the ending banner's
+   strip (same place, same background), informational only — no button. */
+.continueNotice {
+  padding-top: 12px;
+  padding-bottom: 12px;
+
+  @media (width <= 1180px) {
+    padding: 10px 16px;
+  }
+}
+
+.continueInner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.continueIcon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+
+  @media (width <= 767px) {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.continueText {
+  margin: 0;
+  min-width: 0;
+  color: $secondary-text;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+
+  @media (width <= 767px) {
+    font-size: 13px;
+  }
+}
+
+.continueLead {
+  color: $heading;
+  font-weight: 600;
+}
+
+.continueTime {
+  @include gradient-text;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.continueSep {
+  margin: 0 8px;
+
+  @media (width <= 767px) {
+    display: none;
+  }
+}
+
+/* Phones: the "continues at ₹X/min" half on its own line. */
+.continueRest {
+  @media (width <= 767px) {
+    display: block;
+  }
+}
+
+
+/* ==================== PHONES — Figma "User 1st call" mobile (5055:78397) ====================
+ * The header splits into two rows: back + avatar + name/exp on top, and a
+ * full-width cream "Free tag" card under it (gift, "1st Free Call" /
+ * "Free session active", divider, and a timer pill that fills the rest).
+ * The ending banner shows only "Your free session will end soon" beside a
+ * pill Recharge Now button. Desktop/tablet (> 767px) is unchanged.
+ */
+@media (width <= 767px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .headerLeft {
+    gap: 12px;
+  }
+
+  .backBtn {
+    width: 24px;
+    height: 24px;
+    border-width: 0.667px;
+
+    img {
+      width: 5.25px;
+      height: 9.33px;
+    }
+  }
+
+  .headerAvatar {
+    display: block;
+    width: 32px;
+    height: 32px;
+  }
+
+  .headerInfo {
+    gap: 4px;
+  }
+
+  .headerName {
+    font-size: 16px;
+    line-height: 16px;
+    letter-spacing: -0.32px;
+  }
+
+  .headerExp {
+    font-size: 12px;
+    line-height: 12px;
+    letter-spacing: -0.24px;
+  }
+
+  /* The "Free tag" card. */
+  .headerRight {
+    width: 100%;
+    gap: 36px;
+    margin-block: 0;
+    padding: 4px 8px;
+    border: 1px solid $brand;
+    border-radius: 8px;
+    background: #fff3d6;
+  }
+
+  .badge {
+    flex-shrink: 0;
+    gap: 6px;
+  }
+
+  .badgeIcon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .badgeText {
+    display: flex;
+    gap: 0;
+  }
+
+  .badgeTitle {
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .badgeSubtitle {
+    font-size: 10px;
+  }
+
+  .divider {
+    display: flex;
+    height: 27px;
+
+    img {
+      width: 27px;
+    }
+  }
+
+  .timerPill {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+    gap: 4px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: normal;
+
+    img {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  /* Ending banner: one short line + pill button, side by side. */
+  .endingBanner {
+    padding: 10px 12px;
+  }
+
+  .endingInner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .endingText {
+    font-size: 16px;
+    font-weight: 500;
+    text-align: left;
+  }
+
+  .endingTextMore {
+    display: none;
+  }
+
+  .endingBtn {
+    flex-shrink: 0;
+    width: auto;
+    height: auto;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 100px;
+    font-size: 14px;
+
+    .rechargeLabel {
+      gap: 4px;
+    }
+
+    .rechargeLabel img {
+      width: 18px;
+      height: 18px;
+    }
+
+    .rechargeChevron {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+/* Narrow phones: tighter gaps so the tag stays on one line. */
+@media (width <= 360px) {
+  .headerRight {
+    gap: 16px;
+  }
+
+  .endingText {
+    font-size: 14px;
+  }
+}

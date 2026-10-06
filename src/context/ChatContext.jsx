@@ -1,11 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
-import { voiceSocket, registerChatSession, clearChatSession } from "../services/voiceSocketServices";
+import { voiceSocket, registerChatSession, clearChatSession, getActiveCallSession } from "../services/voiceSocketServices";
 import { toast as rht } from "react-hot-toast";
 import ChatNotificationBanner from "../component/UI/ChatNotificationBanner/ChatNotificationBanner";
-import { PANDIT_AI_ID, isPanditAIEvent } from "../component/panditAI/usePanditAI";
+import { PANDIT_AI_ID, isPanditAIEvent, isPanditAIErrorEvent } from "../component/panditAI/usePanditAI";
 import { isShubhMallEnabled } from "../utils/featureConfig";
 import { getNavigate } from "../utils/navigationHelper";
+import { isFreeSessionRoom } from "../utils/auth/freeSessionRoom";
 
 const ChatContext = createContext();
 
@@ -34,6 +35,10 @@ export const ChatProvider = ({ children }) => {
   const activeChatRef = useRef(null);
   const lastAstrologerInfoRef = useRef(null);
   const isReconnectingRef = useRef(false);
+  // Room a chat:reconnect is currently waiting on, and the last room the user
+  // was told has ended — both keep one chat end from producing two toasts.
+  const reconnectRoomRef = useRef(null);
+  const notifiedEndedRoomRef = useRef(null);
 
   // Keep reconnecting ref in sync so the reconnect timeout can bail out early
   // if the reconnect already resolved.
@@ -155,12 +160,21 @@ export const ChatProvider = ({ children }) => {
   // user would get no feedback that the astrologer went offline.
   const notifyChatEnded = useCallback((data = {}) => {
     if (data?.astrologerId === PANDIT_AI_ID) return;
+    // Already reported for this room (two reconnect failures for one end).
+    if (data?.roomId && notifiedEndedRoomRef.current === data.roomId) return;
+    notifiedEndedRoomRef.current = data?.roomId || null;
 
     setActiveChat(null);
     stopTimer();
     setChatSeconds(0);
 
-    rht("Astrologer is offline. Chat ended.", { icon: "⚠️" });
+    // A free first chat is ended by the server when its free time runs out —
+    // the astrologer is still online, so don't say they went offline.
+    if (isFreeSessionRoom(data?.roomId)) {
+      rht("Your free chat session has ended.", { icon: "ℹ️", id: `chat-ended-${data.roomId}` });
+    } else {
+      rht("Astrologer is offline. Chat ended.", { icon: "⚠️", id: `chat-ended-${data?.roomId || "unknown"}` });
+    }
 
     // Let page-level components (ChatWindow) disable input and open feedback.
     window.dispatchEvent(new CustomEvent("global:chat:ended", { detail: data }));
@@ -188,6 +202,15 @@ export const ChatProvider = ({ children }) => {
       clearPersistedChatState();
       return;
     }
+
+    // One reconnect per room at a time: a second attempt would add a second set
+    // of listeners, and both would report the same failure.
+    if (reconnectRoomRef.current === reconnectChat.roomId) {
+      console.log("[ChatReconnect] ⏭️ Reconnect already in flight for room:", reconnectChat.roomId);
+      return;
+    }
+    reconnectRoomRef.current = reconnectChat.roomId;
+    let settled = false;
 
     // Make sure the current in-memory chat is persisted and registered before reconnect.
     persistChatState(reconnectChat);
@@ -224,6 +247,8 @@ export const ChatProvider = ({ children }) => {
 
     const cleanupAll = () => {
       console.log("[ChatReconnect] 🧹 cleanupAll — removing all reconnect listeners");
+      settled = true;
+      if (reconnectRoomRef.current === reconnectChat.roomId) reconnectRoomRef.current = null;
       voiceSocket.off("chat:reconnected", onReconnected);
       voiceSocket.off("chat:rejected", onReconnectError);
       voiceSocket.off("connect", doEmit);
@@ -232,6 +257,12 @@ export const ChatProvider = ({ children }) => {
     };
 
     const onReconnectError = (data) => {
+      // Not about this chat (Pandit AI's error, or another room's rejection):
+      // don't end the chat because of it.
+      if (isPanditAIErrorEvent(data) || (data?.roomId && data.roomId !== reconnectChat.roomId)) {
+        console.log("[ChatReconnect] ⏭️ Ignoring error/rejection not about this chat:", data?.roomId);
+        return;
+      }
       console.log("[ChatReconnect] ❌ Got error/rejection during reconnect:");
       console.log("[ChatReconnect]   → event data:", JSON.stringify(data));
       console.log("[ChatReconnect]   → message:", data?.message);
@@ -333,7 +364,7 @@ export const ChatProvider = ({ children }) => {
     setTimeout(() => {
       // If the reconnect already resolved, the listeners were cleaned up; don't
       // fire a spurious "ended" notification on top of a successful reconnect.
-      if (!isReconnectingRef.current) return;
+      if (settled || !isReconnectingRef.current) return;
       console.log("[ChatReconnect] ⏰ 30s timeout reached — giving up, notifying user");
       voiceSocket.offAny(debugAnyEvent);
       cleanupAll();
@@ -365,8 +396,20 @@ export const ChatProvider = ({ children }) => {
       voiceSocket.connect();
     }
 
+    /*
+      `activity` is broadcast for every live session (this chat, a call, Pandit
+      AI). Another session's tick re-timed the chat to that session's clock.
+      Only ticks positively identified as another session's are skipped.
+    */
+    const isOtherSessionActivity = (data) => {
+      if (isPanditAIEvent(data)) return true;
+      const ownRoomId = activeChatRef.current?.roomId;
+      const callRoomId = getActiveCallSession()?.roomId;
+      return !!(data?.roomId && ownRoomId && data.roomId !== ownRoomId && data.roomId === callRoomId);
+    };
+
     const handleActivity = (data) => {
-      if (data?.remainingTime) {
+      if (data?.remainingTime && !isOtherSessionActivity(data)) {
         resetTimer();
         setChatSeconds(data.remainingTime * 60);
         startTimer();
@@ -442,7 +485,11 @@ export const ChatProvider = ({ children }) => {
           setChatSeconds(secs);
           startTimer();
         }
-      } else if (data && data.active === false) {
+      } else if (
+        data && data.active === false &&
+        // A failed reconnect for some other room is not this chat ending.
+        !(data.roomId && activeChatRef.current?.roomId && data.roomId !== activeChatRef.current.roomId)
+      ) {
         console.log("[ChatContext] ❌ Auto-reconnect failed, chat ended:", data?.reason);
         // Chat ended during disconnect (astrologer offline) — notify the user.
         // notifyChatEnded shows the offline toast, clears state, and dispatches

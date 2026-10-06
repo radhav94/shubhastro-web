@@ -60,7 +60,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   /* Now a <button>: strip the UA chrome so it keeps rendering as the heading it
      looks like, but keep a pointer cursor and a focus ring so it reads and
      behaves as the control it now is. `font: inherit` matters — a button does not
@@ -86,6 +86,32 @@
   @media (width <= 380px) {
     font-size: 16px;
     gap: 10px;
+  }
+}
+
+/* Figma 4787:30545 — wallet icon in a cream circle. */
+.walletIconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border-radius: 100px;
+  background: #FFF3D6;
+  flex-shrink: 0;
+
+  img {
+    display: block;
+    width: 36px;
+    height: 36px;
+  }
+
+  @media (width <= 767px) {
+    padding: 8px;
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
   }
 }
 
@@ -124,43 +150,56 @@
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(12px);
     border: 1px solid #fff;
-    border-radius: 14px;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 1100px;
-    padding: 24px;
+    max-width: 1198px;
+    padding: 20px;
     @media (width <= 767px) {
       padding: 16px;
     }
 
+    /* Figma 4787:30543 — "Current Balance" 20px medium, amount 36px gradient. */
     .walletBalance {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      font-weight: 600;
-      font-size: 22px;
+      font-weight: 500;
+      font-size: 20px;
+      color: #030303;
       width: 100%;
       @media (width <= 767px) {
         font-size: 17px;
-        img{
-          width: 35px;
-        }
       }
 
       .dangerColor {
-        color: #F75801;
+        margin-left: 20px;
+        font-size: 36px;
+        font-weight: 500;
+        line-height: normal;
+        background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        @media (width <= 767px) {
+          margin-left: 8px;
+          font-size: 24px;
+        }
       }
     }
 
+    /* Figma 4787:30551 — left-aligned section title. */
     .rechargeHeader {
-      margin: 5px 0 20px;
+      align-self: stretch;
+      margin: 20px 0 0px;
       font-weight: 500;
       font-size: 18px;
+      color: #030303;
       @media (width <= 767px) {
-        margin: 5px 0 16px 0px;
+        margin: 16px 0 0px 0px;
         font-size: 16px;
       }
     }
@@ -193,15 +232,19 @@
     }
 
     /* ⭐ Responsive Grid */
+    /* Figma 4787:30552 — three plans per row, 8px apart. The top padding
+       leaves room for a "Best Value" tag on a first-row card. */
     .rechargeFlex {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 16px;
-      justify-items: start;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
       width: 100%;
-      padding: 10px 0;
+      padding: 14px 0 0;
       @media (width <= 767px) {
-        gap: 8px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      @media (width <= 390px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
@@ -210,42 +253,97 @@
         `.rechargeAmount` div was removed, so the anchor IS the card. Every
         property (dimensions, border, hover, active, child text styles) moved
         here from the old `.rechargeAmount` rule; layout is unchanged. */
+    /* Figma 4787:30554 — cream card, gradient amount, outlined bonus pill. */
     .linkWrapper {
-      display: block;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
       width: 100%;
+      box-sizing: border-box;
       text-decoration: none;
-      border: 1px solid var(--cta-border-50, rgba(229, 99, 41, 0.50));
-      background: var(--card-2, #FFF5EC);
-      border-radius: 14px;
-      padding: 16px 10px;
+      border: 2px solid transparent;
+      background: #FFF3D6;
+      border-radius: 12px;
+      padding: 12px 6px;
       text-align: center;
       cursor: pointer;
       transition: 0.25s ease;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
       min-height: 91px;
 
       .price {
-        font-size: 18px;
-        font-weight: 600;
-        color: #030303;
+        font-size: 24px;
+        font-weight: 500;
+        line-height: normal;
+        background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
         @media (width <= 767px) {
-          font-size: 16px;
+          font-size: 18px;
         }
       }
 
       .extra {
-        display: block;
-        margin-top: 6px;
-        font-size: 14px;
+        display: inline-block;
+        padding: 5px 12px;
+        border: 1px solid #F75801;
+        border-radius: 100px;
+        background-color: #FFF3D6;
+        font-size: 13px;
         font-weight: 600;
+        line-height: normal;
+        white-space: nowrap;
         color: #F75801;
         @media (width <= 767px) {
-          font-size: 12px;
+          padding: 4px 6px;
+          font-size: 10px;
         }
       }
 
       &:hover {
         transform: translateY(-2px);
+      }
+
+      /* Figma 4787:30559 — highlighted plan. */
+      &.bestValue {
+        border-color: #F75801;
+        background: #FFF3D6 url("../../../assets/chat/freeSession/popup-bg.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 100% 100%;
+
+        .extra {
+          background: linear-gradient(90deg, #F75801 0%, #D43400 100%);
+          color: #fff;
+        }
+      }
+
+      .bestValueTag {
+        width: max-content;
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 1px 6px;
+        border: 1px solid #F75801;
+        border-radius: 100px;
+        background: #FFF3D6;
+        color: #D43400;
+        font-size: 11px;
+        font-weight: 500;
+        line-height: normal;
+        white-space: nowrap;
+
+        img {
+          width: 16px;
+          height: 16px;
+        }
       }
 
       &.active {

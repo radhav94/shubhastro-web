@@ -15,12 +15,14 @@
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-
+.onboardingContainer::-webkit-scrollbar {
+    display: none;
+  }
 .onboardingContainer {
   min-height: auto;
   // background: #FDEBDD;
   // background: url(../../../assets/images/onboarding.jpg);
-  background: url("https://assets.shubhastro.ai/new-login-bg.jpeg");
+  // background: url("https://assets.shubhastro.ai/new-login-bg.jpeg");
   background-size: cover;
   background-repeat: no-repeat;
   // padding:16px;
@@ -28,6 +30,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-scrollbar {
+    display: none;
+  }
   // @media (width <= 768px) {
   //    max-width: 100%;
   //    width: 100%;
@@ -2607,5 +2612,402 @@
   @media (width <= 767px) {
     width: 24px;
     height: 24px;
+  }
+}
+
+/* ───────────── "Enter Your Details" — single registration form ─────────────
+ * Replaces the old two-step Personalize → Birth Details pair. Values follow the
+ * Figma frame "Form" (node 4886:74844): 700px card, 32px radius, 48px fields.
+ * Everything is scoped under .detailsFormWeb so the other onboarding screens
+ * are untouched. The date, time and place fields are shared components,
+ * reached with attribute selectors on their (hashed) class names.
+ */
+$details-orange: #f75801;
+$details-orange-dark: #d43400;
+$details-text: #030303;
+$details-muted: #62564e;
+$details-field-bg: rgba(255, 255, 255, 0.4);
+
+.detailsFormWeb {
+  width: min(600px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 22px 24px 24px;
+  border-radius: 32px;
+  border: 2px solid #fff;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  overflow-y: auto;
+  /* Still scrollable on short windows, but without a visible scrollbar
+     cutting through the glass card. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* The form is a flex column; when it is shorter than its content (short
+     screens) children must scroll, not shrink — the Next button was being
+     squashed to a sliver at 320×568. */
+  > * {
+    flex-shrink: 0;
+  }
+
+  .content {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .formGroup {
+    margin-bottom: 0;
+
+    > label,
+    .detailsFormLabel {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: normal;
+      color: $details-text;
+    }
+  }
+
+  /* Text fields: name, and the inputs inside DateTimePicker / LocationSearch. */
+  .input,
+  [class*="formGroup"] input[type="text"] {
+    width: 100%;
+    height: 48px;
+    padding: 0 46px 0 12px;
+    border: 2px solid #fff;
+    border-radius: 12px;
+    background: $details-field-bg;
+    font-size: 16px;
+    color: $details-text;
+    box-shadow: none;
+
+    &::placeholder {
+      color: $details-muted;
+      opacity: 1;
+    }
+
+    &:focus {
+      border-color: $details-orange;
+      outline: none;
+    }
+  }
+
+  .input {
+    padding-right: 12px;
+  }
+
+  /* Field icons (calendar, clock, map pin): 24px, brand orange, 10px from the edge. */
+  .inputIcon {
+    right: 10px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .inputIcon,
+  [class*="calendarBtn"] svg,
+  [class*="calendarBtn"] {
+    color: $details-orange;
+  }
+
+  .errorText {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+  }
+
+  .checkboxContainer {
+    margin-top: 8px;
+  }
+
+  .checkboxLabel {
+    gap: 6px;
+    font-size: 12px;
+    color: $details-muted;
+
+    input[type="checkbox"] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      border: 1px solid $details-orange;
+      border-radius: 4px;
+      background: transparent;
+      display: grid;
+      place-items: center;
+
+      &:checked {
+        background: $details-orange;
+      }
+
+      &:checked::after {
+        content: "";
+        width: 4px;
+        height: 8px;
+        border: solid #fff;
+        border-width: 0 2px 2px 0;
+        transform: translateY(-1px) rotate(45deg);
+      }
+
+      &:focus-visible {
+        outline: 2px solid $details-orange;
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  /* Next: full-width gradient pill with a chevron, 32px below the fields. */
+  .otpprimaryBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    max-width: none;
+    height: 48px;
+    margin: 32px 0 0;
+    padding: 12px;
+    border: none;
+    border-radius: 100px;
+    background: linear-gradient(90deg, $details-orange 0%, $details-orange-dark 100%);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .loginInlineHint {
+    margin: 16px 0 -16px;
+    text-align: center;
+  }
+}
+
+.detailsFormHeader {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  margin-bottom: 24px;
+}
+
+.detailsFormBack {
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0.667px solid $details-orange;
+  border-radius: 50%;
+  background: #f7f7f7;
+  color: $details-orange;
+  cursor: pointer;
+
+  &:hover {
+    background: #feeee6;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $details-orange;
+    outline-offset: 2px;
+  }
+}
+
+.detailsFormTitle {
+  margin: 0;
+  padding: 0 36px;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: normal;
+  color: $details-text;
+  text-align: center;
+}
+
+.detailsGenderRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.detailsGenderBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  height: 48px;
+  padding: 0 10px 0 12px;
+  border: 2px solid #fff;
+  border-radius: 12px;
+  background: $details-field-bg;
+  color: $details-muted;
+  font-size: 14px;
+  line-height: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    border-color: rgba(247, 88, 1, 0.5);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $details-orange;
+    outline-offset: 2px;
+  }
+}
+
+.detailsGenderBtnActive {
+  border-color: $details-orange;
+  background: rgba(254, 238, 230, 0.9);
+  color: $details-text;
+  font-weight: 500;
+}
+
+.detailsGenderIcon {
+  flex-shrink: 0;
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.detailsFormNextIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+/* Short windows (laptops at 768px tall, browser chrome, zoom): tighten the
+   vertical rhythm so the whole card fits without scrolling. */
+@media (width > 767px) and (height <= 820px) {
+  .detailsFormWeb {
+    padding-top: 18px;
+    padding-bottom: 20px;
+
+    .content {
+      gap: 14px;
+    }
+
+    .formGroup > label,
+    .formGroup .detailsFormLabel {
+      margin-bottom: 6px;
+    }
+
+    .input,
+    [class*="formGroup"] input[type="text"] {
+      height: 44px;
+    }
+
+    .otpprimaryBtn {
+      height: 44px;
+      margin-top: 20px;
+    }
+  }
+
+  .detailsFormHeader {
+    margin-bottom: 16px;
+  }
+
+  .detailsGenderBtn {
+    height: 44px;
+  }
+}
+
+@media (width > 767px) and (height <= 680px) {
+  .detailsFormWeb {
+    .content {
+      gap: 10px;
+    }
+
+    .input,
+    [class*="formGroup"] input[type="text"] {
+      height: 40px;
+    }
+
+    .checkboxContainer {
+      margin-top: 6px;
+    }
+
+    .otpprimaryBtn {
+      height: 40px;
+      margin-top: 16px;
+    }
+  }
+
+  .detailsFormHeader {
+    margin-bottom: 12px;
+  }
+
+  .detailsGenderBtn {
+    height: 40px;
+  }
+}
+
+/* Tablets / small laptops: same card, a little tighter. */
+@media (width <= 1024px) {
+  .detailsFormWeb {
+    padding: 20px;
+
+    .content {
+      gap: 20px;
+    }
+
+    .otpprimaryBtn {
+      margin-top: 28px;
+    }
+  }
+}
+
+/* Phones: edge-to-edge like the other onboarding steps. */
+@media (width <= 767px) {
+  .detailsFormWeb {
+    width: 100%;
+    /* Exactly the screen height and scrolling inside: the container centres
+       its child vertically, so a taller form had its header cut off at the top
+       on short phones (320×568) with no way to scroll back to it. */
+    height: 100dvh;
+    max-height: none;
+    padding: 16px 16px 24px;
+    border: none;
+    border-radius: 0;
+
+    .content {
+      gap: 18px;
+    }
+
+    .otpprimaryBtn {
+      margin-top: 24px;
+    }
+  }
+
+  .detailsFormHeader {
+    margin-bottom: 20px;
+  }
+
+  .detailsFormTitle {
+    font-size: 18px;
+  }
+}
+
+/* Narrowest phones: gender labels and icons get tight three across. */
+@media (width <= 360px) {
+  .detailsGenderBtn {
+    padding: 0 6px 0 8px;
+    gap: 4px;
+    font-size: 13px;
+  }
+
+  .detailsGenderIcon {
+    width: 20px;
+    height: 20px;
   }
 }

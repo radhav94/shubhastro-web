@@ -16,10 +16,14 @@ import { useGetBalanceMutation } from "../../redux/api/wallet/walletApi";
  * so buttons are never wrongly hidden on load or on a failed request.
  *
  * @param {string} astrologerId
- * @param {{ enabled?: boolean }} [options]
+ * @param {{ enabled?: boolean, refreshKey?: any }} [options]
+ *   `refreshKey`: re-check whenever it changes. The answer is taken once when
+ *   the session opens; during a FREE first session the server reports call /
+ *   video as unavailable, so without a re-check the Voice/Video buttons stayed
+ *   hidden after the chat had carried on as paid.
  * @returns {{ chat: boolean, call: boolean, video: boolean, loaded: boolean }}
  */
-const useAstrologerAvailability = (astrologerId, { enabled = true } = {}) => {
+const useAstrologerAvailability = (astrologerId, { enabled = true, refreshKey } = {}) => {
   const [getBalance] = useGetBalanceMutation();
   const [availability, setAvailability] = useState({
     chat: true,
@@ -69,7 +73,7 @@ const useAstrologerAvailability = (astrologerId, { enabled = true } = {}) => {
     return () => {
       cancelled = true;
     };
-  }, [astrologerId, enabled, getBalance]);
+  }, [astrologerId, enabled, getBalance, refreshKey]);
 
   return availability;
 };

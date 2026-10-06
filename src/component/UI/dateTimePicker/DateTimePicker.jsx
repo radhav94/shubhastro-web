@@ -48,7 +48,7 @@ const MINUTES = Array.from({ length: 60 }, (_, i) => i);
 const PERIODS = ["AM", "PM"];
 
 /* ───── Custom 12-hour Time Picker ───── */
-const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholder, dropUp = false, openOnClick = false }) => {
+const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholder, dropUp = false, openOnClick = false, iconOnly = false }) => {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -454,16 +454,18 @@ const TimePicker12 = ({ selected, onChange, disabled, disabledReason, placeholde
           catches the area beside it. Same arrangement, and the same stylesheet
           rules, as the date field — no new CSS.
         */}
-        <button
-          type="button"
-          className={styles.calendarOverlay}
-          onClick={() => {
-            if (timeBlock.blocked) return timeBlock.explain();
-            if (!disabled) setOpen(true);
-          }}
-          tabIndex={-1}
-          aria-hidden="true"
-        />
+        {!iconOnly && (
+          <button
+            type="button"
+            className={styles.calendarOverlay}
+            onClick={() => {
+              if (timeBlock.blocked) return timeBlock.explain();
+              if (!disabled) setOpen(true);
+            }}
+            tabIndex={-1}
+            aria-hidden="true"
+          />
+        )}
         <button
           type="button"
           className={styles.calendarBtn}
@@ -586,6 +588,10 @@ const DateTimePicker = ({
   dropUp = false,
   // When true, clicking the input opens the picker and disables manual typing
   openOnClick = false,
+  // When true, ONLY the calendar / clock icon opens the picker — no invisible
+  // hit area over the right third of the input (SHB-2154: on signup the
+  // calendar opened when tapping to the left of the icon).
+  iconOnly = false,
   // When true, the calendar renders in a body-level portal (avoids clipping
   // inside scrollable/overflow-hidden containers like modals)
   portal = false,
@@ -595,6 +601,10 @@ const DateTimePicker = ({
   onRawChange,
   // Callback fired with error string (or empty string when valid)
   onError,
+  // Shown when a typed date is later than maxDate / earlier than minDate.
+  // Defaults name the limit; forms can pass a reason (e.g. the signup age rule).
+  maxDateError,
+  minDateError,
 }) => {
   // Resolve mode from legacy showTime prop
   const resolvedMode = showTime ? "datetime" : mode;
@@ -632,6 +642,7 @@ const DateTimePicker = ({
           placeholder={placeholder || "Select time"}
           dropUp={dropUp}
           openOnClick={openOnClick}
+          iconOnly={iconOnly}
         />
       </div>
     );
@@ -665,32 +676,35 @@ const DateTimePicker = ({
     }
   }, [selected]);
 
-  // Parse DD/MM/YYYY string to Date
-  const parseManualDate = (text) => {
+  /*
+    Parse DD/MM/YYYY and say *why* it failed.
+
+    Every failure used to read "Invalid date". Clarity qmyvfb (Instagram
+    WebView, Pandit AI signup) shows the cost: the visitor's typed birth date
+    was rejected, the field said only "Invalid date", and they rage-tapped
+    "Continue & Get ₹99 Bonus" for ~40s before leaving. A date past maxDate
+    (e.g. under the signup age) or a half-typed year gives them nothing to fix.
+  */
+  const checkManualDate = (text) => {
     const cleaned = text.replace(/[^0-9/]/g, "");
     const parts = cleaned.split("/");
-    if (parts.length !== 3) return null;
     const [dd, mm, yyyy] = parts;
-    if (!dd || !mm || !yyyy || yyyy.length !== 4) return null;
+    if (parts.length !== 3 || !dd || !mm || !yyyy || yyyy.length !== 4)
+      return { error: "Enter the full date as DD/MM/YYYY" };
     const d = parseInt(dd, 10);
     const m = parseInt(mm, 10);
     const y = parseInt(yyyy, 10);
-    if (d < 1 || d > 31 || m < 1 || m > 12 || y < 1900) return null;
+    if (m < 1 || m > 12) return { error: "Month must be between 01 and 12" };
+    if (y < 1900) return { error: "Year must be 1900 or later" };
     const date = new Date(y, m - 1, d);
     // Verify the date is valid (e.g., not Feb 30)
-    if (date.getDate() !== d || date.getMonth() !== m - 1 || date.getFullYear() !== y) return null;
-    // Check constraints
-    if (minDate && date < minDate) return null;
-    if (maxDate && date > maxDate) return null;
-    return date;
-  };
-
-  /* A typed entry is complete once it has three parts and a four-digit year.
-     Deliberately not "the text is 10 characters long": that assumed a
-     zero-padded DD/MM/YYYY and so treated 5/8/1990 as still being typed. */
-  const looksComplete = (text) => {
-    const parts = String(text).split("/");
-    return parts.length === 3 && parts[0] && parts[1] && parts[2]?.length === 4;
+    if (d < 1 || date.getDate() !== d || date.getMonth() !== m - 1 || date.getFullYear() !== y)
+      return { error: "This date doesn't exist — check the day" };
+    if (minDate && date < minDate)
+      return { error: minDateError || `Date can't be before ${formatDateDisplay(minDate)}` };
+    if (maxDate && date > maxDate)
+      return { error: maxDateError || `Date can't be after ${formatDateDisplay(maxDate)}` };
+    return { date };
   };
 
   const handleManualChange = (e) => {
@@ -766,8 +780,8 @@ const DateTimePicker = ({
     setInputText(formatted);
     onRawChange?.(formatted);
 
-    if (looksComplete(formatted)) {
-      const parsed = parseManualDate(formatted);
+    if (formatted.length > 0) {
+      const { date: parsed, error } = checkManualDate(formatted);
       if (parsed) {
         setDateError("");
         onError?.("");
@@ -775,13 +789,9 @@ const DateTimePicker = ({
         // Valid date submitted — allow future syncs from selected prop
         setIsManuallyEditing(false);
       } else {
-        setDateError("Invalid date");
-        onError?.("Invalid date");
+        setDateError(error);
+        onError?.(error);
       }
-    } else if (formatted.length > 0) {
-      // Partial input — show error for incomplete dates
-      setDateError("Invalid date");
-      onError?.("Invalid date");
     } else {
       setDateError("");
       onError?.("");
@@ -797,7 +807,7 @@ const DateTimePicker = ({
       // This prevents the useEffect from restoring the old date when user clears the field
       return;
     }
-    const parsed = parseManualDate(inputText);
+    const { date: parsed, error } = checkManualDate(inputText);
     if (parsed) {
       setIsManuallyEditing(false);
       /*
@@ -813,8 +823,8 @@ const DateTimePicker = ({
         onRawChange?.(tidy);
       }
     } else {
-      setDateError("Invalid date");
-      onError?.("Invalid date");
+      setDateError(error);
+      onError?.(error);
       // Keep isManuallyEditing true so the useEffect doesn't overwrite
     }
   };
@@ -885,13 +895,15 @@ const DateTimePicker = ({
             A button rather than a div: same reason as everywhere else, though it
             stays out of the tab order and hidden from assistive tech because the
             real calendar button next to it does the same job. */}
-        <button
-          type="button"
-          className={styles.calendarOverlay}
-          onClick={openCalendar}
-          tabIndex={-1}
-          aria-hidden="true"
-        />
+        {!iconOnly && (
+          <button
+            type="button"
+            className={styles.calendarOverlay}
+            onClick={openCalendar}
+            tabIndex={-1}
+            aria-hidden="true"
+          />
+        )}
         <button
           type="button"
           className={styles.calendarBtn}

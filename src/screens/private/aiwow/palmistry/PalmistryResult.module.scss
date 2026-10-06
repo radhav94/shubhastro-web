@@ -129,6 +129,12 @@
 }
 
 .content {
+  /* SHB-2075: switching tabs swaps this panel for one of a different height.
+     With scroll anchoring on, Chrome picks a node inside the panel as its
+     anchor and shifts the page to keep it in place — the "page jumps down on
+     tab click" QA still saw after the scrollIntoView fix. The tab handler owns
+     scrolling here, so opt the panel out of anchoring. */
+  overflow-anchor: none;
   max-width: 1420px;
   margin: 16px auto;
   padding: 1rem;

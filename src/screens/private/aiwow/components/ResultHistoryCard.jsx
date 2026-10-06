@@ -21,8 +21,33 @@ const ResultHistoryCard = ({ item }) => {
 
   const statusInfo = statusConfig[status] || statusConfig.completed;
 
+  /*
+    The whole card opens the report. onViewResult was always passed in but never
+    attached, so the card read as a link and did nothing — Clarity nkanev
+    logged a dead click on "✦ Astro Face Reading · Completed" at 03:32, right
+    after the visitor had downloaded that report.
+  */
+  const handleCardKeyDown = (e) => {
+    if (e.target !== e.currentTarget) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onViewResult?.();
+    }
+  };
+
   return (
-    <div className={styles.card}>
+    <div
+      className={`${styles.card} ${onViewResult ? styles.clickable : ""}`}
+      {...(onViewResult
+        ? {
+            role: "button",
+            tabIndex: 0,
+            "aria-label": `Open ${featureName} report`,
+            onClick: onViewResult,
+            onKeyDown: handleCardKeyDown,
+          }
+        : {})}
+    >
 
       {/* Header */}
       <div className={styles.cardHeader}>
@@ -59,7 +84,13 @@ const ResultHistoryCard = ({ item }) => {
             {isPaid ? "Paid" : "Free"}
           </span>
           <div className={styles.downloadBtnWrap}>
-            <button className={styles.downloadBtn} onClick={onDownload}>
+            <button
+              className={styles.downloadBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDownload?.();
+              }}
+            >
               <DownloadIcon />
               Download
             </button>

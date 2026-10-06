@@ -53,7 +53,7 @@ import WaitingModal from "../../../component/UI/modal/waitingModal/WaitingModal"
 import { useGetAstroDetailsQuery } from "../../../redux/api/kundli/kundliApi";
 import { buildVedicParam } from "../../../utils/VedicParams.js/vedicParams";
 import { PATH } from "../../../utils/routes/Paths";
-import { PANDIT_AI_ID } from "../../../component/panditAI/usePanditAI";
+import { PANDIT_AI_ID, isPanditAIErrorEvent } from "../../../component/panditAI/usePanditAI";
 import { logout, updateRegistrationStatus, setEmail } from "../../../redux/auth/authSlice";
 import { setSelectedKundli } from "../../../redux/kundli/kundliSlice";
 import styles from "./Profile.module.scss";
@@ -1159,6 +1159,10 @@ const Profile = () => {
     };
 
     const handleSocketError = (err) => {
+      // Pandit AI shares this socket; its errors (e.g. insufficient balance for
+      // Pandit AI) are handled in its own chat and must not toast here or reset
+      // this screen's flow — that reset zeroed the live chat/call timer.
+      if (isPanditAIErrorEvent(err)) return;
       Toast.error(err?.message || "Connection error");
 
       // Clear localStorage

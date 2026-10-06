@@ -19,11 +19,13 @@ import { trackEvent } from "../../../utils/analytics";
 import { BranchEvents } from "../../../utils/branchEvents";
 import { clearOtpResume } from "./otpResume";
 import { useWebOtpAutofill } from "../../../utils/hooks/useWebOtpAutofill";
+import { isReturnTarget, POST_LOGIN_LANDING_PATH } from "../../../utils/auth/completeCustomerLogin";
 // import onboardingBg from "../../../assets/images/onboarding.jpg";
 import onboardingBg from "../../../assets/images/new-login-bg-2.jpeg";
 // import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
 import LanguageSelector from "../../../component/LanguageSelector";
 import BackButton from "../../../component/UI/BackButton/BackButton";
+import { setBranchUser } from "../../../utils/branchIntegration";
 
 // Isolated timer component — its state changes won't re-render the OTP inputs
 const ResendTimer = memo(({ onResend }) => {
@@ -226,6 +228,8 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           localStorage.setItem("refreshToken", refreshToken);
           localStorage.setItem("shubhtalk_customer_token", accessToken);
           localStorage.setItem("shubhtalk_customer_id", userData._id); // Add customer ID
+          // Branch identity at login.
+          setBranchUser(userData._id);
           localStorage.setItem("userData", JSON.stringify(userData));
 
           // Store user in the format that getUserFromStorage expects
@@ -337,7 +341,7 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
               setTimeout(() => {
                 navigate(logoutRedirectPath);
               }, 500);
-            } else if (redirectPath && redirectPath !== "/login") {
+            } else if (isReturnTarget(redirectPath)) {
               // Clear the redirect path
               localStorage.removeItem("shubhtalk_redirect_after_login");
               console.log("✅ Redirecting to saved path:", redirectPath);
@@ -347,13 +351,19 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
                 navigate(redirectPath);
               }, 500);
             } else {
-              // No redirect path, go to home
-              console.log("ℹ️ No valid redirect path, going to home");
+              // No redirect path: back to the page that sent them, else the
+              // astrologers list (the post-login landing page, not home).
+              console.log("ℹ️ No valid redirect path, going to astrologers");
               console.log("📍 redirectPath value:", redirectPath);
               // toast.success("Welcome back!");
               setTimeout(() => {
-                console.log("🚀 Executing navigate to home");
-                navigate(location?.state?.from || PATH.privateRoutes.HOME.path,{ replace: true });
+                console.log("🚀 Executing navigate to astrologers");
+                // A saved redirect that was only home / login is dropped too.
+                if (redirectPath) localStorage.removeItem("shubhtalk_redirect_after_login");
+                navigate(
+                  isReturnTarget(location?.state?.from) ? location.state.from : POST_LOGIN_LANDING_PATH,
+                  { replace: true }
+                );
               }, 500);
             }
           } else {

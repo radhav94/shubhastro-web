@@ -3,7 +3,7 @@ import { WaitingQueueContext } from "./waitingQueueContextInstance";
 import { voiceSocket, clearChatSession } from "../services/voiceSocketServices";
 import { useCall } from "./CallContext";
 import { useChat } from "./ChatContext";
-import { PANDIT_AI_ID } from "../component/panditAI/usePanditAI";
+import { PANDIT_AI_ID, isPanditAIErrorEvent, isPanditAIEvent } from "../component/panditAI/usePanditAI";
 import { Toast } from "../component";
 import { trackEvent } from "../utils/analytics";
 
@@ -505,6 +505,9 @@ export const WaitingQueueProvider = ({ children }) => {
   const chatApprovalRef = useRef(null);
   useEffect(() => { callApprovalRef.current = callApprovalData; }, [callApprovalData]);
   useEffect(() => { chatApprovalRef.current = chatApprovalData; }, [chatApprovalData]);
+  // Same reason: handleGlobalChatEnded must compare against the CURRENT chat.
+  const activeChatRef = useRef(activeChat);
+  useEffect(() => { activeChatRef.current = activeChat; }, [activeChat]);
 
   // Ring sound: loop while an astrologer has accepted and the user is being
   // asked to join (approval data is set), and stop the moment that state is
@@ -889,11 +892,32 @@ export const WaitingQueueProvider = ({ children }) => {
     /* ================= GLOBAL CHAT:ENDED HANDLER ================= */
     // Ensures chat is cleaned up regardless of which page the user is on
     const handleGlobalChatEnded = (data) => {
-      // Skip Pandit AI events
-      if (data?.astrologerId === PANDIT_AI_ID) return;
-
       const endedRoomId = data?.roomId || data?.sessionData?.roomId;
+
+      // Skip Pandit AI events — by astrologerId AND by room: the Pandit AI
+      // bubble ends its session on close, and the server's chat:ended for that
+      // room (which may not carry astrologerId) arrives after the bubble has
+      // already forgotten its roomId. It used to fall through to the teardown
+      // below and end the astrologer chat on screen while it was still running.
+      if (data?.astrologerId === PANDIT_AI_ID || isPanditAIEvent({ roomId: endedRoomId })) return;
+
       console.log("[GlobalEnded] 🔚 chat:ended — roomId:", endedRoomId, "endedBy:", data?.endedBy);
+
+      /*
+        chat:ended is socket-wide. When it names a room that is not the live
+        chat (a withdrawn/timed-out request, a previous session, the other leg
+        of a switch), clean up that room's queue entry only — never the live
+        chat. Only ignored when both ids are known, so a payload without roomId
+        behaves exactly as before.
+      */
+      const liveChat = activeChatRef.current;
+      const liveRoomIds = [liveChat?.roomId, liveChat?.chatRoomId].filter(Boolean);
+      if (endedRoomId && liveRoomIds.length && !liveRoomIds.includes(endedRoomId)) {
+        removePendingConnection(endedRoomId);
+        if (chatApprovalRef.current?.roomId === endedRoomId) setChatApprovalData(null);
+        console.log("[GlobalEnded] ⏭️ chat:ended for another room — live chat is", liveRoomIds[0]);
+        return;
+      }
 
       // Skip SYSTEM ends — let page-level handler deal with reconnect logic
       if (data?.endedBy === "SYSTEM") return;
@@ -1128,6 +1152,10 @@ export const WaitingQueueProvider = ({ children }) => {
      * toast `error` themselves, and this would double it.
      */
     const handleInitiationError = (err) => {
+      // Pandit AI shares this socket; a refusal of ITS initiate (e.g.
+      // insufficient balance) is not about an astrologer request, so it must not
+      // withdraw one of those. Pandit AI shows its own message.
+      if (isPanditAIErrorEvent(err)) return;
       const dropped = dropUnansweredRequest();
 
       if (err?.statusCode === 409) {

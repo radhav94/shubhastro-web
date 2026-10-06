@@ -1,11 +1,23 @@
 import { useEffect } from "react";
 import { voiceSocket } from "../../services/voiceSocketServices";
-import { isFreeSessionEnabled } from "../featureConfig";
 import {
   refreshFreeSessionStatus,
   markFreeSessionConsumed,
+  readFreeSessionStatus,
   SESSION_ENDED_EVENT,
 } from "../auth/freeSessionStatus";
+import {
+  rememberFreeSessionRoom,
+  rememberFreeSessionCall,
+  rememberFreeSessionMeta,
+  freeSessionCallId,
+  payloadSaysFree,
+  isEmergencySession,
+  clearEmergencyRequest,
+  isLiveSession,
+  clearLiveRequest,
+} from "../auth/freeSessionRoom";
+import { resolveFreeAllowanceSeconds } from "../../screens/private/home/components/chats/freeSession/freeSessionUtils";
 
 /*
  * Keeps free-session eligibility honest for the rest of the visit.
@@ -34,6 +46,14 @@ import {
  */
 const REFRESH_DELAY_MS = 1200;
 
+// Astrologer of an accepted payload (shapes vary across chat / call events).
+const sessionAstrologerIdOf = (data) =>
+  data?.astrologerId?._id ||
+  data?.astrologerId ||
+  data?.astrologerDetail?._id ||
+  data?.astrologer?._id ||
+  null;
+
 /*
  * Second, confirming read — only when the first one still says the user has a
  * free session. Covers a backend that flips the flag while finalising billing,
@@ -43,8 +63,10 @@ const CONFIRM_DELAY_MS = 6000;
 
 export const useFreeSessionWatcher = () => {
   useEffect(() => {
-    // Nothing reads the value when the offer is off, so don't watch for it.
-    if (!isFreeSessionEnabled()) return undefined;
+    // Eligibility is API-driven now (isFirstSessionFree), so this always runs.
+    // It self-gates: refreshFreeSessionStatus() no-ops for guests and once the
+    // answer is already false, and room tagging below only happens when the
+    // cached status is true (or the payload says free).
 
     /*
       Once per page load, on top of the session-end refreshes below.
@@ -116,16 +138,94 @@ export const useFreeSessionWatcher = () => {
       markFreeSessionConsumed();
       scheduleRefresh();
     };
-    voiceSocket.on("chat:accepted", handleSessionStarted);
-    voiceSocket.on("call:accepted", handleSessionStarted);
+
+    /*
+      A session requested from an astrologer's LIVE STREAM (SHB-2148).
+
+      It is never recorded as the free session: it is requested from the live
+      room, wallet-checked up front (LiveView) and billed at the live rate, so
+      it must not show the free UI or end on the locked free-call screen.
+
+      It DOES use up the free offer, though (SHB-2168): after a paid live call
+      the backend billed the next "free" session in full, while the listing
+      still advertised it as free. So it is marked spent locally, like any other
+      session start, and the profile re-read behind that.
+    */
+    const handleLiveSessionStarted = (data) => {
+      if (!data?.isSwitch) clearLiveRequest(sessionAstrologerIdOf(data));
+      handleSessionStarted();
+    };
+
+    /*
+      Chat only: before the offer is marked spent, remember whether THIS room is
+      the free session, so the chat screen can show the free-session header,
+      "ending soon" banner and locked footer (see utils/auth/freeSessionRoom).
+      Must run before markFreeSessionConsumed — afterwards the flag reads false.
+    */
+    const handleChatStarted = (data) => {
+      // Emergency sessions are always paid: not the free session, and they
+      // must not use up the free offer either. Just re-read the profile.
+      if (isEmergencySession(data)) {
+        clearEmergencyRequest();
+        scheduleRefresh();
+        return;
+      }
+      // Live-stream sessions are never the free session either (SHB-2148) —
+      // see handleLiveSessionStarted.
+      if (isLiveSession(data)) {
+        handleLiveSessionStarted(data);
+        return;
+      }
+      if (data?.roomId && (readFreeSessionStatus() === true || payloadSaysFree(data))) {
+        rememberFreeSessionRoom(data.roomId);
+        // Start time + free allowance (when the payload has one) so the free
+        // part can be timed on its own — see freeSessionUtils.getFreeSecondsLeft.
+        rememberFreeSessionMeta(data.roomId, resolveFreeAllowanceSeconds(data));
+      }
+      handleSessionStarted();
+    };
+    /*
+      Audio calls, same idea: remember the call's roomId so VoiceCall can show
+      the "1st Free Call" badge, the last-minute popup/banner and the locked end
+      state. VIDEO is never free (the offer covers chat and audio only), and a
+      mid-call switch (audio <-> video) is not a new session, so neither is
+      recorded. Must run before markFreeSessionConsumed, as above.
+    */
+    const handleCallStarted = (data) => {
+      // Emergency calls (audio or video) are always paid — see handleChatStarted.
+      if (isEmergencySession(data)) {
+        if (!data?.isSwitch) clearEmergencyRequest();
+        scheduleRefresh();
+        return;
+      }
+      // A call placed from a live stream (SHB-2148): not the free call, so no
+      // free badge / countdown and no locked FreeCallEndedScreen at the end.
+      if (isLiveSession(data)) {
+        handleLiveSessionStarted(data);
+        return;
+      }
+      const isAudio = data?.type === "audio";
+      if (
+        isAudio &&
+        data?.roomId &&
+        !data?.isSwitch &&
+        (readFreeSessionStatus() === true || payloadSaysFree(data))
+      ) {
+        rememberFreeSessionCall(data.roomId);
+        rememberFreeSessionMeta(freeSessionCallId(data.roomId), resolveFreeAllowanceSeconds(data));
+      }
+      handleSessionStarted();
+    };
+    voiceSocket.on("chat:accepted", handleChatStarted);
+    voiceSocket.on("call:accepted", handleCallStarted);
 
     return () => {
       clearTimeout(timer);
       clearTimeout(confirmTimer);
       voiceSocket.off("call:ended", scheduleRefresh);
       voiceSocket.off("chat:ended", scheduleRefresh);
-      voiceSocket.off("chat:accepted", handleSessionStarted);
-      voiceSocket.off("call:accepted", handleSessionStarted);
+      voiceSocket.off("chat:accepted", handleChatStarted);
+      voiceSocket.off("call:accepted", handleCallStarted);
       window.removeEventListener(SESSION_ENDED_EVENT, scheduleRefresh);
     };
   }, []);

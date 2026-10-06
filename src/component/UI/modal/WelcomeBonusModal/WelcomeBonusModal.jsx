@@ -8,6 +8,13 @@ import welcomeIcon from "../../../../assets/images/welcome-bonus-icon.webp";
 import { useWalletBalance } from "../../../../screens/private/wallet/useWalletBalance";
 import { BranchEvents } from "../../../../utils/branchEvents";
 
+/*
+ * The "A Little Gift From Us" popup is switched off on request. The bonus is
+ * still credited server-side and the Promo Eligible event below still fires;
+ * only the popup is hidden. Flip to true to bring it back.
+ */
+const SHOW_WELCOME_BONUS_POPUP = false;
+
 const WelcomeBonusModal = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
@@ -49,7 +56,9 @@ const WelcomeBonusModal = () => {
         user_id: localStorage.getItem("shubhtalk_customer_id"),
       });
 
-      setIsOpen(true);
+      // The flag above is consumed either way, so a disabled popup can't
+      // resurface on a later navigation.
+      if (SHOW_WELCOME_BONUS_POPUP) setIsOpen(true);
     }
   };
 

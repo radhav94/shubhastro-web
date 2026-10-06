@@ -41,11 +41,13 @@ import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionM
 // import TopAstrologerCard from "../../../component/UI/cards/TopAstrologerCard";
 import NewAstrologerCard from "../../../component/UI/cards/newAstrologerCard/NewAstrologerCard";
 import NewAstrologerDetailsCard from "../../../component/UI/cards/newAstrologerCard/NewAstrologerDetailsCard";
+import FirstSessionOfferBanner from "./FirstSessionOfferBanner";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import AstrologerRingModal from "../../../component/UI/modal/AstrologerRingModal/AstrologerRingModal";
 import { useGuestConnectFlow } from "../../public/guestChat/useGuestConnectFlow";
 import { getAstrologerDisplayName } from "../../../utils/helper/string.utils";
+import { isPanditAIErrorEvent } from "../../../component/panditAI/usePanditAI";
 
 const astroImages = [
   "https://images.astroyogi.com/english/astrologer/profileimage/astro-manpreet-7707605892123109.jpg",
@@ -1307,6 +1309,10 @@ const TalkToAstrologer = () => {
 
     /* ERROR */
     const handleSocketError = (err) => {
+      // Pandit AI shares this socket; its errors (e.g. insufficient balance for
+      // Pandit AI) are handled in its own chat and must not toast here or reset
+      // this screen's flow — that reset zeroed the live chat/call timer.
+      if (isPanditAIErrorEvent(err)) return;
       if (err?.message === "Call has already ended") {
         // Only clear the active session, not pending connections
         setActiveCall(null);
@@ -1453,6 +1459,9 @@ const TalkToAstrologer = () => {
   // empty list cannot trigger a spurious page increment.
   return (
     <div className={styles.mainContainer}>
+      {/* First consultation / first recharge offer from the list API. */}
+      <FirstSessionOfferBanner response={astrodata} />
+
       <div className={styles.pageHeader}>
 
         {/* location.key, not window.history.length — see BackButton.jsx. This is

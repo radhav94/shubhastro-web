@@ -4488,21 +4488,44 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
   margin-bottom: 12px;
+
+  /* The title keeps its width; the location takes what is left. */
+  > h2 {
+    flex-shrink: 0;
+  }
 }
 
+/*
+  SHB-2121: a long place name ran out of the card — the location was
+  `nowrap` with nothing to stop it growing past the header. It now shrinks
+  into the space beside the title and ends in "…"; the full name is in the
+  element's title attribute.
+*/
 .muhuratLocation {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 60%;
   font-size: 13px;
   font-weight: 500;
   color: #d43400;
   white-space: nowrap;
 
   svg {
+    flex-shrink: 0;
     font-size: 15px;
   }
+}
+
+.muhuratLocationText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .muhuratItem {
