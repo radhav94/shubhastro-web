@@ -20,6 +20,7 @@ const ClothColorLanding = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+  const buttonGroupRef = useRef(null);
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const pendingActionRef = useRef(null);
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
@@ -54,6 +55,10 @@ const ClothColorLanding = () => {
     // Persist the selected intention so the analyze API receives it.
     dispatch(setClothColorFormData(formData));
     navigate('/ai-wow/clothes-colour-analysis/camera', { replace: true });
+  };
+
+  const scrollToActions = () => {
+    buttonGroupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   const handleUpload = () => {
@@ -194,7 +199,7 @@ const ClothColorLanding = () => {
 
         {/* Instructions Section - Middle */}
         <div className={styles.instructionsWrapper}>
-          <h2 className={styles.instructionsTitle}>Before you start</h2>
+          <h2 className={styles.instructionsTitle} onClick={scrollToActions}>Before you start</h2>
 
           <div className={styles.middleContent}>
             {/* Tappable — viewfinder framing that was collecting dead clicks.
@@ -222,7 +227,7 @@ const ClothColorLanding = () => {
                 <span style={{ position: 'absolute', top: '0', right: '0', display: 'flex' }}>
                   <TTSButton text={`Analyze Wardrobe Choices. Examine how the choice of clothing colors reflects personal traits and moods. Identify Color Preferences. Explore which colors individuals gravitate towards and what they signify about their personality. Assess Seasonal Impact. Consider how seasonal color trends influence personal style and self-expression. Disclaimer. This color analysis is for informational purposes only and is not a substitute for professional style advice. Our insights are generated using advanced algorithms.`} />
                 </span>
-                <div className={styles.checklistSection}>
+                <div className={styles.checklistSection} onClick={scrollToActions}>
                   <div className={styles.checkItem}>
                     <div className={styles.checkIcon}>
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -267,7 +272,7 @@ const ClothColorLanding = () => {
                   </p>
                 </div>
 
-                <div className={styles.buttonGroup}>
+                <div className={styles.buttonGroup} ref={buttonGroupRef}>
                   <button 
                     className={styles.uploadButton}
                     onClick={handleUpload}
@@ -297,11 +302,11 @@ const ClothColorLanding = () => {
         {/* Feature Cards Section - Below */}
         <div className={styles.featuresWrapper}>
           <h2 className={styles.featuresTitle}>What you'll discover</h2>
-          <p className={styles.featuresDescription}>
+          <p className={styles.featuresDescription} onClick={scrollToActions}>
             Unlock the secrets of your style with AI Color Analysis, which connects your clothing's colors to your personality, revealing insights about your mood, energy, and style.
           </p>
 
-          <div className={styles.featuresGrid}>
+          <div className={styles.featuresGrid} onClick={scrollToActions}>
             {features.map((feature, index) => (
               <div key={index} className={styles.featureCard}>
                 <div className={styles.iconWrapper}>

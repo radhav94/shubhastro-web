@@ -9,7 +9,7 @@ import {
   IoWallet,
   IoRefresh,
 } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import dayjs from "dayjs";
 import styles from "./PanditAIBubble.module.scss";
@@ -54,7 +54,7 @@ const toSameSitePath = (href) => {
 };
 
 // Memoized message bubble to avoid re-rendering the entire list on new messages
-const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInternal }) => {
+const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInternal, awaitingReply }) => {
   const isUser = msg.sender === "user";
   const canReply =
     typeof onReply === "function" && !msg.isError && (msg.messageId || msg._id);
@@ -90,12 +90,32 @@ const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInterna
     setRetryNotice({ seq: retrySeqRef.current, message: reason });
   };
 
+  /*
+    A tap on the visitor's own latest message while Pandit AI is still working on
+    it. The bubble used to be inert, so a visitor checking "did my question go
+    through?" got no answer for as long as the reply took. Clarity 48ht8u (Instagram,
+    mobile) logged seven dead clicks on "When will I get married…" between 04:08
+    and 04:29, then the retry line at 04:46. Same words and same in-place pattern
+    as the suggestion chips (followupNotice), and the line goes when the reply
+    lands because it is shown only while `awaitingReply` is true.
+  */
+  const [waitNotice, setWaitNotice] = useState(null);
+  const waitSeqRef = useRef(0);
+
+  const handleBubbleTap = (e) => {
+    if (!isUser || !awaitingReply) return;
+    if (e.target.closest("a, button")) return;
+    waitSeqRef.current += 1;
+    setWaitNotice({ seq: waitSeqRef.current });
+  };
+
   return (
     <div className={`${styles.msgRow} ${isUser ? styles.userRow : styles.aiRow}`}>
       <div
         className={`${styles.msgBubble} ${isUser ? styles.userBubble : styles.aiBubble} ${
           msg.isError ? styles.failedBubble : ""
         }`}
+        onClick={handleBubbleTap}
       >
         {msg.replyTo && (
           <ReplyPreview reply={msg.replyTo} variant="bubble" onJumpTo={onJumpTo} />
@@ -154,6 +174,16 @@ const MessageBubble = memo(({ msg, onRetry, onReply, onJumpTo, onNavigateInterna
             aria-live="polite"
           >
             {retryNotice.message}
+          </p>
+        )}
+        {awaitingReply && waitNotice && (
+          <p
+            key={waitNotice.seq}
+            className={styles.retryNotice}
+            role="status"
+            aria-live="polite"
+          >
+            Pandit AI is still answering your last question — one moment.
           </p>
         )}
         <div className={styles.msgMeta}>
@@ -614,6 +644,31 @@ const PanditAIBubble = ({ hideBubble = false }) => {
   }, [stopListening]);
 
   /*
+    "Recharge" in the low-balance banner: navigate first, close the chat once the
+    route has actually changed.
+
+    The chat is a full-screen modal on phones, so /recharge has to be uncovered —
+    but closing it in the same tap (handleInternalNavigate) leaves the old page
+    live underneath for as long as the new route takes to load. A second tap of a
+    double-tap then lands on whatever sits under the finger there (on the home
+    page, the "Talk to your Kundli" card), which reopens a fresh chat over the
+    recharge page. Waiting for the route change leaves the banner under the
+    finger instead, so a repeat tap just asks for /recharge again.
+  */
+  const location = useLocation();
+  const closeOnRechargeRef = useRef(false);
+  // A second tap of a double-tap would push /recharge onto the history a second
+  // time and leave Back needing two presses. Repeat taps inside this window are
+  // ignored; the first navigation is already on its way.
+  const lastRechargeTapRef = useRef(0);
+  useEffect(() => {
+    if (closeOnRechargeRef.current && location.pathname.startsWith("/recharge")) {
+      closeOnRechargeRef.current = false;
+      handleClose();
+    }
+  }, [location.pathname, handleClose]);
+
+  /*
     Feedback for a tap on the empty-state invitation ("Ask Pandit AI anything
     about your life").
 
@@ -1063,6 +1118,7 @@ const PanditAIBubble = ({ hideBubble = false }) => {
                 // Find the last AI message to attach scroll ref
                 const allMsgs = Object.values(messageGroups).flat();
                 const lastAiId = [...allMsgs].reverse().find((m) => m.sender !== "user")?._id;
+                const lastUserId = [...allMsgs].reverse().find((m) => m.sender === "user")?._id;
                 return Object.entries(messageGroups).map(([date, msgs], groupIndex) => (
                   <div key={`${date}-${groupIndex}`} className={styles.messageGroup}>
                     <div className={styles.dateHeader}>
@@ -1089,6 +1145,7 @@ const PanditAIBubble = ({ hideBubble = false }) => {
                           onReply={handleReply}
                           onJumpTo={jumpToMessage}
                           onNavigateInternal={handleInternalNavigate}
+                          awaitingReply={sending && msg._id === lastUserId}
                         />
                       </div>
                       );
@@ -1281,7 +1338,24 @@ const PanditAIBubble = ({ hideBubble = false }) => {
                   )}
                   <button
                     className={styles.rechargeNowBtn}
-                    onClick={() => navigate("/recharge")}
+                    /*
+                      The chat has to close on the way out. Plain navigate() left
+                      it open: on a phone it is a full-screen modal
+                      (`.chatWindow { inset: 0 }`) with a tap-swallowing layer
+                      behind it, so /recharge loaded underneath where the visitor
+                      could not see or reach it. Clarity 1ygyudu: "Recharge" at
+                      05:22, page visit /recharge at 05:23, then "New chat" at
+                      05:26 — a button that only exists in this panel — and an
+                      "Insufficient balance" reply at 05:29. No payment followed.
+                      Closing is done by the effect on closeOnRechargeRef.
+                    */
+                    onClick={() => {
+                      const now = Date.now();
+                      if (now - lastRechargeTapRef.current < 800) return;
+                      lastRechargeTapRef.current = now;
+                      closeOnRechargeRef.current = true;
+                      navigate("/recharge");
+                    }}
                     type="button"
                   >
                     Recharge

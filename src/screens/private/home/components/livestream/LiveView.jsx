@@ -787,6 +787,26 @@ const LiveView = (props) => {
     navigate("/astrologers");
   };
 
+  /*
+    Tapping a chat message — a viewer's name, the host's name, or the text itself
+    — puts the cursor in the "Ask a question..." box, which is what a viewer in a
+    live Q&A room is reaching for when they tap a line. Those lines did nothing:
+    Clarity j9k8h3 logged about twenty dead clicks across two long visits, on
+    "ASHISH VERMA" (26:53, 43:07, 43:20, 43:44), on "Jeevanha sir" (31:37,
+    31:50), and on message text (34:47, 37:32-37:46, 43:31, 46:36).
+
+    Deliberately not "open the host's profile" for the host's name: that call
+    ends the viewer session and leaves the stream (see handleViewHostProfile), far
+    too much for a tap that is usually a mis-aim at a line of text. The host's
+    avatar button keeps that job. A tap that ends a text selection is left alone
+    so copying a message still works.
+  */
+  const focusChatInput = (e) => {
+    if (e.target.closest("button, a, input")) return;
+    if (window.getSelection?.()?.toString()) return;
+    inputRef.current?.focus();
+  };
+
   const handleViewHostProfile = () => {
     if (activeCall) {
       Toast.error(`You're on a call with ${hostDisplayName}. End it to view the profile.`);
@@ -1921,7 +1941,10 @@ const LiveView = (props) => {
                 */
                 if (m.isSystem) {
                   return (
-                    <div key={m.id || index} className="inline-message" style={{ opacity: 0.7 }}>
+                    // onClick: a tap on a join line did nothing — Clarity yxsb4
+                    // logged a dead click on "Guest … joined" at 10:54. Same
+                    // answer as a chat message: put the cursor in the box.
+                    <div key={m.id || index} className="inline-message" style={{ opacity: 0.7 }} onClick={focusChatInput}>
                       <span className="inline-initial inline-initial-glyph" aria-hidden="true">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M15 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -1970,7 +1993,7 @@ const LiveView = (props) => {
                 // Follow messages — same style as join (green arrow)
                 if (m.isFollow) {
                   return (
-                    <div key={m.id || index} className="inline-message" style={{ opacity: 0.6 }}>
+                    <div key={m.id || index} className="inline-message" style={{ opacity: 0.6 }} onClick={focusChatInput}>
                       {/* "U" was a fabricated initial too — see the system row. */}
                       <span
                         className={`inline-initial ${m.sender ? "" : "inline-initial-glyph"}`}
@@ -1994,7 +2017,11 @@ const LiveView = (props) => {
                 // Regular messages
                 const isHostMessage = m.role === "host";
                 return (
-                  <div key={m.id || index} className={`inline-message ${isHostMessage ? "inline-host-message" : ""}`}>
+                  <div
+                    key={m.id || index}
+                    className={`inline-message ${isHostMessage ? "inline-host-message" : ""}`}
+                    onClick={focusChatInput}
+                  >
                     {/*
                       The astrologer's own avatar in chat is the one initial here
                       with somewhere to go, so it opens their profile — the same

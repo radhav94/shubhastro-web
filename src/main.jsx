@@ -221,6 +221,15 @@ createRoot(document.getElementById("root")).render(
           }}
         >
           {(t) => (
+            /*
+              A tap anywhere on the toast dismisses it, as the ✕ already does.
+              The ✕ alone is a ~20px target in the corner, so a tap on the
+              message — the natural place to tap — did nothing. Clarity 1lacf9g
+              logged that as a dead click on "Logged out successfully ✕" at
+              25:21. Loading toasts (PDF downloads) stay put until their own
+              code resolves them. toast.custom() renderers bypass this function.
+            */
+            <div onClick={t.type !== "loading" ? () => toast.dismiss(t.id) : undefined}>
             <ToastBar toast={t}>
               {({ icon, message }) => (
                 <>
@@ -250,6 +259,7 @@ createRoot(document.getElementById("root")).render(
                 </>
               )}
             </ToastBar>
+            </div>
           )}
         </Toaster>
 

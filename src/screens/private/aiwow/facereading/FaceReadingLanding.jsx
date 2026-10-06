@@ -113,6 +113,24 @@ const FaceReadingLanding = () => {
   }, []);
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+  const buttonGroupRef = useRef(null);
+
+  /*
+    "Use AI Face Reading to reveal hidden aspects of yourself" is an instruction,
+    set in plain <p> text, and the buttons it refers to are a screen above it by
+    the time a visitor has scrolled down here. Tapping the sentence did nothing.
+    Clarity vig1bd (Instagram Reels, mobile) tapped it at 02:01 right after
+    coming back from the analysis screen. Bring Upload Photo / Use Camera back
+    into view — the response is the scroll, with nothing new drawn on screen.
+
+    The same answer for the other text tiles on this screen: the "Before you
+    start" title and checklist, and the "What you'll discover" cards. Clarity
+    1mpso6k (mobile, page auto-translated) tapped the checklist at 00:15-00:18
+    and the "Facial features" card at 02:09-02:11, three dead clicks each.
+  */
+  const scrollToActions = () => {
+    buttonGroupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   // True while the picked photo is being decoded/re-encoded, so the button can
   // show progress instead of looking idle.
@@ -230,7 +248,7 @@ const FaceReadingLanding = () => {
       <div className={styles.content}>
         {/* Instructions Section - At Top */}
         <div className={styles.instructionsWrapper}>
-          <h2 className={styles.instructionsTitle}>Before you start</h2>
+          <h2 className={styles.instructionsTitle} onClick={scrollToActions}>Before you start</h2>
 
           <div className={styles.middleContent}>
             {/* Tappable, because the corner brackets around it are viewfinder
@@ -261,7 +279,7 @@ const FaceReadingLanding = () => {
                 <span style={{ position: 'absolute', top: '0', right: '0', display: 'flex' }}>
                   <TTSButton text={`Good Lighting. Ensure your room is well-lit for accurate analysis. Stable Position. Hold your device steady during capture. Camera Permission. Allow camera access when prompted. Disclaimer. This face analysis is for informational purposes only and should not be considered a substitute for professional medical or psychological advice. The analysis is based on AI interpretation of facial features. Consult with healthcare professionals for any health concerns.`} />
                 </span>
-                <div className={styles.checklistSection}>
+                <div className={styles.checklistSection} onClick={scrollToActions}>
                   <div className={styles.checkItem}>
                     <div className={styles.checkIcon}>
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -314,7 +332,7 @@ const FaceReadingLanding = () => {
                   onChange={handleFileChange}
                 />
 
-                <div className={styles.buttonGroup}>
+                <div className={styles.buttonGroup} ref={buttonGroupRef}>
                   <button
                     type="button"
                     className={styles.uploadButton}
@@ -338,11 +356,11 @@ const FaceReadingLanding = () => {
         {/* Feature Cards Section - Below */}
         <div className={styles.featuresWrapper}>
           <h2 className={styles.featuresTitle}>What you'll discover</h2>
-          <p className={styles.featuresDescription}>
+          <p className={styles.featuresDescription} onClick={scrollToActions}>
             Use AI Face Reading to reveal hidden aspects of yourself. Get personalized insights into your personality and potential through facial analysis.
           </p>
 
-          <div className={styles.featuresGrid}>
+          <div className={styles.featuresGrid} onClick={scrollToActions}>
             {features.map((feature, index) => (
               <div key={index} className={styles.featureCard}>
                 <div className={styles.iconWrapper}>

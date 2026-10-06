@@ -572,8 +572,27 @@ const FaceReadingCamera = () => {
     );
   }
 
+  /*
+    Any tap on bare screen answers like a tap on the viewfinder.
+
+    The viewfinder already did (below), but the strip beside the back button and
+    the empty space around the shutter did not, and on a phone that is where
+    thumbs land while the camera is starting. Clarity wkpqqt
+    (Instagram, mobile) logged dead clicks at 00:13 and 00:21 on this
+    screen with the face model still downloading — ripples at the top-right
+    corner and beside the shutter, none of it on a control.
+
+    Real controls are skipped so a press on the shutter, the back arrow or the
+    camera switch does only its own job and the notice is not announced twice.
+  */
+  const handleBareScreenTap = (e) => {
+    if (capturedImage) return;
+    if (e.target.closest('button, a, input, select, textarea')) return;
+    captureImage();
+  };
+
   return (
-    <div className={styles.container}>
+    <div className={styles.container} onClick={handleBareScreenTap}>
       <div className={styles.header}>
         <button className={styles.backBtn} onClick={handleBack}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -604,10 +623,7 @@ const FaceReadingCamera = () => {
         name and keyboard handling. Exposing both would announce two controls for
         one action.
       */}
-      <div
-        className={styles.cameraWrapper}
-        onClick={!capturedImage ? captureImage : undefined}
-      >
+      <div className={styles.cameraWrapper}>
         {!capturedImage ? (
           <>
             {videoActive && (

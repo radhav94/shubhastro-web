@@ -21,6 +21,7 @@ const AuraLanding = () => {
   const goBack = useSafeBack();
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+  const buttonGroupRef = useRef(null);
   const [showGuestAuthModal, setShowGuestAuthModal] = useState(false);
   const pendingActionRef = useRef(null);
   const selectedProfile = useSelector((state) => state.aiwow.selectedKundliProfile);
@@ -48,6 +49,10 @@ const AuraLanding = () => {
 
   const handleCamera = () => {
     navigate('/ai-wow/aura-photography/camera', { replace: true });
+  };
+
+  const scrollToActions = () => {
+    buttonGroupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   const handleUpload = () => {
@@ -115,7 +120,7 @@ const AuraLanding = () => {
       <div className={styles.content}>
         {/* Instructions Section - At Top */}
         <div className={styles.instructionsWrapper}>
-          <h2 className={styles.instructionsTitle}>Before you start</h2>
+          <h2 className={styles.instructionsTitle} onClick={scrollToActions}>Before you start</h2>
 
           <div className={styles.middleContent}>
             {/* Tappable — viewfinder framing that was collecting dead clicks.
@@ -143,7 +148,7 @@ const AuraLanding = () => {
                 <span style={{ position: 'absolute', top: '0', right: '0', display: 'flex' }}>
                   <TTSButton text={`Good Lighting. Ensure your room is well-lit for accurate aura capture. Neutral Background. Stand against a plain background for best results. Camera Permission. Allow camera access when prompted. Disclaimer. This aura analysis is for informational and spiritual guidance purposes only. The analysis combines AI technology with astrological principles to provide insights about your energy field and emotional state.`} />
                 </span>
-                <div className={styles.checklistSection}>
+                <div className={styles.checklistSection} onClick={scrollToActions}>
                   <div className={styles.checkItem}>
                     <div className={styles.checkIcon}>
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -188,7 +193,7 @@ const AuraLanding = () => {
                   </p>
                 </div>
 
-                <div className={styles.buttonGroup}>
+                <div className={styles.buttonGroup} ref={buttonGroupRef}>
                   <button 
                     className={styles.uploadButton}
                     onClick={handleUpload}
@@ -218,11 +223,11 @@ const AuraLanding = () => {
         {/* Feature Cards Section - Below */}
         <div className={styles.featuresWrapper}>
           <h2 className={styles.featuresTitle}>What you'll discover</h2>
-          <p className={styles.featuresDescription}>
+          <p className={styles.featuresDescription} onClick={scrollToActions}>
             Capture and analyze your aura to reveal your energy field, emotional state, and spiritual essence. Combine ancient wisdom with modern AI technology for deep insights.
           </p>
 
-          <div className={styles.featuresGrid}>
+          <div className={styles.featuresGrid} onClick={scrollToActions}>
             {features.map((feature, index) => (
               <div key={index} className={styles.featureCard}>
                 <div className={styles.iconWrapper}>

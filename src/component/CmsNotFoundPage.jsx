@@ -63,6 +63,29 @@ const RELATED_TOOL = {
   "car-buying-muhurat": { blurb: "Dates below are general Panchang references. The best buying window shifts with your city and your own chart.", label: "Check your exact car buying muhurat", to: MUHURAT_CALENDAR_PATH },
   "bike-buying-muhurat": { blurb: "Dates below are general Panchang references. The best buying window shifts with your city and your own chart.", label: "Check your exact bike buying muhurat", to: MUHURAT_CALENDAR_PATH },
   "gold-buying-muhurat": { blurb: "Dates below are general Panchang references. The best buying window shifts with your city and your own chart.", label: "Check your exact gold buying muhurat", to: MUHURAT_CALENDAR_PATH },
+  /*
+    /ai-health-astrologer ships a body of 29 paragraphs and not one link or button,
+    so a visitor who arrives wanting to act has nothing to tap. Clarity x4qq8t
+    (Google, 81s) tapped the title line at 00:13 and "ShubhAstro.ai combines tr…"
+    at 00:06, then left after about 16 seconds. Same construct, same fix as the
+    muhurat pages above.
+
+    Talk to your Kundli is open to everyone — a guest gets the in-page details
+    form, not a login redirect — so the "Sign in required" line is switched off
+    for this entry (signInNote: false) rather than shown inaccurately.
+  */
+  "ai-health-astrologer": { blurb: "This page explains health astrology in general. Ask about the health patterns in your own birth chart.", label: "Ask your Kundli about health", to: "/ai-wow/talk-to-your-kundli", signInNote: false },
+  /*
+    The palmistry line articles are the same construct: 96 blocks on
+    /head-line-palmistry with no button and no heading, and a bold line such as
+    "3. Head Line and Heart Line" reads like a section to open. Clarity 1njcfgs
+    logged about seventeen dead clicks on its subheadings and paragraphs between
+    35:18 and 35:57 before the visitor left for the home page, and 8wf5sq did the
+    same on /bracelet-line-palmistry. The site's own AI Palmistry Scanner is the
+    action these articles lead up to. Open to everyone, so no sign-in line.
+  */
+  "head-line-palmistry": { blurb: "This article explains the Head Line in general. Scan your own palm to see how yours reads.", label: "Try the AI Palmistry Scanner", to: "/ai-wow/ai-palmistry-scanner", signInNote: false },
+  "bracelet-line-palmistry": { blurb: "This article explains bracelet lines in general. Scan your own palm to see how yours read.", label: "Try the AI Palmistry Scanner", to: "/ai-wow/ai-palmistry-scanner", signInNote: false },
 };
 
 /**
@@ -170,7 +193,7 @@ const CmsNotFoundPage = () => {
             {relatedTool.label}
             <span aria-hidden="true">&nbsp;&rsaquo;</span>
           </Link>
-          {!getToken() && (
+          {!getToken() && relatedTool.signInNote !== false && (
             <span className={styles.cmsToolCtaNote}>Sign in required to save your details</span>
           )}
         </div>
