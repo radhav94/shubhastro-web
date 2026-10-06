@@ -97,9 +97,9 @@ const GuidanceScreen = ({ onNext, onSkip, formData, updateFormData, currentStep 
       if (!isAdultDob(formData.birthDate)) {
         toast.error(UNDERAGE_ERROR);
         setLoading(false);
-        // Step 1 is BirthDetailsScreen, which owns the field — sending them back
-        // there is the only place the date can be corrected.
-        onStepChange?.(1);
+        // Dot 0 is the "Enter Your Details" form, which owns the field — sending
+        // them back there is the only place the date can be corrected.
+        onStepChange?.(0);
         return;
       }
 

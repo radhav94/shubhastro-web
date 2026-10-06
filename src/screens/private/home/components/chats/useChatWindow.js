@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import socketService from "../../../../../services/socketService";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
+import { isPanditAIEvent } from "../../../../../component/panditAI/usePanditAI";
 import toast from "../../../../../component/toast";
 import { useChat as useChatContext } from "../../../../../context/ChatContext"
 import { useGetAllKundlisQuery } from "../../../../../services/appServices/kundliServicesNew";
@@ -34,7 +35,11 @@ export default function useChat({
   setOpenFeedback,
   astrologerName,
   fullName,
-  refreshKey = 0
+  refreshKey = 0,
+  // Ref to `(warning) => boolean`: true skips the toast. The free first
+  // session handles its own wallet messaging (see ChatWindow), so the
+  // server's paid low-balance warning must not fire on top of it.
+  suppressWarningRef = null,
 }) {
   const { startTimer, stopTimer, chatSeconds, setActiveChat, activeChat, reconnectToChat } = useChatContext();
   const { activeCall, openReview } = useCall();
@@ -136,6 +141,11 @@ export default function useChat({
   console.log("::",messages,"/",error)
 
   const handleChatEndedFromServer = (data) => {
+    // chat:ended is socket-wide: ignore Pandit AI's session and any other room,
+    // otherwise a SYSTEM end elsewhere triggers a reconnect of THIS chat (whose
+    // failure path reports it ended). Unchanged when the payload has no roomId.
+    if (isPanditAIEvent(data)) return;
+    if (data?.roomId && roomId && data.roomId !== roomId && data.roomId !== activeChat?.roomId) return;
     // SYSTEM ends are treated as transient transport failures; attempt reconnect
     // instead of tearing down the active chat session.
     if (data?.endedBy === 'SYSTEM') {
@@ -306,6 +316,7 @@ export default function useChat({
         // setHighLightText("")
       },
       onWarn: (msg) => {
+        if (suppressWarningRef?.current?.(msg)) return;
         toast.warning(msg + " warning" || "Something went wrong");
       },
     });
@@ -521,6 +532,9 @@ export default function useChat({
     };
 
     const handleWarning = (msg) => {
+      // Pandit AI's low-balance warning belongs to Pandit AI, not this chat.
+      if (isPanditAIEvent(msg)) return;
+      if (suppressWarningRef?.current?.(msg)) return;
       toast.warning(msg.message);
     }
 

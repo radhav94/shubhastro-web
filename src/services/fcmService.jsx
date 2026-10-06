@@ -78,8 +78,24 @@ export const initializeFCM = async () => {
     // Suppress push notification toast during active calls (call components handle their own notifications)
     if (window.__shubhtalk_call_active) return;
 
+    /*
+      Data-only pushes (e.g. the wallet debit after a paid PDF download) carry
+      their text in `payload.data`, not `payload.notification`. Reading only the
+      latter showed the placeholder "ShubhTalk / You have a new notification".
+      Read both — the service worker already does the same for background
+      pushes — and show nothing for a push with no text at all (a silent sync
+      push): a placeholder toast tells the user nothing.
+    */
+    const notification = payload?.notification || {};
+    const data = payload?.data || {};
+    const pickText = (...vals) =>
+      vals.find((v) => typeof v === "string" && v.trim())?.trim() || "";
+    const title = pickText(notification.title, data.title, data.notificationTitle);
+    const body = pickText(notification.body, data.body, data.message, data.notificationBody, data.description);
+    const image = pickText(notification.image, data.image, data.imageUrl);
+    if (!title && !body) return;
+
     playNotificationSound();
-    const { title, body, image } = payload.notification || {};
 
     toast.custom(
       (t) => (
@@ -126,6 +142,7 @@ export const initializeFCM = async () => {
             >
               {title || "ShubhTalk"}
             </p>
+            {body && (
             <p
               style={{
                 margin: "2px 0 0",
@@ -137,8 +154,9 @@ export const initializeFCM = async () => {
                 // whiteSpace: "nowrap",
               }}
             >
-              {body || "You have a new notification"}
+              {body}
             </p>
+            )}
           </div>
         </div>
       ),

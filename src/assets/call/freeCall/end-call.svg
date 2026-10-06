@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="1">
+<circle id="Ellipse 6371" cx="30" cy="30" r="30" fill="#DB392B"/>
+<g id="tabler-icon-phone" clip-path="url(#clip0_0_21)">
+<path id="Vector" d="M37.8077 33.5355L40.6362 30.7071C41.0112 30.332 41.222 29.8233 41.222 29.2929C41.222 28.7625 41.0112 28.2538 40.6362 27.8787C37.7103 25.2881 33.9375 23.8578 30.0296 23.8578C26.1216 23.8578 22.3488 25.2881 19.423 27.8787C19.0479 28.2538 18.8372 28.7625 18.8372 29.2929C18.8372 29.8233 19.0479 30.332 19.423 30.7071L22.2514 33.5355L27.2011 31.4142L26.494 28.5858C28.7868 27.8076 31.2723 27.8076 33.5651 28.5858L32.858 31.4142L37.8077 33.5355Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_0_21">
+<rect width="24" height="24" fill="white" transform="translate(47.0001 30) rotate(135)"/>
+</clipPath>
+</defs>
+</svg>

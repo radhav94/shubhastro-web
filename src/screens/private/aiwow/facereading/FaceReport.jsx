@@ -456,31 +456,6 @@ const FaceReport = ({ data, faceImage, onDownload, historyId }) => {
           {overallReading.summary && (
             <p className={styles.bannerText}>{overallReading.summary}</p>
           )}
-
-          {bannerChips.length > 0 && (
-            <dl className={styles.metaChips}>
-              {bannerChips.map((chip) => {
-                // Icon can be a custom image (chip.iconImg) or a lucide
-                // component (chip.icon, capitalised local for JSX).
-                const ChipIcon = chip.icon;
-                return (
-                  <div key={chip.label}>
-                    <dt>
-                      <span className={`${styles.chipIcon} ${styles[chip.tone]}`}>
-                        {chip.iconImg ? (
-                          <img src={chip.iconImg} alt="" aria-hidden="true" className={styles.chipIconImg} />
-                        ) : (
-                          <ChipIcon size={12} aria-hidden="true" />
-                        )}
-                      </span>
-                      {chip.label}
-                    </dt>
-                    <dd>{chip.value}</dd>
-                  </div>
-                );
-              })}
-            </dl>
-          )}
         </div>
 
         {faceImage && (
@@ -500,6 +475,36 @@ const FaceReport = ({ data, faceImage, onDownload, historyId }) => {
           </figure>
         )}
 
+        {/*
+          A direct child of .banner (not inside .bannerCopy) so the banner grid
+          can place it: under the copy on desktop, and after the photo on mobile.
+          Order across that nesting boundary is only possible when it is a
+          sibling of the photo.
+        */}
+        {bannerChips.length > 0 && (
+          <dl className={styles.metaChips}>
+            {bannerChips.map((chip) => {
+              // Icon can be a custom image (chip.iconImg) or a lucide
+              // component (chip.icon, capitalised local for JSX).
+              const ChipIcon = chip.icon;
+              return (
+                <div key={chip.label}>
+                  <dt>
+                    <span className={`${styles.chipIcon} ${styles[chip.tone]}`}>
+                      {chip.iconImg ? (
+                        <img src={chip.iconImg} alt="" aria-hidden="true" className={styles.chipIconImg} />
+                      ) : (
+                        <ChipIcon size={12} aria-hidden="true" />
+                      )}
+                    </span>
+                    {chip.label}
+                  </dt>
+                  <dd>{chip.value}</dd>
+                </div>
+              );
+            })}
+          </dl>
+        )}
 
       </header>
 

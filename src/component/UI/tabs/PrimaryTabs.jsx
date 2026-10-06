@@ -6,7 +6,7 @@ import ConnectCard from "../cards/connectCard/ConnectCard";
 import ServiceCards from "../../../screens/private/home/components/serviceCards/ServiceCards";
 import ZodiacCarousel from "../../../screens/private/horoscope/zodiacCarousel/ZodiacCarousel";
 
-const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0, onTabChange }) => {
+const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0, onTabChange, showServiceCards = true }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTabIndex, setActiveTabIndex] = useState(initialActiveIndex);
 
@@ -103,7 +103,7 @@ const PrimaryTabs = ({ tabs = [], initialActiveIndex = 0, onTabChange }) => {
         </AnimatePresence>
         <div className="mt-4" style={kundliId ? activeStyle : null}>
           <ConnectCard />
-          <ServiceCards />
+          {showServiceCards && <ServiceCards />}
         </div>
       </main>
       {/* <div style={kundliId ? activeStyle : null}>

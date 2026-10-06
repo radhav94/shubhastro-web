@@ -4,7 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
 import styles from "./Onboarding.module.scss";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Calendar, Clock, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import LocationSearch from "../../../utils/location/locationSearchVedic";
 import DateTimePicker from "../../../component/UI/dateTimePicker/DateTimePicker";
 import LanguageSelector from "../../../component/LanguageSelector";
@@ -14,6 +14,34 @@ import { trackEvent } from "../../../utils/analytics";
 import { BranchEvents } from "../../../utils/branchEvents";
 import { isAdultDob, maxSignupDob, UNDERAGE_ERROR } from "../../../utils/helper/age";
 import { setEmail, logout } from "../../../redux/auth/authSlice";
+import { personNameRegex, PERSON_NAME_ERROR } from "../../../utils/regex";
+// Gender icons from the Figma "Enter Your Details" form (node 4886:74879).
+import genderMaleIcon from "../../../assets/icons/onboarding/gender-male.svg";
+import genderFemaleIcon from "../../../assets/icons/onboarding/gender-female.svg";
+import genderOthersIcon from "../../../assets/icons/onboarding/gender-others.svg";
+
+/*
+ * Name + gender, for the single-page "Enter Your Details" form (desktop web,
+ * `withProfileFields`). Same rules as PersonalizeScreen, which collects these
+ * on their own step everywhere else.
+ */
+const profileFieldsSchema = {
+  name: Yup.string()
+    .trim()
+    .min(3, "Name must be at least 3 characters")
+    .max(50, "Name must not exceed 50 characters")
+    .matches(personNameRegex, PERSON_NAME_ERROR)
+    .required("Name is required"),
+  identity: Yup.string()
+    .oneOf(["Male", "Female", "Others"], "Please select your gender")
+    .required("Please select your gender"),
+};
+
+const GENDER_OPTIONS = [
+  { value: "Male", label: "Male", icon: genderMaleIcon },
+  { value: "Female", label: "Female", icon: genderFemaleIcon },
+  { value: "Others", label: "Others", icon: genderOthersIcon },
+];
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -90,6 +118,13 @@ const BirthDetailsScreen = ({
   totalSteps = 3,
   onStepChange,
   skipGuidance = false,
+  /*
+    Desktop web: one "Enter Your Details" form (Figma "Web Free chat user
+    journey", node 4787:27669) that also asks for name and gender, replacing the
+    separate PersonalizeScreen step. Onboarding turns this on at >= 1025px only;
+    the mobile wizard is unchanged.
+  */
+  withProfileFields = false,
 }) => {
   const dispatch = useDispatch();
   const [registering, setRegistering] = useState(false);
@@ -108,10 +143,16 @@ const BirthDetailsScreen = ({
     here because preventDefault stops the submit, so it never increments.
   */
   const [hint, setHint] = useState(null);
+  // Why the typed birth date is not usable yet (half-typed, impossible, under
+  // 18). Shown in place of the Formik error so the field has one message.
+  const [dobTypingError, setDobTypingError] = useState("");
   const showFormHint = (text) =>
     setHint((prev) => ({ text, seq: (prev?.seq || 0) + 1 }));
 
   const initialValues = {
+    ...(withProfileFields
+      ? { name: formData.name || "", identity: formData.identity || "Male" }
+      : {}),
     birthDate: formData.birthDate || "",
     birthTime: formData.birthTime || "",
     birthPlace: formData.birthPlace || "",
@@ -314,7 +355,9 @@ const BirthDetailsScreen = ({
   return (
     <Formik
       initialValues={initialValues}
-      validationSchema={validationSchema}
+      validationSchema={
+        withProfileFields ? validationSchema.shape(profileFieldsSchema) : validationSchema
+      }
       onSubmit={handleSubmit}
       validateOnChange={true}
       validateOnBlur={true}
@@ -324,9 +367,33 @@ const BirthDetailsScreen = ({
         // Blank time with "Don't know" unticked. The schema rejects this; the
         // CTA needs the same answer so its blocked styling matches reality.
         const needsBirthTime = !values.unknownBirthTime && !values.birthTime;
+        // The single-page web form follows the design, which has no asterisks.
+        const requiredMark = withProfileFields ? null : (
+          <span className={styles.required}>*</span>
+        );
+        const unknownTimeLabel = withProfileFields
+          ? "Don't know my exact time of birth"
+          : "Don't know the exact time of birth";
 
         return (
-        <Form className={styles.birthDetailsScreen}>
+        <Form
+          className={`${styles.birthDetailsScreen} ${
+            withProfileFields ? styles.detailsFormWeb : ""
+          }`.trim()}
+        >
+          {withProfileFields ? (
+            <div className={styles.detailsFormHeader}>
+              <button
+                type="button"
+                className={styles.detailsFormBack}
+                onClick={onBack}
+                aria-label="Go back"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <h1 className={styles.detailsFormTitle}>Enter Your Details</h1>
+            </div>
+          ) : (
           <div className={styles.header}>
             <div className={styles.progressDots}>
               {Array.from({ length: totalSteps }).map((_, index) => (
@@ -357,16 +424,43 @@ const BirthDetailsScreen = ({
             {/* Language Translator */}
             {/* <LanguageSelector style={{ position: 'relative', top: 'auto', right: 'auto' }} /> */}
           </div>
+          )}
 
           <div className={styles.content}>
-            <h1 className={styles.title}>
-              Share the moment the stars welcomed you
-            </h1>
+            {!withProfileFields && (
+              <h1 className={styles.title}>
+                Share the moment the stars welcomed you
+              </h1>
+            )}
+
+            {withProfileFields && (
+              <div className={styles.formGroup}>
+                <label htmlFor="details-name">Name</label>
+                <Field
+                  id="details-name"
+                  type="text"
+                  name="name"
+                  className={styles.input}
+                  placeholder="Enter your name"
+                  autoComplete="name"
+                  onBlur={() => {
+                    setFieldTouched("name", true, true);
+                    if (values.name?.trim()) {
+                      trackEvent("profile_field_completed", { field_name: "name" });
+                    }
+                  }}
+                />
+                <ErrorMessage name="name">
+                  {(msg) => <span className={styles.errorText}>{msg}</span>}
+                </ErrorMessage>
+              </div>
+            )}
 
             <div className={styles.formGroup}>
-              <label>Birth Date<span className={styles.required}>*</span></label>
+              <label>Birth Date{requiredMark}</label>
               <DateTimePicker
                 mode="date"
+                iconOnly
                 selected={values.birthDate ? new Date(values.birthDate) : null}
                 onChange={(date) => {
                   if (date) {
@@ -383,15 +477,34 @@ const BirthDetailsScreen = ({
                     });
                   }
                 }}
+                /*
+                  SHB-2159: editing the box after picking a date. A typed date
+                  that does not parse, or is under 18, never reaches onChange,
+                  so the form kept the date picked earlier — the account was
+                  created with that older date while the box showed another.
+                  Any edit that differs from the stored date clears it; a valid
+                  date sets it again through onChange right after.
+                */
+                onRawChange={(text) => {
+                  const [y, m, d] = (values.birthDate || "").split("-");
+                  const stored = values.birthDate ? `${d}/${m}/${y}` : "";
+                  if (values.birthDate && text !== stored) setFieldValue("birthDate", "");
+                }}
+                onError={setDobTypingError}
+                maxDateError={UNDERAGE_ERROR}
                 // Underage dates are not selectable at all. The schema test
                 // still exists for a value that arrives another way (a restored
                 // draft, a typed date).
                 maxDate={maxSignupDob()}
-                placeholder="DD/MM/YYYY"
+                placeholder={withProfileFields ? "Enter your birth date" : "DD/MM/YYYY"}
               />
-              <ErrorMessage name="birthDate">
-                {(msg) => <span className={styles.errorText}>{msg}</span>}
-              </ErrorMessage>
+              {dobTypingError ? (
+                <span className={styles.errorText}>{dobTypingError}</span>
+              ) : (
+                <ErrorMessage name="birthDate">
+                  {(msg) => <span className={styles.errorText}>{msg}</span>}
+                </ErrorMessage>
+              )}
             </div>
 
             <div className={styles.formGroup}>
@@ -402,12 +515,11 @@ const BirthDetailsScreen = ({
               */}
               <label>
                 Birth Time
-                {!values.unknownBirthTime && (
-                  <span className={styles.required}>*</span>
-                )}
+                {!values.unknownBirthTime && requiredMark}
               </label>
               <DateTimePicker
                 mode="time"
+                iconOnly
                 selected={values.birthTime ? (() => { const [h, m] = values.birthTime.split(":"); const d = new Date(); d.setHours(h, m, 0, 0); return d; })() : null}
                 onChange={(date) => {
                   if (date) {
@@ -419,9 +531,9 @@ const BirthDetailsScreen = ({
                     setFieldValue("birthTime", "");
                   }
                 }}
-                placeholder="Select time"
+                placeholder={withProfileFields ? "Enter your birth time" : "Select time"}
                 disabled={values.unknownBirthTime}
-                disabledReason="Uncheck “Don’t know the exact time of birth” to pick a time"
+                disabledReason={`Uncheck “${unknownTimeLabel}” to pick a time`}
               />
               <div className={styles.checkboxContainer}>
                 <label className={styles.checkboxLabel}>
@@ -438,7 +550,7 @@ const BirthDetailsScreen = ({
                       setHint(null);
                     }}
                   />
-                  <span>Don't know the exact time of birth</span>
+                  <span>{unknownTimeLabel}</span>
                 </label>
               </div>
               <ErrorMessage name="birthTime">
@@ -447,7 +559,7 @@ const BirthDetailsScreen = ({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Place of Birth<span className={styles.required}>*</span></label>
+              <label>Place of Birth{requiredMark}</label>
               <div className={`${styles.inputWrapper} ${touched.birthPlace && errors.birthPlace ? styles.error : ""}`}>
                 <LocationSearch
                   value={values.birthPlace}
@@ -467,7 +579,7 @@ const BirthDetailsScreen = ({
                     setFieldTouched("birthPlace", true);
                     setTimeout(() => validateForm(), 0);
                   }}
-                  placeholder="Select here"
+                  placeholder={withProfileFields ? "Enter your place of birth" : "Select here"}
                 />
                 <MapPin className={styles.inputIcon} size={20} />
               </div>
@@ -478,6 +590,45 @@ const BirthDetailsScreen = ({
                 <span className={styles.errorText}>Please select a location from the dropdown</span>
               )}
             </div>
+
+            {withProfileFields && (
+              <div className={styles.formGroup}>
+                <span className={styles.detailsFormLabel} id="details-gender-label">
+                  Gender
+                </span>
+                <div
+                  className={styles.detailsGenderRow}
+                  role="radiogroup"
+                  aria-labelledby="details-gender-label"
+                >
+                  {GENDER_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      role="radio"
+                      aria-checked={values.identity === opt.value}
+                      className={`${styles.detailsGenderBtn} ${
+                        values.identity === opt.value ? styles.detailsGenderBtnActive : ""
+                      }`.trim()}
+                      onClick={() => setFieldValue("identity", opt.value)}
+                    >
+                      <span>{opt.label}</span>
+                      <img
+                        src={opt.icon}
+                        alt=""
+                        aria-hidden="true"
+                        width="24"
+                        height="24"
+                        className={styles.detailsGenderIcon}
+                      />
+                    </button>
+                  ))}
+                </div>
+                <ErrorMessage name="identity">
+                  {(msg) => <span className={styles.errorText}>{msg}</span>}
+                </ErrorMessage>
+              </div>
+            )}
           </div>
 
           {/*
@@ -502,6 +653,7 @@ const BirthDetailsScreen = ({
           <button
             type="submit"
             className={`${styles.otpprimaryBtn} ${
+              (withProfileFields && !(values.name || "").trim()) ||
               !values.birthDate ||
               !values.birthPlace ||
               !values.latitude ||
@@ -510,6 +662,7 @@ const BirthDetailsScreen = ({
                 : ""
             }`.trim()}
             aria-disabled={
+              (withProfileFields && !(values.name || "").trim()) ||
               !values.birthDate ||
               !values.birthPlace ||
               !values.latitude ||
@@ -525,9 +678,27 @@ const BirthDetailsScreen = ({
                 showFormHint("Saving your details — one moment.");
                 return;
               }
+              if (withProfileFields) {
+                const name = (values.name || "").trim();
+                const nameProblem = !name
+                  ? "Please enter your name."
+                  : name.length < 3
+                    ? "Name must be at least 3 characters."
+                    : name.length > 50
+                      ? "Name must not exceed 50 characters."
+                      : !personNameRegex.test(name)
+                        ? PERSON_NAME_ERROR
+                        : null;
+                if (nameProblem) {
+                  e.preventDefault();
+                  setFieldTouched("name", true, true);
+                  showFormHint(nameProblem);
+                  return;
+                }
+              }
               if (!values.birthDate) {
                 e.preventDefault();
-                showFormHint("Please select your date of birth.");
+                showFormHint(dobTypingError || "Please select your date of birth.");
                 return;
               }
               /*
@@ -549,9 +720,7 @@ const BirthDetailsScreen = ({
                   blocked tap had no visible answer anywhere on the page.
                 */
                 e.preventDefault();
-                showFormHint(
-                  "Select your birth time, or tick “Don’t know the exact time of birth”."
-                );
+                showFormHint(`Select your birth time, or tick “${unknownTimeLabel}”.`);
                 return;
               }
               if (!values.birthPlace) {
@@ -579,6 +748,9 @@ const BirthDetailsScreen = ({
             }}
           >
             {registering ? "Saving..." : "Next"}
+            {withProfileFields && !registering && (
+              <ChevronRight size={18} className={styles.detailsFormNextIcon} aria-hidden="true" />
+            )}
           </button>
         </Form>
         );

@@ -50,7 +50,7 @@ export const getProfile = async (id, config = {}) => {
  */
 export const extractIsRegistered = (profileResponse) => {
   const profile = profileResponse?.data?.data ?? profileResponse?.data ?? {};
-
+  
   const value =
     profile.isRegister ??
     profile.isRegistered ??

@@ -33,9 +33,9 @@ const PlanCard = ({ plan, isSelected, onSelect, disabled = false }) => {
       aria-label={`₹${actualPrice}${discountedPrice > 0 ? `, Bonus ₹${discountedPrice}` : ''}`}
     >
       <div className={styles.planContent}>
-        <div className={styles.mainPrice}>₹ {actualPrice}</div>
+        <div className={styles.mainPrice}>₹{actualPrice}</div>
         {discountedPrice > 0 && (
-          <div className={styles.extraAmount}>Bonus ₹ {discountedPrice}</div>
+          <div className={styles.extraAmount}>+₹{discountedPrice} Bonus</div>
         )}
       </div>
     </div>

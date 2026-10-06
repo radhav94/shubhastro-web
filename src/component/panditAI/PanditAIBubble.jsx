@@ -289,6 +289,17 @@ const PanditAIBubble = ({ hideBubble = false }) => {
     }
   }, [hookFreeMinutesRemaining, hookRemainingPaidTime]);
 
+  // SHB-2116: the seed belongs to ONE voice→text handover. If it was never
+  // replaced (e.g. the handed-over chat closed before an event arrived) it
+  // survived into the next chat, whose header then showed the old session's
+  // free/paid state — e.g. a stale `freeMinutesRemaining: 0` = "Free time used"
+  // — until a refresh. Closing the chat ends that session, so drop it then. The
+  // reopen handler sets the seed and opens in the same batch, so a real
+  // handover is unaffected.
+  useEffect(() => {
+    if (!isOpen) setInitialBilling(null);
+  }, [isOpen]);
+
   // Group messages by date for date separators
   const messageGroups = useMemo(() => {
     const groups = {};

@@ -1,5 +1,14 @@
 $orange: #f75801;
 $orange-dark: #d43400;
+$heading: #030303;
+$secondary-text: #62564e;
+$orange-gradient: linear-gradient(90deg, $orange 0%, $orange-dark 100%);
+
+/*
+ * Desktop values follow the Figma "Web Free chat user journey", popup node
+ * 4787:29872 (871 x 436 on a 1440 frame). The block at the bottom keeps the
+ * existing single-column mobile layout.
+ */
 
 .overlay {
   position: fixed;
@@ -17,47 +26,80 @@ $orange-dark: #d43400;
 .modal {
   position: relative;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 10px;
   width: 100%;
-  max-width: 720px;
-  padding: 22px 28px 22px 18px;
-  border-radius: 22px;
-  background: linear-gradient(140deg, #fff 0%, #fff7f1 100%);
+  max-width: 871px;
+  padding: 18px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #fffaf2 0%, #fbfaf9 100%);
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.logo {
+  height: 32px;
+  width: auto;
+  display: block;
 }
 
 .closeBtn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 2;
-  width: 30px;
-  height: 30px;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   border: none;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.06);
-  color: #444;
+  background: transparent;
   cursor: pointer;
 
+  img {
+    display: block;
+    width: 32px;
+    height: 32px;
+  }
+
   &:hover {
-    background: rgba(0, 0, 0, 0.12);
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $orange;
+    outline-offset: 2px;
   }
 }
 
-.art {
-  flex: 0 0 46%;
+.content {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 52px;
+}
+
+/* 362 x 344 frame; the source image is cropped into it exactly as in Figma. */
+.art {
+  position: relative;
+  flex: 0 0 362px;
+  width: 362px;
+  height: 344px;
+  overflow: hidden;
 
   img {
-    width: 100%;
-    max-width: 300px;
-    height: auto;
+    position: absolute;
+    top: -8.14%;
+    left: -5.25%;
+    width: 110.5%;
+    height: 116.28%;
+    max-width: none;
     display: block;
   }
 }
@@ -65,70 +107,84 @@ $orange-dark: #d43400;
 .body {
   flex: 1 1 auto;
   min-width: 0;
-}
-
-.logo {
-  width: 132px;
-  height: auto;
-  display: block;
-  margin: 0 0 14px;
+  display: flex;
+  flex-direction: column;
 }
 
 .kicker {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #1f1f1f;
+  // margin: 0 0 -8px;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: normal;
+  color: $heading;
 }
 
 .headline {
-  margin: 2px 0 8px;
-  font-size: 2.6rem;
-  font-weight: 800;
-  line-height: 1.05;
-  color: $orange;
+  // margin: 0 0 -8px;
+  font-size: 74px;
+  font-weight: 600;
+  line-height: 78px;
+  background: $orange-gradient;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  white-space: nowrap;
 }
 
 .sub {
-  margin: 0 0 18px;
-  font-size: 0.82rem;
-  line-height: 1.55;
-  color: #6b6b6b;
+  margin: 0 0 32px;
+  max-width: 363px;
+  font-size: 18px;
+  line-height: 1.5;
+  color: $secondary-text;
 }
 
 .actions {
   display: flex;
-  gap: 12px;
+  gap: 8px;
 }
 
 .chatBtn,
 .callBtn {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 14px;
+  gap: 5px;
+  height: 46px;
+  padding: 0 40px;
   border-radius: 999px;
-  font-size: 0.88rem;
-  font-weight: 600;
+  // font-size: 20px;
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  font-size: 16px;
+    img{
+      width: 25px;
+      height: 25px;
+    }
 }
 
 .chatBtn {
-  border: 1.5px solid $orange;
+  border: 0.5px solid $orange;
   background: #fff;
-  color: $orange;
 
   &:hover {
     background: #fff3ea;
   }
 }
 
+.chatLabel {
+  background: $orange-gradient;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .callBtn {
   border: none;
-  background: linear-gradient(135deg, $orange, $orange-dark);
+  background: $orange-gradient;
   color: #fff;
 
   &:hover {
@@ -136,56 +192,212 @@ $orange-dark: #d43400;
   }
 }
 
-/* Mobile: single column, copy first, artwork between the copy and the CTAs —
-   the order in the mobile reference. */
-@media (max-width: 720px) {
+/* Narrow desktops / tablets: same layout, scaled down so it fits. */
+@media (max-width: 920px) {
   .modal {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    max-width: 340px;
-    padding: 20px 18px 20px;
-    text-align: left;
+    max-width: 700px;
+  }
+
+  .content {
+    gap: 24px;
   }
 
   .art {
-    order: 2;
-    flex: 0 0 auto;
-    margin: 4px 0 16px;
-
-    img {
-      max-width: 210px;
-    }
-  }
-
-  .body {
-    display: contents;
-  }
-
-  .logo {
-    order: 0;
-    width: 118px;
-    margin-bottom: 10px;
+    flex-basis: 280px;
+    width: 280px;
+    height: 266px;
   }
 
   .kicker {
-    order: 0;
-    font-size: 1.05rem;
+    font-size: 24px;
   }
 
   .headline {
-    order: 0;
-    font-size: 2.15rem;
+    font-size: 60px;
+    line-height: 64px;
   }
 
   .sub {
-    order: 0;
-    margin-bottom: 0;
-    font-size: 0.78rem;
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .chatBtn,
+  .callBtn {
+    padding: 0 22px;
+  }
+}
+
+/*
+ * Mobile: single column following the Figma mobile popup "Free chat popup2"
+ * (node 4561:71664, 354 wide on a 390 frame): header, chat-bubble artwork,
+ * copy, then full-width stacked CTAs.
+ */
+@media (max-width: 720px) {
+  .modal {
+    // gap: 18px;
+    max-width: 354px;
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    padding: 20px 20px 32px;
+    border-radius: 24px;
+  }
+
+  .content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+
+  /* 256px-tall slot with the 269 x 256 image centred in it, same crop as desktop. */
+  .art {
+    flex: 0 0 auto;
+    align-self: center;
+    width: 269px;
+    max-width: 100%;
+    height: 256px;
+  }
+
+  .kicker {
+    font-size: 22px;
+  }
+
+  .headline {
+    font-size: 48px;
+    line-height: 50px;
+  }
+
+  .sub {
+    max-width: none;
+    margin-bottom: 18px;
+    font-size: 14px;
+    line-height: normal;
   }
 
   .actions {
-    order: 3;
-    flex-direction: column;
+    // flex-direction: column;
+    gap: 12px;
+  }
+
+  .chatBtn,
+  .callBtn {
+    flex: unset;
+    padding: 0 16px;
+    gap: 8px;
+    font-size: 16px;
+    width: 100%;
+    img{
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+/* Very narrow phones (< 360px): shrink the type so "100% Free" stays on one line. */
+@media (max-width: 359px) {
+  .modal {
+    padding: 16px 16px 24px;
+  }
+
+  .art {
+    height: 210px;
+    width: 221px;
+  }
+
+  .kicker {
+    font-size: 19px;
+  }
+
+  .headline {
+    font-size: 48px;
+  }
+
+  .chatBtn,
+  .callBtn {
+    height: 50px;
+    font-size: 18px;
+  }
+}
+
+/*
+ * Short phones (e.g. 568-740px tall): shrink the artwork so both CTAs stay on
+ * screen without scrolling inside the popup. Width-independent on purpose —
+ * a 390px-wide phone in a short viewport needs it as much as a 320px one.
+ */
+@media (max-width: 720px) and (max-height: 760px) {
+  .modal {
+    // gap: 12px;
+    padding-bottom: 20px;
+  }
+
+  .content {
+    gap: 10px;
+  }
+
+  .art {
+    width: 168px;
+    height: 160px;
+  }
+
+  .sub {
+    margin-bottom: 14px;
+  }
+}
+
+@media (max-width: 720px) and (max-height: 620px) {
+  .art {
+    width: 116px;
+    height: 110px;
+  }
+
+  .chatBtn,
+  .callBtn {
+    height: 46px;
+    font-size: 17px;
+  }
+}
+
+/* Landscape phones / short windows on the two-column layout: keep the whole
+   popup on screen (scroll inside it only as a last resort). */
+@media (min-width: 721px) {
+  .modal {
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+  }
+}
+
+@media (min-width: 721px) and (max-height: 520px) {
+  .modal {
+    // gap: 10px;
+    padding: 14px 18px;
+  }
+
+  .art {
+    flex-basis: 220px;
+    width: 220px;
+    height: 210px;
+  }
+
+  .kicker {
+    font-size: 22px;
+  }
+
+  .headline {
+    font-size: 52px;
+    line-height: 56px;
+  }
+
+  .sub {
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+
+  .chatBtn,
+  .callBtn {
+    height: 44px;
+    padding: 0 20px;
+    font-size: 16px;
   }
 }

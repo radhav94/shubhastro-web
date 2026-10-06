@@ -144,12 +144,13 @@ const FinalPay = () => {
       await initiatePayment({
         planId: data?.data?._id || planId,
         planData: data.data,
-        onSuccess: () => {
+        onSuccess: (result) => {
           // Refresh wallet balance
           refreshWallet();
 
-          // Show payment success popup (actualPrice + bonus)
-          setSuccessAmount(amount + extra);
+          // Show what the wallet was actually credited; the plan's
+          // actualPrice + bonus only when that could not be read.
+          setSuccessAmount(result?.creditedAmount ?? amount + extra);
         },
         onFailure: (error) => {
           // Cancellation and gateway errors are already toasted by the hook.

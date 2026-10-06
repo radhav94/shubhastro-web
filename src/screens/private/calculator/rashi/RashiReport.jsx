@@ -46,7 +46,10 @@ import detailCalendarIcon from "../../../../assets/images/rashi/icons/detail-cal
 import detailPlaceIcon from "../../../../assets/images/rashi/icons/detail-place.png";
 import careerArt from "../../../../assets/images/rashi/decor/career-art.png";
 import { BsChatDots } from "react-icons/bs";
-import { useGetRashiCalQuery } from "../../../../redux/api/calculator/calcApi";
+import { useGenerateRashiReportQuery } from "../../../../redux/api/aiwow/aiwowApi";
+import { useAIWowDownload } from "../../aiwow/hooks/useAIWowDownload";
+import DownloadReportModal from "../../aiwow/components/DownloadReportModal";
+import SubscriptionModal from "../../../../component/UI/modal/SubscriptionModal/SubscriptionModal";
 import CalcReportLoader from "../CalcReportLoader";
 import styles from "./RashiReport.module.scss";
 import CalcBackButton from "../CalcBackButton";
@@ -232,12 +235,47 @@ const RashiReport = () => {
     if (!isLoggedIn) navigate("/rashi-calculator", { replace: true });
   }, [isLoggedIn, navigate]);
 
-  const { data, isLoading } = useGetRashiCalQuery(stored, {
+  /*
+    Generated through companion-suite/rashi-calculator (SHB-2071) so the result
+    is saved to AI history and can be downloaded as a PDF. The moon-sign data
+    is the same as the old find-moon-sign proxy; it is read from `data.response`
+    or straight from `data`, whichever the endpoint wraps it in.
+  */
+  const { data, isLoading } = useGenerateRashiReportQuery(stored, {
     skip: !stored || !isLoggedIn,
   });
 
-  const response = data?.response;
-  const enriched = response?.enriched;
+  const payload = data?.data ?? data;
+  const response = payload?.response ?? (payload?.moon_sign || payload?.enriched ? payload : null);
+  const enriched = response?.enriched ?? payload?.enriched;
+  // The saved record's id — `ai-history/pdf` takes it as historyId.
+  const reportId = payload?._id || payload?.featureId || response?._id || data?._id || null;
+
+  // Same paid-download flow as the AI reports: price popup, wallet charge on
+  // the first download, free re-download, subscription upsell when blocked.
+  const downloadResultData = useMemo(
+    () => (reportId ? { _id: reportId, featureName: "Rashi Calculator" } : null),
+    [reportId]
+  );
+  const {
+    isDownloading,
+    showDownloadModal,
+    setShowDownloadModal,
+    existingPdfUrl,
+    downloadPrice,
+    walletBalance,
+    handleDownloadClick,
+    handleConfirmDownload,
+    handleDirectDownload,
+    showSubscriptionModal,
+    setShowSubscriptionModal,
+    subscriptionModalVariant,
+    extendedPlans,
+  } = useAIWowDownload({
+    resultData: downloadResultData,
+    toastId: "rashi-report-pdf",
+    downloadFileName: `${String(stored?.name || "").trim() || "Rashi"} Rashi Report`,
+  });
 
   // The coin needs its own failure flag rather than going through ArtImage: when
   // the hosted logo is unavailable AND there is no local coin export, we drop to
@@ -361,9 +399,20 @@ const RashiReport = () => {
     }
   };
 
-  // No PDF pipeline on this calculator report, so use the browser's print
-  // dialog (which offers "Save as PDF").
-  const handleDownload = () => window.print();
+  // PDF from ai-history/pdf (SHB-2071) — replaces the browser print dialog,
+  // which saved the whole web page with its layout issues. Once bought, the
+  // same report downloads again for free.
+  const handleDownload = () => {
+    if (!reportId) {
+      Toast.error("Report download is not available right now. Please try again.");
+      return;
+    }
+    if (existingPdfUrl) {
+      handleDirectDownload(existingPdfUrl);
+      return;
+    }
+    handleDownloadClick();
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -774,6 +823,7 @@ const RashiReport = () => {
                   type="button"
                   className={styles.sidebarIconBtn}
                   onClick={handleDownload}
+                  disabled={isDownloading}
                   aria-label="Download report"
                   title="Download"
                 >
@@ -913,6 +963,25 @@ const RashiReport = () => {
         // Bring the user back to this report after the chat ends (only when the
         // chat was started from here).
         returnTo={`${window.location.pathname}${window.location.search}`}
+      />
+
+      <DownloadReportModal
+        isOpen={showDownloadModal}
+        onClose={() => setShowDownloadModal(false)}
+        // No language choice for the Rashi PDF: hide the picker and send the
+        // request without a `language` param.
+        onDownload={() => handleConfirmDownload()}
+        featureName="Rashi Report"
+        downloadCost={downloadPrice}
+        walletBalance={walletBalance ?? 0}
+        isDownloading={isDownloading}
+        showLanguageSelection={false}
+      />
+      <SubscriptionModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        variant={subscriptionModalVariant}
+        plans={subscriptionModalVariant === "extended" ? extendedPlans : undefined}
       />
     </div>
   );

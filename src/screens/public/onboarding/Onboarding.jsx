@@ -19,15 +19,15 @@ import GuidanceScreen from "./GuidanceScreen";
 // Onboarding is a static import (it backs /login), so that cost was paid app-wide
 // for a date field on one step.
 //
-// It is index 4 in the `screens` array below and `currentStep` starts at 1
-// (login) or 3 (personalize flow), so this step is never the initial render — it
-// is always reached after at least one interaction, by which time the chunk has
-// loaded.
+// It is the single "Enter Your Details" step (index 3 below). In the normal
+// signup it is reached after login + OTP, by which time the chunk has loaded;
+// the `?step=personalize` deep link renders it first and shows the Suspense
+// fallback for a moment.
 const BirthDetailsScreen = lazy(() => import("./BirthDetailsScreen"));
-import PersonalizeScreen from "./PersonalizeScreen";
 import OTPScreen from "./OTPScreen";
 import LoginScreen from "./LoginScreen";
 import { draftToOnboardingFormData } from "../guestChat/guestChatConstants";
+import { isReturnTarget, POST_LOGIN_LANDING_PATH } from "../../../utils/auth/completeCustomerLogin";
 import { loadOtpResume, saveOtpResume, clearOtpResume } from "./otpResume";
 
 /**
@@ -39,11 +39,19 @@ const STEP = {
   WELCOME: 0,
   LOGIN: 1,
   OTP: 2,
+  // Registration details: ONE "Enter Your Details" form (name, birth date,
+  // time, place, gender) — it used to be two steps, Personalize then Birth.
   PERSONALIZE: 3,
+  // Retired second step. Kept as an index so anything that still lands here
+  // (an old `onStepChange(1)`) shows the same details form rather than nothing.
   BIRTH: 4,
   GUIDANCE: 5,
   LOADING: 6,
 };
+
+// Progress dots on the profile-setup steps: Details, then Guidance.
+const DETAILS_DOT = 0;
+const GUIDANCE_DOT = 1;
 
 /* ───────────────────────── Onboarding answers draft ─────────────────────────
  *
@@ -147,10 +155,8 @@ const Onboarding = () => {
    * `/login` is excluded for the same reason the localStorage check excludes it:
    * returning here would loop.
    */
-  const fromPath =
-    typeof location.state?.from === "string" && location.state.from !== "/login"
-      ? location.state.from
-      : null;
+  // Home and /login are not pages to "return" to — see isReturnTarget.
+  const fromPath = isReturnTarget(location.state?.from) ? location.state.from : null;
 
   const isPersonalizeFlow = searchParams.get("step") === "personalize";
   const skipGuidance = searchParams.get("skip") === "welcome" || isPersonalizeFlow;
@@ -315,26 +321,22 @@ const Onboarding = () => {
   }, [isPersonalizeFlow]);
 
   const handleStepChange = (step) => {
-    // When guidance is skipped, don't allow navigating to step index 2
-    // (GuidanceScreen). The dots only render `totalSteps` of them, so this is
-    // currently unreachable — but every other branch here explains itself, and a
-    // silent return is how a control ends up looking broken if that changes.
-    if (skipGuidance && step >= 2) {
+    // Dots: DETAILS_DOT (the single details form) and GUIDANCE_DOT.
+    if (step <= DETAILS_DOT) {
+      setCurrentStep(STEP.PERSONALIZE);
+      return;
+    }
+    // When guidance is skipped there is no second dot, so this is currently
+    // unreachable — but a silent return is how a control ends up looking broken.
+    if (skipGuidance) {
       toast.error("That step isn't part of this signup.");
       return;
     }
-
-    if (step > 0 && (!formData.name || formData.name.trim().length < 3)) {
-      toast.error("Please complete your name in the first step");
+    if (!formData.name || formData.name.trim().length < 3 || !formData.birthDate) {
+      toast.error("Please complete your details first");
       return;
     }
-    if (step > 1 && !formData.birthDate) {
-      toast.error("Please complete your birth date in the second step");
-      return;
-    }
-    // The dots are 0-based within the profile-setup steps, which start at
-    // PERSONALIZE in this array.
-    setCurrentStep(step + STEP.PERSONALIZE);
+    setCurrentStep(STEP.GUIDANCE);
   };
 
   /**
@@ -349,8 +351,12 @@ const Onboarding = () => {
   const handleSkipOtp = () => setCurrentStep(STEP.PERSONALIZE);
 
   const handleNext = () => setCurrentStep((prev) => {
-    // Skip GuidanceScreen (step 5) when skipGuidance is true
-    if (skipGuidance && prev === 4) return 6;
+    // The details form (PERSONALIZE, or the retired BIRTH index) is followed by
+    // Guidance — or, when guidance is skipped, the form has already registered
+    // the user and we go straight to the loading screen.
+    if (prev === STEP.PERSONALIZE || prev === STEP.BIRTH) {
+      return skipGuidance ? STEP.LOADING : STEP.GUIDANCE;
+    }
     return prev + 1;
   });
 
@@ -427,26 +433,29 @@ const Onboarding = () => {
       formData={formData}
       updateFormData={updateFormData}
     />,
-    <PersonalizeScreen
-      key="personalize"
+    <BirthDetailsScreen
+      key="details"
+      withProfileFields
       onNext={handleNext}
       onBack={handlePersonalizeBack}
       onSkip={handleSkip}
       formData={formData}
       updateFormData={updateFormData}
-      currentStep={0}
-      totalSteps={skipGuidance ? 2 : 3}
+      currentStep={DETAILS_DOT}
+      totalSteps={skipGuidance ? 1 : 2}
       onStepChange={handleStepChange}
+      skipGuidance={skipGuidance}
     />,
     <BirthDetailsScreen
-      key="birth"
+      key="details-legacy"
+      withProfileFields
       onNext={handleNext}
-      onBack={handleBack}
+      onBack={handlePersonalizeBack}
       onSkip={handleSkip}
       formData={formData}
       updateFormData={updateFormData}
-      currentStep={1}
-      totalSteps={skipGuidance ? 2 : 3}
+      currentStep={DETAILS_DOT}
+      totalSteps={skipGuidance ? 1 : 2}
       onStepChange={handleStepChange}
       skipGuidance={skipGuidance}
     />,
@@ -456,8 +465,8 @@ const Onboarding = () => {
       onSkip={handleSkip}
       formData={formData}
       updateFormData={updateFormData}
-      currentStep={2}
-      totalSteps={3}
+      currentStep={GUIDANCE_DOT}
+      totalSteps={2}
       onStepChange={handleStepChange}
     />,
     <LoadingScreen
@@ -473,13 +482,15 @@ const Onboarding = () => {
           "shubhtalk_redirect_after_login",
         );
 
-        if (redirectPath && redirectPath !== "/login") {
-          // Clear the redirect path
-          localStorage.removeItem("shubhtalk_redirect_after_login");
+        if (redirectPath) localStorage.removeItem("shubhtalk_redirect_after_login");
+        if (isReturnTarget(redirectPath)) {
           navigate(redirectPath);
         } else {
-          // Fall back to the page that sent us here before defaulting to home.
-          navigate(fromPath || PATH.privateRoutes.HOME.path || "/");
+          // Fall back to the page that sent us here; otherwise a newly
+          // registered user lands on the astrologers list (not home), so the
+          // next step — picking an astrologer for the free session — is right
+          // in front of them.
+          navigate(fromPath || POST_LOGIN_LANDING_PATH);
         }
       }}
     />,

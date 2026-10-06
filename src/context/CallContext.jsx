@@ -1,5 +1,6 @@
 import { useContext, useState, useRef, useEffect, useCallback } from "react";
-import { voiceSocket, registerCallSession, clearCallSession } from "../services/voiceSocketServices";
+import { voiceSocket, registerCallSession, clearCallSession, getActiveChatSession } from "../services/voiceSocketServices";
+import { isPanditAIEvent, isPanditAIErrorEvent } from "../component/panditAI/usePanditAI";
 import { trackEvent } from "../utils/analytics";
 import { getAstrologerDisplayName } from "../utils/helper/string.utils";
 import Toast from "../component/toast";
@@ -29,6 +30,13 @@ export const CallProvider = ({ children }) => {
   const [isReconnecting, setIsReconnecting] = useState(false);
   const [isMicOn, setIsMicOn] = useState(true);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
+  /*
+    Free first-session audio call that has just ended (snapshot of the astrologer
+    it was with), so VideoCallContainer can keep the locked end state on screen —
+    "continue this call at ₹X/min" with Recharge / Explore — after activeCall is
+    cleared and VoiceCall unmounts. Set by VoiceCall's cleanup; null otherwise.
+  */
+  const [endedFreeCall, setEndedFreeCall] = useState(null);
 
   const [waitingList, setWaitingList] = useState(false);
   const [callSeconds, setCallSeconds] = useState(0);
@@ -45,6 +53,8 @@ export const CallProvider = ({ children }) => {
   // Keep ref in sync so closures always have the latest value
   useEffect(() => {
     activeCallRef.current = activeCall;
+    // A new call replaces any free-call end screen still showing.
+    if (activeCall) setEndedFreeCall(null);
   }, [activeCall]);
 
   useEffect(() => {
@@ -271,6 +281,12 @@ export const CallProvider = ({ children }) => {
 
     // Treat any error/rejection during reconnect as "call no longer active"
     const onReconnectError = (data) => {
+      // …except one that is plainly not about this call: Pandit AI's error, or a
+      // rejection/error naming another room. Those used to end the call here.
+      if (isPanditAIErrorEvent(data) || (data?.roomId && data.roomId !== reconnectCall.roomId)) {
+        console.log("[CallReconnect] ⏭️ Ignoring error/rejection not about this call:", data?.roomId);
+        return;
+      }
       console.log("[CallReconnect] ❌ Got error/rejection during reconnect:");
       console.log("[CallReconnect]   → event data:", JSON.stringify(data));
       console.log("[CallReconnect]   → message:", data?.message);
@@ -398,9 +414,25 @@ export const CallProvider = ({ children }) => {
       };
       voiceSocket.connect();
     }
+    /*
+      `activity` is the billing tick of EVERY live session on this socket — the
+      call, an astrologer chat alongside it, and Pandit AI. Taking another
+      session's remainingTime re-timed this call to that session's clock; for
+      the free call that meant the countdown hit 0 and the screen showed the
+      locked "00:00 End" state while the call was still running (a refresh
+      re-synced it). Only a tick positively identified as another session's is
+      skipped; one without a roomId is applied as before.
+    */
+    const isOtherSessionActivity = (data) => {
+      if (isPanditAIEvent(data)) return true;
+      const ownRoomId = activeCallRef.current?.roomId;
+      const chatRoomId = getActiveChatSession()?.roomId;
+      return !!(data?.roomId && ownRoomId && data.roomId !== ownRoomId && data.roomId === chatRoomId);
+    };
+
     const handleActivity = (data) => {
       console.log("[CallContext] activity event:", data);
-      if (data?.remainingTime && data.remainingTime > 0) {
+      if (data?.remainingTime && data.remainingTime > 0 && !isOtherSessionActivity(data)) {
         // Server sync every minute - update remaining time and ensure timer is running
         setCallSeconds(Math.floor(data.remainingTime * 60));
         
@@ -507,6 +539,10 @@ export const CallProvider = ({ children }) => {
     // This fires when socket reconnects and auto-emits call:reconnect
     const handleAutoReconnected = (data) => {
       console.log("[CallContext] 🔄 call:reconnected (auto-reconnect):", JSON.stringify(data));
+
+      // A reconnect answer for another room says nothing about this call.
+      const ownRoomId = activeCallRef.current?.roomId;
+      if (data?.roomId && ownRoomId && data.roomId !== ownRoomId) return;
       
       if (data && data.active) {
         console.log("[CallContext] ✅ Auto-reconnect successful, call still active");
@@ -690,6 +726,8 @@ export const CallProvider = ({ children }) => {
     setIsMicOn,
     isSpeakerOn,
     setIsSpeakerOn,
+    endedFreeCall,
+    setEndedFreeCall,
   };
 
   return (

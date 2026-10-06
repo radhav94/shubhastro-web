@@ -177,7 +177,8 @@ const Register = () => {
         
         Toast.success("Registration successful!");
 
-        navigate(PATH.privateRoutes.HOME.path, { replace: true });
+        // Post-registration landing page is the astrologers list (not home).
+        navigate(PATH.privateRoutes.ASTROLOGERS_LIST.path || "/astrologers", { replace: true });
       } else {
         Toast.error(response?.data?.message || "Something went wrong!");
       }

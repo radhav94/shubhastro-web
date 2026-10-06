@@ -3,6 +3,7 @@ import { privateRequestNew } from "../../services/appServices/privateRequestNew"
 import { clearSelectedKundli } from "../../redux/kundli/kundliSlice";
 import { clearGuestKundliProfiles } from "../helper/cookies";
 import { resolveFreeSessionStatus } from "./freeSessionStatus";
+import { setBranchUser } from "../branchIntegration";
 
 /**
  * Persist a successful CUSTOMER login.
@@ -36,6 +37,8 @@ export const completeCustomerLogin = (userData, dispatch) => {
   localStorage.setItem("refreshToken", refreshToken);
   localStorage.setItem("shubhtalk_customer_token", accessToken);
   localStorage.setItem("shubhtalk_customer_id", userData._id);
+  // Branch identity at login.
+  setBranchUser(userData._id);
   localStorage.setItem("userData", JSON.stringify(userData));
 
   // Snapshot in the shape `getUserFromStorage()` expects.
@@ -103,17 +106,37 @@ export const completeCustomerLogin = (userData, dispatch) => {
  * Same precedence the OTP screen uses: post-device-logout target, then a saved
  * pre-login target, then the caller's fallback.
  */
-export const resolvePostLoginRedirect = (fallback) => {
+/*
+  Where a user lands after login / registration: the astrologers list.
+
+  A "return to where you came from" target only counts when it is a real page
+  the user was trying to reach (a live stream, an astrologer profile, a gated
+  feature). The landing page itself — home ("/", "/home") — or /login is not:
+  returning there sent users who opened login from the homepage straight back
+  to home instead of to the astrologers list, on mobile and desktop alike.
+*/
+export const POST_LOGIN_LANDING_PATH = "/astrologers";
+
+const NOT_A_RETURN_TARGET = new Set(["", "/", "/home", "/login"]);
+
+/** True for a path worth returning to after login (not home / login). */
+export const isReturnTarget = (path) => {
+  if (typeof path !== "string" || !path) return false;
+  const pathname = path.split(/[?#]/)[0].replace(/\/+$/, "") || "/";
+  return !NOT_A_RETURN_TARGET.has(pathname) && !pathname.startsWith("/login");
+};
+
+export const resolvePostLoginRedirect = (fallback = POST_LOGIN_LANDING_PATH) => {
   const logoutRedirect = sessionStorage.getItem("shubhtalk_redirect_after_logout");
-  if (logoutRedirect && logoutRedirect !== "/login") {
+  if (logoutRedirect) {
     sessionStorage.removeItem("shubhtalk_redirect_after_logout");
-    return logoutRedirect;
+    if (isReturnTarget(logoutRedirect)) return logoutRedirect;
   }
 
   const savedRedirect = localStorage.getItem("shubhtalk_redirect_after_login");
-  if (savedRedirect && savedRedirect !== "/login") {
+  if (savedRedirect) {
     localStorage.removeItem("shubhtalk_redirect_after_login");
-    return savedRedirect;
+    if (isReturnTarget(savedRedirect)) return savedRedirect;
   }
 
   return fallback;

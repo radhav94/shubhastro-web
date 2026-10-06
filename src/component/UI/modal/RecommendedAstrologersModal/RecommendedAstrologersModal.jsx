@@ -84,8 +84,10 @@ const RecommendedAstrologersModal = ({
   returnTo = null,
 }) => {
   const isOffer = variant === "offer";
-  // First-session-free offer — label only, see featureConfig.
-  const freeSession = useFreeSession();
+  // First-session-free offer — label only, see featureConfig. The offer covers
+  // chat and audio calls only, so a video list always quotes its real rate.
+  const freeSessionEligible = useFreeSession();
+  const freeSession = freeSessionEligible && type !== "video";
   const trackRef = useRef(null);
 
   const { data, isLoading, isFetching } = useGetRecommendedAstrologersQuery(
