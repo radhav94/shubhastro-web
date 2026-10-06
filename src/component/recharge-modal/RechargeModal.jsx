@@ -164,7 +164,11 @@ const RechargeModal = ({
     refreshWallet();
     const baseAmount = selectedPlan?.actualPrice || selectedPlan?.amount || selectedPlan?.price || data?.amount || 0;
     const bonus = selectedPlan?.discountedPrice || 0;
-    const totalAdded = Number(baseAmount) + Number(bonus);
+    // What the wallet was actually credited (useRazorpay: balance after -
+    // before); the plan's price + bonus only when that could not be read.
+    const totalAdded = Number.isFinite(data?.creditedAmount)
+      ? data.creditedAmount
+      : Number(baseAmount) + Number(bonus);
     // Callers that continue into their own success/confirmation step (e.g. the
     // subscription paywall, which recharges and then activates the plan) opt out
     // — otherwise the user is made to dismiss two success popups in a row.

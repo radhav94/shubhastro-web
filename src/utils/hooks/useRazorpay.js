@@ -452,7 +452,7 @@ export const useRazorpayPayment = () => {
   /**
    * Handle successful payment
    */
-  const handlePaymentSuccess = useCallback(async (response, backendOrderId, planId, planData, onSuccess) => {
+  const handlePaymentSuccess = useCallback(async (response, backendOrderId, planId, planData, onSuccess, balanceBefore) => {
     try {
       clearPaymentTimeout();
       orderStatusUpdatedRef.current = true; // Mark as updated to prevent failure handlers
@@ -475,6 +475,19 @@ export const useRazorpayPayment = () => {
         console.error("[Razorpay] Failed to refresh wallet balance:", refreshError);
         // Don't throw - wallet was credited by backend, just refresh failed.
         // new_balance stays undefined rather than reporting a wrong number.
+      }
+
+      /*
+        What the backend actually credited = balance after - balance before.
+        The success popups used to show the plan's actualPrice + discountedPrice
+        computed on the client, which differs from the wallet whenever the
+        backend applies a different bonus. Left undefined when either balance is
+        unknown, so callers can fall back instead of showing a wrong figure.
+      */
+      let creditedAmount;
+      if (Number.isFinite(newBalance) && Number.isFinite(balanceBefore)) {
+        const diff = +(newBalance - balanceBefore).toFixed(2);
+        if (diff > 0) creditedAmount = diff;
       }
 
       // Step 3: Show success message
@@ -511,7 +524,7 @@ export const useRazorpayPayment = () => {
 
       // Step 5: Call success callback
       if (typeof onSuccess === "function") {
-        onSuccess(response);
+        onSuccess({ ...response, creditedAmount, newBalance });
       }
     } catch (error) {
       console.error("[Razorpay] Post-payment processing failed:", error);
@@ -789,6 +802,18 @@ export const useRazorpayPayment = () => {
       // Step 1: Validate inputs
       validatePaymentInputs({ planId, planData });
 
+      // Wallet before the payment, to work out what the recharge credited
+      // (see handlePaymentSuccess). Best effort — a failed read only means the
+      // success popup falls back to the plan amount.
+      let balanceBefore;
+      try {
+        const before = await getWalletBalance().unwrap();
+        const parsed = Number(before?.data);
+        if (Number.isFinite(parsed)) balanceBefore = parsed;
+      } catch {
+        balanceBefore = undefined;
+      }
+
       // Step 2: Create order on backend
       const orderData = await createPaymentOrder(planId, planData);
 
@@ -799,7 +824,7 @@ export const useRazorpayPayment = () => {
         {
           onSuccess: async (response) => {
             try {
-              await handlePaymentSuccess(response, orderData.orderId, planId, planData, onSuccess);
+              await handlePaymentSuccess(response, orderData.orderId, planId, planData, onSuccess, balanceBefore);
             } catch (error) {
               if (typeof onFailure === "function") {
                 onFailure(error);
@@ -840,6 +865,7 @@ export const useRazorpayPayment = () => {
     openRazorpayCheckout,
     handlePaymentSuccess,
     handlePaymentDismiss,
+    getWalletBalance,
   ]);
 
   return {

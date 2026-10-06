@@ -192,6 +192,35 @@ export const useFreeSessionPhase = ({
     return () => voiceSocket.off("activity", onActivity);
   }, [hasSwitchedToPaid, isPaidConfirmed, key, roomId]);
 
+  /*
+    SHB-2137 (reopened): recharge during the free part. When the free minutes
+    end the server carries the session on the wallet, but its first `activity`
+    tick re-times it to just 1 minute; only the tick after that reports what
+    the wallet really covers. So the paid timer ran 1:00 → 0:00 and then
+    jumped to the full balance. While the server's figure is that one-minute
+    stub and the wallet clearly covers more, show the wallet's time instead.
+    Registered after ChatContext's own `activity` handler, so this wins the
+    tick; the server still owns ending the session.
+  */
+  const walletRef = useRef({ balance, ratePerMinute });
+  walletRef.current = { balance, ratePerMinute };
+  useEffect(() => {
+    if (!hasSwitchedToPaid || !key) return undefined;
+    const onActivity = (data) => {
+      if (data?.roomId && roomId && data.roomId !== roomId) return;
+      const serverSecs = Number(data?.remainingTime) * 60;
+      if (!Number.isFinite(serverSecs) || serverSecs <= 0 || serverSecs > 60) return;
+      const tickBalance = data?.walletBalance ?? data?.remainingBalance;
+      const estimate = estimateWalletSeconds(
+        tickBalance ?? walletRef.current.balance,
+        walletRef.current.ratePerMinute,
+      );
+      if (estimate > serverSecs) seedRef.current?.(estimate);
+    };
+    voiceSocket.on("activity", onActivity);
+    return () => voiceSocket.off("activity", onActivity);
+  }, [hasSwitchedToPaid, key, roomId]);
+
   const isFreePhase = !!isFree && !hasSwitchedToPaid;
   const isEndingSoon =
     isFreePhase && !!isActive && freeSecondsLeft > 0 && freeSecondsLeft <= FREE_SESSION_WARNING_SECONDS;

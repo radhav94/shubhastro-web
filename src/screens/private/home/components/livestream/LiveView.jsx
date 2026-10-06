@@ -1232,6 +1232,29 @@ const LiveView = (props) => {
     refreshWallet,
   ]);
 
+  // Minimum-balance popup for a call the server refused for balance (SHB-2166).
+  useEffect(() => {
+    const handleInsufficient = (e) => {
+      refreshWallet();
+      const callType = e?.detail?.type || pendingCallType || "audio";
+      const audioRate =
+        astrologer?.audioCallRate ?? fullAstro?.price?.audioRate?.amount;
+      const videoRate =
+        astrologer?.videoCallRate ?? fullAstro?.price?.videoCallRate?.amount;
+      const ratePerMin = Number(callType === "video" ? videoRate : audioRate) || 0;
+      // Minimum balance to start a session = 5 minutes of talk time.
+      const MIN_SESSION_MINUTES = 5;
+      setInsufficientBalanceInfo({
+        sessionType: callType,
+        availableAmount: walletBalance,
+        requiredAmount: ratePerMin > 0 ? ratePerMin * MIN_SESSION_MINUTES : undefined,
+        pricePerMinute: ratePerMin || undefined,
+      });
+    };
+    window.addEventListener("live:insufficient-balance", handleInsufficient);
+    return () => window.removeEventListener("live:insufficient-balance", handleInsufficient);
+  }, [astrologer, fullAstro, walletBalance, pendingCallType, refreshWallet]);
+
   // Socket event handlers
   useEffect(() => {
     if (!userIdLocal) return;
@@ -1475,7 +1498,21 @@ const LiveView = (props) => {
         that one; the Toast helper also collapses an identical message inside
         350ms, so a second reporter in the same tick cannot double it.
       */
-      const { statusCode, message } = event?.detail || {};
+      const { statusCode, message, type } = event?.detail || {};
+      /*
+        SHB-2166: a 0-balance user calling the live astrologer got the raw
+        "User has insufficient balance" toast. The pre-call check can pass
+        (e.g. it allows a user who still has a free session), and the refusal
+        then only arrives here. Show the minimum-balance popup instead — via an
+        event, so it is built from the current astrologer/wallet values rather
+        than this socket effect's closure.
+      */
+      if (/insufficient\s*(wallet\s*)?balance|low balance|minimum balance/i.test(message || "")) {
+        window.dispatchEvent(
+          new CustomEvent("live:insufficient-balance", { detail: { type } })
+        );
+        return;
+      }
       if (statusCode !== 409) {
         Toast.error(message || "Could not start the call. Please try again.");
       }

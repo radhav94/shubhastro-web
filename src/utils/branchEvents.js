@@ -25,6 +25,7 @@
  * =========================================================
  */
 
+import { setBranchUser } from "./branchIntegration";
 import { trackEvent } from "./analytics";
 
 /**
@@ -195,6 +196,9 @@ export const BranchEvents = {
     */
     const dedupeKey = "shubhtalk_registration_tracked";
     const trackedFor = params.user_id || localStorage.getItem("shubhtalk_customer_id") || "";
+    // Branch identity at registration (every registration path reports here).
+    // Before the dedupe below, so a repeated report still identifies the user.
+    if (trackedFor) setBranchUser(String(trackedFor));
     try {
       if (trackedFor && localStorage.getItem(dedupeKey) === String(trackedFor)) return;
       if (trackedFor) localStorage.setItem(dedupeKey, String(trackedFor));

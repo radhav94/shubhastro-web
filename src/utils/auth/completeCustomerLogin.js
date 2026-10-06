@@ -3,6 +3,7 @@ import { privateRequestNew } from "../../services/appServices/privateRequestNew"
 import { clearSelectedKundli } from "../../redux/kundli/kundliSlice";
 import { clearGuestKundliProfiles } from "../helper/cookies";
 import { resolveFreeSessionStatus } from "./freeSessionStatus";
+import { setBranchUser } from "../branchIntegration";
 
 /**
  * Persist a successful CUSTOMER login.
@@ -36,6 +37,8 @@ export const completeCustomerLogin = (userData, dispatch) => {
   localStorage.setItem("refreshToken", refreshToken);
   localStorage.setItem("shubhtalk_customer_token", accessToken);
   localStorage.setItem("shubhtalk_customer_id", userData._id);
+  // Branch identity at login.
+  setBranchUser(userData._id);
   localStorage.setItem("userData", JSON.stringify(userData));
 
   // Snapshot in the shape `getUserFromStorage()` expects.

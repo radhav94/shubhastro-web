@@ -43,6 +43,7 @@ import { privateRequestNew, setApiErrorToastSilenced } from "../../../services/a
 import { getDeviceInfo, getDeviceType } from "../../../utils/deviceInfo";
 import { trackEvent } from "../../../utils/analytics";
 import { BranchEvents } from "../../../utils/branchEvents";
+import { setBranchUser } from "../../../utils/branchIntegration";
 
 /**
  * Guest authentication flow for AI Wow services.
@@ -262,6 +263,8 @@ const GuestKundliAuthModal = ({
         localStorage.setItem("shubhtalk_role", "CUSTOMER");
         localStorage.setItem("shubhtalk_customer_token", accessToken);
         localStorage.setItem("shubhtalk_customer_id", _id);
+        // Branch identity at login.
+        setBranchUser(_id);
         if (accessToken) localStorage.setItem("accessToken", accessToken);
         if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
         
@@ -280,6 +283,8 @@ const GuestKundliAuthModal = ({
       localStorage.setItem("shubhtalk_role", "CUSTOMER");
       localStorage.setItem("shubhtalk_customer_token", accessToken);
       localStorage.setItem("shubhtalk_customer_id", _id);
+      // Branch identity at login.
+      setBranchUser(_id);
       if (accessToken) localStorage.setItem("accessToken", accessToken);
       if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
       localStorage.removeItem("selectedKundliProfile");

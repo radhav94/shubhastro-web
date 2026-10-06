@@ -41,6 +41,7 @@ import EmergencySessionModal from "../../../component/UI/modal/EmergencySessionM
 // import TopAstrologerCard from "../../../component/UI/cards/TopAstrologerCard";
 import NewAstrologerCard from "../../../component/UI/cards/newAstrologerCard/NewAstrologerCard";
 import NewAstrologerDetailsCard from "../../../component/UI/cards/newAstrologerCard/NewAstrologerDetailsCard";
+import FirstSessionOfferBanner from "./FirstSessionOfferBanner";
 import useRequireAuth from "../../../utils/hooks/useRequireAuth";
 import { useWaitingQueue } from "../../../context/WaitingQueueContext";
 import AstrologerRingModal from "../../../component/UI/modal/AstrologerRingModal/AstrologerRingModal";
@@ -1458,6 +1459,9 @@ const TalkToAstrologer = () => {
   // empty list cannot trigger a spurious page increment.
   return (
     <div className={styles.mainContainer}>
+      {/* First consultation / first recharge offer from the list API. */}
+      <FirstSessionOfferBanner response={astrodata} />
+
       <div className={styles.pageHeader}>
 
         {/* location.key, not window.history.length — see BackButton.jsx. This is

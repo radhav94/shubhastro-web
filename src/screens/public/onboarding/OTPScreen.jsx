@@ -25,6 +25,7 @@ import onboardingBg from "../../../assets/images/new-login-bg-2.jpeg";
 // import onboardingBgMobile from "../../../assets/images/login-mobile-bg.png";
 import LanguageSelector from "../../../component/LanguageSelector";
 import BackButton from "../../../component/UI/BackButton/BackButton";
+import { setBranchUser } from "../../../utils/branchIntegration";
 
 // Isolated timer component — its state changes won't re-render the OTP inputs
 const ResendTimer = memo(({ onResend }) => {
@@ -227,6 +228,8 @@ const OTPScreen = ({ onNext, onBack, formData, updateFormData }) => {
           localStorage.setItem("refreshToken", refreshToken);
           localStorage.setItem("shubhtalk_customer_token", accessToken);
           localStorage.setItem("shubhtalk_customer_id", userData._id); // Add customer ID
+          // Branch identity at login.
+          setBranchUser(userData._id);
           localStorage.setItem("userData", JSON.stringify(userData));
 
           // Store user in the format that getUserFromStorage expects

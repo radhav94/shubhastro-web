@@ -598,3 +598,30 @@
   //   gap: 16px;
   // }
 }
+
+/* First consultation / first recharge offer banner (image from the list API). */
+.offerBanner {
+  display: block;
+  width: 100%;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: transparent;
+}
+
+.offerBannerBtn {
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #f75801;
+    outline-offset: 2px;
+  }
+}
+
+.offerBannerImg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
