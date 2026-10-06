@@ -1961,6 +1961,36 @@
   }
 }
 
+/* Free-first-session variant (no signup bonus): a two-word headline, so it
+   is sized to stay on one line under the label instead of the ₹ figure size. */
+.offerTextFree {
+  h1 {
+    font-size: 56px;
+    margin-top: 10px;
+    white-space: nowrap;
+
+    @media (max-width: 767px) {
+      font-size: 44px;
+    }
+    @media (max-width: 480px) {
+      font-size: 36px;
+      margin-top: 6px;
+    }
+  }
+
+  .rechargeLabel {
+    white-space: nowrap;
+
+    @media (max-width: 480px) {
+      font-size: 1rem;
+      letter-spacing: 1px;
+    }
+    @media (max-width: 360px) {
+      font-size: 0.875rem;
+    }
+  }
+}
+
 .rupeeSymbol {
   font-size: 48px;
   vertical-align: top;
