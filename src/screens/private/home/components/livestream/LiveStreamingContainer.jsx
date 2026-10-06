@@ -41,6 +41,27 @@ const LiveStreamingContainer = ({ client }) => {
     ? "host"
     : "audience";
 
+  /*
+    SHB-2163: while the customer is in a session that started from a live
+    stream, they must not join another astrologer's live. Swiping/arrows are
+    already off while a call is busy, but Back -> astrologer list -> a live
+    card (or any /live/<channel> link) opened the other live anyway. Every one
+    of those entry points lands here, so the guard is here: any channel other
+    than the session's own sends the user back to it.
+  */
+  const busyLiveChannel =
+    ROLE !== "host" && activeCall?.origin === "live" ? activeCall?.liveChannel || null : null;
+  const urlChannel = location.pathname.split("/live/")[1]?.split("/")[0] || null;
+  useEffect(() => {
+    if (!busyLiveChannel) return;
+    const current = urlChannel || channel;
+    if (!current || current === busyLiveChannel) return;
+    rht.error("You're in a session with an astrologer. End it to join another live.", {
+      id: "live-session-busy",
+    });
+    navigate(`/live/${busyLiveChannel}`, { replace: true });
+  }, [busyLiveChannel, urlChannel, channel, navigate]);
+
   // Keyboard arrow navigation (ArrowUp = prev, ArrowDown = next)
   useEffect(() => {
     if (ROLE === "host" || !liveList || liveList.lives.length <= 1 || isCallBusy) return;

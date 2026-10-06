@@ -369,10 +369,21 @@ const AgoraVoiceCalling = ({ callData }) => {
     }
   }
   if (isFreeCall && !isFreeCallTimeUp && freeJoinedAtRef.current) {
+    /*
+      SHB-2170: duration and "time left" ran on two clocks — the countdown from
+      the accept time / server, the duration from our Agora join a second or
+      two later — so the two drifted ~2s apart. While the countdown is running,
+      derive the duration from it (allowance − time left) so they always add up
+      to the free allowance; the join clock is only the fallback before the
+      allowance is known.
+    */
     const elapsed = Math.max(0, Math.floor((Date.now() - freeJoinedAtRef.current) / 1000));
-    freeDurationRef.current = freeAllowanceRef.current
-      ? Math.min(elapsed, freeAllowanceRef.current)
-      : elapsed;
+    freeDurationRef.current =
+      freeAllowanceRef.current && freeTimerStartedRef.current
+        ? Math.max(0, freeAllowanceRef.current - freeSecondsLeft)
+        : freeAllowanceRef.current
+          ? Math.min(elapsed, freeAllowanceRef.current)
+          : elapsed;
   }
   // "Ran out" = the countdown reached (or is within a few seconds of) zero —
   // the server's clock is slightly ahead of ours, so it usually ends the call
