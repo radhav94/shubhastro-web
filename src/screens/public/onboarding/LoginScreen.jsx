@@ -21,11 +21,14 @@ import bPrivate from "../../../assets/images/b-private.png";
 import {
   getSignupBonusAmount,
   isSignupBonusEnabled,
+  getFreeSessionOfferCopy,
 } from "../../../utils/featureConfig";
 
 // Read once at module scope: an env value cannot change during a session.
 const signupBonus = getSignupBonusAmount();
 const hasBonus = isSignupBonusEnabled();
+// Copy for the no-bonus offer block, from env (see getFreeSessionOfferCopy).
+const freeOffer = getFreeSessionOfferCopy();
 
 const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) => {
   const navigate = useNavigate();
@@ -169,7 +172,9 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
       // message has to appear at the field it is about. See showFormHint.
       showFormHint(
         phoneNumber.length === 0
-          ? "Enter your 10-digit mobile number to claim the bonus."
+          ? hasBonus
+            ? "Enter your 10-digit mobile number to claim the bonus."
+            : "Enter your 10-digit mobile number to get your free first session."
           : `Please enter all 10 digits — ${10 - phoneNumber.length} to go.`
       );
       return;
@@ -319,7 +324,7 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
             with no offer to make there is nothing here to soften; rendering it
             would advertise "₹0".
           */}
-          {hasBonus && (
+          {hasBonus ? (
           <div
             className={styles.offerSection}
             onClick={handleGetOTP}
@@ -337,6 +342,26 @@ const LoginScreen = ({ onNext, onBack, onSkipOtp, formData, updateFormData }) =>
               </h1>
               <p className={styles.rechargeLabel}>FREE RECHARGE BONUS</p>
               <p className={styles.forNewSignups}>FOR NEW SIGN UPS</p>
+            </div>
+          </div>
+          ) : (
+          /*
+            No signup bonus (VITE_SIGNUP_BONUS_AMOUNT = "0"): keep the artwork and
+            advertise the free first session instead of dropping the block.
+          */
+          <div
+            className={styles.offerSection}
+            onClick={handleGetOTP}
+            title="Enter your mobile number to get your free first session"
+          >
+              <img className={styles.giftBox}
+                src={rsBox}
+                alt="Gift"
+                loading="eager"
+              />
+            <div className={`${styles.offerText} ${styles.offerTextFree}`}>
+              {freeOffer.label && <p className={styles.rechargeLabel}>{freeOffer.label}</p>}
+              {freeOffer.title && <h1>{freeOffer.title}</h1>}
             </div>
           </div>
           )}

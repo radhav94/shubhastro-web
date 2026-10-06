@@ -103,6 +103,26 @@ export const getSignupBonusAmount = () => {
 export const isSignupBonusEnabled = () => getSignupBonusAmount() > 0;
 
 /**
+ * Copy for the login-screen offer block when there is no signup bonus
+ * (VITE_SIGNUP_BONUS_AMOUNT = "0"): the free first session instead.
+ *
+ *   VITE_FREE_SESSION_OFFER_LABEL  small line above   (default "YOUR 1ST SESSION IS")
+ *   VITE_FREE_SESSION_OFFER_TITLE  large headline     (default "100% FREE")
+ *
+ * Unset falls back to the default; an explicitly empty value ("") hides that
+ * line, so the block can be reduced to just the headline.
+ *
+ * @returns {{ label: string, title: string }}
+ */
+export const getFreeSessionOfferCopy = () => {
+  const read = (raw, fallback) => (raw === undefined || raw === null ? fallback : String(raw).trim());
+  return {
+    label: read(import.meta.env.VITE_FREE_SESSION_OFFER_LABEL, "YOUR 1ST SESSION IS"),
+    title: read(import.meta.env.VITE_FREE_SESSION_OFFER_TITLE, "100% FREE"),
+  };
+};
+
+/**
  * The figure formatted for display, e.g. "₹250". Empty string when the offer is
  * off, so a caller that forgets to check cannot render "₹0".
  *
