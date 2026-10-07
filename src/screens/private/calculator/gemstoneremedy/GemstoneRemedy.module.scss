@@ -867,6 +867,19 @@ $sticky-gap: 8px;
   color: $muted;
 }
 
+.emptyCta {
+  margin-top: 12px;
+  height: 40px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 100px;
+  background: linear-gradient(90deg, #f75801 0%, #d43400 100%);
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    REDESIGN SECTIONS (match the reference layout)
    ══════════════════════════════════════════════════════════════════════════ */

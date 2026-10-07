@@ -39,6 +39,8 @@ export const ChatProvider = ({ children }) => {
   // was told has ended — both keep one chat end from producing two toasts.
   const reconnectRoomRef = useRef(null);
   const notifiedEndedRoomRef = useRef(null);
+  // When the last end-of-chat notification was shown (see notifyChatEnded).
+  const notifiedEndedAtRef = useRef(0);
 
   // Keep reconnecting ref in sync so the reconnect timeout can bail out early
   // if the reconnect already resolved.
@@ -160,9 +162,22 @@ export const ChatProvider = ({ children }) => {
   // user would get no feedback that the astrologer went offline.
   const notifyChatEnded = useCallback((data = {}) => {
     if (data?.astrologerId === PANDIT_AI_ID) return;
+    // Some reports (the auto-reconnect `active: false` reply) carry no roomId;
+    // they are about the chat that is open.
+    const roomId = data?.roomId || activeChatRef.current?.roomId || null;
     // Already reported for this room (two reconnect failures for one end).
-    if (data?.roomId && notifiedEndedRoomRef.current === data.roomId) return;
-    notifiedEndedRoomRef.current = data?.roomId || null;
+    if (roomId && notifiedEndedRoomRef.current === roomId) return;
+    /*
+      SHB-2169: when the free 3-minute chat ran out, the user got "Your free chat
+      session has ended" AND "Astrologer is offline. Chat ended." The second
+      report arrived without a roomId (and after the chat was cleared), so it
+      slipped past the room check above and, not matching the free room, was
+      reported as the astrologer going offline. One chat end gets one
+      notification: a room-less report right after one was shown is the same end.
+    */
+    if (!roomId && Date.now() - notifiedEndedAtRef.current < 15000) return;
+    notifiedEndedRoomRef.current = roomId;
+    notifiedEndedAtRef.current = Date.now();
 
     setActiveChat(null);
     stopTimer();
@@ -170,10 +185,10 @@ export const ChatProvider = ({ children }) => {
 
     // A free first chat is ended by the server when its free time runs out —
     // the astrologer is still online, so don't say they went offline.
-    if (isFreeSessionRoom(data?.roomId)) {
-      rht("Your free chat session has ended.", { icon: "ℹ️", id: `chat-ended-${data.roomId}` });
+    if (isFreeSessionRoom(roomId)) {
+      rht("Your free chat session has ended.", { icon: "ℹ️", id: `chat-ended-${roomId}` });
     } else {
-      rht("Astrologer is offline. Chat ended.", { icon: "⚠️", id: `chat-ended-${data?.roomId || "unknown"}` });
+      rht("Astrologer is offline. Chat ended.", { icon: "⚠️", id: `chat-ended-${roomId || "unknown"}` });
     }
 
     // Let page-level components (ChatWindow) disable input and open feedback.
@@ -494,7 +509,11 @@ export const ChatProvider = ({ children }) => {
         // Chat ended during disconnect (astrologer offline) — notify the user.
         // notifyChatEnded shows the offline toast, clears state, and dispatches
         // global:chat:ended so ChatWindow opens feedback and disables input.
-        notifyChatEnded({ ...data, astrologerId: activeChatRef.current?.astrologerId });
+        notifyChatEnded({
+          ...data,
+          astrologerId: activeChatRef.current?.astrologerId,
+          roomId: data?.roomId || activeChatRef.current?.roomId,
+        });
       }
     };
 
