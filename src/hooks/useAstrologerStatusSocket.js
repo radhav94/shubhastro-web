@@ -9,10 +9,21 @@ import { privateRequestNew } from "../services/appServices/privateRequestNew";
  */
 export default function useAstrologerStatusSocket() {
   useEffect(() => {
-    const handleAstrologerStatus = (data) => {
-      if (!data?.astrologerId) return;
+    const handleAstrologerStatus = (raw) => {
+      /*
+        The payload can carry the id only inside `astrologer` (no top-level
+        astrologerId) and the state only as `status: "online"`. Both used to be
+        dropped here, so the event never reached any page.
+      */
+      const astrologerId = raw?.astrologerId || raw?.astrologer?._id || null;
+      if (!astrologerId) return;
+      const isActive =
+        typeof raw?.isActive === "boolean"
+          ? raw.isActive
+          : String(raw?.status || "").toLowerCase() === "online";
+      const data = { ...raw, astrologerId, isActive };
 
-      const { astrologerId, isActive, isActiveType, astrologer } = data;
+      const { isActiveType, astrologer } = data;
       console.log("[AstrologerStatus] 📥 Received:", { astrologerId, isActive, isActiveType });
 
       const state = store.getState();
