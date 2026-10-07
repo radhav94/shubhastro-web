@@ -6,6 +6,7 @@ import { useWalletBalance } from "./useWalletBalance";
 import { FaSync } from "react-icons/fa";
 import { trackEvent } from "../../../utils/analytics";
 import { BranchEvents } from "../../../utils/branchEvents";
+import { formatBalance } from "../../../utils/formatBalance";
 
 const PAYMENT = "payment";
 const WALLET = "wallet";
@@ -119,7 +120,7 @@ const WalletTranscations = () => {
         {/* Balance + Actions */}
         <div className="flex flex-wrap items-center gap-3 justify-between sm:justify-end">
           <div className="text-green-600 font-medium text-sm sm:text-base">
-            Available balance: <span className="font-bold">₹ {balance}</span>
+            Available balance: <span className="font-bold">₹ {formatBalance(balance)}</span>
           </div>
 
           {/* Refresh */}

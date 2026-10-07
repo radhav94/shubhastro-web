@@ -5,6 +5,7 @@ import { useWalletBalance } from "../../../wallet/useWalletBalance";
 import toast from "../../../../../component/toast";
 import { getUserFromStorage } from "../../../../../utils/authStorage";
 import walletIcon from "../../../../../assets/icons/wallet-2.svg";
+import { formatBalance } from "../../../../../utils/formatBalance";
 
 const GiftPopup = ({ show, onClose, giftList, astrologerId, socketRef, roomId, userId, userName }) => {
   /*
@@ -109,7 +110,7 @@ const GiftPopup = ({ show, onClose, giftList, astrologerId, socketRef, roomId, u
           <div className="gift-title">Send a Gift</div>
           <div className="gift-header-right">
             <div className="gift-wallet">
-              <span className="gift-wallet-amount">₹{balance ?? 0}</span>
+              <span className="gift-wallet-amount">₹{formatBalance(balance)}</span>
               <div className="gift-wallet-label">
                 <img src={walletIcon} alt="wallet" width="16" height="16" />
                 <span>Wallet</span>

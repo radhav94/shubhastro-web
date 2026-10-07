@@ -28,6 +28,7 @@ import { splitTextByURL } from "../../utils/helper/linkPreview";
 import { IoArrowUndo } from "react-icons/io5";
 import MessageTicks from "../UI/chat/MessageTicks";
 import ReplyPreview from "../UI/chat/ReplyPreview";
+import { formatBalance } from "../../utils/formatBalance";
 
 // Served from the CDN rather than bundled, so it isn't emitted into /assets and
 // isn't re-downloaded per deploy hash. The CDN copy is also the optimised one
@@ -985,7 +986,7 @@ const PanditAIBubble = ({ hideBubble = false }) => {
                         <path d="M16 12h.01"/>
                         <path d="M2 10h20"/>
                       </svg>
-                      ₹{walletBalance}
+                      ₹{formatBalance(walletBalance)}
                     </span>
                   )}
                   <div className={styles.countdownRow}>

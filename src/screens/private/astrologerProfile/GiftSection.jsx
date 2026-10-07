@@ -9,6 +9,7 @@ import toast from "../../../component/toast";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import RechargeModal from "../../../component/recharge-modal/RechargeModal";
 import { trackEvent } from "../../../utils/analytics";
+import { formatBalance } from "../../../utils/formatBalance";
 
 const GiftSection = ({ astrologer }) => {
   const { data, isLoading } = useGetAllGiftsQuery();
@@ -91,7 +92,7 @@ const GiftSection = ({ astrologer }) => {
             Send Gift to {astrologer?.userName ? astrologer.userName : `${astrologer?.firstName || ""} ${astrologer?.lastName || ""}`.trim()}
           </h3>
         </div>
-        <div className={styles.priceTag}> ₹ {balance}</div>
+        <div className={styles.priceTag}> ₹ {formatBalance(balance)}</div>
       </div>
 
       <div className={styles.giftGrid}>

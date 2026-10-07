@@ -9,6 +9,7 @@ import useAIFreeMinutes from "./useAIFreeMinutes";
 import { isInAppBrowser } from "../../utils/deviceInfo";
 import Toast from "../toast";
 import { notifySessionEnded } from "../../utils/auth/freeSessionStatus";
+import { formatBalance } from "../../utils/formatBalance";
 
 // CDN-hosted — see PanditAIBubble for why this is a constant, not an import.
 const panditAiIcon = "https://assets.shubhastro.ai/images/AiPandit.png";
@@ -355,7 +356,7 @@ const PanditAIVoiceBubble = () => {
                       <path d="M16 12h.01"/>
                       <path d="M2 10h20"/>
                     </svg>
-                    ₹{walletBalance}
+                    ₹{formatBalance(walletBalance)}
                   </span>
                 )}
                 <div className={styles.countdownRow}>
