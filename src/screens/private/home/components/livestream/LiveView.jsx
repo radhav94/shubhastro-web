@@ -22,6 +22,7 @@ import { useCall } from "../../../../../context/CallContext";
 import { useWaitingQueue } from "../../../../../context/WaitingQueueContext";
 import { voiceSocket } from "../../../../../services/voiceSocketServices";
 import { rememberLiveRequest } from "../../../../../utils/auth/freeSessionRoom";
+import { readFreeSessionStatus } from "../../../../../utils/auth/freeSessionStatus";
 import { ownsRoom } from "../../../../../utils/tabSession";
 import WaitingModal from "../../../../../component/UI/modal/waitingModal/WaitingModal";
 import WaitlistModal from "../../../../../component/UI/modal/waitlistModal/WaitlistModal";
@@ -821,6 +822,34 @@ const LiveView = (props) => {
     navigate(profilePath);
   };
 
+  /*
+    SHB-2166: a call placed from a live stream is never the free session
+    (SHB-2148), but preSessionBalanceCheck still passes a user who has their
+    free session left. For such a user with too little balance the request went
+    out, the server refused it, and the user got an "insufficient balance"
+    toast. Check the wallet locally first and show the minimum-balance popup
+    instead, before anything is sent. Returns true when the call must stop.
+  */
+  const blockFreeSessionUserWithoutBalance = (type) => {
+    if (readFreeSessionStatus() !== true) return false;
+    const audioRate = astrologer?.audioCallRate ?? fullAstro?.price?.audioRate?.amount;
+    const videoRate = astrologer?.videoCallRate ?? fullAstro?.price?.videoCallRate?.amount;
+    const ratePerMin = Number(type === "video" ? videoRate : audioRate) || 0;
+    // Minimum balance to start a session = 5 minutes of talk time.
+    const MIN_SESSION_MINUTES = 5;
+    const required = ratePerMin * MIN_SESSION_MINUTES;
+    const available = Number(walletBalance) || 0;
+    if (ratePerMin <= 0 || available >= required) return false;
+    refreshWallet();
+    setInsufficientBalanceInfo({
+      sessionType: type,
+      availableAmount: available,
+      requiredAmount: required,
+      pricePerMinute: ratePerMin,
+    });
+    return true;
+  };
+
   // Handle call initiation - uses real call flow (same as homepage astrologer listing)
   const handleDirectVoiceCall = async () => {
     // Check mic permission first
@@ -881,6 +910,7 @@ const LiveView = (props) => {
         waiting queue. Every other caller passes the session type — see
         useAstrologerConnect / useInitiateCall.
       */
+      if (blockFreeSessionUserWithoutBalance("audio")) return;
       const result = await getBalance({ astrologerId, type: "audio" });
 
       if (result?.data?.data?.status === false) {
@@ -1005,6 +1035,10 @@ const LiveView = (props) => {
 
     // Check wallet balance before initiating the call
     try {
+      if (blockFreeSessionUserWithoutBalance(type)) {
+        setShowCallPopup(false);
+        return;
+      }
       const result = await getBalance({ astrologerId, type });
 
       if (result?.data?.data?.status === false) {

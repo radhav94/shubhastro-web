@@ -76,10 +76,21 @@ const GemstoneRemedy = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  /*
+    SHB-2179: the report is for signed-in users only. A guest used to see
+    either the report of whoever was logged in before (the kundli survives in
+    Redux after logout) or, on a first visit, a loader that never ended (no
+    kundli -> no query). Send guests to sign in and bring them back here.
+  */
+  const isLoggedIn = Boolean(localStorage.getItem("shubhtalk_customer_token"));
+  useEffect(() => {
+    if (!isLoggedIn) navigateToLogin(`${window.location.pathname}${window.location.search}`);
+  }, [isLoggedIn]);
+
   // Data flow mirrors the in-Kundli Gemstones tab exactly: read the birth form
   // from Redux (`state.form.kundliPayload`), turn it into the shared vedic
-  // params, and hit the same `gem-suggestion` endpoint. No login gate — the
-  // report shows whatever the shared Kundli form already produced.
+  // params, and hit the same `gem-suggestion` endpoint. Signed-in users only
+  // (see the guard above).
   const kundliPayload = useSelector((state) => state?.form?.kundliPayload);
 
   // The active profile is held in the `kundli` slice and is switched from the
@@ -150,7 +161,9 @@ const GemstoneRemedy = () => {
     return kundliPayload ? buildVedicParam(kundliPayload) : null;
   }, [selectedKundli, kundliPayload]);
 
-  const { data, isLoading } = useGetGemStoneReportQuery(queryArgs || skipToken);
+  const { data, isLoading } = useGetGemStoneReportQuery(
+    isLoggedIn && queryArgs ? queryArgs : skipToken
+  );
 
   const gem = data?.response;
 
@@ -358,7 +371,21 @@ const GemstoneRemedy = () => {
     }
   };
 
-  if (!queryArgs || isLoading) return <CalcReportLoader />;
+  // Guest: the guard above is redirecting to sign in.
+  if (!isLoggedIn) return <CalcReportLoader />;
+  // Signed in but no birth details yet: nothing to compute, so say so instead
+  // of showing the loader forever.
+  if (!queryArgs) {
+    return (
+      <div className={styles.empty}>
+        <p>Create your Kundli to see your gemstone remedy.</p>
+        <button type="button" className={styles.emptyCta} onClick={() => navigate("/kundli")}>
+          Create Kundli
+        </button>
+      </div>
+    );
+  }
+  if (isLoading) return <CalcReportLoader />;
   if (!gem) return <div className={styles.empty}>No gemstone recommendation found</div>;
 
   const wearDay = titleCase(gem.day);

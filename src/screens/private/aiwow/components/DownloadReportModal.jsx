@@ -1,6 +1,7 @@
 import { useState } from "react";
 import styles from "./DownloadReportModal.module.scss";
 import Toast from "../../../../component/toast";
+import { formatBalance } from "../../../../utils/formatBalance";
 
 const DEFAULT_LANGUAGES = [
   { id: "en", label: "English", sub: "English" },
@@ -123,7 +124,7 @@ const DownloadReportModal = ({
             </div>
             <div className={styles.balanceBlock}>
               <span className={styles.costLabel}>Your Balance</span>
-              <span className={styles.balanceValue}>₹{walletBalance?.toLocaleString("en-IN")}</span>
+              <span className={styles.balanceValue}>₹{formatBalance(walletBalance)}</span>
             </div>
           </div>
           <div className={`${styles.deductionMsg} ${!canAfford ? styles.insufficient : ""}`}>

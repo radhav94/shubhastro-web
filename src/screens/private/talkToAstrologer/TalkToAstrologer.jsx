@@ -539,13 +539,27 @@ const TalkToAstrologer = () => {
         )
       );
 
-      setAllAstrologers((prev) =>
-        prev.map((a) =>
-          a._id === astrologerId
-            ? { ...a, isActive, isActiveType: isActiveType || [], ...(astrologer?.price && { price: astrologer.price }) }
-            : a
-        )
-      );
+      setAllAstrologers((prev) => {
+        if (prev.some((a) => a._id === astrologerId)) {
+          return prev.map((a) =>
+            a._id === astrologerId
+              ? { ...a, isActive, isActiveType: isActiveType || [], ...(astrologer?.price && { price: astrologer.price }) }
+              : a
+          );
+        }
+        /*
+          An astrologer who just came online and is not in the loaded list (it
+          only holds the pages fetched so far) was never shown until a reload.
+          The event carries the card data, so add them at the top — online
+          astrologers lead the list. Not while a filter is applied: they may not
+          match it.
+        */
+        if (!isActive || isFilteredRef.current || !astrologer) return prev;
+        return [
+          { ...astrologer, _id: astrologerId, isActive, isActiveType: isActiveType || [] },
+          ...prev,
+        ];
+      });
     };
 
     window.addEventListener("astrologer:status", handleStatusUpdate);

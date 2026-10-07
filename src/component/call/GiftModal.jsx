@@ -15,6 +15,7 @@ import AstrologerShopImage from "../../assets/images/astrologer-shop.png";
 import { getUserFromStorage } from "../../utils/authStorage";
 import { getToken } from "../../utils/token";
 import socketService from "../../services/socketService";
+import { formatBalance } from "../../utils/formatBalance";
 
 // Fallback dummy data
 const DUMMY_GIFTS = [
@@ -228,7 +229,7 @@ const GiftModal = ({ isOpen, onClose, astrologerId, astrologerName, roomId, user
           <div className={styles.modalHeader}>
             <h2 className={styles.modalTitle}>Send a Gift</h2>
             <div className={styles.balanceInfo}>
-              <div className={styles.balanceAmount}>₹{balance ?? 0}</div>
+              <div className={styles.balanceAmount}>₹{formatBalance(balance)}</div>
               <div className={styles.balanceLabel}>
                 <img src={WalletIcon} alt="Wallet" className={styles.balanceIcon} />
                 <span>Balance</span>

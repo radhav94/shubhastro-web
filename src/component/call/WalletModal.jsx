@@ -6,6 +6,7 @@ import RechargeModal from "../recharge-modal/RechargeModal";
 import { IoChevronForward } from "react-icons/io5";
 import WalletIcon from "../../assets/icons/wallet-2.svg";
 import WalletComboImage from "../../assets/images/wallet-popular-combo.png";
+import { formatBalance } from "../../utils/formatBalance";
 
 const WalletModal = ({ isOpen, onClose }) => {
   const { balance, refreshWallet } = useWalletBalance();
@@ -78,7 +79,7 @@ const WalletModal = ({ isOpen, onClose }) => {
         <div className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>Wallet</h2>
           <div className={styles.balanceInfo}>
-            <div className={styles.balanceAmount}>₹{balance}</div>
+            <div className={styles.balanceAmount}>₹{formatBalance(balance)}</div>
             <div className={styles.balanceLabel}>
               <img src={WalletIcon} alt="Wallet" className={styles.balanceIcon} />
               <span>Balance</span>
