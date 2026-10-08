@@ -22,6 +22,11 @@
  *   BranchEvents.trackOtpSent({ phone: "+91XXXXXXXXXX" });
  *   BranchEvents.trackConsultationStarted({ astrologer_id: "123", duration: 30 });
  *
+ * Branch.io only receives these events (everything else still goes to GA):
+ *   otp_verified_success, promo_consultation, view_wallet,
+ *   select_recharge_pack, begin_recharge, consultation_completed,
+ *   recharge_payment_failed
+ *
  * =========================================================
  */
 
@@ -88,7 +93,8 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("landing_page_open", eventParams);
-    trackToBranch("landing_page_open", eventParams);
+    // Not in the Branch event list — kept for GA only.
+    // trackToBranch("landing_page_open", eventParams);
     trackEvent("landing_page_open", eventParams);
   },
 
@@ -112,7 +118,8 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("signup_started", eventParams);
-    trackToBranch("signup_started", eventParams);
+    // Not in the Branch event list — kept for GA only.
+    // trackToBranch("signup_started", eventParams);
     trackEvent("signup_started", eventParams);
   },
 
@@ -139,7 +146,8 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("otp_sent", eventParams);
-    trackToBranch("otp_sent", eventParams);
+    // Not in the Branch event list — kept for GA only.
+    // trackToBranch("otp_sent", eventParams);
     trackEvent("otp_sent", eventParams);
   },
 
@@ -166,7 +174,7 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("otp_verified", eventParams);
-    trackToBranch("otp_verified", eventParams);
+    trackToBranch("otp_verified_success", eventParams);
     trackEvent("otp_verified", eventParams);
   },
 
@@ -221,7 +229,8 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("registration_completed", eventParams);
-    trackToBranch("registration_completed", eventParams);
+    // Not in the Branch event list — kept for GA only.
+    // trackToBranch("registration_completed", eventParams);
     trackEvent("registration_completed", eventParams);
   },
 
@@ -248,7 +257,8 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("profile_completed", eventParams);
-    trackToBranch("profile_completed", eventParams);
+    // Not in the Branch event list — kept for GA only.
+    // trackToBranch("profile_completed", eventParams);
     trackEvent("profile_completed", eventParams);
   },
 
@@ -277,7 +287,8 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("promo_eligible", eventParams);
-    trackToBranch("promo_eligible", eventParams);
+    // Not in the Branch event list — kept for GA only.
+    // trackToBranch("promo_eligible", eventParams);
     trackEvent("promo_eligible", eventParams);
   },
 
@@ -306,7 +317,8 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("promo_credited", eventParams);
-    trackToBranch("promo_credited", eventParams);
+    // Not in the Branch event list — kept for GA only.
+    // trackToBranch("promo_credited", eventParams);
     trackEvent("promo_credited", eventParams);
   },
 
@@ -341,7 +353,8 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("astrologer_listing_viewed", eventParams);
-    trackToBranch("view_astrologer_list", eventParams);
+    // Not in the Branch event list — kept for GA only.
+    // trackToBranch("view_astrologer_list", eventParams);
     trackEvent("astrologer_listing_viewed", eventParams);
   },
 
@@ -371,7 +384,8 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("astrologer_profile_viewed", eventParams);
-    trackToBranch("view_astrologer_profile", eventParams);
+    // Not in the Branch event list — kept for GA only.
+    // trackToBranch("view_astrologer_profile", eventParams);
     trackEvent("astrologer_profile_viewed", eventParams);
   },
 
@@ -492,7 +506,8 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("wallet_recharge_successful", eventParams);
-    trackToBranch("wallet_recharge_success", eventParams);
+    // Not in the Branch event list — kept for GA only.
+    // trackToBranch("wallet_recharge_success", eventParams);
     trackEvent("wallet_recharge_successful", eventParams);
   },
 
@@ -525,7 +540,8 @@ export const BranchEvents = {
       ...params,
     };
     logEvent("consultation_started", eventParams);
-    trackToBranch("consultation_started", eventParams);
+    // Not in the Branch event list — kept for GA only.
+    // trackToBranch("consultation_started", eventParams);
     trackEvent("consultation_started", eventParams);
   },
 
@@ -563,6 +579,52 @@ export const BranchEvents = {
     logEvent("consultation_completed", eventParams);
     trackToBranch("consultation_completed", eventParams);
     trackEvent("consultation_completed", eventParams);
+  },
+
+  /**
+   * Promo Consultation
+   * Tracked when the user's free (promotional) first session starts — chat or
+   * audio call.
+   * @param {Object} params - { room_id: string, consultation_type: "chat"|"call" }
+   */
+  trackPromoConsultation: (params = {}) => {
+    const eventParams = {
+      event_category: "consultation",
+      event_type: "promo_consultation",
+      route_path: window.location.pathname,
+      user_type: "logged_in",
+      user_id: params.user_id || localStorage.getItem("shubhtalk_customer_id") || null,
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
+      ...params,
+    };
+    logEvent("promo_consultation", eventParams);
+    trackToBranch("promo_consultation", eventParams);
+    trackEvent("promo_consultation", eventParams);
+  },
+
+  /**
+   * Recharge Payment Failed
+   * Tracked when a wallet recharge payment fails at the gateway. GA already
+   * gets `recharge_payment_failed` from useRazorpay, so this is Branch only.
+   * @param {Object} params - { amount: number, payment_method: string, reason: string }
+   */
+  trackRechargePaymentFailed: (params = {}) => {
+    const eventParams = {
+      event_category: "wallet",
+      event_type: "recharge_payment_failed",
+      route_path: window.location.pathname,
+      user_type: "logged_in",
+      user_id: params.user_id || localStorage.getItem("shubhtalk_customer_id") || null,
+      currency: params.currency || "INR",
+      platform: params.platform || "web",
+      environment: import.meta.env.MODE,
+      timestamp: new Date().toISOString(),
+      ...params,
+    };
+    logEvent("recharge_payment_failed", eventParams);
+    trackToBranch("recharge_payment_failed", eventParams);
   },
 };
 

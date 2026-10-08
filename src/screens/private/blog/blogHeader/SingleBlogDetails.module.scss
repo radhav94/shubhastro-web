@@ -313,6 +313,30 @@ $font-primary: "Poppins", sans-serif;
     font-size: 14px;
   }
 
+  /*
+    Same look on every OS and browser. Blog bodies are pasted from Word, so
+    nearly every p/span carries inline styles: `line-height: normal`,
+    `font-family: Poppins | "Times New Roman" | Symbol`, mso-* and so on.
+    Inline styles beat this stylesheet, so the 1.7 line height above never
+    applied. `normal` is taken from the font's own metrics, which macOS and
+    Windows read differently — the same blog came out airy on a Mac and cramped
+    on Windows. Force our line height and the self-hosted Poppins on everything
+    inside the body (!important is the only thing that outranks inline styles).
+  */
+  * {
+    line-height: inherit !important;
+    font-family: inherit !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    line-height: 1.4 !important;
+  }
+
   // Underlined, not colour-only. Inside a wall of prose an unstyled-looking link
   // is easy to miss or mis-aim at — readers click next to it and get nothing —
   // and colour alone is not a sufficient affordance.
@@ -344,10 +368,44 @@ $font-primary: "Poppins", sans-serif;
     font-weight: 600;
   }
 
+  // Tailwind's preflight strips list markers (`list-style: none`), so CMS
+  // lists rendered with no bullets or numbers at all. Put them back.
   ul,
   ol {
     margin-left: 20px;
     margin-bottom: 16px;
+    padding-left: 4px;
+  }
+
+  ul {
+    list-style: disc outside;
+  }
+
+  ol {
+    list-style: decimal outside;
+  }
+
+  ul ul {
+    list-style-type: circle;
+  }
+
+  li {
+    display: list-item;
+  }
+
+  /*
+    Word's fake bullets (converted to "•" in utils/helper/blogHtml.js). Each one
+    is followed by a bold label, and `strong` is a block here, so the bullet was
+    left alone on the line above its label. Float it left of the label instead.
+  */
+  [data-word-bullet] {
+    float: left;
+    clear: left;
+    margin: 12px 8px 0 0;
+  }
+
+  [data-word-bullet] + strong {
+    margin-top: 12px;
   }
 
   /*

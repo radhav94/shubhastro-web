@@ -571,6 +571,7 @@ export const useRazorpayPayment = () => {
     const amount = getPlanAmount(planData);
     trackEvent("payment_failed", { amount, payment_method: PAYMENT_METHOD, error_code: error?.code, reason: errorMessage });
     trackEvent("recharge_payment_failed", { amount, payment_method: PAYMENT_METHOD, reason: errorMessage });
+    BranchEvents.trackRechargePaymentFailed({ amount, payment_method: PAYMENT_METHOD, reason: errorMessage, error_code: error?.code || null, plan_id: planId || null });
 
     if (typeof onFailure === "function") {
       onFailure(error);

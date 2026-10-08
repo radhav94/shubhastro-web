@@ -99,7 +99,7 @@ import { Provider } from "react-redux";
 import { store, persistor } from "./store/store.js";
 import { PersistGate } from "redux-persist/integration/react";
 import { trackTestEvent, BranchEvents } from "./utils/branchEvents";
-import { trackBranchEvent, flushBranchEvents } from "./utils/branchIntegration";
+import { flushBranchEvents } from "./utils/branchIntegration";
 import { ensureSession } from "./utils/security/cryptoClient";
 import { initWebVitals } from "./utils/webVitals";
 /*
@@ -297,11 +297,11 @@ if (import.meta.env.DEV) {
       timestamp: new Date().toISOString(),
     });
 
-    // Test Branch event
-    trackBranchEvent("app_load_test", {
-      page: "index",
-      ready: true,
-    });
+    // Test Branch event — not in the Branch event list, so not sent.
+    // trackBranchEvent("app_load_test", {
+    //   page: "index",
+    //   ready: true,
+    // });
 
     // Test BranchEvents GTM/GA4
     BranchEvents.trackLandingPageOpen();

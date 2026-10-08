@@ -18,6 +18,7 @@ import {
   clearLiveRequest,
 } from "../auth/freeSessionRoom";
 import { resolveFreeAllowanceSeconds } from "../../screens/private/home/components/chats/freeSession/freeSessionUtils";
+import { BranchEvents } from "../branchEvents";
 
 /*
  * Keeps free-session eligibility honest for the rest of the visit.
@@ -181,6 +182,7 @@ export const useFreeSessionWatcher = () => {
         // Start time + free allowance (when the payload has one) so the free
         // part can be timed on its own — see freeSessionUtils.getFreeSecondsLeft.
         rememberFreeSessionMeta(data.roomId, resolveFreeAllowanceSeconds(data));
+        BranchEvents.trackPromoConsultation({ room_id: data.roomId, consultation_type: "chat" });
       }
       handleSessionStarted();
     };
@@ -213,6 +215,7 @@ export const useFreeSessionWatcher = () => {
       ) {
         rememberFreeSessionCall(data.roomId);
         rememberFreeSessionMeta(freeSessionCallId(data.roomId), resolveFreeAllowanceSeconds(data));
+        BranchEvents.trackPromoConsultation({ room_id: data.roomId, consultation_type: "call" });
       }
       handleSessionStarted();
     };
