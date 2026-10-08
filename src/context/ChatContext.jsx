@@ -39,6 +39,9 @@ export const ChatProvider = ({ children }) => {
   // was told has ended — both keep one chat end from producing two toasts.
   const reconnectRoomRef = useRef(null);
   const notifiedEndedRoomRef = useRef(null);
+  // Room of the most recent chat, kept after the chat is cleared: some end
+  // reports arrive room-less after another handler already cleared activeChat.
+  const lastChatRoomRef = useRef(null);
   // When the last end-of-chat notification was shown (see notifyChatEnded).
   const notifiedEndedAtRef = useRef(0);
 
@@ -141,6 +144,7 @@ export const ChatProvider = ({ children }) => {
 
     setActiveChatState(chatData);
     if (chatData) {
+      if (chatData.roomId) lastChatRoomRef.current = chatData.roomId;
       persistChatState(chatData);
       // Register session for auto-reconnect on socket disconnect
       registerChatSession({
@@ -163,17 +167,21 @@ export const ChatProvider = ({ children }) => {
   const notifyChatEnded = useCallback((data = {}) => {
     if (data?.astrologerId === PANDIT_AI_ID) return;
     // Some reports (the auto-reconnect `active: false` reply) carry no roomId;
-    // they are about the chat that is open.
-    const roomId = data?.roomId || activeChatRef.current?.roomId || null;
+    // they are about the chat that is open — or, if another handler already
+    // cleared it, the chat that just ended.
+    const roomId =
+      data?.roomId || activeChatRef.current?.roomId || lastChatRoomRef.current || null;
     // Already reported for this room (two reconnect failures for one end).
     if (roomId && notifiedEndedRoomRef.current === roomId) return;
     /*
       SHB-2169: when the free 3-minute chat ran out, the user got "Your free chat
-      session has ended" AND "Astrologer is offline. Chat ended." The second
-      report arrived without a roomId (and after the chat was cleared), so it
-      slipped past the room check above and, not matching the free room, was
-      reported as the astrologer going offline. One chat end gets one
-      notification: a room-less report right after one was shown is the same end.
+      session has ended" AND "Astrologer is offline. Chat ended." The offline
+      one came first, from a room-less report that arrived after the chat had
+      been cleared — so it matched no room, was not seen as the free room, and
+      the real (free) report that followed was not a duplicate either. Resolving
+      the room from lastChatRoomRef above makes both reports the same room: the
+      first shows the free message and the second is skipped. A room-less
+      report right after one was shown is still treated as the same end.
     */
     if (!roomId && Date.now() - notifiedEndedAtRef.current < 15000) return;
     notifiedEndedRoomRef.current = roomId;

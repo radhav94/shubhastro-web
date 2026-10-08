@@ -33,18 +33,10 @@ const RechargePack = ({ actualPrice, discountedPrice }) => (
 );
 
 /*
- * "Best Value" highlight (Figma 4787:30559). Intended to be driven by the plan
- * data, but the plans API does not currently send such a flag. Kept for when it
- * does — the render currently highlights the first card as a design-only stub
- * (see the map below). Any of these field names will be honoured once wired.
+ * "Best Value" highlight (Figma 4787:30559): driven by the plan's
+ * `isBestValue` flag, set per plan in the CMS (Plans > Best Value).
  */
-// eslint-disable-next-line no-unused-vars
-const isBestValuePlan = (plan) =>
-  plan?.isBestValue === true ||
-  plan?.bestValue === true ||
-  plan?.isPopular === true ||
-  plan?.isRecommended === true ||
-  /best\s*value/i.test(String(plan?.tag || plan?.label || plan?.badge || ""));
+const isBestValuePlan = (plan) => plan?.isBestValue === true;
 
 const Payment = () => {
   const navigate = useNavigate();
@@ -211,13 +203,8 @@ const Payment = () => {
           </div>
         ) : (
           <div className={styles.rechargeFlex}>
-            {allPlans?.map((pack, index) => {
-              // DESIGN-ONLY: highlight the first card as "Best Value" so the
-              // active styling (orange border, crown tag, filled bonus pill) is
-              // visible now. The real signal will come from the plan data via
-              // isBestValuePlan(pack) — swap `index === 0` for that once the API
-              // sends the flag. Until then this is a static visual stub.
-              const isBest = index === 0;
+            {allPlans?.map((pack) => {
+              const isBest = isBestValuePlan(pack);
               return (
               <Link
                 to="/recharge/payment"
