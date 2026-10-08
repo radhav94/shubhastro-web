@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { IoGift } from "react-icons/io5";
 import styles from "./FreeCall.module.scss";
 import { capitalizeWords } from "../../utils/capitalize";
@@ -306,7 +306,50 @@ export const FreeCallScreen = ({
 };
 
 /* ---------------- 4886:77824 — low wallet balance popup ---------------- */
-export const FreeCallLowBalancePopup = ({ isOpen, remainingSeconds = 0, onClose, onRemindLater, onRecharge }) => {
+// Voice note played when the popup opens, so a caller listening on the call
+// (screen off, phone at the ear) still hears that the free time is running out.
+const LOW_BALANCE_VOICE_NOTE = "/audio/free-call-low-balance.mp3";
+
+export const FreeCallLowBalancePopup = ({
+  isOpen,
+  remainingSeconds = 0,
+  onClose,
+  onRemindLater,
+  onRecharge,
+  onVoiceNoteStart,
+  onVoiceNoteEnd,
+}) => {
+  // Latest callbacks, so the effect below runs only when the popup opens.
+  const voiceNoteHandlersRef = useRef({ onVoiceNoteStart, onVoiceNoteEnd });
+  voiceNoteHandlersRef.current = { onVoiceNoteStart, onVoiceNoteEnd };
+
+  // Play the voice note once each time the popup opens; stop it if the popup
+  // closes (or the call screen unmounts) before it finishes. Start/end let the
+  // call screen turn the call audio down so the note is heard clearly.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const audio = new Audio(LOW_BALANCE_VOICE_NOTE);
+    let playing = false;
+    const finish = () => {
+      if (!playing) return;
+      playing = false;
+      voiceNoteHandlersRef.current.onVoiceNoteEnd?.();
+    };
+    audio.addEventListener("ended", finish);
+    audio.addEventListener("error", finish);
+    playing = true;
+    voiceNoteHandlersRef.current.onVoiceNoteStart?.();
+    // A blocked autoplay must not break the popup (or leave the call quiet).
+    audio.play().catch(finish);
+    return () => {
+      audio.removeEventListener("ended", finish);
+      audio.removeEventListener("error", finish);
+      audio.pause();
+      audio.src = "";
+      finish();
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return undefined;
     const onKey = (e) => {

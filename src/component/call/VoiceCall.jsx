@@ -632,7 +632,7 @@ const AgoraVoiceCalling = ({ callData }) => {
           await client.subscribe(user, mediaType);
           if (mediaType === "audio") {
             if (speakerOnRef.current) {
-              user.audioTrack?.setVolume(100);
+              user.audioTrack?.setVolume(remoteVolume());
               user.audioTrack?.play();
             } else {
               user.audioTrack?.setVolume(0);
@@ -807,6 +807,29 @@ const AgoraVoiceCalling = ({ callData }) => {
     }
   }, [micOn]);
 
+  /* ================= VOICE NOTE DUCKING ================= */
+  /*
+    While the free-call low balance voice note plays, turn the call audio down
+    so the note is heard clearly: the astrologer's voice on this device and this
+    user's mic towards the astrologer. Restored when the note ends.
+  */
+  const DUCKED_VOLUME = 15;
+  const isDuckedRef = useRef(false);
+  const remoteVolume = () => (isDuckedRef.current ? DUCKED_VOLUME : 100);
+
+  const setCallDucked = useCallback((ducked) => {
+    isDuckedRef.current = ducked;
+    const client = clientRef.current;
+    if (client && speakerOnRef.current) {
+      client.remoteUsers.forEach((user) => user.audioTrack?.setVolume(remoteVolume()));
+    }
+    try {
+      micTrackRef.current?.setVolume(ducked ? DUCKED_VOLUME : 100);
+    } catch {
+      /* mic not ready */
+    }
+  }, []);
+
   /* ================= SPEAKER TOGGLE ================= */
   useEffect(() => {
     const client = clientRef.current;
@@ -816,7 +839,7 @@ const AgoraVoiceCalling = ({ callData }) => {
     client.remoteUsers.forEach((user) => {
       if (user.audioTrack) {
         if (speakerOn) {
-          user.audioTrack.setVolume(100);
+          user.audioTrack.setVolume(remoteVolume());
           try { user.audioTrack.play(); } catch (e) { /* already playing */ }
         } else {
           user.audioTrack.setVolume(0);
@@ -1870,6 +1893,8 @@ const AgoraVoiceCalling = ({ callData }) => {
           setFreeLowBalanceRemindLater(true);
         }}
         onRecharge={handleFreeCallRecharge}
+        onVoiceNoteStart={() => setCallDucked(true)}
+        onVoiceNoteEnd={() => setCallDucked(false)}
       />
 
       {/* Recharge Modal */}

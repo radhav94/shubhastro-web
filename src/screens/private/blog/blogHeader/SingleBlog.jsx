@@ -13,6 +13,7 @@ import { PATH } from "../../../../utils/routes/Paths";
 import { DefaultImages } from "../../../../utils/appImages";
 import defaultBlogImg from "../../../../assets/images/default_image_16x9_1920x1080.png";
 import { linkifyHtml } from "../../../../utils/helper/linkPreview";
+import { normalizeWordBullets } from "../../../../utils/helper/blogHtml";
 
 const SingleBlogDetails = () => {
   const { slug } = useParams();
@@ -68,7 +69,7 @@ const SingleBlogDetails = () => {
     in real anchors before injecting; existing <a> tags are left untouched.
   */
   const blogBodyHtml = useMemo(
-    () => linkifyHtml(singleBLogData?.body || ""),
+    () => linkifyHtml(normalizeWordBullets(singleBLogData?.body || "")),
     [singleBLogData?.body]
   );
 

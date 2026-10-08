@@ -5,6 +5,7 @@ import { useGetAllPlansQuery } from "../../../redux/api/plansApi/plansApi";
 import { getToken } from "../../../utils/token";
 import { useWalletBalance } from "../wallet/useWalletBalance";
 import { trackEvent } from "../../../utils/analytics";
+import { BranchEvents } from "../../../utils/branchEvents";
 import walletIcon from "../../../assets/chat/freeSession/wallet.svg";
 import crownIcon from "../../../assets/chat/freeSession/crown.svg";
 
@@ -217,6 +218,14 @@ const Payment = () => {
                   // loading, so the tap is visibly acknowledged either way.
                   setPendingPlanId(pack._id);
                   trackEvent("recharge_amount_selected", { amount: pack?.actualPrice, is_preset: true });
+                  BranchEvents.trackRechargePackSelected({
+                    pack_id: pack?._id || null,
+                    pack_name: pack?.name || "standard",
+                    amount: pack?.actualPrice || 0,
+                    includes_bonus: Number(pack?.discountedPrice) > 0,
+                    bonus_amount: Number(pack?.discountedPrice) || 0,
+                    source: "recharge_screen",
+                  });
                 }}
               >
                 {isBest && (

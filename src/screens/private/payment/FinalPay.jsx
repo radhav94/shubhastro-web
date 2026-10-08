@@ -9,6 +9,7 @@ import Toast from "../../../component/toast";
 import BackButton from "../../../component/UI/BackButton/BackButton";
 import PaymentSuccessModal from "../../../component/UI/modal/WelcomeBonusModal/PaymentSuccessModal";
 import { trackEvent } from "../../../utils/analytics";
+import { BranchEvents } from "../../../utils/branchEvents";
 
 const FinalPay = () => {
   const location = useLocation();
@@ -136,6 +137,16 @@ const FinalPay = () => {
     // observable "method selected" step. See PaymentDetailsModal.handlePay.
     trackEvent("recharge_payment_method_selected", {
       amount,
+      payment_method: "razorpay",
+      source: "recharge_screen",
+    });
+    BranchEvents.trackWalletRechargeInitiated({
+      route_name: "recharge-payment",
+      user_id: localStorage.getItem("shubhtalk_customer_id"),
+      pack_id: data?.data?._id || planId || null,
+      pack_name: data?.data?.name || "standard",
+      amount,
+      currency: "INR",
       payment_method: "razorpay",
       source: "recharge_screen",
     });
